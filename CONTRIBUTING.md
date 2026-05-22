@@ -18,7 +18,7 @@ We review weekly. First merge counts as a contribution.
 
 ## 2. File a bug or feature request
 
-Open an issue at https://github.com/sneaky-hippo/kolmogorov-stack/issues with:
+Open an issue at https://github.com/sneaky-hippo/kolm-stack/issues with:
 
 - A minimal reproduction (one command, expected vs actual output, kolm version)
 - The kolm version (`kolm --version`) and platform

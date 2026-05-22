@@ -4,15 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Account Control · kolm.ai</title>
-<meta name="description" content="Operate keys, spend, routing, compile defaults, billing, storage, and governance from the kolm account console.">
+<title>AI control plane | Account · kolm.ai</title>
+<meta name="description" content="Operate Kolm account controls for routing, distillation defaults, artifact targets, billing, storage, and governance.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <link rel="canonical" href="https://kolm.ai/account">
-<meta property="og:title" content="Account Control · kolm.ai">
-<meta property="og:description" content="Operate keys, spend, routing, compile defaults, billing, storage, and governance from the kolm account console.">
+<meta property="og:title" content="AI control plane | Account | kolm.ai">
+<meta property="og:description" content="Operate Kolm account controls for routing, distillation defaults, artifact targets, billing, storage, and governance.">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
@@ -28,7 +28,7 @@
  "applicationCategory": "DeveloperApplication",
  "operatingSystem": "Linux, macOS, Windows (WSL)",
  "url": "https://kolm.ai/account",
- "description": "Operate keys, spend, routing, compile defaults, billing, storage, and governance from the kolm account console.",
+ "description": "Operate Kolm account controls for routing, distillation defaults, artifact targets, billing, storage, and governance.",
  "offers": {
  "@type": "Offer",
  "price": "0",
@@ -41,8 +41,8 @@
  }
 }
 </script>
-<meta name="twitter:title" content="Account Control · kolm.ai">
-<meta name="twitter:description" content="Operate keys, spend, routing, compile defaults, billing, storage, and governance from the kolm account console.">
+<meta name="twitter:title" content="AI control plane | Account | kolm.ai">
+<meta name="twitter:description" content="Operate Kolm account controls for routing, distillation defaults, artifact targets, billing, storage, and governance.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="stylesheet" href="/surface-polish.css">
 </head>
@@ -65,13 +65,13 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -84,7 +84,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -152,7 +152,7 @@
     <!-- KOLM_NAV_END (W221) -->
  <div class="site-actions">
  <a href="/docs">Help</a>
- <a class="cta" href="/dashboard#dash-compile">New compile &rarr;</a>
+ <a class="cta" href="/dashboard#dash-compile">New artifact &rarr;</a>
  </div>
  </div>
 </header>
@@ -161,8 +161,9 @@
  <section class="page-head">
  <div>
  <div class="eyebrow"><span class="pulse"></span>account control plane</div>
- <h1>Account control.</h1>
- <p class="lede">Keys, spend, compile defaults, provider routing, billing, and deletion in one operator console.</p>
+ <h1>AI control plane.</h1>
+ <p class="lede">Keys, spend, provider routing, distillation defaults, artifact targets, billing, storage, and governance.</p>
+ <p class="lede" data-w204="honest-scope">What this page does: it links to the authenticated account workspaces and shows the intended operating loop. What this page does not do: it does not expose tenant data until you sign in.</p>
  </div>
  </section>
 
@@ -197,8 +198,8 @@
  <section class="card" style="margin:18px 0;border-color:rgba(126,240,210,0.32);background:linear-gradient(135deg,rgba(126,240,210,0.04),transparent);padding:18px 20px">
  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:space-between">
  <div>
- <h2 style="margin:0 0 4px;font-size:17px">Compile the workflows worth owning</h2>
- <p style="margin:0;color:var(--ink-mute);font-size:14px">Capture AI calls, approve a dataset, then ship a signed runtime.</p>
+ <h2 style="margin:0 0 4px;font-size:17px">Route, distill, deploy.</h2>
+ <p style="margin:0;color:var(--ink-mute);font-size:14px">Capture model calls, approve the dataset, distill the specialist, then ship a signed artifact.</p>
  </div>
  <div class="toolbar" style="gap:8px;flex-wrap:wrap">
  <a class="btn primary" href="/captures">Open captures inbox</a>
@@ -380,7 +381,7 @@
 <footer class="site-footer">
  <div class="wrap">
  <div class="meta">
- kolm v0.1.0 / MIT SDK / <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> / <a href="/status">status</a>
+ kolm v0.1.0 / MIT SDK / <a href="https://github.com/sneaky-hippo/kolm-stack">github</a> / <a href="/status">status</a>
  </div>
  <div class="links">
  <div>
@@ -431,7 +432,7 @@
  </div>
  </div>
  <small class="footer-tag">
- <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/terms">terms</a> &middot; <a href="/faq">faq</a> &middot; <a href="/glossary">glossary</a> &middot; <a href="/troubleshooting">troubleshooting</a> &middot; <a href="/why-now">why now</a> &middot; <a href="/press">press</a> &middot; <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> &middot; kolm.ai &middot; MIT licensed runtime
+ <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/terms">terms</a> &middot; <a href="/faq">faq</a> &middot; <a href="/glossary">glossary</a> &middot; <a href="/troubleshooting">troubleshooting</a> &middot; <a href="/why-now">why now</a> &middot; <a href="/press">press</a> &middot; <a href="https://github.com/sneaky-hippo/kolm-stack">github</a> &middot; kolm.ai &middot; MIT licensed runtime
  </small>
  </div>
 </footer>

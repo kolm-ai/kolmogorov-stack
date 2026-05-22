@@ -37,7 +37,7 @@ const evals = {
   cases: [
     { id: 'case-1', input: { text: 'hello' },     expected: { upper: 'HELLO' } },
     { id: 'case-2', input: { text: 'kolm' },      expected: { upper: 'KOLM' } },
-    { id: 'case-3', input: { text: 'Kolmogorov' },expected: { upper: 'KOLMOGOROV' } },
+    { id: 'case-3', input: { text: 'artifact' },   expected: { upper: 'ARTIFACT' } },
     { id: 'case-4', input: { text: '' },          expected: { upper: '' } },
   ],
   coverage: 1.0,

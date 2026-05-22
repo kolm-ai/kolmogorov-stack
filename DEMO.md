@@ -2,7 +2,7 @@
 
 **Goal:** in 5 minutes, take the customer from "I don't get it" to "where do I sign up." All real, no mocks, all on a publicly-deployed URL.
 
-**Live:** https://kolmogorov-stack-production.up.railway.app
+**Live:** https://kolm.ai
 
 ---
 
@@ -24,15 +24,15 @@ This is the hook. Now show them what they actually get.
 
 Open four browser tabs:
 
-1. https://kolmogorov-stack-production.up.railway.app/ — the pitch (Recipe + 3-pillar framing)
-2. https://kolmogorov-stack-production.up.railway.app/playground — synthesis, live
-3. https://kolmogorov-stack-production.up.railway.app/registry — 26 recipes already published
-4. https://kolmogorov-stack-production.up.railway.app/dashboard — telemetry refreshing every 2s
+1. https://kolm.ai/ - the pitch and product surfaces
+2. https://kolm.ai/quickstart - route, distill, and deploy in one loop
+3. https://kolm.ai/cookbook/ - verified .kolm recipes
+4. https://kolm.ai/account - account, billing, artifacts, and controls
 
 Mint yourself a key:
 
 ```bash
-KS=$(curl -sS -X POST https://kolmogorov-stack-production.up.railway.app/v1/signup \
+KS=$(curl -sS -X POST https://kolm.ai/v1/signup \
   -H 'Content-Type: application/json' -d '{"email":"demo@example.com"}' \
   | python -c "import sys,json;print(json.load(sys.stdin)['api_key'])")
 echo $KS
@@ -182,7 +182,7 @@ Per-unit on the same page if they want to dig in.
 
 ```js
 // 30 lines, drop into any project
-import { Recipe } from '@kolmogorov/recipe';
+import { Recipe } from '@kolm/recipe';
 
 const r = new Recipe({ apiKey: process.env.KS });
 

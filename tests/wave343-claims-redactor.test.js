@@ -63,7 +63,7 @@ test('W343 #2 — spec.json points recipe.source_file at the sandbox-safe recipe
   // {redacted, map, classes}; seeds carry {redacted, classes} so json_subset
   // lets extra keys in actual without failing).
   assert.equal(spec.comparator, 'json_subset');
-  assert.equal(spec.kolmogorov_score && spec.kolmogorov_score.threshold, 0.85);
+  assert.equal(spec.k_score && spec.k_score.threshold, 0.85);
 });
 
 test('W343 #3 — seeds.jsonl has >= 50 rows so split is production-ready (>=40 train, >=10 holdout)', () => {

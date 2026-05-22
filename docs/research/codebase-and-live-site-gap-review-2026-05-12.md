@@ -4,8 +4,8 @@ Review date: 2026-05-12
 
 Scope:
 
-- Local repo: `C:\Users\user\Desktop\kolmogorov-stack`
-- Public repo snapshot: `C:\Users\user\Desktop\kolmogorov-stack-public`
+- Local repo: `local private workspace`
+- Public repo snapshot: `public source workspace`
 - Live site checked: `https://kolm.ai/`
 - Existing strategy docs reviewed: `README.md`, `STRATEGY.md`, `docs/SOTA-2026-05-11.md`, `docs/kolm-infra-business-strategy-report-2026-05-06.md`
 
@@ -102,5 +102,5 @@ Avoid unless implementation evidence exists:
 
 ## Public Repo Snapshot Note
 
-`kolmogorov-stack-public` is a smaller OSS-facing snapshot with CLI, docs, examples, services, source, and tests. It does not include the full public website or API surface from the private/main workspace. Use it for open-source packaging review, not as the complete product state.
+`public source workspace` is a smaller OSS-facing snapshot with CLI, docs, examples, services, source, and tests. It does not include the full public website or API surface from the private/main workspace. Use it for open-source packaging review, not as the complete product state.
 

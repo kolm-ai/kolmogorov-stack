@@ -37,6 +37,158 @@
  --kolm-accent-faint: rgba(16,185,129,0.06) !important;
 }
 
+/* V572 final chrome system: active nav is a stable pill, not an underline.
+   This block sits at the end of brand-refresh so account pages, which load
+   brand after surface-polish, get the same treatment as marketing pages. */
+:where(.site-header .site-nav a, header.site nav a, .site-nav .nav-item > .nav-top, .site-nav > a) {
+ text-decoration: none !important;
+ border-bottom-color: transparent !important;
+}
+
+:where(.site-header .site-nav a[aria-current="page"]::after,
+ header.site nav a[aria-current="page"]::after,
+ .site-header .site-nav a.active::after,
+ header.site nav a.active::after,
+ .site-nav .nav-item > .nav-top[aria-current="page"]::after,
+ .site-nav .nav-item > .nav-top.active::after,
+ .site-nav .mega-menu a[aria-current="page"]::after,
+ .site-nav .mega-menu a.active::after) {
+ content: none !important;
+ display: none !important;
+}
+
+:where(.site-nav .nav-item > .nav-top,
+ .site-nav > a,
+ header.site nav a,
+ .site-header .site-nav a) {
+ min-height: 38px !important;
+ padding: 0 11px !important;
+ border: 1px solid transparent !important;
+ border-radius: 8px !important;
+ line-height: 1 !important;
+ transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease !important;
+}
+
+:where(.site-nav .nav-item > .nav-top[aria-current="page"],
+ .site-nav .nav-item > .nav-top.active,
+ .site-nav > a[aria-current="page"],
+ .site-nav > a.active,
+ header.site nav a[aria-current="page"],
+ header.site nav a.active,
+ .site-header .site-nav a[aria-current="page"],
+ .site-header .site-nav a.active) {
+ background: rgba(126, 240, 210, 0.12) !important;
+ border-color: rgba(126, 240, 210, 0.28) !important;
+ color: var(--ink, #faf2e1) !important;
+ box-shadow: inset 0 0 0 1px rgba(126, 240, 210, 0.05) !important;
+}
+
+:where(.site-nav .nav-item > .nav-top:hover,
+ .site-nav .nav-item > .nav-top:focus-visible,
+ .site-nav > a:hover,
+ .site-nav > a:focus-visible,
+ header.site nav a:hover,
+ header.site nav a:focus-visible,
+ .site-header .site-nav a:hover,
+ .site-header .site-nav a:focus-visible) {
+ background: rgba(255, 247, 232, 0.06) !important;
+ border-color: rgba(255, 247, 232, 0.18) !important;
+ color: var(--ink, #faf2e1) !important;
+ outline-offset: 3px !important;
+}
+
+:where(.site-nav .mega-menu, .site-header .mega-menu) {
+ border-radius: 8px !important;
+ border: 1px solid rgba(255, 247, 232, 0.12) !important;
+ background: rgba(9, 12, 15, 0.96) !important;
+ box-shadow: 0 22px 70px rgba(0, 0, 0, 0.34) !important;
+}
+
+:where(.site-nav .mega-menu a, .site-header .mega-menu a) {
+ min-height: 38px !important;
+ border-radius: 7px !important;
+ border: 1px solid transparent !important;
+ text-decoration: none !important;
+}
+
+:where(.site-nav .mega-menu a:hover,
+ .site-nav .mega-menu a:focus-visible,
+ .site-header .mega-menu a:hover,
+ .site-header .mega-menu a:focus-visible) {
+ background: rgba(255, 247, 232, 0.055) !important;
+ border-color: rgba(255, 247, 232, 0.14) !important;
+}
+
+:where(.btn, .cta, .button, .w271-cta-primary, .w373-cta-primary, .w335-cta-secondary, button[type="submit"]) {
+ border-radius: 8px !important;
+ min-height: 42px !important;
+ text-decoration: none !important;
+}
+
+:where(.kpanel, .metric-card, .product-mode, .journey-card, .closeout-item, .readiness-token) {
+ border-radius: 8px !important;
+}
+
+:where(.kpanel h1, .kpanel h2, .kpanel h3, .product-mode h3, .journey-card h3) {
+ letter-spacing: 0 !important;
+}
+
+:where(#account-sidebar a, .account-sidebar a) {
+ min-height: 38px !important;
+ border-radius: 8px !important;
+ text-decoration: none !important;
+}
+
+:where(#account-sidebar a[aria-current="page"], .account-sidebar a[aria-current="page"], #account-sidebar a.active, .account-sidebar a.active) {
+ background: rgba(126, 240, 210, 0.12) !important;
+ border-color: rgba(126, 240, 210, 0.24) !important;
+ color: var(--ink, #faf2e1) !important;
+}
+
+[data-theme="light"] :where(.site-nav .nav-item > .nav-top[aria-current="page"],
+ [data-theme="light"] .site-nav .nav-item > .nav-top.active,
+ [data-theme="light"] .site-nav > a[aria-current="page"],
+ [data-theme="light"] .site-nav > a.active,
+ [data-theme="light"] header.site nav a[aria-current="page"],
+ [data-theme="light"] header.site nav a.active,
+ [data-theme="light"] .site-header .site-nav a[aria-current="page"],
+ [data-theme="light"] .site-header .site-nav a.active) {
+ background: rgba(8, 127, 104, 0.09) !important;
+ border-color: rgba(8, 127, 104, 0.22) !important;
+ color: #06382e !important;
+}
+
+[data-theme="light"] :where(.site-nav .nav-item > .nav-top:hover,
+ [data-theme="light"] .site-nav .nav-item > .nav-top:focus-visible,
+ [data-theme="light"] .site-nav > a:hover,
+ [data-theme="light"] .site-nav > a:focus-visible,
+ [data-theme="light"] header.site nav a:hover,
+ [data-theme="light"] header.site nav a:focus-visible,
+ [data-theme="light"] .site-header .site-nav a:hover,
+ [data-theme="light"] .site-header .site-nav a:focus-visible) {
+ background: rgba(8, 127, 104, 0.06) !important;
+ border-color: rgba(8, 127, 104, 0.16) !important;
+ color: #06382e !important;
+}
+
+[data-theme="light"] :where(.site-nav .mega-menu, .site-header .mega-menu) {
+ background: rgba(255, 255, 255, 0.97) !important;
+ border-color: rgba(16, 24, 32, 0.12) !important;
+ box-shadow: 0 22px 70px rgba(16, 24, 32, 0.16) !important;
+}
+
+[data-theme="light"] :where(#account-sidebar a[aria-current="page"], .account-sidebar a[aria-current="page"], #account-sidebar a.active, .account-sidebar a.active) {
+ background: rgba(8, 127, 104, 0.08) !important;
+ border-color: rgba(8, 127, 104, 0.18) !important;
+ color: #06382e !important;
+}
+
+@media (max-width: 720px) {
+ :where(.site-nav .nav-item > .nav-top, .site-nav > a, header.site nav a, .site-header .site-nav a) {
+  min-height: 44px !important;
+ }
+}
+
 body {
  background: #0a0c10 !important;
  background-image: none !important;
@@ -199,14 +351,14 @@ nav.top .brand,
 header.site .brand,
 .site-header .brand,
 .brand {
- letter-spacing: -0.01em !important;
+ letter-spacing: 0 !important;
 }
 nav.top .brand span,
 header.site .brand span,
 .site-header .brand span,
 .brand span {
  font-weight: 500 !important;
- letter-spacing: -0.01em !important;
+ letter-spacing: 0 !important;
 }
 nav.top .brand::before,
 header.site .brand::before,
@@ -350,7 +502,7 @@ h1 code,
 .hero-h1 code {
  font-size: 0.78em !important;
  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace !important;
- letter-spacing: -0.01em !important;
+ letter-spacing: 0 !important;
  padding: 2px 8px !important;
  background: rgba(236,231,220,0.10) !important;
  border-radius: 6px !important;
@@ -379,12 +531,14 @@ nav.top .nav-links a {
  letter-spacing: 0 !important;
  color: var(--ink-mute, #b5bdb1) !important;
  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif !important;
- /* Reserve the underline track on every nav link so the row never shifts
- * when an active link gains its accent line. Same metric on both nav
+ /* Reserve one active-pill track on every nav link so the row never shifts
+ * when the active link gains its accent treatment. Same metric on both
  * variants kills the cross-page jump. */
- padding-bottom: 3px !important;
- border-bottom: 1px solid transparent !important;
- transition: color 120ms ease, border-color 120ms ease;
+ padding: 0 10px !important;
+ border: 1px solid transparent !important;
+ border-radius: 999px !important;
+ min-height: 36px !important;
+ transition: color 120ms ease, border-color 120ms ease, background-color 120ms ease;
 }
 header.site nav a:hover,
 .site-header .site-nav a:hover,
@@ -397,7 +551,8 @@ header.site nav a.active,
 nav.top .site-nav a.active,
 nav.top .nav-links a.active {
  color: var(--ink, #faf2e1) !important;
- border-bottom-color: var(--accent, #7a8cff) !important;
+ border-color: rgba(126,240,210,0.22) !important;
+ background: rgba(126,240,210,0.08) !important;
 }
 
 /* Right-side actions - sign-in + CTA tighter and consistently sized.
@@ -497,20 +652,20 @@ h1, h2, h3, h4, h5, h6,
 .headline,
 .title {
  font-weight: 500 !important;
- letter-spacing: -0.02em !important;
+ letter-spacing: 0 !important;
 }
 /* v7.17 brutalist global h1 - frontier-lab scale by default. Pages with
  their own .home-hero-centered h1 or .hero-h1 brutalist rules override this. */
 h1 {
  font-size: clamp(44px, 6.8vw, 96px) !important;
  line-height: 0.96 !important;
- letter-spacing: -0.035em !important;
+ letter-spacing: 0 !important;
  font-weight: 500 !important;
 }
 h2 {
  font-size: clamp(28px, 3.6vw, 46px) !important;
  line-height: 1.06 !important;
- letter-spacing: -0.025em !important;
+ letter-spacing: 0 !important;
  font-weight: 500 !important;
 }
 strong, b {
@@ -705,7 +860,7 @@ img, svg, video, iframe, canvas, picture {
  * Plain English; technical depth lives on /spec. */
 footer.site::before,
 footer.modern::before {
- content: "Kolmogorov \00B7 The AI compiler \00B7 Open standard, MIT-licensed";
+ content: "Kolm \00B7 The AI compiler \00B7 Open standard, MIT-licensed";
  display: block;
  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
  font-size: 11px;
@@ -767,7 +922,7 @@ footer.modern::before {
  color: #b5bdb1;
  text-align: center;
 }
-.diag-fanout .node b { display:block; color:#faf2e1; font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; font-size: 13px; margin-bottom: 4px; letter-spacing: -0.01em; }
+.diag-fanout .node b { display:block; color:#faf2e1; font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; font-size: 13px; margin-bottom: 4px; letter-spacing: 0; }
 .diag-fanout .node span,
 .diag-fanout .center span { display:block; font-size: 10.5px; color:#737c73; }
 .diag-fanout .center {
@@ -820,7 +975,7 @@ footer.modern::before {
  display: block; font-size: 9px; color:#737c73;
  letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 3px;
 }
-.diag-pipeline .stage b { display:block; color:#faf2e1; font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; font-weight: 500; margin-bottom: 2px; letter-spacing: -0.005em; }
+.diag-pipeline .stage b { display:block; color:#faf2e1; font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; font-weight: 500; margin-bottom: 2px; letter-spacing: 0; }
 .diag-pipeline .stage span:not(.n) { display:block; color:#737c73; font-size: 9.5px; letter-spacing: 0.02em; }
 .diag-pipeline .stage.acc { border-color: rgba(236,231,220,0.32); background: rgba(236,231,220,0.05); color:#faf2e1; }
 .diag-pipeline .stage.acc b { color:#faf2e1; }
@@ -857,7 +1012,7 @@ footer.modern::before {
  gap: 18px;
 }
 .diag-gauge .formula {
- font-size: 14px; color:#faf2e1; letter-spacing: -0.005em;
+ font-size: 14px; color:#faf2e1; letter-spacing: 0;
  background: rgba(0,0,0,0.30);
  border: 1px solid rgba(255,255,255,0.06);
  border-radius: 8px;
@@ -1897,7 +2052,7 @@ header.site-header .brand {
  color: var(--ink, #faf2e1) !important;
  font-size: 16px !important;
  font-weight: 500 !important;
- letter-spacing: -0.02em !important;
+ letter-spacing: 0 !important;
 }
 header.site .brand span,
 header.site-header .brand span {
@@ -1925,9 +2080,10 @@ header.site-header .site-nav a {
  font-size: 12.5px !important;
  font-weight: 500 !important;
  letter-spacing: 0 !important;
- padding-bottom: 3px !important;
- border-bottom: 1px solid transparent !important;
- transition: color 120ms ease, border-color 120ms ease !important;
+ padding: 0 10px !important;
+ border: 1px solid transparent !important;
+ border-radius: 8px !important;
+ transition: color 120ms ease, border-color 120ms ease, background-color 120ms ease !important;
 }
 header.site .left nav a:hover,
 header.site nav a:hover,
@@ -1940,7 +2096,8 @@ header.site-header .site-nav a.active {
 header.site .left nav a.active,
 header.site nav a.active,
 header.site-header .site-nav a.active {
- border-bottom-color: var(--accent, #faf2e1) !important;
+ border-color: rgba(126, 240, 210, 0.28) !important;
+ background: rgba(126, 240, 210, 0.12) !important;
 }
 header.site .right,
 header.site-header .site-actions {
@@ -3113,7 +3270,7 @@ section.vr-calc-only {
 .vr-calc-solo .vc-result-x {
  font-size: clamp(48px, 7vw, 84px) !important;
  font-weight: 500 !important;
- letter-spacing: -0.04em !important;
+ letter-spacing: 0 !important;
  line-height: 1 !important;
  color: #7ef0d2 !important;
 }
@@ -3480,7 +3637,7 @@ section.bottom-cta h2,
 section.vr h2 {
  font-size: clamp(44px, 5vw, 68px) !important;
  line-height: 1.02 !important;
- letter-spacing: -0.034em !important;
+ letter-spacing: 0 !important;
  font-weight: 400 !important;
  margin: 0 0 22px !important;
 }
@@ -3494,7 +3651,7 @@ section.vr h2 {
  section.vr h2 {
  font-size: clamp(34px, 9vw, 44px) !important;
  line-height: 1.04 !important;
- letter-spacing: -0.028em !important;
+ letter-spacing: 0 !important;
  }
 }
 
@@ -3601,13 +3758,13 @@ section.provider-strip .ps-cell:hover { color: var(--ink, #faf2e1) !important; }
 /* MOVE 1 . Hero H1 SOTA confidence. */
 .home-hero-left h1 {
  font-size: clamp(64px, 9.4vw, 144px) !important;
- letter-spacing: -0.054em !important;
+ letter-spacing: 0 !important;
  line-height: 0.92 !important;
 }
 @media (max-width: 720px) {
  .home-hero-left h1 {
  font-size: clamp(52px, 12vw, 78px) !important;
- letter-spacing: -0.042em !important;
+ letter-spacing: 0 !important;
  line-height: 0.97 !important;
  }
 }
@@ -3624,7 +3781,7 @@ section.bottom-cta {
 }
 section.bottom-cta .bc-h {
  font-size: clamp(52px, 6.5vw, 88px) !important;
- letter-spacing: -0.04em !important;
+ letter-spacing: 0 !important;
  line-height: 1.0 !important;
  font-weight: 400 !important;
  margin: 0 0 24px !important;
@@ -3632,7 +3789,7 @@ section.bottom-cta .bc-h {
 @media (max-width: 720px) {
  section.bottom-cta .bc-h {
  font-size: clamp(40px, 10.5vw, 58px) !important;
- letter-spacing: -0.034em !important;
+ letter-spacing: 0 !important;
  }
 }
 section.bottom-cta .bc-sub {
@@ -3754,7 +3911,7 @@ section.vr {
 }
 section.vr .vr-h {
  font-size: clamp(44px, 5vw, 68px) !important;
- letter-spacing: -0.034em !important;
+ letter-spacing: 0 !important;
  line-height: 1.02 !important;
  font-weight: 400 !important;
  margin: 0 0 22px !important;
@@ -3762,7 +3919,7 @@ section.vr .vr-h {
 @media (max-width: 720px) {
  section.vr .vr-h {
  font-size: clamp(34px, 9vw, 44px) !important;
- letter-spacing: -0.028em !important;
+ letter-spacing: 0 !important;
  }
 }
 
@@ -3824,7 +3981,7 @@ section.home-faq { border-top: 1px solid rgba(255,255,255,0.04) !important; }
 .uc-strip h2,
 .uc-strip .ucs-h {
  font-size: clamp(44px, 5vw, 68px) !important;
- letter-spacing: -0.034em !important;
+ letter-spacing: 0 !important;
  line-height: 1.02 !important;
  font-weight: 400 !important;
  margin: 0 0 22px !important;
@@ -3832,7 +3989,7 @@ section.home-faq { border-top: 1px solid rgba(255,255,255,0.04) !important; }
 @media (max-width: 720px) {
  .uc-strip h2, .uc-strip .ucs-h {
  font-size: clamp(34px, 9vw, 44px) !important;
- letter-spacing: -0.028em !important;
+ letter-spacing: 0 !important;
  }
 }
 
@@ -3840,7 +3997,7 @@ section.home-faq { border-top: 1px solid rgba(255,255,255,0.04) !important; }
  not a tiny diagram. Increase scale + frame breath. */
 .access-anywhere h2 {
  font-size: clamp(44px, 5vw, 68px) !important;
- letter-spacing: -0.034em !important;
+ letter-spacing: 0 !important;
  line-height: 1.02 !important;
  font-weight: 400 !important;
  margin: 0 0 22px !important;
@@ -3848,7 +4005,7 @@ section.home-faq { border-top: 1px solid rgba(255,255,255,0.04) !important; }
 @media (max-width: 720px) {
  .access-anywhere h2 {
  font-size: clamp(34px, 9vw, 44px) !important;
- letter-spacing: -0.028em !important;
+ letter-spacing: 0 !important;
  }
 }
 
@@ -3957,7 +4114,7 @@ section.bottom-cta .bc-actions .btn.ghost:hover { opacity: 1 !important; }
 @media (min-width: 721px) {
  .home-hero-left h1 {
  font-size: clamp(64px, 9.4vw, 144px) !important;
- letter-spacing: -0.054em !important;
+ letter-spacing: 0 !important;
  line-height: 0.92 !important;
  }
  .home-hero-left .lede {
@@ -3967,7 +4124,7 @@ section.bottom-cta .bc-actions .btn.ghost:hover { opacity: 1 !important; }
  section.bottom-cta { padding: 144px 24px 152px !important; }
  section.bottom-cta .bc-h {
  font-size: clamp(52px, 6.5vw, 88px) !important;
- letter-spacing: -0.04em !important;
+ letter-spacing: 0 !important;
  }
  section.bottom-cta .bc-sub { font-size: 19px !important; margin-bottom: 40px !important; }
  section.provider-strip { padding-top: 88px !important; padding-bottom: 88px !important; }
@@ -3979,7 +4136,7 @@ section.bottom-cta .bc-actions .btn.ghost:hover { opacity: 1 !important; }
  .access-anywhere h2,
  section.vr .vr-h {
  font-size: clamp(44px, 5vw, 68px) !important;
- letter-spacing: -0.034em !important;
+ letter-spacing: 0 !important;
  }
  section.vr .vr-card { padding: 32px 30px !important; }
  /* Header padding & wrap pinned to desktop floor */
@@ -4137,21 +4294,21 @@ code,
 .research-page h1,
 .docs-main h1 {
  font-size: clamp(44px, 6.4vw, 92px) !important;
- letter-spacing: -0.035em !important;
+ letter-spacing: 0 !important;
  line-height: 0.96 !important;
  font-weight: 500 !important;
 }
 .research-page h2,
 .docs-main h2 {
  font-size: clamp(28px, 3.6vw, 40px) !important;
- letter-spacing: -0.018em !important;
+ letter-spacing: 0 !important;
  line-height: 1.08 !important;
  font-weight: 500 !important;
 }
 @media (max-width: 720px) {
  .research-page h1, .docs-main h1 {
  font-size: clamp(36px, 9vw, 52px) !important;
- letter-spacing: -0.028em !important;
+ letter-spacing: 0 !important;
  }
  .research-page h2, .docs-main h2 {
  font-size: clamp(24px, 6.5vw, 30px) !important;
@@ -4384,7 +4541,7 @@ section.home-faq + section.bottom-cta {
 @media (min-width: 721px) {
  .home-hero-left h1 {
  font-size: clamp(64px, 9.4vw, 144px) !important;
- letter-spacing: -0.054em !important;
+ letter-spacing: 0 !important;
  line-height: 0.92 !important;
  }
  .home-hero-left .lede {
@@ -4407,7 +4564,7 @@ section.home-faq + section.bottom-cta {
  section.vr h2 {
  font-size: clamp(44px, 5vw, 68px) !important;
  line-height: 1.02 !important;
- letter-spacing: -0.034em !important;
+ letter-spacing: 0 !important;
  }
 }
 
@@ -4430,10 +4587,9 @@ section.home-faq + section.bottom-cta {
 }
 [data-theme=light] .compile-anatomy .ca-num { color: #4b5158 !important; }
 
-/* Wave 42: aria-current=page styling for post-auth app nav.
- Marks the active tab in Dashboard/Captures/Audit log/Account so
- the buyer knows where they are. Cyan ink + cyan underline matches
- site accent without adding chrome. */
+/* Legacy Wave 42 active-state hook for post-auth app nav.
+ V587 below owns the final pill shape; this block keeps old pages readable
+ without reintroducing underline chrome. */
 .site-header .site-nav a[aria-current="page"],
 header.site nav a[aria-current="page"] {
  color: var(--cyan, #7ef0d2) !important;
@@ -4441,12 +4597,111 @@ header.site nav a[aria-current="page"] {
 }
 .site-header .site-nav a[aria-current="page"]::after,
 header.site nav a[aria-current="page"]::after {
- content: "";
- position: absolute;
- left: 0;
- right: 0;
- bottom: -8px;
- height: 1px;
- background: var(--cyan, #7ef0d2);
- opacity: 0.6;
+ content: none !important;
+ display: none !important;
+}
+
+/* V572 cascade lock: this must remain after legacy Wave 42 active-state hooks. */
+:where(.site-header .site-nav a[aria-current="page"],
+ header.site nav a[aria-current="page"],
+ .site-header .site-nav a.active,
+ header.site nav a.active) {
+ color: var(--ink, #faf2e1) !important;
+ border: 1px solid rgba(126, 240, 210, 0.28) !important;
+ border-radius: 8px !important;
+ background: rgba(126, 240, 210, 0.12) !important;
+ box-shadow: inset 0 0 0 1px rgba(126, 240, 210, 0.05) !important;
+}
+
+:where(.site-header .site-nav a[aria-current="page"]::after,
+ header.site nav a[aria-current="page"]::after,
+ .site-header .site-nav a.active::after,
+ header.site nav a.active::after) {
+ content: none !important;
+ display: none !important;
+}
+
+[data-theme=light] :where(.site-header .site-nav a[aria-current="page"],
+ [data-theme=light] header.site nav a[aria-current="page"],
+ [data-theme=light] .site-header .site-nav a.active,
+ [data-theme=light] header.site nav a.active) {
+ color: #06382e !important;
+ border-color: rgba(8, 127, 104, 0.22) !important;
+ background: rgba(8, 127, 104, 0.09) !important;
+}
+
+/* V572 target-size lock for legacy mega menus loaded without surface-polish. */
+:where(.site-nav .mega-menu a,
+ .site-header .mega-menu a,
+ header.site .mega-menu a,
+ header.site-header .mega-menu a) {
+ display: flex !important;
+ min-height: 44px !important;
+ padding-top: 10px !important;
+ padding-bottom: 10px !important;
+ align-items: center !important;
+}
+
+header.site-header nav.site-nav .mega-menu .mega-col > a,
+header.site-header .site-nav .mega-menu .mega-col > a,
+header.site nav.site-nav .mega-menu .mega-col > a,
+.site-header .site-nav .mega-menu .mega-col > a {
+ display: flex !important;
+ align-items: center !important;
+ min-height: 44px !important;
+ height: auto !important;
+ padding-top: 10px !important;
+ padding-bottom: 10px !important;
+}
+
+/* V587 final nav cascade lock.
+   Keep every global/header active state as a pill. This intentionally has
+   higher specificity than the older Wave 42 underline rules above. */
+.site-header .site-nav a[aria-current="page"],
+.site-header .site-nav a.active,
+header.site nav a[aria-current="page"],
+header.site nav a.active,
+header.site .left nav a[aria-current="page"],
+header.site .left nav a.active,
+nav.top .site-nav a[aria-current="page"],
+nav.top .site-nav a.active,
+nav.top .nav-links a[aria-current="page"],
+nav.top .nav-links a.active {
+ text-decoration: none !important;
+ color: var(--ink, #faf2e1) !important;
+ border: 1px solid rgba(126, 240, 210, 0.28) !important;
+ border-bottom-color: rgba(126, 240, 210, 0.28) !important;
+ border-radius: 8px !important;
+ background: rgba(126, 240, 210, 0.12) !important;
+ box-shadow: inset 0 0 0 1px rgba(126, 240, 210, 0.05) !important;
+}
+
+.site-header .site-nav a[aria-current="page"]::after,
+.site-header .site-nav a.active::after,
+header.site nav a[aria-current="page"]::after,
+header.site nav a.active::after,
+header.site .left nav a[aria-current="page"]::after,
+header.site .left nav a.active::after,
+nav.top .site-nav a[aria-current="page"]::after,
+nav.top .site-nav a.active::after,
+nav.top .nav-links a[aria-current="page"]::after,
+nav.top .nav-links a.active::after {
+ content: none !important;
+ display: none !important;
+}
+
+[data-theme=light] .site-header .site-nav a[aria-current="page"],
+[data-theme=light] .site-header .site-nav a.active,
+[data-theme=light] header.site nav a[aria-current="page"],
+[data-theme=light] header.site nav a.active,
+[data-theme=light] header.site .left nav a[aria-current="page"],
+[data-theme=light] header.site .left nav a.active,
+[data-theme=light] nav.top .site-nav a[aria-current="page"],
+[data-theme=light] nav.top .site-nav a.active,
+[data-theme=light] nav.top .nav-links a[aria-current="page"],
+[data-theme=light] nav.top .nav-links a.active {
+ color: #06382e !important;
+ border-color: rgba(8, 127, 104, 0.22) !important;
+ border-bottom-color: rgba(8, 127, 104, 0.22) !important;
+ background: rgba(8, 127, 104, 0.09) !important;
 }

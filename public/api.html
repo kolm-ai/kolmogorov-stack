@@ -95,11 +95,11 @@
  "url": "https://kolm.ai/api",
  "author": {
  "@type": "Organization",
- "name": "Kolmogorov"
+ "name": "Kolm"
  },
  "publisher": {
  "@type": "Organization",
- "name": "Kolmogorov",
+ "name": "Kolm",
  "url": "https://kolm.ai"
  },
  "keywords": "kolm API, AI compiler API, on-device LLM API"
@@ -146,13 +146,13 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -165,7 +165,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -338,7 +338,7 @@ Authorization: Bearer ks_&lt;your-key&gt;</pre>
  <code style="color:#ff6b91">409</code><span>Conflict: duplicate id, signature mismatch, version skew.</span>
  <code style="color:#ff6b91">422</code><span>Semantically wrong: k-score below floor, verifier rejects.</span>
  <code style="color:#ff6b91">429</code><span>Rate-limited <i>or</i> quota exhausted on current plan; <a href="/pricing" style="color:var(--violet,#faf2e1)">upgrade</a> or wait for reset. <code>Retry-After</code> header indicates when.</span>
- <code style="color:#ff6b91">500</code><span>Server error. File <a href="https://github.com/sneaky-hippo/kolmogorov-stack/issues" style="color:var(--violet,#faf2e1)">an issue</a> with the request path, payload shape, and timestamp; correlated <code>request_id</code> headers ship via the request-id middleware.</span>
+ <code style="color:#ff6b91">500</code><span>Server error. File <a href="https://github.com/sneaky-hippo/kolm-stack/issues" style="color:var(--violet,#faf2e1)">an issue</a> with the request path, payload shape, and timestamp; correlated <code>request_id</code> headers ship via the request-id middleware.</span>
  <code style="color:#ff6b91">503</code><span>Upstream dependency unavailable (frontier API down, secret unset).</span>
  </div>
  </section>
@@ -871,7 +871,7 @@ count_only bool "1" | "true"</pre>
  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;font-family:var(--mono);font-size:12.5px">
  <div style="padding:18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-2,#11151b)">
  <div style="color:var(--violet,#faf2e1);text-transform:uppercase;font-size:10.5px;letter-spacing:0.05em;margin-bottom:6px">Node / TS</div>
- <div style="color:var(--ink,#faf2e1)">npm i -g github:sneaky-hippo/kolmogorov-stack</div>
+ <div style="color:var(--ink,#faf2e1)">npm i -g github:sneaky-hippo/kolm-stack</div>
  </div>
  <div style="padding:18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-2,#11151b)">
  <div style="color:var(--violet,#faf2e1);text-transform:uppercase;font-size:10.5px;letter-spacing:0.05em;margin-bottom:6px">Python</div>

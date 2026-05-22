@@ -264,13 +264,13 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -283,7 +283,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -755,7 +755,7 @@
  var pill = document.getElementById(pillId);
  if (pill && typeof total === 'number') pill.textContent = '(' + total + ' total)';
  }
- function fmt(n) { return (typeof n === 'number') ? n.toFixed(4) : '—'; }
+ function fmt(n) { return (typeof n === 'number') ? n.toFixed(4) : '-'; }
 
  // ---- W347: NL fan-out from a single seed ----
  // Probe /v1/seeds/from-nl/health on load; if available, reveal the strip.
@@ -767,7 +767,7 @@
  if (strip) strip.style.display = 'block';
  }
  })
- .catch(function(){ /* silent — strip stays hidden */ });
+ .catch(function(){ /* silent; strip stays hidden */ });
  var genBtn = document.getElementById('gen-nl-seeds');
  if (genBtn) genBtn.addEventListener('click', function(){
  if (!state.examples.length) {
@@ -777,7 +777,7 @@
  var seed = state.examples[state.examples.length - 1];
  var count = Math.max(2, Math.min(50, parseInt(document.getElementById('nl-count').value || '10', 10)));
  var statusEl = document.getElementById('nl-status');
- statusEl.textContent = 'generating ' + count + '…';
+ statusEl.textContent = 'generating ' + count + '...';
  genBtn.disabled = true;
  fetch('/v1/seeds/from-nl', {
  method: 'POST',

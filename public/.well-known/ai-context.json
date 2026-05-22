@@ -3,9 +3,9 @@
  "@type": "AiContext",
  "version": "1.0",
  "name": "kolm",
- "tagline": "Capture every model call. Distill repeats into models you own.",
- "description": "kolm is a local AI stack for teams and builders who want to keep AI calls, training data, evals, and artifacts under their control. It starts as an OpenAI-compatible gateway that records telemetry, redaction decisions, cost, latency, tool calls, and outputs into a local event lake. Reviewed rows become datasets, holdouts, bakeoffs, distill runs, and signed .kolm artifacts that can run locally or on selected device targets. Production artifacts carry public-key Ed25519 receipt evidence and verifier state.",
- "company": "Kolmogorov, Inc.",
+ "tagline": "Route models. Distill specialists. Run on any device.",
+ "description": "Kolm is the OpenAI-compatible gateway, distillation workflow, and signed runtime for production AI teams. It routes OpenAI, Anthropic, Gemini, OpenRouter, local, and internal models through one gateway, writes approved traces into a local event lake, turns reviewed examples into datasets, holdouts, bakeoffs, distill runs, and signed .kolm artifacts, then runs those artifacts across cloud, browser, edge, device, CLI/TUI, and air-gapped targets. Production artifacts carry public-key Ed25519 receipt evidence and verifier state.",
+ "company": "Kolm, Inc.",
  "binary": "kolm",
  "fileFormat": ".kolm",
  "specification": "RS-1",
@@ -45,8 +45,8 @@
  {"name": "Enterprise", "price": null, "currency": "USD", "billing": "custom"}
  ],
  "byokeyPolicy": "All tiers bring their own frontier-API key. kolm never resells tokens.",
- "repository": "https://github.com/sneaky-hippo/kolmogorov-stack",
- "install": "npm i github:sneaky-hippo/kolmogorov-stack",
+ "repository": "https://kolm.ai/download",
+ "install": "See https://kolm.ai/quickstart",
  "contact": {
  "press": "press@kolm.ai",
  "security": "https://kolm.ai/.well-known/security.txt",

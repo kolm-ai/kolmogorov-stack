@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-// `recipe` CLI — autonomous-friendly. Robots/agents can run any command without
+// `recipe` CLI - autonomous-friendly. Robots/agents can run any command without
 // signing up; the CLI auto-bootstraps an anonymous workspace on first use and
 // stores the token at ~/.recipe/auth.json. `recipe claim --email ...` upgrades
 // to a permanent account when ready.
 //
 // Auth precedence (first match wins):
-//   1. KOLM_API_KEY env (preferred; also RECIPE_API_KEY, KOLMOGOROV_API_KEY)
+//   1. KOLM_API_KEY env (preferred; also RECIPE_API_KEY)
 //   2. ~/.recipe/auth.json (managed by `recipe init` / `recipe claim`)
 //   3. auto-bootstrap an anonymous workspace + persist to ~/.recipe/auth.json
 
@@ -37,7 +37,6 @@ function envKey() {
   return (
     process.env.KOLM_API_KEY ||
     process.env.RECIPE_API_KEY ||
-    process.env.KOLMOGOROV_API_KEY ||
     null
   );
 }
@@ -56,7 +55,7 @@ async function ensureKey({ allowBootstrap = true } = {}) {
     return { key: rec.api_key, source: 'file', record: rec };
   }
   if (!allowBootstrap) return { key: null };
-  // Auto-bootstrap an anonymous tenant — silent, single line of feedback.
+  // Auto-bootstrap an anonymous tenant - silent, single line of feedback.
   const c = new RecipeClient();
   try {
     const r = await c.bootstrapAnonymous({ hostname: os.hostname(), user_agent: `recipe-cli/${SDK_VERSION}` });
@@ -70,7 +69,7 @@ async function ensureKey({ allowBootstrap = true } = {}) {
     };
     saveAuth(rec);
     if (cmd !== 'init' && cmd !== '--quiet-bootstrap') {
-      console.error(`✓ bootstrapped anonymous workspace (expires ${r.expires_at.slice(0, 10)})`);
+      console.error(`ok: bootstrapped anonymous workspace (expires ${r.expires_at.slice(0, 10)})`);
       console.error(`  to keep your work permanently: \`recipe claim --email you@co.com\``);
     }
     return { key: r.anon_token, source: 'bootstrap', record: rec };
@@ -87,7 +86,7 @@ function makeClient(key) {
 
 // ---------- usage / flags ----------
 function usage(code = 0) {
-  console.log(`recipe — Recipe CLI (v${SDK_VERSION})
+  console.log(`recipe - Recipe CLI (v${SDK_VERSION})
 
   zero-friction: any command auto-bootstraps an anonymous workspace.
   no signup required to start. claim later with \`recipe claim --email ...\`.
@@ -117,7 +116,7 @@ usage:
   recipe health
 
 env:
-  KOLM_API_KEY       bearer token (preferred; also RECIPE_API_KEY, KOLMOGOROV_API_KEY)
+  KOLM_API_KEY       bearer token (preferred; also RECIPE_API_KEY)
   KOLM_BASE_URL      override the API base (also RECIPE_BASE_URL); default: https://kolm.ai
 `);
   process.exit(code);
@@ -150,14 +149,14 @@ async function main() {
       const existing = envKey() || loadAuth()?.api_key;
       if (existing) {
         const rec = loadAuth();
-        console.log(`already authenticated (${envKey() ? 'env' : (rec?.kind || 'user')}). key starts with: ${existing.slice(0, 7)}…`);
+        console.log(`already authenticated (${envKey() ? 'env' : (rec?.kind || 'user')}). key starts with: ${existing.slice(0, 7)}...`);
         if (rec?.kind === 'anon') console.log(`expires: ${rec.expires_at}. run \`recipe claim --email you@co.com\` to upgrade.`);
         return process.exit(0);
       }
       const r = await ensureKey({ allowBootstrap: true });
-      console.log(`✓ anonymous workspace ready.`);
+      console.log(`ok: anonymous workspace ready.`);
       console.log(`  token stored at: ${AUTH_FILE}`);
-      console.log(`  starts with: ${r.key.slice(0, 7)}…`);
+      console.log(`  starts with: ${r.key.slice(0, 7)}...`);
       console.log(`  expires: ${r.record.expires_at}`);
       console.log(``);
       console.log(`next: \`recipe synthesize examples.json\` to mint your first recipe.`);
@@ -172,9 +171,9 @@ async function main() {
           ? 'KOLM_API_KEY'
           : process.env.RECIPE_API_KEY
           ? 'RECIPE_API_KEY'
-          : 'KOLMOGOROV_API_KEY';
+          : 'unknown';
         console.log(`source: env (${envVar})`);
-        console.log(`key:    ${env.slice(0, 7)}…`);
+        console.log(`key:    ${env.slice(0, 7)}...`);
         try {
           const c = makeClient(env);
           const a = await c.account();
@@ -190,7 +189,7 @@ async function main() {
       }
       console.log(`source:    file (${AUTH_FILE})`);
       console.log(`kind:      ${rec.kind}`);
-      console.log(`key:       ${rec.api_key.slice(0, 7)}…`);
+      console.log(`key:       ${rec.api_key.slice(0, 7)}...`);
       if (rec.kind === 'anon') {
         const ms = new Date(rec.expires_at).getTime() - Date.now();
         const days = Math.max(0, Math.floor(ms / 86400000));
@@ -225,9 +224,9 @@ async function main() {
           base_url: rec.base_url,
         };
         saveAuth(updated);
-        console.log(`✓ ${r.mode}.`);
+        console.log(`ok: ${r.mode}.`);
         console.log(`  account:  ${r.tenant.name} (${r.tenant.plan})`);
-        console.log(`  new key:  ${r.api_key.slice(0, 7)}…  (saved to ${AUTH_FILE})`);
+        console.log(`  new key:  ${r.api_key.slice(0, 7)}...  (saved to ${AUTH_FILE})`);
         console.log(`  quota:    ${r.tenant.quota} calls/mo`);
         return process.exit(0);
       } catch (e) { fail(e); }

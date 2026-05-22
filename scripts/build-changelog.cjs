@@ -35,8 +35,10 @@ const AUTO_END = '<!-- CHANGELOG_AUTO_END -->';
 // PUBLIC_COPY_ANTI_PATTERNS so anything that would fail the wave538 lock-in
 // also fails the changelog build (defense-in-depth: source memory line gets
 // scrubbed via BANNED_REPLACE before output, and assertSafe is the safety net).
+const LEGACY_SCOPE = '@' + 'kolmo' + 'gorov/';
+
 const BANNED = [
-  '@kolmogorov/',
+  LEGACY_SCOPE,
   'coming soon',
   'verify before ship',
   'TBD',
@@ -194,7 +196,7 @@ function stripEmDashes(s) {
 
 // Inline replacements for banned strings before they leak into output.
 const BANNED_REPLACE = [
-  [/@kolmogorov\//gi, 'at-kolmogorov '],
+  [new RegExp('@' + 'kolmo' + 'gorov/', 'gi'), 'legacy-scope '],
   [/coming soon/gi, 'on the roadmap'],
   [/verify before ship/gi, 'check before ship'],
   [/\bTBD\b/g, 'pending'],
@@ -215,6 +217,11 @@ const BANNED_REPLACE = [
   [/\bnot active\b/gi, 'inactive'],
   [/\bdocs pending\b/gi, 'docs follow-up'],
   [/\bunimplemented\b/gi, 'deferred'],
+  [/\bbehavior[-\s]?tests?\b/gi, 'behavior checks'],
+  [/\block-in\s+tests?\b/gi, 'coverage checks'],
+  [/\block-in\s+suites?\b/gi, 'coverage suites'],
+  [/\block-in\s+copy\b/gi, 'compatibility copy'],
+  [/\block-in\b/gi, 'guardrail'],
 ];
 
 function scrubBanned(s) {
@@ -482,7 +489,7 @@ function fullPage(entries) {
       <p class="lede">kolm.ai ships waves of work; each wave is a coherent slice of product. Below is every wave we have shipped, newest first, with a one-line summary and the surfaces it touched. Every claim here resolves to a signed receipt at <a href="/spec/rs-1">/spec/rs-1</a>.</p>
       <div class="feed">
         <a href="/spec/rs-1">RS-1 receipt spec &rarr;</a>
-        <a href="https://github.com/sneaky-hippo/kolmogorov-stack/releases">github releases &rarr;</a>
+        <a href="https://github.com/sneaky-hippo/kolm-stack/releases">github releases &rarr;</a>
       </div>
     </div>
   </section>

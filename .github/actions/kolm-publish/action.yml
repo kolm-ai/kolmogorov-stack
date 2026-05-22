@@ -1,6 +1,6 @@
 name: kolm publish
 description: Publish a verified .kolm to the public registry, your team registry, or a private team scope.
-author: Kolmogorov
+author: Kolm
 
 inputs:
   artifact:
@@ -35,7 +35,7 @@ runs:
   steps:
     - name: install kolm CLI
       shell: bash
-      run: npm i -g github:sneaky-hippo/kolmogorov-stack
+      run: npm i -g github:sneaky-hippo/kolm-stack
 
     - name: configure
       shell: bash

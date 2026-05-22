@@ -5,22 +5,22 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Distillation · kolm.ai</title>
-<meta name="description" content="Distillation in kolm.ai: compress captured prompt and response pairs into a smaller specialist model, frozen at a K-score threshold. Different from...">
-<meta name="keywords" content="distillation, model distillation, ai distillation, kolm distill, knowledge distillation, specialist model, teacher student, captured prompts">
+<title>Distill top models into signed specialists · kolm.ai</title>
+<meta name="description" content="Use Kolm to distill frontier, open, local, or internal model behavior into smaller signed .kolm specialists with K-score gates, receipts, and runtime targets.">
+<meta name="keywords" content="distillation, model distillation, ai distillation, kolm distill, knowledge distillation, specialist model, teacher student, captured prompts, top model distillation, signed AI artifact">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
-<meta property="og:title" content="Distillation · kolm.ai">
-<meta property="og:description" content="Distillation in kolm.ai: compress captured prompt and response pairs into a smaller specialist model, frozen at a K-score threshold. Different from...">
+<meta property="og:title" content="Distill top models into signed specialists | kolm.ai">
+<meta property="og:description" content="Distill frontier, open, local, or internal model behavior into smaller signed .kolm specialists with K-score gates, receipts, and runtime targets.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/distill">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Distillation · kolm.ai">
-<meta name="twitter:description" content="Distillation in kolm.ai: compress captured prompt and response pairs into a smaller specialist model, frozen at a K-score threshold. Different from...">
+<meta name="twitter:title" content="Distill top models into signed specialists | kolm.ai">
+<meta name="twitter:description" content="Distill frontier, open, local, or internal model behavior into smaller signed .kolm specialists with K-score gates, receipts, and runtime targets.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/distill">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -31,10 +31,10 @@
 {
  "@context": "https://schema.org",
  "@type": "TechArticle",
- "headline": "Distillation: compress captured prompts into a smaller specialist model",
- "description": "Distillation in kolm.ai compresses captured prompt and response pairs into a smaller specialist model, frozen at a K-score threshold. Different from fine-tuning and from compilation.",
+ "headline": "Distill top models into signed specialists",
+ "description": "Use Kolm to distill frontier, open, local, or internal model behavior into smaller signed .kolm specialists with K-score gates, receipts, and runtime targets.",
  "datePublished": "2026-05-18",
- "dateModified": "2026-05-18",
+ "dateModified": "2026-05-22",
  "author": { "@type": "Organization", "name": "kolm.ai" },
  "publisher": { "@type": "Organization", "name": "kolm.ai" },
  "image": "https://kolm.ai/og/distill.svg",
@@ -98,13 +98,13 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -117,7 +117,7 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -192,12 +192,12 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 
 <main id="main">
 
-<h1>Distillation</h1>
-<p class="lede">In kolm.ai, distillation compresses captured prompt and response pairs into a smaller specialist model, frozen at a K-score threshold. It is one pass inside the broader compile pipeline, not a synonym for it. This page explains what it is, when to reach for it, what the 7-step pipeline does, and the one command that runs it end to end.</p>
+<h1>Distill top models into signed specialists.</h1>
+<p class="lede">Kolm distillation takes teacher traces, approved calls, synthetic rows, or curated examples and produces a smaller specialist that must pass held-out K-score gates before it becomes a signed <code>.kolm</code> artifact.</p>
 
 <h2 id="what-it-is">What it is</h2>
-<p>Distillation in kolm.ai is the act of compressing a population of captured prompt and response pairs from a larger upstream model into a smaller specialist model that produces matching outputs on the prompts you actually see. The smaller model is "frozen" at the point where its K-score on a held-out slice of your captures crosses the configured threshold (default 0.85). Until that threshold is met, the artifact is not promotable; once met, it ships as a signed <code>.kolm</code> with a receipt chain back to the original captures.</p>
-<p>Distillation is not the same as fine-tuning. Fine-tuning re-weights an existing base model on new labels and keeps the same architecture and parameter count. Distillation is also not the same as compilation. Compilation is the umbrella verb that includes distillation as one of its passes, alongside quantization, gating, signing, and packaging. A kolm compile run on a 1000-pair namespace will typically include a distillation pass; a compile on a 50-pair recipe-template namespace typically will not.</p>
+<p>Distillation in Kolm compresses useful behavior from a larger teacher into a smaller specialist model that matches the task you actually ship. The teacher can be a frontier API, an open model, a local model, or an internal model. The specialist is frozen only when its K-score on a held-out slice crosses the configured threshold. Until then, the artifact is not promotable; once it clears, it ships as a signed <code>.kolm</code> with a receipt chain back to the source evidence.</p>
+<p>Distillation is not the same as fine-tuning, and it is not the same as compilation. Fine-tuning changes a base model on new labels. Distillation transfers behavior from a teacher to a student. Compilation is the umbrella step that can include distillation, quantization, gating, signing, target metadata, and packaging.</p>
 
 <h2 id="when-to-distill">When to distill (vs. just compile a recipe)</h2>
 <ul>

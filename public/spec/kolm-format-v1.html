@@ -27,8 +27,8 @@
  "headline": "The .kolm file format, v1",
  "description": "Public spec for the .kolm container: ZIP layout, canonical JSON, HMAC receipt chain, K-score gate. Community feedback open.",
  "url": "https://kolm.ai/spec/kolm-format-v1",
- "author": {"@type": "Organization", "name": "Kolmogorov"},
- "publisher": {"@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai"},
+ "author": {"@type": "Organization", "name": "Kolm"},
+ "publisher": {"@type": "Organization", "name": "Kolm", "url": "https://kolm.ai"},
  "datePublished": "2026-05-16",
  "license": "https://www.apache.org/licenses/LICENSE-2.0"
 }
@@ -107,13 +107,13 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -126,7 +126,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -207,7 +207,7 @@
 <h1>The <code>.kolm</code> file format, v1.</h1>
 <p class="subtitle">A deterministic, content-addressable ZIP container for a compiled task recipe. Versioned, citeable, community-feedback open. Apache-2.0.</p>
 <p class="authors">kolm engineering . hello@kolm.ai</p>
-<p class="stamp">v1.0 . 2026-05-16 . citeable as <code>kolm.ai/spec/kolm-format-v1</code> . feedback <a href="https://github.com/sneaky-hippo/kolmogorov-stack/issues/new?labels=spec-feedback&amp;title=.kolm+v1+feedback" style="color:inherit">github issue</a></p>
+<p class="stamp">v1.0 . 2026-05-16 . citeable as <code>kolm.ai/spec/kolm-format-v1</code> . feedback <a href="https://github.com/sneaky-hippo/kolm-stack/issues/new?labels=spec-feedback&amp;title=.kolm+v1+feedback" style="color:inherit">github issue</a></p>
 
 <div class="pill-row">
  <span class="p live">status: in production</span>
@@ -400,7 +400,7 @@ ls phi-extracted/
 <li><b>Recipe sandbox.</b> Currently V8 isolate-style. Open to a WASM target for non-Node runtimes.</li>
 <li><b>Quantization metadata.</b> When a recipe wraps a model, where does the quantization dictionary live? In <code>pack.json</code>? A new <code>quant.json</code>?</li>
 </ul>
-<p>Open issues at <a href="https://github.com/sneaky-hippo/kolmogorov-stack/issues?q=label%3Aspec-feedback" style="color:var(--accent)">github &middot; spec-feedback</a> or email <a href="mailto:hello@kolm.ai" style="color:var(--accent)">hello@kolm.ai</a>. Substantive contributions land in the v1.1 spec with credit.</p>
+<p>Open issues at <a href="https://github.com/sneaky-hippo/kolm-stack/issues?q=label%3Aspec-feedback" style="color:var(--accent)">github &middot; spec-feedback</a> or email <a href="mailto:hello@kolm.ai" style="color:var(--accent)">hello@kolm.ai</a>. Substantive contributions land in the v1.1 spec with credit.</p>
 </div>
 
 </div>

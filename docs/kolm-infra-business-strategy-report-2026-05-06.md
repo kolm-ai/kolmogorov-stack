@@ -1,7 +1,7 @@
 # kolm.ai infrastructure and business strategy report
 
 Date: 2026-05-06
-Scope: `C:\Users\user\Desktop\kolmogorov-stack`
+Scope: Kolm product and infrastructure workspace.
 
 ## Executive summary
 

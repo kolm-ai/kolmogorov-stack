@@ -121,6 +121,8 @@ import {
   tuiViews as productTuiViews,
   validateProductExperience,
 } from './product-experience.js';
+import { kernelCatalog } from './product-kernel.js';
+import { attachEnvelopeHeaders, okEnvelope } from './envelope.js';
 import { cloudReadinessSummary, listPlatformCapabilities } from './platform-capabilities.js';
 import { objectStorageReadiness } from './object-storage.js';
 
@@ -335,6 +337,20 @@ const verifiedLimiter = rateLimit({
 
 // Anonymous workspace bootstrap — bots can mint these without an email. Cap to
 // prevent disk-DoS-by-tenant-row.
+const PRODUCT_GRAPH_PATH = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'public', 'product-graph.json');
+function readProductGraph() {
+  try {
+    return JSON.parse(fs.readFileSync(PRODUCT_GRAPH_PATH, 'utf8'));
+  } catch (e) {
+    return {
+      schema: 'kolm-product-graph-1',
+      ok: false,
+      error: 'product_graph_unavailable',
+      detail: String(e && e.message || e),
+    };
+  }
+}
+
 const anonLimiter = rateLimit({
   windowMs: 24 * 60 * 60 * 1000,
   max: 50,
@@ -436,7 +452,7 @@ const anonModelsProbeLimiter = rateLimit({
 // tenant key on the OpenAI/Anthropic-compatible inference passthrough routes
 // so anonymous traffic cannot bill upstream costs against the operator.
 // Local-daemon mode (127.0.0.1:7403 via `kolm connect start`) stays
-// unauthenticated but stamps a sentinel tenant_id so captured events still
+// unauthenticated but stamps a sentinel tenant_id so captured calls still
 // land under a traceable tenant.
 //
 // Discriminator:
@@ -829,6 +845,54 @@ export function buildRouter() {
       cloud_readiness: cloud,
       secret_values_included: false,
     });
+  });
+
+  // Product graph - public, secret-safe, generated from the route-surface,
+  // journey, readiness, and experience contracts. This is the canonical
+  // machine-readable map for account UI, CLI/TUI parity, docs, and release
+  // audits.
+  r.get('/v1/product/graph', (_req, res) => {
+    const graph = readProductGraph();
+    const envelope = okEnvelope({
+      surface: 'public-docs-sdk',
+      journey: 'public-docs-sdk',
+      readiness: { status: graph.ok === false ? 'blocked' : 'implemented', requirement_ids: ['local-account-ui'] },
+      data: {
+        graph,
+        kernel: kernelCatalog(),
+        secret_values_included: false,
+      },
+      evidence: {
+        source_paths: [
+          'docs/product-surfaces.json',
+          'docs/product-journeys.json',
+          'docs/product-sota-readiness.json',
+          'src/product-experience.js',
+          'src/product-kernel.js',
+          'public/product-graph.json',
+        ],
+      },
+      next_actions: [
+        {
+          kind: 'command',
+          label: 'Verify product kernel',
+          value: 'npm run verify:kernel',
+          surface: 'public-docs-sdk',
+          journey: 'public-docs-sdk',
+          priority: 'P0',
+        },
+        {
+          kind: 'command',
+          label: 'Regenerate product graph',
+          value: 'npm run build:product-graph',
+          surface: 'public-docs-sdk',
+          journey: 'public-docs-sdk',
+          priority: 'P1',
+        },
+      ],
+    });
+    attachEnvelopeHeaders(res, envelope);
+    res.status(graph.ok === false ? 503 : 200).json(envelope);
   });
 
   // Cloud readiness is exposed directly for account UI, CI, and self-hosted
@@ -1757,7 +1821,7 @@ export function buildRouter() {
         eu_ai_act_2026: 'Receipts provide auditable behavior logs required under Articles 12 and 50.',
         soc2: 'Receipts can serve as evidence for change-management controls when stored alongside source.',
       },
-      authors: ['Kolmogorov Stack contributors'],
+      authors: ['Kolm Stack contributors'],
     });
   });
 
@@ -7007,7 +7071,7 @@ export function buildRouter() {
 
   // Admin: list waitlist + submissions for triage
 
-  // Admin waitlist list - returns all waitlist rows for founder triage.
+    // Admin waitlist list - returns all waitlist rows for admin triage.
   r.get('/v1/admin/waitlist', (req, res) => {
     if (!req.is_admin) return res.status(403).json({ error: 'admin only' });
     res.json({ waitlist: all('waitlist'), total: all('waitlist').length });
@@ -10538,7 +10602,7 @@ export function buildRouter() {
     } catch (e) { res.status(500).json(_w384Err(e, 'datasets_list_error')); }
   });
 
-  // Dataset create - builds a tenant-stamped dataset from a namespace of captured events.
+  // Dataset create - builds a tenant-stamped dataset from a namespace of captured calls.
   r.post('/v1/datasets', async (req, res) => {
     try {
       const body = req.body || {};

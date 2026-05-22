@@ -54,7 +54,7 @@ That blocker has since been closed by provisioning a fresh tenant via the public
 
 | Item | Evidence |
 | --- | --- |
-| Repo | `C:\Users\user\Desktop\kolmogorov-stack` |
+| Repo | `local private workspace` |
 | Branch | `main` tracking `origin/main` + `public/main` |
 | Audited commit (W545 close-out) | `98ea4aba59a37793b6dcfb7c6b6512798cd06ddd` |
 | Commit title | `W545 - local-surfaces release-verify gate + audit blocker close-out` |

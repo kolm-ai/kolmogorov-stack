@@ -1,6 +1,6 @@
 // W484 P0-3 — `kolm update` must refuse to run from a repo checkout (without
 // --force). Audit flagged: a dev cloning the repo and running `kolm update`
-// silently triggers `npm i -g github:sneaky-hippo/kolmogorov-stack`, which
+// silently triggers `npm i -g github:sneaky-hippo/kolm-stack`, which
 // clobbers their global install with whatever main is at right now. The fix
 // detects the checkout (sibling .git + matching package.json name) and routes
 // the user to `git pull` instead.
@@ -53,9 +53,9 @@ test('W484 #3 — kolm update --force --dry-run from a repo checkout bypasses th
   assert.ok(!out.includes('refused'), 'should not be refused with --force');
 });
 
-test('W484 #4 — guard source uses package.json name === kolmogorov-stack heuristic', () => {
+test('W484 #4 — guard source uses package.json name === kolm-stack heuristic', () => {
   const src = fs.readFileSync(CLI, 'utf8');
   // Make sure the guard pattern is wired and the right package-name check is present.
-  assert.ok(/kolmogorov-stack/.test(src), 'guard must compare against package name kolmogorov-stack');
+  assert.ok(/kolm-stack/.test(src), 'guard must compare against package name kolm-stack');
   assert.ok(/repo_checkout/.test(src), 'guard must surface reason=repo_checkout');
 });

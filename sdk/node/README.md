@@ -1,4 +1,4 @@
-# @kolmogorov/kolm-sdk
+# @kolm/kolm-sdk
 
 Node SDK for kolm account, registry, receipt, and recipe APIs.
 
@@ -9,15 +9,15 @@ The public package is intentionally small. It gives product code a typed client 
 The npm package is not published yet. Use a local checkout while the package is prepared:
 
 ```bash
-git clone https://github.com/sneaky-hippo/kolmogorov-stack
-npm i file:./kolmogorov-stack/sdk/node
+git clone https://github.com/sneaky-hippo/kolm-stack
+npm i file:./kolm-stack/sdk/node
 ```
 
 For local development:
 
 ```bash
-git clone https://github.com/sneaky-hippo/kolmogorov-stack
-cd kolmogorov-stack/sdk/node
+git clone https://github.com/sneaky-hippo/kolm-stack
+cd kolm-stack/sdk/node
 npm install
 npm test
 ```
@@ -25,7 +25,7 @@ npm test
 ## Usage
 
 ```js
-import KolmClient, { recipe } from '@kolmogorov/kolm-sdk';
+import KolmClient, { recipe } from '@kolm/kolm-sdk';
 
 const kolm = new KolmClient({
   apiKey: process.env.KOLM_API_KEY,
@@ -65,7 +65,7 @@ KOLM_API_KEY=ks_...
 KOLM_BASE_URL=https://kolm.ai
 ```
 
-The SDK still accepts `RECIPE_API_KEY`, `RECIPE_BASE_URL`, and `KOLMOGOROV_API_KEY` for backward compatibility.
+The SDK still accepts `RECIPE_API_KEY` and `RECIPE_BASE_URL` for legacy Recipe SDK installs.
 
 ## API Surface
 
@@ -109,11 +109,11 @@ class KolmClient {
 The production CLI is the repo-root `kolm` binary. This SDK package also includes a legacy recipe-registry helper exposed as `kolm-recipes` for registry experiments. New product flows should prefer:
 
 ```bash
-npm i -g github:sneaky-hippo/kolmogorov-stack
+npm i -g github:sneaky-hippo/kolm-stack
 kolm config base https://kolm.ai
 kolm login
 ```
 
 ## License
 
-Apache-2.0 © [Kolmogorov](https://kolm.ai)
+Apache-2.0 © [Kolm](https://kolm.ai)

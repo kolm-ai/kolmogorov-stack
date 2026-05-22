@@ -1,7 +1,7 @@
 # kolm-runtime
 
 Native Rust verifier for `.kolm` artifacts. Loads the signed zip bundle the
-Kolmogorov Stack toolchain produces, recomputes the content-id (CID),
+Kolm Stack toolchain produces, recomputes the content-id (CID),
 verifies the manifest signature, the 5-step HMAC chain on the receipt, and
 the receipt body signature, and exposes the manifest, receipt, and recipe
 source through a small typed API. The same code compiles to a CLI binary

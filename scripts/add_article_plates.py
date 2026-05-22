@@ -4,7 +4,7 @@ plate matching its topic, inserted right after the byline meta div. Idempotent
 import re
 from pathlib import Path
 
-ROOT = Path("C:/Users/user/Desktop/kolmogorov-stack/public/articles")
+ROOT = Path(__file__).resolve().parents[1] / "public" / "articles"
 
 PLATE_CSS = '''
   .plate{position:relative;margin:32px 0 0;border:1px solid var(--line-strong);border-radius:14px;overflow:hidden;background:#050507;isolation:isolate}

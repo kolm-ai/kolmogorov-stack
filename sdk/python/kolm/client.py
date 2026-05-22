@@ -183,5 +183,5 @@ class Kolm:
     def _cli_or_raise(self, op: str) -> str:
         cli = self._cli_or_none()
         if not cli:
-            raise KolmError(503, f"kolm CLI not installed; required for {op}. Run: npm i -g github:sneaky-hippo/kolmogorov-stack")
+            raise KolmError(503, f"kolm CLI not installed; required for {op}. Run: npm i -g github:sneaky-hippo/kolm-stack")
         return cli

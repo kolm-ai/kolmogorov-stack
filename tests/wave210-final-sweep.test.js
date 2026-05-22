@@ -8,7 +8,7 @@
 // drift slipped in over the 60-wave run.
 //
 // Categories covered:
-//   1.  Forbidden phrase site-wide (`npm i -g @kolmogorov/kolm`)
+//   1.  Forbidden phrase site-wide (`npm i -g @kolm/kolm`)
 //   2.  Marketing fluff site-wide (game-changing, revolutionary, world-class,
 //       best-in-class, next-gen, blazing fast, industry-leading,
 //       enterprise-grade) — must be 0 OR named in EXEMPT_CONTEXTS map (each
@@ -131,12 +131,12 @@ const FLUFF_PHRASES = [
 ];
 
 // 1.
-test('1. no forbidden install pattern "npm i -g @kolmogorov/kolm" anywhere in public/', () => {
+test('1. no forbidden install pattern "npm i -g @kolm/kolm" anywhere in public/', () => {
   const all = listHtmlFiles(PUBLIC);
   const hits = [];
   for (const f of all) {
     const html = read(f);
-    if (html.includes('npm i -g @kolmogorov/kolm')) {
+    if (html.includes('npm i -g @kolm/kolm')) {
       hits.push(path.relative(PUBLIC, f));
     }
   }

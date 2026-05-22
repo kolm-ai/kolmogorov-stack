@@ -74,10 +74,10 @@ The Python package metadata also says project name `kolm`, the README uses a leg
 
 Examples found:
 
-- root package: private `kolmogorov-stack`, bin `kolm`,
-- README: `npm i -g @kolmogorov/kolm`,
+- root package: private `kolm-stack`, bin `kolm`,
+- README: `npm i -g legacy scoped kolm CLI package`,
 - `public/docs.html`: `npm i -g @kolm/cli` and GitHub install,
-- Node SDK: `@kolmogorov/kolm-sdk`, a recipe-named CLI bin, not published,
+- Node SDK: `legacy scoped kolm SDK package`, a recipe-named CLI bin, not published,
 - MCP SDK: legacy recipe-scoped MCP package name and dependency,
 - Python SDK: project `kolm`, script `recipe`, README uses a legacy recipe PyPI name.
 

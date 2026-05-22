@@ -132,7 +132,7 @@
     {
       "id": "compute-cloud",
       "surface": "compute-cloud",
-      "user_story": "As a team with no GPU, I can configure Cloudflare R2, S3-compatible storage, AWS, Supabase, Modal, RunPod, Lambda, Together, or remote SSH and still build artifacts.",
+      "user_story": "As a team with no GPU, I can configure R2-compatible object storage, S3-compatible storage, AWS, Supabase, Modal, RunPod, Lambda, Together, or remote SSH and still build artifacts.",
       "happy_path": ["run readiness", "pick storage", "pick GPU/train backend", "deploy BYOC", "verify attestation"],
       "proof_commands": ["kolm cloud readiness --json", "kolm cloud storage --json", "kolm cloud storage --provider local-artifacts --smoke --json", "kolm cloud readiness --remote --json", "GET /v1/cloud/readiness", "GET /v1/storage/object-readiness", "kolm cloud doctor", "kolm compute list --json", "kolm remote recommend --json"],
       "cloud_or_customization": ["compute-target", "storage-plane", "deployment-mode", "governance-mode"],

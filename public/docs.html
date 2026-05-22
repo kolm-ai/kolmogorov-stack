@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>kolm docs · quickstart, API, SDKs, runtime</title>
+<title>kolm docs · quickstart, API, SDKs, runtime · kolm.ai</title>
 <meta name="description" content="Build with kolm: quickstarts, API reference, SDK guides, runtime docs, receipts, distillation, privacy, storage, evals, troubleshooting, FAQ, and changelog.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
@@ -32,7 +32,7 @@
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
 <style>
- /* W401A: 4-zone landing. Quickstarts, Reference, Concepts, Help. */
+/* Docs landing. Quickstarts, reference, concepts, and help. */
  .docs-wrap{max-width:1100px;margin:0 auto;padding:48px 32px 96px}
  @media (max-width:720px){.docs-wrap{padding:28px 18px 64px}}
  .docs-wrap h1{font-size:clamp(40px,5.6vw,76px);line-height:0.98;letter-spacing:-0.03em;margin:0 0 14px;font-weight:500;color:var(--ink)}
@@ -90,7 +90,7 @@
  [data-theme=light] .zone-eye{color:#737c73}
  [data-theme=light] .zone-eye::before{background:#0a8862;box-shadow:0 0 6px rgba(10,136,98,0.4)}
 
- /* Zone 5: dense reference tables (HTTP routes, CLI verbs by category, env, errors). */
+/* Reference tables: HTTP routes, CLI verbs by category, env, errors. */
  .ref-table{width:100%;border-collapse:collapse;margin:8px 0 24px;font-family:var(--mono);font-size:12.5px}
  .ref-table th{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);color:var(--ink-faint);font-weight:500;text-transform:uppercase;font-size:10.5px;letter-spacing:0.08em}
  .ref-table td{padding:8px 12px;border-bottom:1px solid var(--line);color:var(--ink-mute);vertical-align:top;line-height:1.5}
@@ -183,13 +183,13 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -202,7 +202,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -280,12 +280,12 @@
 
  <p class="crumbs">kolm.ai / docs</p>
 
-  <h1>Build with kolm.</h1>
-  <p class="lede">Start by routing one model call through the gateway. Then use the docs for capture, privacy, datasets, distillation, compilation, runtimes, verification, and deployment.</p>
+<h1>Build with Kolm.</h1>
+ <p class="lede">Route one model call first. Then capture data, protect it, distill specialists, compile artifacts, run anywhere, and verify every release.</p>
 
- <!-- ====================== ZONE 1: QUICKSTARTS ====================== -->
- <h2 id="quickstarts"><span class="zone-eye">Zone 1</span>Quickstarts</h2>
- <p>Five 5-minute walkthroughs. Pick the workflow you need.</p>
+<!-- ====================== QUICKSTARTS ====================== -->
+<h2 id="quickstarts"><span class="zone-eye">Start</span>Quickstarts</h2>
+<p>Pick the shortest path to value.</p>
  <div class="card-grid" data-zone="quickstarts">
  <a class="docs-card" href="/quickstart">
  <div class="dc-eye">overview</div>
@@ -314,15 +314,15 @@
  </a>
  </div>
 
- <!-- ====================== ZONE 2: REFERENCE ====================== -->
- <h2 id="reference"><span class="zone-eye">Zone 2</span>Reference</h2>
- <p>Every route. Every CLI verb. The receipts spec that ties them together.</p>
+<!-- ====================== REFERENCE ====================== -->
+<h2 id="reference"><span class="zone-eye">Reference</span>APIs, CLI, SDKs</h2>
+<p>Routes, commands, SDKs, and receipt specs in one place.</p>
 
  <div class="ref-grid" data-zone="reference-top">
  <a class="ref-card" href="/docs/api">
  <div class="rc-eye">REST</div>
  <div class="rc-t">API reference</div>
- <div class="rc-s">378 documented routes across 112 groups, auto-generated from src/router.js. Auth, capture, compile, distill, runtime, receipts, billing.</div>
+<div class="rc-s">Current generated REST surface. Auth, capture, compile, distill, runtime, receipts, billing.</div>
  </a>
  <a class="ref-card" href="/docs/cli">
  <div class="rc-eye">terminal</div>
@@ -341,8 +341,8 @@
  </a>
  </div>
 
- <h3 id="cli-grid">CLI reference grid</h3>
- <p>Every CLI verb has a doc page. Grouped by what you reach for first.</p>
+<h3 id="cli-grid">CLI commands</h3>
+<p>Grouped by the job: capture, build, run, verify, operate.</p>
 
  <div class="verb-cat">
  <p class="verb-cat-h">capture &middot; ingest production calls</p>
@@ -427,9 +427,9 @@
  </div>
  </div>
 
- <!-- ====================== ZONE 3: CONCEPTS ====================== -->
- <h2 id="concepts"><span class="zone-eye">Zone 3</span>Concepts</h2>
- <p>The moving parts. Read these once and the CLI verbs all click into place.</p>
+<!-- ====================== CONCEPTS ====================== -->
+ <h2 id="concepts"><span class="zone-eye">Learn</span>Concepts</h2>
+ <p>The moving parts behind gateway, datasets, distillation, artifacts, runtime, and receipts.</p>
  <div class="card-grid" data-zone="concepts">
  <a class="docs-card" href="/docs/distill">
  <div class="dc-eye">concept</div>
@@ -463,9 +463,9 @@
  </a>
  </div>
 
- <!-- ====================== ZONE 4: HELP ====================== -->
- <h2 id="help"><span class="zone-eye">Zone 4</span>Help</h2>
- <p>Something broken or unclear? Start here.</p>
+<!-- ====================== HELP ====================== -->
+ <h2 id="help"><span class="zone-eye">Support</span>Help</h2>
+ <p>Debug setup, terms, webhooks, storage, and account access.</p>
  <div class="card-grid" data-zone="help">
  <a class="docs-card" href="/docs/glossary">
  <div class="dc-eye">terms</div>
@@ -499,11 +499,11 @@
  </a>
  </div>
 
- <!-- ====================== ZONE 5: REFERENCE TABLES ====================== -->
- <h2 id="reference-tables"><span class="zone-eye">Zone 5</span>Reference</h2>
- <p>Dense tables, no prose. Use these when you already know what you are looking for. Each row links into the canonical page that defines the contract.</p>
+<!-- ====================== REFERENCE TABLES ====================== -->
+ <h2 id="reference-tables"><span class="zone-eye">Tables</span>Fast lookup</h2>
+ <p>Routes, commands, env vars, errors, and policy terms for operators who already know the workflow.</p>
 
- <h3 id="http-routes">HTTP API routes (most used)</h3>
+ <h3 id="http-routes">Core HTTP routes</h3>
  <table class="ref-table">
  <thead><tr><th>Method</th><th>Path</th><th>Purpose</th><th>Auth</th></tr></thead>
  <tbody>

@@ -75,13 +75,13 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -94,7 +94,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -193,7 +193,7 @@
  - uses: actions/checkout@v4
  - uses: actions/setup-node@v4
  with: { node-version: <span class="g">'20'</span> }
- - run: npm install -g github:sneaky-hippo/kolmogorov-stack
+ - run: npm install -g github:sneaky-hippo/kolm-stack
  - <span class="k">name</span>: compile + verify
  env:
  KOLM_API_KEY: ${{ secrets.KOLM_API_KEY }}
@@ -230,7 +230,7 @@
  runs-on: ubuntu-22.04
  steps:
  - uses: actions/checkout@v4
- - run: npm install -g github:sneaky-hippo/kolmogorov-stack
+ - run: npm install -g github:sneaky-hippo/kolm-stack
  - <span class="k">name</span>: compile + sign + bind
  env:
  KOLM_API_KEY: ${{ secrets.KOLM_API_KEY }}
@@ -265,7 +265,7 @@
  runs-on: ubuntu-22.04
  steps:
  - uses: actions/checkout@v4
- - run: npm install -g github:sneaky-hippo/kolmogorov-stack
+ - run: npm install -g github:sneaky-hippo/kolm-stack
  - run: |
  for art in releases/**/*.kolm; do
  kolm inspect "$art" || { echo "FAIL: $art" >&2; exit 1; }

@@ -152,13 +152,13 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -171,7 +171,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -302,7 +302,7 @@
  <h2 id="signals">Detection signals.</h2>
  <p>The literature on covariate shift and concept drift is rich. The signals we find most useful in a kolm deployment are a small subset of that literature, chosen because they can be computed from the captures stream without extra labeled data.</p>
 
- <p><b>Signal one: production traffic distribution shift.</b> Take a fixed-size feature vector over recent production captures (TF-IDF over a sliding window, or sentence embeddings if you have a cheap embedder available). Compare to the same feature vector over the embedded eval pack. A Kolmogorov-Smirnov test or maximum mean discrepancy estimate gives a single number per axis. If the number crosses a threshold, the captures distribution and the eval distribution have measurably diverged.</p>
+ <p><b>Signal one: production traffic distribution shift.</b> Take a fixed-size feature vector over recent production captures (TF-IDF over a sliding window, or sentence embeddings if you have a cheap embedder available). Compare to the same feature vector over the embedded eval pack. A KS test or maximum mean discrepancy estimate gives a single number per axis. If the number crosses a threshold, the captures distribution and the eval distribution have measurably diverged.</p>
 
  <p><b>Signal two: novel-entity rate.</b> Count named entities or vocabulary tokens in the production captures that are absent from the eval pack. Normalize by total captures. A rate above some operator-chosen ceiling (we have used 8% of distinct entities per week, but the right number is domain specific) indicates the world is producing inputs the pack cannot reach.</p>
 

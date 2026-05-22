@@ -3,7 +3,7 @@ lower-left negative space. Outputs final OG card at 1200x630."""
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
-ROOT = Path("C:/Users/user/Desktop/kolmogorov-stack/public/img")
+ROOT = Path(__file__).resolve().parents[1] / "public" / "img"
 SRC = ROOT / "_generations" / "brand-og_1_raw.png"
 OUT = ROOT / "brand-og.png"  # always recompose from raw
 

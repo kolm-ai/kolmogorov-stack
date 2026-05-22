@@ -66,13 +66,13 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -85,7 +85,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -286,13 +286,13 @@
  <h3 id="al-name" class="al-name">Untitled artifact</h3>
  <button type="button" id="al-clear" class="al-clear" title="Drop another">drop another</button>
  </div>
- <p class="al-task" id="al-task">—</p>
+ <p class="al-task" id="al-task">-</p>
  <div class="al-meta">
- <span class="al-pill"><span class="al-pill-l">model</span><b id="al-model">—</b></span>
- <span class="al-pill"><span class="al-pill-l">K-score</span><b id="al-kscore">—</b></span>
- <span class="al-pill"><span class="al-pill-l">gate</span><b id="al-gate">—</b></span>
- <span class="al-pill"><span class="al-pill-l">size</span><b id="al-size">—</b></span>
- <span class="al-pill al-pill-cid"><span class="al-pill-l">cid</span><code id="al-cid">—</code></span>
+ <span class="al-pill"><span class="al-pill-l">model</span><b id="al-model">-</b></span>
+ <span class="al-pill"><span class="al-pill-l">K-score</span><b id="al-kscore">-</b></span>
+ <span class="al-pill"><span class="al-pill-l">gate</span><b id="al-gate">-</b></span>
+ <span class="al-pill"><span class="al-pill-l">size</span><b id="al-size">-</b></span>
+ <span class="al-pill al-pill-cid"><span class="al-pill-l">cid</span><code id="al-cid">-</code></span>
  </div>
  </header>
 
@@ -347,22 +347,22 @@
  </div>
 
  <div id="al-pane-recipe" class="al-pane" role="tabpanel" aria-labelledby="al-tab-recipe" data-pane="recipe" hidden>
- <pre id="al-recipe-pre" class="al-pre al-pre-tall">—</pre>
+ <pre id="al-recipe-pre" class="al-pre al-pre-tall">-</pre>
  </div>
 
  <div id="al-pane-receipt" class="al-pane" role="tabpanel" aria-labelledby="al-tab-receipt" data-pane="receipt" hidden>
- <pre id="al-receipt-pre" class="al-pre al-pre-tall">—</pre>
+ <pre id="al-receipt-pre" class="al-pre al-pre-tall">-</pre>
  </div>
 
  <div id="al-pane-evals" class="al-pane" role="tabpanel" aria-labelledby="al-tab-evals" data-pane="evals" hidden>
  <p class="al-sub">The held-out evals the K-score was computed against, with per-row pass / fail.</p>
- <pre id="al-evals-pre" class="al-pre al-pre-tall">—</pre>
+ <pre id="al-evals-pre" class="al-pre al-pre-tall">-</pre>
  </div>
  </article>
  </section>
 
  <style>
- /* Artifact lab — wave 121. SOTA drag-drop + test + serve. */
+ /* Artifact lab - wave 121. SOTA drag-drop + test + serve. */
  .al-panel { position: relative }
  .al-drop {
  position: relative; margin: 8px 0 0;
@@ -557,7 +557,20 @@
  // promote the welcome banner immediately on oauth=signup without waiting
  // for the /v1/account round-trip.
  if (oauthFlag === 'signup') showWelcome();
- fetch('/v1/account', { credentials: 'include' })
+ function dashboardAccountHeaders() {
+ var headers = { accept: 'application/json' };
+ try {
+ ['ks_api_key', 'kolm_api_key', 'apiKey', 'recipeApiKey'].some(function (name) {
+ var key = localStorage.getItem(name);
+ if (!key) return false;
+ headers.Authorization = 'Bearer ' + key;
+ headers['X-API-Key'] = key;
+ return true;
+ });
+ } catch (e) {}
+ return headers;
+ }
+ fetch('/v1/account', { credentials: 'include', headers: dashboardAccountHeaders() })
  .then(r => r.ok ? r.json() : null)
  .then(j => { if (j && isEmpty(j.compiles_count)) showWelcome(); })
  .catch(() => {});
@@ -659,7 +672,7 @@
  var KEY_NAMES = ['kolm_api_key', 'apiKey', 'recipeApiKey', 'ks_api_key'];
  function readKey(){
  for (var i = 0; i < KEY_NAMES.length; i++) {
- try { var v = localStorage.getItem(KEY_NAMES[i]); if (v && /^ks_[0-9a-f]{32}$/.test(v)) return v; } catch (_) {}
+ try { var v = localStorage.getItem(KEY_NAMES[i]); if (v && /^ks_/.test(v)) return v; } catch (_) {}
  }
  return null;
  }
@@ -753,7 +766,7 @@
  (/^https?:/.test(step.href) ? ' target="_blank" rel="noopener noreferrer"' : '') +
  '>' + escapeHtml(step.label) + '</a>';
  } else {
- row.textContent = '→ ' + (step.label || '');
+ row.textContent = '-> ' + (step.label || '');
  }
  n.appendChild(row);
  });
@@ -843,7 +856,7 @@
  (/^https?:/.test(step.href) ? ' target="_blank" rel="noopener noreferrer"' : '') +
  '>' + escapeHtml(step.label) + '</a>';
  } else {
- row.textContent = '→ ' + (step.label || '');
+ row.textContent = '-> ' + (step.label || '');
  }
  n.appendChild(row);
  });
@@ -1200,10 +1213,10 @@
 
  <!-- v1 wave 121 . Training data picker. .jsonl/.csv upload + paste + sample templates.
  Reads into dc-examples (array). Sent on the wire as `examples` to /v1/compile.
- Optional — if empty, the compile worker uses the teacher to synthesize from the task alone. -->
+ Optional - if empty, the compile worker uses the teacher to synthesize from the task alone. -->
  <div class="dc-train">
  <div class="dc-train-head">
- <span class="dc-train-cap">Training data <em class="dc-train-em">optional · 0–200 examples · .jsonl, .csv, paste, or template</em></span>
+ <span class="dc-train-cap">Training data <em class="dc-train-em">optional · 0-00 examples · .jsonl, .csv, paste, or template</em></span>
  <span id="dc-train-count" class="dc-train-count">0 examples loaded</span>
  </div>
  <div class="dc-train-tabs">
@@ -1215,12 +1228,12 @@
  <div class="dc-tp" data-tp="file">
  <div id="dc-data-drop" class="dc-data-drop" role="button" tabindex="0">
  <p>Drop a <code>.jsonl</code> or <code>.csv</code> file here, or <button type="button" id="dc-data-pick" class="al-link-btn">browse</button></p>
- <p class="dc-data-hint">JSONL: one <code>{"input":"…","output":"…"}</code> per line. CSV: two columns, headers <code>input,output</code>.</p>
+ <p class="dc-data-hint">JSONL: one <code>{"input":"...","output":"..."}</code> per line. CSV: two columns, headers <code>input,output</code>.</p>
  <input id="dc-data-file" type="file" accept=".jsonl,.csv,.json,.txt,text/*" hidden>
  </div>
  </div>
  <div class="dc-tp" data-tp="paste" hidden>
- <textarea id="dc-data-paste" rows="5" placeholder='{"input":"…","output":"…"}&#10;{"input":"…","output":"…"}' class="dc-data-paste" aria-label="Paste training examples as JSONL or CSV"></textarea>
+ <textarea id="dc-data-paste" rows="5" placeholder='{"input":"...","output":"..."}&#10;{"input":"...","output":"..."}' class="dc-data-paste" aria-label="Paste training examples as JSONL or CSV"></textarea>
  <button type="button" id="dc-data-paste-load" class="btn ghost dc-data-paste-btn">Load from paste &rarr;</button>
  </div>
  <div class="dc-tp" data-tp="template" hidden>
@@ -1315,7 +1328,7 @@
  </div>
  <label style="display:flex;flex-direction:column;gap:6px">
  <span style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.04em">Deploy webhook <em style="font-style:normal;color:var(--ink-faint);font-weight:400;text-transform:none;letter-spacing:0">optional · https only · Vercel Deploy Hook or any webhook</em></span>
- <input id="dc-hook" type="url" pattern="https://.*" placeholder="https://api.vercel.com/v1/integrations/deploy/prj_…/…" style="background:var(--bg-elev);color:var(--ink);border:1px solid var(--line-strong);border-radius:8px;padding:11px 13px;font-family:var(--mono);font-size:12.5px">
+ <input id="dc-hook" type="url" pattern="https://.*" placeholder="https://api.vercel.com/v1/integrations/deploy/prj_example/hook" style="background:var(--bg-elev);color:var(--ink);border:1px solid var(--line-strong);border-radius:8px;padding:11px 13px;font-family:var(--mono);font-size:12.5px">
  </label>
  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
  <button type="submit" class="btn primary" id="dc-submit">Compile &rarr;</button>
@@ -1385,7 +1398,7 @@
  </section>
 
  <section class="metric-grid" style="margin-top:24px" aria-label="Workspace + deploy">
- <a class="metric-card" href="/teams" style="display:block;text-decoration:none;color:inherit"><div class="label">Teams</div><div class="value" style="font-size:22px">Workspace &rarr;</div><p>Share concepts, tunnels, deployments with co-workers. Roles + invites.</p></a>
+ <a class="metric-card" href="/teams" style="display:block;text-decoration:none;color:inherit"><div class="label">Team</div><div class="value" style="font-size:22px">Workspace &rarr;</div><p>Share concepts, tunnels, deployments with co-workers. Roles + invites.</p></a>
  <a class="metric-card" href="/tunnels" style="display:block;text-decoration:none;color:inherit"><div class="label">Remote access</div><div class="value" style="font-size:22px">Tunnel &rarr;</div><p>Reach your self-hosted .kolm anywhere. Model stays on your machine.</p></a>
  <a class="metric-card" href="/byoc" style="display:block;text-decoration:none;color:inherit"><div class="label">BYOC</div><div class="value" style="font-size:22px">Deploy &rarr;</div><p>Your cloud, your TEE. Fly / Nitro / CVM. Payload-blind to provider.</p></a>
  <a class="metric-card" href="/airgap" style="display:block;text-decoration:none;color:inherit"><div class="label">Airgap</div><div class="value" style="font-size:22px">Offline &rarr;</div><p>Zero outbound. Local compile, local run, local receipt verification.</p></a>
@@ -1407,7 +1420,7 @@
 <footer class="site-footer">
  <div class="wrap">
  <div class="meta">
- kolm v0.1.0 / MIT SDK / <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> / <a href="/status">status</a>
+ kolm v0.1.0 / MIT SDK / <a href="https://github.com/sneaky-hippo/kolm-stack">github</a> / <a href="/status">status</a>
  </div>
  <div class="links">
  <div>
@@ -1452,7 +1465,7 @@
  </div>
  </div>
  <small class="footer-tag">
- <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/terms">terms</a> &middot; <a href="/faq">faq</a> &middot; <a href="/glossary">glossary</a> &middot; <a href="/troubleshooting">troubleshooting</a> &middot; <a href="/why-now">why now</a> &middot; <a href="/press">press</a> &middot; <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> &middot; kolm.ai &middot; MIT licensed runtime
+ <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/terms">terms</a> &middot; <a href="/faq">faq</a> &middot; <a href="/glossary">glossary</a> &middot; <a href="/troubleshooting">troubleshooting</a> &middot; <a href="/why-now">why now</a> &middot; <a href="/press">press</a> &middot; <a href="https://github.com/sneaky-hippo/kolm-stack">github</a> &middot; kolm.ai &middot; MIT licensed runtime
  </small>
  </div>
 </footer>
@@ -1668,14 +1681,14 @@
  a.href = data.billing_url;
  a.target = '_blank';
  a.rel = 'noopener';
- a.textContent = 'open billing →';
+ a.textContent = 'open billing ->';
  a.style.cssText = 'display:inline-block;margin-top:8px;color:var(--accent);font-family:var(--mono);font-size:12px';
  parent.appendChild(a);
  }
  if (intent === 'compile' && data.compile_link) {
  var b = document.createElement('a');
  b.href = data.compile_link;
- b.textContent = 'open /compile (prefilled) →';
+ b.textContent = 'open /compile (prefilled) ->';
  b.style.cssText = 'display:inline-block;margin-top:8px;color:var(--accent);font-family:var(--mono);font-size:12px';
  parent.appendChild(b);
  }
@@ -1685,7 +1698,7 @@
  if (!prompt) return;
  bubble('you', prompt);
  asstInput.value = '';
- var pending = bubble('kolm', '…');
+ var pending = bubble('kolm', '...');
  try {
  var r = await fetch('/v1/assistant', {
  method: 'POST',
@@ -1800,7 +1813,7 @@
  hook = hook.trim();
  if (hook && !/^https:\/\//i.test(hook)) { dcSetStatus('deploy webhook must be https://', 'err'); return; }
  dcSubmit.disabled = true;
- dcSetStatus('starting compile…');
+ dcSetStatus('starting compile...');
  try {
  var body = { task: task, base_model: base, preset: preset, lora_rank: rank, k_threshold: kthresh };
  if (corpus) body.corpus_namespace = corpus;
@@ -1821,7 +1834,7 @@
  });
  }
 
- // -- v1 wave 121 — training data picker (file / paste / template) ---------
+ // -- v1 wave 121 -training data picker (file / paste / template) ---------
  // Examples are kept on window.__dcExamples so the dc-form submit handler
  // above can splice them into the /v1/compile body without coupling.
  window.__dcExamples = window.__dcExamples || [];
@@ -1852,7 +1865,7 @@
  var preview = window.__dcExamples.slice(0, 5).map(function (ex) {
  return JSON.stringify(ex);
  }).join('\n');
- var more = n > 5 ? '\n…and ' + (n - 5) + ' more' : '';
+ var more = n > 5 ? '\n...and ' + (n - 5) + ' more' : '';
  trPrePre.textContent = preview + more;
  } else {
  trPreview.hidden = true;
@@ -2011,20 +2024,20 @@
  { input: "Do you have a Slack integration?", output: "Yes. Open Settings > Integrations > Slack to route receipts and alerts to a channel." },
  { input: "I'm getting rate-limited on the API", output: "Free tier is 60 req/min; Pro is 600 req/min. If you need more, drop me a note about your use case and I can bump it." },
  { input: "Can I self-host?", output: "Enterprise includes a customer-hosted bridge for VPC deployments. We provide Docker and Helm charts; setup is usually under 30 minutes." },
- { input: "How long do you retain my data?", output: "Receipts are kept indefinitely (you own them); training data is kept for 30 days then purged. You can delete anything sooner from Settings → Data." },
+ { input: "How long do you retain my data?", output: "Receipts are kept indefinitely (you own them); training data is kept for 30 days then purged. You can delete anything sooner from Settings > Data." },
  { input: "Is my data used to train models?", output: "No. Your data is never used to train shared models. Only models you compile yourself see your data, and the artifacts stay yours." },
- { input: "Do you support HIPAA?", output: "Yes — sign a BAA at /baa and the platform automatically enables PHI redaction, audit chains, and the VPC-only bridge." },
- { input: "I want a refund for last month — I didn't use it", output: "Happy to refund. Confirm the email on the account and I'll process it now; usually shows up in 3–5 business days." },
+ { input: "Do you support HIPAA?", output: "Yes. Sign a BAA at /baa and the platform automatically enables PHI redaction, audit chains, and the VPC-only bridge." },
+ { input: "I want a refund for last month - I didn't use it", output: "Happy to refund. Confirm the email on the account and I'll process it now; usually shows up in 3-5 business days." },
  ],
  classify: [
  { input: "URGENT: Production database is down, need someone now", output: "incident" },
  { input: "Can I get an invoice for last month?", output: "billing" },
  { input: "How do I integrate the SDK with Next.js?", output: "engineering" },
  { input: "I'd like to discuss a custom plan for 200 seats", output: "sales" },
- { input: "Your competitor offers feature X — do you?", output: "sales" },
+ { input: "Your competitor offers feature X - do you?", output: "sales" },
  { input: "Password reset link is broken", output: "support" },
- { input: "We're moving to a different vendor — please cancel", output: "support" },
- { input: "API returning 500 on /v1/recipes — repro inside", output: "engineering" },
+ { input: "We're moving to a different vendor - please cancel", output: "support" },
+ { input: "API returning 500 on /v1/recipes - repro inside", output: "engineering" },
  { input: "Security disclosure: found a path traversal in admin", output: "security" },
  { input: "Where can I sign the BAA?", output: "compliance" },
  { input: "Our SOC2 auditor needs your subprocessors list", output: "compliance" },
@@ -2054,49 +2067,49 @@
  ],
  extract: [
  { input: "Invoice #INV-2025-001 from Acme Corp, total $1,250.00 due 2026-06-30", output: '{"invoice_id":"INV-2025-001","vendor":"Acme Corp","total":1250.00,"due_date":"2026-06-30"}' },
- { input: "Bill from Contoso LLC for $890.50 — invoice C-99812, paid 2026-05-01", output: '{"invoice_id":"C-99812","vendor":"Contoso LLC","total":890.50,"paid_date":"2026-05-01"}' },
+ { input: "Bill from Contoso LLC for $890.50 - invoice C-99812, paid 2026-05-01", output: '{"invoice_id":"C-99812","vendor":"Contoso LLC","total":890.50,"paid_date":"2026-05-01"}' },
  { input: "INVOICE 4421 / Fabrikam Inc / $3,200 / net30", output: '{"invoice_id":"4421","vendor":"Fabrikam Inc","total":3200.00,"terms":"net30"}' },
  { input: "Ref AB-771, Initech, USD 540, sent 2026-04-12", output: '{"invoice_id":"AB-771","vendor":"Initech","total":540.00,"sent_date":"2026-04-12"}' },
- { input: "Northwind Co. — inv #N-2026-08 — €1,100 — due Jul 1, 2026", output: '{"invoice_id":"N-2026-08","vendor":"Northwind Co.","total":1100.00,"currency":"EUR","due_date":"2026-07-01"}' },
+ { input: "Northwind Co. - inv #N-2026-08 - EUR 1,100 - due Jul 1, 2026", output: '{"invoice_id":"N-2026-08","vendor":"Northwind Co.","total":1100.00,"currency":"EUR","due_date":"2026-07-01"}' },
  { input: "Wayne Enterprises billing reference WE-9981, balance $12,400", output: '{"invoice_id":"WE-9981","vendor":"Wayne Enterprises","total":12400.00}' },
  { input: "Stark Industries · invoice S-2026-1102 · $5,750.00 · pay by 06/15/2026", output: '{"invoice_id":"S-2026-1102","vendor":"Stark Industries","total":5750.00,"due_date":"2026-06-15"}' },
  { input: "Bill ref 9912 from Cyberdyne Systems for $440 (paid)", output: '{"invoice_id":"9912","vendor":"Cyberdyne Systems","total":440.00,"status":"paid"}' },
  { input: "Tyrell Corp / invoice TC-001 / 980 GBP / due 2026-07-15", output: '{"invoice_id":"TC-001","vendor":"Tyrell Corp","total":980.00,"currency":"GBP","due_date":"2026-07-15"}' },
  { input: "Ollivanders inv O-2026-5 / £125 / net 14", output: '{"invoice_id":"O-2026-5","vendor":"Ollivanders","total":125.00,"currency":"GBP","terms":"net14"}' },
  { input: "Inv 7012 from Gringotts, 2,400 GBP, paid in cash 2026-05-09", output: '{"invoice_id":"7012","vendor":"Gringotts","total":2400.00,"currency":"GBP","status":"paid","paid_date":"2026-05-09"}' },
- { input: "Globex Corp invoice GX-2026-44 — $999 net30 — sent today", output: '{"invoice_id":"GX-2026-44","vendor":"Globex Corp","total":999.00,"terms":"net30"}' },
+ { input: "Globex Corp invoice GX-2026-44 - $1,240 net30 - sent today", output: '{"invoice_id":"GX-2026-44","vendor":"Globex Corp","total":1240.00,"terms":"net30"}' },
  { input: "Vehement Capital · inv VC-1 · $14,500 · due 2026-08-01", output: '{"invoice_id":"VC-1","vendor":"Vehement Capital","total":14500.00,"due_date":"2026-08-01"}' },
- { input: "Massive Dynamic — MD-99 — USD 7,777 — paid 2026-05-15", output: '{"invoice_id":"MD-99","vendor":"Massive Dynamic","total":7777.00,"status":"paid","paid_date":"2026-05-15"}' },
+ { input: "Massive Dynamic - MD-99 - USD 7,777 - paid 2026-05-15", output: '{"invoice_id":"MD-99","vendor":"Massive Dynamic","total":7777.00,"status":"paid","paid_date":"2026-05-15"}' },
  { input: "Bluth Company / inv BL-12 / $450 / net 7", output: '{"invoice_id":"BL-12","vendor":"Bluth Company","total":450.00,"terms":"net7"}' },
- { input: "Sterling Cooper bill SC-2026-19 — $2,200 — overdue", output: '{"invoice_id":"SC-2026-19","vendor":"Sterling Cooper","total":2200.00,"status":"overdue"}' },
+ { input: "Sterling Cooper bill SC-2026-19 - $2,200 - overdue", output: '{"invoice_id":"SC-2026-19","vendor":"Sterling Cooper","total":2200.00,"status":"overdue"}' },
  ],
  translate: [
- { input: "hello", output: "Hola / Bonjour / Hallo / こんにちは / 你好 / 안녕하세요" },
- { input: "good morning", output: "Buenos días / Bonjour / Guten Morgen / おはようございます / 早上好 / 좋은 아침" },
- { input: "thank you", output: "Gracias / Merci / Danke / ありがとう / 谢谢 / 감사합니다" },
- { input: "you're welcome", output: "De nada / Je vous en prie / Bitte / どういたしまして / 不客气 / 천만에요" },
- { input: "how are you?", output: "¿Cómo estás? / Comment ça va ? / Wie geht's? / お元気ですか / 你好吗? / 어떻게 지내세요?" },
- { input: "I'm fine, thanks", output: "Estoy bien, gracias / Ça va bien, merci / Mir geht's gut, danke / 元気です、ありがとう / 我很好,谢谢 / 잘 지내요, 감사합니다" },
- { input: "good night", output: "Buenas noches / Bonne nuit / Gute Nacht / おやすみなさい / 晚安 / 안녕히 주무세요" },
- { input: "see you tomorrow", output: "Hasta mañana / À demain / Bis morgen / また明日 / 明天见 / 내일 봐요" },
- { input: "please", output: "Por favor / S'il vous plaît / Bitte / お願いします / 请 / 부탁합니다" },
- { input: "excuse me", output: "Disculpe / Excusez-moi / Entschuldigung / すみません / 不好意思 / 실례합니다" },
- { input: "I'm sorry", output: "Lo siento / Je suis désolé / Es tut mir leid / ごめんなさい / 对不起 / 죄송합니다" },
- { input: "do you speak English?", output: "¿Habla inglés? / Parlez-vous anglais ? / Sprechen Sie Englisch? / 英語を話しますか / 你会说英语吗? / 영어 할 줄 아세요?" },
+ { input: "hello", output: "Hola / Bonjour / Hallo" },
+ { input: "good morning", output: "Buenos dias / Bonjour / Guten Morgen" },
+ { input: "thank you", output: "Gracias / Merci / Danke" },
+ { input: "you're welcome", output: "De nada / Je vous en prie / Bitte" },
+ { input: "how are you?", output: "Como estas? / Comment ca va ? / Wie geht's?" },
+ { input: "I'm fine, thanks", output: "Estoy bien, gracias / Ca va bien, merci / Mir geht's gut, danke" },
+ { input: "good night", output: "Buenas noches / Bonne nuit / Gute Nacht" },
+ { input: "see you tomorrow", output: "Hasta manana / A demain / Bis morgen" },
+ { input: "please", output: "Por favor / S'il vous plait / Bitte" },
+ { input: "excuse me", output: "Disculpe / Excusez-moi / Entschuldigung" },
+ { input: "I'm sorry", output: "Lo siento / Je suis desole / Es tut mir leid" },
+ { input: "do you speak English?", output: "Habla ingles? / Parlez-vous anglais ? / Sprechen Sie Englisch?" },
  ],
  code: [
  { input: "TypeError: Cannot read properties of undefined (reading 'map')", output: "type-error" },
  { input: "ReferenceError: foo is not defined at index.js:42", output: "reference-error" },
  { input: "SyntaxError: Unexpected token } in JSON at position 891", output: "syntax-error" },
  { input: "RangeError: Maximum call stack size exceeded", output: "stack-overflow" },
- { input: "ECONNREFUSED 127.0.0.1:5432 — Postgres not responding", output: "network-error" },
+ { input: "ECONNREFUSED 127.0.0.1:5432 - Postgres not responding", output: "network-error" },
  { input: "ETIMEDOUT reaching api.openai.com:443 after 30s", output: "network-error" },
- { input: "401 Unauthorized — Bearer token rejected by /v1/run", output: "auth-error" },
- { input: "403 Forbidden — admin key required for this op", output: "auth-error" },
- { input: "404 Not Found — /v1/recipes/unknown-slug", output: "not-found" },
- { input: "429 Too Many Requests — rate limit 60/min exceeded", output: "rate-limit" },
- { input: "500 Internal Server Error — uncaught at router.js:1742", output: "server-error" },
- { input: "503 Service Unavailable — upstream Ed25519 verifier down", output: "server-error" },
+ { input: "401 Unauthorized - Bearer token rejected by /v1/run", output: "auth-error" },
+ { input: "403 Forbidden - admin key required for this op", output: "auth-error" },
+ { input: "404 Not Found - /v1/recipes/unknown-slug", output: "not-found" },
+ { input: "429 Too Many Requests - rate limit 60/min exceeded", output: "rate-limit" },
+ { input: "500 Internal Server Error - uncaught at router.js:1742", output: "server-error" },
+ { input: "503 Service Unavailable - upstream Ed25519 verifier down", output: "server-error" },
  { input: "ENOENT: no such file or directory, open 'config.json'", output: "fs-error" },
  { input: "EACCES: permission denied, mkdir '/var/lib/kolm'", output: "fs-error" },
  { input: "Out of memory: cannot allocate 2.4GB for model weights", output: "memory-error" },
@@ -2143,12 +2156,12 @@
  if (!section) return;
  function $(id) { return document.getElementById(id); }
  function fmtUs(us) {
- if (us == null || !isFinite(us) || us === 0) return '—';
+ if (us == null || !isFinite(us) || us === 0) return '-';
  if (us < 1000) return us + ' us';
  if (us < 1000000) return (us / 1000).toFixed(1) + ' ms';
  return (us / 1000000).toFixed(2) + ' s';
  }
- function fmtNum(n) { if (n == null) return '—'; return Number(n).toLocaleString(); }
+ function fmtNum(n) { if (n == null) return '-'; return Number(n).toLocaleString(); }
  function drawSpark(points) {
  var line = $('to-spark-line'), fill = $('to-spark-fill'), wrap = $('to-spark-wrap');
  var arr = (points || []).filter(function (n) { return typeof n === 'number' && n >= 0; });
@@ -2175,7 +2188,7 @@
  $('to-receipts').textContent = fmtNum(j.receipt_bearing_runs);
  $('to-p50').textContent = fmtUs(j.p50_us);
  $('to-p95').textContent = fmtUs(j.p95_us);
- $('to-cache').textContent = (j.cache_hit_rate != null) ? ((j.cache_hit_rate * 100).toFixed(1) + '%') : '—';
+ $('to-cache').textContent = (j.cache_hit_rate != null) ? ((j.cache_hit_rate * 100).toFixed(1) + '%') : '-';
  drawSpark(j.sparkline || []);
  $('to-empty').hidden = hasRuns;
  })
@@ -2188,7 +2201,7 @@
 })();
 </script>
 
-<!-- v1 wave 121 . Artifact lab JS — drag-drop parse + test + serve -->
+<!-- v1 wave 121 . Artifact lab JS - drag-drop parse + test + serve -->
 <script>
 (function () {
  // JSZip is vendored at /jszip.min.js (CSP forbids cross-origin scripts).
@@ -2250,20 +2263,20 @@
  setTimeout(function () { els.error.hidden = true; }, 5000);
  }
  function fmtBytes(n) {
- if (!n && n !== 0) return '—';
+ if (!n && n !== 0) return '-';
  if (n < 1024) return n + ' B';
  if (n < 1024*1024) return (n/1024).toFixed(1) + ' KB';
  return (n/1024/1024).toFixed(2) + ' MB';
  }
  function fmtKScore(v) {
- if (v === null || v === undefined) return '—';
+ if (v === null || v === undefined) return '-';
  var n = (typeof v === 'object' && v.composite !== undefined) ? v.composite : v;
- if (typeof n !== 'number') return '—';
+ if (typeof n !== 'number') return '-';
  return n.toFixed(3);
  }
  function shortCid(c) {
- if (!c) return '—';
- return String(c).slice(0, 28) + '…';
+ if (!c) return '-';
+ return String(c).slice(0, 28) + '...';
  }
 
  async function readJSONFromZip(zip, name) {
@@ -2297,11 +2310,11 @@
  function renderCard() {
  if (!current) return;
  var m = current.manifest || {};
- els.name.textContent = m.task ? (m.task.slice(0, 80) + (m.task.length > 80 ? '…' : '')) : (current.fileName || 'untitled');
+ els.name.textContent = m.task ? (m.task.slice(0, 80) + (m.task.length > 80 ? '...' : '')) : (current.fileName || 'untitled');
  els.task.textContent = m.task || '';
- els.model.textContent = m.base_model || m.runtime || '—';
+ els.model.textContent = m.base_model || m.runtime || '-';
  els.kscore.textContent = fmtKScore(m.k_score);
- els.gate.textContent = (m.k_score && m.k_score.gate) ? m.k_score.gate : (m.gate || '—');
+ els.gate.textContent = (m.k_score && m.k_score.gate) ? m.k_score.gate : (m.gate || '-');
  els.size.textContent = fmtBytes(current.sizeBytes);
  els.cid.textContent = shortCid(m.cid);
  els.cid.title = m.cid || '';
@@ -2398,7 +2411,7 @@
  if (!prompt) { els.testSt.textContent = 'enter a prompt'; els.testSt.className = 'al-status err'; els.prompt.focus(); return; }
  var k = Math.max(1, Math.min(8, parseInt(els.k.value, 10) || 2));
  els.run.disabled = true;
- els.testSt.textContent = 'running with k=' + k + '…';
+ els.testSt.textContent = 'running with k=' + k + '...';
  els.testSt.className = 'al-status';
  els.out.hidden = true;
  try {
@@ -2418,7 +2431,7 @@
  var text = '';
  if (resp && Array.isArray(resp.content)) text = (resp.content.find(function(c){return c.type==='text';}) || {}).text || '';
  els.outText.textContent = text || '(no text in response)';
- els.outMeta.textContent = (resp.model || '—') + ' · ' + ms + 'ms · ' + (resp._kolm && resp._kolm.verified ? 'verified ✓' : 'unverified');
+ els.outMeta.textContent = (resp.model || '-') + ' - ' + ms + 'ms - ' + (resp._kolm && resp._kolm.verified ? 'verified' : 'unverified');
  els.outRcpt.textContent = JSON.stringify(resp._kolm || resp, null, 2);
  els.out.hidden = false;
  els.testSt.textContent = 'done in ' + ms + 'ms';

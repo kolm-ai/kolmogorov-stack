@@ -1,4 +1,4 @@
-# @kolmogorov/quantize-worker
+# @kolm/quantize-worker
 
 Wave 195 (Q+5). Isolated kolm quantization worker. Lives in its own package so
 the heavy ML deps (bitsandbytes, auto-gptq, optimum, torch, accelerate) NEVER

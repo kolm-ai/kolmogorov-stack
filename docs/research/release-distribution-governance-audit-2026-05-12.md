@@ -8,7 +8,7 @@ Scope: root npm package, Node SDK package, Python SDK package, legacy MCP packag
 
 Kolm has several useful local distribution building blocks: a root `kolm` bin, an installable GitHub-source package shape, Node/Python/VS Code SDK source trees, a pinned server Dockerfile, lint/smoke workflows, and preview package-manager stubs. But the live distribution story is ahead of the release system.
 
-The live docs and integrations page label npm, Homebrew, Windows package-manager, Docker, Python, Node, VS Code, and GitHub Actions paths as shipped. Current registry checks do not support that broad label. `npm view @kolm/cli`, `npm view @kolmogorov/kolm-sdk`, and `npm view kolmogorov-stack` returned 404. The Homebrew tap implied by the docs returned 404. The Windows package-manager manifest path returned 404. The public Scoop manifest check returned 404. PyPI already has a `kolm` package at version 1.1.4, but it is an unrelated Korean LM toolkit, so the local Python package name collides with an existing project.
+The live docs and integrations page label npm, Homebrew, Windows package-manager, Docker, Python, Node, VS Code, and GitHub Actions paths as shipped. Current registry checks do not support that broad label. `npm view @kolm/cli`, `npm view legacy scoped kolm SDK package`, and `npm view kolm-stack` returned 404. The Homebrew tap implied by the docs returned 404. The Windows package-manager manifest path returned 404. The public Scoop manifest check returned 404. PyPI already has a `kolm` package at version 1.1.4, but it is an unrelated Korean LM toolkit, so the local Python package name collides with an existing project.
 
 The root GitHub install path can still be a valid preview path, but it is not the same as a published npm package. `npm pack --dry-run` for the root package produced a large 390-file package that includes research docs, tests, public site assets, fixture artifacts, workflows, scripts, and no root license file. It also omits the package lock from the package contents, so the GitHub-source install path is not a lockfile-pinned release artifact.
 
@@ -44,7 +44,7 @@ PyPI has a package named `kolm`, but registry metadata says it is `Korean LM too
 
 `npm pack --dry-run --json` at the repo root reported:
 
-- package id: `kolmogorov-stack@0.1.0`
+- package id: `kolm-stack@0.1.0`
 - size: about 8.6 MB packed
 - unpacked size: about 11.9 MB
 - entry count: 390
@@ -130,7 +130,7 @@ The GitHub-source package currently includes broad repo contents and lacks a roo
 
 Use this wording until the release path is real:
 
-> Install the preview CLI from GitHub source with `npm i -g github:sneaky-hippo/kolmogorov-stack`. Published npm, Homebrew, Windows package-manager, VS Code marketplace, Docker image, and signed release artifacts are release-candidate work and should be treated as preview until the first tagged release.
+> Install the preview CLI from GitHub source with `npm i -g github:sneaky-hippo/kolm-stack`. Published npm, Homebrew, Windows package-manager, VS Code marketplace, Docker image, and signed release artifacts are release-candidate work and should be treated as preview until the first tagged release.
 
 Avoid claiming:
 
@@ -159,8 +159,8 @@ Add launch-blocking checks for:
 
 - `npm pack --dry-run --json` for repo root, Node SDK, legacy MCP package, and VS Code package.
 - `npm view @kolm/cli version --json` returned 404.
-- `npm view @kolmogorov/kolm-sdk version --json` returned 404.
-- `npm view kolmogorov-stack version --json` returned 404.
+- `npm view legacy scoped kolm SDK package version --json` returned 404.
+- `npm view kolm-stack version --json` returned 404.
 - `pip index versions kolm` showed an unrelated PyPI package at version 1.1.4.
 - PyPI JSON metadata for `kolm` confirmed unrelated summary, author, and homepage.
 - GitHub checks for documented Homebrew tap, winget path, and Scoop manifest returned 404.

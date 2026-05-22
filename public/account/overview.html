@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f7f4ec";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Overview | Account | kolm.ai</title>
-<meta name="description" content="Operate the full .kolm lifecycle: connect providers, capture AI calls, review data, compile artifacts, run targets, and govern the workspace.">
+<title>Overview - Account - kolm.ai</title>
+<meta name="description" content="Operate Kolm's full product matrix: route model APIs, distill specialists, deploy signed artifacts, and govern every runtime from one account console.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <link rel="canonical" href="https://kolm.ai/account/overview">
 <meta property="og:title" content="Overview &middot; Account &middot; kolm.ai" />
-<meta property="og:description" content="Operate the full .kolm lifecycle: connect providers, capture AI calls, review data, compile artifacts, run targets, and govern the workspace." />
+<meta property="og:description" content="Operate Kolm's full product matrix: route model APIs, distill specialists, deploy signed artifacts, and govern every runtime from one account console." />
 <meta property="og:image" content="https://kolm.ai/og-card.svg" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://kolm.ai/account/overview" />
@@ -20,7 +20,7 @@
 <link rel="stylesheet" href="/surface-polish.css">
 <link rel="stylesheet" href="/brand-refresh.css">
 <script src="/nav.js" defer></script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Overview | Account | kolm.ai","description":"Operate the full .kolm lifecycle: connect providers, capture AI calls, review data, compile artifacts, run targets, and govern the workspace.","url":"https://kolm.ai/account/overview","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"Overview","item":"https://kolm.ai/account/overview"}]}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Overview | Account | kolm.ai","description":"Operate Kolm's full product matrix: route model APIs, distill specialists, deploy signed artifacts, and govern every runtime from one account console.","url":"https://kolm.ai/account/overview","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"Overview","item":"https://kolm.ai/account/overview"}]}}</script>
 <style>
 .acct-shell{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:flex-start;max-width:1280px;margin:0 auto;padding:24px}
 #account-sidebar{position:sticky;top:24px;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13px}
@@ -68,8 +68,23 @@
 .journey-card span{display:block;font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin-bottom:7px}
 .journey-card b{display:block;font-size:14px;font-weight:600;color:var(--ink);line-height:1.25;margin-bottom:6px}
 .journey-card small{display:block;font-size:12.5px;line-height:1.45;color:var(--ink-mute)}
+.product-mode-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 16px}
+.product-mode{padding:16px;border:1px solid var(--line);border-radius:8px;background:linear-gradient(180deg,rgba(126,240,210,.045),transparent),var(--bg-elev)}
+.product-mode span{display:block;font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:8px}
+.product-mode b{display:block;color:var(--ink);font-size:17px;line-height:1.2;margin-bottom:6px}
+.product-mode small{display:block;color:var(--ink-mute);font-size:12.5px;line-height:1.45}
+.readiness-row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 14px}
+.readiness-token{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:7px 10px;border:1px solid var(--line);border-radius:999px;background:var(--bg-elev);font-size:12px;color:var(--ink-mute)}
+.readiness-token b{font-family:var(--mono);font-size:12px;color:var(--ink)}
+.readiness-token[data-open="true"]{border-color:rgba(255,197,92,.42);background:rgba(255,197,92,.06)}
+.closeout-list{display:grid;gap:0;border-top:1px solid var(--line)}
+.closeout-item{display:grid;grid-template-columns:minmax(0,170px) minmax(0,1fr) minmax(0,190px);gap:12px;align-items:start;padding:11px 0;border-bottom:1px solid var(--line);font-size:12.5px;overflow:hidden}
+.closeout-item code{font-size:11.5px;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+.closeout-item strong{font-size:13px;color:var(--ink)}
+.closeout-item small{display:block;color:var(--ink-mute);margin-top:3px;line-height:1.4}
 @media (max-width:980px){.journey-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:620px){.journey-grid{grid-template-columns:1fr}.journey-card{min-height:auto}}
+@media (max-width:820px){.product-mode-grid{grid-template-columns:1fr}}
+@media (max-width:620px){.journey-grid{grid-template-columns:1fr}.journey-card{min-height:auto}.closeout-item{grid-template-columns:1fr}.closeout-item code{font-size:11px}}
 </style>
 </head>
 <body class="kolm-account-surface">
@@ -90,13 +105,13 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -109,7 +124,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -181,27 +196,40 @@
 
 <main id="main">
 <div class="acct-shell">
-<nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview" aria-current="page">Overview</a></li><li><a href="/account/connectors">Connectors</a></li><li><a href="/account/captured">Captured events</a></li><li><a href="/account/privacy-events">Privacy events</a></li><li><a href="/account/repeated-workflows">Repeated workflows</a></li><li><a href="/account/opportunities">Opportunities</a></li><li><a href="/account/labeling">Labeling queue</a></li><li><a href="/account/datasets">Datasets</a></li><li><a href="/account/simulations">Simulations</a></li><li><a href="/account/bakeoffs">Bakeoffs</a></li><li><a href="/account/builds">Artifact jobs</a></li><li><a href="/account/artifacts">Artifacts</a></li><li><a href="/account/devices">Devices</a></li><li><a href="/account/storage">Storage truth</a></li><li><a href="/account/billing">Billing</a></li></ul></nav>
+<nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview" aria-current="page">Overview</a></li><li><a href="/account/connectors">Connectors</a></li><li><a href="/account/captured">Captured calls</a></li><li><a href="/account/privacy-events">Privacy events</a></li><li><a href="/account/repeated-workflows">Repeated workflows</a></li><li><a href="/account/opportunities">Opportunities</a></li><li><a href="/account/labeling">Labeling queue</a></li><li><a href="/account/datasets">Datasets</a></li><li><a href="/account/simulations">Simulations</a></li><li><a href="/account/bakeoffs">Bakeoffs</a></li><li><a href="/account/builds">Artifact jobs</a></li><li><a href="/account/artifacts">Artifacts</a></li><li><a href="/account/devices">Devices</a></li><li><a href="/account/storage">Storage truth</a></li><li><a href="/account/billing">Billing</a></li></ul></nav>
 <section class="acct-content">
-<h1>Overview.</h1>
-<p class="lede">Operate the full <code>.kolm</code> lifecycle from one console: connect providers, capture AI calls, review data, compile artifacts, run targets, and govern the workspace.</p>
+<h1>Your production AI console.</h1>
+<p class="lede">Route models, distill approved work, deploy signed <code>.kolm</code> artifacts, and govern every runtime from one account.</p>
 <section class="kpanel" data-postauth-product-command-center>
-  <h2>Product command center</h2>
-  <p class="pdesc">One map for the full product: API wrapper, privacy lake, datasets, distillation, multimodal evals, signed artifacts, runtimes, cloud storage, devices, governance, and registry handoff.</p>
+  <h2>Product matrix</h2>
+  <p class="pdesc">Start with the mode that matches the job. The full lifecycle stays visible below.</p>
+  <div class="product-mode-grid" aria-label="primary product modes">
+    <div class="product-mode"><span>Gateway</span><b>Route models</b><small>One policy layer for providers, local models, cost, privacy, and receipts.</small></div>
+    <div class="product-mode"><span>Compiler</span><b>Distill owned specialists</b><small>Approved traces and evals become signed artifacts only when gates pass.</small></div>
+    <div class="product-mode"><span>Runtime</span><b>Run on any device</b><small>Cloud, browser, edge, phone, fleet, self-host, CLI/TUI, and air-gap.</small></div>
+  </div>
   <div class="journey-grid">
-    <a class="journey-card" href="/account/connectors" data-journey-id="gateway-capture" data-surface="api-wrapper"><span>Gateway</span><b>Route any model API</b><small>OpenAI, Claude, OpenRouter, Gemini, local, and internal endpoints.</small></a>
+    <a class="journey-card" href="/account/connectors" data-journey-id="gateway-capture" data-surface="api-wrapper"><span>Gateway</span><b>Route models</b><small>OpenAI, Claude, OpenRouter, Gemini-compatible, or self-hosted endpoints.</small></a>
     <a class="journey-card" href="/account/privacy-events" data-journey-id="privacy-lake" data-surface="privacy-lake"><span>Privacy lake</span><b>Capture, redact, govern</b><small>Policy gates, vault links, and class-level privacy controls.</small></a>
     <a class="journey-card" href="/account/datasets" data-journey-id="datasets-labeling" data-surface="datasets-labeling"><span>Datasets</span><b>Promote reviewed rows</b><small>Holdouts, labels, corrections, and lineage.</small></a>
-    <a class="journey-card" href="/account/builds" data-journey-id="train-distill" data-surface="training-distill"><span>Train/distill</span><b>Distill specialists</b><small>Training, distillation, eval gates, and compute.</small></a>
+    <a class="journey-card" href="/account/builds" data-journey-id="train-distill" data-surface="training-distill"><span>Distill</span><b>Build specialists</b><small>Training, distillation, eval gates, and compute.</small></a>
     <a class="journey-card" href="/models" data-journey-id="models-backbones" data-surface="gemma"><span>Backbones</span><b>Select the model family</b><small>Gemma 3, Gemma 3n, MedGemma, EmbeddingGemma, Qwen, Llama, Mistral, and custom rows.</small></a>
     <a class="journey-card" href="/account/multimodal-bakeoff" data-journey-id="multimodal-tokenization" data-surface="multimodal-tokenization"><span>Multimodal</span><b>Tokenize files locally</b><small>Image, audio, video, and PDF sidecars.</small></a>
-    <a class="journey-card" href="/account/builds" data-journey-id="compile-verify" data-surface="compiler"><span>Compile</span><b>Ship signed .kolm</b><small>K-score, receipts, verifier state, and rollback metadata.</small></a>
-    <a class="journey-card" href="/account/artifacts" data-journey-id="runtime-inference" data-surface="runtime-inference"><span>Runtime</span><b>Run anywhere</b><small>CPU, GPU, browser, edge, server, mobile.</small></a>
-    <a class="journey-card" href="/account/storage" data-journey-id="compute-cloud" data-surface="compute"><span>Cloud/compute</span><b>Attach capacity</b><small>BYOC, object storage, SSH, hosted GPU, deployment profiles.</small></a>
-    <a class="journey-card" href="/account/devices" data-journey-id="devices-fleet" data-surface="devices"><span>Devices</span><b>Install the fleet</b><small>Devices, tunnels, health checks, and remote ops.</small></a>
-    <a class="journey-card" href="/account/audit-log" data-journey-id="enterprise-governance" data-surface="enterprise"><span>Enterprise</span><b>Govern every action</b><small>Approvals, audit log, BAA, SSO/SAML/SCIM, evidence export.</small></a>
+    <a class="journey-card" href="/account/builds" data-journey-id="compile-verify" data-surface="compiler"><span>Compile</span><b>Create signed .kolm</b><small>K-score, receipts, verifier state, and rollback metadata.</small></a>
+    <a class="journey-card" href="/account/artifacts" data-journey-id="runtime-inference" data-surface="runtime-inference"><span>Runtime</span><b>Deploy every target</b><small>Local CPU/CUDA/MPS/ROCm/DirectML/OpenVINO/QNN, browser, edge, server, mobile.</small></a>
+    <a class="journey-card" href="/account/storage" data-journey-id="compute-cloud" data-surface="compute"><span>Cloud</span><b>Attach capacity</b><small>R2-compatible object storage, S3-compatible storage, AWS, Supabase, Modal, RunPod, Lambda, Together, or remote SSH.</small></a>
+    <a class="journey-card" href="/account/devices" data-journey-id="devices-fleet" data-surface="devices"><span>Devices</span><b>Install the fleet</b><small>Registered device fleet, local/SSH/HTTP installs, tunnels, health checks, and remote ops.</small></a>
+    <a class="journey-card" href="/account/audit-log" data-journey-id="enterprise-governance" data-surface="enterprise"><span>Enterprise</span><b>Govern every action</b><small>Teams, approvals, audit log, privacy membrane, BAA, SSO/SAML/SCIM, evidence export.</small></a>
     <a class="journey-card" href="/marketplace" data-journey-id="agents-registry" data-surface="agents-registry"><span>Agents/registry</span><b>Publish artifacts</b><small>Private registry, MCP tools, verifier badges, handoff.</small></a>
   </div>
+</section>
+<section class="kpanel" data-product-readiness>
+  <h2>Readiness contract</h2>
+  <p class="pdesc">The same graph powers account, CLI, TUI, API docs, and launch audits. Benchmark, package, partner, and certification gates stay visibly scoped until proof exists.</p>
+  <div id="readiness-counts" class="readiness-row" aria-busy="true">
+    <span class="readiness-token"><b>...</b> loading product graph</span>
+  </div>
+  <div id="readiness-closeout" class="closeout-list" aria-busy="true"></div>
 </section>
 <section class="kpanel" data-w415="ask-form">
   <h2>Ask kolm</h2>
@@ -220,7 +248,7 @@
   </div>
 </section>
 <div class="metric-grid" id="metric-grid" data-counter-count="9" aria-busy="true">
-  <div class="metric-card" data-counter="captured-ai-calls"><div class="label">Captured AI calls</div><div class="value" id="m-events">...</div><div class="delta" id="m-events-d">&nbsp;</div></div>
+  <div class="metric-card" data-counter="captured-traffic"><div class="label">Captured AI calls</div><div class="value" id="m-events">...</div><div class="delta" id="m-events-d">&nbsp;</div></div>
   <div class="metric-card" data-counter="savings-opportunities"><div class="label">Savings opportunities</div><div class="value" id="m-opps">...</div><div class="delta" id="m-opps-d">&nbsp;</div></div>
   <div class="metric-card" data-counter="datasets"><div class="label">Datasets</div><div class="value" id="m-datasets">...</div><div class="delta" id="m-datasets-d">&nbsp;</div></div>
   <div class="metric-card" data-counter="review-queue"><div class="label">Review queue</div><div class="value" id="m-review">...</div><div class="delta" id="m-review-d">&nbsp;</div></div>
@@ -237,7 +265,7 @@
   <div class="kpanel"><div class="skel" style="width:140px"></div><div class="skel" style="width:280px;margin-top:6px"></div></div>
 </div>
 <div id="empty-state" class="empty" hidden data-empty-state>
-  <strong>No captured events yet.</strong> Set <code>OPENAI_BASE_URL=http://127.0.0.1:8787/v1</code> (or point at <code>https://kolm.ai/v1/capture/openai</code>) and your first call lands here. See <a href="/account/connectors">Connectors</a>.
+  <strong>No captured AI calls yet.</strong> Set <code>OPENAI_BASE_URL=http://127.0.0.1:8787/v1</code> (or point at <code>https://kolm.ai/v1/capture/openai</code>) and your first call lands here. See <a href="/account/connectors">Connectors</a>.
 </div>
 </section>
 </div>
@@ -283,6 +311,46 @@
     if(!btn)return;
     var text=btn.getAttribute("data-copy")||"";
     if(navigator.clipboard)navigator.clipboard.writeText(text);
+  });
+})();
+(function(){
+  var countBox=document.getElementById("readiness-counts");
+  var closeoutBox=document.getElementById("readiness-closeout");
+  if(!countBox||!closeoutBox)return;
+  function labelStatus(s){
+    return String(s||"").replace(/^needs_/,"needs ").replace(/_/g," ");
+  }
+  Promise.allSettled([
+    window.kfetch("/v1/product/graph").catch(function(){return null;}),
+    window.kfetch("/product-readiness-closeout.json").catch(function(){return null;})
+  ]).then(function(rs){
+    var graphEnvelope=rs[0].value||{};
+    var graph=(graphEnvelope.data&&graphEnvelope.data.graph)||graphEnvelope.graph||graphEnvelope;
+    var closeout=rs[1].value||{};
+    var counts=(graph&&graph.readiness_counts)||{};
+    var statuses=["shipped","implemented","needs_public_benchmark_data","needs_package_release","needs_external_partner","needs_live_certification"];
+    countBox.removeAttribute("aria-busy");
+    countBox.innerHTML=statuses.filter(function(s){return counts[s]!=null;}).map(function(s){
+      var open=/^needs_|partial/.test(s);
+      return "<span class=\"readiness-token\" data-open=\""+String(open)+"\"><b>"+window.kesc(String(counts[s]))+"</b>"+window.kesc(labelStatus(s))+"</span>";
+    }).join("")||"<span class=\"readiness-token\"><b>0</b> product graph unavailable</span>";
+    var rows=Array.isArray(closeout.open_requirements)?closeout.open_requirements:[];
+    closeoutBox.removeAttribute("aria-busy");
+    if(!rows.length){
+      closeoutBox.innerHTML="<div class=\"empty\" data-empty-state>No open readiness closeout items.</div>";
+      return;
+    }
+    closeoutBox.innerHTML=rows.slice(0,6).map(function(r){
+      return "<div class=\"closeout-item\">"+
+        "<code>"+window.kesc(r.next_wave||"-")+"</code>"+
+        "<div><strong>"+window.kesc((r.surface_id||"-")+"/"+(r.requirement_id||"-"))+"</strong><small>"+window.kesc(r.current_scope||r.title||"")+"</small></div>"+
+        "<code>"+window.kesc(labelStatus(r.status||"-"))+"</code>"+
+      "</div>";
+    }).join("")+
+    (rows.length>6?"<div class=\"closeout-item\"><code>+"+window.kesc(String(rows.length-6))+"</code><div><strong>More closeout items</strong><small>Run `kolm surfaces --closeout --json` for the full proof list.</small></div><code>CLI</code></div>":"");
+  }).catch(function(){
+    countBox.innerHTML="<span class=\"readiness-token\"><b>!</b> product graph unavailable</span>";
+    closeoutBox.innerHTML="<div class=\"empty\" data-empty-state>Readiness data is unavailable while the local account API is offline.</div>";
   });
 })();
 var nextBody=document.getElementById("next-actions-body");

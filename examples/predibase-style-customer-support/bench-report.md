@@ -1,6 +1,6 @@
 # Kolm vs. LLM — Head-to-Head Benchmark
 
-**Artifact**: `C:\Users\user\Desktop\kolmogorov-stack\examples\predibase-style-customer-support\cs-intent.kolm`
+**Artifact**: `examples/predibase-style-customer-support/cs-intent.kolm`
 **Artifact sha256**: `sha256:eff463485f6a27ba2e81fd959b2c5419413d20a48dc1b31f5e1020d8f2893000`
 **Task**: Classify a customer-support message into one of 10 intent labels: refund, cancel, billing, shipping, password_reset, account_lock, complaint, feedback, escalate, other. Designed as the Predibase/LoRAX-style 1000-row demo — the rule-class compiled artifact should match the LLM on intent recall while costing $0/call and running in microseconds.
 **Started**: 2026-05-16T20:35:30.514Z

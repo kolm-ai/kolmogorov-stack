@@ -1,7 +1,7 @@
 // Wave 396 . `kolm demo seed-log-triage` close-the-loop seed corpus.
 //
 // The acceptance test is the 12-command flow:
-//   npm i -g github:sneaky-hippo/kolmogorov-stack
+//   npm i -g github:sneaky-hippo/kolm-stack
 //   kolm connect start --detach
 //   kolm connect doctor
 //   kolm privacy test "email a@b.com ssn 123-45-6789"
@@ -84,7 +84,7 @@ test('W396 #2 . spec.json job_id + K-score gate + comparator are pinned', () => 
   const spec = JSON.parse(fs.readFileSync(path.join(EXAMPLE_DIR, 'spec.json'), 'utf8'));
   assert.equal(spec.job_id, 'job_demo_log_triage_v1');
   assert.equal(spec.comparator, 'json_subset');
-  assert.equal(spec.kolmogorov_score.threshold, 0.85);
+  assert.equal(spec.k_score.threshold, 0.85);
   assert.ok(Array.isArray(spec.recipes) && spec.recipes.length === 1);
   assert.equal(spec.recipes[0].source_file, './recipe.js');
 });

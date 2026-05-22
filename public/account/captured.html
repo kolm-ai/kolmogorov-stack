@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f7f4ec";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Captured events · Account · kolm.ai</title>
-<meta name="description" content="Live tail of captured events on kolm.ai. Search by prompt or response, filter by namespace, see durable badge per row, click for the full event drawer.">
+<title>Captured calls · Account · kolm.ai</title>
+<meta name="description" content="Live tail of captured AI calls on kolm.ai. Search by prompt or response, filter by namespace, see durable badge per row, click for the full call drawer.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <link rel="canonical" href="https://kolm.ai/account/captured">
-<meta property="og:title" content="Captured events &middot; Account &middot; kolm.ai" />
-<meta property="og:description" content="Live tail of captured events on kolm.ai. Search by prompt or response, filter by namespace, see durable badge per row, click for the full event drawer." />
+<meta property="og:title" content="Captured calls &middot; Account &middot; kolm.ai" />
+<meta property="og:description" content="Live tail of captured AI calls on kolm.ai. Search by prompt or response, filter by namespace, see durable badge per row, click for the full call drawer." />
 <meta property="og:image" content="https://kolm.ai/og-card.svg" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://kolm.ai/account/captured" />
@@ -20,7 +20,7 @@
 <link rel="stylesheet" href="/surface-polish.css">
 <link rel="stylesheet" href="/brand-refresh.css">
 <script src="/nav.js" defer></script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Captured events · Account · kolm.ai","description":"Live tail of captured events on kolm.ai. Search by prompt or response, filter by namespace, see durable badge per row, click for the full event drawer.","url":"https://kolm.ai/account/captured","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"Captured events","item":"https://kolm.ai/account/captured"}]}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Captured calls · Account · kolm.ai","description":"Live tail of captured AI calls on kolm.ai. Search by prompt or response, filter by namespace, see durable badge per row, click for the full call drawer.","url":"https://kolm.ai/account/captured","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"Captured calls","item":"https://kolm.ai/account/captured"}]}}</script>
 <style>
 .acct-shell{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:flex-start;max-width:1280px;margin:0 auto;padding:24px}
 #account-sidebar{position:sticky;top:24px;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13px}
@@ -83,13 +83,13 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -102,7 +102,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -174,10 +174,10 @@
 
 <main id="main">
 <div class="acct-shell">
-<nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview">Overview</a></li><li><a href="/account/connectors">Connectors</a></li><li><a href="/account/captured" aria-current="page">Captured events</a></li><li><a href="/account/privacy-events">Privacy events</a></li><li><a href="/account/repeated-workflows">Repeated workflows</a></li><li><a href="/account/opportunities">Opportunities</a></li><li><a href="/account/labeling">Labeling queue</a></li><li><a href="/account/datasets">Datasets</a></li><li><a href="/account/simulations">Simulations</a></li><li><a href="/account/bakeoffs">Bakeoffs</a></li><li><a href="/account/builds">Artifact jobs</a></li><li><a href="/account/artifacts">Artifacts</a></li><li><a href="/account/devices">Devices</a></li><li><a href="/account/storage">Storage truth</a></li><li><a href="/account/billing">Billing</a></li></ul></nav>
+<nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview">Overview</a></li><li><a href="/account/connectors">Connectors</a></li><li><a href="/account/captured" aria-current="page">Captured calls</a></li><li><a href="/account/privacy-events">Privacy events</a></li><li><a href="/account/repeated-workflows">Repeated workflows</a></li><li><a href="/account/opportunities">Opportunities</a></li><li><a href="/account/labeling">Labeling queue</a></li><li><a href="/account/datasets">Datasets</a></li><li><a href="/account/simulations">Simulations</a></li><li><a href="/account/bakeoffs">Bakeoffs</a></li><li><a href="/account/builds">Artifact jobs</a></li><li><a href="/account/artifacts">Artifacts</a></li><li><a href="/account/devices">Devices</a></li><li><a href="/account/storage">Storage truth</a></li><li><a href="/account/billing">Billing</a></li></ul></nav>
 <section class="acct-content">
-<h1>Captured events.</h1>
-<p class="lede">Live tail of every captured event. Search by prompt or response, filter by namespace, durable badge per row. Streams over SSE so nothing flashes empty.</p>
+<h1>Captured calls.</h1>
+<p class="lede">Live tail of every captured AI call. Search by prompt or response, filter by namespace, durable badge per row. Streams over SSE so nothing flashes empty.</p>
 <div class="toolbar">
   <input id="search-filter" type="search" placeholder="Search prompt / response / template..." aria-label="Search captures" style="min-width:260px;flex:1">
   <select id="ns-filter" aria-label="Namespace"><option value="">All namespaces</option></select>
@@ -191,7 +191,7 @@
   </tbody>
 </table>
 <div id="empty-state" class="empty" hidden data-empty-state>
-  <strong>No captured events yet.</strong> Set <code>OPENAI_BASE_URL=http://127.0.0.1:8787/v1</code> and your first call lands here. Or point at the cloud proxy: <code>https://kolm.ai/v1/capture/openai</code>.
+  <strong>No captured AI calls yet.</strong> Set <code>OPENAI_BASE_URL=http://127.0.0.1:8787/v1</code> and your first call lands here. Or point at the cloud proxy: <code>https://kolm.ai/v1/capture/openai</code>.
 </div>
 <aside id="event-drawer" hidden style="position:fixed;right:0;top:0;width:420px;max-width:90vw;height:100vh;background:var(--bg-card);border-left:1px solid var(--line);padding:18px;overflow:auto;z-index:50">
   <button class="btn" id="drawer-close" type="button" style="float:right">close</button>

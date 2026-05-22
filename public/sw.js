@@ -1,8 +1,12 @@
 // Recipe service worker: keeps the registry available offline.
-const CACHE = 'kolm-v10-2026-05-22-sota-quantize-matrix';
+const CACHE = 'kolm-v18-2026-05-22-frontend-v597-product-rail-clarity';
 const PRECACHE = [
  '/device',
  '/styles.css',
+ '/brand-refresh.css',
+ '/home-refresh.css',
+ '/surface-polish.css',
+ '/nav.js',
  '/sdk.js',
  '/v1/registry/export',
  '/manifest.json',
@@ -41,9 +45,9 @@ self.addEventListener('fetch', (e) => {
  return;
  }
 
- // Network-first for JavaScript so navigation and UI fixes are not held behind
- // an old cache after deploy.
- if (url.pathname.match(/\.js$/)) {
+ // Network-first for deploy-sensitive UI assets so hero, nav, and theme fixes
+ // are not held behind an old cache after deploy.
+ if (url.pathname.match(/\.(js|css|woff2?)$/) || url.pathname === '/frontend-version.json') {
  e.respondWith(
  fetch(e.request).then((res) => {
  if (res.ok) caches.open(CACHE).then((c) => c.put(e.request, res.clone()));
@@ -54,7 +58,7 @@ self.addEventListener('fetch', (e) => {
  }
 
  // Cache-first for static assets and the device shell.
- if (PRECACHE.includes(url.pathname) || url.pathname.match(/\.(css|svg|png|woff2-)$/)) {
+ if (PRECACHE.includes(url.pathname) || url.pathname.match(/\.(svg|png)$/)) {
  e.respondWith(
  caches.match(e.request).then(
  (hit) => hit || fetch(e.request).then((res) => {

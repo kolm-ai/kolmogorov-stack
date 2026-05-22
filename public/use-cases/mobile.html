@@ -32,12 +32,12 @@
  "description": "Hermes-class behavior on a phone shipped since 2021. A 2-3GB compiled .kolm that behaves like a 70B model on your specific tasks. Runs on iPhone 13, Pixel 7, anything with NPU and 6GB+ RAM. Offline, sub-100ms, no per-token bill, signed receipts.",
  "author": {
  "@type": "Organization",
- "name": "Kolmogorov",
+ "name": "Kolm",
  "url": "https://kolm.ai"
  },
  "publisher": {
  "@type": "Organization",
- "name": "Kolmogorov",
+ "name": "Kolm",
  "logo": {
  "@type": "ImageObject",
  "url": "https://kolm.ai/favicon.svg"
@@ -203,13 +203,13 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -222,7 +222,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -392,8 +392,8 @@
  <p class="sec-lede">Drop a <code>.kolm</code> in your bundle (or stream it on first launch via on-demand resources). Open it. Call it. The SDK handles model loading, NPU offload, receipt signing, recall. <em style="color:var(--ink-mute,#b5bdb1)">(React Native module ships alongside the browser-WASM-via-WebView path; the API below is the locked surface.)</em></p>
  <div class="term" style="max-width:880px">
  <div class="hd"><span class="dot"></span><span>App.tsx</span></div>
- <pre><span class="cm">// 1. install: npm i github:sneaky-hippo/kolmogorov-stack (RN module ships alongside browser-WASM)</span>
-<span class="pmt">import</span> { Specialist } <span class="pmt">from</span> <span class="ok">"@kolmogorov/react-native"</span>;
+ <pre><span class="cm">// 1. install: npm i github:sneaky-hippo/kolm-stack (RN module ships alongside browser-WASM)</span>
+<span class="pmt">import</span> { Specialist } <span class="pmt">from</span> <span class="ok">"@kolm/react-native"</span>;
 
 <span class="pmt">const</span> writer = <span class="pmt">await</span> Specialist.<span class="ok">load</span>(<span class="ok">"email-reply-1.0.0.kolm"</span>);
 

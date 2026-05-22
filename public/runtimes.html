@@ -4,18 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Run signed AI artifacts on every target · kolm.ai</title>
+<title>Runtimes - run signed AI on every target - kolm.ai</title>
 <meta name="description" content="Build and verify local runtimes for .kolm artifacts across CPU, CUDA, ROCm, Vulkan, Metal, mobile, browser, and edge targets with receipts.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-<meta property="og:title" content="Run signed AI artifacts on every target · kolm.ai">
+<meta property="og:title" content="Runtimes - run signed AI on every target | kolm.ai">
 <meta property="og:description" content="Build and verify local runtimes for .kolm artifacts across CPU, CUDA, ROCm, Vulkan, Metal, mobile, browser, and edge targets with receipts.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/runtimes">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Run signed AI artifacts on every target · kolm.ai">
+<meta name="twitter:title" content="Runtimes - run signed AI on every target | kolm.ai">
 <meta name="twitter:description" content="Build and verify local runtimes for .kolm artifacts across CPU, CUDA, ROCm, Vulkan, Metal, mobile, browser, and edge targets with receipts.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/runtimes">
@@ -28,8 +28,8 @@
  "@graph": [
  {
  "@type": "TechArticle",
- "headline": "kolm.ai runtimes — build llama.cpp from source",
- "description": "Per-target cmake flags and pinned-commit source build for NVIDIA Ada/Hopper/Blackwell, AMD RDNA3/CDNA3, Apple Metal, Vulkan, and CPU AVX2/AVX-512.",
+ "headline": "Kolm runtimes for signed AI artifacts",
+ "description": "Per-target runtime builds for CPU, CUDA, ROCm, Vulkan, Metal, mobile, browser, edge, and air-gap deployments.",
  "url": "https://kolm.ai/runtimes",
  "author": {"@type": "Organization", "name": "kolm.ai"},
  "publisher": {"@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai"},
@@ -102,13 +102,13 @@ pre code{background:none;padding:0}
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -121,7 +121,7 @@ pre code{background:none;padding:0}
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -199,7 +199,7 @@ pre code{background:none;padding:0}
 <section class="hero">
  <h1>Run signed AI artifacts on the hardware you already own.</h1>
  <p class="lede">
- <code>kolm runtime build-from-source --target=&lt;arch&gt;</code> builds a pinned local runtime, records the exact source and flags, and drops a <code>build-receipt.json</code> beside the binary. Use it for CPU, CUDA, ROCm, Vulkan, Metal, mobile and edge paths without turning the root kolm install into a heavy GPU stack.
+ Run one signed <code>.kolm</code> across CPU, GPU, browser, mobile, edge, and air-gap targets. Each runtime build records its source, flags, target, and receipt so teams can prove what executed without turning the root install into a heavy GPU stack.
  </p>
  <p class="lede" style="margin-top:14px">
  This is the run layer for <a href="/compile">compiled artifacts</a>, <a href="/training">distilled students</a>, <a href="/models">Gemma/Gemma 3n and open backbones</a>, and air-gapped enterprise deployments.
@@ -232,12 +232,12 @@ to actually build.</p>
  <tr><td><code>rocm-gfx942</code></td><td>gfx942</td><td>amd</td><td>rocm-hip-sdk</td><td>6.0</td><td>MI300X (CDNA3).</td></tr>
  <tr><td><code>vulkan</code></td><td>vulkan</td><td>khronos</td><td>vulkan-sdk</td><td>1.3</td><td>Vendor-neutral. Runs on NVIDIA, AMD, Intel.</td></tr>
  <tr><td><code>metal</code></td><td>metal</td><td>apple</td><td>xcode-cli</td><td>15.0</td><td>Apple Silicon, embedded kernels.</td></tr>
- <tr><td><code>cpu-avx2</code></td><td>avx2</td><td>intel/amd</td><td>none</td><td>—</td><td>x86_64 fallback (any post-2013 chip).</td></tr>
- <tr><td><code>cpu-avx512</code></td><td>avx512</td><td>intel/amd</td><td>none</td><td>—</td><td>AVX-512 + VNNI. Server-grade CPU.</td></tr>
+ <tr><td><code>cpu-avx2</code></td><td>avx2</td><td>intel/amd</td><td>none</td><td>n/a</td><td>x86_64 fallback for common server and laptop CPUs.</td></tr>
+ <tr><td><code>cpu-avx512</code></td><td>avx512</td><td>intel/amd</td><td>none</td><td>n/a</td><td>AVX-512 + VNNI. Server-grade CPU.</td></tr>
  </tbody>
 </table>
 
-<h2>Honest framing — what kolm does, what it doesn't</h2>
+<h2>What Kolm does, and what it does not</h2>
 <div class="honest">
 <p><strong>kolm runs the build for you, then steps out of the way.</strong></p>
 <p>You get pinned source, pinned cmake flags, a deterministic out-dir, and a
@@ -246,9 +246,8 @@ receipt chain</a> to runtime binaries. We do not fork upstream llama.cpp, we do 
 patch its kernels, and we do not ship a vendored copy. If you want a different
 commit, pass <code>--commit=&lt;sha&gt;</code>. If you want a different repo (e.g., a
 fork with FP8 patches), pass <code>--repo-url=&lt;url&gt;</code>.</p>
-<p>This answers the <a href="https://x.com/sudoingX">@sudoingX</a> "if you're serious
-about local inference, start at source level" critique directly: one command, one
-pinned commit, no abstractions over the build.</p>
+<p>The runtime builder is explicit by design: one command, one pinned commit, one
+receipt, and no hidden abstraction over the build.</p>
 </div>
 
 <h2>Use it</h2>
@@ -282,7 +281,7 @@ kolm runtime build-from-source --target=cuda-90 --dry-run --json</code></pre>
 }</code></pre>
 <p>This receipt is the runtime sibling of the
 <a href="/captures">x-kolm-capture-durable</a> header and the
-<a href="/spec">.kolm manifest signatures</a> — every artifact in the kolm stack
+<a href="/spec">.kolm manifest signatures</a> - every artifact in the kolm stack
 ships with proof of what produced it.</p>
 
 <h2>Where the heavy deps live</h2>
@@ -299,8 +298,8 @@ only invoked when you opt in to <code>kolm runtime build-from-source</code>.</p>
 </p>
 
 <div class="foot">
- <p>kolm.ai · <a href="/runtimes">/runtimes</a> · Wave 219 · pinned commit
- <code>2026-05-17-frontier-pin</code> · isolated worker
+ <p>kolm.ai - <a href="/runtimes">/runtimes</a> - pinned runtime source
+ <code>2026-05-17-frontier-pin</code> - isolated worker
  <code>workers/runtime-build/</code></p>
 </div>
 </div>

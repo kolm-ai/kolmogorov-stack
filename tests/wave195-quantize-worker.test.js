@@ -1,7 +1,7 @@
 // Wave 195: `kolm quantize` via the isolated quantize worker.
 //
 // Locks in the Q+5 closure from the Wave 144 plan: a dedicated `kolm
-// quantize` verb backed by an isolated @kolmogorov/quantize-worker
+// quantize` verb backed by an isolated @kolm/quantize-worker
 // package. The pattern mirrors workers/distill/: heavy Python ML deps
 // (bitsandbytes, torch, auto-gptq, optimum, accelerate) live ONLY inside
 // the worker package; the root kolm install stays light.
@@ -43,10 +43,10 @@ test('1. workers/quantize/ directory exists', () => {
   assert.ok(fs.statSync(WORKER).isDirectory(), 'workers/quantize/ must be a directory');
 });
 
-test('2. workers/quantize/package.json declares @kolmogorov/quantize-worker private package', () => {
+test('2. workers/quantize/package.json declares @kolm/quantize-worker private package', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(WORKER, 'package.json'), 'utf8'));
-  assert.equal(pkg.name, '@kolmogorov/quantize-worker',
-    'worker package must be named @kolmogorov/quantize-worker');
+  assert.equal(pkg.name, '@kolm/quantize-worker',
+    'worker package must be named @kolm/quantize-worker');
   assert.equal(pkg.private, true, 'worker package must be private:true');
   assert.equal(pkg.license, 'Apache-2.0', 'worker package must declare Apache-2.0 license');
   assert.equal(pkg.type, 'module',  'worker package must be type:module');

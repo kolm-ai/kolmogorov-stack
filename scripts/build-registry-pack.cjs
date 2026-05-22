@@ -422,7 +422,7 @@ for (const a of ARTIFACTS) {
 const manifest = {
   spec: 'registry-pack-1',
   generated_at: new Date().toISOString(),
-  source: 'https://github.com/sneaky-hippo/kolmogorov-stack/tree/main/scripts/build-registry-pack.js',
+  source: 'https://github.com/sneaky-hippo/kolm-stack/tree/main/scripts/build-registry-pack.js',
   artifacts: results,
 };
 fs.writeFileSync(path.join(OUT_DIR, 'manifest.json'), JSON.stringify(manifest, null, 2));

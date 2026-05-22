@@ -568,13 +568,13 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -587,7 +587,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -1043,7 +1043,7 @@
  <span><span class="lbl">papers</span>&nbsp;Hinton 2015 arXiv:1503.02531, Kim &amp; Rush 2016 arXiv:1606.07947, Gu 2024 MiniLLM arXiv:2306.08543, Agarwal 2024 arXiv:2306.13649</span>
  <span><span class="lbl">gate</span>&nbsp;teacher and student share a vocabulary</span>
  </div>
- <p>The compression that gives Kolmogorov its name. Token-level KL between teacher and student softmaxes at a shared temperature, plus a small cross-entropy term against the teacher's sampled token. Three objectives ship (forward-KL, reverse-KL, JSD), top-k logit pruning collapses the activation memory by ~2000x on Qwen-class vocabularies, and on-policy sampling beats off-policy when the gap is large. See <a href="/research/response-distillation">the report</a>.</p>
+ <p>The compression that gives Kolm its name. Token-level KL between teacher and student softmaxes at a shared temperature, plus a small cross-entropy term against the teacher's sampled token. Three objectives ship (forward-KL, reverse-KL, JSD), top-k logit pruning collapses the activation memory by ~2000x on Qwen-class vocabularies, and on-policy sampling beats off-policy when the gap is large. See <a href="/research/response-distillation">the report</a>.</p>
  </div>
 
  <div class="row24" id="moe-router">
@@ -1308,7 +1308,7 @@
 
  <div class="closer">
  <p>This is the production-shipping list. The research agenda is on the reports feed below: K-score cross-task calibration, eval-set drift detection, K-sampling at compile time with embedding-cluster diversity, adapter compression, receipt aggregation. The forty-two items above are bench-checked against real captures; the agenda items are open problems we are willing to be wrong about in public.</p>
- <p>If a technique you expect to see is missing, the answer is one of three things: it does not benefit the LoRA-distill loop (most pre-training-only techniques), the implementation is in flight (item on the research agenda), or we have not yet found a buyer whose problem requires it. Open an issue on <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a> and tell us which.</p>
+ <p>If a technique you expect to see is missing, the answer is one of three things: it does not benefit the LoRA-distill loop (most pre-training-only techniques), the implementation is in flight (item on the research agenda), or we have not yet found a buyer whose problem requires it. Open an issue on <a href="https://github.com/sneaky-hippo/kolm-stack" rel="noopener">GitHub</a> and tell us which.</p>
  </div>
  </div>
  </div>
@@ -1331,7 +1331,7 @@
  <div class="links">
  <a href="/whitepaper">Read &rarr;</a>
  <a href="/spec">RS-1 spec</a>
- <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">Reference implementation</a>
+ <a href="https://github.com/sneaky-hippo/kolm-stack" rel="noopener">Reference implementation</a>
  </div>
  </div>
  </article>
@@ -1349,7 +1349,7 @@
  <div class="stamp"><span class="topic">training</span>May 15, 2026</div>
  <div class="body">
  <h3>Response distillation &middot; KL the teacher into the student.</h3>
- <p>The compression that gives Kolmogorov its name. Token-level KL between teacher and student softmaxes at a shared temperature, plus a small cross-entropy term against the teacher's sampled token. Three objectives (forward-KL, reverse-KL, JSD), top-k logit pruning that drops activation memory ~2000x on Qwen-class vocabularies, and on-policy sampling that beats off-policy when the capacity gap is large.</p>
+ <p>The compression that gives Kolm its name. Token-level KL between teacher and student softmaxes at a shared temperature, plus a small cross-entropy term against the teacher's sampled token. Three objectives (forward-KL, reverse-KL, JSD), top-k logit pruning that drops activation memory ~2000x on Qwen-class vocabularies, and on-policy sampling that beats off-policy when the capacity gap is large.</p>
  </div>
  <div class="read">10 min &rarr;</div>
  </a>
@@ -1786,7 +1786,7 @@
  <div class="t">Developer reference</div>
  <div class="d">CLI, server, runtime API. Quickstart through to remote-access TEE deployment.</div>
  </a>
- <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">
+ <a href="https://github.com/sneaky-hippo/kolm-stack" rel="noopener">
  <div class="k">code</div>
  <div class="t">GitHub</div>
  <div class="d">Reference implementation. The harness that produces the numbers above is the same code we ship.</div>

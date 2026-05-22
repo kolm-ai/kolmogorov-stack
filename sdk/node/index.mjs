@@ -1,4 +1,4 @@
-// @kolmogorov/kolm-sdk - ES module entry point.
+// @kolm/kolm-sdk - ES module entry point.
 // Client for kolm account, registry, receipt, and recipe APIs.
 
 const DEFAULT_BASE = "https://kolm.ai";
@@ -17,7 +17,7 @@ export class RecipeClient {
   constructor(opts = {}) {
     this.baseUrl = (opts.baseUrl || (typeof process !== "undefined" && process.env && (process.env.KOLM_BASE_URL || process.env.RECIPE_BASE_URL)) || DEFAULT_BASE).replace(/\/$/, "");
     this.apiKey = opts.apiKey
-      || (typeof process !== "undefined" && process.env && (process.env.KOLM_API_KEY || process.env.RECIPE_API_KEY || process.env.KOLMOGOROV_API_KEY));
+      || (typeof process !== "undefined" && process.env && (process.env.KOLM_API_KEY || process.env.RECIPE_API_KEY));
     this.fetcher = opts.fetch || globalThis.fetch;
     this.timeoutMs = opts.timeoutMs ?? 30000;
     if (!this.fetcher) throw new Error("fetch is not available; pass opts.fetch or run on Node 18+ / a modern browser.");
@@ -27,7 +27,7 @@ export class RecipeClient {
     const url = this.baseUrl + path;
     const headers = {
       "Content-Type": "application/json",
-      "User-Agent": `@kolmogorov/kolm-sdk/${SDK_VERSION}`,
+      "User-Agent": `@kolm/kolm-sdk/${SDK_VERSION}`,
       ...(init.headers || {}),
     };
     if (this.apiKey) headers["Authorization"] = `Bearer ${this.apiKey}`;
@@ -117,7 +117,7 @@ export class RecipeClient {
   // and have 30 days of full functionality before they have to claim or expire.
   bootstrapAnonymous(meta = {}) {
     return this._req("POST", "/v1/anon/bootstrap", {
-      user_agent: meta.user_agent || `@kolmogorov/kolm-sdk/${SDK_VERSION}`,
+      user_agent: meta.user_agent || `@kolm/kolm-sdk/${SDK_VERSION}`,
       hostname: meta.hostname || null,
     });
   }

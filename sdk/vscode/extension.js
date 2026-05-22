@@ -54,7 +54,7 @@ function request(method, urlString, { body, apiKey } = {}) {
 function cfg() {
   const c = vscode.workspace.getConfiguration('kolm');
   return {
-    apiKey: c.get('apiKey') || process.env.KOLM_API_KEY || process.env.KOLMOGOROV_API_KEY,
+    apiKey: c.get('apiKey') || process.env.KOLM_API_KEY,
     baseUrl: (c.get('baseUrl') || DEFAULT_BASE).replace(/\/$/, ''),
     suggest: c.get('suggestReplacements'),
     showRest: c.get('showRestEquivalent'),

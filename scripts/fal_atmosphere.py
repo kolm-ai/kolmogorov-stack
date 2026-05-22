@@ -14,7 +14,7 @@ if not os.environ.get("FAL_KEY"):
 import fal_client
 from PIL import Image, ImageEnhance
 
-OUT_DIR = Path("C:/Users/user/Desktop/kolmogorov-stack/public/img")
+OUT_DIR = Path(__file__).resolve().parents[1] / "public" / "img"
 OUT_DIR.mkdir(exist_ok=True, parents=True)
 RAW_DIR = OUT_DIR / "_generations"
 RAW_DIR.mkdir(exist_ok=True, parents=True)

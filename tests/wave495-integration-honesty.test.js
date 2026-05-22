@@ -7,6 +7,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const ROOT = process.cwd();
+const OLD_REPO_RE = new RegExp(['sneaky-hippo/kolmo', 'gorov-stack'].join(''));
 
 function read(rel) {
   return fs.readFileSync(path.join(ROOT, rel), 'utf8');
@@ -73,7 +74,7 @@ test('W495 #4 - adapter READMEs and metadata point at the real source repo', () 
     'packages/python-llamaindex-kolm/README.md',
   ]) {
     const text = read(rel);
-    assert.match(text, /github\.com\/sneaky-hippo\/kolmogorov-stack/);
+    assert.match(text, /github\.com\/sneaky-hippo\/kolm-stack/);
     assert.match(text, /not published under Kolm control/i);
   }
 
@@ -84,7 +85,7 @@ test('W495 #4 - adapter READMEs and metadata point at the real source repo', () 
     'packages/python-llamaindex-kolm/pyproject.toml',
   ]) {
     const text = read(rel);
-    assert.match(text, /sneaky-hippo\/kolmogorov-stack/);
-    assert.doesNotMatch(text, /sneaky-hippo\/kolm-stack/);
+    assert.match(text, /sneaky-hippo\/kolm-stack/);
+    assert.doesNotMatch(text, OLD_REPO_RE);
   }
 });

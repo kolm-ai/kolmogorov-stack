@@ -156,13 +156,13 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -175,7 +175,7 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -249,7 +249,7 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 </header>
 <main id="main">
  <h1>What is an AI compiler?</h1>
- <p class="lede">An AI compiler is the missing build step between a frontier model API and a local artifact that runs on your hardware. It takes a task specification, a corpus of captured prompts and responses, and a teacher model, and emits a single signed file you can ship anywhere.</p>
+ <p class="lede">An AI compiler is the missing build step between a frontier model API and a local artifact that runs on your hardware. It takes a task specification, captured prompts and responses, and a teacher model, then emits one signed file you can run on the target you own.</p>
  <p style="margin:18px 0 28px;display:flex;gap:12px;flex-wrap:wrap;align-items:center">
  <a href="/builder" style="display:inline-block;padding:12px 22px;background:#7ef0d2;color:#08090c;text-decoration:none;border-radius:6px;font-weight:600;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;letter-spacing:.02em">Build one in your browser &rarr;</a>
  <a href="/quickstart" style="display:inline-block;padding:12px 22px;background:transparent;color:#faf2e1;text-decoration:none;border:1px solid rgba(255,255,255,.18);border-radius:6px;font-weight:500;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px">Compile from the CLI</a>
@@ -335,7 +335,7 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 
  <h2 id="first-compile">Your first compile</h2>
  <p>The shortest path from zero to a .kolm:</p>
-<pre>npm i -g github:sneaky-hippo/kolmogorov-stack
+<pre>npm i -g github:sneaky-hippo/kolm-stack
 kolm init my-task
 kolm capture --teacher=openai --to=my-task
 # (run your application; let captures accumulate)
@@ -364,7 +364,7 @@ kolm run my-task.kolm "the prompt you would have sent to the teacher"</pre>
  <p>No, see the brand-disambiguation panel below.</p>
 
  <div class="brand">
- <p><b>Brand disambiguation.</b> "kolm" is also the name of a few unrelated entities. <b>kolm.ai</b> is the AI compiler company. The domain <code>kolm.ai</code> is the disambiguator. The other "Kolm"s are: <b>Kolm therapeutics</b> (biotech), the <b>Kolm band</b> (Austrian alt-rock), <b>Petter Kolm</b> (Courant Institute professor of mathematical finance), and <b>Kolm engines</b> (historical aerospace manufacturer). The name "Kolm" in this site refers to the AI compiler only and is derived from the Kolm Stack (after Andrey Kolm, the founder of modern probability theory and information theory). See <a href="/articles/kolm-ai-vs-kolm-therapeutics">"kolm.ai vs Kolm therapeutics: brand disambiguation for procurement teams"</a> for the procurement-grade version of this notice.</p>
+<p><b>Brand disambiguation.</b> "kolm" is also the name of a few unrelated entities. <b>kolm.ai</b> is the AI compiler company. The domain <code>kolm.ai</code> is the disambiguator. The other "Kolm"s are: <b>Kolm therapeutics</b> (biotech), the <b>Kolm band</b> (Austrian alt-rock), <b>Petter Kolm</b> (Courant Institute professor of mathematical finance), and <b>Kolm engines</b> (historical aerospace manufacturer). The name "Kolm" in this site refers to the AI compiler only and is derived from the Kolm Stack (after algorithmic information theory and modern probability theory). See <a href="/articles/kolm-ai-vs-kolm-therapeutics">"kolm.ai vs Kolm therapeutics: brand disambiguation for procurement teams"</a> for the procurement-grade version of this notice.</p>
  </div>
 
  <h2>Related reading</h2>

@@ -41,7 +41,7 @@ test('W462 #1 — workers/multimodal-redact-image package + redact-image.mjs exi
   assert.ok(fs.existsSync(entryPath), 'workers/multimodal-redact-image/redact-image.mjs must exist');
 
   const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
-  assert.equal(pkg.name, '@kolmogorov/multimodal-redact-image-worker', 'worker package name');
+  assert.equal(pkg.name, '@kolm/multimodal-redact-image-worker', 'worker package name');
   assert.equal(pkg.type, 'module', 'worker is ESM');
   assert.equal(pkg.main, 'redact-image.mjs', 'worker entrypoint is redact-image.mjs');
   assert.ok(pkg.bin && pkg.bin['kolm-multimodal-redact-image-worker'],

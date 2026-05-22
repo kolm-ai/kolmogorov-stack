@@ -1,4 +1,4 @@
-# @kolmogorov/recipe-mcp
+# @kolm/recipe-mcp
 
 > Preview MCP server for [kolm.ai](https://kolm.ai). Registry publication is pending; run it from a checkout.
 
@@ -9,7 +9,7 @@ Adds 13 tools to Claude Code (or any MCP client) for synthesizing, running, sear
 This package is not published on npm under Kolm control yet. From a repo checkout, point your MCP client at the local server:
 
 ```bash
-node /absolute/path/to/kolmogorov-stack/sdk/mcp/server.mjs
+node /absolute/path/to/kolm-stack/sdk/mcp/server.mjs
 ```
 
 Add to `~/.config/claude-code/.mcp.json` (or your project's `.mcp.json`):
@@ -19,7 +19,7 @@ Add to `~/.config/claude-code/.mcp.json` (or your project's `.mcp.json`):
   "mcpServers": {
     "recipe": {
       "command": "node",
-      "args": ["/absolute/path/to/kolmogorov-stack/sdk/mcp/server.mjs"],
+      "args": ["/absolute/path/to/kolm-stack/sdk/mcp/server.mjs"],
       "env": {
         "KOLM_API_KEY": "ks_..."
       }
@@ -62,8 +62,8 @@ KOLM_API_KEY=ks_...        # preferred
 KOLM_BASE_URL=https://kolm.ai
 ```
 
-The server still accepts `RECIPE_API_KEY`, `RECIPE_BASE_URL`, and `KOLMOGOROV_API_KEY` for backward compatibility.
+The server still accepts `RECIPE_API_KEY` and `RECIPE_BASE_URL` for legacy Recipe SDK installs.
 
 ## License
 
-Apache-2.0 - [Kolmogorov](https://kolm.ai)
+Apache-2.0 - [Kolm](https://kolm.ai)

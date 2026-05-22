@@ -74,4 +74,4 @@ This extension exists so the compile → inspect → verify → run loop happens
 
 ## License
 
-Apache-2.0 © [Kolmogorov](https://kolm.ai)
+Apache-2.0 © [Kolm](https://kolm.ai)

@@ -432,11 +432,11 @@ This register records primary sources used in the first knowledge-base pass. Sou
 | kolm-live-docs-release-current | https://kolm.ai/docs | Live CLI install tabs, missing npm package command, brew tab, source install, and CLI verb docs. |
 | kolm-live-security-release-current | https://kolm.ai/security | Live supply-chain, SLSA, Sigstore, SBOM, and signed-release wording review. |
 | npm-cli-package-current | https://registry.npmjs.org/ | `npm view @kolm/cli` registry availability check. |
-| npm-node-sdk-package-current | https://registry.npmjs.org/ | `npm view @kolmogorov/kolm-sdk` registry availability check. |
-| npm-root-package-current | https://registry.npmjs.org/ | `npm view kolmogorov-stack` registry availability check. |
+| npm-node-sdk-package-current | https://registry.npmjs.org/ | `npm view legacy scoped kolm SDK package` registry availability check. |
+| npm-root-package-current | https://registry.npmjs.org/ | `npm view kolm-stack` registry availability check. |
 | pypi-kolm-current | https://pypi.org/pypi/kolm/json | PyPI package-name ownership and collision review. |
 | github-homebrew-tap-current | https://github.com/kolm/homebrew-kolm | Documented Homebrew tap existence check. |
-| github-winget-current | https://api.github.com/repos/microsoft/winget-pkgs/contents/manifests/k/Kolmogorov/kolm/0.1.0 | Windows package-manager manifest existence check. |
+| github-winget-current | https://api.github.com/repos/microsoft/winget-pkgs/contents/manifests/k/Kolm/kolm/0.1.0 | Windows package-manager manifest existence check. |
 | github-scoop-current | https://github.com/ScoopInstaller/Main/blob/master/bucket/kolm.json | Scoop manifest existence check. |
 | root-package-current | ../package.json | Root CLI bin, private flag, scripts, engine, and package metadata review. |
 | root-npm-pack-current | npm pack dry-run | Root package size, entry count, package contents, lockfile omission, and license-file absence review. |
@@ -557,10 +557,10 @@ This register records primary sources used in the first knowledge-base pass. Sou
 | npm-view-cli-2026-05-13 | local `npm view` for public CLI package | Confirmed documented public CLI npm package returns 404. |
 | npm-view-root-2026-05-13 | local `npm view` for root package | Confirmed root package is not public on npm. |
 | npm-view-node-sdk-2026-05-13 | local `npm view` for Node SDK package | Confirmed Node SDK package is not public on npm. |
-| github-repo-availability-2026-05-13 | https://github.com/sneaky-hippo/kolmogorov-stack | Confirmed public source repository URL returned 200. |
+| github-repo-availability-2026-05-13 | https://github.com/sneaky-hippo/kolm-stack | Confirmed public source repository URL returned 200. |
 | homebrew-tap-check-2026-05-13 | https://github.com/kolm/homebrew-kolm | Confirmed implied Homebrew tap returned 404. |
 | scoop-check-2026-05-13 | https://github.com/ScoopInstaller/Main/blob/master/bucket/kolm.json | Confirmed public Scoop manifest path returned 404. |
-| winget-check-2026-05-13 | https://api.github.com/repos/microsoft/winget-pkgs/contents/manifests/k/Kolmogorov/kolm/0.1.0 | Confirmed winget manifest path returned 404. |
+| winget-check-2026-05-13 | https://api.github.com/repos/microsoft/winget-pkgs/contents/manifests/k/Kolm/kolm/0.1.0 | Confirmed winget manifest path returned 404. |
 | docker-hub-kolm-2026-05-13 | https://hub.docker.com/v2/repositories/sneakyhippo/kolm | Confirmed likely Docker Hub repository returned 404. |
 | public-docs-release-current | ../public/docs.html | Local install tabs for npm, GitHub-source, Homebrew, source checkout, and current command snippets. |
 | public-integrations-release-current | ../public/integrations.html | Local shipped/preview labels for GitHub Actions, Node, Python, npm, Homebrew, Windows package managers, Docker, MCP, and VS Code. |

@@ -247,10 +247,10 @@ test('W273 #24 - brand-anchor span preserved (W228 anchor / W273 instruction)', 
 // =====================================================================
 
 test('W273 #25 - sw.js CACHE slug wave-floor >= 273', () => {
-  const m = SW.match(/const\s+CACHE\s*=\s*'kolm-v7-2026-05-\d+-wave(\d+)-([a-z0-9-]+)'/);
-  assert.ok(m, 'CACHE slug must follow kolm-v7-YYYY-MM-DD-waveN-slug pattern');
-  const waveN = parseInt(m[1], 10);
-  assert.ok(waveN >= 273, `sw.js wave-slug must be >= 273 (saw ${waveN})`);
+  const m = SW.match(/const\s+CACHE\s*=\s*'kolm-v(\d+)-2026-05-\d+-frontend-v(\d+)-([a-z0-9-]+)'/);
+  assert.ok(m, 'CACHE slug must follow kolm-vN-YYYY-MM-DD-frontend-vN-slug pattern');
+  const versionN = parseInt(m[2], 10);
+  assert.ok(versionN >= 273, `sw.js frontend version must be >= 273 (saw ${versionN})`);
 });
 
 // =====================================================================

@@ -1,6 +1,6 @@
 name: kolm verify
 description: Verify a .kolm artifact's receipt chain offline. Fails the job if the seal is broken.
-author: Kolmogorov
+author: Kolm
 
 inputs:
   artifact:
@@ -27,7 +27,7 @@ runs:
   steps:
     - name: install kolm CLI
       shell: bash
-      run: npm i -g github:sneaky-hippo/kolmogorov-stack
+      run: npm i -g github:sneaky-hippo/kolm-stack
 
     - name: verify
       id: verify

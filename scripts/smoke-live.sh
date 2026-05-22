@@ -9,7 +9,7 @@
 # Default URL is the public-facing kolm.ai domain. Vercel proxies /v1/* to
 # the Railway origin, so going through kolm.ai exercises the full edge stack
 # (rate limits, WAF, edge auth) the way real users hit it. Override with
-# URL=https://kolmogorov-stack-production.up.railway.app to bypass the proxy
+# URL=<railway-origin-url> to bypass the proxy
 # when debugging origin-specific behavior. Marketing copy changes constantly
 # and is intentionally NOT asserted here — only routes, auth gates, and the
 # shape of API responses are.

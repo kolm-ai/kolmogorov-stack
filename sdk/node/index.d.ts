@@ -1,4 +1,4 @@
-// @kolmogorov/kolm-sdk - TypeScript declarations.
+// @kolm/kolm-sdk - TypeScript declarations.
 // Client for kolm account, registry, receipt, and recipe APIs.
 
 export type Visibility = "private" | "public";

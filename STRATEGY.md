@@ -323,7 +323,7 @@ Same wedges as v2 (CLI, IDE, SDK, audit funnel) plus three v3-specific plays:
 - [ ] Backend: `/v1/spec` endpoint serving the canonical spec JSON
 
 ### P1 (next 30 days — operationalize the standard)
-- [ ] Conformance test suite as `@kolmogorov/recipe-conformance` npm package
+- [ ] Conformance test suite as `@kolm/recipe-conformance` npm package
 - [ ] Conformance badge / website (`recipe-compatible.dev`)
 - [ ] Open-source repo for the spec at `recipe-spec/recipe-spec`
 - [ ] Reference Cloudflare Workers runtime implementation

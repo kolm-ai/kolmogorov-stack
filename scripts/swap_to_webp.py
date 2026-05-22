@@ -4,7 +4,7 @@ Idempotent."""
 import re
 from pathlib import Path
 
-ROOT = Path("C:/Users/user/Desktop/kolmogorov-stack/public")
+ROOT = Path(__file__).resolve().parents[1] / "public"
 
 TARGETS = [
     "hero-artifact",

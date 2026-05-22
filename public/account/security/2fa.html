@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-<title>Account MFA policy · Account · kolm.ai</title>
+<title>Account MFA policy - Account - kolm.ai</title>
 <meta name="description" content="kolm.ai account MFA policy, API-key controls, recovery paths, and audit evidence for hosted and enterprise tenants.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <link rel="canonical" href="https://kolm.ai/account/security/2fa">
-<meta property="og:title" content="Account MFA policy · Account · kolm.ai">
+<meta property="og:title" content="Account MFA policy - Account - kolm.ai">
 <meta property="og:description" content="kolm.ai account MFA policy, API-key controls, recovery paths, and audit evidence for hosted and enterprise tenants.">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:type" content="website">
@@ -60,7 +60,7 @@
 @media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}.two-col{grid-template-columns:1fr}.qr-box{width:100%;max-width:240px;margin:0 auto}}
 </style>
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Account MFA policy · Account · kolm.ai">
+<meta name="twitter:title" content="Account MFA policy - Account - kolm.ai">
 <meta name="twitter:description" content="kolm.ai account MFA policy, API-key controls, recovery paths, and audit evidence for hosted and enterprise tenants.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="stylesheet" href="/surface-polish.css">
@@ -84,13 +84,13 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -103,7 +103,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -317,7 +317,7 @@ kolm audit --format json
  }).catch(function(){alert("Recovery-code rotation is handled by your identity provider or support recovery workflow.");});
  });
  document.getElementById("btn-download").addEventListener("click",function(){
- var codes=[].map.call(document.querySelectorAll("#recovery-grid span"),function(s){return s.textContent.trim();}).filter(function(c){return c&&!/^[.·\u2014\u2013-]+$/.test(c);});
+ var codes=[].map.call(document.querySelectorAll("#recovery-grid span"),function(s){return s.textContent.trim();}).filter(function(c){return c&&!/^[.-\u2014\u2013-]+$/.test(c);});
  if(!codes.length){alert("Generate codes first.");return;}
  var blob=new Blob(["kolm.ai recovery codes (one-time use)\n\n"+codes.join("\n")+"\n"],{type:"text/plain"});
  var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="kolm-recovery-codes.txt";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},200);

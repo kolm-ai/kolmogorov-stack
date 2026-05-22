@@ -183,7 +183,7 @@
  "description": "Architecture for healthcare teams evaluating PHI-sensitive AI workflows: signed .kolm artifacts, tamper-evident receipts, and Enterprise BAA review path. Customer-controlled deployment required for PHI.",
  "provider": {
  "@type": "Organization",
- "name": "Kolmogorov",
+ "name": "Kolm",
  "url": "https://kolm.ai"
  },
  "url": "https://kolm.ai/healthcare",
@@ -231,13 +231,13 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -250,7 +250,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -396,7 +396,7 @@
  <p class="sec-lede">Reference target: a signed artifact for clinical note drafting, reviewed on de-identified examples first, then evaluated against held-out cases before any production workflow.</p>
 
  <div class="uc" aria-label="Compile pipeline">
- <div class="hd"><span class="dot"></span><span>compile pilot &middot; customer-controlled environment &middot; signed artifact</span></div>
+ <div class="hd"><span class="dot"></span><span>reference compile &middot; customer-controlled environment &middot; signed artifact</span></div>
  <div class="body">
  <h3>From institutional examples to a signed binary on the tablet.</h3>
  <p class="note">Compile happens once per quarter against the institution's de-identified gold set. The artifact is signed, scored against the held-out set, and pushed to the MDM for distribution. Deployment is a single signed file, not a service.</p>
@@ -524,12 +524,12 @@
 <section class="closing">
  <div class="wrap">
  <h2>Evaluate clinical AI<br><span class="tone">inside the approved boundary.</span></h2>
- <p class="lede" style="max-width:60ch">Book Enterprise review self-serve. The BAA / DPA template is at <a href="/baa" style="color:var(--accent);">/baa</a> (founder-signed within 48 hours of engagement letter). Signing does not gate provisioning. Compile a reference artifact the same hour your first key is issued.</p>
+ <p class="lede" style="max-width:60ch">Book an Enterprise review. The BAA / DPA template is at <a href="/baa" style="color:var(--accent);">/baa</a> and is legal-review ready before deployment. Signing does not gate provisioning. Compile a reference artifact the same hour your first key is issued.</p>
  <div class="cta-row">
  <a href="/enterprise/inquiry" class="btn-primary">Book Enterprise review</a>
  <a href="/enterprise" class="btn-link">Enterprise overview <span aria-hidden="true">&rarr;</span></a>
  </div>
- <div style="margin-top:14px"><a href="mailto:dev@kolm.ai?subject=kolm%20healthcare%20pilot" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px;text-decoration:none;letter-spacing:0.02em">or talk to founders &rarr;</a></div>
+ <div style="margin-top:14px"><a href="mailto:dev@kolm.ai?subject=kolm%20healthcare%20deployment" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px;text-decoration:none;letter-spacing:0.02em">or book architecture review &rarr;</a></div>
  </div>
 </section>
 

@@ -9,7 +9,7 @@
 //   3) Every catalog row carries `install_source` (no registry = false isn't
 //      enough; the source path always works from a repo checkout).
 //   4) Python README's headlined package name == pyproject.toml name (the prior
-//      drift: README said kolmogorov-recipe, manifest said kolm).
+//      drift: README and manifest named different Python packages).
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -105,7 +105,7 @@ test('W482 #8 — c catalog pkg is literally "kolm.h" (no registry — vendor it
   assert.equal(c.install_registry, null, 'C SDK is vendor-only — install_registry must be null');
 });
 
-test('W482 #9 — python README headlines the manifest package name (no kolmogorov-recipe drift)', () => {
+test('W482 #9 - python README headlines the manifest package name without legacy drift', () => {
   const readme = fs.readFileSync(path.join(REPO, 'sdk', 'python', 'README.md'), 'utf8');
   const toml = fs.readFileSync(path.join(REPO, 'sdk', 'python', 'pyproject.toml'), 'utf8');
   const nm = toml.match(/^\s*name\s*=\s*"([^"]+)"/m)[1];

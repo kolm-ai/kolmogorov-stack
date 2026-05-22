@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Admin console · kolm.ai</title>
-<meta name="description" content="Founder-only admin console. Read-only view of tenants, usage, audit feed, compile jobs, system health.">
+<meta name="description" content="Admin-only console. Read-only view of tenants, usage, audit feed, compile jobs, system health.">
 <meta name="robots" content="noindex,nofollow">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -101,7 +101,7 @@
 </style>
  <link rel="canonical" href="https://kolm.ai/admin">
  <meta property="og:title" content="Admin console · kolm.ai">
- <meta property="og:description" content="Founder-only admin console. Read-only view of tenants, usage, audit feed, compile jobs, system health.">
+ <meta property="og:description" content="Admin-only console. Read-only view of tenants, usage, audit feed, compile jobs, system health.">
  <meta property="og:image" content="https://kolm.ai/og-card.svg">
  <meta property="og:url" content="https://kolm.ai/admin">
  <meta property="og:type" content="website">
@@ -113,7 +113,7 @@
  "applicationCategory": "DeveloperApplication",
  "operatingSystem": "Linux, macOS, Windows (WSL)",
  "url": "https://kolm.ai/admin",
- "description": "Founder-only admin console. Read-only view of tenants, usage, audit feed, compile jobs, system health.",
+ "description": "Admin-only console. Read-only view of tenants, usage, audit feed, compile jobs, system health.",
  "offers": {
  "@type": "Offer",
  "price": "0",
@@ -128,7 +128,7 @@
 </script>
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Admin console · kolm.ai">
-<meta name="twitter:description" content="Founder-only admin console. Read-only view of tenants, usage, audit feed, compile jobs, system health.">
+<meta name="twitter:description" content="Admin-only console. Read-only view of tenants, usage, audit feed, compile jobs, system health.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="stylesheet" href="/surface-polish.css">
 </head>
@@ -152,13 +152,13 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -171,7 +171,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -439,7 +439,7 @@
 <footer class="site">
  <div class="wrap" style="max-width: 1180px;">
  <div class="footer-tag">
- <span>kolm.ai admin &middot; read-only &middot; founder access</span>
+ <span>kolm.ai admin &middot; read-only &middot; admin access</span>
  </div>
  </div>
 </footer>
@@ -464,7 +464,7 @@
  }
 
  function fmtTime(s) {
- if (!s) return '—';
+ if (!s) return '-';
  try {
  var d = new Date(s);
  var now = new Date();
@@ -477,8 +477,8 @@
  } catch (e) { return s; }
  }
  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
- function fmtBytes(n) { if (!n) return '—'; var u = ['B','KB','MB','GB']; var i = 0; while (n >= 1024 && i < u.length-1) { n /= 1024; i++; } return n.toFixed(1) + u[i]; }
- function fmtNum(n) { if (n == null) return '—'; return Number(n).toLocaleString(); }
+ function fmtBytes(n) { if (!n) return '-'; var u = ['B','KB','MB','GB']; var i = 0; while (n >= 1024 && i < u.length-1) { n /= 1024; i++; } return n.toFixed(1) + u[i]; }
+ function fmtNum(n) { if (n == null) return '-'; return Number(n).toLocaleString(); }
 
  function showConsole() { $('aGate').hidden = true; $('aConsole').hidden = false; loadOverview(); }
  function showGate() { $('aGate').hidden = false; $('aConsole').hidden = true; }
@@ -562,7 +562,7 @@
  var pill = '<span class="a-pill a-pill-' + esc(t.plan) + '">' + esc(t.plan) + '</span>';
  return '<tr>' +
  '<td class="mono">' + esc(t.name || t.id.slice(0,12)) + '</td>' +
- '<td class="mono dim">' + esc(t.email || '—') + '</td>' +
+ '<td class="mono dim">' + esc(t.email || '-') + '</td>' +
  '<td>' + pill + '</td>' +
  '<td class="mono">' + fmtNum(t.used) + ' / ' + fmtNum(t.quota) + '</td>' +
  '<td class="mono dim">' + esc(t.auth_provider) + '</td>' +
@@ -580,12 +580,12 @@
  var rows = (j.events || []).map(function (e) {
  var payload = '';
  try { payload = JSON.stringify(e.payload || {}, null, 0); } catch (_) { payload = ''; }
- if (payload.length > 120) payload = payload.slice(0, 117) + '…';
+ if (payload.length > 120) payload = payload.slice(0, 117) + '...';
  return '<tr>' +
  '<td class="mono dim">' + fmtTime(e.at) + '</td>' +
- '<td class="mono">' + esc(e.tenant_name || e.tenant_id || '—') + '</td>' +
- '<td class="mono"><b>' + esc(e.op || '—') + '</b></td>' +
- '<td class="mono dim">' + esc(e.actor || '—') + '</td>' +
+ '<td class="mono">' + esc(e.tenant_name || e.tenant_id || '-') + '</td>' +
+ '<td class="mono"><b>' + esc(e.op || '-') + '</b></td>' +
+ '<td class="mono dim">' + esc(e.actor || '-') + '</td>' +
  '<td class="mono dim">' + esc(payload) + '</td>' +
  '</tr>';
  }).join('');
@@ -601,10 +601,10 @@
  var k = job.k_score && (job.k_score.composite || job.k_score) || null;
  return '<tr>' +
  '<td class="mono dim">' + esc((job.id || '').slice(0, 16)) + '</td>' +
- '<td class="mono">' + esc(job.tenant || '—') + '</td>' +
- '<td class="mono">' + esc((job.task || '—').slice(0, 60)) + '</td>' +
- '<td class="mono ' + statusColor + '">' + esc(job.status || '—') + '</td>' +
- '<td class="mono ok">' + (k != null ? Number(k).toFixed(3) : '—') + '</td>' +
+ '<td class="mono">' + esc(job.tenant || '-') + '</td>' +
+ '<td class="mono">' + esc((job.task || '-').slice(0, 60)) + '</td>' +
+ '<td class="mono ' + statusColor + '">' + esc(job.status || '-') + '</td>' +
+ '<td class="mono ok">' + (k != null ? Number(k).toFixed(3) : '-') + '</td>' +
  '<td class="mono dim">' + fmtTime(job.created_at) + '</td>' +
  '</tr>';
  }).join('');
@@ -614,7 +614,7 @@
 
  var __obsTimer = null;
  function fmtUs(us) {
- if (us == null || !isFinite(us)) return '—';
+ if (us == null || !isFinite(us)) return '-';
  if (us < 1000) return us + ' us';
  if (us < 1000000) return (us / 1000).toFixed(1) + ' ms';
  return (us / 1000000).toFixed(2) + ' s';
@@ -625,7 +625,7 @@
  if (!line || !fill) return;
  var W = 600, H = 80;
  var arr = (points || []).filter(function (n) { return typeof n === 'number' && n >= 0; });
- if (!arr.length) { line.setAttribute('points', ''); fill.setAttribute('points', ''); $('oSparkMax').textContent = 'peak: —'; return; }
+ if (!arr.length) { line.setAttribute('points', ''); fill.setAttribute('points', ''); $('oSparkMax').textContent = 'peak: -'; return; }
  var max = Math.max.apply(null, arr) || 1;
  $('oSparkMax').textContent = 'peak: ' + fmtUs(max);
  var n = arr.length;
@@ -646,7 +646,7 @@
  $('oP95').textContent = fmtUs(j.p95_us);
  $('oP99').textContent = fmtUs(j.p99_us);
  $('oCacheRate').textContent = (j.cache_hit_rate * 100).toFixed(1) + '%';
- $('oKMedian').textContent = (j.k_score_median != null) ? Number(j.k_score_median).toFixed(3) : '—';
+ $('oKMedian').textContent = (j.k_score_median != null) ? Number(j.k_score_median).toFixed(3) : '-';
  $('oActive24h').textContent = fmtNum(j.active_tenants_24h);
  drawSpark(j.sparkline || []);
  var rows = (j.recent || []).slice(0, 50).map(function (inv) {
@@ -654,8 +654,8 @@
  var cache = inv.cache_hit ? '<span class="ok">hit</span>' : '<span class="dim">miss</span>';
  return '<tr>' +
  '<td class="mono dim">' + fmtTime(inv.ts) + '</td>' +
- '<td class="mono">' + esc((inv.tenant || '—').slice(0, 12)) + '</td>' +
- '<td class="mono">' + esc((inv.concept_id || inv.recipe || '—').slice(0, 20)) + '</td>' +
+ '<td class="mono">' + esc((inv.tenant || '-').slice(0, 12)) + '</td>' +
+ '<td class="mono">' + esc((inv.concept_id || inv.recipe || '-').slice(0, 20)) + '</td>' +
  '<td class="mono ok">' + fmtUs(inv.latency_us) + '</td>' +
  '<td class="mono">' + cache + '</td>' +
  '<td class="mono">' + status + '</td>' +
@@ -674,7 +674,7 @@
  $('oP95').textContent = fmtUs(j.p95_us);
  $('oP99').textContent = fmtUs(j.p99_us);
  $('oCacheRate').textContent = (j.cache_hit_rate * 100).toFixed(1) + '%';
- $('oKMedian').textContent = (j.k_score_median != null) ? Number(j.k_score_median).toFixed(3) : '—';
+ $('oKMedian').textContent = (j.k_score_median != null) ? Number(j.k_score_median).toFixed(3) : '-';
  $('oActive24h').textContent = fmtNum(j.active_tenants_24h);
  drawSpark(j.sparkline || []);
  }).catch(function () {});

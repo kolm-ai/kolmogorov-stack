@@ -10,7 +10,7 @@ import urllib.request
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Union
 
 DEFAULT_BASE = "https://kolm.ai"
-USER_AGENT = "kolmogorov-recipe-py/0.2.0"
+USER_AGENT = "kolm-recipe-py/0.2.0"
 
 
 class RecipeError(Exception):
@@ -38,8 +38,7 @@ class RecipeClient:
 
     Args:
         api_key: bearer token (e.g. "ks_..."). If omitted, falls back to
-            ``KOLM_API_KEY``, then ``RECIPE_API_KEY``, then
-            ``KOLMOGOROV_API_KEY`` env vars.
+            ``KOLM_API_KEY`` or ``RECIPE_API_KEY`` env vars.
         base_url: API base URL. Defaults to ``https://kolm.ai``. Can be
             overridden via ``KOLM_BASE_URL`` or ``RECIPE_BASE_URL`` env vars.
         timeout: per-request timeout in seconds. Default 60.
@@ -55,7 +54,6 @@ class RecipeClient:
             api_key
             or os.environ.get("KOLM_API_KEY")
             or os.environ.get("RECIPE_API_KEY")
-            or os.environ.get("KOLMOGOROV_API_KEY")
         )
         self.base_url = (
             base_url

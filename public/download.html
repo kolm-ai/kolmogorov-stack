@@ -5,16 +5,16 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <title>Download · kolm.ai</title>
-<meta name="description" content="Install kolm on macOS, Windows, Linux, or any Node 20+ shell. CLI ships from npm; native apps wrap the same CLI and runtime.">
+<meta name="description" content="Install Kolm on macOS, Windows, Linux, or any Node 20+ shell from the verified source package.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 
 <meta property="og:title" content="Download · kolm.ai">
-<meta property="og:description" content="Install kolm on macOS, Windows, Linux, or any Node 20+ shell. CLI ships from npm; native apps wrap the same CLI and runtime.">
+<meta property="og:description" content="Install Kolm on macOS, Windows, Linux, or any Node 20+ shell from the verified source package.">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Download · kolm.ai">
-<meta name="twitter:description" content="Install kolm on macOS, Windows, Linux, or any Node 20+ shell. CLI ships from npm; native apps wrap the same CLI and runtime.">
+<meta name="twitter:description" content="Install Kolm on macOS, Windows, Linux, or any Node 20+ shell from the verified source package.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/download">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -123,13 +123,13 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -142,7 +142,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -220,7 +220,7 @@
  <div class="wrap">
  <span class="pill"><span class="dot"></span>Download &middot; CLI and desktop wrappers</span>
  <h1>One CLI. <span style="color:var(--good)">Three native wrappers.</span></h1>
- <p class="lede">The kolm CLI is the canonical entry point. The macOS and Windows apps wrap the same binary and the same runtime; the Linux install is a curl-pipe of the same script the CLI uses on every other platform.</p>
+<p class="lede">The Kolm CLI is the canonical entry point today. One source install gives macOS, Windows, and Linux the same gateway, compiler, verifier, and runtime.</p>
  </div>
 </section>
 
@@ -229,33 +229,33 @@
  <div class="install-grid" data-w373="download-grid">
  <div class="install-card" data-w373="dl-cli">
  <h3>CLI &middot; Node 20+</h3>
- <p>The fastest path. Installs the <code style="font-family:var(--mono);background:var(--bg-card);padding:1px 5px;border-radius:4px">kolm</code> binary globally; works on macOS, Windows, and Linux without admin.</p>
- <pre class="cmd" data-w373="dl-cli-cmd"><code>npm i -g github:sneaky-hippo/kolmogorov-stack</code></pre>
- <p style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">canonical install &middot; verify with <code>kolm --version</code> &middot; then <code>kolm login</code></p>
+<p>The fastest path. Installs the <code style="font-family:var(--mono);background:var(--bg-card);padding:1px 5px;border-radius:4px">kolm</code> binary globally from the current source package; works on macOS, Windows, and Linux without admin.</p>
+ <pre class="cmd" data-w373="dl-cli-cmd"><code>npm i -g github:sneaky-hippo/kolm-stack</code></pre>
+<p style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">source install &middot; verify with <code>kolm --version</code> &middot; then <code>kolm login</code></p>
  <div class="links"><a href="/docs/cli">CLI docs &rarr;</a><a href="/quickstart">Quickstart &rarr;</a></div>
  </div>
 
  <div class="install-card" data-w373="dl-mac">
- <h3>macOS app &middot; Apple silicon + Intel</h3>
- <p>A native app that wraps the CLI, the runtime, and the capture inbox. Signed with a Developer ID; first launch asks for the receipt secret only.</p>
- <pre class="cmd" data-w373="dl-mac-cmd"><code>npm i -g github:sneaky-hippo/kolmogorov-stack</code></pre>
- <span class="next" data-w373="dl-mac-next">Mac GUI &middot; ships next week</span>
+<h3>macOS &middot; Apple silicon + Intel</h3>
+<p>Use the same source install on Apple silicon and Intel Macs. Signed desktop packaging requires release artifacts; the CLI path is the supported install today.</p>
+ <pre class="cmd" data-w373="dl-mac-cmd"><code>npm i -g github:sneaky-hippo/kolm-stack</code></pre>
+<span class="next" data-w373="dl-mac-next">Supported today via CLI</span>
  <div class="links"><a href="/docs/install/mac">Notes &rarr;</a></div>
  </div>
 
  <div class="install-card" data-w373="dl-windows">
- <h3>Windows app &middot; x64 + ARM</h3>
- <p>Signed installer that ships the CLI, the runtime, and a tray icon for the capture inbox. Uses your existing Node if present, otherwise installs a private copy.</p>
- <pre class="cmd" data-w373="dl-win-cmd"><code>npm i -g github:sneaky-hippo/kolmogorov-stack</code></pre>
- <span class="next" data-w373="dl-win-next">Windows GUI &middot; ships next week</span>
+<h3>Windows &middot; x64 + ARM</h3>
+<p>Use the same source install in PowerShell with Node 20+. Signed installer channels require release artifacts; the CLI path is the supported install today.</p>
+ <pre class="cmd" data-w373="dl-win-cmd"><code>npm i -g github:sneaky-hippo/kolm-stack</code></pre>
+<span class="next" data-w373="dl-win-next">Supported today via CLI</span>
  <div class="links"><a href="/docs/install/windows">Notes &rarr;</a></div>
  </div>
 
  <div class="install-card" data-w373="dl-linux">
- <h3>Linux &middot; npm one-liner</h3>
- <p>Installs the CLI and the runtime under <code>~/.kolm</code>. Adds the binary to your shell rc on first run; no root, no systemd unit by default.</p>
- <pre class="cmd" data-w373="dl-linux-cmd"><code>npm i -g github:sneaky-hippo/kolmogorov-stack</code></pre>
- <p style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">canonical install &middot; <a href="/docs/install/linux" style="color:var(--accent)">/docs/install/linux</a></p>
+<h3>Linux &middot; source one-liner</h3>
+<p>Installs the CLI and runtime under <code>~/.kolm</code>. No root and no systemd unit by default.</p>
+ <pre class="cmd" data-w373="dl-linux-cmd"><code>npm i -g github:sneaky-hippo/kolm-stack</code></pre>
+<p style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">source install &middot; <a href="/docs/install/linux" style="color:var(--accent)">/docs/install/linux</a></p>
  <div class="links"><a href="/docs/install/linux">Linux notes &rarr;</a><a href="/airgap">Air-gap install &rarr;</a></div>
  </div>
  </div>

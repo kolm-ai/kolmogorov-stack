@@ -239,7 +239,7 @@ body {
 }
 
 [data-theme="light"] {
- --kolm-bg-deep: #f6f1e7;
+ --kolm-bg-deep: #f7f4ec;
  --kolm-bg-soft: #ffffff;
  --kolm-ink-strong: #111418;
  --kolm-ink-soft: #323a3f;
@@ -273,7 +273,11 @@ nav.top .brand {
 .site-nav a,
 nav.top .nav-links a {
  position: relative !important;
- border-bottom: 0 !important;
+ border: 1px solid transparent !important;
+ border-bottom: 1px solid transparent !important;
+ border-radius: 999px !important;
+ padding: 0 12px !important;
+ min-height: 44px !important;
  color: var(--kolm-ink-muted) !important;
  font-family: var(--sans, system-ui, sans-serif) !important;
  font-size: 12.5px !important;
@@ -284,17 +288,8 @@ nav.top .nav-links a {
 .site-nav .nav-item > a.nav-top::after,
 .site-nav > a::after,
 nav.top .nav-links a::after {
- content: "" !important;
- position: absolute !important;
- left: 8px !important;
- right: 8px !important;
- bottom: 7px !important;
- height: 1px !important;
- transform: scaleX(0) !important;
- transform-origin: center !important;
- background: linear-gradient(90deg, transparent, var(--kolm-teal), transparent) !important;
- opacity: 0 !important;
- transition: transform 150ms var(--kolm-ease), opacity 150ms var(--kolm-ease) !important;
+ content: none !important;
+ display: none !important;
 }
 
 .site-nav .nav-item > a.nav-top:hover,
@@ -304,6 +299,8 @@ nav.top .nav-links a::after {
 nav.top .nav-links a:hover,
 nav.top .nav-links a.active {
  color: var(--kolm-ink-strong) !important;
+ background: rgba(114,231,205,0.08) !important;
+ border-color: rgba(114,231,205,0.20) !important;
  text-decoration: none !important;
 }
 
@@ -313,8 +310,21 @@ nav.top .nav-links a.active {
 .site-nav > a.active::after,
 nav.top .nav-links a:hover::after,
 nav.top .nav-links a.active::after {
- transform: scaleX(1) !important;
- opacity: 1 !important;
+ content: none !important;
+ display: none !important;
+ transform: none !important;
+ opacity: 0 !important;
+}
+
+[data-theme="light"] .site-nav .nav-item > a.nav-top:hover,
+[data-theme="light"] .site-nav .nav-item > a.nav-top.active,
+[data-theme="light"] .site-nav a:hover,
+[data-theme="light"] .site-nav a.active,
+[data-theme="light"] nav.top .nav-links a:hover,
+[data-theme="light"] nav.top .nav-links a.active {
+ background: rgba(6,116,95,0.08) !important;
+ border-color: rgba(6,116,95,0.18) !important;
+ color: #111418 !important;
 }
 
 .site-nav .mega-menu {
@@ -453,7 +463,7 @@ body:has(#acct-loaded) {
 .page-main:has(#acct-loaded) .page-head h1 {
  font-size: clamp(42px, 5vw, 72px) !important;
  line-height: 0.98 !important;
- letter-spacing: -0.02em !important;
+ letter-spacing: 0 !important;
  margin-bottom: 10px !important;
 }
 
@@ -3714,8 +3724,40 @@ html.kolm-sota-ui-v560 body.kolm-account-surface :where(#account-sidebar a[aria-
   grid-template-columns: 1fr !important;
  }
 
+ html.kolm-sota-ui-v560 body.kolm-account-surface :where(.kolm-account-command) {
+  gap: 10px !important;
+  margin-top: 18px !important;
+  padding-top: 0 !important;
+ }
+
  html.kolm-sota-ui-v560 body.kolm-account-surface :where(.kac-copy) {
   min-height: auto !important;
+  padding: 20px !important;
+ }
+
+ html.kolm-sota-ui-v560 body.kolm-account-surface :where(.kac-copy h1) {
+  max-width: none !important;
+  font-size: clamp(32px, 10vw, 42px) !important;
+ }
+
+ html.kolm-sota-ui-v560 body.kolm-account-surface :where(.kac-console) {
+  min-height: auto !important;
+ }
+
+ html.kolm-sota-ui-v560 body.kolm-account-surface :where(.kac-steps, .kac-matrix) {
+  display: flex !important;
+  grid-template-columns: none !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scroll-snap-type: x mandatory !important;
+  -webkit-overflow-scrolling: touch !important;
+ }
+
+ html.kolm-sota-ui-v560 body.kolm-account-surface :where(.kac-steps a, .kac-matrix a) {
+  flex: 0 0 calc((100% - 2px) / 3) !important;
+  min-width: calc((100% - 2px) / 3) !important;
+  min-height: 88px !important;
+  scroll-snap-align: start !important;
  }
 
  html.kolm-sota-ui-v560 :where(.plans-header h2) {
@@ -4012,5 +4054,249 @@ html.kolm-sota-ui-v567 :where(.kolm-surface-media .ksm-stats) {
 @media (max-width: 560px) {
  html.kolm-sota-ui-v567 :where(.kolm-surface-media .ksm-flow) {
   grid-template-columns: 1fr !important;
+ }
+}
+
+/* V573: final homepage first-screen order and hidden-state guard.
+   Shared button rules use display with !important, so native [hidden] must
+   be reasserted. The CTA now appears before the product cards, and provider
+   chips move after the explanation instead of crowding the headline. */
+:where([hidden]) {
+ display: none !important;
+}
+
+html.kolm-sota-ui-v565 body.kolm-home-sota .home-hero-left .kolm-hero-copy {
+ display: flex !important;
+ flex-direction: column !important;
+}
+
+html.kolm-sota-ui-v565 body.kolm-home-sota .home-hero-left .w271-seo-claim {
+ order: 1 !important;
+}
+
+html.kolm-sota-ui-v565 body.kolm-home-sota .home-hero-left h1 {
+ order: 2 !important;
+}
+
+html.kolm-sota-ui-v565 body.kolm-home-sota .home-hero-left .w373-lede {
+ order: 3 !important;
+}
+
+html.kolm-sota-ui-v565 body.kolm-home-sota .home-hero-left .w271-cta-stack {
+ order: 4 !important;
+ margin-top: 18px !important;
+}
+
+html.kolm-sota-ui-v565 body.kolm-home-sota .home-hero-left .kolm-hero-paths {
+ order: 5 !important;
+ margin-top: 22px !important;
+}
+
+html.kolm-sota-ui-v565 body.kolm-home-sota .home-hero-left .hero-quant {
+ order: 6 !important;
+ margin-top: 18px !important;
+}
+
+html.kolm-sota-ui-v565 body.kolm-home-sota .home-hero-left .hero-artifact {
+ order: 7 !important;
+ margin-top: 10px !important;
+}
+
+html.kolm-sota-ui-v565 body.kolm-home-sota .home-hero-left .hero-platforms {
+ order: 8 !important;
+ margin-top: 16px !important;
+}
+
+html.kolm-sota-ui-v565 body.kolm-home-sota .home-hero-left .hero-platforms span {
+ min-height: 30px !important;
+}
+
+/* V578: proof media is intentionally a dark product surface in both themes. */
+.hero-proof .proof-shell {
+ color: #faf2e1 !important;
+}
+
+.hero-proof .proof-toolbar,
+.hero-proof .proof-workspace {
+ position: relative;
+ z-index: 1;
+}
+
+.hero-proof .proof-title,
+.hero-proof .proof-card h3,
+.hero-proof .artifact-copy strong,
+.hero-proof .flow-step strong,
+.hero-proof .proof-tags span {
+ color: #faf2e1 !important;
+}
+
+.hero-proof .proof-status,
+.hero-proof .proof-card p,
+.hero-proof .proof-card .label,
+.hero-proof .artifact-title span,
+.hero-proof .artifact-copy small,
+.hero-proof .flow-step small {
+ color: #c2cabf !important;
+}
+
+.hero-proof .artifact-title strong {
+ color: #a7ffe9 !important;
+}
+
+/* V597: product rail clarity.
+   The shared rail must explain the product at a glance: one AI API, captured
+   data, distillation/compile, deployment targets, use cases, and trust. */
+html.kolm-sota-ui-v597 :where(.kolm-product-spine) {
+ max-width: none !important;
+ margin: 0 !important;
+ padding: 10px max(18px, calc((100vw - var(--kolm-page-max, 1180px)) / 2 + var(--kolm-page-pad, 32px))) !important;
+ display: grid !important;
+ grid-template-columns: repeat(6, minmax(126px, 1fr)) !important;
+ gap: 8px !important;
+ border-radius: 0 !important;
+ border-top: 1px solid rgba(255,247,232,0.07) !important;
+ border-bottom: 1px solid rgba(255,247,232,0.12) !important;
+ background:
+  linear-gradient(180deg, rgba(8, 10, 13, 0.96), rgba(8, 10, 13, 0.90)),
+  rgba(8, 10, 13, 0.92) !important;
+ overflow-x: auto !important;
+ overflow-y: hidden !important;
+ scrollbar-width: none !important;
+}
+
+html.kolm-sota-ui-v597 :where(.kolm-product-spine::-webkit-scrollbar) {
+ display: none !important;
+}
+
+html.kolm-sota-ui-v597 :where(.kolm-product-spine a) {
+ min-width: 0 !important;
+ min-height: 58px !important;
+ display: grid !important;
+ grid-template-columns: 28px 1fr !important;
+ grid-template-rows: auto auto !important;
+ align-items: center !important;
+ gap: 2px 9px !important;
+ padding: 9px 10px !important;
+ border: 1px solid rgba(255,247,232,0.11) !important;
+ border-radius: 8px !important;
+ background: rgba(255,255,255,0.026) !important;
+ color: var(--kolm-ink-1, #d8dfd6) !important;
+ text-align: left !important;
+ scroll-snap-align: start !important;
+}
+
+html.kolm-sota-ui-v597 :where(.kolm-product-spine a span) {
+ grid-row: 1 / span 2 !important;
+ width: 24px !important;
+ height: 24px !important;
+ min-width: 24px !important;
+ display: inline-flex !important;
+ align-items: center !important;
+ justify-content: center !important;
+ border-radius: 7px !important;
+ background: rgba(126,240,210,0.11) !important;
+ color: var(--kolm-green, #7ef0d2) !important;
+ font: 700 10px/1 ui-monospace, "SF Mono", Menlo, Consolas, monospace !important;
+ letter-spacing: 0 !important;
+}
+
+html.kolm-sota-ui-v597 :where(.kolm-product-spine a b) {
+ color: var(--kolm-ink-0, #faf2e1) !important;
+ font-size: 13px !important;
+ line-height: 1.12 !important;
+ font-weight: 720 !important;
+ letter-spacing: 0 !important;
+}
+
+html.kolm-sota-ui-v597 :where(.kolm-product-spine a em) {
+ display: block !important;
+ color: var(--kolm-ink-3, #8d978f) !important;
+ font-style: normal !important;
+ font-size: 10.5px !important;
+ line-height: 1.18 !important;
+ white-space: normal !important;
+ overflow-wrap: normal !important;
+ word-break: normal !important;
+}
+
+html.kolm-sota-ui-v597 :where(.kolm-product-spine a[aria-current="page"],
+.kolm-product-spine a:hover,
+.kolm-product-spine a:focus-visible) {
+ border-color: rgba(126,240,210,0.34) !important;
+ background:
+  linear-gradient(135deg, rgba(126,240,210,0.13), rgba(255,206,125,0.04)),
+  rgba(255,255,255,0.045) !important;
+ color: var(--kolm-ink-0, #faf2e1) !important;
+ text-decoration: none !important;
+}
+
+html.kolm-sota-ui-v597 :where(.kolm-product-spine a[aria-current="page"] em,
+.kolm-product-spine a:hover em,
+.kolm-product-spine a:focus-visible em) {
+ color: var(--kolm-ink-2, #c2cabf) !important;
+}
+
+[data-theme="light"].kolm-sota-ui-v597 :where(.kolm-product-spine) {
+ background: rgba(247,244,236,0.94) !important;
+ border-color: rgba(17,19,21,0.10) !important;
+}
+
+[data-theme="light"].kolm-sota-ui-v597 :where(.kolm-product-spine a) {
+ background: rgba(255,255,255,0.78) !important;
+ border-color: rgba(17,19,21,0.12) !important;
+ color: #354039 !important;
+ box-shadow: none !important;
+}
+
+[data-theme="light"].kolm-sota-ui-v597 :where(.kolm-product-spine a b) {
+ color: #111315 !important;
+}
+
+[data-theme="light"].kolm-sota-ui-v597 :where(.kolm-product-spine a em) {
+ color: #4b5550 !important;
+}
+
+[data-theme="light"].kolm-sota-ui-v597 :where(.kolm-product-spine a[aria-current="page"],
+.kolm-product-spine a:hover,
+.kolm-product-spine a:focus-visible) {
+ background: rgba(8,127,104,0.08) !important;
+ border-color: rgba(8,127,104,0.22) !important;
+ color: #06382e !important;
+}
+
+@media (max-width: 920px) {
+ html.kolm-sota-ui-v597 :where(.kolm-product-spine) {
+  display: flex !important;
+  grid-template-columns: none !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  padding: 9px 14px !important;
+  scroll-snap-type: x proximity !important;
+ }
+
+ html.kolm-sota-ui-v597 :where(.kolm-product-spine a) {
+  flex: 0 0 148px !important;
+  width: 148px !important;
+ }
+}
+
+@media (max-width: 560px) {
+ html.kolm-sota-ui-v597 :where(.kolm-product-spine) {
+  margin: 0 !important;
+  padding: 8px 12px !important;
+ }
+
+ html.kolm-sota-ui-v597 :where(.kolm-product-spine a) {
+  flex-basis: 142px !important;
+  width: 142px !important;
+  min-height: 56px !important;
+ }
+
+ html.kolm-sota-ui-v597 :where(.kolm-product-spine a b) {
+  font-size: 12.5px !important;
+ }
+
+ html.kolm-sota-ui-v597 :where(.kolm-product-spine a em) {
+  font-size: 10px !important;
  }
 }

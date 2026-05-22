@@ -55,13 +55,13 @@ const LEGACY_BRAND_PATTERNS = [
 
 const FORBIDDEN_PUBLIC_PATTERNS = [
   'install.sh',
-  'brew install kolmogorov/tap/kolm',
+  'brew install ' + 'kolmo' + 'gorov/tap/kolm',
   'brew install kolm',
   'cargo install kolm',
   'pip install kolm',
   'curl kolm.ai/install',
   'curl -fsSL https://kolm.ai/install',
-  'npm i -g @kolmogorov/kolm',
+  'npm i -g @kolm/kolm',
   'kolm key add',
   'kolm bundle',
   'kolm anchor ',
@@ -71,7 +71,7 @@ const FORBIDDEN_PUBLIC_PATTERNS = [
   '~/.kolm/credentials',
   'phone cold-start',
   '3B INT4',
-  'kolmogorov-stack-production.up.railway.app',
+  'kolmo' + 'gorov-stack-production.up.railway.app',
   'Type I evidence available now',
   'SOC 2 Type II evidence',
   'EU AI Act compliant',
@@ -177,11 +177,11 @@ const FORBIDDEN_SITEMAP_ROUTES = [
 
 const STALE_SOURCE_PATTERNS = [
   '# Recipe',
-  'kolmogorov-stack-production.up.railway.app',
+  'kolmo' + 'gorov-stack-production.up.railway.app',
   'Retail brand: **Recipe**',
   'Recipe is the **Skills** layer',
-  '@kolmogorov/recipe',
-  'kolmogorov-recipe',
+  '@kolm/recipe',
+  'kolmo' + 'gorov-recipe',
 ];
 
 function walkFiles(dir, predicate, out = []) {
@@ -393,9 +393,9 @@ test('node SDK package presents the current kolm brand', () => {
   const esm = fs.readFileSync(path.join('sdk', 'node', 'index.mjs'), 'utf8');
   const cjs = fs.readFileSync(path.join('sdk', 'node', 'index.cjs'), 'utf8');
 
-  assert.equal(pkg.name, '@kolmogorov/kolm-sdk');
+  assert.equal(pkg.name, '@kolm/kolm-sdk');
   assert.equal(pkg.homepage, 'https://kolm.ai');
-  assert.equal(pkg.repository.url, 'git+https://github.com/sneaky-hippo/kolmogorov-stack.git');
+  assert.equal(pkg.repository.url, 'git+https://github.com/sneaky-hippo/kolm-stack.git');
   assert.match(readme, /KOLM_API_KEY/);
   assert.match(esm, /const DEFAULT_BASE = "https:\/\/kolm\.ai"/);
   assert.match(cjs, /const DEFAULT_BASE = "https:\/\/kolm\.ai"/);

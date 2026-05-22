@@ -41,7 +41,7 @@ test('W454 #1 — workers/media-redact package + redact.mjs exist with expected 
   assert.ok(fs.existsSync(entryPath), 'workers/media-redact/redact.mjs must exist');
 
   const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
-  assert.equal(pkg.name, '@kolmogorov/media-redact-worker', 'worker package name');
+  assert.equal(pkg.name, '@kolm/media-redact-worker', 'worker package name');
   assert.equal(pkg.type, 'module', 'worker is ESM');
   assert.equal(pkg.main, 'redact.mjs', 'worker entrypoint is redact.mjs');
   assert.ok(pkg.bin && pkg.bin['kolm-media-redact-worker'],

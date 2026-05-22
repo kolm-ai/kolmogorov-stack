@@ -26,7 +26,7 @@ export const USER_CONTROL_DIMENSIONS = Object.freeze([
   {
     id: 'storage-plane',
     label: 'Storage plane',
-    options: ['local disk', 'Cloudflare R2', 'S3-compatible', 'AWS S3/KMS', 'Supabase Storage', 'air-gapped export'],
+    options: ['local disk', 'R2-compatible object storage', 'S3-compatible', 'AWS S3/KMS', 'Supabase Storage', 'air-gapped export'],
     required_affordance: 'Artifacts, lake exports, and compliance bundles must be movable between local, cloud, and air-gapped storage.',
   },
   {
@@ -188,7 +188,7 @@ export const PRODUCT_SURFACE_EXPERIENCE = Object.freeze([
     id: 'compute-cloud',
     name: 'Compute And Cloud',
     stage: 'deploy',
-    user_goal: 'Use Kolm even without a GPU by selecting hosted GPU, managed train, BYOC, remote SSH, Cloudflare R2, S3, Supabase, or local compute.',
+    user_goal: 'Use Kolm even without a GPU by selecting R2-compatible object storage, S3-compatible storage, AWS, Supabase, Modal, RunPod, Lambda, Together, or remote SSH.',
     account: ['/account/devices', '/account/storage', '/account/settings'],
     cli: ['kolm cloud readiness --remote --json', 'kolm cloud storage --json', 'kolm cloud storage --provider cloudflare-r2-s3 --smoke --json', 'kolm cloud targets --json', 'kolm cloud deploy-plan --target cloudflare-workers --artifact <id>', 'kolm compute pick --json', 'kolm remote recommend', 'kolm cloud deploy --target aws-nitro --artifact <id>'],
     tui: ['devices', 'storage-sync', 'settings'],
@@ -242,7 +242,7 @@ export const PRODUCT_SURFACE_EXPERIENCE = Object.freeze([
     tui: ['agent-telemetry', 'artifacts', 'connectors'],
     api: ['GET /v1/artifacts', 'GET /v1/agents/stats', 'GET /v1/registry/verified-publishers/policy'],
     customization: ['deployment-mode', 'governance-mode', 'proof-mode'],
-    primary_action: 'Install the verified artifact into the user’s agent harness or registry.',
+    primary_action: 'Install the verified artifact into the user agent harness or registry.',
     empty_state_action: 'Compile with `--as-mcp` or run `kolm serve --mcp` locally.',
     status_fields: ['mcp_tools', 'agent_sessions', 'run_log_count', 'published_artifacts'],
     evidence_paths: ['services/mcp/server.js', 'src/repo-codegraph.js', 'src/publisher-verification.js', 'cli/kolm.js', 'public/account/agent-telemetry.html'],

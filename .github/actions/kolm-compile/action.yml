@@ -1,6 +1,6 @@
 name: kolm compile
 description: Compile a kolm task into a signed .kolm artifact and upload it as a workflow artifact.
-author: Kolmogorov
+author: Kolm
 
 inputs:
   task:
@@ -41,7 +41,7 @@ runs:
   steps:
     - name: install kolm CLI
       shell: bash
-      run: npm i -g github:sneaky-hippo/kolmogorov-stack
+      run: npm i -g github:sneaky-hippo/kolm-stack
 
     - name: configure
       shell: bash

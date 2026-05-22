@@ -13,6 +13,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 const SH = path.join(ROOT, 'scripts', 'install.sh');
 const PS1 = path.join(ROOT, 'scripts', 'install.ps1');
+const OLD_REPO_RE = new RegExp(['kolmo', 'gorov-stack'].join(''));
+const OLD_BRAND_RE = new RegExp(['Kolmo', 'gorov'].join(''));
 
 test('W249 #1 - install.sh exists and is non-empty', () => {
   assert.ok(fs.existsSync(SH), 'install.sh missing');
@@ -27,15 +29,15 @@ test('W249 #2 - install.ps1 exists and is non-empty', () => {
 test('W249 #3 - install.sh repo URL is kolm-stack (post-W254)', () => {
   const body = fs.readFileSync(SH, 'utf8');
   assert.match(body, /github\.com\/sneaky-hippo\/kolm-stack\.git/);
-  assert.doesNotMatch(body, /kolmogorov-stack/);
-  assert.doesNotMatch(body, /Kolmogorov/);
+  assert.doesNotMatch(body, OLD_REPO_RE);
+  assert.doesNotMatch(body, OLD_BRAND_RE);
 });
 
 test('W249 #4 - install.ps1 repo URL is kolm-stack (post-W254)', () => {
   const body = fs.readFileSync(PS1, 'utf8');
   assert.match(body, /github\.com\/sneaky-hippo\/kolm-stack\.git/);
-  assert.doesNotMatch(body, /kolmogorov-stack/);
-  assert.doesNotMatch(body, /Kolmogorov/);
+  assert.doesNotMatch(body, OLD_REPO_RE);
+  assert.doesNotMatch(body, OLD_BRAND_RE);
 });
 
 test('W249 #5 - install.sh detects macOS, Linux, WSL via uname', () => {

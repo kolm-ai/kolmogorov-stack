@@ -81,13 +81,13 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -100,7 +100,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -183,7 +183,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p>Both produce a <code>.kolm</code>. The difference is the input.</p>
 <ul>
 <li><strong>Distill</strong> reads lake rows and learns from them. The teacher is the prompts-and-responses you already captured. Use this when you have traffic.</li>
-<li><strong>Compile</strong> reads a hand-written spec (rules, prompts, schemas) and produces an artifact without any captured traffic. Use this when you are bootstrapping.</li>
+<li><strong>Compile</strong> reads a hand-written spec (rules, prompts, schemas) and produces an artifact without any captured calls. Use this when you are bootstrapping.</li>
 </ul>
 
 <h2 id="recipe-vs-specialist">Recipe vs specialist</h2>

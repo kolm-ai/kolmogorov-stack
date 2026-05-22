@@ -351,6 +351,10 @@
       "description": "Runtime"
     },
     {
+      "name": "scim",
+      "description": "Scim"
+    },
+    {
       "name": "search",
       "description": "Search"
     },
@@ -940,6 +944,33 @@
         }
       }
     },
+    "/v1/account/saml/metadata": {
+      "get": {
+        "tags": [
+          "account"
+        ],
+        "operationId": "getV1AccountSamlMetadata",
+        "summary": "SP metadata is a static document an IdP fetches at federation-config",
+        "description": "SP metadata is a static document an IdP fetches at federation-config time. It does NOT depend on entitlement (publishing the SP entity ID is fine even for tenants who can't yet bind to it).",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/account/settings": {
       "get": {
         "tags": [
@@ -990,6 +1021,60 @@
           }
         },
         "description": "Account settings update - persists whitelisted tenant settings and audits changed fields."
+      }
+    },
+    "/v1/account/sso/configure": {
+      "post": {
+        "tags": [
+          "account"
+        ],
+        "operationId": "postV1AccountSsoConfigure",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/account/sso/status": {
+      "get": {
+        "tags": [
+          "account"
+        ],
+        "operationId": "getV1AccountSsoStatus",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
       }
     },
     "/v1/admin/audit": {
@@ -1214,8 +1299,8 @@
           "admin"
         ],
         "operationId": "getV1AdminWaitlist",
-        "summary": "Admin waitlist list - returns all waitlist rows for founder triage.",
-        "description": "Admin waitlist list - returns all waitlist rows for founder triage.",
+        "summary": "Admin waitlist list - returns all waitlist rows for admin triage.",
+        "description": "Admin waitlist list - returns all waitlist rows for admin triage.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -3671,7 +3756,7 @@
           "datasets"
         ],
         "operationId": "postV1Datasets",
-        "summary": "Dataset create - builds a tenant-stamped dataset from a namespace of captured events.",
+        "summary": "Dataset create - builds a tenant-stamped dataset from a namespace of captured calls.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -3689,7 +3774,7 @@
             "$ref": "#/components/responses/ServerError"
           }
         },
-        "description": "Dataset create - builds a tenant-stamped dataset from a namespace of captured events."
+        "description": "Dataset create - builds a tenant-stamped dataset from a namespace of captured calls."
       }
     },
     "/v1/datasets/{id}": {
@@ -7922,6 +8007,33 @@
         }
       }
     },
+    "/v1/product/graph": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "operationId": "getV1ProductGraph",
+        "summary": "Product graph - public, secret-safe, generated from the route-surface,",
+        "description": "Product graph - public, secret-safe, generated from the route-surface, journey, readiness, and experience contracts. This is the canonical machine-readable map for account UI, CLI/TUI parity, docs, and release audits.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/public/concepts": {
       "get": {
         "tags": [
@@ -9061,6 +9173,85 @@
           }
         },
         "description": "Runtime replacement stats - summarizes replacement rate, savings, and spend over a window."
+      }
+    },
+    "/v1/scim/v2/ServiceProviderConfig": {
+      "get": {
+        "tags": [
+          "scim"
+        ],
+        "operationId": "getV1ScimV2ServiceProviderConfig",
+        "summary": "SCIM 2.0 Service Provider Configuration – RFC 7644 §5. IdPs read this",
+        "description": "SCIM 2.0 Service Provider Configuration – RFC 7644 §5. IdPs read this to discover what SCIM operations the SP supports. Empty/false flags are honest signals to the IdP that bulk/patch/etag are not yet implemented.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/scim/v2/Users": {
+      "get": {
+        "tags": [
+          "scim"
+        ],
+        "operationId": "getV1ScimV2Users",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "scim"
+        ],
+        "operationId": "postV1ScimV2Users",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
       }
     },
     "/v1/search": {

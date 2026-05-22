@@ -11,7 +11,7 @@
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta name="author" content="Kolmogorov">
+<meta name="author" content="Kolm">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm">
 <meta property="og:title" content="Rent vs. buy compute: API bill into local student · kolm.ai">
@@ -32,8 +32,8 @@
  {"@type": "TechArticle",
  "headline": "Rent vs. buy compute - turn your frontier API bill into a local student artifact",
  "description": "Every dollar you spend on Anthropic or OpenAI can compound into a local student artifact you keep forever. The math, the mechanism, the legal frame, and a worked example.",
- "author": { "@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai" },
- "publisher": { "@type": "Organization", "name": "Kolmogorov", "logo": { "@type": "ImageObject", "url": "https://kolm.ai/favicon.svg" } },
+ "author": { "@type": "Organization", "name": "Kolm", "url": "https://kolm.ai" },
+ "publisher": { "@type": "Organization", "name": "Kolm", "logo": { "@type": "ImageObject", "url": "https://kolm.ai/favicon.svg" } },
  "datePublished": "2026-05-09",
  "dateModified": "2026-05-09",
  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://kolm.ai/articles/rent-vs-buy-compute" },
@@ -180,13 +180,13 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -199,7 +199,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -278,7 +278,7 @@
  <span class="pill"><span class="dot"></span>Engineering &middot; 2026-05-09 &middot; 12 min read</span>
  <h1>Rent vs. buy compute. <span class="tone">Keep the artifact.</span></h1>
 <p class="lede">Frontier API spend rents intelligence. Route calls through <code>kolm capture</code> and the same spend also creates verified training data that can compile into a signed local <code>.kolm</code> artifact.</p>
- <div class="meta"><span><b>By</b>&nbsp;Kolmogorov</span><span><b>Tag</b>&nbsp;capture &middot; distill &middot; on-device</span></div>
+ <div class="meta"><span><b>By</b>&nbsp;Kolm</span><span><b>Tag</b>&nbsp;capture &middot; distill &middot; on-device</span></div>
  </div>
 </section>
 
@@ -412,7 +412,7 @@ kolm inspect ~/.kolm/artifacts/<span class="arg">prod-tickets.kolm</span></pre>
  <h2 id="starthere">Start here.</h2>
  <p>Two ways in. <b>Smallest commitment:</b> install the CLI, point one of your existing services at the capture endpoint for a week, run <code>kolm capture status</code> to see what your verified pair count looks like. There is no charge for capture under a hundred thousand pairs per month. <b>Larger commitment:</b> book a thirty-minute design-partner call and we will scope a namespace plan with your team, including the bring-your-own-VPC option if your data residency requires it.</p>
 
- <pre>npm i -g github:sneaky-hippo/kolmogorov-stack
+ <pre>npm i -g github:sneaky-hippo/kolm-stack
 kolm config base <span class="arg">https://kolm.ai</span>
 kolm login
 

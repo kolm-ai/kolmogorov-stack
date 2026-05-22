@@ -90,19 +90,20 @@ test('W260 #3 - index.html keeps the W220 Capture/Compile/Ship/Audit lede beats 
   assert.match(INDEX, /data-w260="lede-beats"/, 'data-w260="lede-beats" marker preserved on the moved element');
 });
 
-test('W260 #4 - index.html v0.2 strip names all four CLI verbs', () => {
-  // The v0.2 section must list moe compose, tokenize, extract, doc check.
-  assert.match(INDEX, /kolm moe compose/, 'v0.2 strip names moe compose');
-  assert.match(INDEX, /kolm tokenize/, 'v0.2 strip names tokenize');
-  assert.match(INDEX, /kolm extract/, 'v0.2 strip names extract');
-  assert.match(INDEX, /kolm doc check/, 'v0.2 strip names doc check');
+test('W260 #4 - index.html hero names the three current product jobs', () => {
+  const heroIdx = INDEX.search(/data-w373="hero-h1"/i);
+  const HERO = INDEX.slice(heroIdx, heroIdx + 2500);
+  assert.match(HERO, /Route any model/i, 'hero names gateway routing');
+  assert.match(HERO, /Distill specialists/i, 'hero names distillation');
+  assert.match(HERO, /Run on any device/i, 'hero names runtime/device deployment');
+  assert.match(HERO, /OpenAI-compatible gateway/i, 'hero proof names the gateway surface');
 });
 
-test('W260 #5 - index.html v0.2 strip carries the v0.2 framing (header + heading)', () => {
-  assert.match(INDEX, /What (ships in )?v0\.2 (today\.|includes\.)/i,
-    'v0.2 section heading preserved');
-  assert.match(INDEX, /aria-label="what ships in v0\.2"/,
-    'v0.2 section aria-label preserved');
+test('W260 #5 - index.html does not return to stale v0.2 launch framing', () => {
+  assert.doesNotMatch(INDEX, /What (ships in )?v0\.2 (today\.|includes\.)/i,
+    'stale v0.2 section heading must stay retired');
+  assert.doesNotMatch(INDEX, /aria-label="what ships in v0\.2"/,
+    'stale v0.2 section aria-label must stay retired');
 });
 
 test('W260 #6 - index.html keeps a concrete .kolm artifact in hero (W220 anchor) [W405: artifact-agnostic]', () => {
@@ -167,11 +168,15 @@ test('W260 #11 - pricing.html Enterprise tier card adds the BAA + self-hosted no
   assert.match(block, /self-hosted/i, 'Enterprise tier must name self-hosted option');
 });
 
-test('W260 #12 - pricing.html keeps existing six-tier grid (Developer/Pro/Business/Enterprise/Starter/Teams)', () => {
-  // Regression: the existing tier names must still be present.
-  for (const tier of ['Developer', 'Pro', 'Business', 'Enterprise', 'Starter', 'Teams']) {
+test('W260 #12 - pricing.html keeps current Free / Pro / Team / Enterprise tier vocabulary', () => {
+  // Regression: current public pricing vocabulary must not drift back to legacy tier names.
+  for (const tier of ['Free', 'Pro', 'Team', 'Enterprise']) {
     const re = new RegExp(`<div class="tag"[^>]*>${tier}</div>`);
     assert.match(PRICING, re, `${tier} tier card must remain`);
+  }
+  for (const retired of ['Developer', 'Starter', 'Teams', 'Business']) {
+    const re = new RegExp(`<div class="tag"[^>]*>${retired}</div>`);
+    assert.doesNotMatch(PRICING, re, `${retired} retired tier card must not return`);
   }
 });
 
@@ -253,22 +258,23 @@ test('W260 #21 - enterprise.html lands the external review callout block', () =>
     'external review callout block must be present');
 });
 
-test('W260 #22 - enterprise.html external review quotes "8.4 / 10" and "category-king"', () => {
+test('W260 #22 - enterprise.html external review frames procurement fit without hype metrics', () => {
   const m = ENTERPRISE.match(/data-w260="external-review"[\s\S]{0,1500}/);
   assert.ok(m, 'external review block must be findable');
   const block = m[0];
-  assert.match(block, /8\.4\s*\/\s*10/, 'block must quote "8.4 / 10"');
-  assert.match(block, /[Cc]ategory.king/i, 'block must quote "category-king"');
+  assert.match(block, /procurement fit/i, 'block must frame enterprise procurement fit');
+  assert.match(block, /route providers/i, 'block must name provider routing');
+  assert.match(block, /distill approved work/i, 'block must name distillation');
+  assert.match(block, /export proof/i, 'block must name proof export');
+  assert.doesNotMatch(block, /8\.4\s*\/\s*10|category.king/i, 'hype metrics must not return');
 });
 
-test('W260 #23 - enterprise.html external review attributed as "External AI infra review, May 2026"', () => {
+test('W260 #23 - enterprise.html external review is attributed to architecture scope', () => {
   const m = ENTERPRISE.match(/data-w260="external-review"[\s\S]{0,1500}/);
   assert.ok(m, 'external review block must be findable');
   const block = m[0];
-  assert.match(block, /External AI infra review/i,
-    'block must attribute as External AI infra review');
-  assert.match(block, /May 2026/i,
-    'block must attribute as May 2026');
+  assert.match(block, /Enterprise architecture review scope/i,
+    'block must attribute to architecture review scope');
 });
 
 test('W260 #24 - enterprise.html keeps the W220 / W228 anchors (live demo + BAA link)', () => {
@@ -280,11 +286,11 @@ test('W260 #24 - enterprise.html keeps the W220 / W228 anchors (live demo + BAA 
     'W228 brand-disambig link preserved');
 });
 
-test('W260 #25 - enterprise.html title still ends with " · kolm.ai" (W228 anchor)', () => {
+test('W260 #25 - enterprise.html title still ends with kolm.ai (W228 anchor)', () => {
   const m = ENTERPRISE.match(/<title>([^<]*)<\/title>/i);
   assert.ok(m, 'title present');
-  assert.match(m[1].trim(), /[·|]\s*kolm\.ai\s*$/i,
-    'enterprise.html title must end with " · kolm.ai"');
+  assert.match(m[1].trim(), /(?:[·|-]|\|)\s*kolm\.ai\s*$/i,
+    'enterprise.html title must end with kolm.ai');
 });
 
 test('W260 #26 - enterprise.html em-dash budget <= 1 (W205 lock)', () => {
@@ -301,10 +307,10 @@ test('W260 #27 - sw.js CACHE slug bumped to wave-floor >= 260', () => {
   // the new HTML pushes through. Slug name is not pinned because later
   // waves are allowed to bump the slug for their own reasons; we only
   // require the cache key to have moved.
-  const m = SW.match(/const\s+CACHE\s*=\s*'kolm-v7-2026-05-\d+-wave(\d+)-([a-z0-9-]+)'/);
-  assert.ok(m, 'CACHE slug must follow kolm-v7-YYYY-MM-DD-waveN-slug pattern');
-  const waveN = parseInt(m[1], 10);
-  assert.ok(waveN >= 260, `sw.js wave-slug must be >= 260 (saw ${waveN})`);
+  const m = SW.match(/const\s+CACHE\s*=\s*'kolm-v(\d+)-2026-05-\d+-frontend-v(\d+)-([a-z0-9-]+)'/);
+  assert.ok(m, 'CACHE slug must follow kolm-vN-YYYY-MM-DD-frontend-vN-slug pattern');
+  const versionN = parseInt(m[2], 10);
+  assert.ok(versionN >= 260, `sw.js frontend version must be >= 260 (saw ${versionN})`);
 });
 
 // =====================================================================

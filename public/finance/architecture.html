@@ -88,13 +88,13 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -107,7 +107,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -259,7 +259,7 @@
  <div class="eyebrow"><span class="num">03</span><span>Day-zero deploy in a bank</span></div>
 
  <ol class="steps">
- <li><b>Vendor onboarding (asynchronously, no sales call)</b><span>InfoSec questionnaire: paste our <a href="/security" style="color:var(--good)">/security</a>, <a href="/subprocessors" style="color:var(--good)">/subprocessors</a>, <a href="/soc2" style="color:var(--good)">/soc2</a> URLs into their procurement portal. SOC 2 Type I attestation available.</span></li>
+ <li><b>Vendor onboarding (asynchronously, no sales call)</b><span>InfoSec questionnaire: paste our <a href="/security" style="color:var(--good)">/security</a>, <a href="/subprocessors" style="color:var(--good)">/subprocessors</a>, <a href="/soc2" style="color:var(--good)">/soc2</a> URLs into their procurement portal. SOC 2 control evidence is available; certification remains auditor-gated.</span></li>
  <li><b>Scope the MSA + DPA</b><span>Book the Enterprise review at <a href="/enterprise/inquiry" style="color:var(--good)">/enterprise/inquiry</a>. Optional PCI addendum for processor scope.</span></li>
  <li><b>Deploy the bridge inside the CDE</b><span>Terraform module deploys behind the CDE perimeter. Egress controlled at the SG layer. Heartbeat to kolm.ai is HTTPS, payload-free.</span></li>
  <li><b>Wire FIPS-validated KMS</b><span>HSM-backed CMK (AWS CloudHSM or Azure Key Vault HSM tier). Every receipt signs with the customer key.</span></li>

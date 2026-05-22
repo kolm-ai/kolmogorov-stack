@@ -16,6 +16,21 @@ const VALID_STATUSES = new Set([
   'needs_live_certification',
 ]);
 const VALID_PRIORITIES = new Set(['P0', 'P1', 'P2']);
+const OPEN_STATUSES = new Set([
+  'partial',
+  'needs_public_benchmark_data',
+  'needs_package_release',
+  'needs_external_partner',
+  'needs_live_certification',
+]);
+const CLOSEOUT_FIELDS = [
+  'current_scope',
+  'blocking_condition',
+  'next_wave',
+  'build_or_proof_required',
+  'done_when',
+  'verification',
+];
 
 function fail(msg) {
   console.error('sota-readiness FAIL: ' + msg);
@@ -40,6 +55,7 @@ if (!Array.isArray(doc.surfaces) || doc.surfaces.length === 0) fail('surfaces[] 
 
 const ids = new Set();
 const counts = {};
+const openRequirements = [];
 let requirements = 0;
 
 for (const surface of doc.surfaces || []) {
@@ -57,6 +73,26 @@ for (const surface of doc.surfaces || []) {
     if (!VALID_PRIORITIES.has(req.priority)) fail(`${prefix}: invalid priority ${req.priority}`);
     if (!VALID_STATUSES.has(req.status)) fail(`${prefix}: invalid status ${req.status}`);
     counts[req.status] = (counts[req.status] || 0) + 1;
+    if (OPEN_STATUSES.has(req.status)) {
+      openRequirements.push({ surface: surface.id, id: req.id, status: req.status, priority: req.priority });
+      if (!req.closeout || typeof req.closeout !== 'object' || Array.isArray(req.closeout)) {
+        fail(`${prefix}: open status ${req.status} requires closeout object`);
+      } else {
+        for (const field of CLOSEOUT_FIELDS) {
+          const value = req.closeout[field];
+          if (Array.isArray(value)) {
+            if (!value.length || value.some((entry) => typeof entry !== 'string' || entry.trim().length < 8)) {
+              fail(`${prefix}: closeout.${field} must contain actionable strings`);
+            }
+          } else if (typeof value !== 'string' || value.trim().length < 8) {
+            fail(`${prefix}: closeout.${field} missing/too short`);
+          }
+        }
+        if (!/^W[0-9]+-[a-z0-9-]+$/.test(req.closeout.next_wave || '')) {
+          fail(`${prefix}: closeout.next_wave must be a stable wave id like W565-format-governance`);
+        }
+      }
+    }
     if (!Array.isArray(req.evidence_paths) || req.evidence_paths.length === 0) {
       fail(`${prefix}: evidence_paths[] missing`);
       continue;
@@ -121,7 +157,8 @@ console.log(JSON.stringify({
   surfaces: (doc.surfaces || []).length,
   requirements,
   counts,
+  open_requirements: openRequirements,
   note: openStatuses.length
-    ? 'Some requirements are intentionally marked partial/external/package/benchmark/certification; do not market them as fully shipped.'
+    ? 'Some requirements are intentionally marked partial/external/package/benchmark/certification; every one must carry a closeout contract and must not be marketed as fully shipped.'
     : 'All requirements are marked shipped or implemented.',
 }, null, 2));

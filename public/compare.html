@@ -139,13 +139,13 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -158,7 +158,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -349,7 +349,7 @@
  <td class="partial">PARTIAL</td>
  <td class="yes">YES</td>
  <td class="no">NO</td>
- <td class="kolm"><b>YES &middot; wave 158</b><div class="note">5 vendors × ~6 SKUs (Anthropic/OpenAI/Google/xAI/local) + 13 student bases; check #15 enforces provenance (Q+3b)</div></td>
+ <td class="kolm"><b>YES &middot; wave 158</b><div class="note">5 vendors ? ~6 SKUs (Anthropic/OpenAI/Google/xAI/local) + 13 student bases; check #15 enforces provenance (Q+3b)</div></td>
  </tr>
  <tr>
  <td class="axis">External + adversarial holdouts</td>
@@ -400,7 +400,7 @@
  </table>
  </div>
  <div class="takeaway">
- <p style="margin:0;font-size:14.5px;color:var(--ink-mute)">Every box where every competitor says <b style="color:var(--ink-faint)">NO</b> and kolm says <b>YES</b> is one of the moat axes. <b>Compiled native + signed + frozen-eval-gated + receipt chain + PHI redactor + cross-vendor + portable format</b> is the defensible combination no competitor leads with.</p>
+ <p style="margin:0;font-size:14.5px;color:var(--ink-mute)">Every box where every competitor says <b style="color:var(--ink-faint)">NO</b> and kolm says <b>YES</b> is one of the moat axes. <b>signed + compiled + frozen-eval-gated + receipt chain + PHI redactor + cross-vendor + portable</b> is the defensible combination no competitor leads with.</p>
  </div>
  </div>
 </section>
@@ -412,7 +412,7 @@
  <div class="pair-grid">
  <a class="card" href="/how-vs-lorax"><span class="vt">01 &middot; LoRA serving infra</span><h3>kolm vs LoRAX</h3><p>LoRAX is Apache-2.0 multi-LoRA serving infrastructure. kolm builds the adapter; LoRAX serves it. Complement, not competitor &mdash; the teardown shows the stack with both.</p><span class="go">open teardown &rarr;</span></a>
  <a class="card" href="/how-vs-predibase"><span class="vt">02 &middot; hosted fine-tune + Rubrik</span><h3>kolm vs Predibase</h3><p>Predibase (acquired by Rubrik June 2025) ships hosted LoRAX + agentic governance. kolm ships a portable signed file you mail to a phone. Different problems.</p><span class="go">open teardown &rarr;</span></a>
- <a class="card" href="/how-vs-openpipe"><span class="vt">03 &middot; capture-traffic SDK</span><h3>kolm vs OpenPipe</h3><p>OpenPipe captures your OpenAI traffic to a hosted endpoint. kolm captures the same traffic to seeds.jsonl and compiles a signed artifact you keep. Same input, different output.</p><span class="go">open teardown &rarr;</span></a>
+ <a class="card" href="/how-vs-openpipe"><span class="vt">03 &middot; call-capture SDK</span><h3>kolm vs OpenPipe</h3><p>OpenPipe captures your OpenAI calls to a hosted endpoint. kolm captures the same calls to seeds.jsonl and compiles a signed artifact you keep. Same input, different output.</p><span class="go">open teardown &rarr;</span></a>
  <a class="card" href="/how-vs-diy"><span class="vt">04 &middot; LLaMA-Factory / Unsloth / TRL</span><h3>kolm vs DIY LoRA stack</h3><p>The DIY stack is the foundation kolm builds on. kolm wraps it with the missing pieces: receipt chain, eval gate, redactor, K-score, signed compiled artifact. You can drop into raw DIY at any time.</p><span class="go">open teardown &rarr;</span></a>
  <a class="card" href="/how-vs-hyperscaler"><span class="vt">05 &middot; OpenAI / Anthropic / Vertex / Bedrock</span><h3>kolm vs hyperscaler fine-tune</h3><p>Hyperscaler fine-tuning produces a model that lives in the vendor's API. kolm produces a model you OWN as a file. Air-gap, residency, and exit cost are structural impossibilities for closed-weight tuning.</p><span class="go">open teardown &rarr;</span></a>
  <a class="card" href="/compare/legacy"><span class="vt">06 &middot; legacy axis matrices</span><h3>Older head-to-head matrices</h3><p>Per-vendor axis-by-axis matrices (kolm-vs-openpipe / together / predibase / openai-fine-tune / rag / ollama). Pre-Wave-144 framing; still useful for procurement evaluators.</p><span class="go">open index &rarr;</span></a>

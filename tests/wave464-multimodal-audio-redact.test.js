@@ -44,7 +44,7 @@ test('W464 #1 — workers/multimodal-redact-audio package + redact-audio.mjs exi
   assert.ok(fs.existsSync(entryPath), 'workers/multimodal-redact-audio/redact-audio.mjs must exist');
 
   const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
-  assert.equal(pkg.name, '@kolmogorov/multimodal-redact-audio-worker', 'worker package name');
+  assert.equal(pkg.name, '@kolm/multimodal-redact-audio-worker', 'worker package name');
   assert.equal(pkg.type, 'module', 'worker is ESM');
   assert.equal(pkg.main, 'redact-audio.mjs', 'worker entrypoint is redact-audio.mjs');
   assert.ok(pkg.bin && pkg.bin['kolm-multimodal-redact-audio-worker'],

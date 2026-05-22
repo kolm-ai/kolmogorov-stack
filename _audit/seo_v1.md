@@ -123,7 +123,7 @@ Sitemap: https://kolm.ai/sitemap.xml
 
 One `<script type="application/ld+json">` block, validated to parse cleanly (`JSON.parse` succeeds). Contains `@graph` with 4 entries:
 
-1. **Organization** — name=Kolmogorov, url=https://kolm.ai, logo=https://kolm.ai/aurora.svg
+1. **Organization** — name=Kolm, url=https://kolm.ai, logo=https://kolm.ai/aurora.svg
 2. **WebSite** — name=kolm, description="Ship private AI on every device.", publisher → Organization
 3. **SoftwareApplication** — applicationCategory=DeveloperApplication, operatingSystem covers iOS/Android/Linux/macOS/Windows/Web, three Offer entries (Free $0, Mobile $9, Pro $49)
 4. **FAQPage** — 10 Q&A covering what kolm is, data privacy, .kolm artifacts, recipe/adapter/specialist/bundle terminology, offline use, receipt verification, platform support, privacy guarantee, fine-tune comparison, what the cloud sees

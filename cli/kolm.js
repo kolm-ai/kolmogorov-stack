@@ -1471,7 +1471,7 @@ METHODS
 FLAGS
   --local-worker          REQUIRED. Routes through workers/quantize/quantize.mjs. The
                           root kolm install has no torch / bitsandbytes / auto-gptq deps;
-                          those live in the isolated @kolmogorov/quantize-worker package.
+                          those live in the isolated @kolm/quantize-worker package.
   --doctor                check whether python3 + torch + bitsandbytes are importable.
                           exits 0 when the toolchain is ready, 1 otherwise.
   --in <dir>              source adapter directory (the .kolm artifact + LoRA weights)
@@ -1759,10 +1759,10 @@ USAGE
   kolm sdk doctor [--json]       # check which SDKs are wired in the local repo
 
 LANGUAGES (package name shown is the local manifest identifier, not a publication claim)
-  node      JavaScript / TypeScript      (package: @kolmogorov/kolm-sdk       | source: sdk/node)
+  node      JavaScript / TypeScript      (package: @kolm/kolm-sdk       | source: sdk/node)
   python    Python 3.8+                  (package: kolm; PyPI name occupied   | source: sdk/python)
-  mcp       Model Context Protocol       (package: @kolmogorov/recipe-mcp     | source: sdk/mcp)
-  vscode    VS Code extension            (package: kolmogorov.kolm-vscode     | source: sdk/vscode)
+  mcp       Model Context Protocol       (package: @kolm/recipe-mcp     | source: sdk/mcp)
+  vscode    VS Code extension            (package: kolm.kolm-vscode     | source: sdk/vscode)
   c         C single-header              (no registry; vendor sdk/c/kolm.h + define KOLM_IMPLEMENTATION)
   rust      Rust crate                   (package: kolm                  | source: sdk/rust)
 
@@ -2282,7 +2282,7 @@ NOTES
   Unknown tokens (ones not present in the map) are left as-is so callers
   can detect when the teacher dropped or paraphrased a placeholder.
 `,
-  'chat-tui': `kolm chat-tui - terminal model cockpit for owned AI.
+  'chat-tui': `kolm chat-tui - terminal model cockpit for signed artifacts.
 
 PRODUCT LOOP
   talk to any provider or .kolm artifact, save the session, replay the useful rows,
@@ -2330,6 +2330,7 @@ PRODUCT LOOP
 
 USAGE
   kolm tui                             launch the REPL
+  kolm tui --views [--json] [--closeout]  print the canonical TUI/product surface map
 
 COMMANDS (inside the REPL)
   open <path>                          load an artifact (drag-drop a .kolm into the terminal works)
@@ -2348,14 +2349,20 @@ NOTES
   surfaces: `kolm surfaces - product journey map for users and operators.
 
 USAGE
-  kolm surfaces [--json]
+  kolm surfaces [--json] [--graph] [--readiness] [--closeout]
 
 WHAT IT SHOWS
   - every major product surface and its account pages
   - the CLI commands and TUI views that mirror each surface
   - API routes, customization dimensions, and proof paths
+  - readiness counts and the named closeout waves for anything not final
   - user-control dimensions: provider, compute, runtime, storage, privacy,
     deployment, governance, and verification
+
+FLAGS
+  --graph       include the generated public product graph in JSON output
+  --readiness   print requirement status counts and open readiness items
+  --closeout    print the generated closeout ledger for external/package/benchmark/certification items
 
 WHY IT EXISTS
   This is the operator-readable contract that prevents account, CLI, TUI,
@@ -2555,11 +2562,11 @@ EXAMPLES
   kolm upgrade --json | jq .status # script-friendly
 
 Reads the current version from package.json. Fetches the latest version from
-the canonical install source (github.com/sneaky-hippo/kolmogorov-stack main
+the canonical install source (github.com/sneaky-hippo/kolm-stack main
 branch package.json) with a 5s timeout. If a newer version is available, it
 prints the upgrade command. It does NOT auto-upgrade (too many footguns).
 
-The canonical install is "npm i -g github:sneaky-hippo/kolmogorov-stack", NOT
+The canonical install is "npm i -g github:sneaky-hippo/kolm-stack", NOT
 the unrelated "kolm" package on the public npm registry.
 
 Status values: current, outdated, unknown (network or github unavailable).
@@ -2659,7 +2666,7 @@ USAGE
   kolm connect test {openai|anthropic|openrouter}
 
 EXAMPLES
-  npm install -g github:sneaky-hippo/kolmogorov-stack
+  npm install -g github:sneaky-hippo/kolm-stack
   export OPENAI_API_KEY=sk-...
   kolm connect start --detach
   export OPENAI_BASE_URL=http://127.0.0.1:8787/v1
@@ -2774,7 +2781,7 @@ EXAMPLES
   kolm update --dry-run            # preview only
   kolm update --json | jq .status  # script-friendly
 
-Runs \`npm i -g github:sneaky-hippo/kolmogorov-stack\` against the npm on PATH,
+Runs \`npm i -g github:sneaky-hippo/kolm-stack\` against the npm on PATH,
 streaming its output. On windows we shell through \`cmd /c\` so npm.cmd resolves.
 Exits non-zero if npm fails (usually a perms issue - try sudo or admin shell).
 
@@ -4390,7 +4397,7 @@ function findCuratedTemplate(name) {
   const slug = String(name || '').toLowerCase();
   if (!slug) return null;
   // examples/ lives at <repo>/examples regardless of where the CLI is invoked.
-  // import.meta.url -> .../kolmogorov-stack/cli/kolm.js -> repoRoot is two up.
+  // import.meta.url -> .../kolm-stack/cli/kolm.js -> repoRoot is two up.
   const here = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]):/, '$1:'));
   const repoRoot = path.dirname(here);
   const dir = path.join(repoRoot, 'examples', slug);
@@ -7577,7 +7584,7 @@ async function cmdBenchCompare(args) {
 // point-estimate lift is shipped before the first end-to-end signed run.
 const REPRODUCE_SUITES = {
   'swebench-lite-n150': {
-    image:        'kolmogorov/swebench-reproducer:1.0.0',
+    image:        'kolm/swebench-reproducer:1.0.0',
     default_n:    150,
     default_seed: 42,
     headline:     'Opus-4.7 vs baseline, swebench 4.1.0 evaluator (headline lift pending first signed run)',
@@ -7686,9 +7693,9 @@ async function cmdBenchReproduce(args) {
     console.error('');
     console.error('this image is published as part of the v7.0 launch. if you are seeing this');
     console.error('before the public launch, the image is not yet in the registry. interim:');
-    console.error('  - watch https://github.com/kolmogorov/kolm-bench-reproducer/releases');
-    console.error('  - or build locally from kolmogorov-stack/bench/:');
-    console.error('      git clone https://github.com/kolmogorov/kolmogorov-stack && cd kolmogorov-stack/bench');
+    console.error('  - watch https://github.com/kolm/kolm-bench-reproducer/releases');
+    console.error('  - or build locally from kolm-stack/bench/:');
+    console.error('      git clone https://github.com/kolm/kolm-stack && cd kolm-stack/bench');
     console.error('      docker build -t ' + cfg.image + ' .');
     console.error('  - or run the n=5 smoke locally without docker: kolm bench --reproduce ' + suite + ' --dry-run');
     process.exitCode = 2; return;
@@ -7865,7 +7872,7 @@ async function cmdEject(args) {
   try {
     ({ default: AdmZip } = await import('adm-zip'));
   } catch (e) {
-    const err = new Error('adm-zip not available; reinstall kolm from a fresh global: npm i -g github:sneaky-hippo/kolmogorov-stack');
+    const err = new Error('adm-zip not available; reinstall kolm from a fresh global: npm i -g github:sneaky-hippo/kolm-stack');
     err.exitCode = EXIT.MISSING_PREREQ;
     throw err;
   }
@@ -9083,10 +9090,10 @@ async function cmdHub(args) {
 // registry to have been pushed; `install_registry` stays null until the
 // package is live and verified under Kolm control on its public registry.
 const KOLM_SDKS = [
-  { lang: 'node',   pkg: '@kolmogorov/kolm-sdk',     install_registry: null,                                                     install_source: 'cd sdk/node && npm install && npm pack',         readme: 'sdk/node/README.md',   notes: 'JavaScript / TypeScript; npm package not published yet' },
+  { lang: 'node',   pkg: '@kolm/kolm-sdk',     install_registry: null,                                                     install_source: 'cd sdk/node && npm install && npm pack',         readme: 'sdk/node/README.md',   notes: 'JavaScript / TypeScript; npm package not published yet' },
   { lang: 'python', pkg: 'kolm',                     install_registry: null,                                                     install_source: 'cd sdk/python && pip install -e .',              readme: 'sdk/python/README.md', notes: 'Python 3.8+; PyPI name kolm is occupied by an unrelated project' },
-  { lang: 'mcp',    pkg: '@kolmogorov/recipe-mcp',   install_registry: null,                                                     install_source: 'node sdk/mcp/server.mjs',                        readme: 'sdk/mcp/README.md',    notes: 'Model Context Protocol bridge; registry package not published yet' },
-  { lang: 'vscode', pkg: 'kolmogorov.kolm-vscode',   install_registry: null,                                                     install_source: 'cd sdk/vscode && npm install -g @vscode/vsce && vsce package && code --install-extension kolm-vscode-*.vsix', readme: 'sdk/vscode/README.md', notes: 'VS Code extension; marketplace listing not published yet' },
+  { lang: 'mcp',    pkg: '@kolm/recipe-mcp',   install_registry: null,                                                     install_source: 'node sdk/mcp/server.mjs',                        readme: 'sdk/mcp/README.md',    notes: 'Model Context Protocol bridge; registry package not published yet' },
+  { lang: 'vscode', pkg: 'kolm.kolm-vscode',   install_registry: null,                                                     install_source: 'cd sdk/vscode && npm install -g @vscode/vsce && vsce package && code --install-extension kolm-vscode-*.vsix', readme: 'sdk/vscode/README.md', notes: 'VS Code extension; marketplace listing not published yet' },
   { lang: 'c',      pkg: 'kolm.h',                   install_registry: null,                                                     install_source: 'cp sdk/c/kolm.h <your-project>/  (define KOLM_IMPLEMENTATION in exactly one TU; link -lcurl)', readme: 'sdk/c/README.md',     notes: 'Single-header stb-style; no registry; vendor it' },
   { lang: 'rust',   pkg: 'kolm',                     install_registry: null,                                                     install_source: 'cd sdk/rust && cargo build --release',           readme: 'sdk/rust/README.md',   notes: 'Sync (ureq + native-tls); crates.io publication not verified yet' },
 ];
@@ -18018,19 +18025,40 @@ async function cmdCloud(args) {
 
 async function cmdSurfaces(args) {
   if (maybeHelp('surfaces', args)) return;
+  function bundledJson(rel) {
+    try {
+      return JSON.parse(fs.readFileSync(new URL(rel, import.meta.url), 'utf8'));
+    } catch (e) {
+      return { ok: false, error: 'bundled_json_unavailable', path: rel, detail: String(e && e.message || e) };
+    }
+  }
   const {
     USER_CONTROL_DIMENSIONS,
     listProductExperience,
     tuiViews,
     validateProductExperience,
   } = await import('../src/product-experience.js');
+  const graph = bundledJson('../public/product-graph.json');
+  const closeout = bundledJson('../public/product-readiness-closeout.json');
+  const includeGraph = args.includes('--graph');
+  const includeReadiness = args.includes('--readiness') || args.includes('--closeout') || includeGraph;
+  const includeCloseout = args.includes('--closeout') || includeGraph;
   const out = {
     ok: true,
     contract: validateProductExperience(),
     customization_dimensions: USER_CONTROL_DIMENSIONS,
     surfaces: listProductExperience(),
     tui_views: tuiViews(),
+    graph_available: graph && graph.ok !== false,
+    closeout_available: closeout && closeout.ok !== false,
+    readiness_counts: graph && graph.ok !== false ? graph.readiness_counts || null : null,
+    closeout_counts: closeout && closeout.ok !== false ? closeout.counts || null : null,
   };
+  if (includeReadiness && closeout && closeout.ok !== false) out.open_requirements = closeout.open_requirements || [];
+  if (includeCloseout && closeout && closeout.ok !== false) out.closeout = closeout;
+  if (includeGraph && graph && graph.ok !== false) out.graph = graph;
+  if (graph && graph.ok === false) out.graph_error = graph;
+  if (closeout && closeout.ok === false) out.closeout_error = closeout;
   out.ok = out.contract.ok;
   if (args.includes('--json')) {
     console.log(JSON.stringify(out, null, 2));
@@ -18048,6 +18076,20 @@ async function cmdSurfaces(args) {
   }
   console.log('');
   console.log('user control: ' + USER_CONTROL_DIMENSIONS.map((d) => d.id).join(', '));
+  if (out.readiness_counts) {
+    console.log('');
+    console.log('readiness: ' + Object.entries(out.readiness_counts).map(([k, v]) => `${k}=${v}`).join('  '));
+  }
+  if (includeReadiness && Array.isArray(out.open_requirements) && out.open_requirements.length) {
+    console.log('');
+    console.log('open closeout items:');
+    for (const req of out.open_requirements) {
+      console.log(`  ${req.priority} ${req.status.padEnd(29)} ${req.next_wave || '-'}  ${req.surface_id}/${req.requirement_id}`);
+    }
+    console.log('run `kolm surfaces --closeout --json` for proof requirements and done-when criteria.');
+  } else if (closeout && closeout.ok !== false && closeout.counts && closeout.counts.open_requirements) {
+    console.log(`open closeout: ${closeout.counts.open_requirements} item(s); run \`kolm surfaces --readiness\`.`);
+  }
 }
 
 // ---------- kolm cloud train ----------
@@ -20520,12 +20562,12 @@ function readPackageVersion() {
 }
 
 // Resolve the canonical latest version of kolm. The canonical install is
-// `npm i -g github:sneaky-hippo/kolmogorov-stack` (NOT the unrelated `kolm`
+// `npm i -g github:sneaky-hippo/kolm-stack` (NOT the unrelated `kolm`
 // npm package), so we read the version off the github main branch's
 // package.json. Falls back to null on any error.
 function fetchLatestNpmVersion(timeoutMs) {
     return new Promise((resolve) => {
-        const url = 'https://raw.githubusercontent.com/sneaky-hippo/kolmogorov-stack/main/package.json';
+        const url = 'https://raw.githubusercontent.com/sneaky-hippo/kolm-stack/main/package.json';
         const controller = new AbortController();
         const timer = setTimeout(() => { try { controller.abort(); } catch {} }, Math.max(500, Number(timeoutMs) || 5000));
         fetch(url, { signal: controller.signal, headers: { 'accept': 'application/json' } })
@@ -20577,7 +20619,7 @@ async function cmdUpgrade(args) {
     if (status === 'outdated') {
         console.log(`a newer kolm release is available: ${latest}.`);
         console.log('upgrade with:');
-        console.log('  npm i -g github:sneaky-hippo/kolmogorov-stack');
+        console.log('  npm i -g github:sneaky-hippo/kolm-stack');
         console.log('  # or one-shot:');
         console.log('  kolm update');
         console.log('');
@@ -20590,7 +20632,7 @@ async function cmdUpgrade(args) {
     }
     console.log('could not reach github to check for updates.');
     console.log('to upgrade manually:');
-    console.log('  npm i -g github:sneaky-hippo/kolmogorov-stack');
+    console.log('  npm i -g github:sneaky-hippo/kolm-stack');
 }
 
 // ---------- seeds ----------
@@ -23441,7 +23483,7 @@ function _badArgs(msg) { const e = new Error(msg); e.exitCode = EXIT.BAD_ARGS; r
 // ---------- update ----------
 // `kolm update` self-installs the latest commit from the canonical github
 // source. This is the verb that actually does it (kolm upgrade only checks).
-// Honest path: spawn `npm i -g github:sneaky-hippo/kolmogorov-stack` and
+// Honest path: spawn `npm i -g github:sneaky-hippo/kolm-stack` and
 // stream npm's stdout/stderr through to the user. Exit code is whatever npm
 // returned. On Windows we shell through `cmd /c` so npm.cmd resolves.
 async function cmdUpdate(args) {
@@ -23449,7 +23491,7 @@ async function cmdUpdate(args) {
     const jsonOut = args.includes('--json');
     const dryRun = args.includes('--dry-run');
     const force = args.includes('--force');
-    const source = 'github:sneaky-hippo/kolmogorov-stack';
+    const source = 'github:sneaky-hippo/kolm-stack';
     const before = readPackageVersion();
 
     // W484 P0-3 ??refuse to run `npm i -g` from a repo checkout. Without this
@@ -23469,13 +23511,13 @@ async function cmdUpdate(args) {
                 try {
                     const j = JSON.parse(fs.readFileSync(pj, 'utf8'));
                     pkgName = j && j.name;
-                    if (pkgName === 'kolmogorov-stack' || pkgName === '@kolmogorov/kolmogorov-stack') {
+                    if (pkgName === 'kolm-stack' || pkgName === '@kolm/kolm-stack') {
                         isCheckout = true;
                     }
                 } catch (_e) { /* fall through */ }
             }
             if (isCheckout) {
-                const hint = 'this is the kolmogorov-stack repo checkout (' + repoRoot + ').';
+                const hint = 'this is the kolm-stack repo checkout (' + repoRoot + ').';
                 const remedy = ['git -C ' + repoRoot + ' pull', 'npm install --prefix ' + repoRoot];
                 if (jsonOut) {
                     console.log(JSON.stringify({
@@ -23486,7 +23528,7 @@ async function cmdUpdate(args) {
                         remedy,
                         repo_root: repoRoot,
                         package_name: pkgName,
-                        override: 'pass --force to bypass (will run `npm i -g github:sneaky-hippo/kolmogorov-stack` and overwrite the global install)',
+                        override: 'pass --force to bypass (will run `npm i -g github:sneaky-hippo/kolm-stack` and overwrite the global install)',
                     }, null, 2));
                     process.exit(EXIT.BAD_ARGS || 1);
                 }
@@ -23544,7 +23586,7 @@ async function cmdUpdate(args) {
             console.error(`npm exited with code ${r.status}. update did not complete.`);
             console.error('common fixes:');
             console.error('  - ensure node 20+ and npm 10+ are on PATH');
-            console.error('  - on macos/linux: try `sudo npm i -g github:sneaky-hippo/kolmogorov-stack`');
+            console.error('  - on macos/linux: try `sudo npm i -g github:sneaky-hippo/kolm-stack`');
             console.error('  - on windows: run an admin PowerShell, then re-run `kolm update`');
         }
         const e = new Error(`npm install failed (exit ${r.status})`);
@@ -24228,7 +24270,24 @@ async function cmdTui(args) {
   if (maybeHelp('tui', args)) return;
   if (args.includes('--views')) {
     const { tuiViews, validateProductExperience } = await import('../src/product-experience.js');
-    const out = { ok: true, contract: validateProductExperience(), views: tuiViews() };
+    function bundledJson(rel) {
+      try {
+        return JSON.parse(fs.readFileSync(new URL(rel, import.meta.url), 'utf8'));
+      } catch (e) {
+        return { ok: false, error: 'bundled_json_unavailable', path: rel, detail: String(e && e.message || e) };
+      }
+    }
+    const graph = bundledJson('../public/product-graph.json');
+    const closeout = bundledJson('../public/product-readiness-closeout.json');
+    const out = {
+      ok: true,
+      contract: validateProductExperience(),
+      views: tuiViews(),
+      product_graph_counts: graph && graph.ok !== false ? graph.counts || null : null,
+      readiness_counts: graph && graph.ok !== false ? graph.readiness_counts || null : null,
+      closeout_counts: closeout && closeout.ok !== false ? closeout.counts || null : null,
+    };
+    if (args.includes('--closeout') && closeout && closeout.ok !== false) out.open_requirements = closeout.open_requirements || [];
     out.ok = out.contract.ok;
     if (args.includes('--json')) {
       console.log(JSON.stringify(out, null, 2));
@@ -24237,6 +24296,18 @@ async function cmdTui(args) {
     console.log(`tui views: ${out.views.length}`);
     for (const v of out.views) {
       console.log(`${v.id.padEnd(22)} ${v.surfaces.join(', ')}`);
+    }
+    if (out.readiness_counts) {
+      console.log('');
+      console.log('readiness: ' + Object.entries(out.readiness_counts).map(([k, v]) => `${k}=${v}`).join('  '));
+    }
+    if (Array.isArray(out.open_requirements) && out.open_requirements.length) {
+      console.log('open closeout:');
+      for (const req of out.open_requirements) {
+        console.log(`  ${req.next_wave || '-'}  ${req.surface_id}/${req.requirement_id}`);
+      }
+    } else if (out.closeout_counts && out.closeout_counts.open_requirements) {
+      console.log(`open closeout: ${out.closeout_counts.open_requirements} item(s); run \`kolm tui --views --closeout\`.`);
     }
     return;
   }

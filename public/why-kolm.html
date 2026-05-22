@@ -116,13 +116,13 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -135,7 +135,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -319,7 +319,7 @@
  <h2>The integration calculus.</h2>
  <p>Two numbers that matter when you are evaluating whether to put kolm in your stack.</p>
  <ul>
- <li><b>1 line to install.</b> Install Node 20, then run <code>npm install -g github:sneaky-hippo/kolmogorov-stack</code> on macOS, Linux, or Windows.</li>
+ <li><b>1 line to install.</b> Install Node 20, then run <code>npm install -g github:sneaky-hippo/kolm-stack</code> on macOS, Linux, or Windows.</li>
  <li><b>~5 minutes to first signed artifact.</b> <code>kolm login</code>, write a one-line task, <code>kolm compile</code>, watch the gate pass, ship the .kolm.</li>
  <li><b>0 dependencies on the runtime side.</b> The verifier SDK is pure-stdlib. The TS SDK has no third-party deps. The Python SDK has none either.</li>
  <li><b>Drops next to your existing serving stack.</b> Already running vLLM or TGI? Point a backend at it. Already using OpenAI? <code>kolm serve --openai-compat</code> exposes a drop-in shape.</li>

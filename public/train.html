@@ -122,13 +122,13 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -141,7 +141,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -408,8 +408,8 @@
  compile.disabled = nExamples === 0;
  }
  function updateGates(){
- gK.textContent = '≥ ' + (parseFloat(kgate.value) || 0.90).toFixed(2);
- gT.textContent = '≥ ' + (parseFloat(taskgate.value) || 0.85).toFixed(2);
+ gK.textContent = '>=' + (parseFloat(kgate.value) || 0.90).toFixed(2);
+ gT.textContent = '>=' + (parseFloat(taskgate.value) || 0.85).toFixed(2);
  gP.textContent = pack.value || 'none';
  }
 
@@ -473,7 +473,7 @@
  ['SFT step 250 / 2000 &middot; loss 1.84', null, 800],
  ['SFT step 1000 / 2000 &middot; loss 1.21', null, 900],
  ['SFT step 2000 / 2000 &middot; loss 0.87', null, 700],
- ['eval &middot; K-score 0.93 (gate ≥ '+ (parseFloat(kgate.value)||0.9).toFixed(2)+')', 'ok', 700],
+ ['eval &middot; K-score 0.93 (gate >='+ (parseFloat(kgate.value)||0.9).toFixed(2)+')', 'ok', 700],
  ['signing manifest &middot; Ed25519', null, 350],
  ['artifact: build/my-model.kolm &middot; 9.4 GB', 'ok', 300],
  ['preview complete. click Run for real to compile against your account.', 'ok', 100],
@@ -483,7 +483,7 @@
  preview.addEventListener('click', function(){
  preview.disabled = true;
  compile.disabled = true;
- preview.textContent = 'Previewing…';
+ preview.textContent = 'Previewing...';
  log.innerHTML = '';
  result.hidden = true;
  var seq = PREVIEW_SEQ_BUILDER();
@@ -533,7 +533,7 @@
  if (!receipt || !Array.isArray(receipt.chain)) { rChain.innerHTML = ''; return; }
  var rows = receipt.chain.map(function(step, idx){
  var num = idx + 1;
- var hmacShort = step.hmac ? (step.hmac.slice(0, 12) + '…') : '';
+ var hmacShort = step.hmac ? (step.hmac.slice(0, 12) + '...') : '';
  return '<div><span class="ok">[step ' + num + '/5]</span> ' +
  '<span style="color:var(--ink)">' + escapeHtml(step.step) + '</span> ' +
  '<span style="color:var(--ink-faint)">Ed25519 ' + escapeHtml(hmacShort) + '</span></div>';
@@ -573,7 +573,7 @@
  v.style.textDecoration = 'none';
  v.style.display = 'inline-block';
  v.href = '/verify-prod';
- v.textContent = 'Verify in browser →';
+ v.textContent = 'Verify in browser ->';
  rActions.appendChild(v);
 
  var d = document.createElement('a');
@@ -763,7 +763,7 @@
  }
  compile.disabled = true;
  preview.disabled = true;
- compile.textContent = 'Compiling…';
+ compile.textContent = 'Compiling...';
  log.innerHTML = '';
  result.hidden = true;
  rChain.innerHTML = '';
@@ -818,7 +818,7 @@
 
  compile.addEventListener('click', runLive);
 
- // Quick path: one sentence → defaults → compile. Smart defaults are Llama 3.1 8B base
+ // Quick path: one sentence: defaults, compile. Smart defaults are Llama 3.1 8B base
  // (selectedBase[0]), Claude Sonnet teacher distill (via task text), K-score gate 0.90,
  // task gate 0.85. Without uploaded files, the server's synthesis path is triggered
  // by embedding the description in the recipe field; the compiler will synthesize a
@@ -842,9 +842,9 @@
  if (!parseFloat(kgate.value)) kgate.value = '0.90';
  if (!parseFloat(taskgate.value)) taskgate.value = '0.85';
  updateGates();
- // Quick mode does not require file upload — server will synthesize from description.
+ // Quick mode does not require file upload; server will synthesize from description.
  compile.disabled = false;
- logLine('quick mode: defaults applied (Llama 3.1 8B + Claude Sonnet distill + K≥0.90)', 'ok');
+ logLine('quick mode: defaults applied (Llama 3.1 8B + Claude Sonnet distill + K>=.90)', 'ok');
  runLive();
  });
  }

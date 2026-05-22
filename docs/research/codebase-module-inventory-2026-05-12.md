@@ -2,7 +2,7 @@
 
 Review date: 2026-05-12
 
-Scope: `C:\Users\user\Desktop\kolmogorov-stack`
+Scope: `local private workspace`
 
 This inventory complements the strategic gap review by mapping what is actually present in the repo: runtime modules, route groups, tests, SDK surfaces, and proof gaps.
 
@@ -91,7 +91,7 @@ The router has 86 inline route declarations in `src/router.js`. `src/oauth.js` m
 | Surface | Evidence | Notes |
 | --- | --- | --- |
 | CLI | `cli/kolm.js`, package `bin.kolm` | Main developer wedge. Needs one canonical install path. |
-| Node SDK | `sdk/node/*`, tests in `site.test.js` | Package name expected as `@kolmogorov/kolm-sdk` in tests. |
+| Node SDK | `sdk/node/*`, tests in `site.test.js` | Package name expected as `legacy scoped kolm SDK package` in tests. |
 | Python SDK | `sdk/python/*` | Needs clean packaging/readme path verification. |
 | MCP server | `sdk/mcp/*`, `services/mcp/server.js` | Strong agent integration path. |
 | GitHub Action | `.github/actions/kolm-compile/action.yml` | CI compile/eval route. |

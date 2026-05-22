@@ -333,7 +333,7 @@ mod tests {
 
     #[test]
     fn canonical_json_recurses_into_arrays() {
-        // The Kolmogorov v10b regression case: array elements must be
+        // The Kolm v10b regression case: array elements must be
         // canonicalized too, not stringified as-is.
         let v = json!([{ "z": 1, "a": 2 }, { "y": 3, "b": 4 }]);
         assert_eq!(canonical_json(&v), r#"[{"a":2,"z":1},{"b":4,"y":3}]"#);

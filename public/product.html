@@ -4,19 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Product | One API to signed .kolm files | kolm.ai</title>
-<meta name="description" content="Kolm routes every model through one API, captures what works, and distills repeat workflows into signed .kolm files that run anywhere.">
+<title>Product | Gateway, distillation, runtime for production AI - kolm.ai</title>
+<meta name="description" content="Kolm is the production AI platform for teams that route provider APIs, distill approved behavior into specialists, and run signed .kolm artifacts across cloud, browser, devices, and air-gap.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-<meta property="og:title" content="Product | One API to signed .kolm files | kolm.ai">
-<meta property="og:description" content="One model API, one proof loop, and signed .kolm files that run anywhere.">
+<meta property="og:title" content="Product | Gateway, distillation, runtime for production AI | kolm.ai">
+<meta property="og:description" content="Route provider APIs, distill approved behavior into specialists, and run signed .kolm artifacts across cloud, browser, devices, and air-gap.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/product">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Product | One API to signed .kolm files | kolm.ai">
-<meta name="twitter:description" content="One model API, one proof loop, and signed .kolm files that run anywhere.">
+<meta name="twitter:title" content="Product | Gateway, distillation, runtime for production AI | kolm.ai">
+<meta name="twitter:description" content="Route provider APIs, distill approved behavior into specialists, and run signed .kolm artifacts across cloud, browser, devices, and air-gap.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/product">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -31,7 +31,7 @@
  "name": "kolm.ai",
  "applicationCategory": "DeveloperApplication",
  "operatingSystem": "Linux, macOS, Windows",
- "description": "The production AI control plane: route model APIs, capture approved data, review rows, distill repeat workflows, compile signed artifacts, run locally, and audit receipts.",
+ "description": "The production AI platform for gateway routing, approved-data distillation, signed artifact runtime, and release receipts.",
  "url": "https://kolm.ai/product",
  "publisher": {"@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai"},
  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}
@@ -125,13 +125,13 @@ code{font-family:var(--p-mono)}
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -144,7 +144,7 @@ code{font-family:var(--p-mono)}
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -217,8 +217,8 @@ code{font-family:var(--p-mono)}
  <section class="hero wrap">
  <div>
  <p class="eyebrow">kolm.ai / Product</p>
- <h1>From model calls to portable AI.<span class="visually-hidden" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">The AI compiler.</span></h1>
- <p class="lede">Use one OpenAI-compatible API for every provider. Kolm captures approved traffic, verifies what repeats, and distills it into signed <code>.kolm</code> files for browser, edge, server, laptop, phone, or air-gap.</p>
+ <h1>Gateway. Compiler. Runtime. Proof.<span class="visually-hidden" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">The AI compiler.</span></h1>
+ <p class="lede">Route provider APIs through one gateway. Distill approved behavior into signed specialists. Deploy <code>.kolm</code> artifacts in cloud, browser, edge, device, CLI/TUI, VPC, or air-gap.</p>
  <div class="hero-actions">
  <a class="btn primary" href="/signup">Get API key</a>
  <a class="btn" href="/quickstart">Run quickstart</a>
@@ -231,28 +231,28 @@ code{font-family:var(--p-mono)}
  <aside class="hero-panel" aria-label="kolm.ai product flow">
  <div class="panel-top"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>kolm-workflow.yml</span></div>
  <div class="pipeline">
- <div class="pipe-step"><div class="num">01</div><div><h3>Route</h3><p>One endpoint for OpenAI, Anthropic, OpenRouter, Gemini, local, and internal models.</p></div></div>
- <div class="pipe-step"><div class="num">02</div><div><h3>Capture</h3><p>Record cost, latency, prompts, outputs, tools, provider, and privacy state.</p></div></div>
- <div class="pipe-step"><div class="num">03</div><div><h3>Review</h3><p>Approve, correct, reject, and label rows before training or eval.</p></div></div>
- <div class="pipe-step"><div class="num">04</div><div><h3>Distill</h3><p>Create signed .kolm files with holdouts, receipts, target metadata, and verifier state.</p></div></div>
- <div class="pipe-step"><div class="num">05</div><div><h3>Run</h3><p>Ship to browser, edge, server, laptop, phone, and air-gapped targets.</p></div></div>
+ <div class="pipe-step"><div class="num">01</div><div><h3>Gateway</h3><p>One endpoint for OpenAI, Anthropic, OpenRouter, Gemini, local, and internal models.</p></div></div>
+ <div class="pipe-step"><div class="num">02</div><div><h3>Capture</h3><p>Record cost, latency, prompts, outputs, tools, provider, privacy state, and receipt links.</p></div></div>
+ <div class="pipe-step"><div class="num">03</div><div><h3>Distill</h3><p>Turn teacher traces and reviewed rows into smaller specialists with holdout gates.</p></div></div>
+ <div class="pipe-step"><div class="num">04</div><div><h3>Compile</h3><p>Create signed .kolm artifacts with evals, policy, target metadata, and verifier state.</p></div></div>
+ <div class="pipe-step"><div class="num">05</div><div><h3>Deploy</h3><p>Run in browser, edge, server, laptop, phone, VPC, CLI/TUI, and air-gapped targets.</p></div></div>
  </div>
  </aside>
  </section>
 
  <section class="band">
  <div class="wrap metric-grid" aria-label="Product modules">
- <div class="metric"><b>1 config</b><span>Adopt through an OpenAI-compatible base URL.</span></div>
- <div class="metric"><b>local lake</b><span>Telemetry stays on your machine by default.</span></div>
- <div class="metric"><b>review gate</b><span>Only approved rows enter train and eval sets.</span></div>
- <div class="metric"><b>.kolm file</b><span>Signed artifact plus receipt chain and runtime target.</span></div>
+ <div class="metric"><b>Gateway</b><span>Adopt through an OpenAI-compatible base URL.</span></div>
+ <div class="metric"><b>Compiler</b><span>Choose distill, LoRA/QLoRA, quantize, route, RAG, or no-op.</span></div>
+ <div class="metric"><b>Runtime</b><span>Target browser, edge, server, device, VPC, CLI/TUI, or air-gap.</span></div>
+ <div class="metric"><b>Proof</b><span>Signed artifact plus receipt chain, evals, and verifier state.</span></div>
  </div>
  </section>
 
  <section class="section wrap">
  <div class="section-head">
- <h2>The product loop.</h2>
- <p>Route calls, protect data, approve rows, test candidates, distill repeat work, and ship the smallest verified file that beats the cloud call.</p>
+ <h2>The production workflow.</h2>
+ <p>Route calls, protect data, approve rows, test candidates, compile the right specialist, and deploy only the verified artifact that passes the gate.</p>
  </div>
  <div class="cards">
  <article class="card"><div class="label">Gateway</div><h3>OpenAI-compatible proxy</h3><p>Replace one base URL and capture the calls your product already sends to frontier providers.</p><a href="/captures">Live capture dashboard</a></article>
@@ -269,12 +269,12 @@ code{font-family:var(--p-mono)}
  <section class="section wrap">
  <div class="section-head">
  <h2>One product, six workflows.</h2>
- <p>Solo developers start local. Teams run the gateway. Enterprises add receipts, billing, device policy, and audit trails.</p>
+ <p>Developers start local. Teams run the gateway. Enterprises add receipts, billing, device policy, and audit trails.</p>
  </div>
  <div class="strip">
  <div><b>CLI</b><span>Capture, compile, run, verify, train, and inspect artifacts locally.</span></div>
  <div><b>API</b><span>OpenAI-compatible endpoints plus lake, dataset, training, device, and billing routes.</span></div>
- <div><b>Account</b><span>Post-auth dashboard for captured events, labels, distill jobs, artifacts, devices, and spend.</span></div>
+ <div><b>Account</b><span>Post-auth dashboard for captured calls, labels, distill jobs, artifacts, devices, and spend.</span></div>
  <div><b>TUI</b><span>Terminal-first operators can review queues, runs, receipts, and artifacts without a browser.</span></div>
  <div><b>SDKs</b><span>Node, Python, MCP, VS Code, C, and Rust integrations.</span></div>
  <div><b>Artifacts</b><span>Signed .kolm artifacts with receipt chains, eval state, and runtime targets.</span></div>
@@ -283,8 +283,8 @@ code{font-family:var(--p-mono)}
 
  <section class="section wrap">
  <div class="section-head">
- <h2>Start as a gateway. Become a model factory.</h2>
- <p>See cost, latency, privacy, repeats, and provider performance first. Distill the repeated work when the evidence says it is ready.</p>
+ <h2>Start as a gateway. Grow into a model factory.</h2>
+ <p>See cost, latency, privacy, repeats, and provider performance first. Distill only the repeated work that earns promotion.</p>
  </div>
  <div class="code-row">
 <pre><code># Drop-in capture

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>The value loop: capture → bridges → distill → replay · kolm.ai</title>
+<title>The value loop: capture, bridges, distill, replay · kolm.ai</title>
 <meta name="description" content="The kolm value loop is five rungs: capture your real prompts, surface them indexed by namespace, distill them into a compiled recipe, and replay against...">
 <meta name="keywords" content="kolm value loop, AI compiler loop, capture distill replay, kolm loop, kolm doctor loop, observe optimize compile">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
@@ -11,13 +11,13 @@
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
-<meta property="og:title" content="The value loop: capture → bridges → distill → replay · kolm.ai">
+<meta property="og:title" content="The value loop: capture, bridges, distill, replay · kolm.ai">
 <meta property="og:description" content="The kolm value loop is five rungs: capture your real prompts, surface them indexed by namespace, distill them into a compiled recipe, and replay against...">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/value-loop">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="The value loop: capture → bridges → distill → replay · kolm.ai">
+<meta name="twitter:title" content="The value loop: capture, bridges, distill, replay · kolm.ai">
 <meta name="twitter:description" content="The kolm value loop is five rungs: capture your real prompts, surface them indexed by namespace, distill them into a compiled recipe, and replay against...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/value-loop">
@@ -138,13 +138,13 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -157,7 +157,7 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -328,7 +328,7 @@ value loop green (6 rungs).</pre>
 # 503 (store down): {"error": "capture_store_unavailable"}</pre>
 
 <h2>Rung 5: replay</h2>
-<p>Close the loop. <code>/v1/replay</code> picks N captures from a namespace, runs each prompt through the freshly compiled artifact (no cache), and emits a per-row diff: jaccard <code>k_score</code> against upstream, latency delta, cost delta. One screen, one click, the whole observe → optimize → compile ladder visible.</p>
+<p>Close the loop. <code>/v1/replay</code> picks N captures from a namespace, runs each prompt through the freshly compiled artifact (no cache), and emits a per-row diff: jaccard <code>k_score</code> against upstream, latency delta, cost delta. One screen, one click, the whole observe, optimize, compile ladder visible.</p>
 <pre>curl -X POST https://kolm.ai/v1/replay \
  -H "authorization: Bearer $KOLM_API_KEY" \
  -H "content-type: application/json" \
@@ -459,7 +459,7 @@ curl -s https://kolm.ai/v1/receipts/verify \
  result.hidden = false;
  if (r.status === 200) {
  status.setAttribute('data-state','ok');
- status.textContent = 'receipt below · demo only · not written';
+ status.textContent = 'receipt below | local preview | not persisted';
  } else {
  status.setAttribute('data-state','err');
  status.textContent = 'HTTP ' + r.status;

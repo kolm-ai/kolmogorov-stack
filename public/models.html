@@ -4,18 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Models · the frontier-2026 base-model catalog · kolm.ai</title>
-<meta name="description" content="Open-weight frontier models kolm compiles against. Step 3.5, Qwen 3.6, DeepSeek V4, GLM 4.7, Kimi K2.5, Gemma 4. Hardware tiers from RTX 3090 to M3 Ultra 512.">
+<title>Models - teachers, students, and device targets - kolm.ai</title>
+<meta name="description" content="Choose teacher models, student backbones, quantization, and hardware tiers for Kolm distillation and signed .kolm runtime targets.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="Models · the frontier-2026 base-model catalog · kolm.ai">
-<meta property="og:description" content="Open-weight frontier models kolm compiles against. Step 3.5, Qwen 3.6, DeepSeek V4, GLM 4.7, Kimi K2.5, Gemma 4. Hardware tiers from RTX 3090 to M3 Ultra 512.">
+<meta property="og:title" content="Models - teachers, students, and device targets | kolm.ai">
+<meta property="og:description" content="Choose teacher models, student backbones, quantization, and hardware tiers for Kolm distillation and signed .kolm runtime targets.">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Models · the frontier-2026 base-model catalog · kolm.ai">
-<meta name="twitter:description" content="Open-weight frontier models kolm compiles against. Step 3.5, Qwen 3.6, DeepSeek V4, GLM 4.7, Kimi K2.5, Gemma 4. Hardware tiers from RTX 3090 to M3 Ultra 512.">
+<meta name="twitter:title" content="Models - teachers, students, and device targets | kolm.ai">
+<meta name="twitter:description" content="Choose teacher models, student backbones, quantization, and hardware tiers for Kolm distillation and signed .kolm runtime targets.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/models">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -28,11 +28,11 @@
  "@graph": [
  {
  "@type": "TechArticle",
- "headline": "kolm frontier-2026 base-model catalog",
- "description": "The catalog of open-weight frontier models kolm compiles for. Step 3.5 Flash REAP, Qwen 3.6, DeepSeek V4, GLM 4.7, Kimi K2.5, Gemma 3, plus hardware tiers from RTX 3090 to M3 Ultra 512.",
+ "headline": "Kolm model and runtime target catalog",
+ "description": "Teacher models, student backbones, quantization profiles, and hardware tiers for Kolm distillation and signed .kolm runtime targets.",
  "url": "https://kolm.ai/models",
- "author": {"@type": "Organization", "name": "Kolmogorov"},
- "publisher": {"@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai"},
+ "author": {"@type": "Organization", "name": "Kolm"},
+ "publisher": {"@type": "Organization", "name": "Kolm", "url": "https://kolm.ai"},
  "datePublished": "2026-05-14",
  "license": "https://opensource.org/licenses/MIT"
  },
@@ -80,8 +80,8 @@
  .hero-eyebrow .he-dot{width:6px;height:6px;border-radius:50%;background:#7ef0d2;box-shadow:0 0 10px #7ef0d2;animation:pulse-dot 2.4s ease-in-out infinite}
  @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
 
- h1{font-weight: 500;letter-spacing:-0.035em;line-height:0.96;font-size:clamp(48px,6.4vw,92px);margin:0 0 28px;max-width:14ch}
- .lede{color:var(--ink-mute);font-size:clamp(18px,1.5vw,22px);margin:0 0 24px;max-width:60ch;line-height:1.55}
+main > .wrap > h1{font-weight:500!important;letter-spacing:-0.02em!important;line-height:1.06!important;font-size:clamp(48px,5.35vw,78px)!important;margin:0 0 46px!important;max-width:15ch}
+.lede{color:var(--ink-mute);font-size:clamp(17px,1.35vw,20px);margin:0 0 24px;max-width:62ch;line-height:1.6}
 
  .sec{margin:140px 0 0}
  .sec:first-of-type{margin-top:120px}
@@ -146,13 +146,13 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -165,7 +165,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -240,35 +240,28 @@
 
 <main id="main">
  <div class="wrap">
- <div class="hero-eyebrow"><span class="he-dot"></span>Models . backbones for every target</div>
- <h1>Choose the backbone.<br>Run the artifact.</h1>
- <p class="lede">Pick the model family and hardware tier behind each signed <code>.kolm</code> file. Use frontier, open-weight, local, or custom rows; the choice travels in the receipt chain.</p>
+ <div class="hero-eyebrow"><span class="he-dot"></span>Models &middot; teachers, students, targets</div>
+ <h1>Choose the teacher.<br>Pick the target.</h1>
+ <p class="lede">Select the provider model, student backbone, quantization profile, and hardware tier behind each signed <code>.kolm</code>. Every choice travels in the receipt chain.</p>
 
  <section class="sec" id="frontier">
- <h2>Frontier 2026 catalog.</h2>
- <p class="kicker">Open-weight, verified, with quant and tier baked in. Run <code>kolm models frontier</code> to list, <code>kolm models show &lt;id&gt;</code> to inspect, <code>kolm models verify</code> to re-validate before ship.</p>
+ <h2>Model registry.</h2>
+ <p class="kicker">Use provider teachers for supervision, open backbones for students, and custom rows for internal models. Run <code>kolm models list</code>, <code>kolm models show &lt;id&gt;</code>, and <code>kolm models verify</code> before release.</p>
  <div class="scroll-x">
  <table class="table">
- <thead><tr><th>Model</th><th>Params</th><th>Quant</th><th>Tier</th><th>License</th></tr></thead>
+ <thead><tr><th>Row</th><th>Role</th><th>Typical size</th><th>Target</th><th>Scope</th></tr></thead>
  <tbody>
- <tr><td><code>stepfun-ai/step3.5-flash-reap-121b</code></td><td>121B (REAP)</td><td>Q6</td><td><code>dgx-spark</code></td><td>Apache-2.0</td></tr>
- <tr><td><code>Qwen/Qwen3.6-27B-Instruct</code></td><td>27B</td><td>Q4</td><td><code>3090</code></td><td>Apache-2.0</td></tr>
- <tr><td><code>nvidia/Nemotron-3-Nano-Omni-30B-A3B</code></td><td>30B-A3B (multimodal)</td><td>Q4</td><td><code>dgx-spark</code></td><td>NVIDIA Open</td></tr>
- <tr><td><code>deepseek-ai/DeepSeek-V4-PRO-1.6T</code></td><td>1.6T</td><td>Q2</td><td><code>m3-ultra-512</code></td><td>DeepSeek</td></tr>
- <tr><td><code>deepseek-ai/DeepSeek-V4-Flash-158B</code></td><td>158B</td><td>Q4</td><td><code>h200-141</code></td><td>DeepSeek</td></tr>
- <tr><td><code>zai-org/GLM-4.7-Flash</code></td><td>large</td><td>Q4</td><td><code>h100-80</code></td><td>Apache-2.0</td></tr>
- <tr><td><code>zai-org/GLM-4.5-Air-REAP-82B-A12B</code></td><td>82B-A12B (REAP)</td><td>Q4</td><td><code>a100-80</code></td><td>Apache-2.0</td></tr>
- <tr><td><code>google/gemma-3-27b-it</code></td><td>27B</td><td>Q4</td><td><code>3090</code></td><td>Gemma</td></tr>
- <tr><td><code>Qwen/Qwen3-VL-235B-A22B-Instruct</code></td><td>235B-A22B (vision)</td><td>Q4</td><td><code>h200-141</code></td><td>Apache-2.0</td></tr>
- <tr><td><code>Qwen/Qwen3-Coder-30B-A3B-Instruct</code></td><td>30B-A3B (code)</td><td>Q4</td><td><code>3090</code></td><td>Apache-2.0</td></tr>
- <tr><td><code>Qwen/Qwen3.5-27B-Instruct</code></td><td>27B</td><td>Q4</td><td><code>3090</code></td><td>Apache-2.0</td></tr>
- <tr><td><code>moonshotai/Kimi-K2.5-1T</code></td><td>1T</td><td>Q2</td><td><code>m3-ultra-512</code></td><td>Moonshot</td></tr>
- <tr><td><code>NousResearch/Hermes-4.3-36B</code></td><td>36B</td><td>Q4</td><td><code>5090</code></td><td>Apache-2.0</td></tr>
- <tr><td><code>cerebras/Carnice-35B-A3B-Instruct</code></td><td>35B-A3B</td><td>Q4</td><td><code>5090</code></td><td>Apache-2.0</td></tr>
+ <tr><td><code>provider/frontier-teacher</code></td><td>teacher</td><td>remote</td><td><code>gateway</code></td><td>OpenAI, Anthropic, Gemini, OpenRouter, or BYOK provider policy</td></tr>
+ <tr><td><code>open/gemma-family</code></td><td>student</td><td>2B-27B</td><td><code>mobile</code> to <code>workstation</code></td><td>device and regulated-industry specialists</td></tr>
+ <tr><td><code>open/qwen-family</code></td><td>student</td><td>1B-72B</td><td><code>edge</code> to <code>datacenter</code></td><td>general, coding, tool, and multilingual specialists</td></tr>
+ <tr><td><code>open/llama-family</code></td><td>student</td><td>1B-70B</td><td><code>laptop</code> to <code>datacenter</code></td><td>enterprise self-host and private registry builds</td></tr>
+ <tr><td><code>open/mistral-family</code></td><td>student</td><td>small-large</td><td><code>edge</code> to <code>server</code></td><td>fast instruction and agent workflows</td></tr>
+ <tr><td><code>open/embedding-family</code></td><td>embedding</td><td>small-large</td><td><code>cpu</code> to <code>server</code></td><td>retrieval, routing, clustering, and eval features</td></tr>
+ <tr><td><code>internal/custom-model</code></td><td>teacher or student</td><td>custom</td><td><code>byoc</code></td><td>customer-hosted rows with explicit manifest provenance</td></tr>
  </tbody>
  </table>
  </div>
- <p style="font-size:14px;color:var(--ink-faint);margin-top:14px">Stable defaults (Qwen 2.5, Llama 3.2, Gemma 3, Phi 3.5, SmolLM2) live in the registry too. Run <code>kolm models list</code> for the full set or browse <a href="/v1/models/manifest" style="color:var(--ink);text-decoration:underline"><code>/v1/models/manifest</code></a>.</p>
+ <p style="font-size:14px;color:var(--ink-faint);margin-top:14px">The exact version, license, source URL, quantization, and runtime target come from your active manifest. Run <code>kolm models list</code> for the full set or browse <a href="/v1/models/manifest" style="color:var(--ink);text-decoration:underline"><code>/v1/models/manifest</code></a>.</p>
  </section>
 
  <section class="sec" id="tiers">
@@ -295,7 +288,7 @@
  <tr><td colspan="4" style="color:var(--ink-faint)">Loading manifest&hellip;</td></tr>
  </tbody>
  </table>
- <p style="font-size:13px;color:var(--ink-faint);margin-top:14px">Where future-tense rows (DeepSeek V4 / Step 3.5 / Kimi K2.5) aren't on HuggingFace yet, the manifest substitutes a closest current-shipping repo and notes it per-variant.</p>
+ <p style="font-size:13px;color:var(--ink-faint);margin-top:14px">If a configured row is unavailable from its source registry, Kolm reports the missing package and keeps the build scoped to the verified rows in your manifest.</p>
  <script>
  (function(){
  var body = document.getElementById('w386-tiers');
@@ -332,8 +325,8 @@
  </section>
 
  <section class="sec">
- <h2>Pick a base.<br>Compile a Specialist.</h2>
- <p class="kicker">The catalog is the menu. The compiler is the kitchen. Capture your real prompts, then turn them into a <code>.kolm</code> that runs on the tier you can afford.</p>
+ <h2>Pick a base.<br>Compile a specialist.</h2>
+ <p class="kicker">Capture real prompts, select the student backbone, and compile a <code>.kolm</code> that runs on the target you can support.</p>
  <div class="cta-row">
  <a href="/builder" class="pri">Create artifact in browser &rarr;</a>
  <a href="/quickstart" class="sec">Compile from the CLI</a>

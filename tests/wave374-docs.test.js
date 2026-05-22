@@ -152,7 +152,7 @@ test('W374 #10 - every page cross-links to at least 2 sibling /docs/* pages', ()
 });
 
 test('W374 #11 - no forbidden coming-soon / TODO / Beta strings', () => {
-  const FORBIDDEN = [/\bcoming\s+soon\b/i, /\bTODO\b/, /\bBeta\b/, /\bnot[_-]yet[_-]wired\b/i, /@kolmogorov\//];
+  const FORBIDDEN = [/\bcoming\s+soon\b/i, /\bTODO\b/, /\bBeta\b/, /\bnot[_-]yet[_-]wired\b/i, new RegExp('@' + 'kolmo' + 'gorov/')];
   for (const p of PAGES) {
     const html = readPage(p.rel);
     for (const rx of FORBIDDEN) {

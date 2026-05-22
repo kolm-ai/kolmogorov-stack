@@ -1,5 +1,5 @@
 {
-  "name": "@kolmogorov/multimodal-redact-image-worker",
+  "name": "@kolm/multimodal-redact-image-worker",
   "version": "0.1.0",
   "private": true,
   "description": "Isolated kolm multimodal image PII redactor. Detects faces + license plates in raw image bytes and emits a blurred/masked output image. Heavy ML deps (onnxruntime-node, sharp, the YOLO/MediaPipe weights) live HERE — root kolm install stays light. When deps are missing the worker emits an honest install_hint envelope; never silently claims it redacted PII it couldn't see.",

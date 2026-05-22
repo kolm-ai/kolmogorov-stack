@@ -107,7 +107,7 @@
  "name": "Integrations · kolm",
  "description": "MCP, claude-code, Cursor, Open MCP client, OpenAI-compatible serve.",
  "url": "https://kolm.ai/integrations",
- "publisher": {"@type":"Organization","name":"Kolmogorov","url":"https://kolm.ai"}
+ "publisher": {"@type":"Organization","name":"Kolm","url":"https://kolm.ai"}
 }
 </script>
 <link rel="stylesheet" href="/surface-polish.css">
@@ -132,13 +132,13 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -151,7 +151,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -340,10 +340,10 @@
  <div class="ig">
  <div class="top"><h3>Claude Code (MCP)</h3><span class="stat shipped">shipped</span></div>
  <p>Run <code>kolm install claude-code --apply</code> and the installer writes <code>mcpServers.kolm</code> into <code>~/.claude/settings.json</code>. Claude can then synthesize, run, and inspect recipes as MCP tools over stdio - no manual JSON editing.</p>
- <pre>npm i -g github:sneaky-hippo/kolmogorov-stack
+ <pre>npm i -g github:sneaky-hippo/kolm-stack
 kolm install claude-code --apply
 # writes ~/.claude/settings.json mcpServers.kolm: { command: "kolm", args: ["serve","--mcp"] }</pre>
- <div class="links"><a href="/integrations/claude-code">walkthrough</a><a href="/runtimes">docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack">source</a></div>
+ <div class="links"><a href="/integrations/claude-code">walkthrough</a><a href="/runtimes">docs</a><a href="https://github.com/sneaky-hippo/kolm-stack">source</a></div>
  </div>
 
  <div class="ig">
@@ -367,7 +367,7 @@ kolm install claude-code --apply
  <p>Source extension at <code>sdk/vscode/</code>. It is not Marketplace-published yet; build the VSIX from the repo and install it manually. Requires <code>KOLM_API_KEY</code>. For everyday use, the Continue integration is the recommended path.</p>
  <pre>cd sdk/vscode &amp;&amp; npm install &amp;&amp; npm run package
 code --install-extension kolm-vscode-0.2.0.vsix</pre>
- <div class="links"><a href="https://github.com/sneaky-hippo/kolmogorov-stack/tree/main/sdk/vscode">source</a></div>
+ <div class="links"><a href="https://github.com/sneaky-hippo/kolm-stack/tree/main/sdk/vscode">source</a></div>
  </div>
 
  <div class="ig">
@@ -387,20 +387,20 @@ mv claude-skill.md CLAUDE.md</pre>
  <div class="ig">
  <div class="top"><h3>GitHub Actions</h3><span class="stat shipped">shipped</span></div>
  <p>Composite action at <code>.github/actions/kolm-compile</code>. Drops into any workflow; uploads the <code>.kolm</code> as a build artifact.</p>
- <pre>- uses: sneaky-hippo/kolmogorov-stack/.github/actions/kolm-compile@main
+ <pre>- uses: sneaky-hippo/kolm-stack/.github/actions/kolm-compile@main
  with:
  task: 'classify support tickets'
  examples: ./labels.jsonl
  api-key: ${{ secrets.KOLM_API_KEY }}</pre>
- <div class="links"><a href="https://github.com/sneaky-hippo/kolmogorov-stack/tree/main/.github/actions/kolm-compile">source</a></div>
+ <div class="links"><a href="https://github.com/sneaky-hippo/kolm-stack/tree/main/.github/actions/kolm-compile">source</a></div>
  </div>
 
  <div class="ig">
  <div class="top"><h3>GitLab CI / CircleCI / Buildkite</h3><span class="stat shipped">shipped</span></div>
- <p>Bare CLI works in any container. Pin <code>node:20-alpine</code>, run <code>npm i -g github:sneaky-hippo/kolmogorov-stack</code>, then <code>kolm compile</code>.</p>
+ <p>Bare CLI works in any container. Pin <code>node:20-alpine</code>, run <code>npm i -g github:sneaky-hippo/kolm-stack</code>, then <code>kolm compile</code>.</p>
  <pre>image: node:20-alpine
 script:
- - npm i -g github:sneaky-hippo/kolmogorov-stack
+ - npm i -g github:sneaky-hippo/kolm-stack
  - kolm compile "$TASK" --examples ./labels.jsonl
  - kolm eval ./artifacts/$ARTIFACT.kolm</pre>
  <div class="links"><a href="/quickstart">quickstart</a></div>
@@ -415,8 +415,8 @@ script:
  <div class="ig">
  <div class="top"><h3>Node / TypeScript</h3><span class="stat shipped">shipped</span></div>
  <p>Browser-native SDK at <code>/sdk.js</code> + a Node wrapper at <code>sdk/node</code>. TypeScript types included.</p>
- <pre>npm i github:sneaky-hippo/kolmogorov-stack
-import { RecipeClient } from 'kolmogorov-stack/sdk/node/index.mjs';
+ <pre>npm i github:sneaky-hippo/kolm-stack
+import { RecipeClient } from 'kolm-stack/sdk/node/index.mjs';
 const k = new RecipeClient({ apiKey: process.env.KOLM_API_KEY });
 const job = await k.synthesize({ positives, negatives });</pre>
  <div class="links"><a href="/sdk.js">/sdk.js</a><a href="/docs">docs</a></div>
@@ -429,7 +429,7 @@ const job = await k.synthesize({ positives, negatives });</pre>
 from kolm import Kolm
 k = Kolm(api_key="ks_...")
 job = k.compile(task=..., examples_path="./tickets.jsonl")</pre>
- <div class="links"><a href="https://github.com/sneaky-hippo/kolmogorov-stack/tree/main/sdk/python">source</a></div>
+ <div class="links"><a href="https://github.com/sneaky-hippo/kolm-stack/tree/main/sdk/python">source</a></div>
  </div>
 
  </div>
@@ -440,17 +440,17 @@ job = k.compile(task=..., examples_path="./tickets.jsonl")</pre>
  <p class="kicker">Install Node with your platform tools, then install the CLI from GitHub via npm.</p>
  <div class="grid">
  <div class="ig">
- <div class="top"><h3>npm</h3><span class="stat shipped">canonical</span></div>
- <pre>npm i -g github:sneaky-hippo/kolmogorov-stack
+ <div class="top"><h3>npm</h3><span class="stat shipped">source install</span></div>
+ <pre>npm i -g github:sneaky-hippo/kolm-stack
 kolm --version</pre>
- <div class="links"><a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a></div>
+ <div class="links"><a href="https://github.com/sneaky-hippo/kolm-stack">github</a></div>
  </div>
 
  <div class="ig">
  <div class="top"><h3>Homebrew</h3><span class="stat">node setup</span></div>
- <p>Node 20 is the runtime. The npm install is the canonical path on macOS and Linux.</p>
+ <p>Node 20 is the runtime. Install from GitHub via npm on macOS and Linux.</p>
  <pre>brew install node
-npm i -g github:sneaky-hippo/kolmogorov-stack</pre>
+npm i -g github:sneaky-hippo/kolm-stack</pre>
  <div class="links"><a href="/quickstart">quickstart</a></div>
  </div>
 
@@ -458,7 +458,7 @@ npm i -g github:sneaky-hippo/kolmogorov-stack</pre>
  <div class="top"><h3>winget / scoop</h3><span class="stat">node setup</span></div>
  <p>The Node CLI runs natively on Windows. Install Node, then npm-install the CLI.</p>
  <pre>winget install OpenJS.NodeJS
-npm i -g github:sneaky-hippo/kolmogorov-stack</pre>
+npm i -g github:sneaky-hippo/kolm-stack</pre>
  <div class="links"><a href="/quickstart">quickstart</a></div>
  </div>
 
@@ -467,9 +467,9 @@ npm i -g github:sneaky-hippo/kolmogorov-stack</pre>
  <p>Reproducible build. Pinned <code>node:22-alpine</code>. Useful for CI where you want a hermetic compile environment.</p>
  <pre>docker run --rm -v $PWD:/work -w /work \
  -e KOLM_API_KEY node:22-alpine sh -c \
- "npm i -g github:sneaky-hippo/kolmogorov-stack \
+ "npm i -g github:sneaky-hippo/kolm-stack \
  && kolm compile '...' --examples ./labels.jsonl"</pre>
- <div class="links"><a href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/Dockerfile">Dockerfile</a></div>
+ <div class="links"><a href="https://github.com/sneaky-hippo/kolm-stack/blob/main/Dockerfile">Dockerfile</a></div>
  </div>
  </div>
  </div>
@@ -481,8 +481,8 @@ npm i -g github:sneaky-hippo/kolmogorov-stack</pre>
  <div class="ig" id="langchain-js">
  <div class="top"><h3>LangChain.js</h3><span class="stat">source package</span></div>
  <p>Drop-in <code>KolmLLM</code> that satisfies the LangChain LLM interface. <code>invokeWithReceipt(prompt)</code> returns <code>{ text, receipt }</code> so chains keep the receipt chain intact. Subprocess mode for local .kolm files, HTTP mode for hosted artifacts.</p>
- <pre>git clone https://github.com/sneaky-hippo/kolmogorov-stack
-npm i ./kolmogorov-stack/packages/langchain-kolm
+ <pre>git clone https://github.com/sneaky-hippo/kolm-stack
+npm i ./kolm-stack/packages/langchain-kolm
 import { KolmLLM } from '@kolm/langchain';
 const llm = new KolmLLM({ artifactPath: './ticket-classifier.kolm' });
 const { text, receipt } = await llm.invokeWithReceipt('refund #1234');</pre>
@@ -492,8 +492,8 @@ const { text, receipt } = await llm.invokeWithReceipt('refund #1234');</pre>
  <div class="ig" id="langchain-py">
  <div class="top"><h3>LangChain (Python)</h3><span class="stat">source package</span></div>
  <p>Same interface, Pythonic. <code>invoke_with_receipt(prompt)</code> returns a tuple. Works in LangGraph nodes, LangServe handlers, and plain scripts.</p>
- <pre>git clone https://github.com/sneaky-hippo/kolmogorov-stack
-pip install -e ./kolmogorov-stack/packages/python-langchain-kolm[langchain]
+ <pre>git clone https://github.com/sneaky-hippo/kolm-stack
+pip install -e ./kolm-stack/packages/python-langchain-kolm[langchain]
 from kolm_langchain import KolmLLM
 llm = KolmLLM(artifact_path='./ticket-classifier.kolm')
 text, receipt = llm.invoke_with_receipt('refund #1234')</pre>
@@ -503,8 +503,8 @@ text, receipt = llm.invoke_with_receipt('refund #1234')</pre>
  <div class="ig" id="llamaindex-js">
  <div class="top"><h3>LlamaIndex.TS</h3><span class="stat">source package</span></div>
  <p>Implements the LlamaIndex LLM protocol. <code>complete(prompt)</code> returns <code>{ text, raw }</code> where <code>raw.receipt</code> carries the kolm receipt chain. Ready to plug into a QueryEngine.</p>
- <pre>git clone https://github.com/sneaky-hippo/kolmogorov-stack
-npm i ./kolmogorov-stack/packages/llamaindex-kolm
+ <pre>git clone https://github.com/sneaky-hippo/kolm-stack
+npm i ./kolm-stack/packages/llamaindex-kolm
 import { KolmLLM } from '@kolm/llamaindex';
 const llm = new KolmLLM({ baseUrl: 'https://kolm.example', apiKey: 'k_...' });
 const r = await llm.complete('summarize this ticket');</pre>
@@ -514,8 +514,8 @@ const r = await llm.complete('summarize this ticket');</pre>
  <div class="ig" id="llamaindex-py">
  <div class="top"><h3>LlamaIndex (Python)</h3><span class="stat">source package</span></div>
  <p>Python LlamaIndex adapter exposing the same <code>invoke_with_receipt</code> interface as the LangChain one. Lets QueryEngines and SubQuestion agents speak to a compiled .kolm without losing the audit trail.</p>
- <pre>git clone https://github.com/sneaky-hippo/kolmogorov-stack
-pip install -e ./kolmogorov-stack/packages/python-llamaindex-kolm[llamaindex]
+ <pre>git clone https://github.com/sneaky-hippo/kolm-stack
+pip install -e ./kolm-stack/packages/python-llamaindex-kolm[llamaindex]
 from kolm_llamaindex import KolmLLM
 llm = KolmLLM(artifact_path='./classifier.kolm')
 r = llm.complete('summarize this ticket') # r.raw.receipt is the kolm receipt</pre>
@@ -535,7 +535,7 @@ r = llm.complete('summarize this ticket') # r.raw.receipt is the kolm receipt</p
 POST https://kolm.ai/v1/run
 authorization: Bearer $KOLM_API_KEY
 { "artifact": "ticket-classifier", "input": "{{trigger.body}}" }</pre>
- <div class="links"><a href="/docs/integrations/zapier">docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack/discussions">discussions</a></div>
+ <div class="links"><a href="/docs/integrations/zapier">docs</a><a href="https://github.com/sneaky-hippo/kolm-stack/discussions">discussions</a></div>
  </div>
 
  <div class="ig" id="make">
@@ -545,14 +545,14 @@ authorization: Bearer $KOLM_API_KEY
 POST https://kolm.ai/v1/run
 authorization: Bearer $KOLM_API_KEY
 { "artifact": "ticket-classifier", "input": "{{1.payload}}" }</pre>
- <div class="links"><a href="/docs/integrations/make">docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack/discussions">discussions</a></div>
+ <div class="links"><a href="/docs/integrations/make">docs</a><a href="https://github.com/sneaky-hippo/kolm-stack/discussions">discussions</a></div>
  </div>
  </div>
  </div>
 
  <div class="group" id="cta-row">
  <h2>Don't see your stack?</h2>
- <p class="kicker">Open a thread in <a href="https://github.com/sneaky-hippo/kolmogorov-stack/discussions" style="color:var(--accent);">GitHub Discussions</a>. RS-1 is open. The HTTP API is stable. The integration you need is usually thirty lines; we'll review the PR.</p>
+ <p class="kicker">Open a thread in <a href="https://github.com/sneaky-hippo/kolm-stack/discussions" style="color:var(--accent);">GitHub Discussions</a>. RS-1 is open. The HTTP API is stable. The integration you need is usually thirty lines; we'll review the PR.</p>
  </div>
 
  </div>

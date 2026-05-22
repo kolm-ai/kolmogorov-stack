@@ -5,9 +5,9 @@ First-party LlamaIndex adapter for kolm.ai compiled artifacts. Drop a `.kolm` in
 ## Install
 
 ```bash
-git clone https://github.com/sneaky-hippo/kolmogorov-stack
+git clone https://github.com/sneaky-hippo/kolm-stack
 cd your-app
-npm install ../kolmogorov-stack/packages/llamaindex-kolm llamaindex
+npm install ../kolm-stack/packages/llamaindex-kolm llamaindex
 ```
 
 The `@kolm/llamaindex` package name is the local package name. It is not published under Kolm control on npm yet, so install it from a checkout until a registry release is verified.

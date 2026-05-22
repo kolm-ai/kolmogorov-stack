@@ -32,11 +32,11 @@
  "url": "https://kolm.ai/spec",
  "author": {
  "@type": "Organization",
- "name": "Kolmogorov"
+ "name": "Kolm"
  },
  "publisher": {
  "@type": "Organization",
- "name": "Kolmogorov",
+ "name": "Kolm",
  "url": "https://kolm.ai"
  },
  "datePublished": "2026-05-09",
@@ -167,13 +167,13 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -186,7 +186,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -307,7 +307,7 @@
  <div class="top"><span class="name">Frontier reference</span><span class="tag">research</span></div>
  <p class="desc">The forty-two techniques kolm ships, grouped by training, decoding, serving, evaluation, data, and observability. Paper, file path, and gating condition for each.</p>
  </a>
- <a class="card" href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/public/docs/rs-1.md" rel="noopener">
+ <a class="card" href="https://github.com/sneaky-hippo/kolm-stack/blob/main/public/docs/rs-1.md" rel="noopener">
  <div class="top"><span class="name">Source on GitHub</span><span class="tag">MIT</span></div>
  <p class="desc">Read the spec on GitHub, propose changes via PR, raise issues against the language.</p>
  </a>
@@ -345,7 +345,7 @@
  <h2>RFC process</h2>
  <p>RS-1 is the floor; everything beyond gets a numbered RFC.</p>
  <ul>
- <li><strong>Open</strong> a discussion on <a href="https://github.com/sneaky-hippo/kolmogorov-stack/discussions" rel="noopener" style="color:var(--ink);text-decoration:underline">GitHub Discussions</a>. One paragraph: what changes, what breaks.</li>
+ <li><strong>Open</strong> a discussion on <a href="https://github.com/sneaky-hippo/kolm-stack/discussions" rel="noopener" style="color:var(--ink);text-decoration:underline">GitHub Discussions</a>. One paragraph: what changes, what breaks.</li>
  <li><strong>Draft</strong> a PR against <code>public/docs/</code> with the new spec as <code>rs-N.md</code> and a JSON Schema if applicable. Mark the prose as <em>draft</em> in the front matter.</li>
  <li><strong>Iterate</strong> until the breaking-change column is empty or unanimous. Two reviewers sign off.</li>
  <li><strong>Promote</strong> by removing the draft marker and bumping the registry signature key version. The reproducibility floor (§6 of RS-1) holds across the bump.</li>

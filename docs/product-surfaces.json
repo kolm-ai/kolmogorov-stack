@@ -236,7 +236,8 @@
         "pricing",
         "stripe",
         "team",
-        "teams"
+        "teams",
+        "scim"
       ],
       "primary_paths": [
         "/signup",
@@ -394,8 +395,10 @@
         "/docs",
         "/docs/api",
         "/openapi.json",
+        "/product-readiness-closeout.json",
         "/sdk-current.json",
         "/v1/product/experience",
+        "/v1/product/graph",
         "/v1/spec"
       ],
       "code_paths": [
@@ -403,6 +406,7 @@
         "src/product-experience.js",
         "scripts/build-api-ref.cjs",
         "scripts/build-openapi.cjs",
+        "scripts/build-readiness-closeout.cjs",
         "scripts/build-sdk-version.js",
         "public/docs/api-routes.json"
       ],
@@ -507,6 +511,32 @@
           "checks": [
             "json",
             "api-routes"
+          ]
+        },
+        {
+          "id": "product-graph",
+          "method": "GET",
+          "path": "/v1/product/graph",
+          "auth": "none",
+          "mode": "safe",
+          "expect": [
+            200
+          ],
+          "checks": [
+            "json"
+          ]
+        },
+        {
+          "id": "product-readiness-closeout",
+          "method": "GET",
+          "path": "/product-readiness-closeout.json",
+          "auth": "none",
+          "mode": "safe",
+          "expect": [
+            200
+          ],
+          "checks": [
+            "json"
           ]
         },
         {

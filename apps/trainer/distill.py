@@ -5,9 +5,9 @@ Response distillation. Train a small student to imitate a large teacher by
 matching the teacher's next-token distribution at every position, not just its
 sampled token.
 
-This is the algorithm the kolm brand is literally named after: Kolmogorov
-complexity is about compressing a string into the shortest program that emits
-it; response distillation is about compressing a 70B teacher's behavior into
+This is the compression idea behind the kolm brand: describe a system with the
+shortest reliable program that reproduces it. Response distillation compresses
+a 70B teacher's behavior into
 a 3B student that emits the same token distribution on the buyer's prompts.
 
 The pipeline is:

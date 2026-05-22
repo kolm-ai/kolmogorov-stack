@@ -3,7 +3,7 @@ mark across every public/*.html page. Idempotent."""
 import re
 from pathlib import Path
 
-ROOT = Path("C:/Users/user/Desktop/kolmogorov-stack/public")
+ROOT = Path(__file__).resolve().parents[1] / "public"
 
 # match the K-letterform path in any svg of viewBox 0 0 24 24, regardless of
 # extra attributes or whitespace

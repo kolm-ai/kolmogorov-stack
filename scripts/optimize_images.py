@@ -4,7 +4,7 @@ or older than the PNG."""
 from pathlib import Path
 from PIL import Image
 
-ROOT = Path("C:/Users/user/Desktop/kolmogorov-stack/public/img")
+ROOT = Path(__file__).resolve().parents[1] / "public" / "img"
 
 TARGETS = [
     "hero-artifact.png",

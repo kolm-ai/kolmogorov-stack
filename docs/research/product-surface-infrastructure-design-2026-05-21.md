@@ -17418,7 +17418,7 @@ This appendix intentionally names the repo-local product IDs verbatim so future 
 - Readiness group `capture-gateway-lake`
   - P0 `openai-anthropic-gateway` status `shipped`: OpenAI-compatible and Anthropic-native gateway/capture paths both exist and are not OpenAI-only.
   - P0 `zero-retention-mode` status `shipped`: Per-request zero-retention/no-store mode forwards calls without persisting capture/event rows.
-  - P1 `capture-filtering` status `shipped`: Operators can reduce lake noise by filtering captured events by provider/model/status/latency/namespace.
+  - P1 `capture-filtering` status `shipped`: Operators can reduce lake noise by filtering captured calls by provider/model/status/latency/namespace.
   - P0 `event-lake-schema` status `implemented`: Local event lake has canonical schema, spend, latency, redaction, provider, and exportable rows.
   - P0 `redaction-quality` status `needs_public_benchmark_data`: PII/PHI redaction is fail-closed and class-counted; public F1 methodology still needs published benchmark data.
   - P1 `differential-privacy` status `shipped`: Lake aggregates can be returned with deterministic Laplace differential privacy noise.

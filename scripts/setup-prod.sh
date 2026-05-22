@@ -5,14 +5,14 @@
 #   bash scripts/setup-prod.sh
 #
 # This requires the railway CLI to be linked to the kolm project:
-#   railway link --project kolmogorov-stack
+#   railway link --project kolm-stack
 #
 # Anything left as <YOURS> is skipped — re-run after you create the OAuth
 # apps / Resend API key / etc. Idempotent.
 
 set -euo pipefail
 
-SERVICE="kolmogorov-stack"
+SERVICE="${RAILWAY_SERVICE:-kolm-stack}"
 
 # Source the operator's production env file if present. This file is .gitignored
 # (covered by .env.* in .gitignore) — paste the live Stripe payment-link URLs +
@@ -73,7 +73,7 @@ set_var OAUTH_REDIRECT_BASE "${OAUTH_REDIRECT_BASE:-https://kolm.ai}"
 # Required for /ready to return ready in production. KOLM_DATA_DIR must point
 # at a writable path. Without a Railway volume mounted at /data this is
 # ephemeral (wiped on every restart); add the volume after first launch:
-#   railway volume add --mount-path /data --service kolmogorov-stack
+#   railway volume add --mount-path /data --service "$SERVICE"
 # then change these to /data and /data/artifacts.
 set_var KOLM_DATA_DIR        "/app/data"
 set_var KOLM_ARTIFACT_DIR    "/app/data/artifacts"

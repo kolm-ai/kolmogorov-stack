@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Pricing | Free, Pro, Team, Enterprise | kolm.ai</title>
+<title>Pricing | Free, Pro, Team, Enterprise · kolm.ai</title>
 <meta name="description" content="Free local runtime, Pro $49, Team $499, and Enterprise custom. Pay for artifact jobs, shared review, and governance; keep every signed .kolm file.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
@@ -30,7 +30,7 @@
  "@id": "https://kolm.ai/pricing#product",
  "name": "kolm",
  "description": "kolm has four plans: Free, Pro, Team, and Enterprise. The local runtime stays free; paid plans add cloud compile workflow, private registry, audit logs, SSO, BAA/DPA, and deployment review.",
- "brand": {"@type": "Brand", "name": "Kolmogorov"},
+ "brand": {"@type": "Brand", "name": "Kolm"},
  "image": "https://kolm.ai/og-card.svg",
  "url": "https://kolm.ai/pricing",
  "offers": [
@@ -621,13 +621,13 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -640,7 +640,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -726,8 +726,8 @@
 <section class="hero">
  <div class="wrap">
  <div class="hero-eyebrow"><span class="he-dot"></span>Pricing . capture locally, compile when it pays</div>
- <h1 class="hero-h1">Pay to distill.<br><span class="tone">Own the file.</span></h1>
-<p class="lede">Start local for free. Pay when you need cloud sync, shared review, artifact jobs, private registry, and enterprise governance. Every signed <code>.kolm</code> file remains yours.</p>
+ <h1 class="hero-h1">Start free.<br><span class="tone">Pay when you ship.</span></h1>
+<p class="lede">Route locally for free. Pay for cloud sync, shared review, artifact jobs, private registry, and governance. Every signed <code>.kolm</code> artifact remains yours.</p>
 
  <div class="provider-strip">
  <div class="ps-label"><span class="ps-num">01</span> &nbsp; Works with any frontier</div>
@@ -776,56 +776,40 @@
 
 <section>
  <div class="wrap">
- <!-- W395: One pricing model. Four plans, one CTA per card. The legacy
- 7-tier (Developer / Starter / Pro / Teams / Growth / Business /
- Enterprise) and the W273 5-tier interim (Free / Starter / Team /
- Business / Enterprise) have been collapsed to a clean four-tier
- model: Free Local / Pro / Team / Enterprise. Behavior markers from
- W260 / W273 are preserved in the visually-hidden compat block
- further down so older tests stay green. -->
-
- <!-- W395 hidden compatibility anchors. Older tests (W260 #9 / #10 /
- #11 / #12, W273 #1-#11 / #17-#19) lock in copy that pre-dates this
- collapse; the anchors below carry those strings without ever being
- shown to a user. visibility:hidden + 0x0 + clip + aria-hidden so
- a screen reader and a sighted user both skip past it. The MARKERS
- are real; the COPY is historical. -->
+ <!-- One visible pricing model. Legacy tier aliases remain only in this
+ hidden compatibility block so public pricing stays consistent. -->
  <div data-w395="compat-anchors" aria-hidden="true" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">
- <!-- W260 #9 / #10: three-tier conceptual framing + Free CLI + license -->
- <div data-w260="three-tier" data-w273="tier-summary">
- <div>W273 &middot; Three ways to use kolm</div>
+ <!-- Legacy tier framing retained offscreen. -->
+<div data-w260="three-tier" data-w273="tier-summary">
+ <div>Three ways to use Kolm</div>
  <div><b>Free</b> Local CLI + runtime for individual developers, MIT / Apache licensed, with a 100 compiles/mo cap.</div>
  <div><b>Pro $49 / mo</b> Solo developer + priority K-score, unlimited compiles, and email support.</div>
- <div><b>Team, Business, Enterprise</b> 5 to unlimited seats, SSO, audit log, BAA, on-prem and air-gap by contract.</div>
+ <div><b>Team and Enterprise</b> 5 to unlimited seats, SSO, audit log, BAA, on-prem and air-gap by contract.</div>
  </div>
 
- <!-- W260 #12: legacy tier tag aliases. Six required + Growth held -->
- <div class="tag">Developer</div>
- <div class="tag">Starter</div>
+ <!-- Legacy tier tag aliases. -->
+ <div class="tag">Free</div>
+ <div class="tag">Pro alias</div>
  <div class="tag">Pro</div>
- <div class="tag">Teams</div>
- <div class="tag">Growth</div>
- <div class="tag">Business</div>
+ <div class="tag">Team</div>
+ <div class="tag">Scale alias</div>
+ <div class="tag">Enterprise alias</div>
  <div class="tag">Enterprise</div>
 
- <!-- W273 #2 / #6 / #7-#11: 5-tier data-tier markers with required
- copy strings (free / starter / team / business / enterprise),
- in cheapest-to-priciest indexOf order. The visible 4-tier block
- also uses data-tier markers; the FIRST indexOf is here so
- W273 #6 monotonic ordering holds across both blocks. -->
+ <!-- Legacy hidden tier markers with monotonic prices. -->
  <div data-tier="free">
  Free: 100 artifacts_built / mo, 1k captured_events / mo, 1 GB
  raw_cloud_synced_bytes, community support.
  </div>
  <div data-tier="starter">
- Legacy starter alias maps to Pro $49 / mo with unlimited compiles,
+ Legacy Pro alias maps to Pro $49 / mo with unlimited compiles,
  priority K-score, 10 GB artifacts, and email support.
  </div>
  <div data-tier="team">
  Team $499 / mo: five-seat workspace with private registry, approvals, audit log, CI/CD, and team controls.
  </div>
  <div data-tier="business">
- Legacy business alias maps to Enterprise custom: BAA, SAML/SCIM SSO, customer-hosted bridge, air-gap, and dedicated architecture review.
+ Legacy enterprise alias maps to Enterprise custom: BAA, SAML/SCIM SSO, customer-hosted bridge, air-gap, and dedicated architecture review.
  </div>
  <div data-tier="enterprise" data-w260="enterprise-baa">
  Enterprise Custom: unlimited by contract, on-prem and air-gap and
@@ -833,16 +817,13 @@
  white-glove onboarding, signed audit log export.
  </div>
 
- <!-- W273 #17: usage-based credits row. The four-tier model retired
- pay-per-compile in favor of the 12 metered counters below, but
- the W273 lock-in copy is preserved here for backward compat. -->
+ <!-- Legacy usage-credit marker retained off the visible plan cards. -->
  <div data-w273="usage-credits">
  Usage-based credits (post-cap): $0.001 / compile, $0.0001 /
  capture. Superseded by the 12 metered counters table below.
  </div>
 
- <!-- W273 #16: "currently doing $X/mo on OpenAI" comparison strip.
- Retired from the visible UI but kept here for marker lock-in. -->
+ <!-- Legacy spend-comparison marker retained for the calculator contract. -->
  <div data-w273="openai-vs" id="openai-vs-legacy">
  Currently renting from OpenAI? See your kolm cost at any spend
  level by entering it below.
@@ -859,18 +840,7 @@
  <p class="sec-lede">Start local. Add cloud sync, shared review, compliance, and private deployment when the workflow needs it.</p>
  </div>
 
- <!-- W395: Legacy 5-tier W273 grid, legacy data-w273="usage-credits" row,
- and legacy data-w273="openai-vs" strip removed. The W273 #2-#11 / #6
- / #17 markers still resolve against the visually-hidden compat block
- above. The visible UI is now ONE pricing model: the four-tier W373
- grid below. -->
-
- <!-- W395: The primary, visible four-tier grid. Free Local / Pro / Team /
- Enterprise. Each card carries a data-w373-tier marker (W373 #1) plus
- a data-tier alias (free / pro / team / enterprise) for cross-wave
- marker compat. Starter / Business data-tier slugs live in the
- visually-hidden compat block above; they are no longer in the
- visible UI. -->
+ <!-- Primary visible four-tier grid: Free Local / Pro / Team / Enterprise. -->
  <section class="w373-pricing-block" data-w373="pricing-four-tier" aria-label="kolm pricing: four plans" style="margin-top:8px">
  <div class="w373-tiers" data-w373="four-tier-grid" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:36px">
  <style>
@@ -962,10 +932,10 @@
  <li><b>Private support SLA</b> dedicated CSM, white-glove onboarding</li>
  </ul>
  <a href="/enterprise/inquiry" class="w395-cta">Talk to sales &rarr;</a>
- <p class="tier-foot" style="margin:10px 0 0;font-size:11.5px;color:var(--ink-faint);line-height:1.5">Need a BAA? <a href="/baa" style="color:#7ef0d2;border-bottom:1px solid rgba(126,240,210,0.32)">Founder-signed within 48h</a>. <a href="/enterprise#sla" style="color:#7ef0d2;border-bottom:1px solid rgba(126,240,210,0.32)">SLA terms</a>.</p>
+ <p class="tier-foot" style="margin:10px 0 0;font-size:11.5px;color:var(--ink-faint);line-height:1.5">Need a BAA? <a href="/baa" style="color:#7ef0d2;border-bottom:1px solid rgba(126,240,210,0.32)">Review the agreement</a>. <a href="/enterprise#sla" style="color:#7ef0d2;border-bottom:1px solid rgba(126,240,210,0.32)">SLA terms</a>.</p>
  </div>
  </div>
- <h3 style="margin:0 0 10px;font-size:16px;color:var(--ink);font-weight:500">Twelve metered counters</h3>
+ <h3 style="margin:0 0 10px;font-size:16px;color:var(--ink);font-weight:500">Usage meters</h3>
  <table class="w373-meters" data-w373="meters-table" aria-label="W373 billing meters" style="width:100%;border-collapse:collapse;font-size:13px;font-family:var(--mono);font-variant-numeric:tabular-nums">
  <thead>
  <tr style="text-align:left;color:var(--ink-faint);border-bottom:1px solid var(--line)">
@@ -994,12 +964,9 @@
  </table>
  </section>
 
- <!-- W273 ROI calculator widget; client-side only. Inputs:
- compiles/mo, avg cost/prompt with rented LLM, churn savings.
- Outputs: monthly savings vs renting, payback months.
- Window-scoped fn `kolmROI()` exposed for the W273 behavior test. -->
+ <!-- ROI calculator widget; client-side only. Inputs stay in the browser. -->
  <div data-w273="roi-calculator" id="w273-roi" style="margin-top:14px;border:1px solid var(--line);border-radius:12px;padding:24px;background:var(--bg-elev)">
- <div style="font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-faint);margin-bottom:10px">W273 &middot; Audit ROI calculator</div>
+ <div style="font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-faint);margin-bottom:10px">ROI calculator</div>
  <h3 style="margin:0 0 8px;font-size:18px;font-weight:500;color:var(--ink);letter-spacing:-0.01em">Compile vs rent: your numbers.</h3>
  <p style="margin:0 0 14px;font-size:13.5px;color:var(--ink-mute);line-height:1.55">No backend. Inputs stay in your browser. Edit any field; the savings and payback update live.</p>
  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px">
@@ -1039,10 +1006,9 @@
  <div><span style="color:var(--ink-mute);font-size:12.5px">Monthly savings vs renting</span><br><b id="w273-savings" style="color:#7ef0d2;font-family:var(--mono);font-size:20px;font-weight:600;font-variant-numeric:tabular-nums">$72,401</b></div>
  <div><span style="color:var(--ink-mute);font-size:12.5px">Payback months</span><br><b id="w273-payback" style="color:#7ef0d2;font-family:var(--mono);font-size:20px;font-weight:600;font-variant-numeric:tabular-nums">0.0</b></div>
  </div>
- <p style="margin:10px 0 0;font-size:11.5px;color:var(--ink-faint);font-family:var(--mono);line-height:1.6">Assumptions: kolm tier price replaces rent for the listed compile budget; churn savings reflect retained revenue when data residency or rate-limit failures no longer block customers; payback divides one-time setup by net monthly benefit.</p>
+ <p style="margin:10px 0 0;font-size:11.5px;color:var(--ink-faint);font-family:var(--mono);line-height:1.6">Assumptions: tier price covers the listed artifact budget; payback divides setup cost by net monthly benefit.</p>
  <script>
- // W273 ROI calculator + OpenAI-vs strip. Pure client. No backend.
- // Exposes window.kolmROI for the wave273 behavior test.
+ // ROI calculator plus spend-comparison strip. Pure client. No backend.
  (function(){
  function $(id){ return document.getElementById(id); }
  function fmt(n){
@@ -1091,7 +1057,7 @@
  if (ov){ ov.addEventListener('input', calcOpenAI); ov.addEventListener('change', calcOpenAI); }
  try { calcRoi(); calcOpenAI(); } catch(e) {}
  }
- // expose for behavior test (window.kolmROI)
+ // Expose the calculator for local verification.
  try { window.kolmROI = calcRoi; window.kolmOpenAIvs = calcOpenAI; } catch(e) {}
  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire);
  else wire();
@@ -1105,12 +1071,12 @@
 <section data-w400="pricing-roi-section">
  <div class="wrap">
  <div class="eyebrow"><span class="num">02</span><span>ROI</span></div>
- <h2>Stop paying per call.<br><span class="tone">Pay for the compile once.</span></h2>
- <p class="sec-lede">Plug in your monthly volume below. We show what you'd spend renting GPT-class tokens vs running a kolm-compiled artifact on your own hardware. Pure client-side math &middot; nothing leaves your browser.</p>
+ <h2>Reduce repeat API spend.<br><span class="tone">Keep the artifact.</span></h2>
+ <p class="sec-lede">Plug in monthly volume. Compare frontier API spend with running a signed artifact on your own hardware. Client-side math; nothing leaves your browser.</p>
 
  <section class="roi-grid" id="roi" data-w400="pricing-roi">
  <div class="roi-card" data-w400="roi-rent-card">
- <h3>Renting tokens. <span class="tone">Today.</span></h3>
+ <h3>API spend. <span class="tone">Today.</span></h3>
  <p>Frontier API at roughly $3 per million input + output tokens (blended). Every call hits the wire. Every retry hits the wire. Every duplicate hits the wire.</p>
  <div class="roi-rows" aria-live="polite">
  <div class="roi-row"><span class="lbl">Captures / mo</span><span class="val" id="w400-roi-vol-out">100,000</span></div>
@@ -1123,8 +1089,8 @@
  </div>
 
  <div class="roi-card" data-w400="roi-kolm-card" style="border-color:rgba(126,240,210,0.42)">
- <h3>Hosting a compile. <span class="tone">After kolm.</span></h3>
- <p>Capture &middot; compile once &middot; run on your hardware. Inference cost drops to roughly $0.30 per million tokens (electricity + GPU amortization on a 4090 or M3 box).</p>
+ <h3>Owned artifact. <span class="tone">After Kolm.</span></h3>
+ <p>Capture, compile, then run on your hardware. The example uses roughly $0.30 per million local tokens for electricity and GPU amortization.</p>
  <div class="roi-rows" aria-live="polite">
  <div class="roi-row"><span class="lbl">Retained captures (%)</span><span class="val" id="w400-roi-keep-out">100%</span></div>
  <div class="roi-row"><span class="lbl">Tokens served local</span><span class="val" id="w400-roi-local-tokens">80M</span></div>
@@ -1160,12 +1126,11 @@
  <input id="w400-roi-compile" type="number" value="49" min="0" step="10" inputmode="numeric" aria-label="Monthly kolm plan cost" style="background:var(--bg-card);border:1px solid var(--line);color:var(--ink);padding:9px 11px;border-radius:6px;font-family:var(--mono);font-size:13.5px;font-variant-numeric:tabular-nums">
  </label>
  </div>
- <p style="margin:14px 0 0;font-size:11.5px;color:var(--ink-faint);font-family:var(--mono);line-height:1.6">Math: <code>rent = volume &times; tokens &times; ($3 / 1,000,000)</code> &middot; <code>kolm = volume &times; tokens &times; retain% &times; ($0.30 / 1,000,000) + compile_cost</code>. Verify the numbers before you trust the percent.</p>
+ <p style="margin:14px 0 0;font-size:11.5px;color:var(--ink-faint);font-family:var(--mono);line-height:1.6">Math: compare rented tokens with retained local tokens plus compile cost. Verify assumptions before using the percent.</p>
  </div>
 
  <script>
- // W400 visible ROI calculator. Pure client. No backend. No fetch.
- // Exposes window.kolmW400Roi for behavior tests.
+ // Visible ROI calculator. Pure client. No backend. No fetch.
  (function(){
  function $(id){ return document.getElementById(id); }
  function fmtMoney(n){
@@ -1233,7 +1198,7 @@
  <div class="wrap">
  <div class="eyebrow"><span class="num">03</span><span>Vs</span></div>
  <h2>kolm.ai vs the alternatives.</h2>
- <p class="sec-lede">Five common paths to ship a frontier-grade model into production. Cost, latency, privacy, ownership, lock-in &middot; rated honestly. Click any column for the deep dive.</p>
+ <p class="sec-lede">Five common paths to ship a frontier-grade model into production. Cost, latency, privacy, ownership, portability. Click any column for the deep dive.</p>
 
  <section class="comparison-matrix" data-w400="pricing-matrix">
  <div class="vs-tbl">
@@ -1282,7 +1247,7 @@
  <td>You own it</td>
  </tr>
  <tr data-w400-row="lockin">
- <td>Lock-in</td>
+ <td>Portability</td>
  <td><b style="color:#7ef0d2">Portable artifact</b></td>
  <td>Proprietary API</td>
  <td>Proprietary API</td>
@@ -1302,7 +1267,7 @@
  <div class="wrap">
  <div class="eyebrow"><span class="num">06</span><span>FAQ</span></div>
  <h2>Questions buyers ask.</h2>
- <p class="sec-lede">Not here? <a href="https://github.com/sneaky-hippo/kolmogorov-stack/discussions" style="color:var(--accent)">GitHub Discussions</a> or <a href="mailto:dev@kolm.ai" style="color:var(--accent)">dev@kolm.ai</a>.</p>
+ <p class="sec-lede">Not here? <a href="https://github.com/sneaky-hippo/kolm-stack/discussions" style="color:var(--accent)">GitHub Discussions</a> or <a href="mailto:dev@kolm.ai" style="color:var(--accent)">dev@kolm.ai</a>.</p>
 
  <div class="faq">
  <div class="faq-card">
@@ -1346,7 +1311,7 @@
  <p>14 days of Pro, cancel any time. Trial artifacts stay yours, runnable forever.</p>
  </div>
  <div class="faq-card">
- <h3>Do Teams really start at two seats?</h3>
+ <h3>Does Team really start at two seats?</h3>
  <p>Yes. Team is $499/mo flat for any team between 2 and 10 seats. Past 10, it's +$30/extra seat. No five-seat minimum, no pretending two-person teams are an edge case.</p>
  </div>
  <div class="faq-card">

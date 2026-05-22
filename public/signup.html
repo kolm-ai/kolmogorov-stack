@@ -4,7 +4,7 @@
  (signin.html does NOT exist as a separate file). The H1, copy, and form CTA
  swap based on document.location.pathname at load time (see #signin-swap and
  the auth-swap script below). If you "refactor" by splitting these into two
- files, the URL-aware swap script becomes dead code — keep them merged unless
+ files, the URL-aware swap script becomes dead code  - keep them merged unless
  you also rewrite the route handlers in vercel.json.
 -->
 <html lang="en" style="background:#08090c;color-scheme:dark">
@@ -102,104 +102,104 @@
 <header class="site-header">
  <div class="wrap">
  <a href="/" class="brand"><span>kolm.ai</span></a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
-    <!-- KOLM_NAV_BEGIN (W221) -->
-    <nav class="site-nav" aria-label="Primary">
-    <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
-      <div class="mega-menu" role="menu" aria-label="product menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/product">Overview</a>
-          <a href="/quickstart">Quickstart</a>
-          <a href="/capture">Gateway</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Distill</p>
-          <a href="/training">Training</a>
-          <a href="/distill">Distill</a>
-          <a href="/compile">Compile</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Run</p>
-          <a href="/runtimes">Runtimes</a>
-          <a href="/docs/devices">Devices</a>
-          <a href="/trust">Verify</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--models has-mega">
-      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
-      <div class="mega-menu" role="menu" aria-label="models menu">
-        <div class="mega-col">
-          <p class="mega-h">Choose</p>
-          <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
-          <a href="/docs/runtime">Runtime targets</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/compute">Compute</a>
-          <a href="/runtimes">Mobile and edge</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
-      <div class="mega-menu" role="menu" aria-label="docs menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/capture">API gateway</a>
-          <a href="/docs/cli">CLI</a>
-          <a href="/docs/sdk">SDKs</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Reference</p>
-          <a href="/docs">Docs home</a>
-          <a href="/docs/api">API reference</a>
-          <a href="/api">HTTP routes</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Operate</p>
-          <a href="/integrations">Integrations</a>
-          <a href="/docs/privacy">Privacy membrane</a>
-          <a href="/docs/datasets">Datasets</a>
-          <a href="/docs/distillation">Distillation</a>
-          <a href="/docs/verify">Verification</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
-      <div class="mega-menu" role="menu" aria-label="pricing menu">
-        <div class="mega-col">
-          <p class="mega-h">Buy</p>
-          <a href="/pricing">Plans</a>
-          <a href="/pricing#roi">ROI calculator</a>
-          <a href="/nonprofits">Nonprofits</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
-      <div class="mega-menu" role="menu" aria-label="enterprise menu">
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/enterprise">Enterprise overview</a>
-          <a href="/self-host">Self-host</a>
-          <a href="/airgap">Air-gap</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Trust</p>
-          <a href="/trust">Trust center</a>
-          <a href="/security">Security</a>
-          <a href="/compliance">Compliance</a>
-          <a href="/baa">BAA</a>
-        </div>
-      </div>
-    </div>
-    </nav>
-    <!-- KOLM_NAV_END (W221) -->
+  <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+  <!-- KOLM_NAV_BEGIN (W221) -->
+  <nav class="site-nav" aria-label="Primary">
+  <div class="nav-item nav-item--product has-mega">
+  <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+  <div class="mega-menu" role="menu" aria-label="product menu">
+  <div class="mega-col">
+  <p class="mega-h">Start</p>
+  <a href="/product">Overview</a>
+  <a href="/quickstart">Quickstart</a>
+  <a href="/capture">Gateway</a>
+  </div>
+  <div class="mega-col">
+  <p class="mega-h">Build</p>
+  <a href="/training">Training</a>
+  <a href="/distill">Distill</a>
+  <a href="/compile">Compile</a>
+  </div>
+  <div class="mega-col">
+  <p class="mega-h">Deploy</p>
+  <a href="/runtimes">Runtimes</a>
+  <a href="/docs/devices">Devices</a>
+  <a href="/trust">Verify</a>
+  </div>
+  </div>
+  </div>
+  <div class="nav-item nav-item--models has-mega">
+  <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+  <div class="mega-menu" role="menu" aria-label="models menu">
+  <div class="mega-col">
+  <p class="mega-h">Choose</p>
+  <a href="/models">Model catalog</a>
+  <a href="/build-your-own">Build your own</a>
+  <a href="/docs/runtime">Runtime targets</a>
+  </div>
+  <div class="mega-col">
+  <p class="mega-h">Deploy</p>
+  <a href="/compute">Compute</a>
+  <a href="/runtimes">Mobile and edge</a>
+  </div>
+  </div>
+  </div>
+  <div class="nav-item nav-item--docs has-mega">
+  <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+  <div class="mega-menu" role="menu" aria-label="docs menu">
+  <div class="mega-col">
+  <p class="mega-h">Start</p>
+  <a href="/capture">API gateway</a>
+  <a href="/docs/cli">CLI</a>
+  <a href="/docs/sdk">SDKs</a>
+  </div>
+  <div class="mega-col">
+  <p class="mega-h">Reference</p>
+  <a href="/docs">Docs home</a>
+  <a href="/docs/api">API reference</a>
+  <a href="/api">HTTP routes</a>
+  </div>
+  <div class="mega-col">
+  <p class="mega-h">Operate</p>
+  <a href="/integrations">Integrations</a>
+  <a href="/docs/privacy">Privacy membrane</a>
+  <a href="/docs/datasets">Datasets</a>
+  <a href="/docs/distillation">Distillation</a>
+  <a href="/docs/verify">Verification</a>
+  </div>
+  </div>
+  </div>
+  <div class="nav-item nav-item--pricing has-mega">
+  <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+  <div class="mega-menu" role="menu" aria-label="pricing menu">
+  <div class="mega-col">
+  <p class="mega-h">Buy</p>
+  <a href="/pricing">Plans</a>
+  <a href="/pricing#roi">ROI calculator</a>
+  <a href="/nonprofits">Nonprofits</a>
+  </div>
+  </div>
+  </div>
+  <div class="nav-item nav-item--enterprise has-mega">
+  <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+  <div class="mega-menu" role="menu" aria-label="enterprise menu">
+  <div class="mega-col">
+  <p class="mega-h">Deploy</p>
+  <a href="/enterprise">Enterprise overview</a>
+  <a href="/self-host">Self-host</a>
+  <a href="/airgap">Air-gap</a>
+  </div>
+  <div class="mega-col">
+  <p class="mega-h">Trust</p>
+  <a href="/trust">Trust center</a>
+  <a href="/security">Security</a>
+  <a href="/compliance">Compliance</a>
+  <a href="/baa">BAA</a>
+  </div>
+  </div>
+  </div>
+  </nav>
+  <!-- KOLM_NAV_END (W221) -->
  <div class="site-actions"><a href="/">home</a></div>
  </div>
 </header>
@@ -289,7 +289,7 @@
  <div class="cli-details-body">
  <div id="cli-bridge">
  <div style="font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px">Use it from the CLI</div>
- <pre id="cli-snippet" style="margin:0;padding:12px 14px;background:#0b0d10;border:1px solid var(--line);border-radius:8px;color:#7ef0d2;font-family:var(--mono);font-size:13px;overflow-x:auto;white-space:pre;line-height:1.55"><code id="cli-snippet-code">npm i -g github:sneaky-hippo/kolmogorov-stack
+ <pre id="cli-snippet" style="margin:0;padding:12px 14px;background:#0b0d10;border:1px solid var(--line);border-radius:8px;color:#7ef0d2;font-family:var(--mono);font-size:13px;overflow-x:auto;white-space:pre;line-height:1.55"><code id="cli-snippet-code">npm i -g github:sneaky-hippo/kolm-stack
 kolm login --key ks_...
 kolm init
 kolm new my-skill --from classifier
@@ -421,11 +421,11 @@ kolm compile --spec my-skill.spec.json</code></pre>
  if (isSignup) {
  if (t) t.textContent = 'Create your account.';
  if (s) s.textContent = 'One click with Google or GitHub. Free, Pro, and Team are self-serve. Enterprise begins with an architecture review.';
- try { document.title = 'Sign up ·kolm'; } catch (_) {}
+ try { document.title = 'Sign up - kolm'; } catch (_) {}
  } else {
  if (t) t.textContent = 'Sign in to kolm.';
  if (s) s.textContent = 'Welcome back. One click with Google or GitHub, or paste your API key.';
- try { document.title = 'Sign in ·kolm'; } catch (_) {}
+ try { document.title = 'Sign in - kolm'; } catch (_) {}
  }
  })();
 
@@ -549,13 +549,12 @@ kolm compile --spec my-skill.spec.json</code></pre>
  saveKey(key);
  $('key-value').textContent = key;
  $('key-display').hidden = false;
- // Bridge to CLI: paste the real key into the snippet so it is one copy away
- // from a working `kolm login`. HD got stuck here without this.
+ // Bridge to CLI: paste the real key into the snippet so setup is one copy away.
  try {
  var snippet = $('cli-snippet-code');
  if (snippet) {
  snippet.textContent =
- 'npm i -g github:sneaky-hippo/kolmogorov-stack\n' +
+ 'npm i -g github:sneaky-hippo/kolm-stack\n' +
  'kolm login --key ' + key + '\n' +
  'kolm init\n' +
  'kolm new my-skill --from classifier\n' +
@@ -579,7 +578,7 @@ kolm compile --spec my-skill.spec.json</code></pre>
  // post-key surface stays focused on payment completion.
  var trainBtn = $('cta-train');
  var dashBtn = $('cta-dashboard');
- if (trainBtn) trainBtn.textContent = 'Skip for now →';
+ if (trainBtn) trainBtn.textContent = 'Skip for now ->';
  if (dashBtn) dashBtn.hidden = true;
  show('ok', planLabel + ' account on hold. Save your key, then complete payment.');
  setTimeout(function(){

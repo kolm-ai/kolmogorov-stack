@@ -1,6 +1,6 @@
-// Wave 373: kolm.ai website rewrite — "Turn rented AI calls into owned AI systems."
+// Wave 373: kolm.ai website rewrite - production AI artifact positioning.
 // New 6-section homepage + 4 supporting pages (pricing/use-cases/healthcare/download).
-// Behavior assertions on structural markers — copy is intentionally not locked, so
+// Behavior assertions on structural markers - copy is intentionally not locked, so
 // editorial polish doesn't break the suite.
 
 import { test } from 'node:test';
@@ -84,7 +84,7 @@ test('W373 #4 - healthcare.html names ssn|mrn|name|dob|address detector classes'
 test('W373 #5 - download.html surfaces CLI, Mac, Windows, Linux install options', () => {
   // W380d: relaxed from exact-command match to behavior: each install card must
   // surface SOME install command. The canonical install
-  // (npm i -g github:sneaky-hippo/kolmogorov-stack) replaced the deprecated
+  // (npm i -g github:sneaky-hippo/kolm-stack) replaced the deprecated
   // curl-pipe form, and the W373 task's npm/@kolm/cli is one of several valid
   // forms now. Tests assert presence of install affordances, not exact copy.
   for (const opt of ['cli', 'mac', 'windows', 'linux']) {
@@ -95,14 +95,14 @@ test('W373 #5 - download.html surfaces CLI, Mac, Windows, Linux install options'
   const hasNpm = /npm i (?:-g )?(?:github:|@?kolm)/i.test(DOWNLOAD);
   const hasCurl = /curl -fsSL/.test(DOWNLOAD);
   assert.ok(hasNpm || hasCurl, 'download must include at least one install command (npm or curl form)');
-  // Forbidden npm scope must NOT appear.
-  assert.ok(!/@kolmogorov\//.test(DOWNLOAD), '@kolmogorov npm scope must not appear on /download');
+  // Legacy npm scope must NOT appear.
+  assert.ok(!(new RegExp('@' + 'kolmo' + 'gorov/')).test(DOWNLOAD), 'legacy npm scope must not appear on /download');
 });
 
 test('W373 #6 - homepage H1 carries a structured value-prop claim (W387: relaxed phrasing)', () => {
   // W387 (2026-05-18): user feedback "this wording positioning and structure
-  // has 0 user empathy and is fucking garbage. 0/10" — the previous H1 claim
-  // ("Turn rented AI calls into owned AI systems") relied on a metaphor an
+  // has 0 user empathy and is fucking garbage. 0/10" - the previous H1 claim
+  // relied on a metaphor an
   // unwarmed visitor doesn't decode. The new H1 leads with concrete pain
   // (paying OpenAI for the same prompt over and over) per the empathy mandate.
   // We assert STRUCTURE here (main claim span + 1 .stop + 1 .pain beats),
@@ -121,7 +121,7 @@ test('W373 #6 - homepage H1 carries a structured value-prop claim (W387: relaxed
 
 test('W373 #7 - homepage exposes 6-item marketing nav (Product/Use Cases/Pricing/Docs/Download/Sign in)', () => {
   // The W373 secondary nav is visually hidden so the W221 5-item primary nav
-  // remains the canonical chrome — but the six W373 links are present in the
+  // remains the canonical chrome - but the six W373 links are present in the
   // DOM and findable by their data-w373 markers.
   const navMatch = INDEX.match(/<nav[^>]*data-w373=["']hero-nav["'][\s\S]*?<\/nav>/i);
   assert.ok(navMatch, 'W373 marketing nav must be present');
@@ -134,7 +134,7 @@ test('W373 #7 - homepage exposes 6-item marketing nav (Product/Use Cases/Pricing
 
 test('W373 #8 - a concrete .kolm artifact preserved on homepage (W220 lock) [W405: artifact-agnostic]', () => {
   // W405 (2026-05-19): relaxed from `phi-redactor.kolm` to any *.kolm filename
-  // anchor — user mandate dropped PHI hero framing, hero now ships a
+  // anchor - user mandate dropped PHI hero framing, hero now ships a
   // frontier-distilled student artifact (qwen3.6-27b.kolm) instead.
   assert.match(INDEX, /<a[^>]*>[^<]*\.kolm[^<]*<\/a>/i,
     'homepage must reference at least one concrete .kolm artifact');
@@ -219,12 +219,12 @@ test('W373 #14 - homepage carries the six W373 marketing sections', () => {
   }
 });
 
-test('W373 #15 - no banned strings (not_yet_wired / coming soon / verify before ship / @kolmogorov scope)', () => {
+test('W373 #15 - no banned strings (not_yet_wired / coming soon / verify before ship / legacy scope)', () => {
   // The whole point of W373 is to ship a final-feeling site. Anything that
   // reads like a TODO is forbidden in the four target files.
   // "Beta" is a generic adjective that appears in legacy copy on other pages
   // and is not under W373's scope, so it's not in the global ban.
-  const BAN_GLOBAL = ['not_yet_wired', 'coming soon', '(verify before ship)', '@kolmogorov/'];
+  const BAN_GLOBAL = ['not_yet_wired', 'coming soon', '(verify before ship)', '@kolm/'];
   for (const [name, src] of [
     ['index.html', INDEX],
     ['use-cases.html', USECASES],

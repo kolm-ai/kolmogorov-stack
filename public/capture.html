@@ -4,17 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>kolm capture - OpenAI-compatible AI gateway · kolm.ai</title>
-<meta name="description" content="Point OpenAI-compatible traffic at kolm capture. Build a local event lake, redact sensitive data, review training rows, and promote repeated workflows.">
+<title>kolm capture - OpenAI-compatible AI call gateway · kolm.ai</title>
+<meta name="description" content="Point OpenAI-compatible calls at kolm capture. Build a local event lake, redact sensitive data, review training rows, and promote repeated workflows.">
 <meta name="keywords" content="OpenAI cost reduction, LoRA distillation, kolm capture, AI cost savings, local model, frontier API proxy, inference cost cutting">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-<meta name="author" content="Kolmogorov">
+<meta name="author" content="Kolm">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm">
-<meta property="og:title" content="kolm capture - OpenAI-compatible AI gateway · kolm.ai">
-<meta property="og:description" content="Point OpenAI-compatible traffic at kolm capture. Build a local event lake, redact sensitive data, review training rows, and promote repeated workflows.">
+<meta property="og:title" content="kolm capture - OpenAI-compatible AI call gateway · kolm.ai">
+<meta property="og:description" content="Point OpenAI-compatible calls at kolm capture. Build a local event lake, redact sensitive data, review training rows, and promote repeated workflows.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/capture">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -22,8 +22,8 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="kolm capture - OpenAI-compatible AI gateway · kolm.ai">
-<meta name="twitter:description" content="Point OpenAI-compatible traffic at kolm capture. Build a local event lake, redact sensitive data, review training rows, and promote repeated workflows.">
+<meta name="twitter:title" content="kolm capture - OpenAI-compatible AI call gateway · kolm.ai">
+<meta name="twitter:description" content="Point OpenAI-compatible calls at kolm capture. Build a local event lake, redact sensitive data, review training rows, and promote repeated workflows.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/capture">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -38,7 +38,7 @@
  "@id": "https://kolm.ai/capture",
  "url": "https://kolm.ai/capture",
  "name": "kolm capture - local AI telemetry gateway",
- "description": "Proxy existing AI traffic into a local event lake, privacy membrane, review queue, eval set, and signed artifact pipeline."
+ "description": "Proxy existing AI calls into a local event lake, privacy membrane, review queue, eval set, and signed artifact pipeline."
  },
  {
  "@type": "SoftwareApplication",
@@ -46,7 +46,7 @@
  "applicationCategory": "DeveloperApplication",
  "operatingSystem": "macOS, Linux, Windows",
  "url": "https://kolm.ai/capture",
- "description": "A drop-in proxy for OpenAI-compatible AI traffic that captures redacted events, builds reviewed datasets, and promotes repeated workflows into local artifacts.",
+ "description": "A drop-in proxy for OpenAI-compatible AI calls that captures redacted events, builds reviewed datasets, and promotes repeated workflows into local artifacts.",
  "offers": {
  "@type": "Offer",
  "price": "0",
@@ -183,13 +183,13 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -202,7 +202,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -281,9 +281,9 @@
 <section class="hero cap-hero">
  <div class="wrap">
  <div class="cap-eyebrow">kolm capture &middot; local AI telemetry gateway</div>
- <h1>Capture the AI traffic you already pay for. <span class="swap">Turn repeats into local systems.</span></h1>
+ <h1>Capture the AI calls you already pay for. <span class="swap">Turn repeats into local systems.</span></h1>
  <p class="lede">
- Point your OpenAI-compatible traffic at the local connector. Kolm records redacted request and response events, tracks cost and latency, clusters repeated work, and promotes only reviewed rows into datasets. Distillation and compilation happen after the workflow proves it can beat the cloud call on cost, latency, privacy, or control.
+ Point OpenAI-compatible calls at the local connector. Kolm records redacted request and response events, tracks cost and latency, clusters repeated work, and promotes only reviewed rows into datasets. Distillation and compilation happen after the workflow proves it can beat the cloud call on cost, latency, privacy, or control.
  </p>
 
  <div class="cap-actions">
@@ -427,7 +427,7 @@ client = OpenAI(base_url="http://127.0.0.1:7402/v1")</pre>
  <div class="cap-provenance-cell">
  <span class="badge shipped">current build</span>
  <ul>
- <li><b>Capture proxy</b> for OpenAI-compatible traffic. Auth, rate-limit, redaction, namespace routing, and local persistence.</li>
+ <li><b>Capture proxy</b> for OpenAI-compatible calls. Auth, rate-limit, redaction, namespace routing, and local persistence.</li>
  <li><b>Inbox + triage.</b> <code>/captures</code> shows redacted event rows; you can discard noise before it touches a dataset.</li>
  <li><b>Reviewed handoff.</b> POST <code>/v1/specialists/auto-distill</code> counts <code>corpus_namespace</code>, packages approved rows, and sends the corpus to your trainer bridge with a callback URL.</li>
  <li><b>Artifact-level receipt.</b> Final <code>.kolm</code> archive is Ed25519-signed and re-verifiable offline against the embedded public key.</li>
@@ -459,7 +459,7 @@ client = OpenAI(base_url="http://127.0.0.1:7402/v1")</pre>
 <footer class="site-footer">
  <div class="wrap">
  <div class="meta">
- kolm / MIT SDK / <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> / <a href="/status">status</a>
+ kolm / MIT SDK / <a href="https://github.com/sneaky-hippo/kolm-stack">github</a> / <a href="/status">status</a>
  </div>
  <div class="links">
  <div>
@@ -510,7 +510,7 @@ client = OpenAI(base_url="http://127.0.0.1:7402/v1")</pre>
  </div>
  </div>
  <small class="footer-tag">
- <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/terms">terms</a> &middot; <a href="/faq">faq</a> &middot; <a href="/glossary">glossary</a> &middot; <a href="/troubleshooting">troubleshooting</a> &middot; <a href="/why-now">why now</a> &middot; <a href="/press">press</a> &middot; <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> &middot; kolm.ai &middot; MIT licensed runtime
+ <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/terms">terms</a> &middot; <a href="/faq">faq</a> &middot; <a href="/glossary">glossary</a> &middot; <a href="/troubleshooting">troubleshooting</a> &middot; <a href="/why-now">why now</a> &middot; <a href="/press">press</a> &middot; <a href="https://github.com/sneaky-hippo/kolm-stack">github</a> &middot; kolm.ai &middot; MIT licensed runtime
  </small>
  </div>
 </footer>

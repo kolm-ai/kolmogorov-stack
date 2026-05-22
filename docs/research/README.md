@@ -2,7 +2,7 @@
 
 Last updated: 2026-05-13
 
-This directory is the living research base for Kolm / the Kolmogorov stack. It is meant to be updated continuously as code, live site claims, competitors, buyer feedback, benchmarks, and regulatory facts change.
+This directory is the living research base for Kolm / the Kolm stack. It is meant to be updated continuously as code, live site claims, competitors, buyer feedback, benchmarks, and regulatory facts change.
 
 ## Current Artifacts
 

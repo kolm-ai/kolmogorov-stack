@@ -21,7 +21,7 @@ Exit:
 This file is the public sketch. The full implementation - including the
 exact prompt envelopes, the retrieve-query rewrite, the bootstrap CI
 plumbing, and the docker-in-docker swebench evaluator wiring - lives at
-https://github.com/kolmogorov/kolm-bench-reproducer.
+https://github.com/kolm/kolm-bench-reproducer.
 """
 from __future__ import annotations
 

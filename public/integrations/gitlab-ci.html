@@ -67,13 +67,13 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -86,7 +86,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -187,7 +187,7 @@
  <span class="k">variables</span>:
  KOLM_BACKEND: local_cpu
  <span class="k">script</span>:
- - npm install -g github:sneaky-hippo/kolmogorov-stack
+ - npm install -g github:sneaky-hippo/kolm-stack
  - mkdir -p artifacts
  - |
  for r in recipes/*.recipe.json; do
@@ -229,7 +229,7 @@
  <span class="k">rules</span>:
  - <span class="k">if</span>: <span class="g">'$CI_COMMIT_TAG'</span>
  <span class="k">script</span>:
- - npm install -g github:sneaky-hippo/kolmogorov-stack
+ - npm install -g github:sneaky-hippo/kolm-stack
  - mkdir -p out
  - |
  for r in recipes/*.recipe.json; do
@@ -275,7 +275,7 @@
  <span class="k">rules</span>:
  - <span class="k">if</span>: <span class="g">'$CI_PIPELINE_SOURCE == "schedule"'</span>
  <span class="k">script</span>:
- - npm install -g github:sneaky-hippo/kolmogorov-stack
+ - npm install -g github:sneaky-hippo/kolm-stack
  - |
  fails=0
  for art in releases/**/*.kolm; do

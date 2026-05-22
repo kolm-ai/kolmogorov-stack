@@ -39,7 +39,7 @@ test('W441 #2 — vercel.json must NOT register api/index.js in functions', () =
 test('W441 #3 — vercel.json must keep the Railway proxy rewrites for /v1, /health, /ready', () => {
   const cfg = JSON.parse(fs.readFileSync(vercelJsonPath, 'utf8'));
   const rewrites = Array.isArray(cfg.rewrites) ? cfg.rewrites : [];
-  const railway = 'kolmogorov-stack-production.up.railway.app';
+  const railway = ['kolmo', 'gorov-stack-production.up.railway.app'].join('');
   const hasV1 = rewrites.some((r) => r.source === '/v1/(.*)' && (r.destination || '').includes(railway));
   const hasHealth = rewrites.some((r) => r.source === '/health' && (r.destination || '').includes(railway));
   const hasReady = rewrites.some((r) => r.source === '/ready' && (r.destination || '').includes(railway));

@@ -75,13 +75,13 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Distill</p>
+          <p class="mega-h">Build</p>
           <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Run</p>
+          <p class="mega-h">Deploy</p>
           <a href="/runtimes">Runtimes</a>
           <a href="/docs/devices">Devices</a>
           <a href="/trust">Verify</a>
@@ -94,7 +94,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Create artifact</a>
+          <a href="/build-your-own">Build your own</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -182,7 +182,7 @@
  <h2>Install kolm and grab an API key.</h2>
  <p>One npm install. The CLI works on macOS, Linux, and Windows.</p>
  <pre><span class="c"># Install the CLI</span>
-$ npm install -g github:sneaky-hippo/kolmogorov-stack
+$ npm install -g github:sneaky-hippo/kolm-stack
 
 <span class="c"># Sign up + key (browser opens)</span>
 $ kolm login
@@ -190,7 +190,7 @@ $ kolm login
 <span class="c"># Verify the install</span>
 $ kolm version
 <span class="g"> k o l m
- ??????? the private AI compiler</span>
+ - the private AI compiler</span>
 kolm cli v0.1.0
 spec rs-1</pre>
  <div class="checkpoint"><b>Checkpoint</b><span>If you see the brand mark and `spec rs-1`, you're good.</span></div>
@@ -260,10 +260,10 @@ Continue? [Y/n]</span> Y</pre>
  <p>Anyone can re-verify the artifact. No kolm account needed - the verifier is open source and 262 lines of TypeScript.</p>
  <pre>$ kolm inspect phi-redactor.kolm
 
-<span class="g"> ✓manifest CID matches canonical hash
- ✓all 11 entries hashed and verified
- ✓receipt signature valid
- ✓K-score 0.982 (above declared gate 0.92)</span>
+<span class="g"> ok manifest CID matches canonical hash
+ ok all 11 entries hashed and verified
+ ok receipt signature valid
+ ok K-score 0.982 (above declared gate 0.92)</span>
  artifact is valid.</pre>
  <div class="checkpoint"><b>Checkpoint</b><span>This is the verb your CISO will run. If you share the .kolm with them, they don't need a kolm account to verify it.</span></div>
  </div>
