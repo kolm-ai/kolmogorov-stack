@@ -1,12 +1,17 @@
 // Recipe service worker: keeps the registry available offline.
-const CACHE = 'kolm-v18-2026-05-22-frontend-v597-product-rail-clarity';
+const CACHE = 'kolm-v25-2026-05-22-frontend-v602-nav-icons';
 const PRECACHE = [
  '/device',
+ '/design-tokens.css',
  '/styles.css',
  '/brand-refresh.css',
  '/home-refresh.css',
  '/surface-polish.css',
+ '/kolm-svg.css',
+ '/w598.css',
+ '/w600-layout.css',
  '/nav.js',
+ '/kolm-svg.js',
  '/sdk.js',
  '/v1/registry/export',
  '/manifest.json',

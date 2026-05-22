@@ -24,9 +24,14 @@
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/distill">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
+<link rel="stylesheet" href="/kolm-svg.css">
+<link rel="stylesheet" href="/w598.css">
+<link rel="stylesheet" href="/w600-layout.css">
 <script defer src="/nav.js"></script>
+<script defer src="/kolm-svg.js"></script>
 <script type="application/ld+json">
 {
  "@context": "https://schema.org",
@@ -89,7 +94,7 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
       <div class="mega-menu" role="menu" aria-label="product menu">
         <div class="mega-col">
           <p class="mega-h">Start</p>
@@ -112,7 +117,7 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
       </div>
     </div>
     <div class="nav-item nav-item--models has-mega">
-      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
       <div class="mega-menu" role="menu" aria-label="models menu">
         <div class="mega-col">
           <p class="mega-h">Choose</p>
@@ -128,7 +133,7 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
       </div>
     </div>
     <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
       <div class="mega-menu" role="menu" aria-label="docs menu">
         <div class="mega-col">
           <p class="mega-h">Start</p>
@@ -153,7 +158,7 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
       </div>
     </div>
     <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
       <div class="mega-menu" role="menu" aria-label="pricing menu">
         <div class="mega-col">
           <p class="mega-h">Buy</p>
@@ -164,7 +169,7 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
       </div>
     </div>
     <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
       <div class="mega-menu" role="menu" aria-label="enterprise menu">
         <div class="mega-col">
           <p class="mega-h">Deploy</p>
@@ -192,8 +197,23 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 
 <main id="main">
 
-<h1>Distill top models into signed specialists.</h1>
-<p class="lede">Kolm distillation takes teacher traces, approved calls, synthetic rows, or curated examples and produces a smaller specialist that must pass held-out K-score gates before it becomes a signed <code>.kolm</code> artifact.</p>
+<section class="kolm-hero" aria-label="Distill overview">
+ <div class="kolm-hero__copy">
+  <span class="kolm-hero__eyebrow"><span data-kolm-icon="distill" data-kolm-size="14"></span> Compile · Step 4 of 6</span>
+  <h1>Distill top models into signed specialists.</h1>
+  <p class="kolm-hero__lede">Train a smaller specialist from teacher traces, approved calls, or curated rows. The K-score gate blocks promotion until the held-out slice clears your threshold. Out: one signed <code>.kolm</code> with a receipt chain back to source evidence.</p>
+  <div class="kolm-hero__cta">
+   <a href="/train" class="kolm-cta kolm-cta--primary">kolm distill <span data-kolm-icon="arrow-right" data-kolm-size="14"></span></a>
+   <a href="/quickstart" class="kolm-cta kolm-cta--ghost">Quickstart</a>
+  </div>
+  <div class="kolm-hero__meta">
+   <span><span data-kolm-icon="check" data-kolm-size="14"></span> K-score gate</span>
+   <span><span data-kolm-icon="shield" data-kolm-size="14"></span> Ed25519 signed</span>
+   <span><span data-kolm-icon="file" data-kolm-size="14"></span> Receipt chain</span>
+  </div>
+ </div>
+ <div class="kolm-hero__visual" data-kolm-illustration="compile-pipeline" aria-hidden="true"></div>
+</section>
 
 <h2 id="what-it-is">What it is</h2>
 <p>Distillation in Kolm compresses useful behavior from a larger teacher into a smaller specialist model that matches the task you actually ship. The teacher can be a frontier API, an open model, a local model, or an internal model. The specialist is frozen only when its K-score on a held-out slice crosses the configured threshold. Until then, the artifact is not promotable; once it clears, it ships as a signed <code>.kolm</code> with a receipt chain back to the source evidence.</p>

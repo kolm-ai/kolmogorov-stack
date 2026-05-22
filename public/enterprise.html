@@ -22,7 +22,11 @@
 <link rel="canonical" href="https://kolm.ai/enterprise">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/brand-refresh.css">
+<link rel="stylesheet" href="/kolm-svg.css">
+<link rel="stylesheet" href="/w598.css">
+<link rel="stylesheet" href="/w600-layout.css">
 <style>
  /* elite demo on /enterprise: an animated, 4-step CLI walk-through that
  shows the team-private publish flow end-to-end. No JS dependencies; the auto-advance is a setInterval that toggles an `is-active` class;
@@ -163,7 +167,7 @@
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
       <div class="mega-menu" role="menu" aria-label="product menu">
         <div class="mega-col">
           <p class="mega-h">Start</p>
@@ -186,7 +190,7 @@
       </div>
     </div>
     <div class="nav-item nav-item--models has-mega">
-      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
       <div class="mega-menu" role="menu" aria-label="models menu">
         <div class="mega-col">
           <p class="mega-h">Choose</p>
@@ -202,7 +206,7 @@
       </div>
     </div>
     <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
       <div class="mega-menu" role="menu" aria-label="docs menu">
         <div class="mega-col">
           <p class="mega-h">Start</p>
@@ -227,7 +231,7 @@
       </div>
     </div>
     <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
       <div class="mega-menu" role="menu" aria-label="pricing menu">
         <div class="mega-col">
           <p class="mega-h">Buy</p>
@@ -238,7 +242,7 @@
       </div>
     </div>
     <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
       <div class="mega-menu" role="menu" aria-label="enterprise menu">
         <div class="mega-col">
           <p class="mega-h">Deploy</p>
@@ -271,7 +275,7 @@
  <div class="hero-copy">
  <div class="hero-eyebrow"><span class="he-dot"></span>Enterprise &middot; AI from cloud to device</div>
  <h1>Enterprise AI, down to every device.</h1>
- <p class="lede">Route model APIs, distill approved behavior, and run signed <code>.kolm</code> artifacts inside your boundary. VPC, on-prem, browser, phone, edge, and air-gap deployments keep receipts, logs, BAA, SBOM, and SLSA evidence attached.</p>
+ <p class="lede">Route model APIs through one gateway. Distill approved behavior into signed <code>.kolm</code> artifacts. Deploy inside VPC, on-prem, browser, phone, edge, or air-gap. Receipts, logs, BAA, SBOM, and SLSA evidence stay attached.</p>
  <div class="actions">
  <a href="/enterprise/inquiry" class="btn primary electric">Book architecture review &rarr;</a>
  <a href="mailto:dev@kolm.ai?subject=kolm%20enterprise" class="btn ghost">Contact us</a>
@@ -281,6 +285,10 @@
  </div>
  </div>
  </section>
+
+ <div class="wrap" style="max-width:1080px;padding:0 24px;margin:32px auto 0">
+  <div class="kolm-hero__visual" data-kolm-illustration="scale-horizon" aria-hidden="true"></div>
+ </div>
 
  <section data-w260="external-review" style="padding:40px 0;border-top:1px solid rgba(255,255,255,0.06);border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.015)">
  <div class="wrap" style="max-width:1080px">
@@ -502,7 +510,7 @@ verdict: <span class="ok">audit clean</span></pre>
  <div class="wrap" style="max-width: 1180px;">
  <div class="footer-grid">
  <div>
- <h4>Build</h4>
+ <h4><span data-kolm-icon="compile" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Build</h4>
  <a href="/quickstart">Quickstart</a>
  <a href="/docs">Docs</a>
  <a href="/spec/rs-1">RS-1 spec</a>
@@ -510,7 +518,7 @@ verdict: <span class="ok">audit clean</span></pre>
  <a href="/cli">CLI</a>
  </div>
  <div>
- <h4>Deploy</h4>
+ <h4><span data-kolm-icon="deploy" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Deploy</h4>
  <a href="/compute">Backends</a>
  <a href="/airgap">Air-gap</a>
  <a href="/integrations/cloudflare">Cloudflare</a>
@@ -527,7 +535,7 @@ verdict: <span class="ok">audit clean</span></pre>
  <a href="/case-studies">Case studies</a>
  </div>
  <div>
- <h4>Industries</h4>
+ <h4><span data-kolm-icon="layers" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Industries</h4>
  <a href="/healthcare">Healthcare</a>
  <a href="/finance">Finance</a>
  <a href="/legal">Legal</a>
@@ -535,7 +543,7 @@ verdict: <span class="ok">audit clean</span></pre>
  <a href="/insure">Insurance</a>
  </div>
  <div>
- <h4>Company</h4>
+ <h4><span data-kolm-icon="user" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Company</h4>
  <a href="/pricing">Pricing</a>
  <a href="/changelog">Changelog</a>
  <a href="/security">Security</a>
@@ -551,6 +559,7 @@ verdict: <span class="ok">audit clean</span></pre>
  &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">kolm.ai vs Kolm therapeutics</a></footer>
 
 <script src="/nav.js" defer></script>
+<script src="/kolm-svg.js" defer></script>
 <script>
  // Elite-demo stepper: cycle 4 steps every 6s, pause on user interaction
  // (click or arrow-key), resume after 20s of idle. No external deps.

@@ -197,7 +197,11 @@
  footer a:hover{color:var(--ink)}
 </style>
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/brand-refresh.css">
+<link rel="stylesheet" href="/kolm-svg.css">
+<link rel="stylesheet" href="/w598.css">
+<link rel="stylesheet" href="/w600-layout.css">
 <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
@@ -211,7 +215,7 @@
   <!-- KOLM_NAV_BEGIN (W221) -->
   <nav class="site-nav" aria-label="Primary">
   <div class="nav-item nav-item--product has-mega">
-  <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+  <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
   <div class="mega-menu" role="menu" aria-label="product menu">
   <div class="mega-col">
   <p class="mega-h">Start</p>
@@ -234,7 +238,7 @@
   </div>
   </div>
   <div class="nav-item nav-item--models has-mega">
-  <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+  <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
   <div class="mega-menu" role="menu" aria-label="models menu">
   <div class="mega-col">
   <p class="mega-h">Choose</p>
@@ -250,7 +254,7 @@
   </div>
   </div>
   <div class="nav-item nav-item--docs has-mega">
-  <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+  <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
   <div class="mega-menu" role="menu" aria-label="docs menu">
   <div class="mega-col">
   <p class="mega-h">Start</p>
@@ -275,7 +279,7 @@
   </div>
   </div>
   <div class="nav-item nav-item--pricing has-mega">
-  <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+  <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
   <div class="mega-menu" role="menu" aria-label="pricing menu">
   <div class="mega-col">
   <p class="mega-h">Buy</p>
@@ -286,7 +290,7 @@
   </div>
   </div>
   <div class="nav-item nav-item--enterprise has-mega">
-  <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+  <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
   <div class="mega-menu" role="menu" aria-label="enterprise menu">
   <div class="mega-col">
   <p class="mega-h">Deploy</p>
@@ -318,10 +322,20 @@
  <div class="head">
  <div>
  <h1>Publish a .kolm. Pull anyone else's.</h1>
- <p class="lede">A compiled .kolm artifact is one self-contained file. The hub gives every artifact a stable handle, a SHA-256 fingerprint, and a verified-on-download contract. Same file format the CLI builds locally - no rebuild, no rehosting, no proprietary container.</p>
+ <p class="lede">A compiled <code>.kolm</code> is one self-contained file. The hub gives every artifact a stable handle, a SHA-256 fingerprint, and a verified-on-download contract. Same file format the CLI builds locally &mdash; no rebuild, no rehosting, no proprietary container.</p>
  </div>
  <a class="cta" href="/quickstart" style="display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:9px 14px;font-size:13px;font-weight:500">Publish your own <span aria-hidden="true">&rarr;</span></a>
  </div>
+
+ <section style="padding:28px 0;background:linear-gradient(180deg,rgba(126,240,210,0.04) 0%,transparent 100%);border-radius:14px;margin:16px 0">
+ <div style="padding:0 20px">
+ <div style="display:flex;align-items:center;gap:8px;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-faint,#9ca3af);margin-bottom:14px">
+ <span data-kolm-icon="file" data-kolm-size="14"></span>
+ <span>What a hub-published .kolm contains</span>
+ </div>
+ <div class="kolm-hero__visual" data-kolm-illustration="artifact-anatomy" aria-hidden="true"></div>
+ </div>
+ </section>
 
  <section class="verified" id="verified" hidden>
  <div class="vh">
@@ -436,7 +450,7 @@ kolm hub show alice/my-redactor</pre>
  <div class="wrap" style="max-width:1180px">
  <div class="footer-grid">
  <div>
- <h4>Build</h4>
+ <h4><span data-kolm-icon="compile" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Build</h4>
  <a href="/quickstart">Quickstart</a>
  <a href="/docs">Docs</a>
  <a href="/hub">Hub</a>
@@ -444,7 +458,7 @@ kolm hub show alice/my-redactor</pre>
  <a href="/openapi.json">OpenAPI</a>
  </div>
  <div>
- <h4>Deploy</h4>
+ <h4><span data-kolm-icon="deploy" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Deploy</h4>
  <a href="/compute">Backends</a>
  <a href="/airgap">Air-gap</a>
  <a href="/integrations/cloudflare">Cloudflare</a>
@@ -461,7 +475,7 @@ kolm hub show alice/my-redactor</pre>
  <a href="/case-studies">Case studies</a>
  </div>
  <div>
- <h4>Industries</h4>
+ <h4><span data-kolm-icon="layers" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Industries</h4>
  <a href="/healthcare">Healthcare</a>
  <a href="/finance">Finance</a>
  <a href="/legal">Legal</a>
@@ -469,7 +483,7 @@ kolm hub show alice/my-redactor</pre>
  <a href="/insure">Insurance</a>
  </div>
  <div>
- <h4>Company</h4>
+ <h4><span data-kolm-icon="user" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Company</h4>
  <a href="/pricing">Pricing</a>
  <a href="/changelog">Changelog</a>
  <a href="/security">Security</a>
@@ -793,5 +807,6 @@ kolm hub show alice/my-redactor</pre>
 })();
 </script>
 <script src="/nav.js" defer></script>
+<script src="/kolm-svg.js" defer></script>
 </body>
 </html>

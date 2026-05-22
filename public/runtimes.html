@@ -20,8 +20,13 @@
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/runtimes">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/brand-refresh.css">
+<link rel="stylesheet" href="/kolm-svg.css">
+<link rel="stylesheet" href="/w598.css">
+<link rel="stylesheet" href="/w600-layout.css">
 <script src="/escape.js"></script>
+<script defer src="/kolm-svg.js"></script>
 <script type="application/ld+json">
 {
  "@context": "https://schema.org",
@@ -93,7 +98,7 @@ pre code{background:none;padding:0}
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
       <div class="mega-menu" role="menu" aria-label="product menu">
         <div class="mega-col">
           <p class="mega-h">Start</p>
@@ -116,7 +121,7 @@ pre code{background:none;padding:0}
       </div>
     </div>
     <div class="nav-item nav-item--models has-mega">
-      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
       <div class="mega-menu" role="menu" aria-label="models menu">
         <div class="mega-col">
           <p class="mega-h">Choose</p>
@@ -132,7 +137,7 @@ pre code{background:none;padding:0}
       </div>
     </div>
     <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
       <div class="mega-menu" role="menu" aria-label="docs menu">
         <div class="mega-col">
           <p class="mega-h">Start</p>
@@ -157,7 +162,7 @@ pre code{background:none;padding:0}
       </div>
     </div>
     <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
       <div class="mega-menu" role="menu" aria-label="pricing menu">
         <div class="mega-col">
           <p class="mega-h">Buy</p>
@@ -168,7 +173,7 @@ pre code{background:none;padding:0}
       </div>
     </div>
     <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
       <div class="mega-menu" role="menu" aria-label="enterprise menu">
         <div class="mega-col">
           <p class="mega-h">Deploy</p>
@@ -196,20 +201,36 @@ pre code{background:none;padding:0}
 
 <main id="main" class="runtime-page">
 <div class="wrap">
-<section class="hero">
- <h1>Run signed AI artifacts on the hardware you already own.</h1>
- <p class="lede">
- Run one signed <code>.kolm</code> across CPU, GPU, browser, mobile, edge, and air-gap targets. Each runtime build records its source, flags, target, and receipt so teams can prove what executed without turning the root install into a heavy GPU stack.
- </p>
- <p class="lede" style="margin-top:14px">
- This is the run layer for <a href="/compile">compiled artifacts</a>, <a href="/training">distilled students</a>, <a href="/models">Gemma/Gemma 3n and open backbones</a>, and air-gapped enterprise deployments.
- </p>
+<section class="kolm-hero" aria-label="Runtimes overview">
+ <div class="kolm-hero__copy">
+  <span class="kolm-hero__eyebrow"><span data-kolm-icon="deploy" data-kolm-size="14"></span> Deploy · Step 5 of 6</span>
+  <h1>One signed artifact. Every target.</h1>
+  <p class="kolm-hero__lede">
+  Run the same signed <code>.kolm</code> on CPU, GPU, browser, mobile, edge, and air-gap. Every build pins source, flags, target, receipt &mdash; root install stays light, audit trail stays tight.
+  </p>
+  <div class="kolm-hero__cta">
+   <a href="/quickstart" class="kolm-cta kolm-cta--primary">Get started <span data-kolm-icon="arrow-right" data-kolm-size="14"></span></a>
+   <a href="/docs/devices" class="kolm-cta kolm-cta--ghost">Device matrix</a>
+  </div>
+  <div class="kolm-hero__meta">
+   <span><span data-kolm-icon="check" data-kolm-size="14"></span> 10 targets</span>
+   <span><span data-kolm-icon="lock" data-kolm-size="14"></span> Air-gap ready</span>
+   <span><span data-kolm-icon="file" data-kolm-size="14"></span> Build receipt</span>
+  </div>
+ </div>
+ <div class="kolm-hero__visual" data-kolm-illustration="device-sequence" aria-hidden="true"></div>
+</section>
+
+<section class="hero" style="border:none;padding:0;margin:0 0 24px">
  <div class="runtime-proof" aria-label="Runtime coverage">
   <div><b>Device</b><span>Gemma 3n, Core ML, ExecuTorch, MLX</span></div>
   <div><b>Browser</b><span>WASM and WebGPU targets for local demos</span></div>
   <div><b>Server</b><span>CUDA, ROCm, Vulkan, AVX2, AVX-512</span></div>
   <div><b>Audit</b><span>Pinned source, cmake flags, build receipt</span></div>
  </div>
+ <p class="lede" style="margin-top:14px">
+ This is the run layer for <a href="/compile">compiled artifacts</a>, <a href="/training">distilled students</a>, <a href="/models">Gemma/Gemma 3n and open backbones</a>, and air-gapped enterprise deployments.
+ </p>
 </section>
 
 <h2>Targets</h2>

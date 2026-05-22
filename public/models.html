@@ -122,9 +122,14 @@ main > .wrap > h1{font-weight:500!important;letter-spacing:-0.02em!important;lin
  .cta-row .pri{background:#7ef0d2;color:#08090c}
  .cta-row .sec{background:transparent;color:var(--ink);border:1px solid rgba(255,255,255,.18)}
 </style>
+<link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
+<link rel="stylesheet" href="/kolm-svg.css">
+<link rel="stylesheet" href="/w598.css">
+<link rel="stylesheet" href="/w600-layout.css">
 <link rel="stylesheet" href="/surface-polish.css">
+<script src="/kolm-svg.js" defer></script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -137,7 +142,7 @@ main > .wrap > h1{font-weight:500!important;letter-spacing:-0.02em!important;lin
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
       <div class="mega-menu" role="menu" aria-label="product menu">
         <div class="mega-col">
           <p class="mega-h">Start</p>
@@ -160,7 +165,7 @@ main > .wrap > h1{font-weight:500!important;letter-spacing:-0.02em!important;lin
       </div>
     </div>
     <div class="nav-item nav-item--models has-mega">
-      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
       <div class="mega-menu" role="menu" aria-label="models menu">
         <div class="mega-col">
           <p class="mega-h">Choose</p>
@@ -176,7 +181,7 @@ main > .wrap > h1{font-weight:500!important;letter-spacing:-0.02em!important;lin
       </div>
     </div>
     <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
       <div class="mega-menu" role="menu" aria-label="docs menu">
         <div class="mega-col">
           <p class="mega-h">Start</p>
@@ -201,7 +206,7 @@ main > .wrap > h1{font-weight:500!important;letter-spacing:-0.02em!important;lin
       </div>
     </div>
     <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
       <div class="mega-menu" role="menu" aria-label="pricing menu">
         <div class="mega-col">
           <p class="mega-h">Buy</p>
@@ -212,7 +217,7 @@ main > .wrap > h1{font-weight:500!important;letter-spacing:-0.02em!important;lin
       </div>
     </div>
     <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
       <div class="mega-menu" role="menu" aria-label="enterprise menu">
         <div class="mega-col">
           <p class="mega-h">Deploy</p>
@@ -243,6 +248,14 @@ main > .wrap > h1{font-weight:500!important;letter-spacing:-0.02em!important;lin
  <div class="hero-eyebrow"><span class="he-dot"></span>Models &middot; teachers, students, targets</div>
  <h1>Choose the teacher.<br>Pick the target.</h1>
  <p class="lede">Select the provider model, student backbone, quantization profile, and hardware tier behind each signed <code>.kolm</code>. Every choice travels in the receipt chain.</p>
+
+ <section style="padding:32px 0 8px 0">
+ <div style="display:flex;align-items:center;gap:8px;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-faint,#9ca3af);margin-bottom:14px">
+ <span data-kolm-icon="device" data-kolm-size="14"></span>
+ <span>Pick the target &middot; ten device classes</span>
+ </div>
+ <div class="kolm-hero__visual" data-kolm-illustration="device-sequence" aria-hidden="true"></div>
+ </section>
 
  <section class="sec" id="frontier">
  <h2>Model registry.</h2>

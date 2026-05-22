@@ -35,11 +35,16 @@
 <link rel="alternate" hreflang="x-default" href="https://kolm.ai/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/design-tokens.css" as="style">
 <link rel="preload" href="/styles.css" as="style">
 <link rel="preload" href="/brand-refresh.css" as="style">
 <link rel="preload" href="/logo-mark.svg" as="image" type="image/svg+xml">
+<link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
+<link rel="stylesheet" href="/kolm-svg.css">
+<link rel="stylesheet" href="/w598.css">
+<link rel="stylesheet" href="/w600-layout.css">
 <style>
  /* anti-incumbent kicker */
  .anti-incumbent { display: inline-block; font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--violet, #faf2e1); margin-bottom: 14px; padding: 4px 10px; border: 1px solid rgba(236,231,220, 0.32); border-radius: 999px; background: rgba(236,231,220, 0.06); }
@@ -1054,7 +1059,7 @@
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
       <div class="mega-menu" role="menu" aria-label="product menu">
         <div class="mega-col">
           <p class="mega-h">Start</p>
@@ -1077,7 +1082,7 @@
       </div>
     </div>
     <div class="nav-item nav-item--models has-mega">
-      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
       <div class="mega-menu" role="menu" aria-label="models menu">
         <div class="mega-col">
           <p class="mega-h">Choose</p>
@@ -1093,7 +1098,7 @@
       </div>
     </div>
     <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
       <div class="mega-menu" role="menu" aria-label="docs menu">
         <div class="mega-col">
           <p class="mega-h">Start</p>
@@ -1118,7 +1123,7 @@
       </div>
     </div>
     <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
       <div class="mega-menu" role="menu" aria-label="pricing menu">
         <div class="mega-col">
           <p class="mega-h">Buy</p>
@@ -1129,7 +1134,7 @@
       </div>
     </div>
     <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
       <div class="mega-menu" role="menu" aria-label="enterprise menu">
         <div class="mega-col">
           <p class="mega-h">Deploy</p>
@@ -1281,12 +1286,34 @@ Kolm gives AI teams one gateway for provider APIs, one workflow to train smaller
 
 <section class="home-surface-band" aria-label="kolm product workflow">
  <div class="home-surface-wrap">
- <a href="/quickstart"><span>01 Gateway</span><b>One AI API</b><em>Keep your SDK. Route every model through kolm.</em></a>
- <a href="/captures"><span>02 Capture</span><b>Approved calls</b><em>Cost, latency, tools, prompts, and receipts in one lake.</em></a>
- <a href="/account/labeling"><span>03 Review</span><b>Human gates</b><em>Promote only the rows worth training.</em></a>
- <a href="/distill"><span>04 Compile</span><b>Specialist models</b><em>Distill repeated work into smaller models and signed artifacts.</em></a>
- <a href="/runtimes"><span>05 Deploy</span><b>Any device</b><em>Browser, edge, server, phone, CLI/TUI, VPC, and air-gap.</em></a>
- <a href="/enterprise"><span>06 Govern</span><b>Proof for teams</b><em>Keys, logs, BAA, SBOM, SLSA, storage truth.</em></a>
+ <a href="/quickstart"><span class="k-rail-icon" data-kolm-icon="gateway" data-kolm-size="18" aria-hidden="true"></span><span>01 Gateway</span><b>One AI API</b><em>Keep your SDK. Route every model through kolm.</em></a>
+ <a href="/captures"><span class="k-rail-icon" data-kolm-icon="capture" data-kolm-size="18" aria-hidden="true"></span><span>02 Capture</span><b>Approved calls</b><em>Cost, latency, tools, prompts, and receipts in one lake.</em></a>
+ <a href="/account/labeling"><span class="k-rail-icon" data-kolm-icon="check" data-kolm-size="18" aria-hidden="true"></span><span>03 Review</span><b>Human gates</b><em>Promote only the rows worth training.</em></a>
+ <a href="/distill"><span class="k-rail-icon" data-kolm-icon="distill" data-kolm-size="18" aria-hidden="true"></span><span>04 Compile</span><b>Specialist models</b><em>Distill repeated work into smaller models and signed artifacts.</em></a>
+ <a href="/runtimes"><span class="k-rail-icon" data-kolm-icon="deploy" data-kolm-size="18" aria-hidden="true"></span><span>05 Deploy</span><b>Any device</b><em>Browser, edge, server, phone, CLI/TUI, VPC, and air-gap.</em></a>
+ <a href="/enterprise"><span class="k-rail-icon" data-kolm-icon="shield" data-kolm-size="18" aria-hidden="true"></span><span>06 Govern</span><b>Proof for teams</b><em>Keys, logs, BAA, SBOM, SLSA, storage truth.</em></a>
+ </div>
+</section>
+
+<!-- W598 anatomy section: visualize what's inside a .kolm artifact -->
+<section class="kolm-anatomy" aria-label="What is inside a kolm artifact">
+ <div class="kolm-anatomy__wrap">
+  <div class="kolm-anatomy__visual" data-kolm-illustration="artifact-anatomy" aria-hidden="true"></div>
+  <div>
+   <span class="kolm-section-eyebrow">The .kolm artifact</span>
+   <h2 class="kolm-anatomy__h2">One signed file. Every receipt.</h2>
+   <p class="kolm-anatomy__lede">A <code>.kolm</code> is a portable, signed bundle that travels from your laptop to a customer device without losing its audit trail. Every shipped artifact carries its weights, its K-score, its receipt chain, and an Ed25519 signature you can verify offline.</p>
+   <ul class="kolm-anatomy__list">
+    <li><span data-kolm-icon="layers" data-kolm-size="18" aria-hidden="true"></span><span><b>Model weights</b> &mdash; INT4, INT8, or full precision; GGUF, ONNX, or safetensors, picked by the target.</span></li>
+    <li><span data-kolm-icon="file" data-kolm-size="18" aria-hidden="true"></span><span><b>Manifest</b> &mdash; teacher model, capture namespace, seeds hash, holdout hash, build flags, target slug.</span></li>
+    <li><span data-kolm-icon="shield" data-kolm-size="18" aria-hidden="true"></span><span><b>Ed25519 signature</b> &mdash; verifiable offline, in CI, or on-device. Tamper invalidates it.</span></li>
+    <li><span data-kolm-icon="chart" data-kolm-size="18" aria-hidden="true"></span><span><b>Receipt</b> &mdash; K-score, eval rows, PHI leak count, latency, cost-per-call, and the audit chain back to source captures.</span></li>
+   </ul>
+   <div class="kolm-hero__cta" style="margin-top:28px">
+    <a href="/trust" class="kolm-cta kolm-cta--primary">See the trust center <span data-kolm-icon="arrow-right" data-kolm-size="14"></span></a>
+    <a href="/docs/verify" class="kolm-cta kolm-cta--ghost">Verify an artifact</a>
+   </div>
+  </div>
  </div>
 </section>
 
@@ -2826,7 +2853,7 @@ OPENROUTER_API_KEY=sk-kolm-...</code></pre>
  <div class="wrap" style="max-width: 1180px;">
  <div class="footer-grid">
  <div>
- <h4>Build</h4>
+ <h4><span data-kolm-icon="compile" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Build</h4>
  <a href="/quickstart">Quickstart</a>
  <a href="/ask">Ask kolm</a>
  <a href="/train">Train in browser</a>
@@ -2838,7 +2865,7 @@ OPENROUTER_API_KEY=sk-kolm-...</code></pre>
  <a href="/cli">CLI</a>
  </div>
  <div>
- <h4>Deploy</h4>
+ <h4><span data-kolm-icon="deploy" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Deploy</h4>
  <a href="/compute">Backends</a>
  <a href="/airgap">Air-gap</a>
  <a href="/device-transfer">Device transfer</a>
@@ -2846,7 +2873,7 @@ OPENROUTER_API_KEY=sk-kolm-...</code></pre>
  <a href="/integrations/github-actions">GitHub Actions</a>
  </div>
  <div>
- <h4>Trust</h4>
+ <h4><span data-kolm-icon="shield" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Trust</h4>
  <a href="/benchmarks">Benchmarks</a>
  <a href="/compare">Compare</a>
  <a href="/case-studies">Case studies</a>
@@ -2856,7 +2883,7 @@ OPENROUTER_API_KEY=sk-kolm-...</code></pre>
  <a href="/verify-prod">Verify a .kolm</a>
  </div>
  <div>
- <h4>Industries</h4>
+ <h4><span data-kolm-icon="layers" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Industries</h4>
  <a href="/healthcare">Healthcare</a>
  <a href="/health-insurance">Health insurance</a>
  <a href="/finance">Finance</a>
@@ -2865,7 +2892,7 @@ OPENROUTER_API_KEY=sk-kolm-...</code></pre>
  <a href="/insure">Insurance</a>
  </div>
  <div>
- <h4>Company</h4>
+ <h4><span data-kolm-icon="user" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Company</h4>
  <a href="/pricing">Pricing</a>
  <a href="/changelog">Changelog</a>
  <a href="/security">Security</a>
@@ -3711,5 +3738,6 @@ OPENROUTER_API_KEY=sk-kolm-...</code></pre>
 </script>
 
 <script src="/nav.js" defer></script>
+<script src="/kolm-svg.js" defer></script>
 </body>
 </html>
