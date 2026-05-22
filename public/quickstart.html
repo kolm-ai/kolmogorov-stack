@@ -16,6 +16,8 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/frontier.css">
+<script defer src="/frontier.js"></script>
 <style>
   .qs-steps { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: var(--ks-6) var(--ks-8); margin: 0 0 var(--ks-12); }
   @media (max-width: 760px) { .qs-steps { grid-template-columns: 1fr; gap: var(--ks-3); } }
@@ -345,6 +347,66 @@ console.log(r.content[0].text);</pre>
         </div>
 
       </div>
+
+      <section class="fr-section fr-section--tight fr-reveal" id="sota-recipes" style="margin: var(--ks-12) 0;">
+        <div class="fr-container">
+          <span class="fr-eyebrow">SOTA RECIPES</span>
+          <h2 class="fr-h2">Or build a SOTA recipe in one line.</h2>
+          <p class="fr-lede">Same compiler. Different starting point. These commands produce verified, signed, K-scored .kolm artifacts ready for the leaderboard.</p>
+          <div class="fr-grid-2">
+            <div class="fr-card fr-card--feature">
+              <div>
+                <span class="fr-pill fr-pill--violet">REASONING</span>
+                <span class="fr-pill fr-pill--amber">MULTI-TEACHER</span>
+              </div>
+              <h3 class="fr-h3">SOTA reasoning, 8B</h3>
+              <p>Opus-4.7 teacher distilled into a Qwen2.5-7B student with NF4 quantization and reasoning-trace supervision.</p>
+              <pre class="fr-cli"><span class="fr-cli__prompt">$</span> kolm build sota-reasoning <span class="fr-cli__flag">--teacher=claude-opus-4-7</span> <span class="fr-cli__flag">--student=qwen2-5-7b</span> <span class="fr-cli__flag">--bit=4.0</span> <span class="fr-cli__flag">--mode=reasoning</span></pre>
+            </div>
+            <div class="fr-card fr-card--feature">
+              <div>
+                <span class="fr-pill fr-pill--violet">CODING</span>
+                <span class="fr-pill fr-pill--amber">MTP</span>
+              </div>
+              <h3 class="fr-h3">SOTA coding, 13B + MTP</h3>
+              <p>Multi-token prediction head bolted onto a 14B coder student. Aider bench drives the bake-off grader.</p>
+              <pre class="fr-cli"><span class="fr-cli__prompt">$</span> kolm build sota-coding <span class="fr-cli__flag">--student=qwen2-5-14b</span> <span class="fr-cli__flag">--bit=4.0</span> <span class="fr-cli__flag">--mode=mpt</span> <span class="fr-cli__flag">--bench=aider</span></pre>
+            </div>
+            <div class="fr-card fr-card--mint">
+              <div>
+                <span class="fr-pill fr-pill--ghost">LOW-BIT</span>
+                <span class="fr-pill fr-pill--amber">BITNET</span>
+              </div>
+              <h3 class="fr-h3">Low-bit generalist, 1.58-bit</h3>
+              <p>BitNet ternary weights, drift-bounded against a BF16 reference. Runs on CPU with under 2 GB resident.</p>
+              <pre class="fr-cli"><span class="fr-cli__prompt">$</span> kolm build low-bit-generalist <span class="fr-cli__flag">--bit=1.58</span> <span class="fr-cli__flag">--quant=bitnet</span></pre>
+            </div>
+            <div class="fr-card fr-card--feature">
+              <div>
+                <span class="fr-pill fr-pill--violet">MULTI-TEACHER</span>
+              </div>
+              <h3 class="fr-h3">Multi-teacher fused, 14B</h3>
+              <p>Claude, GPT, and DeepSeek each generate the same prompts. The fuser keeps the answer that the K-score grader ranks highest.</p>
+              <pre class="fr-cli"><span class="fr-cli__prompt">$</span> kolm build multi-teacher-fused <span class="fr-cli__flag">--teachers=claude,gpt,deepseek</span></pre>
+            </div>
+          </div>
+          <p style="margin-top:24px"><a class="fr-btn fr-btn--ghost" href="/recipes">All recipes</a> <a class="fr-btn fr-btn--mint" data-fr-magnetic href="/forge">Open the forge</a></p>
+        </div>
+      </section>
+
+      <section class="fr-section fr-section--tight fr-reveal" id="verify-artifact" style="margin: var(--ks-12) 0;">
+        <div class="fr-container">
+          <span class="fr-eyebrow">VERIFY</span>
+          <h2 class="fr-h2">Verify any artifact.</h2>
+          <p class="fr-lede">Validates the Ed25519 signature, recomputes the JCS-canonical SHA-256, replays the K-score eval pack. Works offline.</p>
+          <pre class="fr-cli"><span class="fr-cli__prompt">$</span> kolm verify &lt;artifact-cid&gt;</pre>
+          <div class="fr-status" style="margin-top:16px">
+            <span class="fr-status__dot"></span>
+            <span>Ledger receipts are public. Share a CID with your auditor; they verify against /verify-prod without your private key.</span>
+          </div>
+          <p style="margin-top:20px"><a class="fr-btn fr-btn--ghost" href="/k-score">Read the K-score spec</a> <a class="fr-btn fr-btn--ghost" href="/security">Review the security model</a> <a class="fr-btn fr-btn--ghost" href="/enterprise">Procurement path</a></p>
+        </div>
+      </section>
 
       <section id="checkpoint" style="margin: var(--ks-12) 0;">
         <h2 class="ks-h2" style="font-size: 26px; margin-bottom: var(--ks-3);">Checkpoint</h2>

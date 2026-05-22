@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SDKs &middot; kolm.ai</title>
-<meta name="description" content="Six first-class kolm bindings. Node, Python, MCP server, VS Code, single-header C, and Rust. Apache-2.0. Same gateway, same verifier, same signed receipts.">
+<meta name="description" content="Six shipped kolm bindings — Node, Python, MCP, VS Code, single-header C, Rust — plus Swift and Kotlin in progress. Apache-2.0. One gateway, one verifier, one receipt schema.">
 <meta name="theme-color" content="#07090c">
 <meta property="og:title" content="SDKs &middot; kolm.ai">
-<meta property="og:description" content="Six first-class bindings for the kolm AI compiler. Node, Python, MCP, VS Code, C, Rust.">
+<meta property="og:description" content="Bindings for the kolm AI compiler. Six shipped today; mobile in progress.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/sdks">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -16,6 +16,8 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/frontier.css">
+<script defer src="/frontier.js"></script>
 <style>
   .sdk-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
   .sdk-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
@@ -88,23 +90,37 @@
 
 <main id="main">
 
-<section class="sdk-hero">
-  <div class="ks-wrap">
-    <div class="eyebrow">SDKs &middot; bindings for every developer surface</div>
-    <h1>Six first-class kolm bindings. <b>Install the CLI, ship a signed artifact.</b></h1>
-    <p class="lede">Node, Python, MCP server, VS Code, single-header C, and Rust. Apache-2.0. Every binding wraps the same kolm gateway, the same /v1 routes, and the same Ed25519 verifier. A developer or engineer can switch languages without changing the artifact behavior or the receipt schema.</p>
-    <div class="cta-row">
-      <a href="/quickstart" class="ks-btn ks-btn--primary">Install the CLI <span class="ks-btn-arrow">&rarr;</span></a>
-      <a href="/api" class="ks-btn ks-btn--ghost">REST API reference</a>
-      <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener" class="ks-btn ks-btn--ghost">Source on GitHub</a>
+<section class="fr-section sdk-hero">
+  <div class="fr-container ks-wrap">
+    <div class="fr-eyebrow">SDKs &middot; bindings per ecosystem</div>
+    <h1 class="fr-h1">Six shipped bindings. <b>Two more on the bench.</b></h1>
+    <p class="fr-lede">Node, Python, MCP, VS Code, single-header C, Rust — all Apache-2.0, all wrapping the same /v1 gateway and the same Ed25519 verifier. Swift and Kotlin for on-device .kolm loading are in progress; their status is marked clearly below.</p>
+    <div class="cta-row" style="display:flex;flex-wrap:wrap;gap:var(--ks-3)">
+      <a href="/quickstart" class="fr-btn fr-btn--mint">Install the CLI &rarr;</a>
+      <a href="/api" class="fr-btn fr-btn--ghost">REST reference</a>
+      <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener" class="fr-btn fr-btn--ghost">Source on GitHub</a>
+    </div>
+    <div class="fr-grid-3" style="margin-top:var(--ks-7)">
+      <div class="fr-num"><span class="fr-num--mid">6</span><span class="fr-num--unit">shipped SDKs</span></div>
+      <div class="fr-num"><span class="fr-num--mid">355+</span><span class="fr-num--unit">/v1 routes wrapped</span></div>
+      <div class="fr-num"><span class="fr-num--mid">1</span><span class="fr-num--unit">receipt schema, every language</span></div>
     </div>
   </div>
 </section>
 
-<section class="sdk-section" id="overview">
-  <div class="ks-wrap">
-    <h2>Honest scope across the six SDKs</h2>
-    <p class="sub">Coverage is intentionally uneven. Node and Python wrap every /v1/* route. MCP and VS Code wrap the verbs a Claude-resident developer actually uses. C and Rust wrap the verifier path because that is what regulated and embedded deployments need to verify a .kolm artifact without a heavy runtime.</p>
+<section class="fr-section">
+  <div class="fr-container ks-wrap">
+    <div class="fr-eyebrow">Why so many SDKs</div>
+    <h2 class="fr-h2">One compiler. Runtime adapters per ecosystem.</h2>
+    <p class="fr-lede">kolm is a single product: capture API traffic, distill, quantize, compile to a signed .kolm artifact you own. The SDKs are thin clients over the same /v1 routes the CLI uses, plus the loaders each ecosystem needs. Node and Python wrap every route. MCP and VS Code wrap the verbs a Claude-resident developer reaches for. C and Rust exist so regulated and embedded deployments can verify a .kolm artifact without a heavy runtime. Swift and Kotlin are coming for on-device artifact loading on phones and edge devices.</p>
+  </div>
+</section>
+
+<section class="fr-section sdk-section" id="overview">
+  <div class="fr-container ks-wrap">
+    <div class="fr-eyebrow">Coverage matrix</div>
+    <h2 class="fr-h2">Honest scope across every binding</h2>
+    <p class="fr-lede">Coverage is intentionally uneven. Node and Python wrap every /v1/* route. MCP and VS Code wrap the verbs a Claude-resident developer actually uses. C and Rust wrap the verifier path so regulated and embedded deployments can verify a .kolm artifact without a heavy runtime. Swift and Kotlin are on-device loaders, not gateway clients — the row marks what they'll cover when they ship.</p>
     <table class="cov-tbl">
       <thead>
         <tr><th>Binding</th><th>Auth</th><th>Capture</th><th>Distill</th><th>Compile</th><th>Score</th><th>Verify</th><th>Streaming</th></tr>
@@ -116,100 +132,119 @@
         <tr><td>VS Code</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td></tr>
         <tr><td>C (kolm.h)</td><td class="y">yes</td><td class="y">yes</td><td class="n">no</td><td class="n">no</td><td class="n">no</td><td class="y">yes</td><td class="n">no</td></tr>
         <tr><td>Rust (kolm)</td><td class="y">yes</td><td class="y">yes</td><td class="n">no</td><td class="n">no</td><td class="n">no</td><td class="y">yes</td><td class="n">no</td></tr>
+        <tr><td>Swift (coming)</td><td class="n">planned</td><td class="n">planned</td><td class="n">no</td><td class="n">no</td><td class="n">on-device</td><td class="n">planned</td><td class="n">on-device</td></tr>
+        <tr><td>Kotlin (coming)</td><td class="n">planned</td><td class="n">planned</td><td class="n">no</td><td class="n">no</td><td class="n">on-device</td><td class="n">planned</td><td class="n">on-device</td></tr>
       </tbody>
     </table>
   </div>
 </section>
 
-<section class="sdk-section" id="cards">
-  <div class="ks-wrap">
-    <h2>Pick your SDK</h2>
-    <p class="sub">Every install line below is real. Every entry points at the same backend; the artifact and the receipt are identical across bindings.</p>
-    <div class="sdk-grid">
+<section class="fr-section sdk-section" id="cards">
+  <div class="fr-container ks-wrap">
+    <div class="fr-eyebrow">Shipped &middot; six bindings</div>
+    <h2 class="fr-h2">Pick the SDK that matches your runtime</h2>
+    <p class="fr-lede">Every install line below is real. Every entry hits the same backend; the artifact and the receipt are identical across bindings.</p>
 
-      <article class="sdk-card" id="node">
-        <div class="row"><span class="tag">@kolm/node</span><span class="st live">Live</span></div>
-        <h3>Node.js</h3>
-        <p>The reference binding. Promise-based, types included, OAuth + API key auth, streaming responses, retry policies with exponential backoff. The VS Code extension is built on top.</p>
-        <pre class="install">npm install @kolm/sdk</pre>
-        <div class="meta">
-          <span>node &gt;= 18</span>
-          <span>esm + cjs</span>
-          <span>typescript</span>
-          <span>covers all /v1/*</span>
+    <div class="fr-grid-2" style="margin-top:var(--ks-6)">
+
+      <article class="fr-card fr-card--feature fr-reveal" id="node">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:var(--ks-3);flex-wrap:wrap">
+          <span class="fr-pill">@kolm/sdk &middot; Apache-2.0</span>
+          <span class="fr-status"><span class="fr-status__dot"></span>shipped</span>
+        </div>
+        <h3 class="fr-h3">Node.js</h3>
+        <p>The reference binding. Promise-based, typed, OAuth + API key auth, streaming responses, retry policies with exponential backoff. The VS Code extension sits on top of it.</p>
+        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> npm install @kolm/sdk</pre>
+        <div style="display:flex;flex-wrap:wrap;gap:var(--ks-2)">
+          <span class="fr-pill fr-pill--ghost">node &gt;= 18</span>
+          <span class="fr-pill fr-pill--ghost">esm + cjs</span>
+          <span class="fr-pill fr-pill--ghost">typescript</span>
+          <span class="fr-pill fr-pill--ghost">covers all /v1/*</span>
         </div>
         <a href="/api" class="more">/api reference &rarr;</a>
       </article>
 
-      <article class="sdk-card" id="python">
-        <div class="row"><span class="tag">kolm-py</span><span class="st live">Live</span></div>
-        <h3>Python</h3>
-        <p>Sync and async clients in one package. Type-stubbed. Integrates with pytest for honesty fixtures. Used inside the distill runner itself. Install from PyPI or from the open-source repo.</p>
-        <pre class="install">pip install kolm
-# or from source:
-pip install git+https://github.com/sneaky-hippo/kolmogorov-stack@main#subdirectory=sdk/python</pre>
-        <div class="meta">
-          <span>python &gt;= 3.10</span>
-          <span>sync + async</span>
-          <span>pytest plugin</span>
+      <article class="fr-card fr-card--feature fr-reveal" id="python">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:var(--ks-3);flex-wrap:wrap">
+          <span class="fr-pill">kolm-py &middot; Apache-2.0</span>
+          <span class="fr-status"><span class="fr-status__dot"></span>shipped</span>
+        </div>
+        <h3 class="fr-h3">Python</h3>
+        <p>Sync and async clients in one package. Type-stubbed. Pytest fixtures included. Used inside the distill runner itself. Install from source today; PyPI publish in flight.</p>
+        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> pip install git+https://github.com/sneaky-hippo/kolmogorov-stack@main<span class="fr-cli__flag">#subdirectory=sdk/python</span>
+<span class="fr-cli__comment"># PyPI: pip install kolm  (coming)</span></pre>
+        <div style="display:flex;flex-wrap:wrap;gap:var(--ks-2)">
+          <span class="fr-pill fr-pill--ghost">python &gt;= 3.10</span>
+          <span class="fr-pill fr-pill--ghost">sync + async</span>
+          <span class="fr-pill fr-pill--ghost">pytest plugin</span>
         </div>
         <a href="/api" class="more">/api reference &rarr;</a>
       </article>
 
-      <article class="sdk-card" id="mcp">
-        <div class="row"><span class="tag">MCP server</span><span class="st live">Live</span></div>
-        <h3>Model Context Protocol server</h3>
+      <article class="fr-card fr-card--feature fr-reveal" id="mcp">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:var(--ks-3);flex-wrap:wrap">
+          <span class="fr-pill">@kolm/mcp-server &middot; Apache-2.0</span>
+          <span class="fr-status"><span class="fr-status__dot"></span>shipped</span>
+        </div>
+        <h3 class="fr-h3">Model Context Protocol server</h3>
         <p>For Claude Desktop and any IDE that speaks MCP. Exposes the kolm verbs as MCP tools so a Claude-resident developer can capture, distill, compile, score, and verify without leaving the editor.</p>
-        <pre class="install">npm install -g @kolm/mcp-server
-# then add to your MCP host config</pre>
-        <div class="meta">
-          <span>node &gt;= 18</span>
-          <span>stdio transport</span>
-          <span>Claude Desktop</span>
-          <span>IDE Claude</span>
+        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> npm install -g @kolm/mcp-server
+<span class="fr-cli__comment"># then register it in your MCP host config</span></pre>
+        <div style="display:flex;flex-wrap:wrap;gap:var(--ks-2)">
+          <span class="fr-pill fr-pill--ghost">node &gt;= 18</span>
+          <span class="fr-pill fr-pill--ghost">stdio transport</span>
+          <span class="fr-pill fr-pill--ghost">Claude Desktop</span>
+          <span class="fr-pill fr-pill--ghost">IDE Claude</span>
         </div>
         <a href="/integrations/claude-code" class="more">/integrations/claude-code &rarr;</a>
       </article>
 
-      <article class="sdk-card" id="vscode">
-        <div class="row"><span class="tag">VS Code</span><span class="st live">Live</span></div>
-        <h3>VS Code extension</h3>
-        <p>Distill, score, and verify from inside the editor. Status-bar K-score on the active .kolm file. Inline distill commands. Receipt explorer. CI integration mirrors the command-palette verbs.</p>
-        <pre class="install">code --install-extension kolm.kolm-vscode</pre>
-        <div class="meta">
-          <span>vscode &gt;= 1.90</span>
-          <span>built on @kolm/node</span>
-          <span>status-bar K-score</span>
+      <article class="fr-card fr-card--feature fr-reveal" id="vscode">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:var(--ks-3);flex-wrap:wrap">
+          <span class="fr-pill">kolm.kolm-vscode &middot; Apache-2.0</span>
+          <span class="fr-status"><span class="fr-status__dot"></span>shipped</span>
+        </div>
+        <h3 class="fr-h3">VS Code extension</h3>
+        <p>Distill, score, and verify from inside the editor. Status-bar K-score on the active .kolm file. Inline distill commands. Receipt explorer. CI verbs mirror the command palette.</p>
+        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> code <span class="fr-cli__flag">--install-extension</span> kolm.kolm-vscode</pre>
+        <div style="display:flex;flex-wrap:wrap;gap:var(--ks-2)">
+          <span class="fr-pill fr-pill--ghost">vscode &gt;= 1.90</span>
+          <span class="fr-pill fr-pill--ghost">built on @kolm/node</span>
+          <span class="fr-pill fr-pill--ghost">status-bar K-score</span>
         </div>
         <a href="/integrations/vscode" class="more">/integrations/vscode &rarr;</a>
       </article>
 
-      <article class="sdk-card" id="c">
-        <div class="row"><span class="tag">stb-style</span><span class="st live">Live</span></div>
-        <h3>C (single-header)</h3>
-        <p>One header file, <code>kolm.h</code>. Define <code>KOLM_IMPLEMENTATION</code> in exactly one translation unit. libcurl-backed. No JSON parser bundled (pair with cJSON). For embedded contexts and CLI integrators who do not want a runtime.</p>
-        <pre class="install">curl -L -o kolm.h https://github.com/sneaky-hippo/kolmogorov-stack/raw/main/sdk/c/kolm.h
-# in one .c file: #define KOLM_IMPLEMENTATION before #include "kolm.h"</pre>
-        <div class="meta">
-          <span>c99</span>
-          <span>libcurl</span>
-          <span>sdk/c/ in repo</span>
-          <span>verify-first</span>
+      <article class="fr-card fr-card--feature fr-reveal" id="c">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:var(--ks-3);flex-wrap:wrap">
+          <span class="fr-pill">sdk/c &middot; stb-style &middot; Apache-2.0</span>
+          <span class="fr-status"><span class="fr-status__dot"></span>shipped</span>
+        </div>
+        <h3 class="fr-h3">C (single header)</h3>
+        <p>One header file, <code>kolm.h</code>. Define <code>KOLM_IMPLEMENTATION</code> in exactly one translation unit. libcurl-backed. No JSON parser bundled — pair with cJSON. Built for embedded contexts and integrators who don't want a runtime.</p>
+        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> curl <span class="fr-cli__flag">-L -o</span> kolm.h https://github.com/sneaky-hippo/kolmogorov-stack/raw/main/sdk/c/kolm.h
+<span class="fr-cli__comment"># in one .c file: #define KOLM_IMPLEMENTATION before #include "kolm.h"</span></pre>
+        <div style="display:flex;flex-wrap:wrap;gap:var(--ks-2)">
+          <span class="fr-pill fr-pill--ghost">c99</span>
+          <span class="fr-pill fr-pill--ghost">libcurl</span>
+          <span class="fr-pill fr-pill--ghost">verify-first</span>
         </div>
         <a href="https://github.com/sneaky-hippo/kolmogorov-stack/tree/main/sdk/c" rel="noopener" class="more">sdk/c/ on GitHub &rarr;</a>
       </article>
 
-      <article class="sdk-card" id="rust">
-        <div class="row"><span class="tag">crates.io</span><span class="st live">Live</span></div>
-        <h3>Rust</h3>
-        <p>The <code>kolm</code> crate v0.1.0. ureq-sync transport, no async runtime required. Honest error envelope: no <code>is_success()</code> sugar hiding 4xx; raw status and body surfaced to the caller.</p>
-        <pre class="install">cargo add kolm
-# or in Cargo.toml: kolm = "0.1"</pre>
-        <div class="meta">
-          <span>rust stable</span>
-          <span>ureq sync</span>
-          <span>examples/whoami.rs</span>
-          <span>sdk/rust/ in repo</span>
+      <article class="fr-card fr-card--feature fr-reveal" id="rust">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:var(--ks-3);flex-wrap:wrap">
+          <span class="fr-pill">kolm v0.1.0 &middot; Apache-2.0</span>
+          <span class="fr-status"><span class="fr-status__dot"></span>shipped</span>
+        </div>
+        <h3 class="fr-h3">Rust</h3>
+        <p>The <code>kolm</code> crate v0.1.0. ureq-sync transport, no async runtime required. Honest error envelope: no <code>is_success()</code> sugar hides a 4xx; raw status and body surface to the caller.</p>
+        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> cargo add kolm
+<span class="fr-cli__comment"># or in Cargo.toml: kolm = "0.1"</span></pre>
+        <div style="display:flex;flex-wrap:wrap;gap:var(--ks-2)">
+          <span class="fr-pill fr-pill--ghost">rust stable</span>
+          <span class="fr-pill fr-pill--ghost">ureq sync</span>
+          <span class="fr-pill fr-pill--ghost">examples/whoami.rs</span>
         </div>
         <a href="https://github.com/sneaky-hippo/kolmogorov-stack/tree/main/sdk/rust" rel="noopener" class="more">sdk/rust/ on GitHub &rarr;</a>
       </article>
@@ -218,10 +253,88 @@ pip install git+https://github.com/sneaky-hippo/kolmogorov-stack@main#subdirecto
   </div>
 </section>
 
-<section class="sdk-section" id="hello">
-  <div class="ks-wrap">
-    <h2>The same four-line whoami across the bindings</h2>
-    <p class="sub">Every kolm SDK starts the same way: read <code>KOLM_API_KEY</code> from the environment, hit <code>/v1/whoami</code>, print the authenticated tenant. If this works, every other route works.</p>
+<section class="fr-section" id="mobile">
+  <div class="fr-container ks-wrap">
+    <div class="fr-eyebrow">In progress &middot; on-device loaders</div>
+    <h2 class="fr-h2">Mobile and edge bindings</h2>
+    <p class="fr-lede">A .kolm artifact already runs on a laptop GPU and a server. The next step is loading the same signed bundle on a phone. Swift and Kotlin loaders are on the bench — honest status below; no install line yet.</p>
+
+    <div class="fr-grid-2" style="margin-top:var(--ks-6)">
+
+      <article class="fr-card fr-reveal" id="swift">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:var(--ks-3);flex-wrap:wrap">
+          <span class="fr-pill fr-pill--amber">Coming</span>
+          <span class="fr-status fr-status--warn"><span class="fr-status__dot"></span>not yet shipped</span>
+        </div>
+        <h3 class="fr-h3">Swift / iOS &mdash; load .kolm on-device</h3>
+        <p>SwiftPM package that opens a signed .kolm bundle, verifies the Ed25519 receipt, and routes the weights through Core ML (Apple Neural Engine) or onnxruntime-objc as a fallback. Targets iOS 17+ and macOS 14+. Public API will mirror the C verifier so the same artifact runs on both surfaces.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:var(--ks-2)">
+          <span class="fr-pill fr-pill--ghost">Core ML path</span>
+          <span class="fr-pill fr-pill--ghost">ONNX fallback</span>
+          <span class="fr-pill fr-pill--ghost">SwiftPM</span>
+          <span class="fr-pill fr-pill--ghost">verify on-device</span>
+        </div>
+        <a href="/contact" class="more">Tell us your iOS use case &rarr;</a>
+      </article>
+
+      <article class="fr-card fr-reveal" id="kotlin">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:var(--ks-3);flex-wrap:wrap">
+          <span class="fr-pill fr-pill--amber">Coming</span>
+          <span class="fr-status fr-status--warn"><span class="fr-status__dot"></span>not yet shipped</span>
+        </div>
+        <h3 class="fr-h3">Kotlin / Android &mdash; load .kolm on-device</h3>
+        <p>Kotlin library that opens a signed .kolm bundle, verifies the Ed25519 receipt, and runs inference through ExecuTorch (PyTorch Edge) with an onnxruntime-android fallback. Targets API 26+. Same artifact, same receipt schema, same verify path as the desktop runtime.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:var(--ks-2)">
+          <span class="fr-pill fr-pill--ghost">ExecuTorch path</span>
+          <span class="fr-pill fr-pill--ghost">ONNX fallback</span>
+          <span class="fr-pill fr-pill--ghost">Gradle / Maven</span>
+          <span class="fr-pill fr-pill--ghost">API 26+</span>
+        </div>
+        <a href="/contact" class="more">Tell us your Android use case &rarr;</a>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<section class="fr-section" id="integrations">
+  <div class="fr-container ks-wrap">
+    <div class="fr-eyebrow">Framework integrations</div>
+    <h2 class="fr-h2">Drop kolm into the framework you already use</h2>
+    <p class="fr-lede">kolm sits one layer below the orchestration framework — capture flows in regardless of who wrote the agent loop. The SDKs talk to LangChain, LlamaIndex, and the Vercel AI SDK through their normal client hooks.</p>
+
+    <div class="fr-grid-3" style="margin-top:var(--ks-6)">
+
+      <article class="fr-card fr-card--mint fr-reveal">
+        <span class="fr-pill">Python</span>
+        <h3 class="fr-h3">LangChain</h3>
+        <p>Wrap any LangChain LLM or tool call with the kolm-py capture client. Every invocation lands as a structured capture row, ready for distill and bake-off.</p>
+        <a href="/integrations" class="more">/integrations &rarr;</a>
+      </article>
+
+      <article class="fr-card fr-card--mint fr-reveal">
+        <span class="fr-pill">Python</span>
+        <h3 class="fr-h3">LlamaIndex</h3>
+        <p>Hook the kolm callback into the LlamaIndex service context. RAG queries and tool calls flow into the same capture stream the CLI uses.</p>
+        <a href="/integrations" class="more">/integrations &rarr;</a>
+      </article>
+
+      <article class="fr-card fr-card--mint fr-reveal">
+        <span class="fr-pill">Node</span>
+        <h3 class="fr-h3">Vercel AI SDK</h3>
+        <p>Middleware for the Vercel <code>ai</code> package. Stream tokens to the user; mirror the request and response into a kolm capture so a distill pass can rebuild the model behind the route.</p>
+        <a href="/integrations" class="more">/integrations &rarr;</a>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<section class="fr-section sdk-section" id="hello">
+  <div class="fr-container ks-wrap">
+    <div class="fr-eyebrow">Hello world</div>
+    <h2 class="fr-h2">The same four-line whoami across every binding</h2>
+    <p class="fr-lede">Every kolm SDK starts the same way: read <code>KOLM_API_KEY</code> from the environment, hit <code>/v1/whoami</code>, print the authenticated tenant. If this works, every other route works.</p>
 
     <div class="sdk-code">
       <div class="title">Node &middot; @kolm/sdk</div>
@@ -258,39 +371,41 @@ printf(<span class="s">"%d %s\n"</span>, r.status, r.body);</pre>
   </div>
 </section>
 
-<section class="sdk-section" id="contract">
-  <div class="ks-wrap">
-    <h2>The contract every binding honors</h2>
-    <p class="sub">Six bindings, one contract. Promises a developer or engineer can rely on regardless of which language they pick.</p>
-    <div class="sdk-grid">
-      <div class="sdk-card">
-        <div class="row"><span class="tag">envelope</span><span class="st live">Stable</span></div>
-        <h3>Honest error envelope</h3>
+<section class="fr-section sdk-section" id="contract">
+  <div class="fr-container ks-wrap">
+    <div class="fr-eyebrow">One contract &middot; every binding</div>
+    <h2 class="fr-h2">The promises that hold regardless of language</h2>
+    <p class="fr-lede">Six shipped bindings, one contract. The shape an engineer relies on stays constant.</p>
+    <div class="fr-grid-2" style="margin-top:var(--ks-6)">
+      <div class="fr-card fr-reveal">
+        <span class="fr-pill">envelope</span>
+        <h3 class="fr-h3">Honest error envelope</h3>
         <p>Every response surfaces raw HTTP status plus the structured body <code>{ok, code, error, data}</code>. No binding hides a 4xx behind a success boolean. The C and Rust bindings expose status and body directly so callers see what the server said.</p>
       </div>
-      <div class="sdk-card">
-        <div class="row"><span class="tag">auth</span><span class="st live">Stable</span></div>
-        <h3>x-kolm-api-key header</h3>
+      <div class="fr-card fr-reveal">
+        <span class="fr-pill">auth</span>
+        <h3 class="fr-h3">x-kolm-api-key header</h3>
         <p>One header, one key. Read from <code>KOLM_API_KEY</code> by default. Override with explicit constructor args when calling from a multi-tenant runner. The CLI writes the key to <code>~/.kolm/credentials</code> on <code>kolm login</code>.</p>
       </div>
-      <div class="sdk-card">
-        <div class="row"><span class="tag">base-url</span><span class="st live">Stable</span></div>
-        <h3>KOLM_BASE_URL override</h3>
+      <div class="fr-card fr-reveal">
+        <span class="fr-pill">base-url</span>
+        <h3 class="fr-h3">KOLM_BASE_URL override</h3>
         <p>Point any SDK at a self-hosted gateway by setting <code>KOLM_BASE_URL=https://kolm.internal</code>. The hosted default is <code>https://kolm.ai</code>. Useful for VPC-resident installs and air-gapped CI.</p>
       </div>
-      <div class="sdk-card">
-        <div class="row"><span class="tag">verifier</span><span class="st live">Stable</span></div>
-        <h3>Verify without a runtime</h3>
+      <div class="fr-card fr-reveal">
+        <span class="fr-pill">verifier</span>
+        <h3 class="fr-h3">Verify without a runtime</h3>
         <p>Every binding can call <code>/v1/verify/:cid</code> against a public CID. The C and Rust bindings exist precisely so a regulated deployment can verify a .kolm artifact from inside an audit pipeline without a Node or Python dependency.</p>
       </div>
     </div>
   </div>
 </section>
 
-<section class="sdk-section" id="install">
-  <div class="ks-wrap">
-    <h2>What the CLI install actually does</h2>
-    <p class="sub">The CLI is the canonical surface. Every SDK is a thin client over the same /v1 routes the CLI talks to. Install once, use any binding.</p>
+<section class="fr-section sdk-section" id="install">
+  <div class="fr-container ks-wrap">
+    <div class="fr-eyebrow">CLI is the canonical surface</div>
+    <h2 class="fr-h2">What an install actually does</h2>
+    <p class="fr-lede">Every SDK is a thin client over the same /v1 routes the CLI talks to. Install once, use any binding.</p>
     <div class="sdk-code">
       <div class="title">From zero to a signed receipt</div>
 <pre><span class="c"># 1. Install the CLI (npm-distributed; Node 18+ required)</span>
@@ -313,35 +428,41 @@ kolm verify ./cm-claims-v4.kolm</pre>
   </div>
 </section>
 
-<section class="sdk-section" id="reach">
-  <div class="ks-wrap">
-    <h2>Where the SDKs live</h2>
-    <p class="sub">Every binding ships in the open-source monorepo. File a bug, send a PR, or vendor the source.</p>
-    <div class="sdk-grid">
-      <div class="sdk-card">
-        <h3>Monorepo on GitHub</h3>
-        <p>Node: <code>sdk/node/</code>. Python: <code>sdk/python/</code>. MCP: <code>sdk/mcp/</code>. VS Code: <code>sdk/vscode/</code>. C: <code>sdk/c/</code>. Rust: <code>sdk/rust/</code>. All Apache-2.0.</p>
+<section class="fr-section sdk-section" id="reach">
+  <div class="fr-container ks-wrap">
+    <div class="fr-eyebrow">Where the SDKs live</div>
+    <h2 class="fr-h2">All bindings, one Apache-2.0 monorepo</h2>
+    <p class="fr-lede">File a bug, send a PR, or vendor the source. The SDKs ship in <code>sdk/node/</code>, <code>sdk/python/</code>, <code>sdk/mcp/</code>, <code>sdk/vscode/</code>, <code>sdk/c/</code>, and <code>sdk/rust/</code>.</p>
+    <div class="fr-grid-2" style="margin-top:var(--ks-6)">
+      <div class="fr-card fr-reveal">
+        <span class="fr-pill">monorepo</span>
+        <h3 class="fr-h3">GitHub source</h3>
+        <p>Node, Python, MCP, VS Code, C, and Rust live under <code>sdk/*</code>. All Apache-2.0.</p>
         <p><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener" style="color:var(--ks-accent)">github.com/sneaky-hippo/kolmogorov-stack &rarr;</a></p>
       </div>
-      <div class="sdk-card">
-        <h3>REST routes the SDKs wrap</h3>
-        <p>The kolm gateway exposes 355+ routes under <code>/v1/*</code>. Every SDK is a typed client over those routes. See the <a href="/api" style="color:var(--ks-accent)">/api</a> reference for the full surface.</p>
+      <div class="fr-card fr-reveal">
+        <span class="fr-pill">/v1/*</span>
+        <h3 class="fr-h3">REST routes the SDKs wrap</h3>
+        <p>The kolm gateway exposes 355+ routes under <code>/v1/*</code>. Every SDK is a typed client over those routes. The <a href="/api" style="color:var(--ks-accent)">/api</a> reference is the full surface.</p>
       </div>
-      <div class="sdk-card">
-        <h3>Quickstart in 10 minutes</h3>
-        <p>The fastest way to confirm an SDK is wired correctly is to install the CLI, sign up, and run <code>kolm whoami</code>. The quickstart walks you through it.</p>
+      <div class="fr-card fr-reveal">
+        <span class="fr-pill">10 minutes</span>
+        <h3 class="fr-h3">Quickstart</h3>
+        <p>The fastest way to confirm an SDK is wired correctly: install the CLI, sign up, run <code>kolm whoami</code>.</p>
         <p><a href="/quickstart" style="color:var(--ks-accent)">/quickstart &rarr;</a></p>
       </div>
-      <div class="sdk-card">
-        <h3>Talk to a real engineer</h3>
-        <p>SDK questions, missing-route reports, regulated-deployment binding asks. <a href="/contact" style="color:var(--ks-accent)">/contact &rarr;</a> or open an issue on GitHub.</p>
+      <div class="fr-card fr-reveal">
+        <span class="fr-pill">/docs/sdk</span>
+        <h3 class="fr-h3">SDK docs</h3>
+        <p>Deep-dive guides, recipe code, and the per-method reference. See <a href="/docs/sdk" style="color:var(--ks-accent)">/docs/sdk</a> for the canonical pages and <a href="/contact" style="color:var(--ks-accent)">/contact</a> for missing-route or regulated-deployment asks.</p>
       </div>
     </div>
-    <div style="margin-top:var(--ks-6); display:flex; flex-wrap:wrap; gap:var(--ks-3)">
-      <a href="/quickstart" class="ks-btn ks-btn--primary">Install the CLI <span class="ks-btn-arrow">&rarr;</span></a>
-      <a href="/api" class="ks-btn ks-btn--ghost">Browse the REST API</a>
-      <a href="/integrations" class="ks-btn ks-btn--ghost">See first-party integrations</a>
-      <a href="/security" class="ks-btn ks-btn--ghost">Security posture</a>
+    <div style="margin-top:var(--ks-7); display:flex; flex-wrap:wrap; gap:var(--ks-3)">
+      <a href="/quickstart" class="fr-btn fr-btn--mint">Install the CLI &rarr;</a>
+      <a href="/docs/sdk" class="fr-btn fr-btn--ghost">SDK docs</a>
+      <a href="/integrations" class="fr-btn fr-btn--ghost">Framework integrations</a>
+      <a href="/api" class="fr-btn fr-btn--ghost">Browse the REST API</a>
+      <a href="/security" class="fr-btn fr-btn--ghost">Security posture</a>
     </div>
   </div>
 </section>

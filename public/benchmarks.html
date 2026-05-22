@@ -16,6 +16,8 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/frontier.css">
+<script defer src="/frontier.js"></script>
 <style>
   .bm-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
   .bm-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
@@ -413,6 +415,137 @@ kolm run    ./r1-distill-qwen-32b.int4.kolm \
       </tbody>
     </table>
     <p style="font-size:12.5px; font-family:var(--ks-mono); color:var(--ks-ink-3); margin-top:var(--ks-3)">vLLM and TensorRT-LLM numbers measured on the same RTX 5090 with single-stream input to keep the comparison apples-to-apples. The full runtime matrix and the verifier sidecars for each adapter are documented on <a href="/runtimes" style="color:var(--ks-accent)">/runtimes</a>.</p>
+  </div>
+</section>
+
+<section class="fr-section" id="benchmark-suites">
+  <div class="fr-container">
+    <div class="fr-eyebrow">Five suites &middot; one CLI verb</div>
+    <h2 class="fr-h2">Benchmark suites</h2>
+    <p class="fr-lede">Every suite below runs against a compiled .kolm artifact and emits a signed receipt. The eval pack is embedded in the artifact manifest, so a third party can replay the score offline.</p>
+    <div class="fr-grid-3" style="margin-top:var(--ks-6)">
+      <div class="fr-card fr-reveal">
+        <span class="fr-pill fr-pill--violet">Code editing</span>
+        <h3 class="fr-h3">Aider</h3>
+        <p>Measures whether the model can apply a real pull-request diff against a real repository and pass the repo's own tests. The grader is the repo's CI, not a synthetic judge.</p>
+        <div class="fr-cli" style="margin-top:var(--ks-3)">
+          <span class="fr-cli__prompt">$</span> kolm bench <span class="fr-cli__flag">aider</span>
+        </div>
+      </div>
+      <div class="fr-card fr-reveal">
+        <span class="fr-pill fr-pill--amber">Issue resolution</span>
+        <h3 class="fr-h3">SWE-Bench</h3>
+        <p>Takes a real GitHub issue and asks the model to produce a patch that closes it. Pass requires the resulting PR to compile and pass the project's existing test suite end to end.</p>
+        <div class="fr-cli" style="margin-top:var(--ks-3)">
+          <span class="fr-cli__prompt">$</span> kolm bench <span class="fr-cli__flag">swe-bench</span>
+        </div>
+      </div>
+      <div class="fr-card fr-reveal">
+        <span class="fr-pill">Graduate science</span>
+        <h3 class="fr-h3">GPQA</h3>
+        <p>Graduate-level multiple-choice questions in physics, chemistry, and biology authored by domain PhDs. Tests reasoning depth on problems that resist surface pattern-matching.</p>
+        <div class="fr-cli" style="margin-top:var(--ks-3)">
+          <span class="fr-cli__prompt">$</span> kolm bench <span class="fr-cli__flag">gpqa</span>
+        </div>
+      </div>
+      <div class="fr-card fr-reveal">
+        <span class="fr-pill fr-pill--violet">Live coding</span>
+        <h3 class="fr-h3">LiveCodeBench</h3>
+        <p>Competitive-programming problems sourced from live contest streams after the model's cutoff. The contamination control is the key feature; scores are not inflated by training-set leakage.</p>
+        <div class="fr-cli" style="margin-top:var(--ks-3)">
+          <span class="fr-cli__prompt">$</span> kolm bench <span class="fr-cli__flag">livecodebench</span>
+        </div>
+      </div>
+      <div class="fr-card fr-reveal">
+        <span class="fr-pill fr-pill--amber">Extreme generalization</span>
+        <h3 class="fr-h3">Humanity's Last Exam (HLE)</h3>
+        <p>An expert-authored set covering subjects where the modal correct answer requires synthesis across multiple fields. Designed to remain difficult as frontier models improve.</p>
+        <div class="fr-cli" style="margin-top:var(--ks-3)">
+          <span class="fr-cli__prompt">$</span> kolm bench <span class="fr-cli__flag">hle</span>
+        </div>
+      </div>
+      <div class="fr-card fr-card--mint fr-reveal">
+        <span class="fr-pill fr-pill--ghost">All five</span>
+        <h3 class="fr-h3">Full sweep</h3>
+        <p>Run every suite against an artifact and aggregate into a single receipt. The result is what /leaderboard uses to rank entries; the eval packs are pinned per-quarter.</p>
+        <div class="fr-cli" style="margin-top:var(--ks-3)">
+          <span class="fr-cli__prompt">$</span> kolm bench <span class="fr-cli__flag">--all</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="fr-section" id="leaderboard-preview">
+  <div class="fr-container">
+    <div class="fr-eyebrow">Sample baseline runs &middot; not definitive leaderboard data</div>
+    <h2 class="fr-h2">Leaderboard preview</h2>
+    <p class="fr-lede">Three sample runs from the in-house rig, included to show the shape of the upcoming public leaderboard. These are example runs labeled as such; the full ranked board with third-party submissions lives at <a href="/leaderboard" style="color:var(--ks-accent)">/leaderboard</a>.</p>
+    <div class="fr-grid-3" style="margin-top:var(--ks-6)">
+      <div class="fr-card fr-card--feature fr-reveal">
+        <span class="fr-pill fr-pill--violet">Sample run</span>
+        <h3 class="fr-h3">Best reasoning under 8B</h3>
+        <p>Qwen2.5-7B INT4, GPQA-diamond subset, signed receipt against the q2 pack. Replace with the leader once the public board opens.</p>
+        <div style="margin-top:var(--ks-3)">
+          <span class="fr-num fr-num--mid">62.4</span>
+          <span class="fr-num--unit">% accuracy</span>
+        </div>
+        <p style="margin-top:var(--ks-2); font-size:12.5px; font-family:var(--ks-mono); color:var(--ks-ink-3)">Sample baseline &middot; not a definitive ranking</p>
+        <a href="/leaderboard" class="fr-btn fr-btn--ghost" style="margin-top:var(--ks-3)">View /leaderboard</a>
+      </div>
+      <div class="fr-card fr-card--feature fr-reveal">
+        <span class="fr-pill fr-pill--amber">Sample run</span>
+        <h3 class="fr-h3">Best coding under 14B</h3>
+        <p>DeepSeek-Coder distilled into a 7B INT4 specialist, Aider edit-rate plus SWE-Bench-Lite pass-rate, single-stream on RTX 5090.</p>
+        <div style="margin-top:var(--ks-3)">
+          <span class="fr-num fr-num--mid">38.1</span>
+          <span class="fr-num--unit">% pass@1</span>
+        </div>
+        <p style="margin-top:var(--ks-2); font-size:12.5px; font-family:var(--ks-mono); color:var(--ks-ink-3)">Sample baseline &middot; not a definitive ranking</p>
+        <a href="/leaderboard" class="fr-btn fr-btn--ghost" style="margin-top:var(--ks-3)">View /leaderboard</a>
+      </div>
+      <div class="fr-card fr-card--feature fr-reveal">
+        <span class="fr-pill">Sample run</span>
+        <h3 class="fr-h3">Smallest passing K-score 0.90</h3>
+        <p>Qwen2.5-3B INT4, 1.9 GB on disk, composite K-score 96 against ks-general-2026-q2. The smallest artifact that crosses the 0.90 ship gate on the standard packs.</p>
+        <div style="margin-top:var(--ks-3)">
+          <span class="fr-num fr-num--mid">1.9</span>
+          <span class="fr-num--unit">GB on disk</span>
+        </div>
+        <p style="margin-top:var(--ks-2); font-size:12.5px; font-family:var(--ks-mono); color:var(--ks-ink-3)">Sample baseline &middot; not a definitive ranking</p>
+        <a href="/leaderboard" class="fr-btn fr-btn--ghost" style="margin-top:var(--ks-3)">View /leaderboard</a>
+      </div>
+    </div>
+    <p style="font-size:12.5px; font-family:var(--ks-mono); color:var(--ks-ink-3); margin-top:var(--ks-4)">Sample runs above are the in-house rig speaking honestly. The public leaderboard at <a href="/leaderboard" style="color:var(--ks-accent)">/leaderboard</a> opens once third-party submissions clear receipt verification.</p>
+  </div>
+</section>
+
+<section class="fr-section" id="reproducibility">
+  <div class="fr-container">
+    <div class="fr-eyebrow">Reproducibility &middot; receipts not vibes</div>
+    <h2 class="fr-h2">Every score is verifiable offline</h2>
+    <p class="fr-lede">A benchmark number on this page is only as honest as the receipt it points at. Every run on a .kolm artifact bakes the eval pack into the manifest; a third party can replay the score against the same prompts, on different hardware, and compare the resulting receipts byte for byte.</p>
+    <div class="fr-grid-3" style="margin-top:var(--ks-6)">
+      <div class="fr-card fr-reveal">
+        <span class="fr-status"><span class="fr-status__dot"></span>Manifest binding</span>
+        <h3 class="fr-h3" style="margin-top:var(--ks-2)">Eval pack in the artifact</h3>
+        <p>The eval pack hash, prompt count, and pack version are written into the artifact manifest at compile time. <code>kolm verify</code> reports the pack on every load.</p>
+      </div>
+      <div class="fr-card fr-reveal">
+        <span class="fr-status"><span class="fr-status__dot"></span>Signed receipt</span>
+        <h3 class="fr-h3" style="margin-top:var(--ks-2)">Ed25519 signature per run</h3>
+        <p>Every bench run emits a signed receipt with the score, the prompt-by-prompt outputs, and the rig manifest. The signature lets a third party detect any post-hoc tampering.</p>
+      </div>
+      <div class="fr-card fr-reveal">
+        <span class="fr-status"><span class="fr-status__dot"></span>Offline replay</span>
+        <h3 class="fr-h3" style="margin-top:var(--ks-2)">Replay without the network</h3>
+        <p>The pack and the prompts ship inside the artifact. A reviewer can replay against a local copy on an air-gapped machine and verify the receipt without contacting kolm.</p>
+      </div>
+    </div>
+    <div class="fr-cli" style="margin-top:var(--ks-6)">
+      <span class="fr-cli__prompt">$</span> kolm bench replay <span class="fr-cli__flag">&lt;artifact-cid&gt;</span>
+    </div>
+    <p style="margin-top:var(--ks-4); font-size:14px; line-height:1.65; color:var(--ks-ink-2); max-width:64ch">More on the methodology and the per-axis math at <a href="/k-score" style="color:var(--ks-accent)">/k-score</a> and <a href="/docs/evals" style="color:var(--ks-accent)">/docs/evals</a>. The compile path that bakes the eval pack in is documented at <a href="/forge" style="color:var(--ks-accent)">/forge</a>; sample recipes that score above 0.90 on the public packs live at <a href="/recipes" style="color:var(--ks-accent)">/recipes</a>.</p>
   </div>
 </section>
 

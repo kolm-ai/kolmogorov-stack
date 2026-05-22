@@ -106,6 +106,8 @@
 </script>
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/frontier.css">
+<script defer src="/frontier.js"></script>
 </head>
 <body class="ks">
 <a href="#main" class="ks-skip">Skip to content</a>
@@ -258,6 +260,326 @@
  </article>
 
  </div>
+</section>
+
+<section class="fr-section fr-reveal" id="w621-hero">
+  <div class="fr-container">
+    <span class="fr-eyebrow">FRONTIER STACK</span>
+    <h2 class="fr-h2" style="font-size:var(--fr-text-3xl);max-width:880px">Every technique that ships in a .kolm.</h2>
+    <p class="fr-lede">Four pillars hold the compiler up. Quantization shrinks the weights. Distillation borrows from frontier teachers. Compilation and inference optimization make the artifact fast on real hardware. Merges fuse capabilities from multiple bases into one student. Every method below cites its lineage; every status is honest about whether it is first-class in <code>kolm compile</code> today or still experimental.</p>
+    <hr class="fr-rule fr-rule--mint" style="margin-top:24px">
+  </div>
+</section>
+
+<section class="fr-section fr-reveal" id="quantization">
+  <div class="fr-container">
+    <span class="fr-eyebrow">PILLAR 1 / QUANTIZATION</span>
+    <h2 class="fr-h2">Shrink the weights without losing the score.</h2>
+    <p class="fr-lede">Nine quantization paths, ranging from production-default to experimental. Quant choice is recorded in the receipt and can be replayed offline. See <a href="/compile">/compile</a> for the verb, <a href="/recipes">/recipes</a> for ready-made recipes, and <a href="/benchmarks">/benchmarks</a> for K-score vs bit-width sweeps.</p>
+    <div class="fr-grid-2">
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill fr-pill--amber">2022 / GPTQ</span>
+        <h3 class="fr-h3">GPTQ (Hessian-aware PTQ)</h3>
+        <p>One-shot post-training quantization that uses approximate second-order information (per-layer Hessian) to choose quantization grid points. Frantar, Ashkboos, Hoefler, Alistarh 2022. Strong INT4 baseline; still the reference for 4-bit weight-only quantization.</p>
+        <div class="fr-status"><span class="fr-status__dot"></span>FIRST-CLASS in <code>kolm compile --quant=gptq</code></div>
+      </div>
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill fr-pill--amber">2023 / AWQ</span>
+        <h3 class="fr-h3">AWQ (activation-aware weight quantization)</h3>
+        <p>Protects the salient 1% of weights identified by activation magnitude; quantizes the rest aggressively. Lin, Tang, Tang, Yang, Xiao, Dang, Gan, Han 2023. Often pairs better than GPTQ with serving stacks like vLLM and TGI on Llama-class architectures.</p>
+        <div class="fr-status"><span class="fr-status__dot"></span>FIRST-CLASS in <code>kolm compile --quant=awq</code></div>
+      </div>
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill">2023 / bitsandbytes</span>
+        <h3 class="fr-h3">bitsandbytes NF4 / FP4</h3>
+        <p>4-bit normal-float and float quantization with optional double quantization. Underpins QLoRA (Dettmers, Pagnoni, Holtzman, Zettlemoyer 2023). The reference path for DeepSeek-R1 32B INT4 on a single RTX 5090: 61.0 GB BF16 down to 17.9 GB NF4 in 125 seconds.</p>
+        <div class="fr-status"><span class="fr-status__dot"></span>FIRST-CLASS in <code>kolm compile --quant=bnb-nf4</code></div>
+      </div>
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill">2022 / SmoothQuant</span>
+        <h3 class="fr-h3">SmoothQuant</h3>
+        <p>Migrates activation quantization difficulty into the weights via a per-channel scaling transform, enabling INT8 weight + INT8 activation. Xiao, Lin, Seznec, Wu, Demouth, Han 2022. Useful when activation outliers block low-bit weight-only quantization.</p>
+        <div class="fr-status"><span class="fr-status__dot"></span>FIRST-CLASS in <code>kolm compile --quant=smoothquant</code></div>
+      </div>
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill fr-pill--ghost">2023 / GGUF</span>
+        <h3 class="fr-h3">GGUF + imatrix</h3>
+        <p>llama.cpp's portable quantized weight format with k-quant variants (Q4_K_M, Q5_K_S, Q6_K) and importance-matrix-aware quant levels for outlier preservation. Gerganov and contributors. The standard target for CPU and edge GPU deployment of distilled artifacts.</p>
+        <div class="fr-status"><span class="fr-status__dot"></span>FIRST-CLASS in <code>kolm compile --target=gguf</code></div>
+      </div>
+
+      <div class="fr-card fr-card--mint">
+        <span class="fr-pill fr-pill--ghost">2024-2026 / DEFAULT</span>
+        <h3 class="fr-h3">Unsloth Dynamic 2.0</h3>
+        <p>Per-tensor dynamic quantization that scans each layer and picks 4-bit, 5-bit, 6-bit, or 8-bit by sensitivity rather than applying a single bit-width uniformly. Maintained by the Unsloth team and community. The default path in <code>kolm distill</code> when the user does not pin a quant scheme.</p>
+        <div class="fr-status"><span class="fr-status__dot"></span>FIRST-CLASS / default in <code>kolm distill</code></div>
+      </div>
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill">2024 / KV CACHE</span>
+        <h3 class="fr-h3">TurboQuant KV-cache quantization</h3>
+        <p>4-bit and 8-bit quantization of the K and V tensors at serve time, lowering memory for long-context inference without touching the weights. Distinct from weight quantization above; stackable with any of them. Used by vLLM and TensorRT-LLM under the FP8-KV / INT4-KV flags.</p>
+        <div class="fr-status"><span class="fr-status__dot"></span>FIRST-CLASS in <code>kolm run --kv-quant=int4</code></div>
+      </div>
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill fr-pill--violet">2024 / BITNET</span>
+        <h3 class="fr-h3">BitNet b1.58</h3>
+        <p>Ternary weights (-1, 0, +1) trained from scratch as a quantization-aware architecture, not a PTQ pass. Microsoft Research 2024 (Ma, Wang, Ma, Wang, Wang, Huang, Dong, Wang, Xue, Wei). Pairs with the low-bit specialist distill mode; the K-score floor decides whether the run survives.</p>
+        <div class="fr-status"><span class="fr-status__dot"></span>EXPERIMENTAL in <code>kolm distill --mode=low-bit-specialist --bit=1.58</code></div>
+      </div>
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill fr-pill--violet">2026 / ANGELSLIM</span>
+        <h3 class="fr-h3">AngelSlim 1.25-bit</h3>
+        <p>Sub-2-bit quantization toolkit published by Tencent in 2026, pushing below BitNet's ternary floor with calibration-set-aware lookup tables. Lineage and reproducibility still being validated externally; kolm exposes it behind a flag so the receipt records its experimental status.</p>
+        <div class="fr-status"><span class="fr-status__dot"></span>EXPERIMENTAL in <code>kolm compile --quant=angelslim</code></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="fr-section fr-reveal" id="distillation">
+  <div class="fr-container">
+    <span class="fr-eyebrow">PILLAR 2 / DISTILLATION</span>
+    <h2 class="fr-h2">Borrow capabilities from a frontier teacher.</h2>
+    <p class="fr-lede">Six distillation paths. See <a href="/distill">/distill</a> for the full mode picker and <a href="/docs/distillation">/docs/distillation</a> for the in-depth walkthrough. Lineage cited per method; every receipt records which teacher signed which row.</p>
+    <div class="fr-grid-2">
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill fr-pill--amber">2015 / FOUNDATION</span>
+        <h3 class="fr-h3">Soft-target knowledge distillation</h3>
+        <p>The original. Hinton, Vinyals, Dean 2015. Student learns to match teacher's softmax over a temperature, not just the argmax. Every modern distillation path traces here; kolm's response-distill default falls back to hard labels only when the teacher will not expose logits.</p>
+        <div class="fr-status"><span class="fr-status__dot"></span>FIRST-CLASS / default in <code>kolm distill</code></div>
+      </div>
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill">2019 / DISTILBERT</span>
+        <h3 class="fr-h3">Layer-wise distillation</h3>
+        <p>Sanh, Debut, Chaumond, Wolf 2019. In addition to soft targets, match teacher hidden states and attention maps at corresponding layers. Costs more per step but raises retention on encoder-style tasks; kolm wires it on when the student backbone is smaller than half the teacher.</p>
+        <div class="fr-status"><span class="fr-status__dot"></span>FIRST-CLASS in <code>kolm distill --layer-match=auto</code></div>
+      </div>
+
+      <div class="fr-card fr-card--mint">
+        <span class="fr-pill fr-pill--violet">2025 / REASONING</span>
+        <h3 class="fr-h3">Reasoning / CoT-trace distillation</h3>
+        <p>Capture the teacher's full chain-of-thought, train the student to reproduce both the trace and the answer. The DeepSeek-R1-Distill family 2025 is the canonical reference; on RTX 5090 the 32B variant quantizes to 17.9 GB INT4 with the reasoning intact. See <a href="/recipes">/recipes</a> for the working sample.</p>
+        <div class="fr-status"><span class="fr-status__dot"></span>FIRST-CLASS in <code>kolm distill --mode=reasoning</code></div>
+      </div>
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill fr-pill--amber">ON-POLICY</span>
+        <h3 class="fr-h3">On-policy / self-distillation</h3>
+        <p>Student generates rollouts; teacher (or a separate grader) scores them; only the positives flow into the SFT batch. Lineage: the RLHF reward-model line plus the more recent self-distill papers that close the loop without a full RL stage. Cheaper than RLHF, sharper than vanilla SFT on multi-step tasks.</p>
+        <div class="fr-status"><span class="fr-status__dot"></span>FIRST-CLASS in <code>kolm distill --mode=on-policy</code></div>
+      </div>
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill">MULTI-TEACHER</span>
+        <h3 class="fr-h3">Multi-teacher fusion</h3>
+        <p>Per-token best-of across multiple teacher logits. Pair a reasoning teacher (DeepSeek-R1), a code teacher (Qwen2.5-Coder), and a generalist (Claude Opus) into one student. The runner records which teacher won each token so the receipt is auditable end to end.</p>
+        <div class="fr-status"><span class="fr-status__dot"></span>FIRST-CLASS in <code>kolm distill --mode=multi-teacher</code></div>
+      </div>
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill fr-pill--violet">AGENTIC</span>
+        <h3 class="fr-h3">Agentic workflow distillation</h3>
+        <p>Replay captured multi-step LangGraph or CrewAI runs. Compile the orchestrator plus the tool dialogues into one forward pass on a single student. Removes the network round-trips between steps; lineage is the 2025-2026 agent-distill literature, not an invention of ours.</p>
+        <div class="fr-status"><span class="fr-status__dot"></span>FIRST-CLASS in <code>kolm distill --mode=agentic</code></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="fr-section fr-reveal" id="compilation">
+  <div class="fr-container">
+    <span class="fr-eyebrow">PILLAR 3 / COMPILATION + INFERENCE</span>
+    <h2 class="fr-h2">Make the artifact fast where it actually runs.</h2>
+    <p class="fr-lede">Quantizing a model is half the story; the other half is the kernel and the scheduler. Six methods that ship in the kolm runtime path. See <a href="/docs/runtime">/docs/runtime</a> for which engine kolm picks per device tier.</p>
+    <div class="fr-grid-2">
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill fr-pill--amber">2022 / FLASHATTN</span>
+        <h3 class="fr-h3">FlashAttention</h3>
+        <p>IO-aware exact attention that tiles the softmax and avoids materializing the full N x N matrix. Dao, Fu, Ermon, Rudra, Re 2022. The kernel that made long-context tractable; every modern serving stack ships a variant.</p>
+        <div class="fr-status"><span class="fr-status__dot"></span>FIRST-CLASS / default kernel in <code>kolm run</code></div>
+      </div>
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill fr-pill--amber">2023-2024 / FA-2 / FA-3</span>
+        <h3 class="fr-h3">FlashAttention-2 / FlashAttention-3</h3>
+        <p>Dao 2023 (FA-2: better parallelism across heads and warps). Shah, Bikshandi, Zhang, Thakkar, Ramani, Dao 2024 (FA-3: asynchrony and FP8 on Hopper). FA-3 is the path for sub-millisecond per-token attention at high batch on H100-class hardware.</p>
+        <div class="fr-status"><span class="fr-status__dot"></span>FIRST-CLASS in <code>kolm run --engine=vllm</code></div>
+      </div>
+
+      <div class="fr-card fr-card--mint">
+        <span class="fr-pill fr-pill--ghost">2023 / VLLM</span>
+        <h3 class="fr-h3">PagedAttention</h3>
+        <p>KV-cache memory management modelled on OS virtual memory: cache lives in non-contiguous pages, scheduler allocates lazily. Kwon, Li, Zhuang, Sheng, Zheng, Yu, Gonzalez, Zhang, Stoica 2023. The reason vLLM hits 24x throughput at long context vs naive serving. kolm's default CUDA runtime.</p>
+        <div class="fr-status"><span class="fr-status__dot"></span>FIRST-CLASS / default in <code>kolm run --engine=vllm</code></div>
+      </div>
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill">2023 / TORCH.COMPILE</span>
+        <h3 class="fr-h3">torch.compile</h3>
+        <p>TorchDynamo + Inductor: graph-capture and codegen for PyTorch models. PyTorch team 2023. Lifts the small-batch latency floor that hand-tuned kernels still leave on the table; kolm opts it in when the target is single-host single-GPU and batch size is below 8.</p>
+        <div class="fr-status"><span class="fr-status__dot"></span>FIRST-CLASS in <code>kolm run --compile</code></div>
+      </div>
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill">2023 / SPEC-DECODE</span>
+        <h3 class="fr-h3">Speculative decoding</h3>
+        <p>Small draft model proposes N tokens, target model verifies in parallel. Leviathan, Kalman, Matias 2023; Chen, Borgeaud, Irving, Lespiau, Sifre, Jumper 2023. Lossless throughput multiplier when draft and target agree often. Distinct from MTP, which removes the draft model entirely.</p>
+        <div class="fr-status"><span class="fr-status__dot"></span>FIRST-CLASS in <code>kolm run --speculate=draft</code></div>
+      </div>
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill fr-pill--violet">2025-2026 / MTP</span>
+        <h3 class="fr-h3">MTP (multi-token prediction)</h3>
+        <p>Architectural option in the student head: predict N tokens per forward, accept the consistent prefix. Native speculative decoding without an external draft model. The 2025-2026 Alibaba and DeepSeek lines are the public references; the kolm runner refuses MTP for student families that have not validated the head.</p>
+        <div class="fr-status"><span class="fr-status__dot"></span>EXPERIMENTAL in <code>kolm distill --mode=mpt</code></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="fr-section fr-reveal" id="merges">
+  <div class="fr-container">
+    <span class="fr-eyebrow">PILLAR 4 / MERGES</span>
+    <h2 class="fr-h2">Fuse capabilities from multiple bases.</h2>
+    <p class="fr-lede">Merging is the cheapest way to combine domain experts when you cannot afford a full re-train. kolm uses mergekit under the hood; the merge config and source SHAs are pinned in the receipt. See <a href="/forge">/forge</a> for the merge picker.</p>
+    <div class="fr-grid-3">
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill">TIES</span>
+        <h3 class="fr-h3">mergekit TIES</h3>
+        <p>Trim, Elect Sign, and Merge. Yadav, Tam, Choshen, Raffel, Bansal 2023. Resolves sign conflicts between fine-tunes by majority vote per parameter; preserves task-specific deltas that vanilla averaging would cancel.</p>
+        <div class="fr-status"><span class="fr-status__dot"></span>FIRST-CLASS in <code>kolm distill --merge=ties</code></div>
+      </div>
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill">DARE</span>
+        <h3 class="fr-h3">mergekit DARE</h3>
+        <p>Drop And REscale. Yu, Yu, Yang, Lin, Cheng, Zhao 2024. Randomly drops a fraction of delta parameters and rescales the rest; surprisingly robust at preserving multi-task capability when stacked with TIES.</p>
+        <div class="fr-status"><span class="fr-status__dot"></span>FIRST-CLASS in <code>kolm distill --merge=dare</code></div>
+      </div>
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill fr-pill--ghost">SLERP</span>
+        <h3 class="fr-h3">SLERP and task arithmetic</h3>
+        <p>Spherical linear interpolation between two checkpoints plus task-arithmetic over deltas. Ilharco, Ribeiro, Wortsman, Schmidt, Hajishirzi, Farhadi 2022 on task vectors. Pairs cleanly with the merge-first distill mode.</p>
+        <div class="fr-status"><span class="fr-status__dot"></span>FIRST-CLASS in <code>kolm distill --merge=slerp</code></div>
+      </div>
+
+    </div>
+    <div class="fr-card" style="margin-top:24px">
+      <p style="margin:0;color:var(--ink-mute);font-size:14.5px;line-height:1.6">Merge lineage credit where it is due: the Gryphe MythoMax era proved community merges could match labs on creative writing benchmarks; mlabonne's public playbooks (Maxime Labonne, <a href="https://huggingface.co/mlabonne">huggingface.co/mlabonne</a>) standardized the recipe for the rest of us. The mergekit library by Charles Goddard is the underlying tool.</p>
+    </div>
+  </div>
+</section>
+
+<section class="fr-section fr-reveal" id="combinatorial">
+  <div class="fr-container">
+    <span class="fr-eyebrow">STACKS</span>
+    <h2 class="fr-h2">Where the magic happens.</h2>
+    <p class="fr-lede">Individual techniques are well-studied. The frontier is in stacking them. Four canonical combinations the compiler resolves on request, each pinned in the receipt so an auditor can replay the exact pipeline.</p>
+    <div class="fr-grid-2">
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill fr-pill--amber">STACK / QAD</span>
+        <h3 class="fr-h3">Quantization-Aware Distillation</h3>
+        <p>Quantize the student during the distill loop, not after. The student learns to compensate for quant error while still consuming teacher signal; recovers significantly more K-score than PTQ-after-SFT at the same bit-width. The honest path for sub-3-bit targets.</p>
+        <div class="fr-status"><span class="fr-status__dot"></span>FIRST-CLASS in <code>kolm distill --quant-aware</code></div>
+      </div>
+
+      <div class="fr-card fr-card--mint">
+        <span class="fr-pill fr-pill--ghost">STACK / META</span>
+        <h3 class="fr-h3">Distill, merge, quant, MTP</h3>
+        <p>The current meta. Distill multiple specialists from one teacher set; mergekit-TIES them into one base; Unsloth-Dynamic-2.0 quantize the merge; train an MTP head for speculative-free throughput. The full receipt records every step's source SHA.</p>
+        <div class="fr-status"><span class="fr-status__dot"></span>FIRST-CLASS in <code>kolm distill --mode=merge-first,mpt --quant=dynamic-2.0</code></div>
+      </div>
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill fr-pill--violet">STACK / 2026 SOTA</span>
+        <h3 class="fr-h3">Reasoning, Dynamic, Speculative</h3>
+        <p>DeepSeek-R1-style CoT-trace distillation into a 7B-14B student, Unsloth Dynamic 2.0 4-bit, plus speculative decoding with a 1-2B draft of the same family. Tractable single-host, preserves the reasoning shape, and serves at the latencies a chat UX expects.</p>
+        <div class="fr-status"><span class="fr-status__dot"></span>FIRST-CLASS in <code>kolm distill --mode=reasoning --quant=dynamic-2.0 --speculate=draft</code></div>
+      </div>
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill">STACK / EXTREME</span>
+        <h3 class="fr-h3">Prune, distill, quant</h3>
+        <p>Structured prune the base first (LLM-Pruner family), then distill against the dense teacher to restore K-score on the pruned scaffold, then quantize. Used when the deploy target is edge-class hardware; the K-score floor decides whether the pipeline ships or aborts.</p>
+        <div class="fr-status"><span class="fr-status__dot"></span>EXPERIMENTAL in <code>kolm distill --prune --mode=reasoning --quant=bnb-nf4</code></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="fr-section fr-reveal" id="ranked">
+  <div class="fr-container">
+    <span class="fr-eyebrow">CANONICAL RANKING</span>
+    <h2 class="fr-h2">Most-impactful overall.</h2>
+    <p class="fr-lede">Ranked by counterfactual: which methods, if removed from the literature, would force a complete redesign of the open-source serving stack? Compiled from the technique inventory above. Not a vendor list.</p>
+    <div class="fr-card" style="padding:28px 32px">
+      <ol style="margin:0;padding-left:0;list-style:none;counter-reset:rank;color:var(--ink-mute);font-size:15.5px;line-height:1.8">
+        <li style="counter-increment:rank;display:grid;grid-template-columns:48px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)">
+          <span style="font-family:var(--fr-font-mono);font-size:14px;color:var(--fr-mint);letter-spacing:0.04em">01</span>
+          <div><strong style="color:var(--ink);font-weight:500">GGUF / llama.cpp</strong> &mdash; the portable runtime that put local LLMs on every laptop, phone, and Raspberry Pi. Gerganov and the llama.cpp community.</div>
+        </li>
+        <li style="counter-increment:rank;display:grid;grid-template-columns:48px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)">
+          <span style="font-family:var(--fr-font-mono);font-size:14px;color:var(--fr-mint);letter-spacing:0.04em">02</span>
+          <div><strong style="color:var(--ink);font-weight:500">FlashAttention</strong> &mdash; the IO-aware kernel that made long-context tractable. Dao, Fu, Ermon, Rudra, Re 2022; FA-2/3 by Dao and Shah et al.</div>
+        </li>
+        <li style="counter-increment:rank;display:grid;grid-template-columns:48px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)">
+          <span style="font-family:var(--fr-font-mono);font-size:14px;color:var(--fr-mint);letter-spacing:0.04em">03</span>
+          <div><strong style="color:var(--ink);font-weight:500">GPTQ / AWQ + bitsandbytes</strong> &mdash; the three quantization families that took 4-bit serving from research curiosity to production default. Frantar et al. 2022; Lin et al. 2023; Dettmers et al. 2023.</div>
+        </li>
+        <li style="counter-increment:rank;display:grid;grid-template-columns:48px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)">
+          <span style="font-family:var(--fr-font-mono);font-size:14px;color:var(--fr-mint);letter-spacing:0.04em">04</span>
+          <div><strong style="color:var(--ink);font-weight:500">DeepSeek-R1 distill family</strong> &mdash; proved CoT-trace distillation works at 1.5B-70B scales, with open weights and an open recipe. 2025.</div>
+        </li>
+        <li style="counter-increment:rank;display:grid;grid-template-columns:48px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)">
+          <span style="font-family:var(--fr-font-mono);font-size:14px;color:var(--fr-mint);letter-spacing:0.04em">05</span>
+          <div><strong style="color:var(--ink);font-weight:500">vLLM / PagedAttention</strong> &mdash; the scheduler and memory manager that lifted serving throughput an order of magnitude at long context. Kwon et al. 2023.</div>
+        </li>
+        <li style="counter-increment:rank;display:grid;grid-template-columns:48px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)">
+          <span style="font-family:var(--fr-font-mono);font-size:14px;color:var(--fr-mint);letter-spacing:0.04em">06</span>
+          <div><strong style="color:var(--ink);font-weight:500">Unsloth Dynamic 2.0 + MTP</strong> &mdash; per-tensor dynamic bit-widths and native multi-token heads, the 2026 baseline for "make it small and fast without a draft model." Unsloth team and community.</div>
+        </li>
+        <li style="counter-increment:rank;display:grid;grid-template-columns:48px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)">
+          <span style="font-family:var(--fr-font-mono);font-size:14px;color:var(--fr-mint);letter-spacing:0.04em">07</span>
+          <div><strong style="color:var(--ink);font-weight:500">mergekit</strong> &mdash; took TIES, DARE, and SLERP from papers to a community-standard toolchain. Charles Goddard and contributors; popularized by mlabonne.</div>
+        </li>
+        <li style="counter-increment:rank;display:grid;grid-template-columns:48px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)">
+          <span style="font-family:var(--fr-font-mono);font-size:14px;color:var(--fr-mint);letter-spacing:0.04em">08</span>
+          <div><strong style="color:var(--ink);font-weight:500">KV-cache quantization</strong> &mdash; the inference-time companion to weight quantization; the reason 128k context fits on one card.</div>
+        </li>
+        <li style="counter-increment:rank;display:grid;grid-template-columns:48px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)">
+          <span style="font-family:var(--fr-font-mono);font-size:14px;color:var(--fr-mint);letter-spacing:0.04em">09</span>
+          <div><strong style="color:var(--ink);font-weight:500">Hinton 2015 KD</strong> &mdash; the foundation paper. Every method above traces back to soft targets and temperature.</div>
+        </li>
+        <li style="counter-increment:rank;display:grid;grid-template-columns:48px 1fr;gap:16px;padding:14px 0">
+          <span style="font-family:var(--fr-font-mono);font-size:14px;color:var(--fr-mint);letter-spacing:0.04em">10</span>
+          <div><strong style="color:var(--ink);font-weight:500">BitNet b1.58</strong> &mdash; first credible 1-bit-class architecture from scratch, opening the path that AngelSlim and the 2026 sub-2-bit line continue. Microsoft Research 2024.</div>
+        </li>
+      </ol>
+    </div>
+    <div class="cta-row" style="margin-top:32px">
+      <a class="fr-btn fr-btn--mint" href="/distill">Pick a distill mode &rarr;</a>
+      <a class="fr-btn fr-btn--ghost" href="/compile">See compile flags</a>
+      <a class="fr-btn fr-btn--ghost" href="/benchmarks">K-score sweeps</a>
+    </div>
+  </div>
 </section>
 
 <section class="footer-cta">

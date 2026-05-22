@@ -1,5 +1,5 @@
 // Recipe service worker: keeps the registry available offline.
-const CACHE = 'kolm-v7-2026-05-23-wave620-homepage-tighten';
+const CACHE = 'kolm-v7-2026-05-23-wave621-sota-frontier-pivot';
 const PRECACHE = [
  '/device',
  '/design-tokens.css',
@@ -12,11 +12,13 @@ const PRECACHE = [
  '/w600-layout.css',
  '/w605.css',
  '/docs-shell.css',
+ '/frontier.css',
  '/nav.js',
  '/kolm-svg.js',
  '/w605.js',
  '/sdk.js',
  '/docs-shell.js',
+ '/frontier.js',
  '/docs-manifest.json',
  '/v1/registry/export',
  '/manifest.json',

@@ -11,6 +11,8 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/frontier.css">
+<script defer src="/frontier.js"></script>
 <style>
   .sec-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
   .sec-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
@@ -87,16 +89,17 @@
 
 <main id="main">
 
-<section class="sec-hero">
-  <div class="ks-wrap">
-    <div class="eyebrow">Distill &middot; step 2 of 4 &middot; capture to quantized specialist</div>
+<section class="sec-hero fr-reveal">
+  <div class="ks-wrap fr-container">
+    <span class="fr-eyebrow">Distill &middot; step 2 of 4 &middot; capture to quantized specialist</span>
     <h1>Distill a frontier model into a <b>quantized specialist.</b></h1>
-    <p class="lede">A data engineer points the distill verb at a namespace of captured rows. The runner clusters them, generates teacher labels from Claude Opus 4.7 or any configured endpoint, trains a smaller student (Qwen2.5, Llama-3.3, DeepSeek-R1-Distill), and gates promotion on a real K-score against a frozen holdout. Out the back: a quantized .kolm artifact you can verify, sign, and ship.</p>
+    <p class="lede fr-lede">A data engineer points the distill verb at a namespace of captured rows. The runner clusters them, generates teacher labels from Claude Opus 4.7 or any configured endpoint, trains a smaller student (Qwen2.5, Llama-3.3, DeepSeek-R1-Distill), and gates promotion on a real K-score against a frozen holdout. Out the back: a quantized .kolm artifact you can verify, sign, and ship.</p>
     <div class="cta-row">
-      <a href="/quickstart" class="ks-btn ks-btn--primary">Install the CLI <span class="ks-btn-arrow">&rarr;</span></a>
-      <a href="/compile" class="ks-btn ks-btn--ghost">Next: compile and sign</a>
-      <a href="/k-score" class="ks-btn ks-btn--ghost">How the K-score gate works</a>
-      <a href="/models" class="ks-btn ks-btn--ghost">Supported students</a>
+      <a href="/quickstart" class="ks-btn ks-btn--primary fr-btn fr-btn--mint">Install the CLI <span class="ks-btn-arrow">&rarr;</span></a>
+      <a href="/compile" class="ks-btn ks-btn--ghost fr-btn fr-btn--ghost">Next: compile and sign</a>
+      <a href="/k-score" class="ks-btn ks-btn--ghost fr-btn fr-btn--ghost">How the K-score gate works</a>
+      <a href="/forge" class="ks-btn ks-btn--ghost fr-btn fr-btn--ghost">Forge</a>
+      <a href="/recipes" class="ks-btn ks-btn--ghost fr-btn fr-btn--ghost">Recipes</a>
     </div>
   </div>
 </section>
@@ -269,6 +272,133 @@ verified    kolm verify support-triage.kolm</pre>
   </div>
 </section>
 
+<section class="fr-section fr-reveal" id="modes">
+  <div class="fr-container">
+    <span class="fr-eyebrow">MODES</span>
+    <h2 class="fr-h2">Every mode you'd reach for. Stackable.</h2>
+    <p class="fr-lede">Pick one, pick several. The compiler composes them into a single signed artifact with a reproducible spec. Each mode is honest about its research lineage; nothing here is invented by us alone.</p>
+    <div class="fr-grid-2">
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill fr-pill--violet">REASONING</span>
+        <h3 class="fr-h3">Reasoning / CoT trace distillation</h3>
+        <p>Capture full step-by-step traces from teacher. Student learns the reasoning shape, not just the final answer. The DeepSeek-R1 distill family is the canonical reference; the original chain-of-thought distillation lineage traces to Hinton et al. 2015 on soft targets.</p>
+        <div class="fr-cli">
+          <span class="fr-cli__prompt">$</span> kolm distill <span class="fr-cli__flag">--mode</span>=reasoning <span class="fr-cli__flag">--teacher</span>=deepseek-r1 <span class="fr-cli__flag">--student</span>=qwen2-5-7b
+          <div class="fr-cli__comment"># student inherits the trace, not just the label</div>
+        </div>
+      </div>
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill fr-pill--amber">ON-POLICY</span>
+        <h3 class="fr-h3">On-policy / self-distillation</h3>
+        <p>Student generates. Teacher grades. Student learns from its own corrected outputs. Lineage: the RLHF family (reward-model grading on student rollouts) and the more recent self-distill papers that close the loop without a separate RL stage.</p>
+        <div class="fr-cli">
+          <span class="fr-cli__prompt">$</span> kolm distill <span class="fr-cli__flag">--mode</span>=on-policy <span class="fr-cli__flag">--student</span>=qwen2-5-7b <span class="fr-cli__flag">--grader</span>=claude-opus-4-7
+          <div class="fr-cli__comment"># student rolls out, grader scores, only positives flow back</div>
+        </div>
+      </div>
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill">MULTI-TEACHER</span>
+        <h3 class="fr-h3">Multi-teacher</h3>
+        <p>Per-token best-of across multiple teacher logits. Claude reasoning, DeepSeek math, and Qwen coding fused into one student. The runner records which teacher won each token so the receipt is auditable.</p>
+        <div class="fr-cli">
+          <span class="fr-cli__prompt">$</span> kolm distill <span class="fr-cli__flag">--mode</span>=multi-teacher <span class="fr-cli__flag">--teachers</span>=claude,gpt,deepseek <span class="fr-cli__flag">--student</span>=qwen2-5-14b
+          <div class="fr-cli__comment"># per-token best-of, attribution preserved</div>
+        </div>
+      </div>
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill fr-pill--violet">AGENTIC</span>
+        <h3 class="fr-h3">Agentic workflow distillation</h3>
+        <p>Capture multi-step LangGraph or CrewAI runs. Compile the orchestrator plus tool calls into one forward pass on a single student. Reduces inference cost on workflows that repeat, and removes the network round-trips between steps.</p>
+        <div class="fr-cli">
+          <span class="fr-cli__prompt">$</span> kolm distill <span class="fr-cli__flag">--mode</span>=agentic <span class="fr-cli__flag">--capture</span>=~/.kolm/lake/workflows
+          <div class="fr-cli__comment"># lineage: 2025-2026 agent-distill papers; not our invention</div>
+        </div>
+      </div>
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill fr-pill--amber">MERGE-FIRST</span>
+        <h3 class="fr-h3">Merge-first</h3>
+        <p>Run mergekit TIES / DARE / SLERP on multiple bases or teachers, then distill the merged result. Lineage: mlabonne and the mergekit community. The merge config and source SHAs are recorded in the receipt.</p>
+        <div class="fr-cli">
+          <span class="fr-cli__prompt">$</span> kolm distill <span class="fr-cli__flag">--mode</span>=merge-first <span class="fr-cli__flag">--merge</span>=ties <span class="fr-cli__flag">--models</span>=gemma-4-31b,qwen2-5-14b
+          <div class="fr-cli__comment"># mergekit recipe pinned, source hashes locked</div>
+        </div>
+      </div>
+
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill">MTP</span>
+        <h3 class="fr-h3">MTP (multi-token prediction)</h3>
+        <p>Architectural option in the student: predict N tokens per forward. Native speculative decoding without an external draft model. Currently best on Qwen3.6 bases; the runner refuses for student families that have not validated MTP heads.</p>
+        <div class="fr-cli">
+          <span class="fr-cli__prompt">$</span> kolm distill <span class="fr-cli__flag">--mode</span>=mpt <span class="fr-cli__flag">--student</span>=qwen2-5-14b
+          <div class="fr-cli__comment"># N=4 default; student head predicts ahead</div>
+        </div>
+      </div>
+
+      <div class="fr-card fr-card--mint">
+        <span class="fr-pill fr-pill--ghost">LOW-BIT</span>
+        <h3 class="fr-h3">Low-bit specialist</h3>
+        <p>Aggressive quantization with K-score safety floor. The runner walks 4.0 to 2.0 to 1.58-bit and stops the moment K-score drops below the floor you set. Cited lineage: BitNet-b1.58 and the SpQR family for outlier-aware low-bit. The receipt records the final bit-width and the floor.</p>
+        <div class="fr-cli">
+          <span class="fr-cli__prompt">$</span> kolm distill <span class="fr-cli__flag">--mode</span>=low-bit-specialist <span class="fr-cli__flag">--bit</span>=1.58 <span class="fr-cli__flag">--kscore-min</span>=0.85
+          <div class="fr-cli__comment"># walks 4.0 to 1.58; aborts if K-score floor breached</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="fr-section fr-reveal" id="stack">
+  <div class="fr-container">
+    <span class="fr-eyebrow">STACK THEM</span>
+    <h2 class="fr-h2">One verb, many modes, one signed artifact.</h2>
+    <p class="fr-lede">Combine reasoning, multi-teacher, and MTP on a 14B Qwen base with 4-bit dynamic quantization and a 0.92 K-score floor. The compiler resolves the spec, runs the pipeline, and signs the artifact. Same .kolm format you'd get from a single-mode run.</p>
+    <div class="fr-cli">
+      <span class="fr-cli__prompt">$</span> kolm distill <span class="fr-cli__flag">--teacher</span>=claude-opus-4-7 <span class="fr-cli__flag">--student</span>=qwen2-5-14b <span class="fr-cli__flag">--mode</span>=reasoning,multi-teacher,mpt <span class="fr-cli__flag">--bit</span>=4.0 <span class="fr-cli__flag">--quant</span>=dynamic-2.0 <span class="fr-cli__flag">--kscore-min</span>=0.92
+      <div class="fr-cli__comment"># spec.json records every mode; receipt records every gate</div>
+    </div>
+    <div style="margin-top:var(--ks-5); display:flex; flex-wrap:wrap; gap:var(--ks-3)">
+      <a href="/recipes" class="fr-btn fr-btn--mint">Recipes for common stacks</a>
+      <a href="/benchmarks" class="fr-btn fr-btn--ghost">Benchmarks</a>
+      <a href="/docs/distillation" class="fr-btn fr-btn--ghost">Spec reference</a>
+    </div>
+  </div>
+</section>
+
+<section class="fr-section fr-reveal" id="synthetic">
+  <div class="fr-container">
+    <span class="fr-eyebrow">SYNTHETIC BOOSTER</span>
+    <h2 class="fr-h2">When captures are sparse, augment honestly.</h2>
+    <div class="fr-grid-2">
+      <div class="fr-card fr-card--mint">
+        <span class="fr-pill fr-pill--ghost">DISCLOSED IN RECEIPT</span>
+        <h3 class="fr-h3">Teacher-generated traces, flagged</h3>
+        <p>When the captured corpus is below the floor for a robust holdout, kolm can ask the teacher to generate additional traces seeded from the existing cluster centroids. The booster never silently mixes synthetic and real: every synthetic row is tagged in <code>seeds.jsonl</code> and the receipt reports <code>synthetic_ratio</code>, the teacher endpoint, and the prompt hash that produced the augmentation.</p>
+        <p>The K-score holdout is held out before augmentation. Synthetic data cannot leak into evaluation. If the receipt shows <code>synthetic_ratio &gt; 0</code>, downstream consumers can refuse on policy.</p>
+        <div class="fr-cli">
+          <span class="fr-cli__prompt">$</span> kolm distill from-captures support-triage <span class="fr-cli__flag">--augment-synthetic</span>=0.4 <span class="fr-cli__flag">--teacher</span>=claude-opus-4-7
+          <div class="fr-cli__comment"># receipt will record synthetic_ratio=0.40 and the augment prompt hash</div>
+        </div>
+      </div>
+      <div class="fr-card">
+        <span class="fr-pill">HONESTY CONTRACT</span>
+        <h3 class="fr-h3">No silent passthrough</h3>
+        <p>The booster refuses to run if the augmentation would push the synthetic share above <code>--max-synthetic-ratio</code> (default 0.5). A run that exceeds the cap aborts before the teacher pass, so you do not pay for tokens you would not be able to ship.</p>
+        <p>If you need a fully real corpus, set <code>--no-synthetic</code> and the runner falls back to refusing thin namespaces below the <code>--min-pairs</code> floor.</p>
+        <div class="fr-status">
+          <span class="fr-status__dot"></span>
+          <span>booster off by default &middot; always disclosed when on</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="sec-section" id="reach">
   <div class="ks-wrap">
     <h2>Next steps</h2>
@@ -289,9 +419,11 @@ verified    kolm verify support-triage.kolm</pre>
     </div>
     <div style="margin-top:var(--ks-6); display:flex; flex-wrap:wrap; gap:var(--ks-3)">
       <a href="/compile" class="ks-btn ks-btn--primary">Next: compile <span class="ks-btn-arrow">&rarr;</span></a>
-      <a href="/quickstart" class="ks-btn ks-btn--ghost">Run the quickstart</a>
-      <a href="/security" class="ks-btn ks-btn--ghost">Boundary and receipts</a>
-      <a href="/enterprise" class="ks-btn ks-btn--ghost">Enterprise deployment</a>
+      <a href="/forge" class="ks-btn ks-btn--ghost">Forge</a>
+      <a href="/recipes" class="ks-btn ks-btn--ghost">Recipes</a>
+      <a href="/benchmarks" class="ks-btn ks-btn--ghost">Benchmarks</a>
+      <a href="/docs/distillation" class="ks-btn ks-btn--ghost">Docs: distillation</a>
+      <a href="/k-score" class="ks-btn ks-btn--ghost">K-score</a>
     </div>
   </div>
 </section>

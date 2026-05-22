@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Recipes &middot; kolm.ai</title>
+<meta name="description" content="A curated gallery of kolm CLI one-liners. Frontier distillations for the LocalLLaMA crowd; production vertical bots for the compliance crowd. Same compiler, same signed receipts.">
+<meta name="theme-color" content="#07090c">
+<link rel="canonical" href="https://kolm.ai/recipes">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/frontier.css">
+<script defer src="/frontier.js"></script>
+<style>
+  /* Recipes-specific tuning. Sits on top of frontier.css. */
+  .rg-hero { padding: clamp(80px, 10vw, 144px) 24px clamp(56px, 7vw, 96px); border-bottom: 1px solid var(--line-1); position: relative; overflow: hidden; }
+  .rg-hero__bg {
+    position: absolute; inset: 0; pointer-events: none; z-index: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 18% 22%, rgba(126,240,210,0.10), transparent 60%),
+      radial-gradient(ellipse 50% 40% at 84% 78%, rgba(176,124,245,0.08), transparent 60%);
+  }
+  .rg-hero__inner { position: relative; z-index: 1; max-width: var(--fr-container); margin: 0 auto; }
+  .rg-hero h1 {
+    font-family: var(--fr-font-display);
+    font-size: var(--fr-text-5xl);
+    letter-spacing: var(--fr-track-display);
+    line-height: 1.04;
+    font-weight: 580;
+    color: var(--ink-1);
+    margin: 16px 0 20px;
+    max-width: 18ch;
+  }
+  .rg-hero h1 b { color: var(--fr-mint); font-weight: 580; }
+  .rg-hero .rg-lede { font-size: var(--fr-text-lg); line-height: 1.5; color: var(--ink-2); max-width: 60ch; margin: 0 0 32px; }
+  .rg-hero .rg-cta { display: flex; flex-wrap: wrap; gap: 12px; }
+  .rg-hero .rg-trail { margin-top: 36px; display: flex; flex-wrap: wrap; gap: 10px; }
+
+  /* Lane filter cards. */
+  .rg-lanes { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px; }
+  @media (max-width: 900px) { .rg-lanes { grid-template-columns: 1fr; } }
+  .rg-lane { padding: 32px; display: flex; flex-direction: column; gap: 16px; min-height: 220px; }
+  .rg-lane__row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .rg-lane__h { font-family: var(--fr-font-display); font-size: var(--fr-text-2xl); letter-spacing: var(--fr-track-tight); font-weight: 560; color: var(--ink-1); margin: 0; line-height: 1.15; }
+  .rg-lane__p { font-size: var(--fr-text-base); line-height: 1.6; color: var(--ink-2); margin: 0; }
+  .rg-lane__foot { margin-top: auto; display: flex; gap: 10px; flex-wrap: wrap; }
+
+  /* Recipe card grid. */
+  .rg-card { padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+  .rg-card__top { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .rg-card__h { font-family: var(--fr-font-display); font-size: var(--fr-text-lg); letter-spacing: var(--fr-track-tight); font-weight: 560; color: var(--ink-1); margin: 0; line-height: 1.25; }
+  .rg-card__desc { font-size: var(--fr-text-sm); line-height: 1.55; color: var(--ink-2); margin: 0; }
+  .rg-card .fr-cli { padding: 14px 16px; font-size: 12.5px; line-height: 1.55; white-space: pre-wrap; word-break: break-word; }
+  .rg-card__out { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: auto; padding-top: 12px; border-top: 1px dashed var(--line-1); }
+  .rg-card__out .rg-out { display: flex; flex-direction: column; gap: 2px; }
+  .rg-card__out .rg-out__k { font-family: var(--fr-font-mono); font-size: var(--fr-text-xxs); letter-spacing: var(--fr-track-label); text-transform: uppercase; color: var(--ink-3); }
+  .rg-card__out .rg-out__v { font-family: var(--fr-font-mono); font-size: var(--fr-text-sm); color: var(--ink-1); font-variant-numeric: tabular-nums; }
+  .rg-card__foot { display: flex; gap: 14px; flex-wrap: wrap; font-family: var(--fr-font-mono); font-size: var(--fr-text-xs); }
+  .rg-card__foot a { color: var(--ink-2); text-decoration: none; border-bottom: 1px dashed var(--line-2); padding-bottom: 1px; transition: color var(--fr-duration-quick) var(--fr-spring-base), border-color var(--fr-duration-quick) var(--fr-spring-base); }
+  .rg-card__foot a:hover { color: var(--fr-mint); border-color: var(--fr-mint-edge); }
+
+  /* Section dividers and meta. */
+  .rg-meta {
+    display: flex; gap: 24px; flex-wrap: wrap; padding-top: 16px;
+    font-family: var(--fr-font-mono); font-size: var(--fr-text-xs); color: var(--ink-3);
+    letter-spacing: var(--fr-track-label); text-transform: uppercase;
+  }
+  .rg-meta b { color: var(--ink-1); font-weight: 500; }
+
+  /* Author-a-recipe block. */
+  .rg-author { padding: 36px; display: grid; grid-template-columns: 1.1fr 1fr; gap: 32px; align-items: start; }
+  @media (max-width: 900px) { .rg-author { grid-template-columns: 1fr; } }
+  .rg-author ol { margin: 16px 0 0; padding-left: 20px; color: var(--ink-2); font-size: var(--fr-text-base); line-height: 1.7; }
+  .rg-author ol li { margin-bottom: 8px; }
+  .rg-author ol li code { font-family: var(--fr-font-mono); font-size: 12.5px; color: var(--ink-1); background: var(--surface-2); padding: 1px 6px; border-radius: 4px; }
+
+  /* Proof matrix (real numbers). */
+  .rg-proof { padding: 28px; }
+  .rg-proof table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: var(--fr-text-sm); }
+  .rg-proof th, .rg-proof td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--line-1); color: var(--ink-2); vertical-align: middle; }
+  .rg-proof th { color: var(--ink-1); font-weight: 540; font-family: var(--fr-font-mono); font-size: var(--fr-text-xs); letter-spacing: var(--fr-track-label); text-transform: uppercase; }
+  .rg-proof td.num { font-family: var(--fr-font-mono); font-variant-numeric: tabular-nums; color: var(--ink-1); }
+  .rg-proof tr:last-child td { border-bottom: 0; }
+
+  /* Footer slot — mirror compile.html / distill.html. */
+</style>
+</head>
+<body class="ks fr-grain">
+
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/k-score">K-score</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
+      </div>
+    </div>
+  </header>
+</div>
+
+<main id="main">
+
+<section class="rg-hero">
+  <div class="rg-hero__bg" aria-hidden="true"></div>
+  <div class="rg-hero__inner">
+    <span class="fr-eyebrow">Recipe gallery</span>
+    <h1>Recipes. <b>Real ones.</b> Both worlds.</h1>
+    <p class="rg-lede">Frontier-grade distillations for the LocalLLaMA crowd. Production vertical bots for the compliance crowd. Same compiler. Same receipts.</p>
+    <div class="rg-cta">
+      <a href="#all" class="fr-btn fr-btn--mint" data-fr-magnetic>Browse all</a>
+      <a href="/quickstart" class="fr-btn fr-btn--ghost">Fork in CLI &rarr;</a>
+    </div>
+    <div class="rg-hero__trail rg-trail">
+      <span class="fr-status"><span class="fr-status__dot"></span>14 recipes</span>
+      <span class="fr-status"><span class="fr-status__dot"></span>7 frontier &middot; 7 vertical</span>
+      <span class="fr-status fr-status--info"><span class="fr-status__dot"></span>Every output a signed .kolm</span>
+    </div>
+  </div>
+</section>
+
+<section class="fr-section fr-section--tight" id="lanes">
+  <div class="fr-container">
+    <div class="fr-section__head fr-reveal">
+      <span class="fr-eyebrow">Two audiences, one toolchain</span>
+      <h2 class="fr-h2">Pick the lane that fits.</h2>
+      <p class="fr-lede">Both lanes ship through the same <span class="fr-code">kolm build</span> verb, the same K-score gate, the same Ed25519 receipt. The difference is what the recipe optimises for: parameter efficiency on consumer GPUs, or behavior under regulator scrutiny.</p>
+    </div>
+    <div class="rg-lanes">
+      <div class="fr-card fr-card--feature fr-card--mint fr-reveal" data-fr-tilt="3">
+        <div class="rg-lane">
+          <div class="rg-lane__row">
+            <span class="fr-pill">SOTA Frontier</span>
+            <span class="fr-status"><span class="fr-status__dot"></span>7 recipes</span>
+          </div>
+          <h3 class="rg-lane__h">For the LocalLLaMA &amp; HF efficiency crowd.</h3>
+          <p class="rg-lane__p">Multi-teacher fused distillations, MTP speed-demons, sub-2-bit generalists, agentic workflow compilers, merge-first frankenmodels. Every recipe targets a real GPU class (5090, 4090, H100) with measured tok/s and K-score floors.</p>
+          <p class="rg-lane__p">Reference points already in the wild: DeepSeek-R1-Distill-Qwen-32B quantizes from 61.0 GB to 17.9 GB INT4 in 125.3s on a single RTX 5090; Qwen2.5-7B lands at 5.2 GB and 24.5 tok/s.</p>
+          <div class="rg-lane__foot">
+            <a href="#frontier" class="fr-btn fr-btn--ghost">Jump to frontier &rarr;</a>
+            <a href="/leaderboard" class="fr-btn fr-btn--ghost">See the board</a>
+          </div>
+        </div>
+      </div>
+      <div class="fr-card fr-card--feature fr-card--amber fr-reveal" data-fr-tilt="3">
+        <div class="rg-lane">
+          <div class="rg-lane__row">
+            <span class="fr-pill fr-pill--amber">Production Vertical</span>
+            <span class="fr-status"><span class="fr-status__dot"></span>7 recipes</span>
+          </div>
+          <h3 class="rg-lane__h">For the enterprise &amp; regulated industry crowd.</h3>
+          <p class="rg-lane__p">HIPAA-clean medical summarisers, PCI-aware finance classifiers, contract redactors, SecOps incident summarisers, internal RAG specialists. Every recipe ships with a PII mode, a K-score floor, and a binder receipt an auditor can verify offline.</p>
+          <p class="rg-lane__p">Vertical bases inherit the same Ed25519 chain as the frontier recipes; the difference is the eval pack (HIPAA-mapping, SR 11-7, NIST AI RMF) and the redaction policy baked into the binder.</p>
+          <div class="rg-lane__foot">
+            <a href="#vertical" class="fr-btn fr-btn--ghost">Jump to vertical &rarr;</a>
+            <a href="/enterprise" class="fr-btn fr-btn--ghost">Enterprise overview</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="fr-rule fr-rule--mint">
+
+<section class="fr-section" id="all">
+  <div class="fr-container">
+    <div class="fr-section__head fr-reveal">
+      <span class="fr-eyebrow">Frontier recipes &middot; 7</span>
+      <h2 class="fr-h2" id="frontier">Frontier recipes.</h2>
+      <p class="fr-lede">Reasoning, coding, multi-teacher fusion, MTP, agentic, merge-first, low-bit. Each one is a single command. Each one writes a signed .kolm to <span class="fr-code">~/.kolm/artifacts/</span>. Each one ships at or above its K-score floor, or it does not ship at all.</p>
+      <div class="rg-meta">
+        <span><b>quant lib</b> bitsandbytes 0.49.2</span>
+        <span><b>signing</b> Ed25519 over JCS-canonical receipt</span>
+        <span><b>gate</b> K-score on held-out eval pack</span>
+      </div>
+    </div>
+
+    <div class="fr-grid-2">
+
+      <!-- a. SOTA reasoning, 8B -->
+      <article class="fr-card fr-card--mint rg-card fr-reveal" data-fr-tilt="2">
+        <div class="rg-card__top">
+          <span class="fr-pill">REASONING</span>
+          <span class="fr-pill fr-pill--ghost">MULTI-TEACHER</span>
+          <span class="fr-pill fr-pill--ghost">DYNAMIC-2.0</span>
+        </div>
+        <h3 class="rg-card__h">SOTA reasoning, 8B</h3>
+        <p class="rg-card__desc">Distill Claude Opus 4.7 into a Qwen2.5-7B student under a reasoning-mode trace. Ships at 4-bit dynamic-2.0 once the K-score clears 0.92 on chain-of-thought evals.</p>
+<div class="fr-cli"><span class="fr-cli__prompt">$</span> <span class="fr-cli__flag">kolm</span> build sota-reasoning <span class="fr-cli__flag">--teacher=</span>claude-opus-4-7 <span class="fr-cli__flag">--student=</span>qwen2-5-7b <span class="fr-cli__flag">--bit=</span>4.0 <span class="fr-cli__flag">--mode=</span>reasoning <span class="fr-cli__flag">--kscore-min=</span>0.92</div>
+        <div class="rg-card__out">
+          <div class="rg-out"><span class="rg-out__k">size</span><span class="rg-out__v">~5.2 GB</span></div>
+          <div class="rg-out"><span class="rg-out__k">K-score floor</span><span class="rg-out__v">0.92</span></div>
+          <div class="rg-out"><span class="rg-out__k">target</span><span class="rg-out__v">RTX 4090+</span></div>
+        </div>
+        <div class="rg-card__foot">
+          <a href="/forge">Compose in /forge &rarr;</a>
+          <a href="/benchmarks">Verified scores</a>
+        </div>
+      </article>
+
+      <!-- b. SOTA coding, 13B + MTP -->
+      <article class="fr-card fr-card--mint rg-card fr-reveal" data-fr-tilt="2">
+        <div class="rg-card__top">
+          <span class="fr-pill">CODING</span>
+          <span class="fr-pill fr-pill--ghost">MTP</span>
+          <span class="fr-pill fr-pill--ghost">AIDER &middot; SWE-BENCH</span>
+        </div>
+        <h3 class="rg-card__h">SOTA coding, 13B + MTP</h3>
+        <p class="rg-card__desc">DeepSeek-R1-32B teacher distilled into a Qwen2.5-14B student with multi-token-prediction. Benchmarks gated on Aider and SWE-bench Verified.</p>
+<div class="fr-cli"><span class="fr-cli__prompt">$</span> <span class="fr-cli__flag">kolm</span> build sota-coding <span class="fr-cli__flag">--teacher=</span>deepseek-r1-32b <span class="fr-cli__flag">--student=</span>qwen2-5-14b <span class="fr-cli__flag">--bit=</span>4.0 <span class="fr-cli__flag">--mode=</span>mpt <span class="fr-cli__flag">--bench=</span>aider,swe-bench</div>
+        <div class="rg-card__out">
+          <div class="rg-out"><span class="rg-out__k">size</span><span class="rg-out__v">~9.4 GB</span></div>
+          <div class="rg-out"><span class="rg-out__k">decode</span><span class="rg-out__v">MTP-2</span></div>
+          <div class="rg-out"><span class="rg-out__k">target</span><span class="rg-out__v">RTX 5090</span></div>
+        </div>
+        <div class="rg-card__foot">
+          <a href="/forge">Compose in /forge &rarr;</a>
+          <a href="/benchmarks">Verified scores</a>
+        </div>
+      </article>
+
+      <!-- c. Low-bit generalist, 1.58-bit -->
+      <article class="fr-card fr-card--mint rg-card fr-reveal" data-fr-tilt="2">
+        <div class="rg-card__top">
+          <span class="fr-pill">LOW-BIT</span>
+          <span class="fr-pill fr-pill--ghost">BITNET</span>
+          <span class="fr-pill fr-pill--ghost">GENERALIST</span>
+        </div>
+        <h3 class="rg-card__h">Low-bit generalist, 1.58-bit</h3>
+        <p class="rg-card__desc">Quantize a Qwen2.5-3B student into BitNet 1.58-bit. Targets edge devices and CPU-only fleets where every gigabyte costs RAM.</p>
+<div class="fr-cli"><span class="fr-cli__prompt">$</span> <span class="fr-cli__flag">kolm</span> build low-bit-generalist <span class="fr-cli__flag">--student=</span>qwen2-5-3b <span class="fr-cli__flag">--bit=</span>1.58 <span class="fr-cli__flag">--quant=</span>bitnet <span class="fr-cli__flag">--kscore-min=</span>0.85</div>
+        <div class="rg-card__out">
+          <div class="rg-out"><span class="rg-out__k">size</span><span class="rg-out__v">~1.1 GB</span></div>
+          <div class="rg-out"><span class="rg-out__k">K-score floor</span><span class="rg-out__v">0.85</span></div>
+          <div class="rg-out"><span class="rg-out__k">target</span><span class="rg-out__v">CPU / edge</span></div>
+        </div>
+        <div class="rg-card__foot">
+          <a href="/forge">Compose in /forge &rarr;</a>
+          <a href="/benchmarks">Verified scores</a>
+        </div>
+      </article>
+
+      <!-- d. Multi-teacher fused, 14B -->
+      <article class="fr-card fr-card--mint rg-card fr-reveal" data-fr-tilt="2">
+        <div class="rg-card__top">
+          <span class="fr-pill">MULTI-TEACHER</span>
+          <span class="fr-pill fr-pill--violet">FUSED</span>
+          <span class="fr-pill fr-pill--ghost">DYNAMIC-2.0</span>
+        </div>
+        <h3 class="rg-card__h">Multi-teacher fused, 14B</h3>
+        <p class="rg-card__desc">Fuse Claude Opus 4.7, GPT-5.5, and DeepSeek-R1 traces into a single Qwen2.5-14B student. The teacher attribution row is preserved per-token in the binder.</p>
+<div class="fr-cli"><span class="fr-cli__prompt">$</span> <span class="fr-cli__flag">kolm</span> build multi-teacher-fused <span class="fr-cli__flag">--teachers=</span>claude-opus-4-7,gpt-5-5,deepseek-r1 <span class="fr-cli__flag">--student=</span>qwen2-5-14b <span class="fr-cli__flag">--mode=</span>multi-teacher <span class="fr-cli__flag">--quant=</span>dynamic-2.0</div>
+        <div class="rg-card__out">
+          <div class="rg-out"><span class="rg-out__k">teachers</span><span class="rg-out__v">3</span></div>
+          <div class="rg-out"><span class="rg-out__k">size</span><span class="rg-out__v">~9.4 GB</span></div>
+          <div class="rg-out"><span class="rg-out__k">target</span><span class="rg-out__v">RTX 5090</span></div>
+        </div>
+        <div class="rg-card__foot">
+          <a href="/forge">Compose in /forge &rarr;</a>
+          <a href="/benchmarks">Verified scores</a>
+        </div>
+      </article>
+
+      <!-- e. MTP speed demon, 32B -->
+      <article class="fr-card fr-card--mint rg-card fr-reveal" data-fr-tilt="2">
+        <div class="rg-card__top">
+          <span class="fr-pill">SPEED</span>
+          <span class="fr-pill fr-pill--ghost">MTP</span>
+          <span class="fr-pill fr-pill--ghost">RTX 5090</span>
+        </div>
+        <h3 class="rg-card__h">MTP speed demon, 32B</h3>
+        <p class="rg-card__desc">Compile the R1-Distill-Qwen-32B as an MTP decoder with dynamic-2.0 quantization, hardware-tuned for RTX 5090. Reference numbers: 61.0 GB to 17.9 GB INT4 in 125.3s.</p>
+<div class="fr-cli"><span class="fr-cli__prompt">$</span> <span class="fr-cli__flag">kolm</span> build speed-demon <span class="fr-cli__flag">--student=</span>r1-distill-32b <span class="fr-cli__flag">--bit=</span>4.0 <span class="fr-cli__flag">--mode=</span>mpt <span class="fr-cli__flag">--quant=</span>dynamic-2.0 <span class="fr-cli__flag">--target=</span>rtx-5090</div>
+        <div class="rg-card__out">
+          <div class="rg-out"><span class="rg-out__k">size INT4</span><span class="rg-out__v">17.9 GB</span></div>
+          <div class="rg-out"><span class="rg-out__k">quant time</span><span class="rg-out__v">125.3s</span></div>
+          <div class="rg-out"><span class="rg-out__k">decode</span><span class="rg-out__v">11.5 tok/s</span></div>
+        </div>
+        <div class="rg-card__foot">
+          <a href="/forge">Compose in /forge &rarr;</a>
+          <a href="/benchmarks">Verified scores</a>
+        </div>
+      </article>
+
+      <!-- f. Agentic workflow compiler -->
+      <article class="fr-card fr-card--mint rg-card fr-reveal" data-fr-tilt="2">
+        <div class="rg-card__top">
+          <span class="fr-pill">AGENTIC</span>
+          <span class="fr-pill fr-pill--ghost">TRACE-COMPILE</span>
+          <span class="fr-pill fr-pill--ghost">CAPTURE</span>
+        </div>
+        <h3 class="rg-card__h">Agentic workflow compiler</h3>
+        <p class="rg-card__desc">Replay captured agent traces from your local lake; the compiler folds the (user-input -> final-output) path into a cache-hit replay so repeat workflows skip the LLM and the tool calls.</p>
+<div class="fr-cli"><span class="fr-cli__prompt">$</span> <span class="fr-cli__flag">kolm</span> build agentic <span class="fr-cli__flag">--capture=</span>~/.kolm/lake/workflows <span class="fr-cli__flag">--mode=</span>agentic <span class="fr-cli__flag">--bit=</span>4.0</div>
+        <div class="rg-card__out">
+          <div class="rg-out"><span class="rg-out__k">source</span><span class="rg-out__v">lake/workflows</span></div>
+          <div class="rg-out"><span class="rg-out__k">mode</span><span class="rg-out__v">agentic</span></div>
+          <div class="rg-out"><span class="rg-out__k">replay</span><span class="rg-out__v">cache-hit</span></div>
+        </div>
+        <div class="rg-card__foot">
+          <a href="/forge">Compose in /forge &rarr;</a>
+          <a href="/benchmarks">Verified scores</a>
+        </div>
+      </article>
+
+      <!-- g. Merge-first frankenmodel -->
+      <article class="fr-card fr-card--mint rg-card fr-reveal" data-fr-tilt="2">
+        <div class="rg-card__top">
+          <span class="fr-pill">MERGE</span>
+          <span class="fr-pill fr-pill--violet">TIES</span>
+          <span class="fr-pill fr-pill--ghost">FRANKENMODEL</span>
+        </div>
+        <h3 class="rg-card__h">Merge-first frankenmodel</h3>
+        <p class="rg-card__desc">TIES-merge a Gemma-4-31B and Qwen2.5-14B donor pair, then distill into a 14B student. Useful when no single open base covers your domain mix.</p>
+<div class="fr-cli"><span class="fr-cli__prompt">$</span> <span class="fr-cli__flag">kolm</span> build merge-distill <span class="fr-cli__flag">--merge=</span>ties <span class="fr-cli__flag">--models=</span>gemma-4-31b,qwen2-5-14b <span class="fr-cli__flag">--mode=</span>merge-first <span class="fr-cli__flag">--student=</span>qwen2-5-14b <span class="fr-cli__flag">--bit=</span>4.0</div>
+        <div class="rg-card__out">
+          <div class="rg-out"><span class="rg-out__k">merge</span><span class="rg-out__v">TIES</span></div>
+          <div class="rg-out"><span class="rg-out__k">donors</span><span class="rg-out__v">2</span></div>
+          <div class="rg-out"><span class="rg-out__k">student</span><span class="rg-out__v">qwen2-5-14b</span></div>
+        </div>
+        <div class="rg-card__foot">
+          <a href="/forge">Compose in /forge &rarr;</a>
+          <a href="/benchmarks">Verified scores</a>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<hr class="fr-rule">
+
+<section class="fr-section" id="vertical">
+  <div class="fr-container">
+    <div class="fr-section__head fr-reveal">
+      <span class="fr-eyebrow">Production vertical &middot; 7</span>
+      <h2 class="fr-h2">Production vertical bots.</h2>
+      <p class="fr-lede">PHI redaction, contract review, support routing, internal RAG, SecOps triage, finance risk. Each recipe inherits a base spec and adds a PII mode, an eval pack, and a K-score floor calibrated to its compliance regime.</p>
+      <div class="rg-meta">
+        <span><b>PII modes</b> hipaa &middot; us-pii &middot; pci &middot; soc2 &middot; gdpr</span>
+        <span><b>binder</b> redaction policy + capture lineage</span>
+        <span><b>gate</b> per-axis K-score (faithfulness, calibration, honesty)</span>
+      </div>
+    </div>
+
+    <div class="fr-grid-2">
+
+      <!-- a. PHI-safe medical note summarizer -->
+      <article class="fr-card fr-card--amber rg-card fr-reveal" data-fr-tilt="2">
+        <div class="rg-card__top">
+          <span class="fr-pill fr-pill--amber">HEALTHCARE</span>
+          <span class="fr-pill fr-pill--ghost">HIPAA</span>
+          <span class="fr-pill fr-pill--ghost">PHI-CLEAN</span>
+        </div>
+        <h3 class="rg-card__h">PHI-safe medical note summarizer</h3>
+        <p class="rg-card__desc">Wrap the claims-redactor base in HIPAA PII mode and gate on a 0.95 K-score floor. Every output row carries a redaction proof an auditor can replay. <a href="/healthcare" style="color:var(--fr-mint)">/healthcare</a>.</p>
+<div class="fr-cli"><span class="fr-cli__prompt">$</span> <span class="fr-cli__flag">kolm</span> build vertical <span class="fr-cli__flag">--base=</span>claims-redactor <span class="fr-cli__flag">--pii-mode=</span>hipaa <span class="fr-cli__flag">--kscore-min=</span>0.95</div>
+        <div class="rg-card__out">
+          <div class="rg-out"><span class="rg-out__k">PII mode</span><span class="rg-out__v">hipaa</span></div>
+          <div class="rg-out"><span class="rg-out__k">K-score floor</span><span class="rg-out__v">0.95</span></div>
+          <div class="rg-out"><span class="rg-out__k">eval pack</span><span class="rg-out__v">phi-safe</span></div>
+        </div>
+        <div class="rg-card__foot">
+          <a href="/forge">Compose in /forge &rarr;</a>
+          <a href="/benchmarks">Verified scores</a>
+        </div>
+      </article>
+
+      <!-- b. Legal contract reviewer + redactor -->
+      <article class="fr-card fr-card--amber rg-card fr-reveal" data-fr-tilt="2">
+        <div class="rg-card__top">
+          <span class="fr-pill fr-pill--amber">LEGAL</span>
+          <span class="fr-pill fr-pill--ghost">US-PII</span>
+          <span class="fr-pill fr-pill--ghost">REVIEWER</span>
+        </div>
+        <h3 class="rg-card__h">Legal contract reviewer + redactor</h3>
+        <p class="rg-card__desc">A reviewer head wired to the legal-reviewer base. Flags risky clauses, redacts US-PII pre-export, and bakes the redaction map into the binder.</p>
+<div class="fr-cli"><span class="fr-cli__prompt">$</span> <span class="fr-cli__flag">kolm</span> build vertical <span class="fr-cli__flag">--base=</span>legal-reviewer <span class="fr-cli__flag">--pii-mode=</span>us-pii <span class="fr-cli__flag">--kscore-min=</span>0.95</div>
+        <div class="rg-card__out">
+          <div class="rg-out"><span class="rg-out__k">PII mode</span><span class="rg-out__v">us-pii</span></div>
+          <div class="rg-out"><span class="rg-out__k">K-score floor</span><span class="rg-out__v">0.95</span></div>
+          <div class="rg-out"><span class="rg-out__k">eval pack</span><span class="rg-out__v">contract-review</span></div>
+        </div>
+        <div class="rg-card__foot">
+          <a href="/forge">Compose in /forge &rarr;</a>
+          <a href="/benchmarks">Verified scores</a>
+        </div>
+      </article>
+
+      <!-- c. Code review + PR bot -->
+      <article class="fr-card fr-card--amber rg-card fr-reveal" data-fr-tilt="2">
+        <div class="rg-card__top">
+          <span class="fr-pill fr-pill--amber">DEVTOOLS</span>
+          <span class="fr-pill fr-pill--ghost">PR REVIEW</span>
+          <span class="fr-pill fr-pill--ghost">CAPTURE</span>
+        </div>
+        <h3 class="rg-card__h">Code review + PR bot</h3>
+        <p class="rg-card__desc">Distill your staff engineer's PR comments into a reviewer head. The capture lake feeds the recipe; the binder remembers which file paths were ever seen.</p>
+<div class="fr-cli"><span class="fr-cli__prompt">$</span> <span class="fr-cli__flag">kolm</span> build vertical <span class="fr-cli__flag">--base=</span>pr-reviewer <span class="fr-cli__flag">--capture=</span>~/.kolm/lake/code-review <span class="fr-cli__flag">--kscore-min=</span>0.92</div>
+        <div class="rg-card__out">
+          <div class="rg-out"><span class="rg-out__k">K-score floor</span><span class="rg-out__v">0.92</span></div>
+          <div class="rg-out"><span class="rg-out__k">source</span><span class="rg-out__v">lake/code-review</span></div>
+          <div class="rg-out"><span class="rg-out__k">eval pack</span><span class="rg-out__v">pr-quality</span></div>
+        </div>
+        <div class="rg-card__foot">
+          <a href="/forge">Compose in /forge &rarr;</a>
+          <a href="/benchmarks">Verified scores</a>
+        </div>
+      </article>
+
+      <!-- d. Customer support classifier -->
+      <article class="fr-card fr-card--amber rg-card fr-reveal" data-fr-tilt="2">
+        <div class="rg-card__top">
+          <span class="fr-pill fr-pill--amber">SUPPORT</span>
+          <span class="fr-pill fr-pill--ghost">ROUTER</span>
+          <span class="fr-pill fr-pill--ghost">CLASSIFIER</span>
+        </div>
+        <h3 class="rg-card__h">Customer support classifier</h3>
+        <p class="rg-card__desc">Route inbound tickets into intent + priority + queue. Reads from your captured ticket lake; the gate is calibration, not vibes.</p>
+<div class="fr-cli"><span class="fr-cli__prompt">$</span> <span class="fr-cli__flag">kolm</span> build vertical <span class="fr-cli__flag">--base=</span>support-router <span class="fr-cli__flag">--capture=</span>~/.kolm/lake/tickets</div>
+        <div class="rg-card__out">
+          <div class="rg-out"><span class="rg-out__k">source</span><span class="rg-out__v">lake/tickets</span></div>
+          <div class="rg-out"><span class="rg-out__k">axis</span><span class="rg-out__v">calibration</span></div>
+          <div class="rg-out"><span class="rg-out__k">eval pack</span><span class="rg-out__v">ticket-router</span></div>
+        </div>
+        <div class="rg-card__foot">
+          <a href="/forge">Compose in /forge &rarr;</a>
+          <a href="/benchmarks">Verified scores</a>
+        </div>
+      </article>
+
+      <!-- e. Internal company RAG specialist -->
+      <article class="fr-card fr-card--amber rg-card fr-reveal" data-fr-tilt="2">
+        <div class="rg-card__top">
+          <span class="fr-pill fr-pill--amber">KNOWLEDGE</span>
+          <span class="fr-pill fr-pill--ghost">RAG</span>
+          <span class="fr-pill fr-pill--ghost">CITED</span>
+        </div>
+        <h3 class="rg-card__h">Internal company RAG specialist</h3>
+        <p class="rg-card__desc">Index Notion, Confluence, and Slack into a recall side-car; distill answers grounded in the index, with citations. The retrieval source list is in the receipt.</p>
+<div class="fr-cli"><span class="fr-cli__prompt">$</span> <span class="fr-cli__flag">kolm</span> build vertical <span class="fr-cli__flag">--base=</span>internal-rag <span class="fr-cli__flag">--source=</span>notion,confluence,slack</div>
+        <div class="rg-card__out">
+          <div class="rg-out"><span class="rg-out__k">sources</span><span class="rg-out__v">3</span></div>
+          <div class="rg-out"><span class="rg-out__k">retrieval</span><span class="rg-out__v">side-car</span></div>
+          <div class="rg-out"><span class="rg-out__k">eval pack</span><span class="rg-out__v">wiki-cited</span></div>
+        </div>
+        <div class="rg-card__foot">
+          <a href="/forge">Compose in /forge &rarr;</a>
+          <a href="/benchmarks">Verified scores</a>
+        </div>
+      </article>
+
+      <!-- f. Security / log anomaly + incident summarizer -->
+      <article class="fr-card fr-card--amber rg-card fr-reveal" data-fr-tilt="2">
+        <div class="rg-card__top">
+          <span class="fr-pill fr-pill--amber">SECOPS</span>
+          <span class="fr-pill fr-pill--ghost">SIEM</span>
+          <span class="fr-pill fr-pill--ghost">INCIDENT</span>
+        </div>
+        <h3 class="rg-card__h">Security / log anomaly + incident summarizer</h3>
+        <p class="rg-card__desc">Read from the SIEM lake; classify anomalies; emit a one-page incident summary for the on-call engineer. Every page link traces back to the raw log row.</p>
+<div class="fr-cli"><span class="fr-cli__prompt">$</span> <span class="fr-cli__flag">kolm</span> build vertical <span class="fr-cli__flag">--base=</span>secops <span class="fr-cli__flag">--capture=</span>~/.kolm/lake/siem</div>
+        <div class="rg-card__out">
+          <div class="rg-out"><span class="rg-out__k">source</span><span class="rg-out__v">lake/siem</span></div>
+          <div class="rg-out"><span class="rg-out__k">output</span><span class="rg-out__v">incident pg</span></div>
+          <div class="rg-out"><span class="rg-out__k">eval pack</span><span class="rg-out__v">secops-triage</span></div>
+        </div>
+        <div class="rg-card__foot">
+          <a href="/forge">Compose in /forge &rarr;</a>
+          <a href="/benchmarks">Verified scores</a>
+        </div>
+      </article>
+
+      <!-- g. Finance risk classification + report generator -->
+      <article class="fr-card fr-card--amber rg-card fr-reveal" data-fr-tilt="2">
+        <div class="rg-card__top">
+          <span class="fr-pill fr-pill--amber">FINANCE</span>
+          <span class="fr-pill fr-pill--ghost">PCI</span>
+          <span class="fr-pill fr-pill--ghost">SR 11-7</span>
+        </div>
+        <h3 class="rg-card__h">Finance risk classification + report generator</h3>
+        <p class="rg-card__desc">Classify transactions, score risk, generate the regulator-ready report. PCI PII mode; the model card includes an SR 11-7 alignment table. <a href="/finance" style="color:var(--fr-mint)">/finance</a>.</p>
+<div class="fr-cli"><span class="fr-cli__prompt">$</span> <span class="fr-cli__flag">kolm</span> build vertical <span class="fr-cli__flag">--base=</span>fin-risk <span class="fr-cli__flag">--pii-mode=</span>pci</div>
+        <div class="rg-card__out">
+          <div class="rg-out"><span class="rg-out__k">PII mode</span><span class="rg-out__v">pci</span></div>
+          <div class="rg-out"><span class="rg-out__k">framework</span><span class="rg-out__v">SR 11-7</span></div>
+          <div class="rg-out"><span class="rg-out__k">eval pack</span><span class="rg-out__v">fin-risk</span></div>
+        </div>
+        <div class="rg-card__foot">
+          <a href="/forge">Compose in /forge &rarr;</a>
+          <a href="/benchmarks">Verified scores</a>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<hr class="fr-rule fr-rule--mint">
+
+<section class="fr-section fr-section--tight" id="proof">
+  <div class="fr-container">
+    <div class="fr-section__head fr-reveal">
+      <span class="fr-eyebrow">Proof, not promises</span>
+      <h2 class="fr-h2">Four quantize times on one RTX 5090.</h2>
+      <p class="fr-lede">These are the real numbers behind the SOTA quantize matrix the frontier recipes lean on. Reproduced via bitsandbytes 0.49.2 NF4 + double-quant on torch 2.11.0 + cu128.</p>
+    </div>
+    <div class="fr-card rg-proof fr-reveal">
+      <table>
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th>BF16 size</th>
+            <th>INT4 size</th>
+            <th>Quant time</th>
+            <th>Decode</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Qwen2.5-0.5B</td>
+            <td class="num">0.93 GB</td>
+            <td class="num">0.44 GB</td>
+            <td class="num">11.6s</td>
+            <td class="num">&mdash;</td>
+          </tr>
+          <tr>
+            <td>Qwen2.5-3B</td>
+            <td class="num">5.8 GB</td>
+            <td class="num">1.9 GB</td>
+            <td class="num">13.9s</td>
+            <td class="num">&mdash;</td>
+          </tr>
+          <tr>
+            <td>Qwen2.5-7B</td>
+            <td class="num">14.2 GB</td>
+            <td class="num">5.2 GB</td>
+            <td class="num">29.2s</td>
+            <td class="num">24.5 tok/s</td>
+          </tr>
+          <tr>
+            <td>DeepSeek-R1-Distill-Qwen-32B</td>
+            <td class="num">61.0 GB</td>
+            <td class="num">17.9 GB</td>
+            <td class="num">125.3s</td>
+            <td class="num">11.5 tok/s</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<hr class="fr-rule">
+
+<section class="fr-section" id="author">
+  <div class="fr-container">
+    <div class="fr-card fr-card--feature fr-card--mint rg-author fr-reveal">
+      <div>
+        <span class="fr-eyebrow">Author a recipe</span>
+        <h2 class="fr-h2">Ship your own. Keep your share.</h2>
+        <p class="fr-lede">Every recipe in the gallery started as a single command on someone's laptop. If yours reproduces, signs, and clears its K-score floor, publish it to the marketplace and keep the revenue share configured on your tenant.</p>
+<div class="fr-cli"><span class="fr-cli__prompt">$</span> <span class="fr-cli__flag">kolm</span> recipe new my-recipe</div>
+        <ol>
+          <li>Edit the generated <code>recipe.yaml</code>: name the base, the teacher (if any), the PII mode, the K-score floor, the eval pack.</li>
+          <li>Run <code>kolm recipe publish</code>; the marketplace lists your recipe with its signed receipt and the revenue-share terms from your tenant settings.</li>
+        </ol>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
+          <a href="/community" class="fr-btn fr-btn--mint">Revenue-share details &rarr;</a>
+          <a href="/forge" class="fr-btn fr-btn--ghost">Compose in /forge</a>
+        </div>
+      </div>
+      <div>
+        <div class="rg-card__out" style="grid-template-columns:1fr 1fr;gap:12px;padding-top:0;border-top:0">
+          <div class="rg-out"><span class="rg-out__k">listings</span><span class="rg-out__v">14 curated</span></div>
+          <div class="rg-out"><span class="rg-out__k">format</span><span class="rg-out__v">recipe.yaml</span></div>
+          <div class="rg-out"><span class="rg-out__k">signing</span><span class="rg-out__v">Ed25519</span></div>
+          <div class="rg-out"><span class="rg-out__k">marketplace</span><span class="rg-out__v">opt-in</span></div>
+        </div>
+        <p style="margin:16px 0 0;font-size:var(--fr-text-sm);line-height:1.6;color:var(--ink-3)">A published recipe carries the same signed-receipt chain as a private one. A downstream verifier checks the recipe cid, the artifact cid, and the K-score axes offline. No registry call, no honesty service in the middle.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/recipes">Recipes</a>
+        <a href="/forge">Forge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/leaderboard">Leaderboard</a>
+        <a href="/community">Community</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Verticals</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/enterprise">Enterprise</a>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/manifesto">Manifesto</a>
+        <a href="/why-kolm">Why kolm</a>
+        <a href="/contact">Contact</a>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- w621-recipe-gallery -->
+</body>
+</html>

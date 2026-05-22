@@ -16,6 +16,8 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/frontier.css">
+<script defer src="/frontier.js"></script>
 <style>
   .faq-toc { display: flex; flex-wrap: wrap; gap: var(--ks-2); padding: var(--ks-4); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); margin-bottom: var(--ks-6); }
   .faq-toc a { padding: 6px 14px; background: var(--ks-bg-2); border: 1px solid var(--ks-line-2); border-radius: 999px; font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-2); text-decoration: none; }
@@ -31,6 +33,27 @@
   .faq-items details p { margin: var(--ks-3) 0 0; font-size: 14px; color: var(--ks-ink-2); line-height: 1.7; }
   .faq-items details p a { color: var(--ks-accent); }
   .test-anchor { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+  /* W621 frontier overlay for FAQ */
+  .faq-w621 details.fr-card { padding: var(--ks-4) var(--ks-5); margin-bottom: var(--ks-3); }
+  .faq-w621 details.fr-card summary.fr-h3 { font-size: 16px; font-weight: 600; cursor: pointer; list-style: none; padding-right: 32px; position: relative; line-height: 1.45; margin: 0; }
+  .faq-w621 details.fr-card summary.fr-h3::-webkit-details-marker { display: none; }
+  .faq-w621 details.fr-card summary.fr-h3::after { content: "+"; color: var(--ks-accent); font-family: var(--ks-mono); position: absolute; right: 0; top: 0; font-size: 20px; line-height: 1; }
+  .faq-w621 details.fr-card[open] summary.fr-h3::after { content: "−"; }
+  .faq-w621 details.fr-card p { margin: var(--ks-3) 0 0; font-size: 14.5px; color: var(--ks-ink-2); line-height: 1.7; }
+  .faq-w621 details.fr-card p + p { margin-top: var(--ks-2); }
+  .faq-w621 details.fr-card p a { color: var(--ks-accent); }
+  .faq-w621 details.fr-card code { font-family: var(--ks-mono); font-size: 12.5px; background: var(--ks-bg-2); padding: 1px 6px; border-radius: 4px; color: var(--ks-ink); }
+  .faq-w621 .fr-section + .fr-section { padding-top: var(--ks-2); }
+  .faq-w621 .fr-h2 { font-size: clamp(22px, 2.4vw, 28px); font-weight: 600; letter-spacing: -0.01em; margin: 0 0 var(--ks-2); }
+  .faq-w621 .fr-eyebrow { font-family: var(--ks-mono); font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-accent); }
+  .faq-w621 .fr-lede { font-size: 14.5px; color: var(--ks-ink-2); margin: 0 0 var(--ks-5); max-width: 68ch; line-height: 1.6; }
+  .faq-w621 .fr-rule { height: 1px; background: var(--ks-line-2); margin: var(--ks-6) 0; border: 0; }
+  .faq-w621 .fr-pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; font-family: var(--ks-mono); font-size: 11px; border-radius: 999px; border: 1px solid var(--ks-line-2); color: var(--ks-ink-2); }
+  .faq-w621 .fr-pill--amber { color: #f5b955; border-color: rgba(245,185,85,0.35); background: rgba(245,185,85,0.06); }
+  .faq-w621 .fr-pill--ghost { color: var(--ks-ink-2); }
+  .faq-w621 .fr-status { display: inline-flex; align-items: center; gap: 6px; font-family: var(--ks-mono); font-size: 11.5px; color: var(--ks-ink-2); }
+  .faq-w621 .fr-status__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ks-accent); display: inline-block; }
+  .faq-w621 .fr-reveal { opacity: 1; }
 </style>
 </head>
 <body class="ks">
@@ -81,144 +104,220 @@
   </div>
 </section>
 
-<section class="ks-section">
+<section class="ks-section faq-w621">
   <div class="ks-wrap">
 
     <div class="faq-toc">
-      <a href="#general">General</a>
-      <a href="#dev">For developers</a>
-      <a href="#eng">For engineers</a>
-      <a href="#data">For data scientists</a>
-      <a href="#sec">For security &amp; compliance</a>
-      <a href="#proc">For procurement</a>
-      <a href="#oss">Open source &amp; licensing</a>
+      <a href="#build">Building &amp; compiling</a>
+      <a href="#legal">Legality &amp; provenance</a>
+      <a href="#privacy">Privacy &amp; compliance</a>
+      <a href="#pricing">Pricing &amp; tiers</a>
+      <a href="#compare">Comparisons</a>
     </div>
 
-    <div class="faq-cat" id="general">
-      <h2>General</h2>
-      <div class="faq-items">
-        <details><summary>What is kolm?</summary>
-          <p>kolm is an open-source AI compiler. It takes captured input/output examples, distills them through a teacher model into a smaller student model, scores the result, and emits a signed .kolm artifact you can run on your own hardware. The full case is on the <a href="/why-kolm">why-kolm</a> page; the principles behind the design are in the <a href="/manifesto">manifesto</a>.</p>
-        </details>
-        <details><summary>What does "compiler" mean in this context?</summary>
-          <p>A compiler takes a source artifact and turns it into a runnable artifact through a deterministic, verifiable pipeline. We borrow the word from systems engineering. Source = your captures + a teacher + a base model. Output = a content-addressed .kolm file with a K-score, an eval pack hash, and a signed receipt.</p>
-        </details>
-        <details><summary>How is this different from fine-tuning?</summary>
-          <p>Fine-tuning is a step inside the compile path; not the whole thing. The compiler also captures, scores against a held-out eval pack, quantizes, packages, and signs. Each step is reproducible. Each output carries the evidence chain. See <a href="/compare">compare</a> for the side-by-side with adjacent stacks.</p>
-        </details>
-        <details><summary>How do I start?</summary>
-          <p>Install the CLI, run `kolm signup`, run `kolm distill` against the bundled sample captures, then `kolm score` on the output. The full path is documented in <a href="/quickstart">quickstart</a>; the whole loop runs in under ten minutes on a developer laptop.</p>
-        </details>
-      </div>
-    </div>
+    <!-- Building & compiling -->
+    <section class="fr-section fr-reveal" id="build">
+      <div class="fr-container fr-container--prose">
+        <span class="fr-eyebrow">01 &middot; Build path</span>
+        <h2 class="fr-h2">Building and compiling</h2>
+        <p class="fr-lede">What you can compile, how big it goes, how long it takes, and what the artifact actually contains. Every number below is from a verified run; numbers cite the GPU.</p>
 
-    <div class="faq-cat" id="dev">
-      <h2>For developers</h2>
-      <div class="faq-items">
-        <details><summary>Which CLI do I install?</summary>
-          <p>`npm i -g @kolm/cli`, `pip install kolm`, or `brew install kolm`. There is also a curl-based installer for environments without a package manager. All four install paths land the same binary; the source is in the GitHub repo.</p>
+        <details class="fr-card"><summary class="fr-h3">What bit-widths can I compile to?</summary>
+          <p>From 1.0-bit ternary (BitNet-style via AngelSlim) through INT2, INT3, INT4, INT5, INT6, INT8, FP8, BF16, and FP16. The forge enumerates every supported combination per base family. Default is <code>NF4 + Unsloth Dynamic 2.0</code> because it consistently lands the best K-score retention per gigabyte across the bases we test against. Pick the row from the matrix on <a href="/compile">/compile</a> if you want a different target.</p>
+          <p>Below 2 bits, expect K-score retention to fall off a cliff outside reasoning-heavy bases that were trained with ternary in mind. We don't hide it: the forge prints the expected K-score envelope before you commit a run.</p>
         </details>
-        <details><summary>Which language SDKs are first-class?</summary>
-          <p>Six: Node.js, Python, MCP, VS Code, C (stb-style single header), and Rust. C and Rust target embedded and CLI integrators; the others target hosted apps and dev tools. See <a href="/sdks">/sdks</a> for the full matrix.</p>
-        </details>
-        <details><summary>Can I use kolm without signing up for an account?</summary>
-          <p>Yes. The CLI runs entirely locally for development. An account is only required when you want hosted features: the registry, hosted bake-offs, or production-tier rate limits on the gateway. Anonymous usage will work indefinitely.</p>
-        </details>
-        <details><summary>How do I integrate kolm with my existing inference stack?</summary>
-          <p>If you run vLLM, SGLang, TGI, or TRT-LLM, point the kolm gateway at your existing endpoint and turn on capture; nothing else changes. If you serve directly from your application, swap your model load call for `kolm.load(artifact_path)` and the verifier runs at load time. See <a href="/runtimes">runtimes</a>.</p>
-        </details>
-      </div>
-    </div>
 
-    <div class="faq-cat" id="eng">
-      <h2>For engineers (platform &amp; SRE)</h2>
-      <div class="faq-items">
-        <details><summary>What does the runtime contract look like?</summary>
-          <p>The runtime refuses to load an artifact whose signature fails verification, whose eval pack hash is not present, or whose K-score is below the configured floor. All three checks are at load time; once loaded, the artifact is referenced by CID throughout. The default policy refuses anything below K=80.</p>
+        <details class="fr-card"><summary class="fr-h3">What's the largest base model kolm can quantize?</summary>
+          <p>We have verified runs up to <code>DeepSeek-R1-Distill-Qwen-32B</code>: 61 GB BF16 compressed to 17.9 GB INT4 in 125.3 seconds on a single RTX 5090, NF4 + double quantization via bitsandbytes 0.49.2 on torch 2.11.0+cu128. Loads in 13.3 s, sits at 19.22 GB VRAM, hits 11.5 tok/s, and reasoned correctly through the standard snail-on-wall problem end-to-end.</p>
+          <p>Larger MoEs and dense bases work if BF16 fits on disk; the quantize worker is layer-streamed and never holds the full weight tensor in VRAM. We are actively testing 70B and 405B; the matrix on <a href="/compile">/compile</a> is updated when a size is reproducibly green.</p>
         </details>
-        <details><summary>How do I gate CI on K-score?</summary>
-          <p>`kolm score artifact.kolm --evals my-pack --min 80` exits with code 1 if the artifact does not score above the floor. Wire it into your CI step; the build fails on a sub-floor artifact and the receipt is uploaded as a CI artifact.</p>
-        </details>
-        <details><summary>How does kolm handle drift in production?</summary>
-          <p>The runtime emits per-call confidence and the K-score baseline travels with the artifact. The compiler watches for divergence, alerts when production K diverges from baseline by more than 3 points, and runs `kolm distill --since 90d` to rebuild from rolling captures. See <a href="/runtimes">runtimes</a> for the alert wiring.</p>
-        </details>
-        <details><summary>What happens if the kolm.ai control plane goes down?</summary>
-          <p>Nothing in your runtime. The control plane handles registry, account, and bake-off APIs. The artifacts you have already pulled run unchanged; the verifier runs locally; the per-call receipt path does not touch our control plane. Telemetry retries when the control plane recovers.</p>
-        </details>
-      </div>
-    </div>
 
-    <div class="faq-cat" id="data">
-      <h2>For data scientists</h2>
-      <div class="faq-items">
-        <details><summary>How do I author my own eval pack?</summary>
-          <p>An eval pack is a JSONL file plus a manifest that names the per-axis weights and the input/output schema. The compiler accepts any JSONL pack that conforms to the kolm-eval-pack-1 schema. We ship reference packs for prior auth, claims adjudication, SOAP notes, and FWA triage.</p>
+        <details class="fr-card"><summary class="fr-h3">Does kolm support multi-token prediction (MTP)?</summary>
+          <p>Yes, on bases that support it natively (the Qwen3.6 family). The compiler emits MTP-aware student weights when you pass <code>--mode=mpt</code>. The MTP head ships inside the .kolm bundle and the runtime picks it up automatically; you don't need to wire anything else.</p>
         </details>
-        <details><summary>What if my K-score is low?</summary>
-          <p>Read the per-axis breakdown. Low Faith means teacher mismatch or insufficient captures. Low Cover means distribution skew. Low Calibration usually means distill temperature too high. Low Honesty means the refusal probe is hitting a hole in your captures. Each axis has a documented failure-mode playbook on the <a href="/k-score">k-score</a> page.</p>
-        </details>
-        <details><summary>Can I distill on a reasoning teacher (CoT)?</summary>
-          <p>Yes. Chain-of-thought transfers cleanly when the student is in the same family as the teacher's reasoning trace style. Phi-4-Mini-Reasoning pairs particularly well with Claude Opus 4.7; DeepSeek-R1-Distill-Qwen-32B is already trained on R1 traces and accepts further specialization without losing its reasoning surface.</p>
-        </details>
-        <details><summary>How do I prevent eval pack contamination during distillation?</summary>
-          <p>The compiler holds out the eval pack at distill time and asserts no leakage. If any cases in the eval pack appear in the distill captures, the build fails with `eval_contamination:true`. The check is content-hash based; you cannot defeat it by rewording.</p>
-        </details>
-      </div>
-    </div>
 
-    <div class="faq-cat" id="sec">
-      <h2>For security &amp; compliance</h2>
-      <div class="faq-items">
-        <details><summary>Is kolm HIPAA-eligible?</summary>
-          <p>Yes, under the BYOC and on-prem deployment patterns. We sign a BAA before any data touches our infrastructure. PHI does not leave your VPC under the recommended deployment pattern. See the <a href="/healthcare">healthcare</a> page for the full Security Rule mapping.</p>
+        <details class="fr-card"><summary class="fr-h3">Can I use my own teacher API key?</summary>
+          <p>Yes. <code>KOLM_DISTILL_TEACHER</code> accepts a comma-separated list, e.g. <code>anthropic,openai,deepseek,xai</code>. The compiler attempts each teacher in order and retries across the list if one is down or rate-limited. Token spend goes to your own keys; we never proxy paid teacher traffic through our infra.</p>
+          <p>The receipt records which teacher actually produced each batch, so if you mix teachers across a run you can audit the mix after the fact.</p>
         </details>
-        <details><summary>Is kolm SOC 2 certified?</summary>
-          <p>SOC 2 Type I is available now; Type II is in progress. The report is shared under NDA via the <a href="/security">security</a> page or directly through your account team.</p>
-        </details>
-        <details><summary>What does the receipt actually contain?</summary>
-          <p>Artifact CID, eval pack hash, teacher id and version, K-score and per-axis scores, weight vector, compiler version, build timestamp, and an Ed25519 signature over the manifest. Per-call receipts add input hash, decision, and stated confidence. Every field is named in the receipt schema, which is in the open source.</p>
-        </details>
-        <details><summary>How long are receipts retrievable?</summary>
-          <p>For HIPAA workloads, we retain receipt metadata under your record-keeping policy (typically seven years). The artifact and the eval pack persist under your registry retention; per-call receipts are content-addressed and survive as long as the underlying storage holds them.</p>
-        </details>
-      </div>
-    </div>
 
-    <div class="faq-cat" id="proc">
-      <h2>For procurement</h2>
-      <div class="faq-items">
-        <details><summary>What is the pricing model?</summary>
-          <p>Open source: free. Team: $99/seat/month. Business: $499/seat/month + audit features. Enterprise: custom. Self-hosting is always included. Full breakdown on <a href="/pricing">pricing</a>.</p>
+        <details class="fr-card"><summary class="fr-h3">How long does a typical compile take?</summary>
+          <p>On a single RTX 5090: 11.6 s for Qwen2.5-0.5B INT4 (0.93 GB to 0.44 GB), 13.9 s for Qwen2.5-3B INT4 (5.8 GB to 1.9 GB), 29.2 s for Qwen2.5-7B INT4 (14.2 GB to 5.2 GB), and 125.3 s for DeepSeek-R1-Distill-Qwen-32B INT4 (61.0 GB to 17.9 GB). Multi-teacher reasoning runs are longer because the distill loop walks more captures; budget 5 to 20 minutes for a 7B reasoning compile.</p>
         </details>
-        <details><summary>Do you accept POs and invoicing?</summary>
-          <p>Yes, on Business and Enterprise tiers. Net-30 standard. Multi-year commits offered at a discount; the terms travel in the order form, not in a back-channel email.</p>
-        </details>
-        <details><summary>Can we negotiate redlines on the MSA?</summary>
-          <p>Yes. Our standard MSA covers Apache-2.0 open source and a clean BAA path; redlines on indemnification, data residency, and renewal terms are normal. Legal is on the kickoff call; we do not hand-off to a separate function.</p>
-        </details>
-        <details><summary>What does the evaluation pack include?</summary>
-          <p>For NDA reviewers: SOC 2 report, HIPAA Security Rule mapping, network topology, pen test summary, source code access agreement. For everyone else: the OSS and the public docs. See <a href="/enterprise">enterprise</a> for the evaluation card.</p>
-        </details>
-      </div>
-    </div>
 
-    <div class="faq-cat" id="oss">
-      <h2>Open source &amp; licensing</h2>
-      <div class="faq-items">
-        <details><summary>What is the license?</summary>
-          <p>Apache-2.0 for the compiler, the runtime, the verifier, the K-score math, the eval pack schema, and all six SDKs. Some hosted-only features in the registry are closed-source SaaS; you can run kolm end-to-end without those.</p>
+        <details class="fr-card"><summary class="fr-h3">What's "K-score"?</summary>
+          <p>K-score is a composite quality score in the Kolmogorov tradition: it weights reasoning, coding, instruction-following, and fluency against a held-out eval pack and emits a single 0 to 100 number with a per-axis breakdown. The full spec, the per-axis weights, the contamination check, and the reference eval packs are on <a href="/k-score">/k-score</a>. The math is in the open source.</p>
+          <p>The runtime refuses to load any artifact whose K-score is below the configured floor at load time. Default floor is 80.</p>
         </details>
-        <details><summary>Can I fork kolm?</summary>
-          <p>Yes. The license permits it. If you fork the compiler, your artifacts will carry a different compiler-id in the receipt and downstream verifiers will treat them as such. We will not pursue your fork; if you want to upstream improvements, the PR queue is open.</p>
+
+        <details class="fr-card"><summary class="fr-h3">Does the compiled artifact ship the weights?</summary>
+          <p>Yes. A .kolm is a self-contained, signed bundle: weights + spec + receipt + eval pack snapshot. The whole thing is verifiable offline with <code>kolm verify &lt;cid&gt;</code>; no network call required. You can ship a .kolm to a customer behind a firewall and they can prove it came from you without ever phoning home.</p>
         </details>
-        <details><summary>Do you accept community contributions?</summary>
-          <p>Yes. CONTRIBUTING.md in the repo explains the workflow. Most accepted PRs target the eval-pack catalog, the SDK ergonomics, and the runtime adapters. Compiler core changes go through a longer review with two maintainers; the test floor is strict.</p>
+
+        <details class="fr-card"><summary class="fr-h3">Does kolm support mergekit?</summary>
+          <p>Yes. <code>--mode=merge-first</code> runs TIES, DARE, or SLERP across your chosen teachers and bases before the distill step begins. The merged interim is consumed by the distill loop; the final output is a single distilled .kolm whose receipt records the merge recipe. You can reproduce the merge from the receipt alone.</p>
         </details>
-        <details><summary>How do I reach the maintainers?</summary>
-          <p>GitHub issues for bugs and feature requests. Discord for community questions. Email for sensitive disclosures (security@kolm.ai). For commercial conversations, the <a href="/contact">contact form</a> routes to the right team.</p>
+
+        <details class="fr-card"><summary class="fr-h3">Can I distill on a reasoning teacher (CoT)?</summary>
+          <p>Yes. Chain-of-thought transfers cleanly when the student is in the same family as the teacher's trace style. Phi-4-Mini-Reasoning pairs particularly well with Claude Opus 4.7; DeepSeek-R1-Distill-Qwen-32B is already trained on R1 traces and accepts further specialization without losing its reasoning surface. The forge will warn you when a teacher and base family don't match well.</p>
+        </details>
+
+        <details class="fr-card"><summary class="fr-h3">How do I author my own eval pack?</summary>
+          <p>An eval pack is a JSONL file plus a manifest naming the per-axis weights and the I/O schema. Any pack conforming to the <code>kolm-eval-pack-1</code> schema is accepted by the compiler. We ship reference packs for prior auth, claims adjudication, SOAP notes, FWA triage, and the Frontier methods baseline. The compiler holds out the eval pack at distill time and emits <code>eval_contamination:true</code> on any content-hash collision; you can't defeat it by rewording.</p>
         </details>
       </div>
-    </div>
+    </section>
+
+    <hr class="fr-rule">
+
+    <!-- Legality & provenance -->
+    <section class="fr-section fr-reveal" id="legal">
+      <div class="fr-container fr-container--prose">
+        <span class="fr-eyebrow">02 &middot; Legal &amp; provenance</span>
+        <h2 class="fr-h2">Legality and provenance</h2>
+        <p class="fr-lede">The honest answers about distillation from frontier APIs, the signature chain, and what an artifact attests to. Provider ToS vary; we don't bypass any of them and we mark synthetic data explicitly.</p>
+
+        <details class="fr-card"><summary class="fr-h3">Is it legal to distill from Claude, GPT, or Gemini?</summary>
+          <p>kolm's recommended path is to distill only from your <em>own captured API traffic</em> — outputs that came back to your account against your own prompts, on your own paid keys. Provider ToS vary across releases and across regions; we don't bypass any of them and we don't host a shared scrape. Read your provider's terms and act accordingly.</p>
+          <p>For synthetic-trace augmentation (where the compiler generates extra prompts from a teacher to fill a coverage gap), the receipt explicitly flags <code>synthetic_augmentation:true</code> with the teacher id and the augmentation ratio. You can configure the compiler to refuse any artifact whose synthetic ratio exceeds your policy.</p>
+        </details>
+
+        <details class="fr-card"><summary class="fr-h3">How do I prove an artifact came from me?</summary>
+          <p>Every .kolm carries an Ed25519 signature over a JCS-canonical SHA-256 of the spec + weights + receipts. The public key lives in your registry, in the artifact sidecar, and on your team's <code>/verify-prod</code> page. <code>kolm verify &lt;cid&gt;</code> re-checks the full chain offline. A signature mismatch refuses to load.</p>
+          <p>If you self-host the registry, the key never leaves your infrastructure. Customers verify with the public half and the math says everything they need to know.</p>
+        </details>
+
+        <details class="fr-card"><summary class="fr-h3">Can I publish a .kolm on Hugging Face?</summary>
+          <p>Yes. <code>kolm push hf</code> writes a Hugging Face-compatible repo with the .kolm bundle, a model card, and a kolm "verified artifact" badge that links back to the on-chain verification record. Pulling it down with <code>kolm pull hf://&lt;owner&gt;/&lt;repo&gt;</code> re-verifies the signature before the artifact is usable.</p>
+        </details>
+
+        <details class="fr-card"><summary class="fr-h3">What's in the receipt chain?</summary>
+          <p>capture-id → dataset hash → teacher trace → eval pack hash → weight hash → Ed25519 signature. Each link verifiable independently, each cited by content-hash, and each printable from <code>kolm verify --pretty</code>. The receipt also records compiler version, build timestamp, K-score and per-axis scores, the teacher mix, the merge recipe (if any), and whether synthetic augmentation was used.</p>
+        </details>
+
+        <details class="fr-card"><summary class="fr-h3">What SLSA level are you at?</summary>
+          <p>Currently <span class="fr-pill">SLSA Level 2 attested</span>. Level 3 (CI provenance plus reproducible builds end-to-end) is in progress; the gap is the deterministic GPU kernel pinning, which is on the W6xx engineering line. The current attestation lives on <a href="/security">/security</a>.</p>
+        </details>
+
+        <details class="fr-card"><summary class="fr-h3">Are .kolm artifacts reproducible bit-for-bit?</summary>
+          <p>Spec, eval pack snapshot, and metadata: yes, deterministic. Weights: deterministic <em>given the same teacher trace</em>, which is the part outside our control if you use a hosted teacher. The receipt records every seed we control. We are working with kernel maintainers on full determinism across CUDA driver versions.</p>
+        </details>
+
+        <details class="fr-card"><summary class="fr-h3">How do I detect a forged or tampered artifact?</summary>
+          <p>Any byte flip in a .kolm breaks the SHA-256 over the bundle, which breaks the Ed25519 signature, which causes <code>kolm verify</code> to refuse the file and the runtime to refuse to load it. There is no in-band path to bypass this check; the verifier is in the open source and the math is checked at every load.</p>
+        </details>
+      </div>
+    </section>
+
+    <hr class="fr-rule">
+
+    <!-- Privacy & compliance -->
+    <section class="fr-section fr-reveal" id="privacy">
+      <div class="fr-container fr-container--prose">
+        <span class="fr-eyebrow">03 &middot; Privacy &amp; compliance</span>
+        <h2 class="fr-h2">Privacy and compliance</h2>
+        <p class="fr-lede">Where data lives, what crosses our network, and exactly what compliance posture we hold today. We mark what's shipped, what's in progress, and what's on the roadmap.</p>
+
+        <details class="fr-card"><summary class="fr-h3">Do you see my prompts?</summary>
+          <p>On the hosted gateway, prompts transit through our network. The Privacy Membrane runs PHI and PII redaction in-line before persistence; redacted captures land in <em>your</em> local lake, not ours. We do not retain raw prompts on hosted infra beyond the request lifetime; the lake is yours and the encryption key never leaves your tenant.</p>
+          <p>On self-host or air-gap deployments, nothing leaves your network. The gateway, the compiler, the verifier, and the runtime are all running entirely inside your perimeter. See <a href="/enterprise">/enterprise</a> for the air-gap kit.</p>
+        </details>
+
+        <details class="fr-card"><summary class="fr-h3">Are you HIPAA-ready?</summary>
+          <p>Yes, under BYOC and on-prem deployment patterns. A BAA is available on the Business and Enterprise tiers. The full HIPAA Security Rule mapping lives on <a href="/hipaa-mapping">/hipaa-mapping</a> and the BAA template is at <a href="/baa">/baa</a>. PHI does not leave your VPC under the recommended deployment pattern.</p>
+        </details>
+
+        <details class="fr-card"><summary class="fr-h3">What's your SOC 2 status?</summary>
+          <p><span class="fr-status"><span class="fr-status__dot"></span>SOC 2 Type I available</span> &mdash; the Type I report is shareable under NDA today. <span class="fr-pill fr-pill--amber">Type II in progress</span> &mdash; the observation window is open; the report is expected in the next reporting cycle. Until Type II is final we do not represent it as shipped. See <a href="/security">/security</a> for the timeline.</p>
+        </details>
+
+        <details class="fr-card"><summary class="fr-h3">ISO 27001?</summary>
+          <p>The ISO 27001 mapping is shipped and shareable under NDA. Certification itself is on the enterprise roadmap; we will publish the certificate when the audit is complete. We don't claim certification we haven't earned.</p>
+        </details>
+
+        <details class="fr-card"><summary class="fr-h3">Can I run kolm fully air-gapped?</summary>
+          <p>Yes. The Enterprise air-gap kit ships the CLI, the gateway, the runtime, and a curated set of pre-approved base artifacts as a single tarball. The verifier runs locally against your registry's public key; no traffic crosses the air gap. We have customers running this pattern today.</p>
+        </details>
+
+        <details class="fr-card"><summary class="fr-h3">EU AI Act &mdash; what's your posture?</summary>
+          <p>kolm is a tool, not a deployed model; classification depends on what you build with it. The receipt chain (capture provenance, eval pack, K-score, teacher mix) is designed to map cleanly to the Act's transparency and documentation requirements for high-risk systems. We are tracking the Code of Practice and will publish a mapping when the final text settles. Talk to the field team for the current draft.</p>
+        </details>
+
+        <details class="fr-card"><summary class="fr-h3">ITAR / export control?</summary>
+          <p>kolm is general-purpose open-source software; the core (compiler, runtime, verifier, K-score math) is Apache-2.0 and the public registry is accessible from the U.S. and most jurisdictions. For ITAR-controlled workloads, the air-gap kit is the supported path; we sign a contractual data-handling addendum on Enterprise. The hosted control plane is not a path for ITAR data.</p>
+        </details>
+      </div>
+    </section>
+
+    <hr class="fr-rule">
+
+    <!-- Pricing & tiers -->
+    <section class="fr-section fr-reveal" id="pricing">
+      <div class="fr-container fr-container--prose">
+        <span class="fr-eyebrow">04 &middot; Pricing &amp; tiers</span>
+        <h2 class="fr-h2">Pricing and tiers</h2>
+        <p class="fr-lede">Flat compile credits, your own teacher API spend, no per-token markup. Self-hosting is always included. The full breakdown is on <a href="/pricing">/pricing</a>.</p>
+
+        <details class="fr-card"><summary class="fr-h3">Is there a free tier?</summary>
+          <p>Yes. The free tier includes the full CLI, gateway, runtime, and verifier; 5 compiles per month; and 1 GB of capture lake storage. Pro is $49/mo: 50 compiles per month, access to higher K-score teachers, and the hosted bake-off API. Full ladder is on <a href="/pricing">/pricing</a>.</p>
+        </details>
+
+        <details class="fr-card"><summary class="fr-h3">What counts as a "compile"?</summary>
+          <p>One distill + quantize + sign + benchmark cycle counts as one compile. Re-runs of a verified recipe with the same spec (same captures, same teacher, same base, same target bit-width) reuse the cached receipt and don't count against your quota. Failed compiles don't count either; you only pay for green output.</p>
+        </details>
+
+        <details class="fr-card"><summary class="fr-h3">Do you charge per token?</summary>
+          <p>No. Compile credits are flat. Token spend on teacher APIs goes to your own keys (Anthropic, OpenAI, DeepSeek, xAI, etc.); we never proxy or mark up paid teacher traffic. If you self-host a teacher, the compile is free of token cost entirely.</p>
+        </details>
+
+        <details class="fr-card"><summary class="fr-h3">What's the marketplace revenue share?</summary>
+          <p>Creators keep 70%; kolm takes 30% on paid recipe downloads from the registry. Free recipes are free in both directions. The split is the same for all tiers; we don't claw it back at scale.</p>
+        </details>
+
+        <details class="fr-card"><summary class="fr-h3">Do you accept POs and invoicing?</summary>
+          <p>Yes, on Business and Enterprise tiers. Net-30 standard. Multi-year commits are offered at a discount; the terms live in the order form, not in a back-channel email. Legal is on the kickoff call and stays through the redline.</p>
+        </details>
+
+        <details class="fr-card"><summary class="fr-h3">Am I locked in?</summary>
+          <p>No. The .kolm format is open, the verifier is open-source, and the runtime is yours. If kolm.ai disappeared tomorrow, your compiled artifacts would continue to load and verify against any conforming runtime. The captures in your lake are JSONL on your disk. There is no proprietary serialization to escape.</p>
+        </details>
+      </div>
+    </section>
+
+    <hr class="fr-rule">
+
+    <!-- Comparisons -->
+    <section class="fr-section fr-reveal" id="compare">
+      <div class="fr-container fr-container--prose">
+        <span class="fr-eyebrow">05 &middot; Comparisons</span>
+        <h2 class="fr-h2">How kolm compares</h2>
+        <p class="fr-lede">Where kolm overlaps with adjacent tools, where it differs, and where it composes with them rather than replacing them. We don't take cheap shots at peers.</p>
+
+        <details class="fr-card"><summary class="fr-h3">How does kolm differ from Unsloth?</summary>
+          <p>Unsloth is a quantization and fine-tuning engine; we use it. kolm <em>uses</em> Unsloth Dynamic 2.0 as one of its default quantization backends and adds the capture pipeline, the K-score gate, the signed artifact format, the marketplace, and the audit-ready receipt chain on top. If you are happy with Unsloth alone, keep using it; kolm is the compiler layer that sits around tools like Unsloth.</p>
+        </details>
+
+        <details class="fr-card"><summary class="fr-h3">How does kolm differ from LiteLLM?</summary>
+          <p>LiteLLM is a gateway. kolm is a gateway + compiler + signed artifact format. The kolm gateway can sit in front of LiteLLM or replace it. After kolm runs, you have a portable .kolm file that you own and that any conforming runtime can verify and load. LiteLLM doesn't try to do that; it doesn't need to.</p>
+        </details>
+
+        <details class="fr-card"><summary class="fr-h3">How does kolm differ from OpenAI fine-tuning?</summary>
+          <p>OpenAI fine-tuning produces a model that lives on OpenAI infrastructure, behind an OpenAI API key, with usage gated by their tenancy. kolm produces a .kolm file that lives on your disk, signed by your key, loadable by any conforming runtime, on hardware you control. Yours stays yours. The full side-by-side is at <a href="/how-vs-openai-fine-tune">/how-vs-openai-fine-tune</a>.</p>
+        </details>
+
+        <details class="fr-card"><summary class="fr-h3">vs OpenPipe / Predibase / LoRAX?</summary>
+          <p>OpenPipe and Predibase are managed fine-tuning platforms; LoRAX is a multi-tenant LoRA server. kolm overlaps with the fine-tuning step but adds the K-score gate, the signed receipt chain, the air-gap path, and the marketplace. See <a href="/how-vs-openpipe">/how-vs-openpipe</a> and <a href="/how-vs-predibase">/how-vs-predibase</a> for the row-by-row comparisons.</p>
+        </details>
+
+        <details class="fr-card"><summary class="fr-h3">vs Hugging Face TGI / vLLM / SGLang / TRT-LLM?</summary>
+          <p>Those are inference runtimes. kolm is a compiler; the artifact it emits runs on those runtimes. The gateway has adapters for all four; the runtime contract loads a .kolm into any of them and runs the verifier at load time. Use what you already run; kolm sits one layer up.</p>
+        </details>
+
+        <details class="fr-card"><summary class="fr-h3">vs writing the whole pipeline myself?</summary>
+          <p>The capture, distill, quantize, score, sign, verify loop is something a small team can put together in a quarter or two. The value kolm adds is that we have already done it, the receipts are auditable, the K-score math is open, the registry is shipped, and the air-gap path is supported. If you prefer to roll your own, fork it; the license permits it.</p>
+        </details>
+      </div>
+    </section>
 
   </div>
 </section>

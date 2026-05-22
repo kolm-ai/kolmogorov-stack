@@ -16,6 +16,8 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/frontier.css">
+<script defer src="/frontier.js"></script>
 <style>
   .int-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
   .int-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
@@ -366,6 +368,186 @@
           <span class="meta">langchain.com</span>
         </a>
       </div>
+    </div>
+  </div>
+</section>
+
+<section class="fr-section" id="ecosystem">
+  <div class="fr-container">
+    <div class="fr-eyebrow">W621 &middot; Frontier compiler ecosystem</div>
+    <h2 class="fr-h2">The full distill / quantize / compile / run stack.</h2>
+    <p class="fr-lede">kolm is a compiler for AI: capture API traffic, distill it into a smaller student, quantize, sign, and run it on your own hardware. The matrix below is the canonical map of every adjacent tool that already works with kolm, or is on the near roadmap. Cross-links: <a href="/quickstart" class="fr-link">/quickstart</a> &middot; <a href="/sdks" class="fr-link">/sdks</a> &middot; <a href="/forge" class="fr-link">/forge</a> &middot; <a href="/recipes" class="fr-link">/recipes</a> &middot; <a href="/docs" class="fr-link">/docs</a>.</p>
+
+    <div class="fr-reveal" style="margin-top: var(--ks-7)">
+      <h3 class="fr-h3">Group A &middot; Distillation and quantization engines</h3>
+      <p class="fr-lede" style="font-size:14px;color:var(--ks-ink-3);max-width:60ch">The compute substrate that does the actual work when you run <code>kolm compile</code>. kolm wires them together behind a single command.</p>
+      <div class="fr-grid-4" style="margin-top: var(--ks-4)">
+        <div class="fr-card fr-card--mint fr-card--feature">
+          <span class="fr-pill">FIRST-CLASS</span>
+          <span class="fr-h3" style="font-size:16px">Unsloth Dynamic 2.0</span>
+          <span class="fr-lede" style="font-size:13px">Default GGUF compile engine for K-score retention. Layer-by-layer dynamic quant in the compile path.</span>
+        </div>
+        <div class="fr-card fr-card--mint fr-card--feature">
+          <span class="fr-pill">FIRST-CLASS</span>
+          <span class="fr-h3" style="font-size:16px">bitsandbytes</span>
+          <span class="fr-lede" style="font-size:13px">NF4 / FP4 quantization backend. Proven across Qwen 0.5B through DeepSeek-R1 32B.</span>
+        </div>
+        <div class="fr-card fr-card--mint fr-card--feature">
+          <span class="fr-pill">FIRST-CLASS</span>
+          <span class="fr-h3" style="font-size:16px">llama.cpp imatrix</span>
+          <span class="fr-lede" style="font-size:13px">imatrix quantization passes for IQ variants. K-score gated before the artifact signs.</span>
+        </div>
+        <div class="fr-card fr-card--feature">
+          <span class="fr-pill fr-pill--amber">COMING</span>
+          <span class="fr-h3" style="font-size:16px">mergekit</span>
+          <span class="fr-lede" style="font-size:13px">TIES / DARE / SLERP merges before distillation. Layered into the compile recipe DAG.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="fr-reveal" style="margin-top: var(--ks-7)">
+      <h3 class="fr-h3">Group B &middot; Runtimes and inference</h3>
+      <p class="fr-lede" style="font-size:14px;color:var(--ks-ink-3);max-width:60ch">Where the signed .kolm artifact actually serves tokens. Pick one or compile to several.</p>
+      <div class="fr-grid-3" style="margin-top: var(--ks-4)">
+        <div class="fr-card fr-card--mint fr-card--feature">
+          <span class="fr-pill">FIRST-CLASS</span>
+          <span class="fr-h3" style="font-size:16px">llama.cpp</span>
+          <span class="fr-lede" style="font-size:13px">GGUF + IQ runtime, CPU + Metal + CUDA. The portable on-prem default.</span>
+        </div>
+        <div class="fr-card fr-card--mint fr-card--feature">
+          <span class="fr-pill">FIRST-CLASS</span>
+          <span class="fr-h3" style="font-size:16px">vLLM</span>
+          <span class="fr-lede" style="font-size:13px">PagedAttention plus speculative decoding. The throughput-first server preset.</span>
+        </div>
+        <div class="fr-card fr-card--mint fr-card--feature">
+          <span class="fr-pill">FIRST-CLASS</span>
+          <span class="fr-h3" style="font-size:16px">TensorRT-LLM</span>
+          <span class="fr-lede" style="font-size:13px">NVIDIA FP8 / NVFP4 production preset. Compile target for Blackwell deployments.</span>
+        </div>
+        <div class="fr-card fr-card--mint fr-card--feature">
+          <span class="fr-pill">FIRST-CLASS</span>
+          <span class="fr-h3" style="font-size:16px">ONNX Runtime</span>
+          <span class="fr-lede" style="font-size:13px">Cross-platform reference runtime. The portable verifier substrate.</span>
+        </div>
+        <div class="fr-card fr-card--feature">
+          <span class="fr-pill fr-pill--amber">COMING</span>
+          <span class="fr-h3" style="font-size:16px">ExecuTorch</span>
+          <span class="fr-lede" style="font-size:13px">iOS and Android on-device. The mobile compile target on the W6xx roadmap.</span>
+        </div>
+        <div class="fr-card fr-card--feature">
+          <span class="fr-pill fr-pill--amber">COMING</span>
+          <span class="fr-h3" style="font-size:16px">MLX</span>
+          <span class="fr-lede" style="font-size:13px">Apple Silicon native. M-series unified-memory compile preset.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="fr-reveal" style="margin-top: var(--ks-7)">
+      <h3 class="fr-h3">Group C &middot; Frameworks and agents</h3>
+      <p class="fr-lede" style="font-size:14px;color:var(--ks-ink-3);max-width:60ch">The layers your application code already imports. Most are a single env var away.</p>
+      <div class="fr-grid-4" style="margin-top: var(--ks-4)">
+        <div class="fr-card fr-card--mint fr-card--feature">
+          <span class="fr-pill">FIRST-CLASS</span>
+          <span class="fr-h3" style="font-size:16px">LangChain</span>
+          <span class="fr-lede" style="font-size:13px">Drop-in via OPENAI_BASE_URL. Callback handler emits one capture row per chain step.</span>
+        </div>
+        <div class="fr-card fr-card--mint fr-card--feature">
+          <span class="fr-pill">FIRST-CLASS</span>
+          <span class="fr-h3" style="font-size:16px">LlamaIndex</span>
+          <span class="fr-lede" style="font-size:13px">Same drop-in path. Retrieval and synthesis steps land as captures.</span>
+        </div>
+        <div class="fr-card fr-card--mint fr-card--feature">
+          <span class="fr-pill">FIRST-CLASS</span>
+          <span class="fr-h3" style="font-size:16px">LangGraph</span>
+          <span class="fr-lede" style="font-size:13px">Agentic workflow capture. Every graph node becomes a distillable row.</span>
+        </div>
+        <div class="fr-card fr-card--feature">
+          <span class="fr-pill fr-pill--amber">COMING</span>
+          <span class="fr-h3" style="font-size:16px">CrewAI</span>
+          <span class="fr-lede" style="font-size:13px">Crew capture for agentic distillation. Tracks role and delegation per row.</span>
+        </div>
+        <div class="fr-card fr-card--feature">
+          <span class="fr-pill fr-pill--amber">COMING</span>
+          <span class="fr-h3" style="font-size:16px">AutoGen</span>
+          <span class="fr-lede" style="font-size:13px">Multi-agent capture. Conversation graph preserved through to compile.</span>
+        </div>
+        <div class="fr-card fr-card--mint fr-card--feature">
+          <span class="fr-pill">FIRST-CLASS</span>
+          <span class="fr-h3" style="font-size:16px">Vercel AI SDK</span>
+          <span class="fr-lede" style="font-size:13px">Frontend streaming compatibility. Token streams pass through unchanged.</span>
+        </div>
+        <div class="fr-card fr-card--feature">
+          <span class="fr-pill fr-pill--amber">COMING</span>
+          <span class="fr-h3" style="font-size:16px">Haystack</span>
+          <span class="fr-lede" style="font-size:13px">RAG and agent capture. Pipeline-aware row metadata.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="fr-reveal" style="margin-top: var(--ks-7)">
+      <h3 class="fr-h3">Group D &middot; Editors and IDEs</h3>
+      <p class="fr-lede" style="font-size:14px;color:var(--ks-ink-3);max-width:60ch">Every developer surface where you write code. Wired in one command via the kolm CLI installer.</p>
+      <div class="fr-grid-4" style="margin-top: var(--ks-4)">
+        <div class="fr-card fr-card--mint fr-card--feature">
+          <span class="fr-pill">FIRST-CLASS</span>
+          <span class="fr-h3" style="font-size:16px">Cursor</span>
+          <span class="fr-lede" style="font-size:13px"><code>kolm install cursor</code> wires API key plus env. MCP-resident.</span>
+        </div>
+        <div class="fr-card fr-card--mint fr-card--feature">
+          <span class="fr-pill">FIRST-CLASS</span>
+          <span class="fr-h3" style="font-size:16px">Claude Code</span>
+          <span class="fr-lede" style="font-size:13px"><code>kolm install claude-code</code>. MCP server exposes the kolm verbs as tools.</span>
+        </div>
+        <div class="fr-card fr-card--mint fr-card--feature">
+          <span class="fr-pill">FIRST-CLASS</span>
+          <span class="fr-h3" style="font-size:16px">Aider</span>
+          <span class="fr-lede" style="font-size:13px"><code>kolm install aider</code>. Terminal-first AI pair programmer with kolm capture.</span>
+        </div>
+        <div class="fr-card fr-card--mint fr-card--feature">
+          <span class="fr-pill">FIRST-CLASS</span>
+          <span class="fr-h3" style="font-size:16px">VS Code</span>
+          <span class="fr-lede" style="font-size:13px">Official extension. Status-bar K-score on the active .kolm file.</span>
+        </div>
+        <div class="fr-card fr-card--feature">
+          <span class="fr-pill fr-pill--amber">COMING</span>
+          <span class="fr-h3" style="font-size:16px">Windsurf</span>
+          <span class="fr-lede" style="font-size:13px">Drop-in via OPENAI_BASE_URL. Codeium's editor with kolm gateway routing.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="fr-section" id="publish">
+  <div class="fr-container">
+    <div class="fr-eyebrow">W621 &middot; Publish your artifact</div>
+    <h2 class="fr-h2">Push to Hugging Face or GitHub.</h2>
+    <p class="fr-lede">A signed .kolm is yours to share. Push the artifact and its receipt to the registry your team already uses; downstream consumers verify the signature against the public CID.</p>
+    <div class="fr-grid-2" style="margin-top: var(--ks-5)">
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill">FIRST-CLASS</span>
+        <span class="fr-h3" style="font-size:16px">Hugging Face</span>
+        <span class="fr-lede" style="font-size:13px">Push the GGUF and the receipt as a repo. Sets the model card up with the K-score, the verify CID, and the recipe hash.</span>
+        <div class="fr-cli" style="margin-top: var(--ks-3)">
+          <span class="fr-cli__prompt">$</span> kolm push hf <span class="fr-cli__flag">&lt;artifact-cid&gt;</span>
+          <span class="fr-cli__comment"># pushes to your-org/your-model on huggingface.co</span>
+        </div>
+      </div>
+      <div class="fr-card fr-card--feature">
+        <span class="fr-pill">FIRST-CLASS</span>
+        <span class="fr-h3" style="font-size:16px">GitHub Releases</span>
+        <span class="fr-lede" style="font-size:13px">Push as a GitHub release asset. Receipt and recipe attached; downstream CI consumers verify the CID before pulling.</span>
+        <div class="fr-cli" style="margin-top: var(--ks-3)">
+          <span class="fr-cli__prompt">$</span> kolm push github <span class="fr-cli__flag">&lt;artifact-cid&gt;</span>
+          <span class="fr-cli__comment"># attaches .kolm + receipt to the latest release</span>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:var(--ks-5); display:flex; flex-wrap:wrap; gap:var(--ks-3)">
+      <a href="/quickstart" class="fr-btn fr-btn--mint">Quickstart <span aria-hidden="true">&rarr;</span></a>
+      <a href="/forge" class="fr-btn fr-btn--ghost">Forge recipes</a>
+      <a href="/recipes" class="fr-btn fr-btn--ghost">Recipe catalog</a>
+      <a href="/docs" class="fr-btn fr-btn--ghost">Docs</a>
     </div>
   </div>
 </section>
