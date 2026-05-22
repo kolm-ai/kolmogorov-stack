@@ -1,5 +1,5 @@
 // Recipe service worker: keeps the registry available offline.
-const CACHE = 'kolm-v7-2026-05-22-wave614-sota-quant-menu-10-methods';
+const CACHE = 'kolm-v7-2026-05-22-wave615-quant-menu-decider-not-shopping';
 const PRECACHE = [
  '/device',
  '/design-tokens.css',

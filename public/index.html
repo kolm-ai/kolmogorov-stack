@@ -380,41 +380,52 @@
   </div>
 </section>
 
-<!-- ================== SOTA quantization menu (W614) ================== -->
+<!-- ================== SOTA quantization menu (W615: intuitive rebuild of W614) ================== -->
 <section class="ks-section" id="quant-menu">
   <div class="ks-wrap">
     <div class="ks-shead">
-      <span class="ks-eyebrow">Quantize &middot; 10 methods &middot; per-method doctor</span>
-      <h2 class="ks-h2">Every state-of-the-art quantizer, behind one verb.</h2>
-      <p class="ks-lede">The 4-bit / NF4 baseline is a commodity. The differentiator is the <em class="ks-em">menu</em>, the K-score gate, and the signed cross-engine <code>.kolm</code>. Pick the method that fits your accuracy / VRAM target, install only the libs you need, and the artifact format stays the same on the other side.</p>
+      <span class="ks-eyebrow">Quantize &middot; 10 methods, one default</span>
+      <h2 class="ks-h2">Don't shop the menu. Tell kolm the constraint.</h2>
+      <p class="ks-lede">Most teams should use <code>int4</code> and stop reading. The other nine methods exist for one specific constraint each: fit a 32B in 8 GB, skip calibration data, retrain anyway. Pick the constraint that matches, kolm picks the method.</p>
     </div>
 
-    <div class="home-cmp">
-      <table>
-        <thead>
-          <tr>
-            <th>Method</th>
-            <th>Bits</th>
-            <th>Library &middot; paper</th>
-            <th class="kolm-col">Shipped via <code>kolm quantize</code></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td><code>int4</code></td><td>4</td><td>bitsandbytes (Dettmers 2022) NF4 + double</td><td class="kolm-col">yes</td></tr>
-          <tr><td><code>int8</code></td><td>8</td><td>bitsandbytes (Dettmers 2022) LLM.int8</td><td class="kolm-col">yes</td></tr>
-          <tr><td><code>gptq</code></td><td>2&ndash;8</td><td>AutoGPTQ (Frantar 2022) calibration-based</td><td class="kolm-col">yes</td></tr>
-          <tr><td><code>awq</code></td><td>3&ndash;4</td><td>AutoAWQ (Lin 2023) activation-aware</td><td class="kolm-col">yes</td></tr>
-          <tr><td><code>aqlm</code></td><td>2</td><td>AQLM (Egiazarian 2024) additive, near-lossless</td><td class="kolm-col">yes</td></tr>
-          <tr><td><code>quip</code></td><td>&lt;2</td><td>QuIP# (Tseng 2024) E8 lattice + incoherence</td><td class="kolm-col">yes</td></tr>
-          <tr><td><code>exl2</code></td><td>variable</td><td>ExLlamaV2 EXL2 runtime-optimized</td><td class="kolm-col">yes</td></tr>
-          <tr><td><code>exl3</code></td><td>variable</td><td>ExLlamaV2 EXL3 successor format (tighter than EXL2)</td><td class="kolm-col">yes</td></tr>
-          <tr><td><code>hqq</code></td><td>1&ndash;8</td><td>HQQ (Mobius Labs 2024) calibration-free</td><td class="kolm-col">yes</td></tr>
-          <tr><td><code>qat</code></td><td>2&ndash;4</td><td>EfficientQAT (Chen 2024) block-wise QAT</td><td class="kolm-col">yes</td></tr>
-        </tbody>
-      </table>
+    <!-- DEFAULT: the canonical command, large -->
+    <div class="ks-card" style="margin-bottom:var(--ks-6); padding:var(--ks-6); border:1px solid var(--ks-accent-edge); background:var(--ks-accent-soft);">
+      <div style="display:flex; flex-wrap:wrap; align-items:center; gap:var(--ks-4); margin-bottom:var(--ks-3);">
+        <span class="ks-eyebrow" style="margin:0;">Default for 95% of cases</span>
+        <code style="font-size:0.95rem; color:var(--ks-accent);">int4 &middot; bitsandbytes NF4 + double</code>
+      </div>
+      <pre class="ks-code" aria-label="Default quantize command"><span class="pmpt">$</span> kolm quantize qwen2.5-7b --method <span class="arg">int4</span>
+  <span class="ok"><i class="ks-yes" aria-hidden="true"></i></span> 14.2 GB &rarr; 5.2 GB in 29s on RTX 5090
+  <span class="ok"><i class="ks-yes" aria-hidden="true"></i></span> K-score 0.91 (above 0.85 gate)
+  <span class="ok"><i class="ks-yes" aria-hidden="true"></i></span> signed qwen2.5-7b-int4-2026-05-22.kolm</pre>
     </div>
 
-    <div class="ks-grid ks-grid-3" style="margin-top:var(--ks-6)">
+    <!-- DECIDER: three forks, plain-english triggers -->
+    <div class="ks-shead" style="margin-top:var(--ks-7);">
+      <span class="ks-eyebrow">Switch when you have a specific reason</span>
+      <h3 class="ks-h3">Three forks. Pick the one that matches your constraint.</h3>
+    </div>
+    <div class="ks-grid ks-grid-3">
+      <div class="ks-card">
+        <div class="ks-card__h">It has to fit in less than 8 GB</div>
+        <p class="ks-card__p">A 32B at INT4 is 17.9 GB. If you need it in 8 GB, drop to <strong>2-bit</strong> with <code>aqlm</code> (Egiazarian 2024, near-lossless) or <strong>sub-2-bit</strong> with <code>quip</code> (Tseng 2024, E8 lattice). Both want the upstream repo checkout, the doctor names the env var.</p>
+        <p class="ks-card__p" style="margin-top:var(--ks-3);"><code>kolm quantize --method aqlm</code></p>
+      </div>
+      <div class="ks-card">
+        <div class="ks-card__h">No calibration samples on hand</div>
+        <p class="ks-card__p">Most 4-bit methods (gptq, awq) want 128 to 512 calibration samples. <code>hqq</code> (Mobius Labs 2024) is calibration-free, runs in seconds, gets you most of the way. Run it for a fast first pass, switch to gptq/awq once you have real samples.</p>
+        <p class="ks-card__p" style="margin-top:var(--ks-3);"><code>kolm quantize --method hqq</code></p>
+      </div>
+      <div class="ks-card">
+        <div class="ks-card__h">You're going to retrain anyway</div>
+        <p class="ks-card__p">If the model is going through a training pass, do quantization-aware training instead of post-hoc. <code>qat</code> uses EfficientQAT (Chen 2024) so 2 to 4-bit lands with full task accuracy. Costs more compute up front, recovers it in every inference.</p>
+        <p class="ks-card__p" style="margin-top:var(--ks-3);"><code>kolm quantize --method qat</code></p>
+      </div>
+    </div>
+
+    <!-- Differentiator cards (kolm's contribution, not the methods) -->
+    <div class="ks-grid ks-grid-3" style="margin-top:var(--ks-7);">
       <div class="ks-card">
         <div class="ks-card__h">Per-method doctor</div>
         <p class="ks-card__p"><code>kolm quantize --local-worker --doctor --json</code> returns <code>ready_by_method</code>: green for the methods whose libs are importable, red for the rest, with install hints. A tenant who only runs <code>int4</code> and <code>hqq</code> installs bitsandbytes + hqq and skips the other eight.</p>
@@ -429,7 +440,35 @@
       </div>
     </div>
 
-    <p class="ks-fineprint" style="margin-top:var(--ks-5)">Heavy ML libs (bitsandbytes / auto-gptq / autoawq / aqlm / quip-sharp / exllamav2 / hqq / efficient_qat / torch / accelerate) live in the isolated <code>@kolm/quantize-worker</code> package, NOT in the root <code>kolm</code> install. AQLM / QuIP# / EfficientQAT also need the upstream repo checkout (env var) because their optimizers are research code, not pip-clean libraries; the doctor surfaces the missing path with a copy-paste install hint.</p>
+    <!-- POWER USER: full 10-method matrix hidden behind a toggle -->
+    <details style="margin-top:var(--ks-6);">
+      <summary class="ks-eyebrow" style="cursor:pointer; user-select:none;">See all 10 methods (the full SOTA menu)</summary>
+      <div class="home-cmp" style="margin-top:var(--ks-4);">
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Bits</th>
+              <th>Library &middot; paper</th>
+              <th class="kolm-col">Shipped via <code>kolm quantize</code></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code>int4</code></td><td>4</td><td>bitsandbytes (Dettmers 2022) NF4 + double</td><td class="kolm-col">yes</td></tr>
+            <tr><td><code>int8</code></td><td>8</td><td>bitsandbytes (Dettmers 2022) LLM.int8</td><td class="kolm-col">yes</td></tr>
+            <tr><td><code>gptq</code></td><td>2&ndash;8</td><td>AutoGPTQ (Frantar 2022) calibration-based</td><td class="kolm-col">yes</td></tr>
+            <tr><td><code>awq</code></td><td>3&ndash;4</td><td>AutoAWQ (Lin 2023) activation-aware</td><td class="kolm-col">yes</td></tr>
+            <tr><td><code>aqlm</code></td><td>2</td><td>AQLM (Egiazarian 2024) additive, near-lossless</td><td class="kolm-col">yes</td></tr>
+            <tr><td><code>quip</code></td><td>&lt;2</td><td>QuIP# (Tseng 2024) E8 lattice + incoherence</td><td class="kolm-col">yes</td></tr>
+            <tr><td><code>exl2</code></td><td>variable</td><td>ExLlamaV2 EXL2 runtime-optimized</td><td class="kolm-col">yes</td></tr>
+            <tr><td><code>exl3</code></td><td>variable</td><td>ExLlamaV2 EXL3 successor format (tighter than EXL2)</td><td class="kolm-col">yes</td></tr>
+            <tr><td><code>hqq</code></td><td>1&ndash;8</td><td>HQQ (Mobius Labs 2024) calibration-free</td><td class="kolm-col">yes</td></tr>
+            <tr><td><code>qat</code></td><td>2&ndash;4</td><td>EfficientQAT (Chen 2024) block-wise QAT</td><td class="kolm-col">yes</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="ks-fineprint" style="margin-top:var(--ks-4);">Heavy ML libs (bitsandbytes / auto-gptq / autoawq / aqlm / quip-sharp / exllamav2 / hqq / efficient_qat / torch / accelerate) live in the isolated <code>@kolm/quantize-worker</code> package, NOT in the root <code>kolm</code> install. AQLM / QuIP# / EfficientQAT also need the upstream repo checkout (env var) because their optimizers are research code, not pip-clean libraries; the doctor surfaces the missing path with a copy-paste install hint.</p>
+    </details>
   </div>
 </section>
 

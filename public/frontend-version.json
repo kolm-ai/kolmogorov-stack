@@ -1,6 +1,6 @@
 {
   "surface": "kolm-public-frontend",
-  "version": "2026-05-22-w614-sota-quant-menu-10-methods",
+  "version": "2026-05-22-w615-quant-menu-decider-not-shopping",
   "source_commit_at_edit_time": "a195783",
   "hero_h1": "Compile any AI model. Run it anywhere.",
   "hero_loop": "route -> capture -> compile -> run",
@@ -194,7 +194,12 @@
     "W614 homepage public/index.html grew a new SOTA quantization menu section (between #numbers and #how) with 10-row method matrix + 3-card differentiator grid (per-method doctor / K-score gate / one-artifact-every-engine)",
     "W614 homepage inline methods list (line 433) updated from 4 methods to 10",
     "W614 changelog section gained a W614 entry above W604",
-    "W614 sw.js cache key bumped to kolm-v7-2026-05-22-wave614-sota-quant-menu-10-methods"
+    "W614 sw.js cache key bumped to kolm-v7-2026-05-22-wave614-sota-quant-menu-10-methods",
+    "W615 quant-menu section rebuilt for intuition: visitor sees ONE plain-english answer first ('Most teams should use int4 and stop reading'), the full 10-row matrix collapses behind a 'See all 10 methods' details/summary toggle so the depth is one click away without dominating the prospect-orientation viewport",
+    "W615 added a large default-recommendation card with the canonical int4 command, real timings (14.2 GB -> 5.2 GB in 29s, K-score 0.91), and the actual artifact filename so the visitor sees the success path without having to read the menu",
+    "W615 added a 3-card 'Switch when you have a specific reason' decider (fit in less than 8 GB -> aqlm/quip, no calibration samples -> hqq, retraining anyway -> qat) so the matrix becomes a forking question instead of a wall of expert names",
+    "W615 preserved the 3 differentiator cards (per-method doctor / K-score gate / one artifact every engine) since those describe kolm's contribution and belong above the fold",
+    "W615 sw.js cache key bumped to kolm-v7-2026-05-22-wave615-quant-menu-decider-not-shopping"
   ],
   "production_verification_url": "https://kolm.ai/frontend-version.json"
 }
