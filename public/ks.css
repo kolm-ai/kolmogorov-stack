@@ -12,27 +12,27 @@
 
 /* ----- 1. Tokens ---------------------------------------------------------- */
 :root {
-  /* Canvas */
-  --ks-bg:          #07090c;
-  --ks-bg-1:        #0c0f14;
-  --ks-bg-2:        #11151c;
-  --ks-bg-3:        #181d26;
-  --ks-line-1:      rgba(255,255,255,0.06);
-  --ks-line-2:      rgba(255,255,255,0.10);
-  --ks-line-3:      rgba(255,255,255,0.16);
+  /* Canvas — warm neutral dark (W612: shifted off cool blue tint) */
+  --ks-bg:          #0a0a0c;
+  --ks-bg-1:        #111114;
+  --ks-bg-2:        #17171b;
+  --ks-bg-3:        #1d1e22;
+  --ks-line-1:      rgba(255,250,240,0.055);
+  --ks-line-2:      rgba(255,250,240,0.09);
+  --ks-line-3:      rgba(255,250,240,0.14);
 
-  /* Ink */
-  --ks-ink:         #f5f3ec;
-  --ks-ink-2:       rgba(245,243,236,0.78);
-  --ks-ink-3:       rgba(245,243,236,0.56);
-  --ks-ink-4:       rgba(245,243,236,0.38);
+  /* Ink — warm cream */
+  --ks-ink:         #f5f1e8;
+  --ks-ink-2:       rgba(245,241,232,0.76);
+  --ks-ink-3:       rgba(245,241,232,0.54);
+  --ks-ink-4:       rgba(245,241,232,0.36);
 
-  /* Accent — ONE color. Cyan-mint. */
+  /* Accent — ONE color. Cyan-mint. Used sparingly. */
   --ks-accent:      #76edd0;
   --ks-accent-2:    #b6f5e2;
-  --ks-accent-soft: rgba(118,237,208,0.10);
-  --ks-accent-edge: rgba(118,237,208,0.28);
-  --ks-accent-glow: rgba(118,237,208,0.18);
+  --ks-accent-soft: rgba(118,237,208,0.08);
+  --ks-accent-edge: rgba(118,237,208,0.24);
+  --ks-accent-glow: rgba(118,237,208,0.14);
 
   /* Status — used only in product / dashboards, not marketing */
   --ks-pos:         #6ee7a8;
@@ -53,13 +53,25 @@
   --ks-4:  16px;
   --ks-5:  20px;
   --ks-6:  24px;
+  --ks-7:  28px;
   --ks-8:  32px;
+  --ks-9:  36px;
   --ks-10: 40px;
   --ks-12: 48px;
+  --ks-14: 56px;
   --ks-16: 64px;
   --ks-20: 80px;
   --ks-24: 96px;
   --ks-32: 128px;
+
+  /* Legacy aliases — kept so pages that pre-date the rename resolve cleanly
+     instead of falling through to transparent and bleeding background color. */
+  --ks-bg-0:        var(--ks-bg);
+  --ks-surface-1:   var(--ks-bg-1);
+  --ks-surface-2:   var(--ks-bg-2);
+  --ks-bad:         var(--ks-err);
+  --ks-good:        var(--ks-pos);
+  --ks-ink-faint:   var(--ks-ink-4);
 
   /* Layout */
   --ks-container:   1240px;
@@ -900,3 +912,82 @@ html, body { margin: 0; padding: 0; max-width: 100vw; overflow-x: hidden; }
 .ks .kolm-anatomy,
 .ks .demo-anchor,
 .ks .provider-strip { display: none !important; }
+
+/* ----- 18. W612 Mobile compression + bleed fix ----------------------------
+   Goals:
+   - Aggressively tighten vertical rhythm on mobile so pages don't feel
+     "shockingly long" when long-form content stacks vertically.
+   - Block all color bleed by giving every section explicit bg.
+   - Hide tertiary sections behind data-mobile-hide on phones so the page
+     reads as the 8-10 sections the narrative was designed around, not
+     the 40 sections it grew into.
+   - Make the prod-stickynav (anywhere it appears) hide on phones — on
+     mobile it competes with the main ks-nav and creates an overlap.
+------------------------------------------------------------------------- */
+
+/* Every ks-section gets explicit bg so no transparent stacking bleed. */
+.ks .ks-section,
+.ks .ks-hero,
+.ks .ks-finale,
+.ks .api-section,
+.ks .api-hero,
+.ks .prod-section,
+.ks .prod-hero { background-color: var(--ks-bg); position: relative; }
+
+/* Section alternation (subtle): odd elevations on bg-1 to break monotony. */
+.ks .ks-section.ks-section--alt,
+.ks .api-section.api-section--alt { background-color: var(--ks-bg-1); }
+
+/* Mobile-only compression. <=720px = phones + small landscape tablets. */
+@media (max-width: 720px) {
+  :root {
+    --ks-section-y: 48px;
+    --ks-pad-x: 16px;
+  }
+  .ks .ks-hero { padding: 56px 0 40px; }
+  .ks .ks-hero h1 { font-size: clamp(28px, 7.8vw, 40px); line-height: 1.06; letter-spacing: -0.02em; }
+  .ks .ks-section { padding: 48px 0; }
+  .ks .ks-section h2 { font-size: clamp(22px, 5.6vw, 28px); line-height: 1.12; }
+  .ks .ks-section .lede,
+  .ks .ks-section .sub,
+  .ks .ks-section p.lede { font-size: 15px; line-height: 1.55; }
+
+  /* Cards/tiles tighten on mobile. */
+  .ks .ks-card,
+  .ks .api-group,
+  .ks .api-ep,
+  .ks .prod-card,
+  .ks [class*="-card"] { padding: 16px; }
+
+  /* Buttons size up for thumbs, but row gap shrinks. */
+  .ks .ks-btn { padding: 11px 16px; font-size: 14px; min-height: 44px; }
+  .ks .ks-cta-row { gap: 10px; }
+
+  /* Stat rails / 4-up grids collapse cleanly. */
+  .ks .ks-stats,
+  .ks .ks-pillars { gap: 10px; }
+
+  /* Tighten code blocks so they don't fight the page on phones. */
+  .ks pre { font-size: 12px; line-height: 1.55; padding: 12px 14px; }
+
+  /* Code-inline can wrap to avoid horizontal pressure. */
+  .ks code { word-break: break-word; }
+
+  /* Hide tertiary sections that bloat the mobile scroll. */
+  .ks [data-mobile-hide] { display: none !important; }
+
+  /* prod-stickynav (per-page sub-nav on /product) competes with the main
+     ks-nav-wrap (sticky, top:0). Suppress on mobile — the main nav still
+     gives users navigation; the sub-nav is a desktop affordance only. */
+  .prod-stickynav { display: none !important; }
+
+  /* Footer tighten — 5-col footer is a punishing stack on mobile. */
+  .ks .ks-foot { padding: 40px 0 28px; margin-top: 40px; }
+  .ks .ks-foot__grid { gap: 24px; }
+}
+
+/* Tablet refinement (just enough to keep type from overflowing). */
+@media (min-width: 721px) and (max-width: 980px) {
+  :root { --ks-section-y: 72px; }
+}
+

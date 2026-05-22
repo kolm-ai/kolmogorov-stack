@@ -1,6 +1,6 @@
 {
   "surface": "kolm-public-frontend",
-  "version": "2026-05-22-w611-product-section-prod-depth-port",
+  "version": "2026-05-22-w612-warm-canvas-mobile-compress-bleed-fix",
   "source_commit_at_edit_time": "a195783",
   "hero_h1": "Compile any AI model. Run it anywhere.",
   "hero_loop": "route -> capture -> compile -> run",
@@ -167,7 +167,15 @@
     "W611 deepened /compile.html (31KB->42KB) by porting prod patterns: IO contract pair card (You provide / kolm returns), 6-card task gallery (Email/Code/Photos/Health/Finance/Docs each in 5 minutes), and 6-card DX grid (One command / Reproducible / Inspectable / BYO key / CI native / Customer-hosted bridge)",
     "W611 deepened /k-score.html (36KB->50KB) with an interactive K-score calculator widget: 7 industry preset buttons (Default/Healthcare/Legal/Finance/Code/Support/Moderation), 5 weighted sliders (A/S/L/C/V), live K-score readout with 0.85 gate marker, live formula display, and reproduce-on-your-machine command hint, with prefers-reduced-motion respect",
     "W611 deepened /api.html (41KB->56KB) with an 8-endpoint reference card section (signup/whoami/capture-log/distill/compile/score/verify/rotate-key) showing full request/response JSON bodies, stable error code tables, and per-route notes inside method+path+auth-pill headers",
-    "W611 sw.js cache key bumped to kolm-v7-2026-05-22-wave611-product-section-prod-depth-port"
+    "W611 sw.js cache key bumped to kolm-v7-2026-05-22-wave611-product-section-prod-depth-port",
+    "W612 facelift — color first principles + mobile compression + bleed fix",
+    "W612 canvas tokens shifted from cool-blue (#07090c/0c0f14/11151c/181d26) to warm-neutral (#0a0a0c/111114/17171b/1d1e22); line tokens warmed from rgba(255,255,255,*) to rgba(255,250,240,*); ink tokens warmed slightly; accent-soft/edge/glow opacity tightened so the cyan-mint is reserved for primary CTAs and key data not every link/code/label",
+    "W612 fixed color bleed root cause: defined --ks-surface-1, --ks-surface-2, --ks-bg-0, --ks-bad, --ks-good, --ks-ink-faint as aliases to existing tokens (CSS was falling through to transparent because pages referenced these names but ks.css never defined them — explains 'color issues with bleed throughout')",
+    "W612 added missing spacing tokens --ks-7 (28px), --ks-9 (36px), --ks-14 (56px) which were used in product.html but undefined",
+    "W612 unified @media (max-width:720px) compression block at the bottom of ks.css: section-y 132->48px, pad-x 40->16px, hero h1 7.8vw, section h2 5.6vw, card padding 16px, code blocks 12px, button min-height 44px (Apple touch-target floor), [data-mobile-hide] display:none, .prod-stickynav display:none (was overlapping the main ks-nav on mobile)",
+    "W612 explicit background-color: var(--ks-bg) on every .ks-section/.ks-hero/.ks-finale/.api-section/.api-hero/.prod-section/.prod-hero so transparent stacking can no longer bleed",
+    "W612 marked 28 tertiary index.html sections with data-mobile-hide (pieces/arch/selfhost/sdks/compliance/kscore/migrate/whats-new/engineering/limits/receipts/training/industries/cli/roadmap/glossary/ecosystem/principles/cookbook/procurement-faq/devx/verified-transcript/perf-table/cost-scenarios/quickstart-preview/press/trust-deep/community); mobile readers now see the 11 essential sections (hero/numbers/how/product/why/roi/pricing/scenarios/compare/faq/finale) instead of all 40",
+    "W612 sw.js cache key bumped to kolm-v7-2026-05-22-wave612-warm-canvas-mobile-compress-bleed-fix"
   ],
   "production_verification_url": "https://kolm.ai/frontend-version.json"
 }
