@@ -291,11 +291,11 @@
       </div>
     </div>
 
-    <!-- W617: full pipeline visual. Inputs (data+training) -> kolm verbs
-         (distill, quantize, compile) -> .kolm artifact -> devices.
-         Inline SVG, zero JS, renders crisp on retina. -->
+    <!-- W618: full pipeline visual with real 25-model menu showing the open-weights
+         universe kolm distills from. Sources -> model menu -> kolm verbs ->
+         .kolm artifact -> devices. Inline SVG, zero JS, renders crisp on retina. -->
     <div aria-hidden="true">
-      <svg viewBox="0 0 480 560" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto; max-width:520px; display:block;">
+      <svg viewBox="0 0 520 760" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto; max-width:560px; display:block;">
         <defs>
           <linearGradient id="kolmGlow" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stop-color="var(--ks-accent)" stop-opacity="0.9"/>
@@ -308,91 +308,155 @@
         </defs>
 
         <!-- ROW 1: source inputs -->
-        <text x="240" y="22" text-anchor="middle" font-family="var(--ks-sans)" font-size="11" letter-spacing="0.14em" fill="var(--ks-ink-3)">WHAT YOU HAVE</text>
-        <g transform="translate(120 60)">
+        <text x="260" y="22" text-anchor="middle" font-family="var(--ks-sans)" font-size="11" letter-spacing="0.14em" fill="var(--ks-ink-3)">WHAT YOU HAVE</text>
+        <g transform="translate(140 60)">
           <rect x="-62" y="-22" width="124" height="44" rx="8" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)" stroke-width="1"/>
           <text x="0" y="-3" text-anchor="middle" font-family="var(--ks-sans)" font-size="14" font-weight="600" fill="var(--ks-ink)">your data</text>
           <text x="0" y="14" text-anchor="middle" font-family="var(--ks-sans)" font-size="10" fill="var(--ks-ink-3)">CSV &middot; JSONL &middot; parquet</text>
         </g>
-        <g transform="translate(360 60)">
+        <g transform="translate(380 60)">
           <rect x="-70" y="-22" width="140" height="44" rx="8" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)" stroke-width="1"/>
           <text x="0" y="-3" text-anchor="middle" font-family="var(--ks-sans)" font-size="14" font-weight="600" fill="var(--ks-ink)">training traffic</text>
           <text x="0" y="14" text-anchor="middle" font-family="var(--ks-sans)" font-size="10" fill="var(--ks-ink-3)">openai &middot; anthropic calls</text>
         </g>
 
-        <!-- arrows from sources into verb row -->
-        <path d="M120 86 L160 138 M156 132 L160 138 L153 136" stroke="var(--ks-ink-4)" stroke-width="1.3" fill="none"/>
-        <path d="M360 86 L320 138 M327 136 L320 138 L324 132" stroke="var(--ks-ink-4)" stroke-width="1.3" fill="none"/>
+        <!-- arrows from sources down into model menu -->
+        <path d="M140 86 L210 124 M205 117 L210 124 L202 122" stroke="var(--ks-ink-4)" stroke-width="1.3" fill="none"/>
+        <path d="M380 86 L310 124 M318 122 L310 124 L315 117" stroke="var(--ks-ink-4)" stroke-width="1.3" fill="none"/>
 
-        <!-- ROW 2: kolm verbs -->
-        <text x="240" y="160" text-anchor="middle" font-family="var(--ks-sans)" font-size="11" letter-spacing="0.14em" fill="var(--ks-ink-3)">WHAT KOLM DOES</text>
-        <g transform="translate(78 190)">
+        <!-- ROW 2 (NEW W618): the open-weights menu - 25 real model families.
+             Real, May 2026: Llama 3.x/4 (Meta), Qwen 2.5/3 (Alibaba), DeepSeek
+             V3/R1 + R1-Distill (DeepSeek), Mistral Large 2 + Mixtral + Codestral
+             + NeMo (Mistral AI), Gemma 2/3 (Google), Phi 3.5/4 (Microsoft). -->
+        <text x="260" y="146" text-anchor="middle" font-family="var(--ks-sans)" font-size="11" letter-spacing="0.14em" fill="var(--ks-ink-3)">ANY OPEN-WEIGHTS MODEL</text>
+
+        <!-- subtle backplate behind the menu so the grid reads as one unit -->
+        <rect x="22" y="158" width="476" height="178" rx="10" fill="var(--ks-bg-1)" stroke="var(--ks-ink-4)" stroke-width="1" stroke-dasharray="2 4" opacity="0.65"/>
+
+        <!-- 5 column headers (model families) -->
+        <g font-family="var(--ks-sans)" font-size="9" font-weight="700" fill="var(--ks-ink-2)" text-anchor="middle" letter-spacing="0.12em">
+          <text x="78"  y="178">META &middot; LLAMA</text>
+          <text x="174" y="178">ALIBABA &middot; QWEN</text>
+          <text x="270" y="178">DEEPSEEK</text>
+          <text x="366" y="178">MISTRAL AI</text>
+          <text x="462" y="178">GOOGLE / MS</text>
+        </g>
+
+        <!-- 5 cols x 5 rows of real model pills -->
+        <g font-family="var(--ks-mono)" font-size="9" fill="var(--ks-ink)" text-anchor="middle">
+          <!-- row 1 -->
+          <g transform="translate(78 196)"><rect x="-44" y="-9" width="88" height="18" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/><text y="3">LLAMA-4-SCOUT</text></g>
+          <g transform="translate(174 196)"><rect x="-44" y="-9" width="88" height="18" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/><text y="3">QWEN3-235B-MoE</text></g>
+          <g transform="translate(270 196)"><rect x="-44" y="-9" width="88" height="18" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/><text y="3">DEEPSEEK-R1</text></g>
+          <g transform="translate(366 196)"><rect x="-44" y="-9" width="88" height="18" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/><text y="3">MISTRAL-LARGE-2</text></g>
+          <g transform="translate(462 196)"><rect x="-44" y="-9" width="88" height="18" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/><text y="3">GEMMA-3-27B</text></g>
+
+          <!-- row 2 -->
+          <g transform="translate(78 222)"><rect x="-44" y="-9" width="88" height="18" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/><text y="3">LLAMA-4-MAV</text></g>
+          <g transform="translate(174 222)"><rect x="-44" y="-9" width="88" height="18" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/><text y="3">QWEN3-32B</text></g>
+          <g transform="translate(270 222)"><rect x="-44" y="-9" width="88" height="18" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/><text y="3">DEEPSEEK-V3</text></g>
+          <g transform="translate(366 222)"><rect x="-44" y="-9" width="88" height="18" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/><text y="3">MIXTRAL-8x22B</text></g>
+          <g transform="translate(462 222)"><rect x="-44" y="-9" width="88" height="18" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/><text y="3">GEMMA-3-12B</text></g>
+
+          <!-- row 3 -->
+          <g transform="translate(78 248)"><rect x="-44" y="-9" width="88" height="18" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/><text y="3">LLAMA-3.3-70B</text></g>
+          <g transform="translate(174 248)"><rect x="-44" y="-9" width="88" height="18" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/><text y="3">QWEN2.5-72B</text></g>
+          <g transform="translate(270 248)"><rect x="-44" y="-9" width="88" height="18" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/><text y="3">R1-DISTILL-32B</text></g>
+          <g transform="translate(366 248)"><rect x="-44" y="-9" width="88" height="18" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/><text y="3">CODESTRAL-22B</text></g>
+          <g transform="translate(462 248)"><rect x="-44" y="-9" width="88" height="18" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/><text y="3">GEMMA-2-27B</text></g>
+
+          <!-- row 4 -->
+          <g transform="translate(78 274)"><rect x="-44" y="-9" width="88" height="18" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/><text y="3">LLAMA-3.2-90B</text></g>
+          <g transform="translate(174 274)"><rect x="-44" y="-9" width="88" height="18" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/><text y="3">QWEN2.5-32B</text></g>
+          <g transform="translate(270 274)"><rect x="-44" y="-9" width="88" height="18" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/><text y="3">R1-DISTILL-70B</text></g>
+          <g transform="translate(366 274)"><rect x="-44" y="-9" width="88" height="18" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/><text y="3">MISTRAL-NEMO</text></g>
+          <g transform="translate(462 274)"><rect x="-44" y="-9" width="88" height="18" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/><text y="3">PHI-4-14B</text></g>
+
+          <!-- row 5 -->
+          <g transform="translate(78 300)"><rect x="-44" y="-9" width="88" height="18" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/><text y="3">LLAMA-3.1-405B</text></g>
+          <g transform="translate(174 300)"><rect x="-44" y="-9" width="88" height="18" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/><text y="3">QWEN2.5-7B</text></g>
+          <g transform="translate(270 300)"><rect x="-44" y="-9" width="88" height="18" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/><text y="3">DEEPSEEK-CODER</text></g>
+          <g transform="translate(366 300)"><rect x="-44" y="-9" width="88" height="18" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/><text y="3">MISTRAL-7B-V0.3</text></g>
+          <g transform="translate(462 300)"><rect x="-44" y="-9" width="88" height="18" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/><text y="3">PHI-3.5-MoE</text></g>
+        </g>
+
+        <!-- tier-2 strip + count -->
+        <text x="260" y="324" text-anchor="middle" font-family="var(--ks-mono)" font-size="9" fill="var(--ks-ink-3)">
+          + COMMAND-R+ &middot; YI-34B &middot; GRANITE-8B &middot; NEMOTRON-340B &middot; OLMO-2 &middot; DBRX &middot; ARCTIC &middot; SMOLLM-2 &middot; FALCON-3 &middot; STARCODER-2
+        </text>
+
+        <!-- arrow from menu down into the verb row -->
+        <path d="M260 348 L260 376 M254 370 L260 376 L266 370" stroke="var(--ks-ink-4)" stroke-width="1.3" fill="none"/>
+
+        <!-- ROW 3: kolm verbs -->
+        <text x="260" y="398" text-anchor="middle" font-family="var(--ks-sans)" font-size="11" letter-spacing="0.14em" fill="var(--ks-ink-3)">WHAT KOLM DOES</text>
+        <g transform="translate(98 428)">
           <rect x="-50" y="-20" width="100" height="40" rx="20" fill="var(--ks-accent-soft)" stroke="var(--ks-accent-edge)" stroke-width="1"/>
           <text x="0" y="6" text-anchor="middle" font-family="var(--ks-sans)" font-size="15" font-weight="600" fill="var(--ks-accent)">distill</text>
         </g>
-        <path d="M130 190 L194 190 M188 185 L194 190 L188 195" stroke="var(--ks-accent-edge)" stroke-width="1.3" fill="none"/>
-        <g transform="translate(240 190)">
+        <path d="M150 428 L214 428 M208 423 L214 428 L208 433" stroke="var(--ks-accent-edge)" stroke-width="1.3" fill="none"/>
+        <g transform="translate(260 428)">
           <rect x="-54" y="-20" width="108" height="40" rx="20" fill="var(--ks-accent-soft)" stroke="var(--ks-accent-edge)" stroke-width="1"/>
           <text x="0" y="6" text-anchor="middle" font-family="var(--ks-sans)" font-size="15" font-weight="600" fill="var(--ks-accent)">quantize</text>
         </g>
-        <path d="M296 190 L360 190 M354 185 L360 190 L354 195" stroke="var(--ks-accent-edge)" stroke-width="1.3" fill="none"/>
-        <g transform="translate(404 190)">
+        <path d="M316 428 L380 428 M374 423 L380 428 L374 433" stroke="var(--ks-accent-edge)" stroke-width="1.3" fill="none"/>
+        <g transform="translate(424 428)">
           <rect x="-50" y="-20" width="100" height="40" rx="20" fill="var(--ks-accent-soft)" stroke="var(--ks-accent-edge)" stroke-width="1"/>
           <text x="0" y="6" text-anchor="middle" font-family="var(--ks-sans)" font-size="15" font-weight="600" fill="var(--ks-accent)">compile</text>
         </g>
 
         <!-- verbs to artifact arrow -->
-        <path d="M240 212 L240 252 M234 246 L240 252 L246 246" stroke="var(--ks-ink-4)" stroke-width="1.3" fill="none"/>
+        <path d="M260 450 L260 490 M254 484 L260 490 L266 484" stroke="var(--ks-ink-4)" stroke-width="1.3" fill="none"/>
 
         <!-- ambient bloom behind artifact -->
-        <circle cx="240" cy="315" r="135" fill="url(#kolmBloom)"/>
+        <circle cx="260" cy="555" r="135" fill="url(#kolmBloom)"/>
 
-        <!-- ROW 3: the .kolm artifact (plain-english label) -->
-        <g transform="translate(150 262)">
+        <!-- ROW 4: the .kolm artifact (W618 label: 'your AI, anywhere' ties to H1) -->
+        <g transform="translate(170 500)">
           <rect x="0" y="0" width="180" height="106" rx="14" fill="var(--ks-bg-1)" stroke="url(#kolmGlow)" stroke-width="2"/>
           <text x="90" y="50" text-anchor="middle" font-family="var(--ks-mono)" font-size="28" font-weight="600" fill="var(--ks-ink)">.kolm</text>
-          <text x="90" y="76" text-anchor="middle" font-family="var(--ks-sans)" font-size="12" fill="var(--ks-ink-2)">one signed file</text>
+          <text x="90" y="76" text-anchor="middle" font-family="var(--ks-sans)" font-size="12" fill="var(--ks-ink-2)">your AI, anywhere</text>
         </g>
 
-        <!-- ROW 4: device fan -->
-        <text x="240" y="402" text-anchor="middle" font-family="var(--ks-sans)" font-size="11" letter-spacing="0.14em" fill="var(--ks-ink-3)">WHERE IT RUNS</text>
+        <!-- ROW 5: device fan -->
+        <text x="260" y="638" text-anchor="middle" font-family="var(--ks-sans)" font-size="11" letter-spacing="0.14em" fill="var(--ks-ink-3)">WHERE IT RUNS</text>
 
         <!-- dashed fan from artifact bottom to devices -->
         <g stroke="var(--ks-accent-edge)" stroke-width="1.4" stroke-dasharray="3 3" fill="none">
-          <line x1="200" y1="370" x2="60" y2="446"/>
-          <line x1="220" y1="370" x2="160" y2="452"/>
-          <line x1="260" y1="370" x2="260" y2="452"/>
-          <line x1="280" y1="370" x2="360" y2="456"/>
-          <line x1="295" y1="370" x2="420" y2="446"/>
+          <line x1="220" y1="608" x2="80"  y2="682"/>
+          <line x1="240" y1="608" x2="180" y2="688"/>
+          <line x1="280" y1="608" x2="280" y2="688"/>
+          <line x1="300" y1="608" x2="380" y2="692"/>
+          <line x1="315" y1="608" x2="440" y2="682"/>
         </g>
 
         <g font-family="var(--ks-sans)" font-size="11" fill="var(--ks-ink-2)" text-anchor="middle">
-          <g transform="translate(60 446)">
+          <g transform="translate(80 682)">
             <rect x="-18" y="0" width="36" height="58" rx="6" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/>
             <rect x="-12" y="6" width="24" height="38" rx="2" fill="var(--ks-bg-1)"/>
             <text x="0" y="78">phone</text>
           </g>
-          <g transform="translate(160 456)">
+          <g transform="translate(180 692)">
             <rect x="-30" y="-4" width="60" height="38" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/>
             <rect x="-26" y="0" width="52" height="30" fill="var(--ks-bg-1)"/>
             <path d="M-36 36 L36 36 L32 42 L-32 42 Z" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/>
             <text x="0" y="62">laptop</text>
           </g>
-          <g transform="translate(260 456)">
+          <g transform="translate(280 692)">
             <rect x="-32" y="-4" width="64" height="42" rx="4" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/>
             <rect x="-32" y="-4" width="64" height="10" rx="4" fill="var(--ks-bg-3)"/>
             <circle cx="-26" cy="1" r="1.5" fill="var(--ks-accent-warm)"/>
             <circle cx="-22" cy="1" r="1.5" fill="var(--ks-accent)"/>
             <text x="0" y="62">browser</text>
           </g>
-          <g transform="translate(360 456)">
+          <g transform="translate(380 692)">
             <rect x="-30" y="0" width="60" height="34" rx="4" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/>
             <rect x="-22" y="8" width="14" height="6" fill="var(--ks-accent)" opacity="0.7"/>
             <rect x="-4" y="8" width="14" height="6" fill="var(--ks-accent-warm)" opacity="0.7"/>
             <rect x="-22" y="20" width="32" height="6" fill="var(--ks-accent-cool)" opacity="0.55"/>
             <text x="0" y="58">cloud GPU</text>
           </g>
-          <g transform="translate(420 446)">
+          <g transform="translate(440 682)">
             <rect x="-22" y="0" width="44" height="50" rx="6" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/>
             <path d="M0 14 L-10 22 L-10 36 L0 42 L10 36 L10 22 Z" fill="none" stroke="var(--ks-accent)" stroke-width="1.5"/>
             <text x="0" y="68">air-gapped</text>

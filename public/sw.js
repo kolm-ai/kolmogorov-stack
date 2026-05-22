@@ -1,5 +1,5 @@
 // Recipe service worker: keeps the registry available offline.
-const CACHE = 'kolm-v7-2026-05-22-wave617-pipeline-visual-faq-trim';
+const CACHE = 'kolm-v7-2026-05-23-wave619-docs-shell-sidebar';
 const PRECACHE = [
  '/device',
  '/design-tokens.css',
@@ -11,10 +11,13 @@ const PRECACHE = [
  '/w598.css',
  '/w600-layout.css',
  '/w605.css',
+ '/docs-shell.css',
  '/nav.js',
  '/kolm-svg.js',
  '/w605.js',
  '/sdk.js',
+ '/docs-shell.js',
+ '/docs-manifest.json',
  '/v1/registry/export',
  '/manifest.json',
  '/frontend-version.json',
