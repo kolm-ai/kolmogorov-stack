@@ -1,5 +1,5 @@
 // Recipe service worker: keeps the registry available offline.
-const CACHE = 'kolm-v7-2026-05-23-wave619-docs-shell-sidebar';
+const CACHE = 'kolm-v7-2026-05-23-wave620-homepage-tighten';
 const PRECACHE = [
  '/device',
  '/design-tokens.css',

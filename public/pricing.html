@@ -32,6 +32,8 @@
   .pr-tier:hover { border-color: var(--ks-accent-edge); }
   .pr-tier--feat { border-color: var(--ks-accent-edge); background: linear-gradient(180deg, var(--ks-accent-soft) 0%, var(--ks-bg-1) 28%); }
   .pr-tier--feat::before { content: "Most teams"; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); padding: 4px 10px; background: var(--ks-accent); color: #07090c; font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; border-radius: var(--ks-r-pill); font-weight: 600; }
+  .pr-tier--bus { border-color: var(--ks-accent-warm); background: linear-gradient(180deg, rgba(220, 138, 60, 0.10) 0%, var(--ks-bg-1) 32%); }
+  .pr-tier--bus::before { content: "Best $ / call"; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); padding: 4px 10px; background: var(--ks-accent-warm); color: #07090c; font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; border-radius: var(--ks-r-pill); font-weight: 600; }
   .pr-tier h3 { font-family: var(--ks-mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ks-accent); margin: 0; }
   .pr-tier .price { font-size: 38px; font-weight: 520; letter-spacing: -0.022em; color: var(--ks-ink); line-height: 1; margin: var(--ks-1) 0; font-variant-numeric: tabular-nums; }
   .pr-tier .price small { font-size: 13px; color: var(--ks-ink-3); font-weight: 400; margin-left: 5px; letter-spacing: 0; }
@@ -220,20 +222,20 @@
         <div class="ctaWrap"><a class="ks-btn ks-btn--ghost" style="width: 100%; justify-content: center;" href="/signup?plan=team">Start Team</a></div>
       </div>
 
-      <div class="pr-tier">
+      <div class="pr-tier pr-tier--bus">
         <h3>Business</h3>
         <div class="price" data-monthly="$999" data-annual="$832">$999<small>/ mo</small></div>
-        <p class="tagline">For regulated workloads and the platform team running them.</p>
+        <p class="tagline" style="color: var(--ks-accent); font-weight: 500;">$0.020 per 1k calls. Cheapest tier by 33%.</p>
         <ul>
-          <li><i class="ks-yes" aria-hidden="true"></i><span>50 million gateway calls / month</span></li>
-          <li><i class="ks-yes" aria-hidden="true"></i><span>Bring-your-own-cloud (AWS, GCP, Azure)</span></li>
-          <li><i class="ks-yes" aria-hidden="true"></i><span>SCIM + SAML SSO (Okta, Azure AD, OneLogin)</span></li>
-          <li><i class="ks-yes" aria-hidden="true"></i><span>SOC 2 Type I, HIPAA mapping, ISO 27001</span></li>
-          <li><i class="ks-yes" aria-hidden="true"></i><span>Signed BAA, EU / APAC data residency</span></li>
-          <li><i class="ks-yes" aria-hidden="true"></i><span>Dedicated registry + private build runner</span></li>
-          <li><i class="ks-yes" aria-hidden="true"></i><span>SLA 99.9%, dedicated Slack channel, named CSM</span></li>
+          <li><i class="ks-yes" aria-hidden="true"></i><span><b>50 million</b> gateway calls / month (10&times; Team)</span></li>
+          <li><i class="ks-yes" aria-hidden="true"></i><span>BYOC into your AWS, GCP, or Azure account</span></li>
+          <li><i class="ks-yes" aria-hidden="true"></i><span>SCIM + SAML (Okta, Azure AD, OneLogin)</span></li>
+          <li><i class="ks-yes" aria-hidden="true"></i><span>SOC 2 Type I + HIPAA + signed BAA + ISO 27001</span></li>
+          <li><i class="ks-yes" aria-hidden="true"></i><span>EU + APAC data residency, on request</span></li>
+          <li><i class="ks-yes" aria-hidden="true"></i><span>Dedicated registry, private build runner</span></li>
+          <li><i class="ks-yes" aria-hidden="true"></i><span>99.9% SLA + named CSM + Slack channel</span></li>
         </ul>
-        <div class="ctaWrap"><a class="ks-btn ks-btn--ghost" style="width: 100%; justify-content: center;" href="/enterprise">Contact sales</a></div>
+        <div class="ctaWrap"><a class="ks-btn ks-btn--primary" style="width: 100%; justify-content: center;" href="/enterprise">Talk to sales <span class="ks-btn-arrow">&rarr;</span></a></div>
       </div>
 
     </div>
