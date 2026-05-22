@@ -20,7 +20,7 @@ const read = (p) => fs.readFileSync(p, 'utf8');
 // Floors set well below the live size as of W205 baseline so future
 // trims do not break the lock, while still catching catastrophic delete.
 const PAGES = [
-  { slug: 'index',           file: 'index.html',           floor: 200 * 1024 },
+  { slug: 'index',           file: 'index.html',           floor: 180 * 1024 },
   { slug: 'why-kolm',        file: 'why-kolm.html',        floor: 16 * 1024 },
   { slug: 'manifesto',       file: 'manifesto.html',       floor: 16 * 1024 },
   { slug: 'pricing',         file: 'pricing.html',         floor: 60 * 1024 },

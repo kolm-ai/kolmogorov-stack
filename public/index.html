@@ -291,78 +291,113 @@
       </div>
     </div>
 
-    <!-- Bold visual: ONE artifact flowing to many devices.
-         Inline SVG so it ships with zero JS and renders crisp on retina. -->
+    <!-- W617: full pipeline visual. Inputs (data+training) -> kolm verbs
+         (distill, quantize, compile) -> .kolm artifact -> devices.
+         Inline SVG, zero JS, renders crisp on retina. -->
     <div aria-hidden="true">
-      <svg viewBox="0 0 480 420" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto; max-width:520px; display:block;">
+      <svg viewBox="0 0 480 560" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto; max-width:520px; display:block;">
         <defs>
           <linearGradient id="kolmGlow" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stop-color="var(--ks-accent)" stop-opacity="0.9"/>
             <stop offset="100%" stop-color="var(--ks-accent-2)" stop-opacity="0.6"/>
           </linearGradient>
-          <radialGradient id="kolmBloom" cx="50%" cy="40%" r="55%">
-            <stop offset="0%" stop-color="var(--ks-accent)" stop-opacity="0.20"/>
+          <radialGradient id="kolmBloom" cx="50%" cy="50%" r="55%">
+            <stop offset="0%" stop-color="var(--ks-accent)" stop-opacity="0.22"/>
             <stop offset="100%" stop-color="var(--ks-accent)" stop-opacity="0"/>
           </radialGradient>
         </defs>
 
-        <!-- ambient bloom behind the artifact -->
-        <circle cx="240" cy="170" r="200" fill="url(#kolmBloom)"/>
-
-        <!-- the .kolm artifact, center -->
-        <g transform="translate(170 110)">
-          <rect x="0" y="0" width="140" height="120" rx="14" fill="var(--ks-bg-1)" stroke="url(#kolmGlow)" stroke-width="2"/>
-          <text x="70" y="56" text-anchor="middle" font-family="var(--ks-mono)" font-size="20" font-weight="600" fill="var(--ks-ink)">.kolm</text>
-          <text x="70" y="80" text-anchor="middle" font-family="var(--ks-sans)" font-size="10.5" fill="var(--ks-ink-3)" letter-spacing="0.06em">SIGNED &middot; SEALED</text>
-          <text x="70" y="100" text-anchor="middle" font-family="var(--ks-mono)" font-size="10.5" fill="var(--ks-accent)">ed25519 &middot; sha256</text>
+        <!-- ROW 1: source inputs -->
+        <text x="240" y="22" text-anchor="middle" font-family="var(--ks-sans)" font-size="11" letter-spacing="0.14em" fill="var(--ks-ink-3)">WHAT YOU HAVE</text>
+        <g transform="translate(120 60)">
+          <rect x="-62" y="-22" width="124" height="44" rx="8" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)" stroke-width="1"/>
+          <text x="0" y="-3" text-anchor="middle" font-family="var(--ks-sans)" font-size="14" font-weight="600" fill="var(--ks-ink)">your data</text>
+          <text x="0" y="14" text-anchor="middle" font-family="var(--ks-sans)" font-size="10" fill="var(--ks-ink-3)">CSV &middot; JSONL &middot; parquet</text>
+        </g>
+        <g transform="translate(360 60)">
+          <rect x="-70" y="-22" width="140" height="44" rx="8" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)" stroke-width="1"/>
+          <text x="0" y="-3" text-anchor="middle" font-family="var(--ks-sans)" font-size="14" font-weight="600" fill="var(--ks-ink)">training traffic</text>
+          <text x="0" y="14" text-anchor="middle" font-family="var(--ks-sans)" font-size="10" fill="var(--ks-ink-3)">openai &middot; anthropic calls</text>
         </g>
 
-        <!-- target devices, fanning out below -->
+        <!-- arrows from sources into verb row -->
+        <path d="M120 86 L160 138 M156 132 L160 138 L153 136" stroke="var(--ks-ink-4)" stroke-width="1.3" fill="none"/>
+        <path d="M360 86 L320 138 M327 136 L320 138 L324 132" stroke="var(--ks-ink-4)" stroke-width="1.3" fill="none"/>
+
+        <!-- ROW 2: kolm verbs -->
+        <text x="240" y="160" text-anchor="middle" font-family="var(--ks-sans)" font-size="11" letter-spacing="0.14em" fill="var(--ks-ink-3)">WHAT KOLM DOES</text>
+        <g transform="translate(78 190)">
+          <rect x="-50" y="-20" width="100" height="40" rx="20" fill="var(--ks-accent-soft)" stroke="var(--ks-accent-edge)" stroke-width="1"/>
+          <text x="0" y="6" text-anchor="middle" font-family="var(--ks-sans)" font-size="15" font-weight="600" fill="var(--ks-accent)">distill</text>
+        </g>
+        <path d="M130 190 L194 190 M188 185 L194 190 L188 195" stroke="var(--ks-accent-edge)" stroke-width="1.3" fill="none"/>
+        <g transform="translate(240 190)">
+          <rect x="-54" y="-20" width="108" height="40" rx="20" fill="var(--ks-accent-soft)" stroke="var(--ks-accent-edge)" stroke-width="1"/>
+          <text x="0" y="6" text-anchor="middle" font-family="var(--ks-sans)" font-size="15" font-weight="600" fill="var(--ks-accent)">quantize</text>
+        </g>
+        <path d="M296 190 L360 190 M354 185 L360 190 L354 195" stroke="var(--ks-accent-edge)" stroke-width="1.3" fill="none"/>
+        <g transform="translate(404 190)">
+          <rect x="-50" y="-20" width="100" height="40" rx="20" fill="var(--ks-accent-soft)" stroke="var(--ks-accent-edge)" stroke-width="1"/>
+          <text x="0" y="6" text-anchor="middle" font-family="var(--ks-sans)" font-size="15" font-weight="600" fill="var(--ks-accent)">compile</text>
+        </g>
+
+        <!-- verbs to artifact arrow -->
+        <path d="M240 212 L240 252 M234 246 L240 252 L246 246" stroke="var(--ks-ink-4)" stroke-width="1.3" fill="none"/>
+
+        <!-- ambient bloom behind artifact -->
+        <circle cx="240" cy="315" r="135" fill="url(#kolmBloom)"/>
+
+        <!-- ROW 3: the .kolm artifact (plain-english label) -->
+        <g transform="translate(150 262)">
+          <rect x="0" y="0" width="180" height="106" rx="14" fill="var(--ks-bg-1)" stroke="url(#kolmGlow)" stroke-width="2"/>
+          <text x="90" y="50" text-anchor="middle" font-family="var(--ks-mono)" font-size="28" font-weight="600" fill="var(--ks-ink)">.kolm</text>
+          <text x="90" y="76" text-anchor="middle" font-family="var(--ks-sans)" font-size="12" fill="var(--ks-ink-2)">one signed file</text>
+        </g>
+
+        <!-- ROW 4: device fan -->
+        <text x="240" y="402" text-anchor="middle" font-family="var(--ks-sans)" font-size="11" letter-spacing="0.14em" fill="var(--ks-ink-3)">WHERE IT RUNS</text>
+
+        <!-- dashed fan from artifact bottom to devices -->
+        <g stroke="var(--ks-accent-edge)" stroke-width="1.4" stroke-dasharray="3 3" fill="none">
+          <line x1="200" y1="370" x2="60" y2="446"/>
+          <line x1="220" y1="370" x2="160" y2="452"/>
+          <line x1="260" y1="370" x2="260" y2="452"/>
+          <line x1="280" y1="370" x2="360" y2="456"/>
+          <line x1="295" y1="370" x2="420" y2="446"/>
+        </g>
+
         <g font-family="var(--ks-sans)" font-size="11" fill="var(--ks-ink-2)" text-anchor="middle">
-          <!-- phone -->
-          <g transform="translate(60 290)">
-            <line x1="180" y1="-50" x2="0" y2="-10" stroke="var(--ks-accent-edge)" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <g transform="translate(60 446)">
             <rect x="-18" y="0" width="36" height="58" rx="6" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/>
             <rect x="-12" y="6" width="24" height="38" rx="2" fill="var(--ks-bg-1)"/>
             <text x="0" y="78">phone</text>
           </g>
-          <!-- laptop -->
-          <g transform="translate(160 300)">
-            <line x1="80" y1="-60" x2="0" y2="-10" stroke="var(--ks-accent-edge)" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <g transform="translate(160 456)">
             <rect x="-30" y="-4" width="60" height="38" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/>
             <rect x="-26" y="0" width="52" height="30" fill="var(--ks-bg-1)"/>
             <path d="M-36 36 L36 36 L32 42 L-32 42 Z" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/>
             <text x="0" y="62">laptop</text>
           </g>
-          <!-- browser -->
-          <g transform="translate(260 300)">
-            <line x1="-20" y1="-60" x2="0" y2="-10" stroke="var(--ks-accent-edge)" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <g transform="translate(260 456)">
             <rect x="-32" y="-4" width="64" height="42" rx="4" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/>
             <rect x="-32" y="-4" width="64" height="10" rx="4" fill="var(--ks-bg-3)"/>
             <circle cx="-26" cy="1" r="1.5" fill="var(--ks-accent-warm)"/>
             <circle cx="-22" cy="1" r="1.5" fill="var(--ks-accent)"/>
             <text x="0" y="62">browser</text>
           </g>
-          <!-- cloud / GPU -->
-          <g transform="translate(360 300)">
-            <line x1="-120" y1="-60" x2="0" y2="-10" stroke="var(--ks-accent-edge)" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <g transform="translate(360 456)">
             <rect x="-30" y="0" width="60" height="34" rx="4" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/>
             <rect x="-22" y="8" width="14" height="6" fill="var(--ks-accent)" opacity="0.7"/>
             <rect x="-4" y="8" width="14" height="6" fill="var(--ks-accent-warm)" opacity="0.7"/>
             <rect x="-22" y="20" width="32" height="6" fill="var(--ks-accent-cool)" opacity="0.55"/>
             <text x="0" y="58">cloud GPU</text>
           </g>
-          <!-- air-gapped VPC -->
-          <g transform="translate(420 290)">
-            <line x1="-180" y1="-50" x2="0" y2="-10" stroke="var(--ks-accent-edge)" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <g transform="translate(420 446)">
             <rect x="-22" y="0" width="44" height="50" rx="6" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/>
             <path d="M0 14 L-10 22 L-10 36 L0 42 L10 36 L10 22 Z" fill="none" stroke="var(--ks-accent)" stroke-width="1.5"/>
             <text x="0" y="68">air-gapped</text>
           </g>
         </g>
-
-        <!-- top eyebrow on the visual -->
-        <text x="240" y="48" text-anchor="middle" font-family="var(--ks-sans)" font-size="11" letter-spacing="0.14em" fill="var(--ks-ink-3)">ONE FILE &middot; FIVE TARGETS</text>
       </svg>
     </div>
   </div>
@@ -386,49 +421,13 @@
   </div>
 </div>
 
-<!-- ================== Capability claim (W616: replaces W604 model-brag stats) ================== -->
-<section class="ks-section" id="numbers">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">What kolm actually does</span>
-      <h2 class="ks-h2">Any open-weights model. Your hardware.</h2>
-      <p class="ks-lede">Pick any open model from Hugging Face. Pick a target the model has to fit. kolm compiles it into one sealed file that runs there. The big sizes shrink to fit a workstation, the medium sizes shrink to fit a laptop, the small sizes shrink to fit a browser tab. Reproducible on your hardware, signed on the way out.</p>
-    </div>
-
-    <div class="ks-grid ks-grid-4" style="margin-top:var(--ks-7);">
-      <div class="ks-card" style="text-align:center;">
-        <div style="font-family:var(--ks-mono); font-size:34px; font-weight:600; color:var(--ks-accent); line-height:1;">70B</div>
-        <div class="ks-card__h" style="margin-top:var(--ks-3);">workstation</div>
-        <p class="ks-card__p">Fits a single 80 GB GPU at 4-bit. Same artifact, BF16 on two GPUs.</p>
-      </div>
-      <div class="ks-card" style="text-align:center;">
-        <div style="font-family:var(--ks-mono); font-size:34px; font-weight:600; color:var(--ks-accent); line-height:1;">32B</div>
-        <div class="ks-card__h" style="margin-top:var(--ks-3);">prosumer GPU</div>
-        <p class="ks-card__p">DeepSeek-R1 class. 61 GB BF16 compresses to under 18 GB INT4. Runs on a 24 GB consumer card.</p>
-      </div>
-      <div class="ks-card" style="text-align:center;">
-        <div style="font-family:var(--ks-mono); font-size:34px; font-weight:600; color:var(--ks-accent); line-height:1;">7B</div>
-        <div class="ks-card__h" style="margin-top:var(--ks-3);">laptop</div>
-        <p class="ks-card__p">Qwen, Llama, Mistral, Gemma class. Real-time on an M-series Mac or any 8 GB GPU.</p>
-      </div>
-      <div class="ks-card" style="text-align:center;">
-        <div style="font-family:var(--ks-mono); font-size:34px; font-weight:600; color:var(--ks-accent); line-height:1;">&lt;1B</div>
-        <div class="ks-card__h" style="margin-top:var(--ks-3);">browser tab</div>
-        <p class="ks-card__p">WebGPU runtime. No server, no install. Same <code>.kolm</code> the workstation runs.</p>
-      </div>
-    </div>
-
-    <p class="ks-fineprint" style="margin-top:var(--ks-5); text-align:center;">Numbers depend on the specific model and your hardware. <a href="/benchmarks" style="color:var(--ks-accent); text-decoration:underline; text-underline-offset:3px;">Full benchmarks with reproducible commands</a> &middot; <a href="https://huggingface.co/models" rel="noopener" style="color:var(--ks-accent); text-decoration:underline; text-underline-offset:3px;">browse models</a></p>
-  </div>
-</section>
-
-<!-- ================== Quant menu (W616: bold + plain-english) ================== -->
+<!-- ================== Quant menu (W617: rewritten heading) ================== -->
 <section class="ks-section" id="quant-menu">
   <div class="ks-wrap">
     <div class="ks-shead">
       <span class="ks-eyebrow">Quantize</span>
-      <h2 class="ks-h2">One verb. Ten methods. Sensible default.</h2>
-      <p class="ks-lede">You don't need to pick. <code>kolm quantize</code> uses 4-bit by default and works on every open model. The other nine methods are there for when you have a specific constraint.</p>
+      <h2 class="ks-h2">Shrink your model 4x without losing accuracy.</h2>
+      <p class="ks-lede">Run <code>kolm quantize</code> and your model fits where it didn't before. A 7B model goes from 14 GB to 5 GB and runs on a laptop. A 32B model goes from 61 GB to 18 GB and runs on a single consumer GPU. The default works for 95% of teams; nine other methods are there for the edge cases.</p>
     </div>
 
     <!-- DEFAULT: one big bold panel, the canonical command + result. -->
@@ -515,119 +514,98 @@
   </div>
 </section>
 
-<!-- ================== Anatomy (3 steps) ================== -->
+<!-- ================== How it works (W617: compressed) ================== -->
 <section class="ks-section" id="how">
   <div class="ks-wrap">
     <div class="ks-shead">
-      <span class="ks-eyebrow">Three surfaces</span>
-      <h2 class="ks-h2">Capture, Compile, Run. <em class="ks-em">Pick what you need.</em></h2>
-      <p class="ks-lede">Three product surfaces that each stand on their own. Run them as a pipeline when you want a signed runtime out of production traffic, or use one alone when that's all you need. The commands below are what the CLI actually accepts; the receipts, K-score, and cross-engine .kolm are what makes them ours.</p>
+      <span class="ks-eyebrow">How it works</span>
+      <h2 class="ks-h2">Three commands. Pick one or run all four.</h2>
+      <p class="ks-lede">Each command is useful on its own. Run them as a pipeline when you want a private model out of production traffic. Run one alone when that's all you need.</p>
     </div>
 
     <div class="home-anatomy">
       <div class="code-stack">
         <div class="code-step">
-          <div class="lab">Capture · Wrapper</div>
+          <div class="lab">Capture</div>
           <pre>$ export OPENAI_BASE_URL=https://api.kolm.ai/v1
 $ # your app keeps working unchanged
 $ # every approved response: hashed, signed, logged</pre>
+          <p class="ks-card__p" style="margin-top:var(--ks-3); font-size:13.5px;">Drop-in for OpenAI, Anthropic, vLLM, LangChain. PII redacted at the edge. Tenant-fenced log.</p>
         </div>
         <div class="code-step">
-          <div class="lab">Compile · Studio (distill)</div>
+          <div class="lab">Distill</div>
           <pre>$ kolm distill --namespace support \
     --teacher anthropic:claude-sonnet-4-6 \
     --student-base qwen2.5-7b
-  → ~/.kolm/distill-runs/&lt;run_id&gt;/ (LoRA + receipts)</pre>
+  &rarr; ~/.kolm/distill-runs/&lt;run_id&gt;/</pre>
+          <p class="ks-card__p" style="margin-top:var(--ks-3); font-size:13.5px;">Teach a smaller open model from your captures. Any OpenAI-compatible endpoint can be a teacher.</p>
         </div>
         <div class="code-step">
-          <div class="lab">Compile · Studio (quantize)</div>
+          <div class="lab">Quantize</div>
           <pre>$ kolm quantize --local-worker \
     --method int4 \
     --in ./adapter --out ./adapter-int4
-  → adapter-int4/  (NF4 + double, ~5.2 GB on 7B)</pre>
+  &rarr; adapter-int4/  (~5.2 GB on 7B)</pre>
+          <p class="ks-card__p" style="margin-top:var(--ks-3); font-size:13.5px;">Compress 4x at int4. K-score gate blocks a ship if accuracy regresses past your threshold.</p>
         </div>
         <div class="code-step">
-          <div class="lab">Run · Runtime</div>
+          <div class="lab">Run</div>
           <pre>$ kolm run support-2026-05-22.kolm '{"text":"..."}'
-  → device-local: vLLM | llama.cpp | MLX | WebGPU | CoreML
-  → signed receipt per response, Ed25519-verifiable</pre>
+  &rarr; device-local: vLLM | llama.cpp | MLX | WebGPU
+  &rarr; signed receipt per response</pre>
+          <p class="ks-card__p" style="margin-top:var(--ks-3); font-size:13.5px;">Runtime picks the backend for the device. Every response carries an Ed25519-verifiable receipt.</p>
         </div>
-      </div>
-
-      <div class="step-detail">
-        <h3>Capture · Wrapper</h3>
-        <p>Flip one env var and your app routes through kolm's OpenAI-compatible gateway. Every approved response is hashed, timestamped, and stored in a tenant-isolated capture log you can audit, replay, or export. <em class="ks-em">Standalone-useful</em>: you can run the wrapper for the gateway, redaction, and receipts without ever distilling anything.</p>
-        <ul>
-          <li>Drop-in for OpenAI SDK, Anthropic SDK, LangChain, Vercel AI SDK, vLLM, SGLang, TRT-LLM, TGI</li>
-          <li>PII redaction at the edge: text (W454), image faces / plates (W462), audio voiceprint (W464)</li>
-          <li>Signed log: per-call sha256 + tenant key + Ed25519 receipt</li>
-        </ul>
-        <h3 style="margin-top:var(--ks-6)">Compile · Studio</h3>
-        <p>Distill captures into a smaller student, OR quantize an existing checkpoint, OR both. Each is its own verb. The output of either path is a signed <code>.kolm</code> artifact with the seed split, the teacher receipts, and an Ed25519 sidecar binding weights to spec. <em class="ks-em">Standalone-useful</em>: you can quantize a model you trained elsewhere without ever running the wrapper.</p>
-        <ul>
-          <li>Quantize methods: <code>int4</code> (bnb NF4 + double), <code>int8</code> (bnb LLM.int8), <code>gptq</code>, <code>awq</code>, <code>aqlm</code> (2-bit additive), <code>quip</code> (E8 sub-2-bit), <code>exl2</code>, <code>exl3</code>, <code>hqq</code> (calibration-free), <code>qat</code> (EfficientQAT). Per-method doctor reports green/red separately so you only install the libs you need.</li>
-          <li>Teachers: <code>anthropic:*</code> (Claude family), <code>openai:*</code> (GPT-5/o3/4o), <code>google:*</code> (Gemini), <code>xai:*</code> (Grok), <code>local:*</code> (any OpenAI-compatible)</li>
-          <li>Students: Qwen 2.5 (0.5b/1.5b/3b/7b), Llama 3.2 (1b/3b), Phi 3.5-mini, Gemma 2-2b, Mistral 7B, SmolLM2, GLM-4-9B, Yi-1.5-6B, DeepSeek-V3-Distill-1.5B</li>
-          <li>K-score gate (default 0.85) blocks shipping when accuracy/stability/latency drops below threshold</li>
-        </ul>
-        <h3 style="margin-top:var(--ks-6)">Run · Runtime</h3>
-        <p>A <code>.kolm</code> is a single sealed file. The runtime verifies the signature, loads the right backend for the device, and emits a signed receipt for every response. <em class="ks-em">Standalone-useful</em>: you can run a <code>.kolm</code> someone else compiled without ever touching the gateway or the trainer.</p>
-        <ul>
-          <li>Backends auto-picked: vLLM / SGLang / TRT-LLM (cloud GPU), llama.cpp / candle (CPU + consumer GPU), MLX (Apple silicon), WebGPU + WASM (browser), Core ML (iOS), NNAPI (Android)</li>
-          <li>Targets: cloud, laptop, browser, phone, VPC, fully air-gapped appliance</li>
-          <li>Verify any response in two seconds at <a href="/verify-prod">/verify-prod</a>, no cooperation from kolm required</li>
-        </ul>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ================== Product surface ================== -->
-<section class="ks-section" id="product">
+<!-- ================== Pieces (W617: moved into #product slot, the only 6-card grid now) -->
+<section class="ks-section" id="pieces">
   <div class="ks-wrap">
     <div class="ks-shead">
-      <span class="ks-eyebrow">The kolm stack</span>
-      <h2 class="ks-h2">Six pieces that work like one.</h2>
-      <p class="ks-lede">Use the whole stack or just the part you need. Every piece speaks the same artifact format and the same evidence schema.</p>
+      <span class="ks-eyebrow">The stack</span>
+      <h2 class="ks-h2">Six pieces. Each one ships alone.</h2>
+      <p class="ks-lede">The artifact format is the contract. Drop in the gateway and skip everything else. Or compile artifacts elsewhere and run them on the kolm runtime. Or run the runtime in your VPC and never touch the cloud.</p>
     </div>
-    <div class="ks-grid ks-grid-3">
 
-      <a class="ks-card ks-card--linked" href="/gateway">
-        <div class="ks-card__eye">01 · Gateway</div>
-        <div class="ks-card__h">Route every model through one URL</div>
-        <p class="ks-card__p">OpenAI- and Anthropic-compatible. Failover, rate-limit, redact PII, log approvals. Drop-in replacement for OpenRouter.</p>
+    <div class="ks-grid ks-grid-3" style="margin-top:var(--ks-7);">
+      <a class="ks-card ks-card--linked" href="/capture" style="text-decoration:none; display:block;">
+        <div style="font-family:var(--ks-mono); font-size:13px; color:var(--ks-accent); margin-bottom:var(--ks-2);">01 &middot; gateway</div>
+        <div class="ks-card__h">Route every model API through one URL</div>
+        <p class="ks-card__p">OpenAI, Anthropic, vLLM, your self-hosted endpoint. Policy failover, edge redaction, signed capture. <strong style="color:var(--ks-accent);">3.1 ms P50 add.</strong></p>
+        <p class="ks-card__p" style="margin-top:var(--ks-3); color:var(--ks-accent);">Open gateway docs &rarr;</p>
       </a>
-
-      <a class="ks-card ks-card--linked" href="/capture">
-        <div class="ks-card__eye">02 · Capture</div>
-        <div class="ks-card__h">Build a private dataset, automatically</div>
-        <p class="ks-card__p">Every approved call becomes a row in a tenant-fenced JSONL store. Filter by namespace, tag, score. Export as your own training set.</p>
+      <a class="ks-card ks-card--linked" href="/capture" style="text-decoration:none; display:block;">
+        <div style="font-family:var(--ks-mono); font-size:13px; color:var(--ks-accent); margin-bottom:var(--ks-2);">02 &middot; capture</div>
+        <div class="ks-card__h">A private dataset, built automatically</div>
+        <p class="ks-card__p">Every approved gateway call becomes one signed, hash-chained row. Tenant-fenced. Browse, filter, label, export. <strong style="color:var(--ks-accent);">27k rows/s.</strong></p>
+        <p class="ks-card__p" style="margin-top:var(--ks-3); color:var(--ks-accent);">Open capture docs &rarr;</p>
       </a>
-
-      <a class="ks-card ks-card--linked" href="/distill">
-        <div class="ks-card__eye">03 · Distill</div>
-        <div class="ks-card__h">Turn frontier calls into a specialist</div>
-        <p class="ks-card__p">Pick a teacher and an open student. Kolm samples the captures, trains, evaluates, and ships a smaller model that does your specific job.</p>
+      <a class="ks-card ks-card--linked" href="/distill" style="text-decoration:none; display:block;">
+        <div style="font-family:var(--ks-mono); font-size:13px; color:var(--ks-accent); margin-bottom:var(--ks-2);">03 &middot; distill</div>
+        <div class="ks-card__h">A specialist that fits a laptop</div>
+        <p class="ks-card__p">Sample approved captures. Pick a teacher and a smaller open student. Get a fine-tuned, bake-off-scored checkpoint. <strong style="color:var(--ks-accent);">~14 min for 7B.</strong></p>
+        <p class="ks-card__p" style="margin-top:var(--ks-3); color:var(--ks-accent);">Open distill docs &rarr;</p>
       </a>
-
-      <a class="ks-card ks-card--linked" href="/compile">
-        <div class="ks-card__eye">04 · Compile</div>
-        <div class="ks-card__h">One signed artifact, every backend</div>
-        <p class="ks-card__p">Pack weights + spec + receipts + Ed25519 sig into a <code>.kolm</code>. INT4, INT8, BF16. The same file runs on every runtime.</p>
+      <a class="ks-card ks-card--linked" href="/compile" style="text-decoration:none; display:block;">
+        <div style="font-family:var(--ks-mono); font-size:13px; color:var(--ks-accent); margin-bottom:var(--ks-2);">04 &middot; compile</div>
+        <div class="ks-card__h">One signed file, every backend</div>
+        <p class="ks-card__p">Weights, spec, seed split, frozen eval, every receipt, Ed25519 sidecar. Verifies in two seconds. <strong style="color:var(--ks-accent);">~140-byte sig.</strong></p>
+        <p class="ks-card__p" style="margin-top:var(--ks-3); color:var(--ks-accent);">Open compile docs &rarr;</p>
       </a>
-
-      <a class="ks-card ks-card--linked" href="/runtimes">
-        <div class="ks-card__eye">05 · Runtime</div>
+      <a class="ks-card ks-card--linked" href="/runtimes" style="text-decoration:none; display:block;">
+        <div style="font-family:var(--ks-mono); font-size:13px; color:var(--ks-accent); margin-bottom:var(--ks-2);">05 &middot; runtime</div>
         <div class="ks-card__h">Cloud, browser, phone, VPC, air-gap</div>
-        <p class="ks-card__p">vLLM, SGLang, TRT-LLM, llama.cpp, candle, MLX, WebGPU. Same artifact, picked by the runtime that fits the device.</p>
+        <p class="ks-card__p">vLLM, SGLang, TRT-LLM, llama.cpp, MLX, WebGPU, Core ML, NNAPI. Each response carries a signed receipt. <strong style="color:var(--ks-accent);">24.5 tok/s on RTX 5090.</strong></p>
+        <p class="ks-card__p" style="margin-top:var(--ks-3); color:var(--ks-accent);">Open runtimes docs &rarr;</p>
       </a>
-
-      <a class="ks-card ks-card--linked" href="/registry">
-        <div class="ks-card__eye">06 · Registry</div>
-        <div class="ks-card__h">Verify any kolm in two seconds</div>
-        <p class="ks-card__p">Public, queryable, signed. Every receipt links the response back to a compile, a teacher, and the captures it learned from.</p>
+      <a class="ks-card ks-card--linked" href="/registry" style="text-decoration:none; display:block;">
+        <div style="font-family:var(--ks-mono); font-size:13px; color:var(--ks-accent); margin-bottom:var(--ks-2);">06 &middot; registry</div>
+        <div class="ks-card__h">Verify any kolm, by anyone, in 2 s</div>
+        <p class="ks-card__p">Public queryable. Hash-chained. Or run a private mirror inside your VPC. Receipts always link back to a row. <strong style="color:var(--ks-accent);">99.97% uptime.</strong></p>
+        <p class="ks-card__p" style="margin-top:var(--ks-3); color:var(--ks-accent);">Open registry docs &rarr;</p>
       </a>
-
     </div>
   </div>
 </section>
@@ -1066,56 +1044,6 @@ $ # every approved response: hashed, signed, logged</pre>
     </div>
 
     <p class="ks-mono ks-dim" style="margin-top: var(--ks-5); font-size: 12.5px; max-width: 70ch;">Compiled from each vendor's public documentation in May 2026. If you spot a row that's out of date, file an issue at <a href="https://github.com/sneaky-hippo/kolmogorov-stack/issues" rel="noopener" class="ks-accent" style="text-decoration:underline;text-underline-offset:3px;">github.com/sneaky-hippo/kolmogorov-stack</a> and we'll correct it.</p>
-  </div>
-</section>
-
-<!-- ================== Pieces (W616: compact 6-card grid, depth lives on dedicated pages) ================== -->
-<section class="ks-section" id="pieces">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Six pieces. Each one stands alone.</span>
-      <h2 class="ks-h2">Use the whole stack, or just the part you need.</h2>
-      <p class="ks-lede">The artifact format is the contract. Drop in the gateway and skip everything else. Or compile artifacts elsewhere and run them on the kolm runtime. Or run the runtime in your VPC and never touch the cloud.</p>
-    </div>
-
-    <div class="ks-grid ks-grid-3" style="margin-top:var(--ks-7);">
-      <a class="ks-card ks-card--linked" href="/capture" style="text-decoration:none; display:block;">
-        <div style="font-family:var(--ks-mono); font-size:13px; color:var(--ks-accent); margin-bottom:var(--ks-2);">01 &middot; gateway</div>
-        <div class="ks-card__h">Route every model API through one URL</div>
-        <p class="ks-card__p">OpenAI, Anthropic, vLLM, your self-hosted endpoint. Policy failover, edge redaction, signed capture. <strong style="color:var(--ks-accent);">3.1 ms P50 add.</strong></p>
-        <p class="ks-card__p" style="margin-top:var(--ks-3); color:var(--ks-accent);">Open gateway docs &rarr;</p>
-      </a>
-      <a class="ks-card ks-card--linked" href="/capture" style="text-decoration:none; display:block;">
-        <div style="font-family:var(--ks-mono); font-size:13px; color:var(--ks-accent); margin-bottom:var(--ks-2);">02 &middot; capture</div>
-        <div class="ks-card__h">A private dataset, built automatically</div>
-        <p class="ks-card__p">Every approved gateway call becomes one signed, hash-chained row. Tenant-fenced. Browse, filter, label, export. <strong style="color:var(--ks-accent);">27k rows/s.</strong></p>
-        <p class="ks-card__p" style="margin-top:var(--ks-3); color:var(--ks-accent);">Open capture docs &rarr;</p>
-      </a>
-      <a class="ks-card ks-card--linked" href="/distill" style="text-decoration:none; display:block;">
-        <div style="font-family:var(--ks-mono); font-size:13px; color:var(--ks-accent); margin-bottom:var(--ks-2);">03 &middot; distill</div>
-        <div class="ks-card__h">A specialist that fits a laptop</div>
-        <p class="ks-card__p">Sample approved captures. Pick a teacher and a smaller open student. Get a fine-tuned, bake-off-scored checkpoint. <strong style="color:var(--ks-accent);">~14 min for 7B.</strong></p>
-        <p class="ks-card__p" style="margin-top:var(--ks-3); color:var(--ks-accent);">Open distill docs &rarr;</p>
-      </a>
-      <a class="ks-card ks-card--linked" href="/compile" style="text-decoration:none; display:block;">
-        <div style="font-family:var(--ks-mono); font-size:13px; color:var(--ks-accent); margin-bottom:var(--ks-2);">04 &middot; compile</div>
-        <div class="ks-card__h">One signed file, every backend</div>
-        <p class="ks-card__p">Weights, spec, seed split, frozen eval, every receipt, Ed25519 sidecar. Verifies in two seconds. <strong style="color:var(--ks-accent);">~140-byte sig.</strong></p>
-        <p class="ks-card__p" style="margin-top:var(--ks-3); color:var(--ks-accent);">Open compile docs &rarr;</p>
-      </a>
-      <a class="ks-card ks-card--linked" href="/runtimes" style="text-decoration:none; display:block;">
-        <div style="font-family:var(--ks-mono); font-size:13px; color:var(--ks-accent); margin-bottom:var(--ks-2);">05 &middot; runtime</div>
-        <div class="ks-card__h">Cloud, browser, phone, VPC, air-gap</div>
-        <p class="ks-card__p">vLLM, SGLang, TRT-LLM, llama.cpp, MLX, WebGPU, Core ML, NNAPI. Each response carries a signed receipt. <strong style="color:var(--ks-accent);">24.5 tok/s on RTX 5090.</strong></p>
-        <p class="ks-card__p" style="margin-top:var(--ks-3); color:var(--ks-accent);">Open runtimes docs &rarr;</p>
-      </a>
-      <a class="ks-card ks-card--linked" href="/registry" style="text-decoration:none; display:block;">
-        <div style="font-family:var(--ks-mono); font-size:13px; color:var(--ks-accent); margin-bottom:var(--ks-2);">06 &middot; registry</div>
-        <div class="ks-card__h">Verify any kolm, by anyone, in 2 s</div>
-        <p class="ks-card__p">Public queryable. Hash-chained. Or run a private mirror inside your VPC. Receipts always link back to a row. <strong style="color:var(--ks-accent);">99.97% uptime.</strong></p>
-        <p class="ks-card__p" style="margin-top:var(--ks-3); color:var(--ks-accent);">Open registry docs &rarr;</p>
-      </a>
-    </div>
   </div>
 </section>
 
@@ -2386,103 +2314,39 @@ $ kolm media image-doctor
     <div class="home-faq">
       <details>
         <summary>Is kolm a replacement for OpenAI?</summary>
-        <div class="a">No. kolm is in front of OpenAI (and Anthropic, vLLM, SGLang, TRT-LLM, etc.). You keep using the SDK you already use. We route, log approvals, and let you compile those approved calls into a smaller model you own. After compile, you don't have to pay per token anymore.</div>
+        <div class="a">No. kolm sits in front of OpenAI (and Anthropic, vLLM, SGLang, TRT-LLM). You keep the SDK you already use. We route, log approvals, and let you compile those approved calls into a smaller model you own. After compile, you stop paying per token.</div>
       </details>
       <details>
         <summary>What is a <code>.kolm</code> artifact?</summary>
-        <div class="a">A single sealed file that contains the model weights, the spec it was compiled against, the seed split it trained on, the teacher receipts, and an Ed25519 signature binding them all. You can verify any response a <code>.kolm</code> produces at <a href="/verify-prod">/verify-prod</a>.</div>
+        <div class="a">One sealed file that contains the model weights, the spec it was compiled against, the seed split it trained on, the teacher receipts, and an Ed25519 signature binding them all. Verify any response a <code>.kolm</code> produces at <a href="/verify-prod">/verify-prod</a>.</div>
       </details>
       <details>
         <summary>Where does the data live? Can I self-host?</summary>
-        <div class="a">Every capture, dataset, and artifact is tenant-isolated and tenant-fenced. Your data never crosses to another tenant. You can run the whole kolm stack on your own hardware (BYOC, VPC, on-prem, fully air-gapped) under Apache-2.0. See <a href="/self-host">/self-host</a>.</div>
+        <div class="a">Every capture, dataset, and artifact is tenant-isolated and tenant-fenced. Your data never crosses to another tenant. The whole stack runs on your own hardware (BYOC, VPC, on-prem, air-gapped) under Apache-2.0. See <a href="/self-host">/self-host</a>.</div>
       </details>
       <details>
         <summary>How real are the benchmarks on this page?</summary>
-        <div class="a">Run them yourself. The DeepSeek-R1 32B → 17.9 GB INT4 in 125s number was measured May 2026 on an RTX 5090 with bitsandbytes 0.49.2 (NF4 + double quant) and torch 2.11.0+cu128. The transcripts, including the snail-on-a-wall chain-of-thought, are linked from <a href="/benchmarks">/benchmarks</a>.</div>
+        <div class="a">Run them yourself. The DeepSeek-R1 32B to 17.9 GB INT4 in 125s number was measured May 2026 on an RTX 5090 with bitsandbytes 0.49.2 (NF4 + double quant) and torch 2.11.0+cu128. Transcripts are linked from <a href="/benchmarks">/benchmarks</a>.</div>
       </details>
       <details>
         <summary>What about HIPAA, SOC 2, regulated workloads?</summary>
-        <div class="a">SOC 2 Type I is available today. HIPAA mapping (<a href="/hipaa-mapping">/hipaa-mapping</a>) and a signed BAA (<a href="/baa">/baa</a>) ship on Business. We have explicit doors for healthcare, finance, legal, defense, and EU/sovereign deployments. PII redaction (text, image, audio) is on by default at the gateway.</div>
+        <div class="a">SOC 2 Type I available today. HIPAA mapping (<a href="/hipaa-mapping">/hipaa-mapping</a>) and a signed BAA (<a href="/baa">/baa</a>) ship on Business. Explicit doors for healthcare, finance, legal, defense, and EU/sovereign deployments. PII redaction (text, image, audio) on by default at the gateway.</div>
       </details>
       <details>
         <summary>Will my model drift after I deploy it?</summary>
         <div class="a">Every compile carries a K-score. The runtime computes a fresh K-score from production responses and alerts when it drops. <a href="/drift">/drift</a> shows the recipe: snapshot at compile, detect on every batch, recompile from fresh captures when the verdict moves out of "within."</div>
       </details>
       <details>
-        <summary>How do I integrate kolm into an existing CI/CD pipeline?</summary>
-        <div class="a">There's a first-party GitHub Action (<code>kolm-ai/kolm-action</code>) and a GitLab template. The compile step runs in the pipeline against the captures committed to the repo, the resulting <code>.kolm</code> is uploaded as a release artifact, and the Ed25519 signature is checked by the runtime on download. Examples at <a href="/docs/ci-cd">/docs/ci-cd</a>.</div>
-      </details>
-      <details>
-        <summary>Can I use my own teacher model?</summary>
-        <div class="a">Yes. Any OpenAI-compatible or Anthropic-compatible endpoint can be a teacher: a hosted vLLM, an SGLang deployment, a TRT-LLM server, an Ollama on a workstation, or your own internal proxy. Set <code>--teacher http://your.endpoint/v1</code> and kolm will call it during compile. Anthropic-shape endpoints work too with <code>--teacher-protocol anthropic</code>.</div>
-      </details>
-      <details>
-        <summary>What students do you support?</summary>
-        <div class="a">As of May 2026: Qwen2.5 0.5B, 3B, 7B, 14B, 32B; Llama-3 8B and 70B; Mistral-7B; Mixtral-8x7B; Gemma-2 9B and 27B; Phi-3 mini and medium. Adding a new student is a config entry and a tokenizer template; happy to add yours if the weights are publicly licensed.</div>
-      </details>
-      <details>
-        <summary>How big is the <code>.kolm</code> for a 7B model?</summary>
-        <div class="a">5.2 GB at INT4 (NF4 + double), 8.1 GB at INT8, 14.2 GB at BF16. The artifact format is one zstd-compressed file with the weights at level 19, plus a few KB of spec, eval, receipts, and Ed25519 sidecar. Inspection of any artifact: <code>kolm inspect file.kolm</code>.</div>
-      </details>
-      <details>
-        <summary>What's the smallest server that can run a 7B INT4?</summary>
-        <div class="a">A single A10G (24 GB VRAM) handles 4 concurrent requests at ~22 tok/s each, drawing about 130 W under load. A laptop with 16 GB RAM runs the same artifact at ~9 tok/s via llama.cpp. We've also run it on a Raspberry Pi 5 (16 GB) at ~2 tok/s, mostly for the meme.</div>
-      </details>
-      <details>
-        <summary>How does kolm handle prompt injection or jailbreaks?</summary>
-        <div class="a">The gateway has a configurable injection filter (regex + ML classifier) you can turn on per-namespace. The compiler keeps the teacher's refusal behavior intact during distill, so a specialist doesn't lose its safety floor unless you specifically train it to. Full safety guide at <a href="/safety">/safety</a>.</div>
-      </details>
-      <details>
-        <summary>Can I expose a <code>.kolm</code> as an OpenAI-compatible server?</summary>
-        <div class="a">Yes. <code>kolm serve artifact.kolm --port 8080</code> exposes a POST <code>/v1/chat/completions</code> endpoint that speaks the OpenAI Chat Completions shape. Drop-in for any client that points at <code>OPENAI_BASE_URL</code>. Streaming, tool-use, and JSON-mode all supported.</div>
-      </details>
-      <details>
-        <summary>Does kolm support tool use and function calling?</summary>
-        <div class="a">Yes for runtime; OpenAI <code>tools</code> and Anthropic <code>tool_use</code> shapes both pass through the gateway and are emitted by <code>kolm serve</code>. For distill, you can include tool calls in the captures; the student learns to emit the same tool calls in the same shape. Bake-off scores tool-call-shape match separately from text match.</div>
-      </details>
-      <details>
-        <summary>What's the upgrade path for an artifact when the format evolves?</summary>
-        <div class="a">Artifacts carry a version pin (<code>version: kolm-1</code>). The runtime supports current + previous major. When we bump to <code>kolm-2</code>, the CLI ships a <code>kolm migrate</code> verb that rewraps the weights into the new shell without re-training. Older artifacts keep working; new ones get new features.</div>
-      </details>
-      <details>
-        <summary>How do I export my data if I leave kolm?</summary>
-        <div class="a"><code>kolm account export</code> writes a JSONL of every capture, every artifact, every receipt, every registry row, and every audit-log entry. Apache-2.0 license + open artifact format means the data is yours forever; you can rebuild the same compile elsewhere from the export. We make leaving easy on purpose.</div>
-      </details>
-      <details>
-        <summary>What about RAG? Vector stores? Embeddings?</summary>
-        <div class="a">Kolm doesn't ship a vector store. The compiler is for "learn to answer my domain"; RAG is for "look up facts in my corpus." They compose: put the kolm artifact behind your RAG pipeline (LangChain, LlamaIndex, your own), so the retrieved chunks feed into a model that's already specialized to your shape. We pair well with pgvector, Weaviate, LanceDB, and Pinecone.</div>
-      </details>
-      <details>
-        <summary>What happens if the gateway is down? What's the fallback?</summary>
-        <div class="a">The SDK has a built-in fallback list. If <code>api.kolm.ai</code> is unreachable, it can either fail closed (default for compile, doctor) or fall back to a configured direct provider (default for runtime). You can also self-host the gateway in your VPC and use the hosted one only as a backup. Status: <a href="/status">/status</a>.</div>
-      </details>
-      <details>
-        <summary>Why "kolm"? What does it mean?</summary>
-        <div class="a">Short for Kolmogorov, after the mathematician who introduced algorithmic complexity (Kolmogorov complexity, 1965): the shortest program that produces a given output. Distillation is the same idea: compress the parts of a frontier model that matter for your job, and discard the rest.</div>
-      </details>
-      <details>
-        <summary>Is kolm a single founder side project?</summary>
-        <div class="a">No. Kolm is a small team (currently 9 engineers + 1 designer + 1 GTM) backed by lead investors who let us publish a public roadmap and a public test count. We've shipped weekly since Wave 144 (December 2024) and write a public changelog. Headcount and funding details at <a href="/about">/about</a>.</div>
-      </details>
-      <details>
-        <summary>What if I just want the gateway, not the compiler?</summary>
-        <div class="a">Use it. The gateway alone is a strong OpenRouter replacement: failover, edge redaction, OpenAI/Anthropic compat, per-namespace metering. You can ignore captures and compile entirely. The pricing tiers stay the same; you just don't use most of the surface.</div>
+        <summary>How is this different from "fine-tune a small model"?</summary>
+        <div class="a">Fine-tuning is one step of compile. Kolm wraps capture (where do the rows come from?), distill (which student? which teacher? what loss?), quantize (verified roundtrip), eval (frozen at compile), package (one file), sign (Ed25519), and verify (registry + receipt). The value is the wiring.</div>
       </details>
       <details>
         <summary>What if I just want to verify someone else's <code>.kolm</code>?</summary>
         <div class="a">Free, no signup. <code>curl https://kolm.ai/v1/verify/&lt;cid&gt;</code> returns the registry row. <code>kolm verify file.kolm</code> verifies an artifact locally. <code>kolm verify --receipt &lt;receipt.json&gt;</code> verifies a response. All three work without an API key.</div>
       </details>
       <details>
-        <summary>Does kolm work with my model serving framework?</summary>
-        <div class="a">If your framework speaks OpenAI Chat Completions or Anthropic Messages, yes. Tested: vLLM, SGLang, TGI, TRT-LLM, Fireworks, Together, Groq, llama.cpp server, Ollama, Replicate, LM Studio. If yours isn't here, <a href="/contact">tell us</a> and we'll add an adapter.</div>
-      </details>
-      <details>
-        <summary>How is this different from "fine-tune a small model"?</summary>
-        <div class="a">Fine-tuning is one step of compile. Kolm wraps capture (where do the training rows come from?), distill (which student? which teacher? what loss?), quantize (verified roundtrip), eval (frozen at compile), package (one file), sign (Ed25519), and verify (registry + receipt). The value is the wiring, not any single piece.</div>
-      </details>
-      <details>
-        <summary>Can I run kolm on Windows?</summary>
-        <div class="a">Yes. The CLI ships as a signed Windows binary (winget + direct download). Compile-on-Windows works with WSL or with native CUDA for NVIDIA GPUs. The runtime works in native PowerShell. Air-gap install for Windows-only environments is on the roadmap; today, Topology D is Linux-first.</div>
+        <summary>How do I export my data if I leave kolm?</summary>
+        <div class="a"><code>kolm account export</code> writes a JSONL of every capture, every artifact, every receipt, every registry row, and every audit-log entry. Apache-2.0 license + open artifact format means the data is yours forever; rebuild the same compile elsewhere from the export.</div>
       </details>
       <details>
         <summary>How do I cancel my plan?</summary>
@@ -2723,67 +2587,27 @@ document.body.innerText = r.text;
     <div class="home-faq">
       <details>
         <summary>Where is kolm incorporated and where are you headquartered?</summary>
-        <div class="a">Kolm Inc., Delaware C-Corp (US), headquartered in San Francisco. EU entity Kolm Europe B.V. (Netherlands) handles EU data-processor responsibilities for sovereign deploys.</div>
+        <div class="a">Kolm Inc., Delaware C-Corp (US), HQ in San Francisco. EU entity Kolm Europe B.V. (Netherlands) handles EU data-processor responsibilities for sovereign deploys.</div>
       </details>
       <details>
         <summary>Who are your subprocessors?</summary>
-        <div class="a">Live list at <a href="/subprocessors">/subprocessors</a>. As of May 2026: Vercel (hosting), Cloudflare R2 (object storage), Anthropic and OpenAI (as fallthrough model providers, optional), Datadog (telemetry), Stripe (billing), Plain (support). Customers on Topology B or D have zero subprocessors.</div>
+        <div class="a">Live list at <a href="/subprocessors">/subprocessors</a>. As of May 2026: Vercel (hosting), Cloudflare R2 (object storage), Anthropic and OpenAI (fallthrough model providers, optional), Datadog (telemetry), Stripe (billing). Customers on Topology B or D have zero subprocessors.</div>
       </details>
       <details>
-        <summary>What is your DPA process? GDPR compliance?</summary>
-        <div class="a">Standard DPA at <a href="/dpa">/dpa</a>; customers can sign in-app via the dashboard. Standard Contractual Clauses included. DPIA template at <a href="/dpia">/dpia</a>. EU data residency available on Business; counsel: Bird &amp; Bird (EU).</div>
-      </details>
-      <details>
-        <summary>Do you have a SOC 2 report?</summary>
-        <div class="a">Yes, SOC 2 Type I (November 2025, A-LIGN). Bridge letter available. Type II in observation, targeting Q3 2026. Request via <a href="/security#reports">/security#reports</a>.</div>
-      </details>
-      <details>
-        <summary>What is your HIPAA stance?</summary>
-        <div class="a">HIPAA mapping shipped (<a href="/hipaa-mapping">/hipaa-mapping</a>). Signed BAA available on the Business tier. PHI never leaves the customer tenant when deployed in Topology B or D. Counsel: Cooley LLP.</div>
-      </details>
-      <details>
-        <summary>What about ISO 27001?</summary>
-        <div class="a">Annex A control mapping shipped (<a href="/iso-27001">/iso-27001</a>). Stage 1 audit complete; Stage 2 scheduled Q4 2026 with Schellman. Certificate expected end of 2026.</div>
-      </details>
-      <details>
-        <summary>How long do you retain customer data?</summary>
-        <div class="a">Captures: indefinite (customer-controlled, deletable via API). Audit log: 7 years on Business, 90 days on Pro, 30 days on Free. Billing data: 7 years (US tax requirement). All retention windows customer-overridable upward; downward only by request.</div>
-      </details>
-      <details>
-        <summary>Are model weights ever shared with third parties?</summary>
-        <div class="a">No. Weights from open models you distill from remain under their original license (Apache-2.0, Llama-3 Community, etc.); the fine-tuned delta and the sealed <code>.kolm</code> belong to the customer. Kolm never accesses, copies, or shares either.</div>
+        <summary>Do you have SOC 2 and HIPAA?</summary>
+        <div class="a">SOC 2 Type I (November 2025, A-LIGN); Type II in observation, targeting Q3 2026. HIPAA mapping shipped (<a href="/hipaa-mapping">/hipaa-mapping</a>) and a signed BAA available on Business. PHI never leaves the customer tenant when deployed in Topology B or D.</div>
       </details>
       <details>
         <summary>What happens to my data if kolm shuts down?</summary>
-        <div class="a">90-day notice in your dashboard, your inbox, and on the status page. <code>kolm account export</code> works through the wind-down window. The open-source stack (Apache-2.0) keeps working forever; you can self-host the gateway, the compiler, the registry, and the runtime without kolm Inc. The artifact format is open and documented.</div>
+        <div class="a">90-day notice in your dashboard, your inbox, and on the status page. <code>kolm account export</code> works through the wind-down window. The open-source stack (Apache-2.0) keeps working forever; self-host the gateway, the compiler, the registry, and the runtime without kolm Inc. The artifact format is open and documented.</div>
       </details>
       <details>
-        <summary>Do you have cyber insurance?</summary>
-        <div class="a">Yes. $5M cyber liability + tech E&amp;O via Coalition. Certificate of insurance on request via <a href="mailto:legal@kolm.ai">legal@kolm.ai</a>.</div>
-      </details>
-      <details>
-        <summary>What is your uptime SLA?</summary>
-        <div class="a">Business tier: 99.9% monthly uptime (gateway + registry), 4-hour P1 response. Team: 99.5% best-effort. Pro and Free: best-effort with public status page. Past performance: 99.97% (last 30 days), 99.91% (last 90 days).</div>
-      </details>
-      <details>
-        <summary>Do you support custom MSA?</summary>
-        <div class="a">Yes on Business and Enterprise. Standard MSA at <a href="/msa">/msa</a>. Custom redlines through Ironclad; typical turnaround: 5 business days. Enterprise-only: custom payment terms, escrow, source-code escrow option.</div>
-      </details>
-      <details>
-        <summary>Will you sign our security questionnaire?</summary>
-        <div class="a">Yes. We use the CAIQ / SIG / Vanta auto-fill if your platform supports it (saves a week). For custom questionnaires we typically respond in 3 business days. Most common questionnaires already filled and available via <a href="/security#questionnaires">/security#questionnaires</a>.</div>
+        <summary>Will you sign our security questionnaire? Custom MSA?</summary>
+        <div class="a">Yes to both. CAIQ / SIG / Vanta auto-fill if your platform supports it; custom questionnaires in 3 business days. Standard MSA at <a href="/msa">/msa</a>; custom redlines via Ironclad, typical turnaround 5 business days. Enterprise: custom payment terms and source-code escrow option.</div>
       </details>
       <details>
         <summary>What about export control / ITAR / EAR?</summary>
         <div class="a">Kolm's hosted gateway is not designed for ITAR data; air-gap (Topology D) is. The CLI and runtimes are released under EAR99 (no special export license required). For ITAR / classified workloads, contact <a href="/gov">/gov</a>.</div>
-      </details>
-      <details>
-        <summary>Do you provide invoices in our currency?</summary>
-        <div class="a">USD by default. EUR, GBP, CAD, AUD, JPY supported on Business via Stripe. Wire transfer + NET-30 / NET-60 / NET-90 available on Business with credit approval. PO-based billing supported.</div>
-      </details>
-      <details>
-        <summary>Can we get a written reference call?</summary>
-        <div class="a">Yes, two per quarter on Business tier. Reach out via <a href="/contact">/contact</a> with the persona you'd like to talk to (engineering, security, compliance, procurement). References named on request after the call.</div>
       </details>
     </div>
   </div>
@@ -3148,43 +2972,6 @@ $ kolm verify --receipt last.receipt.json
 </section>
 
 <!-- ================== Press / mentions ================== -->
-<section class="ks-section" id="press" data-mobile-hide>
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">In the press</span>
-      <h2 class="ks-h2">External coverage and conference talks.</h2>
-      <p class="ks-lede">If you'd like to write about kolm, the press page has logos, a one-paragraph blurb, headshots, and a calendar link: <a href="/press" class="ks-accent" style="text-decoration:underline;text-underline-offset:3px;">/press</a>.</p>
-    </div>
-
-    <div class="home-clog">
-      <div class="home-clog-item">
-        <div class="home-clog-date">2026-05-15</div>
-        <div class="home-clog-body"><b>KubeCon EU 2026</b>: "Compile-once AI: how to put a model in an OCI artifact and stop paying per token" (Roy Schestowitz, 30 min).</div>
-      </div>
-      <div class="home-clog-item">
-        <div class="home-clog-date">2026-05-08</div>
-        <div class="home-clog-body"><b>The New Stack</b>: "Why this team built an AI compiler instead of a vector store" (interview, 18 min read).</div>
-      </div>
-      <div class="home-clog-item">
-        <div class="home-clog-date">2026-04-22</div>
-        <div class="home-clog-body"><b>Latent Space podcast</b>: "Kolm: the gateway is the dataset" (episode 142, 1h 09m).</div>
-      </div>
-      <div class="home-clog-item">
-        <div class="home-clog-date">2026-04-10</div>
-        <div class="home-clog-body"><b>Hacker News</b>: "Show HN: kolm, distill any frontier model to a 5 GB INT4 .kolm" reached #2, 612 comments, 2,400+ upvotes.</div>
-      </div>
-      <div class="home-clog-item">
-        <div class="home-clog-date">2026-03-28</div>
-        <div class="home-clog-body"><b>AI Engineer Summit (SF)</b>: "How we verify any response from a distilled model in 2 seconds" (25 min + Q&amp;A).</div>
-      </div>
-      <div class="home-clog-item">
-        <div class="home-clog-date">2026-03-14</div>
-        <div class="home-clog-body"><b>Information is Beautiful</b>: kolm's K-score viz featured in "Tools that make AI observable" (curated list, March 2026).</div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- ================== Trust + security deeper ================== -->
 <section class="ks-section" id="trust-deep" data-mobile-hide>
   <div class="ks-wrap">
