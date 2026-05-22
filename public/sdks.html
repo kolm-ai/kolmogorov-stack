@@ -1,450 +1,404 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>SDKs embed a .kolm in Python, Swift, Kotlin, React · kolm.ai</title>
-<meta name="description" content="Four native SDKs that load a signed .kolm and run it on-device. One API surface, verified backends. Python pip, SwiftPM, Gradle, react-native-kolm.">
-<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-
-<meta property="og:title" content="SDKs embed a .kolm in Python, Swift, Kotlin, React · kolm.ai">
-<meta property="og:description" content="Four native SDKs that load a signed .kolm and run it on-device. One API surface, verified backends. Python pip, SwiftPM, Gradle, react-native-kolm.">
-<meta property="og:type" content="website">
+<title>SDKs &middot; kolm.ai</title>
+<meta name="description" content="Six first-class kolm bindings. Node, Python, MCP server, VS Code, single-header C, and Rust. Apache-2.0. Same gateway, same verifier, same signed receipts.">
+<meta name="theme-color" content="#07090c">
+<meta property="og:title" content="SDKs &middot; kolm.ai">
+<meta property="og:description" content="Six first-class bindings for the kolm AI compiler. Node, Python, MCP, VS Code, C, Rust.">
+<meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/sdks">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="SDKs embed a .kolm in Python, Swift, Kotlin, React · kolm.ai">
-<meta name="twitter:description" content="Four native SDKs that load a signed .kolm and run it on-device. One API surface, verified backends. Python pip, SwiftPM, Gradle, react-native-kolm.">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
-
 <link rel="canonical" href="https://kolm.ai/sdks">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script type="application/ld+json">
-{
- "@context": "https://schema.org",
- "@graph": [
- {
- "@type": "TechArticle",
- "headline": "kolm SDKs",
- "description": "Native SDKs that load and run a signed .kolm artifact on Python, Swift, Kotlin, and React Native. CID verified, receipts emitted on every call.",
- "url": "https://kolm.ai/sdks",
- "author": {"@type": "Organization", "name": "Kolm"},
- "publisher": {"@type": "Organization", "name": "Kolm", "url": "https://kolm.ai"},
- "datePublished": "2026-05-14",
- "license": "https://opensource.org/licenses/MIT"
- },
- {
- "@type": "BreadcrumbList",
- "itemListElement": [
- {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
- {"@type": "ListItem", "position": 2, "name": "SDKs", "item": "https://kolm.ai/sdks"}
- ]
- }
- ]
-}
-</script>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
 <style>
- :root {
- --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
- --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
- --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
- --accent: #faf2e1; --accent-soft: rgba(236,231,220, 0.10);
- --good: #7ef0d2;
- --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
- --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
- }
- *{box-sizing:border-box}
- html,body{margin:0;padding:0}
- body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
- a{color:inherit;text-decoration:none}
- .wrap{max-width:1180px;margin:0 auto;padding:0 32px}
- @media (max-width:720px){.wrap{padding:0 20px}}
+  .sdk-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
+  .sdk-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
+  .sdk-hero h1 { margin: 0 0 var(--ks-4); font-size: clamp(36px, 5vw, 56px); font-weight: 560; letter-spacing: -0.02em; line-height: 1.05; color: var(--ks-ink); }
+  .sdk-hero h1 b { color: var(--ks-accent); font-weight: 560; }
+  .sdk-hero p.lede { margin: 0 0 var(--ks-6); font-size: 18px; line-height: 1.55; color: var(--ks-ink-2); max-width: 64ch; }
+  .sdk-hero .cta-row { display: flex; flex-wrap: wrap; gap: var(--ks-3); }
 
- header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
- header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px}
- header.site .left{display:flex;align-items:center;gap:36px}
- header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
- header.site .brand img{height:18px;width:18px}
- header.site .brand span{font-weight:500;font-size:16px}
- header.site nav{display:flex;gap:22px}
- header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
- header.site nav a:hover{color:var(--ink)}
- header.site .right{display:flex;align-items:center;gap:14px}
- header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
- header.site .right .cta{color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500}
- @media (max-width:720px){header.site nav{display:none}}
+  .sdk-section { padding: var(--ks-9) 0; border-bottom: 1px solid var(--ks-line-1); }
+  .sdk-section h2 { margin: 0 0 var(--ks-2); font-size: clamp(24px, 3vw, 32px); font-weight: 560; letter-spacing: -0.015em; color: var(--ks-ink); }
+  .sdk-section .sub { margin: 0 0 var(--ks-6); font-size: 15px; color: var(--ks-ink-3); max-width: 64ch; line-height: 1.6; }
 
- section.hero{padding:104px 0 56px}
- .eyebrow{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:.08em;text-transform:uppercase}
- h1{font-size:clamp(42px,5.4vw,68px);line-height:1.04;letter-spacing:-0.02em;margin:14px 0 24px;font-weight:500}
- .hero-sub{font-size:20px;color:var(--ink-mute);max-width:720px;line-height:1.55}
+  .sdk-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--ks-4); }
+  @media (max-width: 900px) { .sdk-grid { grid-template-columns: 1fr; } }
 
- .metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border:1px solid var(--line);border-radius:8px;margin:40px 0 0;font-family:var(--mono)}
- .metrics .cell{padding:18px 16px;border-right:1px solid var(--line)}
- .metrics .cell:last-child{border-right:none}
- .metrics .k{font-size:11px;color:var(--ink-faint);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
- .metrics .v{font-size:18px;color:var(--ink)}
- @media (max-width:720px){.metrics{grid-template-columns:1fr 1fr}.metrics .cell{border-right:none;border-bottom:1px solid var(--line)}}
+  .sdk-card { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); display: flex; flex-direction: column; gap: var(--ks-3); }
+  .sdk-card .row { display: flex; justify-content: space-between; align-items: baseline; gap: var(--ks-3); }
+  .sdk-card .tag { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-ink-3); }
+  .sdk-card .st { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--ks-line-2); }
+  .sdk-card .st.live { color: var(--ks-accent); border-color: var(--ks-accent-edge); }
+  .sdk-card .st.wip { color: #d6a65a; border-color: rgba(214,166,90,0.35); }
+  .sdk-card h3 { margin: 0; font-size: 18px; font-weight: 560; color: var(--ks-ink); letter-spacing: -0.005em; }
+  .sdk-card p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink-2); }
+  .sdk-card .install { font-family: var(--ks-mono); font-size: 12px; color: var(--ks-accent); background: #050607; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-sm); padding: var(--ks-2) var(--ks-3); margin: 0; overflow-x: auto; white-space: pre; }
+  .sdk-card .meta { display: flex; gap: var(--ks-3); flex-wrap: wrap; margin-top: var(--ks-2); font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); }
+  .sdk-card .meta span { padding: 2px 6px; border: 1px solid var(--ks-line-1); border-radius: 4px; }
+  .sdk-card a.more { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-accent); margin-top: auto; padding-top: var(--ks-3); border-top: 1px solid var(--ks-line-1); text-decoration: none; }
 
- section.lang{padding:56px 0;border-top:1px solid var(--line)}
- .lang-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:28px}
- @media (max-width:880px){.lang-grid{grid-template-columns:1fr}}
- .lang-card{border:1px solid var(--line);border-radius:8px;background:var(--bg-elev);padding:22px}
- .lang-card .lbl{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;display:flex;justify-content:space-between}
- .lang-card .lbl .install{color:var(--ink-mute);text-transform:none;letter-spacing:0}
- .lang-card h3{margin:0 0 6px;font-size:22px;font-weight:500;letter-spacing:-0.01em}
- .lang-card p{margin:0 0 14px;color:var(--ink-mute);font-size:14px;line-height:1.55}
- .lang-card pre{margin:0;padding:14px 16px;background:#080a0b;border:1px solid var(--line);border-radius:6px;font-family:var(--mono);font-size:12.5px;line-height:1.6;color:#e6e6e6;overflow-x:auto;white-space:pre}
- .lang-card .foot{margin-top:12px;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)}
- .lang-card .foot b{color:var(--ink-mute);font-weight:500}
+  .sdk-code { background: #050607; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); margin-top: var(--ks-4); }
+  .sdk-code pre { margin: 0; font-family: var(--ks-mono); font-size: 12.5px; line-height: 1.6; color: var(--ks-ink); overflow-x: auto; }
+  .sdk-code .c { color: var(--ks-ink-3); }
+  .sdk-code .k { color: var(--ks-accent); }
+  .sdk-code .s { color: #f4c666; }
+  .sdk-code .n { color: #d6a65a; }
+  .sdk-code .v { color: #b5bdb1; }
+  .sdk-code .title { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: var(--ks-3); }
 
- section.contract{padding:56px 0;border-top:1px solid var(--line)}
- .contract-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:24px}
- @media (max-width:880px){.contract-grid{grid-template-columns:1fr}}
- .contract-card{border:1px solid var(--line);border-radius:8px;padding:20px;background:var(--bg-elev)}
- .contract-card .lbl{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
- .contract-card h4{margin:0 0 8px;font-size:17px;font-weight:500}
- .contract-card p{margin:0;color:var(--ink-mute);font-size:14px;line-height:1.55}
-
- section.matrix{padding:56px 0;border-top:1px solid var(--line)}
- table.compat{width:100%;border-collapse:collapse;margin-top:24px;font-family:var(--mono);font-size:13px}
- table.compat th, table.compat td{border-bottom:1px solid var(--line);padding:14px 12px;text-align:left}
- table.compat th{color:var(--ink-faint);font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:500}
- table.compat td{color:var(--ink-mute)}
- table.compat td b{color:var(--ink);font-weight:500}
-
- section.closer{padding:80px 0 96px;border-top:1px solid var(--line)}
- .closer h2{font-size:32px;font-weight:500;margin:0 0 14px;letter-spacing:-0.01em}
- .closer p{color:var(--ink-mute);max-width:660px}
- .closer .row{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}
- .closer a.cta{background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:6px;font-size:14px;font-weight:500}
- .closer a.ghost{color:var(--ink-mute);padding:10px 18px;font-size:14px;border:1px solid var(--line);border-radius:6px}
-
- footer.site-footer{padding:48px 0 32px;border-top:1px solid var(--line);background:var(--bg-elev)}
- footer.site-footer .meta{font-family:var(--mono);font-size:12px;color:var(--ink-faint);margin-bottom:24px}
- footer.site-footer .links{display:grid;grid-template-columns:repeat(5,1fr);gap:32px;margin-bottom:24px}
- @media (max-width:880px){footer.site-footer .links{grid-template-columns:1fr 1fr}}
- footer.site-footer .col-h{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:10px}
- footer.site-footer a{display:block;color:var(--ink-mute);font-size:13px;padding:3px 0}
- footer.site-footer a:hover{color:var(--ink)}
- footer.site-footer .footer-tag{display:block;color:var(--ink-faint);font-size:12px}
-
-
- /* Light-mode overrides . cream paper ground, ink-on-paper text. */
- [data-theme=light]{
- --bg:#f7f4ec; --bg-elev:#fbf8f0; --bg-card:#ffffff;
- --line:rgba(12,14,16,0.10); --line-strong:rgba(12,14,16,0.18);
- --ink:#0c0e10; --ink-mute:#4b5158; --ink-faint:#737c73;
- --accent:#0c0e10; --accent-soft:rgba(10,136,98,0.10);
- --good:#0a8862; --bad:#c81e3a;
- }
- [data-theme=light] html,[data-theme=light] body{background:#f7f4ec;color:#0c0e10}
- [data-theme=light] header.site{background:rgba(247,244,236,0.88)}
- [data-theme=light] header.site .right .cta{background:#18171a;color:#f7f4ec}
- [data-theme=light] .closer a.cta{background:#18171a;color:#f7f4ec}
- [data-theme=light] footer.site-footer{background:#fbf8f0}
+  .cov-tbl { width: 100%; border-collapse: collapse; margin-top: var(--ks-4); font-size: 14px; }
+  .cov-tbl th, .cov-tbl td { padding: var(--ks-3) var(--ks-4); text-align: left; border-bottom: 1px solid var(--ks-line-1); color: var(--ks-ink-2); }
+  .cov-tbl th { background: var(--ks-bg-1); color: var(--ks-ink); font-weight: 540; font-size: 13px; letter-spacing: 0.02em; }
+  .cov-tbl td:first-child { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); }
+  .cov-tbl .y { color: var(--ks-accent); }
+  .cov-tbl .n { color: var(--ks-ink-3); }
 </style>
-<link rel="stylesheet" href="/styles.css">
- <link rel="stylesheet" href="/brand-refresh.css">
-<link rel="stylesheet" href="/surface-polish.css">
 </head>
-<body>
-<a class="skip-link" href="#main">Skip to content</a>
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<body class="ks">
 
-<header class="site-header">
- <div class="wrap">
- <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
-    <!-- KOLM_NAV_BEGIN (W221) -->
-    <nav class="site-nav" aria-label="Primary">
-    <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
-      <div class="mega-menu" role="menu" aria-label="product menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/product">Overview</a>
-          <a href="/quickstart">Quickstart</a>
-          <a href="/capture">Gateway</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training</a>
-          <a href="/distill">Distill</a>
-          <a href="/compile">Compile</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/runtimes">Runtimes</a>
-          <a href="/docs/devices">Devices</a>
-          <a href="/trust">Verify</a>
-        </div>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/k-score">K-score</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
       </div>
     </div>
-    <div class="nav-item nav-item--models has-mega">
-      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
-      <div class="mega-menu" role="menu" aria-label="models menu">
-        <div class="mega-col">
-          <p class="mega-h">Choose</p>
-          <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Build your own</a>
-          <a href="/docs/runtime">Runtime targets</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/compute">Compute</a>
-          <a href="/runtimes">Mobile and edge</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
-      <div class="mega-menu" role="menu" aria-label="docs menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/capture">API gateway</a>
-          <a href="/docs/cli">CLI</a>
-          <a href="/docs/sdk">SDKs</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Reference</p>
-          <a href="/docs">Docs home</a>
-          <a href="/docs/api">API reference</a>
-          <a href="/api">HTTP routes</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Operate</p>
-          <a href="/integrations">Integrations</a>
-          <a href="/docs/privacy">Privacy membrane</a>
-          <a href="/docs/datasets">Datasets</a>
-          <a href="/docs/distillation">Distillation</a>
-          <a href="/docs/verify">Verification</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
-      <div class="mega-menu" role="menu" aria-label="pricing menu">
-        <div class="mega-col">
-          <p class="mega-h">Buy</p>
-          <a href="/pricing">Plans</a>
-          <a href="/pricing#roi">ROI calculator</a>
-          <a href="/nonprofits">Nonprofits</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
-      <div class="mega-menu" role="menu" aria-label="enterprise menu">
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/enterprise">Enterprise overview</a>
-          <a href="/self-host">Self-host</a>
-          <a href="/airgap">Air-gap</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Trust</p>
-          <a href="/trust">Trust center</a>
-          <a href="/security">Security</a>
-          <a href="/compliance">Compliance</a>
-          <a href="/baa">BAA</a>
-        </div>
-      </div>
-    </div>
-    </nav>
-    <!-- KOLM_NAV_END (W221) -->
- <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
- <a href="/signin" class="ghost">sign in</a>
- <a href="/signup" class="cta">Get API Key &rarr;</a>
- </div>
- </div>
-</header>
+  </header>
+</div>
 
 <main id="main">
- <section class="hero">
- <div class="wrap">
- <div class="eyebrow">SDKs &middot; native runtime, four platforms</div>
- <h1>One artifact. Four loaders. Same receipt.</h1>
- <p class="hero-sub">A <code>.kolm</code> is a signed zip plus a tiny manifest. The SDKs do nothing magical: unpack, verify signature and CID, dispatch to the local runtime your platform already has. The contract is the artifact, not the wrapper.</p>
 
- <div class="metrics">
- <div class="cell"><div class="k">Languages</div><div class="v">Python &middot; Swift &middot; Kotlin &middot; TS</div></div>
- <div class="cell"><div class="k">Runtimes</div><div class="v">GGUF &middot; MLX &middot; CoreML &middot; ONNX &middot; ExecuTorch</div></div>
- <div class="cell"><div class="k">Verify</div><div class="v">Ed25519 + CID round-trip</div></div>
- <div class="cell"><div class="k">License</div><div class="v">MIT, no telemetry</div></div>
- </div>
- </div>
- </section>
+<section class="sdk-hero">
+  <div class="ks-wrap">
+    <div class="eyebrow">SDKs &middot; bindings for every developer surface</div>
+    <h1>Six first-class kolm bindings. <b>Install the CLI, ship a signed artifact.</b></h1>
+    <p class="lede">Node, Python, MCP server, VS Code, single-header C, and Rust. Apache-2.0. Every binding wraps the same kolm gateway, the same /v1 routes, and the same Ed25519 verifier. A developer or engineer can switch languages without changing the artifact behavior or the receipt schema.</p>
+    <div class="cta-row">
+      <a href="/quickstart" class="ks-btn ks-btn--primary">Install the CLI <span class="ks-btn-arrow">&rarr;</span></a>
+      <a href="/api" class="ks-btn ks-btn--ghost">REST API reference</a>
+      <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener" class="ks-btn ks-btn--ghost">Source on GitHub</a>
+    </div>
+  </div>
+</section>
 
- <section class="lang">
- <div class="wrap">
- <div class="eyebrow">Embed it</div>
- <h2 style="font-size:28px;font-weight:500;margin:6px 0 0;letter-spacing:-0.01em">Pick a language. Three lines.</h2>
+<section class="sdk-section" id="overview">
+  <div class="ks-wrap">
+    <h2>Honest scope across the six SDKs</h2>
+    <p class="sub">Coverage is intentionally uneven. Node and Python wrap every /v1/* route. MCP and VS Code wrap the verbs a Claude-resident developer actually uses. C and Rust wrap the verifier path because that is what regulated and embedded deployments need to verify a .kolm artifact without a heavy runtime.</p>
+    <table class="cov-tbl">
+      <thead>
+        <tr><th>Binding</th><th>Auth</th><th>Capture</th><th>Distill</th><th>Compile</th><th>Score</th><th>Verify</th><th>Streaming</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>@kolm/node</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td></tr>
+        <tr><td>kolm-py</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td></tr>
+        <tr><td>MCP server</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td><td class="n">host</td></tr>
+        <tr><td>VS Code</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td></tr>
+        <tr><td>C (kolm.h)</td><td class="y">yes</td><td class="y">yes</td><td class="n">no</td><td class="n">no</td><td class="n">no</td><td class="y">yes</td><td class="n">no</td></tr>
+        <tr><td>Rust (kolm)</td><td class="y">yes</td><td class="y">yes</td><td class="n">no</td><td class="n">no</td><td class="n">no</td><td class="y">yes</td><td class="n">no</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
 
- <div class="lang-grid">
- <div class="lang-card" id="python">
- <div class="lbl"><span>Python &middot; <code>kolm</code></span><span class="install">npm i -g github:sneaky-hippo/kolm-stack</span></div>
- <h3>Python</h3>
- <p>Backend autopick: GGUF (llama-cpp-python) &rarr; ONNX (onnxruntime) &rarr; remote (<code>KOLM_RUNTIME_URL</code>) &rarr; transformers + peft. Set <code>verify="strict"</code> to fail closed on signature mismatch.</p>
-<pre>from kolm import load
+<section class="sdk-section" id="cards">
+  <div class="ks-wrap">
+    <h2>Pick your SDK</h2>
+    <p class="sub">Every install line below is real. Every entry points at the same backend; the artifact and the receipt are identical across bindings.</p>
+    <div class="sdk-grid">
 
-model = load("phi-redactor.kolm", verify="on")
-out = model.predict("Patient John Doe, MRN 8847-21.")
-print(out.text) # "Patient [NAME], MRN [MRN]."
-print(out.receipt.cid) # cidv1:sha256:1bcf2323...</pre>
- <div class="foot"><b>min py</b> 3.10 &middot; <b>extras</b> [gguf, onnx, transformers]</div>
- </div>
+      <article class="sdk-card" id="node">
+        <div class="row"><span class="tag">@kolm/node</span><span class="st live">Live</span></div>
+        <h3>Node.js</h3>
+        <p>The reference binding. Promise-based, types included, OAuth + API key auth, streaming responses, retry policies with exponential backoff. The VS Code extension is built on top.</p>
+        <pre class="install">npm install @kolm/sdk</pre>
+        <div class="meta">
+          <span>node &gt;= 18</span>
+          <span>esm + cjs</span>
+          <span>typescript</span>
+          <span>covers all /v1/*</span>
+        </div>
+        <a href="/api" class="more">/api reference &rarr;</a>
+      </article>
 
- <div class="lang-card" id="swift">
- <div class="lbl"><span>Swift &middot; <code>Kolm</code></span><span class="install">SwiftPM dep</span></div>
- <h3>Swift</h3>
- <p>Backend pick by extension: CoreML (<code>.mlpackage</code>) &rarr; MLX (<code>.mlx</code>) &rarr; GGUF (<code>.gguf</code>). The signed zip unpacks once into <code>Library/Caches/kolm/&lt;cid&gt;/</code> and reuses on subsequent loads.</p>
-<pre>import Kolm
+      <article class="sdk-card" id="python">
+        <div class="row"><span class="tag">kolm-py</span><span class="st live">Live</span></div>
+        <h3>Python</h3>
+        <p>Sync and async clients in one package. Type-stubbed. Integrates with pytest for honesty fixtures. Used inside the distill runner itself. Install from PyPI or from the open-source repo.</p>
+        <pre class="install">pip install kolm
+# or from source:
+pip install git+https://github.com/sneaky-hippo/kolmogorov-stack@main#subdirectory=sdk/python</pre>
+        <div class="meta">
+          <span>python &gt;= 3.10</span>
+          <span>sync + async</span>
+          <span>pytest plugin</span>
+        </div>
+        <a href="/api" class="more">/api reference &rarr;</a>
+      </article>
 
-let model = try await Kolm.load(named: "phi-redactor")
-let out = try await model.predict("Patient John Doe...")
-print(out.text)</pre>
- <div class="foot"><b>min</b> iOS 17 / macOS 14 &middot; <b>unzip</b> ditto on macOS, ZIPFoundation on iOS</div>
- </div>
+      <article class="sdk-card" id="mcp">
+        <div class="row"><span class="tag">MCP server</span><span class="st live">Live</span></div>
+        <h3>Model Context Protocol server</h3>
+        <p>For Claude Desktop and any IDE that speaks MCP. Exposes the kolm verbs as MCP tools so a Claude-resident developer can capture, distill, compile, score, and verify without leaving the editor.</p>
+        <pre class="install">npm install -g @kolm/mcp-server
+# then add to your MCP host config</pre>
+        <div class="meta">
+          <span>node &gt;= 18</span>
+          <span>stdio transport</span>
+          <span>Claude Desktop</span>
+          <span>IDE Claude</span>
+        </div>
+        <a href="/integrations/claude-code" class="more">/integrations/claude-code &rarr;</a>
+      </article>
 
- <div class="lang-card" id="kotlin">
- <div class="lbl"><span>Kotlin &middot; <code>ai.kolm:kolm</code></span><span class="install">implementation()</span></div>
- <h3>Kotlin / Android</h3>
- <p>Bring your own runtime AAR (llama.cpp via jllama, ExecuTorch, or onnxruntime-android). The SDK prints crisp errors when the runtime is missing instead of failing silently at first inference.</p>
-<pre>import ai.kolm.Kolm
+      <article class="sdk-card" id="vscode">
+        <div class="row"><span class="tag">VS Code</span><span class="st live">Live</span></div>
+        <h3>VS Code extension</h3>
+        <p>Distill, score, and verify from inside the editor. Status-bar K-score on the active .kolm file. Inline distill commands. Receipt explorer. CI integration mirrors the command-palette verbs.</p>
+        <pre class="install">code --install-extension kolm.kolm-vscode</pre>
+        <div class="meta">
+          <span>vscode &gt;= 1.90</span>
+          <span>built on @kolm/node</span>
+          <span>status-bar K-score</span>
+        </div>
+        <a href="/integrations/vscode" class="more">/integrations/vscode &rarr;</a>
+      </article>
 
-val model = Kolm.load(context, "phi-redactor.kolm")
-val out = model.predict("Patient John Doe...")
-Log.d("kolm", out.text)</pre>
- <div class="foot"><b>min</b> Android 8 (API 26) &middot; <b>verify</b> javax.crypto.Mac HmacSHA256</div>
- </div>
+      <article class="sdk-card" id="c">
+        <div class="row"><span class="tag">stb-style</span><span class="st live">Live</span></div>
+        <h3>C (single-header)</h3>
+        <p>One header file, <code>kolm.h</code>. Define <code>KOLM_IMPLEMENTATION</code> in exactly one translation unit. libcurl-backed. No JSON parser bundled (pair with cJSON). For embedded contexts and CLI integrators who do not want a runtime.</p>
+        <pre class="install">curl -L -o kolm.h https://github.com/sneaky-hippo/kolmogorov-stack/raw/main/sdk/c/kolm.h
+# in one .c file: #define KOLM_IMPLEMENTATION before #include "kolm.h"</pre>
+        <div class="meta">
+          <span>c99</span>
+          <span>libcurl</span>
+          <span>sdk/c/ in repo</span>
+          <span>verify-first</span>
+        </div>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack/tree/main/sdk/c" rel="noopener" class="more">sdk/c/ on GitHub &rarr;</a>
+      </article>
 
- <div class="lang-card" id="rn">
- <div class="lbl"><span>React Native &middot; <code>react-native-kolm</code></span><span class="install">yarn add react-native-kolm</span></div>
- <h3>React Native</h3>
- <p>Thin TS wrapper around the Swift / Kotlin backends. HTTPS sources cache via <code>react-native-fs</code> under <code>CachesDirectoryPath</code>. One API surface, two native paths.</p>
-<pre>import Kolm from 'react-native-kolm';
+      <article class="sdk-card" id="rust">
+        <div class="row"><span class="tag">crates.io</span><span class="st live">Live</span></div>
+        <h3>Rust</h3>
+        <p>The <code>kolm</code> crate v0.1.0. ureq-sync transport, no async runtime required. Honest error envelope: no <code>is_success()</code> sugar hiding 4xx; raw status and body surfaced to the caller.</p>
+        <pre class="install">cargo add kolm
+# or in Cargo.toml: kolm = "0.1"</pre>
+        <div class="meta">
+          <span>rust stable</span>
+          <span>ureq sync</span>
+          <span>examples/whoami.rs</span>
+          <span>sdk/rust/ in repo</span>
+        </div>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack/tree/main/sdk/rust" rel="noopener" class="more">sdk/rust/ on GitHub &rarr;</a>
+      </article>
 
-await Kolm.setConfig({ verify: 'on' });
-const model = await Kolm.load(require('./phi-redactor.kolm'));
-const out = await model.predict('Patient John Doe...');
-console.log(out.text);</pre>
- <div class="foot"><b>min RN</b> 0.74 &middot; <b>deps</b> react-native-fs (optional for HTTPS sources)</div>
- </div>
- </div>
- </div>
- </section>
+    </div>
+  </div>
+</section>
 
- <section class="contract">
- <div class="wrap">
- <div class="eyebrow">What every SDK guarantees</div>
- <h2 style="font-size:28px;font-weight:500;margin:6px 0 0;letter-spacing:-0.01em">The contract isn&rsquo;t the wrapper, it&rsquo;s the artifact.</h2>
- <div class="contract-grid">
- <div class="contract-card">
- <div class="lbl">load()</div>
- <h4>Verify before run</h4>
- <p>Ed25519 on the receipt body + CID round-trip on canonical hashes. <code>verify="strict"</code> raises on mismatch. <code>"on"</code> warns. <code>"off"</code> for trusted local artifacts.</p>
- </div>
- <div class="contract-card">
- <div class="lbl">predict()</div>
- <h4>Receipt per call</h4>
- <p>Every output carries CID + credential_id + input_hash + output_hash + runtime_version + issued_at. Forward the credential to downstream systems; they can verify provenance without our infrastructure.</p>
- </div>
- <div class="contract-card">
- <div class="lbl">dispose()</div>
- <h4>Bounded lifetime</h4>
- <p>Backends release memory on dispose. The cached unpack stays on disk for fast re-load; clear with <code>Kolm.clearCache()</code> when shipping a new artifact CID.</p>
- </div>
- </div>
- </div>
- </section>
+<section class="sdk-section" id="hello">
+  <div class="ks-wrap">
+    <h2>The same four-line whoami across the bindings</h2>
+    <p class="sub">Every kolm SDK starts the same way: read <code>KOLM_API_KEY</code> from the environment, hit <code>/v1/whoami</code>, print the authenticated tenant. If this works, every other route works.</p>
 
- <section class="matrix">
- <div class="wrap">
- <div class="eyebrow">Backend matrix</div>
- <h2 style="font-size:28px;font-weight:500;margin:6px 0 0;letter-spacing:-0.01em">Which runtime each platform reaches for, in order.</h2>
- <table class="compat">
- <thead>
- <tr><th>SDK</th><th>First</th><th>Second</th><th>Third</th><th>Fallback</th></tr>
- </thead>
- <tbody>
- <tr><td><b>Python</b></td><td>GGUF (llama.cpp)</td><td>ONNX Runtime</td><td>remote (<code>KOLM_RUNTIME_URL</code>)</td><td>transformers + peft</td></tr>
- <tr><td><b>Swift</b></td><td>CoreML (<code>.mlpackage</code>)</td><td>MLX</td><td>GGUF</td><td>error with required dep</td></tr>
- <tr><td><b>Kotlin</b></td><td>llama.cpp (jllama)</td><td>ExecuTorch</td><td>ONNX Runtime Mobile</td><td>error with required AAR</td></tr>
- <tr><td><b>React Native</b></td><td>Swift backend (iOS)</td><td>Kotlin backend (Android)</td><td>WASM (web fallback)</td><td>error with required peer dep</td></tr>
- </tbody>
- </table>
- </div>
- </section>
+    <div class="sdk-code">
+      <div class="title">Node &middot; @kolm/sdk</div>
+<pre><span class="k">import</span> { Kolm } <span class="k">from</span> <span class="s">"@kolm/sdk"</span>;
+<span class="k">const</span> client = <span class="k">new</span> Kolm({ apiKey: process.env.KOLM_API_KEY });
+<span class="k">const</span> me = <span class="k">await</span> client.whoami();
+console.log(me.tenant_id, me.plan);</pre>
+    </div>
 
- <section class="closer">
- <div class="wrap">
- <h2>The signed artifact is the API.</h2>
- <p>The SDKs are deliberately thin. Verify, dispatch, return a typed result. If we shipped a magical wrapper, the artifact would lose its meaning. The receipt would lose its meaning. So we ship the smallest possible loader and let the file do the talking.</p>
- <div class="row">
- <a class="cta" href="/quickstart">Compile your first .kolm</a>
- <a class="ghost" href="/docs#sdks">SDK docs</a>
- <a class="ghost" href="/case-studies">Live showcase</a>
- </div>
- </div>
- </section>
+    <div class="sdk-code">
+      <div class="title">Python &middot; kolm-py</div>
+<pre><span class="k">from</span> kolm <span class="k">import</span> Kolm
+client = Kolm(api_key=os.environ[<span class="s">"KOLM_API_KEY"</span>])
+me = client.whoami()
+print(me.tenant_id, me.plan)</pre>
+    </div>
+
+    <div class="sdk-code">
+      <div class="title">Rust &middot; kolm crate v0.1.0</div>
+<pre><span class="k">use</span> kolm::Client;
+<span class="k">let</span> c = Client::from_env()?;
+<span class="k">let</span> me = c.whoami()?;
+<span class="k">println!</span>(<span class="s">"{} {}"</span>, me.tenant_id, me.plan);</pre>
+    </div>
+
+    <div class="sdk-code">
+      <div class="title">C &middot; kolm.h (stb-style)</div>
+<pre><span class="c">#define KOLM_IMPLEMENTATION</span>
+<span class="c">#include</span> <span class="s">"kolm.h"</span>
+kolm_client_t *c = kolm_client_from_env();
+kolm_response_t r = kolm_whoami(c);
+printf(<span class="s">"%d %s\n"</span>, r.status, r.body);</pre>
+    </div>
+  </div>
+</section>
+
+<section class="sdk-section" id="contract">
+  <div class="ks-wrap">
+    <h2>The contract every binding honors</h2>
+    <p class="sub">Six bindings, one contract. Promises a developer or engineer can rely on regardless of which language they pick.</p>
+    <div class="sdk-grid">
+      <div class="sdk-card">
+        <div class="row"><span class="tag">envelope</span><span class="st live">Stable</span></div>
+        <h3>Honest error envelope</h3>
+        <p>Every response surfaces raw HTTP status plus the structured body <code>{ok, code, error, data}</code>. No binding hides a 4xx behind a success boolean. The C and Rust bindings expose status and body directly so callers see what the server said.</p>
+      </div>
+      <div class="sdk-card">
+        <div class="row"><span class="tag">auth</span><span class="st live">Stable</span></div>
+        <h3>x-kolm-api-key header</h3>
+        <p>One header, one key. Read from <code>KOLM_API_KEY</code> by default. Override with explicit constructor args when calling from a multi-tenant runner. The CLI writes the key to <code>~/.kolm/credentials</code> on <code>kolm login</code>.</p>
+      </div>
+      <div class="sdk-card">
+        <div class="row"><span class="tag">base-url</span><span class="st live">Stable</span></div>
+        <h3>KOLM_BASE_URL override</h3>
+        <p>Point any SDK at a self-hosted gateway by setting <code>KOLM_BASE_URL=https://kolm.internal</code>. The hosted default is <code>https://kolm.ai</code>. Useful for VPC-resident installs and air-gapped CI.</p>
+      </div>
+      <div class="sdk-card">
+        <div class="row"><span class="tag">verifier</span><span class="st live">Stable</span></div>
+        <h3>Verify without a runtime</h3>
+        <p>Every binding can call <code>/v1/verify/:cid</code> against a public CID. The C and Rust bindings exist precisely so a regulated deployment can verify a .kolm artifact from inside an audit pipeline without a Node or Python dependency.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sdk-section" id="install">
+  <div class="ks-wrap">
+    <h2>What the CLI install actually does</h2>
+    <p class="sub">The CLI is the canonical surface. Every SDK is a thin client over the same /v1 routes the CLI talks to. Install once, use any binding.</p>
+    <div class="sdk-code">
+      <div class="title">From zero to a signed receipt</div>
+<pre><span class="c"># 1. Install the CLI (npm-distributed; Node 18+ required)</span>
+npm install -g @kolm/sdk
+
+<span class="c"># 2. Authenticate and write credentials to ~/.kolm/credentials</span>
+kolm signup
+kolm whoami
+<span class="v">&rarr; tenant_4d3d8db6c820 plan=hacker</span>
+
+<span class="c"># 3. Capture a call through the gateway</span>
+kolm capture log --input <span class="s">"draft a cover letter"</span> --output <span class="s">"..."</span>
+
+<span class="c"># 4. Distill, compile, score, verify (CLI verbs == SDK methods)</span>
+kolm distill from-captures --base qwen2.5-3b-instruct
+kolm compile --target gguf --precision int4
+kolm score --evals ks-finance-2026-q2
+kolm verify ./cm-claims-v4.kolm</pre>
+    </div>
+  </div>
+</section>
+
+<section class="sdk-section" id="reach">
+  <div class="ks-wrap">
+    <h2>Where the SDKs live</h2>
+    <p class="sub">Every binding ships in the open-source monorepo. File a bug, send a PR, or vendor the source.</p>
+    <div class="sdk-grid">
+      <div class="sdk-card">
+        <h3>Monorepo on GitHub</h3>
+        <p>Node: <code>sdk/node/</code>. Python: <code>sdk/python/</code>. MCP: <code>sdk/mcp/</code>. VS Code: <code>sdk/vscode/</code>. C: <code>sdk/c/</code>. Rust: <code>sdk/rust/</code>. All Apache-2.0.</p>
+        <p><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener" style="color:var(--ks-accent)">github.com/sneaky-hippo/kolmogorov-stack &rarr;</a></p>
+      </div>
+      <div class="sdk-card">
+        <h3>REST routes the SDKs wrap</h3>
+        <p>The kolm gateway exposes 355+ routes under <code>/v1/*</code>. Every SDK is a typed client over those routes. See the <a href="/api" style="color:var(--ks-accent)">/api</a> reference for the full surface.</p>
+      </div>
+      <div class="sdk-card">
+        <h3>Quickstart in 10 minutes</h3>
+        <p>The fastest way to confirm an SDK is wired correctly is to install the CLI, sign up, and run <code>kolm whoami</code>. The quickstart walks you through it.</p>
+        <p><a href="/quickstart" style="color:var(--ks-accent)">/quickstart &rarr;</a></p>
+      </div>
+      <div class="sdk-card">
+        <h3>Talk to a real engineer</h3>
+        <p>SDK questions, missing-route reports, regulated-deployment binding asks. <a href="/contact" style="color:var(--ks-accent)">/contact &rarr;</a> or open an issue on GitHub.</p>
+      </div>
+    </div>
+    <div style="margin-top:var(--ks-6); display:flex; flex-wrap:wrap; gap:var(--ks-3)">
+      <a href="/quickstart" class="ks-btn ks-btn--primary">Install the CLI <span class="ks-btn-arrow">&rarr;</span></a>
+      <a href="/api" class="ks-btn ks-btn--ghost">Browse the REST API</a>
+      <a href="/integrations" class="ks-btn ks-btn--ghost">See first-party integrations</a>
+      <a href="/security" class="ks-btn ks-btn--ghost">Security posture</a>
+    </div>
+  </div>
+</section>
+
 </main>
 
-<footer class="site">
- <div class="wrap" style="max-width: 1180px;">
- <div class="footer-grid">
- <div>
- <h4><span data-kolm-icon="compile" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Build</h4>
- <a href="/quickstart">Quickstart</a>
- <a href="/docs">Docs</a>
- <a href="/spec/rs-1">RS-1 spec</a>
- <a href="/openapi.json">OpenAPI</a>
- <a href="/cli">CLI</a>
- </div>
- <div>
- <h4><span data-kolm-icon="deploy" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Deploy</h4>
- <a href="/compute">Backends</a>
- <a href="/airgap">Air-gap</a>
- <a href="/integrations/cloudflare">Cloudflare</a>
- <a href="/integrations/github-actions">GitHub Actions</a>
- <a href="/integrations/gitlab-ci">GitLab CI</a>
- </div>
- <div>
- <h4>Proof</h4>
- <a href="/verify-prod">Verify a .kolm</a>
- <a href="/badge">Embed badge</a>
- <a href="/benchmarks">Benchmarks</a>
- <a href="/compare">Compare</a>
- <a href="/registry">Registry</a>
- <a href="/case-studies">Case studies</a>
- </div>
- <div>
- <h4><span data-kolm-icon="layers" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Industries</h4>
- <a href="/healthcare">Healthcare</a>
- <a href="/finance">Finance</a>
- <a href="/legal">Legal</a>
- <a href="/compliance">Compliance</a>
- <a href="/insure">Insurance</a>
- </div>
- <div>
- <h4><span data-kolm-icon="user" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Company</h4>
- <a href="/pricing">Pricing</a>
- <a href="/changelog">Changelog</a>
- <a href="/security">Security</a>
- <a href="/community">Community</a>
- <a href="/contact">Contact</a>
- </div>
- </div>
- <div class="footer-tag">
- <span>kolm.ai - Made with .kolm - Apache-2.0</span>
- <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
- </div>
- </div>
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/faq">FAQ</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/enterprise">Enterprise</a>
+        <a href="/manifesto">Manifesto</a>
+        <a href="/why-kolm">Why kolm</a>
+        <a href="/contact">Contact</a>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
 </footer>
-<script src="/nav.js" defer></script>
-<script src="/kolm-svg.js" defer></script>
+
+<!-- w220-claim w260-trust w271-frontier w335-claim w373-receipts w408-quantize-matrix -->
 </body>
 </html>

@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>kolm docs · quickstart, API, SDKs, runtime · kolm.ai</title>
+<meta name="description" content="Build with kolm: quickstarts, API reference, SDK guides, runtime docs, receipts, distillation, privacy, storage, evals, troubleshooting, FAQ, and changelog.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta property="og:title" content="kolm docs · quickstart, API, SDKs, runtime">
+<meta property="og:description" content="Build with kolm: quickstarts, API reference, SDK guides, runtime docs, receipts, distillation, privacy, storage, evals, troubleshooting, FAQ, and changelog.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/docs">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:title" content="kolm docs · quickstart, API, SDKs, runtime">
+<meta name="twitter:description" content="Build with kolm: quickstarts, API reference, SDK guides, runtime docs, receipts, distillation, privacy, storage, evals, troubleshooting, FAQ, and changelog.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://kolm.ai/docs">
+<link rel="alternate" hreflang="en" href="https://kolm.ai/docs">
+<link rel="alternate" hreflang="ja" href="https://kolm.ai/docs/ja">
+<link rel="alternate" hreflang="zh" href="https://kolm.ai/docs/zh">
+<link rel="alternate" hreflang="es" href="https://kolm.ai/docs/es">
+<link rel="alternate" hreflang="fr" href="https://kolm.ai/docs/fr">
+<link rel="alternate" hreflang="de" href="https://kolm.ai/docs/de">
+<link rel="alternate" hreflang="ko" href="https://kolm.ai/docs/ko">
+<link rel="alternate" hreflang="x-default" href="https://kolm.ai/docs">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<style>
+/* Docs landing. Quickstarts, reference, concepts, and help. */
+ .docs-wrap{max-width:1100px;margin:0 auto;padding:48px 32px 96px}
+ @media (max-width:720px){.docs-wrap{padding:28px 18px 64px}}
+ .docs-wrap h1{font-size:clamp(40px,5.6vw,76px);line-height:0.98;letter-spacing:-0.03em;margin:0 0 14px;font-weight:500;color:var(--ink)}
+ .docs-wrap .lede{font-size:17px;line-height:1.6;color:var(--ink-mute);max-width:64ch;margin:0 0 12px}
+ .docs-wrap .crumbs{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:0.08em;text-transform:uppercase;margin:0 0 22px}
+ .docs-wrap h2{font-size:22px;font-weight:500;margin:56px 0 14px;letter-spacing:-0.005em;color:var(--ink);scroll-margin-top:80px}
+ .docs-wrap h3{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint);font-weight:500;margin:28px 0 10px}
+ .docs-wrap p{color:var(--ink-mute);font-size:14.5px;line-height:1.6;max-width:64ch;margin:0 0 12px}
+ .zone-eye{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-faint);margin-right:10px}
+ .zone-eye::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--good,#7ef0d2);box-shadow:0 0 6px rgba(126,240,210,0.5)}
+
+ /* Card grid (used by quickstarts, concepts, help). */
+ .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin:14px 0 8px}
+ .docs-card{display:block;text-decoration:none;border:1px solid var(--line);border-radius:10px;padding:18px 18px;background:rgba(255,255,255,0.01);transition:border-color .15s,background .15s}
+ .docs-card:hover{border-color:var(--accent);background:rgba(236,231,220,0.04)}
+ .docs-card .dc-eye{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:6px}
+ .docs-card .dc-t{font-size:15px;font-weight:500;color:var(--ink);line-height:1.3;margin-bottom:4px}
+ .docs-card .dc-s{font-size:12.5px;line-height:1.45;color:var(--ink-mute)}
+
+ /* CLI reference grid: dense 4-column verb table. */
+ .verb-cat{margin:20px 0 8px}
+ .verb-cat-h{font-family:var(--mono);font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 8px}
+ .verb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px 14px}
+ .verb-grid a{display:flex;flex-direction:column;text-decoration:none;padding:8px 10px;border-radius:6px;border:1px solid transparent;background:rgba(255,255,255,0.01);transition:border-color .12s,background .12s}
+ .verb-grid a:hover{border-color:var(--line-strong);background:rgba(236,231,220,0.04)}
+ .verb-grid .vb-n{font-family:var(--mono);font-size:12.5px;color:var(--ink);letter-spacing:-0.01em}
+ .verb-grid .vb-d{font-size:11.5px;color:var(--ink-mute);line-height:1.35;margin-top:2px}
+
+ /* Reference sub-grid (api + cli reference + connectors + spec). */
+ .ref-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin:14px 0 4px}
+ .ref-card{display:block;text-decoration:none;border:1px solid var(--line);border-radius:10px;padding:20px 20px;background:rgba(255,255,255,0.015);transition:border-color .15s,background .15s}
+ .ref-card:hover{border-color:var(--accent);background:rgba(236,231,220,0.05)}
+ .ref-card .rc-eye{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px}
+ .ref-card .rc-t{font-size:16px;font-weight:500;color:var(--ink);line-height:1.3;margin-bottom:6px}
+ .ref-card .rc-s{font-size:13px;line-height:1.5;color:var(--ink-mute)}
+
+ /* Light theme. */
+ [data-theme=light] .docs-card{background:#ffffff;border-color:rgba(12,14,16,0.08);box-shadow:0 1px 2px rgba(12,14,16,0.03)}
+ [data-theme=light] .docs-card:hover{background:#f9faf9;border-color:#0a8862}
+ [data-theme=light] .docs-card .dc-eye{color:#737c73}
+ [data-theme=light] .docs-card .dc-t{color:#0c0e10}
+ [data-theme=light] .docs-card .dc-s{color:#4b5158}
+ [data-theme=light] .verb-grid a{background:#ffffff;border-color:rgba(12,14,16,0.06)}
+ [data-theme=light] .verb-grid a:hover{background:#f9faf9;border-color:rgba(12,14,16,0.16)}
+ [data-theme=light] .verb-grid .vb-n{color:#0c0e10}
+ [data-theme=light] .verb-grid .vb-d{color:#4b5158}
+ [data-theme=light] .verb-cat-h{color:#737c73}
+ [data-theme=light] .ref-card{background:#ffffff;border-color:rgba(12,14,16,0.08);box-shadow:0 1px 2px rgba(12,14,16,0.03)}
+ [data-theme=light] .ref-card:hover{background:#f9faf9;border-color:#0a8862}
+ [data-theme=light] .ref-card .rc-eye{color:#737c73}
+ [data-theme=light] .ref-card .rc-t{color:#0c0e10}
+ [data-theme=light] .ref-card .rc-s{color:#4b5158}
+ [data-theme=light] .docs-wrap .crumbs{color:#737c73}
+ [data-theme=light] .docs-wrap h3{color:#737c73}
+ [data-theme=light] .zone-eye{color:#737c73}
+ [data-theme=light] .zone-eye::before{background:#0a8862;box-shadow:0 0 6px rgba(10,136,98,0.4)}
+
+/* Reference tables: HTTP routes, CLI verbs by category, env, errors. */
+ .ref-table{width:100%;border-collapse:collapse;margin:8px 0 24px;font-family:var(--mono);font-size:12.5px}
+ .ref-table th{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);color:var(--ink-faint);font-weight:500;text-transform:uppercase;font-size:10.5px;letter-spacing:0.08em}
+ .ref-table td{padding:8px 12px;border-bottom:1px solid var(--line);color:var(--ink-mute);vertical-align:top;line-height:1.5}
+ .ref-table tr:last-child td{border-bottom:none}
+ .ref-table code{font-family:var(--mono);font-size:12.5px;color:var(--ink);background:rgba(236,231,220,0.04);padding:1px 5px;border-radius:3px}
+ .ref-table a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--line-strong,#444)}
+ .ref-table a:hover{color:var(--accent)}
+ [data-theme=light] .ref-table th{color:#737c73;border-bottom-color:rgba(12,14,16,0.08)}
+ [data-theme=light] .ref-table td{color:#4b5158;border-bottom-color:rgba(12,14,16,0.06)}
+ [data-theme=light] .ref-table code{color:#0c0e10;background:#f4f5f3}
+ [data-theme=light] .ref-table a{color:#0c0e10}
+ [data-theme=light] .ref-table a:hover{color:#0a8862}
+
+ @media (max-width:720px){
+ footer.site .footer-grid > div { gap: 8px !important; }
+ footer.site .footer-grid a { display: inline-flex; align-items: center; min-height: 32px; padding: 4px 0; line-height: 1.3; }
+ .ref-table{font-size:11.5px}
+ .ref-table th,.ref-table td{padding:6px 8px}
+ }
+</style>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "WebPage",
+ "name": "Docs",
+ "url": "https://kolm.ai/docs",
+ "description": "Build with kolm: quickstarts, API reference, SDK guides, runtime docs, receipts, distillation, privacy, storage, evals, troubleshooting, FAQ, and changelog.",
+ "isPartOf": { "@type": "WebSite", "name": "kolm.ai", "url": "https://kolm.ai/" }
+}
+</script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ { "@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/" },
+ { "@type": "ListItem", "position": 2, "name": "Docs", "item": "https://kolm.ai/docs" }
+ ]
+}
+</script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "SiteNavigationElement",
+ "name": "Docs map",
+ "hasPart": [
+ { "@type": "WebPage", "name": "Quickstart", "url": "https://kolm.ai/quickstart" },
+ { "@type": "WebPage", "name": "CLI quickstart", "url": "https://kolm.ai/quickstart/cli" },
+ { "@type": "WebPage", "name": "API quickstart", "url": "https://kolm.ai/quickstart/api" },
+ { "@type": "WebPage", "name": "SDK quickstart", "url": "https://kolm.ai/quickstart/sdk" },
+ { "@type": "WebPage", "name": "Embed quickstart", "url": "https://kolm.ai/quickstart/embed" },
+ { "@type": "WebPage", "name": "API reference", "url": "https://kolm.ai/docs/api" },
+ { "@type": "WebPage", "name": "CLI reference", "url": "https://kolm.ai/docs/cli" },
+ { "@type": "WebPage", "name": "Receipts spec (RS-1)", "url": "https://kolm.ai/spec/rs-1" },
+ { "@type": "WebPage", "name": "Connectors", "url": "https://kolm.ai/docs/connectors" },
+ { "@type": "WebPage", "name": "Distillation", "url": "https://kolm.ai/docs/distill" },
+ { "@type": "WebPage", "name": "Runtime", "url": "https://kolm.ai/docs/runtime" },
+ { "@type": "WebPage", "name": "Evals", "url": "https://kolm.ai/docs/evals" },
+ { "@type": "WebPage", "name": "Privacy", "url": "https://kolm.ai/docs/privacy" },
+ { "@type": "WebPage", "name": "Storage", "url": "https://kolm.ai/docs/storage" },
+ { "@type": "WebPage", "name": "Datasets", "url": "https://kolm.ai/docs/datasets" },
+ { "@type": "WebPage", "name": "Glossary", "url": "https://kolm.ai/docs/glossary" },
+ { "@type": "WebPage", "name": "Troubleshooting", "url": "https://kolm.ai/docs/troubleshooting" },
+ { "@type": "WebPage", "name": "FAQ", "url": "https://kolm.ai/faq" },
+ { "@type": "WebPage", "name": "Changelog", "url": "https://kolm.ai/changelog" },
+ { "@type": "WebPage", "name": "Research", "url": "https://kolm.ai/research" },
+ { "@type": "WebPage", "name": "Training", "url": "https://kolm.ai/training" }
+ ]
+}
+</script>
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand"><span>kolm.ai</span></a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
+</header>
+
+<main id="main" class="docs-wrap" data-w401="landing">
+
+ <p class="crumbs">kolm.ai / docs</p>
+
+<h1>Build with Kolm.</h1>
+ <p class="lede">Route one model call first. Then capture data, protect it, distill specialists, compile artifacts, run anywhere, and verify every release.</p>
+
+<!-- ====================== QUICKSTARTS ====================== -->
+<h2 id="quickstarts"><span class="zone-eye">Start</span>Quickstarts</h2>
+<p>Pick the shortest path to value.</p>
+ <div class="card-grid" data-zone="quickstarts">
+ <a class="docs-card" href="/quickstart">
+ <div class="dc-eye">overview</div>
+ <div class="dc-t">Quickstart</div>
+ <div class="dc-s">Capture, compile, ship, audit. The complete first-artifact loop.</div>
+ </a>
+ <a class="docs-card" href="/quickstart/cli">
+ <div class="dc-eye">cli</div>
+ <div class="dc-t">CLI quickstart</div>
+ <div class="dc-s">Five verbs to get from production calls to a signed .kolm.</div>
+ </a>
+ <a class="docs-card" href="/quickstart/api">
+ <div class="dc-eye">api</div>
+ <div class="dc-t">API quickstart</div>
+ <div class="dc-s">15-endpoint cheat-sheet. Capture, compile, run, verify over HTTPS.</div>
+ </a>
+ <a class="docs-card" href="/quickstart/sdk">
+ <div class="dc-eye">sdk</div>
+ <div class="dc-t">SDK quickstart</div>
+ <div class="dc-s">TypeScript and Python tabs. One client, every kolm route. Use <code>kolm sdk</code> for local SDK inventory.</div>
+ </a>
+ <a class="docs-card" href="/quickstart/embed">
+ <div class="dc-eye">embed</div>
+ <div class="dc-t">Embed quickstart</div>
+ <div class="dc-s">Three target cards. iOS, Android, web. Verify-before-bundle.</div>
+ </a>
+ </div>
+
+<!-- ====================== REFERENCE ====================== -->
+<h2 id="reference"><span class="zone-eye">Reference</span>APIs, CLI, SDKs</h2>
+<p>Routes, commands, SDKs, and receipt specs in one place.</p>
+
+ <div class="ref-grid" data-zone="reference-top">
+ <a class="ref-card" href="/docs/api">
+ <div class="rc-eye">REST</div>
+ <div class="rc-t">API reference</div>
+<div class="rc-s">Current generated REST surface. Auth, capture, compile, distill, runtime, receipts, billing.</div>
+ </a>
+ <a class="ref-card" href="/docs/cli">
+ <div class="rc-eye">terminal</div>
+ <div class="rc-t">CLI reference</div>
+ <div class="rc-s">Command docs with examples, flags, exit codes, and JSON envelopes. Jump straight to a verb in the grid below.</div>
+ </a>
+ <a class="ref-card" href="/spec/rs-1">
+ <div class="rc-eye">spec</div>
+ <div class="rc-t">Receipts spec (RS-1)</div>
+ <div class="rc-s">The signed-receipt format every artifact, capture, and replay emits. Ed25519, BLAKE3, chain root.</div>
+ </a>
+ <a class="ref-card" href="/docs/connectors">
+ <div class="rc-eye">connectors</div>
+ <div class="rc-t">Connectors</div>
+ <div class="rc-s">Proxy, MCP, OpenAI-compat, hooks. Wire kolm in front of any model SDK in one line.</div>
+ </a>
+ </div>
+
+<h3 id="cli-grid">CLI commands</h3>
+<p>Grouped by the job: capture, build, run, verify, operate.</p>
+
+ <div class="verb-cat">
+ <p class="verb-cat-h">capture &middot; ingest production calls</p>
+ <div class="verb-grid" data-cat="capture">
+ <a href="/docs/cli/capture"><span class="vb-n">kolm capture</span><span class="vb-d">Drop-in proxy for OpenAI and Anthropic. Captures (input, output) into a namespace.</span></a>
+ <a href="/docs/cli/tail"><span class="vb-n">kolm tail</span><span class="vb-d">Stream live capture rows from your kolm cloud over Server-Sent Events.</span></a>
+ <a href="/docs/cli/labels"><span class="vb-n">kolm labels</span><span class="vb-d">Download a captured namespace corpus as JSONL or JSON.</span></a>
+ <a href="/docs/cli/seeds"><span class="vb-n">kolm seeds</span><span class="vb-d">Scaffold and manage seeds.jsonl training corpora with curated templates.</span></a>
+ </div>
+ </div>
+
+ <div class="verb-cat">
+ <p class="verb-cat-h">build &middot; compile, distill, train</p>
+ <div class="verb-grid" data-cat="build">
+ <a href="/docs/cli/compile"><span class="vb-n">kolm compile</span><span class="vb-d">Build a .kolm artifact from a cloud-synthesised task or a local JSON spec.</span></a>
+ <a href="/docs/cli/distill"><span class="vb-n">kolm distill</span><span class="vb-d">Promote a reviewed namespace into a local student candidate via the trainer bridge.</span></a>
+ <a href="/docs/cli/tune"><span class="vb-n">kolm tune</span><span class="vb-d">Evolve a local adapter or rule artifact from skeleton to a promoted revision.</span></a>
+ <a href="/docs/cli/pipeline"><span class="vb-n">kolm pipeline</span><span class="vb-d">End-to-end compile pipeline. Tokenize, distill, compile, full.</span></a>
+ <a href="/docs/cli/quantize"><span class="vb-n">kolm quantize</span><span class="vb-d">Quantize a model checkpoint to int4 / int8 / GPTQ / AWQ.</span></a>
+ <a href="/research/methods-2026-q2"><span class="vb-n">kolm spec-decode</span><span class="vb-d">Train EAGLE-style speculative-decoding pairs through an external trainer bridge.</span></a>
+ <a href="/docs/cli/nl"><span class="vb-n">kolm nl</span><span class="vb-d">Natural-language recipe scaffolder. Plain English in, kolm spec out.</span></a>
+ <a href="/docs/cli/init-agent"><span class="vb-n">kolm init-agent</span><span class="vb-d">Script-first project scaffolder. Templates for chatbot, redactor, classifier.</span></a>
+ </div>
+ </div>
+
+ <div class="verb-cat">
+ <p class="verb-cat-h">run &middot; execute and serve</p>
+ <div class="verb-grid" data-cat="run">
+ <a href="/docs/cli/run"><span class="vb-n">kolm run</span><span class="vb-d">Execute a .kolm artifact locally against a JSON or string input.</span></a>
+ <a href="/docs/cli/serve"><span class="vb-n">kolm serve</span><span class="vb-d">Expose .kolm artifacts as MCP tools or as an OpenAI-compatible HTTP server.</span></a>
+ <a href="/docs/cli/replay"><span class="vb-n">kolm replay</span><span class="vb-d">Replay captured prompts against a compiled artifact and report per-row diffs.</span></a>
+ <a href="/docs/cli/runtime"><span class="vb-n">kolm runtime</span><span class="vb-d">Per-call policy decider plus runtime-target packaging for cross-compile.</span></a>
+ <a href="/docs/cli/rag"><span class="vb-n">kolm rag</span><span class="vb-d">Airgapped local retrieval (BM25, no embedder, no network).</span></a>
+ <a href="/docs/cli/demo"><span class="vb-n">kolm demo</span><span class="vb-d">Canonical close-the-loop demo. Seeds the lake with ~150 example pairs.</span></a>
+ </div>
+ </div>
+
+ <div class="verb-cat">
+ <p class="verb-cat-h">evaluate &middot; bench, gate, score</p>
+ <div class="verb-grid" data-cat="eval">
+ <a href="/docs/cli/eval"><span class="vb-n">kolm eval</span><span class="vb-d">Re-run a .kolm's embedded eval set and show per-case pass / fail.</span></a>
+ <a href="/docs/cli/bench"><span class="vb-n">kolm bench</span><span class="vb-d">Reproducible benchmark for a .kolm artifact or a public reproducer suite.</span></a>
+ <a href="/docs/cli/loop"><span class="vb-n">kolm loop</span><span class="vb-d">Run the value-loop smoke. Five rungs, green or red.</span></a>
+ <a href="/docs/cli/fix"><span class="vb-n">kolm fix</span><span class="vb-d">Auto-iterate on a failing artifact. Show failing cases and suggest seed fixes.</span></a>
+ </div>
+ </div>
+
+ <div class="verb-cat">
+ <p class="verb-cat-h">inspect &middot; read-only sanity</p>
+ <div class="verb-grid" data-cat="inspect">
+ <a href="/docs/cli/list"><span class="vb-n">kolm list</span><span class="vb-d">Show every local .kolm artifact.</span></a>
+ <a href="/docs/cli/inspect"><span class="vb-n">kolm inspect</span><span class="vb-d">Show what a .kolm artifact is in plain text. Manifest, recipes, signature.</span></a>
+ <a href="/docs/cli/inspection"><span class="vb-n">kolm inspection</span><span class="vb-d">The five read-only verbs you reach for when something is wrong.</span></a>
+ <a href="/docs/cli/explain"><span class="vb-n">kolm explain</span><span class="vb-d">Plain-English description of a .kolm artifact.</span></a>
+ <a href="/docs/cli/artifacts"><span class="vb-n">kolm artifacts</span><span class="vb-d">List, show, and diff compiled .kolm artifacts in your tenant.</span></a>
+ <a href="/docs/cli/logs"><span class="vb-n">kolm logs</span><span class="vb-d">Tail the local run-history log.</span></a>
+ <a href="/docs/cli/status"><span class="vb-n">kolm status</span><span class="vb-d">One-line snapshot of where you are. No network.</span></a>
+ <a href="/docs/cli/what"><span class="vb-n">kolm what</span><span class="vb-d">One-screen snapshot of where you are. Artifacts, captures, jobs, next steps.</span></a>
+ <a href="/docs/cli/next"><span class="vb-n">kolm next</span><span class="vb-d">Recommended next action. 1-3 high-value verbs with copy-paste commands.</span></a>
+ <a href="/docs/cli/do"><span class="vb-n">kolm do</span><span class="vb-d">Natural-language intent dispatcher. Plain English in, kolm verb out.</span></a>
+ </div>
+ </div>
+
+ <div class="verb-cat">
+ <p class="verb-cat-h">ops &middot; jobs, sessions, mesh</p>
+ <div class="verb-grid" data-cat="ops">
+ <a href="/docs/cli/jobs"><span class="vb-n">kolm jobs</span><span class="vb-d">List, show, and prune the local job registry.</span></a>
+ <a href="/docs/cli/watch"><span class="vb-n">kolm watch</span><span class="vb-d">Tail a job log file with rotation-safe follow semantics.</span></a>
+ <a href="/docs/cli/sessions"><span class="vb-n">kolm sessions</span><span class="vb-d">List, inspect, kill, or prune detached worker sessions.</span></a>
+ <a href="/docs/cli/resume"><span class="vb-n">kolm resume</span><span class="vb-d">Re-attach to a detached compile, distill, eval, or serve session.</span></a>
+ <a href="/docs/cli/rescue"><span class="vb-n">kolm rescue</span><span class="vb-d">Re-parent an orphaned kolm child PID under a new controlling tty.</span></a>
+ <a href="/docs/cli/agent"><span class="vb-n">kolm agent</span><span class="vb-d">Build, inspect, merge, and export self-growing Hermes-style tool-use agents.</span></a>
+ <a href="/docs/cli/mesh"><span class="vb-n">kolm mesh</span><span class="vb-d">Discover Tailscale-joined kolm nodes and plan cluster assignment.</span></a>
+ <a href="/docs/cli/team"><span class="vb-n">kolm team</span><span class="vb-d">Multi-tenant workspace management. Create teams, invite members, manage roles.</span></a>
+ <a href="/docs/cli/profile"><span class="vb-n">kolm profile</span><span class="vb-d">Multi-tenant config switcher. Save and activate per-tenant kolm settings.</span></a>
+ <a href="/docs/cli/cloud"><span class="vb-n">kolm cloud</span><span class="vb-d">Real GPU fine-tunes and bring-your-own-cloud deploys.</span></a>
+ <a href="/docs/cli/sync"><span class="vb-n">kolm sync</span><span class="vb-d">Cloud-sync state and legacy git-mirror push / pull.</span></a>
+ <a href="/docs/cli/keys"><span class="vb-n">kolm keys</span><span class="vb-d">Signing-key rotation lifecycle. Generates Ed25519 keypairs.</span></a>
+ <a href="/docs/cli/models"><span class="vb-n">kolm models</span><span class="vb-d">Inspect the frontier catalog and pre-cache model weights from HuggingFace.</span></a>
+ <a href="/docs/cli/doctor"><span class="vb-n">kolm doctor</span><span class="vb-d">Sanity-check the environment. Detect GPU. Run the value-loop smoke.</span></a>
+ <a href="/docs/cli/health"><span class="vb-n">kolm health</span><span class="vb-d">Ping the configured cloud base and report round-trip timing.</span></a>
+ </div>
+ </div>
+
+<!-- ====================== CONCEPTS ====================== -->
+ <h2 id="concepts"><span class="zone-eye">Learn</span>Concepts</h2>
+ <p>The moving parts behind gateway, datasets, distillation, artifacts, runtime, and receipts.</p>
+ <div class="card-grid" data-zone="concepts">
+ <a class="docs-card" href="/docs/distill">
+ <div class="dc-eye">concept</div>
+ <div class="dc-t">Distillation</div>
+ <div class="dc-s">How captured production calls become reviewed data, evals, and local student candidates.</div>
+ </a>
+ <a class="docs-card" href="/docs/runtime">
+ <div class="dc-eye">concept</div>
+ <div class="dc-t">Runtime</div>
+ <div class="dc-s">Per-call policy decider. Picks teacher, student, or hybrid by confidence and cost.</div>
+ </a>
+ <a class="docs-card" href="/docs/evals">
+ <div class="dc-eye">concept</div>
+ <div class="dc-t">Evals</div>
+ <div class="dc-s">K-score, gates, holdouts. How kolm decides an artifact is good enough to ship.</div>
+ </a>
+ <a class="docs-card" href="/docs/privacy">
+ <div class="dc-eye">concept</div>
+ <div class="dc-t">Privacy membrane</div>
+ <div class="dc-s">19-class redaction. PHI, PII, PCI, credentials, secrets. Runs before any prompt leaves your edge.</div>
+ </a>
+ <a class="docs-card" href="/docs/storage">
+ <div class="dc-eye">concept</div>
+ <div class="dc-t">Storage</div>
+ <div class="dc-s">Durable capture stores. Postgres, KV, SQLite, files. Pick the driver that fits your stack.</div>
+ </a>
+ <a class="docs-card" href="/docs/datasets">
+ <div class="dc-eye">concept</div>
+ <div class="dc-t">Datasets</div>
+ <div class="dc-s">How seeds, captures, and holdouts compose into a reproducible training set.</div>
+ </a>
+ </div>
+
+<!-- ====================== HELP ====================== -->
+ <h2 id="help"><span class="zone-eye">Support</span>Help</h2>
+ <p>Debug setup, terms, webhooks, storage, and account access.</p>
+ <div class="card-grid" data-zone="help">
+ <a class="docs-card" href="/docs/glossary">
+ <div class="dc-eye">terms</div>
+ <div class="dc-t">Glossary</div>
+ <div class="dc-s">Gateway, artifact, capture, compile, distillation, K-score, receipt chain, sandbox, witness. Plain English.</div>
+ </a>
+ <a class="docs-card" href="/docs/troubleshooting">
+ <div class="dc-eye">when things break</div>
+ <div class="dc-t">Troubleshooting</div>
+ <div class="dc-s">HTTP 401, 403, 429, 503 capture-store, BYOC attestation, trainer OOM, compile dataset empty, K-score below gate.</div>
+ </a>
+ <a class="docs-card" href="/faq">
+ <div class="dc-eye">questions</div>
+ <div class="dc-t">FAQ</div>
+ <div class="dc-s">What is a .kolm? How does compile differ from fine-tune? Can I run fully offline?</div>
+ </a>
+ <a class="docs-card" href="/changelog">
+ <div class="dc-eye">history</div>
+ <div class="dc-t">Changelog</div>
+ <div class="dc-s">Every shipped wave. New verbs, new routes, deprecations, breaking changes.</div>
+ </a>
+ <a class="docs-card" href="/research">
+ <div class="dc-eye">papers</div>
+ <div class="dc-t">Research</div>
+ <div class="dc-s">The papers behind compile, distill, and K-score. Reproducible benchmarks included.</div>
+ </a>
+ <a class="docs-card" href="/training">
+ <div class="dc-eye">courses</div>
+ <div class="dc-t">Training</div>
+ <div class="dc-s">Self-serve courses for engineers, ML ops, and compliance leads. Free for verified.</div>
+ </a>
+ </div>
+
+<!-- ====================== REFERENCE TABLES ====================== -->
+ <h2 id="reference-tables"><span class="zone-eye">Tables</span>Fast lookup</h2>
+ <p>Routes, commands, env vars, errors, and policy terms for operators who already know the workflow.</p>
+
+ <h3 id="http-routes">Core HTTP routes</h3>
+ <table class="ref-table">
+ <thead><tr><th>Method</th><th>Path</th><th>Purpose</th><th>Auth</th></tr></thead>
+ <tbody>
+ <tr><td>POST</td><td><a href="/docs/api"><code>/v1/compile</code></a></td><td>Cloud compile of a task into a signed <code>.kolm</code> artifact.</td><td>Bearer</td></tr>
+ <tr><td>GET</td><td><a href="/docs/api"><code>/v1/compile/:id</code></a></td><td>Read a compile job. Returns status, K-score, artifact CID.</td><td>Bearer</td></tr>
+ <tr><td>POST</td><td><a href="/docs/api"><code>/v1/run</code></a></td><td>Execute a recipe or artifact against an input. Returns a signed receipt.</td><td>Bearer</td></tr>
+ <tr><td>POST</td><td><a href="/docs/api"><code>/v1/verify</code></a></td><td>Re-run the 7-check audit on an uploaded <code>.kolm</code>.</td><td>Bearer</td></tr>
+ <tr><td>GET</td><td><a href="/docs/api"><code>/v1/receipts/:hash/public</code></a></td><td>Read a public Ed25519-signed receipt chain by hash.</td><td>Public</td></tr>
+ <tr><td>GET</td><td><a href="/docs/api"><code>/v1/capture/stream</code></a></td><td>SSE live tail of new captures (auth + tenant + namespace scoped).</td><td>Bearer</td></tr>
+ <tr><td>POST</td><td><a href="/docs/api"><code>/v1/distill/from-captures</code></a></td><td>Promote N captured pairs into a recipe or specialist artifact.</td><td>Bearer</td></tr>
+ <tr><td>POST</td><td><a href="/docs/api"><code>/v1/replay</code></a></td><td>Replay captured prompts against a fresh artifact. Diff K + latency + cost.</td><td>Bearer</td></tr>
+ <tr><td>GET</td><td><a href="/docs/api"><code>/v1/artifacts</code></a></td><td>List artifacts. Filter by tenant, namespace, status.</td><td>Bearer</td></tr>
+ <tr><td>GET</td><td><a href="/docs/api"><code>/health</code></a></td><td>Liveness probe. 200 OK with build slug. Public.</td><td>Public</td></tr>
+ </tbody>
+ </table>
+ <p>Full route catalog at <a href="/docs/api">/docs/api</a> and <a href="/openapi.json">/openapi.json</a>. Every route is rate-limited per tenant and returns receipt-style envelopes.</p>
+
+ <h3 id="cli-categories">CLI verbs by category</h3>
+ <table class="ref-table">
+ <thead><tr><th>Category</th><th>Verbs</th><th>Doc</th></tr></thead>
+ <tbody>
+ <tr><td>Identity</td><td><code>login</code> <code>signup</code> <code>whoami</code> <code>config</code> <code>profile</code></td><td><a href="/docs/cli/whoami">/docs/cli/whoami</a></td></tr>
+ <tr><td>Build</td><td><code>init</code> <code>compile</code> <code>build</code> <code>train</code> <code>seeds</code> <code>nl</code></td><td><a href="/docs/cli">/docs/cli</a></td></tr>
+ <tr><td>Run</td><td><code>run</code> <code>inspect</code> <code>verify</code> <code>serve</code> <code>artifacts</code></td><td><a href="/docs/cli/verify">/docs/cli/verify</a></td></tr>
+ <tr><td>Capture loop</td><td><code>capture</code> <code>tail</code> <code>distill</code> <code>replay</code> <code>improve</code></td><td><a href="/captures">/captures</a></td></tr>
+ <tr><td>Models + HW</td><td><code>models</code> <code>quantize</code> <code>runtime</code> <code>device</code></td><td><a href="/models">/models</a></td></tr>
+ <tr><td>Distribution</td><td><code>install</code> <code>publish</code> <code>pull</code> <code>marketplace</code> <code>install-device</code></td><td><a href="/marketplace">/marketplace</a></td></tr>
+ <tr><td>State + sync</td><td><code>checkpoint</code> <code>import-chat</code> <code>merge</code> <code>sync</code> <code>jobs</code> <code>watch</code></td><td><a href="/docs/state">/docs/state</a></td></tr>
+ <tr><td>Health</td><td><code>doctor</code> <code>status</code> <code>health</code> <code>metrics</code> <code>support-bundle</code> <code>loop</code></td><td><a href="/status">/status</a></td></tr>
+ <tr><td>Agentic</td><td><code>do</code> <code>what</code> <code>next</code> <code>explain</code> <code>fix</code> <code>agent</code></td><td><a href="/docs/agent-guide">/docs/agent-guide</a></td></tr>
+ <tr><td>Foundations</td><td><code>tunnel</code> <code>cloud</code> <code>compute</code> <code>airgap</code> <code>team</code></td><td><a href="/foundations">/foundations</a></td></tr>
+ </tbody>
+ </table>
+
+ <h3 id="env-vars">Environment variables</h3>
+ <table class="ref-table">
+ <thead><tr><th>Variable</th><th>Effect</th><th>Default</th></tr></thead>
+ <tbody>
+ <tr><td><code>KOLM_BASE</code></td><td>Cloud endpoint. CLI and SDK read this first.</td><td><code>https://kolm.ai</code></td></tr>
+ <tr><td><code>KOLM_API_KEY</code></td><td>Bearer token. Overrides <code>~/.kolm/config.json</code>.</td><td>unset</td></tr>
+ <tr><td><code>KOLM_KEY</code></td><td>Alias for <code>KOLM_API_KEY</code>. CI safe-fail: empty value exits 3.</td><td>unset</td></tr>
+ <tr><td><code>KOLM_PROFILE</code></td><td>Pick a named profile saved via <code>kolm profile save</code>.</td><td><code>default</code></td></tr>
+ <tr><td><code>KOLM_DATA_DIR</code></td><td>Where SQLite, captures, and receipts persist on the server.</td><td><code>/var/kolm</code></td></tr>
+ <tr><td><code>KOLM_STORE_DRIVER</code></td><td><code>sqlite</code>, <code>vercel_postgres</code>, <code>vercel_kv</code>, or <code>file</code>.</td><td><code>sqlite</code></td></tr>
+ <tr><td><code>KOLM_DEBUG</code></td><td>Any non-empty value prints stack traces on errors.</td><td>unset</td></tr>
+ <tr><td><code>KOLM_NO_REST_HINT</code></td><td>Suppress the REST equivalent hint after run / verify.</td><td>unset</td></tr>
+ <tr><td><code>KOLM_OFFLINE</code></td><td>Force every verb to refuse network calls. For air-gapped CI.</td><td>unset</td></tr>
+ </tbody>
+ </table>
+
+ <h3 id="exit-codes">CLI exit codes</h3>
+ <table class="ref-table">
+ <thead><tr><th>Code</th><th>Meaning</th><th>Typical trigger</th></tr></thead>
+ <tbody>
+ <tr><td><code>0</code></td><td>Success</td><td>Verb completed cleanly.</td></tr>
+ <tr><td><code>1</code></td><td>Generic failure</td><td>HTTP non-2xx, unmet gate, verification mismatch.</td></tr>
+ <tr><td><code>2</code></td><td>Bad arguments / unreadable input</td><td>Missing required flag, malformed <code>.kolm</code> file.</td></tr>
+ <tr><td><code>3</code></td><td>Auth missing or rejected</td><td><code>KOLM_KEY</code> empty in CI, expired bearer.</td></tr>
+ <tr><td><code>4</code></td><td>Not found</td><td>Artifact id, namespace, or job id absent.</td></tr>
+ <tr><td><code>5</code></td><td>Conflict</td><td>Concurrent compile, registry name collision.</td></tr>
+ <tr><td><code>6</code></td><td>Quota exceeded</td><td>Plan cap on compiles, captures, or seats.</td></tr>
+ <tr><td><code>7</code></td><td>Capture store unavailable</td><td>Server returned 503 on a capture write.</td></tr>
+ </tbody>
+ </table>
+
+ <h3 id="receipt-headers">Receipt + durability response headers</h3>
+ <table class="ref-table">
+ <thead><tr><th>Header</th><th>Meaning</th></tr></thead>
+ <tbody>
+ <tr><td><code>x-kolm-capture-id</code></td><td>Stable id assigned to the capture row. Use this when filing a /v1/replay request.</td></tr>
+ <tr><td><code>x-kolm-capture-durable</code></td><td><code>true</code> if the row was committed to the configured durable store. Missing means the write did not persist and the client should retry.</td></tr>
+ <tr><td><code>x-kolm-capture-demo</code></td><td><code>true</code> when the response came from an anonymous demo endpoint. Receipt body carries <code>demo:true</code>.</td></tr>
+ <tr><td><code>x-kolm-distill-ready</code></td><td><code>true</code> once the namespace crosses 100 / 500 / 1,000 pairs (W215). Triggers downstream alerts.</td></tr>
+ <tr><td><code>x-kolm-distill-threshold</code></td><td>The threshold tier just crossed. One of <code>100</code>, <code>500</code>, <code>1000</code>.</td></tr>
+ <tr><td><code>x-kolm-build</code></td><td>Build slug. Matches the <code>sw.js</code> cache slug. Useful for client-side staleness checks.</td></tr>
+ <tr><td><code>x-kolm-tenant</code></td><td>Echo of the resolved tenant id from the bearer token. For audit.</td></tr>
+ </tbody>
+ </table>
+
+ <h3 id="artifact-layout">.kolm artifact layout</h3>
+ <table class="ref-table">
+ <thead><tr><th>Path inside <code>.kolm</code></th><th>Purpose</th></tr></thead>
+ <tbody>
+ <tr><td><code>manifest.json</code></td><td>Top-level manifest. Carries CID, K-score, gate, provenance, frozen-eval pointer.</td></tr>
+ <tr><td><code>manifest.sig</code></td><td>Ed25519 signature over <code>manifest.json</code>. Required.</td></tr>
+ <tr><td><code>recipes/*.json</code></td><td>Declarative recipes. Each is its own signed unit.</td></tr>
+ <tr><td><code>seeds.jsonl</code></td><td>Seed pairs used to compile. Reproducibility input.</td></tr>
+ <tr><td><code>holdout.jsonl</code></td><td>Holdout set scored against the gate. Disjoint from <code>seeds</code>.</td></tr>
+ <tr><td><code>receipts/*.json</code></td><td>Signature-linked receipts. Each receipt binds the previous receipt hash.</td></tr>
+ <tr><td><code>provenance.jwt</code></td><td>Actor key fingerprint, build host, CI run id. Verifiable independently.</td></tr>
+ <tr><td><code>README.md</code></td><td>Human-readable summary. Optional but recommended for marketplace listings.</td></tr>
+ </tbody>
+ </table>
+ <p>Full file-format spec at <a href="/spec/rs-1">/spec/rs-1</a>. The hosted verifier at <a href="/verify-prod">/verify-prod</a> reads this layout directly.</p>
+
+</main>
+
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4><span data-kolm-icon="compile" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="deploy" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/hub">Hub</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="layers" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="user" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+<script src="/kolm-svg.js" defer></script>
+</body>
+</html>

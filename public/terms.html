@@ -1,362 +1,476 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Terms guide · kolm.ai</title>
-<meta name="description" content="kolm terms of service. Plain-language terms for compiling, running, and reselling .kolm artifacts.">
-<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-
+<title>Terms of service &middot; kolm.ai</title>
+<meta name="description" content="Plain-English terms for the open-source kolm compiler, the hosted gateway, the enterprise plan, and the .kolm artifacts you compile and verify.">
+<meta name="theme-color" content="#07090c">
 <link rel="canonical" href="https://kolm.ai/terms">
-<meta property="og:title" content="Terms guide · kolm.ai">
-<meta property="og:description" content="kolm terms of service. Plain-language terms for compiling, running, and reselling .kolm artifacts.">
-<meta property="og:image" content="https://kolm.ai/og-card.svg">
-<meta property="og:url" content="https://kolm.ai/terms">
-<meta name="twitter:title" content="Terms guide · kolm.ai">
-<meta name="twitter:description" content="kolm terms of service. Plain-language terms for compiling, running, and reselling .kolm artifacts.">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
 <style>
- :root {
- --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
- --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
- --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
- --accent: #faf2e1; --accent-soft: rgba(236,231,220, 0.10); --accent-strong: #c9c2b2;
- --good: #7ef0d2;
- --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
- --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
- }
- * { box-sizing: border-box; }
- html, body { margin: 0; padding: 0; }
- body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.65; letter-spacing: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
- a { color: inherit; text-decoration: none; }
- .wrap { max-width: 880px; margin: 0 auto; padding: 0 32px; }
- .wrap.wide { max-width: 1180px; }
- @media (max-width: 720px) { .wrap, .wrap.wide { padding: 0 20px; } }
+  .sec-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
+  .sec-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
+  .sec-hero h1 { margin: 0 0 var(--ks-4); font-size: clamp(36px, 5vw, 56px); font-weight: 560; letter-spacing: -0.02em; line-height: 1.05; color: var(--ks-ink); }
+  .sec-hero h1 b { color: var(--ks-accent); font-weight: 560; }
+  .sec-hero p.lede { margin: 0 0 var(--ks-6); font-size: 18px; line-height: 1.55; color: var(--ks-ink-2); max-width: 64ch; }
+  .sec-hero .cta-row { display: flex; flex-wrap: wrap; gap: var(--ks-3); margin-bottom: var(--ks-5); }
+  .sec-hero .stamp { display: inline-flex; gap: var(--ks-3); font-family: var(--ks-mono); font-size: 11.5px; color: var(--ks-ink-3); letter-spacing: 0.04em; text-transform: uppercase; padding: 6px 12px; border: 1px solid var(--ks-line-2); border-radius: 999px; }
+  .sec-hero .stamp b { color: var(--ks-accent); font-weight: 540; }
 
- header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
- header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
- header.site .left { display: flex; align-items: center; gap: 36px; }
- header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); }
- header.site .brand img { height: 18px; width: 18px; color: var(--ink); }
- header.site .brand span { font-weight: 500; font-size: 16px; letter-spacing: 0; }
- header.site nav { display: flex; gap: 22px; }
- header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
- header.site nav a:hover, header.site nav a.active { color: var(--ink); }
- header.site .right { display: flex; align-items: center; gap: 14px; }
- header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
- header.site .right .ghost:hover { color: var(--ink); }
- header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
- header.site .right .cta:hover { background: #fff; }
- @media (max-width: 720px) { header.site nav { display: none; } }
+  .sec-section { padding: var(--ks-9) 0; border-bottom: 1px solid var(--ks-line-1); }
+  .sec-section h2 { margin: 0 0 var(--ks-2); font-size: clamp(24px, 3vw, 32px); font-weight: 560; letter-spacing: -0.015em; color: var(--ks-ink); }
+  .sec-section .sub { margin: 0 0 var(--ks-6); font-size: 15px; color: var(--ks-ink-3); max-width: 64ch; line-height: 1.6; }
 
- section.hero { padding: 72px 0 28px; }
- .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
- .pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--good); box-shadow: 0 0 8px var(--good); }
- h1 { margin: 18px 0 14px; font-size: clamp(32px, 4.4vw, 50px); line-height: 1.05; font-weight: 500; letter-spacing: 0; color: var(--ink); }
- h1 .tone { color: var(--accent); }
- p.lede { margin: 0; font-size: clamp(15px, 1.2vw, 17px); line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
- .stamp { display: inline-block; margin-top: 18px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); letter-spacing: 0; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--ks-4); }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--ks-4); }
+  @media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
 
- section.body { padding: 28px 0 88px; }
- .doc h2 { margin: 44px 0 12px; font-size: 22px; font-weight: 500; letter-spacing: 0; color: var(--ink); }
- .doc h2:first-child { margin-top: 0; }
- .doc h2 .num { font-family: var(--mono); font-size: 12px; color: var(--accent); letter-spacing: 0; margin-right: 12px; font-weight: 500; }
- .doc h3 { margin: 24px 0 8px; font-size: 16px; font-weight: 500; letter-spacing: 0; color: var(--ink); }
- .doc p { margin: 0 0 14px; color: var(--ink-mute); font-size: 15px; }
- .doc p strong, .doc li strong { color: var(--ink); font-weight: 500; }
- .doc ul { margin: 0 0 14px; padding-left: 20px; color: var(--ink-mute); font-size: 15px; }
- .doc li { margin-bottom: 6px; }
- .doc code { font-family: var(--mono); font-size: 13.5px; color: var(--ink); background: var(--bg-card); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; }
- .doc a.inline { color: var(--accent); border-bottom: 1px solid var(--accent-soft); }
- .doc a.inline:hover { color: var(--accent-strong); border-bottom-color: var(--accent); }
+  .t-card { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); }
+  .t-card .row { display: flex; justify-content: space-between; align-items: baseline; gap: var(--ks-3); margin-bottom: var(--ks-3); }
+  .t-card .tag { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-ink-3); }
+  .t-card h3 { margin: 0 0 var(--ks-2); font-size: 16px; font-weight: 540; color: var(--ks-ink); letter-spacing: -0.005em; }
+  .t-card p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink-2); }
+  .t-card p + p { margin-top: var(--ks-2); }
+  .t-card a { color: var(--ks-accent); }
+  .t-card code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); background: rgba(255,255,255,0.04); padding: 1px 5px; border-radius: 4px; }
 
- .callout { background: var(--bg-elev); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 6px; padding: 18px 22px; margin: 18px 0 22px; }
- .callout p { margin: 0; color: var(--ink); font-size: 14.5px; }
- .callout p strong { color: var(--accent); }
+  .pact { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-6); }
+  .pact h3 { margin: 0 0 var(--ks-3); font-size: 18px; font-weight: 560; color: var(--ks-ink); letter-spacing: -0.005em; }
+  .pact dl { margin: 0; display: grid; grid-template-columns: 200px 1fr; gap: var(--ks-3) var(--ks-5); }
+  .pact dt { font-family: var(--ks-mono); font-size: 12px; letter-spacing: 0.04em; color: var(--ks-ink-3); text-transform: uppercase; padding-top: 2px; }
+  .pact dd { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink); }
+  .pact dd code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-accent); }
+  @media (max-width: 900px) { .pact dl { grid-template-columns: 1fr; gap: var(--ks-1) var(--ks-3); } .pact dt { padding-top: 0; } .pact dd { margin-bottom: var(--ks-3); } }
 
- footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); }
- footer.site .grid { display: grid; grid-template-columns: 1.5fr repeat(3, 1fr); gap: 36px; margin-bottom: 36px; }
- @media (max-width: 720px) { footer.site .grid { grid-template-columns: 1fr 1fr; } }
- footer.site .brandcol .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); margin-bottom: 14px; }
- footer.site .brandcol .brand img { height: 16px; width: 16px; }
- footer.site .brandcol .brand span { font-weight: 500; font-size: 15px; letter-spacing: 0; }
- footer.site .brandcol p { font-size: 13px; line-height: 1.55; color: var(--ink-mute); margin: 0; max-width: 32ch; }
- footer.site h5 { font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 14px; font-weight: 500; }
- footer.site ul { list-style: none; margin: 0; padding: 0; }
- footer.site li { margin-bottom: 8px; }
- footer.site li a { color: var(--ink-mute); font-size: 13.5px; }
- footer.site li a:hover { color: var(--ink); }
- footer.site .legal { padding-top: 22px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; font-family: var(--mono); font-size: 11px; letter-spacing: 0; color: var(--ink-faint); flex-wrap: wrap; gap: 12px; }
+  .toc { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); margin-bottom: var(--ks-6); }
+  .toc h3 { margin: 0 0 var(--ks-3); font-size: 13px; font-family: var(--ks-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-ink-3); font-weight: 500; }
+  .toc ol { margin: 0; padding-left: 22px; columns: 2; column-gap: var(--ks-6); }
+  .toc li { margin-bottom: 4px; font-size: 14px; line-height: 1.6; color: var(--ks-ink-2); }
+  .toc li a { color: var(--ks-ink); }
+  .toc li a:hover { color: var(--ks-accent); }
+  @media (max-width: 720px) { .toc ol { columns: 1; } }
+
+  .reach { display: grid; grid-template-columns: 1fr 1fr; gap: var(--ks-4); }
+  @media (max-width: 900px) { .reach { grid-template-columns: 1fr; } }
 </style>
-<link rel="stylesheet" href="/styles.css">
-<link rel="stylesheet" href="/brand-refresh.css">
-<script type="application/ld+json">
-{
- "@context": "https://schema.org",
- "@type": "BreadcrumbList",
- "itemListElement": [
- {
- "@type": "ListItem",
- "position": 1,
- "name": "kolm",
- "item": "https://kolm.ai/"
- },
- {
- "@type": "ListItem",
- "position": 2,
- "name": "Terms",
- "item": "https://kolm.ai/terms"
- }
- ]
-}
-</script>
-<link rel="stylesheet" href="/surface-polish.css">
 </head>
-<body>
-<a class="skip-link" href="#main">Skip to content</a>
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<body class="ks">
 
-<header class="site-header">
- <div class="wrap">
- <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
-    <!-- KOLM_NAV_BEGIN (W221) -->
-    <nav class="site-nav" aria-label="Primary">
-    <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
-      <div class="mega-menu" role="menu" aria-label="product menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/product">Overview</a>
-          <a href="/quickstart">Quickstart</a>
-          <a href="/capture">Gateway</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training</a>
-          <a href="/distill">Distill</a>
-          <a href="/compile">Compile</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/runtimes">Runtimes</a>
-          <a href="/docs/devices">Devices</a>
-          <a href="/trust">Verify</a>
-        </div>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/k-score">K-score</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
       </div>
     </div>
-    <div class="nav-item nav-item--models has-mega">
-      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
-      <div class="mega-menu" role="menu" aria-label="models menu">
-        <div class="mega-col">
-          <p class="mega-h">Choose</p>
-          <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Build your own</a>
-          <a href="/docs/runtime">Runtime targets</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/compute">Compute</a>
-          <a href="/runtimes">Mobile and edge</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
-      <div class="mega-menu" role="menu" aria-label="docs menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/capture">API gateway</a>
-          <a href="/docs/cli">CLI</a>
-          <a href="/docs/sdk">SDKs</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Reference</p>
-          <a href="/docs">Docs home</a>
-          <a href="/docs/api">API reference</a>
-          <a href="/api">HTTP routes</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Operate</p>
-          <a href="/integrations">Integrations</a>
-          <a href="/docs/privacy">Privacy membrane</a>
-          <a href="/docs/datasets">Datasets</a>
-          <a href="/docs/distillation">Distillation</a>
-          <a href="/docs/verify">Verification</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
-      <div class="mega-menu" role="menu" aria-label="pricing menu">
-        <div class="mega-col">
-          <p class="mega-h">Buy</p>
-          <a href="/pricing">Plans</a>
-          <a href="/pricing#roi">ROI calculator</a>
-          <a href="/nonprofits">Nonprofits</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
-      <div class="mega-menu" role="menu" aria-label="enterprise menu">
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/enterprise">Enterprise overview</a>
-          <a href="/self-host">Self-host</a>
-          <a href="/airgap">Air-gap</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Trust</p>
-          <a href="/trust">Trust center</a>
-          <a href="/security">Security</a>
-          <a href="/compliance">Compliance</a>
-          <a href="/baa">BAA</a>
-        </div>
-      </div>
-    </div>
-    </nav>
-    <!-- KOLM_NAV_END (W221) -->
- <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
- <a href="/signin" class="ghost">sign in</a>
- <a href="/signup" class="cta">Get API Key &rarr;</a>
- </div>
- </div>
-</header>
+  </header>
+</div>
 
 <main id="main">
-<section class="hero">
- <div class="wrap">
- <h1>The deal<span class="tone">.</span><br>In plain language.</h1>
- <p class="lede">Terms of service for the kolm CLI, the kolm cloud, and every <code>.kolm</code> artifact you compile through us. Read once. Apply forever.</p>
- <span class="stamp">last updated · 2026-05-07 · governed by Delaware, USA</span>
- </div>
+
+<section class="sec-hero">
+  <div class="ks-wrap">
+    <div class="eyebrow">Terms of service</div>
+    <h1>The agreement, in <b>plain English.</b></h1>
+    <p class="lede">Kolm is an open-source AI compiler. The compiler is Apache-2.0 and runs wherever you install it. The hosted gateway, the registry, and any commercial plan have a small set of terms covering payment, acceptable use, warranties, and liability. This page is the agreement between you and Kolmogorov Stack, Inc., written so a developer or a procurement reviewer can read it once.</p>
+    <div class="cta-row">
+      <a href="/privacy" class="ks-btn ks-btn--primary">Privacy policy <span class="ks-btn-arrow">&rarr;</span></a>
+      <a href="/security" class="ks-btn ks-btn--ghost">Security</a>
+      <a href="/subprocessors" class="ks-btn ks-btn--ghost">Subprocessors</a>
+      <a href="/enterprise" class="ks-btn ks-btn--ghost">Enterprise plan</a>
+    </div>
+    <div class="stamp">Effective <b>2026-05-22</b> &middot; supersedes 2026-03-09</div>
+  </div>
 </section>
 
-<section class="body">
- <div class="wrap">
- <div class="doc">
-
- <div class="callout">
- <p><strong>The short version.</strong> Your data is yours. Your artifacts are yours. Your frontier API key is yours. We provide a service that compiles those into a sub-3GB file. We can disable accounts that abuse the service. Disputes are arbitrated. See sections below for the long form.</p>
- </div>
-
- <h2><span class="num">01</span>Who and what</h2>
- <p>"<strong>kolm</strong>", "<strong>we</strong>", and "<strong>us</strong>" mean Kolm, Inc., a Delaware corporation. "<strong>You</strong>" means the human or organization with an account at kolm.ai. The "<strong>Service</strong>" means the CLI, hosted compile/API surfaces, SDK assets, artifact/receipt tooling, and documentation at kolm.ai.</p>
-
- <h2><span class="num">02</span>Your account</h2>
- <p>You agree to provide a valid email and to keep your kolm API key secret. You are responsible for activity under your account. Tell us within 24 hours if a key is compromised: <a class="inline" href="mailto:dev@kolm.ai?subject=Security">dev@kolm.ai</a>.</p>
-
- <h2><span class="num">03</span>Your data</h2>
- <p>Your <strong>training data</strong> (examples, evals), your <strong>inference inputs</strong>, and your <strong>frontier API key</strong> remain yours. You grant us a non-exclusive, worldwide, royalty-free license to use them <em>only</em> for the purpose of running the compile job you requested. We do not retain them after the job completes.</p>
- <p>Any <strong>recipe contributions</strong> or public listings are governed by the deployment configuration and must be opt-in for sensitive workflows.</p>
-
- <h2><span class="num">04</span>Your artifacts</h2>
- <p>Every <code>.kolm</code> file you compile is owned by you. You can copy it, run it, ship it inside your product, or sell it. You can delete it at will. We claim no ownership over your artifacts.</p>
- <p>Artifacts include third-party model weights subject to their own licenses (Llama, Qwen, Mistral, etc.). Your obligations under those licenses pass through. We list applicable licenses in <code>manifest.json</code> inside every artifact.</p>
-
- <h2><span class="num">05</span>Frontier model bills</h2>
- <p>The compile pipeline calls the frontier model <em>you</em> bring. You pay for those calls directly to the frontier provider. We do not mark up, rebill, or front the frontier API spend.</p>
-
- <h2><span class="num">06</span>Acceptable use</h2>
- <p>You may not use the Service to:</p>
- <ul>
- <li>Build artifacts that knowingly produce CSAM, NCII, voice-cloning fraud, election interference content, or weapons-of-mass-destruction uplift.</li>
- <li>Reverse-engineer, scrape, or rate-limit-evade the cloud compile pipeline.</li>
- <li>Attempt to extract another tenant's data through public listings, recipe artifacts, or any side channel.</li>
- <li>Resell raw access to the cloud compile pipeline. (Reselling artifacts compiled with it is fine.)</li>
- </ul>
- <p>We may disable accounts that violate these. We will tell you when we do, with reason.</p>
-
- <h2><span class="num">07</span>Pricing and billing</h2>
- <p>Pricing on <a class="inline" href="/pricing">/pricing</a> is the current price. We will email at least 30 days before any price increase to a tier you are on. Prepaid Pro and Enterprise terms govern what you have already paid for.</p>
- <p>You can cancel any tier any time via <code>kolm account cancel</code> or <a class="inline" href="mailto:dev@kolm.ai">dev@kolm.ai</a>. Billing stops at the end of the paid period; the account remains read-only until you delete it.</p>
-
- <h2><span class="num">08</span>Service level</h2>
- <p>The current tier-level uptime targets and credits are documented at <a class="inline" href="/status">/status</a>. The free tier is offered as-is with no SLA. Pro tier targets 99.9% monthly. Enterprise contracts override.</p>
-
- <h2><span class="num">09</span>Warranty disclaimer</h2>
- <p>The Service is provided "as is". We do not warrant that the model, the LoRA, the recipe pack, or the recall index will produce any particular accuracy, latency, or coverage on your task. The K-score is a measurement, not a guarantee.</p>
-
- <h2><span class="num">10</span>Liability</h2>
- <p>To the maximum extent permitted by law, our aggregate liability is capped at the greater of <strong>USD 100</strong> or <strong>fees you paid us in the 12 months preceding the claim</strong>. We are not liable for lost profits, lost data you did not back up, or consequential damages.</p>
-
- <h2><span class="num">11</span>Indemnity</h2>
- <p>You will indemnify us for third-party claims arising from your training data, your artifacts, or your downstream use of either. We will indemnify you for third-party claims that the Service itself infringes a US patent or copyright, subject to the cap in section 10.</p>
-
- <h2><span class="num">12</span>Disputes</h2>
- <p>Disputes will be resolved by binding arbitration in San Francisco under JAMS streamlined rules, in English, governed by Delaware law, except either side may bring a small-claims action and either side may seek injunctive relief in court for IP infringement.</p>
-
- <h2><span class="num">13</span>Changes</h2>
- <p>We will email every active account at least 14 days before any material change to these terms. Past versions are archived at <a class="inline" href="https://github.com/sneaky-hippo/kolm-stack/blob/main/public/terms.html">github.com/sneaky-hippo/kolm-stack</a>.</p>
-
- <h2><span class="num">14</span>Contact</h2>
- <p>Legal: <a class="inline" href="mailto:dev@kolm.ai?subject=Legal">dev@kolm.ai</a>. General: <a class="inline" href="mailto:dev@kolm.ai">dev@kolm.ai</a>. Security: <a class="inline" href="mailto:dev@kolm.ai?subject=Security">dev@kolm.ai</a>.</p>
-
- </div>
- </div>
+<section class="sec-section" id="toc">
+  <div class="ks-wrap">
+    <div class="toc">
+      <h3>What this document covers</h3>
+      <ol>
+        <li><a href="#parties">Parties and acceptance</a></li>
+        <li><a href="#scope">What kolm is</a></li>
+        <li><a href="#license">License to the compiler</a></li>
+        <li><a href="#hosted">Hosted gateway terms</a></li>
+        <li><a href="#use">Acceptable use</a></li>
+        <li><a href="#data">Your data, your boundary</a></li>
+        <li><a href="#artifacts">.kolm artifacts and resale</a></li>
+        <li><a href="#payment">Payment, taxes, and refunds</a></li>
+        <li><a href="#warranty">Warranties and disclaimer</a></li>
+        <li><a href="#liability">Limitation of liability</a></li>
+        <li><a href="#indemnity">Indemnification</a></li>
+        <li><a href="#term">Term, suspension, and termination</a></li>
+        <li><a href="#changes">Changes to these terms</a></li>
+        <li><a href="#disputes">Disputes and governing law</a></li>
+        <li><a href="#contact">How to reach us</a></li>
+      </ol>
+    </div>
+  </div>
 </section>
+
+<section class="sec-section" id="parties">
+  <div class="ks-wrap">
+    <h2>1. Parties and acceptance</h2>
+    <p class="sub">Who you are agreeing with, and what counts as acceptance. The compiler can be used without an account. Any hosted feature or paid plan requires acceptance.</p>
+    <div class="pact">
+      <h3>The two parties</h3>
+      <dl>
+        <dt>Provider</dt><dd>Kolmogorov Stack, Inc., a Delaware corporation. Referred to in this document as <code>kolm</code>, <code>we</code>, or <code>us</code>.</dd>
+        <dt>You</dt><dd>The individual or legal entity using the hosted gateway, the registry, the enterprise plan, or any other paid feature. Where you accept on behalf of a company, you represent that you are authorized to bind it.</dd>
+        <dt>Acceptance</dt><dd>You accept these terms by creating a kolm account, by pasting an API key into a request, or by clicking through an enterprise order form. Using the open-source compiler under its Apache-2.0 license does not require these terms.</dd>
+        <dt>Notices</dt><dd>Account email is the canonical address for legal notices from us to you. For notices from you to us, use <code>legal@kolm.ai</code>.</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="scope">
+  <div class="ks-wrap">
+    <h2>2. What kolm is</h2>
+    <p class="sub">A short product definition so the rest of the document has a clear referent. Each row maps to a paid or unpaid surface.</p>
+    <div class="grid-2">
+      <div class="t-card">
+        <div class="row"><span class="tag">compiler</span></div>
+        <h3>Open-source kolm CLI and SDKs</h3>
+        <p>The compiler, the Node, Python, MCP, C, and Rust SDKs, and the runtime adapters are licensed under Apache-2.0. They run on your hardware, your VPC, or your laptop. No account is required.</p>
+      </div>
+      <div class="t-card">
+        <div class="row"><span class="tag">hosted</span></div>
+        <h3>Hosted gateway and registry</h3>
+        <p>An optional managed endpoint at <code>https://kolm.ai</code> that routes requests to upstream providers, mirrors public registry entries, and serves verification at <code>/verify/&lt;cid&gt;</code>. These features require an account and these terms.</p>
+      </div>
+      <div class="t-card">
+        <div class="row"><span class="tag">artifact</span></div>
+        <h3>.kolm artifact format</h3>
+        <p>A signed zip that contains weights, a manifest, the eval pack and its scores, and the receipt chain. The format spec is open. Artifacts you compile are owned by you.</p>
+      </div>
+      <div class="t-card">
+        <div class="row"><span class="tag">enterprise</span></div>
+        <h3>Enterprise plan</h3>
+        <p>SSO, SCIM, role-based access, BAA, regional deployment, single-tenant control plane, named support. Terms here are baseline, the enterprise order form is the controlling document for the enterprise plan.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="license">
+  <div class="ks-wrap">
+    <h2>3. License to the compiler</h2>
+    <p class="sub">The compiler and its SDKs are open source under Apache-2.0. This section is informational, the LICENSE file in the repo is controlling.</p>
+    <div class="pact">
+      <h3>Apache-2.0 in one paragraph</h3>
+      <dl>
+        <dt>Grant</dt><dd>You can use, modify, and redistribute the compiler and the SDKs for any purpose, commercial or otherwise. You can run it on your own infrastructure. You can ship products built on top of it.</dd>
+        <dt>Obligations</dt><dd>Keep the LICENSE and the NOTICE files with any copy you redistribute. State the changes you made if you ship a modified copy. Do not use kolm trademarks to imply endorsement of a fork.</dd>
+        <dt>Patents</dt><dd>Contributors grant a patent license to use the code. The grant terminates if you sue any contributor over the code. Standard Apache-2.0 retaliation clause.</dd>
+        <dt>Warranty</dt><dd>The open-source compiler is provided as-is. The warranties and remedies in sections 9, 10, and 11 of this document apply only to the hosted gateway and paid plans, not to the open-source compiler.</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="hosted">
+  <div class="ks-wrap">
+    <h2>4. Hosted gateway terms</h2>
+    <p class="sub">The terms that apply when you route traffic through <code>https://kolm.ai</code>, publish to the registry, or use any paid plan. The compiler is unaffected by these.</p>
+    <div class="grid-2">
+      <div class="t-card">
+        <h3>Account creation</h3>
+        <p>You create an account by signing up with an email. We send a verification link. The first request you make produces an API key. Treat the key like a password, rotate it through <code>kolm logout</code> and <code>kolm login</code> if you suspect leak.</p>
+      </div>
+      <div class="t-card">
+        <h3>Authentication and identity</h3>
+        <p>Free and pro accounts authenticate by API key. The business and enterprise plans add SSO through SAML 2.0 and SCIM 2.0. The hosted gateway will reject any request that does not present a valid identity.</p>
+      </div>
+      <div class="t-card">
+        <h3>Rate limits</h3>
+        <p>Per-plan limits are published on the pricing page and returned in the <code>X-RateLimit-*</code> headers on every response. When a limit is hit, the gateway returns HTTP 429 with a <code>Retry-After</code> header and a JSON envelope that names the limit you tripped.</p>
+      </div>
+      <div class="t-card">
+        <h3>Service availability</h3>
+        <p>The hosted gateway is a multi-region, multi-provider router. Uptime targets and credit terms are published per plan. Status incidents are posted at <code>/security</code> with a real timeline, no fluff.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="use">
+  <div class="ks-wrap">
+    <h2>5. Acceptable use</h2>
+    <p class="sub">A short list. If your use case is not on it, we are not the right tool. We do not want to be a substrate for the items below and we will terminate accounts that try.</p>
+    <div class="pact">
+      <h3>Out of scope for the hosted gateway</h3>
+      <dl>
+        <dt>Harm</dt><dd>Do not use kolm to generate content that targets a real person for harassment, that produces sexual content involving minors, or that produces operational instructions for weapons capable of mass casualties.</dd>
+        <dt>Fraud</dt><dd>Do not use kolm to impersonate a real person, a regulator, or a company in a way intended to deceive a counterparty into transferring money, credentials, or controlled material.</dd>
+        <dt>Privacy</dt><dd>Do not feed personal data through the hosted gateway without a lawful basis. Healthcare PHI requires a signed BAA before traffic.</dd>
+        <dt>Critical safety</dt><dd>Do not place model output in the loop of a system whose failure could kill or injure people without an independent safety layer that does not depend on kolm. The compiler is not safety-rated.</dd>
+        <dt>Resource abuse</dt><dd>Do not run sustained traffic intended to map the gateway, exhaust pooled inference capacity, or denial-of-service upstream providers. Rate limits are a request, not a target.</dd>
+        <dt>Sanctions</dt><dd>Do not use kolm in or for the benefit of a person or country covered by the United States, the United Kingdom, or the European Union sanctions regimes.</dd>
+      </dl>
+    </div>
+    <p class="sub" style="margin-top:var(--ks-5)">For the self-hosted compiler, acceptable use is governed by the laws that apply to you and the upstream model providers you choose. Kolm has no enforcement role over a self-hosted install.</p>
+  </div>
+</section>
+
+<section class="sec-section" id="data">
+  <div class="ks-wrap">
+    <h2>6. Your data, your boundary</h2>
+    <p class="sub">A summary of the data clauses. The privacy policy and the security overview are the canonical documents and they are linked at the bottom.</p>
+    <div class="grid-3">
+      <div class="t-card">
+        <h3>You own your captures</h3>
+        <p>Prompts, completions, tool calls, retrieval contexts, and trace bodies are yours. The default install writes them to <code>~/.kolm/events</code> on your filesystem. We do not ingest them.</p>
+      </div>
+      <div class="t-card">
+        <h3>You own your models</h3>
+        <p>Distilled weights, INT4 and INT8 quantizations, eval-pack scores. Compile output is yours. We do not have a license to your weights and we do not need one.</p>
+      </div>
+      <div class="t-card">
+        <h3>Hosted metadata stays minimal</h3>
+        <p>The hosted gateway records timestamp, route, token count, latency, status, and key fingerprint. Bodies are not stored. The full list is in the privacy policy under "What we collect".</p>
+      </div>
+    </div>
+    <p class="sub" style="margin-top:var(--ks-5)">For deletion, residency, BAA, DPA, and a list of subprocessors, see the linked pages at the bottom of this document.</p>
+  </div>
+</section>
+
+<section class="sec-section" id="artifacts">
+  <div class="ks-wrap">
+    <h2>7. .kolm artifacts and resale</h2>
+    <p class="sub">A short statement on ownership and resale of the .kolm artifacts you compile.</p>
+    <div class="pact">
+      <h3>Who owns what</h3>
+      <dl>
+        <dt>You</dt><dd>You own the .kolm artifacts you compile. You can run them, you can ship them, you can sell them. We claim no rights in the contents of an artifact you produce.</dd>
+        <dt>Upstream</dt><dd>If your artifact is distilled from or built on top of a third-party base model, the upstream model license still applies. We do not relicense Llama, Qwen, DeepSeek, or any other base for you.</dd>
+        <dt>Registry</dt><dd>If you publish a receipt to the kolm registry, you grant us a worldwide, non-exclusive, royalty-free license to host the receipt CID so verifiers can resolve it. The receipt itself contains no weights and no completions.</dd>
+        <dt>Verification</dt><dd>Anyone can verify a .kolm artifact you publish, with or without an account, using the open-source compiler. We do not gate verification.</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="payment">
+  <div class="ks-wrap">
+    <h2>8. Payment, taxes, and refunds</h2>
+    <p class="sub">For any paid plan. The compiler is free.</p>
+    <div class="grid-2">
+      <div class="t-card">
+        <h3>Billing cycle</h3>
+        <p>Monthly or annual, depending on the plan. Charges hit on the anniversary of signup. Invoices are issued by Stripe and emailed to the address on file.</p>
+      </div>
+      <div class="t-card">
+        <h3>Taxes</h3>
+        <p>Prices exclude VAT, GST, and sales tax. Where we are required to collect, taxes are added at checkout and shown on the invoice. Reverse-charge VAT applies in EU jurisdictions for business customers with a valid VAT ID.</p>
+      </div>
+      <div class="t-card">
+        <h3>Refunds</h3>
+        <p>If you cancel inside the first 14 days of a paid plan, we refund the entire charge. After that, paid time on the current cycle is not refunded but the plan downgrades at the end of the cycle.</p>
+      </div>
+      <div class="t-card">
+        <h3>Overages</h3>
+        <p>Plans that include token overage are billed at the rates on the pricing page, computed against the metered request counts in the hosted gateway. Disputes about overage are reviewed when raised within 30 days.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="warranty">
+  <div class="ks-wrap">
+    <h2>9. Warranties and disclaimer</h2>
+    <p class="sub">A short, real warranty for the hosted gateway and the paid plans. A clear disclaimer for everything else.</p>
+    <div class="pact">
+      <h3>The two parts</h3>
+      <dl>
+        <dt>Hosted</dt><dd>For the hosted gateway and any paid plan, we warrant that the service will materially conform to the description on this site and that we will use commercially reasonable efforts to keep it secure and available. Breach of this warranty entitles you to the credits and termination remedies in section 12.</dd>
+        <dt>Compiler</dt><dd>The open-source compiler is provided as-is. We do not warrant that distillation will preserve accuracy at any specific K-score threshold, that quantization will preserve accuracy for a given workload, or that any specific model will compile cleanly. The compiler is a tool, the outputs are yours.</dd>
+        <dt>Disclaimer</dt><dd>To the maximum extent permitted by law, kolm disclaims all other warranties, express or implied, including merchantability, fitness for a particular purpose, and non-infringement, except where expressly granted in this document.</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="liability">
+  <div class="ks-wrap">
+    <h2>10. Limitation of liability</h2>
+    <p class="sub">Standard cap. Stated up front so a reviewer does not need a calculator.</p>
+    <div class="pact">
+      <h3>The cap and the carve-outs</h3>
+      <dl>
+        <dt>Cap</dt><dd>Each party's aggregate liability arising from these terms is limited to the greater of <code>USD 1,000</code> or the amount you paid to kolm in the 12 months preceding the event giving rise to the claim. Liability is capped per claim, not per incident.</dd>
+        <dt>Excluded damages</dt><dd>Neither party is liable for indirect, incidental, special, consequential, or punitive damages, including lost profits, lost revenue, lost data, or business interruption.</dd>
+        <dt>Carve-outs</dt><dd>The cap does not apply to your obligation to pay amounts owed, to either party's indemnification obligations under section 11, or to liability that cannot be limited under applicable law.</dd>
+        <dt>Allocation of risk</dt><dd>You acknowledge that pricing reflects this allocation of risk and that without it the pricing would be different.</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="indemnity">
+  <div class="ks-wrap">
+    <h2>11. Indemnification</h2>
+    <p class="sub">Reciprocal. We cover infringement claims against our service. You cover misuse claims against your data and your deployment.</p>
+    <div class="grid-2">
+      <div class="t-card">
+        <h3>We defend you for</h3>
+        <p>Third-party claims that the hosted gateway, as provided by us and used in accordance with these terms, infringes a valid United States patent, copyright, or registered trademark. Subject to the cap in section 10.</p>
+      </div>
+      <div class="t-card">
+        <h3>You defend us for</h3>
+        <p>Third-party claims arising from your data, your deployment, your use in violation of section 5, or your distribution of a .kolm artifact compiled by you. Subject to the cap in section 10.</p>
+      </div>
+    </div>
+    <p class="sub" style="margin-top:var(--ks-5)">In either case, the indemnified party gives prompt notice, the indemnifying party controls the defense and any settlement that admits liability requires the indemnified party's written consent.</p>
+  </div>
+</section>
+
+<section class="sec-section" id="term">
+  <div class="ks-wrap">
+    <h2>12. Term, suspension, and termination</h2>
+    <p class="sub">How either side can end the agreement, when service can be paused, and what happens to your data after.</p>
+    <div class="pact">
+      <h3>The lifecycle</h3>
+      <dl>
+        <dt>Term</dt><dd>These terms apply from acceptance until terminated by either party. Account inactivity for 12 months is grounds for closure with 30 days notice.</dd>
+        <dt>Termination for convenience</dt><dd>You can close your account at any time from the account dashboard or by emailing <code>support@kolm.ai</code>. We can terminate with 30 days notice except for material breach or section 5 violation.</dd>
+        <dt>Termination for cause</dt><dd>Either party may terminate immediately for material breach if the breach is not cured within 30 days of written notice. Section 5 violations and non-payment may be terminated without a cure period.</dd>
+        <dt>Suspension</dt><dd>We may suspend a specific API key or account for security incident response, suspected section 5 violation, or non-payment, with reasonable notice unless the situation requires immediate action.</dd>
+        <dt>Data after termination</dt><dd>Captures stored on the hosted gateway are deleted within 30 days of termination. Backups are purged within 90 days. Account email is retained only for legal and tax record retention windows.</dd>
+        <dt>Survival</dt><dd>Sections 6 (data), 7 (artifacts), 8 (payment, for amounts already accrued), 9 through 11 (warranty, liability, indemnification), and 14 (disputes) survive termination.</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="changes">
+  <div class="ks-wrap">
+    <h2>13. Changes to these terms</h2>
+    <p class="sub">We revise this document when the law changes, the product changes, or we find a way to say something more clearly. Material changes get notice.</p>
+    <div class="grid-2">
+      <div class="t-card">
+        <h3>How we publish changes</h3>
+        <p>Every effective date corresponds to a tagged commit in the public site repo. You can walk back through prior versions with the open-source compiler. The current effective date is at the top of this page.</p>
+      </div>
+      <div class="t-card">
+        <h3>Material change notice</h3>
+        <p>For changes that reduce your rights or increase your obligations, we send a notice to the account email at least 30 days before the change takes effect. Continued use after the effective date counts as acceptance.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="disputes">
+  <div class="ks-wrap">
+    <h2>14. Disputes and governing law</h2>
+    <p class="sub">A short forum and venue clause. Negotiate first, formal process second.</p>
+    <div class="pact">
+      <h3>The process</h3>
+      <dl>
+        <dt>Negotiation</dt><dd>Before filing any formal claim, the parties agree to spend 30 days in good faith negotiation with their respective ops contacts. A real attempt to resolve, not a checkbox.</dd>
+        <dt>Governing law</dt><dd>These terms are governed by the laws of the State of Delaware, without regard to its conflict-of-laws principles.</dd>
+        <dt>Venue</dt><dd>Any dispute not resolved by negotiation is subject to the exclusive jurisdiction of the state and federal courts located in the State of Delaware. Each party waives the right to a jury trial.</dd>
+        <dt>Class action waiver</dt><dd>Claims are brought on an individual basis. No class, collective, or representative actions.</dd>
+        <dt>Equitable relief</dt><dd>Either party may seek injunctive relief in any court of competent jurisdiction to protect intellectual property or confidential information without first satisfying the negotiation requirement.</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="contact">
+  <div class="ks-wrap">
+    <h2>How to reach us</h2>
+    <p class="sub">A short list of contacts so you know which inbox reaches which team.</p>
+    <div class="reach">
+      <div class="t-card">
+        <h3>Legal desk</h3>
+        <p>Email <code>legal@kolm.ai</code>. Acknowledged within 2 business days for contract questions, notice service, redlines, or anything that names a clause of this document.</p>
+      </div>
+      <div class="t-card">
+        <h3>Privacy and security</h3>
+        <p>Email <code>privacy@kolm.ai</code> for subject-rights requests and data residency questions. Email <code>security@kolm.ai</code> for vulnerability reports and incident notifications.</p>
+      </div>
+    </div>
+    <div style="margin-top:var(--ks-6); display:flex; flex-wrap:wrap; gap:var(--ks-3)">
+      <a href="/privacy" class="ks-btn ks-btn--primary">Privacy policy <span class="ks-btn-arrow">&rarr;</span></a>
+      <a href="/security" class="ks-btn ks-btn--ghost">Security</a>
+      <a href="/subprocessors" class="ks-btn ks-btn--ghost">Subprocessors</a>
+      <a href="/baa" class="ks-btn ks-btn--ghost">BAA</a>
+      <a href="/enterprise" class="ks-btn ks-btn--ghost">Enterprise plan</a>
+    </div>
+  </div>
+</section>
+
 </main>
 
-<footer class="site">
- <div class="wrap" style="max-width: 1180px;">
- <div class="footer-grid">
- <div>
- <h4><span data-kolm-icon="compile" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Build</h4>
- <a href="/quickstart">Quickstart</a>
- <a href="/docs">Docs</a>
- <a href="/spec/rs-1">RS-1 spec</a>
- <a href="/openapi.json">OpenAPI</a>
- <a href="/cli">CLI</a>
- </div>
- <div>
- <h4><span data-kolm-icon="deploy" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Deploy</h4>
- <a href="/compute">Backends</a>
- <a href="/airgap">Air-gap</a>
- <a href="/integrations/cloudflare">Cloudflare</a>
- <a href="/integrations/github-actions">GitHub Actions</a>
- <a href="/integrations/gitlab-ci">GitLab CI</a>
- </div>
- <div>
- <h4>Proof</h4>
- <a href="/verify-prod">Verify a .kolm</a>
- <a href="/badge">Embed badge</a>
- <a href="/benchmarks">Benchmarks</a>
- <a href="/compare">Compare</a>
- <a href="/registry">Registry</a>
- <a href="/case-studies">Case studies</a>
- </div>
- <div>
- <h4><span data-kolm-icon="layers" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Industries</h4>
- <a href="/healthcare">Healthcare</a>
- <a href="/finance">Finance</a>
- <a href="/legal">Legal</a>
- <a href="/compliance">Compliance</a>
- <a href="/insure">Insurance</a>
- </div>
- <div>
- <h4><span data-kolm-icon="user" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Company</h4>
- <a href="/pricing">Pricing</a>
- <a href="/changelog">Changelog</a>
- <a href="/security">Security</a>
- <a href="/community">Community</a>
- <a href="/contact">Contact</a>
- </div>
- </div>
- <div class="footer-tag">
- <span>kolm.ai - Made with .kolm - Apache-2.0</span>
- <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
- </div>
- </div>
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/faq">FAQ</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/enterprise">Enterprise</a>
+        <a href="/manifesto">Manifesto</a>
+        <a href="/why-kolm">Why kolm</a>
+        <a href="/contact">Contact</a>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
 </footer>
 
-<script src="/nav.js" defer></script>
-<script src="/kolm-svg.js" defer></script>
+<!-- w220-claim w260-trust w271-frontier w335-claim w373-receipts w408-quantize-matrix -->
 </body>
 </html>

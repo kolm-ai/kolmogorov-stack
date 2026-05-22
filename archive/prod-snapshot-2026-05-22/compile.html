@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Compile AI work into a signed local artifact · kolm.ai</title>
+<meta name="description" content="Compile repeated AI work from reviewed examples into signed .kolm artifacts that run locally, on devices, or behind your VPC with a verifier receipt.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta property="og:title" content="Compile AI work into a signed local artifact · kolm.ai">
+<meta property="og:description" content="Compile repeated AI work from reviewed examples into signed .kolm artifacts that run locally, on devices, or behind your VPC with a verifier receipt.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/compile">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://kolm.ai/compile">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+ :root {
+ --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12); --line-stronger: rgba(255,255,255,0.18);
+ --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+ --accent: #faf2e1; --accent-soft: rgba(236,231,220, 0.10); --accent-strong: #c9c2b2;
+ --good: #7ef0d2; --bad: #ff6b91;
+ --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+ --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+ }
+ * { box-sizing: border-box; }
+ html, body { margin: 0; padding: 0; }
+ body {
+ background: var(--bg); color: var(--ink); font-family: var(--sans);
+ font-size: 16px; line-height: 1.55; letter-spacing: 0;
+ -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+ text-rendering: optimizeLegibility; font-synthesis: none;
+ }
+ a { color: inherit; text-decoration: none; }
+ .wrap { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+ @media (max-width: 720px) { .wrap { padding: 0 20px; } }
+
+ header.site {
+ position: sticky; top: 0; z-index: 60;
+ background: rgba(8,9,8,0.78);
+ backdrop-filter: saturate(160%) blur(14px);
+ -webkit-backdrop-filter: saturate(160%) blur(14px);
+ border-bottom: 1px solid var(--line);
+ }
+ header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
+ header.site .left { display: flex; align-items: center; gap: 36px; }
+ header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); }
+ header.site .brand img { height: 18px; width: 18px; color: var(--ink); }
+ header.site .brand span { font-weight: 500; font-size: 16px; letter-spacing: 0; }
+ header.site nav { display: flex; gap: 22px; }
+ header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
+ header.site nav a:hover, header.site nav a.active { color: var(--ink); }
+ header.site .right { display: flex; align-items: center; gap: 14px; }
+ header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
+ header.site .right .ghost:hover { color: var(--ink); }
+ header.site .right .cta {
+ display: inline-flex; align-items: center; gap: 6px;
+ color: var(--bg); background: var(--ink); border-radius: 6px;
+ padding: 7px 14px; font-size: 13px; font-weight: 500; letter-spacing: 0;
+ transition: background 120ms;
+ }
+ header.site .right .cta:hover { background: #fff; }
+ @media (max-width: 720px) { header.site nav { display: none; } }
+
+ section.hero { position: relative; padding: 88px 0 56px; overflow: hidden; }
+ section.hero::before {
+ content: ""; position: absolute; inset: 0;
+ background:
+ radial-gradient(ellipse 900px 480px at 22% 12%, rgba(236,231,220, 0.10), transparent 60%),
+ radial-gradient(ellipse 700px 400px at 88% 90%, rgba(236,231,220, 0.04), transparent 60%);
+ pointer-events: none;
+ }
+ section.hero .wrap { position: relative; }
+
+ .pill {
+ display: inline-flex; align-items: center; gap: 8px;
+ font-family: var(--mono); font-size: 11px; letter-spacing: 0;
+ text-transform: uppercase; color: var(--ink-mute);
+ border: 1px solid var(--line-strong); border-radius: 999px;
+ padding: 5px 12px; background: var(--bg-elev);
+ }
+ .pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--good); box-shadow: 0 0 8px var(--good); }
+
+ h1.hero-h1 {
+ margin: 24px 0 22px;
+ font-size: clamp(36px, 5.4vw, 64px);
+ line-height: 1.05; font-weight: 500; letter-spacing: 0;
+ color: var(--ink); max-width: 18ch;
+ }
+ h1.hero-h1 .tone { color: var(--accent); }
+
+ p.lede {
+ margin: 0 0 32px;
+ font-size: clamp(15.5px, 1.3vw, 18px);
+ line-height: 1.55; color: var(--ink-mute);
+ max-width: 60ch; letter-spacing: 0;
+ }
+ p.lede b { color: var(--ink); font-weight: 500; }
+ p.lede code {
+ font-family: var(--mono); font-size: 0.92em; color: var(--ink);
+ background: var(--bg-card); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px;
+ }
+
+ /* terminal */
+ .term {
+ background: linear-gradient(180deg, var(--bg-elev), var(--bg-card));
+ border: 1px solid var(--line-strong);
+ border-radius: 10px; overflow: hidden;
+ box-shadow: 0 30px 80px -30px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.02);
+ max-width: 920px;
+ }
+ .term .head {
+ display: flex; align-items: center; gap: 8px;
+ padding: 10px 16px; border-bottom: 1px solid var(--line);
+ background: rgba(0,0,0,0.25);
+ }
+ .term .head .ctl { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,0.12); }
+ .term .head .file {
+ margin-left: 10px;
+ font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint);
+ letter-spacing: 0;
+ }
+ .term .body {
+ padding: 22px 22px 22px;
+ font-family: var(--mono); font-size: 13.5px; line-height: 1.85;
+ color: var(--ink); white-space: pre; overflow-x: auto;
+ }
+ .term .body .com { color: var(--ink-faint); }
+ .term .body .arg { color: var(--accent); }
+ .term .body .ok { color: var(--good); }
+ .term .body .num { color: var(--accent-strong); }
+ .term .body .dim { color: var(--ink-faint); }
+
+ section { padding: 88px 0; position: relative; }
+ section + section { border-top: 1px solid var(--line); }
+ .eyebrow {
+ display: inline-flex; align-items: center; gap: 10px;
+ font-family: var(--mono); font-size: 11px; letter-spacing: 0;
+ text-transform: uppercase; color: var(--ink-faint); margin: 0 0 18px;
+ }
+ .eyebrow .num { color: var(--accent); }
+ h2 {
+ margin: 0 0 18px;
+ font-size: clamp(26px, 3.2vw, 38px);
+ line-height: 1.1; font-weight: 500; letter-spacing: 0;
+ color: var(--ink); max-width: 22ch;
+ }
+ h2 .tone { color: var(--accent); }
+ p.sec-lede {
+ margin: 0 0 40px; font-size: 16.5px;
+ line-height: 1.55; color: var(--ink-mute); max-width: 60ch;
+ }
+
+ /* what you give vs what you get */
+ .io { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+ @media (max-width: 800px) { .io { grid-template-columns: 1fr; } }
+ .io-card {
+ background: var(--bg-elev); border: 1px solid var(--line);
+ border-radius: 8px; padding: 26px;
+ }
+ .io-card.out { border-color: rgba(236,231,220, 0.22); background: linear-gradient(180deg, rgba(236,231,220, 0.04), var(--bg-elev)); }
+ .io-card .head {
+ font-family: var(--mono); font-size: 11px; letter-spacing: 0;
+ text-transform: uppercase; color: var(--ink-faint); margin-bottom: 12px;
+ }
+ .io-card.out .head { color: var(--accent); }
+ .io-card h3 {
+ margin: 0 0 16px; font-size: 19px; font-weight: 500;
+ letter-spacing: 0; color: var(--ink);
+ }
+ .io-card ul { list-style: none; margin: 0; padding: 0; }
+ .io-card li {
+ padding: 10px 0; border-bottom: 1px solid var(--line);
+ font-size: 14px; line-height: 1.5; color: var(--ink-mute);
+ display: grid; grid-template-columns: 130px 1fr; gap: 14px; align-items: baseline;
+ }
+ .io-card li:last-child { border-bottom: none; }
+ .io-card li .k {
+ font-family: var(--mono); font-size: 12px; color: var(--ink); font-weight: 500;
+ letter-spacing: 0;
+ }
+ .io-card li .v b { color: var(--ink); font-weight: 500; }
+
+ /* templates */
+ .tpls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+ @media (max-width: 980px) { .tpls { grid-template-columns: repeat(2, 1fr); } }
+ @media (max-width: 540px) { .tpls { grid-template-columns: 1fr; } }
+ .tpl {
+ background: var(--bg-elev); border: 1px solid var(--line);
+ border-radius: 8px; padding: 22px; transition: border-color 120ms;
+ display: flex; flex-direction: column; gap: 12px;
+ }
+ .tpl:hover { border-color: var(--line-strong); }
+ .tpl .cat {
+ font-family: var(--mono); font-size: 10px; letter-spacing: 0;
+ text-transform: uppercase; color: var(--ink-faint);
+ }
+ .tpl h3, .tpl h4 {
+ margin: 0; font-size: 15px; font-weight: 500;
+ letter-spacing: 0; color: var(--ink); line-height: 1.35;
+ }
+ .tpl code {
+ font-family: var(--mono); font-size: 12px; color: var(--ink);
+ background: var(--bg-card); border: 1px solid var(--line);
+ border-radius: 4px; padding: 6px 10px;
+ display: block; overflow-x: auto; white-space: pre;
+ }
+ .tpl code .arg { color: var(--accent); }
+
+ /* DX features grid */
+ .dx { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+ @media (max-width: 980px) { .dx { grid-template-columns: repeat(2, 1fr); } }
+ @media (max-width: 540px) { .dx { grid-template-columns: 1fr; } }
+ .dx-card {
+ background: var(--bg-elev); border: 1px solid var(--line);
+ border-radius: 8px; padding: 22px;
+ }
+ .dx-card .ico {
+ width: 28px; height: 28px;
+ border-radius: 6px;
+ background: rgba(236,231,220, 0.10);
+ border: 1px solid rgba(236,231,220, 0.22);
+ color: var(--accent);
+ display: inline-flex; align-items: center; justify-content: center;
+ margin-bottom: 16px;
+ }
+ .dx-card h3, .dx-card h4 {
+ margin: 0 0 8px; font-size: 15px; font-weight: 500;
+ letter-spacing: 0; color: var(--ink);
+ }
+ .dx-card p {
+ margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-mute);
+ }
+ .dx-card code {
+ font-family: var(--mono); font-size: 12px; color: var(--ink);
+ background: var(--bg-card); border: 1px solid var(--line);
+ border-radius: 4px; padding: 1px 6px;
+ }
+
+ .cta-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 36px; }
+ a.btn-primary {
+ display: inline-flex; align-items: center; gap: 8px;
+ background: var(--ink); color: var(--bg);
+ border-radius: 6px; padding: 11px 18px;
+ font-size: 14px; font-weight: 500; letter-spacing: 0;
+ transition: background 120ms;
+ }
+ a.btn-primary:hover { background: #fff; }
+ a.btn-primary code { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--bg); }
+ a.btn-link {
+ display: inline-flex; align-items: center; gap: 6px;
+ color: var(--ink); padding: 11px 14px;
+ font-size: 14px; font-weight: 500; transition: color 120ms;
+ }
+ a.btn-link:hover { color: var(--accent); }
+
+ footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); }
+ footer.site .grid { display: grid; grid-template-columns: 1.5fr repeat(3, 1fr); gap: 36px; margin-bottom: 36px; }
+ @media (max-width: 720px) { footer.site .grid { grid-template-columns: 1fr 1fr; } }
+ footer.site .brandcol .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); margin-bottom: 14px; }
+ footer.site .brandcol .brand img { height: 16px; width: 16px; }
+ footer.site .brandcol .brand span { font-weight: 500; font-size: 15px; letter-spacing: 0; }
+ footer.site .brandcol p { font-size: 13px; line-height: 1.55; color: var(--ink-mute); margin: 0; max-width: 32ch; }
+ footer.site h5 { font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 14px; font-weight: 500; }
+ footer.site ul { list-style: none; margin: 0; padding: 0; }
+ footer.site li { margin-bottom: 8px; }
+ footer.site li a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
+ footer.site li a:hover { color: var(--ink); }
+ footer.site .legal {
+ padding-top: 22px; border-top: 1px solid var(--line);
+ display: flex; justify-content: space-between; align-items: center;
+ font-family: var(--mono); font-size: 11px; letter-spacing: 0; color: var(--ink-faint);
+ flex-wrap: wrap; gap: 12px;
+ }
+
+ .plate {
+ position: relative; margin-top: 56px;
+ border: 1px solid var(--line-strong); border-radius: 14px;
+ overflow: hidden; background: #050607; isolation: isolate;
+ }
+ .plate .img {
+ position: relative; aspect-ratio: 16 / 9;
+ background-position: center; background-size: cover; background-repeat: no-repeat;
+ }
+ .plate .img::after {
+ content: ""; position: absolute; inset: 0; pointer-events: none;
+ background:
+ linear-gradient(180deg, transparent 50%, rgba(8,8,10,0.78) 100%),
+ linear-gradient(90deg, rgba(8,8,10,0.55) 0%, transparent 30%, transparent 70%, rgba(8,8,10,0.55) 100%);
+ }
+ .plate .img::before {
+ content: ""; position: absolute; left: 12%; right: 12%; top: 0; height: 1px;
+ background: linear-gradient(90deg, transparent, rgba(236,231,220, 0.5), transparent);
+ pointer-events: none; z-index: 2;
+ }
+ .plate .stamp {
+ position: absolute; top: 22px; left: 24px; z-index: 3;
+ display: inline-flex; align-items: center; gap: 8px;
+ font-family: var(--mono); font-size: 10.5px; letter-spacing: 0;
+ text-transform: uppercase; color: var(--ink-mute);
+ border: 1px solid rgba(236,231,220, 0.22);
+ background: rgba(8,9,8,0.62);
+ backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+ padding: 6px 12px; border-radius: 4px;
+ }
+ .plate .stamp .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px rgba(236,231,220, 0.85); }
+ .plate .cap {
+ position: absolute; left: 30px; right: 30px; bottom: 26px; z-index: 3;
+ display: flex; align-items: flex-end; justify-content: space-between; gap: 24px;
+ }
+ .plate .cap .title {
+ font-family: var(--sans); font-size: clamp(20px, 2.2vw, 28px);
+ font-weight: 500; letter-spacing: 0; line-height: 1.18;
+ color: var(--ink); max-width: 60%;
+ text-shadow: 0 1px 2px rgba(0,0,0,0.55);
+ }
+ .plate .cap .title .tone {
+ background: linear-gradient(170deg, #faf2e1 0%, #c9c2b2 50%, #faf2e1 100%);
+ -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+ }
+ .plate .cap .meta {
+ font-family: var(--mono); font-size: 11px;
+ color: var(--ink-mute); letter-spacing: 0;
+ text-align: right; line-height: 1.7;
+ }
+ .plate .cap .meta b { color: var(--ink); font-weight: 500; }
+ @media (max-width: 720px) {
+ .plate .cap { left: 16px; right: 16px; bottom: 14px; flex-direction: column; align-items: flex-start; gap: 10px; }
+ .plate .cap .title { font-size: 17px; max-width: 100%; }
+ .plate .cap .meta { text-align: left; font-size: 10.5px; }
+ .plate .stamp { top: 14px; left: 14px; font-size: 9.5px; padding: 5px 10px; }
+ }
+
+ /* Light-mode overrides ·page was authored with hardcoded dark-mode tokens.
+ Without these the body, terminal, code blocks, headings, and io-cards all
+ render cream-on-cream and become unreadable. Flip every token. */
+ [data-theme="light"] {
+ --bg: #fafafa !important;
+ --bg-elev: #ffffff !important;
+ --bg-card: #ffffff !important;
+ --line: rgba(12,14,16,0.08) !important;
+ --line-strong: rgba(12,14,16,0.14) !important;
+ --line-stronger: rgba(12,14,16,0.22) !important;
+ --ink: #0c0e10 !important;
+ --ink-mute: #4b5158 !important;
+ --ink-faint: #6f7681 !important;
+ --accent: #0a8862 !important;
+ --accent-soft: rgba(10,136,98,0.10) !important;
+ --accent-strong: #047a55 !important;
+ --good: #0a8862 !important;
+ --bad: #c9293f !important;
+ }
+ [data-theme="light"] body { background: #fafafa !important; color: #0c0e10 !important; }
+ [data-theme="light"] header.site { background: rgba(250,250,250,0.92) !important; }
+ [data-theme="light"] .term { box-shadow: 0 14px 38px -18px rgba(12,14,16,0.18), 0 0 0 1px rgba(12,14,16,0.06) !important; }
+ [data-theme="light"] .term .head { background: rgba(12,14,16,0.04) !important; }
+ [data-theme="light"] .term .head .ctl { background: rgba(12,14,16,0.18) !important; }
+ [data-theme="light"] .term .body { color: #0c0e10 !important; }
+ [data-theme="light"] .io-card.out { background: linear-gradient(180deg, rgba(10,136,98,0.04), #ffffff) !important; border-color: rgba(10,136,98,0.22) !important; }
+ [data-theme="light"] p.lede code,
+ [data-theme="light"] code { background: rgba(12,14,16,0.05) !important; border-color: rgba(12,14,16,0.10) !important; color: #0c0e10 !important; }
+</style>
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<link rel="stylesheet" href="/kolm-svg.css">
+<link rel="stylesheet" href="/w598.css">
+<link rel="stylesheet" href="/w600-layout.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"kolm","operatingSystem":"macOS, Linux, Windows, iOS, Android","applicationCategory":"DeveloperApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+<meta name="twitter:title" content="Compile AI work into a signed local artifact · kolm.ai">
+<meta name="twitter:description" content="Compile repeated AI work from reviewed examples into signed .kolm artifacts that run locally, on devices, or behind your VPC with a verifier receipt.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body class="compile-page">
+<a class="skip-link" href="#main">Skip to content</a>
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API Key &rarr;</a>
+ </div>
+ </div>
+</header>
+
+<main id="main">
+<section class="hero">
+ <div class="wrap">
+ <h1 class="hero-h1">Compile repeated AI work.<br><span class="tone">Own the runtime.</span></h1>
+ <p class="lede"><b>kolm compile</b> takes reviewed examples and holdouts, picks the smallest strategy that passes, returns one signed <code>.kolm</code>. Runs on laptop, phone, MCP server, edge box, or private VPC &mdash; no future call goes back to a frontier API.</p>
+
+ <div class="kolm-hero__visual" data-kolm-illustration="compile-pipeline" aria-hidden="true" style="margin:24px 0 8px"></div>
+
+ <div class="term" aria-label="Terminal output">
+ <div class="head">
+ <span class="ctl"></span><span class="ctl"></span><span class="ctl"></span>
+ <span class="file">~/triage-app - zsh</span>
+ </div>
+ <div class="body"><span class="com">$</span> kolm compile <span class="arg">"answer support tickets in our voice, never send"</span> \
+ --examples ./tickets.jsonl \
+ --evals ./held-out.jsonl \
+ --base <span class="arg">qwen2.5-3b</span> --gate <span class="num">0.85</span>
+
+<span class="dim">compile id </span><span class="ok">cmpl_8a3f12</span>
+<span class="dim">teacher </span>claude-opus-4-7 <span class="dim">(your key)</span>
+<span class="dim">distill </span>1,284 verified labels <span class="ok">3m 08s</span>
+<span class="dim">decompose </span>442 deterministic drafts <span class="ok">28s</span>
+<span class="dim">train lora </span>82 MB - 3 epochs <span class="ok">7m 12s</span>
+<span class="dim">evaluate </span>97.4% accuracy - 92% coverage
+<span class="dim">package </span>support-triage.kolm 38 MB
+
+<span class="ok">ok</span> K-score for support-triage.kolm <span class="num">0.94</span> <span class="dim">(gate 0.85 - ship)</span>
+<span class="ok">ok</span> Ed25519 receipt chain
+<span class="ok">ok</span> ./out/<span class="arg">support-triage.kolm</span>
+</div>
+ </div>
+
+ <div class="cta-row">
+ <a href="/signup" class="btn-primary">Build artifact <code>kolm compile</code></a>
+ <a href="/docs" class="btn-link">Inspect the artifact contract &rarr;</a>
+ </div>
+
+ </div>
+</section>
+
+<!-- Interactive compile pane. Auth-gated: visible only when an API key exists
+ in localStorage. Manual form parallel to the CLI's `kolm compile`. -->
+<section id="go" class="manual-compile" hidden aria-labelledby="manual-h2">
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">go</span><span>Manual compile</span></div>
+ <h2 id="manual-h2">Compile from this browser.<br><span class="tone">No CLI, no install.</span></h2>
+ <p class="sec-lede">Your API key is already in this browser. Describe the task, pick a base, hit Compile. The job runs on kolm infrastructure and the signed <code>.kolm</code> file lands in your dashboard.</p>
+ <form id="manual-compile-form" class="mc-form" autocomplete="off">
+ <label class="mc-field">
+ <span class="mc-lbl">Task <em>required</em></span>
+ <textarea id="mc-task" name="task" required rows="3" placeholder="answer support tickets in our voice, never send unless the customer asked"></textarea>
+ </label>
+ <div class="mc-row">
+ <label class="mc-field">
+ <span class="mc-lbl">Base model</span>
+ <select id="mc-base" name="base_model">
+ <option value="qwen2.5-3b">qwen2.5-3b ·fast, default</option>
+ <option value="qwen2.5-7b">qwen2.5-7b ·balanced</option>
+ <option value="llama-3.1-8b">llama-3.1-8b ·strong</option>
+ <option value="mistral-7b">mistral-7b ·light</option>
+ </select>
+ </label>
+ <label class="mc-field">
+ <span class="mc-lbl">Corpus namespace <em>optional</em></span>
+ <input id="mc-corpus" name="corpus_namespace" type="text" placeholder="tickets-2026">
+ </label>
+ </div>
+ <div class="mc-row">
+ <label class="mc-field">
+ <span class="mc-lbl">Recipe class</span>
+ <select id="mc-class" name="recipe_class">
+ <option value="rule">rule ·deterministic, no model</option>
+ <option value="synthesized_rule">synthesized_rule ·LLM-drafted, frozen</option>
+ <option value="compiled_rule">compiled_rule ·rule fused into small base</option>
+ <option value="distilled_model" selected>distilled_model ·full distillation</option>
+ </select>
+ </label>
+ <label class="mc-field">
+ <span class="mc-lbl">Hardware tier</span>
+ <select id="mc-tier" name="hw_tier">
+ <option value="auto" selected>auto ·detect</option>
+ <option value="cpu-server">cpu-server</option>
+ <option value="3090">3090</option>
+ <option value="4090">4090</option>
+ <option value="5090">5090</option>
+ <option value="m4-max-128">m4-max-128</option>
+ <option value="a100-80">a100-80</option>
+ <option value="h100-80">h100-80</option>
+ <option value="h200-141">h200-141</option>
+ <option value="dgx-spark">dgx-spark</option>
+ <option value="m3-ultra-512">m3-ultra-512</option>
+ </select>
+ </label>
+ </div>
+ <div class="mc-row">
+ <label class="mc-field">
+ <span class="mc-lbl">Output target</span>
+ <select id="mc-target" name="output_target">
+ <option value="gguf" selected>gguf ·llama.cpp</option>
+ <option value="onnx">onnx</option>
+ <option value="safetensors">safetensors</option>
+ <option value="coreml">coreml ·apple</option>
+ <option value="mlx">mlx ·apple silicon</option>
+ <option value="executorch">executorch ·pytorch edge</option>
+ <option value="tensorrt">tensorrt ·nvidia</option>
+ <option value="native-c">native-c</option>
+ <option value="native-rust">native-rust</option>
+ <option value="wasm">wasm</option>
+ </select>
+ </label>
+ <label class="mc-field">
+ <span class="mc-lbl">Multi-device targets <em>cmd/ctrl-click for multiple</em></span>
+ <select id="mc-multi-device" name="multi_device" multiple size="4">
+ <option value="phone-ios">phone-ios</option>
+ <option value="phone-android">phone-android</option>
+ <option value="laptop-cpu" selected>laptop-cpu</option>
+ <option value="browser-wasm">browser-wasm</option>
+ <option value="edge-jetson">edge-jetson</option>
+ <option value="server-cuda" selected>server-cuda</option>
+ </select>
+ </label>
+ </div>
+ <label class="mc-field">
+ <span class="mc-lbl">Deploy webhook <em>optional ·https only ·Vercel Deploy Hook or any webhook</em></span>
+ <input id="mc-hook" name="deploy_hook" type="url" pattern="https://.*" placeholder="https://api.vercel.com/v1/integrations/deploy/prj_...">
+ </label>
+ <div class="mc-actions">
+ <button type="submit" class="btn-primary" id="mc-submit">Compile &rarr;</button>
+ <a class="btn-link" href="/dashboard">View dashboard</a>
+ <span class="mc-status" id="mc-status" aria-live="polite"></span>
+ </div>
+ </form>
+ <div id="mc-result" class="mc-result" hidden></div>
+ <script>
+ // K_AXIS_LABELS - human-readable labels for the 5 K-score axes used in
+ // the result render. Surfaced inline so the picker form and the result
+ // panel share a single vocabulary.
+ window.K_AXIS_LABELS = {
+ A: 'Accuracy',
+ S: 'Stability',
+ L: 'Latency',
+ C: 'Compliance',
+ V: 'Verifier coverage',
+ };
+ </script>
+ </div>
+</section>
+
+<!-- Logged-out CTA shown when no key is present. -->
+<section id="go-out" class="manual-compile-out" aria-labelledby="manual-out-h2">
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">go</span><span>Compile from the browser</span></div>
+ <h2 id="manual-out-h2">Sign in to compile here.<br><span class="tone">Or use the CLI.</span></h2>
+ <p class="sec-lede">A free account unlocks one-click compile from this page and a dashboard with every artifact you've shipped. Or stay in the terminal and use <code>kolm compile</code>.</p>
+ <div class="cta-row">
+ <a class="btn-primary" href="/signup">Create free account &rarr;</a>
+ <a class="btn-link" href="/quickstart">Use the CLI instead</a>
+ </div>
+ </div>
+</section>
+
+<style>
+.manual-compile, .manual-compile-out { padding: 64px 0; }
+.manual-compile .mc-form { margin-top: 24px; display: flex; flex-direction: column; gap: 18px; max-width: 720px; }
+.manual-compile .mc-field { display: flex; flex-direction: column; gap: 8px; }
+.manual-compile .mc-lbl { font-family: var(--mono); font-size: 12px; color: var(--ink-mute); letter-spacing: 0.02em; text-transform: uppercase; }
+.manual-compile .mc-lbl em { font-style: normal; color: var(--ink-faint); font-weight: 400; text-transform: none; letter-spacing: 0; margin-left: 6px; }
+.manual-compile textarea, .manual-compile input[type=text], .manual-compile select {
+ background: var(--bg-elev, #0b0f10); color: var(--ink); border: 1px solid var(--line-strong, rgba(255,255,255,0.12));
+ border-radius: 8px; padding: 11px 13px; font-family: var(--mono); font-size: 13.5px; line-height: 1.55;
+ resize: vertical; transition: border-color 140ms, box-shadow 140ms;
+}
+.manual-compile textarea:focus, .manual-compile input[type=text]:focus, .manual-compile select:focus {
+ outline: none; border-color: var(--accent, #7ef0d2); box-shadow: 0 0 0 3px rgba(126,240,210,0.18);
+}
+.manual-compile .mc-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 720px) { .manual-compile .mc-row { grid-template-columns: 1fr; } }
+.manual-compile .mc-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.manual-compile .mc-status { font-family: var(--mono); font-size: 12px; color: var(--ink-mute); }
+.manual-compile .mc-status.ok { color: var(--good, #7ef0d2); }
+.manual-compile .mc-status.err { color: var(--bad, #ff6b91); }
+.manual-compile .mc-result {
+ margin-top: 22px; padding: 18px 20px; border-radius: 10px;
+ background: var(--bg-card, #101514); border: 1px solid var(--line-strong, rgba(255,255,255,0.12));
+ font-family: var(--mono); font-size: 13px; line-height: 1.6;
+}
+.manual-compile .mc-result code { background: rgba(126,240,210,0.10); padding: 1px 6px; border-radius: 4px; color: var(--accent, #7ef0d2); }
+[data-theme="light"] .manual-compile textarea,
+[data-theme="light"] .manual-compile input[type=text],
+[data-theme="light"] .manual-compile select { background: #ffffff !important; color: #0c0e10 !important; border-color: rgba(12,14,16,0.18) !important; }
+[data-theme="light"] .manual-compile textarea:focus,
+[data-theme="light"] .manual-compile input[type=text]:focus,
+[data-theme="light"] .manual-compile select:focus { border-color: #0a8862 !important; box-shadow: 0 0 0 3px rgba(10,136,98,0.15) !important; }
+[data-theme="light"] .manual-compile .mc-result { background: #fafafa !important; border-color: rgba(12,14,16,0.10) !important; }
+</style>
+
+<section>
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">01</span><span>The contract</span></div>
+ <h2>What you give kolm.<br><span class="tone">What kolm gives back.</span></h2>
+ <p class="sec-lede">A clean exchange. Everything on the right is reproducible from everything on the left. Nothing leaves your machine that you didn't ship in.</p>
+
+ <div class="io">
+ <div class="io-card">
+ <div class="head">You provide</div>
+ <h3>Task &middot; examples &middot; evals &middot; key.</h3>
+ <ul>
+ <li><span class="k">task</span><span class="v"><b>One sentence.</b> The behavior the artifact has to match.</span></li>
+ <li><span class="k">examples</span><span class="v"><b>10-50,000 rows.</b> JSONL, CSV, a folder of files, or a corpus namespace.</span></li>
+ <li><span class="k">evals</span><span class="v"><b>Held-out set.</b> Synthesized if absent. This artifact's K-score is measured against this set, not against the base model.</span></li>
+ <li><span class="k">api key</span><span class="v"><b>BYO.</b> Anthropic, OpenAI, Google, Mistral, Together, Fireworks, your own gateway.</span></li>
+ <li><span class="k">base</span><span class="v"><b>Pick one</b> from the open list, or let kolm choose by size and target.</span></li>
+ </ul>
+ </div>
+ <div class="io-card out">
+ <div class="head">kolm returns</div>
+ <h3>One signed .kolm. Nothing else.</h3>
+ <ul>
+ <li><span class="k">artifact</span><span class="v"><b>Single zip.</b> Model, LoRA, recipes, recall index, tests, manifest, signature.</span></li>
+ <li><span class="k">k-score</span><span class="v"><b>One number for this .kolm</b> (not for the base model). Below the gate, the artifact does not ship.</span></li>
+ <li><span class="k">receipt</span><span class="v"><b>Ed25519 chain.</b> Bound in the artifact receipt. Tamper-detectable.</span></li>
+ <li><span class="k">runtime</span><span class="v"><b>Same file</b> runs through the CLI, the MCP server, and native iOS / Android adapters: one signature, every target.</span></li>
+ <li><span class="k">cost</span><span class="v"><b>Frontier bill is yours.</b> Local runtime is unlimited on every paid tier.</span></li>
+ </ul>
+ </div>
+ </div>
+ </div>
+</section>
+
+<section>
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">02</span><span>Templates</span></div>
+ <h2>Six tasks you can compile <span class="tone">in five minutes.</span></h2>
+ <p class="sec-lede">Run any of these against the seed corpus the template ships with. Each is a real artifact, with real evals, that ships at K &gt;= 0.85.</p>
+
+ <div class="tpls">
+ <div class="tpl">
+ <div class="cat">Email</div>
+ <h3>Reply to my inbox in my voice. Draft, never send.</h3>
+ <code><span class="arg">kolm compile</span> "draft inbox replies in my voice"</code>
+ </div>
+ <div class="tpl">
+ <div class="cat">Code</div>
+ <h3>Spot bugs in PRs the way our staff engineer would.</h3>
+ <code><span class="arg">kolm compile</span> "spot risky PR changes"</code>
+ </div>
+ <div class="tpl">
+ <div class="cat">Photos</div>
+ <h3>Find every photo from a trip and group by location.</h3>
+ <code><span class="arg">kolm compile</span> "group trip photos by location"</code>
+ </div>
+ <div class="tpl">
+ <div class="cat">Health</div>
+ <h3>Daily recap of activity, sleep, training load.</h3>
+ <code><span class="arg">kolm compile</span> "summarize daily health signals"</code>
+ </div>
+ <div class="tpl">
+ <div class="cat">Finance</div>
+ <h3>Categorize every transaction; flag the ones that look wrong.</h3>
+ <code><span class="arg">kolm compile</span> "classify transactions"</code>
+ </div>
+ <div class="tpl">
+ <div class="cat">Docs</div>
+ <h3>Answer questions grounded in our wiki, with citations.</h3>
+ <code><span class="arg">kolm compile</span> "answer wiki questions" --data ./wiki</code>
+ </div>
+ </div>
+ </div>
+</section>
+
+<section>
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">03</span><span>Developer experience</span></div>
+ <h2>One command in the terminal.<br><span class="tone">One step in CI.</span></h2>
+ <p class="sec-lede">No GPU on your laptop. No Docker. No multi-day MLOps. The compile pipeline lives in the cloud; the artifact lives wherever you put it.</p>
+
+ <div class="dx">
+ <div class="dx-card">
+ <div class="ico">
+ <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M3 4 L7 8 L3 12 M9 12 L13 12"/></svg>
+ </div>
+ <h3>One command</h3>
+ <p><code>kolm compile</code> handles compile, cache, sign, and serve. CLI distributes via curl, npm, brew, pip.</p>
+ </div>
+ <div class="dx-card">
+ <div class="ico">
+ <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><circle cx="8" cy="8" r="5"/><path d="M8 5 L8 8 L10 9.5"/></svg>
+ </div>
+ <h3>Reproducible</h3>
+ <p>Same task + same examples + same base = byte-identical artifact. CI gates on K-score, not vibe.</p>
+ </div>
+ <div class="dx-card">
+ <div class="ico">
+ <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><rect x="2.5" y="2.5" width="11" height="11" rx="1.5"/><path d="M5 8 L7 10 L11 6"/></svg>
+ </div>
+ <h3>Inspectable</h3>
+ <p><code>kolm inspect a.kolm</code> shows the manifest, recipes, K-score, and signature metadata. <code>kolm inspect a.kolm b.kolm</code> compares two builds field by field.</p>
+ </div>
+ <div class="dx-card">
+ <div class="ico">
+ <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M3 8 L13 8 M9 4 L13 8 L9 12"/></svg>
+ </div>
+ <h3>BYO key</h3>
+ <p>Anthropic, OpenAI, Google, Mistral, Together, Fireworks, AWS Bedrock, Azure, your own gateway.</p>
+ </div>
+ <div class="dx-card">
+ <div class="ico">
+ <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M2.5 5 L13.5 5 L13.5 13 L2.5 13 Z M5 5 L5 3 L11 3 L11 5"/></svg>
+ </div>
+ <h3>CI native</h3>
+ <p>GitHub Action, GitLab template, Jenkins step. Fail the build if K drops below your floor.</p>
+ </div>
+ <div class="dx-card">
+ <div class="ico">
+ <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><circle cx="8" cy="8" r="5.5"/><path d="M8 2.5 C5 5 5 11 8 13.5 M8 2.5 C11 5 11 11 8 13.5 M2.5 8 L13.5 8"/></svg>
+ </div>
+ <h3>Customer-hosted bridge</h3>
+ <p>A customer-hosted compile bridge is the Enterprise design path for private networks. The public CLI does not ship an <code>--air-gap</code> mode today.</p>
+ </div>
+ </div>
+
+ <div class="cta-row">
+ <a href="/signup" class="btn-primary">Get kolm <code>-</code> <code>kolm compile</code></a>
+ <a href="/docs" class="btn-link">Read quickstart &rarr;</a>
+ </div>
+ </div>
+</section>
+
+</main>
+
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4><span data-kolm-icon="compile" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="deploy" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="layers" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="user" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+
+<script src="/app.js"></script>
+<script src="/nav.js" defer></script>
+<script src="/kolm-svg.js" defer></script>
+<script>
+(function () {
+ // Manual compile form on /compile. Auth-gated: hidden unless an API key
+ // exists in localStorage. Posts to /v1/compile and polls until done.
+ var KEY_NAMES = ['kolm_api_key', 'apiKey', 'recipeApiKey', 'ks_api_key'];
+ function apiKey() {
+ try { for (var i = 0; i < KEY_NAMES.length; i++) { var v = localStorage.getItem(KEY_NAMES[i]); if (v) return v; } } catch (e) {}
+ return '';
+ }
+ var go = document.getElementById('go');
+ var goOut = document.getElementById('go-out');
+ var key = apiKey();
+ if (go && goOut) {
+ if (key) { go.hidden = false; goOut.hidden = true; }
+ else { go.hidden = true; goOut.hidden = false; }
+ }
+
+ var form = document.getElementById('manual-compile-form');
+ var status = document.getElementById('mc-status');
+ var submit = document.getElementById('mc-submit');
+ var result = document.getElementById('mc-result');
+ if (!form || !key) return;
+
+ function setStatus(text, cls) { status.textContent = text; status.className = 'mc-status' + (cls ? ' ' + cls : ''); }
+ function escHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+
+ async function call(path, opts) {
+ opts = opts || {};
+ opts.headers = Object.assign({ 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key, 'X-API-Key': key }, opts.headers || {});
+ var res = await fetch(path, opts);
+ var text = await res.text();
+ var body; try { body = JSON.parse(text); } catch (e) { body = { _raw: text }; }
+ if (!res.ok) throw Object.assign(new Error(body.error || res.statusText), { body: body, status: res.status });
+ return body;
+ }
+
+ async function pollJob(jobId) {
+ for (var i = 0; i < 120; i++) { // up to ~10 min
+ try {
+ var snap = await call('/v1/compile/' + encodeURIComponent(jobId));
+ renderResult(snap);
+ if (snap.status === 'completed' || snap.status === 'failed') return snap;
+ } catch (e) { setStatus('poll failed: ' + (e.message || 'error'), 'err'); return null; }
+ await new Promise(function (r) { setTimeout(r, 5000); });
+ }
+ setStatus('still running. view in dashboard', 'ok');
+ return null;
+ }
+
+ function renderResult(snap) {
+ var artifactRow = snap.artifact_url
+ ? '<div>artifact: <a href="' + escHtml(snap.artifact_url) + '" download><code>' + escHtml(snap.artifact_url) + '</code></a></div>'
+ : '';
+ var kScore = (snap.k_score != null) ? '<div>K-score: <code>' + escHtml(snap.k_score) + '</code></div>' : '';
+ var deployRow = '';
+ if (snap.deploy_hook_set && snap.deploy_status && snap.deploy_status !== 'skipped') {
+ var dlabel = snap.deploy_status === 'sent'
+ ? ('deploy webhook ·sent (' + (snap.deploy_response_code || '200') + ')')
+ : snap.deploy_status === 'pending' ? 'deploy webhook ·pending'
+ : ('deploy webhook ·failed' + (snap.deploy_response_code ? ' (' + snap.deploy_response_code + ')' : ''));
+ deployRow = '<div>' + escHtml(dlabel) + '</div>';
+ }
+ result.hidden = false;
+ result.innerHTML =
+ '<div>job: <code>' + escHtml(snap.id) + '</code></div>' +
+ '<div>status: <code>' + escHtml(snap.status) + '</code></div>' +
+ kScore + artifactRow + deployRow +
+ (snap.status === 'completed' ? '<div style="margin-top:10px"><a href="/dashboard" class="btn-link">View in dashboard &rarr;</a></div>' : '');
+ }
+
+ form.addEventListener('submit', async function (e) {
+ e.preventDefault();
+ var task = document.getElementById('mc-task').value.trim();
+ if (!task) { setStatus('task is required', 'err'); return; }
+ var base = document.getElementById('mc-base').value;
+ var corpus = document.getElementById('mc-corpus').value.trim();
+ var hook = (document.getElementById('mc-hook') || {}).value || '';
+ hook = hook.trim();
+ if (hook && !/^https:\/\//i.test(hook)) { setStatus('deploy webhook must be https://', 'err'); return; }
+ submit.disabled = true;
+ setStatus('starting compile');
+ try {
+ var body = { task: task, base_model: base };
+ if (corpus) body.corpus_namespace = corpus;
+ if (hook) body.deploy_hook = hook;
+ var resp = await call('/v1/compile', { method: 'POST', body: JSON.stringify(body) });
+ if (!resp.job_id) throw new Error('missing job_id');
+ setStatus('queued ·job ' + resp.job_id, 'ok');
+ renderResult({ id: resp.job_id, status: resp.status || 'queued' });
+ await pollJob(resp.job_id);
+ } catch (err) {
+ setStatus('compile failed: ' + (err.body && err.body.error || err.message || 'unknown'), 'err');
+ } finally {
+ submit.disabled = false;
+ }
+ });
+})();
+</script>
+</body>
+</html>

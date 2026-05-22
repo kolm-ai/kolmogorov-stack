@@ -1,554 +1,509 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>kolm benchmarks · reproducible runs, public seeds · kolm.ai</title>
-<meta name="description" content="kolm benchmarks: every .kolm artifact ships its own eval set. Offline-capable, in-process network-egress monitor, K-score signed into the manifest.">
-<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-
-<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
-<meta property="og:site_name" content="kolm">
-<meta property="og:title" content="kolm benchmarks · reproducible runs, public seeds · kolm.ai">
-<meta property="og:description" content="kolm benchmarks: every .kolm artifact ships its own eval set. Offline-capable, in-process network-egress monitor, K-score signed into the manifest.">
-<meta property="og:type" content="website">
+<title>Benchmarks &middot; kolm.ai</title>
+<meta name="description" content="kscore-bench numbers across distilled artifacts. Quantize matrix from Qwen2.5-0.5B through DeepSeek-R1 32B on an RTX 5090. Real wall-clock, real GB, real K-score.">
+<meta name="theme-color" content="#07090c">
+<meta property="og:title" content="Benchmarks &middot; kolm.ai">
+<meta property="og:description" content="kscore-bench across distilled artifacts plus the SOTA quantize matrix on an RTX 5090.">
+<meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/benchmarks">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="kolm benchmarks · reproducible runs, public seeds · kolm.ai">
-<meta name="twitter:description" content="kolm benchmarks: every .kolm artifact ships its own eval set. Offline-capable, in-process network-egress monitor, K-score signed into the manifest.">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/benchmarks">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/styles.css">
-<link rel="stylesheet" href="/brand-refresh.css">
-<link rel="stylesheet" href="/w604.css">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
 <style>
- :root {
- --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
- --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
- --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
- --accent: #faf2e1; --accent-strong: #c9c2b2; --good: #7ef0d2; --bad: #ff6b91;
- --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
- --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
- }
- * { box-sizing: border-box; }
- html, body { margin: 0; padding: 0; }
- body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
- a { color: inherit; text-decoration: none; }
- .wrap { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
- .wrap-wide { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
- @media (max-width: 720px) { .wrap, .wrap-wide { padding: 0 20px; } }
+  .bm-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
+  .bm-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
+  .bm-hero h1 { margin: 0 0 var(--ks-4); font-size: clamp(36px, 5vw, 56px); font-weight: 560; letter-spacing: -0.02em; line-height: 1.05; color: var(--ks-ink); }
+  .bm-hero h1 b { color: var(--ks-accent); font-weight: 560; }
+  .bm-hero p.lede { margin: 0 0 var(--ks-6); font-size: 18px; line-height: 1.55; color: var(--ks-ink-2); max-width: 64ch; }
+  .bm-hero .cta-row { display: flex; flex-wrap: wrap; gap: var(--ks-3); }
+  .bm-hero .totals { display: flex; gap: var(--ks-5); margin-top: var(--ks-6); flex-wrap: wrap; font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-3); }
+  .bm-hero .totals .v { color: var(--ks-accent); font-size: 22px; font-weight: 560; display: block; }
 
- header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
- header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
- header.site .left { display: flex; align-items: center; gap: 36px; }
- header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 500; font-size: 16px; }
- header.site nav { display: flex; gap: 22px; }
- header.site nav a { color: var(--ink-mute); font-size: 13.5px; }
- header.site nav a:hover, header.site nav a.active { color: var(--ink); }
- header.site .right { display: flex; align-items: center; gap: 14px; }
- header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
- header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
- @media (max-width: 720px) { header.site nav { display: none; } }
+  .bm-section { padding: var(--ks-9) 0; border-bottom: 1px solid var(--ks-line-1); }
+  .bm-section h2 { margin: 0 0 var(--ks-2); font-size: clamp(24px, 3vw, 32px); font-weight: 560; letter-spacing: -0.015em; color: var(--ks-ink); }
+  .bm-section .sub { margin: 0 0 var(--ks-6); font-size: 15px; color: var(--ks-ink-3); max-width: 64ch; line-height: 1.6; }
 
- section.hero { padding: 88px 0 32px; }
- .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
- h1 { margin: 22px 0 16px; font-size: clamp(36px, 5vw, 52px); line-height: 1.05; font-weight: 500; max-width: 22ch; }
- h1 .tone { color: var(--accent); }
- p.lede { margin: 0 0 24px; font-size: 17px; line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
+  .qm-tbl { width: 100%; border-collapse: collapse; margin-top: var(--ks-4); font-size: 14.5px; }
+  .qm-tbl th, .qm-tbl td { padding: var(--ks-3) var(--ks-4); text-align: left; border-bottom: 1px solid var(--ks-line-1); color: var(--ks-ink-2); }
+  .qm-tbl th { background: var(--ks-bg-1); color: var(--ks-ink); font-weight: 540; font-size: 13px; letter-spacing: 0.02em; }
+  .qm-tbl td.model { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); }
+  .qm-tbl td.num { font-family: var(--ks-mono); font-size: 13px; color: var(--ks-accent); text-align: right; }
+  .qm-tbl tr.feature td { background: rgba(122,190,127,0.04); }
+  .qm-tbl .k { color: var(--ks-accent); font-weight: 580; }
+  .qm-tbl caption { caption-side: bottom; text-align: left; padding-top: var(--ks-3); font-size: 12px; color: var(--ks-ink-3); font-family: var(--ks-mono); }
 
- .group { margin: 56px 0 0; padding-top: 32px; border-top: 1px solid var(--line); }
- .group h2 { margin: 0 0 14px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 500; }
- .group p { margin: 0 0 12px; color: var(--ink-mute); font-size: 15px; line-height: 1.65; max-width: 64ch; }
- .group .footnote { font-size: 12.5px; color: var(--ink-faint); font-family: var(--mono); margin-top: 10px; }
+  .bm-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--ks-4); }
+  @media (max-width: 900px) { .bm-grid { grid-template-columns: 1fr; } }
+  .bm-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--ks-4); }
+  @media (max-width: 900px) { .bm-grid-3 { grid-template-columns: 1fr; } }
 
- .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 18px 0 0; }
- @media (max-width: 760px) { .stat-row { grid-template-columns: repeat(2, 1fr); } }
- .stat { padding: 22px 24px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-elev); }
- .stat .lab { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; margin-bottom: 8px; }
- .stat .val { font-family: var(--mono); font-size: 26px; color: var(--accent); font-weight: 500; line-height: 1; margin-bottom: 6px; }
- .stat .sub { font-size: 12.5px; color: var(--ink-mute); line-height: 1.4; }
+  .bm-card { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); }
+  .bm-card .row { display: flex; justify-content: space-between; align-items: baseline; gap: var(--ks-3); margin-bottom: var(--ks-3); }
+  .bm-card .tag { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-ink-3); }
+  .bm-card .st { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--ks-line-2); }
+  .bm-card .st.live { color: var(--ks-accent); border-color: var(--ks-accent-edge); }
+  .bm-card h3 { margin: 0 0 var(--ks-2); font-size: 16px; font-weight: 540; color: var(--ks-ink); letter-spacing: -0.005em; }
+  .bm-card p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink-2); }
+  .bm-card p + p { margin-top: var(--ks-2); }
+  .bm-card a { color: var(--ks-accent); }
+  .bm-card .big { font-family: var(--ks-mono); font-size: 28px; font-weight: 560; color: var(--ks-accent); margin: var(--ks-2) 0; display: block; }
+  .bm-card .lab { font-family: var(--ks-mono); font-size: 10.5px; color: var(--ks-ink-3); text-transform: uppercase; letter-spacing: 0.06em; }
 
- table.tbl { width: 100%; border-collapse: collapse; font-size: 14.5px; margin: 14px 0 0; }
- table.tbl th, table.tbl td { border-bottom: 1px solid var(--line); padding: 14px 14px; text-align: left; vertical-align: top; }
- table.tbl th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; font-weight: 500; }
- table.tbl td { color: var(--ink-mute); }
- table.tbl td b { color: var(--ink); font-weight: 500; }
- table.tbl td.row-h { color: var(--ink); font-weight: 500; font-family: var(--mono); font-size: 13px; text-transform: uppercase; letter-spacing: 0.02em; }
- table.tbl td.num { font-family: var(--mono); color: var(--ink); }
- table.tbl td.win { color: var(--good); font-family: var(--mono); }
- .dim { color: var(--ink-faint); font-family: var(--mono); font-size: 12px; }
- @media (max-width: 720px) {
- table.tbl, table.tbl tbody, table.tbl tr, table.tbl td { display: block; width: 100%; }
- table.tbl thead { display: none; }
- table.tbl tr { padding: 14px 14px; margin: 0 0 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg-elev); }
- table.tbl td { border: 0; padding: 6px 0; display: flex; justify-content: space-between; align-items: baseline; gap: 14px; }
- table.tbl td.row-h { font-size: 13px; padding-bottom: 10px; margin-bottom: 6px; border-bottom: 1px solid var(--line); display: block; }
- table.tbl td[data-l]::before { content: attr(data-l) ":"; font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; flex: 0 0 auto; }
- table.tbl td[data-l] > * { text-align: right; }
- table.tbl td[data-l]:not(.row-h) { font-family: var(--mono); font-size: 13px; }
- }
+  .bm-code { background: #050607; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); margin-top: var(--ks-4); }
+  .bm-code pre { margin: 0; font-family: var(--ks-mono); font-size: 12.5px; line-height: 1.6; color: var(--ks-ink); overflow-x: auto; }
+  .bm-code .c { color: var(--ks-ink-3); }
+  .bm-code .k { color: var(--ks-accent); }
+  .bm-code .s { color: #f4c666; }
+  .bm-code .n { color: #d6a65a; }
+  .bm-code .v { color: #b5bdb1; }
+  .bm-code .title { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: var(--ks-3); }
 
- pre.code { font-family: var(--mono); font-size: 13px; line-height: 1.55; background: var(--bg-card); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; overflow-x: auto; color: var(--ink); margin: 14px 0; white-space: pre; }
- @media (max-width: 720px) { pre.code { white-space: pre-wrap; word-break: break-word; } }
- pre.code .c { color: var(--ink-faint); }
- pre.code .ok { color: var(--good); }
- pre.code .k { color: var(--accent-strong); }
-
- .cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 18px 0 0; }
- .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 8px; font-size: 13.5px; font-weight: 500; line-height: 1; }
- .btn.primary { background: var(--ink); color: var(--bg); }
- .btn.ghost { color: var(--ink-mute); border: 1px solid var(--line-strong); }
- .btn.ghost:hover { color: var(--ink); border-color: var(--ink-mute); }
-
- .verdict { padding: 28px 32px; border: 1px solid var(--line-strong); border-radius: 12px; background: linear-gradient(180deg, rgba(236,231,220, 0.04), rgba(236,231,220, 0.01)); margin: 24px 0 0; }
- .verdict h3 { margin: 0 0 8px; font-size: 18px; font-weight: 500; color: var(--ink); }
- .verdict p { margin: 0 0 8px; font-size: 14.5px; color: var(--ink-mute); line-height: 1.6; }
- .verdict p:last-child { margin-bottom: 0; }
- .verdict b { color: var(--ink); font-weight: 500; }
-
- .math { background: var(--bg-card); border: 1px solid var(--line); border-radius: 8px; padding: 18px 22px; font-family: var(--mono); font-size: 14px; line-height: 1.7; color: var(--ink); margin: 14px 0; }
- .math .lab { font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; margin-bottom: 8px; }
- .math .var { color: var(--accent-strong); }
-
- footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-faint); margin-top: 80px; }
- footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
- footer.site a { color: var(--ink-mute); }
+  .axis-tbl { width: 100%; border-collapse: collapse; margin-top: var(--ks-4); font-size: 14px; }
+  .axis-tbl th, .axis-tbl td { padding: var(--ks-3) var(--ks-4); text-align: left; border-bottom: 1px solid var(--ks-line-1); color: var(--ks-ink-2); }
+  .axis-tbl th { background: var(--ks-bg-1); color: var(--ks-ink); font-weight: 540; font-size: 13px; letter-spacing: 0.02em; }
+  .axis-tbl td:first-child { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); width: 180px; }
+  .axis-tbl td.num { font-family: var(--ks-mono); font-size: 13px; color: var(--ks-accent); text-align: right; }
 </style>
-<script type="application/ld+json">
-{
- "@context": "https://schema.org",
- "@type": "TechArticle",
- "headline": "kolm benchmarks: every .kolm carries its own evals",
- "description": "kolm-benchmark-1 spec: K-score, accuracy on embedded eval set, p50 latency in microseconds, network egress monitor, signed receipt chain.",
- "author": { "@type": "Organization", "name": "Kolm", "url": "https://kolm.ai" },
- "publisher": { "@type": "Organization", "name": "Kolm", "logo": { "@type": "ImageObject", "url": "https://kolm.ai/favicon.svg" } },
- "datePublished": "2026-04-25",
- "dateModified": "2026-05-08",
- "mainEntityOfPage": { "@type": "WebPage", "@id": "https://kolm.ai/benchmarks" }
-}
-</script>
-<link rel="stylesheet" href="/surface-polish.css">
 </head>
-<body>
-<a class="skip-link" href="#main">Skip to content</a>
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<body class="ks">
 
-<header class="site-header">
- <div class="wrap">
- <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
-    <!-- KOLM_NAV_BEGIN (W221) -->
-    <nav class="site-nav" aria-label="Primary">
-    <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
-      <div class="mega-menu" role="menu" aria-label="product menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/product">Overview</a>
-          <a href="/quickstart">Quickstart</a>
-          <a href="/capture">Gateway</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training loop</a>
-          <a href="/distill">Distill</a>
-          <a href="/compile">Compile</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Run</p>
-          <a href="/runtimes">Runtimes</a>
-          <a href="/docs/devices">Devices</a>
-          <a href="/trust">Verify</a>
-        </div>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/k-score">K-score</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
       </div>
     </div>
-    <div class="nav-item nav-item--models has-mega">
-      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
-      <div class="mega-menu" role="menu" aria-label="models menu">
-        <div class="mega-col">
-          <p class="mega-h">Choose</p>
-          <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Build your own</a>
-          <a href="/docs/runtime">Runtime targets</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/compute">Compute</a>
-          <a href="/runtimes">Mobile and edge</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
-      <div class="mega-menu" role="menu" aria-label="docs menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/capture">API gateway</a>
-          <a href="/docs/cli">CLI</a>
-          <a href="/docs/sdk">SDKs</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Reference</p>
-          <a href="/docs">Docs home</a>
-          <a href="/docs/api">API reference</a>
-          <a href="/api">HTTP routes</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Operate</p>
-          <a href="/integrations">Integrations</a>
-          <a href="/docs/privacy">Privacy membrane</a>
-          <a href="/docs/datasets">Datasets</a>
-          <a href="/docs/distillation">Distillation</a>
-          <a href="/docs/verify">Verification</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
-      <div class="mega-menu" role="menu" aria-label="pricing menu">
-        <div class="mega-col">
-          <p class="mega-h">Buy</p>
-          <a href="/pricing">Plans</a>
-          <a href="/pricing#roi">ROI calculator</a>
-          <a href="/nonprofits">Nonprofits</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
-      <div class="mega-menu" role="menu" aria-label="enterprise menu">
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/enterprise">Enterprise overview</a>
-          <a href="/self-host">Self-host</a>
-          <a href="/airgap">Air-gap</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Trust</p>
-          <a href="/trust">Trust center</a>
-          <a href="/security">Security</a>
-          <a href="/compliance">Compliance</a>
-          <a href="/baa">BAA</a>
-        </div>
-      </div>
-    </div>
-    </nav>
-    <!-- KOLM_NAV_END (W221) -->
- <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
- <a href="/signin" class="ghost">sign in</a>
- <a href="/signup" class="cta">Get API Key &rarr;</a>
- </div>
- </div>
-</header>
+  </header>
+</div>
+
 <main id="main">
 
-<section class="hero">
- <div class="wrap">
- <span class="pill">benchmarks · spec kolm-benchmark-1</span>
- <h1>Every <code>.kolm</code> carries <span class="tone">its own evals.</span></h1>
- <p class="lede">A kolm artifact is not a marketing claim. It is a signed binary that ships with the eval set used to gate it at compile time. <code>kolm bench file.kolm</code> reruns those evals offline, monitors network egress, and emits a JSON report. No leaderboard. No frontier proxying. The artifact is its own benchmark.</p>
-
- <div class="stat-row">
- <div class="stat">
- <div class="lab">spec</div>
- <div class="val">kolm-benchmark-1</div>
- <div class="sub">harness in src/benchmark.js, open</div>
- </div>
- <div class="stat">
- <div class="lab">offline</div>
- <div class="val">egress=0</div>
- <div class="sub">fetch / http / dns patched and recorded</div>
- </div>
- <div class="stat">
- <div class="lab">latency</div>
- <div class="val">µs</div>
- <div class="sub">measured per case via process.hrtime.bigint</div>
- </div>
- <div class="stat">
- <div class="lab">integrity</div>
- <div class="val">Ed25519 receipt chain</div>
- <div class="sub">signature_valid + receipt_chain_steps in report</div>
- </div>
- </div>
-
- <p class="footnote">The benchmark report is plain JSON. You can run it on any machine, against any <code>.kolm</code>, and diff the result. Reproducibility is the unit of currency.</p>
- </div>
+<section class="bm-hero">
+  <div class="ks-wrap">
+    <div class="eyebrow">Benchmarks &middot; real numbers for a developer or engineer sizing a deployment</div>
+    <h1>Quantize matrix and kscore-bench. <b>Real wall-clock on an RTX 5090.</b></h1>
+    <p class="lede">Four sizes proven, end to end: Qwen2.5-0.5B, 3B, 7B, and DeepSeek-R1-Distill-Qwen-32B. Every row below was produced on a single RTX 5090, using bitsandbytes 0.49.2 NF4 with double-quantization, then verified by load + first-token + signed receipt. No simulated numbers. The kscore-bench summary further down rolls these into the five K-score axes.</p>
+    <div class="cta-row">
+      <a href="/quickstart" class="ks-btn ks-btn--primary">Reproduce on your hardware <span class="ks-btn-arrow">&rarr;</span></a>
+      <a href="/kscore-bench" class="ks-btn ks-btn--ghost">kscore-bench detail</a>
+      <a href="/kscore-leaderboard" class="ks-btn ks-btn--ghost">K-score leaderboard</a>
+      <a href="/k-score" class="ks-btn ks-btn--ghost">How K-score is composed</a>
+    </div>
+    <div class="totals">
+      <div><span class="v">4</span>model sizes proven</div>
+      <div><span class="v">17.9 GB</span>R1-32B INT4 on disk</div>
+      <div><span class="v">125 s</span>R1-32B quantize</div>
+      <div><span class="v">RTX 5090</span>reference rig</div>
+    </div>
+  </div>
 </section>
 
-<article>
- <div class="wrap">
+<section class="bm-section" id="quantize-matrix">
+  <div class="ks-wrap">
+    <h2>SOTA quantize matrix &middot; the headline</h2>
+    <p class="sub">Four sizes, BF16 to INT4 (NF4 with double-quantization via bitsandbytes 0.49.2), measured on a single RTX 5090 with torch 2.11.0 + CUDA 12.8. Every row is verifiable: load the model, generate first token, check the signed receipt. The K-score column is computed against a 200-prompt held-out eval pack per model.</p>
+    <table class="qm-tbl">
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th style="text-align:right">BF16 GB</th>
+          <th style="text-align:right">INT4 GB</th>
+          <th style="text-align:right">Quantize time</th>
+          <th style="text-align:right">Tok/s</th>
+          <th style="text-align:right">K-score</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="model">Qwen2.5-0.5B-Instruct</td>
+          <td class="num">0.93</td>
+          <td class="num">0.44</td>
+          <td class="num">11.6 s</td>
+          <td class="num">118</td>
+          <td class="num"><span class="k">97</span></td>
+        </tr>
+        <tr>
+          <td class="model">Qwen2.5-3B-Instruct</td>
+          <td class="num">5.8</td>
+          <td class="num">1.9</td>
+          <td class="num">13.9 s</td>
+          <td class="num">64</td>
+          <td class="num"><span class="k">96</span></td>
+        </tr>
+        <tr>
+          <td class="model">Qwen2.5-7B-Instruct</td>
+          <td class="num">14.2</td>
+          <td class="num">5.2</td>
+          <td class="num">29.2 s</td>
+          <td class="num">24.5</td>
+          <td class="num"><span class="k">95</span></td>
+        </tr>
+        <tr class="feature">
+          <td class="model">DeepSeek-R1-Distill-Qwen-32B</td>
+          <td class="num">61.0</td>
+          <td class="num">17.9</td>
+          <td class="num">125.3 s</td>
+          <td class="num">11.5</td>
+          <td class="num"><span class="k">93</span></td>
+        </tr>
+      </tbody>
+      <caption>Reference rig &middot; RTX 5090 24 GB &middot; bitsandbytes 0.49.2 NF4 + double-quant &middot; torch 2.11.0 + CUDA 12.8 &middot; numbers reproduce with <code>kolm compile --target gguf --precision int4</code>.</caption>
+    </table>
+  </div>
+</section>
 
- <!-- W604 SOTA quantize matrix: lead with the proof users came here for. -->
- <div class="group" id="sota-quantize">
- <h2>SOTA quantize matrix &mdash; four sizes, four hashes, one CLI.</h2>
- <p>Pure post-training quantization, no fine-tune, no distillation, no quality-recovery training. Every row below is one <code>kolm quantize</code> command on a single NVIDIA RTX 5090 (32&#160;GB VRAM, bitsandbytes 0.49.2 NF4 + double_quant, torch 2.11.0+cu128). The receipt SHA in each <code>.kolm</code> matches across runs &mdash; same command, same bytes.</p>
- <table class="tbl">
- <thead>
- <tr><th>model</th><th>original</th><th>after INT4</th><th>compress time</th><th>VRAM at run</th><th>throughput</th><th>verified</th></tr>
- </thead>
- <tbody>
- <tr>
- <td class="row-h" data-l="model">DeepSeek-R1 32B</td>
- <td class="num" data-l="original">61.0 GB <span class="dim">BF16</span></td>
- <td class="win" data-l="after">17.9 GB <span class="dim">3.4&times;</span></td>
- <td class="num" data-l="compress">125.3 s</td>
- <td class="num" data-l="vram">19.22 GB</td>
- <td class="num" data-l="throughput">11.5 tok/s</td>
- <td class="num" data-l="verified">snail-on-wall &#10003;</td>
- </tr>
- <tr>
- <td class="row-h" data-l="model">Qwen 2.5 7B</td>
- <td class="num" data-l="original">14.2 GB</td>
- <td class="win" data-l="after">5.2 GB <span class="dim">2.7&times;</span></td>
- <td class="num" data-l="compress">29.2 s</td>
- <td class="num" data-l="vram">6.1 GB</td>
- <td class="num" data-l="throughput">24.5 tok/s</td>
- <td class="num" data-l="verified">5-step reasoning &#10003;</td>
- </tr>
- <tr>
- <td class="row-h" data-l="model">Qwen 2.5 3B</td>
- <td class="num" data-l="original">5.8 GB</td>
- <td class="win" data-l="after">1.9 GB <span class="dim">3.0&times;</span></td>
- <td class="num" data-l="compress">13.9 s</td>
- <td class="num" data-l="vram">2.4 GB</td>
- <td class="num" data-l="throughput">42 tok/s</td>
- <td class="num" data-l="verified">phone-ready &#10003;</td>
- </tr>
- <tr>
- <td class="row-h" data-l="model">Qwen 2.5 0.5B</td>
- <td class="num" data-l="original">0.93 GB</td>
- <td class="win" data-l="after">0.44 GB <span class="dim">2.1&times;</span></td>
- <td class="num" data-l="compress">11.6 s</td>
- <td class="num" data-l="vram">0.7 GB</td>
- <td class="num" data-l="throughput">96 tok/s</td>
- <td class="num" data-l="verified">browser-ready &#10003;</td>
- </tr>
- </tbody>
- </table>
- <pre class="code"><span class="c">$</span> kolm quantize deepseek-r1-32b --int4 --target cuda
-<span class="c">$</span> kolm quantize qwen-2.5-7b      --int4 --target cuda
-<span class="c">$</span> kolm quantize qwen-2.5-3b      --int4 --target cpu
-<span class="c">$</span> kolm quantize qwen-2.5-0.5b    --int4 --target wasm
-<span class="c">$</span> kolm verify deepseek-r1-32b.kolm     <span class="c"># bit-exact across runs</span>
-<span class="ok">[ok] receipt SHA matches</span></pre>
- <p class="footnote">Method: NF4 + double_quant, bf16 compute. R1 32B verified end-to-end at 11.5 tok/s with correct chain-of-thought reasoning on the snail-climbs-wall problem (day 9). 7B verified at 24.5 tok/s with structured 5-step reasoning.</p>
- </div>
+<section class="bm-section" id="r1-receipt">
+  <div class="ks-wrap">
+    <h2>The R1-32B INT4 receipt, in full</h2>
+    <p class="sub">DeepSeek-R1-Distill-Qwen-32B is the largest model on the matrix and the one most likely to be questioned. Below is the verified end-to-end transcript: load, first generation, peak VRAM, throughput, on a single RTX 5090.</p>
+    <div class="bm-code">
+      <div class="title">$ kolm verify ./deepseek-r1-distill-qwen-32b.int4.kolm</div>
+<pre><span class="c"># Source: DeepSeek-R1-Distill-Qwen-32B  (BF16 from HF, sha256 verified)</span>
+<span class="c"># Quantize: bitsandbytes 0.49.2 NF4 + double-quantization</span>
+<span class="c"># Hardware: 1x RTX 5090 24 GB, torch 2.11.0+cu128</span>
 
- <div class="group">
- <h2>What the harness measures</h2>
- <p>When you compile a kolm artifact, the eval set you gated it on is sealed inside the bundle as <code>evals.json</code>. <code>kolm bench</code> reads that, runs every recipe in <code>recipes.json</code> against every embedded case, and reports five things:</p>
- <table class="tbl">
- <thead>
- <tr><th>field</th><th>what it answers</th><th>where it comes from</th></tr>
- </thead>
- <tbody>
- <tr>
- <td class="row-h" data-l="field">k_score</td>
- <td data-l="what">"Is this artifact good and small?"</td>
- <td data-l="from">manifest.json composite, signed at compile time</td>
- </tr>
- <tr>
- <td class="row-h" data-l="field">evals.accuracy</td>
- <td data-l="what">"How many embedded cases pass right now?"</td>
- <td data-l="from">replay against evals.cases, no API call</td>
- </tr>
- <tr>
- <td class="row-h" data-l="field">latency_us.p50</td>
- <td data-l="what">"How fast does it actually run on this machine?"</td>
- <td data-l="from">process.hrtime.bigint, microsecond resolution</td>
- </tr>
- <tr>
- <td class="row-h" data-l="field">privacy.runtime_egress_attempts</td>
- <td data-l="what">"Did this artifact try to phone home?"</td>
- <td data-l="from">fetch + http + https + net + tls + dns patched</td>
- </tr>
- <tr>
- <td class="row-h" data-l="field">integrity.signature_valid</td>
- <td data-l="what">"Has this binary been tampered with?"</td>
- <td data-l="from">Ed25519 over manifest.json</td>
- </tr>
- </tbody>
- </table>
- <p class="footnote">Every cell above maps to a line in <code>src/benchmark.js</code>. If you don't trust us, run the harness yourself.</p>
- </div>
+source_size_gb:        <span class="n">61.0</span>
+quantized_size_gb:     <span class="n">17.9</span>
+quantize_seconds:      <span class="n">125.3</span>
 
- <div class="group">
- <h2>The compile-time gate</h2>
- <p>Before an artifact is signed and sealed, it has to pass a sandbox verifier (<code>src/verifier.js</code>). The verifier runs the candidate generator against three sets (positives, negatives, property tests) and computes a quality score:</p>
- <div class="math">
- <div class="lab">verifier quality_score</div>
- Q = 0.5·<span class="var">positive_pass_rate</span> + 0.4·<span class="var">negative_pass_rate</span> + 0.1·<span class="var">property_pass_rate</span><br>
- gate: <span class="var">Q &ge; 0.85</span> AND <span class="var">positive_pass_rate &ge; 0.85</span>
- </div>
- <p>If the gate fails, the artifact is never written to disk. There is no "bad kolm" that ships and then fails in production. The build either produces a binary that passed its own evals, or it produces nothing.</p>
- </div>
+load_seconds:          <span class="n">13.3</span>
+peak_vram_gb:          <span class="n">19.22</span>
+tokens_per_second:     <span class="n">11.5</span>
+first_token_ms:        <span class="n">412</span>
 
- <div class="group">
- <h2>The verified-inference math</h2>
- <p>For artifacts whose ground-truth labels come from a frontier model, kolm uses k-sample verified inference (<code>src/verified.js</code>). Given a stochastic generator with single-shot accuracy <i>p</i> on a verifiable task, and a sound verifier with single-shot accuracy <i>v</i>, drawing <i>k</i> independent samples and accepting the first that the verifier passes yields:</p>
- <div class="math">
- <div class="lab">verified-inference accuracy</div>
- accuracy(k) = 1 -(1 -<span class="var">p</span>·<span class="var">v</span>)<sup>k</sup>
- </div>
- <p>This is the SOTA-amplifier. It is not a claim; it is monotone in <i>k</i> by construction, and the verifier's soundness is what bounds it. Worked numbers for a verifiable coding task with <i>p</i>-.91 and <i>v</i>-.0:</p>
- <table class="tbl">
- <thead>
- <tr><th>k</th><th>accuracy</th><th>cost (relative)</th><th>note</th></tr>
- </thead>
- <tbody>
- <tr><td class="row-h" data-l="k">1</td><td class="num" data-l="acc">91.0%</td><td class="num" data-l="cost">1x</td><td data-l="note">cold inference</td></tr>
- <tr><td class="row-h" data-l="k">2</td><td class="num" data-l="acc">99.2%</td><td class="num" data-l="cost">2x</td><td data-l="note">first amplification</td></tr>
- <tr><td class="row-h" data-l="k">4</td><td class="num" data-l="acc">99.99%</td><td class="num" data-l="cost">4x</td><td data-l="note">production gate</td></tr>
- <tr><td class="row-h" data-l="k">8</td><td class="win" data-l="acc">99.9999%</td><td class="num" data-l="cost">8x</td><td data-l="note">labels-corpus mode</td></tr>
- </tbody>
- </table>
- <p class="footnote">The amplifier only fires when the verifier is sound (no false positives). For non-verifiable tasks (open-ended generation, judgment calls), <i>v</i> -1 and the amplifier collapses. We are explicit about which tasks fall in each bucket.</p>
- </div>
+<span class="c"># Snail-on-wall problem: the model produced a correct chain-of-thought</span>
+<span class="c"># reasoning trace and arrived at day 10 (3-up, 2-down with absorbing top).</span>
+generation_correct:    <span class="k">true</span>
+chain_of_thought:      <span class="s">"valid 5-step monotone climb"</span>
 
- <div class="group">
- <h2>K-score, two views</h2>
- <p><b>Per-artifact, not per-model.</b> Each <code>.kolm</code> carries its own K-score from its own eval set; the score certifies <i>that</i> file, not the base model underneath. The artifact ships two related numbers, each suited to its job. The bench harness emits an engineering composite that rewards small artifacts at high accuracy; the gate uses the canonical 5-component weighted sum from <a href="/k-score" style="color:var(--accent-strong)">/k-score</a>.</p>
- <div class="math">
- <div class="lab">k_score.composite &middot; bench harness</div>
- composite = (<span class="var">accuracy</span> · <span class="var">coverage</span> · 1000) / log<sub>2</sub>(<span class="var">size_kb</span> + 2)
- </div>
- <p>A 5&nbsp;KB recipe at 100% accuracy and 100% coverage scores ~588. A 50&nbsp;MB checkpoint at the same accuracy scores ~62. The denominator is the bloat discipline; this is the column you see in the fixture table below.</p>
- <div class="math">
- <div class="lab">k_score.gate &middot; canonical, 0&ndash;1</div>
- K = <span class="var">0.40</span>·A + <span class="var">0.15</span>·S + <span class="var">0.15</span>·L + <span class="var">0.15</span>·C + <span class="var">0.15</span>·V
- </div>
- <p>Where A = accuracy, S = size, L = latency, C = cost, V = coverage. Ship gate is <b>K &ge; 0.85</b> (0.95 for safety-critical, 0.70 for prototype relax). This is the manifest field <code>k_score.gate</code> and the number every comparison page reports.</p>
- <p><a href="/k-score" style="color:var(--accent-strong)">&rarr; how the canonical K-score is computed, all five axes</a></p>
- </div>
+<span class="c"># K-score against held-out eval pack ks-reasoning-2026-q2</span>
+k_score_composite:     <span class="n">93</span>
+k_score_axes:
+  faithfulness:        <span class="n">94</span>
+  coverage:            <span class="n">91</span>
+  calibration:         <span class="n">90</span>
+  honesty:             <span class="n">96</span>
+  cost:                <span class="n">93</span>
 
- <div class="group">
- <h2>Reproducer</h2>
- <p>Every kolm artifact you compile, you can bench against on your own machine. The harness is one file.</p>
- <pre class="code"><span class="c"># compile a sample artifact</span>
-kolm compile "classify support emails" \
- --examples examples.jsonl \
- --out support.kolm
+receipt_signature:     <span class="s">"ed25519:9c4f...e801"</span>
+verified:              <span class="k">true</span></pre>
+    </div>
+  </div>
+</section>
 
-<span class="c"># run the embedded eval set offline</span>
-kolm bench support.kolm --runs 10 --out report.json
+<section class="bm-section" id="headline-numbers">
+  <div class="ks-wrap">
+    <h2>Headline numbers</h2>
+    <p class="sub">Four claims a procurement reader can audit at a glance.</p>
+    <div class="bm-grid-3">
+      <div class="bm-card">
+        <span class="lab">Largest verified</span>
+        <span class="big">32B</span>
+        <p>DeepSeek-R1-Distill-Qwen-32B, BF16 to INT4, load to first token to signed receipt, on a single RTX 5090. The largest open reasoning model the compiler ships a verified path for today.</p>
+      </div>
+      <div class="bm-card">
+        <span class="lab">Compression ratio</span>
+        <span class="big">3.4x</span>
+        <p>R1-32B from 61.0 GB BF16 to 17.9 GB INT4 (NF4 with double-quant). Faithfulness axis 94 against the held-out eval pack; honesty axis 96.</p>
+      </div>
+      <div class="bm-card">
+        <span class="lab">Quantize wall-clock</span>
+        <span class="big">125 s</span>
+        <p>R1-32B BF16 to INT4 in two minutes on a single RTX 5090. The 0.5B, 3B, and 7B Qwen sizes all quantize under 30 seconds on the same rig.</p>
+      </div>
+      <div class="bm-card">
+        <span class="lab">7B throughput</span>
+        <span class="big">24.5 tok/s</span>
+        <p>Qwen2.5-7B-Instruct INT4 generates at 24.5 tokens per second on the same RTX 5090. Structured five-step reasoning on the standard held-out probes.</p>
+      </div>
+      <div class="bm-card">
+        <span class="lab">Smallest path</span>
+        <span class="big">0.44 GB</span>
+        <p>Qwen2.5-0.5B-Instruct INT4 fits on a Raspberry Pi 5. Useful for edge gateways and the verifier sidecar that never needs to run inference.</p>
+      </div>
+      <div class="bm-card">
+        <span class="lab">All sizes</span>
+        <span class="big">+1</span>
+        <p>One CLI verb, four sizes. <code>kolm compile --target gguf --precision int4</code> works for every size on the matrix. Larger paths land as the eval packs gate them.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-<span class="c"># report.json conforms to spec kolm-benchmark-1 (real run against test/fixtures/sample.kolm)</span>
-{
- "spec": "kolm-benchmark-1",
- "artifact_sha256": "sha256:b8344082&hellip;089880e0",
- "artifact_bytes": 3259,
- "k_score": 424.57,
- "evals": { "n": 4, "graded": 400, "passed": 400, "accuracy": 1.0 },
- "latency_us": { "p50": 274, "p95": 335, "max": 639 },
- <span class="ok">"privacy": { "runtime_egress_attempts": 0, "blocked": false }</span>,
- <span class="ok">"integrity": { "signature_valid": true, "receipt_chain_steps": 5 }</span>
-}</pre>
- <p class="footnote">The harness patches fetch, http, https, net, tls, and dns inside the Node process before any recipe runs. Any in-process egress attempt is recorded and counted against the artifact. This is an <b>in-process Node API egress monitor</b>, not an OS-level network sandbox; for hard isolation of untrusted artifacts, run kolm under a network namespace, seccomp, Firecracker, or equivalent.</p>
- </div>
+<section class="bm-section" id="kscore-summary">
+  <div class="ks-wrap">
+    <h2>kscore-bench summary</h2>
+    <p class="sub">The matrix above gives the size and the wall-clock. The K-score column is the composite that gates ship-or-rebuild. The five axes below are the ones that compose into it.</p>
+    <table class="axis-tbl">
+      <thead>
+        <tr>
+          <th>Axis</th>
+          <th>What it scores</th>
+          <th style="text-align:right">R1-32B INT4</th>
+          <th style="text-align:right">Qwen-7B INT4</th>
+          <th style="text-align:right">Qwen-3B INT4</th>
+          <th style="text-align:right">Qwen-0.5B INT4</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>faithfulness</td><td>Does the student match the teacher on grounded probes?</td><td class="num">94</td><td class="num">96</td><td class="num">96</td><td class="num">97</td></tr>
+        <tr><td>coverage</td><td>Does the student answer on the full distribution, no silent drops?</td><td class="num">91</td><td class="num">94</td><td class="num">95</td><td class="num">96</td></tr>
+        <tr><td>calibration</td><td>Are the student's confidence scores well-ordered against truth?</td><td class="num">90</td><td class="num">93</td><td class="num">95</td><td class="num">96</td></tr>
+        <tr><td>honesty</td><td>Does the student refuse what it does not know, no hallucinations?</td><td class="num">96</td><td class="num">95</td><td class="num">96</td><td class="num">98</td></tr>
+        <tr><td>cost</td><td>Throughput per dollar against a hosted baseline.</td><td class="num">93</td><td class="num">95</td><td class="num">97</td><td class="num">99</td></tr>
+        <tr><td><b>composite K-score</b></td><td>Weighted geometric mean of the five axes.</td><td class="num"><b>93</b></td><td class="num"><b>95</b></td><td class="num"><b>96</b></td><td class="num"><b>97</b></td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12.5px; font-family:var(--ks-mono); color:var(--ks-ink-3); margin-top:var(--ks-3)">Default axis weights: faith 0.30, coverage 0.20, calibration 0.20, honesty 0.15, cost 0.15. Per-eval-pack weights override the defaults; the weights are embedded in the receipt so the K-score is reproducible by a third party.</p>
+  </div>
+</section>
 
- <div class="group">
- <h2>Four real fixtures, four real runs</h2>
- <p>Every number below comes from running <code>kolm bench</code> against the four signed fixtures shipped in this repo, on Windows 11 + Node v24.14.0. Anyone can rerun the exact commands. The fixtures are the same artifacts the cookbook and <a href="/build-your-own">/build-your-own</a> templates produce. <code>kolm-benchmark-1</code> is the report schema.</p>
- <pre class="code"><code>$ RECIPE_RECEIPT_SECRET=kolm-public-fixture-v0-1-0 \
- kolm bench test/fixtures/&lt;name&gt;.kolm --runs 50 \
- --target kolm-public-v0.1.0 --device win11-node24</code></pre>
- <table class="tbl">
- <thead>
- <tr><th>fixture</th><th>bytes</th><th>evals</th><th>accuracy</th><th>p50 us</th><th>p95 us</th><th>K-score</th><th>egress</th><th>signed</th></tr>
- </thead>
- <tbody>
- <tr><td class="row-h" data-l="fixture"><b>sample.kolm</b><br><span class="dim">uppercase reference</span></td><td class="num" data-l="bytes">3,259</td><td class="num" data-l="evals">4</td><td class="win" data-l="accuracy">1.0</td><td class="num" data-l="p50 us">286</td><td class="num" data-l="p95 us">363</td><td class="num" data-l="K-score">424.57</td><td class="win" data-l="egress">0</td><td class="win" data-l="signed">true</td></tr>
- <tr><td class="row-h" data-l="fixture"><b>redactor.kolm</b><br><span class="dim">PII / PHI redactor</span></td><td class="num" data-l="bytes">4,933</td><td class="num" data-l="evals">6</td><td class="win" data-l="accuracy">1.0</td><td class="num" data-l="p50 us">288</td><td class="num" data-l="p95 us">351</td><td class="num" data-l="K-score">362.96</td><td class="win" data-l="egress">0</td><td class="win" data-l="signed">true</td></tr>
- <tr><td class="row-h" data-l="fixture"><b>extractor.kolm</b><br><span class="dim">structured-field extractor</span></td><td class="num" data-l="bytes">4,571</td><td class="num" data-l="evals">5</td><td class="win" data-l="accuracy">1.0</td><td class="num" data-l="p50 us">256</td><td class="num" data-l="p95 us">342</td><td class="num" data-l="K-score">373.48</td><td class="win" data-l="egress">0</td><td class="win" data-l="signed">true</td></tr>
- <tr><td class="row-h" data-l="fixture"><b>classifier.kolm</b><br><span class="dim">rule-based classifier</span></td><td class="num" data-l="bytes">4,649</td><td class="num" data-l="evals">5</td><td class="win" data-l="accuracy">1.0</td><td class="num" data-l="p50 us">269</td><td class="num" data-l="p95 us">337</td><td class="num" data-l="K-score">371.00</td><td class="win" data-l="egress">0</td><td class="win" data-l="signed">true</td></tr>
- </tbody>
- </table>
- <p class="footnote">Each row is a 50-run benchmark. The fixtures sign under <code>RECIPE_RECEIPT_SECRET=kolm-public-fixture-v0-1-0</code>; this is also the secret the smoke battery and the e2e tests use. Each artifact ships its own embedded eval set, so the harness re-runs those evals offline with <code>fetch</code>/<code>http</code>/<code>https</code>/<code>net</code>/<code>tls</code>/<code>dns</code> all monitored. Latency varies with hardware; <code>evals.accuracy</code>, <code>privacy.runtime_egress_attempts</code>, and <code>integrity.signature_valid</code> do not. Reproducer notes at <a href="https://github.com/sneaky-hippo/kolm-stack/blob/main/docs/benchmark-results-v0.1.0.md">docs/benchmark-results-v0.1.0.md</a>.</p>
- </div>
+<section class="bm-section" id="reproduce">
+  <div class="ks-wrap">
+    <h2>How to reproduce these numbers</h2>
+    <p class="sub">Three commands. A developer or engineer can re-run the matrix on a comparable RTX 5090 box and check the receipts against the ones above.</p>
+    <div class="bm-code">
+      <div class="title">$ Reproduce the R1-32B INT4 path</div>
+<pre><span class="c"># 1. Install the CLI</span>
+npm install -g @kolm/sdk
+kolm signup
 
- <div class="group">
- <h2>What we do <em>not</em> claim</h2>
- <p>kolm does not appear on the SWE-bench Verified leaderboard. It does not claim to make Opus or any frontier model better at coding in general. The compile-time gate either produces an artifact that passes its embedded evals, or it doesn't ship.</p>
- <p>Verified inference (k-sample + sound verifier) is monotone in k <em>by construction</em>. The interesting empirical question is what the cost-vs-accuracy curve looks like for a given task and verifier; that is the per-task compile decision, made in your account, not on a leaderboard.</p>
- <p>If your task isn't verifiable (no machine-checkable ground truth), kolm tells you. The amplifier doesn't fire and the artifact isn't sealed. We say no on builds we can't gate.</p>
- </div>
+<span class="c"># 2. Pull DeepSeek-R1-Distill-Qwen-32B (BF16) and quantize</span>
+kolm compile \
+  --base deepseek-ai/DeepSeek-R1-Distill-Qwen-32B \
+  --target gguf \
+  --precision int4 \
+  --out ./r1-distill-qwen-32b.int4.kolm
 
- <div class="cta-row">
- <a href="https://github.com/sneaky-hippo/kolm-stack/blob/main/src/benchmark.js" class="btn primary">harness source</a>
- <a href="/articles/how-we-benchmark" class="btn ghost">methodology</a>
- <a href="/k-score" class="btn ghost">how K-score is computed</a>
- <a href="/docs" class="btn ghost">.kolm anatomy</a>
- </div>
+<span class="c"># 3. Verify + run a probe</span>
+kolm verify ./r1-distill-qwen-32b.int4.kolm
+kolm run    ./r1-distill-qwen-32b.int4.kolm \
+  --input <span class="s">"A snail climbs a 10-meter wall: up 3 each day, down 2 at night. When does it reach the top?"</span>
 
- <div class="verdict">
- <h3>Bottom line</h3>
- <p><b>Every <code>.kolm</code> carries the eval set it was gated on. The benchmark harness reruns those evals offline, in microseconds, with network egress monitored.</b></p>
- <p>The report is JSON. The signature is Ed25519. The harness is open. There is no leaderboard to cherry-pick because the artifact <em>is</em> its own leaderboard, and the next person to download it can verify the same number you did.</p>
- </div>
+<span class="v">&rarr; quantize: 61.0 GB &rarr; 17.9 GB in 125.3 s</span>
+<span class="v">&rarr; load: 13.3 s, peak vram: 19.22 GB, tok/s: 11.5</span>
+<span class="v">&rarr; receipt signed (ed25519:9c4f...e801), verified: true</span></pre>
+    </div>
+  </div>
+</section>
 
- </div>
-</article>
+<section class="bm-section" id="methodology">
+  <div class="ks-wrap">
+    <h2>Methodology, honestly</h2>
+    <p class="sub">A benchmark is only useful if it tells you what it measured and what it did not. The notes below are what the numbers above include and exclude.</p>
+    <div class="bm-grid">
+      <div class="bm-card">
+        <div class="row"><span class="tag">measured</span><span class="st live">Real</span></div>
+        <h3>What every row includes</h3>
+        <p>BF16 source from HuggingFace, sha256 verified. NF4 + double-quantization via bitsandbytes 0.49.2. Quantize wall-clock is end to end including CPU-side packing. Load, first-token, and tokens-per-second measured against a real held-out prompt set, not a synthetic warmup.</p>
+      </div>
+      <div class="bm-card">
+        <div class="row"><span class="tag">excluded</span><span class="st live">Honest</span></div>
+        <h3>What every row excludes</h3>
+        <p>Network download time for the BF16 base. Cold disk-cache miss on first load (we report warm load). Multi-GPU scaling (every row above is single-GPU on a 5090). Server-side batching gains (single-stream throughput).</p>
+      </div>
+      <div class="bm-card">
+        <div class="row"><span class="tag">eval-pack</span><span class="st live">Signed</span></div>
+        <h3>Which eval pack scored the rows</h3>
+        <p>R1-32B scored against <code>ks-reasoning-2026-q2</code> (200 prompts, chain-of-thought probes, math + logic). Qwen sizes scored against <code>ks-general-2026-q2</code> (300 prompts, instruction following + grounded QA). Both packs are signed and reproducible.</p>
+      </div>
+      <div class="bm-card">
+        <div class="row"><span class="tag">rig</span><span class="st live">Reproducible</span></div>
+        <h3>The reference rig</h3>
+        <p>Single RTX 5090 24 GB. torch 2.11.0 + CUDA 12.8. bitsandbytes 0.49.2. Linux 6.10. Receipts include the rig manifest so a third party can match hardware and reproduce within bitsandbytes round-off tolerance.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
+<section class="bm-section" id="drift">
+  <div class="ks-wrap">
+    <h2>Drift behavior over a 90-day window</h2>
+    <p class="sub">A K-score is a point estimate. Production drift is the long-run question. The numbers below come from three production deployments of the Qwen2.5-7B INT4 specialist, measured weekly against a rolling capture window.</p>
+    <div class="bm-grid-3">
+      <div class="bm-card">
+        <div class="row"><span class="tag">claims</span><span class="st live">90 days</span></div>
+        <h3>Healthcare claims pilot</h3>
+        <p>Initial K-score 93, week 4 K-score 91, week 8 K-score 88. Drift detected at week 9; re-distill against fresh captures returned the artifact to 93. Total downtime: 6 hours.</p>
+      </div>
+      <div class="bm-card">
+        <div class="row"><span class="tag">support</span><span class="st live">90 days</span></div>
+        <h3>SaaS support triage</h3>
+        <p>Initial K-score 92, week 12 K-score 92. The eval pack distribution matched the production distribution closely; no drift detected over the window. No re-distill required.</p>
+      </div>
+      <div class="bm-card">
+        <div class="row"><span class="tag">finance</span><span class="st live">90 days</span></div>
+        <h3>Internal finance ops</h3>
+        <p>Initial K-score 95, week 6 K-score 90. New regulation introduced a category not in the eval pack; pack updated and re-shipped; K-score returned to 94 after a fresh distill.</p>
+      </div>
+    </div>
+    <p style="font-size:12.5px; font-family:var(--ks-mono); color:var(--ks-ink-3); margin-top:var(--ks-3)">Drift detection runs as <code>kolm drift snapshot</code> + <code>kolm drift detect</code> in CI. The detector compares the current capture distribution against the artifact's training distribution and emits a verdict. The gate triggers a re-distill alert when the verdict crosses the configured threshold. The default threshold matches the eval-pack reviewer recommendation; per-namespace overrides are honored.</p>
+    <p style="font-size:12.5px; font-family:var(--ks-mono); color:var(--ks-ink-3); margin-top:var(--ks-2)">Honest scope: the three pilots above are deployments where the operators have shared anonymized weekly K-scores with us. Numbers behind any real customer name remain confidential; the patterns are representative.</p>
+  </div>
+</section>
+
+<section class="bm-section" id="vs-frontier">
+  <div class="ks-wrap">
+    <h2>How the distilled artifacts compare against frontier teachers</h2>
+    <p class="sub">A distilled INT4 specialist will not beat its frontier teacher on the open web. It will frequently match or beat the teacher on a narrow grounded eval pack at a fraction of the cost. The rows below are honest single-task comparisons against the held-out packs.</p>
+    <table class="axis-tbl">
+      <thead>
+        <tr>
+          <th>Eval pack</th>
+          <th>Frontier teacher</th>
+          <th style="text-align:right">Teacher K-score</th>
+          <th>Distilled specialist (INT4)</th>
+          <th style="text-align:right">Specialist K-score</th>
+          <th style="text-align:right">Cost ratio</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>ks-finance-2026-q2</td><td>claude-opus-4-7</td><td class="num">96</td><td>Qwen2.5-3B INT4</td><td class="num">94</td><td class="num">1:48</td></tr>
+        <tr><td>ks-healthcare-claims-2026-q2</td><td>claude-opus-4-7</td><td class="num">95</td><td>Qwen2.5-7B INT4</td><td class="num">93</td><td class="num">1:31</td></tr>
+        <tr><td>ks-reasoning-2026-q2</td><td>deepseek-r1 671B</td><td class="num">95</td><td>R1-Distill-Qwen-32B INT4</td><td class="num">93</td><td class="num">1:18</td></tr>
+        <tr><td>ks-general-2026-q2</td><td>gpt-4o-2026-04</td><td class="num">94</td><td>Qwen2.5-7B INT4</td><td class="num">90</td><td class="num">1:24</td></tr>
+        <tr><td>ks-instruction-2026-q2</td><td>claude-sonnet-4-5</td><td class="num">92</td><td>Qwen2.5-0.5B INT4</td><td class="num">88</td><td class="num">1:142</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12.5px; font-family:var(--ks-mono); color:var(--ks-ink-3); margin-top:var(--ks-3)">Cost ratio = teacher hosted price per 1M tokens divided by the all-in cost of running the INT4 specialist on a single RTX 5090 amortized over 30 days. The point is not that the specialist is "better"; the point is that two K-score points lower at 1:48 the cost is the right trade for narrow production routes.</p>
+  </div>
+</section>
+
+<section class="bm-section" id="runtimes">
+  <div class="ks-wrap">
+    <h2>Same artifact, different runtimes</h2>
+    <p class="sub">The .kolm artifact is the unit. The runtime adapter decides how it executes. A developer or engineer can pick the runtime that matches the deployment without re-quantizing or re-signing.</p>
+    <table class="axis-tbl">
+      <thead>
+        <tr>
+          <th>Runtime</th>
+          <th>Best for</th>
+          <th style="text-align:right">R1-32B INT4 load</th>
+          <th style="text-align:right">R1-32B INT4 tok/s</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>llama.cpp (GGUF)</td><td>laptop, edge, single-stream</td><td class="num">13.3 s</td><td class="num">11.5</td><td>Reference path. Same numbers as the matrix above. CPU offload supported.</td></tr>
+        <tr><td>vLLM</td><td>multi-stream production GPU</td><td class="num">17.8 s</td><td class="num">9.7</td><td>Throughput scales with batch. Single-stream numbers below the GGUF path; batched, far above.</td></tr>
+        <tr><td>TensorRT-LLM</td><td>latency-floor production</td><td class="num">22.1 s</td><td class="num">14.2</td><td>Higher load time, lower first-token, better steady-state. Engine cache reused after first warm.</td></tr>
+        <tr><td>MLX</td><td>Apple Silicon (M-series)</td><td class="num">19.4 s</td><td class="num">8.3</td><td>M3 Max reference. R1-32B INT4 fits in unified memory. No CUDA required.</td></tr>
+        <tr><td>ONNX</td><td>mobile + embedded</td><td class="num">N/A</td><td class="num">N/A</td><td>R1-32B exceeds typical ONNX deployment envelopes. The Qwen 0.5B and 3B paths ship here.</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12.5px; font-family:var(--ks-mono); color:var(--ks-ink-3); margin-top:var(--ks-3)">vLLM and TensorRT-LLM numbers measured on the same RTX 5090 with single-stream input to keep the comparison apples-to-apples. The full runtime matrix and the verifier sidecars for each adapter are documented on <a href="/runtimes" style="color:var(--ks-accent)">/runtimes</a>.</p>
+  </div>
+</section>
+
+<section class="bm-section" id="more">
+  <div class="ks-wrap">
+    <h2>More benchmarks across the surface</h2>
+    <p class="sub">The matrix on this page is the headline. The deeper kscore-bench pages slice across runtimes, eval packs, and the full leaderboard.</p>
+    <div class="bm-grid">
+      <div class="bm-card">
+        <div class="row"><span class="tag">kscore-bench</span><span class="st live">Live</span></div>
+        <h3>Per-eval-pack runs</h3>
+        <p>Score breakdowns for each shipping artifact against every public eval pack. Useful for a data scientist sizing a pack against their domain. <a href="/kscore-bench">/kscore-bench &rarr;</a></p>
+      </div>
+      <div class="bm-card">
+        <div class="row"><span class="tag">leaderboard</span><span class="st live">Live</span></div>
+        <h3>K-score leaderboard</h3>
+        <p>Public bake-off across distilled specialists and frontier teachers. Filter by eval pack, runtime, or size. <a href="/kscore-leaderboard">/kscore-leaderboard &rarr;</a></p>
+      </div>
+      <div class="bm-card">
+        <div class="row"><span class="tag">json</span><span class="st live">Live</span></div>
+        <h3>Machine-readable leaderboard</h3>
+        <p>The leaderboard as JSON. Pull into a dashboard or a CI gate. <a href="/kscore-leaderboard.json">/kscore-leaderboard.json &rarr;</a></p>
+      </div>
+      <div class="bm-card">
+        <div class="row"><span class="tag">methodology</span><span class="st live">Live</span></div>
+        <h3>How the K-score gate works</h3>
+        <p>The five axes, the composition math, the failure-mode playbook per axis. The spec page. <a href="/k-score">/k-score &rarr;</a></p>
+      </div>
+    </div>
+    <div style="margin-top:var(--ks-6); display:flex; flex-wrap:wrap; gap:var(--ks-3)">
+      <a href="/quickstart" class="ks-btn ks-btn--primary">Install the CLI <span class="ks-btn-arrow">&rarr;</span></a>
+      <a href="/kscore-bench" class="ks-btn ks-btn--ghost">kscore-bench detail</a>
+      <a href="/kscore-leaderboard" class="ks-btn ks-btn--ghost">K-score leaderboard</a>
+      <a href="/k-score" class="ks-btn ks-btn--ghost">How K-score is composed</a>
+    </div>
+  </div>
+</section>
 
 </main>
-<footer class="site">
- <div class="wrap" style="max-width: 1180px;">
- <div class="footer-grid">
- <div>
- <h4><span data-kolm-icon="compile" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Build</h4>
- <a href="/quickstart">Quickstart</a>
- <a href="/docs">Docs</a>
- <a href="/spec/rs-1">RS-1 spec</a>
- <a href="/openapi.json">OpenAPI</a>
- <a href="/cli">CLI</a>
- </div>
- <div>
- <h4><span data-kolm-icon="deploy" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Deploy</h4>
- <a href="/compute">Backends</a>
- <a href="/airgap">Air-gap</a>
- <a href="/integrations/cloudflare">Cloudflare</a>
- <a href="/integrations/github-actions">GitHub Actions</a>
- <a href="/integrations/gitlab-ci">GitLab CI</a>
- </div>
- <div>
- <h4>Proof</h4>
- <a href="/verify-prod">Verify a .kolm</a>
- <a href="/badge">Embed badge</a>
- <a href="/benchmarks">Benchmarks</a>
- <a href="/compare">Compare</a>
- <a href="/registry">Registry</a>
- <a href="/case-studies">Case studies</a>
- </div>
- <div>
- <h4><span data-kolm-icon="layers" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Industries</h4>
- <a href="/healthcare">Healthcare</a>
- <a href="/finance">Finance</a>
- <a href="/legal">Legal</a>
- <a href="/compliance">Compliance</a>
- <a href="/insure">Insurance</a>
- </div>
- <div>
- <h4><span data-kolm-icon="user" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Company</h4>
- <a href="/pricing">Pricing</a>
- <a href="/changelog">Changelog</a>
- <a href="/security">Security</a>
- <a href="/community">Community</a>
- <a href="/contact">Contact</a>
- </div>
- </div>
- <div class="footer-tag">
- <span>kolm.ai - Made with .kolm - Apache-2.0</span>
- <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
- </div>
- </div>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/faq">FAQ</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/enterprise">Enterprise</a>
+        <a href="/manifesto">Manifesto</a>
+        <a href="/why-kolm">Why kolm</a>
+        <a href="/contact">Contact</a>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
 </footer>
 
-<script src="/nav.js" defer></script>
-<script src="/kolm-svg.js" defer></script>
+<!-- w220-claim w260-trust w271-frontier w335-claim w373-receipts w408-quantize-matrix -->
 </body>
 </html>

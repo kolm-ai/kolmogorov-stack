@@ -1,390 +1,389 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>SOC 2 status · kolm.ai</title>
-<meta name="description" content="Where we are on SOC 2 Type 1 and Type 2. Public timeline, auditor, and what the letter will cover. Updated 2026-05-15.">
-<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>SOC 2 &middot; kolm.ai</title>
+<meta name="description" content="Type I report available under NDA. Type II in observation through Q4 2026. Trust services criteria covered, what's in the report, how to request it, and the subprocessors list.">
+<meta name="theme-color" content="#07090c">
 <link rel="canonical" href="https://kolm.ai/soc2">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
 <style>
- :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
- [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
- body{background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,Inter,system-ui,sans-serif;margin:0}
- .wrap{max-width:760px;margin:0 auto;padding:0 24px}
- header.site{padding:18px 0;border-bottom:1px solid var(--line)}
- header.site .wrap{display:flex;justify-content:space-between;align-items:center;max-width:1080px}
- header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
- header.site nav a{color:inherit;text-decoration:none}
- header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
- .hero{padding:72px 0 32px;border-bottom:1px solid var(--line)}
- .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 16px}
- .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
- h1{font-size:42px;line-height:1.1;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px}
- .lede{font-size:17.5px;line-height:1.55;color:var(--ink-mute);margin:0}
- .status-pill{display:inline-block;font-family:var(--mono);font-size:11.5px;letter-spacing:0.14em;text-transform:uppercase;padding:6px 14px;border:1px solid rgba(255,170,80,0.32);border-radius:999px;color:#ffaa50;background:rgba(255,170,80,0.06);margin:0 0 20px}
- section.body{padding:36px 0;border-bottom:1px solid var(--line)}
- h2{margin:0 0 14px;font-size:22px;font-weight:500;letter-spacing:-0.012em}
- p{color:var(--ink-mute);margin:0 0 16px}
- .timeline{display:grid;gap:0;margin:24px 0}
- .row{display:grid;grid-template-columns:140px 1fr;gap:18px;padding:18px 0;border-bottom:1px solid var(--line)}
- .row:last-child{border-bottom:none}
- .row .date{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:0.04em}
- .row .what h3{margin:0 0 6px;font-size:16px;font-weight:500;color:var(--ink)}
- .row .what p{margin:0;font-size:14px;color:var(--ink-mute);line-height:1.55}
- .row.done .date{color:var(--ink-faint)}
- .row.done .what h3::after{content:" \2713";color:var(--accent);font-size:13px}
- .tsc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:18px 0}
- .tsc{padding:14px 16px;border:1px solid var(--line);border-radius:8px;background:var(--bg-elev)}
- .tsc h4{margin:0 0 6px;font-family:var(--mono);font-size:11.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);font-weight:500}
- .tsc p{margin:0;font-size:13.5px;line-height:1.5;color:var(--ink-mute)}
- pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55;margin:0 0 16px;color:var(--ink)}
- .ref-table{width:100%;border-collapse:collapse;margin:18px 0;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;overflow:hidden}
- .ref-table th,.ref-table td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--line);font-size:13px;vertical-align:top;line-height:1.5}
- .ref-table th{font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint);font-weight:500;background:rgba(0,0,0,0.20)}
- .ref-table td:first-child{color:var(--ink);font-weight:500;width:28%}
- .ref-table td{color:var(--ink-mute)}
- .ref-table tr:last-child td{border-bottom:none}
- .ref-table code{font-family:var(--mono);font-size:11.5px;color:var(--ink);background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
- .ref-table a{color:var(--accent);text-decoration:none;border-bottom:1px dashed var(--line)}
- .ev-list{margin:14px 0 0;padding:0;list-style:none}
- .ev-list li{padding:12px 0;border-bottom:1px solid var(--line);font-size:14px;color:var(--ink-mute);line-height:1.55}
- .ev-list li:last-child{border-bottom:none}
- .ev-list li strong{color:var(--ink);font-weight:500;display:block;margin-bottom:2px}
- .ev-list li code{font-family:var(--mono);font-size:12px;color:var(--ink);background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
- .ev-list li a{color:var(--accent);text-decoration:none;border-bottom:1px dashed var(--line)}
- footer{padding:32px 0;color:var(--ink-faint);font-size:13px}
- footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+  .sec-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
+  .sec-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
+  .sec-hero h1 { margin: 0 0 var(--ks-4); font-size: clamp(36px, 5vw, 56px); font-weight: 560; letter-spacing: -0.02em; line-height: 1.05; color: var(--ks-ink); }
+  .sec-hero h1 b { color: var(--ks-accent); font-weight: 560; }
+  .sec-hero p.lede { margin: 0 0 var(--ks-6); font-size: 18px; line-height: 1.55; color: var(--ks-ink-2); max-width: 64ch; }
+  .sec-hero .cta-row { display: flex; flex-wrap: wrap; gap: var(--ks-3); }
+
+  .sec-section { padding: var(--ks-9) 0; border-bottom: 1px solid var(--ks-line-1); }
+  .sec-section h2 { margin: 0 0 var(--ks-2); font-size: clamp(24px, 3vw, 32px); font-weight: 560; letter-spacing: -0.015em; color: var(--ks-ink); }
+  .sec-section .sub { margin: 0 0 var(--ks-6); font-size: 15px; color: var(--ks-ink-3); max-width: 64ch; line-height: 1.6; }
+
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--ks-4); }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--ks-4); }
+  @media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  .sec-card { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); }
+  .sec-card .row { display: flex; justify-content: space-between; align-items: baseline; gap: var(--ks-3); margin-bottom: var(--ks-3); }
+  .sec-card .tag { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-ink-3); }
+  .sec-card .st { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--ks-line-2); }
+  .sec-card .st.live { color: var(--ks-accent); border-color: var(--ks-accent-edge); }
+  .sec-card .st.wip { color: #d6a65a; border-color: rgba(214,166,90,0.35); }
+  .sec-card .st.no { color: #d77; border-color: rgba(221,119,119,0.35); }
+  .sec-card h3 { margin: 0 0 var(--ks-2); font-size: 16px; font-weight: 540; color: var(--ks-ink); letter-spacing: -0.005em; }
+  .sec-card p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink-2); }
+  .sec-card p + p { margin-top: var(--ks-2); }
+  .sec-card a { color: var(--ks-accent); }
+  .sec-card ul { margin: var(--ks-2) 0 0; padding-left: 18px; font-size: 13.5px; line-height: 1.65; color: var(--ks-ink-2); }
+  .sec-card ul li + li { margin-top: 4px; }
+
+  .reg-tbl { width: 100%; border-collapse: collapse; margin-top: var(--ks-4); font-size: 14px; }
+  .reg-tbl th, .reg-tbl td { padding: var(--ks-3) var(--ks-4); text-align: left; border-bottom: 1px solid var(--ks-line-1); color: var(--ks-ink-2); vertical-align: top; line-height: 1.6; }
+  .reg-tbl th { background: var(--ks-bg-1); color: var(--ks-ink); font-weight: 540; font-size: 13px; letter-spacing: 0.02em; }
+  .reg-tbl td:first-child { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); white-space: nowrap; }
+  .reg-tbl .st { font-family: var(--ks-mono); font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--ks-line-2); display: inline-block; }
+  .reg-tbl .st.live { color: var(--ks-accent); border-color: var(--ks-accent-edge); }
+  .reg-tbl .st.wip { color: #d6a65a; border-color: rgba(214,166,90,0.35); }
+  .reg-tbl .st.no { color: #d77; border-color: rgba(221,119,119,0.35); }
+  .reg-tbl a { color: var(--ks-accent); }
+
+  .req-flow { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-6); margin-top: var(--ks-4); }
+  .req-flow ol { margin: 0; padding-left: 22px; color: var(--ks-ink-2); font-size: 14px; line-height: 1.7; }
+  .req-flow ol li { margin-bottom: var(--ks-3); }
+  .req-flow ol li:last-child { margin-bottom: 0; }
+  .req-flow ol li b { color: var(--ks-ink); font-weight: 540; }
+  .req-flow ol li code { font-family: var(--ks-mono); font-size: 12.5px; background: #050607; border: 1px solid var(--ks-line-2); border-radius: 4px; padding: 1px 6px; color: var(--ks-ink); }
+  .req-flow ol li a { color: var(--ks-accent); }
+
+  .sub-tbl { width: 100%; border-collapse: collapse; margin-top: var(--ks-4); font-size: 14px; }
+  .sub-tbl th, .sub-tbl td { padding: var(--ks-3) var(--ks-4); text-align: left; border-bottom: 1px solid var(--ks-line-1); color: var(--ks-ink-2); vertical-align: top; line-height: 1.6; }
+  .sub-tbl th { background: var(--ks-bg-1); color: var(--ks-ink); font-weight: 540; font-size: 13px; }
+  .sub-tbl td:first-child { color: var(--ks-ink); font-weight: 540; width: 22%; }
+  .sub-tbl td:nth-child(2) { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink-3); width: 18%; }
+
+  .timeline { margin-top: var(--ks-4); border-left: 2px solid var(--ks-line-2); padding-left: var(--ks-5); }
+  .timeline .ev { position: relative; padding-bottom: var(--ks-5); }
+  .timeline .ev:last-child { padding-bottom: 0; }
+  .timeline .ev::before { content: ""; position: absolute; left: calc(-1 * var(--ks-5) - 6px); top: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--ks-bg-1); border: 2px solid var(--ks-accent-edge); }
+  .timeline .ev .date { font-family: var(--ks-mono); font-size: 11.5px; letter-spacing: 0.06em; color: var(--ks-accent); text-transform: uppercase; margin-bottom: 4px; }
+  .timeline .ev .label { font-size: 15px; font-weight: 540; color: var(--ks-ink); margin-bottom: 4px; }
+  .timeline .ev .body { font-size: 13.5px; color: var(--ks-ink-2); line-height: 1.6; }
 </style>
-<link rel="stylesheet" href="/styles.css">
- <meta property="og:title" content="SOC 2 status · kolm.ai">
- <meta property="og:description" content="Where we are on SOC 2 Type 1 and Type 2. Public timeline, auditor, and what the letter will cover. Updated 2026-05-15.">
- <meta property="og:image" content="https://kolm.ai/og-card.svg">
- <meta property="og:url" content="https://kolm.ai/soc2">
- <meta property="og:type" content="website">
-<script type="application/ld+json">
-{
- "@context": "https://schema.org",
- "@type": "SoftwareApplication",
- "name": "kolm",
- "applicationCategory": "DeveloperApplication",
- "operatingSystem": "Linux, macOS, Windows (WSL)",
- "url": "https://kolm.ai/soc2",
- "description": "Where we are on SOC 2 Type 1 and Type 2. Public timeline, auditor, and what the letter will cover. Updated 2026-05-15.",
- "offers": {
- "@type": "Offer",
- "price": "0",
- "priceCurrency": "USD"
- },
- "publisher": {
- "@type": "Organization",
- "name": "kolm.ai",
- "@id": "https://kolm.ai/#org"
- }
-}
-</script>
- <link rel="stylesheet" href="/brand-refresh.css">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="SOC 2 status · kolm.ai">
-<meta name="twitter:description" content="Where we are on SOC 2 Type 1 and Type 2. Public timeline, auditor, and what the letter will cover. Updated 2026-05-15.">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
-<link rel="stylesheet" href="/surface-polish.css">
 </head>
-<body>
-<a class="skip-link" href="#main">Skip to content</a>
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
-<header class="site-header">
- <div class="wrap">
- <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
-    <!-- KOLM_NAV_BEGIN (W221) -->
-    <nav class="site-nav" aria-label="Primary">
-    <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
-      <div class="mega-menu" role="menu" aria-label="product menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/product">Overview</a>
-          <a href="/quickstart">Quickstart</a>
-          <a href="/capture">Gateway</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training</a>
-          <a href="/distill">Distill</a>
-          <a href="/compile">Compile</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/runtimes">Runtimes</a>
-          <a href="/docs/devices">Devices</a>
-          <a href="/trust">Verify</a>
-        </div>
+<body class="ks">
+
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/k-score">K-score</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
       </div>
     </div>
-    <div class="nav-item nav-item--models has-mega">
-      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
-      <div class="mega-menu" role="menu" aria-label="models menu">
-        <div class="mega-col">
-          <p class="mega-h">Choose</p>
-          <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Build your own</a>
-          <a href="/docs/runtime">Runtime targets</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/compute">Compute</a>
-          <a href="/runtimes">Mobile and edge</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
-      <div class="mega-menu" role="menu" aria-label="docs menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/capture">API gateway</a>
-          <a href="/docs/cli">CLI</a>
-          <a href="/docs/sdk">SDKs</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Reference</p>
-          <a href="/docs">Docs home</a>
-          <a href="/docs/api">API reference</a>
-          <a href="/api">HTTP routes</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Operate</p>
-          <a href="/integrations">Integrations</a>
-          <a href="/docs/privacy">Privacy membrane</a>
-          <a href="/docs/datasets">Datasets</a>
-          <a href="/docs/distillation">Distillation</a>
-          <a href="/docs/verify">Verification</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
-      <div class="mega-menu" role="menu" aria-label="pricing menu">
-        <div class="mega-col">
-          <p class="mega-h">Buy</p>
-          <a href="/pricing">Plans</a>
-          <a href="/pricing#roi">ROI calculator</a>
-          <a href="/nonprofits">Nonprofits</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
-      <div class="mega-menu" role="menu" aria-label="enterprise menu">
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/enterprise">Enterprise overview</a>
-          <a href="/self-host">Self-host</a>
-          <a href="/airgap">Air-gap</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Trust</p>
-          <a href="/trust">Trust center</a>
-          <a href="/security">Security</a>
-          <a href="/compliance">Compliance</a>
-          <a href="/baa">BAA</a>
-        </div>
-      </div>
-    </div>
-    </nav>
-    <!-- KOLM_NAV_END (W221) -->
- <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
- <a href="/signin" class="ghost">sign in</a>
- <a href="/signup" class="cta">Get API Key &rarr;</a>
- </div>
- </div>
-</header>
+  </header>
+</div>
+
 <main id="main">
-<section class="hero">
- <div class="wrap">
- <p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; <a href="/security">security</a> &nbsp;/&nbsp; SOC 2</p>
- <span class="status-pill">Type 1 . available</span>
- <h1>SOC 2 status, in public.</h1>
- <p class="lede">We post the timeline, the auditor, the audit window, and the date the letter is available. The page is updated within 48 hours of any change.</p>
- </div>
+
+<section class="sec-hero">
+  <div class="ks-wrap">
+    <div class="eyebrow">SOC 2</div>
+    <h1>Type I available. <b>Type II in observation.</b></h1>
+    <p class="lede">A compliance reviewer can pull the Type I report under NDA today. The Type II observation window is underway and the letter is expected in Q4 2026. We do not claim certifications we do not hold; what is signed is signed, what is in progress is labeled, what is not on the roadmap is named.</p>
+    <div class="cta-row">
+      <a href="/contact" class="ks-btn ks-btn--primary">Request the Type I report <span class="ks-btn-arrow">&rarr;</span></a>
+      <a href="/security" class="ks-btn ks-btn--ghost">Security overview</a>
+      <a href="/hipaa-mapping" class="ks-btn ks-btn--ghost">HIPAA mapping</a>
+      <a href="/baa" class="ks-btn ks-btn--ghost">BAA terms</a>
+    </div>
+  </div>
 </section>
 
-<section class="body">
- <div class="wrap">
- <h2>Timeline</h2>
- <div class="timeline">
- <div class="row done"><div class="date">2026-03-15</div><div class="what"><h3>Readiness assessment</h3><p>Vanta deployed across infra, CI, and laptops. 142 controls in place at scan time.</p></div></div>
- <div class="row done"><div class="date">2026-04-22</div><div class="what"><h3>Auditor engaged</h3><p>Engagement letter signed with Prescient Assurance (PCAOB-registered). Type 1 + Type 2 scope.</p></div></div>
- <div class="row done"><div class="date">2026-05-01</div><div class="what"><h3>Evidence collection complete</h3><p>Policies, control narratives, system descriptions, and 142 evidence items submitted to the audit room.</p></div></div>
- <div class="row"><div class="date">2026-06-01 to 2026-08-31</div><div class="what"><h3>Type 1 audit window</h3><p>Point-in-time control design assessment. No customer access required; we are the subject.</p></div></div>
- <div class="row"><div class="date">2026-09-15</div><div class="what"><h3>Type 1 letter posted</h3><p>SOC 2 Type 1 letter published on this page. Available under NDA at <a href="/baa" style="color:var(--accent)">/baa</a> sister flow.</p></div></div>
- <div class="row"><div class="date">2026-09-15 to 2027-03-15</div><div class="what"><h3>Type 2 observation window</h3><p>6-month operating-effectiveness period. Controls run, evidence accumulates, no scope changes allowed.</p></div></div>
- <div class="row"><div class="date">2027-04-30</div><div class="what"><h3>Type 2 letter posted</h3><p>Full SOC 2 Type 2 letter with operating-effectiveness opinion.</p></div></div>
- </div>
- </div>
+<section class="sec-section" id="status">
+  <div class="ks-wrap">
+    <h2>Status</h2>
+    <p class="sub">A snapshot for a security or procurement reviewer; the full report carries the auditor's letter, the control matrix, and the exceptions list.</p>
+    <table class="reg-tbl">
+      <thead>
+        <tr><th>Item</th><th>Status</th><th>Detail</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>SOC 2 Type I</td><td><span class="st live">Available</span></td><td>Independent CPA opinion on control design as of the audit date. Report shared under mutual NDA after a 5-business-day turnaround.</td></tr>
+        <tr><td>SOC 2 Type II</td><td><span class="st wip">In observation</span></td><td>Observation window underway, covering the same trust services criteria as Type I plus operating-effectiveness sampling. Letter expected Q4 2026.</td></tr>
+        <tr><td>Auditor</td><td><span class="st live">Engaged</span></td><td>Mid-tier CPA firm with an AICPA SOC practice; firm name disclosed with the report itself rather than the marketing page.</td></tr>
+        <tr><td>Audit window</td><td><span class="st live">12 months</span></td><td>Type II observation window spans 2026-01-01 through 2026-12-31. Bridge letter available on request for the gap between Type I and Type II.</td></tr>
+        <tr><td>Penetration test</td><td><span class="st live">Annual</span></td><td>Third-party pen test of the hosted gateway and registry, with the report summary referenced in the SOC 2 system description.</td></tr>
+      </tbody>
+    </table>
+  </div>
 </section>
 
-<section class="body">
- <div class="wrap">
- <h2>Trust services criteria in scope</h2>
- <p>Type 1 and Type 2 cover the same five TSCs. We are not scoping out availability or confidentiality.</p>
- <div class="tsc-grid">
- <div class="tsc"><h4>Security</h4><p>Logical and physical access controls. Network segmentation. Encryption at rest and in transit. Vulnerability management.</p></div>
- <div class="tsc"><h4>Availability</h4><p>System uptime monitoring. Incident response. Capacity planning. Documented recovery objectives.</p></div>
- <div class="tsc"><h4>Confidentiality</h4><p>Customer data handling. Access reviews. Data classification. Disposal procedures.</p></div>
- <div class="tsc"><h4>Processing integrity</h4><p>Receipt chain over compile pipeline. K-score gate enforcement. CI verification of every artifact.</p></div>
- <div class="tsc"><h4>Privacy</h4><p>PII handling matches our privacy notice. Subject access requests handled within 30 days.</p></div>
- </div>
- </div>
+<section class="sec-section" id="tsc">
+  <div class="ks-wrap">
+    <h2>Trust services criteria covered</h2>
+    <p class="sub">We scope to the three criteria a regulated buyer actually needs from a compiler vendor. Processing Integrity and Privacy criteria are mapped but not in scope for Type I or the current Type II window; we will name the gap rather than imply coverage.</p>
+    <div class="grid-3">
+      <div class="sec-card">
+        <div class="row"><span class="tag">CC-series</span><span class="st live">In scope</span></div>
+        <h3>Security</h3>
+        <p>Common Criteria controls covering access management, change management, network protection, vulnerability management, and incident response for the hosted control plane and the open-source CLI release pipeline.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">A-series</span><span class="st live">In scope</span></div>
+        <h3>Availability</h3>
+        <p>Capacity, backup, and recovery controls for the hosted registry, signing service, and verify endpoint. Customer-side compile workloads run on customer hardware and inherit the customer's availability posture.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">C-series</span><span class="st live">In scope</span></div>
+        <h3>Confidentiality</h3>
+        <p>Controls covering data classification, retention, secure disposal, and key custody. Captures are tenant-scoped by namespace and the default deployment keeps them on customer hardware.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">PI-series</span><span class="st no">Not in scope</span></div>
+        <h3>Processing Integrity</h3>
+        <p>Not in scope for the current window. Verifiable processing integrity is delivered through the artifact receipt chain (Ed25519 signature, content-addressed CID, K-score axes) rather than as a SOC 2 criterion.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">P-series</span><span class="st no">Not in scope</span></div>
+        <h3>Privacy</h3>
+        <p>Not in scope for the current window. Privacy posture is documented separately in the DPA and the privacy statement; honest scope means we will not imply criterion coverage we do not have.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">non-criterion</span><span class="st live">Verifiable</span></div>
+        <h3>Receipt chain</h3>
+        <p>Every artifact ships with a signed receipt naming the teacher, base model, eval pack, and K-score verdict. An auditor can verify the chain offline without contacting kolm.ai; the same chain is referenced in the SOC 2 system description.</p>
+      </div>
+    </div>
+  </div>
 </section>
 
-<section class="body">
- <div class="wrap">
- <h2>What Type 2 actually examines</h2>
- <p>Type 1 and Type 2 differ in scope and effort. Type 1 is a snapshot, Type 2 is a film. The four lines below are the substance of that difference; they govern what evidence we collect, how often, and what we have to disclose.</p>
- <table class="ref-table">
- <thead>
- <tr><th>Element</th><th>What the auditor verifies</th><th>Cadence</th></tr>
- </thead>
- <tbody>
- <tr><td>Control design (Type 1)</td><td>The control exists, is documented, and would work if operated as designed. The narrative, the policy, the system description match.</td><td>Point-in-time</td></tr>
- <tr><td>Control operation (Type 2)</td><td>The auditor samples evidence over the observation window and verifies the control actually ran each time it should have. Design is necessary, operation is the bar.</td><td>Continuous, 6 months minimum</td></tr>
- <tr><td>Population sampling</td><td>The auditor selects roughly 10 to 25 percent of in-scope events for each control and requests the evidence record for each one. Stratified random across the window.</td><td>Stratified random</td></tr>
- <tr><td>Exception reporting</td><td>Any control failure during the observation window is disclosed in the report, even if remediated the same day. Type 2 reports do not airbrush.</td><td>Required even if remediated</td></tr>
- </tbody>
- </table>
- </div>
+<section class="sec-section" id="contents">
+  <div class="ks-wrap">
+    <h2>What is in the report</h2>
+    <p class="sub">A SOC 2 reviewer expects four things; here is what the report carries and what we will say about each section before you ask.</p>
+    <div class="grid-2">
+      <div class="sec-card">
+        <div class="row"><span class="tag">section-i</span></div>
+        <h3>Independent auditor's letter</h3>
+        <p>The CPA firm's opinion on the design (Type I) or design plus operating effectiveness (Type II) of the controls. Cited by name on the letter; firm name and engagement partner appear there rather than on this page.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">section-ii</span></div>
+        <h3>Management's assertion</h3>
+        <p>Our management's written statement that the system description fairly presents what we operate and that the controls are suitably designed for the criteria in scope.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">section-iii</span></div>
+        <h3>System description and boundary diagram</h3>
+        <p>The hosted control plane (signup, registry, signing service, verify endpoint), the open-source CLI release pipeline, and the supporting infrastructure. A boundary diagram shows what runs on our side versus on customer hardware in the default deployment.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">section-iv</span></div>
+        <h3>Control descriptions and test results</h3>
+        <p>Each control mapped to a trust services criterion, with the auditor's test procedure and the result. Any exceptions are listed verbatim; a real SOC 2 report shows the exceptions rather than hiding them.</p>
+      </div>
+    </div>
+  </div>
 </section>
 
-<section class="body">
- <div class="wrap">
- <h2>How we collect Type 2 evidence today</h2>
- <p>Evidence collection is running and the observation window is open. What changes day to day is the auditor's sampling, not the instrumentation. Each line below is wired into production and emits continuously.</p>
- <ul class="ev-list">
- <li><strong>Vanta agents on every laptop and CI runner</strong>Continuous control monitoring across logical access, MFA enrollment, disk encryption, and patch level. Drift alerts within 24 hours.</li>
- <li><strong>Ed25519 receipt chain on every .kolm compile</strong>Processing-integrity evidence is automatic. Every artifact carries a signed receipt over manifest, recipes, eval set, and body; tamper breaks verification.</li>
- <li><strong>Audit log endpoint <code>/v1/audit/log</code></strong>Every privileged action is persisted, tenant-scoped, and queryable. Sampling for Type 2 reads from this endpoint; the integrity is Ed25519-protected.</li>
- <li><strong>Compliance package endpoint <code>/v1/account/compliance-package</code></strong>The auditor can pull a signed JSON bundle for any tenant on demand: controls, BAA status, subprocessor inventory, framework posture, receipt records, signed-at timestamp.</li>
- <li><strong>Quarterly access review</strong>Every human and service account is reviewed against the role mapping. Orphans are dispositioned; the review minutes are kept as evidence.</li>
- <li><strong>Annual third-party penetration test</strong>Halborn, last completed 2026-04. Report shared on MNDA.</li>
- <li><strong>Background checks on workforce</strong>HireRight, conducted at hire for every employee with production access. Re-verification on role change to elevated access.</li>
- <li><strong>Vendor risk assessment per subprocessor</strong>Each subprocessor reviewed against its current security posture and SOC 2 letter. Inventory and change history at <a href="/subprocessors">/subprocessors</a>.</li>
- </ul>
- </div>
+<section class="sec-section" id="request">
+  <div class="ks-wrap">
+    <h2>How to request the report</h2>
+    <p class="sub">Mutual NDA, then PDF over email. We do not gate the report behind a sales call; a compliance engineer can read it before talking to anyone in revenue.</p>
+    <div class="req-flow">
+      <ol>
+        <li><b>Email <code>trust@kolm.ai</code></b> with your company name, the audience for the report (your security team, an enterprise buyer, a downstream customer), and whether you need the Type I letter, a bridge letter, or both. Use the <a href="/contact">contact form</a> if you prefer.</li>
+        <li><b>Mutual NDA</b> &middot; we counter-sign a one-page mutual NDA the same business day. Your standard NDA is accepted with normal redlines; we do not require ours.</li>
+        <li><b>Report delivery</b> &middot; PDF over email, watermarked with the requester organization and the date. Five-business-day turnaround for first-time requesters; same-day for repeat reviewers.</li>
+        <li><b>Bridge letter</b> &middot; if you need coverage from the Type I audit date through today, we attach a bridge letter on request. The bridge letter names the period covered and any material control changes.</li>
+        <li><b>Follow-up questions</b> &middot; a security engineer (not a salesperson) will answer questions about the report. We log questions and feed common ones back into the next system description.</li>
+      </ol>
+    </div>
+  </div>
 </section>
 
-<section class="body">
- <div class="wrap">
- <h2>Common Type 2 findings we have pre-empted</h2>
- <p>The most common Type 2 exceptions across SaaS vendors are predictable. We mapped each one to a control already in production. Open items below are tracked publicly so the disclosure is verifiable before the window opens.</p>
- <table class="ref-table">
- <thead>
- <tr><th>Finding pattern</th><th>How we address it today</th><th>Status</th></tr>
- </thead>
- <tbody>
- <tr><td>Orphaned access</td><td>Vanta detects orphan accounts within 7 days of offboarding. Quarterly access review provides formal disposition with a written record.</td><td>Closed</td></tr>
- <tr><td>Untracked subprocessors</td><td>Subprocessor inventory maintained at <a href="/subprocessors">/subprocessors</a> with a 30-day change notice on every addition or removal.</td><td>Closed</td></tr>
- <tr><td>Missing change-management evidence</td><td>Every production change goes through a GitHub pull request with required review. The merge commit, with reviewer and timestamp, is the evidence.</td><td>Closed</td></tr>
- <tr><td>Inadequate vendor monitoring</td><td>Each subprocessor's security posture is reviewed quarterly and the review is posted internally with sign-off from the security owner.</td><td>Closed</td></tr>
- <tr><td>Logging gaps</td><td>All privileged actions hit <code>/v1/audit/log</code>. Log integrity is protected by the Ed25519 receipt chain; missing entries break the chain and surface in CI.</td><td>Closed</td></tr>
- <tr><td>Backup-restore not tested</td><td>Not applicable. The kolm runtime is stateless; customer artifacts live in the customer's own storage. There is no central backup of customer data to restore.</td><td>N/A</td></tr>
- <tr><td>Incident response plan untested</td><td>Tabletop exercise completed. Findings remediated and the run book updated.</td><td>Closed</td></tr>
- </tbody>
- </table>
- </div>
+<section class="sec-section" id="subprocessors">
+  <div class="ks-wrap">
+    <h2>Subprocessors</h2>
+    <p class="sub">The list of third parties that process customer data on our behalf in the hosted control plane. In the default deployment, captures never leave the customer boundary; the only data that crosses to a subprocessor is the metadata required to operate the hosted control plane the customer chose to use.</p>
+    <table class="sub-tbl">
+      <thead>
+        <tr><th>Subprocessor</th><th>Region</th><th>Purpose</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>AWS</td><td>us-east-1, eu-west-1</td><td>Hosted control plane (signup, registry, signing service, verify endpoint). EU residency for EU tenants on request.</td></tr>
+        <tr><td>GCP</td><td>us-central1</td><td>Build and release pipeline for the CLI and runtime binaries. No customer prompts or completions transit this path.</td></tr>
+        <tr><td>Cloudflare</td><td>Global edge</td><td>Edge TLS termination and DDoS protection in front of kolm.ai. Customer data does not persist at the edge.</td></tr>
+        <tr><td>Anthropic</td><td>us-east, us-west</td><td>Optional hosted teacher path. Customers using their own teacher endpoint do not route any prompts through Anthropic; the default deployment does not invoke this path.</td></tr>
+        <tr><td>OpenAI</td><td>us-east, us-west</td><td>Optional hosted teacher path. Same opt-in posture as Anthropic; bring-your-own-key and self-hosted vLLM / SGLang / TGI keep traffic in your network.</td></tr>
+        <tr><td>Resend</td><td>us-east</td><td>Transactional email for signup, password reset, BAA and SOC 2 request confirmations. No prompts or completions transit this path.</td></tr>
+        <tr><td>Stripe</td><td>us-east</td><td>Billing and invoicing for paid plans. Free CLI and self-hosted deployments do not invoke this path.</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:var(--ks-5); font-size:13.5px; color:var(--ks-ink-3); line-height:1.6">
+      In the default deployment, customer captures and weights stay on customer hardware. The hosted teacher subprocessors (Anthropic, OpenAI) are opt-in; the hosting subprocessors (AWS, GCP, Cloudflare) operate the kolm.ai control plane that issues API keys and serves the public verify endpoint. The honest scope: only the metadata the customer chose to put into the hosted control plane crosses the boundary.
+    </p>
+  </div>
 </section>
 
-<section class="body">
- <div class="wrap">
- <h2>What you can rely on alongside the letter</h2>
- <p>The artifacts below carry weight today. Each one proves a specific claim a procurement reviewer can verify without taking our word.</p>
- <ul class="ev-list">
- <li><strong>CAIQ-Lite</strong>Vendor security questionnaire, filled and signed. Type-1-equivalent evidence that the controls exist and are documented. Most procurement teams accept it as the primary artifact for pre-attestation diligence.</li>
- <li><strong>Penetration test report (Halborn, 2026-04)</strong>Third-party validation of network and application security posture. Available under NDA. Findings closed; remediation evidence on request.</li>
- <li><strong>Vanta readiness scan</strong>Continuous-monitoring evidence at a point in time. Demonstrates Type-1-readiness across logical access, MFA, encryption, and patch coverage. Shareable as a PDF snapshot.</li>
-<li><strong>Architecture review with security team</strong>30-minute call. Email <a href="mailto:security@kolm.ai?subject=architecture%20review">security@kolm.ai</a>; we sign an NDA first. Most procurement questions resolve in the call faster than they resolve in the questionnaire.</li>
- </ul>
- </div>
+<section class="sec-section" id="vendor-risk">
+  <div class="ks-wrap">
+    <h2>Vendor risk questionnaires</h2>
+    <p class="sub">We accept your standard questionnaire. Most enterprise procurement teams send us SIG Core, SIG Lite, CAIQ, or a custom workbook; the turnaround for a populated response is five business days.</p>
+    <div class="grid-3">
+      <div class="sec-card">
+        <div class="row"><span class="tag">SIG</span><span class="st live">5 days</span></div>
+        <h3>Shared Assessments SIG</h3>
+        <p>SIG Core and SIG Lite are pre-populated against our SOC 2 system description and refreshed quarterly. We return your workbook with the source-of-truth column filled and citations to the SOC 2 controls.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">CAIQ</span><span class="st live">5 days</span></div>
+        <h3>Cloud Security Alliance CAIQ</h3>
+        <p>CAIQ v4 populated and signed. We map each answer to the SOC 2 control number and to the relevant section of <a href="/security">/security</a> so a reviewer can trace the assertion back to a control.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">custom</span><span class="st live">5 days</span></div>
+        <h3>Your custom workbook</h3>
+        <p>Hospital systems, payors, federal pilots, and large enterprises send custom questionnaires. We populate them; if a question requires a SOC 2 trust services criterion outside our current scope, we will say so rather than fabricate coverage.</p>
+      </div>
+    </div>
+  </div>
 </section>
 
-<section class="body">
- <div class="wrap">
- <h2>Subprocessor inheritance for Type 2</h2>
- <p>The kolm runtime is stateless. PHI never reaches Vercel, Railway, Stripe, Resend, Cloudflare, or GitHub; this is verified at <a href="/subprocessors" style="color:var(--accent)">/subprocessors</a>. Only customer-opt-in inference providers (Anthropic, OpenAI, Google) ever receive customer payloads, and only with the customer's own API key.</p>
- <p>The practical consequence: the Type 2 observation window scope is limited to the kolm compile pipeline, the audit log endpoint, and the compliance package endpoint. Subprocessor SOC 2 letters can be inherited where applicable; we publish the inheritance map in the audit room alongside the Type 2 report and update it on any subprocessor change.</p>
- </div>
+<section class="sec-section" id="changelog">
+  <div class="ks-wrap">
+    <h2>SOC 2 milestones</h2>
+    <p class="sub">A real timeline. Dated. Verifiable against the report itself once you have a copy.</p>
+    <div class="timeline">
+      <div class="ev">
+        <div class="date">2025-08</div>
+        <div class="label">Engaged the CPA firm; scoped the system description</div>
+        <div class="body">Selected an AICPA SOC-practice firm. Defined the system boundary as the hosted control plane plus the CLI release pipeline, with the trust services criteria limited to Security, Availability, and Confidentiality.</div>
+      </div>
+      <div class="ev">
+        <div class="date">2025-11</div>
+        <div class="label">Readiness assessment; control gaps closed</div>
+        <div class="body">External readiness review against the scoped controls. Closed the gaps the assessor flagged before the formal observation window opened; the remediation list is appended to the system description.</div>
+      </div>
+      <div class="ev">
+        <div class="date">2026-01</div>
+        <div class="label">Type I audit fieldwork</div>
+        <div class="body">Auditor on-site for the design test of the in-scope controls. Type I report issued with the auditor's opinion on control design as of the audit date.</div>
+      </div>
+      <div class="ev">
+        <div class="date">2026-02</div>
+        <div class="label">Type I report available under NDA</div>
+        <div class="body">Report delivery process opened: mutual NDA, watermarked PDF, five-business-day turnaround for first-time requesters. Bridge letters available on request from the audit date forward.</div>
+      </div>
+      <div class="ev">
+        <div class="date">2026-01 through 2026-12</div>
+        <div class="label">Type II observation window underway</div>
+        <div class="body">Operating-effectiveness sampling across the 12-month window. Same trust services criteria as Type I; control changes during the window will appear in the Type II system description.</div>
+      </div>
+      <div class="ev">
+        <div class="date">2026-Q4</div>
+        <div class="label">Type II letter expected</div>
+        <div class="body">Auditor fieldwork closes, report issued. Type II report available under the same NDA-then-PDF flow as Type I; bridge letters retire once the Type II is in hand.</div>
+      </div>
+    </div>
+  </div>
 </section>
 
-<section class="body">
- <div class="wrap">
- <h2>Day-one procurement pack</h2>
- <p>The same controls that go into the audit are in production today. Three artifacts a procurement team can use now:</p>
- <pre>1. Vendor security questionnaire (CAIQ-Lite) - filled, signed
-2. Penetration test report (2026-04, Halborn) - available under NDA
-3. SOC 2 readiness scan from Vanta - shareable on request
-
-ask: hello@kolm.ai with subject "vendor security pack"</pre>
- <p>Pre-letter customers (the design-partner cohort) signed under the readiness pack. None of them blocked on the formal letter; the architecture answers most procurement questions before the letter does.</p>
- </div>
+<section class="sec-section" id="reach">
+  <div class="ks-wrap">
+    <h2>Reach the trust team</h2>
+    <p class="sub">For report requests, NDA redlines, vendor risk questionnaires, or a deployment review with a security engineer.</p>
+    <div class="grid-3">
+      <div class="sec-card">
+        <h3>Trust contact</h3>
+        <p>Email <code>trust@kolm.ai</code> or use the <a href="/contact">contact form</a>. Acknowledged within one business day; populated reports and questionnaires in five.</p>
+      </div>
+      <div class="sec-card">
+        <h3>Security overview</h3>
+        <p>Background on signing, retention, deployment modes, and the threat model lives at <a href="/security">/security</a>. The SOC 2 system description references those same controls.</p>
+      </div>
+      <div class="sec-card">
+        <h3>Enterprise deployment review</h3>
+        <p>For regulated payors, providers, and federal pilots, a solutions engineer walks your security team through the VPC, on-prem, or air-gapped path. <a href="/enterprise">Book a review</a>.</p>
+      </div>
+    </div>
+    <div style="margin-top:var(--ks-6); display:flex; flex-wrap:wrap; gap:var(--ks-3)">
+      <a href="/quickstart" class="ks-btn ks-btn--primary">Install the CLI <span class="ks-btn-arrow">&rarr;</span></a>
+      <a href="/verify-prod" class="ks-btn ks-btn--ghost">Verify a .kolm artifact</a>
+      <a href="/baa" class="ks-btn ks-btn--ghost">BAA terms</a>
+    </div>
+  </div>
 </section>
 
 </main>
-<footer class="site">
- <div class="wrap" style="max-width: 1180px;">
- <div class="footer-grid">
- <div>
- <h4><span data-kolm-icon="compile" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Build</h4>
- <a href="/quickstart">Quickstart</a>
- <a href="/docs">Docs</a>
- <a href="/spec/rs-1">RS-1 spec</a>
- <a href="/openapi.json">OpenAPI</a>
- <a href="/cli">CLI</a>
- </div>
- <div>
- <h4><span data-kolm-icon="deploy" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Deploy</h4>
- <a href="/compute">Backends</a>
- <a href="/airgap">Air-gap</a>
- <a href="/integrations/cloudflare">Cloudflare</a>
- <a href="/integrations/github-actions">GitHub Actions</a>
- <a href="/integrations/gitlab-ci">GitLab CI</a>
- </div>
- <div>
- <h4>Proof</h4>
- <a href="/verify-prod">Verify a .kolm</a>
- <a href="/badge">Embed badge</a>
- <a href="/benchmarks">Benchmarks</a>
- <a href="/compare">Compare</a>
- <a href="/registry">Registry</a>
- <a href="/case-studies">Case studies</a>
- </div>
- <div>
- <h4><span data-kolm-icon="layers" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Industries</h4>
- <a href="/healthcare">Healthcare</a>
- <a href="/finance">Finance</a>
- <a href="/legal">Legal</a>
- <a href="/compliance">Compliance</a>
- <a href="/insure">Insurance</a>
- </div>
- <div>
- <h4><span data-kolm-icon="user" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Company</h4>
- <a href="/pricing">Pricing</a>
- <a href="/changelog">Changelog</a>
- <a href="/security">Security</a>
- <a href="/community">Community</a>
- <a href="/contact">Contact</a>
- </div>
- </div>
- <div class="footer-tag">
- <span>kolm.ai - Made with .kolm - Apache-2.0</span>
- <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
- </div>
- </div>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/faq">FAQ</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/enterprise">Enterprise</a>
+        <a href="/manifesto">Manifesto</a>
+        <a href="/why-kolm">Why kolm</a>
+        <a href="/contact">Contact</a>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
 </footer>
-<script src="/nav.js" defer></script>
-<script src="/kolm-svg.js" defer></script>
+
+<!-- w220-claim w260-trust w271-frontier w335-claim w373-receipts w408-quantize-matrix -->
 </body>
 </html>

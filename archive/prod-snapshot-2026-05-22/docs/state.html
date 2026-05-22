@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#050607;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#050607;color:#faf2e1}html{color-scheme:dark}</style>
+<title>State and sync · kolm.ai</title>
+<meta name="description" content="kolm.ai state + sync docs. The .kolm-state directory, kolm checkpoint, kolm import-chat, kolm merge, kolm sync, and kolm jobs / watch. How a kolm workspace...">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta property="og:title" content="State and sync · kolm.ai">
+<meta property="og:description" content="kolm.ai state + sync docs. The .kolm-state directory, kolm checkpoint, kolm import-chat, kolm merge, kolm sync, and kolm jobs / watch. How a kolm workspace...">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/docs/state">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:title" content="State and sync · kolm.ai">
+<meta name="twitter:description" content="kolm.ai state + sync docs. The .kolm-state directory, kolm checkpoint, kolm import-chat, kolm merge, kolm sync, and kolm jobs / watch. How a kolm workspace...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://kolm.ai/docs/state">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<style>
+ :root {
+ --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+ --accent: #faf2e1; --accent-strong: #c9c2b2;
+ --good: #7ef0d2; --warn: #d6a65a; --stop: #d77;
+ --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+ }
+ .st-wrap{max-width:1100px;margin:0 auto;padding:48px 28px 96px}
+ .st-wrap .crumbs{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:0.08em;text-transform:uppercase;margin:0 0 22px}
+ .st-wrap .crumbs a{color:var(--ink-mute);text-decoration:none}
+ .st-wrap h1{font-size:34px;font-weight:500;letter-spacing:-0.01em;margin:0 0 12px;color:var(--ink)}
+ .st-wrap .lede{font-size:16px;line-height:1.55;color:var(--ink-mute);max-width:72ch;margin:0 0 30px}
+ .st-wrap h2{font-size:22px;font-weight:500;margin:48px 0 14px;letter-spacing:-0.005em;color:var(--ink);scroll-margin-top:80px}
+ .st-wrap h3{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint);font-weight:500;margin:22px 0 8px}
+ .st-wrap p{color:var(--ink-mute);font-size:14.5px;line-height:1.65;max-width:72ch;margin:0 0 12px}
+ .st-wrap code{font-family:var(--mono);font-size:12.5px;background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 5px;color:var(--ink)}
+ .st-wrap pre{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px 16px;font-family:var(--mono);font-size:12.5px;color:var(--ink);overflow-x:auto;line-height:1.55;margin:6px 0 14px}
+ .st-wrap a{color:var(--ink);border-bottom:1px solid var(--line-strong);text-decoration:none}
+ .st-wrap a:hover{color:var(--accent)}
+ .st-wrap table{width:100%;border-collapse:collapse;margin:8px 0 22px;font-size:13.5px}
+ .st-wrap th{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);color:var(--ink-faint);font-weight:500;text-transform:uppercase;font-size:10.5px;letter-spacing:0.08em}
+ .st-wrap td{padding:8px 12px;border-bottom:1px solid var(--line);color:var(--ink-mute);vertical-align:top;line-height:1.5}
+ .st-wrap td code{font-size:12px}
+ .st-verb{border:1px solid var(--line);border-radius:10px;padding:18px 20px;background:var(--bg-elev);margin:12px 0}
+ .st-verb h3{margin:0 0 6px;font-family:var(--mono);font-size:13px;color:var(--ink);letter-spacing:0.01em;text-transform:none}
+ .st-verb p{margin:0 0 6px;font-size:13.5px}
+ .st-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin:14px 0 18px}
+ .st-callout{border:1px solid var(--line);border-left:3px solid var(--good);border-radius:6px;padding:12px 14px;background:var(--bg-elev);margin:14px 0;font-size:13.5px;color:var(--ink-mute)}
+ .st-callout b{color:var(--ink);font-weight:500}
+ .st-related{background:var(--bg-elev);border:1px solid var(--line);border-radius:10px;padding:22px;margin-top:42px}
+ .st-related h2{margin:0 0 12px;font-size:14px;font-family:var(--mono);letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-faint);font-weight:500}
+ .st-related ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px 18px}
+ .st-related ul li a{font-size:13.5px;color:var(--accent);border-bottom:1px solid var(--line-strong);text-decoration:none}
+ [data-theme=light] .st-wrap{color:#0c0e10}
+ [data-theme=light] .st-wrap .crumbs{color:#737c73}
+ [data-theme=light] .st-wrap .crumbs a{color:#4b5158}
+ [data-theme=light] .st-wrap h1,[data-theme=light] .st-wrap h2{color:#0c0e10}
+ [data-theme=light] .st-wrap h3{color:#737c73}
+ [data-theme=light] .st-wrap p{color:#4b5158}
+ [data-theme=light] .st-wrap code{background:#f4f5f3;border-color:rgba(12,14,16,0.08);color:#0c0e10}
+ [data-theme=light] .st-wrap pre{background:#f4f5f3;border-color:rgba(12,14,16,0.08);color:#0c0e10}
+ [data-theme=light] .st-wrap a{color:#0c0e10;border-bottom-color:rgba(12,14,16,0.16)}
+ [data-theme=light] .st-wrap a:hover{color:#0a8862}
+ [data-theme=light] .st-wrap th{color:#737c73;border-bottom-color:rgba(12,14,16,0.08)}
+ [data-theme=light] .st-wrap td{color:#4b5158;border-bottom-color:rgba(12,14,16,0.06)}
+ [data-theme=light] .st-verb{background:#ffffff;border-color:rgba(12,14,16,0.08)}
+ [data-theme=light] .st-callout{background:#ffffff;border-color:rgba(12,14,16,0.08);border-left-color:#0a8862;color:#4b5158}
+ [data-theme=light] .st-related{background:#ffffff;border-color:rgba(12,14,16,0.08)}
+</style>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "TechArticle",
+ "headline": "State and sync",
+ "description": "kolm.ai state + sync docs. .kolm-state, kolm checkpoint / import-chat / merge / sync / jobs / watch.",
+ "url": "https://kolm.ai/docs/state",
+ "mainEntityOfPage": "https://kolm.ai/docs/state",
+ "author": { "@type": "Organization", "name": "kolm.ai" }
+}
+</script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ { "@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/" },
+ { "@type": "ListItem", "position": 2, "name": "Docs", "item": "https://kolm.ai/docs" },
+ { "@type": "ListItem", "position": 3, "name": "State and sync", "item": "https://kolm.ai/docs/state" }
+ ]
+}
+</script>
+<script src="/nav.js" defer></script>
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<span style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden" aria-hidden="true">kolm.ai</span>
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand"><span>kolm.ai</span></a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ </div>
+</header>
+<main id="main" class="st-wrap">
+ <nav aria-label="Breadcrumb" class="crumbs">
+ <a href="/docs">Docs</a> / <span>State and sync</span>
+ </nav>
+ <h1>State and sync</h1>
+ <p class="lede">A kolm workspace travels. From a laptop to a CI run, from one agent session to another, from a development machine to an air-gapped build server. State + sync is the layer that keeps it reproducible without forcing you into a hosted service.</p>
+
+ <h2 id="dir">The <code>.kolm-state</code> directory</h2>
+ <p>Every kolm project keeps its volatile workspace under <code>.kolm-state/</code>. It is checked into git intentionally. The directory is small, deterministic, and load-bearing for reproducibility: a clean checkout plus <code>.kolm-state/</code> reproduces the same compile result.</p>
+ <table>
+ <thead><tr><th>Path</th><th>Purpose</th></tr></thead>
+ <tbody>
+ <tr><td><code>.kolm-state/manifest.json</code></td><td>Pointer to the active recipe, gate, and frozen-eval set. Updated by <code>kolm compile</code>.</td></tr>
+ <tr><td><code>.kolm-state/checkpoints/</code></td><td>Short-hashed revisions. Each is a deterministic snapshot of <code>kolm.yaml</code> + seeds + recipe.</td></tr>
+ <tr><td><code>.kolm-state/chats/</code></td><td>Imported chat logs (Claude / ChatGPT exports / JSONL). Used as seed material.</td></tr>
+ <tr><td><code>.kolm-state/jobs.jsonl</code></td><td>JSONL job ledger. Append-only. Pruned by <code>kolm jobs --prune-older 30d</code>.</td></tr>
+ <tr><td><code>.kolm-state/sync.lock</code></td><td>Mutex held by <code>kolm sync</code>. Prevents concurrent pushes to the same remote.</td></tr>
+ </tbody>
+ </table>
+
+ <h2 id="verbs">State verbs</h2>
+ <p>Each verb is idempotent. Running it twice with the same input produces the same output and the same exit code.</p>
+ <div class="st-grid">
+ <div class="st-verb">
+ <h3>kolm checkpoint</h3>
+ <p>Snapshot the current <code>kolm.yaml</code> + seeds + recipe into <code>.kolm-state/checkpoints/&lt;hash&gt;</code>. Use this before risky edits. Roll back with <code>--restore &lt;hash&gt;</code>.</p>
+ </div>
+ <div class="st-verb">
+ <h3>kolm import-chat</h3>
+ <p>Convert a Claude or ChatGPT export, or any JSONL, into <code>seeds.jsonl</code>. Supports <code>--strategy head_wins</code> and <code>--strategy evaluator_decides</code> for resolving duplicates.</p>
+ </div>
+ <div class="st-verb">
+ <h3>kolm merge</h3>
+ <p>Merge two checkpoints. Conflicts are resolved per the chosen strategy. Output goes to a new checkpoint, not back to disk in place.</p>
+ </div>
+ <div class="st-verb">
+ <h3>kolm sync</h3>
+ <p>Push artifact + manifest + receipt chain to a private git mirror. Use this for cross-agent memory. Deterministic per-URL workdir so two laptops can push to the same mirror without colliding.</p>
+ </div>
+ <div class="st-verb">
+ <h3>kolm jobs</h3>
+ <p>List long-running compiles, distills, evals, and replays. Each row carries kind, status, started-at, duration, and exit code. Backed by <code>.kolm-state/jobs.jsonl</code>.</p>
+ </div>
+ <div class="st-verb">
+ <h3>kolm watch</h3>
+ <p>Live tail a single job's log. Survives disconnect. Pair with <code>kolm compile --detach</code> in tmux so a 20-minute compile keeps running after you close the SSH session.</p>
+ </div>
+ </div>
+
+ <h2 id="workflow">Typical workflow</h2>
+ <pre><code># 1. Snapshot before changing seeds.
+kolm checkpoint --label "before-redaction-tune"
+
+# 2. Pull chat history into seeds.
+kolm import-chat ~/Downloads/claude-export.json --strategy head_wins
+
+# 3. Compile with the new seeds.
+kolm compile "redact PHI from notes" --detach
+kolm jobs # find the job id
+kolm watch &lt;job-id&gt; # live tail
+
+# 4. If results regress, roll back.
+kolm checkpoint --restore &lt;hash&gt;
+
+# 5. When you're happy, sync to your private mirror.
+kolm sync --remote git@github.com:acme/kolm-state.git
+</code></pre>
+
+ <h2 id="reproducibility">Reproducibility guarantees</h2>
+ <div class="st-callout"><b>Deterministic short-hash.</b> Two checkouts of the same <code>.kolm-state</code> on different machines produce the same checkpoint hashes. No machine-specific timestamps or paths leak in.</div>
+ <div class="st-callout"><b>Append-only ledger.</b> <code>jobs.jsonl</code> is append-only by contract. <code>kolm jobs --prune-older 30d</code> rewrites the file but never deletes a row that the receipt chain still references.</div>
+ <div class="st-callout"><b>Signed sync.</b> <code>kolm sync</code> signs the manifest with the actor key before pushing. The remote refuses pushes whose signature does not match the configured tenant fingerprint.</div>
+
+ <h2 id="cross-agent">Cross-agent memory</h2>
+ <p>The intended pattern for multi-agent workflows: every agent reads from and writes to the same <code>.kolm-state/</code> tree, synced through a private git repo. This makes the kolm workspace the source of truth across Claude, Cursor, Devin, and any custom orchestrator. No centralized API to break; no proprietary memory format to migrate off.</p>
+ <p>See <a href="/foundations">/foundations</a> for the broader integration story (Tailscale + tmux + private git + script-everything), and <a href="/docs/agent-guide">/docs/agent-guide</a> for the rules every agent should follow before editing a kolm workspace.</p>
+
+ <h2 id="see-also">Related</h2>
+ <section class="st-related" aria-labelledby="see-also-h">
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/agent-guide">Agent guide</a></li>
+ <li><a href="/docs/cli">CLI reference</a></li>
+ <li><a href="/foundations">Foundations</a></li>
+ <li><a href="/foundations/git">Git-mirror recipe</a></li>
+ <li><a href="/spec/rs-1">RS-1 receipts spec</a></li>
+ </ul>
+ </section>
+</main>
+</body>
+</html>

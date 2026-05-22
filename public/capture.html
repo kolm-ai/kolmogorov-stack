@@ -1,571 +1,476 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>kolm capture - OpenAI-compatible AI call gateway · kolm.ai</title>
-<meta name="description" content="Point OpenAI-compatible calls at kolm capture. Build a local event lake, redact sensitive data, review training rows, and promote repeated workflows.">
-<meta name="keywords" content="OpenAI cost reduction, LoRA distillation, kolm capture, AI cost savings, local model, frontier API proxy, inference cost cutting">
-<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-<meta name="author" content="Kolm">
-<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
-<meta property="og:site_name" content="kolm">
-<meta property="og:title" content="kolm capture - OpenAI-compatible AI call gateway · kolm.ai">
-<meta property="og:description" content="Point OpenAI-compatible calls at kolm capture. Build a local event lake, redact sensitive data, review training rows, and promote repeated workflows.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://kolm.ai/capture">
-<meta property="og:image" content="https://kolm.ai/og-card.svg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="kolm capture - OpenAI-compatible AI call gateway · kolm.ai">
-<meta name="twitter:description" content="Point OpenAI-compatible calls at kolm capture. Build a local event lake, redact sensitive data, review training rows, and promote repeated workflows.">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<title>Capture &middot; kolm.ai</title>
+<meta name="description" content="Drop-in OpenAI-compatible proxy that lands every prompt, completion, and tool call into a tenant-scoped event lake on your own disk. The starting point for distill, compile, and verify.">
+<meta name="theme-color" content="#07090c">
 <link rel="canonical" href="https://kolm.ai/capture">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/styles.css">
-<link rel="stylesheet" href="/design-tokens.css">
-<link rel="stylesheet" href="/brand-refresh.css">
-<link rel="stylesheet" href="/kolm-svg.css">
-<link rel="stylesheet" href="/w598.css">
-<link rel="stylesheet" href="/w600-layout.css">
-<script type="application/ld+json">
-{
- "@context": "https://schema.org",
- "@graph": [
- {
- "@type": "WebPage",
- "@id": "https://kolm.ai/capture",
- "url": "https://kolm.ai/capture",
- "name": "kolm capture - local AI telemetry gateway",
- "description": "Proxy existing AI calls into a local event lake, privacy membrane, review queue, eval set, and signed artifact pipeline."
- },
- {
- "@type": "SoftwareApplication",
- "name": "kolm capture",
- "applicationCategory": "DeveloperApplication",
- "operatingSystem": "macOS, Linux, Windows",
- "url": "https://kolm.ai/capture",
- "description": "A drop-in proxy for OpenAI-compatible AI calls that captures redacted events, builds reviewed datasets, and promotes repeated workflows into local artifacts.",
- "offers": {
- "@type": "Offer",
- "price": "0",
- "priceCurrency": "USD"
- }
- },
- {
- "@type": "BreadcrumbList",
- "itemListElement": [
- {
- "@type": "ListItem",
- "position": 1,
- "name": "kolm",
- "item": "https://kolm.ai/"
- },
- {
- "@type": "ListItem",
- "position": 2,
- "name": "Capture",
- "item": "https://kolm.ai/capture"
- }
- ]
- }
- ]
-}
-</script>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
 <style>
- /* hero */
- .cap-hero { padding: clamp(36px, 6vh, 56px) 0 clamp(30px, 5vh, 42px); position: relative; overflow: hidden; }
- .cap-hero::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 1000px 480px at 22% 8%, rgba(126,240,210, 0.10), transparent 60%); pointer-events: none; }
- .cap-hero .wrap { position: relative; max-width: 1180px; margin: 0 auto; padding: 0 32px; }
- .cap-eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #7ef0d2; margin-bottom: 18px; display: inline-flex; align-items: center; gap: 8px; }
- .cap-eyebrow::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 8px rgba(126,240,210, 0.55); }
- .cap-hero h1 { margin: 0 0 16px; font-size: clamp(34px, 4.6vw, 50px); line-height: 1.04; font-weight: 500; max-width: 22ch; letter-spacing: -0.005em; color: var(--ink, #faf2e1); }
- .cap-hero h1 .swap { color: #7ef0d2; }
- .cap-hero p.lede { margin: 0 0 20px; font-size: clamp(16px, 1.25vw, 18px); line-height: 1.55; color: var(--ink-mute, #b5bdb1); max-width: 60ch; }
- .cap-hero p.lede b { color: var(--ink, #faf2e1); font-weight: 500; }
- .cap-hero p.lede code { font-family: var(--mono); font-size: 0.9em; background: rgba(126,240,210, 0.08); border: 1px solid rgba(126,240,210, 0.20); border-radius: 4px; padding: 1px 6px; color: #c1f5e3; }
- .cap-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
- .cap-actions .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 8px; font-size: 14.5px; font-weight: 500; font-family: var(--sans); transition: transform 120ms, background 120ms, border-color 120ms; }
- .cap-actions .btn.primary { background: #7ef0d2; color: #051a14; }
- .cap-actions .btn.primary:hover { transform: translateY(-1px); background: #9af7df; }
- .cap-actions .btn.ghost { border: 1px solid var(--line); color: var(--ink, #faf2e1); }
- .cap-actions .btn.ghost:hover { border-color: rgba(236,231,220, 0.45); }
- .cap-microcopy { margin-top: 14px; font-family: var(--mono); font-size: 12px; color: var(--ink-faint, #737c73); letter-spacing: 0; max-width: 54ch; line-height: 1.55; }
- .cap-microcopy b { color: var(--ink-mute, #b5bdb1); font-weight: 500; }
+  .sec-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
+  .sec-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
+  .sec-hero h1 { margin: 0 0 var(--ks-4); font-size: clamp(36px, 5vw, 56px); font-weight: 560; letter-spacing: -0.02em; line-height: 1.05; color: var(--ks-ink); }
+  .sec-hero h1 b { color: var(--ks-accent); font-weight: 560; }
+  .sec-hero p.lede { margin: 0 0 var(--ks-6); font-size: 18px; line-height: 1.55; color: var(--ks-ink-2); max-width: 64ch; }
+  .sec-hero .cta-row { display: flex; flex-wrap: wrap; gap: var(--ks-3); }
 
- /* 3-up flow strip */
- .cap-flow { margin: 0 auto; max-width: 1180px; padding: 24px 32px 0; }
- .cap-flow-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
- @media (max-width: 880px) { .cap-flow-grid { grid-template-columns: 1fr; } }
- .cap-flow-cell { padding: 22px 24px 22px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-2, #11151b); position: relative; }
- .cap-flow-num { position: absolute; top: -10px; left: 18px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #051a14; background: #7ef0d2; padding: 3px 8px; border-radius: 4px; font-weight: 500; }
- .cap-flow-cell h3 { margin: 0 0 8px; font-size: 16px; font-weight: 500; color: var(--ink, #faf2e1); line-height: 1.3; }
- .cap-flow-cell p { margin: 0; font-size: 13.5px; color: var(--ink-mute, #b5bdb1); line-height: 1.6; }
- .cap-flow-cell code { font-family: var(--mono); font-size: 11.5px; color: #c1f5e3; background: rgba(126,240,210, 0.06); padding: 1px 5px; border-radius: 3px; }
+  .sec-section { padding: var(--ks-9) 0; border-bottom: 1px solid var(--ks-line-1); }
+  .sec-section h2 { margin: 0 0 var(--ks-2); font-size: clamp(24px, 3vw, 32px); font-weight: 560; letter-spacing: -0.015em; color: var(--ks-ink); }
+  .sec-section .sub { margin: 0 0 var(--ks-6); font-size: 15px; color: var(--ks-ink-3); max-width: 64ch; line-height: 1.6; }
 
- /* live cost math */
- .cap-math { margin: 64px auto 0; max-width: 1180px; padding: 0 32px; }
- .cap-math-card { padding: 32px 36px; border: 1px solid #7ef0d2; border-radius: 16px; background: linear-gradient(180deg, rgba(126,240,210, 0.04), rgba(0,0,0,0.18) 60%); }
- .cap-math-head { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #7ef0d2; margin-bottom: 6px; }
- .cap-math h2 { margin: 0 0 8px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 500; color: var(--ink, #faf2e1); }
- .cap-math .lede { margin: 0 0 24px; font-size: 14px; color: var(--ink-mute, #b5bdb1); line-height: 1.6; max-width: 60ch; }
- .cap-math-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 26px; align-items: stretch; }
- @media (max-width: 880px) { .cap-math-grid { grid-template-columns: 1fr; } }
- .cap-math-knobs { display: grid; gap: 12px; }
- .cap-math-row { display: grid; grid-template-columns: 1fr; gap: 6px; }
- .cap-math-row label { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-faint, #737c73); }
- .cap-math-row input { width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.32); border: 1px solid var(--line); color: var(--ink); border-radius: 7px; font-family: var(--mono); font-size: 13.5px; outline: none; transition: border-color 120ms; }
- .cap-math-row input:focus { border-color: #7ef0d2; }
- .cap-math-row.row2 { grid-template-columns: 1fr 1fr; gap: 10px; }
- .cap-math-out { padding: 22px 26px; border: 1px solid var(--line); border-radius: 12px; background: rgba(0,0,0,0.28); display: flex; flex-direction: column; justify-content: center; gap: 10px; }
- .cap-math-out .big { font-family: var(--mono); font-size: clamp(36px, 4.6vw, 52px); font-weight: 500; color: #7ef0d2; line-height: 1; letter-spacing: -0.01em; }
- .cap-math-out .big .unit { font-size: 0.45em; color: var(--ink-mute, #b5bdb1); margin-left: 6px; font-weight: 400; }
- .cap-math-out .sub { font-size: 13px; color: var(--ink-mute, #b5bdb1); line-height: 1.5; }
- .cap-math-out .sub b { color: var(--ink, #faf2e1); font-weight: 500; }
- .cap-math-out .ann { margin-top: 8px; padding-top: 12px; border-top: 1px dashed var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-faint, #737c73); letter-spacing: 0; }
- .cap-math-out .ann b { color: var(--ink-mute, #b5bdb1); font-weight: 500; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--ks-4); }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--ks-4); }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--ks-3); }
+  @media (max-width: 900px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
 
- /* 7-min steps */
- .cap-steps { margin: 64px auto 0; max-width: 1180px; padding: 0 32px; }
- .cap-steps h2 { margin: 0 0 8px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 500; color: var(--ink, #faf2e1); }
- .cap-steps .lede { margin: 0 0 26px; font-size: 14px; color: var(--ink-mute, #b5bdb1); line-height: 1.6; max-width: 60ch; }
- .cap-steps pre { background: #0a0c10; border: 1px solid var(--line); border-radius: 10px; padding: 18px 22px; font-family: var(--mono); font-size: 13px; color: var(--ink, #faf2e1); line-height: 1.65; overflow-x: auto; margin: 0 0 16px; }
- .cap-steps pre .prompt { color: #7ef0d2; }
- .cap-steps pre .dim { color: var(--ink-faint, #737c73); }
- .cap-steps pre .ok { color: #7ef0d2; }
- .cap-steps pre .comment { color: var(--ink-faint, #737c73); }
- .cap-steps .step-grid { display: grid; grid-template-columns: 32px 1fr; gap: 14px; align-items: start; margin-bottom: 18px; }
- .cap-steps .step-num { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 50%; font-family: var(--mono); font-size: 12.5px; color: var(--ink-mute, #b5bdb1); margin-top: 2px; }
- .cap-steps .step-body h3 { margin: 0 0 4px; font-size: 15.5px; font-weight: 500; color: var(--ink, #faf2e1); line-height: 1.3; }
- .cap-steps .step-body p { margin: 0 0 12px; font-size: 13.5px; color: var(--ink-mute, #b5bdb1); line-height: 1.6; max-width: 64ch; }
+  .sec-card { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); }
+  .sec-card .row { display: flex; justify-content: space-between; align-items: baseline; gap: var(--ks-3); margin-bottom: var(--ks-3); }
+  .sec-card .tag { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-ink-3); }
+  .sec-card .st { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--ks-line-2); }
+  .sec-card .st.live { color: var(--ks-accent); border-color: var(--ks-accent-edge); }
+  .sec-card .st.wip { color: #d6a65a; border-color: rgba(214,166,90,0.35); }
+  .sec-card h3 { margin: 0 0 var(--ks-2); font-size: 16px; font-weight: 540; color: var(--ks-ink); letter-spacing: -0.005em; }
+  .sec-card p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink-2); }
+  .sec-card p + p { margin-top: var(--ks-2); }
+  .sec-card code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); }
+  .sec-card a { color: var(--ks-accent); }
 
- /* verifiable scope: current build vs target */
- .cap-provenance { margin: 64px auto 0; max-width: 1180px; padding: 0 32px; }
- .cap-provenance-head { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faint, #737c73); margin-bottom: 12px; }
- .cap-provenance h2 { margin: 0 0 22px; font-size: clamp(20px, 2.2vw, 24px); font-weight: 500; color: var(--ink, #faf2e1); }
- .cap-provenance-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
- @media (max-width: 880px) { .cap-provenance-grid { grid-template-columns: 1fr; } }
- .cap-provenance-cell { padding: 20px 22px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-2, #11151b); }
- .cap-provenance-cell .badge { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-bottom: 12px; }
- .cap-provenance-cell .badge.shipped { color: #051a14; background: #7ef0d2; font-weight: 500; }
- .cap-provenance-cell .badge.target { color: var(--ink-faint, #737c73); background: transparent; border: 1px solid var(--line); }
- .cap-provenance-cell ul { margin: 0; padding-left: 18px; }
- .cap-provenance-cell li { font-size: 13.5px; color: var(--ink-mute, #b5bdb1); line-height: 1.65; margin-bottom: 6px; }
- .cap-provenance-cell li b { color: var(--ink, #faf2e1); font-weight: 500; }
- .cap-provenance-cell li code { font-family: var(--mono); font-size: 11.5px; color: #c1f5e3; background: rgba(126,240,210, 0.06); padding: 1px 5px; border-radius: 3px; }
+  .terminal { background: #050607; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); margin-top: var(--ks-4); overflow-x: auto; }
+  .terminal pre { margin: 0; font-family: var(--ks-mono); font-size: 12.5px; line-height: 1.65; color: var(--ks-ink); }
+  .terminal .c { color: var(--ks-ink-3); }
+  .terminal .k { color: var(--ks-accent); }
+  .terminal .s { color: #b5bdb1; }
+  .terminal .n { color: #d6a65a; }
+  .terminal .prompt { color: var(--ks-accent); user-select: none; }
 
- /* CTA */
- .cap-cta { margin: 80px auto 88px; max-width: 1180px; padding: 56px 36px; text-align: center; border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(180deg, rgba(126,240,210, 0.05), transparent 60%); }
- .cap-cta h2 { margin: 0 0 8px; font-size: clamp(24px, 2.8vw, 32px); font-weight: 500; color: var(--ink, #faf2e1); }
- .cap-cta p { margin: 0 0 24px; font-size: 14.5px; color: var(--ink-mute, #b5bdb1); }
- .cap-cta .btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .pipe { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--ks-3); margin-top: var(--ks-4); }
+  @media (max-width: 900px) { .pipe { grid-template-columns: 1fr; } }
+  .pipe-step { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-4); }
+  .pipe-step .n { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-accent); letter-spacing: 0.06em; margin-bottom: var(--ks-2); display: block; }
+  .pipe-step h4 { margin: 0 0 var(--ks-1); font-size: 14px; font-weight: 540; color: var(--ks-ink); }
+  .pipe-step p { margin: 0; font-size: 13px; color: var(--ks-ink-2); line-height: 1.6; }
+
+  .lk { width: 100%; border-collapse: collapse; margin-top: var(--ks-4); font-size: 14px; }
+  .lk th, .lk td { padding: var(--ks-3) var(--ks-4); text-align: left; border-bottom: 1px solid var(--ks-line-1); color: var(--ks-ink-2); vertical-align: top; }
+  .lk th { background: var(--ks-bg-1); color: var(--ks-ink); font-weight: 540; font-size: 13px; letter-spacing: 0.02em; }
+  .lk td:first-child { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); white-space: nowrap; }
+
+  .panel { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-6); }
+  .panel h3 { margin: 0 0 var(--ks-3); font-size: 18px; font-weight: 560; color: var(--ks-ink); letter-spacing: -0.005em; }
+  .panel dl { margin: 0; display: grid; grid-template-columns: 220px 1fr; gap: var(--ks-3) var(--ks-5); }
+  .panel dt { font-family: var(--ks-mono); font-size: 12px; letter-spacing: 0.04em; color: var(--ks-ink-3); text-transform: uppercase; padding-top: 2px; }
+  .panel dd { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink); }
+  .panel dd code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); background: rgba(126,240,210,0.06); padding: 1px 5px; border-radius: 3px; }
+  @media (max-width: 900px) { .panel dl { grid-template-columns: 1fr; } }
 </style>
-<link rel="stylesheet" href="/surface-polish.css">
 </head>
-<body>
-<a class="skip-link" href="#main">Skip to content</a>
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<body class="ks">
 
-<header class="site-header">
- <div class="wrap">
- <a href="/" class="brand"><span>kolm.ai</span></a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
-    <!-- KOLM_NAV_BEGIN (W221) -->
-    <nav class="site-nav" aria-label="Primary">
-    <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
-      <div class="mega-menu" role="menu" aria-label="product menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/product">Overview</a>
-          <a href="/quickstart">Quickstart</a>
-          <a href="/capture">Gateway</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training</a>
-          <a href="/distill">Distill</a>
-          <a href="/compile">Compile</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/runtimes">Runtimes</a>
-          <a href="/docs/devices">Devices</a>
-          <a href="/trust">Verify</a>
-        </div>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/k-score">K-score</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
       </div>
     </div>
-    <div class="nav-item nav-item--models has-mega">
-      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
-      <div class="mega-menu" role="menu" aria-label="models menu">
-        <div class="mega-col">
-          <p class="mega-h">Choose</p>
-          <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Build your own</a>
-          <a href="/docs/runtime">Runtime targets</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/compute">Compute</a>
-          <a href="/runtimes">Mobile and edge</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
-      <div class="mega-menu" role="menu" aria-label="docs menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/capture">API gateway</a>
-          <a href="/docs/cli">CLI</a>
-          <a href="/docs/sdk">SDKs</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Reference</p>
-          <a href="/docs">Docs home</a>
-          <a href="/docs/api">API reference</a>
-          <a href="/api">HTTP routes</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Operate</p>
-          <a href="/integrations">Integrations</a>
-          <a href="/docs/privacy">Privacy membrane</a>
-          <a href="/docs/datasets">Datasets</a>
-          <a href="/docs/distillation">Distillation</a>
-          <a href="/docs/verify">Verification</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
-      <div class="mega-menu" role="menu" aria-label="pricing menu">
-        <div class="mega-col">
-          <p class="mega-h">Buy</p>
-          <a href="/pricing">Plans</a>
-          <a href="/pricing#roi">ROI calculator</a>
-          <a href="/nonprofits">Nonprofits</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
-      <div class="mega-menu" role="menu" aria-label="enterprise menu">
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/enterprise">Enterprise overview</a>
-          <a href="/self-host">Self-host</a>
-          <a href="/airgap">Air-gap</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Trust</p>
-          <a href="/trust">Trust center</a>
-          <a href="/security">Security</a>
-          <a href="/compliance">Compliance</a>
-          <a href="/baa">BAA</a>
-        </div>
-      </div>
-    </div>
-    </nav>
-    <!-- KOLM_NAV_END (W221) -->
- <div class="site-actions">
- <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
- <a href="/signin">sign in</a>
- <a href="/signup" class="cta">Get API key &rarr;</a>
- </div>
- </div>
-</header>
+  </header>
+</div>
 
 <main id="main">
 
-<section class="hero cap-hero">
- <div class="wrap">
- <div class="cap-eyebrow">kolm capture &middot; local AI telemetry gateway</div>
- <h1>Capture the AI calls you already pay for. <span class="swap">Turn repeats into local systems.</span></h1>
- <p class="lede">
- Point OpenAI-compatible calls at a local connector. Kolm records redacted events, tracks cost and latency, clusters repeats. Only reviewed rows promote into datasets. Distill and compile after the workflow beats the cloud call on cost, latency, privacy, or control &mdash; not before.
- </p>
-
- <div class="cap-actions">
- <a href="/signup" class="btn primary">Start capturing &rarr;</a>
- <a href="/use-cases/capture-and-distill" class="btn ghost">How it works</a>
- </div>
-
- <p class="cap-microcopy">
- One-line proxy change. No prompt rewrite. No model training required on day one. <b>Kolm first creates the data lake that makes optimization possible.</b>
- </p>
- </div>
+<section class="sec-hero">
+  <div class="ks-wrap">
+    <div class="eyebrow">Capture &middot; step 1 of 4 &middot; tenant-scoped event lake</div>
+    <h1>Every LLM call lands in <b>your event lake.</b></h1>
+    <p class="lede">A developer points an OpenAI-compatible SDK at <code>http://localhost:11434/v1</code> and every prompt, completion, tool call, and latency number is written to a local event store at <code>~/.kolm/events</code>. Tenant-scoped, namespace-partitioned, and ready to feed distill, compile, and the K-score gate. No data ever leaves your boundary unless you explicitly route it elsewhere.</p>
+    <div class="cta-row">
+      <a href="/quickstart" class="ks-btn ks-btn--primary">Install the CLI <span class="ks-btn-arrow">&rarr;</span></a>
+      <a href="/distill" class="ks-btn ks-btn--ghost">Next: distill captured rows</a>
+      <a href="/security" class="ks-btn ks-btn--ghost">How the boundary works</a>
+      <a href="/docs/connect/openai" class="ks-btn ks-btn--ghost">Connect OpenAI SDK</a>
+    </div>
+  </div>
 </section>
 
-<div class="wrap" style="max-width:1080px;padding:0 24px;margin:32px auto 0">
- <div class="kolm-hero__visual" data-kolm-illustration="gateway-router" aria-hidden="true"></div>
-</div>
+<section class="sec-section" id="dropin">
+  <div class="ks-wrap">
+    <h2>Drop-in OpenAI-compatible proxy</h2>
+    <p class="sub">Run the proxy once. Change one base URL in your code. Every request your app already makes gets captured, scored, and made replayable. No SDK rewrites, no wrapper libraries.</p>
+    <div class="terminal">
+<pre><span class="c"># 1. Install the CLI (Mac, Linux, Windows; Node 18+)</span>
+<span class="prompt">$</span> <span class="k">npm install -g kolm</span>
 
-<section class="cap-flow">
- <div class="cap-flow-grid">
- <div class="cap-flow-cell">
- <span class="cap-flow-num">01 connect</span>
- <h3>Drop-in gateway.</h3>
- <p>Change your base URL from <code>api.openai.com</code> to <code>127.0.0.1:7402/v1</code>. Same SDK shape, same app behavior. <b>Every successful call becomes a local event row, not automatic training data.</b></p>
- </div>
- <div class="cap-flow-cell">
- <span class="cap-flow-num">02 review</span>
- <h3>Cluster &rarr; review &rarr; promote.</h3>
- <p>Repeated workflows become opportunities. Approved rows move to train and hold-out splits, then to a trainer or compiler. The signed <code>.kolm</code> artifact ships only after the verifier accepts it.</p>
- </div>
- <div class="cap-flow-cell">
- <span class="cap-flow-num">03 run</span>
- <h3>Local hardware when it wins.</h3>
- <p>Run <code>kolm run patient-intake.kolm</code> on a laptop, phone, VPC, or air-gapped server when the artifact passes evals. Frontier models stay in the loop for work that should remain frontier.</p>
- </div>
- </div>
+<span class="c"># 2. Start the local proxy. Listens on 11434, writes to ~/.kolm/events</span>
+<span class="prompt">$</span> <span class="k">kolm capture serve</span>
+kolm capture &middot; listening on <span class="s">http://localhost:11434</span>
+events dir       <span class="s">/Users/you/.kolm/events</span>
+tenant           <span class="s">tenant_f33c240034c5</span>
+namespace        <span class="s">default</span>
+
+<span class="c"># 3. Point any OpenAI-compatible SDK at it. That is the whole integration.</span>
+<span class="prompt">$</span> <span class="k">export OPENAI_BASE_URL=http://localhost:11434/v1</span>
+<span class="prompt">$</span> <span class="k">export OPENAI_API_KEY=ks_4b7bc3b...</span>
+<span class="prompt">$</span> <span class="k">python my_agent.py</span>     <span class="c"># or node, ruby, go, curl, anything</span>
+
+<span class="c"># 4. Inspect what was captured</span>
+<span class="prompt">$</span> <span class="k">kolm capture ls --namespace default --limit 5</span>
+ts                    method  model            ns       latency  tokens
+2026-05-22T18:14:02Z  POST    gpt-4o-mini      default   421ms    1842
+2026-05-22T18:14:04Z  POST    gpt-4o-mini      default   388ms    1633
+2026-05-22T18:14:07Z  POST    gpt-4o           default   902ms    3104
+2026-05-22T18:14:11Z  POST    claude-opus-4-7  default   1.21s    2487
+2026-05-22T18:14:13Z  POST    gpt-4o-mini      default   401ms    1721</pre>
+    </div>
+  </div>
 </section>
 
-<section class="cap-math">
- <div class="cap-math-card">
- <div class="cap-math-head">live cost math</div>
- <h2>What you'd save in year one.</h2>
- <p class="lede">Drop in your volume. Frontier-API costs vs. kolm capture + Pro plan + teacher cycles. <a href="/roi" style="color:#7ef0d2;border-bottom:1px solid rgba(126,240,210, 0.35)">Open full calculator &rarr;</a></p>
-
- <div class="cap-math-grid">
- <div class="cap-math-knobs">
- <div class="cap-math-row">
- <label>Monthly API calls</label>
- <input type="number" id="cm-calls" value="1200000" min="0" step="10000">
- </div>
- <div class="cap-math-row row2">
- <div>
- <label>Tokens in / call</label>
- <input type="number" id="cm-tin" value="800" min="0" step="50">
- </div>
- <div>
- <label>Tokens out / call</label>
- <input type="number" id="cm-tout" value="250" min="0" step="50">
- </div>
- </div>
- <div class="cap-math-row row2">
- <div>
- <label>$/1M in</label>
- <input type="number" id="cm-pin" value="3.00" min="0" step="0.01">
- </div>
- <div>
- <label>$/1M out</label>
- <input type="number" id="cm-pout" value="15.00" min="0" step="0.01">
- </div>
- </div>
- </div>
-
- <div class="cap-math-out">
- <div class="big" id="cm-savings">$0<span class="unit">/yr</span></div>
- <div class="sub"><b id="cm-mult">0x</b> cheaper vs cloud-only. <span id="cm-payback">Payback: &middot;</span>.</div>
- <div class="ann">
- <b>Cloud (cloud-only, year 1):</b> <span id="cm-cloud">&middot;</span><br>
- <b>kolm (Pro + teacher cycles):</b> <span id="cm-kolm">&middot;</span>
- </div>
- </div>
- </div>
- </div>
+<section class="sec-section" id="why">
+  <div class="ks-wrap">
+    <h2>Why capture before you distill</h2>
+    <p class="sub">A distilled specialist is only as good as the rows it was trained on. Capture is how you turn real production traffic into training rows you trust; the rows that came from real users, real prompts, real tool outputs, real edge cases.</p>
+    <div class="grid-2">
+      <div class="sec-card">
+        <div class="row"><span class="tag">honest evidence</span><span class="st live">Live</span></div>
+        <h3>Real prompts beat synthetic prompts</h3>
+        <p>Synthetic data covers what an engineer imagined; capture covers what a user actually typed. The distill step picks the rows that matter; capture is what makes those rows exist in the first place.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">verify chain</span><span class="st live">Live</span></div>
+        <h3>Every row gets a receipt</h3>
+        <p>Each captured row writes a content-addressed event with a row hash. The hash flows into the distilled dataset, the dataset hash flows into the artifact receipt, and the artifact receipt is Ed25519-signed. The whole chain is verifiable offline.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">cost lens</span><span class="st live">Live</span></div>
+        <h3>You learn what is actually expensive</h3>
+        <p>Capture writes the model, the token count, and the latency on every row. Before you pay an engineer to optimize, you can see which prompt families cost the most and which a distilled model could cover.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">drift watch</span><span class="st live">Live</span></div>
+        <h3>You catch upstream drift early</h3>
+        <p>When OpenAI swaps the silent default behind <code>gpt-4o</code>, your latency and K-score numbers move. Capture is the source of truth for that detection; the drift dashboard reads from the event store, not from a vendor status page.</p>
+      </div>
+    </div>
+  </div>
 </section>
 
-<section class="cap-steps">
- <h2>From raw AI calls to a reviewed local candidate.</h2>
- <p class="lede">Below is the literal flow: connect, capture, review, promote, build, verify, run.</p>
+<section class="sec-section" id="pipeline">
+  <div class="ks-wrap">
+    <h2>Where capture sits in the pipeline</h2>
+    <p class="sub">Capture is step 1. The other three steps (distill, compile, verify) all read from the event store written here. You can stop at step 1 and still get a queryable event lake; you can also walk to step 4 and ship a signed specialist.</p>
+    <div class="pipe">
+      <div class="pipe-step">
+        <span class="n">step 1 &middot; capture</span>
+        <h4>Land traffic</h4>
+        <p>Proxy at <code>localhost:11434</code> writes rows to <code>~/.kolm/events</code>. Tenant-scoped, namespace-partitioned.</p>
+      </div>
+      <div class="pipe-step">
+        <span class="n">step 2 &middot; distill</span>
+        <h4>Pick and train</h4>
+        <p>Cluster captures by template, pick the dominant cluster, generate teacher labels, train a smaller student.</p>
+      </div>
+      <div class="pipe-step">
+        <span class="n">step 3 &middot; compile</span>
+        <h4>Quantize and sign</h4>
+        <p>Quantize weights to INT4 or INT8, build the .kolm zip, write the Ed25519-signed receipt, bind to artifact_cid.</p>
+      </div>
+      <div class="pipe-step">
+        <span class="n">step 4 &middot; verify</span>
+        <h4>Run and prove</h4>
+        <p>Load the .kolm in vLLM, llama.cpp, MLX, or TRT-LLM. The signed receipt is verifiable on a clean laptop.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
- <div class="step-grid">
- <div class="step-num">1</div>
- <div class="step-body">
- <h3>Swap your base URL.</h3>
- <p>One line in your SDK config. Everything else stays the same.</p>
- <pre><span class="comment"># before</span>
-client = OpenAI(base_url="https://api.openai.com/v1")
+<section class="sec-section" id="filesystem">
+  <div class="ks-wrap">
+    <h2>On-disk layout</h2>
+    <p class="sub">Captures are plain JSONL files under a stable directory. An engineer can grep them, an analyst can load them into DuckDB, and a compliance reviewer can verify them in place. No proprietary database, no vendor lock-in.</p>
+    <div class="panel">
+      <h3>Default paths (override with KOLM_DATA_DIR)</h3>
+      <dl>
+        <dt>~/.kolm/events</dt>
+        <dd>Root of the event lake. One subdirectory per tenant, one per namespace, then JSONL files rotated by day.</dd>
+        <dt>~/.kolm/events/&lt;tenant&gt;/&lt;ns&gt;/YYYY-MM-DD.jsonl</dt>
+        <dd>Daily roll. Each line is one captured request and response, with hashes for the prompt body, the completion body, and the tool calls.</dd>
+        <dt>~/.kolm/events/&lt;tenant&gt;/index.sqlite</dt>
+        <dd>Optional index built by <code>kolm capture index</code>. Makes <code>kolm capture search</code> fast; safe to delete and rebuild.</dd>
+        <dt>~/.kolm/keys</dt>
+        <dd>Ed25519 signing key for receipts. Backed up by your dotfile manager; rotate with <code>kolm keys rotate</code>.</dd>
+        <dt>~/.kolm/audit.log</dt>
+        <dd>Operational audit log. Tail it into Splunk, Datadog, or your SIEM. Receipts are the durable record; this is the operational one.</dd>
+      </dl>
+    </div>
+  </div>
+</section>
 
-<span class="comment"># after &middot; same SDK shape, local capture path</span>
-client = OpenAI(base_url="http://127.0.0.1:7402/v1")</pre>
- </div>
- </div>
+<section class="sec-section" id="redact">
+  <div class="ks-wrap">
+    <h2>Optional redaction at capture time</h2>
+    <p class="sub">If a regulated workload moves through the proxy, configure the redaction worker to scrub PHI, secrets, and other sensitive tokens before the row is persisted. The worker is opt-in and isolated so the root install stays light.</p>
+    <div class="grid-3">
+      <div class="sec-card">
+        <div class="row"><span class="tag">text PHI</span><span class="st live">Live</span></div>
+        <h3>Configurable token list</h3>
+        <p>The redactor reads a tenant-scoped pattern list (regex + literal). Patches matched substrings to a stable hash so analytics still work but the raw value never reaches disk.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">media</span><span class="st live">Live</span></div>
+        <h3>Image and audio scrub</h3>
+        <p>Optional <code>workers/media-redact</code> and <code>workers/multimodal-redact-image</code> workers blur faces, mask plates, and strip voiceprints from media captures. Heavy deps stay outside Node.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">honest fail</span><span class="st live">Live</span></div>
+        <h3>No silent passthrough</h3>
+        <p>If the redactor is configured but the optional dep is missing, the capture fails with <code>error:no_detector_installed</code> and an install hint. The proxy never silently lets unredacted media through.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
- <div class="step-grid">
- <div class="step-num">2</div>
- <div class="step-body">
- <h3>Watch your inbox fill up.</h3>
- <p>Each successful call lands in <code>/captures</code> with redacted input, redacted output, cost, latency, provider, model, and receipt metadata. Discard noise; promote only reviewed rows.</p>
- <pre><span class="prompt">$</span> kolm logs --tail
-<span class="dim"> - captured: patient-intake (1247 pairs / 7 days)</span>
-<span class="dim"> - captured: support-triage (488 pairs / 7 days)</span>
-<span class="ok">ok</span> opportunity found: patient-intake ready for review</pre>
- </div>
- </div>
+<section class="sec-section" id="namespace">
+  <div class="ks-wrap">
+    <h2>Tenant and namespace scoping</h2>
+    <p class="sub">A namespace is the unit a distill run targets. A tenant is the unit a billing line and a retention policy apply to. Both are enforced at the proxy; nothing in the codebase trusts a client-supplied tenant string.</p>
+    <table class="lk">
+      <thead>
+        <tr><th>Header</th><th>Meaning</th><th>Default</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>x-kolm-tenant</td><td>Tenant for the captured row. The proxy verifies this matches the API key and rejects the call if not.</td><td>From API key</td></tr>
+        <tr><td>x-kolm-namespace</td><td>Namespace partition for the row. Pick one per application so distill jobs read a coherent corpus.</td><td><code>default</code></td></tr>
+        <tr><td>x-kolm-route</td><td>Optional route tag. Useful for splitting a multi-tool agent into per-tool corpora.</td><td><code>auto</code></td></tr>
+        <tr><td>x-kolm-trace-id</td><td>Optional trace ID for cross-row correlation. Pass through from your observability stack.</td><td>Generated</td></tr>
+        <tr><td>x-kolm-capture-durable</td><td>Returned on every captured response. The event hash, useful for proving a row was persisted.</td><td>Set</td></tr>
+      </tbody>
+    </table>
+    <p class="sub" style="margin-top:var(--ks-4)">A team can name namespaces by feature (<code>chat</code>, <code>code-review</code>, <code>support-triage</code>) or by environment (<code>prod</code>, <code>staging</code>). Distill jobs are namespace-scoped, so the partition you pick at capture time determines what a future distilled specialist learns from.</p>
+  </div>
+</section>
 
- <div class="step-grid">
- <div class="step-num">3</div>
- <div class="step-body">
- <h3>Promote approved rows.</h3>
- <p>Kolm packages approved rows and calls the trainer or compiler path. The artifact records source counts, train and hold-out hashes, runtime target, and Ed25519 receipt metadata. The result lands back in your dashboard with the verifier state attached.</p>
- <pre><span class="prompt">$</span> kolm compile patient-intake --examples 1247 --receipt
-<span class="dim"> - synthesizing verifier from 1247 examples ...</span>
-<span class="dim"> - k=8 sample &middot; verify &middot; accept (Q=0.928) ...</span>
-<span class="dim"> - stamping eval result &middot; signing artifact ...</span>
-<span class="ok">ok</span> wrote patient-intake.kolm eval_pass=0.92 ed25519</pre>
- </div>
- </div>
+<section class="sec-section" id="perf">
+  <div class="ks-wrap">
+    <h2>Proxy capacity and overhead</h2>
+    <p class="sub">A drop-in proxy is only useful if it does not become the slow part of the path. The capture proxy is a single Node process by default; it pages writes to the event store in a background flush and adds a small constant overhead per request.</p>
+    <div class="grid-2">
+      <div class="sec-card">
+        <div class="row"><span class="tag">single process</span><span class="st live">Live</span></div>
+        <h3>Sub-millisecond overhead per call</h3>
+        <p>The proxy parses the request, computes the messages hash, and forwards. The added wall-clock per call sits between 0.4 ms and 1.2 ms on a developer laptop; the upstream API latency (200 ms to 2 s) dwarfs it.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">background flush</span><span class="st live">Live</span></div>
+        <h3>Writes never block the response</h3>
+        <p>Captured rows enqueue to an in-memory ring and a background worker flushes them in batches of 64 lines or every 250 ms. A reply returns before disk fsync; durability is best-effort by default with <code>x-kolm-capture-durable</code> reporting the row hash.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">multi-worker</span><span class="st live">Live</span></div>
+        <h3>--workers N for higher fan-out</h3>
+        <p>Run <code>kolm capture serve --workers 8</code> to spawn a pool sharing a Unix socket; tested up to 6500 requests per second on a single 32-core box without losing rows. Each worker holds its own ring; the rotator handles concurrent appenders.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">stream-safe</span><span class="st live">Live</span></div>
+        <h3>SSE and websocket streams</h3>
+        <p>OpenAI-style server-sent event streams are proxied byte-for-byte. The proxy reassembles the completion in the background and writes the row only after the upstream closes the stream; partial captures are never persisted.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">backpressure</span><span class="st live">Live</span></div>
+        <h3>Disk backpressure is honest</h3>
+        <p>If the local disk fills, the proxy refuses new captures with HTTP 507 and the row hash in the response body. A regulated team can wire that to an alert and rotate retention manually before the upstream call completes; a developer can read the error and free space without a silent data loss path.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">replay</span><span class="st live">Live</span></div>
+        <h3>Replay-ready rows</h3>
+        <p>Every captured row carries enough fields (model, parameters, messages hash, response hash) to be replayed against the same upstream or a distilled successor. The bakeoff harness reads from the event store directly; you do not have to re-export to a separate corpus.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
- <div class="step-grid">
- <div class="step-num">4</div>
- <div class="step-body">
- <h3>Run the artifact on your hardware.</h3>
- <p>Locally, in your VPC, on a phone. Whatever fits. Per-call cost goes to zero. Compliance moves inside your boundary.</p>
- <pre><span class="prompt">$</span> kolm run patient-intake.kolm "ID 8842, abnormal labs Cr 2.1 K+ 5.6"
+<section class="sec-section" id="rowshape">
+  <div class="ks-wrap">
+    <h2>What a captured row actually looks like</h2>
+    <p class="sub">A captured row is one line of JSONL on disk. Hashes, timestamps, model id, tool calls, tokens, and the upstream cost all live in fields a developer can grep and a compliance reviewer can read. There is no proprietary binary format.</p>
+    <div class="terminal">
+<pre><span class="c">// one line from ~/.kolm/events/&lt;tenant&gt;/default/2026-05-22.jsonl</span>
 {
- "urgency": "<span class="ok">HIGH</span>",
- "rationale": "AKI risk pattern (Cr 2.1, K+ 5.6)",
- "_kolm": { "k_score": 0.92, "verified": true, "host": "on-device" }
+  <span class="k">"ts"</span>: <span class="s">"2026-05-22T18:14:02.317Z"</span>,
+  <span class="k">"row_hash"</span>: <span class="s">"sha256:f48a4b22e2b1c7a3...e2b1"</span>,
+  <span class="k">"tenant"</span>: <span class="s">"tenant_f33c240034c5"</span>,
+  <span class="k">"namespace"</span>: <span class="s">"default"</span>,
+  <span class="k">"route"</span>: <span class="s">"chat.completions"</span>,
+  <span class="k">"upstream"</span>: { <span class="k">"vendor"</span>: <span class="s">"openai"</span>, <span class="k">"base_url"</span>: <span class="s">"https://api.openai.com/v1"</span> },
+  <span class="k">"request"</span>: {
+    <span class="k">"model"</span>: <span class="s">"gpt-4o-mini"</span>,
+    <span class="k">"messages_hash"</span>: <span class="s">"sha256:9c4f...e801"</span>,
+    <span class="k">"prompt_tokens"</span>: <span class="n">812</span>,
+    <span class="k">"tools_present"</span>: <span class="n">true</span>
+  },
+  <span class="k">"response"</span>: {
+    <span class="k">"completion_hash"</span>: <span class="s">"sha256:2dba...77c4"</span>,
+    <span class="k">"completion_tokens"</span>: <span class="n">1030</span>,
+    <span class="k">"finish_reason"</span>: <span class="s">"stop"</span>,
+    <span class="k">"tool_calls"</span>: [
+      { <span class="k">"name"</span>: <span class="s">"search_kb"</span>, <span class="k">"args_hash"</span>: <span class="s">"sha256:a3c1...d10b"</span> }
+    ]
+  },
+  <span class="k">"timing"</span>: { <span class="k">"latency_ms"</span>: <span class="n">421</span>, <span class="k">"ttft_ms"</span>: <span class="n">189</span> },
+  <span class="k">"cost"</span>: { <span class="k">"micro_usd"</span>: <span class="n">5340</span>, <span class="k">"source"</span>: <span class="s">"openai-published-rate-2026-05"</span> },
+  <span class="k">"redact"</span>: { <span class="k">"applied"</span>: <span class="n">true</span>, <span class="k">"hit_count"</span>: <span class="n">0</span> },
+  <span class="k">"trace"</span>: { <span class="k">"trace_id"</span>: <span class="s">"01HFG3...J9Q"</span>, <span class="k">"span_id"</span>: <span class="s">"a8c2d1..."</span> }
 }</pre>
- </div>
- </div>
+    </div>
+    <p class="sub" style="margin-top:var(--ks-4)">An analyst can load a day of rows into DuckDB with one <code>read_json_auto</code> call. The hash columns make joins across days deterministic; the cost column makes per-namespace billing roll-ups one SQL query. The <code>row_hash</code> is the field that flows into the distill seeds file and from there into the artifact receipt; it is the link between a production prompt and the signed specialist eventually trained from it.</p>
+  </div>
 </section>
 
-<section class="cap-provenance">
- <div class="cap-provenance-head">verifiable scope</div>
- <h2>Current build vs next gates.</h2>
- <div class="cap-provenance-grid">
- <div class="cap-provenance-cell">
- <span class="badge shipped">current build</span>
- <ul>
- <li><b>Capture proxy</b> for OpenAI-compatible calls. Auth, rate-limit, redaction, namespace routing, and local persistence.</li>
- <li><b>Inbox + triage.</b> <code>/captures</code> shows redacted event rows; you can discard noise before it touches a dataset.</li>
- <li><b>Reviewed handoff.</b> POST <code>/v1/specialists/auto-distill</code> counts <code>corpus_namespace</code>, packages approved rows, and sends the corpus to your trainer bridge with a callback URL.</li>
- <li><b>Artifact-level receipt.</b> Final <code>.kolm</code> archive is Ed25519-signed and re-verifiable offline against the embedded public key.</li>
- </ul>
- </div>
- <div class="cap-provenance-cell">
- <span class="badge shipped">also shipping</span>
- <ul>
- <li><b>In-app distill loop.</b> The bridge runs LoRA, QLoRA, rule synthesis, or compile targets depending on dataset size and runtime target.</li>
- <li><b>Review binding on distill.</b> Discard hides from inbox; approved rows can export to label queues, simulations, bake-offs, and auto-distill.</li>
- <li><b>Per-call receipt chain</b> across requests, with optional Sigstore Rekor anchoring. Legacy shared-secret integrity remains only for old v0.1 receipts.</li>
- <li><b>Server-owned distill status.</b> The bridge owns status; <code>/v1/specialists/auto-distill/:id/status</code> ships alongside.</li>
- </ul>
- </div>
- </div>
+<section class="sec-section" id="otlp">
+  <div class="ks-wrap">
+    <h2>Export to Datadog, Grafana, Splunk</h2>
+    <p class="sub">The capture proxy emits OpenTelemetry traces and metrics on the standard OTLP gRPC and HTTP ports. Point an OTel collector at it; the captured rows themselves stay on disk, but the latency, cost, and error counters become first-class signals in your existing observability stack.</p>
+    <div class="terminal">
+<pre><span class="c"># Send OTLP traces to Datadog Agent on localhost</span>
+<span class="prompt">$</span> <span class="k">kolm capture serve \
+    --otlp-endpoint http://localhost:4318 \
+    --otlp-headers "DD-API-KEY=$DD_API_KEY"</span>
+
+<span class="c"># Resource attributes the exporter adds automatically</span>
+service.name              <span class="s">kolm.capture</span>
+service.namespace         <span class="s">default</span>
+kolm.tenant               <span class="s">tenant_f33c240034c5</span>
+kolm.row_hash             <span class="s">sha256:f48a...e2b1</span>
+kolm.upstream             <span class="s">openai</span>
+kolm.model                <span class="s">gpt-4o-mini</span>
+kolm.latency_ms           <span class="n">421</span>
+kolm.prompt_tokens        <span class="n">812</span>
+kolm.completion_tokens    <span class="n">1030</span>
+kolm.cost_micro_usd       <span class="n">5340</span></pre>
+    </div>
+    <p class="sub" style="margin-top:var(--ks-4)">A site-reliability engineer can dashboard cost-per-namespace, p99 latency-per-model, and error rate per route without changing application code. The same OTLP stream feeds Grafana, Honeycomb, New Relic, and any other vendor that speaks OTLP.</p>
+  </div>
 </section>
 
-<section class="cap-cta">
- <h2>Start with the connector. Earn the model.</h2>
- <p>Free tier captures enough local telemetry to find your first optimization candidate. No card. No vendor lock.</p>
- <div class="btn-row">
- <a href="/signup" class="btn primary" style="padding:14px 24px;border-radius:8px;background:#7ef0d2;color:#051a14;font-weight: 500;font-size:15px">Start capturing &rarr;</a>
- <a href="/pricing" class="btn ghost" style="padding:14px 24px;border-radius:8px;border:1px solid var(--line);color:var(--ink);font-weight: 500;font-size:15px">See pricing</a>
- </div>
+<section class="sec-section" id="commands">
+  <div class="ks-wrap">
+    <h2>CLI reference</h2>
+    <p class="sub">Every capture operation is reachable from the <code>kolm capture</code> verb. Run <code>kolm capture --help</code> for the full surface; the most common subcommands are below.</p>
+    <table class="lk">
+      <thead>
+        <tr><th>Command</th><th>What it does</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>kolm capture serve</td><td>Start the OpenAI-compatible proxy on <code>:11434</code>. Add <code>--port</code> to move it.</td></tr>
+        <tr><td>kolm capture ls</td><td>List recent captures. Filters: <code>--namespace</code>, <code>--model</code>, <code>--since</code>, <code>--limit</code>.</td></tr>
+        <tr><td>kolm capture search</td><td>Substring or regex search over captured prompts. Uses the optional SQLite index if present.</td></tr>
+        <tr><td>kolm capture index</td><td>Build or rebuild the SQLite index. Safe to delete and rerun.</td></tr>
+        <tr><td>kolm capture stats</td><td>Per-namespace counts, cost, latency p50/p95/p99, top models.</td></tr>
+        <tr><td>kolm capture export</td><td>Stream captures to a file. JSONL, CSV, or Parquet via the optional <code>workers/parquet-export</code>.</td></tr>
+        <tr><td>kolm capture delete</td><td>Subject deletion. Removes raw rows and writes a tombstone receipt so an auditor can prove the deletion happened.</td></tr>
+        <tr><td>kolm capture redact-doctor</td><td>Check the optional redaction worker is installed and able to scrub. Honest fail with an install hint if not.</td></tr>
+        <tr><td>kolm namespace set-retention</td><td>Set per-namespace retention in days. The local rotator deletes older rows; receipts that reference them stay verifiable.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="sec-section" id="reach">
+  <div class="ks-wrap">
+    <h2>Next steps</h2>
+    <p class="sub">Captured rows are the input to the rest of the compiler. Once a namespace holds a thousand rows or more, the distill step can turn them into a quantized specialist with a signed receipt.</p>
+    <div class="grid-3">
+      <div class="sec-card">
+        <h3>Run the quickstart</h3>
+        <p>Five minutes from npm install to first captured row. <a href="/quickstart">Open quickstart</a>.</p>
+      </div>
+      <div class="sec-card">
+        <h3>Connect an SDK</h3>
+        <p>One-line setup for OpenAI, Anthropic, Gemini, OpenRouter. <a href="/docs/connect/openai">OpenAI</a> &middot; <a href="/docs/connect/anthropic">Anthropic</a>.</p>
+      </div>
+      <div class="sec-card">
+        <h3>See the boundary</h3>
+        <p>How captures stay inside your network, what (if anything) crosses the boundary. <a href="/security">Security overview</a>.</p>
+      </div>
+    </div>
+    <div style="margin-top:var(--ks-6); display:flex; flex-wrap:wrap; gap:var(--ks-3)">
+      <a href="/distill" class="ks-btn ks-btn--primary">Next: distill captures <span class="ks-btn-arrow">&rarr;</span></a>
+      <a href="/compile" class="ks-btn ks-btn--ghost">Then compile</a>
+      <a href="/k-score" class="ks-btn ks-btn--ghost">Then gate on K-score</a>
+      <a href="/enterprise" class="ks-btn ks-btn--ghost">Enterprise deployment</a>
+    </div>
+  </div>
 </section>
 
 </main>
 
-<footer class="site-footer">
- <div class="wrap">
- <div class="meta">
- kolm / MIT SDK / <a href="https://github.com/sneaky-hippo/kolm-stack">github</a> / <a href="/status">status</a>
- </div>
- <div class="links">
- <div>
- <div class="col-h">build</div>
- <a href="/captures">captures</a>
- <a href="/compile">compile</a>
- <a href="/run">run</a>
- <a href="/docs">recall</a>
- <a href="/builder">distill console</a>
- <a href="/sdks">sdks</a>
- <a href="/quickstart">quickstart</a>
- <a href="/cli">cli</a>
- </div>
- <div>
- <div class="col-h">deploy</div>
- <a href="/teams">teams</a>
- <a href="/tunnels">remote access</a>
- <a href="/byoc">byoc cloud</a>
- <a href="/airgap">airgap</a>
- <a href="/enterprise">enterprise</a>
- </div>
- <div>
- <div class="col-h">proof</div>
- <a href="/benchmarks">benchmarks</a>
- <a href="/compare">Compare</a>
- <a href="/research">research</a>
- <a href="/k-score">k-score</a>
- <a href="/leaderboard">registry</a>
- <a href="/spec">rs-1 spec</a>
- <a href="/case-studies">case studies</a>
- </div>
- <div>
- <div class="col-h">industries</div>
- <a href="/healthcare">healthcare</a>
- <a href="/finance">finance</a>
- <a href="/legal">legal</a>
- <a href="/device">device</a>
- <a href="/docs">cookbook</a>
- <a href="/compliance-packs">compliance packs</a>
- </div>
- <div>
- <div class="col-h">company</div>
- <a href="/pricing">pricing</a>
- <a href="/docs">docs</a>
- <a href="/roadmap">roadmap</a>
- <a href="/manifesto">manifesto</a>
- <a href="/roi">roi</a>
- </div>
- </div>
- <small class="footer-tag">
- <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/terms">terms</a> &middot; <a href="/faq">faq</a> &middot; <a href="/glossary">glossary</a> &middot; <a href="/troubleshooting">troubleshooting</a> &middot; <a href="/why-now">why now</a> &middot; <a href="/press">press</a> &middot; <a href="https://github.com/sneaky-hippo/kolm-stack">github</a> &middot; kolm.ai &middot; MIT licensed runtime
- </small>
- </div>
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/faq">FAQ</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/enterprise">Enterprise</a>
+        <a href="/manifesto">Manifesto</a>
+        <a href="/why-kolm">Why kolm</a>
+        <a href="/contact">Contact</a>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
 </footer>
 
-<script src="/nav.js" defer></script>
-<script src="/kolm-svg.js" defer></script>
-<script>
- // live cost math
- (function(){
- var $ = function(id){ return document.getElementById(id); };
- function fmt(n){
- if (!isFinite(n) || n <= 0) return '$0';
- if (n >= 1e6) return '$' + (n/1e6).toFixed(1) + 'M';
- if (n >= 1e3) return '$' + Math.round(n/1e3) + 'K';
- return '$' + Math.round(n).toLocaleString();
- }
- function recompute(){
- var calls = +$('cm-calls').value || 0;
- var tin = +$('cm-tin').value || 0;
- var tout = +$('cm-tout').value || 0;
- var pin = +$('cm-pin').value || 0;
- var pout = +$('cm-pout').value || 0;
- // cloud year-1
- var callsYr = calls * 12;
- var cloud = (callsYr * tin)/1e6 * pin + (callsYr * tout)/1e6 * pout;
- cloud *= 1.08; // observability + retry overhead
- // kolm year-1: Pro $49/mo + teacher cycles (8 samples, 2000 rows, 12 cycles default)
- var kolmPlan = 49 * 12;
- var teacherPerCycle = (8 * 2000 * tin)/1e6 * pin + (8 * 2000 * tout)/1e6 * pout;
- var kolm = kolmPlan + (teacherPerCycle * 12);
- var savings = cloud - kolm;
- var mult = kolm > 0 ? cloud / kolm : 0;
- var monthly = cloud / 12;
- var paybackMonths = monthly > 0 ? Math.max(1, Math.ceil(kolm / monthly)) : 0;
-
- $('cm-savings').innerHTML = (savings >= 0 ? fmt(savings) : '&minus;' + fmt(-savings)) + '<span class="unit">/yr saved</span>';
- $('cm-mult').textContent = (mult >= 1 ? mult.toFixed(1) : (1/Math.max(mult,0.001)).toFixed(1)) + 'x';
- $('cm-payback').textContent = paybackMonths > 0 ? 'Payback: ' + paybackMonths + ' month' + (paybackMonths>1?'s':'') : 'Payback: instant';
- $('cm-cloud').textContent = fmt(cloud);
- $('cm-kolm').textContent = fmt(kolm);
- }
- ['cm-calls','cm-tin','cm-tout','cm-pin','cm-pout'].forEach(function(id){
- var el = $(id); if (el) el.addEventListener('input', recompute);
- });
- recompute();
- })();
-</script>
-
+<!-- w220-claim w260-trust w271-frontier w335-claim w373-receipts w408-quantize-matrix -->
 </body>
 </html>

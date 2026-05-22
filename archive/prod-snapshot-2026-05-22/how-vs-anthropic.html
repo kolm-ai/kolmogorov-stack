@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>kolm vs Anthropic · kolm.ai</title>
+<meta name="description" content="Anthropic Claude via the API with prompt caching is one of the strongest hosted reasoning surfaces in 2026. kolm captures, distills, and ships a signed file...">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<meta property="og:title" content="kolm vs Anthropic · kolm.ai">
+<meta property="og:description" content="Anthropic Claude via the API with prompt caching is one of the strongest hosted reasoning surfaces in 2026. kolm captures, distills, and ships a signed file...">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://kolm.ai/how-vs-anthropic">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+ :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--accent-soft:rgba(16,185,129,0.10);--warn:#f0b86b;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
+ *{box-sizing:border-box}
+ body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+ .wrap{max-width:880px;margin:0 auto;padding:0 24px}
+ header.site{padding:18px 0;border-bottom:1px solid var(--line)}
+ header.site .wrap{display:flex;justify-content:space-between;align-items:center;max-width:1180px}
+ header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px;flex-wrap:wrap}
+ header.site nav a{color:inherit;text-decoration:none}
+ header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+ .hero{padding:88px 0 36px;border-bottom:1px solid var(--line)}
+ .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+ .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px}
+ .lede{font-size:17.5px;line-height:1.55;color:var(--ink-mute);max-width:720px;margin:0 0 14px}
+ .stamp{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin:20px 0 0;letter-spacing:0.04em}
+ .section{padding:56px 0;border-bottom:1px solid var(--line)}
+ .section h2{font-size:26px;font-weight:500;letter-spacing:-0.018em;margin:0 0 14px}
+ .section h3{font-size:18px;font-weight:500;margin:24px 0 8px;color:var(--ink)}
+ .section p{color:var(--ink-mute);margin:0 0 14px;max-width:720px}
+ .section ul{color:var(--ink-mute);padding-left:18px;margin:0 0 14px}
+ .section ul li{margin-bottom:8px}
+ .section code{font-family:var(--mono);font-size:13px;background:var(--bg-elev);padding:1px 6px;border-radius:3px;border:1px solid var(--line);color:var(--ink)}
+ table.matrix{width:100%;border-collapse:collapse;margin:20px 0;font-size:13.5px}
+ table.matrix th{font-family:var(--mono);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-faint);text-align:left;padding:12px 10px;border-bottom:1px solid var(--line);font-weight:400}
+ table.matrix td{padding:14px 10px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.5;color:var(--ink-mute)}
+ table.matrix td.axis{font-weight:500;color:var(--ink);min-width:160px}
+ table.matrix td.kolm{color:var(--ink);background:var(--accent-soft)}
+ table.matrix td.kolm b{color:var(--accent);font-weight:500;font-family:var(--mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase}
+ table.matrix td .sub{display:block;color:var(--ink-faint);font-size:12px;margin-top:4px;line-height:1.45}
+ pre.cli{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:18px 20px;font-family:var(--mono);font-size:12.5px;line-height:1.6;color:var(--ink);overflow-x:auto;margin:14px 0}
+ pre.cli b{color:var(--accent);font-weight:500}
+ pre.cli .cm{color:var(--ink-faint)}
+ .grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin:16px 0}
+ .grid-2 .card{padding:18px 20px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev)}
+ .grid-2 .card h3{margin:0 0 6px;font-size:15px;color:var(--ink)}
+ .grid-2 .card p{margin:0;font-size:13px;color:var(--ink-mute);max-width:none}
+ .actions{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}
+ .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:8px;font-family:var(--mono);font-size:12.5px;text-decoration:none;border:1px solid var(--line);color:var(--ink);transition:all 160ms}
+ .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+ .btn:hover{transform:translateY(-1px)}
+ .callout{padding:18px 22px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);margin:24px 0;font-size:14px;color:var(--ink-mute)}
+ .callout b{color:var(--ink)}
+ .callout.warn{border-color:rgba(240,184,107,0.32);background:rgba(240,184,107,0.04)}
+ .callout.warn b{color:var(--warn)}
+ footer.site{padding:36px 0;color:var(--ink-faint);font-size:13px}
+ footer.site .wrap{max-width:1180px}
+ footer.site a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ .ft-row{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;border-top:1px solid var(--line);padding-top:20px;font-family:var(--mono);font-size:11.5px}
+</style>
+ <meta property="og:image" content="https://kolm.ai/og-card.svg">
+ <meta property="og:url" content="https://kolm.ai/how-vs-anthropic">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "Article",
+ "headline": "kolm vs Anthropic",
+ "description": "Honest comparison of using Anthropic Claude directly via API with prompt caching against kolm (capture, distill, ship a signed file). Cost, latency, privacy, ownership, lock-in, residency, and when to layer both.",
+ "url": "https://kolm.ai/how-vs-anthropic",
+ "author": {"@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org"},
+ "publisher": {"@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org"},
+ "datePublished": "2026-05-18",
+ "dateModified": "2026-05-18",
+ "mainEntityOfPage": "https://kolm.ai/how-vs-anthropic"
+}
+</script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {"@type": "ListItem", "position": 1, "name": "kolm.ai", "item": "https://kolm.ai/"},
+ {"@type": "ListItem", "position": 2, "name": "Compare", "item": "https://kolm.ai/compare"},
+ {"@type": "ListItem", "position": 3, "name": "kolm vs Anthropic", "item": "https://kolm.ai/how-vs-anthropic"}
+ ]
+}
+</script>
+ <link rel="stylesheet" href="/brand-refresh.css">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="kolm vs Anthropic · kolm.ai">
+<meta name="twitter:description" content="Anthropic Claude via the API with prompt caching is one of the strongest hosted reasoning surfaces in 2026. kolm captures, distills, and ships a signed file...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+
+
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API Key &rarr;</a>
+ </div>
+ </div>
+</header>
+<main id="main">
+
+<section class="hero">
+ <div class="wrap">
+ <p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; <a href="/compare">compare</a> &nbsp;/&nbsp; how kolm relates to Anthropic</p>
+ <h1>kolm vs Anthropic</h1>
+ <p class="lede">Claude is the right call when your constraint is frontier reasoning and your deployment target is Anthropic's hosted API. kolm is for repeated, narrow workflows you want to own, prove, and run outside a vendor endpoint.</p>
+ <p class="lede">They can pair: use Claude as the teacher inside a kolm compile, then ship the repetitive workflow as a portable <code>.kolm</code> artifact. This page shows when Claude wins, when kolm wins, and when they stack.</p>
+ <p class="stamp">Wave 401 &middot; reviewed 2026-05-18 &middot; hosted reasoning vs portable signed file</p>
+ </div>
+</section>
+
+<section class="section">
+ <div class="wrap">
+ <h2>At a glance.</h2>
+ <p>Same six dimensions the pricing matrix on <a href="/pricing" style="color:var(--accent)">/pricing</a> uses. Anthropic's row is rated for Claude Sonnet 4.x and Haiku 4.x with prompt caching enabled (the realistic 2026 hosted shape, not the no-cache worst case); kolm's row assumes a 7B INT4 student on a single 3090 or H100.</p>
+ <table class="matrix">
+ <thead><tr><th>Dimension</th><th>Anthropic Claude (API + cache)</th><th>kolm</th></tr></thead>
+ <tbody>
+ <tr>
+ <td class="axis">Cost / 1M tokens</td>
+ <td>$3 to $15<span class="sub">Sonnet input $3, output $15. Cache reads are 90% off the input rate. Cache writes carry a one-time premium.</span></td>
+ <td class="kolm"><b>~$0.30</b> amortized<span class="sub">Power + depreciation of one 3090 or H100 across a year of throughput. The teacher tokens at compile are one-time.</span></td>
+ </tr>
+ <tr>
+ <td class="axis">Latency (p50)</td>
+ <td>500 ms to 3 s<span class="sub">Cache hits cut prefill but the network roundtrip and generation are the floor.</span></td>
+ <td class="kolm"><b>~80 ms</b> on-box<span class="sub">No network. INT4 7B on a 3090 stays well under 100 ms for typical task lengths.</span></td>
+ </tr>
+ <tr>
+ <td class="axis">Privacy</td>
+ <td>Vendor logs + ZDR available<span class="sub">Standard tier logs for safety review. Enterprise ZDR pulls retention to zero. Healthcare BAA exists.</span></td>
+ <td class="kolm"><b>Local or BAA</b><span class="sub">Inference runs in your VPC or on-device. PHI redactor (W157) gates teacher traffic at compile.</span></td>
+ </tr>
+ <tr>
+ <td class="axis">Ownership</td>
+ <td>Rental<span class="sub">No fine-tune or custom-model export. You rent the call.</span></td>
+ <td class="kolm"><b>You own .kolm</b><span class="sub">Signed file on disk. RS-1 v2.1 Apache-2.0. Runs without kolm.ai or Anthropic existing.</span></td>
+ </tr>
+ <tr>
+ <td class="axis">Lock-in</td>
+ <td>Proprietary API<span class="sub">The Messages contract is the lock. Cache identifiers are vendor-internal.</span></td>
+ <td class="kolm"><b>Portable artifact</b><span class="sub">Ed25519 signature (W161) + Sigstore entry (W162). The file is the contract.</span></td>
+ </tr>
+ <tr>
+ <td class="axis">Data residency</td>
+ <td>US + EU regions<span class="sub">Available on Enterprise. APAC and on-prem are not on the menu.</span></td>
+ <td class="kolm"><b>Your filesystem</b><span class="sub">Anywhere. Tenant shadow corpus stays on-prem (W165). Air-gap is first-class.</span></td>
+ </tr>
+ </tbody>
+ </table>
+ </div>
+</section>
+
+<section class="section">
+ <div class="wrap">
+ <h2>Where they actually differ.</h2>
+ <p>The matrix above is the executive summary. The five sections below are the substance. Anthropic is genuinely strong on the reasoning surface; kolm is genuinely strong on the ownership and on-device surface. The interesting buyers use both.</p>
+
+ <h2 style="margin-top:32px">Caching vs distillation.</h2>
+ <p>Prompt caching takes a repeated prefix (your system prompt, your tool definitions, the document you are reasoning over) and amortizes its cost across many calls. It is the right answer for workloads where the prefix is large and the variable suffix is short, because the cache write happens once and the cache reads are cheap. It does not change the latency floor (you still pay the network roundtrip and the generation step) and it does not change ownership (the cache lives in Anthropic's infrastructure). Distillation takes a different cut: it learns the input-to-output mapping on your task distribution and bakes it into student weights that run locally. The cache helps the next thousand calls; the distilled student helps every call forever and runs in your VPC. They solve different shapes of the same cost problem and are complementary, not substitutes.</p>
+
+ <h2 style="margin-top:32px">Per-call audit chain.</h2>
+ <p>Anthropic provides usage logs, console history, and (on Enterprise) ZDR plus a BAA on the Healthcare SKU. That is sufficient documentation for many regulators. For tenants whose auditor wants to know what model, what prompt template, what tool definitions, and what eval gate produced each inference, the per-call vendor log is not the same as a compile-time receipt chain. kolm signs the artifact at compile, records the 14-step provenance chain (spec, seeds, split, train, recipes, evals, external holdout, tenant shadow, auditor, supersession, drift, sigs, rekor), and the runtime verifier confirms the bytes on disk match the bytes that were signed. When the auditor asks "what trained this, on what data, with what gate, signed by whom" the answer is a single file plus a Sigstore entry, not a console screenshot.</p>
+
+ <h2 style="margin-top:32px">On-device inference vs API roundtrip.</h2>
+ <p>The Anthropic surface assumes a network. That is not a complaint: the Messages API plus tool use plus extended thinking plus the file-handling surface is excellent and depends on Anthropic's infrastructure to work. The trade is that every inference is one network hop away, p50 latency sits in the 500 ms to 3 s range, p99 spikes during peak hours, and an outage on Anthropic's side is an outage on yours. kolm's runtime is in-process: a 7B INT4 student on a 3090 generates at well under 100 ms for typical task lengths, p99 is predictable, and an Anthropic outage does not touch a deployment that runs the .kolm artifact. For interactive UX (chat, autocomplete, in-the-loop tooling) the latency difference is the difference between feeling instant and feeling laggy. For batch or background workloads the latency floor matters less; the cost crossover matters more.</p>
+
+ <h2 style="margin-top:32px">Cost structure: token-based vs amortized GPU.</h2>
+ <p>Token-based pricing scales linearly with usage. Cache reads at 90% off the input rate flatten the curve substantially for prefix-heavy workloads, but the curve is still linear. Amortized GPU cost is a step function: you pay for the hardware whether you use it or not, and the per-call cost is power plus depreciation divided by throughput. Below the duty-cycle threshold (a few thousand requests per day, depending on prompt length), the token-priced API with caching is cheaper than owning a GPU. Above the threshold (typically 50k to 200k requests per day on a stable task), the amortized GPU plus a kolm student is cheaper by an order of magnitude and the savings compound monthly. The decision is throughput and predictability, not a moral judgment about hosted vs local.</p>
+
+ <h2 style="margin-top:32px">When Anthropic + kolm work together (the layered pattern).</h2>
+ <p>The pattern that wins for high-volume regulated workloads in 2026 is layered. Use Claude (Opus or Sonnet 4.x) as the teacher inside <code>kolm distill --teacher=anthropic:claude-sonnet-4-7</code> on your captured production traffic. The compile step calls Anthropic once per seed, applies the PHI redactor (W157) before the call, and bakes the teacher's behavior on your task distribution into a small student. The .kolm artifact ships to your runtime and handles the repetitive 80% to 95% of inference at local cost and local latency. The remaining 5% to 20% (the long tail that genuinely needs frontier reasoning) routes back to the Anthropic API directly. The bill drops by an order of magnitude, the auditor reads a receipt chain, and Claude is doing the work it is uniquely good at: hard reasoning on the long tail.</p>
+ </div>
+</section>
+
+<section class="section">
+ <div class="wrap">
+ <h2>What to use kolm for.</h2>
+ <ul>
+ <li><b>Regulated data with a strict perimeter.</b> HIPAA PHI, financial KYC, legal privilege, classified workflows. Inference runs in your VPC; the teacher call at compile is redacted; the auditor reads a signed file.</li>
+ <li><b>Edge, on-device, or air-gapped deploy.</b> Phones, retail kiosks, factory PLCs, ship-borne networks, classified enclaves. The .kolm file ships through any pipe that ships a binary and runs without a network.</li>
+ <li><b>Repetitive prompts.</b> Form normalizers, denial-code classifiers, schema-aware extractors, retrieval rerankers, intent routers. If a substantial share of traffic looks similar in shape, distillation captures the mapping and runs forever at local cost.</li>
+ <li><b>Interactive latency budgets.</b> Sub-200 ms p99 for in-the-loop tooling (autocomplete, voice agents, real-time triage). The network hop to Anthropic is the floor; the on-device student does not have one.</li>
+ <li><b>Cost predictability at volume.</b> Once you cross the duty-cycle threshold for owning a GPU, amortized hardware plus a kolm artifact is cheaper than any token-based SKU and the line is flat instead of linear.</li>
+ </ul>
+ </div>
+</section>
+
+<section class="section">
+ <div class="wrap">
+ <h2>What to use Anthropic for.</h2>
+ <ul>
+ <li><b>Long-tail reasoning that does not distill cleanly.</b> Hard novel reasoning, agentic multi-step planning, code synthesis on unfamiliar codebases. The frontier capability of Opus or Sonnet 4.x is what you are paying for and a 7B student plateaus below that bar.</li>
+ <li><b>Hosted-only deploy with moderate volume.</b> Below the cost crossover, token-based pricing with prompt caching is cheaper than owning a GPU. If your buyer does not require local inference and your volume is in the few-thousand-requests-per-day band, skip the rest.</li>
+ <li><b>Safety and constitutional posture.</b> Buyers whose risk team specifically asked for Claude's safety posture, refusal behavior, or constitutional alignment as a procurement requirement.</li>
+ <li><b>Frontier-grade tool use and extended thinking.</b> The Messages API surface (tool use, parallel tools, extended thinking, file handling) is excellent and is what you would build anyway if you owned the runtime. Use it directly when the runtime owns the loop.</li>
+ </ul>
+ <div class="callout">
+ <b>Licensing note.</b> Anthropic's API terms restrict using outputs to develop "competing" general-purpose models. A narrow-task kolm artifact (form normalizer, denial-code classifier, single-vertical extractor) is not a competing general model; the legal status of the narrow-task carve-out is unsettled. The always-safe option is <code>--teacher=local:&lt;open-weight-model&gt;</code> on your own GPU. See <a href="/spec/rs-1#section-7-7" style="color:var(--accent)">RS-1 &sect;7.7</a> for the posture.
+ </div>
+ <div class="actions">
+ <a class="btn primary" href="/pricing">/pricing matrix &rarr;</a>
+ <a class="btn" href="/captures">/captures inbox &rarr;</a>
+ <a class="btn" href="/how-vs-lorax">vs LoRAX (serving) &rarr;</a>
+ <a class="btn" href="/how-vs-openai-fine-tune">vs OpenAI fine-tune &rarr;</a>
+ </div>
+ </div>
+</section>
+
+</main>
+
+<footer class="site">
+ <div class="wrap">
+ <div class="ft-row">
+ <span>kolm.ai &middot; Apache-2.0 &middot; RS-1 v2.1</span>
+ <span><a href="/compare">/compare</a> &middot; <a href="/how-vs-openai-fine-tune">vs OpenAI fine-tune</a> &middot; <a href="/how-vs-hyperscaler">vs hyperscaler</a> &middot; <a href="/how-vs-openpipe">vs OpenPipe</a> &middot; <a href="/how-vs-lorax">vs LoRAX</a></span>
+ </div>
+ </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+</body>
+</html>

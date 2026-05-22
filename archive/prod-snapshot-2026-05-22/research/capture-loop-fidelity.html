@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Capture-loop fidelity: what we discard and why · kolm.ai</title>
+<meta name="description" content="The capture-to-distill loop is a local loop, not a closed loop. What kolm chooses not to keep, why, and the counters that surface the tradeoff on the dashboard.">
+<meta name="keywords" content="capture loop, distillation, retention, namespace, PII, hashing, bridge handoff, adapter eval">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta name="author" content="kolm">
+<meta name="robots" content="index,follow,max-snippet:-1">
+<meta property="og:site_name" content="kolm">
+<meta property="og:title" content="Capture-loop fidelity: what we discard and why · kolm.ai">
+<meta property="og:description" content="The capture-to-distill loop is a local loop, not a closed loop. What kolm chooses not to keep, why, and the counters that surface the tradeoff on the dashboard.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Capture-loop fidelity: what we discard and why · kolm.ai">
+<meta name="twitter:description" content="The capture-to-distill loop is a local loop, not a closed loop. What kolm chooses not to keep, why, and the counters that surface the tradeoff on the dashboard.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/research/capture-loop-fidelity">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/research/capture-loop-fidelity">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "TechArticle",
+ "headline": "Capture-loop fidelity: what we discard and why",
+ "description": "The capture-to-distill loop, the discard rules, the bridge-handoff framing, and the counters surfaced on the dashboard.",
+ "author": { "@type": "Organization", "name": "kolm", "url": "https://kolm.ai" },
+ "publisher": { "@type": "Organization", "name": "kolm", "logo": { "@type": "ImageObject", "url": "https://kolm.ai/favicon.svg" } },
+ "datePublished": "2026-05-14",
+ "dateModified": "2026-05-14",
+ "mainEntityOfPage": { "@type": "WebPage", "@id": "https://kolm.ai/research/capture-loop-provenance" },
+ "image": "https://kolm.ai/og-card.svg",
+ "keywords": "capture, distillation, retention, namespace, PII",
+ "articleSection": "Data",
+ "wordCount": 2050
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+ {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
+ {"@type": "ListItem", "position": 3, "name": "Capture-loop fidelity", "item": "https://kolm.ai/research/capture-loop-provenance"}
+ ]
+ }
+ ]
+}
+</script>
+<style>
+ :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--accent-soft:rgba(236,231,220, 0.10);--good:#7ef0d2;--bad:#ff6b91;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+ *{box-sizing:border-box}
+ html,body{margin:0;padding:0}
+ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;font-synthesis:none}
+ a{color:inherit;text-decoration:none}
+ .wrap{max-width:760px;margin:0 auto;padding:0 32px}
+ .wrap-wide{max-width:1180px;margin:0 auto;padding:0 32px}
+ @media(max-width:720px){.wrap,.wrap-wide{padding:0 20px}}
+
+ header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+ header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px}
+ header.site .left{display:flex;align-items:center;gap:36px}
+ header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
+ header.site .brand span{font-weight:500;font-size:16px}
+ header.site nav{display:flex;gap:22px}
+ header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
+ header.site nav a:hover{color:var(--ink)}
+ header.site .right{display:flex;align-items:center;gap:14px}
+ header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
+ header.site .right .cta{color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500}
+ @media(max-width:720px){header.site nav{display:none}}
+
+ section.hero{padding:80px 0 36px;position:relative;overflow:hidden}
+ section.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 900px 460px at 22% 12%,rgba(236,231,220, 0.10),transparent 60%)}
+ section.hero .wrap{position:relative}
+ .pill{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-mute);border:1px solid var(--line-strong);border-radius:999px;padding:5px 12px;background:var(--bg-elev)}
+ .pill .dot{width:5px;height:5px;border-radius:50%;background:#10b981}
+ h1{margin:22px 0 18px;font-size:clamp(34px,5.4vw,54px);line-height:1.05;font-weight:500;max-width:22ch}
+ h1 .tone{color:#10b981}
+ p.lede{margin:0;font-size:clamp(17px,1.4vw,20px);line-height:1.55;color:var(--ink-mute);max-width:60ch}
+ p.lede b{color:var(--ink);font-weight:500}
+ .meta{display:flex;gap:18px;margin-top:22px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
+ .meta b{color:var(--ink-mute);font-weight:500}
+
+ article{padding:36px 0 96px}
+ article h2{margin:56px 0 14px;font-size:clamp(24px,2.6vw,30px);line-height:1.2;font-weight:500;color:var(--ink)}
+ article h3{margin:36px 0 10px;font-size:18px;font-weight:500;color:var(--ink)}
+ article p{margin:0 0 16px;font-size:16.5px;line-height:1.7;color:var(--ink-mute)}
+ article p b{color:var(--ink);font-weight:500}
+ article p code,article li code,article td code{font-family:var(--mono);font-size:0.92em;background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink)}
+ article blockquote{margin:28px 0;padding:16px 22px;border-left:2px solid #10b981;background:var(--bg-elev);border-radius:0 8px 8px 0;font-size:17px;line-height:1.6;color:var(--ink)}
+ article blockquote p{color:var(--ink);margin:0;font-weight:500}
+ article ul{padding-left:0;list-style:none;margin:16px 0 24px}
+ article ul li{padding:8px 0 8px 22px;position:relative;font-size:16px;line-height:1.6;color:var(--ink-mute)}
+ article ul li::before{content:"-";color:#10b981;position:absolute;left:6px;font-weight:500}
+ article ul li b{color:var(--ink);font-weight:500}
+ article pre{margin:18px 0 24px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.75;color:var(--ink)}
+ article pre .com{color:var(--ink-faint)}
+ article pre .arg{color:#10b981}
+ article pre .kw{color:#b0bbff}
+ article table{width:100%;border-collapse:collapse;margin:18px 0 24px;font-size:14px}
+ article table th,article table td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;color:var(--ink-mute)}
+ article table th{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);font-weight:500;letter-spacing:0.04em}
+ article table td b{color:var(--ink)}
+
+ .toc{margin:28px 0 36px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px}
+ .toc h5{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);margin:0 0 10px;font-weight:500}
+ .toc ol{margin:0;padding-left:20px}
+ .toc li{padding:4px 0;font-size:14px;color:var(--ink-mute)}
+ .toc li a{color:var(--ink-mute)}
+ .toc li a:hover{color:#10b981}
+
+ .signpost{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:48px 0 0}
+ @media(max-width:720px){.signpost{grid-template-columns:1fr}}
+ .signpost a{display:flex;flex-direction:column;gap:8px;padding:22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;transition:border-color 120ms,background 120ms}
+ .signpost a:hover{border-color:var(--line-strong);background:var(--bg-card)}
+ .signpost a .lab{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
+ .signpost a .v{color:var(--ink);font-weight:500;font-size:16px}
+ .signpost a .v .arrow{color:#10b981;margin-left:6px}
+ .signpost a p{margin:4px 0 0;font-size:13.5px;color:var(--ink-mute);line-height:1.5}
+
+ footer.site{padding:56px 0 40px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+ footer.site .row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+</style>
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API Key &rarr;</a>
+ </div>
+ </div>
+</header>
+<main id="main">
+
+<section class="hero">
+ <div class="wrap">
+ <span class="pill"><span class="dot"></span>Research &middot; Data &middot; 2026-05-14 &middot; 12 min read</span>
+ <h1>Capture-loop fidelity: what we <span class="tone">discard</span> and why.</h1>
+ <p class="lede">The path from a production inference to a recompiled adapter is a <b>local loop, not a closed loop</b>. What kolm chooses not to retain, what that costs the user in long-tail coverage, and the four counters that surface the tradeoff on the dashboard.</p>
+ <div class="meta"><span><b>By</b>&nbsp;kolm</span><span><b>Tag</b>&nbsp;capture &middot; retention &middot; bridge handoff</span></div>
+ </div>
+</section>
+
+<article>
+ <div class="wrap">
+
+ <div class="toc">
+ <h5>Contents</h5>
+ <ol>
+ <li><a href="#loop">The loop, end to end</a></li>
+ <li><a href="#discard">Discard rules</a></li>
+ <li><a href="#bridge">Local loop, not closed loop</a></li>
+ <li><a href="#keep">What goes wrong if you keep everything</a></li>
+ <li><a href="#lost">What you give up by discarding</a></li>
+ <li><a href="#counters">The four counters on the dashboard</a></li>
+ <li><a href="#opt-in">Opt-in retention per namespace</a></li>
+ </ol>
+ </div>
+
+ <h2 id="loop">The loop, end to end.</h2>
+ <p>The capture-to-distill loop has five legible stages. Each stage is a separate subcommand or HTTP route; nothing is implicit; the boundary between stages is the place where data either gets persisted or gets dropped.</p>
+
+ <ul>
+ <li><b>Stage 1: the agent runs in production.</b> Your application points its provider client at a concrete capture route such as <code>https://kolm.ai/v1/capture/openai</code>, <code>https://kolm.ai/v1/capture/anthropic</code>, or <code>https://kolm.ai/v1/capture/openrouter</code> and passes the real upstream key in <code>x-upstream-api-key</code>. The proxy forwards the call, strips the key on the way out, and observes the <code>(input, output, latency_us, model, namespace, tenant)</code> tuple as the response streams back.</li>
+ <li><b>Stage 2: the user triages the inbox.</b> The captured pair lands in the <code>/captures</code> inbox. The default state is neither <i>kept</i> nor <i>discarded</i>; it is <i>untriaged</i>. A human or an automated triage rule marks each pair as one of the three. Untriaged pairs do not flow forward.</li>
+ <li><b>Stage 3: a winner is promoted.</b> Pairs flagged <i>kept</i> become candidate distillation pairs. A namespace accumulates kept pairs until it crosses the distill threshold (default 1,000). The corpus is queryable through <code>/v1/labels/synthesize-corpus</code> as JSONL.</li>
+ <li><b>Stage 4: the bridge produces an artifact.</b> <code>kolm distill --namespace tickets</code> hands the corpus to the trainer bridge, which runs a synthesis pass, fits a LoRA adapter on the agreed base, runs the eval gate, and emits a signed <code>.kolm</code>. If the bridge is unreachable the route returns 503 and prints an operator hint; <i>nothing further happens server-side</i>.</li>
+ <li><b>Stage 5: recompile or shelve.</b> If the new artifact clears the K-score gate it is published to the registry under the same task name, with the prior receipt linked as <code>parent</code>. If it does not clear the gate the diagnostic JSON is written and the corpus is left intact for a re-run with different parameters.</li>
+ </ul>
+
+ <p>The legibility matters because every transition is a place where a different retention policy could apply. The simple version is: <b>at every stage we keep the smallest amount of state that lets the next stage do its job</b>, and we surface the decision to the user with a counter.</p>
+
+ <h2 id="discard">Discard rules.</h2>
+ <p>Three discard rules are in force by default. Each rule is a concession to a category of harm we have seen in adjacent products and have no interest in reproducing.</p>
+
+ <p><b>Rule one: full-text bodies decay to hashes after the namespace retention window.</b> The default window is 30 days from the capture timestamp. Inside the window the inbox shows the full prompt and the full response so the triager can read them and make a real keep-or-discard decision. After the window, the body is hashed (SHA-256 over the canonical UTF-8 text), the original is deleted from the row, and the hash is what persists. Counters and dedup still work; the text is gone.</p>
+
+ <p><b>Rule two: the namespace is the retention boundary, not the tenant.</b> Two namespaces inside the same tenant can have different retention windows. A customer-support namespace might keep raw bodies for 7 days because the support tickets contain PII. A code-review namespace might keep raw bodies for 90 days because there is no PII risk and the long tail of code patterns is worth more. The CLI sets the window per namespace; the dashboard shows it next to the namespace name; the audit log records every change.</p>
+
+ <p><b>Rule three: no implicit-signal collection without opt-in.</b> A naive system can guess at "user happiness" by watching which responses get retried, which get copy-pasted, or how long a session lasts. We do not do this by default. The only feedback signals the loop reads are <i>explicit</i>: a kept-or-discarded flag from the inbox, or structured feedback submitted with an observation through <code>/v1/capture/log</code>. If the user opts a namespace into implicit signal collection, the dashboard shows the toggle as enabled and the receipt for any downstream distill records the source as <code>signal: implicit</code>.</p>
+
+ <p>The pattern is the same in all three rules: <b>the default is conservative; opting in is explicit; the decision is surfaced</b>. None of this is novel. What is unusual is that the rules are visible to the deployer without reading source code.</p>
+
+ <h2 id="bridge">Local loop, not closed loop.</h2>
+ <p>The framing matters because "closed-loop AI" is a phrase that gets used loosely. A closed loop in control theory observes its own output, compares to a setpoint, and adjusts continuously. The capture-to-distill loop is not that. It is a local loop with explicit handoffs.</p>
+
+ <p>The handoff that makes it local is the bridge boundary. The kolm server holds the corpus and the triage state. The trainer bridge holds the GPU and runs the actual distillation. The artifact, once produced, is signed and delivered back to the customer's storage; the server does not retain a copy of the bytes. The trainer bridge runs as a separate process the customer can host themselves, run on a partner GPU, or call out to a managed instance; whichever option is chosen, the bridge is the place where training actually happens, and the server is the place where the metadata lives.</p>
+
+ <p>This design has three concrete consequences.</p>
+
+ <ul>
+ <li><b>The compile is human-initiated.</b> A namespace reaching 1,000 kept pairs does not automatically trigger a distill. It unlocks the distill command. A human runs <code>kolm distill --namespace tickets</code>; the trainer bridge accepts or refuses; the artifact is signed; the user inspects the diff against the previous version. No automatic deployment.</li>
+ <li><b>The adapter is evaluated before it ships.</b> The distill pass terminates in the K-score gate. An adapter that improved 12 cases and regressed 9 will lose net K-score and the compile will fail; the corpus stays put; the operator gets a diagnostic. There is no "shadow deploy" of an unevaluated adapter.</li>
+ <li><b>The chain is auditable.</b> The receipt for the new artifact carries a <code>parent</code> field pointing to the prior version, plus the corpus hash, the bridge identity, and the K-score delta. A third party reading the chain can reconstruct every distill decision in order.</li>
+ </ul>
+
+ <h2 id="keep">What goes wrong if you keep everything.</h2>
+ <p>The temptation to retain every body for the longest possible window is real. More data is more option value; more option value is more leverage during the next compile. We resist it because four kinds of harm compound when the retention horizon is unbounded.</p>
+
+ <p><b>PII bleed.</b> A support inbox accumulates names, addresses, account numbers, and the occasional unredacted credit card. Three years of those tuples are a liability shaped exactly like a breach. The 30-day hash-down rule means the worst breach against a stale capture row produces hashes, not bodies. Hashes are not zero risk, but they are a substantially smaller risk surface than full plaintext.</p>
+
+ <p><b>Distribution drift.</b> An agent trained on a body that is 18 months old is trained on a world that has moved. Catalogs changed; case law updated; pricing rotated. A corpus that retains all bodies forever produces an adapter that is anchored to a past that no longer exists. Aggressive decay forces the loop to keep up.</p>
+
+ <p><b>Privilege violations.</b> A namespace inherits the access control of the tenant that captured it. A multi-team deployment where retention is unbounded eventually accumulates bodies that one team produced and another team should not see. Tight retention windows compress the privilege-violation horizon to something a routine audit can cover.</p>
+
+ <p><b>Regulatory exposure.</b> HIPAA, GDPR, and the ICO breach-notification regime all treat "data we kept past its useful life" as worse than "data we did not collect". A short retention window is a defensible position; an unbounded retention window is an unbounded promise.</p>
+
+ <h2 id="lost">What you give up by discarding.</h2>
+ <p>The verifiable cost of conservative defaults is real. Three categories of evidence get lost in the discard window.</p>
+
+ <p><b>Long-tail edge cases.</b> A bug only fires on the third Tuesday of months with an R in their name. The kept-pair from that incident is 31 days old when the next reproducer would help; the body has decayed to a hash. The operator either re-runs production until the case re-occurs, or they bump the retention window for that namespace before the next reproducer is needed.</p>
+
+ <p><b>Rare failure patterns.</b> A class of inputs that causes a refusal cascade. The captures exist, but only as scattered rows across three or four namespaces. The aggregation that would tell you the cascade has a shared root is gone after 30 days because each row is now a hash. The mitigation is a structured failure tag at capture time; the cost is that the operator has to think about the failure shape before the data ages out.</p>
+
+ <p><b>Post-deployment validation.</b> A theory you want to test about how an artifact behaves on January's traffic is not testable in March if January's bodies are gone. The mitigation is structured holdout: a small fraction of every namespace's traffic is sampled with full bodies retained for the longer window, the rest decays. This is the per-namespace retention setting expressed concretely.</p>
+
+ <blockquote>
+ <p>You can have conservative defaults or you can have a complete archive. You cannot have both. The default is conservative; the opt-in is per-namespace and audited; the choice belongs to the deployer.</p>
+ </blockquote>
+
+ <h2 id="counters">The four counters on the dashboard.</h2>
+ <p>The capture dashboard surfaces four counters per namespace. The counters are the operational vocabulary of the loop. Every action and every dropped row updates one of them.</p>
+
+ <table>
+ <thead><tr><th>Counter</th><th>What it counts</th><th>Source field</th></tr></thead>
+ <tbody>
+ <tr><td><b>captured</b></td><td>Total tuples observed since namespace creation. Monotonic.</td><td><code>captures.count</code></td></tr>
+ <tr><td><b>discarded</b></td><td>Tuples flagged discarded in the inbox, or aged out by the retention window. Their hash persists; the body does not.</td><td><code>captures.discarded</code></td></tr>
+ <tr><td><b>distilled</b></td><td>Kept pairs that have been included in a successful distill run.</td><td><code>captures.distilled</code></td></tr>
+ <tr><td><b>merged</b></td><td>Distill runs that cleared the K-score gate and were published to the registry under this task name.</td><td><code>captures.merged</code></td></tr>
+ </tbody>
+ </table>
+
+ <p>The relationship between the four is the diagnostic. A namespace where <b>captured</b> is 12,000 and <b>discarded</b> is 11,800 has a noisy upstream; the triage rule needs to be tightened. A namespace where <b>distilled</b> is 4,000 and <b>merged</b> is zero has a gate problem; the corpus is being submitted but no run is clearing it. The CLI prints the four numbers on every <code>kolm capture status --namespace &lt;n&gt;</code>; the inbox shows them at the top of the page; the receipt for any merged artifact records all four at the time of the merge.</p>
+
+ <h2 id="opt-in">Opt-in retention per namespace.</h2>
+ <p>The defaults are conservative because the population of customers is heterogeneous and the failure mode of an aggressive default is irreversible. A customer with a stronger compliance posture, or a customer running on-premise where the data does not leave their network, may rationally want more retention. The opt-in is per-namespace, the configuration is auditable, and the dashboard shows the current state at all times.</p>
+
+ <pre><span class="kw">$</span> kolm capture status --namespace tickets
+captured: 14,203
+discarded: 3,118 <span class="com"># 22% triage discard rate</span>
+distilled: 8,400 <span class="com"># included in 6 distill runs</span>
+merged: 4 <span class="com"># 4 of 6 cleared the gate</span>
+
+retention: 30d <span class="com"># default</span>
+implicit: off <span class="com"># default; only explicit kept/discard flags read</span>
+signal: {kept,feedback}
+ready: yes <span class="com"># run: kolm distill --namespace tickets</span></pre>
+
+ <p>The customer reads four numbers and three switches. They know what got captured, what got dropped, what got used, and what got shipped. They know the window. They know whether implicit signal is on or off. They know whether a distill is unlocked. None of this requires reading source code; none of it requires trusting a vendor narrative.</p>
+
+ <p>That is the whole pitch on retention. The defaults are conservative because the defaults have to be defensible without case-by-case review. The opt-ins exist because some workloads earn more retention. The counters exist because a system that drops your data without telling you is indistinguishable from a system that lost it. <b>One inbox, four counters, three switches, a 30-day default decay. The rest is the deployer's call.</b></p>
+
+ <div class="signpost">
+ <a href="/research/eval-set-drift">
+ <span class="lab">read next</span>
+ <span class="v">Eval set drift <span class="arrow">&rarr;</span></span>
+ <p>A gold set that scored 0.91 in January and 0.84 in June with no model change. The drift problem and where the v0.2 detector fits.</p>
+ </a>
+ <a href="/research/registry-economics">
+ <span class="lab">read next</span>
+ <span class="v">Registry economics <span class="arrow">&rarr;</span></span>
+ <p>How the public registry sustains itself, why the bytes do not live on kolm.ai, and how the left-pad failure mode is contained.</p>
+ </a>
+ <a href="/captures">
+ <span class="lab">product</span>
+ <span class="v">Captures inbox <span class="arrow">&rarr;</span></span>
+ <p>The triage surface where the four counters live. Keep, discard, and promote each observation.</p>
+ </a>
+ <a href="/docs/receipt-v0.1.json">
+ <span class="lab">schema</span>
+ <span class="v">Receipt v0.1 <span class="arrow">&rarr;</span></span>
+ <p>The receipt body the bridge writes after a successful merge. Corpus hash, parent, K-score delta.</p>
+ </a>
+ </div>
+
+ </div>
+</article>
+
+
+</main>
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+</body>
+</html>

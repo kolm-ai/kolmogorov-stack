@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Churn predict recipe · kolm cookbook · kolm.ai</title>
+<meta name="description" content="Compile a signed local model that classifies an account as churn-risk by reading 30 days of usage telemetry. 600 labeled accounts, calibrated probability...">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta property="og:title" content="Churn predict recipe · kolm cookbook · kolm.ai">
+<meta property="og:description" content="Compile a signed local model that classifies an account as churn-risk by reading 30 days of usage telemetry. 600 labeled accounts, calibrated probability...">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Churn predict recipe · kolm cookbook · kolm.ai">
+<meta name="twitter:description" content="Compile a signed local model that classifies an account as churn-risk by reading 30 days of usage telemetry. 600 labeled accounts, calibrated probability...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/cookbook/churn-predict">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/cookbook/churn-predict">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/cookbook/_recipe.css">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "HowTo",
+ "name": "Churn-predict recipe",
+ "description": "Local churn-risk classifier with calibrated probabilities. Signed, offline.",
+ "url": "https://kolm.ai/cookbook/churn-predict",
+ "totalTime": "PT5M",
+ "tool": [
+ {
+ "@type": "HowToTool",
+ "name": "kolm CLI"
+ }
+ ],
+ "step": [
+ {
+ "@type": "HowToStep",
+ "name": "Install",
+ "text": "npm i -g github:sneaky-hippo/kolm-stack"
+ },
+ {
+ "@type": "HowToStep",
+ "name": "Compile",
+ "text": "kolm compile churn-predict.toml"
+ },
+ {
+ "@type": "HowToStep",
+ "name": "Run",
+ "text": "kolm run churn-predict.kolm"
+ }
+ ]
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {
+ "@type": "ListItem",
+ "position": 1,
+ "name": "kolm",
+ "item": "https://kolm.ai/"
+ },
+ {
+ "@type": "ListItem",
+ "position": 2,
+ "name": "Cookbook",
+ "item": "https://kolm.ai/cookbook"
+ },
+ {
+ "@type": "ListItem",
+ "position": 3,
+ "name": "Churn predict recipe",
+ "item": "https://kolm.ai/cookbook/churn-predict"
+ }
+ ]
+ }
+ ]
+}
+</script>
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API Key &rarr;</a>
+ </div>
+ </div>
+</header>
+<main id="main">
+
+<section class="hero">
+ <div class="wrap">
+ <div class="crumbs"><a href="/docs">cookbook</a> &middot; product &middot; churn-predict</div>
+ <span class="pill">Recipe &middot; product</span>
+ <h1>Risk scores, <span class="tone">calibrated.</span></h1>
+ <p class="lede">A local <code>.kolm</code> file that reads 30 days of an account's usage telemetry and returns <em>(risk, reasons, suggested_outreach)</em>. Trained on 600 historical accounts labeled by ground truth (renewed / churned at 90 days). Verifier rejects any output where the stated reasons contradict the input telemetry.</p>
+
+ <div class="meta-row">
+ <div class="item"><span class="label">base model</span><span class="value">qwen2.5-coder-3b</span></div>
+ <div class="item"><span class="label">gold pairs</span><span class="value">600 (420 train / 180 eval)</span></div>
+ <div class="item"><span class="label">k-score floor</span><span class="value">0.85</span></div>
+ <div class="item"><span class="label">artifact size</span><span class="value">1.6 GB</span></div>
+ <div class="item"><span class="label">compile time</span><span class="value">~36 min</span></div>
+ <div class="item"><span class="label">spec source</span><span class="value">calibrated probability + grounding</span></div>
+ </div>
+ </div>
+</section>
+
+<article>
+ <div class="wrap">
+
+ <div class="group">
+ <h2>What this recipe does</h2>
+ <p>Replaces a "churn risk" rules engine that was 20+ if-statements deep and never quite right. Reads telemetry (login frequency, feature breadth, seat-utilization, support-ticket sentiment, billing health) and returns a risk band plus the specific signals that drove it. The verifier confirms every cited signal actually appears in the input · no hallucinated reasons.</p>
+ <p>The probability is calibrated on the held-out set: when the model says "0.7 risk," accounts at that bucket actually churn ~70% of the time within 90 days.</p>
+ </div>
+
+ <div class="group">
+ <h2>The spec</h2>
+ <pre class="code">{
+ <span class="k">"output_kind"</span>: <span class="k">"json"</span>,
+ <span class="k">"schema"</span>: {
+ <span class="k">"required"</span>: [<span class="k">"risk"</span>, <span class="k">"band"</span>, <span class="k">"reasons"</span>, <span class="k">"suggested_outreach"</span>],
+ <span class="k">"properties"</span>: {
+ <span class="k">"risk"</span>: { <span class="k">"type"</span>: <span class="k">"number"</span>, <span class="k">"minimum"</span>: 0, <span class="k">"maximum"</span>: 1 },
+ <span class="k">"band"</span>: { <span class="k">"enum"</span>: [<span class="k">"green"</span>, <span class="k">"yellow"</span>, <span class="k">"red"</span>] },
+ <span class="k">"reasons"</span>: { <span class="k">"type"</span>: <span class="k">"array"</span>, <span class="k">"items"</span>: {
+ <span class="k">"required"</span>: [<span class="k">"signal"</span>, <span class="k">"value"</span>, <span class="k">"trend"</span>],
+ <span class="k">"properties"</span>: {
+ <span class="k">"signal"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span> },
+ <span class="k">"value"</span>: {},
+ <span class="k">"trend"</span>: { <span class="k">"enum"</span>: [<span class="k">"up"</span>, <span class="k">"flat"</span>, <span class="k">"down"</span>] }
+ }
+ } },
+ <span class="k">"suggested_outreach"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span> }
+ }
+ },
+ <span class="k">"verifier"</span>: {
+ <span class="k">"reasons_must_match_input"</span>: <span class="ok">true</span>,
+ <span class="k">"calibration_target_brier_score"</span>: 0.10
+ }
+}</pre>
+ </div>
+
+ <div class="group">
+ <h2>Gold pairs (1 of 600 shown)</h2>
+
+ <div class="pair">
+ <div class="pair-h">input - 30d telemetry</div>
+ <pre class="code">{
+ <span class="k">"account"</span>: <span class="k">"acme-co"</span>, <span class="k">"plan"</span>: <span class="k">"team"</span>, <span class="k">"seats"</span>: 12,
+ <span class="k">"logins_30d"</span>: 84, <span class="k">"prev_logins_30d"</span>: 142,
+ <span class="k">"feature_breadth"</span>: 0.31, <span class="k">"prev_feature_breadth"</span>: 0.58,
+ <span class="k">"support_tickets_30d"</span>: 4, <span class="k">"prev_support_tickets_30d"</span>: 1,
+ <span class="k">"avg_support_sentiment"</span>: -0.35, <span class="k">"prev_avg_support_sentiment"</span>: 0.10,
+ <span class="k">"billing_health"</span>: <span class="k">"current"</span>, <span class="k">"renewal_in_days"</span>: 41
+}</pre>
+ <div class="pair-h">output</div>
+ <pre class="code">{
+ <span class="k">"risk"</span>: 0.72,
+ <span class="k">"band"</span>: <span class="k">"red"</span>,
+ <span class="k">"reasons"</span>: [
+ {<span class="k">"signal"</span>: <span class="k">"logins_30d"</span>, <span class="k">"value"</span>: 84, <span class="k">"trend"</span>: <span class="k">"down"</span>},
+ {<span class="k">"signal"</span>: <span class="k">"feature_breadth"</span>, <span class="k">"value"</span>: 0.31, <span class="k">"trend"</span>: <span class="k">"down"</span>},
+ {<span class="k">"signal"</span>: <span class="k">"support_tickets_30d"</span>, <span class="k">"value"</span>: 4, <span class="k">"trend"</span>: <span class="k">"up"</span>},
+ {<span class="k">"signal"</span>: <span class="k">"avg_support_sentiment"</span>, <span class="k">"value"</span>: -0.35, <span class="k">"trend"</span>: <span class="k">"down"</span>}
+ ],
+ <span class="k">"suggested_outreach"</span>: <span class="k">"CSM check-in within 7 days; lead with the support ticket sentiment dip and ask which workflow regressed. Renewal is 41 days out · there's time to fix this."</span>
+}</pre>
+ </div>
+ </div>
+
+ <div class="group">
+ <h2>Compile</h2>
+ <pre class="code">kolm compile <span class="k">"churn risk classifier with grounded reasons"</span> \
+ --base qwen2.5-coder-3b \
+ --pairs pairs.jsonl \
+ --verifier reasons-grounded,calibrated-brier=0.10 \
+ --k-floor 0.85 \
+ --output churn-predict.kolm
+
+<span class="ok">ok</span> wrote <span class="k">churn-predict.kolm</span>
+ k_score=0.87 signature=ed25519</pre>
+ </div>
+
+ <div class="group">
+ <h2>K-score gate</h2>
+ <div class="k-bar">
+ <span class="k-label">K-score</span>
+ <span class="k-value">0.87</span>
+ <span class="k-detail">held-out 180 accounts &middot; reasons-grounded 100% &middot; band-accuracy 84% &middot; Brier 0.092 (target 0.10)</span>
+ </div>
+ <p>"Reasons grounded" means: every cited signal-value pair must appear in the input telemetry. The model can't make up a "feature_breadth = 0.31, trending down" reason if the input shows 0.58 stable. Verifier catches this at compile time.</p>
+ </div>
+
+ <div class="group">
+ <h2>Run-time profile</h2>
+ <div class="lat-grid">
+ <div class="cell"><div class="h">M2 MacBook</div><div class="v">680<span class="u">ms</span></div></div>
+ <div class="cell"><div class="h">RTX 5090</div><div class="v">190<span class="u">ms</span></div></div>
+ <div class="cell"><div class="h">iPhone 15 Pro</div><div class="v">2.0<span class="u">s</span></div></div>
+ <div class="cell"><div class="h">CPU x86 (server)</div><div class="v">2.6<span class="u">s</span></div></div>
+ </div>
+ </div>
+
+ <div class="group">
+ <h2>Deploy</h2>
+ <pre class="code"><span class="c"># nightly batch · score every active account, write red-band to CSM queue:</span>
+for acct in $(psql -t -c <span class="k">"SELECT id FROM accounts WHERE active"</span>); do
+ tel=$(./build-telemetry.py --account <span class="k">"$acct"</span> --days 30)
+ out=$(kolm run churn-predict.kolm --input <span class="k">"$tel"</span>)
+ if [ <span class="k">"$(echo "$out" | jq -r .band)"</span> = <span class="k">"red"</span> ]; then
+ queue write csm-priority <span class="k">"$out"</span>
+ fi
+done</pre>
+ </div>
+
+ <div class="group">
+ <h2>Related recipes</h2>
+ <div class="related">
+ <a href="/cookbook/nps-classifier"><div class="h">NPS classifier</div><div class="d">Free-text response -> score + theme.</div></a>
+ <a href="/cookbook/support-reply"><div class="h">Support reply</div><div class="d">Ticket -> empathy-tuned, brand-faithful reply.</div></a>
+ <a href="/cookbook/pricing-quote"><div class="h">Pricing quote</div><div class="d">Customer info -> reconciled quote.</div></a>
+ </div>
+ </div>
+
+ </div>
+</article>
+
+
+</main>
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+</body>
+</html>

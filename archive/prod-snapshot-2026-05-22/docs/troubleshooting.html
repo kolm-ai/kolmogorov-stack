@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#050607;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#050607;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Troubleshooting · kolm.ai</title>
+<meta name="description" content="Troubleshooting guide for kolm.ai. HTTP 401, 403, 429, 503 capture-store and receipt failures, BYOC attestation, trainer OOM, compile dataset empty, K-score...">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta property="og:title" content="Troubleshooting · kolm.ai">
+<meta property="og:description" content="Troubleshooting guide for kolm.ai. HTTP 401, 403, 429, 503 capture-store and receipt failures, BYOC attestation, trainer OOM, compile dataset empty, K-score...">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/docs/troubleshooting">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:title" content="Troubleshooting · kolm.ai">
+<meta name="twitter:description" content="Troubleshooting guide for kolm.ai. HTTP 401, 403, 429, 503 capture-store and receipt failures, BYOC attestation, trainer OOM, compile dataset empty, K-score...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://kolm.ai/docs/troubleshooting">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<style>
+ :root {
+ --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+ --accent: #faf2e1; --accent-strong: #c9c2b2;
+ --good: #7ef0d2; --warn: #d6a65a; --stop: #d77;
+ --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+ }
+ .ts-toc { background:var(--bg-elev); border:1px solid var(--line); border-radius:10px; padding:20px 22px; margin:8px 0 28px; }
+ .ts-toc p { margin:0 0 10px; font-family:var(--mono); font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-faint); }
+ .ts-toc ol { margin:0; padding-left:22px; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px 24px; color:var(--ink-mute); font-size:13.5px; }
+ @media (max-width:680px){ .ts-toc ol { grid-template-columns:1fr; } }
+ .ts-toc ol li a { color:var(--accent); border-bottom:1px solid transparent; text-decoration:none; }
+ .ts-toc ol li a:hover { border-bottom-color:var(--line-strong); }
+ .ts-card { background:var(--bg-elev); border:1px solid var(--line); border-radius:10px; padding:22px 24px 20px; margin:18px 0; scroll-margin-top:80px; }
+ .ts-card .code { display:inline-block; font-family:var(--mono); font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-faint); border:1px solid var(--line-strong); border-radius:999px; padding:2px 9px; margin-bottom:8px; }
+ .ts-card h2 { margin:0 0 12px; font-size:18px; line-height:1.35; font-weight:500; color:var(--ink); letter-spacing:-0.01em; }
+ .ts-card .lbl { font-family:var(--mono); font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-faint); margin:14px 0 6px; }
+ .ts-card .body p { margin:0 0 8px; font-size:14px; line-height:1.6; color:var(--ink-mute); }
+ .ts-card .body p code, .ts-card .body li code { font-family:var(--mono); font-size:12px; background:var(--bg-card); border:1px solid var(--line); border-radius:4px; padding:1px 5px; color:var(--ink); overflow-wrap:anywhere; }
+ .ts-card .body pre { background:var(--bg-card); border:1px solid var(--line); border-radius:6px; padding:12px 14px; font-family:var(--mono); font-size:12.5px; color:var(--ink); overflow-x:auto; margin:6px 0 8px; }
+ .ts-card ol { margin:0 0 4px; padding-left:22px; color:var(--ink-mute); font-size:14px; line-height:1.65; }
+ .ts-card ol li { margin:0 0 6px; }
+ .ts-related { background:var(--bg-elev); border:1px solid var(--line); border-radius:10px; padding:22px; margin-top:36px; }
+ .ts-related h2 { margin:0 0 12px; font-size:14px; font-family:var(--mono); letter-spacing:0.04em; text-transform:uppercase; color:var(--ink-faint); font-weight:500; }
+ .ts-related ul { list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:8px 18px; }
+ .ts-related ul li a { font-size:13.5px; color:var(--accent); border-bottom:1px solid var(--line-strong); text-decoration:none; }
+</style>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "TechArticle",
+ "headline": "Troubleshooting kolm.ai",
+ "description": "Troubleshooting guide for kolm.ai. HTTP 401, 403, 429, 503 capture-store and receipt failures, BYOC attestation, trainer OOM, compile dataset empty, K-score below gate, quantize torch missing, receipt verified false, SSE disconnects.",
+ "url": "https://kolm.ai/docs/troubleshooting",
+ "dateModified": "2026-05-18",
+ "author": { "@type": "Organization", "name": "Kolm" },
+ "publisher": { "@type": "Organization", "name": "Kolm", "url": "https://kolm.ai" },
+ "image": "https://kolm.ai/og/troubleshooting.svg",
+ "proficiencyLevel": "Expert",
+ "dependencies": "kolm CLI 0.4 or later"
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ { "@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/" },
+ { "@type": "ListItem", "position": 2, "name": "Docs", "item": "https://kolm.ai/docs" },
+ { "@type": "ListItem", "position": 3, "name": "Troubleshooting", "item": "https://kolm.ai/docs/troubleshooting" }
+ ]
+ }
+ ]
+}
+</script>
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand"><span>kolm.ai</span></a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
+</header>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<main id="main">
+ <section class="hero frontier-bg">
+ <div class="wrap">
+ <div class="hero-copy">
+ <div class="hero-eyebrow"><span class="he-dot"></span>kolm.ai docs &middot; troubleshooting</div>
+ <h1>Troubleshooting.</h1>
+ <p class="lede">Eleven common failures with the kolm.ai CLI, API, and runtime. Each entry names the symptom, the root cause, and three to five concrete steps to recover. If a fix is not here, open an issue or email <a href="mailto:support@kolm.ai">support@kolm.ai</a> with the receipt id from <a href="/docs/cli/logs"><code>kolm logs</code></a>.</p>
+ </div>
+ </div>
+ </section>
+
+ <section class="section">
+ <div class="wrap" style="max-width:980px">
+
+ <nav class="ts-toc" aria-label="Errors in this guide">
+ <p>11 entries</p>
+ <ol>
+ <li><a href="#http-401">HTTP 401 &ndash; unauthorized</a></li>
+ <li><a href="#http-403">HTTP 403 &ndash; forbidden</a></li>
+ <li><a href="#http-429">HTTP 429 &ndash; rate limited</a></li>
+ <li><a href="#http-503-capture">HTTP 503 capture_store_unavailable</a></li>
+ <li><a href="#http-503-receipt">HTTP 503 receipt_unverifiable</a></li>
+ <li><a href="#byoc-attestation">BYOC attestation failure</a></li>
+ <li><a href="#trainer-oom">Trainer timeout or OOM</a></li>
+ <li><a href="#compile-empty">Compile says dataset empty</a></li>
+ <li><a href="#compile-gate">Compile K-score below gate</a></li>
+ <li><a href="#quantize-torch">Quantize says torch not installed</a></li>
+ <li><a href="#verify-false">Receipt verify returns verified false</a></li>
+ <li><a href="#sse-disconnect">SSE capture stream disconnects</a></li>
+ </ol>
+ </nav>
+
+ <article class="ts-card" id="http-401">
+ <div class="code">HTTP 401</div>
+ <h2>Unauthorized. The API key is missing, expired, or wrong tenant.</h2>
+ <div class="body">
+ <p class="lbl">What you see</p>
+ <pre>{"error":"unauthorized","message":"missing or invalid api key"}</pre>
+ <p class="lbl">Root cause</p>
+ <p>The <code>Authorization: Bearer kolm-xxx</code> header is absent, the key was rotated, or the request hit a different tenant base. The CLI reads the key from <code>~/.kolm/config.json</code>, written by <code>kolm login</code>.</p>
+ <p class="lbl">What to do</p>
+ <ol>
+ <li>Run <code>kolm whoami --json</code>. If <code>logged_in</code> is false, run <code>kolm login</code> and paste a fresh key from <a href="/account/api-keys">/account/keys</a>.</li>
+ <li>Confirm the <code>base</code> URL matches the tenant you expect; switch with <code>kolm profile use &lt;name&gt;</code> (see <a href="/docs/cli/profile"><code>kolm profile</code></a>).</li>
+ <li>If you are using a CI key, re-issue from <a href="/account/api-keys">/account/keys</a> and update the secret store.</li>
+ <li>If 401 persists after re-login, the user may have been removed from the workspace. Check with <code>kolm team list</code>.</li>
+ </ol>
+ </div>
+ </article>
+
+ <article class="ts-card" id="http-403">
+ <div class="code">HTTP 403</div>
+ <h2>Forbidden. The key is valid but lacks the required role or scope.</h2>
+ <div class="body">
+ <p class="lbl">What you see</p>
+ <pre>{"error":"forbidden","message":"role 'viewer' cannot POST /v1/compile"}</pre>
+ <p class="lbl">Root cause</p>
+ <p>kolm.ai uses role-based access. <code>viewer</code> can read receipts and run <code>kolm verify</code> but cannot compile, distill, or modify captures. Service keys can be further scoped per-namespace.</p>
+ <p class="lbl">What to do</p>
+ <ol>
+ <li>Ask a workspace admin to elevate your role via <a href="/account/overview">/account/overview</a> (viewer to builder, or builder to admin).</li>
+ <li>If you are using a scoped service key, re-issue with the namespace and verb you need.</li>
+ <li>For BYOC compile, confirm the <code>policy.yaml</code> at the cluster allows the verb. Run <code>kolm doctor --byoc</code>.</li>
+ <li>For air-gapped installs, re-check the seat-license file under <code>~/.kolm/license</code>.</li>
+ </ol>
+ </div>
+ </article>
+
+ <article class="ts-card" id="http-429">
+ <div class="code">HTTP 429</div>
+ <h2>Rate limited. You exceeded the per-key per-minute quota.</h2>
+ <div class="body">
+ <p class="lbl">What you see</p>
+ <pre>{"error":"rate_limited","retry_after_ms":12000}
+Retry-After: 12</pre>
+ <p class="lbl">Root cause</p>
+ <p>Each key gets a per-minute call budget by plan tier. Bursts above the budget return 429 with a <code>Retry-After</code> header. Capture endpoints have a separate higher budget so log writes do not starve compute calls.</p>
+ <p class="lbl">What to do</p>
+ <ol>
+ <li>Honor the <code>Retry-After</code> header. The CLI already backs off automatically; if you are calling the API directly, sleep for <code>retry_after_ms</code> then retry.</li>
+ <li>Batch small calls in the shipped endpoint by sending multiple <code>items</code> to <code>POST /v1/capture/log</code> instead of one POST per row.</li>
+ <li>Move heavy training calls to the <code>cloud</code> backend or self-hosted compute via <a href="/docs/cli/cloud"><code>kolm cloud train</code></a>.</li>
+ <li>If you need a higher steady rate, request a quota bump at <a href="/account/billing">/account/billing</a>.</li>
+ </ol>
+ </div>
+ </article>
+
+ <article class="ts-card" id="http-503-capture">
+ <div class="code">HTTP 503 capture_store_unavailable</div>
+ <h2>The durable capture store is offline. The request was rejected, not silently dropped.</h2>
+ <div class="body">
+ <p class="lbl">What you see</p>
+ <pre>HTTP/1.1 503 Service Unavailable
+x-kolm-capture-durable: false
+{"error":"capture_store_unavailable","retry_after_ms":5000}</pre>
+ <p class="lbl">Root cause</p>
+ <p>W212 changed every capture handler to <em>refuse</em> writes when the durable backing store (<code>vercel_postgres</code>, <code>vercel_kv</code>, or sqlite) is not reachable, instead of silently swallowing the row. The response header <code>x-kolm-capture-durable: false</code> is the canary.</p>
+ <p class="lbl">What to do</p>
+ <ol>
+ <li>Probe the backing store: <code>GET /v1/capture/health</code> returns <code>{"durable":true|false,"driver":"vercel_postgres","latency_ms":...}</code>.</li>
+ <li>If self-hosting, restart the storage driver. Check <code>KOLM_STORE_DRIVER</code> env var and confirm <code>~/.kolm/data/kolm.sqlite</code> is writable.</li>
+ <li>The CLI buffers retries on the client side. Re-send with the same <code>Idempotency-Key</code> header to avoid double-write.</li>
+ <li>For status, watch <a href="https://status.kolm.ai">status.kolm.ai</a>.</li>
+ </ol>
+ </div>
+ </article>
+
+ <article class="ts-card" id="http-503-receipt">
+ <div class="code">HTTP 503 receipt_unverifiable</div>
+ <h2>The receipt could not be cross-checked with the witness in time.</h2>
+ <div class="body">
+ <p class="lbl">What you see</p>
+ <pre>HTTP/1.1 503 Service Unavailable
+{"error":"receipt_unverifiable","reason":"rekor_unreachable","timeout_ms":4000}</pre>
+ <p class="lbl">Root cause</p>
+ <p>The build receipt has a sigstore Rekor entry id, but the public log was unreachable within the verifier timeout. The artifact bytes are still valid; the witness leg of the chain just could not be confirmed online.</p>
+ <p class="lbl">What to do</p>
+ <ol>
+ <li>Retry the verify call. Transparency logs are eventually consistent; retry typically succeeds within 60 seconds.</li>
+ <li>Run <code>kolm verify --offline path/to/artifact.kolm</code> to skip the witness leg if you only need signature plus Ed25519 receipt chain.</li>
+ <li>For air-gapped installs, point the verifier at your private witness via <code>KOLM_WITNESS_URL</code>.</li>
+ <li>If Rekor is down for an extended period, check <a href="https://status.sigstore.dev">status.sigstore.dev</a>.</li>
+ </ol>
+ </div>
+ </article>
+
+ <article class="ts-card" id="byoc-attestation">
+ <div class="code">BYOC</div>
+ <h2>BYOC attestation failure. The cluster nodes did not produce a TEE quote the host trusts.</h2>
+ <div class="body">
+ <p class="lbl">What you see</p>
+ <pre>kolm cloud deploy --byoc
+[error] attestation_failed: node-7 SEV-SNP quote rejected (PCK chain mismatch)</pre>
+ <p class="lbl">Root cause</p>
+ <p>The node failed to produce a valid AMD SEV-SNP, Intel TDX, or Nitro attestation quote. Usually the host firmware is too old, the PCK certificate chain is stale, or the node booted outside the expected secure-boot policy.</p>
+ <p class="lbl">What to do</p>
+ <ol>
+ <li>Run <code>kolm doctor --byoc</code> to dump the per-node attestation report and the expected policy hash.</li>
+ <li>Update the host BIOS or the cloud-provider AMD SEV firmware on the affected node.</li>
+ <li>Refresh the PCK chain: <code>kolm cloud byoc refresh-pck --node node-7</code>.</li>
+ <li>If a node cannot attest, drain it: <code>kolm cloud byoc drain node-7</code>. The artifact will not deploy until the cluster meets the minimum attested-node count.</li>
+ </ol>
+ </div>
+ </article>
+
+ <article class="ts-card" id="trainer-oom">
+ <div class="code">Trainer</div>
+ <h2>Trainer timeout or OOM. The student model did not fit or the step budget was exhausted.</h2>
+ <div class="body">
+ <p class="lbl">What you see</p>
+ <pre>[trainer] OOM at step 142 of 200 (peak 23.8 GiB on 24 GiB device)
+[trainer] killed by watchdog after 1800s wall time</pre>
+ <p class="lbl">Root cause</p>
+ <p>Either the student base is too large for the device, the batch size is too high, or the wall-clock budget is too tight. The runtime kills training instead of paging to disk to avoid corrupting half-written shards.</p>
+ <p class="lbl">What to do</p>
+ <ol>
+ <li>Drop one student tier: <code>kolm distill --student-base auto</code> picks the largest student that fits in <code>doctor --detect-hw</code> output.</li>
+ <li>Halve the batch: <code>--batch 8</code>. K-score impact is usually under 1 percent on specialist tasks.</li>
+ <li>Raise the wall budget: <code>--max-steps 500 --max-wall 3600</code>.</li>
+ <li>If still OOM, switch to a smaller student via <code>--student-base qwen-3.5b</code> or move to <code>kolm cloud train</code> on an A100.</li>
+ </ol>
+ </div>
+ </article>
+
+ <article class="ts-card" id="compile-empty">
+ <div class="code">Compile</div>
+ <h2>Compile refuses with "dataset empty". The capture filter matched zero rows.</h2>
+ <div class="body">
+ <p class="lbl">What you see</p>
+ <pre>kolm compile --namespace claims-router
+[error] dataset_empty: 0 rows match {namespace:'claims-router', since:'2026-05-01'}</pre>
+ <p class="lbl">Root cause</p>
+ <p>The <a href="/docs/cli/compile"><code>compile</code></a> filter resolves to no captured pairs. Most often the namespace name is misspelled, the <code>--since</code> window is too tight, or the captures landed under a different namespace because the proxy header was set wrong.</p>
+ <p class="lbl">What to do</p>
+ <ol>
+ <li>List what is on disk: <code>kolm what --json</code> shows the namespaces and per-namespace pair counts.</li>
+ <li>Confirm the proxy capture is writing the right namespace: <code>kolm tail captures --namespace claims-router</code>.</li>
+ <li>Widen the time window: <code>--since 2026-01-01</code>.</li>
+ <li>If the namespace is genuinely empty, run the capture step longer or import a JSONL with <code>kolm compile --from-jsonl ./pairs.jsonl</code>.</li>
+ </ol>
+ </div>
+ </article>
+
+ <article class="ts-card" id="compile-gate">
+ <div class="code">Compile</div>
+ <h2>Compile blocks on K-score below gate. The artifact would not pass production gates.</h2>
+ <div class="body">
+ <p class="lbl">What you see</p>
+ <pre>[gate] frozen_set K-score 0.78 below threshold 0.85
+[gate] refuse_to_ship (use --force to override)</pre>
+ <p class="lbl">Root cause</p>
+ <p>The <a href="/docs/glossary#frozen-set-gate">frozen-set gate</a> failed. Either the student is too small, the recipe is underspecified, or the captures are mixing two tasks under one namespace.</p>
+ <p class="lbl">What to do</p>
+ <ol>
+ <li>Inspect failing rows: <code>kolm fix &lt;artifact.kolm&gt;</code> surfaces the top failing cases and suggests seed rows.</li>
+ <li>Add or relabel captures: <code>kolm fix &lt;artifact.kolm&gt; --apply</code> writes <code>&lt;basename&gt;.fix-seeds.jsonl</code> to feed back to compile.</li>
+ <li>Lower the gate intentionally during exploration: <code>--k-target 0.75</code>. Do not lower below the production threshold for a release.</li>
+ <li>Switch the student up one tier or extend training: <code>--student-base qwen-7b --max-steps 500</code>.</li>
+ </ol>
+ </div>
+ </article>
+
+ <article class="ts-card" id="quantize-torch">
+ <div class="code">Quantize</div>
+ <h2>Quantize says torch not installed. The Python sidecar is missing.</h2>
+ <div class="body">
+ <p class="lbl">What you see</p>
+ <pre>kolm quantize --to int4 phi-redactor.kolm
+[error] python_sidecar_missing: torch not importable (python_ok=true, torch_ok=false, bnb_ok=false)</pre>
+ <p class="lbl">Root cause</p>
+ <p>kolm's quantizer (<code>scripts/quantize.py</code>) needs <code>torch</code> plus <code>bitsandbytes</code> for int4 and gptq, or <code>auto-gptq</code> for awq. The host has Python but the wheels are not installed in the kolm venv.</p>
+ <p class="lbl">What to do</p>
+ <ol>
+ <li>Run <code>kolm doctor --quantize</code> to print which wheels are missing.</li>
+ <li>Install into the kolm venv: <code>kolm quantize install</code> (downloads matching torch + bnb wheels for the local CUDA or ROCm version).</li>
+ <li>On macOS or CPU-only, use <code>--to int8</code> (no bnb required) or skip quantization.</li>
+ <li>For air-gapped installs, copy a pre-warmed venv from a mirror node; see <a href="/airgap">/airgap</a>.</li>
+ </ol>
+ </div>
+ </article>
+
+ <article class="ts-card" id="verify-false">
+ <div class="code">Verify</div>
+ <h2>kolm verify returns 200 with verified: false. The chain has a broken link.</h2>
+ <div class="body">
+ <p class="lbl">What you see</p>
+ <pre>{
+ "verified": false,
+ "signature": "ok",
+ "receipt_chain": "ok",
+ "frozen_set": "ok",
+ "witness": "rekor_uuid_not_found"
+}</pre>
+ <p class="lbl">Root cause</p>
+ <p>One leg of the chain failed. Common cases: the Rekor entry id was rotated out of the test log, the artifact was rebuilt without re-signing the manifest, or the frozen-set hash on disk does not match the receipt.</p>
+ <p class="lbl">What to do</p>
+ <ol>
+ <li>Read the per-leg breakdown in the JSON response. Whichever field is not <code>"ok"</code> is the failing link.</li>
+ <li>If <code>signature</code> failed, the artifact was modified after sign. Re-fetch from the source.</li>
+ <li>If <code>witness</code> failed, retry; transparency logs are eventually consistent. Or run <code>--offline</code>.</li>
+ <li>If <code>frozen_set</code> failed, the in-artifact frozen samples diverged from the receipt hash. Re-compile.</li>
+ </ol>
+ </div>
+ </article>
+
+ <article class="ts-card" id="sse-disconnect">
+ <div class="code">SSE</div>
+ <h2>SSE /v1/capture/stream disconnects every few minutes. Idle timeout from a proxy or CDN.</h2>
+ <div class="body">
+ <p class="lbl">What you see</p>
+ <pre>event: open
+data: {"ok":true}
+
+... (3 minutes silence) ...
+
+(connection closed by remote)</pre>
+ <p class="lbl">Root cause</p>
+ <p>Most front proxies (Vercel edge, Cloudflare, nginx default) cut idle HTTP connections at 60 to 300 seconds. The SSE endpoint emits a keepalive comment every 25 seconds, but a proxy stripping comments or buffering responses will still cut the stream.</p>
+ <p class="lbl">What to do</p>
+ <ol>
+ <li>The CLI re-connects automatically. <code>kolm tail captures</code> handles the gap and de-dupes by capture id.</li>
+ <li>If using the API directly, listen for <code>onerror</code> and re-open the EventSource with the last seen <code>Last-Event-ID</code>.</li>
+ <li>Disable proxy buffering: add <code>X-Accel-Buffering: no</code> response header (already set server-side) and confirm your reverse proxy honors it.</li>
+ <li>For long-running streams behind a corporate proxy that buffers regardless, switch to <code>kolm tail captures --poll 2s</code> which uses short HTTP polls instead.</li>
+ </ol>
+ </div>
+ </article>
+
+ <div class="ts-related">
+ <h2>Related</h2>
+ <ul>
+ <li><a href="/docs/glossary">Glossary</a></li>
+ <li><a href="/captures">Live captures</a></li>
+ <li><a href="/docs/api">API reference</a></li>
+ <li><a href="/docs/cli">CLI reference</a></li>
+ <li><a href="/docs/cli/doctor"><code>kolm doctor</code></a></li>
+ <li><a href="/docs/cli/health"><code>kolm health</code></a></li>
+ <li><a href="/docs/cli/verify"><code>kolm verify</code></a></li>
+ <li><a href="/spec/rs-1">RS-1 receipts spec</a></li>
+ </ul>
+ </div>
+
+ </div>
+ </section>
+</main>
+
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/spec/kolm-format-v1">.kolm format</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/byoc">BYOC</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Trust</h4>
+ <a href="/security">Security</a>
+ <a href="/baa">BAA &amp; DPA</a>
+ <a href="/subprocessors">Subprocessors</a>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/.well-known/security.txt">security.txt</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/health-insurance">Health insurance</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/manifesto">Manifesto</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai &middot; Made with .kolm &middot; Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+</body>
+</html>

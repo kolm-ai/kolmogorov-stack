@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Run task-compiled AI inside Continue (VS Code) · kolm.ai</title>
+<meta name="description" content="One command installs kolm into Continue. Your compiled AI shows up as a model and tool inside VS Code or JetBrains. Local execution. No outbound API calls.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta property="og:title" content="Run task-compiled AI inside Continue (VS Code) · kolm.ai">
+<meta property="og:description" content="One command installs kolm into Continue. Your compiled AI shows up as a model and tool inside VS Code or JetBrains. Local execution. No outbound API calls.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Run task-compiled AI inside Continue (VS Code) · kolm.ai">
+<meta name="twitter:description" content="One command installs kolm into Continue. Your compiled AI shows up as a model and tool inside VS Code or JetBrains. Local execution. No outbound API calls.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/integrations/continue">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/integrations/continue">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+ :root {
+ --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+ --accent: #faf2e1; --accent-soft: rgba(236,231,220, 0.10); --accent-strong: #c9c2b2;
+ --good: #7ef0d2; --warn: #ffd07a;
+ --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+ --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+ }
+ * { box-sizing: border-box; }
+ html, body { margin: 0; padding: 0; }
+ body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+ a { color: inherit; text-decoration: none; }
+ .wrap { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
+ .wrap-wide { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+ @media (max-width: 720px) { .wrap, .wrap-wide { padding: 0 20px; } }
+
+ header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
+ header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
+ header.site .left { display: flex; align-items: center; gap: 36px; }
+ header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 500; font-size: 16px; }
+ header.site nav { display: flex; gap: 22px; }
+ header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
+ header.site nav a:hover { color: var(--ink); }
+ header.site .right { display: flex; align-items: center; gap: 14px; }
+ header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
+ header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
+ @media (max-width: 720px) { header.site nav { display: none; } }
+
+ section.hero { padding: 88px 0 32px; }
+ .crumb { font-family: var(--mono); font-size: 11.5px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; margin: 0 0 18px; }
+ .crumb a { color: var(--ink-mute); }
+ .crumb a:hover { color: var(--ink); }
+ h1 { margin: 0 0 18px; font-size: clamp(36px, 5.4vw, 60px); line-height: 1.04; font-weight: 500; max-width: 22ch; letter-spacing: -0.01em; }
+ h1 .tone { color: var(--accent-strong); }
+ p.lede { margin: 0 0 28px; font-size: 17.5px; line-height: 1.55; color: var(--ink-mute); max-width: 64ch; }
+
+ .meta-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 0; }
+ .kind { font-family: var(--mono); font-size: 11.5px; text-transform: uppercase; color: var(--ink-faint); padding: 5px 11px; border: 1px solid var(--line); border-radius: 999px; }
+ .kind.good { color: var(--good); border-color: rgba(126,240,210,0.18); }
+
+ section.steps { padding: 24px 0 56px; }
+ .steps-grid { display: grid; gap: 16px; grid-template-columns: 1fr; margin: 16px 0 0; }
+ .step { border: 1px solid var(--line); border-radius: 12px; padding: 24px 26px; background: var(--bg-elev); }
+ .step .num { font-family: var(--mono); font-size: 11.5px; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 8px; letter-spacing: 0.04em; }
+ .step h3 { margin: 0 0 10px; font-size: 19px; font-weight: 500; color: var(--ink); }
+ .step p { margin: 0; font-size: 15px; color: var(--ink-mute); line-height: 1.6; max-width: 60ch; }
+ .step .code-row { position: relative; margin: 14px 0 0; }
+ .step pre { margin: 0; padding: 14px 18px; background: var(--bg-card); border: 1px solid var(--line); border-radius: 8px; font-family: var(--mono); font-size: 13.5px; color: var(--ink); overflow-x: auto; line-height: 1.55; }
+ .copy-btn { position: absolute; top: 8px; right: 8px; background: var(--bg-elev); color: var(--ink-mute); border: 1px solid var(--line); border-radius: 5px; padding: 4px 10px; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; cursor: pointer; letter-spacing: 0.04em; }
+ .copy-btn:hover { color: var(--ink); border-color: var(--line-strong); }
+ .copy-btn.done { color: var(--good); border-color: rgba(126,240,210,0.18); }
+
+ section.snippet { padding: 32px 0 56px; border-top: 1px solid var(--line); }
+ section.snippet h2 { margin: 0 0 8px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 500; }
+ section.snippet p.kicker { margin: 0 0 22px; color: var(--ink-mute); font-size: 15px; max-width: 64ch; }
+ section.snippet .file-label { font-family: var(--mono); font-size: 11.5px; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 6px; letter-spacing: 0.04em; }
+ section.snippet pre { margin: 0; padding: 18px 22px; background: var(--bg-card); border: 1px solid var(--line); border-radius: 10px; font-family: var(--mono); font-size: 13px; color: var(--ink); overflow-x: auto; line-height: 1.6; }
+
+ section.what-you-get { padding: 32px 0 56px; border-top: 1px solid var(--line); }
+ section.what-you-get h2 { margin: 0 0 22px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 500; }
+ .check-grid { display: grid; gap: 14px; grid-template-columns: repeat(2, 1fr); }
+ @media (max-width: 720px) { .check-grid { grid-template-columns: 1fr; } }
+ .check { padding: 18px 20px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-elev); }
+ .check h3 { margin: 0 0 6px; font-size: 15px; font-weight: 500; color: var(--ink); }
+ .check p { margin: 0; font-size: 14px; color: var(--ink-mute); line-height: 1.6; }
+
+ section.cta { padding: 48px 0 96px; border-top: 1px solid var(--line); }
+ .cta-row { display: flex; flex-wrap: wrap; gap: 14px; margin: 18px 0 0; }
+ .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; border-radius: 8px; font-size: 14.5px; font-weight: 500; font-family: var(--sans); border: 1px solid var(--line-strong); color: var(--ink); background: transparent; transition: border-color 180ms, background 180ms; }
+ .btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+ .btn.primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+ .btn:hover { border-color: var(--ink-mute); }
+
+ footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-faint); }
+ footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+ footer.site a { color: var(--ink-mute); }
+</style>
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "HowTo",
+ "name": "Run a kolm-compiled AI inside Continue",
+ "description": "Three steps to surface a kolm artifact inside the Continue extension for VS Code and JetBrains.",
+ "totalTime": "PT1M",
+ "step": [
+ {"@type":"HowToStep","position":1,"name":"Install the integration","text":"Run kolm install continue --apply. The installer writes the kolm model and MCP server entries to ~/.continue/config.json."},
+ {"@type":"HowToStep","position":2,"name":"Reload the editor","text":"Continue picks up the new config on reload."},
+ {"@type":"HowToStep","position":3,"name":"Pick the kolm model","text":"Open the Continue panel. Pick the kolm model. Recipes run locally."}
+ ]
+}
+</script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {"@type":"ListItem","position":1,"name":"Home","item":"https://kolm.ai/"},
+ {"@type":"ListItem","position":2,"name":"Integrations","item":"https://kolm.ai/integrations"},
+ {"@type":"ListItem","position":3,"name":"Continue","item":"https://kolm.ai/integrations/continue"}
+ ]
+}
+</script>
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API Key &rarr;</a>
+ </div>
+ </div>
+</header>
+
+<main id="main">
+
+<section class="hero">
+ <div class="wrap">
+ <p class="crumb"><a href="/integrations">Integrations</a> &middot; Continue</p>
+ <h1>Run task-compiled AI inside <span class="tone">Continue</span> (VS Code).</h1>
+ <p class="lede">One command writes the kolm model entry into Continue's <code>config.json</code>. Reload the editor. Your compiled recipe shows up in the Continue model picker alongside whatever else you have set up. Local. Reproducible. Offline-capable.</p>
+ <div class="meta-row">
+ <span class="kind good">shipped</span>
+ <span class="kind">VS Code &middot; JetBrains</span>
+ <span class="kind">MCP &middot; stdio</span>
+ <span class="kind">one command</span>
+ </div>
+ </div>
+</section>
+
+<section class="steps">
+ <div class="wrap">
+ <div class="steps-grid">
+
+ <div class="step">
+ <p class="num">Step 01</p>
+ <h3>Install the integration.</h3>
+ <p>The installer locates <code>~/.continue/config.json</code> and adds a kolm model entry plus an MCP server entry. Existing models in your config stay in place. Re-running is idempotent.</p>
+ <div class="code-row">
+ <pre id="cmd-1">kolm install continue --apply</pre>
+ <button type="button" class="copy-btn" data-copy="cmd-1" aria-label="Copy command">copy</button>
+ </div>
+ </div>
+
+ <div class="step">
+ <p class="num">Step 02</p>
+ <h3>Reload the editor.</h3>
+ <p>Continue watches <code>~/.continue/config.json</code> and hot-reloads on save. If your editor doesn't pick it up, run the <code>Continue: Reload Window</code> command. The kolm model appears in the picker.</p>
+ <div class="code-row">
+ <pre id="cmd-2"># in VS Code
+&gt; Continue: Reload Window
+# or just quit and relaunch the editor</pre>
+ <button type="button" class="copy-btn" data-copy="cmd-2" aria-label="Copy command">copy</button>
+ </div>
+ </div>
+
+ <div class="step">
+ <p class="num">Step 03</p>
+ <h3>Pick the kolm model.</h3>
+ <p>Open the Continue panel. Pick the kolm model from the dropdown. Continue routes your prompts through the kolm MCP server. Recipes execute locally against the <code>.kolm</code> artifact. Zero outbound API calls on the recipe path.</p>
+ <div class="code-row">
+ <pre id="cmd-3"># click the model picker in Continue
+# select &quot;kolm (your-recipe-id)&quot;
+# ask anything; the recipe runs locally</pre>
+ <button type="button" class="copy-btn" data-copy="cmd-3" aria-label="Copy command">copy</button>
+ </div>
+ </div>
+
+ </div>
+ </div>
+</section>
+
+<section class="snippet">
+ <div class="wrap">
+ <h2>What lands in <code>~/.continue/config.json</code></h2>
+ <p class="kicker">Two entries: a model the picker can select, and an MCP server the agent can call as a tool. Continue keeps everything else in your config untouched. The <code>command</code> is the absolute path of the kolm binary, so PATH changes won't break the setup.</p>
+ <p class="file-label">~/.continue/config.json</p>
+<pre>{
+ "models": [
+ {
+ "title": "kolm (local)",
+ "provider": "openai",
+ "model": "kolm",
+ "apiBase": "http://127.0.0.1:8765/v1",
+ "apiKey": "local"
+ }
+ ],
+ "experimental": {
+ "modelContextProtocolServers": [
+ {
+ "transport": {
+ "type": "stdio",
+ "command": "/usr/local/bin/kolm",
+ "args": ["serve", "--mcp"]
+ }
+ }
+ ]
+ }
+}</pre>
+ </div>
+</section>
+
+<section class="what-you-get">
+ <div class="wrap">
+ <h2>What you get.</h2>
+ <div class="check-grid">
+ <div class="check">
+ <h3>Model picker entry.</h3>
+ <p>The kolm recipe shows up in the same dropdown as your hosted models. Switching is one click. Continue calls it over the OpenAI-compatible local endpoint.</p>
+ </div>
+ <div class="check">
+ <h3>MCP tool surface.</h3>
+ <p>Continue agents can call <code>kolm.run</code>, <code>kolm.compile</code>, <code>kolm.inspect</code>, and <code>kolm.query</code> directly. Same tools as Claude Code and Cursor.</p>
+ </div>
+ <div class="check">
+ <h3>VS Code and JetBrains.</h3>
+ <p>The Continue extension covers both. Same config file. Same install command. No JetBrains-specific setup.</p>
+ </div>
+ <div class="check">
+ <h3>Local OpenAI endpoint.</h3>
+ <p>The kolm process binds to <code>127.0.0.1:8765</code> with an OpenAI-compatible <code>/v1</code> shape. Useful if you want to point other tools at it.</p>
+ </div>
+ <div class="check">
+ <h3>Hot reload.</h3>
+ <p>Continue watches the config file. After install you usually don't need to restart at all. The model appears in the picker.</p>
+ </div>
+ <div class="check">
+ <h3>Dry-run first.</h3>
+ <p>Without <code>--apply</code> the installer prints the JSON it would merge into your config. Audit it. Then re-run with the flag.</p>
+ </div>
+ </div>
+ </div>
+</section>
+
+<section class="cta">
+ <div class="wrap">
+ <h2 style="margin:0 0 6px;font-size:clamp(22px,2.4vw,28px);font-weight:500;">Ready to compile.</h2>
+ <p class="lede" style="margin:0 0 8px;">If the CLI isn't on your machine yet, the quickstart compiles your first recipe in one page. The spec page is the canonical reference for the MCP surface kolm exposes.</p>
+ <div class="cta-row">
+ <a href="/quickstart" class="btn primary">Get the CLI &rarr;</a>
+ <a href="/spec" class="btn">View MCP spec</a>
+ <a href="/integrations" class="btn">Other integrations</a>
+ </div>
+ </div>
+</section>
+
+</main>
+
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+
+<script>
+(function(){
+ document.querySelectorAll('.copy-btn').forEach(function(btn){
+ btn.addEventListener('click', function(){
+ var id = btn.getAttribute('data-copy');
+ var pre = document.getElementById(id);
+ if (!pre) return;
+ var text = pre.textContent;
+ try {
+ navigator.clipboard.writeText(text).then(function(){
+ btn.textContent = 'copied';
+ btn.classList.add('done');
+ setTimeout(function(){ btn.textContent = 'copy'; btn.classList.remove('done'); }, 1600);
+ });
+ } catch (e) {
+ var r = document.createRange(); r.selectNode(pre);
+ window.getSelection().removeAllRanges();
+ window.getSelection().addRange(r);
+ try { document.execCommand('copy'); btn.textContent='copied'; btn.classList.add('done'); setTimeout(function(){ btn.textContent='copy'; btn.classList.remove('done'); }, 1600); } catch(_){}
+ window.getSelection().removeAllRanges();
+ }
+ });
+ });
+})();
+</script>
+<script src="/nav.js" defer></script>
+</body>
+</html>

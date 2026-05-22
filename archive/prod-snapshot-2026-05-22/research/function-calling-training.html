@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Function-calling SFT Hermes-FC template | kolm research · kolm.ai</title>
+<meta name="description" content="SFT over the open Hermes-FC chat template: tool schemas in system, tool_call JSON blocks in assistant, tool_response in user. The dataset validator rejects...">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta property="og:title" content="Function-calling SFT Hermes-FC template | kolm research · kolm.ai">
+<meta property="og:description" content="SFT over the open Hermes-FC chat template: tool schemas in system, tool_call JSON blocks in assistant, tool_response in user. The dataset validator rejects...">
+<meta property="og:type" content="website">
+<meta property="article:published_time" content="2026-05-14">
+<meta property="article:author" content="Kolm">
+<meta property="article:section" content="tools">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Function-calling SFT Hermes-FC template | kolm research · kolm.ai">
+<meta name="twitter:description" content="SFT over the open Hermes-FC chat template: tool schemas in system, tool_call JSON blocks in assistant, tool_response in user. The dataset validator rejects...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/research/function-calling-training">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/research/function-calling-training">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script src="/escape.js"></script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "TechArticle",
+ "headline": "Function-calling SFT: Hermes-FC template",
+ "description": "SFT over the open Hermes-FC template with a strict dataset validator and a tolerant inference parser.",
+ "url": "https://kolm.ai/research/function-calling-training",
+ "author": {"@type": "Organization", "name": "Kolm"},
+ "publisher": {"@type": "Organization", "name": "Kolm", "url": "https://kolm.ai"},
+ "datePublished": "2026-05-14",
+ "articleSection": "tools",
+ "keywords": "function calling, tool calling, Hermes-FC, SFT, ToolACE, Gorilla",
+ "citation": [
+ "Liu et al, 2024, arXiv:2409.00920 (ToolACE)",
+ "Patil et al, 2023, arXiv:2305.15334 (Gorilla)"
+ ],
+ "license": "https://creativecommons.org/licenses/by/4.0/"
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+ {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
+ {"@type": "ListItem", "position": 3, "name": "Function-calling SFT", "item": "https://kolm.ai/research/function-calling-training"}
+ ]
+ }
+ ]
+}
+</script>
+
+<style>
+ :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--good:#7ef0d2;--warn:#ffd479;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+ *{box-sizing:border-box}
+ html,body{margin:0;padding:0}
+ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15.5px;line-height:1.65;letter-spacing:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-synthesis:none;min-height:100vh;display:flex;flex-direction:column}
+ a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line-strong)}
+ a:hover{border-bottom-color:var(--ink)}
+ .nb{border:0}
+ ::selection{background:rgba(236,231,220,0.30)}
+
+ .wrap{max-width:760px;margin:0 auto;padding:0 32px;width:100%}
+ @media(max-width:720px){.wrap{padding:0 20px}}
+
+ header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+ header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px;max-width:1180px;margin:0 auto;padding:0 32px}
+ @media(max-width:720px){header.site .row{padding:0 20px}}
+ header.site .left{display:flex;align-items:center;gap:36px}
+ header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink);border:0}
+ header.site .brand span{font-weight: 500;font-size:16px;letter-spacing:0}
+ header.site nav{display:flex;gap:22px}
+ header.site nav a{color:var(--ink-mute);font-size:13.5px;border:0}
+ header.site nav a:hover,header.site nav a.active{color:var(--ink)}
+ header.site .right{display:flex;align-items:center;gap:14px}
+ header.site .right .ghost{color:var(--ink-mute);font-size:13.5px;border:0}
+ header.site .right .ghost:hover{color:var(--ink)}
+ header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight: 500;border:0}
+
+ main{padding:80px 0 96px;flex:1}
+
+ .hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 22px;border:1px solid var(--line-strong);border-radius:999px;padding:6px 14px;background:rgba(8,9,8,0.62)}
+ .hero-eyebrow .he-dot{width:6px;height:6px;border-radius:50%;background:#7ef0d2;box-shadow:0 0 10px #7ef0d2;animation:pulse-dot 2.4s ease-in-out infinite}
+ @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
+
+ h1{font-weight: 500;letter-spacing:-0.03em;line-height:1.04;font-size:clamp(32px,4.2vw,52px);margin:0 0 16px}
+ .lede{color:var(--ink-mute);font-size:17.5px;margin:0 0 36px;line-height:1.55}
+ h2{font-weight: 500;letter-spacing:0;font-size:23px;margin:46px 0 14px;border-top:1px solid var(--line);padding-top:32px}
+ h3{font-weight: 500;letter-spacing:0;font-size:17px;margin:24px 0 6px}
+ p{color:var(--ink-mute);margin:0 0 14px}
+ p strong{color:var(--ink);font-weight: 500}
+ code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+ pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink);line-height:1.55}
+ ul{padding-left:22px;margin:0 0 14px;color:var(--ink-mute)}
+ ul li{margin:6px 0}
+
+ .meta-line{display:flex;flex-wrap:wrap;gap:14px;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;margin:0 0 28px}
+
+ .table{width:100%;border-collapse:collapse;margin:18px 0;border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:13px}
+ .table th,.table td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+ .table th{font-weight: 500;color:var(--ink-faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;background:var(--bg-elev)}
+ .table tr:last-child td{border-bottom:0}
+
+ .citations{color:var(--ink-faint);font-size:12.5px;font-family:var(--mono);line-height:1.55;border-top:1px solid var(--line);padding-top:18px;margin-top:36px}
+ .citations a{color:var(--ink-mute)}
+
+ footer{border-top:1px solid var(--line);padding:32px 32px 28px;color:var(--ink-faint);font-size:12.5px;text-align:center}
+ footer a{color:var(--ink-mute);border:0}
+ footer a:hover{color:var(--ink)}
+ .footer-row{margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint);justify-content:center;display:flex}
+ .footer-row a{color:inherit}
+</style>
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API Key &rarr;</a>
+ </div>
+ </div>
+</header>
+
+<main id="main">
+ <div class="wrap">
+ <div class="hero-eyebrow"><span class="he-dot"></span>research . tools . 11 min read</div>
+ <h1>Teaching a model to call tools.</h1>
+ <p class="lede">Most function-calling failures are template failures: the model emits a tool call in a format the parser does not recognise, the call gets dropped, the agent retries. The fix is to train on a strict template, validate the dataset before training, and parse tolerantly at inference. Hermes-FC is the open format that holds all three.</p>
+
+ <div class="meta-line">
+ <span>May 14, 2026</span>
+ <span>&middot;</span>
+ <span>Kolm research</span>
+ <span>&middot;</span>
+ <span>apps/trainer/function_calling.py</span>
+ </div>
+
+ <h2>Why Hermes-FC instead of OpenAI's format</h2>
+
+ <p>OpenAI's tool-calling format is closed: the tool call is a structured field on the assistant message object, not a string the model emits. To replicate this on an open model you have to either (a) train the model on a string template that your parser then converts back to the structured form, or (b) ship a constrained-decode union schema that forces emission to match a target schema.</p>
+
+ <p>Hermes-FC, introduced by NousResearch in the Hermes-2-Pro series, picks (a) and writes the template down. The tool schemas go in the system prompt between <code>&lt;tools&gt;</code> and <code>&lt;/tools&gt;</code>; the assistant emits tool calls as <code>&lt;tool_call&gt;</code>JSON<code>&lt;/tool_call&gt;</code> blocks; tool responses come back as <code>&lt;tool_response&gt;</code>JSON<code>&lt;/tool_response&gt;</code> blocks in user turns. The format is open, the trainer can SFT directly on it, and the parser is regex-friendly.</p>
+
+ <h2>The template</h2>
+
+ <pre>&lt;|im_start|&gt;system
+You are a function calling AI model. Use the following tools when helpful.
+
+&lt;tools&gt;
+{"type":"function","function":{"name":"get_weather","description":"...","parameters":{...}}}
+{"type":"function","function":{"name":"search_docs","description":"...","parameters":{...}}}
+&lt;/tools&gt;
+
+For each function call return a tool_call block.
+&lt;|im_end|&gt;
+&lt;|im_start|&gt;user
+What's the weather in Tokyo?
+&lt;|im_end|&gt;
+&lt;|im_start|&gt;assistant
+&lt;tool_call&gt;
+{"name": "get_weather", "arguments": {"city": "Tokyo"}}
+&lt;/tool_call&gt;
+&lt;|im_end|&gt;
+&lt;|im_start|&gt;user
+&lt;tool_response&gt;
+{"temperature_c": 22, "conditions": "clear"}
+&lt;/tool_response&gt;
+&lt;|im_end|&gt;
+&lt;|im_start|&gt;assistant
+The weather in Tokyo is 22 C and clear.&lt;|im_end|&gt;</pre>
+
+ <p>One tool schema per line inside <code>&lt;tools&gt;</code>; one JSON object per <code>&lt;tool_call&gt;</code> block; multiple <code>&lt;tool_call&gt;</code> blocks back-to-back when the model wants to call several tools in one turn. The trainer's <code>format_hermes_example</code> renders this from a structured dataset row; the inference parser walks the model output for <code>&lt;tool_call&gt;...&lt;/tool_call&gt;</code> and parses each as JSON.</p>
+
+ <h2>The dataset validator</h2>
+
+ <p>Function-calling SFT data is full of subtle bugs: tool calls that don't match any declared tool, JSON arguments that don't match the tool's parameter schema, assistant turns that should have a tool call but don't, user turns with a tool_response for a tool that was never called. Training on a dataset with these bugs produces a model that emits the same bugs at inference.</p>
+
+ <pre>def validate_dataset(rows):
+ issues = []
+ for i, row in enumerate(rows):
+ tool_names = {t["function"]["name"] for t in row.get("tools", [])}
+ for msg in row.get("messages", []):
+ if msg["role"] == "assistant":
+ for call in parse_tool_calls(msg["content"]):
+ if call.get("name") not in tool_names:
+ issues.append(f"row {i}: undeclared tool {call.get('name')!r}")
+ # ... schema validation of call.arguments vs the tool's parameters
+ return issues</pre>
+
+ <p>The trainer runs the validator before training; any non-empty issue list is a hard error with a list of rows to fix. The buyer's dataset is rejected, not silently trained on. This is the single most consequential move in the whole pipeline; ~30% of public function-calling datasets have at least one bug per 1000 rows, and SFT on bad data is worse than no SFT.</p>
+
+ <h2>The inference parser is tolerant</h2>
+
+ <pre>_TOOL_CALL_PATTERN = re.compile(
+ r"&lt;tool_call&gt;\s*(\{.*?\})\s*&lt;/tool_call&gt;",
+ re.DOTALL
+)
+
+def parse_tool_calls(text):
+ out = []
+ for match in _TOOL_CALL_PATTERN.finditer(text):
+ body = match.group(1)
+ try:
+ out.append(json.loads(body))
+ except json.JSONDecodeError:
+ # Try once more with minor cleanup (trailing commas, single quotes)
+ try:
+ out.append(json.loads(_clean(body)))
+ except json.JSONDecodeError:
+ logger.warning("dropping unparseable tool call: %r", body[:80])
+ return out</pre>
+
+ <p>Strict at training time, tolerant at inference time. The model occasionally drifts (a stray comma, a smart quote, an unescaped newline inside a string); the parser cleans these where it can and drops the call where it cannot. The receipt records dropped calls per request so a buyer can spot a degradation early.</p>
+
+ <h2>The minimal call</h2>
+
+ <pre>from apps.trainer.function_calling import fc_trainer, FCConfig, validate_dataset
+
+issues = validate_dataset(train_rows)
+if issues:
+ raise ValueError(f"{len(issues)} dataset issues, first 5: {issues[:5]}")
+
+trainer = fc_trainer(
+ model_id="Qwen/Qwen2.5-7B-Instruct",
+ train_rows=train_rows,
+ config=FCConfig(
+ learning_rate=2e-5,
+ max_seq_length=4096,
+ num_train_epochs=1,
+ bf16=True,
+ ),
+)
+trainer.train()</pre>
+
+ <h2>What lands in the receipt</h2>
+
+ <pre>"function_calling": {
+ "template": "hermes-fc",
+ "papers": ["arXiv:2409.00920", "arXiv:2305.15334"],
+ "n_tools_declared": 14,
+ "n_tool_calls_in_train": 8923,
+ "validator_issues": 0,
+ "max_seq_length": 4096,
+ "train_examples": 4096
+}</pre>
+
+ <p>The buyer's auditor sees the validator ran with zero issues (otherwise training would not have started), how many tool schemas the buyer declared, and how many tool calls landed in the training set. The deployment-time tool-call drop rate is a separate metric on the runtime side.</p>
+
+ <h2>Composing with constrained decoding</h2>
+
+ <p>SFT on Hermes-FC teaches the model the format. Constrained decoding at inference time guarantees the format. The two compose: the trainer ships a model that wants to emit Hermes-FC tool calls; the runtime's union schema (in <code>apps/runtime/tools.py</code>) forces every <code>&lt;tool_call&gt;</code> block to validate against the union of declared tool schemas. The buyer never sees a malformed tool call.</p>
+
+ <p>This is the engineering reason kolm uses Hermes-FC instead of OpenAI's structured-output format directly: the open template makes both the training signal and the constrained-decode schema explicit and inspectable. A buyer running an audit can read the system prompt, see the declared tools, see the constrained-decode grammar, and trace any single tool call back through the receipt to the exact assistant emission.</p>
+
+ <h2>Edge cases worth naming</h2>
+
+ <p><strong>Parallel tool calls.</strong> The model emits multiple <code>&lt;tool_call&gt;</code> blocks in one assistant turn. The parser handles this natively (the regex is global). The runtime's executor fans them out in parallel and waits for all responses before resuming generation. The training data should include parallel-call examples; if it does not, the model learns to call tools serially and the agent loses throughput.</p>
+
+ <p><strong>The tool call needs a thought block first.</strong> Many strong tool-calling models (Hermes 2.5+, Qwen 2.5) emit a brief reasoning sentence before the tool call: "I'll check the weather. <code>&lt;tool_call&gt;</code>...<code>&lt;/tool_call&gt;</code>". The trainer's loss includes those preface tokens; the parser ignores them. Stripping the preface from training data degrades quality without saving inference cost.</p>
+
+ <p><strong>No-call turns.</strong> When the user's request needs no tool, the model should answer directly with no <code>&lt;tool_call&gt;</code> block. The training data must include such turns; otherwise the model learns to always call a tool, even when answering "What is 2+2?" causes it to call a calculator unnecessarily. The validator warns if &lt; 5% of assistant turns are no-call.</p>
+
+ <h2>Where this fits in the kolm compile loop</h2>
+
+ <p>Function-calling SFT is a sibling stage to plain SFT. The buyer's spec names it as a separate run; the dataset format is structured (rows of <code>{tools, messages}</code>); the K-score evaluator runs against a function-calling-specific eval pack with tool-call accuracy as the primary axis. The constrained-decode tool surface at serve time is part of the same artifact; the receipt links the SFT output to the runtime tools schema by sharing a tool-schema hash.</p>
+
+ <div class="citations">
+ <p><strong>Citations</strong></p>
+ <p>Liu, W. et al. <em>ToolACE: Winning the Points of LLM Function Calling</em>. arXiv:2409.00920, 2024.</p>
+ <p>Patil, S. G. et al. <em>Gorilla: Large Language Model Connected with Massive APIs</em>. arXiv:2305.15334, 2023.</p>
+ </div>
+
+ <div class="meta-line" style="margin-top:36px">
+ <a class="nb" href="/research">&larr; Back to research</a>
+ <span>&middot;</span>
+ <a class="nb" href="/research#function-calling">Frontier reference &middot; Function calling</a>
+ <span>&middot;</span>
+ <a class="nb" href="/spec">RS-1 spec</a>
+ </div>
+ </div>
+</main>
+
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+<script src="/nav.js"></script>
+</body>
+</html>

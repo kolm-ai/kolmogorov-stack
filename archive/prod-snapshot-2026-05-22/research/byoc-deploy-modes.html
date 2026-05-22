@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>BYOC deploy modes: choosing among five attestation · kolm.ai</title>
+<meta name="description" content="The five BYOC deploy modes kolm ships: fly, aws-nitro, gcp-cvm, azure-cvm, and docker. Attestation formats, TOFU pinning, vendor-rooted trust chains, the...">
+<meta name="keywords" content="BYOC, bring your own cloud, Nitro Enclaves, SEV-SNP, TDX, Confidential VM, MAA, TOFU attestation, kolm cloud">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta name="author" content="kolm">
+<meta name="robots" content="index,follow,max-snippet:-1">
+<meta property="og:site_name" content="kolm">
+<meta property="og:title" content="BYOC deploy modes: choosing among five attestation · kolm.ai">
+<meta property="og:description" content="The five BYOC deploy modes kolm ships: fly, aws-nitro, gcp-cvm, azure-cvm, and docker. Attestation formats, TOFU pinning, vendor-rooted trust chains, the...">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="BYOC deploy modes: choosing among five attestation · kolm.ai">
+<meta name="twitter:description" content="The five BYOC deploy modes kolm ships: fly, aws-nitro, gcp-cvm, azure-cvm, and docker. Attestation formats, TOFU pinning, vendor-rooted trust chains, the...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/research/byoc-deploy-modes">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/research/byoc-deploy-modes">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "TechArticle",
+ "headline": "BYOC deploy modes: choosing among five attestation tiers",
+ "description": "The five BYOC deploy modes kolm ships: fly, aws-nitro, gcp-cvm, azure-cvm, and docker. Attestation formats, TOFU pinning, vendor-rooted trust chains, the kolm cloud CLI, and how to choose.",
+ "author": { "@type": "Organization", "name": "kolm", "url": "https://kolm.ai" },
+ "publisher": { "@type": "Organization", "name": "kolm", "logo": { "@type": "ImageObject", "url": "https://kolm.ai/favicon.svg" } },
+ "datePublished": "2026-05-14",
+ "dateModified": "2026-05-14",
+ "mainEntityOfPage": { "@type": "WebPage", "@id": "https://kolm.ai/research/byoc-deploy-modes" },
+ "image": "https://kolm.ai/og-card.svg",
+ "keywords": "BYOC, bring your own cloud, Nitro Enclaves, SEV-SNP, TDX, Confidential VM, TOFU attestation, kolm cloud",
+ "articleSection": "Deployment",
+ "wordCount": 1860
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+ {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
+ {"@type": "ListItem", "position": 3, "name": "BYOC deploy modes", "item": "https://kolm.ai/research/byoc-deploy-modes"}
+ ]
+ }
+ ]
+}
+</script>
+<style>
+ :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--accent-soft:rgba(236,231,220, 0.10);--good:#7ef0d2;--bad:#ff6b91;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+ *{box-sizing:border-box}
+ html,body{margin:0;padding:0}
+ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;font-synthesis:none}
+ a{color:inherit;text-decoration:none}
+ .wrap{max-width:760px;margin:0 auto;padding:0 32px}
+ .wrap-wide{max-width:1180px;margin:0 auto;padding:0 32px}
+ @media(max-width:720px){.wrap,.wrap-wide{padding:0 20px}}
+
+ header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+ header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px}
+ header.site .left{display:flex;align-items:center;gap:36px}
+ header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
+ header.site .brand span{font-weight:500;font-size:16px}
+ header.site nav{display:flex;gap:22px}
+ header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
+ header.site nav a:hover{color:var(--ink)}
+ header.site .right{display:flex;align-items:center;gap:14px}
+ header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
+ header.site .right .cta{color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500}
+ @media(max-width:720px){header.site nav{display:none}}
+
+ section.hero{padding:80px 0 36px;position:relative;overflow:hidden}
+ section.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 900px 460px at 22% 12%,rgba(236,231,220, 0.10),transparent 60%)}
+ section.hero .wrap{position:relative}
+ .pill{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-mute);border:1px solid var(--line-strong);border-radius:999px;padding:5px 12px;background:var(--bg-elev)}
+ .pill .dot{width:5px;height:5px;border-radius:50%;background:#10b981}
+ h1{margin:22px 0 18px;font-size:clamp(34px,5.4vw,54px);line-height:1.05;font-weight:500;max-width:22ch}
+ h1 .tone{color:#10b981}
+ p.lede{margin:0;font-size:clamp(17px,1.4vw,20px);line-height:1.55;color:var(--ink-mute);max-width:60ch}
+ p.lede b{color:var(--ink);font-weight:500}
+ .meta{display:flex;gap:18px;margin-top:22px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
+ .meta b{color:var(--ink-mute);font-weight:500}
+
+ article{padding:36px 0 96px}
+ article h2{margin:56px 0 14px;font-size:clamp(24px,2.6vw,30px);line-height:1.2;font-weight:500;color:var(--ink)}
+ article h3{margin:36px 0 10px;font-size:18px;font-weight:500;color:var(--ink)}
+ article p{margin:0 0 16px;font-size:16.5px;line-height:1.7;color:var(--ink-mute)}
+ article p b{color:var(--ink);font-weight:500}
+ article p code,article li code,article td code{font-family:var(--mono);font-size:0.92em;background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink)}
+ article blockquote{margin:28px 0;padding:16px 22px;border-left:2px solid #10b981;background:var(--bg-elev);border-radius:0 8px 8px 0;font-size:17px;line-height:1.6;color:var(--ink)}
+ article blockquote p{color:var(--ink);margin:0;font-weight:500}
+ article ul{padding-left:0;list-style:none;margin:16px 0 24px}
+ article ul li{padding:8px 0 8px 22px;position:relative;font-size:16px;line-height:1.6;color:var(--ink-mute)}
+ article ul li::before{content:"-";color:#10b981;position:absolute;left:6px;font-weight:500}
+ article ul li b{color:var(--ink);font-weight:500}
+ article pre{margin:18px 0 24px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.75;color:var(--ink)}
+ article pre .com{color:var(--ink-faint)}
+ article pre .arg{color:#10b981}
+ article pre .kw{color:#b0bbff}
+ article table{width:100%;border-collapse:collapse;margin:18px 0 24px;font-size:14px}
+ article table th,article table td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;color:var(--ink-mute)}
+ article table th{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);font-weight:500;letter-spacing:0.04em}
+ article table td b{color:var(--ink)}
+
+ .toc{margin:28px 0 36px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px}
+ .toc h5{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);margin:0 0 10px;font-weight:500}
+ .toc ol{margin:0;padding-left:20px}
+ .toc li{padding:4px 0;font-size:14px;color:var(--ink-mute)}
+ .toc li a{color:var(--ink-mute)}
+ .toc li a:hover{color:#10b981}
+
+ .signpost{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:48px 0 0}
+ @media(max-width:720px){.signpost{grid-template-columns:1fr}}
+ .signpost a{display:flex;flex-direction:column;gap:8px;padding:22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;transition:border-color 120ms,background 120ms}
+ .signpost a:hover{border-color:var(--line-strong);background:var(--bg-card)}
+ .signpost a .lab{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
+ .signpost a .v{color:var(--ink);font-weight:500;font-size:16px}
+ .signpost a .v .arrow{color:#10b981;margin-left:6px}
+ .signpost a p{margin:4px 0 0;font-size:13.5px;color:var(--ink-mute);line-height:1.5}
+
+ footer.site{padding:56px 0 40px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+ footer.site .row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+</style>
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API Key &rarr;</a>
+ </div>
+ </div>
+</header>
+<main id="main">
+
+<section class="hero">
+ <div class="wrap">
+ <span class="pill"><span class="dot"></span>Research &middot; Deployment &middot; 2026-05-14 &middot; 12 min read</span>
+ <h1>BYOC deploy modes: <span class="tone">five attestation tiers.</span></h1>
+ <p class="lede">Five targets, four vendor TEEs plus one no-TEE escape hatch. <b>The attestation document is the thing your auditor reviews; the deploy mode is the thing that produces one.</b> What each mode signs, what the verifier checks, and which tier the regulator on the other side of the table will actually accept.</p>
+ <div class="meta"><span><b>By</b>&nbsp;kolm</span><span><b>Tag</b>&nbsp;byoc &middot; tee &middot; attestation</span></div>
+ </div>
+</section>
+
+<article>
+ <div class="wrap">
+
+ <div class="toc">
+ <h5>Contents</h5>
+ <ol>
+ <li><a href="#five-modes">The five modes at a glance</a></li>
+ <li><a href="#attestation">Attestation format per mode</a></li>
+ <li><a href="#tofu">The TOFU pinning model</a></li>
+ <li><a href="#cli">The kolm cloud CLI</a></li>
+ <li><a href="#pick">When to pick which</a></li>
+ <li><a href="#limits">Documented limits</a></li>
+ </ol>
+ </div>
+
+ <h2 id="five-modes">The five modes at a glance.</h2>
+ <p>The <code>packages/attestation</code> module ships parsers for four vendor TEEs and a no-TEE docker fallback. Every deploy produces an attestation document that the verifier writes into the receipt. The five modes are not interchangeable; they sit on a spectrum of vendor coupling, regulatory standing, and operational cost.</p>
+
+ <table>
+ <thead>
+ <tr><th>mode</th><th>tee</th><th>attestation</th><th>vendor</th></tr>
+ </thead>
+ <tbody>
+ <tr><td><b>fly</b></td><td>none / Nitro on opt-in</td><td>image sha + region pin</td><td>Fly.io</td></tr>
+ <tr><td><b>aws-nitro</b></td><td>Nitro Enclaves</td><td>COSE_Sign1 + PCR0 SHA-384</td><td>AWS</td></tr>
+ <tr><td><b>gcp-cvm</b></td><td>Confidential VM (SEV-SNP)</td><td>1184-byte binary report</td><td>Google Cloud + AMD</td></tr>
+ <tr><td><b>azure-cvm</b></td><td>Confidential VM (TDX or SNP)</td><td>TDX quote or MAA JWT</td><td>Azure + Intel/AMD</td></tr>
+ <tr><td><b>docker</b></td><td>none</td><td>image sha256 only</td><td>your registry</td></tr>
+ </tbody>
+ </table>
+
+ <p>The <code>fly</code> target is operationally the cheapest. A region pin and an image SHA are the entire attestation. It's a fast deploy to a fast platform, and the trust model is the same trust model you already have with any platform-as-a-service provider. For a workload where the threat is operational mistakes and the regulator does not require hardware-rooted attestation, this is the right tier.</p>
+
+ <p>The three middle modes (<code>aws-nitro</code>, <code>gcp-cvm</code>, <code>azure-cvm</code>) produce a hardware-rooted attestation document. A measurement of the running code lands inside a signed envelope that originates from silicon. The vendor's attestation service signs the document with a key that chains to a vendor-controlled root certificate. The verifier's job is to check the chain, the freshness, and the measurement against an expected value.</p>
+
+ <p>The <code>docker</code> target is the escape hatch. The attestation is an image SHA and a registry signature, nothing more. There is no TEE. The operator chooses this mode when the deploy is on a private network they already control, when the regulator does not require a hardware root, or when the operational complexity of running Nitro or CVM is not worth the marginal trust gain.</p>
+
+ <h2 id="attestation">Attestation format per mode.</h2>
+ <p>The four hardware-rooted formats have different shapes. The receipt-chain code parses each one into a common structure and records the canonical form in the artifact's audit log.</p>
+
+ <h3>aws-nitro: COSE_Sign1 + PCR0 SHA-384</h3>
+ <p>Nitro Enclaves produce a COSE_Sign1 envelope. The payload is a CBOR map containing the PCR set (PCR0 is the enclave image SHA-384, PCR1 the bootloader, PCR2 the OS), the public key the enclave was launched with, a user-supplied nonce, and a timestamp. The signature is over the payload with a per-region attestation key. The verifier walks the chain to the AWS Nitro root certificate, then checks PCR0 against the expected enclave image hash.</p>
+
+ <pre><span class="com"># the receipt records the canonical form</span>
+<span class="kw">{</span>
+ <span class="arg">"mode":</span> <span class="kw">"aws-nitro"</span>,
+ <span class="arg">"pcr0":</span> <span class="kw">"a1b2...384-hex"</span>,
+ <span class="arg">"pcr1":</span> <span class="kw">"c3d4...384-hex"</span>,
+ <span class="arg">"pcr2":</span> <span class="kw">"e5f6...384-hex"</span>,
+ <span class="arg">"signed_at":</span> <span class="kw">1747200000</span>,
+ <span class="arg">"signed_by":</span> <span class="kw">"nitro-region-us-east-1"</span>
+<span class="kw">}</span></pre>
+
+ <h3>gcp-cvm: SEV-SNP 1184-byte report</h3>
+ <p>Confidential VM on Google Cloud (using AMD SEV-SNP) produces a 1184-byte attestation report defined by the AMD SEV-SNP specification. The report contains the measurement (a SHA-384 over the VM's initial memory), the launch digest, the policy bits, the chip ID, and a TCB version. The signature is from an AMD-signed VCEK (Versioned Chip Endorsement Key) that chains to AMD's ARK and ASK root certificates. Google's Confidential Computing API returns the raw report; the verifier parses it.</p>
+
+ <h3>azure-cvm: TDX quote or MAA JWT</h3>
+ <p>Azure Confidential VMs use either Intel TDX (most current SKUs) or AMD SEV-SNP. The TDX quote is a binary structure similar in spirit to SGX quotes; it contains the measurement of the trust domain, the TD's runtime state, and a signature from an Intel-rooted PCK. Azure also offers a higher-level alternative: the Microsoft Azure Attestation service (MAA) returns a JWT after server-side verification. The JWT format is operationally easier to consume; the binary quote is what an auditor who does not trust MAA will want.</p>
+
+ <h3>docker: image sha256 only</h3>
+ <p>The docker target's attestation is the image digest from the registry. There is no hardware root. The verifier records the SHA, the registry name, and the registry signature (Docker Content Trust or a Sigstore cosign signature, if the operator configured one). This is the lowest tier; it's intended for environments where the trust comes from elsewhere (a private network, a regulator-approved hosting agreement, an existing third-party attestation).</p>
+
+ <h2 id="tofu">The TOFU pinning model.</h2>
+ <p>kolm's BYOC verifier does not maintain a curated list of vendor root certificates. It uses trust-on-first-use. The first attestation document received from a given deploy is pinned: the PCR set, the measurement, the launch digest, the image SHA. Subsequent attestations from the same deploy have to match the pinned values on the fields that should be stable. A mismatch is flagged in the audit log and the deploy is marked as drifted.</p>
+
+ <p>TOFU is a pragmatic choice, not a cryptographic certainty. The argument is: a kolm deployment is a long-lived single artifact on a single piece of hardware running a single image. The thing that changes is the measurement, and the only legitimate reason for a measurement to change is an operator-authorized image update. If the operator is consulting the audit log when an update lands (the workflow), the TOFU pinning gives them a clear signal: "this attestation is new, here is the diff, sign or roll back."</p>
+
+ <p>The verifier records every pinning event with a timestamp. The audit log answers the auditor's question of "when did this measurement first appear?" with a per-deploy timeline. A measurement that has been stable for three months and then changes without an authorized image update is the thing the audit log is designed to surface.</p>
+
+ <blockquote>
+ <p>TOFU does not give you a guarantee that the measurement is correct on its first appearance. It gives you a guarantee that the measurement is unchanged across the life of the deploy. Pair the first-use pinning with an out-of-band check (the auditor independently computes the expected enclave image hash) and the chain closes.</p>
+ </blockquote>
+
+ <h2 id="cli">The kolm cloud CLI.</h2>
+ <p>Five verbs. The flag names below are the actual flags exposed by <code>cli/kolm.js</code>.</p>
+
+ <pre><span class="kw">$</span> kolm cloud targets
+<span class="arg">available targets:</span>
+ fly Fly.io machines needs: KOLM_FLY_TOKEN
+ aws-nitro AWS Nitro Enclaves needs: KOLM_AWS_PROFILE
+ gcp-cvm GCP Confidential VM (SEV-SNP) needs: KOLM_GCP_PROJECT
+ azure-cvm Azure CVM (TDX/SNP) needs: KOLM_AZURE_TENANT
+ docker Docker (no TEE) needs: KOLM_DOCKER_REGISTRY
+
+<span class="kw">$</span> kolm cloud deploy --target aws-nitro --artifact support_ticket_router-1.0.0 \
+ --region us-east-1 --name router-prod
+<span class="arg">[deploy]</span> target=aws-nitro region=us-east-1
+<span class="arg">[deploy]</span> building enclave image (PCR0 expected: a1b2...)
+<span class="arg">[deploy]</span> launching enclave on m5n.xlarge
+<span class="arg">[deploy]</span> fetching first attestation (Nitro COSE_Sign1)
+<span class="arg">[deploy]</span> PCR0 matched; pinned as deploy=dep_8f3a2c
+<span class="arg">[deploy]</span> endpoint: https://router-prod.nitro.example
+<span class="arg">[deploy]</span> check it with: kolm cloud show dep_8f3a2c
+
+<span class="kw">$</span> kolm cloud show dep_8f3a2c
+<span class="arg">deployment:</span> dep_8f3a2c
+<span class="arg">target:</span> aws-nitro
+<span class="arg">region:</span> us-east-1
+<span class="arg">status:</span> running
+<span class="arg">artifact:</span> support_ticket_router-1.0.0
+<span class="arg">pcr0:</span> a1b2... pinned 2026-05-14 09:12 UTC
+<span class="arg">attestations:</span> 47 verified, 0 mismatched
+
+<span class="kw">$</span> kolm cloud destroy dep_8f3a2c
+<span class="arg">[destroy]</span> stopping enclave dep_8f3a2c
+<span class="arg">[destroy]</span> deployment status -> destroyed</pre>
+
+ <p>The deploy verb takes a <code>--target</code> flag with one of the five tier names, an <code>--artifact</code> flag pointing at a registered <code>.kolm</code>, and optional flags for region, name, team, and output path. The targets verb prints the active set with the env var each one expects. The show verb prints the current attestation state and the pinning timestamp. The destroy verb tears the deploy down and writes a final audit-log entry.</p>
+
+ <h2 id="pick">When to pick which.</h2>
+ <p>The matrix has four axes: who the regulator is, how much latency the workload tolerates, what the per-hour cost ceiling is, and what vendor commitments the buyer already has.</p>
+
+ <p><b>Fly</b> wins when the regulator does not require a hardware root, latency is the binding constraint, and the operator wants the cheapest per-hour bill. Fly's machines start in seconds and the operator does not have to learn a new vendor console. The attestation is weak; for workloads where the artifact's receipt chain plus a platform-level trust story is enough, that's fine.</p>
+
+ <p><b>aws-nitro</b> wins when the buyer already has an AWS commitment and the workload is regulated. FedRAMP-aligned, FFIEC-aware, HIPAA-on-AWS shops have years of AWS controls work behind them; adding a Nitro Enclave is a smaller change than introducing a new cloud. The Nitro attestation format is the most mature of the four; the COSE_Sign1 envelope is parseable from any language with a CBOR library.</p>
+
+ <p><b>gcp-cvm</b> wins when the buyer is on Google Cloud and the workload runs against BigQuery, GCS, or Vertex. The SEV-SNP report is verifiable end-to-end with AMD's root certificates. Latency is similar to Nitro; cost is in the same range. The selection often comes down to which cloud the data is already in.</p>
+
+ <p><b>azure-cvm</b> wins when the buyer is in the Microsoft ecosystem. The MAA JWT path is the most operationally friendly of the four (a JWT is easier than a binary quote); the binary TDX path is available for buyers whose regulator does not trust the MAA service. Government cloud shops (Azure Government, Azure for Sovereign) often have the strongest reason to be here.</p>
+
+ <p><b>docker</b> wins when the trust story is provided by the network, not the silicon. Private on-prem, regulator-bounded environments where the operator already runs Kubernetes, internal staging environments where the threat model is "an engineer accidentally leaks data" rather than "a cloud provider is compromised". The image SHA plus a registry signature is enough.</p>
+
+ <h2 id="limits">Documented limits.</h2>
+ <p>Three things the TEE story does not give you.</p>
+
+ <p><b>Vendor-rooted attestation depends on trusting the vendor.</b> An aws-nitro attestation chains to a Nitro Attestation Service root that AWS controls. A gcp-cvm SEV-SNP report chains to AMD's root, with Google in the middle of the path that delivered it. An azure-cvm TDX quote chains to Intel. If the threat model includes the cloud provider itself, or the silicon vendor itself, the TEE attestation does not close it. The code-grounded framing is: the TEE makes the cloud provider's operations team materially weaker as an adversary, while doing nothing about the cloud provider's compliance team if a subpoena or a national-security letter is the threat.</p>
+
+ <p><b>TOFU is pragmatic, not cryptographic certainty.</b> The first measurement the verifier sees is the baseline. If the deploy was compromised before that first measurement was pinned, the pinning happily preserves the compromise. The mitigation is an out-of-band check: the operator independently computes the expected PCR0 or measurement from the enclave image they built, and confirms the pinning matches. This is operational discipline; the verifier records the steps so the auditor can replay them.</p>
+
+ <p><b>Performance and cost are non-trivial.</b> Nitro Enclaves run on a slice of the parent EC2 instance; you pay for the parent. CVMs are typically priced 10-30% above the equivalent non-confidential SKU and are not available in every region. TDX is currently more limited geographically than SEV-SNP. The decision is not "is the attestation strong enough" in isolation; it's "is the attestation strong enough for the cost and latency we can absorb."</p>
+
+ <p>For most workloads we have shipped, the right answer is a mix. Production lives on a hardware-rooted target (aws-nitro or gcp-cvm) where the regulator wants a chain. Staging lives on docker or fly. Internal demo lives on docker. The same artifact runs on all of them; the receipt chain records the deploy mode and the attestation document, and the audit log shows what was sent where.</p>
+
+ <div class="signpost">
+ <a href="/research/airgap-deployment">
+ <span class="lab">read next</span>
+ <span class="v">Air-gapped deployment <span class="arrow">&rarr;</span></span>
+ <p>When the network is the threat model. The pre-flight cache plan, the offline switches, and the operational realities of a static artifact.</p>
+ </a>
+ <a href="/research/receipt-chains">
+ <span class="lab">read next</span>
+ <span class="v">Receipt chains <span class="arrow">&rarr;</span></span>
+ <p>How the attestation document lands inside the receipt and what the verifier checks alongside it.</p>
+ </a>
+ <a href="/byoc">
+ <span class="lab">docs</span>
+ <span class="v">kolm cloud reference <span class="arrow">&rarr;</span></span>
+ <p>Full CLI surface for the cloud verbs: targets, deploy, list, show, destroy.</p>
+ </a>
+ <a href="/threat-model">
+ <span class="lab">security</span>
+ <span class="v">Threat model <span class="arrow">&rarr;</span></span>
+ <p>What the attestation chain protects, what it does not, and where the operator's controls have to fill the gap.</p>
+ </a>
+ </div>
+
+ </div>
+</article>
+
+
+</main>
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+</body>
+</html>

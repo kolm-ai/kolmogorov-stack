@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Verifiable on-chain AI · kolm.ai</title>
+<meta name="description" content="Ed25519-chained receipts anchor to Sigstore / Rekor, optionally content-anchor service / OP_RETURN. Outputs you can prove came from a specific artifact.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta property="og:title" content="Verifiable on-chain AI · kolm.ai">
+<meta property="og:description" content="Ed25519-chained receipts anchor to Sigstore / Rekor, optionally content-anchor service / OP_RETURN. Outputs you can prove came from a specific artifact.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/use-cases/web3-verifiable">
+<link rel="canonical" href="https://kolm.ai/use-cases/web3-verifiable">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:title" content="Verifiable on-chain AI · kolm.ai">
+<meta name="twitter:description" content="Ed25519-chained receipts anchor to Sigstore / Rekor, optionally content-anchor service / OP_RETURN. Outputs you can prove came from a specific artifact.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="twitter:image" content="https://kolm.ai/img/brand-og.png">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "TechArticle",
+ "headline": "Verifiable on-chain AI",
+ "description": "Every .kolm output carries an Ed25519-chained receipt. Anchor it to Sigstore, Rekor, content-anchor service, or OP_RETURN, and prove that this exact model produced this exact output. Outputs you can verify forever, without trusting the runner.",
+ "author": {
+ "@type": "Organization",
+ "name": "Kolm",
+ "url": "https://kolm.ai"
+ },
+ "publisher": {
+ "@type": "Organization",
+ "name": "Kolm",
+ "logo": {
+ "@type": "ImageObject",
+ "url": "https://kolm.ai/favicon.svg"
+ }
+ },
+ "datePublished": "2026-05-08",
+ "dateModified": "2026-05-09",
+ "mainEntityOfPage": {
+ "@type": "WebPage",
+ "@id": "https://kolm.ai/use-cases/web3-verifiable"
+ },
+ "image": "https://kolm.ai/og-card.svg",
+ "keywords": "verifiable AI, on-chain inference, Sigstore, Rekor, content-anchor service, OP_RETURN, Ed25519 receipt",
+ "articleSection": "Use case"
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {
+ "@type": "ListItem",
+ "position": 1,
+ "name": "kolm",
+ "item": "https://kolm.ai/"
+ },
+ {
+ "@type": "ListItem",
+ "position": 2,
+ "name": "Solutions",
+ "item": "https://kolm.ai/use-cases"
+ },
+ {
+ "@type": "ListItem",
+ "position": 3,
+ "name": "Verifiable on-chain AI",
+ "item": "https://kolm.ai/use-cases/web3-verifiable"
+ }
+ ]
+ }
+ ]
+}
+</script>
+<style>
+ :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--accent-soft:rgba(236,231,220, 0.10);--good:#7ef0d2;--bad:#ff6b91;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+ *{box-sizing:border-box}
+ html,body{margin:0;padding:0}
+ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;font-synthesis:none}
+ a{color:inherit;text-decoration:none}
+ .wrap{max-width:1180px;margin:0 auto;padding:0 32px}
+ @media(max-width:720px){.wrap{padding:0 20px}}
+
+ header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+ header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px}
+ header.site .left{display:flex;align-items:center;gap:36px}
+ header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
+ header.site .brand span{font-weight: 500;font-size:16px}
+ header.site nav{display:flex;gap:22px}
+ header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
+ header.site nav a:hover{color:var(--ink)}
+ header.site .right{display:flex;align-items:center;gap:14px}
+ header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
+ header.site .right .cta{display:inline-flex;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight: 500}
+ @media(max-width:720px){header.site nav{display:none}}
+
+ section.hero{padding:88px 0 56px;position:relative;overflow:hidden}
+ section.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 900px 460px at 22% 12%,rgba(236,231,220, 0.10),transparent 60%);pointer-events:none}
+ section.hero .wrap{position:relative}
+ .crumbs{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+ .crumbs a{color:var(--ink-faint)}
+ .crumbs a:hover{color:var(--ink-mute)}
+ .crumbs .sep{color:var(--ink-faint);opacity:0.5}
+ .crumbs .here{color:var(--accent)}
+ h1{margin:14px 0 22px;font-size:clamp(36px,5.4vw,58px);line-height:1.05;font-weight:500;max-width:18ch;letter-spacing:0}
+ h1 .tone{color:var(--accent)}
+ p.lede{margin:0 0 28px;font-size:clamp(16px,1.3vw,18.5px);line-height:1.55;color:var(--ink-mute);max-width:60ch}
+ p.lede b{color:var(--ink);font-weight: 500}
+ p.lede code{font-family:var(--mono);font-size:0.9em;background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink)}
+ .cta-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+ a.btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--bg);border-radius:6px;padding:11px 18px;font-size:14px;font-weight: 500;transition:background 120ms}
+ a.btn-primary:hover{background:#fff}
+ a.btn-link{display:inline-flex;align-items:center;gap:6px;color:var(--ink);padding:11px 14px;font-size:14px;font-weight:500;transition:color 120ms}
+ a.btn-link:hover{color:var(--accent)}
+
+ section{padding:80px 0}
+ section + section{border-top:1px solid var(--line)}
+ .eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+ .eyebrow .num{color:var(--accent)}
+ h2{margin:0 0 18px;font-size:clamp(24px,2.8vw,34px);line-height:1.12;font-weight: 500;max-width:24ch;letter-spacing:0}
+ h2 .tone{color:var(--accent)}
+ p.sec-lede{margin:0 0 36px;font-size:15.5px;line-height:1.55;color:var(--ink-mute);max-width:62ch}
+
+ .pain{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+ @media(max-width:880px){.pain{grid-template-columns:1fr}}
+ .pain-card{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:22px;display:flex;flex-direction:column;min-height:184px}
+ .pain-card .lab{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;color:var(--ink-faint)}
+ .pain-card .big{margin:14px 0 10px;font-size:36px;font-weight: 500;line-height:1;color:var(--ink)}
+ .pain-card .big .u{font-size:13px;font-weight:400;color:var(--ink-mute);margin-left:4px}
+ .pain-card p{margin:0;font-size:13.5px;line-height:1.55;color:var(--ink-mute)}
+ .pain-card p b{color:var(--accent);font-weight: 500}
+
+ .triplets{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+ @media(max-width:880px){.triplets{grid-template-columns:1fr}}
+ .trip{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:24px}
+ .trip .icn{display:inline-flex;width:36px;height:36px;align-items:center;justify-content:center;border-radius:6px;background:var(--accent-soft);color:var(--accent);font-family:var(--mono);font-size:14px;font-weight: 500;margin-bottom:16px}
+ .trip h3{margin:0 0 10px;font-size:17px;font-weight: 500;line-height:1.3;color:var(--ink)}
+ .trip p{margin:0;font-size:13.5px;line-height:1.55;color:var(--ink-mute)}
+ .trip p b{color:var(--ink);font-weight:500}
+
+ .term{background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:10px;overflow:hidden;box-shadow:0 30px 80px -30px rgba(0,0,0,0.6)}
+ .term .hd{padding:12px 18px;border-bottom:1px solid var(--line);background:rgba(0,0,0,0.25);display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;color:var(--ink-mute)}
+ .term .hd .dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 8px var(--good)}
+ .term pre{margin:0;padding:24px 26px;font-family:var(--mono);font-size:13px;line-height:1.6;color:var(--ink);overflow-x:auto;white-space:pre}
+ .term .pmt{color:var(--accent)}
+ .term .cm{color:var(--ink-faint)}
+ .term .ok{color:var(--good)}
+ .term .ng{color:var(--bad)}
+
+ .anchors{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+ @media(max-width:720px){.anchors{grid-template-columns:1fr}}
+ .anchor{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:24px}
+ .anchor .lab{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+ .anchor h3{margin:0 0 8px;font-size:18px;font-weight: 500;color:var(--ink)}
+ .anchor p{margin:0 0 12px;font-size:13.5px;line-height:1.55;color:var(--ink-mute)}
+ .anchor .meta{display:flex;flex-wrap:wrap;gap:8px;font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+ .anchor .meta span{padding:3px 8px;border:1px solid var(--line-strong);border-radius:4px;background:var(--bg-card)}
+
+ .closing{padding:100px 0;position:relative;text-align:center}
+ .closing::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 700px 400px at 50% 50%,rgba(236,231,220, 0.08),transparent 60%);pointer-events:none}
+ .closing .wrap{position:relative}
+ .closing h2{margin:0 auto 24px;max-width:22ch;font-size:clamp(28px,4vw,44px)}
+ .closing .cta-row{justify-content:center}
+
+ footer{border-top:1px solid var(--line);padding:48px 0 36px;color:var(--ink-faint);font-size:12.5px}
+ footer .cols{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px;margin-bottom:24px}
+ @media(max-width:720px){footer .cols{grid-template-columns:1fr 1fr;gap:24px}}
+ footer h4{font-size:11px;color:var(--ink-mute);text-transform:uppercase;margin:0 0 10px;font-weight: 500}
+ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+ footer ul a{color:var(--ink-faint);transition:color 120ms}
+ footer ul a:hover{color:var(--ink)}
+ footer .legal{padding-top:18px;border-top:1px solid var(--line);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+</style>
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API Key &rarr;</a>
+ </div>
+ </div>
+</header>
+<main id="main">
+
+<section class="hero">
+ <div class="wrap">
+ <div class="crumbs">
+ <a href="/use-cases">use cases</a>
+ <span class="sep">/</span>
+ <span class="here">UC-05 &middot; verifiable AI</span>
+ </div>
+ <h1>Outputs you can prove came from a <span class="tone">specific artifact.</span></h1>
+<p class="lede">Every <code>.kolm</code> output can carry an Ed25519 receipt chained to the artifact manifest and tenant key. Auditors can re-verify offline, and external anchoring paths cover higher-assurance deployments.</p>
+ <div class="cta-row">
+ <a href="/signup?plan=pro" class="btn-primary">Start Pro &rarr;</a>
+ <a href="/whitepaper#receipts" class="btn-link">Receipt format spec <span aria-hidden="true">&rarr;</span></a>
+ </div>
+ </div>
+</section>
+
+<section>
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">01</span> &middot; what gets signed</div>
+ <h2>The chain has <span class="tone">three rings.</span></h2>
+ <p class="sec-lede">A <code>.kolm</code> receipt isn&rsquo;t a single hash. It&rsquo;s a chain that ties together the artifact, the call, and the registry, so you can verify provenance end-to-end without trusting our infrastructure.</p>
+ <div class="pain">
+ <div class="pain-card">
+ <div class="lab">Ring 1 &middot; artifact</div>
+ <div class="big">SHA-256<span class="u">&nbsp;manifest</span></div>
+ <p>Signs the manifest, base model GGUF, LoRA, recipes, recall index. <b>Tampering breaks the chain.</b> Verify with <code>kolm inspect &lt;artifact&gt;</code>.</p>
+ </div>
+ <div class="pain-card">
+ <div class="lab">Ring 2 &middot; call</div>
+ <div class="big">Ed25519<span class="u">-tenant key</span></div>
+ <p>Signs the input, output, K-score, timestamp, recall sources. <b>Bound to your tenant key.</b> Cannot be forged without it.</p>
+ </div>
+ <div class="pain-card">
+ <div class="lab">Ring 3 &middot; anchor</div>
+ <div class="big">Rekor<span class="u">&nbsp;or chain</span></div>
+ <p>Optional: anchor the chain head to <b>Sigstore Rekor (default)</b>, content-anchor service (permanent), or on-chain transaction (timestamped). Public, tamper-evident, decade-durable.</p>
+ </div>
+ </div>
+ </div>
+</section>
+
+<section>
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">02</span> &middot; anchors</div>
+ <h2>Four ledgers. <span class="tone">Pick the one that fits your trust model.</span></h2>
+ <p class="sec-lede">The receipt format is anchor-agnostic. We default to Sigstore Rekor because it&rsquo;s free, audited, and operated by the Linux Foundation. But the artifact verifies the same against any of these.</p>
+ <div class="anchors">
+ <div class="anchor">
+ <div class="lab">default &middot; free</div>
+ <h3>Sigstore Rekor.</h3>
+ <p>Anchored as part of <code>kolm compile</code> when the registry policy targets Rekor. Public transparency log; merklized; LF-AI-aligned.</p>
+ <div class="meta"><span>RFC 6962</span><span>~1s anchor</span><span>$0 / receipt</span><span>operator: LF</span></div>
+ </div>
+ <div class="anchor">
+ <div class="lab">permanent &middot; cheap</div>
+ <h3>content-anchor service.</h3>
+ <p>Permanent storage with a one-time fee. <b>Useful for receipts that must outlive the company.</b> 200-year storage commitment from the protocol.</p>
+ <div class="meta"><span>~$0.0002 / kb</span><span>~30s confirm</span><span>permanent</span></div>
+ </div>
+ <div class="anchor">
+ <div class="lab">timestamp-only</div>
+ <h3>on-chain transaction.</h3>
+ <p>32-byte chain head into the most-attacked timestamp service in the world. <b>Pure existence proof.</b> Useful when your audit story needs the strongest available timestamp anchor.</p>
+ <div class="meta"><span>~$1-3 / receipt</span><span>~10 min confirm</span><span>OP_RETURN</span></div>
+ </div>
+ <div class="anchor">
+ <div class="lab">enterprise</div>
+ <h3>Private merkle log.</h3>
+ <p>Don&rsquo;t want a public anchor? <b>Self-hosted Trillian log</b> on your infra. Same merkle proofs, private trust domain. Ships in Enterprise tier.</p>
+ <div class="meta"><span>RFC 6962</span><span>self-hosted</span><span>per-tenant</span></div>
+ </div>
+ </div>
+ </div>
+</section>
+
+<section>
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">03</span> &middot; verifying offline</div>
+ <h2>An auditor in 2030 verifies a receipt from <span class="tone">today.</span></h2>
+<p class="sec-lede">The verification ritual works offline against any artifact using your archived receipt material. Rekor and anchor flows extend the same proof path for deployments that require third-party anchoring.</p>
+ <div class="term" style="max-width:880px">
+ <div class="hd"><span class="dot"></span><span>auditor laptop &middot; 2030</span></div>
+ <pre><span class="cm"># given: a .kolm artifact and a receipt claim</span>
+<span class="pmt">$</span> kolm inspect \
+ --artifact ./contract-clauses-1.2.kolm \
+ --receipt ./output-2026-05-08.receipt \
+ --anchor rekor
+
+<span class="ok"> - /span> ring 1 (artifact): manifest hash matches sha256:7f3a&hellip;
+<span class="ok"> - /span> ring 2 (call): ed25519 valid tenant: org_4xK
+<span class="ok"> - /span> ring 3 (anchor): rekor entry 19,283,471 tlog timestamp: 2026-05-08T14:21:09Z
+<span class="ok"> - /span> base model: qwen-2.5-3b-instruct sha256:9d1e&hellip;
+<span class="ok"> - /span> recall sources: 4 chunks, all present index: contracts-prod-v3
+<span class="ok"> - /span> K-score on holdout: 91.4 (gate: - 5)
+<span class="ok"> - /span> evaluator: clause-classifier-eval-v2 sha256:3a72&hellip;
+
+<span class="ok">VERIFIED</span> &middot; this output was produced by this exact artifact at the time anchored to Rekor.</pre>
+ </div>
+ </div>
+</section>
+
+<section>
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">04</span> &middot; where verifiable AI matters</div>
+ <h2>Three classes of buyer ask for <span class="tone">this exact thing.</span></h2>
+ <p class="sec-lede">Receipts aren&rsquo;t for show. The buyers below are the ones we hear from first when the conversation turns to provenance.</p>
+ <div class="triplets">
+ <div class="trip">
+ <div class="icn">RG</div>
+ <h3>Regulated industries.</h3>
+ <p>Healthcare model risk reviewers, banking SR 11-7 model committees, FDA-path SaMD vendors. <b>Receipts replace screenshots</b> as the audit substrate. The chain is the evidence.</p>
+ </div>
+ <div class="trip">
+ <div class="icn">L3</div>
+ <h3>Layer-3 protocols.</h3>
+ <p>Verifiable inference rollups, data DAOs, prediction markets that pay model authors per call. <b>The receipt is the on-chain bill.</b> Public-key (Ed25519) receipts ship alongside, via the sidecar; Ed25519 verification with the shared tenant receipt secret is the default.</p>
+ </div>
+ <div class="trip">
+ <div class="icn">JU</div>
+ <h3>Litigation-grade outputs.</h3>
+ <p>Contract review, due-diligence reports, journalism. <b>The receipt is the chain of custody.</b> A court can verify the artifact-output binding without us being in the loop.</p>
+ </div>
+ </div>
+ </div>
+</section>
+
+<section>
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">05</span> &middot; what receipts are not</div>
+ <h2>Three things <span class="tone">we explicitly don&rsquo;t claim.</span></h2>
+ <p class="sec-lede">Verification has limits. We list them.</p>
+ <div class="triplets">
+ <div class="trip">
+ <div class="icn">!</div>
+ <h3>Not a correctness proof.</h3>
+ <p>A receipt proves the artifact ran and what it produced. <b>Not</b> that the output is correct; that&rsquo;s what the K-score and the verifier are for.</p>
+ </div>
+ <div class="trip">
+ <div class="icn">!</div>
+ <h3>Not zk-SNARK proof.</h3>
+ <p>We don&rsquo;t generate a zero-knowledge proof of the inference itself. <b>That&rsquo;s a separate research direction</b> we&rsquo;re tracking; today the chain is Ed25519-anchored.</p>
+ </div>
+ <div class="trip">
+ <div class="icn">!</div>
+ <h3>Not a substitute for the artifact.</h3>
+ <p>Verification needs the <code>.kolm</code> file (or its components). <b>Receipts alone don&rsquo;t reproduce</b> the output; they prove provenance against the file.</p>
+ </div>
+ </div>
+ </div>
+</section>
+
+<section class="closing">
+ <div class="wrap">
+ <h2>Outputs that <span class="tone">survive a subpoena.</span></h2>
+ <p class="sec-lede" style="margin:0 auto 28px;text-align:center">If your AI has to answer to an auditor, a regulator, or a chain, the answer is a receipt. kolm produces one for every call, free, by default.</p>
+ <div class="cta-row">
+ <a href="/signup?plan=pro" class="btn-primary">Start Pro &rarr;</a>
+ <a href="/whitepaper#receipts" class="btn-link">Receipt format spec <span aria-hidden="true">&rarr;</span></a>
+ </div>
+ </div>
+</section>
+
+
+</main>
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+</body>
+</html>

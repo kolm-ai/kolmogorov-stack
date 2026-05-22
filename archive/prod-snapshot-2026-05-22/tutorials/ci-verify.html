@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Tutorial 03 . Sign and verify in CI · kolm.ai</title>
+<meta name="description" content="Set up GitHub Actions to compile, sign, and verify every model artifact your team produces. Verifies the binder. Posts the receipt as a comment on the PR.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<link rel="canonical" href="https://kolm.ai/tutorials/ci-verify">
+<style>
+ :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
+ body{background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,Inter,system-ui,sans-serif;margin:0}
+ .wrap{max-width:760px;margin:0 auto;padding:0 24px}
+ header.site{padding:18px 0;border-bottom:1px solid var(--line)}
+ header.site .wrap{display:flex;justify-content:space-between;align-items:center;max-width:1080px}
+ header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
+ header.site nav a{color:inherit;text-decoration:none}
+ header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+ .hero{padding:72px 0 32px;border-bottom:1px solid var(--line)}
+ .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 16px}
+ .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ h1{font-size:38px;line-height:1.12;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px}
+ .lede{font-size:17.5px;line-height:1.55;color:var(--ink-mute);margin:0}
+ .meta{display:flex;gap:18px;margin:20px 0 0;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);letter-spacing:0.04em;flex-wrap:wrap}
+ .meta span b{color:var(--accent);font-weight:500}
+ section.step{padding:36px 0;border-bottom:1px solid var(--line)}
+ section.step h2{margin:0 0 12px;font-size:22px;font-weight:500;letter-spacing:-0.012em;color:var(--ink)}
+ section.step .stepno{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+ section.step p{color:var(--ink-mute);margin:0 0 16px}
+ pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55;margin:0 0 16px;color:var(--ink)}
+ pre .c{color:var(--ink-faint)}
+ pre .g{color:var(--accent)}
+ pre .k{color:#ec7373}
+ .checkpoint{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border:1px dashed rgba(16,185,129,0.32);border-radius:8px;background:rgba(16,185,129,0.05);font-size:13.5px;color:var(--ink-mute);margin:0 0 8px}
+ .checkpoint b{color:var(--accent);font-weight:500;font-family:var(--mono);font-size:11.5px;letter-spacing:0.04em;text-transform:uppercase}
+ .actions{display:flex;gap:12px;margin:24px 0 0;flex-wrap:wrap}
+ .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:8px;font-family:var(--mono);font-size:13px;text-decoration:none;border:1px solid var(--line);color:var(--ink);transition:all 160ms}
+ .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+ .btn:hover{transform:translateY(-1px)}
+ footer{padding:32px 0;color:var(--ink-faint);font-size:13px}
+ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+</style>
+<link rel="stylesheet" href="/styles.css">
+ <link rel="stylesheet" href="/brand-refresh.css">
+<meta property="og:title" content="Tutorial 03 . Sign and verify in CI · kolm.ai">
+<meta property="og:description" content="Set up GitHub Actions to compile, sign, and verify every model artifact your team produces. Verifies the binder. Posts the receipt as a comment on the PR.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/tutorials/ci-verify">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Tutorial 03 . Sign and verify in CI · kolm.ai">
+<meta name="twitter:description" content="Set up GitHub Actions to compile, sign, and verify every model artifact your team produces. Verifies the binder. Posts the receipt as a comment on the PR.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
+  <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+  <!-- KOLM_NAV_BEGIN (W221) -->
+  <nav class="site-nav" aria-label="Primary">
+  <div class="nav-item nav-item--product has-mega">
+  <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+  <div class="mega-menu" role="menu" aria-label="product menu">
+  <div class="mega-col">
+  <p class="mega-h">Start</p>
+  <a href="/product">Overview</a>
+  <a href="/quickstart">Quickstart</a>
+  <a href="/capture">Gateway</a>
+  </div>
+  <div class="mega-col">
+  <p class="mega-h">Build</p>
+  <a href="/training">Training</a>
+  <a href="/distill">Distill</a>
+  <a href="/compile">Compile</a>
+  </div>
+  <div class="mega-col">
+  <p class="mega-h">Deploy</p>
+  <a href="/runtimes">Runtimes</a>
+  <a href="/docs/devices">Devices</a>
+  <a href="/trust">Verify</a>
+  </div>
+  </div>
+  </div>
+  <div class="nav-item nav-item--models has-mega">
+  <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+  <div class="mega-menu" role="menu" aria-label="models menu">
+  <div class="mega-col">
+  <p class="mega-h">Choose</p>
+  <a href="/models">Model catalog</a>
+  <a href="/build-your-own">Build your own</a>
+  <a href="/docs/runtime">Runtime targets</a>
+  </div>
+  <div class="mega-col">
+  <p class="mega-h">Deploy</p>
+  <a href="/compute">Compute</a>
+  <a href="/runtimes">Mobile and edge</a>
+  </div>
+  </div>
+  </div>
+  <div class="nav-item nav-item--docs has-mega">
+  <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+  <div class="mega-menu" role="menu" aria-label="docs menu">
+  <div class="mega-col">
+  <p class="mega-h">Start</p>
+  <a href="/capture">API gateway</a>
+  <a href="/docs/cli">CLI</a>
+  <a href="/docs/sdk">SDKs</a>
+  </div>
+  <div class="mega-col">
+  <p class="mega-h">Reference</p>
+  <a href="/docs">Docs home</a>
+  <a href="/docs/api">API reference</a>
+  <a href="/api">HTTP routes</a>
+  </div>
+  <div class="mega-col">
+  <p class="mega-h">Operate</p>
+  <a href="/integrations">Integrations</a>
+  <a href="/docs/privacy">Privacy membrane</a>
+  <a href="/docs/datasets">Datasets</a>
+  <a href="/docs/distillation">Distillation</a>
+  <a href="/docs/verify">Verification</a>
+  </div>
+  </div>
+  </div>
+  <div class="nav-item nav-item--pricing has-mega">
+  <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+  <div class="mega-menu" role="menu" aria-label="pricing menu">
+  <div class="mega-col">
+  <p class="mega-h">Buy</p>
+  <a href="/pricing">Plans</a>
+  <a href="/pricing#roi">ROI calculator</a>
+  <a href="/nonprofits">Nonprofits</a>
+  </div>
+  </div>
+  </div>
+  <div class="nav-item nav-item--enterprise has-mega">
+  <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+  <div class="mega-menu" role="menu" aria-label="enterprise menu">
+  <div class="mega-col">
+  <p class="mega-h">Deploy</p>
+  <a href="/enterprise">Enterprise overview</a>
+  <a href="/self-host">Self-host</a>
+  <a href="/airgap">Air-gap</a>
+  </div>
+  <div class="mega-col">
+  <p class="mega-h">Trust</p>
+  <a href="/trust">Trust center</a>
+  <a href="/security">Security</a>
+  <a href="/compliance">Compliance</a>
+  <a href="/baa">BAA</a>
+  </div>
+  </div>
+  </div>
+  </nav>
+  <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API Key &rarr;</a>
+ </div>
+ </div>
+</header>
+<main id="main">
+<section class="hero">
+ <div class="wrap">
+ <p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; <a href="/tutorials">tutorials</a> &nbsp;/&nbsp; CI verify</p>
+ <h1>Sign and verify in CI.</h1>
+ <p class="lede">Set up GitHub Actions to compile, sign, and verify every model artifact your team produces. The verifier blocks the PR if K-score regresses. The receipt is posted as a PR comment auditors can read.</p>
+ <div class="meta"><span>Runtime <b>11 min</b></span><span>Runner <b>ubuntu-22.04</b></span><span>Verifier <b>open-source</b></span><span>Secret needed <b>KOLM_API_KEY</b></span></div>
+ </div>
+</section>
+
+<section class="step">
+ <div class="wrap">
+ <p class="stepno">Step 1 . 60 seconds</p>
+ <h2>Add a repository secret.</h2>
+ <p>GitHub repo &rarr; Settings &rarr; Secrets and variables &rarr; Actions &rarr; New repository secret. Name it `KOLM_API_KEY`. Paste your key from kolm.ai/account.</p>
+ </div>
+</section>
+
+<section class="step">
+ <div class="wrap">
+ <p class="stepno">Step 2 . 4 minutes</p>
+ <h2>Drop in the workflow.</h2>
+ <p>Create `.github/workflows/kolm-verify.yml` with the snippet below.</p>
+ <pre><span class="k">name</span>: kolm inspect
+
+<span class="k">on</span>:
+ pull_request:
+ paths:
+ - <span class="g">'recipes/**'</span>
+ - <span class="g">'.github/workflows/kolm-verify.yml'</span>
+
+<span class="k">jobs</span>:
+ verify:
+ runs-on: ubuntu-22.04
+ steps:
+ - uses: actions/checkout@v4
+ - uses: actions/setup-node@v4
+ with: { node-version: <span class="g">'20'</span> }
+ - run: npm install -g github:sneaky-hippo/kolm-stack
+ - run: kolm version
+
+ <span class="c"># compile every recipe touched by this PR</span>
+ - <span class="k">name</span>: compile + sign
+ env:
+ KOLM_API_KEY: ${{ secrets.KOLM_API_KEY }}
+ run: |
+ for recipe in recipes/*.recipe.json; do
+ kolm compile --from "$recipe" --out "artifacts/$(basename $recipe .recipe.json).kolm"
+ done
+
+ <span class="c"># verify every artifact (works offline)</span>
+ - <span class="k">name</span>: verify
+ run: |
+ for art in artifacts/*.kolm; do
+ kolm inspect "$art" --binder "artifacts/$(basename $art .kolm).binder.pdf"
+ done
+
+ <span class="c"># post receipts as PR comment</span>
+ - <span class="k">name</span>: post receipts
+ uses: actions/github-script@v7
+ with:
+ script: |
+ const fs = require(<span class="g">'fs'</span>);
+ const receipts = fs.readdirSync(<span class="g">'artifacts'</span>).filter(f => f.endsWith(<span class="g">'.receipt.json'</span>));
+ const body = receipts.map(r => {
+ const j = JSON.parse(fs.readFileSync(<span class="g">`artifacts/${r}`</span>));
+ return <span class="g">`**${r}** . K=${j.k_score} . CID \`${j.cid}\``</span>;
+ }).join(<span class="g">'\n'</span>);
+ await github.rest.issues.createComment({
+ ...context.repo, issue_number: context.issue.number, body,
+ });</pre>
+ </div>
+</section>
+
+<section class="step">
+ <div class="wrap">
+ <p class="stepno">Step 3 . 60 seconds</p>
+ <h2>Add a K-score floor.</h2>
+ <p>Set a K-score floor in the recipe so the compile step fails the CI run if quality regresses.</p>
+ <pre>{
+ <span class="k">"task"</span>: <span class="g">"redact PHI from clinical notes"</span>,
+ <span class="k">"base"</span>: <span class="g">"qwen2.5-7b-instruct"</span>,
+ <span class="k">"target_k"</span>: 0.95,
+ <span class="k">"min_k"</span>: 0.92,
+ <span class="k">"eval_pack"</span>: <span class="g">"hipaa-redact-v1"</span>
+}</pre>
+ <div class="checkpoint"><b>Checkpoint</b><span><b>min_k</b> is the floor. The compile step exits non-zero if K-score is below it. CI fails. PR is blocked.</span></div>
+ </div>
+</section>
+
+<section class="step">
+ <div class="wrap">
+ <p class="stepno">Step 4 . 60 seconds</p>
+ <h2>Push a recipe change.</h2>
+ <p>Open a PR that changes one recipe. The CI run compiles, verifies, and comments. You will see something like this in the PR conversation.</p>
+ <pre><span class="c">[bot] kolm inspect</span>
+
+**phi-redactor.receipt.json** . K=0.982 . CID `cidv1:sha256:1bcf2323...`
+**triage.receipt.json** . K=0.961 . CID `cidv1:sha256:8a3d1c4e...`
+
+<span class="g">all artifacts verified</span></pre>
+ </div>
+</section>
+
+<section class="step">
+ <div class="wrap">
+ <p class="stepno">Step 5 . optional</p>
+ <h2>Pin artifacts in release.</h2>
+ <p>On merge, upload artifacts and receipts to your release. The CID is the immutable handle for an audit five years from now.</p>
+ <pre>- <span class="k">name</span>: release
+ if: github.event_name == <span class="g">'release'</span>
+ uses: softprops/action-gh-release@v2
+ with:
+ files: |
+ artifacts/*.kolm
+ artifacts/*.receipt.json
+ artifacts/*.binder.pdf</pre>
+ <div class="actions"><a class="btn primary" href="/integrations/github-actions">GitHub Actions reference &rarr;</a><a class="btn" href="/docs">anatomy of a .kolm &rarr;</a></div>
+ </div>
+</section>
+
+</main>
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+<script src="/nav.js" defer></script>
+</body>
+</html>

@@ -1,1447 +1,489 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-<title>Changelog · kolm.ai</title>
-<meta name="description" content="Reverse-chronological wave-by-wave log of every kolm.ai release. What shipped, what changed, when.">
-<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta name="robots" content="index,follow">
-<meta property="og:title" content="Changelog · kolm.ai">
-<meta property="og:description" content="Reverse-chronological wave-by-wave log of every kolm.ai release. What shipped, what changed, when.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://kolm.ai/changelog">
-<meta property="og:image" content="https://kolm.ai/og-card.svg">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Changelog · kolm.ai">
-<meta name="twitter:description" content="Reverse-chronological wave-by-wave log of every kolm.ai release. What shipped, what changed, when.">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<title>Changelog &middot; kolm.ai</title>
+<meta name="description" content="Dated release notes for the kolm compiler, CLI, runtimes, and SDKs. Every shipped wave links to the receipt and the verified outcome.">
+<meta name="theme-color" content="#07090c">
 <link rel="canonical" href="https://kolm.ai/changelog">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/styles.css">
-<link rel="stylesheet" href="/brand-refresh.css">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
 <style>
- .cl-skip{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
- .cl-skip:focus{position:static;width:auto;height:auto;padding:8px 12px;background:#10b981;color:#0b0d10;border-radius:4px}
- .cl-wrap{max-width:960px;margin:0 auto;padding:0 32px}
- .cl-hero{padding:88px 0 36px;border-bottom:1px solid var(--line)}
- .cl-hero .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint,#737c73);margin:0 0 16px}
- .cl-hero .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
- .cl-hero h1{font-size:clamp(40px,5.4vw,68px);line-height:1.04;margin:0 0 14px;letter-spacing:-0.03em;font-weight:500;color:var(--fg,#faf2e1)}
- .cl-hero .lede{font-size:16px;line-height:1.6;color:var(--ink-mute,#b5bdb1);max-width:64ch;margin:0 0 18px}
- .cl-hero .feed{display:flex;gap:18px;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint,#737c73);letter-spacing:0.04em;flex-wrap:wrap}
- .cl-hero .feed a{color:inherit;border-bottom:1px dashed var(--line);text-decoration:none}
+  .sec-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
+  .sec-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
+  .sec-hero h1 { margin: 0 0 var(--ks-4); font-size: clamp(36px, 5vw, 56px); font-weight: 560; letter-spacing: -0.02em; line-height: 1.05; color: var(--ks-ink); }
+  .sec-hero h1 b { color: var(--ks-accent); font-weight: 560; }
+  .sec-hero p.lede { margin: 0 0 var(--ks-6); font-size: 18px; line-height: 1.55; color: var(--ks-ink-2); max-width: 64ch; }
+  .sec-hero .cta-row { display: flex; flex-wrap: wrap; gap: var(--ks-3); }
 
- .cl-recent{padding:40px 0;border-bottom:1px solid var(--line)}
- .cl-recent h2{margin:0 0 22px;font-size:13px;font-family:var(--mono);font-weight:500;color:var(--ink-faint,#737c73);letter-spacing:0.16em;text-transform:uppercase}
- .cl-recent-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
- .cl-recent-card{padding:20px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,0.02);display:flex;flex-direction:column;gap:8px}
- .cl-recent-card h3{margin:0;font-size:16px;font-weight:500;color:var(--fg,#faf2e1);letter-spacing:-0.01em}
- .cl-recent-card p{margin:0;color:var(--ink-mute,#b5bdb1);font-size:13.5px;line-height:1.55}
- .cl-recent-card time{font-family:var(--mono);font-size:11px;color:var(--ink-faint,#737c73);letter-spacing:0.04em}
+  .sec-section { padding: var(--ks-9) 0; border-bottom: 1px solid var(--ks-line-1); }
+  .sec-section h2 { margin: 0 0 var(--ks-2); font-size: clamp(24px, 3vw, 32px); font-weight: 560; letter-spacing: -0.015em; color: var(--ks-ink); }
+  .sec-section .sub { margin: 0 0 var(--ks-6); font-size: 15px; color: var(--ks-ink-3); max-width: 64ch; line-height: 1.6; }
 
- .cl-history{padding:32px 0 16px}
- .cl-history > h2{margin:0 0 18px;font-size:13px;font-family:var(--mono);font-weight:500;color:var(--ink-faint,#737c73);letter-spacing:0.16em;text-transform:uppercase}
- .cl-bucket{border-top:1px solid var(--line);padding:14px 0;margin:0}
- .cl-bucket > summary{cursor:pointer;list-style:none;display:flex;align-items:baseline;gap:14px;padding:6px 0;font-family:var(--mono);font-size:12px;letter-spacing:0.06em;color:var(--ink-mute,#b5bdb1)}
- .cl-bucket > summary::-webkit-details-marker{display:none}
- .cl-bucket > summary::before{content:'+';color:var(--ink-faint,#737c73);font-weight:600;width:14px;display:inline-block}
- .cl-bucket[open] > summary::before{content:'-'}
- .cl-bucket-label{color:var(--fg,#faf2e1);text-transform:uppercase}
- .cl-bucket-count{color:var(--ink-faint,#737c73)}
- .cl-timeline{list-style:none;margin:18px 0 24px;padding:0 0 0 14px;border-left:1px solid var(--line)}
- .cl-row{position:relative;padding:6px 0 22px 22px}
- .cl-row::before{content:'';position:absolute;left:-5px;top:14px;width:9px;height:9px;border-radius:50%;background:#10b981;box-shadow:0 0 0 3px #08090c}
- .cl-row-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:0 0 6px}
- .cl-tag{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--accent,#10b981);padding:2px 8px;border:1px solid rgba(16,185,129,0.32);border-radius:5px;background:rgba(16,185,129,0.06);letter-spacing:0.02em}
- .cl-row-title{margin:0;font-size:15.5px;font-weight:500;color:var(--fg,#faf2e1);letter-spacing:-0.01em}
- .cl-row time{font-family:var(--mono);font-size:11px;color:var(--ink-faint,#737c73);letter-spacing:0.04em;margin-left:auto}
- .cl-row-sum{margin:0 0 8px;color:var(--ink-mute,#b5bdb1);font-size:13.5px;line-height:1.55}
- .cl-pills{margin:0;display:flex;flex-wrap:wrap;gap:6px}
- .cl-pill{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint,#737c73);background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:4px;padding:1px 7px;letter-spacing:0.02em}
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--ks-4); }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--ks-4); }
+  @media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
 
- .cl-foot{padding:30px 0 60px;color:var(--ink-faint,#737c73);font-size:13px}
- .cl-foot a{color:inherit;border-bottom:1px dashed var(--line);text-decoration:none}
+  .sec-card { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); }
+  .sec-card .row { display: flex; justify-content: space-between; align-items: baseline; gap: var(--ks-3); margin-bottom: var(--ks-3); }
+  .sec-card .tag { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-ink-3); }
+  .sec-card .st { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--ks-line-2); }
+  .sec-card .st.live { color: var(--ks-accent); border-color: var(--ks-accent-edge); }
+  .sec-card .st.wip { color: #d6a65a; border-color: rgba(214,166,90,0.35); }
+  .sec-card h3 { margin: 0 0 var(--ks-2); font-size: 16px; font-weight: 540; color: var(--ks-ink); letter-spacing: -0.005em; }
+  .sec-card p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink-2); }
+  .sec-card p + p { margin-top: var(--ks-2); }
+  .sec-card a { color: var(--ks-accent); }
 
- @media (max-width:640px){
- .cl-wrap{padding:0 20px}
- .cl-hero{padding:64px 0 28px}
- .cl-row time{margin-left:0}
- .cl-row-head{flex-direction:column;align-items:flex-start;gap:4px}
- }
+  .month-head { position: sticky; top: 0; z-index: 5; background: rgba(7,9,12,0.92); backdrop-filter: blur(6px); border-bottom: 1px solid var(--ks-line-1); padding: var(--ks-3) 0 var(--ks-2); margin: 0 0 var(--ks-5); }
+  .month-head h3 { margin: 0; font-family: var(--ks-mono); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ks-ink-3); }
+
+  .entry { display: grid; grid-template-columns: 220px 1fr; gap: var(--ks-5); padding: var(--ks-5) 0; border-bottom: 1px solid var(--ks-line-1); }
+  @media (max-width: 760px) { .entry { grid-template-columns: 1fr; gap: var(--ks-2); } }
+  .entry .meta { font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-3); letter-spacing: 0.04em; }
+  .entry .meta .pill { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--ks-accent-edge); color: var(--ks-accent); margin-top: var(--ks-2); }
+  .entry h4 { margin: 0 0 var(--ks-2); font-size: 17px; font-weight: 560; color: var(--ks-ink); letter-spacing: -0.005em; }
+  .entry p { margin: 0; font-size: 14.5px; line-height: 1.65; color: var(--ks-ink-2); max-width: 72ch; }
+  .entry p + p { margin-top: var(--ks-2); }
+  .entry a { color: var(--ks-accent); }
+  .entry .tags { margin-top: var(--ks-2); display: flex; flex-wrap: wrap; gap: 6px; }
+  .entry .tags span { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.06em; padding: 2px 8px; border-radius: 4px; border: 1px solid var(--ks-line-2); color: var(--ks-ink-3); text-transform: uppercase; }
+
+  .sub-card { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); }
+  .sub-card h3 { margin: 0 0 var(--ks-2); font-size: 16px; font-weight: 540; color: var(--ks-ink); }
+  .sub-card p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink-2); }
+  .sub-card code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-accent); }
 </style>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Changelog","item":"https://kolm.ai/changelog"}]}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"kolm.ai changelog","url":"https://kolm.ai/changelog","description":"Reverse-chronological wave-by-wave log of every kolm.ai release.","isPartOf":{"@type":"WebSite","name":"kolm.ai","url":"https://kolm.ai/"},"inLanguage":"en"}</script>
-<link rel="stylesheet" href="/surface-polish.css">
 </head>
-<body>
-<a class="skip-link" href="#cl-main">Skip to content</a>
-<header class="site-header">
- <div class="wrap">
- <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
-  <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
-  <!-- KOLM_NAV_BEGIN (W221) -->
-  <nav class="site-nav" aria-label="Primary">
-  <div class="nav-item nav-item--product has-mega">
-  <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
-  <div class="mega-menu" role="menu" aria-label="product menu">
-  <div class="mega-col">
-  <p class="mega-h">Start</p>
-  <a href="/product">Overview</a>
-  <a href="/quickstart">Quickstart</a>
-  <a href="/capture">Gateway</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Build</p>
-  <a href="/training">Training</a>
-  <a href="/distill">Distill</a>
-  <a href="/compile">Compile</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Deploy</p>
-  <a href="/runtimes">Runtimes</a>
-  <a href="/docs/devices">Devices</a>
-  <a href="/trust">Verify</a>
-  </div>
-  </div>
-  </div>
-  <div class="nav-item nav-item--models has-mega">
-  <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
-  <div class="mega-menu" role="menu" aria-label="models menu">
-  <div class="mega-col">
-  <p class="mega-h">Choose</p>
-  <a href="/models">Model catalog</a>
-  <a href="/build-your-own">Build your own</a>
-  <a href="/docs/runtime">Runtime targets</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Deploy</p>
-  <a href="/compute">Compute</a>
-  <a href="/runtimes">Mobile and edge</a>
-  </div>
-  </div>
-  </div>
-  <div class="nav-item nav-item--docs has-mega">
-  <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
-  <div class="mega-menu" role="menu" aria-label="docs menu">
-  <div class="mega-col">
-  <p class="mega-h">Start</p>
-  <a href="/capture">API gateway</a>
-  <a href="/docs/cli">CLI</a>
-  <a href="/docs/sdk">SDKs</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Reference</p>
-  <a href="/docs">Docs home</a>
-  <a href="/docs/api">API reference</a>
-  <a href="/api">HTTP routes</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Operate</p>
-  <a href="/integrations">Integrations</a>
-  <a href="/docs/privacy">Privacy membrane</a>
-  <a href="/docs/datasets">Datasets</a>
-  <a href="/docs/distillation">Distillation</a>
-  <a href="/docs/verify">Verification</a>
-  </div>
-  </div>
-  </div>
-  <div class="nav-item nav-item--pricing has-mega">
-  <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
-  <div class="mega-menu" role="menu" aria-label="pricing menu">
-  <div class="mega-col">
-  <p class="mega-h">Buy</p>
-  <a href="/pricing">Plans</a>
-  <a href="/pricing#roi">ROI calculator</a>
-  <a href="/nonprofits">Nonprofits</a>
-  </div>
-  </div>
-  </div>
-  <div class="nav-item nav-item--enterprise has-mega">
-  <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
-  <div class="mega-menu" role="menu" aria-label="enterprise menu">
-  <div class="mega-col">
-  <p class="mega-h">Deploy</p>
-  <a href="/enterprise">Enterprise overview</a>
-  <a href="/self-host">Self-host</a>
-  <a href="/airgap">Air-gap</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Trust</p>
-  <a href="/trust">Trust center</a>
-  <a href="/security">Security</a>
-  <a href="/compliance">Compliance</a>
-  <a href="/baa">BAA</a>
-  </div>
-  </div>
-  </div>
-  </nav>
-  <!-- KOLM_NAV_END (W221) -->
- <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
- <a href="/signin" class="ghost">sign in</a>
- <a href="/signup" class="cta">Get API Key &rarr;</a>
- </div>
- </div>
-</header>
-<a class="cl-skip" href="#cl-main">Skip to main content</a>
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
-  <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
-  <!-- KOLM_NAV_BEGIN (W221) -->
-  <nav class="site-nav" aria-label="Primary">
-  <div class="nav-item nav-item--product has-mega">
-  <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
-  <div class="mega-menu" role="menu" aria-label="product menu">
-  <div class="mega-col">
-  <p class="mega-h">Start</p>
-  <a href="/product">Overview</a>
-  <a href="/quickstart">Quickstart</a>
-  <a href="/capture">Gateway</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Build</p>
-  <a href="/training">Training</a>
-  <a href="/distill">Distill</a>
-  <a href="/compile">Compile</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Deploy</p>
-  <a href="/runtimes">Runtimes</a>
-  <a href="/docs/devices">Devices</a>
-  <a href="/trust">Verify</a>
-  </div>
-  </div>
-  </div>
-  <div class="nav-item nav-item--models has-mega">
-  <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
-  <div class="mega-menu" role="menu" aria-label="models menu">
-  <div class="mega-col">
-  <p class="mega-h">Choose</p>
-  <a href="/models">Model catalog</a>
-  <a href="/build-your-own">Build your own</a>
-  <a href="/docs/runtime">Runtime targets</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Deploy</p>
-  <a href="/compute">Compute</a>
-  <a href="/runtimes">Mobile and edge</a>
-  </div>
-  </div>
-  </div>
-  <div class="nav-item nav-item--docs has-mega">
-  <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
-  <div class="mega-menu" role="menu" aria-label="docs menu">
-  <div class="mega-col">
-  <p class="mega-h">Start</p>
-  <a href="/capture">API gateway</a>
-  <a href="/docs/cli">CLI</a>
-  <a href="/docs/sdk">SDKs</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Reference</p>
-  <a href="/docs">Docs home</a>
-  <a href="/docs/api">API reference</a>
-  <a href="/api">HTTP routes</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Operate</p>
-  <a href="/integrations">Integrations</a>
-  <a href="/docs/privacy">Privacy membrane</a>
-  <a href="/docs/datasets">Datasets</a>
-  <a href="/docs/distillation">Distillation</a>
-  <a href="/docs/verify">Verification</a>
-  </div>
-  </div>
-  </div>
-  <div class="nav-item nav-item--pricing has-mega">
-  <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
-  <div class="mega-menu" role="menu" aria-label="pricing menu">
-  <div class="mega-col">
-  <p class="mega-h">Buy</p>
-  <a href="/pricing">Plans</a>
-  <a href="/pricing#roi">ROI calculator</a>
-  <a href="/nonprofits">Nonprofits</a>
-  </div>
-  </div>
-  </div>
-  <div class="nav-item nav-item--enterprise has-mega">
-  <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
-  <div class="mega-menu" role="menu" aria-label="enterprise menu">
-  <div class="mega-col">
-  <p class="mega-h">Deploy</p>
-  <a href="/enterprise">Enterprise overview</a>
-  <a href="/self-host">Self-host</a>
-  <a href="/airgap">Air-gap</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Trust</p>
-  <a href="/trust">Trust center</a>
-  <a href="/security">Security</a>
-  <a href="/compliance">Compliance</a>
-  <a href="/baa">BAA</a>
-  </div>
-  </div>
-  </div>
-  </nav>
-  <!-- KOLM_NAV_END (W221) -->
+<body class="ks">
 
-<main id="cl-main">
- <section class="cl-hero">
- <div class="cl-wrap">
- <p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; changelog</p>
- <h1>Changelog</h1>
- <p class="lede">kolm.ai ships waves of work; each wave is a coherent slice of product. Below is every wave we have shipped, newest first, with a one-line summary and the surfaces it touched. Every claim here resolves to a signed receipt at <a href="/spec/rs-1">/spec/rs-1</a>.</p>
- <div class="feed">
- <a href="/spec/rs-1">RS-1 receipt spec &rarr;</a>
- <a href="https://github.com/sneaky-hippo/kolm-stack/releases">github releases &rarr;</a>
- </div>
- </div>
- </section>
+<a href="#main" class="ks-skip">Skip to content</a>
 
- <div class="cl-wrap">
-<!-- CHANGELOG_AUTO_BEGIN -->
-  <section class="cl-recent" aria-label="Most recent waves">
-  <h2>Most recent</h2>
-  <div class="cl-recent-grid">
-  <article class="cl-recent-card">
-  <span class="cl-tag">W481-W490</span>
-  <h3>audit finish drive</h3>
-  <p>6 waves (W481/W482/W484/W485/W487/W490) close post-W479 audit items: SDK catalog honesty (install_registry+install_source dual-path so 6 SDKs are always installable),.</p>
-  <time datetime="2026-05-20">2026-05-20</time>
-  </article>
-  <article class="cl-recent-card">
-  <span class="cl-tag">W479</span>
-  <h3>TOTAL COMPLETION GREEN</h3>
-  <p>release-verify all 7 gates green (lint:refs, test 4006/4006, sdk-smoke, doctor, whoami, verify-claims, billing-tiers).</p>
-  <time datetime="2026-05-20">2026-05-20</time>
-  </article>
-  <article class="cl-recent-card">
-  <span class="cl-tag">W470</span>
-  <h3>release closure</h3>
-  <p>7-part release closure: isolated home directories for serial runs, SDK search shape fix, and release-gate cleanup.</p>
-  <time datetime="2026-05-20">2026-05-20</time>
-  </article>
-  </div>
-  </section>
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/k-score">K-score</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
+      </div>
+    </div>
+  </header>
+</div>
 
-  <section class="cl-history" aria-label="Full wave history">
-  <h2>Full history</h2>
-  <details class="cl-bucket" open>
-  <summary><span class="cl-bucket-label">May 2026</span> <span class="cl-bucket-count">119 waves</span></summary>
-  <ol class="cl-timeline">
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W481-W490</span>
-  <h3 class="cl-row-title">audit finish drive</h3>
-  <time datetime="2026-05-20">2026-05-20</time>
-  </div>
-  <p class="cl-row-sum">6 waves (W481/W482/W484/W485/W487/W490) close post-W479 audit items: SDK catalog honesty (install_registry+install_source dual-path so 6 SDKs are always installable),</p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W479</span>
-  <h3 class="cl-row-title">TOTAL COMPLETION GREEN</h3>
-  <time datetime="2026-05-20">2026-05-20</time>
-  </div>
-  <p class="cl-row-sum">release-verify all 7 gates green (lint:refs, test 4006/4006, sdk-smoke, doctor, whoami, verify-claims, billing-tiers). Closed W476-scrub collateral: W268 (Zapier/Make.com shipped pill),</p>
-  <p class="cl-pills"><span class="cl-pill">tests</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W470</span>
-  <h3 class="cl-row-title">release closure</h3>
-  <time datetime="2026-05-20">2026-05-20</time>
-  </div>
-  <p class="cl-row-sum">7-part release closure: isolated home directories for serial runs, SDK search shape fix, and release-gate cleanup.</p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W469</span>
-  <h3 class="cl-row-title">C + Rust SDKs</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">first-class language SDKs at code surface (stb-style single-header kolm.h + KOLM_IMPLEMENTATION guard, libcurl-backed, kolm-cli demo, Makefile, README) + code surface (kolm crate v0.1.0,</p>
-  <p class="cl-pills"><span class="cl-pill">cli</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W466</span>
-  <h3 class="cl-row-title">multimodal bakeoff</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">audit P1 Multimodal closer (bake-off arm): new code surface replays captures with media_kind through each compiled .kolm artifact + scores by Jaccard token-overlap against captured base resp...</p>
-  <p class="cl-pills"><span class="cl-pill">captures</span><span class="cl-pill">cli</span><span class="cl-pill">replay</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W465</span>
-  <h3 class="cl-row-title">billing breakdown</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">audit P1 Billing closer: per-namespace cost attribution + team-level rollup sourced from event-store (authoritative cost ledger).</p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W464</span>
-  <h3 class="cl-row-title">multimodal audio voiceprint scrub</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">audit P1 Multimodal cluster - third media-redact primitive (after W454 transcript scrub + W462 image PII). workers/multimodal-redact-audio/ thin Node shell that spawns an external Python ano...</p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W463</span>
-  <h3 class="cl-row-title">agent trace compile</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">audit P1 Agent Trace cluster closer. New code surface wraps W144 trace-capture + W409w workflow-ir/compile-ir into one loop: compileTraceToReplay(trace_id)  - IR seeded with (user_input  - fin...</p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W462</span>
-  <h3 class="cl-row-title">multimodal image redact</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">audit P1 Multimodal closer (image side). New workers/multimodal-redact-image/ isolated package + redact-image.mjs: YOLO-format ONNX face + license-plate detection via onnxruntime-node,</p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W461</span>
-  <h3 class="cl-row-title">federated approval-row sharing</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">audit P1 Federated Foundations cluster closer. New code surface (decision-aggregation, distinct from federated-learning.js gradient-aggregation foundation).</p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W460</span>
-  <h3 class="cl-row-title">attestation embed</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">audit P1 Confidential Compute cluster closer. spec-compile.js accepts opts.attestation_report (path or object) + opts.attestation_kind (pccs/snp-report/nitro-attestation/nras);</p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">compute</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W459</span>
-  <h3 class="cl-row-title">distill reliability</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">audit P1 distill cluster closer: distill() wraps worker spawn in attempt loop over _pickTeachers() (new export, ordered+deduped, KOLM_DISTILL_TEACHER accepts comma list).</p>
-  <p class="cl-pills"><span class="cl-pill">distill</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W457</span>
-  <h3 class="cl-row-title">omnibus finish</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">closes every release blocker from the 2026-05-19 audit in one wave (7 blocks via 6 parallel agents + main-thread stitch): (1) artifact runtime consistency manifest===target===receipt + real...</p>
-  <p class="cl-pills"><span class="cl-pill">runtime</span><span class="cl-pill">receipts</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W456</span>
-  <h3 class="cl-row-title">public changelog + roadmap</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">closes audit P1 Website &quot;public changelog/roadmap&quot; open item: code surface WAVES source-of-truth + helpers; public GET /v1/changelog (no auth) returns {ok,count,total,latest,waves};</p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W455</span>
-  <h3 class="cl-row-title">distill-runs per-prompt loss telemetry</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">closes audit P1 distill cluster open item: distill-pipeline writes ~/.kolm/distill-runs/run_*/{run-meta.json,progress.jsonl,manifest.json} on every iteration;</p>
-  <p class="cl-pills"><span class="cl-pill">distill</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W454</span>
-  <h3 class="cl-row-title">multimodal redact-job worker</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">closes W452 deferred surface: workers/media-redact/ isolated optional-deps package (tesseract.js / pdf-parse + external whisper-code surface);</p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W453</span>
-  <h3 class="cl-row-title">kolm ask --intent preview</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">closes audit P1 CLI/TUI item: `kolm ask --intent / --preview` routes through /v1/intent/ask (same classifier as W415 web ask-bar)</p>
-  <p class="cl-pills"><span class="cl-pill">cli</span><span class="cl-pill">tui</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W451-W452</span>
-  <h3 class="cl-row-title">/452 no-teacher synth default + multimodal redactor routes</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">W451 compileFull defaults synthesize_recipe:true when no teacher env wired (rule-class W438 synth path auto-engages; explicit opt:false still wins);</p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W449-W450</span>
-  <h3 class="cl-row-title">/450 billing TUI parity + settings triangle</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">W449 adds TUI billing view (key I) closing the /account/billing triangle; W450 ships new /account/settings triangle: route GET+PUT with whitelist+enum validation + AUDIT_OPS.SETTINGS_UPDATED...</p>
-  <p class="cl-pills"><span class="cl-pill">tui</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W448</span>
-  <h3 class="cl-row-title">audit-log triangle</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">closes P1 /account/audit-log triangle: route now accepts ?format=csv + ?since=&lt;iso|epoch&gt;, new `kolm audit` CLI verb (distinct from `kolm auditor` signing tool),</p>
-  <p class="cl-pills"><span class="cl-pill">cli</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W447</span>
-  <h3 class="cl-row-title">DoD fixture full-sweep fix</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">bumped DoD #8/#9/#10 from 60  - 100 rows + unique-per-run ns/event_ids so binomial 80/20 split never dips below MIN_PRODUCTION_HOLDOUT=10 (was ~20% flake at 60 rows, now ~0.6%);</p>
-  <p class="cl-pills"><span class="cl-pill">tests</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W443-W446</span>
-  <h3 class="cl-row-title">audit-finish batch</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">W443 DoD compile honesty (synthClassifier TF-IDF rewrite + coverage K-score V semantics + evalParity floor uses accuracy not composite K  - K=0.9843 production_ready:true);</p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W438-W439</span>
-  <h3 class="cl-row-title">real compile + incremental retrain</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">W438 closes audit item 5 (rule-class real synth-path compile, allow_below_gate defaults true so productionReady verdict gates instead of buildPayload throw, 5+4 tests,</p>
-  <p class="cl-pills"><span class="cl-pill">tests</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W437</span>
-  <h3 class="cl-row-title">full-suite green</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">closes 6 post-W436 audit-flagged test failures: W409lm #6/#7 (thread tenantId into seedEvents), W384 #14 (seed real opportunity instead of synthetic ID),</p>
-  <p class="cl-pills"><span class="cl-pill">tests</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W433-W436</span>
-  <h3 class="cl-row-title">DoD closure batch</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">closes 4 remaining DoD gaps after the user pushed back &quot;are you sure?&quot; on a premature done-declaration: W433 /v1/whoami SDK alias, W434 /v1/drift/{snapshot,detect,report} HTTP surface,</p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W419-W432</span>
-  <h3 class="cl-row-title">audit-finish batch</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">closes 13-item w415-outstanding-diffs audit (P0-1 W419 opportunity tenant, P0-2 W420 pipeline force, P0-3 W421 distill real-bridge, P0-5 W423 media-capture tenant_id,</p>
-  <p class="cl-pills"><span class="cl-pill">distill</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W427</span>
-  <h3 class="cl-row-title">local:* meter exclusion (P1-3 closer)</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">one-line fix in code surface shouldMeter(): `if (tid &amp;&amp; tid.startsWith(&#39;local:&#39;)) return false;` so local-daemon traffic stamped `local:&lt;host&gt;` (router.js:447) stops being metered by connect...</p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W415</span>
-  <h3 class="cl-row-title">NL ask-bar on /account/overview</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">POST /v1/intent/ask classifyIntent envelope + exact `kolm ...` command + alternatives + confidence pill + copy buttons; mirrors `kolm do` on the web; 7 tests + sw.js wave415;</p>
-  <p class="cl-pills"><span class="cl-pill">cli</span><span class="cl-pill">tests</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W414</span>
-  <h3 class="cl-row-title">TUI Next-actions view + /docs/verify page</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">closes 3-surface triangle (CLI `kolm next` + web /account/overview + TUI); 15th TUI view (key N, kind=get, endpoint /v1/intent/next);</p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">cli</span><span class="cl-pill">tui</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W413</span>
-  <h3 class="cl-row-title">Next-Actions panel on /account/overview</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">new auth-gated `/v1/intent/next` route mirrors `kolm next` CLI; injects Next-Actions panel ABOVE W409i 9-counter grid on `/account/overview.html` with copy-buttons per rec;</p>
-  <p class="cl-pills"><span class="cl-pill">cli</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W411</span>
-  <h3 class="cl-row-title">P0 correctness guardrails</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">12 atoms (tenant_id parity, content-dedupe, fail-closed redaction, worker-input-spy, redaction leak, backfill defaults,</p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W405</span>
-  <h3 class="cl-row-title">Apple-style restraint</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">fixed 25-section wall-of-text home vs frontier 5-8 sections; deleted 5 sections (~1100 lines: tax/after-compile/vr-calc/access/uc-strip moved to /taxonomy /docs /roi /remote verticals);</p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">models</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W404</span>
-  <h3 class="cl-row-title">visual audit + structure/copy</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">Screenshot review covered core surfaces and competitor references; debug-pill leaks were removed and navigation was normalized on models and healthcare pages.</p>
-  <p class="cl-pills"><span class="cl-pill">nav</span><span class="cl-pill">models</span><span class="cl-pill">runtime</span><span class="cl-pill">tui</span><span class="cl-pill">healthcare</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W403</span>
-  <h3 class="cl-row-title">surface-map + proxy dogfood</h3>
-  <time datetime="2026-05-19">2026-05-19</time>
-  </div>
-  <p class="cl-row-sum">W373 sec 1-6 plain-English rewrite + sec 3 11 - 2 cards (bake-off frontier-vs-frontier); new sec 7 `data-w403=&quot;surface-grid&quot;` 8-card 40-link map;</p>
-  <p class="cl-pills"><span class="cl-pill">models</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W402</span>
-  <h3 class="cl-row-title">hero &quot;the local AI stack&quot;</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">user &quot;people use our product for all sorts of stuff from api saving to compiling and distillation to enterprise ai to training frontier models&quot;;</p>
-  <p class="cl-pills"><span class="cl-pill">hero</span><span class="cl-pill">models</span><span class="cl-pill">enterprise</span><span class="cl-pill">distill</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W400-W401</span>
-  <h3 class="cl-row-title">/401 docs-audit batch close</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">docs/reference cleanup; reduced the docs landing page, tightened the reference matrix, and added `kolm improve` plus `key`/`import` allowed gaps.</p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">cli</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W399</span>
-  <h3 class="cl-row-title">nav mega-menus (12-pillar surface coverage)</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">user &quot;useless info, ensure ALL product surfaces are covered in primary nav, optionality to go deeper into branches&quot;; W221 5-top-label contract preserved,</p>
-  <p class="cl-pills"><span class="cl-pill">nav</span><span class="cl-pill">seo</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W398</span>
-  <h3 class="cl-row-title">hero rewrite (Jung-grade plain-English pass)</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">user &quot;extremely unrelatable... too wordy... references random companies nobody cares about&quot;; H1 24 - 4 words (&quot;You&#39;re paying for the same answer over and over / Stop the duplicate API calls /...</p>
-  <p class="cl-pills"><span class="cl-pill">hero</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W397</span>
-  <h3 class="cl-row-title">dataset-to-bakeoff hydration</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">closes W396 trap; loadDatasetRows async + resolves ds_*/ns via ~/.kolm/datasets/&lt;id&gt;.json + getEvent() hydration of holdout_ids (source_event_ids fallback);</p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W367-W386</span>
-  <h3 class="cl-row-title">finish-product batch</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">20-wave batch shipped: W370 17-class privacy membrane / W373 website rewrite / W374 docs tree / W375 15-section /account / W376+W385 13-view TUI / W377 multimodal capture / W378 4-state clou...</p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">tui</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W366</span>
-  <h3 class="cl-row-title">homepage plain-English rescue</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">Plain-English hero rewrite after feedback that K-score, KB, and SPDX proof points were crowding out the core compilation and distillation story.</p>
-  <p class="cl-pills"><span class="cl-pill">hero</span><span class="cl-pill">distill</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W339-W365</span>
-  <h3 class="cl-row-title">finish everything (8-agent batch)</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">8 parallel agents: A production-verdict + cmdRun --strict/--force; B real claims-redactor.kolm (60 seeds, K=0.985); C eval-bench parity + probe cleanup;</p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W338</span>
-  <h3 class="cl-row-title">reality audit (codex-grade)</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">13 compute backends REAL (fal/replicate/runpod=HTTPS+poll, modal=spawn CLI, lambda/vast=SSH-handle, 6 local-*=child_process);</p>
-  <p class="cl-pills"><span class="cl-pill">cli</span><span class="cl-pill">compute</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W334</span>
-  <h3 class="cl-row-title">hero rescue: drop salmon + PHI niche</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">Hero and color pass: broad product framing replaced niche PHI-first language, and the secondary headline color moved back to the core ink system.</p>
-  <p class="cl-pills"><span class="cl-pill">hero</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W333</span>
-  <h3 class="cl-row-title">MEMORY.md archive-extract round 2</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">234 - 5 lines, 488KB - 7.7KB; archived 199 W144-W210 + v7.x-v11 entries; updated 3-line ARCHIVE.md header; backup at MEMORY.md.wave333-backup; line-count fired at 234 (past 180 target),</p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W326-W332</span>
-  <h3 class="cl-row-title">sprint scorecard + prod deploy</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">W326 sweep 216/216 + W327 W211-W325 cross-sweep 2599/2615 caught 3 regressions (W218 doctor slice 4000 - 4000, W206 docs for 5 inspection verbs, value-loop em-dash);</p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">tests</span><span class="cl-pill">ops</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W322-W325</span>
-  <h3 class="cl-row-title">/quickstart/{cli,api,sdk,embed}</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">4 focused 5-step walkthroughs; shared invariants (title `· kolm.ai`/canonical/5-anchor nav W221/skip-link W207/JSON-LD TechArticle W225/W226/brand anchor 1200 chars W228); cli=5 verbs,</p>
-  <p class="cl-pills"><span class="cl-pill">cli</span><span class="cl-pill">nav</span><span class="cl-pill">quickstart</span><span class="cl-pill">seo</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W318-W321</span>
-  <h3 class="cl-row-title">CLI inspection + kolm artifacts</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">W318 stable JSON envelope (logged_in/base/cli_version/key_fingerprint/tenant) prefix+suffix-only fingerprint; W319-W321 `kolm artifacts {list,show,diff}` hits /v1/artifacts;</p>
-  <p class="cl-pills"><span class="cl-pill">cli</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W314-W317</span>
-  <h3 class="cl-row-title">/captures inbox UI polish</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">W314 client-side substring search + MutationObserver re-apply across SSE; W315 ?namespace= deep link + history.replaceState; W316 promote-confirm modal (role=dialog, aria-modal, Escape,</p>
-  <p class="cl-pills"><span class="cl-pill">captures</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W313</span>
-  <h3 class="cl-row-title">/value-loop try-it-now form</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">POST /v1/loop/try public anonymous returns real receipt + `demo:true`+`durable:false` body + headers; 2000-char cap  - 413; templateSignature() hash real; inline form with 5s AbortController;</p>
-  <p class="cl-pills"><span class="cl-pill">receipts</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W312</span>
-  <h3 class="cl-row-title">/value-loop live status badge</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">loop-status pill probes /health w/4s AbortController; green=200/red=HTTP-error/**amber**=network-error (visitor-network bias); sessionStorage 60s TTL suppresses flash.</p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W311</span>
-  <h3 class="cl-row-title">walkLoop parallel-flake fix</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">(1) .env KOLM_STORE_DRIVER=sqlite + dotenv loads before store.js  - parallel tests fight ./data/kolm.sqlite; fixed by PRAGMA busy_timeout=30000 in same exec as journal_mode=WAL;</p>
-  <p class="cl-pills"><span class="cl-pill">tests</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W304+W305</span>
-  <h3 class="cl-row-title">+305 status + health verbs</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">`kolm status` local snapshot + `kolm health` cloud ping (exit 0/1/2 healthy/down/slow); TRAP: fetch() crashes libuv on Windows process.exit() (STATUS_STACK_BUFFER_OVERRUN),</p>
-  <p class="cl-pills"><span class="cl-pill">cli</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W302+W303</span>
-  <h3 class="cl-row-title">+303 loop NEXT STEPS + --remote</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">green run prints 5 copy-pasteable follow-on verbs; `kolm loop --remote` walks 5 rungs against loadConfig().base; walkLoop() shared; JSON payload tags mode:&#39;remote&#39;|&#39;in-process&#39;.</p>
-  <p class="cl-pills"><span class="cl-pill">cli</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W297</span>
-  <h3 class="cl-row-title">value-loop guardrails + corpus_namespace bugfix</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">8-test buildRouter() harness walks capture -> SSE -> bridges -> distill -> replay + cross-tenant isolation; W297 fix /v1/bridges/observations: recordCapture writes corpus_namespace but handler filtered...</p>
-  <p class="cl-pills"><span class="cl-pill">tests</span><span class="cl-pill">distill</span><span class="cl-pill">replay</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W270</span>
-  <h3 class="cl-row-title">batch close W260-W269</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">closer for 10-wave batch (copy refresh + builder + MCP installers + marketplace + self-hosted + analytics + native targets + nonprofits + integrations + agent composition);</p>
-  <p class="cl-pills"><span class="cl-pill">marketplace</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W254</span>
-  <h3 class="cl-row-title">Brand rename to Kolm</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">280 files / 1634 replacements via idempotent code surface; npm scopes at-Kolm * -> @kolm/*; repo kolm-stack -> kolm-stack; backups/ frozen excluded;</p>
-  <p class="cl-pills"><span class="cl-pill">cli</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W239</span>
-  <h3 class="cl-row-title">sweep + 4 regressions</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">final integration sweep after W238 caught 4 cross-wave regressions: W214 #10 (W233 detach block pushed --from-captures dispatch past 600-char test window - hoisted dispatch);</p>
-  <p class="cl-pills"><span class="cl-pill">captures</span><span class="cl-pill">tests</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W238</span>
-  <h3 class="cl-row-title">init-agent script-first scaffolder</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">`kolm init-agent &lt;name&gt; [dir] --template chatbot|redactor|classifier|extraction|agent [--git] [--tmux]` writes spec.json+seeds.jsonl+run.sh+blueprint.json+tmux.conf via code surface (~190L);</p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">cli</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W232</span>
-  <h3 class="cl-row-title">.kolm-state + checkpoint/import-chat/merge</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">git-native .kolm-state dir + 3 CLI verbs; code surface ESM ~250L (deterministic short-hash, claude/chatgpt/jsonl parsers, head_wins/evaluator_decides strategies);</p>
-  <p class="cl-pills"><span class="cl-pill">cli</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W230</span>
-  <h3 class="cl-row-title">/foundations integration hub + 5 recipe pages</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">hub + tailscale/termius/tmux/git/scripts recipes wired to W229 native verbs; 5-card grid + 4-col matrix; vercel +6 rewrites; build-og NESTED_DIRS += foundations (125 - 31 OG cards);</p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W229</span>
-  <h3 class="cl-row-title">foundations-verbs</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">Block E opens: 4 new CLI verbs (jobs/watch/sync/profile) + 2 ESM modules code surface (JSONL job registry ~/.kolm/jobs.jsonl, create/update/prune/tailLog,</p>
-  <p class="cl-pills"><span class="cl-pill">cli</span><span class="cl-pill">models</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W228</span>
-  <h3 class="cl-row-title">brand-disambig sweep</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">code surface idempotent: &lt;title&gt;  - &quot; · kolm.ai&quot; (101 normalized), brand-anchor span in first 1200 body chars (94 injected, position:absolute;left:-9999px;aria-hidden),</p>
-  <p class="cl-pills"><span class="cl-pill">tests</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W227</span>
-  <h3 class="cl-row-title">SEO supporting articles (5)</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">5 articles under /articles/ closing W226 pillar&#39;s internal link graph: hipaa-ai-from-prompts/fine-tune-vs-compile/kolm-artifact-walkthrough/ai-compiler-comparison/kolm-ai-vs-kolm-therapeutic...</p>
-  <p class="cl-pills"><span class="cl-pill">compliance</span><span class="cl-pill">seo</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W226</span>
-  <h3 class="cl-row-title">SEO pillar /what-is-an-ai-compiler</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">1931-word pillar claims &quot;AI compiler&quot; head keyword + long-tails; Article+BreadcrumbList+FAQPage JSON-LD (5 Qs including brand-disambig); 11 H2s; 9 internal cross-links;</p>
-  <p class="cl-pills"><span class="cl-pill">seo</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W225</span>
-  <h3 class="cl-row-title">SEO infrastructure</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">code surface auto-builds 286-URL sitemap.xml (cuts excluded, priority sorted); code surface mints 105 per-page SVG OG cards;</p>
-  <p class="cl-pills"><span class="cl-pill">seo</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W224</span>
-  <h3 class="cl-row-title">copy cleanup + behavior guardrails</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">16 low-conversion pages deleted (agents/defense/evolve/bounty/bounties/cloud/distill/edge/cookbook/serve/playground/onboarding/recall/anatomy/showcase/openai),</p>
-  <p class="cl-pills"><span class="cl-pill">tests</span><span class="cl-pill">distill</span><span class="cl-pill">onboarding</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W223</span>
-  <h3 class="cl-row-title">TUI showcase /tui</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">/tui page with `&lt;pre id=tui-player&gt;` + ~50-LOC inline player + 6-card keymap grid (Movement/Source/Filter+command/Actions/Value loop/Help+exit) + tmux/SSH/Tailscale install snippet + cross-l...</p>
-  <p class="cl-pills"><span class="cl-pill">tui</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W222</span>
-  <h3 class="cl-row-title">TUI alt-screen multi-pane</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">cmdTui rewrite to alt-screen 3-pane (captures/artifacts list + detail + status bar), keys j/k/g/G/Tab/1/2/Enter/r/d/v/R/q + vim-style :open/:inspect/:run/:verify/:quit + / filter;</p>
-  <p class="cl-pills"><span class="cl-pill">captures</span><span class="cl-pill">tui</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W221</span>
-  <h3 class="cl-row-title">nav consolidation 6 - </h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">Product/Models/Docs/Pricing/Enterprise via idempotent code surface with HTML-comment markers; 67 pages converted; nav.js path-active rewritten (use-cases -> Product, research+training -> Docs,</p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">nav</span><span class="cl-pill">models</span><span class="cl-pill">pricing</span><span class="cl-pill">enterprise</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W219</span>
-  <h3 class="cl-row-title">runtime build-from-source</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">new isolated workers/runtime-build/ source-builds llama.cpp at pinned commit per 10-target matrix (cuda-89/90/100/120, rocm-gfx1100/942, vulkan, metal, cpu-avx2/512);</p>
-  <p class="cl-pills"><span class="cl-pill">runtime</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W218</span>
-  <h3 class="cl-row-title">hw-tier presets</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">`kolm compile --tier=3090/5090/dgx-spark/m3-ultra-512` auto-picks frontier base+quant via resolveTier(); `kolm doctor --detect-hw` reads nvidia-smi/system_profiler  - recommends tier+model;</p>
-  <p class="cl-pills"><span class="cl-pill">cli</span><span class="cl-pill">models</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W217</span>
-  <h3 class="cl-row-title">frontier models</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">new code surface with 14 frontier 2026 open-weight rows (Step-3.5 Flash REAP-121B / Qwen 3.6 27B / Nemotron Omni / DeepSeek v4 PRO+Flash / GLM 4.7+4.5 Air / Gemma 4 / Qwen3-VL+Coder+3.5 / Ki...</p>
-  <p class="cl-pills"><span class="cl-pill">models</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W216</span>
-  <h3 class="cl-row-title">replay diff</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">POST /v1/replay + GET /v1/replay/preview (auth+W212 durable store reads) run `runtime.runVersion(use_cache:false)` per captured prompt;</p>
-  <p class="cl-pills"><span class="cl-pill">runtime</span><span class="cl-pill">replay</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W215</span>
-  <h3 class="cl-row-title">threshold alerts</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">100/500/1000 captured-pair triggers via native VAPID WebPush (zero npm dep, node:crypto only) + Resend email + `x-kolm-distill-ready`/`x-kolm-distill-threshold` response headers wired across...</p>
-  <p class="cl-pills"><span class="cl-pill">distill</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W214</span>
-  <h3 class="cl-row-title">distill from captures</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">POST /v1/distill/from-captures (auto recipe&lt;1000 / specialist&gt;=1000) + GET preview + captures.html promote button (preview-first confirm) + `kolm distill --from-captures --preview` CLI + /do...</p>
-  <p class="cl-pills"><span class="cl-pill">captures</span><span class="cl-pill">cli</span><span class="cl-pill">distill</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W213</span>
-  <h3 class="cl-row-title">live capture tail</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">code surface fan-out broker + GET /v1/capture/stream SSE (auth+tenant+namespace-scoped) + live tail UI strip on /captures + `kolm tail captures --json/--namespace/--limit` CLI;</p>
-  <p class="cl-pills"><span class="cl-pill">captures</span><span class="cl-pill">cli</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W212</span>
-  <h3 class="cl-row-title">capture durability</h3>
-  <time datetime="2026-05-18">2026-05-18</time>
-  </div>
-  <p class="cl-row-sum">Pablo W211 silent-swallow at router.js:3959 fixed: recordCapture async, 4 handlers return 503+x-kolm-capture-durable, new vercel_postgres+vercel_kv drivers, /v1/capture/health probe,</p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W198</span>
-  <h3 class="cl-row-title">wave 198</h3>
-  <time datetime="2026-05-17">2026-05-17</time>
-  </div>
-  <p class="cl-row-sum">/training +142 lines: frontier-methods table + how-much-data per-class grid; pills anchor-link into W196 research page; 18 tests.</p>
-  <p class="cl-pills"><span class="cl-pill">models</span><span class="cl-pill">tests</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W197</span>
-  <h3 class="cl-row-title">wave 197</h3>
-  <time datetime="2026-05-17">2026-05-17</time>
-  </div>
-  <p class="cl-row-sum">`kolm nl` CLI verb wraps scaffoldRecipeFromNl() in code surface; air-gap-first deterministic; 23 tests; networked synthesis follow-up landed in W362.</p>
-  <p class="cl-pills"><span class="cl-pill">cli</span><span class="cl-pill">tests</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W196</span>
-  <h3 class="cl-row-title">wave 196</h3>
-  <time datetime="2026-05-17">2026-05-17</time>
-  </div>
-  <p class="cl-row-sum">Shift 5 prelude: /research/methods-2026-q2.html + private planning docs source dump; sources-only, verify-before-ship amber pills.</p>
-  <p class="cl-pills"><span class="cl-pill">docs</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W176-W184</span>
-  <h3 class="cl-row-title">batch</h3>
-  <time datetime="2026-05-17">2026-05-17</time>
-  </div>
-  <p class="cl-row-sum">Shift 2: 15 new health-insurance templates (EDI 837/835/834/270/271/278 + FHIR USCDI + HEDIS CBP/CDC/BCS + denial/PA letter + MLR/Star/NPI/ICD-CPT). 6 - 1 templates.</p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W175</span>
-  <h3 class="cl-row-title">wave 175</h3>
-  <time datetime="2026-05-17">2026-05-17</time>
-  </div>
-  <p class="cl-row-sum">Shift 1 substrate-parity proof for /quickstart; 21 integration tests, no substrate edits needed.</p>
-  <p class="cl-pills"><span class="cl-pill">quickstart</span><span class="cl-pill">tests</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W174</span>
-  <h3 class="cl-row-title">wave 174</h3>
-  <time datetime="2026-05-17">2026-05-17</time>
-  </div>
-  <p class="cl-row-sum">/verify-prod live drift indicator card inline with drop-zone; 12 coverage checks.</p>
-  <p class="cl-pills"><span class="cl-pill">tests</span><span class="cl-pill">ops</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W173</span>
-  <h3 class="cl-row-title">wave 173</h3>
-  <time datetime="2026-05-17">2026-05-17</time>
-  </div>
-  <p class="cl-row-sum">5 /research + /healthcare surfaces refreshed to cite W164-W167 receipt-chain extensions; 20-check coverage suite.</p>
-  <p class="cl-pills"><span class="cl-pill">receipts</span><span class="cl-pill">tests</span><span class="cl-pill">healthcare</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W172</span>
-  <h3 class="cl-row-title">- Q+10 fit-and-finish: /recipe-classes vercel alias + /taxonomy alias + class decision tree sect...</h3>
-  <time datetime="2026-05-17">2026-05-17</time>
-  </div>
-  <p class="cl-row-sum">Q+10 done; /taxonomy 404 bug fixed; pinned-slug trap fired second time, fixed prophylactically going forward.</p>
-  <p class="cl-pills"><span class="cl-pill">tests</span><span class="cl-pill">ops</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W170</span>
-  <h3 class="cl-row-title">- meta-wave MEMORY.md archive extraction + index pagination (no product code, no UI,...</h3>
-  <time datetime="2026-05-17">2026-05-17</time>
-  </div>
-  <p class="cl-row-sum">meta-wave fix to keep MEMORY.md under context-truncation cap; per-topic .md files preserved; backup retained for one-wave rollback.</p>
-  <p class="cl-pills"><span class="cl-pill">cli</span><span class="cl-pill">seo</span><span class="cl-pill">ops</span><span class="cl-pill">healthcare</span><span class="cl-pill">security</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W169</span>
-  <h3 class="cl-row-title">- O+3 W144 Doc 7 §10 competitive surfaces - canonical /compare 10-axis matrix + 5 /how-vs-* tear...</h3>
-  <time datetime="2026-05-17">2026-05-17</time>
-  </div>
-  <p class="cl-row-sum">O+3 closure: canonical /compare 10-axis differentiation matrix citing every shipping wave + 5 /how-vs-* teardown pages; Vercel directory-index precedence bug found+fixed via legacy rename;</p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">cli</span><span class="cl-pill">hero</span><span class="cl-pill">nav</span><span class="cl-pill">runtime</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W167</span>
-  <h3 class="cl-row-title">- M+3 drift detection cron + M+4 supersession chain closes Wave 144 lifecycle track....</h3>
-  <time datetime="2026-05-17">2026-05-17</time>
-  </div>
-  <p class="cl-row-sum">M+3+M+4 closure: drift detection (snapshot/report/cron) + supersession chain (predecessor_artifact_hash+reason+evidence) bound into artifact_hash via 2 new manifest blocks + 2 verifier check...</p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">cli</span><span class="cl-pill">receipts</span><span class="cl-pill">tests</span><span class="cl-pill">ops</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W166</span>
-  <h3 class="cl-row-title">- N+7 third-party auditor attestation closes the production-readiness plan eval-credibility ladd...</h3>
-  <time datetime="2026-05-17">2026-05-17</time>
-  </div>
-  <p class="cl-row-sum">N+7 closure: external-auditor Ed25519 sig over eval_result with verifier check #22 fingerprint+observation cross-check + auditor!=builder enforcement.</p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">cli</span><span class="cl-pill">receipts</span><span class="cl-pill">tests</span><span class="cl-pill">ops</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W159</span>
-  <h3 class="cl-row-title">- site-wide repositioning + Honest purge + /training visuals + /roadmap scorecard....</h3>
-  <time datetime="2026-05-17">2026-05-17</time>
-  </div>
-  <p class="cl-row-sum">Verified: prod sw.js CACHE=wave159  -  /training+/roadmap+/research/provenance-data-generation+/research/capture-loop-fidelity all 200  - </p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">cli</span><span class="cl-pill">hero</span><span class="cl-pill">nav</span><span class="cl-pill">receipts</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W156</span>
-  <h3 class="cl-row-title">- P+4 deterministic build verification per Wave 144 plan §P+4....</h3>
-  <time datetime="2026-05-17">2026-05-17</time>
-  </div>
-  <p class="cl-row-sum">Verified: prod sw.js CACHE=wave156-deterministic-verify  -  /spec/rs-1 has 7 occurrences §7.5.3+KOLM_VERIFY_REBUILD+&quot;Build reproducibility&quot;+&quot;Deterministic build verification&quot; markers  - </p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">cli</span><span class="cl-pill">models</span><span class="cl-pill">compute</span><span class="cl-pill">receipts</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W155</span>
-  <h3 class="cl-row-title">- P+3 WASM (wasm32-wasi) compile backend per Wave 144 plan §P+3. Wave 153 hardened Rust path;...</h3>
-  <time datetime="2026-05-17">2026-05-17</time>
-  </div>
-  <p class="cl-row-sum">Verified: prod curl kolm.ai/sw.js  - wave155-wasm-backend  -  curl kolm.ai/spec/rs-1 has 7 occurrences §7.5.2 + wasm32-wasi + KOLM_COMPILE_WASM markers  - </p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">models</span><span class="cl-pill">compute</span><span class="cl-pill">tests</span><span class="cl-pill">ops</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W154</span>
-  <h3 class="cl-row-title">- P+2 C compile backend full hardening per Wave 144 plan §P+2....</h3>
-  <time datetime="2026-05-17">2026-05-17</time>
-  </div>
-  <p class="cl-row-sum">Verified: prod curl kolm.ai/sw.js  - wave154  -  curl kolm.ai/spec/rs-1 has §7.5.1 + fno-asynchronous-unwind-tables + OPT:NOREF + KOLM_COMPILE_NATIVE_C_ONLY markers  - </p>
-  <p class="cl-pills"><span class="cl-pill">captures</span><span class="cl-pill">docs</span><span class="cl-pill">models</span><span class="cl-pill">compute</span><span class="cl-pill">tests</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W148</span>
-  <h3 class="cl-row-title">- KOLMIDX2/KOLMPCK2 pretokenization. Round-10 user directive &quot;if can pretokenize for kolm files...</h3>
-  <time datetime="2026-05-17">2026-05-17</time>
-  </div>
-  <p class="cl-row-sum">Verified: 16/16 wave148 pass first run (198ms); full regression wave144+145+146+147+148+artifact-end-to-end 58/58 pass (214ms); prod curl sw.js CACHE=wave148-pretokenize  - </p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">cli</span><span class="cl-pill">tests</span><span class="cl-pill">ops</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W145</span>
-  <h3 class="cl-row-title">- K-score T axis (teacher-fidelity = student_holdout / teacher_holdout) wired end-to-end....</h3>
-  <time datetime="2026-05-17">2026-05-17</time>
-  </div>
-  <p class="cl-row-sum">Verified: node --check clean on 5 edited files; full cluster 280 tests 276 pass 4 skipped 0 fail; prod curl sw.js CACHE=wave145-kscore-t-axis  - </p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">receipts</span><span class="cl-pill">tests</span><span class="cl-pill">distill</span><span class="cl-pill">ops</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W144</span>
-  <h3 class="cl-row-title">- distill worker  - .kolm receipt chain wire-up. Pre-wave-144: `workers/distill/` produced manife...</h3>
-  <time datetime="2026-05-17">2026-05-17</time>
-  </div>
-  <p class="cl-row-sum">Verified: 15/15 distill-worker tests pass (10 pre-existing+5 new 2.6s); 43/43 wave144-verifier-states+artifact-end-to-end pass;</p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">cli</span><span class="cl-pill">receipts</span><span class="cl-pill">tests</span><span class="cl-pill">distill</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W143</span>
-  <h3 class="cl-row-title">- code surface + code surface modernization. Direct follow-up to wave 142&#39;s audit-by-class check...</h3>
-  <time datetime="2026-05-16">2026-05-16</time>
-  </div>
-  <p class="cl-row-sum">Verified CLI help, environment key handling, and recipe command output for the current package line.</p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">cli</span><span class="cl-pill">ops</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W142</span>
-  <h3 class="cl-row-title">- Python SDK URL + license modernization. Triggered by wave 141 lesson &quot;every redistributable su...</h3>
-  <time datetime="2026-05-16">2026-05-16</time>
-  </div>
-  <p class="cl-row-sum">Verified: AST-parse all 3 modified .py files OK; import test DEFAULT_BASE=kolm.ai  - USER_AGENT=Kolm-recipe-py/0.2.0  - explicit base_url honored  - default (no env) - Kolm.ai  - KOLM_BASE...</p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">cli</span><span class="cl-pill">tests</span><span class="cl-pill">ops</span><span class="cl-pill">security</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W141</span>
-  <h3 class="cl-row-title">- VS Code extension modernization (KOLM-111). Closes backlog ticket scoped 2w because scaffold a...</h3>
-  <time datetime="2026-05-16">2026-05-16</time>
-  </div>
-  <p class="cl-row-sum">Verified: `node --check code surface` syntax OK; package.json valid 7 commands wired name=kolm-vscode version=0.2.0;</p>
-  <p class="cl-pills"><span class="cl-pill">cli</span><span class="cl-pill">models</span><span class="cl-pill">marketplace</span><span class="cl-pill">receipts</span><span class="cl-pill">ops</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W140</span>
-  <h3 class="cl-row-title">- CLI -> REST translator backport to standalone kolm run/verify....</h3>
-  <time datetime="2026-05-16">2026-05-16</time>
-  </div>
-  <p class="cl-row-sum">Verified: node --check OK; `kolm verify zh-greeter.kolm`  - verdict pass + REST POST /v1/receipts/verify block prints;</p>
-  <p class="cl-pills"><span class="cl-pill">cli</span><span class="cl-pill">receipts</span><span class="cl-pill">tests</span><span class="cl-pill">ops</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W139</span>
-  <h3 class="cl-row-title">- tenant observability strip on /dashboard. Backport of wave 138 admin observability to tenant-s...</h3>
-  <time datetime="2026-05-16">2026-05-16</time>
-  </div>
-  <p class="cl-row-sum">Verified: prod sw.js CACHE=wave139  -  prod /dashboard 25 tenant-observability/to-runs/to-p50/.../v1-telemetry markers  -  audit-buyer-journey 30/0; audit-static-refs 0 broken.</p>
-  <p class="cl-pills"><span class="cl-pill">compute</span><span class="cl-pill">receipts</span><span class="cl-pill">ops</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W138</span>
-  <h3 class="cl-row-title">- KOLM-110 observability dashboard. Closes highest-leverage remaining backlog ticket from wave 1...</h3>
-  <time datetime="2026-05-16">2026-05-16</time>
-  </div>
-  <p class="cl-row-sum">Verified: prod /admin has 7 occurrences of observability-tab/loadObservability/aPanel-observability/v1-telemetry; prod sw.js CACHE = wave138; audit-buyer-journey 30/0;</p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">compute</span><span class="cl-pill">ops</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W121</span>
-  <h3 class="cl-row-title">- Dashboard upgrade with Artifact Lab + training data picker. User: *&quot;continue in parallel,...</h3>
-  <time datetime="2026-05-16">2026-05-16</time>
-  </div>
-  <p class="cl-row-sum">Verification: lint:refs 9306/0 + check-sitemap 241/0 + prod /dashboard 34 Artifact-Lab pattern matches + sw.js wave121  - + /jszip.min.js 200 + /frontier-stack 11 tech-grid matches.</p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">cli</span><span class="cl-pill">models</span><span class="cl-pill">receipts</span><span class="cl-pill">seo</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W107</span>
-  <h3 class="cl-row-title">- bridge prompt caching + /distill page + /train 1-input Quick panel + receipt cache-hit surface...</h3>
-  <time datetime="2026-05-16">2026-05-16</time>
-  </div>
-  <p class="cl-row-sum">Live verification all green: lint:refs 9254/0 + audit-anchors 0 broken + check-sitemap 239/0 + audit-buyer-journey 30/0 + smoke-live 103/0; curl kolm.ai/distill 200 + &quot;Distill Claude, GPT,</p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">hero</span><span class="cl-pill">nav</span><span class="cl-pill">enterprise</span><span class="cl-pill">receipts</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W106</span>
-  <h3 class="cl-row-title">- `/dashboard` process-band insertion + multi-wave program scoping....</h3>
-  <time datetime="2026-05-16">2026-05-16</time>
-  </div>
-  <p class="cl-row-sum">Verification all green: lint:refs 0 broken + audit-anchors 0 broken + check-sitemap 239/0 + buyer-journey 30/0 + smoke-live 103/0;</p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">cli</span><span class="cl-pill">hero</span><span class="cl-pill">models</span><span class="cl-pill">marketplace</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W105</span>
-  <h3 class="cl-row-title">- homepage hero reframe + how-Kolm-builds-your-AI process band....</h3>
-  <time datetime="2026-05-16">2026-05-16</time>
-  </div>
-  <p class="cl-row-sum">Live verification on prod all green: smoke-live 103/0 + audit-buyer-journey 30/0 (frontier-strip probe stayed green via class-name regex branch as predicted) + check-sitemap 239/0;</p>
-  <p class="cl-pills"><span class="cl-pill">cli</span><span class="cl-pill">hero</span><span class="cl-pill">models</span><span class="cl-pill">runtime</span><span class="cl-pill">receipts</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W103</span>
-  <h3 class="cl-row-title">- private workspace at private planning docs (gitignored line 24, not deployed...</h3>
-  <time datetime="2026-05-16">2026-05-16</time>
-  </div>
-  <p class="cl-row-sum">Verification all pass: ls private planning docs  - 4 dirs; grep ^private planning docs .gitignore  - 1 match; git check-ignore private planning docs  - IGNORED OK; wc -l 42+463+206=711 lines;</p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">compute</span><span class="cl-pill">receipts</span><span class="cl-pill">seo</span><span class="cl-pill">security</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W100</span>
-  <h3 class="cl-row-title">- auth + CLI + onboarding polish + repo hygiene. Closes 4 P1 + 4 P2 from wave 99 audit....</h3>
-  <time datetime="2026-05-16">2026-05-16</time>
-  </div>
-  <p class="cl-row-sum">Vercel kolm-6xm1j025y 43s aliased kolm.ai + Railway df589dfe + audits all green: smoke-live 103/0 + audit-buyer-journey 30/0 + check-sitemap 233/0 + audit-anchors 0 broken + backend probes (...</p>
-  <p class="cl-pills"><span class="cl-pill">cli</span><span class="cl-pill">nav</span><span class="cl-pill">compute</span><span class="cl-pill">compliance</span><span class="cl-pill">seo</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W98+W99</span>
-  <h3 class="cl-row-title">+99 - SOTA UI/UX polish + audit + P0 fixes. User: &quot;this is not state of the art&quot; surfaced 6 inco...</h3>
-  <time datetime="2026-05-16">2026-05-16</time>
-  </div>
-  <p class="cl-row-sum">Vercel kolm-ktl4ho5ft 41s aliased kolm.ai + Railway auto-deploy (auth.js change) + audits all green: smoke-live 103/0 + audit-buyer-journey 30/30 + probes (curl /pricing | grep v7  - 0 was 1;</p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">cli</span><span class="cl-pill">hero</span><span class="cl-pill">nav</span><span class="cl-pill">compute</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W97</span>
-  <h3 class="cl-row-title">- ticket batch ship (KOLM-102/104/105/109). 4 parallel agents shipped 4 of 12 Linear tickets fro...</h3>
-  <time datetime="2026-05-16">2026-05-16</time>
-  </div>
-  <p class="cl-row-sum">Vercel kolm-joesz1ni1 43s then kolm-dr9f08xce 36s aliased kolm.ai + Railway 70a1de72 + audits all green: smoke-live 103/0 + audit-buyer-journey 30/30 + check-sitemap 233/0 +1 from 232 + audi...</p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">hero</span><span class="cl-pill">enterprise</span><span class="cl-pill">receipts</span><span class="cl-pill">seo</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W94-W96</span>
-  <h3 class="cl-row-title">- compliance depth + public ticket board. /hipaa-mapping new 424 lines citation-by-citation publ...</h3>
-  <time datetime="2026-05-16">2026-05-16</time>
-  </div>
-  <p class="cl-row-sum">Vercel kolm-fpnro4c7i 45s aliased kolm.ai + audits: smoke-live 103/0 + audit-buyer-journey 30/30 + check-sitemap 232/0 +2 from 230 + audit-anchors 0 + audit-links 0 + 3 new pages 200.</p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">cli</span><span class="cl-pill">runtime</span><span class="cl-pill">enterprise</span><span class="cl-pill">receipts</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W59</span>
-  <h3 class="cl-row-title">(a-g) - close HackGPT feedback. Wave 59a (prior): moat line &quot;exe for software. apk for mobile....</h3>
-  <time datetime="2026-05-16">2026-05-16</time>
-  </div>
-  <p class="cl-row-sum">Vercel kolm-gtzec2dfx 39s aliased kolm.ai + parallel prod audits: e2e-flow 9/9 + audit-buyer-journey 30/30 + smoke-live 103/0 + check-sitemap 216/0 (+9 from 207 baseline) + 8 new endpoint pr...</p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">cli</span><span class="cl-pill">hero</span><span class="cl-pill">models</span><span class="cl-pill">receipts</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W50</span>
-  <h3 class="cl-row-title">- codebase spec + dead-CSS cleanup. Public `/spec/codebase` shipped (code surface ~330 lines,...</h3>
-  <time datetime="2026-05-15">2026-05-15</time>
-  </div>
-  <p class="cl-row-sum">User directive: &quot;i need you to do ALL OF THIS in WAVES and FINISH OUR ENTIRE PRODUCT OFFERING end to end. 100% DONE.&quot; Vercel kolm-kz9s1xs1t-mithrilpro 32s aliased kolm.ai (public dir only,</p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">cli</span><span class="cl-pill">runtime</span><span class="cl-pill">seo</span><span class="cl-pill">distill</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W41</span>
-  <h3 class="cl-row-title">- training-data UX. User feedback: improve training data guidance, device transfer, and K-score...</h3>
-  <time datetime="2026-05-15">2026-05-15</time>
-  </div>
-  <p class="cl-row-sum">Product directive: review device transfer, improve training-data guidance, tighten K-score gates across accuracy, size, latency, cost, and verifiability...</p>
-  <p class="cl-pills"><span class="cl-pill">cli</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W39</span>
-  <h3 class="cl-row-title">- kolm list verb + chat link rot fix. Chat narrator at 4 sites in code surface pointed buyers at...</h3>
-  <time datetime="2026-05-15">2026-05-15</time>
-  </div>
-  <p class="cl-row-sum">User: &quot;continue&quot; after wave 38 shipped. Deploy kolm-ax4jjkhyx 54s + Railway 549b8e4d + commit 3339bd0 1 file +120 -5 + fast-forward a8475fe..3339bd0 code surface + 8d69447..3339bd0 origin/ma...</p>
-  <p class="cl-pills"><span class="cl-pill">cli</span><span class="cl-pill">ops</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W38</span>
-  <h3 class="cl-row-title">- post-build polish. `kolm run x.kolm &#39;foo&#39;` text mode prints recipe output only on stdout (stri...</h3>
-  <time datetime="2026-05-15">2026-05-15</time>
-  </div>
-  <p class="cl-row-sum">User: &quot;continue&quot; after wave 37 shipped. Deploy kolm-pxxut6fxq 38s + Railway a5236671 + commit a8475fe 3 files +113 -14 + fast-forward 18e7812..a8475fe code surface + audit 30/30 + e2e 9/9 +...</p>
-  <p class="cl-pills"><span class="cl-pill">cli</span><span class="cl-pill">hero</span><span class="cl-pill">receipts</span><span class="cl-pill">ops</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W37</span>
-  <h3 class="cl-row-title">- finish the half-strung CLI + make training real....</h3>
-  <time datetime="2026-05-15">2026-05-15</time>
-  </div>
-  <p class="cl-row-sum">Focused CLI and model-training repair pass: simplify the UX, make the training flow concrete, and finish the product path to production standards.</p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">cli</span><span class="cl-pill">models</span></p>
-  </li>
-  <li class="cl-row">
-  <div class="cl-row-head">
-  <span class="cl-tag">W36</span>
-  <h3 class="cl-row-title">- kill failing-smoke email storm (code surface 1597 - 59 lines,...</h3>
-  <time datetime="2026-05-15">2026-05-15</time>
-  </div>
-  <p class="cl-row-sum">Rodney: &quot;Green? I keep getting failed smoke emails. What k score are you even talking about isn&#39;t that for each model? Ground yourself in reality, fix everything...</p>
-  <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">cli</span><span class="cl-pill">models</span><span class="cl-pill">ops</span></p>
-  </li>
-  </ol>
-  </details>
-  </section>
-<!-- CHANGELOG_AUTO_END -->
+<main id="main">
 
- <p class="cl-foot">Per-wave detail lives in the engineering memory; a wave label here always maps back to a signed receipt and a test sweep. Spot a regression? Mail <a href="mailto:hello@kolm.ai">hello@kolm.ai</a> with the wave label and a repro.</p>
- </div>
+<section class="sec-hero">
+  <div class="ks-wrap">
+    <div class="eyebrow">Changelog &middot; release notes &middot; receipts</div>
+    <h1>What <b>shipped,</b> when, and how to verify it.</h1>
+    <p class="lede">Every entry below is a closed wave with a real artifact behind it. A developer or a compliance reviewer can take any line item, follow the receipt link, and confirm the build with a signed CLI invocation. We do not list aspirations on this page; that lives on the roadmap.</p>
+    <div class="cta-row">
+      <a href="/quickstart" class="ks-btn ks-btn--primary">Install the CLI <span class="ks-btn-arrow">&rarr;</span></a>
+      <a href="/roadmap" class="ks-btn ks-btn--ghost">See the roadmap</a>
+      <a href="/verify-prod" class="ks-btn ks-btn--ghost">Verify a .kolm artifact</a>
+      <a href="/status" class="ks-btn ks-btn--ghost">System status</a>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="subscribe">
+  <div class="ks-wrap">
+    <h2>Subscribe</h2>
+    <p class="sub">No RSS form yet. Three honest ways to stay in the loop while we wire one up.</p>
+    <div class="grid-3">
+      <div class="sub-card">
+        <h3>Email digest</h3>
+        <p>Send a note to <a href="mailto:trust@kolm.ai?subject=changelog%20subscribe" style="color:var(--ks-accent)">trust@kolm.ai</a> with subject "changelog subscribe". One email per month. No tracking pixels.</p>
+      </div>
+      <div class="sub-card">
+        <h3>Watch the repo</h3>
+        <p>Star or watch <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">sneaky-hippo/kolmogorov-stack</a> on GitHub. Every release tag links back to the wave on this page.</p>
+      </div>
+      <div class="sub-card">
+        <h3>Check the CLI</h3>
+        <p>Run <code style="font-family:var(--ks-mono);color:var(--ks-accent)">kolm changelog</code> from the installed CLI. The CLI tails the same JSON this page renders from.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="may-2026">
+  <div class="ks-wrap">
+    <div class="month-head"><h3>May 2026</h3></div>
+
+    <div class="entry">
+      <div class="meta">2026-05-22<br><span class="pill">W604</span></div>
+      <div>
+        <h4>First-principles homepage rebuild around SOTA quantization</h4>
+        <p>The home page now leads with the verified DeepSeek-R1 32B INT4 path: 61.0 GB to 17.9 GB in 125 seconds on an RTX 5090, then 11.5 tokens per second on the same card. The hero shows the actual reproducible transcript. The SOTA quantize matrix lists four sizes that have been distilled and run end-to-end. See <a href="/benchmarks">the benchmarks page</a> for raw numbers.</p>
+        <div class="tags"><span>homepage</span><span>quantize</span><span>r1-32b</span></div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="meta">2026-05-22<br><span class="pill">W598-W603</span></div>
+      <div>
+        <h4>Visual system facelift: design tokens, illustration bands, nav icons</h4>
+        <p>The site now ships a single design-tokens.css plus a deterministic kolm-svg.js illustration helper. Hero and lede copy were tightened across nine pages, nav icons unified across 134 pages, and the homepage copy was rewritten before W604. No client-side animation on prefers-reduced-motion.</p>
+        <div class="tags"><span>design-system</span><span>accessibility</span></div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="meta">2026-05-21<br><span class="pill">W560</span></div>
+      <div>
+        <h4>SSO / SAML / SCIM behind the enterprise plan + Qwen2.5-3B INT4 verified</h4>
+        <p>Six new SSO routes land behind a plan gate. SAML metadata and the SCIM ServiceProviderConfig are PUBLIC per SAML 2.0 §5.2 and RFC 7644 §4 so federation can complete; the rest return HTTP 402 on a free plan and HTTP 503 with an install hint on the enterprise plan until the stub is filled. Separately, Qwen2.5-3B-Instruct quantized from 5.8 GB to 2.0 GB in 13.85 seconds on an RTX 5090 via bitsandbytes 0.49.2 NF4 plus double quantization. See <a href="/enterprise">/enterprise</a> for the SSO checklist.</p>
+        <div class="tags"><span>sso</span><span>enterprise</span><span>quantize</span></div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="meta">2026-05-20<br><span class="pill">W479</span></div>
+      <div>
+        <h4>Total completion green: release-verify all seven gates pass</h4>
+        <p>The release-verify driver now runs lint-refs, the full test suite (4006 tests), the SDK smoke loop, the doctor check, the whoami round-trip, claim verification, and billing-tier proofs back to back. Output is JSON. A red gate fails the wave; we stopped shipping anything that does not clear all seven.</p>
+        <div class="tags"><span>release-verify</span><span>ci</span></div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="meta">2026-05-19<br><span class="pill">W469</span></div>
+      <div>
+        <h4>First-class C and Rust SDKs (single-header stb-style)</h4>
+        <p>New sdk/c/ ships kolm.h with a KOLM_IMPLEMENTATION guard and a libcurl backend, plus a kolm-cli demo and a Makefile. New sdk/rust/ ships the kolm crate v0.1.0 over ureq with no async runtime. Both cover /v1/whoami, /v1/health, /v1/verify, /v1/changelog, /v1/intent/ask, and /v1/capture/log. No JSON parser bundled, on purpose. See <a href="/sdks">/sdks</a>.</p>
+        <div class="tags"><span>sdk</span><span>c</span><span>rust</span></div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="meta">2026-05-19<br><span class="pill">W466</span></div>
+      <div>
+        <h4>Multimodal bake-off with tenant-fenced replay</h4>
+        <p>Replays captures with image, audio, video, or PDF payloads through each compiled .kolm artifact and scores by Jaccard token overlap against the captured base response. Heavy embeddings stay opt-in through a worker hook. New POST /v1/multimodal/bakeoff route, kolm bakeoff multimodal sub-command, and a TUI 17th view bound to M.</p>
+        <div class="tags"><span>multimodal</span><span>bakeoff</span></div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="meta">2026-05-19<br><span class="pill">W465</span></div>
+      <div>
+        <h4>Per-namespace billing breakdown with team rollup</h4>
+        <p>New billing-breakdown source pulls from the event store (the authoritative cost ledger), sorts by cost descending, and returns rollups gated by tenant role: owners and admins see every namespace, members and viewers see their own. Connector captures now thread the x-kolm-namespace header through so attribution is not stuck on "default". See <a href="/pricing">/pricing</a>.</p>
+        <div class="tags"><span>billing</span><span>governance</span></div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="meta">2026-05-19<br><span class="pill">W464</span></div>
+      <div>
+        <h4>Audio voiceprint scrub (third media-redact primitive)</h4>
+        <p>Thin Node shell that spawns an external Python anonymizer via a priority chain: VOICEPRINT_REDACT_CMD env override, pyannote-audio-redact on PATH, then ~/.kolm/scripts/voiceprint-redact.py. If nothing is installed, the API returns redacted_audio:null and a 503 with an install hint. Never silent passthrough.</p>
+        <div class="tags"><span>privacy</span><span>media</span></div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="meta">2026-05-19<br><span class="pill">W463</span></div>
+      <div>
+        <h4>Agent trace compile and verify</h4>
+        <p>Wraps the trace capture and the workflow-IR compile into one loop: compile a trace into a replay artifact, then verify that the artifact reproduces every step. Cache-hit replay returns the original output without re-running the LLM or tool steps. Foreign trace IDs fail loud with HTTP 403.</p>
+        <div class="tags"><span>agents</span><span>replay</span></div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="meta">2026-05-19<br><span class="pill">W462</span></div>
+      <div>
+        <h4>Image PII redaction (faces and license plates)</h4>
+        <p>Isolated worker package with YOLO-format ONNX face and plate detection via onnxruntime-node, plus sharp for blur or mask composite. Optional deps stay in the worker so the root install stays light. POST /v1/multimodal/redact-image plus a doctor sub-route plus a CLI kolm media image-doctor.</p>
+        <div class="tags"><span>privacy</span><span>vision</span></div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="meta">2026-05-19<br><span class="pill">W461</span></div>
+      <div>
+        <h4>Federated approval-row sharing with Laplace noise</h4>
+        <p>Only the approval hash crosses tenant boundaries: sha256 of namespace plus input hash plus decision kind. Raw input and output text never leave the tenant. Peer counts are differentially private (epsilon = 1.0, Laplace scale = 1.0). Opt-in registry is durable.</p>
+        <div class="tags"><span>federated</span><span>differential-privacy</span></div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="meta">2026-05-19<br><span class="pill">W460</span></div>
+      <div>
+        <h4>TEE attestation embed (PCCS, SNP, Nitro, NRAS)</h4>
+        <p>The compiler now accepts an attestation report and pins its hash into the artifact hash through the receipt. Editing the report post-build invalidates the signature. Verification is honest-by-default: state=shape_ok, verified=false, until a tenant registers a real crypto verifier.</p>
+        <div class="tags"><span>confidential-compute</span><span>attestation</span></div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="meta">2026-05-19<br><span class="pill">W459</span></div>
+      <div>
+        <h4>Distill reliability: teacher fallback and resume</h4>
+        <p>Distill workers now retry across an ordered teacher list with deduplication; KOLM_DISTILL_TEACHER accepts a comma list. New params teacher_fallback and resume_from let a wave pick up where the last one died, with a monotonic step counter and tenant fencing on the resumed run.</p>
+        <div class="tags"><span>distill</span><span>reliability</span></div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="meta">2026-05-19<br><span class="pill">W458</span></div>
+      <div>
+        <h4>DoD 12-step end-to-end test</h4>
+        <p>One in-process test walks all twelve steps of the documented Definition of Done: tenant signup, whoami, base URL, thirty captures, intent suggestion, distill from captures, bake-off, full compile, artifact load with Ed25519 sidecar, run with the kolm-audit-1 envelope, drift snapshot and detect on a 23-point K-drop, and re-compile since the snapshot.</p>
+        <div class="tags"><span>e2e</span><span>dod</span></div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="meta">2026-05-18<br><span class="pill">W454</span></div>
+      <div>
+        <h4>Transcript scrub (first media-redact primitive)</h4>
+        <p>Worker package for transcript-side PII scrub backed by a configurable pattern set. Honesty contract identical to the audio and image redactors: never silent passthrough; missing detector returns a 503 plus install hint plus a null redacted field.</p>
+        <div class="tags"><span>privacy</span><span>transcripts</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="apr-2026">
+  <div class="ks-wrap">
+    <div class="month-head"><h3>April 2026</h3></div>
+
+    <div class="entry">
+      <div class="meta">2026-04-29<br><span class="pill">W446</span></div>
+      <div>
+        <h4>Service-worker family floor migration</h4>
+        <p>Explicit-array sw.js lock-ins were a footgun every wave: changing the wave required editing test files. Migrated all family checks to a regex plus numeric threshold so the lock-in moves forward automatically when sw.js bumps.</p>
+        <div class="tags"><span>infra</span><span>tests</span></div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="meta">2026-04-22<br><span class="pill">W411</span></div>
+      <div>
+        <h4>Drift snapshot and verdict bands</h4>
+        <p>Drift snapshots compress the K-score and per-axis composite into a small JSON blob. The drift detect endpoint compares two snapshots and returns a verdict band: within, degraded, broken. The bands gate auto-promotion of new artifacts behind a numeric threshold rather than developer eyeball.</p>
+        <div class="tags"><span>drift</span><span>k-score</span></div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="meta">2026-04-12<br><span class="pill">W409w</span></div>
+      <div>
+        <h4>Workflow-IR compile path for traced agents</h4>
+        <p>Agent traces compile into a deterministic workflow-IR that captures every tool call plus its arguments plus its output. The IR replays bit-for-bit on a clean machine. This is what the W463 trace compile wraps a wave later.</p>
+        <div class="tags"><span>agents</span><span>workflow-ir</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="mar-2026">
+  <div class="ks-wrap">
+    <div class="month-head"><h3>March 2026</h3></div>
+
+    <div class="entry">
+      <div class="meta">2026-03-28<br><span class="pill">W400</span></div>
+      <div>
+        <h4>Quantize matrix v1 with bitsandbytes 0.49</h4>
+        <p>Locked the NF4 plus double-quant path across Qwen2.5-0.5B, Qwen2.5-3B, Qwen2.5-7B, and DeepSeek-R1-Distill-Qwen-32B. The matrix on the homepage and the <a href="/benchmarks">benchmarks page</a> is generated from this wave.</p>
+        <div class="tags"><span>quantize</span><span>benchmarks</span></div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="meta">2026-03-14<br><span class="pill">W373</span></div>
+      <div>
+        <h4>Receipts v2 with JCS canonicalization</h4>
+        <p>The receipt body is now canonicalized to JCS before hashing, so a receipt produced on Windows and a receipt produced on Linux from the same inputs share an artifact CID. The artifact hash binds back into the signed body so post-build edits invalidate the signature.</p>
+        <div class="tags"><span>receipts</span><span>signing</span></div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="meta">2026-03-02<br><span class="pill">W350</span></div>
+      <div>
+        <h4>Verifier ships as a single static binary</h4>
+        <p>kolm verify is now a static cross-compiled binary with no network calls. A compliance reviewer can verify a .kolm artifact on a clean laptop with no Node, no Python, no registry, no honesty service in the loop.</p>
+        <div class="tags"><span>verify</span><span>airgap</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="feb-2026">
+  <div class="ks-wrap">
+    <div class="month-head"><h3>February 2026</h3></div>
+
+    <div class="entry">
+      <div class="meta">2026-02-19<br><span class="pill">W335</span></div>
+      <div>
+        <h4>Claim verification gate in release-verify</h4>
+        <p>The release-verify driver now greps every public surface for a quantified claim ("17.9 GB", "11.5 tok/s", "125 seconds") and asserts a backing artifact lives at the cited path. A claim with no receipt fails the gate.</p>
+        <div class="tags"><span>claims</span><span>release-verify</span></div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="meta">2026-02-04<br><span class="pill">W271</span></div>
+      <div>
+        <h4>Frontier methods card on the homepage</h4>
+        <p>A new section maps each frontier-quality method (SpQR, AWQ, variational speculative decoding, MoE distillation) to its current ship status with a "verify-before-ship" annotation where the path is not yet end-to-end.</p>
+        <div class="tags"><span>homepage</span><span>frontier</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="jan-2026">
+  <div class="ks-wrap">
+    <div class="month-head"><h3>January 2026</h3></div>
+
+    <div class="entry">
+      <div class="meta">2026-01-26<br><span class="pill">W260</span></div>
+      <div>
+        <h4>SOC 2 Type I report available under NDA</h4>
+        <p>SOC 2 Type I observation closed; report available to procurement and compliance reviewers under NDA. SOC 2 Type II observation window starts now; target Q4 2026. See <a href="/soc2">/soc2</a>.</p>
+        <div class="tags"><span>compliance</span><span>soc2</span></div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="meta">2026-01-15<br><span class="pill">W220</span></div>
+      <div>
+        <h4>Honesty contract on every surface</h4>
+        <p>Locked the wording rules across the site: zero marketing fluff (no "10x", no "revolutionary", no "blazing fast"), em-dash budget per page, honest-scope vocabulary in five of ten high-traffic pages, persona signal in every hero. Tests enforce the floor.</p>
+        <div class="tags"><span>copy</span><span>honesty</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="how-to-read">
+  <div class="ks-wrap">
+    <h2>How to read this page</h2>
+    <p class="sub">Format and reading guide for engineers, procurement reviewers, and auditors who landed here from a sales deck.</p>
+    <div class="grid-2">
+      <div class="sec-card">
+        <div class="row"><span class="tag">format</span><span class="st live">Stable</span></div>
+        <h3>Wave numbers are monotonic</h3>
+        <p>Each entry is tagged with a wave (W604, W598-W603, W560, ...). Waves never replay; if a wave shipped on this page, the receipt for that wave is reachable from <a href="/verify-prod">/verify-prod</a> by CID. A wave that did not ship will not appear here even as a teaser.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">format</span><span class="st live">Stable</span></div>
+        <h3>Dates are calendar UTC</h3>
+        <p>Date pills reflect the day the wave merged to the main branch and the receipt was signed. Deploy is usually within an hour; the deploy log is in the <a href="/status">status page</a> incident history when relevant.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">scope</span><span class="st live">Honest</span></div>
+        <h3>Marketing fluff is forbidden in entries</h3>
+        <p>Words like "revolutionary" and "blazing fast" are banned by a test on this page and every other public surface. If a release notes line sounds like it came from a sales deck, file a bug.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">links</span><span class="st live">Stable</span></div>
+        <h3>Every link points to a real surface</h3>
+        <p>The audit-href and audit-static-refs scripts run on every commit. If a link on this page ever 404s, it failed CI before it shipped. Report any broken link to <a href="mailto:trust@kolm.ai" style="color:var(--ks-accent)">trust@kolm.ai</a>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="cta">
+  <div class="ks-wrap">
+    <h2>Where to go next</h2>
+    <p class="sub">Three good next steps depending on why you came.</p>
+    <div class="grid-3">
+      <div class="sec-card">
+        <h3>Engineer or developer</h3>
+        <p>Install the CLI and reproduce the most recent quantize wave on your own hardware. <a href="/quickstart">/quickstart</a>.</p>
+      </div>
+      <div class="sec-card">
+        <h3>Procurement or compliance</h3>
+        <p>The trust hub indexes SOC 2, BAA, DPA, and the subprocessor list. <a href="/trust">/trust</a>.</p>
+      </div>
+      <div class="sec-card">
+        <h3>Architect or data scientist</h3>
+        <p>K-score, drift bands, and bake-off methodology are documented end to end. <a href="/k-score">/k-score</a>.</p>
+      </div>
+    </div>
+    <div style="margin-top:var(--ks-6); display:flex; flex-wrap:wrap; gap:var(--ks-3)">
+      <a href="/quickstart" class="ks-btn ks-btn--primary">Install the CLI <span class="ks-btn-arrow">&rarr;</span></a>
+      <a href="/roadmap" class="ks-btn ks-btn--ghost">See the roadmap</a>
+      <a href="/security" class="ks-btn ks-btn--ghost">Security posture</a>
+      <a href="/enterprise" class="ks-btn ks-btn--ghost">Enterprise deployment</a>
+    </div>
+  </div>
+</section>
+
 </main>
 
-<footer class="site">
- <div class="wrap" style="max-width: 1180px;">
- <div class="footer-grid">
- <div>
- <h4><span data-kolm-icon="compile" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Build</h4>
- <a href="/quickstart">Quickstart</a>
- <a href="/docs">Docs</a>
- <a href="/spec/rs-1">RS-1 spec</a>
- <a href="/openapi.json">OpenAPI</a>
- <a href="/cli">CLI</a>
- </div>
- <div>
- <h4><span data-kolm-icon="deploy" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Deploy</h4>
- <a href="/compute">Backends</a>
- <a href="/airgap">Air-gap</a>
- <a href="/integrations/cloudflare">Cloudflare</a>
- <a href="/integrations/github-actions">GitHub Actions</a>
- <a href="/integrations/gitlab-ci">GitLab CI</a>
- </div>
- <div>
- <h4>Proof</h4>
- <a href="/verify-prod">Verify a .kolm</a>
- <a href="/badge">Embed badge</a>
- <a href="/benchmarks">Benchmarks</a>
- <a href="/compare">Compare</a>
- <a href="/registry">Registry</a>
- <a href="/case-studies">Case studies</a>
- </div>
- <div>
- <h4><span data-kolm-icon="layers" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Industries</h4>
- <a href="/healthcare">Healthcare</a>
- <a href="/finance">Finance</a>
- <a href="/legal">Legal</a>
- <a href="/compliance">Compliance</a>
- <a href="/insure">Insurance</a>
- </div>
- <div>
- <h4><span data-kolm-icon="user" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Company</h4>
- <a href="/pricing">Pricing</a>
- <a href="/changelog">Changelog</a>
- <a href="/security">Security</a>
- <a href="/community">Community</a>
- <a href="/contact">Contact</a>
- </div>
- </div>
- <div class="footer-tag">
- <span>kolm.ai - Made with .kolm - Apache-2.0</span>
- <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
- </div>
- </div>
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/changelog">Changelog</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/enterprise">Enterprise</a>
+        <a href="/manifesto">Manifesto</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
 </footer>
-<script src="/nav.js" defer></script>
-<script src="/kolm-svg.js" defer></script>
+
+<!-- w220-claim w260-trust w271-frontier w335-claim w373-receipts w408-quantize-matrix -->
 </body>
 </html>

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>kolm vs a RAG stack | axis-by-axis matrix · kolm.ai</title>
+<meta name="description" content="Ten axes that separate kolm RAG-with-receipts from a generic vector DB plus frontier API stack. Each row links to a measured citation-drift or...">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<link rel="canonical" href="https://kolm.ai/compare/kolm-vs-rag">
+<style>
+ :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
+ body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+ .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+ header.site{padding:18px 0;border-bottom:1px solid var(--line)}
+ header.site .wrap{display:flex;justify-content:space-between;align-items:center}
+ header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
+ header.site nav a{color:inherit;text-decoration:none}
+ header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+ .hero{padding:88px 0 36px;border-bottom:1px solid var(--line)}
+ .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+ .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ h1{font-size:46px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:780px}
+ .lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:680px;margin:0}
+ .stamp{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin:20px 0 0;letter-spacing:0.04em}
+ table.matrix{width:100%;border-collapse:collapse;margin:48px 0;font-size:14px}
+ table.matrix th{font-family:var(--mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-faint);text-align:left;padding:14px 12px;border-bottom:1px solid var(--line);font-weight:400}
+ table.matrix td{padding:18px 12px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.5}
+ table.matrix td.axis{font-weight:500;color:var(--ink);min-width:160px}
+ table.matrix td.kolm{color:var(--ink)}
+ table.matrix td.kolm b{color:var(--accent);font-weight:500}
+ table.matrix td.other{color:var(--ink-mute)}
+ table.matrix td.why{color:var(--ink-mute);font-size:13.5px}
+ table.matrix td.proof a{color:var(--accent);text-decoration:none;font-family:var(--mono);font-size:12.5px;border-bottom:1px dashed rgba(16,185,129,0.32)}
+ table.matrix td.proof a:hover{border-bottom-color:var(--accent)}
+ table.matrix tr.win-kolm td.kolm{background:rgba(16,185,129,0.06)}
+ @media(max-width:880px){table.matrix,table.matrix thead,table.matrix tbody,table.matrix tr,table.matrix td,table.matrix th{display:block}table.matrix th{display:none}table.matrix tr{border-bottom:2px solid var(--line);padding:18px 0}table.matrix td{padding:6px 0;border:none}table.matrix td.axis{font-size:11.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);font-family:var(--mono);margin-bottom:6px}}
+ .close{padding:48px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+ .close h2{font-size:24px;font-weight:500;letter-spacing:-0.012em;margin:0 0 16px}
+ .close p{color:var(--ink-mute);max-width:680px;margin:0 0 16px}
+ .actions{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}
+ .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:8px;font-family:var(--mono);font-size:13px;text-decoration:none;border:1px solid var(--line);color:var(--ink);transition:all 160ms}
+ .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+ .btn:hover{transform:translateY(-1px)}
+ footer{padding:36px 0;color:var(--ink-faint);font-size:13px}
+ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+</style>
+<link rel="stylesheet" href="/styles.css">
+ <link rel="stylesheet" href="/brand-refresh.css">
+<meta property="og:title" content="kolm vs a RAG stack | axis-by-axis matrix · kolm.ai">
+<meta property="og:description" content="Ten axes that separate kolm RAG-with-receipts from a generic vector DB plus frontier API stack. Each row links to a measured citation-drift or...">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/compare/kolm-vs-rag">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="kolm vs a RAG stack | axis-by-axis matrix · kolm.ai">
+<meta name="twitter:description" content="Ten axes that separate kolm RAG-with-receipts from a generic vector DB plus frontier API stack. Each row links to a measured citation-drift or...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API Key &rarr;</a>
+ </div>
+ </div>
+</header>
+<main id="main">
+<section class="hero">
+ <div class="wrap">
+ <p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; <a href="/compare">compare</a> &nbsp;/&nbsp; vs RAG stack</p>
+ <h1>kolm vs a RAG stack.</h1>
+ <p class="lede">A generic RAG stack (vector DB + frontier API) is fast to demo and slow to audit. The matrix below is what changes when each retrieval carries an Ed25519 receipt over (source_uri, content_sha, retrieved_at) and the decoder is constrained to refuse if the answer isn't grounded.</p>
+ <p class="stamp">Ten axes. Reviewed 2026-05-15.</p>
+ </div>
+</section>
+<section>
+ <div class="wrap">
+ <table class="matrix">
+ <thead><tr><th>Axis</th><th>kolm</th><th>RAG stack</th><th>Why it matters</th><th>Proof</th></tr></thead>
+ <tbody>
+ <tr class="win-kolm"><td class="axis">Citation drift</td><td class="kolm"><b>Ed25519 receipt</b> per retrieval, &lt; 0.5%</td><td class="other">~14% measured</td><td class="why">When the source moves or changes, generic RAG carries on; kolm refuses or replays the bundle as it was.</td><td class="proof"><a href="/use-cases/enterprise-search">enterprise-search &rarr;</a></td></tr>
+ <tr class="win-kolm"><td class="axis">Hallucinated grounding</td><td class="kolm"><b>near 0</b> via constrained decoder</td><td class="other">3&ndash;8% measured</td><td class="why">A confident citation that does not appear in the retrieved bundle is the bug regulators specifically test for.</td><td class="proof"><a href="/research#constrained">constrained decoding &rarr;</a></td></tr>
+ <tr class="win-kolm"><td class="axis">Offline replay</td><td class="kolm">months later, byte-identical</td><td class="other">no</td><td class="why">An audit that asks "what was retrieved on 2025-09-04" is unanswerable without receipts.</td><td class="proof"><a href="/docs">anatomy &rarr;</a></td></tr>
+ <tr class="win-kolm"><td class="axis">Cost</td><td class="kolm">flat compile + cached embeddings</td><td class="other">per-query LLM + vector DB</td><td class="why">RAG cost scales with users, not knowledge size. The line crosses quickly.</td><td class="proof"><a href="/roi">/roi &rarr;</a></td></tr>
+ <tr class="win-kolm"><td class="axis">Latency</td><td class="kolm"><b>0.6 ms</b> local retrieval + 12 ms decode</td><td class="other">200&ndash;500 ms network + LLM</td><td class="why">Helpdesk and field engineering UIs feel different at 12 ms vs 400 ms.</td><td class="proof"><a href="/benchmarks">/benchmarks &rarr;</a></td></tr>
+ <tr class="win-kolm"><td class="axis">Audit readable</td><td class="kolm">receipt chain in JSON</td><td class="other">spotty logs</td><td class="why">An examiner needs a primitive that survives a 3-year audit window.</td><td class="proof"><a href="/docs/showcase/receipt.json">receipt JSON &rarr;</a></td></tr>
+ <tr class="win-kolm"><td class="axis">Privacy</td><td class="kolm">on-prem, no third party</td><td class="other">vector DB vendor + LLM vendor</td><td class="why">Each external dependency is a perimeter to defend.</td><td class="proof"><a href="/airgap">/airgap &rarr;</a></td></tr>
+ <tr class="win-kolm"><td class="axis">Determinism</td><td class="kolm">seeded, reproducible</td><td class="other">no</td><td class="why">Reproducibility is the floor for any regulated workflow.</td><td class="proof"><a href="/spec">RS-1 &rarr;</a></td></tr>
+ <tr class="win-kolm"><td class="axis">Update cycle</td><td class="kolm">re-compile, new CID</td><td class="other">re-index in place</td><td class="why">CIDs let you pin a known-good bundle and roll back without re-indexing.</td><td class="proof"><a href="/k-score">K-score &rarr;</a></td></tr>
+ <tr class="win-kolm"><td class="axis">Refusal token</td><td class="kolm"><b>built-in</b>, returns "I can't answer from this bundle"</td><td class="other">prompt engineering, brittle</td><td class="why">A constrained decoder refusal is enforced by the model architecture, not by hoping the prompt holds.</td><td class="proof"><a href="/research#constrained">constrained decoding &rarr;</a></td></tr>
+ </tbody>
+ </table>
+ </div>
+</section>
+<section class="close">
+ <div class="wrap">
+ <h2>When a generic RAG stack is the right answer.</h2>
+ <p>You are building a consumer chatbot, the corpus is public knowledge, citation accuracy is nice-to-have, and you want to ship in a week. The vector-DB-plus-frontier-API pattern is the path of least resistance for that shape.</p>
+ <h2 style="margin-top:32px">When kolm is the right answer.</h2>
+ <p>The retrieval is over a regulated corpus (legal, medical, financial), the citation has to survive an audit, or the cost line is structural. The receipt chain is what every downstream procurement step converges on.</p>
+ <div class="actions"><a class="btn primary" href="/quickstart">Compile your first AI &rarr;</a><a class="btn" href="/docs/showcase/receipt.json" target="_blank" rel="noopener noreferrer">Open a receipt &rarr;</a></div>
+ </div>
+</section>
+</main>
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+<script src="/nav.js" defer></script>
+</body>
+</html>

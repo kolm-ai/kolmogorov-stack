@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>kolm benchmarks · reproducible runs, public seeds · kolm.ai</title>
+<meta name="description" content="kolm benchmarks: every .kolm artifact ships its own eval set. Offline-capable, in-process network-egress monitor, K-score signed into the manifest.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:site_name" content="kolm">
+<meta property="og:title" content="kolm benchmarks · reproducible runs, public seeds · kolm.ai">
+<meta property="og:description" content="kolm benchmarks: every .kolm artifact ships its own eval set. Offline-capable, in-process network-egress monitor, K-score signed into the manifest.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/benchmarks">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="kolm benchmarks · reproducible runs, public seeds · kolm.ai">
+<meta name="twitter:description" content="kolm benchmarks: every .kolm artifact ships its own eval set. Offline-capable, in-process network-egress monitor, K-score signed into the manifest.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/benchmarks">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<link rel="stylesheet" href="/w604.css">
+<style>
+ :root {
+ --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+ --accent: #faf2e1; --accent-strong: #c9c2b2; --good: #7ef0d2; --bad: #ff6b91;
+ --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+ --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+ }
+ * { box-sizing: border-box; }
+ html, body { margin: 0; padding: 0; }
+ body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+ a { color: inherit; text-decoration: none; }
+ .wrap { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
+ .wrap-wide { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+ @media (max-width: 720px) { .wrap, .wrap-wide { padding: 0 20px; } }
+
+ header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
+ header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
+ header.site .left { display: flex; align-items: center; gap: 36px; }
+ header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 500; font-size: 16px; }
+ header.site nav { display: flex; gap: 22px; }
+ header.site nav a { color: var(--ink-mute); font-size: 13.5px; }
+ header.site nav a:hover, header.site nav a.active { color: var(--ink); }
+ header.site .right { display: flex; align-items: center; gap: 14px; }
+ header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
+ header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
+ @media (max-width: 720px) { header.site nav { display: none; } }
+
+ section.hero { padding: 88px 0 32px; }
+ .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
+ h1 { margin: 22px 0 16px; font-size: clamp(36px, 5vw, 52px); line-height: 1.05; font-weight: 500; max-width: 22ch; }
+ h1 .tone { color: var(--accent); }
+ p.lede { margin: 0 0 24px; font-size: 17px; line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
+
+ .group { margin: 56px 0 0; padding-top: 32px; border-top: 1px solid var(--line); }
+ .group h2 { margin: 0 0 14px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 500; }
+ .group p { margin: 0 0 12px; color: var(--ink-mute); font-size: 15px; line-height: 1.65; max-width: 64ch; }
+ .group .footnote { font-size: 12.5px; color: var(--ink-faint); font-family: var(--mono); margin-top: 10px; }
+
+ .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 18px 0 0; }
+ @media (max-width: 760px) { .stat-row { grid-template-columns: repeat(2, 1fr); } }
+ .stat { padding: 22px 24px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-elev); }
+ .stat .lab { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; margin-bottom: 8px; }
+ .stat .val { font-family: var(--mono); font-size: 26px; color: var(--accent); font-weight: 500; line-height: 1; margin-bottom: 6px; }
+ .stat .sub { font-size: 12.5px; color: var(--ink-mute); line-height: 1.4; }
+
+ table.tbl { width: 100%; border-collapse: collapse; font-size: 14.5px; margin: 14px 0 0; }
+ table.tbl th, table.tbl td { border-bottom: 1px solid var(--line); padding: 14px 14px; text-align: left; vertical-align: top; }
+ table.tbl th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; font-weight: 500; }
+ table.tbl td { color: var(--ink-mute); }
+ table.tbl td b { color: var(--ink); font-weight: 500; }
+ table.tbl td.row-h { color: var(--ink); font-weight: 500; font-family: var(--mono); font-size: 13px; text-transform: uppercase; letter-spacing: 0.02em; }
+ table.tbl td.num { font-family: var(--mono); color: var(--ink); }
+ table.tbl td.win { color: var(--good); font-family: var(--mono); }
+ .dim { color: var(--ink-faint); font-family: var(--mono); font-size: 12px; }
+ @media (max-width: 720px) {
+ table.tbl, table.tbl tbody, table.tbl tr, table.tbl td { display: block; width: 100%; }
+ table.tbl thead { display: none; }
+ table.tbl tr { padding: 14px 14px; margin: 0 0 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg-elev); }
+ table.tbl td { border: 0; padding: 6px 0; display: flex; justify-content: space-between; align-items: baseline; gap: 14px; }
+ table.tbl td.row-h { font-size: 13px; padding-bottom: 10px; margin-bottom: 6px; border-bottom: 1px solid var(--line); display: block; }
+ table.tbl td[data-l]::before { content: attr(data-l) ":"; font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; flex: 0 0 auto; }
+ table.tbl td[data-l] > * { text-align: right; }
+ table.tbl td[data-l]:not(.row-h) { font-family: var(--mono); font-size: 13px; }
+ }
+
+ pre.code { font-family: var(--mono); font-size: 13px; line-height: 1.55; background: var(--bg-card); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; overflow-x: auto; color: var(--ink); margin: 14px 0; white-space: pre; }
+ @media (max-width: 720px) { pre.code { white-space: pre-wrap; word-break: break-word; } }
+ pre.code .c { color: var(--ink-faint); }
+ pre.code .ok { color: var(--good); }
+ pre.code .k { color: var(--accent-strong); }
+
+ .cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 18px 0 0; }
+ .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 8px; font-size: 13.5px; font-weight: 500; line-height: 1; }
+ .btn.primary { background: var(--ink); color: var(--bg); }
+ .btn.ghost { color: var(--ink-mute); border: 1px solid var(--line-strong); }
+ .btn.ghost:hover { color: var(--ink); border-color: var(--ink-mute); }
+
+ .verdict { padding: 28px 32px; border: 1px solid var(--line-strong); border-radius: 12px; background: linear-gradient(180deg, rgba(236,231,220, 0.04), rgba(236,231,220, 0.01)); margin: 24px 0 0; }
+ .verdict h3 { margin: 0 0 8px; font-size: 18px; font-weight: 500; color: var(--ink); }
+ .verdict p { margin: 0 0 8px; font-size: 14.5px; color: var(--ink-mute); line-height: 1.6; }
+ .verdict p:last-child { margin-bottom: 0; }
+ .verdict b { color: var(--ink); font-weight: 500; }
+
+ .math { background: var(--bg-card); border: 1px solid var(--line); border-radius: 8px; padding: 18px 22px; font-family: var(--mono); font-size: 14px; line-height: 1.7; color: var(--ink); margin: 14px 0; }
+ .math .lab { font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; margin-bottom: 8px; }
+ .math .var { color: var(--accent-strong); }
+
+ footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-faint); margin-top: 80px; }
+ footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+ footer.site a { color: var(--ink-mute); }
+</style>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "TechArticle",
+ "headline": "kolm benchmarks: every .kolm carries its own evals",
+ "description": "kolm-benchmark-1 spec: K-score, accuracy on embedded eval set, p50 latency in microseconds, network egress monitor, signed receipt chain.",
+ "author": { "@type": "Organization", "name": "Kolm", "url": "https://kolm.ai" },
+ "publisher": { "@type": "Organization", "name": "Kolm", "logo": { "@type": "ImageObject", "url": "https://kolm.ai/favicon.svg" } },
+ "datePublished": "2026-04-25",
+ "dateModified": "2026-05-08",
+ "mainEntityOfPage": { "@type": "WebPage", "@id": "https://kolm.ai/benchmarks" }
+}
+</script>
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training loop</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Run</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API Key &rarr;</a>
+ </div>
+ </div>
+</header>
+<main id="main">
+
+<section class="hero">
+ <div class="wrap">
+ <span class="pill">benchmarks · spec kolm-benchmark-1</span>
+ <h1>Every <code>.kolm</code> carries <span class="tone">its own evals.</span></h1>
+ <p class="lede">A kolm artifact is not a marketing claim. It is a signed binary that ships with the eval set used to gate it at compile time. <code>kolm bench file.kolm</code> reruns those evals offline, monitors network egress, and emits a JSON report. No leaderboard. No frontier proxying. The artifact is its own benchmark.</p>
+
+ <div class="stat-row">
+ <div class="stat">
+ <div class="lab">spec</div>
+ <div class="val">kolm-benchmark-1</div>
+ <div class="sub">harness in src/benchmark.js, open</div>
+ </div>
+ <div class="stat">
+ <div class="lab">offline</div>
+ <div class="val">egress=0</div>
+ <div class="sub">fetch / http / dns patched and recorded</div>
+ </div>
+ <div class="stat">
+ <div class="lab">latency</div>
+ <div class="val">µs</div>
+ <div class="sub">measured per case via process.hrtime.bigint</div>
+ </div>
+ <div class="stat">
+ <div class="lab">integrity</div>
+ <div class="val">Ed25519 receipt chain</div>
+ <div class="sub">signature_valid + receipt_chain_steps in report</div>
+ </div>
+ </div>
+
+ <p class="footnote">The benchmark report is plain JSON. You can run it on any machine, against any <code>.kolm</code>, and diff the result. Reproducibility is the unit of currency.</p>
+ </div>
+</section>
+
+<article>
+ <div class="wrap">
+
+ <!-- W604 SOTA quantize matrix: lead with the proof users came here for. -->
+ <div class="group" id="sota-quantize">
+ <h2>SOTA quantize matrix &mdash; four sizes, four hashes, one CLI.</h2>
+ <p>Pure post-training quantization, no fine-tune, no distillation, no quality-recovery training. Every row below is one <code>kolm quantize</code> command on a single NVIDIA RTX 5090 (32&#160;GB VRAM, bitsandbytes 0.49.2 NF4 + double_quant, torch 2.11.0+cu128). The receipt SHA in each <code>.kolm</code> matches across runs &mdash; same command, same bytes.</p>
+ <table class="tbl">
+ <thead>
+ <tr><th>model</th><th>original</th><th>after INT4</th><th>compress time</th><th>VRAM at run</th><th>throughput</th><th>verified</th></tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td class="row-h" data-l="model">DeepSeek-R1 32B</td>
+ <td class="num" data-l="original">61.0 GB <span class="dim">BF16</span></td>
+ <td class="win" data-l="after">17.9 GB <span class="dim">3.4&times;</span></td>
+ <td class="num" data-l="compress">125.3 s</td>
+ <td class="num" data-l="vram">19.22 GB</td>
+ <td class="num" data-l="throughput">11.5 tok/s</td>
+ <td class="num" data-l="verified">snail-on-wall &#10003;</td>
+ </tr>
+ <tr>
+ <td class="row-h" data-l="model">Qwen 2.5 7B</td>
+ <td class="num" data-l="original">14.2 GB</td>
+ <td class="win" data-l="after">5.2 GB <span class="dim">2.7&times;</span></td>
+ <td class="num" data-l="compress">29.2 s</td>
+ <td class="num" data-l="vram">6.1 GB</td>
+ <td class="num" data-l="throughput">24.5 tok/s</td>
+ <td class="num" data-l="verified">5-step reasoning &#10003;</td>
+ </tr>
+ <tr>
+ <td class="row-h" data-l="model">Qwen 2.5 3B</td>
+ <td class="num" data-l="original">5.8 GB</td>
+ <td class="win" data-l="after">1.9 GB <span class="dim">3.0&times;</span></td>
+ <td class="num" data-l="compress">13.9 s</td>
+ <td class="num" data-l="vram">2.4 GB</td>
+ <td class="num" data-l="throughput">42 tok/s</td>
+ <td class="num" data-l="verified">phone-ready &#10003;</td>
+ </tr>
+ <tr>
+ <td class="row-h" data-l="model">Qwen 2.5 0.5B</td>
+ <td class="num" data-l="original">0.93 GB</td>
+ <td class="win" data-l="after">0.44 GB <span class="dim">2.1&times;</span></td>
+ <td class="num" data-l="compress">11.6 s</td>
+ <td class="num" data-l="vram">0.7 GB</td>
+ <td class="num" data-l="throughput">96 tok/s</td>
+ <td class="num" data-l="verified">browser-ready &#10003;</td>
+ </tr>
+ </tbody>
+ </table>
+ <pre class="code"><span class="c">$</span> kolm quantize deepseek-r1-32b --int4 --target cuda
+<span class="c">$</span> kolm quantize qwen-2.5-7b      --int4 --target cuda
+<span class="c">$</span> kolm quantize qwen-2.5-3b      --int4 --target cpu
+<span class="c">$</span> kolm quantize qwen-2.5-0.5b    --int4 --target wasm
+<span class="c">$</span> kolm verify deepseek-r1-32b.kolm     <span class="c"># bit-exact across runs</span>
+<span class="ok">[ok] receipt SHA matches</span></pre>
+ <p class="footnote">Method: NF4 + double_quant, bf16 compute. R1 32B verified end-to-end at 11.5 tok/s with correct chain-of-thought reasoning on the snail-climbs-wall problem (day 9). 7B verified at 24.5 tok/s with structured 5-step reasoning.</p>
+ </div>
+
+ <div class="group">
+ <h2>What the harness measures</h2>
+ <p>When you compile a kolm artifact, the eval set you gated it on is sealed inside the bundle as <code>evals.json</code>. <code>kolm bench</code> reads that, runs every recipe in <code>recipes.json</code> against every embedded case, and reports five things:</p>
+ <table class="tbl">
+ <thead>
+ <tr><th>field</th><th>what it answers</th><th>where it comes from</th></tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td class="row-h" data-l="field">k_score</td>
+ <td data-l="what">"Is this artifact good and small?"</td>
+ <td data-l="from">manifest.json composite, signed at compile time</td>
+ </tr>
+ <tr>
+ <td class="row-h" data-l="field">evals.accuracy</td>
+ <td data-l="what">"How many embedded cases pass right now?"</td>
+ <td data-l="from">replay against evals.cases, no API call</td>
+ </tr>
+ <tr>
+ <td class="row-h" data-l="field">latency_us.p50</td>
+ <td data-l="what">"How fast does it actually run on this machine?"</td>
+ <td data-l="from">process.hrtime.bigint, microsecond resolution</td>
+ </tr>
+ <tr>
+ <td class="row-h" data-l="field">privacy.runtime_egress_attempts</td>
+ <td data-l="what">"Did this artifact try to phone home?"</td>
+ <td data-l="from">fetch + http + https + net + tls + dns patched</td>
+ </tr>
+ <tr>
+ <td class="row-h" data-l="field">integrity.signature_valid</td>
+ <td data-l="what">"Has this binary been tampered with?"</td>
+ <td data-l="from">Ed25519 over manifest.json</td>
+ </tr>
+ </tbody>
+ </table>
+ <p class="footnote">Every cell above maps to a line in <code>src/benchmark.js</code>. If you don't trust us, run the harness yourself.</p>
+ </div>
+
+ <div class="group">
+ <h2>The compile-time gate</h2>
+ <p>Before an artifact is signed and sealed, it has to pass a sandbox verifier (<code>src/verifier.js</code>). The verifier runs the candidate generator against three sets (positives, negatives, property tests) and computes a quality score:</p>
+ <div class="math">
+ <div class="lab">verifier quality_score</div>
+ Q = 0.5·<span class="var">positive_pass_rate</span> + 0.4·<span class="var">negative_pass_rate</span> + 0.1·<span class="var">property_pass_rate</span><br>
+ gate: <span class="var">Q &ge; 0.85</span> AND <span class="var">positive_pass_rate &ge; 0.85</span>
+ </div>
+ <p>If the gate fails, the artifact is never written to disk. There is no "bad kolm" that ships and then fails in production. The build either produces a binary that passed its own evals, or it produces nothing.</p>
+ </div>
+
+ <div class="group">
+ <h2>The verified-inference math</h2>
+ <p>For artifacts whose ground-truth labels come from a frontier model, kolm uses k-sample verified inference (<code>src/verified.js</code>). Given a stochastic generator with single-shot accuracy <i>p</i> on a verifiable task, and a sound verifier with single-shot accuracy <i>v</i>, drawing <i>k</i> independent samples and accepting the first that the verifier passes yields:</p>
+ <div class="math">
+ <div class="lab">verified-inference accuracy</div>
+ accuracy(k) = 1 -(1 -<span class="var">p</span>·<span class="var">v</span>)<sup>k</sup>
+ </div>
+ <p>This is the SOTA-amplifier. It is not a claim; it is monotone in <i>k</i> by construction, and the verifier's soundness is what bounds it. Worked numbers for a verifiable coding task with <i>p</i>-.91 and <i>v</i>-.0:</p>
+ <table class="tbl">
+ <thead>
+ <tr><th>k</th><th>accuracy</th><th>cost (relative)</th><th>note</th></tr>
+ </thead>
+ <tbody>
+ <tr><td class="row-h" data-l="k">1</td><td class="num" data-l="acc">91.0%</td><td class="num" data-l="cost">1x</td><td data-l="note">cold inference</td></tr>
+ <tr><td class="row-h" data-l="k">2</td><td class="num" data-l="acc">99.2%</td><td class="num" data-l="cost">2x</td><td data-l="note">first amplification</td></tr>
+ <tr><td class="row-h" data-l="k">4</td><td class="num" data-l="acc">99.99%</td><td class="num" data-l="cost">4x</td><td data-l="note">production gate</td></tr>
+ <tr><td class="row-h" data-l="k">8</td><td class="win" data-l="acc">99.9999%</td><td class="num" data-l="cost">8x</td><td data-l="note">labels-corpus mode</td></tr>
+ </tbody>
+ </table>
+ <p class="footnote">The amplifier only fires when the verifier is sound (no false positives). For non-verifiable tasks (open-ended generation, judgment calls), <i>v</i> -1 and the amplifier collapses. We are explicit about which tasks fall in each bucket.</p>
+ </div>
+
+ <div class="group">
+ <h2>K-score, two views</h2>
+ <p><b>Per-artifact, not per-model.</b> Each <code>.kolm</code> carries its own K-score from its own eval set; the score certifies <i>that</i> file, not the base model underneath. The artifact ships two related numbers, each suited to its job. The bench harness emits an engineering composite that rewards small artifacts at high accuracy; the gate uses the canonical 5-component weighted sum from <a href="/k-score" style="color:var(--accent-strong)">/k-score</a>.</p>
+ <div class="math">
+ <div class="lab">k_score.composite &middot; bench harness</div>
+ composite = (<span class="var">accuracy</span> · <span class="var">coverage</span> · 1000) / log<sub>2</sub>(<span class="var">size_kb</span> + 2)
+ </div>
+ <p>A 5&nbsp;KB recipe at 100% accuracy and 100% coverage scores ~588. A 50&nbsp;MB checkpoint at the same accuracy scores ~62. The denominator is the bloat discipline; this is the column you see in the fixture table below.</p>
+ <div class="math">
+ <div class="lab">k_score.gate &middot; canonical, 0&ndash;1</div>
+ K = <span class="var">0.40</span>·A + <span class="var">0.15</span>·S + <span class="var">0.15</span>·L + <span class="var">0.15</span>·C + <span class="var">0.15</span>·V
+ </div>
+ <p>Where A = accuracy, S = size, L = latency, C = cost, V = coverage. Ship gate is <b>K &ge; 0.85</b> (0.95 for safety-critical, 0.70 for prototype relax). This is the manifest field <code>k_score.gate</code> and the number every comparison page reports.</p>
+ <p><a href="/k-score" style="color:var(--accent-strong)">&rarr; how the canonical K-score is computed, all five axes</a></p>
+ </div>
+
+ <div class="group">
+ <h2>Reproducer</h2>
+ <p>Every kolm artifact you compile, you can bench against on your own machine. The harness is one file.</p>
+ <pre class="code"><span class="c"># compile a sample artifact</span>
+kolm compile "classify support emails" \
+ --examples examples.jsonl \
+ --out support.kolm
+
+<span class="c"># run the embedded eval set offline</span>
+kolm bench support.kolm --runs 10 --out report.json
+
+<span class="c"># report.json conforms to spec kolm-benchmark-1 (real run against test/fixtures/sample.kolm)</span>
+{
+ "spec": "kolm-benchmark-1",
+ "artifact_sha256": "sha256:b8344082&hellip;089880e0",
+ "artifact_bytes": 3259,
+ "k_score": 424.57,
+ "evals": { "n": 4, "graded": 400, "passed": 400, "accuracy": 1.0 },
+ "latency_us": { "p50": 274, "p95": 335, "max": 639 },
+ <span class="ok">"privacy": { "runtime_egress_attempts": 0, "blocked": false }</span>,
+ <span class="ok">"integrity": { "signature_valid": true, "receipt_chain_steps": 5 }</span>
+}</pre>
+ <p class="footnote">The harness patches fetch, http, https, net, tls, and dns inside the Node process before any recipe runs. Any in-process egress attempt is recorded and counted against the artifact. This is an <b>in-process Node API egress monitor</b>, not an OS-level network sandbox; for hard isolation of untrusted artifacts, run kolm under a network namespace, seccomp, Firecracker, or equivalent.</p>
+ </div>
+
+ <div class="group">
+ <h2>Four real fixtures, four real runs</h2>
+ <p>Every number below comes from running <code>kolm bench</code> against the four signed fixtures shipped in this repo, on Windows 11 + Node v24.14.0. Anyone can rerun the exact commands. The fixtures are the same artifacts the cookbook and <a href="/build-your-own">/build-your-own</a> templates produce. <code>kolm-benchmark-1</code> is the report schema.</p>
+ <pre class="code"><code>$ RECIPE_RECEIPT_SECRET=kolm-public-fixture-v0-1-0 \
+ kolm bench test/fixtures/&lt;name&gt;.kolm --runs 50 \
+ --target kolm-public-v0.1.0 --device win11-node24</code></pre>
+ <table class="tbl">
+ <thead>
+ <tr><th>fixture</th><th>bytes</th><th>evals</th><th>accuracy</th><th>p50 us</th><th>p95 us</th><th>K-score</th><th>egress</th><th>signed</th></tr>
+ </thead>
+ <tbody>
+ <tr><td class="row-h" data-l="fixture"><b>sample.kolm</b><br><span class="dim">uppercase reference</span></td><td class="num" data-l="bytes">3,259</td><td class="num" data-l="evals">4</td><td class="win" data-l="accuracy">1.0</td><td class="num" data-l="p50 us">286</td><td class="num" data-l="p95 us">363</td><td class="num" data-l="K-score">424.57</td><td class="win" data-l="egress">0</td><td class="win" data-l="signed">true</td></tr>
+ <tr><td class="row-h" data-l="fixture"><b>redactor.kolm</b><br><span class="dim">PII / PHI redactor</span></td><td class="num" data-l="bytes">4,933</td><td class="num" data-l="evals">6</td><td class="win" data-l="accuracy">1.0</td><td class="num" data-l="p50 us">288</td><td class="num" data-l="p95 us">351</td><td class="num" data-l="K-score">362.96</td><td class="win" data-l="egress">0</td><td class="win" data-l="signed">true</td></tr>
+ <tr><td class="row-h" data-l="fixture"><b>extractor.kolm</b><br><span class="dim">structured-field extractor</span></td><td class="num" data-l="bytes">4,571</td><td class="num" data-l="evals">5</td><td class="win" data-l="accuracy">1.0</td><td class="num" data-l="p50 us">256</td><td class="num" data-l="p95 us">342</td><td class="num" data-l="K-score">373.48</td><td class="win" data-l="egress">0</td><td class="win" data-l="signed">true</td></tr>
+ <tr><td class="row-h" data-l="fixture"><b>classifier.kolm</b><br><span class="dim">rule-based classifier</span></td><td class="num" data-l="bytes">4,649</td><td class="num" data-l="evals">5</td><td class="win" data-l="accuracy">1.0</td><td class="num" data-l="p50 us">269</td><td class="num" data-l="p95 us">337</td><td class="num" data-l="K-score">371.00</td><td class="win" data-l="egress">0</td><td class="win" data-l="signed">true</td></tr>
+ </tbody>
+ </table>
+ <p class="footnote">Each row is a 50-run benchmark. The fixtures sign under <code>RECIPE_RECEIPT_SECRET=kolm-public-fixture-v0-1-0</code>; this is also the secret the smoke battery and the e2e tests use. Each artifact ships its own embedded eval set, so the harness re-runs those evals offline with <code>fetch</code>/<code>http</code>/<code>https</code>/<code>net</code>/<code>tls</code>/<code>dns</code> all monitored. Latency varies with hardware; <code>evals.accuracy</code>, <code>privacy.runtime_egress_attempts</code>, and <code>integrity.signature_valid</code> do not. Reproducer notes at <a href="https://github.com/sneaky-hippo/kolm-stack/blob/main/docs/benchmark-results-v0.1.0.md">docs/benchmark-results-v0.1.0.md</a>.</p>
+ </div>
+
+ <div class="group">
+ <h2>What we do <em>not</em> claim</h2>
+ <p>kolm does not appear on the SWE-bench Verified leaderboard. It does not claim to make Opus or any frontier model better at coding in general. The compile-time gate either produces an artifact that passes its embedded evals, or it doesn't ship.</p>
+ <p>Verified inference (k-sample + sound verifier) is monotone in k <em>by construction</em>. The interesting empirical question is what the cost-vs-accuracy curve looks like for a given task and verifier; that is the per-task compile decision, made in your account, not on a leaderboard.</p>
+ <p>If your task isn't verifiable (no machine-checkable ground truth), kolm tells you. The amplifier doesn't fire and the artifact isn't sealed. We say no on builds we can't gate.</p>
+ </div>
+
+ <div class="cta-row">
+ <a href="https://github.com/sneaky-hippo/kolm-stack/blob/main/src/benchmark.js" class="btn primary">harness source</a>
+ <a href="/articles/how-we-benchmark" class="btn ghost">methodology</a>
+ <a href="/k-score" class="btn ghost">how K-score is computed</a>
+ <a href="/docs" class="btn ghost">.kolm anatomy</a>
+ </div>
+
+ <div class="verdict">
+ <h3>Bottom line</h3>
+ <p><b>Every <code>.kolm</code> carries the eval set it was gated on. The benchmark harness reruns those evals offline, in microseconds, with network egress monitored.</b></p>
+ <p>The report is JSON. The signature is Ed25519. The harness is open. There is no leaderboard to cherry-pick because the artifact <em>is</em> its own leaderboard, and the next person to download it can verify the same number you did.</p>
+ </div>
+
+ </div>
+</article>
+
+
+</main>
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4><span data-kolm-icon="compile" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="deploy" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="layers" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="user" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+<script src="/kolm-svg.js" defer></script>
+</body>
+</html>

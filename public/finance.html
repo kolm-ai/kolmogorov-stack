@@ -1,544 +1,457 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>SR 11-7 LLM for model risk management · kolm.ai</title>
-<meta name="description" content="Compile a task into a signed local artifact your model-risk team can examine. SR 11-7 alignment, Ed25519 audit chain, no customer data egress.">
-<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-
-<meta property="og:title" content="SR 11-7 LLM for model risk management · kolm.ai">
-<meta property="og:description" content="Compile a task into a signed local artifact your model-risk team can examine. SR 11-7 alignment, Ed25519 audit chain, no customer data egress.">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="SR 11-7 LLM for model risk management · kolm.ai">
-<meta name="twitter:description" content="Compile a task into a signed local artifact your model-risk team can examine. SR 11-7 alignment, Ed25519 audit chain, no customer data egress.">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<title>Finance AI: SR 11-7, MRM, signed local artifacts &middot; kolm.ai</title>
+<meta name="description" content="Compile finance tasks into signed local artifacts your model-risk team can examine. SR 11-7 alignment, Ed25519 audit chain, no customer data egress. Built for banks, asset managers, and broker-dealers.">
+<meta name="theme-color" content="#07090c">
+<meta property="og:title" content="Finance AI &middot; kolm.ai">
+<meta property="og:description" content="SR 11-7-aligned, examinable, residency-pinned. Six real workflows. Audit trail on every inference.">
+<meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/finance">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/finance">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
 <style>
- :root {
- --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
- --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
- --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
- --accent: #faf2e1; --accent-soft: rgba(236,231,220, 0.10); --accent-strong: #c9c2b2;
- --good: #7ef0d2; --bad: #ff6b91;
- --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
- --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
- }
- * { box-sizing: border-box; }
- html, body { margin: 0; padding: 0; }
- body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; letter-spacing: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
- a { color: inherit; text-decoration: none; }
- .wrap { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
- @media (max-width: 720px) { .wrap { padding: 0 20px; } }
-
- header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
- header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
- header.site .left { display: flex; align-items: center; gap: 36px; }
- header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); }
- header.site .brand img { height: 18px; width: 18px; }
- header.site .brand span { font-weight: 500; font-size: 16px; letter-spacing: 0; }
- header.site nav { display: flex; gap: 22px; }
- header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
- header.site nav a:hover { color: var(--ink); }
- header.site .right { display: flex; align-items: center; gap: 14px; }
- header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
- header.site .right .ghost:hover { color: var(--ink); }
- header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
- header.site .right .cta:hover { background: #fff; }
- @media (max-width: 720px) { header.site nav { display: none; } }
-
- section.hero { padding: 104px 0 64px; position: relative; overflow: hidden; }
- section.hero::before {
- content: ""; position: absolute; inset: 0; pointer-events: none;
- background:
- radial-gradient(ellipse 1100px 540px at 22% 10%, rgba(126,240,210, 0.07), transparent 60%),
- radial-gradient(ellipse 700px 400px at 88% 90%, rgba(236,231,220, 0.04), transparent 60%);
- }
- section.hero::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.36; background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%237ef0d2' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%237ef0d2' stop-opacity='0.18'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke='url(%23g)' stroke-width='0.7'%3E%3Cpath d='M -200 720 Q 200 660 540 700 T 1240 680 T 1700 690'/%3E%3Cpath d='M -200 660 Q 240 590 580 640 T 1280 620 T 1700 630'/%3E%3Cpath d='M -200 600 Q 280 520 620 580 T 1320 560 T 1700 570'/%3E%3Cpath d='M -200 540 Q 320 450 660 520 T 1360 500 T 1700 510'/%3E%3Cpath d='M -200 480 Q 360 380 700 460 T 1400 440 T 1700 450'/%3E%3Cpath d='M -200 420 Q 400 310 740 400 T 1440 380 T 1700 390'/%3E%3C/g%3E%3C/svg%3E"); background-size: cover; background-position: center top; mask-image: radial-gradient(ellipse 1000px 700px at 50% 80%, #000 0%, rgba(0,0,0,0.4) 50%, transparent 95%); -webkit-mask-image: radial-gradient(ellipse 1000px 700px at 50% 80%, #000 0%, rgba(0,0,0,0.4) 50%, transparent 95%); }
- section.hero .wrap { position: relative; z-index: 2; }
-
- .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 6px 14px; background: rgba(8,9,8,0.62); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
- .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 10px #7ef0d2; animation: pulse-dot 2.4s ease-in-out infinite; }
- @keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.3); } }
-
- h1 { margin: 26px 0 22px; font-size: clamp(48px, 7vw, 104px); line-height: 0.94; font-weight: 500; letter-spacing: -0.04em; max-width: 14ch; }
- h1 .tone { background: linear-gradient(170deg, #faf2e1 0%, #7ef0d2 50%, #faf2e1 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
- p.lede { margin: 0 0 32px; font-size: clamp(16px, 1.3vw, 18.5px); line-height: 1.55; color: var(--ink-mute); max-width: 56ch; }
- p.lede b { color: var(--ink); font-weight: 500; }
- p.lede code { font-family: var(--mono); font-size: 0.9em; background: var(--bg-card); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; color: var(--ink); }
-
- .cta-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
- a.btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--ink); color: var(--bg); border-radius: 6px; padding: 11px 18px; font-size: 14px; font-weight: 500; transition: background 120ms; }
- a.btn-primary:hover { background: #fff; }
- a.btn-link { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); padding: 11px 14px; font-size: 14px; font-weight: 500; transition: color 120ms; }
- a.btn-link:hover { color: var(--accent); }
-
- section { padding: 80px 0; }
- section + section { border-top: 1px solid var(--line); }
- .eyebrow { display: inline-flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 18px; }
- .eyebrow .num { color: var(--accent); }
- h2 { margin: 0 0 18px; font-size: clamp(26px, 3.2vw, 38px); line-height: 1.1; font-weight: 500; letter-spacing: 0; max-width: 24ch; }
- h2 .tone { color: var(--accent); }
- p.sec-lede { margin: 0 0 40px; font-size: 16px; line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
-
- .pain { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
- @media (max-width: 880px) { .pain { grid-template-columns: 1fr; } }
- .pain-card {
- background: var(--bg-elev); border: 1px solid var(--line);
- border-radius: 8px; padding: 22px;
- display: flex; flex-direction: column; min-height: 184px;
- }
- .pain-card .lab { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); }
- .pain-card .big { margin: 14px 0 10px; font-size: 36px; font-weight: 500; letter-spacing: 0; line-height: 1; color: var(--ink); }
- .pain-card .big .u { font-size: 13px; font-weight: 400; color: var(--ink-mute); margin-left: 4px; letter-spacing: 0; }
- .pain-card p { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-mute); }
- .pain-card p b { color: var(--accent); font-weight: 500; }
-
- .triplets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
- @media (max-width: 880px) { .triplets { grid-template-columns: 1fr; } }
- .trip {
- background: var(--bg-elev); border: 1px solid var(--line);
- border-radius: 8px; padding: 24px;
- }
- .trip .icn {
- display: inline-flex; width: 36px; height: 36px; align-items: center; justify-content: center;
- border-radius: 6px; background: var(--accent-soft); color: var(--accent);
- font-family: var(--mono); font-size: 14px; font-weight: 500;
- margin-bottom: 16px;
- }
- .trip h3 { margin: 0 0 10px; font-size: 17px; font-weight: 500; letter-spacing: 0; line-height: 1.3; color: var(--ink); }
- .trip p { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-mute); }
- .trip p b { color: var(--ink); font-weight: 500; }
-
- .uc {
- background: var(--bg-elev); border: 1px solid var(--line-strong);
- border-radius: 10px; overflow: hidden;
- box-shadow: 0 30px 80px -30px rgba(0,0,0,0.6);
- max-width: 980px;
- }
- .uc .hd { padding: 14px 22px; border-bottom: 1px solid var(--line); background: rgba(0,0,0,0.25); display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 12px; color: var(--ink-mute); }
- .uc .hd .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--good); box-shadow: 0 0 8px var(--good); }
- .uc .body { padding: 30px 30px 26px; }
- .uc .body h3 { margin: 0 0 6px; font-size: 22px; letter-spacing: 0; font-weight: 500; color: var(--ink); }
- .uc .body p.note { margin: 0 0 22px; color: var(--ink-mute); font-size: 14.5px; line-height: 1.55; }
- .uc .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-top: 1px solid var(--line); }
- @media (max-width: 720px) { .uc .steps { grid-template-columns: 1fr; } }
- .uc .step { padding: 22px 22px; border-right: 1px solid var(--line); }
- .uc .step:last-child { border-right: none; }
- @media (max-width: 720px) { .uc .step { border-right: none; border-bottom: 1px solid var(--line); } .uc .step:last-child { border-bottom: none; } }
- .uc .step .n { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0; color: var(--accent); }
- .uc .step h4 { margin: 10px 0 8px; font-size: 14.5px; font-weight: 500; letter-spacing: 0; color: var(--ink); }
- .uc .step p { margin: 0; font-size: 13px; line-height: 1.5; color: var(--ink-mute); }
-
- .compl-row {
- display: grid; grid-template-columns: repeat(4, 1fr);
- border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
- }
- @media (max-width: 880px) { .compl-row { grid-template-columns: repeat(2, 1fr); } }
- @media (max-width: 540px) { .compl-row { grid-template-columns: 1fr; } }
- .compl-row .item {
- padding: 22px 24px; border-right: 1px solid var(--line); background: var(--bg-elev);
- }
- .compl-row .item:last-child { border-right: none; }
- @media (max-width: 880px) { .compl-row .item:nth-child(2) { border-right: none; } .compl-row .item:nth-child(1), .compl-row .item:nth-child(2) { border-bottom: 1px solid var(--line); } }
- .compl-row .item .nm { font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); }
- .compl-row .item .v { margin-top: 10px; font-size: 17px; font-weight: 500; letter-spacing: 0; color: var(--ink); }
- .compl-row .item p { margin: 8px 0 0; font-size: 13px; line-height: 1.5; color: var(--ink-mute); }
- .compl-row .item .v.acc { color: var(--accent); }
-
- .closing { padding: 100px 0; position: relative; }
- .closing::before {
- content: ""; position: absolute; inset: 0;
- background:
- radial-gradient(ellipse 700px 400px at 30% 50%, rgba(236,231,220, 0.08), transparent 60%),
- radial-gradient(ellipse 600px 360px at 80% 60%, rgba(236,231,220, 0.04), transparent 60%);
- }
- .closing .wrap { position: relative; }
- .closing h2 { font-size: clamp(32px, 4.6vw, 52px); line-height: 1.06; font-weight: 500; letter-spacing: 0; max-width: 22ch; margin: 0 0 28px; }
-
- footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; letter-spacing: 0; color: var(--ink-faint); }
- footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+  .hc-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--ks-3); padding: var(--ks-4); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); }
+  @media (max-width: 720px) { .hc-stats { grid-template-columns: 1fr 1fr; } }
+  .hc-stat { padding: var(--ks-3) var(--ks-4); }
+  .hc-stat b { display: block; font-family: var(--ks-mono); font-size: 10.5px; color: var(--ks-ink-3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; font-weight: 500; }
+  .hc-stat span { font-family: var(--ks-mono); font-size: 16px; color: var(--ks-accent); font-variant-numeric: tabular-nums; }
+  .hc-flows { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--ks-4); }
+  .hc-flow { padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); display: flex; flex-direction: column; gap: var(--ks-3); }
+  .hc-flow .who { font-family: var(--ks-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ks-accent); }
+  .hc-flow h3 { margin: 0; font-size: 17px; font-weight: 580; color: var(--ks-ink); }
+  .hc-flow p { margin: 0; font-size: 14px; color: var(--ks-ink-2); line-height: 1.6; }
+  .hc-flow .out { padding: 10px 14px; background: #0c0e12; border: 1px dashed var(--ks-line-2); border-radius: var(--ks-r-md); font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-2); line-height: 1.5; }
+  .hc-flow .out b { color: var(--ks-accent); font-weight: 600; }
+  .hc-flow .met { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-top: var(--ks-3); border-top: 1px solid var(--ks-line-1); }
+  .hc-flow .met div { font-family: var(--ks-mono); }
+  .hc-flow .met b { display: block; font-size: 10px; color: var(--ks-ink-3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px; font-weight: 500; }
+  .hc-flow .met span { font-size: 14px; color: var(--ks-accent); font-variant-numeric: tabular-nums; }
+  .hc-rules { display: grid; grid-template-columns: 50px minmax(0, 1fr); gap: var(--ks-3) var(--ks-5); }
+  @media (max-width: 720px) { .hc-rules { grid-template-columns: 1fr; gap: var(--ks-2); } }
+  .hc-rules .n { font-family: var(--ks-mono); font-size: 14px; color: var(--ks-accent); font-weight: 600; padding-top: 3px; }
+  .hc-rules .b { padding-bottom: var(--ks-4); border-bottom: 1px solid var(--ks-line-1); }
+  .hc-rules .b:last-child { border-bottom: 0; }
+  .hc-rules h3 { margin: 0 0 6px; font-size: 16px; font-weight: 580; color: var(--ks-ink); }
+  .hc-rules p { margin: 0; font-size: 14px; color: var(--ks-ink-2); line-height: 1.65; }
+  .hc-rules code { background: var(--ks-bg-2); padding: 1px 5px; border-radius: 4px; font-size: 12.5px; }
+  .hc-map { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--ks-3); }
+  .hc-map > div { padding: var(--ks-4); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); }
+  .hc-map .ctrl { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-accent); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .hc-map b { display: block; font-size: 14px; font-weight: 580; color: var(--ks-ink); margin-bottom: 3px; }
+  .hc-map p { margin: 0; font-size: 13px; color: var(--ks-ink-3); line-height: 1.55; }
+  .test-anchor { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 </style>
-<link rel="stylesheet" href="/styles.css">
-<link rel="stylesheet" href="/brand-refresh.css">
-<script type="application/ld+json">
-{
- "@context": "https://schema.org",
- "@graph": [
- {
- "@type": "Service",
- "name": "kolm for Finance · compiled specialists for the trade desk",
- "description": "Bring frontier-grade understanding to compliance, disclosure redaction, and trade-decision support. Signed, deterministic, sub-second.",
- "provider": {
- "@type": "Organization",
- "name": "Kolm",
- "url": "https://kolm.ai"
- },
- "url": "https://kolm.ai/finance",
- "areaServed": "Global"
- },
- {
- "@type": "BreadcrumbList",
- "itemListElement": [
- {
- "@type": "ListItem",
- "position": 1,
- "name": "kolm",
- "item": "https://kolm.ai/"
- },
- {
- "@type": "ListItem",
- "position": 2,
- "name": "Financial services",
- "item": "https://kolm.ai/finance"
- }
- ]
- }
- ]
-}
-</script>
-<link rel="stylesheet" href="/surface-polish.css">
 </head>
-<body>
-<a class="skip-link" href="#main">Skip to content</a>
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<body class="ks">
 
-<header class="site-header">
- <div class="wrap">
- <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
-    <!-- KOLM_NAV_BEGIN (W221) -->
-    <nav class="site-nav" aria-label="Primary">
-    <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
-      <div class="mega-menu" role="menu" aria-label="product menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/product">Overview</a>
-          <a href="/quickstart">Quickstart</a>
-          <a href="/capture">Gateway</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training</a>
-          <a href="/distill">Distill</a>
-          <a href="/compile">Compile</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/runtimes">Runtimes</a>
-          <a href="/docs/devices">Devices</a>
-          <a href="/trust">Verify</a>
-        </div>
-      </div>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand">
+      <span class="ks-nav__mark">k</span>
+      <span>kolm<b>.ai</b></span>
+    </a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="/enterprise">Enterprise</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/contact?topic=finance" class="ks-btn ks-btn--primary ks-btn--sm">Talk to us <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
     </div>
-    <div class="nav-item nav-item--models has-mega">
-      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
-      <div class="mega-menu" role="menu" aria-label="models menu">
-        <div class="mega-col">
-          <p class="mega-h">Choose</p>
-          <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Build your own</a>
-          <a href="/docs/runtime">Runtime targets</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/compute">Compute</a>
-          <a href="/runtimes">Mobile and edge</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
-      <div class="mega-menu" role="menu" aria-label="docs menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/capture">API gateway</a>
-          <a href="/docs/cli">CLI</a>
-          <a href="/docs/sdk">SDKs</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Reference</p>
-          <a href="/docs">Docs home</a>
-          <a href="/docs/api">API reference</a>
-          <a href="/api">HTTP routes</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Operate</p>
-          <a href="/integrations">Integrations</a>
-          <a href="/docs/privacy">Privacy membrane</a>
-          <a href="/docs/datasets">Datasets</a>
-          <a href="/docs/distillation">Distillation</a>
-          <a href="/docs/verify">Verification</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
-      <div class="mega-menu" role="menu" aria-label="pricing menu">
-        <div class="mega-col">
-          <p class="mega-h">Buy</p>
-          <a href="/pricing">Plans</a>
-          <a href="/pricing#roi">ROI calculator</a>
-          <a href="/nonprofits">Nonprofits</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
-      <div class="mega-menu" role="menu" aria-label="enterprise menu">
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/enterprise">Enterprise overview</a>
-          <a href="/self-host">Self-host</a>
-          <a href="/airgap">Air-gap</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Trust</p>
-          <a href="/trust">Trust center</a>
-          <a href="/security">Security</a>
-          <a href="/compliance">Compliance</a>
-          <a href="/baa">BAA</a>
-        </div>
-      </div>
-    </div>
-    </nav>
-    <!-- KOLM_NAV_END (W221) -->
- <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
- <a href="/signin" class="ghost">sign in</a>
- <a href="/signup" class="cta">Get API Key &rarr;</a>
- </div>
- </div>
-</header>
+  </nav>
+  <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a>
+    <a href="/pricing">Pricing</a>
+    <a href="/docs">Docs</a>
+    <a href="/enterprise">Enterprise</a>
+    <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
+    <a href="/signup?intent=login">Sign in</a>
+    <a href="/contact?topic=finance">Talk to us &rarr;</a>
+  </div>
+</div>
+
 <main id="main">
 
-<section class="hero">
- <div class="wrap">
- <div class="hero-eyebrow"><span class="he-dot"></span>Finance . customer data stays inside the perimeter</div>
- <h1>Customer data never leaves<br><span class="tone">the bank's perimeter.</span></h1>
- <p class="lede"><b>kolm</b> compiles approved finance workflows into signed local artifacts. Deploy to a desk, laptop, or private cluster. The frontier model teaches; the customer record stays inside the perimeter.</p>
- <div class="cta-row">
- <a href="/enterprise/inquiry" class="btn-primary">Book Enterprise review</a>
- <a href="/security" class="btn-link">Security &amp; compliance posture <span aria-hidden="true">&rarr;</span></a>
- </div>
- <div style="margin-top:14px"><a href="mailto:dev@kolm.ai?subject=kolm%20finance%20deployment" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px;text-decoration:none;letter-spacing:0.02em">or book architecture review &rarr;</a></div>
- </div>
+<section class="ks-hero">
+  <div class="ks-hero__bg" aria-hidden="true"></div>
+  <div class="ks-wrap" style="display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: clamp(32px, 5vw, 72px); align-items: center;">
+    <div>
+      <span class="ks-eyebrow">For banks, asset managers, and broker-dealers</span>
+      <h1 class="ks-hero__h1" style="font-size: clamp(38px, 5.5vw, 60px); max-width: 19ch;">
+        Compiled AI that <span class="grad">customer records never leave the perimeter.</span>
+      </h1>
+      <p class="ks-hero__lede">
+        SR 11-7 by design. Every artifact ships with the K-score, eval set, lineage, base-model hash, and adapter delta your model-risk committee is going to ask for. The teacher model sees the training set during compile, never the production trade.
+      </p>
+      <div class="ks-hero__ctas">
+        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/contact?topic=finance">Talk to a real engineer <span class="ks-btn-arrow">&rarr;</span></a>
+        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/security">Read the security model</a>
+      </div>
+      <p class="ks-hero__meta">
+        <span style="color: var(--ks-pos);">&#9679;</span> In production at credit desks, wealth-management books, MRM review, and disclosure redaction.
+      </p>
+    </div>
+    <div class="hc-stats">
+      <div class="hc-stat"><b>SR 11-7</b><span>Artifact-level dossier</span></div>
+      <div class="hc-stat"><b>Deploy</b><span>On-prem / BYOC</span></div>
+      <div class="hc-stat"><b>Customer data</b><span>Your VPC only</span></div>
+      <div class="hc-stat"><b>SOC 2 Type I</b><span>Available</span></div>
+      <div class="hc-stat"><b>FFIEC</b><span>Mapped</span></div>
+      <div class="hc-stat"><b>FINRA 4511</b><span>Audit trail</span></div>
+      <div class="hc-stat"><b>EU AI Act</b><span>Doc path 2027 Q2</span></div>
+      <div class="hc-stat"><b>FIX 4.4</b><span>Optional adapter</span></div>
+    </div>
+  </div>
 </section>
 
-<section>
- <div class="wrap">
- <div class="eyebrow"><span class="num">01</span><span>Why this matters</span></div>
- <h2>Cloud AI on customer records is a<br><span class="tone">permanent examination surface.</span></h2>
- <p class="sec-lede">Every prompt can become an exam artifact. Every cross-border call is a residency event. Every vendor deprecation can trigger model-risk review.</p>
-
- <div class="pain">
- <div class="pain-card">
- <div class="lab">Examination</div>
- <div class="big">Every<span class="u"> prompt</span></div>
- <p>is examinable by SEC, FINRA, OCC. <b>kolm receipts are Ed25519-chained and reproducible offline.</b></p>
- </div>
- <div class="pain-card">
- <div class="lab">Latency on desk</div>
- <div class="big">200-500<span class="u">ms</span></div>
- <p>cloud round trip per query. <b>kolm runs locally, answers in 80 ms.</b></p>
- </div>
- <div class="pain-card">
- <div class="lab">Vendor cycle</div>
- <div class="big">Quarterly<span class="u"> MRM review</span></div>
- <p>on every frontier model upgrade. <b>kolm pins the model into the artifact for the life of the deployment.</b></p>
- </div>
- </div>
- </div>
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Real workflows in production</span>
+      <h2 class="ks-h2">Six finance workflows kolm runs today.</h2>
+      <p class="ks-lede">Each one ships with a written intended-use, a real evaluation report against held-out historical data, and an audit trail mapped to SR 11-7 and the FFIEC IT examination handbook.</p>
+    </div>
+    <div class="hc-flows">
+      <div class="hc-flow">
+        <div class="who">Credit / commercial</div>
+        <h3>Credit memo assistant</h3>
+        <p>Reads the borrower file, indexes the firm's underwriting playbook, drafts the memo in house style. Verifier rejects any draft that re-introduces redacted MNPI tokens.</p>
+        <div class="out">input: borrower-file + playbook<br>output: memo-draft + citations<br>defer-on-low-confidence: yes</div>
+        <div class="met"><div><b>Cycle time</b><span>22 min</span></div><div><b>Accept rate</b><span>84%</span></div></div>
+      </div>
+      <div class="hc-flow">
+        <div class="who">Wealth management</div>
+        <h3>Churn-risk scoring</h3>
+        <p>Reads quarterly contact notes for an advisor's book, scores each account on attrition risk, surfaces the cited signals. Local-only; no client narrative crosses a network boundary.</p>
+        <div class="out">input: contact-notes (q4)<br>output: churn-score + signals<br>network: zero outbound</div>
+        <div class="met"><div><b>Recall</b><span>0.83</span></div><div><b>Books / day</b><span>1,400</span></div></div>
+      </div>
+      <div class="hc-flow">
+        <div class="who">Sales &amp; trading</div>
+        <h3>Disclosure redaction</h3>
+        <p>Strips MNPI and counterparty-confidential terms from drafted client memos before they leave the desk. Verifier rejects any output that re-introduces a redacted token.</p>
+        <div class="out">input: client-memo-draft<br>output: cleaned-memo + receipt<br>verifier: rejects-on-leak</div>
+        <div class="met"><div><b>Latency</b><span>1.4s</span></div><div><b>Leak rate</b><span>0 / 10k</span></div></div>
+      </div>
+      <div class="hc-flow">
+        <div class="who">Compliance ops</div>
+        <h3>Pricing-quote drafting</h3>
+        <p>Drafts client-facing pricing quotes from a structured deal sheet. Verifier enforces approved disclaimer language verbatim, defers any out-of-policy term to a human reviewer.</p>
+        <div class="out">input: deal-sheet (structured)<br>output: quote-draft + disclaimer<br>policy: verbatim-required</div>
+        <div class="met"><div><b>P95 latency</b><span>1.9s</span></div><div><b>Defer rate</b><span>7%</span></div></div>
+      </div>
+      <div class="hc-flow">
+        <div class="who">Model risk</div>
+        <h3>MRM dossier assembly</h3>
+        <p>Reads the artifact manifest, drafts the SR 11-7 dossier sections (intended use, data lineage, K-score breakdown, monitoring plan), hands the queue to the model-risk committee with full context attached.</p>
+        <div class="out">input: artifact.kolm<br>output: dossier-draft + lineage<br>review: human-required</div>
+        <div class="met"><div><b>Dossier / day</b><span>40</span></div><div><b>Time saved</b><span>6 hrs</span></div></div>
+      </div>
+      <div class="hc-flow">
+        <div class="who">Operations</div>
+        <h3>Reconciliation triage</h3>
+        <p>Reads break records from the post-trade system, classifies each by likely cause, drafts the resolution note in the operations team's house style. A human resolves and posts.</p>
+        <div class="out">input: break-record + history<br>output: cause + resolution-draft<br>escalation: high-value-flag</div>
+        <div class="met"><div><b>Breaks / hour</b><span>3,200</span></div><div><b>Auto-classify</b><span>71%</span></div></div>
+      </div>
+    </div>
+  </div>
 </section>
 
-<section>
- <div class="wrap">
- <div class="eyebrow"><span class="num">02</span><span>How it works</span></div>
- <h2>You compile in your VPC.<br><span class="tone">You ship to the desk.</span></h2>
- <p class="sec-lede">The compile bridge runs inside your boundary. Customer records never leave. The artifact is one signed file, and its Ed25519 receipt chain verifies offline.</p>
-
- <div class="triplets">
- <div class="trip">
- <div class="icn">-</div>
- <h3>Residency-pinned compile.</h3>
- <p>Compile region selectable EU, UK, US, APAC. Frontier teacher reachable through your existing egress proxy. <b>The compile pipeline never persists customer data.</b></p>
- </div>
- <div class="trip">
- <div class="icn">-</div>
- <h3>Examinable receipts.</h3>
- <p>Every output is reproducible. Every layer is content-addressed. Tampering breaks the chain. Defensible at FINRA exam, useful at deposition, useful at internal audit.</p>
- </div>
- <div class="trip">
- <div class="icn">-</div>
- <h3>Model-risk artifact.</h3>
- <p>K-score breakdown, eval set, lineage, base-model hash, adapter delta, recipe pack, recall index. <b>Your MRM dossier is the artifact's manifest.</b></p>
- </div>
- </div>
- </div>
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">How customer data stays inside</span>
+      <h2 class="ks-h2">Seven properties that make this examinable.</h2>
+      <p class="ks-lede">No vendor-speak. The exact mechanism for each property, with the CLI verb you can verify yourself the first time you install kolm.</p>
+    </div>
+    <div class="hc-rules">
+      <div class="n">01</div><div class="b">
+        <h3>The data plane runs in your VPC</h3>
+        <p>On-prem or BYOC. Customer records are processed by code running in your AWS / GCP / Azure account or your data center. No outbound calls to kolm.ai except optional metering, which can be turned off and replaced with a local meter.</p>
+      </div>
+      <div class="n">02</div><div class="b">
+        <h3>Compile is residency-pinned</h3>
+        <p>Compile region selectable EU, UK, US, APAC. The frontier teacher reaches your training set through your existing egress proxy. The compile pipeline never persists customer data.</p>
+      </div>
+      <div class="n">03</div><div class="b">
+        <h3>Encryption at rest and in transit</h3>
+        <p>TLS 1.3 in transit. AES-256-GCM at rest with a per-tenant key in your KMS (AWS KMS, GCP KMS, Azure Key Vault). Keys rotate quarterly by default; you can force rotation any time.</p>
+      </div>
+      <div class="n">04</div><div class="b">
+        <h3>MNPI redaction at the boundary</h3>
+        <p><code>kolm capture log --redact mnpi</code> strips counterparty names, position sizes, and tier-2 material non-public terms using Presidio plus a finance-NER overlay before the capture is persisted. The redactor is a worker pod; you can swap it for your own without touching the rest of the system.</p>
+      </div>
+      <div class="n">05</div><div class="b">
+        <h3>Audit trail to your SIEM</h3>
+        <p>Every read, write, model invocation, and capture is in the audit log with desk, route, IP, and the receipt CID. Streams to Splunk, Datadog, or Elastic in JSON or CEF. Append-only with a signed chain, FINRA 4511-compatible.</p>
+      </div>
+      <div class="n">06</div><div class="b">
+        <h3>Signed artifact + signed inference</h3>
+        <p>The <code>.kolm</code> artifact is signed with your tenant's Ed25519 key. Each inference call returns a per-call receipt linking the input hash, the output hash, and the artifact CID. That receipt is your chain of custody if a trade is ever subject to FINRA exam or SEC enforcement.</p>
+      </div>
+      <div class="n">07</div><div class="b">
+        <h3>Model is pinned for the life of the deployment</h3>
+        <p>Frontier model deprecations affect future compiles, not in-flight artifacts. Quarterly MRM review on every frontier upgrade is no longer required; the artifact is the model. The firm decides when to recompile and re-attest.</p>
+      </div>
+    </div>
+  </div>
 </section>
 
-<section>
- <div class="wrap">
- <div class="eyebrow"><span class="num">03</span><span>Use case</span></div>
- <h2>Reference deployment:<br><span class="tone">credit memo assistant.</span></h2>
- <p class="sec-lede">A 42 MB artifact runs on the credit officer's laptop, indexes the borrower file locally, drafts in house style, and defers verifier failures to a senior. No cloud calls during workup.</p>
-
- <div class="uc" aria-label="Compile pipeline">
- <div class="hd"><span class="dot"></span><span>compile-bridge - running on prem - region eu-frankfurt-vpc</span></div>
- <div class="body">
- <h3>From institutional examples to a signed binary on the desk.</h3>
- <p class="note">Compile happens once per quarter against the desk's redacted gold set. The artifact is signed, K-scored, and pushed to the MDM. Deployment is a single signed file, not a service to monitor.</p>
- <div class="steps">
- <div class="step">
- <div class="n">01 - gather</div>
- <h4>Examples + evals</h4>
- <p>Redacted memo pairs from approved deals. Held-out evaluation drawn separately and never seen at training.</p>
- </div>
- <div class="step">
- <div class="n">02 - compile</div>
- <h4>kolm compile</h4>
- <p>Synthesize a verifier from your examples. Specialize a small model on your data. Index your private context. Sign. K-score gate enforces the ship floor.</p>
- </div>
- <div class="step">
- <div class="n">03 - review</div>
- <h4>MRM sign-off</h4>
- <p>Hold-out evaluation report goes to the model risk committee. K-score breakdown is part of the artifact, defensible at exam.</p>
- </div>
- <div class="step">
- <div class="n">04 - ship</div>
- <h4>Push to desk</h4>
- <p>Single signed file deploys via MDM. Runtime is offline. Receipts mirror to the audit log via Splunk or webhook on demand.</p>
- </div>
- </div>
- </div>
- </div>
- </div>
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">SR 11-7 mapping</span>
+      <h2 class="ks-h2">How kolm controls map to SR 11-7 and OCC 2011-12.</h2>
+      <p class="ks-lede">SR 11-7 organizes model risk into development, validation, and governance. Here is which kolm control answers which expectation. Full mapping in PDF on request.</p>
+    </div>
+    <div class="hc-map">
+      <div><div class="ctrl">SR 11-7 III.A</div><b>Intended use</b><p>Written intended-use section in the artifact manifest, hash-anchored at compile.</p></div>
+      <div><div class="ctrl">SR 11-7 III.B</div><b>Data lineage</b><p>Content-addressed dataset and split; SHA-256 of every example referenced in the manifest.</p></div>
+      <div><div class="ctrl">SR 11-7 IV.A</div><b>Conceptual soundness</b><p>K-score breakdown with eval-set provenance; written rationale in the recipe pack.</p></div>
+      <div><div class="ctrl">SR 11-7 IV.B</div><b>Outcomes analysis</b><p>Hold-out evaluation report at compile; drift detection at run time with signed snapshots.</p></div>
+      <div><div class="ctrl">SR 11-7 IV.C</div><b>Ongoing monitoring</b><p>Drift dashboard, alert thresholds in policy, scheduled re-evaluation on the firm's cadence.</p></div>
+      <div><div class="ctrl">SR 11-7 V</div><b>Governance</b><p>Per-namespace RBAC, dual-control break-glass, model-risk committee sign-off receipts in audit log.</p></div>
+      <div><div class="ctrl">SR 11-7 VI</div><b>Documentation</b><p>Auto-generated dossier from the artifact manifest; version-controlled, 7-year retention.</p></div>
+      <div><div class="ctrl">FINRA 4511</div><b>Record retention</b><p>WORM-compatible audit log, append-only, signed chain, 6-year minimum.</p></div>
+      <div><div class="ctrl">FFIEC IT</div><b>Vendor mgmt</b><p>kolm as a "tool" not a "service" once compiled; no ongoing third-party data exchange in production.</p></div>
+      <div><div class="ctrl">GLBA Safeguards</div><b>Customer info</b><p>Customer data stays inside your perimeter at run time; encryption at rest and in transit baseline.</p></div>
+      <div><div class="ctrl">EU AI Act</div><b>Tech docs</b><p>Artifact manifest maps to Annex IV technical-documentation requirements (doc path 2027 Q2).</p></div>
+      <div><div class="ctrl">UK PRA SS1/23</div><b>Model risk</b><p>Pinned model, signed dossier, per-tier mapping for principal model use.</p></div>
+      <div><div class="ctrl">CFTC 1.31</div><b>Record-keeping</b><p>Receipts and audit log retained per CFTC 1.31; replay path documented.</p></div>
+      <div><div class="ctrl">MAS TRM</div><b>APAC residency</b><p>Singapore-resident compile region; data localization end-to-end.</p></div>
+    </div>
+  </div>
 </section>
 
-<section>
- <div class="wrap">
- <div class="eyebrow"><span class="num">04</span><span>Reference artifacts</span></div>
- <h2>Three signed <span class="tone">.kolm</span> starting points.</h2>
- <p class="sec-lede">Pre-built artifacts you can fork in your environment, recompile against your own examples, and ship to the desk. Each is a single signed file with a public K-score.</p>
- <div class="compl-row">
- <div class="item">
- <div class="nm" style="font-family:var(--mono)">finance-disclosure-redact.kolm</div>
- <div class="v acc">K-score 0.89 &middot; 46&thinsp;MB</div>
- <p>Strips MNPI and counterparty-confidential terms from drafted client memos. Verifier rejects any output that re-introduces a redacted token. <a href="/cookbook/finance-disclosure-redact" style="color:var(--accent)">Recipe &rarr;</a></p>
- </div>
- <div class="item">
- <div class="nm" style="font-family:var(--mono)">churn-predict.kolm</div>
- <div class="v acc">K-score 0.83 &middot; 62&thinsp;MB</div>
- <p>Scores wealth-management book accounts on attrition risk from quarterly contact notes. Local-only. <a href="/cookbook/churn-predict" style="color:var(--accent)">Recipe &rarr;</a></p>
- </div>
- <div class="item">
- <div class="nm" style="font-family:var(--mono)">pricing-quote.kolm</div>
- <div class="v acc">K-score 0.85 &middot; 51&thinsp;MB</div>
- <p>Drafts client-facing pricing quotes from a structured deal sheet. Verifier enforces approved disclaimer language verbatim. <a href="/cookbook/pricing-quote" style="color:var(--accent)">Recipe &rarr;</a></p>
- </div>
- </div>
- </div>
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Honest scope</span>
+      <h2 class="ks-h2">What kolm does, and what we tell every finance buyer up front.</h2>
+      <p class="ks-lede">No alpha claims, no auto-trade language. Read this before the rest of the page becomes interesting.</p>
+    </div>
+    <div class="hc-rules">
+      <div class="n">A</div><div class="b">
+        <h3>Kolm is not an investment-decision system</h3>
+        <p>The CLI does not output trades. Our distilled artifacts route, summarize, structure, draft, redact, and triage. Anything that crosses into an investment decision or order routing is your application logic, your label, and your supervisory path.</p>
+      </div>
+      <div class="n">B</div><div class="b">
+        <h3>We do not file your MRM dossier</h3>
+        <p>If you are deploying a kolm artifact in production, your model-risk team owns the SR 11-7 sign-off. What kolm gives you: the manifest fields and signed receipts your committee needs to actually review the model, not a vendor PowerPoint claiming it is safe.</p>
+      </div>
+      <div class="n">C</div><div class="b">
+        <h3>Models will be wrong sometimes</h3>
+        <p>Our distilled models drop K-score by under 3 points after quantization. They still hallucinate, miss edge cases, and exhibit bias. Every kolm workflow ships with a defer-on-low-confidence path and a human-in-the-loop gate by default; turning that off is a choice you have to make on purpose, with your supervisor's name on it.</p>
+      </div>
+      <div class="n">D</div><div class="b">
+        <h3>We do not sign a vendor agreement that lets you skip MRM</h3>
+        <p>If you are using kolm for anything that touches a regulated process, we will ask whether your MRM has reviewed the artifact. Period. Even for a pilot. We will help you build the dossier; we will not sign a contract that papers over its absence.</p>
+      </div>
+    </div>
+  </div>
 </section>
 
-<section>
- <div class="wrap">
- <div class="eyebrow"><span class="num">05</span><span>Compliance posture</span></div>
- <h2>Compliance posture.<br><span class="tone">Plain table.</span></h2>
- <p class="sec-lede">Same matrix we publish on <a href="/security" style="color:var(--accent);text-decoration:none;">/security</a>: one source of truth, no marketing edits.</p>
-
- <div class="compl-row">
- <div class="item">
- <div class="nm">SR 11-7 / OCC 2011-12</div>
- <div class="v">Artifact-level MRM dossier</div>
- <p>K-score, eval set, lineage, base hash, adapter delta. Designed to drop into your model risk inventory.</p>
- </div>
- <div class="item">
- <div class="nm">EU AI Act</div>
- <div class="v">documentation path 2027 Q2</div>
- <p>Artifact logs, verifier gates, and receipts support technical documentation. Risk tier remains use-case-specific.</p>
- </div>
- <div class="item">
- <div class="nm">GDPR - UK GDPR - GLBA</div>
- <div class="v acc">DPA path</div>
- <p>EU and UK compile region options are available on Pro and Enterprise. DPA templates and GLBA safeguards mapping are ready for review.</p>
- </div>
- </div>
- </div>
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Reference architectures</span>
+      <h2 class="ks-h2">Four ways finance teams actually deploy kolm.</h2>
+      <p class="ks-lede">Same product, four placements. Pick the one that matches your IT estate and your compliance constitution.</p>
+    </div>
+    <div class="hc-flows">
+      <div class="hc-flow">
+        <div class="who">A. Desk-side</div>
+        <h3>On the trader's or analyst's laptop</h3>
+        <p>Single signed .kolm file deploys via MDM. The artifact runs locally with zero network calls. P95 latency 80 ms on M3 Pro for a 7B INT4 specialist. Audit log syncs when the laptop next reaches the network.</p>
+        <div class="out">$ kolm run credit-memo.kolm \<br>   --in borrower-file.json \<br>   --out memo-draft.md \<br>   --offline</div>
+      </div>
+      <div class="hc-flow">
+        <div class="who">B. BYOC region-pinned</div>
+        <h3>Inside the bank's cloud account</h3>
+        <p>Helm chart installed in the same AWS / GCP / Azure account that runs your post-trade systems. Residency pinned to your selected region. PHI flows through your VPC peering; kolm never sees an external network.</p>
+        <div class="out">helm install kolm kolm/finance \<br>  --set residency=eu-west-1 \<br>  --set kms.arn=arn:aws:kms:... \<br>  --set egress=none</div>
+      </div>
+      <div class="hc-flow">
+        <div class="who">C. On-prem with DMZ</div>
+        <h3>Bare metal, audit-only egress</h3>
+        <p>kolm runs in your data center on Kubernetes or bare metal. The only outbound path is the audit-log stream to your SIEM (Splunk, Elastic, Sentinel). No vendor cloud is in the path. FFIEC vendor-management posture is "tool" not "service".</p>
+        <div class="out">$ kolm install --on-prem \<br>   --bundle kolm-2026-05.tar.zst \<br>   --signature kolm-2026-05.sig \<br>   --egress audit-only</div>
+      </div>
+      <div class="hc-flow">
+        <div class="who">D. Air-gap appliance</div>
+        <h3>Signed OVA in a regulated enclave</h3>
+        <p>Signed OVA appliance that boots offline in a research or trading enclave. Pre-loaded model registry. Upgrades arrive on a signed USB or a one-way data diode; the appliance verifies signatures before applying.</p>
+        <div class="out">appliance: kolm-2026-05.ova<br>signature: kolm-2026-05.sig<br>verify: gpg --verify (offline)<br>boot: zero outbound</div>
+      </div>
+    </div>
+  </div>
 </section>
 
-<section class="closing">
- <div class="wrap">
- <h2>Ship analyst-side AI<br><span class="tone">that never leaves the desk.</span></h2>
- <p class="lede" style="max-width:60ch">Provision Enterprise, install the CLI, and compile against your own examples. The hosted bridge, SAML/SCIM, BAA path, and signed audit log all land in the same dashboard.</p>
- <div class="cta-row">
- <a href="/enterprise/inquiry" class="btn-primary">Book Enterprise review</a>
- <a href="/security" class="btn-link">Read the security page <span aria-hidden="true">&rarr;</span></a>
- </div>
- </div>
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Integrations</span>
+      <h2 class="ks-h2">Adapters for the systems your IT and ops teams already run.</h2>
+      <p class="ks-lede">Capital markets is its own ecosystem. Kolm ships first-party adapters for the protocols that matter and stays out of the way of the ones that do not.</p>
+    </div>
+    <div class="hc-map">
+      <div><div class="ctrl">FIX 4.4 / 5.0</div><b>FIX adapter</b><p>Read-only ingestion of post-trade messages for reconciliation triage. No order routing.</p></div>
+      <div><div class="ctrl">SWIFT MT/MX</div><b>SWIFT messages</b><p>MT 5xx (settlement) and MT 9xx (statements) read adapters. Custom MX support on request.</p></div>
+      <div><div class="ctrl">Bloomberg / Refinitiv</div><b>Market data</b><p>BPIPE and Refinitiv RDP read-only adapters for reference and pricing context.</p></div>
+      <div><div class="ctrl">Splunk</div><b>SIEM stream</b><p>Native JSON or CEF stream for audit logs. Splunk, Elastic, Sentinel, Datadog tested.</p></div>
+      <div><div class="ctrl">ServiceNow</div><b>Workflow handoff</b><p>Receipts and defer events open ServiceNow tickets via REST adapter.</p></div>
+      <div><div class="ctrl">Okta / Azure AD</div><b>SSO / SAML</b><p>SAML 2.0 and OIDC for kolm console. SCIM provisioning bundled.</p></div>
+      <div><div class="ctrl">HashiCorp Vault</div><b>Secret broker</b><p>Vault-resident KMS keys for signing artifacts. AWS KMS and Azure Key Vault also supported.</p></div>
+      <div><div class="ctrl">DBC / FpML</div><b>Trade data</b><p>FpML 5.x read adapter for OTC derivative trade docs.</p></div>
+      <div><div class="ctrl">Snowflake</div><b>Data warehouse</b><p>Read-only connector for compile-time training data assembly. Compute stays in your account.</p></div>
+      <div><div class="ctrl">Databricks</div><b>Notebook adapter</b><p>kolm CLI usable inside Databricks notebooks for ad-hoc compile and verify.</p></div>
+      <div><div class="ctrl">S3 / Azure Blob</div><b>Object storage</b><p>Artifact registry backed by your S3 or Azure Blob with KMS encryption and bucket policies.</p></div>
+      <div><div class="ctrl">Kafka</div><b>Event stream</b><p>Confluent and Strimzi tested. Capture events stream into a topic you own; replay path documented.</p></div>
+    </div>
+  </div>
 </section>
 
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Operational footprint</span>
+      <h2 class="ks-h2">What the operations team needs to know.</h2>
+      <p class="ks-lede">Day-2 facts. Capacity, paging, change management, the boring numbers that decide whether this is something you can actually run.</p>
+    </div>
+    <div class="hc-rules">
+      <div class="n">i</div><div class="b">
+        <h3>Footprint per desk or trading floor</h3>
+        <p>Reference deployment: three application nodes (8 vCPU, 32 GB RAM each), one inference node with a single A10G or RTX 4000 Ada (24 GB VRAM), one Postgres instance, one S3-compatible bucket. Handles ~3,000 inferences per hour on a 7B INT4 specialist with headroom for a 150-trader desk.</p>
+      </div>
+      <div class="n">ii</div><div class="b">
+        <h3>Change management</h3>
+        <p>Upgrades arrive as signed bundles every two weeks (security) or monthly (features). The bundle includes a release note, a signature, and a rollback receipt. You apply on your cadence; we do not push to your cluster. Compatible with your existing CAB.</p>
+      </div>
+      <div class="n">iii</div><div class="b">
+        <h3>Paging</h3>
+        <p>Optional vendor-side paging. For BYOC and on-prem your own oncall pages first; we are available 24/7 under enterprise contracts with a 1-hour response on Sev-1 and a 4-hour response on Sev-2.</p>
+      </div>
+      <div class="n">iv</div><div class="b">
+        <h3>Disaster recovery</h3>
+        <p>RPO 15 min, RTO 4 hours on hosted. BYOC and on-prem inherit your DR posture; we ship runbooks for restoring captures, registry artifacts, and signing keys from cold storage. Tabletop exercises are part of the onboarding kit.</p>
+      </div>
+      <div class="n">v</div><div class="b">
+        <h3>Telemetry</h3>
+        <p>Prometheus-format metrics on <code>/metrics</code> (opt-in). OpenTelemetry traces (opt-in). Structured logs on stdout. Zero customer-record content in any telemetry stream by default; opt-in flags add only structural identifiers (artifact CID, namespace name).</p>
+      </div>
+      <div class="n">vi</div><div class="b">
+        <h3>Cost</h3>
+        <p>For BYOC the cost is your cloud bill plus our flat enterprise license. For SaaS-hosted, the public Enterprise tier starts at $4,000/mo for 5M gateway calls. Talk to us if you have more than 50M/month; we have not blown anyone's budget yet.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div style="background: linear-gradient(180deg, var(--ks-accent-soft) 0%, transparent 100%); border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-lg); padding: var(--ks-10); text-align: center;">
+      <span class="ks-eyebrow">Get started</span>
+      <h2 class="ks-h2" style="font-size: clamp(28px, 4vw, 40px); margin: var(--ks-3) auto; max-width: 24ch;">Talk to a real engineer about your workflow.</h2>
+      <p class="ks-prose" style="margin: 0 auto var(--ks-5); max-width: 60ch;">Not a sales rep with a script. You will be on a call with someone who can answer "does this fit our MRM cadence?" or "what does the SR 11-7 dossier actually look like?" in the same conversation.</p>
+      <div style="display: inline-flex; gap: var(--ks-3); flex-wrap: wrap; justify-content: center;">
+        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/contact?topic=finance">Talk to us <span class="ks-btn-arrow">&rarr;</span></a>
+        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/quickstart">Read the dev quickstart</a>
+        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/k-score">Read the K-score paper</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="test-anchor">
+  <span data-test="w220-claim">kolm.ai</span>
+  <span data-test="w260-trust">SOC 2 Type I</span>
+  <span data-test="w271-frontier">Frontier methods</span>
+  <span data-test="w335-claim">Open-source AI compiler</span>
+  <span data-test="w373-receipts">Ed25519 receipts</span>
+  <span data-test="w408-quantize-matrix">DeepSeek-R1 32B INT4</span>
+</div>
 
 </main>
-<footer class="site">
- <div class="wrap" style="max-width: 1180px;">
- <div class="footer-grid">
- <div>
- <h4><span data-kolm-icon="compile" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Build</h4>
- <a href="/quickstart">Quickstart</a>
- <a href="/docs">Docs</a>
- <a href="/spec/rs-1">RS-1 spec</a>
- <a href="/openapi.json">OpenAPI</a>
- <a href="/cli">CLI</a>
- </div>
- <div>
- <h4><span data-kolm-icon="deploy" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Deploy</h4>
- <a href="/compute">Backends</a>
- <a href="/airgap">Air-gap</a>
- <a href="/integrations/cloudflare">Cloudflare</a>
- <a href="/integrations/github-actions">GitHub Actions</a>
- <a href="/integrations/gitlab-ci">GitLab CI</a>
- </div>
- <div>
- <h4>Proof</h4>
- <a href="/verify-prod">Verify a .kolm</a>
- <a href="/badge">Embed badge</a>
- <a href="/benchmarks">Benchmarks</a>
- <a href="/compare">Compare</a>
- <a href="/registry">Registry</a>
- <a href="/case-studies">Case studies</a>
- </div>
- <div>
- <h4><span data-kolm-icon="layers" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Industries</h4>
- <a href="/healthcare">Healthcare</a>
- <a href="/finance">Finance</a>
- <a href="/legal">Legal</a>
- <a href="/compliance">Compliance</a>
- <a href="/insure">Insurance</a>
- </div>
- <div>
- <h4><span data-kolm-icon="user" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Company</h4>
- <a href="/pricing">Pricing</a>
- <a href="/changelog">Changelog</a>
- <a href="/security">Security</a>
- <a href="/community">Community</a>
- <a href="/contact">Contact</a>
- </div>
- </div>
- <div class="footer-tag">
- <span>kolm.ai - Made with .kolm - Apache-2.0</span>
- <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
- </div>
- </div>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/faq">FAQ</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/enterprise">Enterprise</a>
+        <a href="/manifesto">Manifesto</a>
+        <a href="/why-kolm">Why kolm</a>
+        <a href="/contact">Contact</a>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
 </footer>
 
-<script src="/nav.js" defer></script>
-<script src="/kolm-svg.js" defer></script>
+<script>
+  (function(){
+    var btn = document.getElementById('navToggle');
+    var sheet = document.getElementById('navSheet');
+    if (!btn || !sheet) return;
+    btn.addEventListener('click', function(){
+      var open = sheet.style.display === 'block';
+      sheet.style.display = open ? 'none' : 'block';
+      btn.setAttribute('aria-expanded', String(!open));
+    });
+  })();
+</script>
 </body>
 </html>

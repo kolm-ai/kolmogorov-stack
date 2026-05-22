@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cookbook · kolm.ai docs · kolm.ai</title>
+<meta name="description" content="kolm.ai recipe cookbook: HIPAA redactors, claims routers, intake triage, multi-tenant capture, replay diff, and other end-to-end recipes.">
+<link rel="canonical" href="https://kolm.ai/docs/cookbook">
+<meta property="og:title" content="Cookbook · kolm.ai docs · kolm.ai">
+<meta property="og:description" content="kolm.ai recipe cookbook: HIPAA redactors, claims routers, intake triage, multi-tenant capture, replay diff, and other end-to-end recipes.">
+<meta property="og:url" content="https://kolm.ai/docs/cookbook">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/styles.css">
+<script src="/nav.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm.ai cookbook","description":"End-to-end recipes for compiling production AI on kolm.ai.","url":"https://kolm.ai/docs/cookbook","mainEntityOfPage":"https://kolm.ai/docs/cookbook","author":{"@type":"Organization","name":"kolm.ai"}}
+</script>
+ <link rel="stylesheet" href="/brand-refresh.css">
+<meta name="twitter:title" content="Cookbook · kolm.ai docs · kolm.ai">
+<meta name="twitter:description" content="kolm.ai recipe cookbook: HIPAA redactors, claims routers, intake triage, multi-tenant capture, replay diff, and other end-to-end recipes.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API Key &rarr;</a>
+ </div>
+ </div>
+</header>
+<main id="main" class="docs-page" data-w401g="cookbook">
+<nav aria-label="Breadcrumb" class="crumbs">
+ <a href="/docs">Docs</a> / <span>Cookbook</span>
+</nav>
+<header class="page-h">
+ <p class="eyebrow">kolm.ai · cookbook</p>
+ <h1>End-to-end recipes for production AI.</h1>
+ <p class="lede">The cookbook is a curated set of full-pipeline walkthroughs. Each recipe shows capture, compile, eval gates, and deployment for a real task. Browse the full set at <a href="/docs/cookbook">/docs/cookbook</a>.</p>
+</header>
+
+<section>
+ <h2>Featured recipes</h2>
+ <ul>
+ <li><a href="/cookbook/soap-redactor">SOAP redactor</a>: HIPAA-grade PHI removal from clinical notes.</li>
+ <li><a href="/cookbook/phi-redactor">PHI redactor</a>: structured PHI removal from free-form text.</li>
+ <li><a href="/cookbook/intake-triage">Intake triage</a>: structured extraction from free-form patient intake.</li>
+ <li><a href="/cookbook/healthcare">Healthcare vertical</a>: the full healthcare pipeline.</li>
+ <li><a href="/cookbook/finance">Finance vertical</a>: KYC, AML narrative review, document QA.</li>
+ <li><a href="/cookbook/legal">Legal vertical</a>: privileged-document redaction, contract clause routing.</li>
+ </ul>
+</section>
+
+<section>
+ <h2>Browse by stage</h2>
+ <ul>
+ <li><a href="/quickstart">Quickstart</a>: the 5-minute first-recipe walkthrough.</li>
+ <li><a href="/docs/cli/capture">Capture</a>: record real traffic into a namespace.</li>
+ <li><a href="/docs/cli/distill">Distill</a>: turn captures into a recipe.</li>
+ <li><a href="/docs/cli/compile">Compile</a>: bake a recipe into a signed <code>.kolm</code> artifact.</li>
+ <li><a href="/docs/cli/replay">Replay</a>: side-by-side diff against the teacher.</li>
+ </ul>
+</section>
+
+<section class="see-also" aria-labelledby="see-also-h">
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/cookbook">Full cookbook index</a>.</li>
+ <li><a href="/docs">Docs hub</a>.</li>
+ <li><a href="/docs/api">HTTP API reference</a>.</li>
+ <li><a href="/marketplace">Recipe marketplace</a>.</li>
+ </ul>
+</section>
+</main>
+</body>
+</html>

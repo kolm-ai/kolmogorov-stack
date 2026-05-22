@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Voice memo to task recipe · kolm cookbook · kolm.ai</title>
+ <meta name="description" content="Compile a signed local model that turns a voice memo into a structured task in your task system. Whisper + structured extraction, runs on-device.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta property="og:title" content="Voice memo to task recipe · kolm cookbook · kolm.ai">
+ <meta property="og:description" content="Compile a signed local model that turns a voice memo into a structured task in your task system. Whisper + structured extraction, runs on-device.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Voice memo to task recipe · kolm cookbook · kolm.ai">
+ <meta name="twitter:description" content="Compile a signed local model that turns a voice memo into a structured task in your task system. Whisper + structured extraction, runs on-device.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/cookbook/voice-memo-to-task">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/cookbook/voice-memo-to-task">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/cookbook/_recipe.css">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "HowTo",
+ "name": "Voice-memo-to-task recipe",
+ "description": "Local voice -> structured task. Signed, offline.",
+ "url": "https://kolm.ai/cookbook/voice-memo-to-task",
+ "totalTime": "PT5M",
+ "tool": [
+ {
+ "@type": "HowToTool",
+ "name": "kolm CLI"
+ }
+ ],
+ "step": [
+ {
+ "@type": "HowToStep",
+ "name": "Install",
+ "text": "npm i -g github:sneaky-hippo/kolm-stack"
+ },
+ {
+ "@type": "HowToStep",
+ "name": "Compile",
+ "text": "kolm compile voice-memo-to-task.toml"
+ },
+ {
+ "@type": "HowToStep",
+ "name": "Run",
+ "text": "kolm run voice-memo-to-task.kolm"
+ }
+ ]
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {
+ "@type": "ListItem",
+ "position": 1,
+ "name": "kolm",
+ "item": "https://kolm.ai/"
+ },
+ {
+ "@type": "ListItem",
+ "position": 2,
+ "name": "Cookbook",
+ "item": "https://kolm.ai/cookbook"
+ },
+ {
+ "@type": "ListItem",
+ "position": 3,
+ "name": "Voice memo to task recipe",
+ "item": "https://kolm.ai/cookbook/voice-memo-to-task"
+ }
+ ]
+ }
+ ]
+}
+</script>
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API Key &rarr;</a>
+ </div>
+ </div>
+</header>
+<main id="main">
+
+<section class="hero">
+ <div class="wrap">
+ <div class="crumbs"><a href="/docs">cookbook</a> &middot; personal &middot; voice-memo-to-task</div>
+ <span class="pill">Recipe &middot; personal</span>
+ <h1>Talk it, <span class="tone">it goes in the right list.</span></h1>
+ <p class="lede">A local <code>.kolm</code> file that takes a voice-memo transcript (whisper.cpp on-device) and returns <em>(title, list, due_date, project, priority, raw_transcript)</em>. Trained on 300 of your past memos paired with where they ended up in Things 3 / Reminders / Notion. The verifier rejects any task with a project not in your project list.</p>
+
+ <div class="meta-row">
+ <div class="item"><span class="label">base model</span><span class="value">phi-3-mini-4k</span></div>
+ <div class="item"><span class="label">gold pairs</span><span class="value">300 (210 train / 90 eval)</span></div>
+ <div class="item"><span class="label">k-score floor</span><span class="value">0.83</span></div>
+ <div class="item"><span class="label">artifact size</span><span class="value">2.1 GB</span></div>
+ <div class="item"><span class="label">compile time</span><span class="value">~30 min</span></div>
+ <div class="item"><span class="label">spec source</span><span class="value">closed-vocab + grounded</span></div>
+ </div>
+ </div>
+</section>
+
+<article>
+ <div class="wrap">
+
+ <div class="group">
+ <h2>What this recipe does</h2>
+ <p>Voice memos are the highest-bandwidth capture method and the lowest-organized. This recipe is the missing layer: hold the button, talk for ten seconds, and a structured task lands in the right list with the right due date · using the project taxonomy <em>you already use</em>, not a generic one.</p>
+ <p>Whisper.cpp does the transcription on-device. The <code>.kolm</code> reads the transcript and writes the task. Nothing leaves the phone.</p>
+ </div>
+
+ <div class="group">
+ <h2>The spec</h2>
+ <pre class="code">{
+ <span class="k">"output_kind"</span>: <span class="k">"json"</span>,
+ <span class="k">"schema"</span>: {
+ <span class="k">"required"</span>: [<span class="k">"title"</span>, <span class="k">"list"</span>, <span class="k">"raw_transcript"</span>],
+ <span class="k">"properties"</span>: {
+ <span class="k">"title"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span>, <span class="k">"maxLength"</span>: 80 },
+ <span class="k">"list"</span>: { <span class="k">"$ref"</span>: <span class="k">"lists.json"</span> },
+ <span class="k">"project"</span>: { <span class="k">"$ref"</span>: <span class="k">"projects.json"</span> },
+ <span class="k">"due_date"</span>: { <span class="k">"type"</span>: [<span class="k">"string"</span>, <span class="k">"null"</span>], <span class="k">"format"</span>: <span class="k">"date"</span> },
+ <span class="k">"priority"</span>: { <span class="k">"enum"</span>: [<span class="k">"low"</span>, <span class="k">"med"</span>, <span class="k">"high"</span>] },
+ <span class="k">"raw_transcript"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span> }
+ }
+ },
+ <span class="k">"verifier"</span>: {
+ <span class="k">"list_must_be_in_lists_json"</span>: <span class="ok">true</span>,
+ <span class="k">"project_must_be_in_projects_json"</span>: <span class="ok">true</span>,
+ <span class="k">"due_date_must_be_extractable_or_null"</span>: <span class="ok">true</span>,
+ <span class="k">"redact_pii"</span>: <span class="ok">true</span>
+ }
+}</pre>
+ </div>
+
+ <div class="group">
+ <h2>Gold pair (1 of 300 shown)</h2>
+
+ <div class="pair">
+ <div class="pair-h">input - whisper transcript</div>
+ <pre class="code">"hey remind me to email the contract back to jen by friday, that's
+the kolm contract not the studio one. high priority."</pre>
+ <div class="pair-h">output</div>
+ <pre class="code">{
+ <span class="k">"title"</span>: <span class="k">"email contract back to jen"</span>,
+ <span class="k">"list"</span>: <span class="k">"work"</span>,
+ <span class="k">"project"</span>: <span class="k">"kolm"</span>,
+ <span class="k">"due_date"</span>: <span class="k">"2026-05-15"</span>,
+ <span class="k">"priority"</span>: <span class="k">"high"</span>,
+ <span class="k">"raw_transcript"</span>: <span class="k">"hey remind me to email the contract back to jen by friday, that's the kolm contract not the studio one. high priority."</span>
+}</pre>
+ </div>
+ </div>
+
+ <div class="group">
+ <h2>Compile</h2>
+ <pre class="code">kolm compile <span class="k">"voice memo to structured task using my project taxonomy"</span> \
+ --base phi-3-mini-4k \
+ --pairs ~/.kolm/voice-pairs.jsonl \
+ --lists ~/.kolm/lists.json \
+ --projects ~/.kolm/projects.json \
+ --verifier closed-vocab,date-extractable \
+ --k-floor 0.83 \
+ --output voice-memo-to-task.kolm
+
+<span class="ok">ok</span> wrote <span class="k">voice-memo-to-task.kolm</span>
+ k_score=0.88 signature=ed25519</pre>
+ </div>
+
+ <div class="group">
+ <h2>K-score gate</h2>
+ <div class="k-bar">
+ <span class="k-label">K-score</span>
+ <span class="k-value">0.88</span>
+ <span class="k-detail">held-out 90 memos &middot; list-correct 96% &middot; project-correct 91% &middot; due-date-correct 89% (relative dates resolved against memo timestamp) &middot; 100% closed-vocab</span>
+ </div>
+ </div>
+
+ <div class="group">
+ <h2>Run-time profile</h2>
+ <div class="lat-grid">
+ <div class="cell"><div class="h">M2 MacBook</div><div class="v">540<span class="u">ms</span></div></div>
+ <div class="cell"><div class="h">RTX 5090</div><div class="v">150<span class="u">ms</span></div></div>
+ <div class="cell"><div class="h">iPhone 15 Pro</div><div class="v">1.6<span class="u">s</span></div></div>
+ <div class="cell"><div class="h">CPU x86 (server)</div><div class="v">2.1<span class="u">s</span></div></div>
+ </div>
+ </div>
+
+ <div class="group">
+ <h2>Deploy</h2>
+ <pre class="code"><span class="c"># iOS shortcut · record memo, transcribe, route to Things 3:</span>
+const audio = await Shortcut.recordAudio();
+const text = await whisper.transcribe(audio);
+const task = kolm.run(<span class="k">'voice-memo-to-task.kolm'</span>, text);
+await Things.add({
+ list: task.list, project: task.project,
+ title: task.title, due: task.due_date, notes: task.raw_transcript
+});</pre>
+ </div>
+
+ <div class="group">
+ <h2>Related recipes</h2>
+ <div class="related">
+ <a href="/cookbook/email-reply"><div class="h">Email reply</div><div class="d">Inbound email -> draft in your voice.</div></a>
+ <a href="/cookbook/calendar-summary"><div class="h">Calendar summary</div><div class="d">Week's events -> summary + conflicts.</div></a>
+ <a href="/cookbook/daily-recap"><div class="h">Daily recap</div><div class="d">Logs and messages -> one-paragraph recap.</div></a>
+ </div>
+ </div>
+
+ </div>
+</article>
+
+
+</main>
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+</body>
+</html>

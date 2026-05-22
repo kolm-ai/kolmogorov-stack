@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#050607;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#050607;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Glossary · kolm.ai</title>
+<meta name="description" content="Glossary of kolm.ai terms. Adapter, AI compiler, artifact, capture, compile, distillation, K-score, receipt chain, sandbox, witness, and more. Plain...">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta property="og:title" content="Glossary · kolm.ai">
+<meta property="og:description" content="Glossary of kolm.ai terms. Adapter, AI compiler, artifact, capture, compile, distillation, K-score, receipt chain, sandbox, witness, and more. Plain...">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/docs/glossary">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:title" content="Glossary · kolm.ai">
+<meta name="twitter:description" content="Glossary of kolm.ai terms. Adapter, AI compiler, artifact, capture, compile, distillation, K-score, receipt chain, sandbox, witness, and more. Plain...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://kolm.ai/docs/glossary">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<style>
+ :root {
+ --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+ --accent: #faf2e1; --accent-strong: #c9c2b2;
+ --good: #7ef0d2; --warn: #d6a65a; --stop: #d77;
+ --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+ }
+ .gl-toc { background:var(--bg-elev); border:1px solid var(--line); border-radius:10px; padding:20px 22px; margin:8px 0 28px; }
+ .gl-toc p { margin:0 0 10px; font-family:var(--mono); font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-faint); }
+ .gl-toc ul { list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px 18px; }
+ @media (max-width:860px){ .gl-toc ul { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+ @media (max-width:480px){ .gl-toc ul { grid-template-columns:1fr; } }
+ .gl-toc ul li a { font-family:var(--mono); font-size:12px; color:var(--ink-mute); text-decoration:none; border-bottom:1px solid transparent; }
+ .gl-toc ul li a:hover { color:var(--ink); border-bottom-color:var(--line-strong); }
+ dl.gl-list { margin:0; padding:0; }
+ dl.gl-list dt { font-family:var(--mono); font-size:13px; letter-spacing:0.02em; color:var(--ink); margin:28px 0 8px; padding-top:18px; border-top:1px solid var(--line); scroll-margin-top:80px; }
+ dl.gl-list dt:first-child { padding-top:0; border-top:0; margin-top:8px; }
+ dl.gl-list dt a.permalink { color:var(--ink-faint); text-decoration:none; margin-left:8px; font-size:11px; opacity:0.6; }
+ dl.gl-list dt a.permalink:hover { opacity:1; color:var(--ink); }
+ dl.gl-list dd { margin:0 0 6px; font-size:14px; line-height:1.65; color:var(--ink-mute); max-width:78ch; }
+ dl.gl-list dd a { color:var(--accent); border-bottom:1px solid var(--line-strong); text-decoration:none; }
+ dl.gl-list dd code { font-family:var(--mono); font-size:12px; background:var(--bg-card); border:1px solid var(--line); border-radius:4px; padding:1px 5px; color:var(--ink); }
+ .gl-related { background:var(--bg-elev); border:1px solid var(--line); border-radius:10px; padding:22px; margin-top:36px; }
+ .gl-related h2 { margin:0 0 12px; font-size:14px; font-family:var(--mono); letter-spacing:0.04em; text-transform:uppercase; color:var(--ink-faint); font-weight:500; }
+ .gl-related ul { list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:8px 18px; }
+ .gl-related ul li a { font-size:13.5px; color:var(--accent); border-bottom:1px solid var(--line-strong); text-decoration:none; }
+</style>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "WebPage",
+ "name": "Glossary",
+ "description": "Glossary of kolm.ai terms. Adapter, AI compiler, artifact, capture, compile, distillation, K-score, receipt chain, sandbox, witness, and more.",
+ "url": "https://kolm.ai/docs/glossary",
+ "dateModified": "2026-05-18",
+ "publisher": { "@type": "Organization", "name": "Kolm", "url": "https://kolm.ai" }
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ { "@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/" },
+ { "@type": "ListItem", "position": 2, "name": "Docs", "item": "https://kolm.ai/docs" },
+ { "@type": "ListItem", "position": 3, "name": "Glossary", "item": "https://kolm.ai/docs/glossary" }
+ ]
+ },
+ {
+ "@type": "DefinedTermSet",
+ "name": "kolm.ai glossary",
+ "url": "https://kolm.ai/docs/glossary",
+ "hasDefinedTerm": [
+ { "@type": "DefinedTerm", "name": "Adapter", "termCode": "adapter", "description": "A small set of weights, usually a LoRA, that overlays a base model to specialize it for one task. Smaller than a full fine-tune and cheaper to ship.", "url": "https://kolm.ai/docs/glossary#adapter" },
+ { "@type": "DefinedTerm", "name": "AI compiler", "termCode": "ai-compiler", "description": "A toolchain that turns captured prompts, evals, and a base model into a self-contained artifact you can run on your own hardware. Like a C compiler but for LLM behavior.", "url": "https://kolm.ai/docs/glossary#ai-compiler" },
+ { "@type": "DefinedTerm", "name": "Artifact (.kolm)", "termCode": "artifact", "description": "A signed zip containing manifest, recipes, evals, weights, tokenizer, and a receipt chain. The shippable output of `kolm compile`.", "url": "https://kolm.ai/docs/glossary#artifact" },
+ { "@type": "DefinedTerm", "name": "Bundle", "termCode": "bundle", "description": "An offline distribution package combining one or more artifacts with a runtime binary. Built by the air-gap export verb for offline install.", "url": "https://kolm.ai/docs/glossary#bundle" },
+ { "@type": "DefinedTerm", "name": "Capture", "termCode": "capture", "description": "A recorded request and response pair from a teacher model. Captures are what `kolm distill` learns from.", "url": "https://kolm.ai/docs/glossary#capture" },
+ { "@type": "DefinedTerm", "name": "Capture namespace", "termCode": "capture-namespace", "description": "A label that groups captures by task, for example `claims-router`. The unit of work for `kolm distill --namespace`.", "url": "https://kolm.ai/docs/glossary#capture-namespace" },
+ { "@type": "DefinedTerm", "name": "Compile", "termCode": "compile", "description": "The end-to-end step that turns a recipe plus captures into a `.kolm` artifact. Runs evals, gates on K-score, signs, and emits a receipt chain.", "url": "https://kolm.ai/docs/glossary#compile" },
+ { "@type": "DefinedTerm", "name": "Distillation", "termCode": "distillation", "description": "Training a smaller student model to imitate a larger teacher. kolm uses soft-label KD, top-K KD, and rejection sampling.", "url": "https://kolm.ai/docs/glossary#distillation" },
+ { "@type": "DefinedTerm", "name": "Drift", "termCode": "drift", "description": "Behavior change between a teacher model snapshot and a later snapshot, measured by re-running the same eval set. Reported on `/drift`.", "url": "https://kolm.ai/docs/glossary#drift" },
+ { "@type": "DefinedTerm", "name": "Frozen-set gate", "termCode": "frozen-set-gate", "description": "An eval-pass gate that blocks compile from shipping if the held-out frozen set falls below a configured K-score.", "url": "https://kolm.ai/docs/glossary#frozen-set-gate" },
+ { "@type": "DefinedTerm", "name": "Tenant-local HMAC chain", "termCode": "hmac-chain", "description": "A shared-secret receipt ledger for one-tenant deployments. Public distribution uses Ed25519 receipt signatures.", "url": "https://kolm.ai/docs/glossary#hmac-chain" },
+ { "@type": "DefinedTerm", "name": "K-score", "termCode": "k-score", "description": "kolm's composite quality score with six axes: Accuracy, Stability, Latency, Cost, Variance, Teacher. Reported per compile.", "url": "https://kolm.ai/docs/glossary#k-score" },
+ { "@type": "DefinedTerm", "name": "K-sample", "termCode": "k-sample", "description": "The fixed sample set used to compute a comparable K-score across runs. Same prompts, same seeds, different artifact.", "url": "https://kolm.ai/docs/glossary#k-sample" },
+ { "@type": "DefinedTerm", "name": "Recipe", "termCode": "recipe", "description": "A JSON document that names the task, the base model, the eval suite, and the gating thresholds. Input to `kolm compile`.", "url": "https://kolm.ai/docs/glossary#recipe" },
+ { "@type": "DefinedTerm", "name": "Receipt", "termCode": "receipt", "description": "A signed JSON record for one build step. Includes input hashes, output hashes, K-score, timestamp, and a Rekor entry id.", "url": "https://kolm.ai/docs/glossary#receipt" },
+ { "@type": "DefinedTerm", "name": "Receipt chain", "termCode": "receipt-chain", "description": "The ordered list of receipts inside a `.kolm`. Verifies end-to-end build provenance via `kolm verify`.", "url": "https://kolm.ai/docs/glossary#receipt-chain" },
+ { "@type": "DefinedTerm", "name": "Sandbox", "termCode": "sandbox", "description": "The constrained runtime where a `.kolm` executes. Blocks `process`, `require`, `eval(`, `Function(`, and outbound sockets.", "url": "https://kolm.ai/docs/glossary#sandbox" },
+ { "@type": "DefinedTerm", "name": "Specialist", "termCode": "specialist", "description": "A `.kolm` that targets one narrow task such as PHI redaction or claims routing. Usually under 5 GB, well under teacher cost.", "url": "https://kolm.ai/docs/glossary#specialist" },
+ { "@type": "DefinedTerm", "name": "Verifier", "termCode": "verifier", "description": "The tool that re-checks an artifact: signature, receipt chain, frozen-set K-score. Run via `kolm verify` or `/verify-prod`.", "url": "https://kolm.ai/docs/glossary#verifier" },
+ { "@type": "DefinedTerm", "name": "Witness", "termCode": "witness", "description": "An external attester that countersigns receipts. kolm uses sigstore Rekor as the default public transparency witness.", "url": "https://kolm.ai/docs/glossary#witness" }
+ ]
+ }
+ ]
+}
+</script>
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand"><span>kolm.ai</span></a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
+</header>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<main id="main">
+ <section class="hero frontier-bg">
+ <div class="wrap">
+ <div class="hero-copy">
+ <div class="hero-eyebrow"><span class="he-dot"></span>kolm.ai docs &middot; glossary</div>
+ <h1>Glossary.</h1>
+ <p class="lede">Twenty terms used across kolm.ai docs, the CLI, and the receipts spec. Plain English, one definition per term, deep-linkable. Run into a word in <a href="/docs">the docs</a> you do not recognize, this is where it is defined.</p>
+ </div>
+ </div>
+ </section>
+
+ <section class="section">
+ <div class="wrap" style="max-width:980px">
+
+ <nav class="gl-toc" aria-label="Glossary terms">
+ <p>20 terms</p>
+ <ul>
+ <li><a href="#adapter">Adapter</a></li>
+ <li><a href="#ai-compiler">AI compiler</a></li>
+ <li><a href="#artifact">Artifact (.kolm)</a></li>
+ <li><a href="#bundle">Bundle</a></li>
+ <li><a href="#capture">Capture</a></li>
+ <li><a href="#capture-namespace">Capture namespace</a></li>
+ <li><a href="#compile">Compile</a></li>
+ <li><a href="#distillation">Distillation</a></li>
+ <li><a href="#drift">Drift</a></li>
+ <li><a href="#frozen-set-gate">Frozen-set gate</a></li>
+ <li><a href="#hmac-chain">Tenant-local HMAC chain</a></li>
+ <li><a href="#k-score">K-score</a></li>
+ <li><a href="#k-sample">K-sample</a></li>
+ <li><a href="#recipe">Recipe</a></li>
+ <li><a href="#receipt">Receipt</a></li>
+ <li><a href="#receipt-chain">Receipt chain</a></li>
+ <li><a href="#sandbox">Sandbox</a></li>
+ <li><a href="#specialist">Specialist</a></li>
+ <li><a href="#verifier">Verifier</a></li>
+ <li><a href="#witness">Witness</a></li>
+ </ul>
+ </nav>
+
+ <dl class="gl-list">
+
+ <dt id="adapter">Adapter<a class="permalink" href="#adapter">#</a></dt>
+ <dd>A small set of weights, usually a LoRA, that overlays a base model to specialize it for one task. Adapters are smaller than a full fine-tune and cheap to ship as part of a <a href="#specialist">specialist</a> <a href="#artifact">.kolm</a>. The base model stays frozen; only the adapter changes.</dd>
+
+ <dt id="ai-compiler">AI compiler<a class="permalink" href="#ai-compiler">#</a></dt>
+ <dd>A toolchain that turns captured prompts, evals, and a base model into a self-contained artifact you can run on your own hardware. The way a C compiler turns source into a binary, kolm turns <a href="#capture">captures</a> plus a <a href="#recipe">recipe</a> into a <a href="#artifact">.kolm</a>. Background reading at <a href="/what-is-an-ai-compiler">/what-is-an-ai-compiler</a>.</dd>
+
+ <dt id="artifact">Artifact (.kolm)<a class="permalink" href="#artifact">#</a></dt>
+ <dd>A signed zip containing the manifest, the <a href="#recipe">recipe</a>, the eval suite, weights or adapter, tokenizer, and a <a href="#receipt-chain">receipt chain</a>. The shippable output of <code>kolm compile</code>. Verifiable at <a href="/verify-prod">/verify-prod</a>.</dd>
+
+ <dt id="bundle">Bundle<a class="permalink" href="#bundle">#</a></dt>
+ <dd>An offline distribution package combining one or more <a href="#artifact">artifacts</a> with a runtime binary and verifier. Built by the air-gap export verb (see the <a href="/docs/cli">CLI reference</a>) for offline install. Same provenance guarantees as the individual artifact.</dd>
+
+ <dt id="capture">Capture<a class="permalink" href="#capture">#</a></dt>
+ <dd>A recorded request and response pair from a teacher model, plus the prompt template hash, timing, and cost. Captures are the raw material that <a href="#distillation">distillation</a> learns from. Live tail at <a href="/captures">/captures</a>.</dd>
+
+ <dt id="capture-namespace">Capture namespace<a class="permalink" href="#capture-namespace">#</a></dt>
+ <dd>A label that groups <a href="#capture">captures</a> by task, for example <code>claims-router</code> or <code>phi-redactor</code>. The unit of work for <code>kolm distill --namespace</code> and the slot that thresholds and gates live under.</dd>
+
+ <dt id="compile">Compile<a class="permalink" href="#compile">#</a></dt>
+ <dd>The end-to-end step that turns a <a href="#recipe">recipe</a> plus <a href="#capture">captures</a> into an <a href="#artifact">.kolm</a>. Runs evals, gates on <a href="#k-score">K-score</a>, signs, and emits a <a href="#receipt-chain">receipt chain</a>. CLI verb: <a href="/docs/cli/compile"><code>kolm compile</code></a>.</dd>
+
+ <dt id="distillation">Distillation<a class="permalink" href="#distillation">#</a></dt>
+ <dd>Training a smaller student model to imitate a larger teacher. kolm supports soft-label KD, top-K KD, and rejection sampling, picked automatically by <code>--mode auto</code>. See <a href="/docs/distill">/docs/distill</a>.</dd>
+
+ <dt id="drift">Drift<a class="permalink" href="#drift">#</a></dt>
+ <dd>Behavior change between a teacher model snapshot and a later snapshot, measured by re-running the same fixed eval set. Reported per provider on <a href="/drift">/drift</a>. The number you cite when a frontier vendor silently updates a model.</dd>
+
+ <dt id="frozen-set-gate">Frozen-set gate<a class="permalink" href="#frozen-set-gate">#</a></dt>
+ <dd>An eval-pass gate that blocks <a href="#compile">compile</a> from shipping if the held-out frozen set falls below a configured <a href="#k-score">K-score</a>. The frozen set is sealed at recipe-creation time so it cannot be optimized against.</dd>
+
+ <dt id="hmac-chain">Tenant-local HMAC chain<a class="permalink" href="#hmac-chain">#</a></dt>
+ <dd>A shared-secret receipt ledger for one-tenant deployments or contractually bound pairs. Public distribution and third-party verification use Ed25519 receipt signatures so the verifier does not need a tenant secret.</dd>
+
+ <dt id="k-score">K-score<a class="permalink" href="#k-score">#</a></dt>
+ <dd>kolm's composite quality score, scaled 0 to 1, computed on a held-out <a href="#k-sample">K-sample</a>. Six axes: Accuracy, Stability, Latency, Cost, Variance, Teacher. Full methodology at <a href="/k-score">/k-score</a>.</dd>
+
+ <dt id="k-sample">K-sample<a class="permalink" href="#k-sample">#</a></dt>
+ <dd>The fixed sample set used to compute a comparable <a href="#k-score">K-score</a> across runs. Same prompts, same seeds, different artifact. K-samples are shareable so two teams can compare apples to apples.</dd>
+
+ <dt id="recipe">Recipe<a class="permalink" href="#recipe">#</a></dt>
+ <dd>A JSON document that names the task, the base model, the eval suite, the <a href="#frozen-set-gate">frozen-set gate</a>, and the threshold values. Input to <a href="#compile">compile</a>. Reusable across runs; you change one field and re-compile.</dd>
+
+ <dt id="receipt">Receipt<a class="permalink" href="#receipt">#</a></dt>
+ <dd>A signed JSON record for one build step. Includes input hashes, output hashes, <a href="#k-score">K-score</a>, timestamp, and a sigstore Rekor entry id. Format documented at <a href="/spec/rs-1">/spec/rs-1</a>.</dd>
+
+ <dt id="receipt-chain">Receipt chain<a class="permalink" href="#receipt-chain">#</a></dt>
+ <dd>The ordered list of <a href="#receipt">receipts</a> inside an <a href="#artifact">.kolm</a>. Verifies end-to-end build provenance: tokenize, distill, compile, sign, witness. Re-verified by <code>kolm verify</code> any time.</dd>
+
+ <dt id="sandbox">Sandbox<a class="permalink" href="#sandbox">#</a></dt>
+ <dd>The constrained runtime where a <a href="#artifact">.kolm</a> executes user code. Blocks <code>process</code>, <code>require</code>, <code>eval(</code>, <code>Function(</code>, and outbound sockets. Forbidden-identifier list at <a href="/docs/sandbox">/docs/sandbox</a>.</dd>
+
+ <dt id="specialist">Specialist<a class="permalink" href="#specialist">#</a></dt>
+ <dd>A <a href="#artifact">.kolm</a> that targets one narrow task such as PHI redaction or claims routing. Usually well under 5 GB and a fraction of teacher cost per call. Built from at least 1000 <a href="#capture">captures</a> in one <a href="#capture-namespace">namespace</a>.</dd>
+
+ <dt id="verifier">Verifier<a class="permalink" href="#verifier">#</a></dt>
+ <dd>The tool that re-checks an <a href="#artifact">artifact</a>: signature, <a href="#receipt-chain">receipt chain</a>, frozen-set <a href="#k-score">K-score</a>. Run via <a href="/docs/cli/verify"><code>kolm verify</code></a> locally or hosted at <a href="/verify-prod">/verify-prod</a>.</dd>
+
+ <dt id="witness">Witness<a class="permalink" href="#witness">#</a></dt>
+ <dd>An external attester that countersigns <a href="#receipt">receipts</a>. kolm uses sigstore Rekor as the default public transparency witness. Self-hosted witness optional for air-gapped installs.</dd>
+
+ </dl>
+
+ <div class="gl-related">
+ <h2>Related</h2>
+ <ul>
+ <li><a href="/docs">Docs home</a></li>
+ <li><a href="/k-score">K-score explained</a></li>
+ <li><a href="/what-is-an-ai-compiler">What is an AI compiler?</a></li>
+ <li><a href="/quickstart">Quickstart</a></li>
+ <li><a href="/docs/troubleshooting">Troubleshooting</a></li>
+ <li><a href="/docs/cli">CLI reference</a></li>
+ <li><a href="/docs/api">API reference</a></li>
+ <li><a href="/spec/rs-1">RS-1 receipts spec</a></li>
+ </ul>
+ </div>
+
+ </div>
+ </section>
+</main>
+
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/spec/kolm-format-v1">.kolm format</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/byoc">BYOC</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Trust</h4>
+ <a href="/security">Security</a>
+ <a href="/baa">BAA &amp; DPA</a>
+ <a href="/subprocessors">Subprocessors</a>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/.well-known/security.txt">security.txt</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/health-insurance">Health insurance</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/manifesto">Manifesto</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai &middot; Made with .kolm &middot; Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+</body>
+</html>

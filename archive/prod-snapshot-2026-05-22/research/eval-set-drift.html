@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Eval set drift: when your gold set rots kolm research · kolm.ai</title>
+<meta name="description" content="A gold eval set that scored K=0.91 in January may score 0.84 in June without the model changing. The problem, the detection signals, kolm">
+<meta name="keywords" content="eval drift, gold set, distribution shift, continual evaluation, HELM, registry baseline">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta name="author" content="kolm">
+<meta name="robots" content="index,follow,max-snippet:-1">
+<meta property="og:site_name" content="kolm">
+<meta property="og:title" content="Eval set drift: when your gold set rots kolm research · kolm.ai">
+<meta property="og:description" content="A gold eval set that scored K=0.91 in January may score 0.84 in June without the model changing. The problem, the detection signals, kolm">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Eval set drift: when your gold set rots kolm research · kolm.ai">
+<meta name="twitter:description" content="A gold eval set that scored K=0.91 in January may score 0.84 in June without the model changing. The problem, the detection signals, kolm">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/research/eval-set-drift">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/research/eval-set-drift">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "TechArticle",
+ "headline": "Eval set drift: when your gold set rots",
+ "description": "An open research problem on eval set drift. Detection signals, kolm's stance, and the v0.2 detector sketch.",
+ "author": { "@type": "Organization", "name": "kolm", "url": "https://kolm.ai" },
+ "publisher": { "@type": "Organization", "name": "kolm", "logo": { "@type": "ImageObject", "url": "https://kolm.ai/favicon.svg" } },
+ "datePublished": "2026-05-14",
+ "dateModified": "2026-05-14",
+ "mainEntityOfPage": { "@type": "WebPage", "@id": "https://kolm.ai/research/eval-set-drift" },
+ "image": "https://kolm.ai/og-card.svg",
+ "keywords": "eval drift, gold set, distribution shift, continual evaluation",
+ "articleSection": "Methodology",
+ "wordCount": 2030
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+ {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
+ {"@type": "ListItem", "position": 3, "name": "Eval set drift", "item": "https://kolm.ai/research/eval-set-drift"}
+ ]
+ }
+ ]
+}
+</script>
+<style>
+ :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--accent-soft:rgba(236,231,220, 0.10);--good:#7ef0d2;--bad:#ff6b91;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+ *{box-sizing:border-box}
+ html,body{margin:0;padding:0}
+ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;font-synthesis:none}
+ a{color:inherit;text-decoration:none}
+ .wrap{max-width:760px;margin:0 auto;padding:0 32px}
+ .wrap-wide{max-width:1180px;margin:0 auto;padding:0 32px}
+ @media(max-width:720px){.wrap,.wrap-wide{padding:0 20px}}
+
+ header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+ header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px}
+ header.site .left{display:flex;align-items:center;gap:36px}
+ header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
+ header.site .brand span{font-weight:500;font-size:16px}
+ header.site nav{display:flex;gap:22px}
+ header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
+ header.site nav a:hover{color:var(--ink)}
+ header.site .right{display:flex;align-items:center;gap:14px}
+ header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
+ header.site .right .cta{color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500}
+ @media(max-width:720px){header.site nav{display:none}}
+
+ section.hero{padding:80px 0 36px;position:relative;overflow:hidden}
+ section.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 900px 460px at 22% 12%,rgba(236,231,220, 0.10),transparent 60%)}
+ section.hero .wrap{position:relative}
+ .pill{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-mute);border:1px solid var(--line-strong);border-radius:999px;padding:5px 12px;background:var(--bg-elev)}
+ .pill .dot{width:5px;height:5px;border-radius:50%;background:#10b981}
+ h1{margin:22px 0 18px;font-size:clamp(34px,5.4vw,54px);line-height:1.05;font-weight:500;max-width:22ch}
+ h1 .tone{color:#10b981}
+ p.lede{margin:0;font-size:clamp(17px,1.4vw,20px);line-height:1.55;color:var(--ink-mute);max-width:60ch}
+ p.lede b{color:var(--ink);font-weight:500}
+ .meta{display:flex;gap:18px;margin-top:22px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
+ .meta b{color:var(--ink-mute);font-weight:500}
+
+ article{padding:36px 0 96px}
+ article h2{margin:56px 0 14px;font-size:clamp(24px,2.6vw,30px);line-height:1.2;font-weight:500;color:var(--ink)}
+ article h3{margin:36px 0 10px;font-size:18px;font-weight:500;color:var(--ink)}
+ article p{margin:0 0 16px;font-size:16.5px;line-height:1.7;color:var(--ink-mute)}
+ article p b{color:var(--ink);font-weight:500}
+ article p code,article li code,article td code{font-family:var(--mono);font-size:0.92em;background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink)}
+ article blockquote{margin:28px 0;padding:16px 22px;border-left:2px solid #10b981;background:var(--bg-elev);border-radius:0 8px 8px 0;font-size:17px;line-height:1.6;color:var(--ink)}
+ article blockquote p{color:var(--ink);margin:0;font-weight:500}
+ article ul{padding-left:0;list-style:none;margin:16px 0 24px}
+ article ul li{padding:8px 0 8px 22px;position:relative;font-size:16px;line-height:1.6;color:var(--ink-mute)}
+ article ul li::before{content:"-";color:#10b981;position:absolute;left:6px;font-weight:500}
+ article ul li b{color:var(--ink);font-weight:500}
+ article pre{margin:18px 0 24px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.75;color:var(--ink)}
+ article pre .com{color:var(--ink-faint)}
+ article pre .arg{color:#10b981}
+ article pre .kw{color:#b0bbff}
+ article table{width:100%;border-collapse:collapse;margin:18px 0 24px;font-size:14px}
+ article table th,article table td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;color:var(--ink-mute)}
+ article table th{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);font-weight:500;letter-spacing:0.04em}
+ article table td b{color:var(--ink)}
+
+ .toc{margin:28px 0 36px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px}
+ .toc h5{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);margin:0 0 10px;font-weight:500}
+ .toc ol{margin:0;padding-left:20px}
+ .toc li{padding:4px 0;font-size:14px;color:var(--ink-mute)}
+ .toc li a{color:var(--ink-mute)}
+ .toc li a:hover{color:#10b981}
+
+ .signpost{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:48px 0 0}
+ @media(max-width:720px){.signpost{grid-template-columns:1fr}}
+ .signpost a{display:flex;flex-direction:column;gap:8px;padding:22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;transition:border-color 120ms,background 120ms}
+ .signpost a:hover{border-color:var(--line-strong);background:var(--bg-card)}
+ .signpost a .lab{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
+ .signpost a .v{color:var(--ink);font-weight:500;font-size:16px}
+ .signpost a .v .arrow{color:#10b981;margin-left:6px}
+ .signpost a p{margin:4px 0 0;font-size:13.5px;color:var(--ink-mute);line-height:1.5}
+
+ footer.site{padding:56px 0 40px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+ footer.site .row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+</style>
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API Key &rarr;</a>
+ </div>
+ </div>
+</header>
+<main id="main">
+
+<section class="hero">
+ <div class="wrap">
+ <span class="pill"><span class="dot"></span>Research &middot; SHIPPED wave 167 &middot; 2026-05-17 &middot; 13 min read</span>
+ <h1>Eval set drift: when your <span class="tone">gold set</span> rots.</h1>
+ <p class="lede">A gold eval set that scored <b>K=0.91 in January</b> may score <b>0.84 in June</b> without the model changing. The world moved. The set did not. What signals that drift, why kolm refuses to auto-rotate, and the <b>shipped wave 167 detector</b> (RS-1 &sect;7.15) with its three drift status values, six tolerance axes, and supersession-chain semantics.</p>
+ <div class="meta"><span><b>By</b>&nbsp;kolm</span><span><b>Tag</b>&nbsp;evaluation &middot; drift &middot; open problem</span></div>
+ </div>
+</section>
+
+<article>
+ <div class="wrap">
+
+ <div class="toc">
+ <h5>Contents</h5>
+ <ol>
+ <li><a href="#problem">The problem statement</a></li>
+ <li><a href="#domains">Where it hits hardest</a></li>
+ <li><a href="#signals">Detection signals</a></li>
+ <li><a href="#stance">Why we will not auto-rotate</a></li>
+ <li><a href="#detector">Sketch of the v0.2 detector</a></li>
+ <li><a href="#related">Related work</a></li>
+ <li><a href="#today">What an operator can do today</a></li>
+ </ol>
+ </div>
+
+ <h2 id="problem">The problem statement.</h2>
+ <p>The shipped <code>.kolm</code> artifact embeds an eval pack and a K-score computed at compile time. The eval pack is a fixed set of declared inputs with declared expected outputs. The K-score is the composite of accuracy, size, latency, cost, and coverage on that pack. None of these numbers move after the artifact is signed; the receipt seals them.</p>
+
+ <p>The world the inputs were drawn from is not so polite. Product catalogs churn; case law updates; consumer slang rotates; the medical coding standard publishes new ICD codes; tax law changes; news cycles produce a new vocabulary every quarter. A static eval set captures a snapshot of a moving distribution. As the snapshot ages, two failure modes compound.</p>
+
+ <p><b>Failure mode one: covered cases stop being representative.</b> The artifact still scores 0.91 on the January eval pack in June because the pack has not changed. But the June production traffic looks substantially different from the January pack. The 0.91 number is verifiable for what it measures and misleading as an estimate of current production quality.</p>
+
+ <p><b>Failure mode two: novel cases enter the traffic and the eval pack never sees them.</b> An artifact that handled all of the January catalog perfectly cannot answer a question about the June catalog because the eval pack has no June catalog cases. The artifact may still ship the receipt with its January K-score; the receipt is correct; the inference for the new entries is unaddressed.</p>
+
+ <p>Both modes are reasonable to expect. Neither is a bug in the artifact, the receipt, or the gate. They are bugs in the assumption that an eval set is a stable proxy for production. The verifiable research question is: <i>when has the gap between eval and production grown enough that the K-score on the embedded pack is no longer a useful signal?</i></p>
+
+ <h2 id="domains">Where it hits hardest.</h2>
+ <p>Drift is not uniform across application domains. Five domains we have run compiles for show the pattern most clearly.</p>
+
+ <table>
+ <thead><tr><th>Domain</th><th>Driver</th><th>Typical half-life of an eval pack</th></tr></thead>
+ <tbody>
+ <tr><td><b>E-commerce search</b></td><td>Catalog churn, SKU rotation, brand entry/exit</td><td>3 to 6 months</td></tr>
+ <tr><td><b>Legal research</b></td><td>Case law publication, statute amendment</td><td>6 to 12 months</td></tr>
+ <tr><td><b>Regulatory text</b></td><td>Rule publication, comment-period output</td><td>6 to 18 months</td></tr>
+ <tr><td><b>News summarization</b></td><td>Vocabulary churn, named-entity emergence</td><td>4 to 8 weeks</td></tr>
+ <tr><td><b>Medical coding</b></td><td>ICD revisions, payer policy updates</td><td>12 months (annual cycle)</td></tr>
+ </tbody>
+ </table>
+
+ <p>The half-life column is not a measurement; it is an observation from the compiles we have shipped and the regressions we have seen. The pattern that holds across all five domains is that <b>the rate of drift is the rate of vocabulary entry</b>. When the rate of new named entities or new tokens in production traffic exceeds the rate captured in the eval pack, the pack is aging.</p>
+
+ <p>Domains not on this list (basic spam, sentiment of stable product reviews, classification of well-formed JSON, structured extraction from a frozen schema) drift more slowly. An eval pack on a stable distribution can be useful for years. The question is which distribution the deployer is actually drawing from.</p>
+
+ <h2 id="signals">Detection signals.</h2>
+ <p>The literature on covariate shift and concept drift is rich. The signals we find most useful in a kolm deployment are a small subset of that literature, chosen because they can be computed from the captures stream without extra labeled data.</p>
+
+ <p><b>Signal one: production traffic distribution shift.</b> Take a fixed-size feature vector over recent production captures (TF-IDF over a sliding window, or sentence embeddings if you have a cheap embedder available). Compare to the same feature vector over the embedded eval pack. A KS test or maximum mean discrepancy estimate gives a single number per axis. If the number crosses a threshold, the captures distribution and the eval distribution have measurably diverged.</p>
+
+ <p><b>Signal two: novel-entity rate.</b> Count named entities or vocabulary tokens in the production captures that are absent from the eval pack. Normalize by total captures. A rate above some operator-chosen ceiling (we have used 8% of distinct entities per week, but the right number is domain specific) indicates the world is producing inputs the pack cannot reach.</p>
+
+ <p><b>Signal three: item-IDs leaking into queries.</b> A specific pattern in e-commerce, legal, and ticket-routing workloads: production queries start to reference SKU codes, case numbers, or ticket IDs that did not exist when the pack was assembled. A simple regex matched against the captures stream catches this without semantic analysis.</p>
+
+ <p><b>Signal four: shadow accuracy gap.</b> If the deployer is running a small fraction of production traffic through a "shadow" frontier-model call for spot checks, the gap between the artifact's answer and the shadow answer on the same input is a direct estimate of accuracy on live traffic. The gap need not be ground truth; it is a noisy estimate, but it moves in the right direction when the artifact's coverage falls.</p>
+
+ <p>None of these signals require ground-truth labels on production traffic. All four can be computed from the captures stream and the embedded eval pack alone. The four together are usually enough to decide whether a re-eval is warranted before the K-score gate starts failing for the wrong reasons.</p>
+
+ <h2 id="stance">Why we will not auto-rotate.</h2>
+ <p>The seductive next step is to use the captures stream to automatically rotate the eval pack. The captures contain real production inputs; promote a sample of them into the pack; the pack stays fresh; the K-score stays meaningful. This is a bad idea, and we have explicitly declined to ship it.</p>
+
+ <p><b>Reason one: an auto-rotated pack is no longer auditable.</b> The receipt that signs a K-score should be reproducible from the artifact and the pack. If the pack mutates between the moment the receipt was signed and the moment a third party tries to verify, the verification fails. Every auto-rotation invalidates every prior receipt that referenced the pack.</p>
+
+ <p><b>Reason two: ground truth is not free.</b> Promoting a captured input into the eval pack requires a declared expected output. Production captures do not carry one. An auto-rotation that promotes captures with model outputs as ground truth produces a pack that measures self-agreement, not correctness. The K-score against such a pack monotonically rises and means nothing.</p>
+
+ <p><b>Reason three: distributional capture risks PII bleed.</b> The captures stream is operationally sensitive (see <a href="/research/capture-loop-provenance">capture-loop fidelity</a>). A pack assembled from raw captures inherits the same sensitivity but is now embedded in every signed artifact and shipped to every consumer of the registry. The blast radius of an inadvertent PII leak into a pack is enormous.</p>
+
+ <p>The verifiable stance is: <b>the pack is human-curated</b>. A drift signal triggers an alert. A human reviews the alert. The human decides whether to expand the pack, hand-label new cases, and re-run the compile against the larger pack. The receipt for the new artifact references the new pack hash; the prior receipt remains valid against the prior pack.</p>
+
+ <blockquote>
+ <p>Auto-rotating an eval pack is one of those features whose hidden cost is "now every receipt depends on a moving target". We prefer the cost of asking a human.</p>
+ </blockquote>
+
+ <h2 id="detector">The shipped wave 167 detector.</h2>
+ <p>The detector is no longer a roadmap sketch. <b>Wave 167 shipped it as <code>src/drift-supersession.js</code></b>, exposed via <code>kolm drift detect</code> + <code>kolm drift cron</code>, and surfaced as RS-1 &sect;7.15 (the M+3 + M+4 lifecycle tiers). It runs against the captures stream on the cadence the operator chooses (daily, weekly, per-deployment) and emits a signed <code>drift-report-v1</code> JSON block that binds into <code>artifact_hash_input</code> alongside the original receipt chain.</p>
+
+ <p>The detector produces three drift status values (not four states &mdash; the v0.2 sketch was simplified at ship):</p>
+
+ <ul>
+ <li><b>within</b>: every axis is within the warn tolerance. The pack is current. No action.</li>
+ <li><b>drift</b>: one or more axes exceeds the warn tolerance but stays under the fail floor. The pack is showing its age. Operator should expand the pack within the next compile cycle; the artifact still ships.</li>
+ <li><b>breach</b>: one or more axes exceeds the fail floor. <code>kolm verify</code> exits with status 2 by default (configurable); the artifact must be re-compiled with a fresh pack and a supersession block before it can be re-shipped.</li>
+ </ul>
+
+ <p>Six tolerance axes ship in <code>DEFAULT_TOLERANCES</code>: <code>eval_score</code> warn 0.02 / fail 0.05; <code>k_score.composite</code> warn 0.03 / fail 0.08; <code>k_score.&lt;axis&gt;</code> warn 0.05 / fail 0.10 (per K-axis); <code>external_holdout_hash</code> exact (any change is a breach); <code>tenant_shadow_corpus_hash</code> exact (residency contract); <code>artifact_hash</code> informational (recorded but never gates). Operators can override per-axis via <code>kolm drift detect --tolerance k_score.composite:warn=0.04</code>.</p>
+
+ <p>Six supersession reasons ship in <code>SUPERSESSION_REASONS</code> and the corresponding receipt block: <code>drift_detected</code> (paired with a <code>drift_report_hash</code> evidence guard), <code>scheduled_rebuild</code>, <code>security_patch</code>, <code>recipe_revision</code>, <code>policy_change</code>, <code>tenant_request</code>. The <code>SupersessionBlock</code> binds the predecessor <code>artifact_hash</code> to the successor and the verifier rejects forged supersession (verifier checks #23 and #24).</p>
+
+ <p>The detector output is a structured artifact, not a number. It records the signals computed, the thresholds used, the sample of captures inspected, and the state. It is signed against the operator's receipt secret so the audit trail can recover when the state changed and why.</p>
+
+ <pre><span class="kw">$</span> kolm drift detect --artifact ticket-router.kolm --window 7d
+<span class="arg">[drift]</span> spec: drift-report-v1
+<span class="arg">[drift]</span> captures inspected: 2,418
+<span class="arg">[drift]</span> baseline snapshot: drift-snapshot-v1 (hash sha256:9d3e&hellip;)
+<span class="arg">[drift]</span> eval_score: delta 0.024 <span class="com"># warn 0.02 / fail 0.05 &rarr; drift</span>
+<span class="arg">[drift]</span> k_score.composite: delta 0.011 <span class="com"># warn 0.03 / fail 0.08 &rarr; within</span>
+<span class="arg">[drift]</span> k_score.accuracy: delta 0.062 <span class="com"># warn 0.05 / fail 0.10 &rarr; drift</span>
+<span class="arg">[drift]</span> external_holdout_hash: match <span class="com"># exact &rarr; within</span>
+<span class="arg">[drift]</span> tenant_shadow_corpus_hash: match <span class="com"># exact &rarr; within</span>
+<span class="arg">[drift]</span> artifact_hash: recorded <span class="com"># informational</span>
+
+verdict: drift
+recommendation: expand eval pack with last 7d novel-entity samples; re-compile within cadence window
+
+<span class="kw">$</span> kolm drift cron --artifact ticket-router.kolm --schedule weekly
+<span class="arg">wrote crontab entry: 0 3 * * 1 kolm drift detect --artifact /opt/kolm/ticket-router.kolm</span>
+
+<span class="kw">$</span> kolm compile --supersession-of ticket-router.kolm --reason drift_detected \
+ --drift-report ./drift-2026-05-17.json --spec ticket-router.spec.json
+<span class="arg">supersession block written: predecessor=sha256:9d3e&hellip; reason=drift_detected</span>
+<span class="arg">verifier check #23 (supersession) + #24 (drift report) pass</span>
+<span class="arg">artifact_hash: sha256:fc20&hellip; signed under tenant key</span></pre>
+
+ <p>The output is intentionally boring. Six axes, a verdict, a recommendation. It does not auto-rotate the pack; it does not auto-compile; it does not deploy anything. The operator does the work, and the supersession block makes the chain of decisions auditable end-to-end. See <a href="/drift" style="color:#10b981">/drift</a> for the full lifecycle UI surface, manifest blocks (<code>SupersessionBlock</code> + <code>DriftReport</code>), and the four scenarios A/B/C/D (scheduled rebuild, warn-band ship, breach + successor, forged supersession rejected).</p>
+
+ <h2 id="related">Related work.</h2>
+ <p>Three lines of prior work inform the design.</p>
+
+ <p><b>HELM</b> (Liang et al., <a href="https://arxiv.org/abs/2211.09110" rel="noopener">arXiv:2211.09110</a>) framed the broad-coverage evaluation question with explicit attention to scenario coverage and the way a static benchmark can lose representativeness. The HELM contribution we lean on is the separation between the metric (accuracy on a scenario) and the operational decision (which scenarios to run). The kolm K-score sits closer to the operational decision; the HELM framing of scenario rotation as a deliberate human choice rather than an automatic one informs our refusal to auto-rotate.</p>
+
+ <p><b>Continual evaluation literature</b> over the last decade in classical ML has converged on the same diagnostic shape: detect shift, alert a human, expand the labeled set, retrain. The Hendrycks et al. line on out-of-distribution detection, the Lipton et al. work on label shift estimation, and the Kuznetsova et al. treatment of distribution-shift uncertainty are all instances of the same operational pattern: <i>computing a shift signal is the cheap half; deciding what to label next is the expensive half</i>.</p>
+
+ <p><b>Production-MLOps drift detection systems</b> (Evidently AI, Arize, Fiddler) have built monitoring around variants of these signals. The contribution of those systems is mostly operational: a UI that surfaces the signal, an alerting rule that lets a human notice. Our detector is meant to slot into the same operational role for kolm deployments, with the additional constraint that the signal output gets signed alongside the receipt chain.</p>
+
+ <h2 id="today">What an operator can do today.</h2>
+ <p>The full v0.2 detector ships when the calibration data lands. Until then, three practices an operator can adopt today.</p>
+
+ <p><b>Practice one: maintain a hand-labeled holdout outside the artifact.</b> The eval pack inside the <code>.kolm</code> is the compile-time gate. The production-quality estimate is a separate exercise. Sample 50 to 200 captures a week; have a human label them; run them through the artifact; record the accuracy. The result is a noisy but unbiased estimate of how the artifact is performing on current traffic.</p>
+
+ <p><b>Practice two: expand the eval pack on a calendar.</b> A quarterly compile cycle with explicit eval-pack expansion catches most drift before it hurts. Add 20 to 50 new cases per quarter, drawn from human-labeled production captures, and re-run the compile.</p>
+
+ <p><b>Practice three: monitor the kolm capture counters.</b> A namespace whose <b>captured</b> count keeps growing while <b>distilled</b> stays flat is producing inputs that are not making it into the next artifact. That is often a sign that the eval pack needs to grow to cover the new inputs before the next distill will clear the gate.</p>
+
+ <p>Drift is the part of the system the receipt chain cannot guarantee. The chain attests that the K-score was computed plainly against a particular pack at a particular time. It does not attest that the pack still describes the world. <b>The chain is the proof of what we did. The pack is the bet on what we measured. The detector is the open problem.</b> Today, the bet is the operator's; we are working on the detector that helps them see when the bet is going stale.</p>
+
+ <div class="signpost">
+ <a href="/research/registry-economics">
+ <span class="lab">read next</span>
+ <span class="v">Registry economics <span class="arrow">&rarr;</span></span>
+ <p>How the public catalog sustains itself, why bytes do not live on kolm.ai, and how left-pad is contained.</p>
+ </a>
+ <a href="/research/capture-loop-provenance">
+ <span class="lab">read next</span>
+ <span class="v">Capture-loop fidelity <span class="arrow">&rarr;</span></span>
+ <p>What kolm chooses not to retain, the bridge-handoff framing, and the four counters on the dashboard.</p>
+ </a>
+ <a href="/research/k-score-correlation">
+ <span class="lab">methodology</span>
+ <span class="v">K-score correlation <span class="arrow">&rarr;</span></span>
+ <p>The score whose pack is the thing that drifts. Weights, gate, and the v0.2 cross-task calibration question.</p>
+ </a>
+ <a href="/benchmarks">
+ <span class="lab">harness</span>
+ <span class="v">Benchmark methodology <span class="arrow">&rarr;</span></span>
+ <p>The reproducer harness for cross-task comparisons. n=150 SWE-bench Lite, seed=42.</p>
+ </a>
+ </div>
+
+ </div>
+</article>
+
+
+</main>
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>GitLab CI reference · kolm.ai</title>
+<meta name="description" content="Reference .gitlab-ci.yml snippets for kolm. Verify-on-MR, release-with-binder, scheduled quarterly re-verify. Blocks merges on K-score regression, posts...">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="robots" content="index,follow">
+<meta property="og:title" content="GitLab CI reference · kolm.ai">
+<meta property="og:description" content="Reference .gitlab-ci.yml snippets for kolm. Verify-on-MR, release-with-binder, scheduled quarterly re-verify. Blocks merges on K-score regression, posts...">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/integrations/gitlab-ci">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="GitLab CI reference · kolm.ai">
+<meta name="twitter:description" content="Reference .gitlab-ci.yml snippets for kolm. Verify-on-MR, release-with-binder, scheduled quarterly re-verify. Blocks merges on K-score regression, posts...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/integrations/gitlab-ci">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<style>
+ .i-wrap{max-width:760px;margin:0 auto;padding:0 24px}
+ .i-hero{padding:72px 0 32px;border-bottom:1px solid var(--line)}
+ .i-hero .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint,#737c73);margin:0 0 16px}
+ .i-hero .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ .i-hero h1{font-size:38px;line-height:1.12;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;color:var(--fg,#faf2e1)}
+ .i-hero .lede{font-size:17.5px;line-height:1.55;color:var(--ink-mute,#b5bdb1);margin:0}
+ .i-hero .meta{display:flex;gap:18px;margin:20px 0 0;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint,#737c73);letter-spacing:0.04em;flex-wrap:wrap}
+ .i-hero .meta span b{color:var(--accent,#10b981);font-weight:500}
+
+ .i-step{padding:36px 0;border-bottom:1px solid var(--line)}
+ .i-step h2{margin:0 0 12px;font-size:22px;font-weight:500;letter-spacing:-0.012em;color:var(--fg,#faf2e1)}
+ .i-step .stepno{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent,#10b981);margin:0 0 8px}
+ .i-step p{color:var(--ink-mute,#b5bdb1);margin:0 0 16px;font-size:15px;line-height:1.65}
+ pre.term{background:rgba(0,0,0,0.32);border:1px solid var(--line);border-radius:8px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55;margin:0 0 16px;color:var(--fg,#faf2e1);white-space:pre}
+ pre.term .c{color:var(--ink-faint,#737c73)}
+ pre.term .g{color:var(--accent,#10b981)}
+ pre.term .k{color:#ec7373}
+ .checkpoint{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border:1px dashed rgba(16,185,129,0.32);border-radius:8px;background:rgba(16,185,129,0.05);font-size:13.5px;color:var(--ink-mute,#b5bdb1);margin:0 0 8px}
+ .checkpoint b{color:var(--accent,#10b981);font-weight:500;font-family:var(--mono);font-size:11.5px;letter-spacing:0.04em;text-transform:uppercase}
+ .actions{display:flex;gap:12px;margin:24px 0 0;flex-wrap:wrap}
+ .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:8px;font-family:var(--mono);font-size:13px;text-decoration:none;border:1px solid var(--line);color:var(--fg,#faf2e1);transition:all 160ms}
+ .btn.primary{background:var(--accent,#10b981);color:#0b0d10;border-color:var(--accent,#10b981)}
+ .btn:hover{transform:translateY(-1px)}
+</style>
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+ <div class="wrap">
+ <a class="logo" href="/">k o l m</a>
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <nav class="primary">
+ <a href="/quickstart">quickstart</a>
+ <a href="/docs">docs</a>
+ <a href="/integrations">integrations</a>
+ </nav>
+ </div>
+</header>
+
+<main id="main">
+<section class="i-hero">
+ <div class="i-wrap">
+ <p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; <a href="/integrations">integrations</a> &nbsp;/&nbsp; GitLab CI</p>
+ <h1>kolm in GitLab CI.</h1>
+ <p class="lede">Three reference <code>.gitlab-ci.yml</code> snippets: verify-on-MR, release-with-binder, scheduled quarterly re-verify. Each one wires kolm into your existing GitLab project, blocks merges on K-score regression, posts receipts as MR notes, and ships signed artifacts to GitLab releases. Works on GitLab.com and self-managed.</p>
+ <div class="meta"><span>Runner image <b>node:20</b></span><span>Verifier <b>offline</b></span><span>Min minutes <b>2</b></span></div>
+ </div>
+</section>
+
+<section class="i-step">
+ <div class="i-wrap">
+ <p class="stepno">Workflow 1 . verify on MR</p>
+ <h2>Block merges on K-score regression.</h2>
+ <p>Drop this in <code>.gitlab-ci.yml</code>. When a merge request touches a recipe, the pipeline compiles, signs, verifies, and posts a receipt as an MR note. The merge button is blocked if any artifact misses its K-score floor (the compile step exits non-zero).</p>
+ <p>Add a project CI/CD variable named <code>KOLM_API_KEY</code> (Settings &rarr; CI/CD &rarr; Variables; masked, protected). Add <code>GITLAB_API_TOKEN</code> as a project access token with <code>api</code> scope so the MR-note step can post.</p>
+<pre class="term"><span class="k">stages</span>: [verify]
+
+<span class="k">verify</span>:
+ <span class="k">stage</span>: verify
+ <span class="k">image</span>: node:20
+ <span class="k">rules</span>:
+ - <span class="k">if</span>: <span class="g">'$CI_PIPELINE_SOURCE == "merge_request_event"'</span>
+ <span class="k">changes</span>: [<span class="g">"recipes/**/*"</span>]
+ <span class="k">variables</span>:
+ KOLM_BACKEND: local_cpu
+ <span class="k">script</span>:
+ - npm install -g github:sneaky-hippo/kolm-stack
+ - mkdir -p artifacts
+ - |
+ for r in recipes/*.recipe.json; do
+ name=$(basename "$r" .recipe.json)
+ kolm compile --from "$r" --out "artifacts/${name}.kolm"
+ kolm inspect "artifacts/${name}.kolm"
+ done
+ - |
+ <span class="c"># post a single MR note with the receipts</span>
+ BODY=<span class="g">""</span>
+ for rc in artifacts/*.receipt.json; do
+ K=$(node -e <span class="g">"console.log(require('./'+process.argv[1]).k_score)"</span> <span class="g">"$rc"</span>)
+ C=$(node -e <span class="g">"console.log(require('./'+process.argv[1]).cid)"</span> <span class="g">"$rc"</span>)
+ BODY=<span class="g">"${BODY}\n**$(basename $rc)** . K=${K} . CID \`${C}\`"</span>
+ done
+ curl -sf -X POST \
+ -H <span class="g">"PRIVATE-TOKEN: ${GITLAB_API_TOKEN}"</span> \
+ -H <span class="g">"Content-Type: application/json"</span> \
+ -d <span class="g">"{\"body\":\"${BODY}\"}"</span> \
+ <span class="g">"${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}/notes"</span>
+ <span class="k">artifacts</span>:
+ <span class="k">when</span>: always
+ <span class="k">paths</span>: [<span class="g">"artifacts/*.kolm"</span>, <span class="g">"artifacts/*.receipt.json"</span>]
+ <span class="k">expire_in</span>: 30 days</pre>
+ <div class="checkpoint"><b>Checkpoint</b><span>The MR is auto-blocked when the compile fails its K-score gate. The reviewer sees a single note listing each artifact, its K-score, and its CID. No noise.</span></div>
+ </div>
+</section>
+
+<section class="i-step">
+ <div class="i-wrap">
+ <p class="stepno">Workflow 2 . release with binder</p>
+ <h2>Ship a one-page audit PDF with every tag.</h2>
+ <p>On a tag push, attach the <code>.kolm</code>, the receipt, and a single-page binder PDF that lists CID + recipe + base model + K-score to a GitLab release. The PDF is what your auditor signs.</p>
+<pre class="term"><span class="k">stages</span>: [build, release]
+
+<span class="k">build_release</span>:
+ <span class="k">stage</span>: build
+ <span class="k">image</span>: node:20
+ <span class="k">rules</span>:
+ - <span class="k">if</span>: <span class="g">'$CI_COMMIT_TAG'</span>
+ <span class="k">script</span>:
+ - npm install -g github:sneaky-hippo/kolm-stack
+ - mkdir -p out
+ - |
+ for r in recipes/*.recipe.json; do
+ name=$(basename "$r" .recipe.json)
+ kolm compile --from "$r" --out "out/${name}.kolm"
+ kolm inspect "out/${name}.kolm" --binder "out/${name}.binder.pdf"
+ done
+ <span class="k">artifacts</span>:
+ <span class="k">paths</span>: [<span class="g">"out/*.kolm"</span>, <span class="g">"out/*.receipt.json"</span>, <span class="g">"out/*.binder.pdf"</span>]
+ <span class="k">expire_in</span>: never
+
+<span class="k">publish_release</span>:
+ <span class="k">stage</span>: release
+ <span class="k">image</span>: registry.gitlab.com/gitlab-org/release-cli:latest
+ <span class="k">needs</span>: [build_release]
+ <span class="k">rules</span>:
+ - <span class="k">if</span>: <span class="g">'$CI_COMMIT_TAG'</span>
+ <span class="k">script</span>:
+ - echo <span class="g">"Publishing release ${CI_COMMIT_TAG}"</span>
+ <span class="k">release</span>:
+ <span class="k">tag_name</span>: <span class="g">'$CI_COMMIT_TAG'</span>
+ <span class="k">name</span>: <span class="g">'Release $CI_COMMIT_TAG'</span>
+ <span class="k">description</span>: <span class="g">'Signed kolm artifacts + binder PDFs. Verify with `kolm inspect *.kolm`.'</span>
+ <span class="k">assets</span>:
+ <span class="k">links</span>:
+ - <span class="k">name</span>: <span class="g">'kolm artifacts (zip)'</span>
+ <span class="k">url</span>: <span class="g">'${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/download'</span>
+ <span class="k">link_type</span>: package</pre>
+ <div class="checkpoint"><b>Checkpoint</b><span>The release-cli image is the official GitLab-published one. Tags trigger; branches and MRs do not. The binder PDF is what your auditor signs five years from now.</span></div>
+ </div>
+</section>
+
+<section class="i-step">
+ <div class="i-wrap">
+ <p class="stepno">Workflow 3 . scheduled re-verify</p>
+ <h2>Re-verify last-quarter's artifacts on a schedule.</h2>
+ <p>Quarterly pipeline that re-runs <code> kolm inspect</code> against every artifact in <code>releases/</code>. If a verifier-side change ever rejects an artifact you previously shipped, you find out before your auditor does. Configure the schedule in GitLab UI: Build &rarr; Pipeline schedules &rarr; New schedule, cron <code>0 4 1 */3 *</code>, ref <code>main</code>.</p>
+<pre class="term"><span class="k">stages</span>: [reverify]
+
+<span class="k">reverify</span>:
+ <span class="k">stage</span>: reverify
+ <span class="k">image</span>: node:20
+ <span class="k">rules</span>:
+ - <span class="k">if</span>: <span class="g">'$CI_PIPELINE_SOURCE == "schedule"'</span>
+ <span class="k">script</span>:
+ - npm install -g github:sneaky-hippo/kolm-stack
+ - |
+ fails=0
+ for art in releases/**/*.kolm; do
+ if ! kolm inspect "$art"; then
+ echo <span class="g">"FAIL: $art"</span> &gt;&amp;2
+ fails=$((fails+1))
+ fi
+ done
+ if [ "$fails" -gt 0 ]; then
+ echo <span class="g">"$fails artifact(s) failed re-verify"</span> &gt;&amp;2
+ exit 1
+ fi
+ <span class="k">artifacts</span>:
+ <span class="k">when</span>: on_failure
+ <span class="k">paths</span>: [<span class="g">"releases/**/*.receipt.json"</span>]
+ <span class="k">expire_in</span>: 90 days</pre>
+ <div class="checkpoint"><b>Checkpoint</b><span>If the verifier rejects an old artifact, that is the moment to investigate before the artifact ever reaches an auditor or a customer. Schedule this. Forget it. Get paged on the day it matters.</span></div>
+ <div class="actions">
+ <a class="btn primary" href="/tutorials/ci-verify">Walkthrough tutorial &rarr;</a>
+ <a class="btn" href="/integrations/github-actions">GitHub Actions reference &rarr;</a>
+ <a class="btn" href="/spec/rs-1">RS-1 spec &rarr;</a>
+ </div>
+ </div>
+</section>
+</main>
+
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+<script src="/nav.js" defer></script>
+</body>
+</html>

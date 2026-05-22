@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>Tutorial 04 . PagerDuty triage in 15 minutes · kolm.ai</title>
+<meta name="description" content="Compile a .kolm that classifies incoming PagerDuty alerts into severity + team. Base Qwen 2.5 3B. K-target 0.88. Walks every step end-to-end.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="robots" content="index,follow">
+<meta property="og:title" content="Tutorial 04 . PagerDuty triage in 15 minutes · kolm.ai">
+<meta property="og:description" content="Compile a .kolm that classifies incoming PagerDuty alerts into severity + team. Base Qwen 2.5 3B. K-target 0.88. Walks every step end-to-end.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/tutorials/support-triage">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Tutorial 04 . PagerDuty triage in 15 minutes · kolm.ai">
+<meta name="twitter:description" content="Compile a .kolm that classifies incoming PagerDuty alerts into severity + team. Base Qwen 2.5 3B. K-target 0.88. Walks every step end-to-end.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/tutorials/support-triage">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "TechArticle",
+ "headline": "Compile a PagerDuty triage model in 15 minutes",
+ "description": "Step-by-step: compile a .kolm that classifies incoming PagerDuty alerts into severity + team. Base Qwen 2.5 3B. K-target 0.88.",
+ "datePublished": "2026-05-15",
+ "dateModified": "2026-05-15",
+ "author": { "@type": "Organization", "name": "kolm" },
+ "publisher": { "@type": "Organization", "name": "kolm", "url": "https://kolm.ai" },
+ "mainEntityOfPage": "https://kolm.ai/tutorials/support-triage"
+}
+</script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ { "@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/" },
+ { "@type": "ListItem", "position": 2, "name": "tutorials", "item": "https://kolm.ai/tutorials" },
+ { "@type": "ListItem", "position": 3, "name": "support triage", "item": "https://kolm.ai/tutorials/support-triage" }
+ ]
+}
+</script>
+<style>
+ .t-wrap{max-width:760px;margin:0 auto;padding:0 24px}
+ .t-hero{padding:72px 0 32px;border-bottom:1px solid var(--line)}
+ .t-hero .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint,#737c73);margin:0 0 16px}
+ .t-hero .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ .t-hero h1{font-size:38px;line-height:1.12;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;color:var(--fg,#faf2e1)}
+ .t-hero .lede{font-size:17.5px;line-height:1.55;color:var(--ink-mute,#b5bdb1);margin:0}
+ .t-hero .meta{display:flex;gap:18px;margin:20px 0 0;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint,#737c73);letter-spacing:0.04em;flex-wrap:wrap}
+ .t-hero .meta span b{color:var(--accent,#10b981);font-weight:500}
+
+ .t-step{padding:36px 0;border-bottom:1px solid var(--line)}
+ .t-step h2{margin:0 0 12px;font-size:22px;font-weight:500;letter-spacing:-0.012em;color:var(--fg,#faf2e1)}
+ .t-step .stepno{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent,#10b981);margin:0 0 8px}
+ .t-step p{color:var(--ink-mute,#b5bdb1);margin:0 0 16px;font-size:15px;line-height:1.65}
+ .t-step ul{color:var(--ink-mute,#b5bdb1);margin:0 0 16px;padding-left:20px;font-size:15px;line-height:1.65}
+ pre.term{background:rgba(0,0,0,0.32);border:1px solid var(--line);border-radius:8px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55;margin:0 0 16px;color:var(--fg,#faf2e1);white-space:pre}
+ pre.term .c{color:var(--ink-faint,#737c73)}
+ pre.term .g{color:var(--accent,#10b981)}
+ pre.term .k{color:#ec7373}
+ .checkpoint{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border:1px dashed rgba(16,185,129,0.32);border-radius:8px;background:rgba(16,185,129,0.05);font-size:13.5px;color:var(--ink-mute,#b5bdb1);margin:0 0 8px}
+ .checkpoint b{color:var(--accent,#10b981);font-weight:500;font-family:var(--mono);font-size:11.5px;letter-spacing:0.04em;text-transform:uppercase}
+ .actions{display:flex;gap:12px;margin:24px 0 0;flex-wrap:wrap}
+ .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:8px;font-family:var(--mono);font-size:13px;text-decoration:none;border:1px solid var(--line);color:var(--fg,#faf2e1);transition:all 160ms}
+ .btn.primary{background:var(--accent,#10b981);color:#0b0d10;border-color:var(--accent,#10b981)}
+ .btn:hover{transform:translateY(-1px)}
+ .grad-footer{padding:32px 0;color:var(--ink-faint,#737c73);font-size:13.5px;line-height:1.65}
+ .grad-footer h3{margin:0 0 8px;font-family:var(--mono);font-size:11px;color:var(--accent,#10b981);text-transform:uppercase;letter-spacing:0.05em;font-weight:500}
+</style>
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+ <div class="wrap">
+ <a class="logo" href="/">k o l m</a>
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <nav class="primary">
+ <a href="/quickstart">quickstart</a>
+ <a href="/docs">docs</a>
+ <a href="/tutorials">tutorials</a>
+ </nav>
+ </div>
+</header>
+
+<main id="main">
+<section class="t-hero">
+ <div class="t-wrap">
+ <p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; <a href="/tutorials">tutorials</a> &nbsp;/&nbsp; support triage</p>
+ <h1>Triage PagerDuty alerts in 15 minutes.</h1>
+ <p class="lede">By the end of this walkthrough you have a 4.8 KB .kolm that reads an incoming PagerDuty webhook, returns a severity (sev1, sev2, sev3) and a routing team (api, ingest, db, ml-infra, frontend), with a Ed25519 receipt on every call. Runs on a single CPU. No alert text leaves your VPC.</p>
+ <div class="t-hero meta" style="display:flex;gap:18px;margin:20px 0 0;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint,#737c73);letter-spacing:0.04em;flex-wrap:wrap">
+ <span>Runtime <b style="color:var(--accent,#10b981);font-weight:500">15 min</b></span>
+ <span>Output <b style="color:var(--accent,#10b981);font-weight:500">triage.kolm</b></span>
+ <span>Base <b style="color:var(--accent,#10b981);font-weight:500">qwen2.5-3b</b></span>
+ <span>K-target <b style="color:var(--accent,#10b981);font-weight:500">0.88</b></span>
+ <span>Size <b style="color:var(--accent,#10b981);font-weight:500">4.8 KB</b></span>
+ </div>
+ </div>
+</section>
+
+<section class="t-step">
+ <div class="t-wrap">
+ <p class="stepno">Step 1 . 90 seconds</p>
+ <h2>Install and log in.</h2>
+ <p>You will need a kolm account so the compile job has somewhere to charge against. Free tier covers the first three artifacts.</p>
+<pre class="term"><span class="c"># Install</span>
+$ npm install -g github:sneaky-hippo/kolm-stack
+
+<span class="c"># Open the browser sign-in flow</span>
+$ kolm login
+
+<span class="c"># Sanity check</span>
+$ kolm version
+<span class="g"> k o l m
+ ------- the private AI compiler</span>
+kolm cli v0.1.0
+spec rs-1</pre>
+ <div class="checkpoint"><b>Checkpoint</b><span>If <code>kolm version</code> prints the brand mark and <code>spec rs-1</code>, you are ready.</span></div>
+ </div>
+</section>
+
+<section class="t-step">
+ <div class="t-wrap">
+ <p class="stepno">Step 2 . 2 minutes</p>
+ <h2>Write the recipe.</h2>
+ <p>The recipe names the task. It binds an input schema (raw alert text), an output schema (severity + team), an evaluator (multi-class F1 over a labeled set), and a K-score floor. Kolm picks the base model and the adapter unless you override.</p>
+<pre class="term">$ cat &gt; triage.recipe.json &lt;&lt;'JSON'
+{
+ <span class="k">"task"</span>: <span class="g">"classify PagerDuty alert text into severity and routing team"</span>,
+ <span class="k">"base"</span>: <span class="g">"qwen2.5-3b-instruct"</span>,
+ <span class="k">"objective"</span>: <span class="g">"multiclass-f1"</span>,
+ <span class="k">"adapter"</span>: <span class="g">"lora"</span>,
+ <span class="k">"output_schema"</span>: {
+ <span class="k">"severity"</span>: { <span class="k">"enum"</span>: [<span class="g">"sev1"</span>, <span class="g">"sev2"</span>, <span class="g">"sev3"</span>] },
+ <span class="k">"team"</span>: { <span class="k">"enum"</span>: [<span class="g">"api"</span>, <span class="g">"ingest"</span>, <span class="g">"db"</span>, <span class="g">"ml-infra"</span>, <span class="g">"frontend"</span>] },
+ <span class="k">"summary"</span>: { <span class="k">"type"</span>: <span class="g">"string"</span>, <span class="k">"max_chars"</span>: 140 }
+ },
+ <span class="k">"target_k"</span>: 0.92,
+ <span class="k">"min_k"</span>: 0.88,
+ <span class="k">"eval_pack"</span>: <span class="g">"on-call-triage-v1"</span>
+}
+JSON</pre>
+ <div class="checkpoint"><b>Checkpoint</b><span><code>min_k</code> is the hard floor. The compile step exits non-zero if the artifact misses it. Use it as your CI gate.</span></div>
+ </div>
+</section>
+
+<section class="t-step">
+ <div class="t-wrap">
+ <p class="stepno">Step 3 . 1 minute</p>
+ <h2>Drop in labeled examples.</h2>
+ <p>You need a small labeled set. 60 examples is enough to bootstrap. Format is JSONL: one record per line, each with <code>input</code> and <code>expected</code>. Pull a quarter of your past PagerDuty incidents and label them by team and severity.</p>
+<pre class="term">$ head -3 triage.examples.jsonl
+{<span class="k">"input"</span>:<span class="g">"DB connection pool exhausted on primary; 2k 503s in last 5min"</span>,<span class="k">"expected"</span>:{<span class="k">"severity"</span>:<span class="g">"sev1"</span>,<span class="k">"team"</span>:<span class="g">"db"</span>}}
+{<span class="k">"input"</span>:<span class="g">"Login button mis-aligned on mobile Safari, 3 user reports"</span>,<span class="k">"expected"</span>:{<span class="k">"severity"</span>:<span class="g">"sev3"</span>,<span class="k">"team"</span>:<span class="g">"frontend"</span>}}
+{<span class="k">"input"</span>:<span class="g">"Ingest worker queue depth growing 200/min, no consumer errors"</span>,<span class="k">"expected"</span>:{<span class="k">"severity"</span>:<span class="g">"sev2"</span>,<span class="k">"team"</span>:<span class="g">"ingest"</span>}}</pre>
+ <p>Synthetic augmentation runs as part of the compile, so 60 labels typically expand to ~1,200 training pairs.</p>
+ </div>
+</section>
+
+<section class="t-step">
+ <div class="t-wrap">
+ <p class="stepno">Step 4 . 8 minutes</p>
+ <h2>Compile.</h2>
+ <p>One command. Step out for coffee while the compile streams its progress.</p>
+<pre class="term">$ kolm compile --from triage.recipe.json --examples triage.examples.jsonl --out triage.kolm
+
+<span class="g">[1/6]</span> synthesizing (Magpie + Evol-Instruct) ........ 1,184 pairs <span class="c">38s</span>
+<span class="g">[2/6]</span> dedup + label-noise filter ................. 1,042 pairs <span class="c">6s</span>
+<span class="g">[3/6]</span> student fit ................................... 3 epochs <span class="c">5m 04s</span>
+<span class="g">[4/6]</span> constrained-decoder fit (JSON schema) ...... <span class="c">24s</span>
+<span class="g">[5/6]</span> K-score gate ............................... <span class="g">K = 0.913</span> <span class="c">&gt; 0.88 floor</span>
+<span class="g">[6/6]</span> sign + package ............................. <span class="c">2s</span>
+
+<span class="c"> artifact: ./triage.kolm (4.8 KB)
+ receipt: ./triage.receipt.json (3.0 KB)
+ CID: cidv1:sha256:8c92f1...</span></pre>
+ <div class="checkpoint"><b>Checkpoint</b><span>Total compile cost on our account: <b>$0.62</b>. The K-score gate blocks if the artifact misses the floor; you do not have to enforce it in CI separately.</span></div>
+ </div>
+</section>
+
+<section class="t-step">
+ <div class="t-wrap">
+ <p class="stepno">Step 5 . 30 seconds</p>
+ <h2>Run it locally.</h2>
+ <p>The artifact runs in-process on a single CPU. No network call.</p>
+<pre class="term">$ kolm run triage.kolm <span class="g">"DB connection pool exhausted on primary; 2k 503s in last 5min"</span>
+
+<span class="c">{
+ "severity": "sev1",
+ "team": "db",
+ "summary": "Primary database connection pool exhausted; 2,000 503 errors in 5 minutes.",
+ "latency_ms": 18.4,
+ "receipt_cid": "cidv1:sha256:8c92f1..."
+}</span></pre>
+ </div>
+</section>
+
+<section class="t-step">
+ <div class="t-wrap">
+ <p class="stepno">Step 6 . 2 minutes</p>
+ <h2>Wire it into PagerDuty.</h2>
+ <p>Point PagerDuty's webhook at a small handler that runs <code>kolm run</code> and posts the structured output back as an incident note. The artifact lives on your handler host; no alert text leaves your network.</p>
+<pre class="term">$ cat &gt; handler.js &lt;&lt;'JS'
+const { spawn } = require(<span class="g">'node:child_process'</span>);
+const http = require(<span class="g">'node:http'</span>);
+
+http.createServer((req, res) =&gt; {
+ let body = <span class="g">''</span>;
+ req.on(<span class="g">'data'</span>, c =&gt; body += c);
+ req.on(<span class="g">'end'</span>, () =&gt; {
+ const alert = JSON.parse(body);
+ const p = spawn(<span class="g">'kolm'</span>, [<span class="g">'run'</span>, <span class="g">'./triage.kolm'</span>, alert.summary]);
+ let out = <span class="g">''</span>;
+ p.stdout.on(<span class="g">'data'</span>, c =&gt; out += c);
+ p.on(<span class="g">'close'</span>, () =&gt; {
+ const r = JSON.parse(out);
+ console.log(<span class="g">'[triage]'</span>, alert.id, r.severity, r.team);
+ res.end(JSON.stringify(r));
+ });
+ });
+}).listen(8088);
+JS
+
+$ node handler.js</pre>
+ <div class="checkpoint"><b>Checkpoint</b><span>The receipt CID is your audit handle. Six months from now you can rerun the exact same alert against the exact same .kolm and prove the routing decision.</span></div>
+ </div>
+</section>
+
+<section class="t-step">
+ <div class="t-wrap">
+ <p class="stepno">Step 7 . optional</p>
+ <h2>Verify and ship.</h2>
+ <p>The verifier confirms the manifest, the receipt Ed25519, and the K-score gate. Hand the .kolm + the binder PDF to your on-call lead.</p>
+<pre class="term">$ kolm inspect triage.kolm --binder triage.binder.pdf
+
+<span class="g"> &check; manifest CID matches canonical hash
+ &check; all 9 entries hashed and verified
+ &check; receipt signature valid
+ &check; K-score 0.913 (above declared gate 0.88)</span>
+ artifact is valid.
+
+<span class="c"># one-page PDF lists CID + base + recipe + K-score
+# auditors sign the PDF, not the JSON</span></pre>
+ <div class="actions">
+ <a class="btn primary" href="/tutorials">All tutorials &rarr;</a>
+ <a class="btn" href="/docs">Anatomy of a .kolm &rarr;</a>
+ <a class="btn" href="/integrations/github-actions">Wire into CI &rarr;</a>
+ </div>
+ </div>
+</section>
+
+<section class="grad-footer">
+ <div class="t-wrap">
+ <h3>What graduates you off this tutorial</h3>
+ <p>You have a signed triage.kolm on disk, a working PagerDuty webhook handler, and a receipt for every routing decision. The next move is wiring <code> kolm inspect</code> into the CI for your handler repo so a future recipe change cannot regress without a failing build. The <a href="/tutorials/ci-verify" style="color:inherit;border-bottom:1px dashed var(--line)">CI verify tutorial</a> takes 11 more minutes.</p>
+ </div>
+</section>
+</main>
+
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+<script src="/nav.js" defer></script>
+</body>
+</html>

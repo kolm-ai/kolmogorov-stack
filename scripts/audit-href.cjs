@@ -17,6 +17,11 @@ for (const r of v.rewrites || []) {
   if (src.includes("(.*)")) continue;
   valid.add(src);
 }
+for (const r of v.redirects || []) {
+  const src = r.source;
+  if (src.includes("(.*)")) continue;
+  valid.add(src);
+}
 for (const f of walk("public", [], null)) {
   const rel = f.replace(/\\/g, "/").replace(/^public/, "");
   valid.add(rel);

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="fr" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>kolm Compilez votre propre IA. · kolm.ai</title>
+<meta name="description" content="Construisez, entra&amp;icirc;nez et conservez votre propre IA. kolm la compile sur vos donn&amp;eacute;es, l">
+<meta name="keywords" content="propre IA, IA locale, IA priv&eacute;e, IA souveraine, compilateur IA, .kolm artefact, ajustement fin, RGPD IA, IA r&eacute;gul&eacute;e">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<link rel="alternate" hreflang="en" href="https://kolm.ai/">
+<link rel="alternate" hreflang="de" href="https://kolm.ai/lang/de">
+<link rel="alternate" hreflang="fr" href="https://kolm.ai/lang/fr">
+<link rel="alternate" hreflang="ja" href="https://kolm.ai/lang/ja">
+<link rel="alternate" hreflang="x-default" href="https://kolm.ai/">
+
+<meta property="og:site_name" content="kolm">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:title" content="kolm Compilez votre propre IA. · kolm.ai">
+<meta property="og:description" content="Construisez, entra&amp;icirc;nez et conservez votre propre IA. kolm la compile sur vos donn&amp;eacute;es, l">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/lang/fr">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:title" content="kolm Compilez votre propre IA. · kolm.ai">
+<meta name="twitter:description" content="Construisez, entra&amp;icirc;nez et conservez votre propre IA. kolm la compile sur vos donn&amp;eacute;es, l">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://kolm.ai/lang/fr">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<style>
+ .i18n-shell { max-width: 1180px; margin: 0 auto; padding: 96px 32px 56px; }
+ .i18n-shell h1 { font-size: clamp(42px, 6vw, 76px); line-height: 1.04; margin: 0 0 22px; font-weight: 500; letter-spacing: -0.025em; max-width: 18ch; }
+ .i18n-shell h1 .accent { color: var(--violet, #b3a8ff); }
+ .i18n-shell .lede { font-size: clamp(16px, 1.6vw, 19px); color: var(--ink-mute, #b5bdb1); max-width: 64ch; line-height: 1.6; margin: 0 0 28px; }
+ .i18n-shell .cta-row { display: flex; gap: 14px; flex-wrap: wrap; }
+ .lang-switch { display: flex; gap: 6px 14px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint, #737c73); letter-spacing: 0.04em; margin: 0 0 24px; padding: 10px 14px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 8px; background: rgba(255,255,255,0.01); max-width: 62ch; flex-wrap: wrap; align-items: center; }
+ .lang-switch .lbl { color: var(--ink-faint, #737c73); text-transform: uppercase; margin-right: 4px; }
+ .lang-switch a { color: var(--ink-mute, #b5bdb1); text-decoration: none; border-bottom: 1px solid transparent; }
+ .lang-switch a:hover, .lang-switch a.is-active { color: var(--ink, #faf2e1); border-bottom-color: var(--accent, #7ef0d2); }
+ .i18n-section { max-width: 1180px; margin: 0 auto; padding: 56px 32px; border-top: 1px solid var(--line, rgba(255,255,255,0.08)); }
+ .i18n-section h2 { font-size: clamp(26px, 3vw, 38px); font-weight: 500; margin: 0 0 14px; line-height: 1.15; letter-spacing: -0.015em; }
+ .i18n-section .sec-lede { color: var(--ink-mute, #b5bdb1); font-size: 15.5px; max-width: 70ch; line-height: 1.65; margin: 0 0 28px; }
+ .i18n-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+ @media (max-width: 880px) { .i18n-cards { grid-template-columns: 1fr; } }
+ .i18n-card { padding: 24px 26px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 12px; background: var(--bg-2, #11151b); }
+ .i18n-card .pill { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--violet, #faf2e1); margin-bottom: 10px; }
+ .i18n-card h3 { margin: 0 0 8px; font-size: 17px; font-weight: 500; }
+ .i18n-card p { margin: 0; font-size: 13.5px; color: var(--ink-mute, #b5bdb1); line-height: 1.6; }
+ @media (max-width: 560px) {
+ .i18n-shell { padding: 56px 18px 32px; }
+ .i18n-section { padding: 36px 18px; }
+ }
+</style>
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand"><span>kolm.ai</span></a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions">
+ <button type="button" class="nav-toggle" aria-label="Basculer la navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button>
+ <button type="button" class="theme-toggle" aria-label="Basculer le mode clair ou sombre" title="Basculer le mode clair ou sombre"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin">Se connecter</a>
+ <a href="/signup" class="cta">Obtenir une cl&eacute; API &rarr;</a>
+ </div>
+ </div>
+</header>
+
+<main id="main">
+
+ <section class="i18n-shell">
+ <div class="lang-switch">
+ <span class="lbl">Langue</span>
+ <a href="/">English</a>
+ <a href="/lang/de">Deutsch</a>
+ <a href="/lang/fr" class="is-active">Fran&ccedil;ais</a>
+ <a href="/lang/ja">&#26085;&#26412;&#35486;</a>
+ </div>
+ <h1>Compilez votre <span class="accent">propre IA.</span></h1>
+ <p class="lede">kolm transforme une t&acirc;che d&eacute;crite en une phrase en artefact <code>.kolm</code>. Il s'entra&icirc;ne sur vos donn&eacute;es, s'ex&eacute;cute sur votre mat&eacute;riel, journalise chaque appel et vous lib&egrave;re du tarif &agrave; l'appel.</p>
+ <div class="cta-row">
+ <a href="/signup" class="btn primary electric">Obtenir une cl&eacute; API &rarr;</a>
+ <a href="/quickstart" class="btn ghost">D&eacute;marrage en 60 secondes</a>
+ <a href="/eu" class="btn accent">R&eacute;sidence UE</a>
+ </div>
+ </section>
+
+ <section class="i18n-section">
+ <h2>Quatre verbes. Un contrat.</h2>
+ <p class="sec-lede">L'ensemble du cycle de vie d'un mod&egrave;le tient en quatre verbes de la ligne de commande. D&eacute;crivez la t&acirc;che, compilez l'artefact, ex&eacute;cutez-le localement, v&eacute;rifiez chaque r&eacute;ponse. Il n'y a pas de serveur cach&eacute;, pas de t&eacute;l&eacute;m&eacute;trie cach&eacute;e et pas de grille tarifaire cach&eacute;e. Ce que vous voyez ici est exactement ce que vous ex&eacute;cuterez.</p>
+ <div class="i18n-cards">
+ <div class="i18n-card">
+ <div class="pill">kolm compile</div>
+ <h3>Compiler.</h3>
+ <p>&Agrave; partir d'une description en une phrase et de vos exemples, le compilateur produit un artefact .kolm d&eacute;terministe avec sa cha&icirc;ne de quittances sign&eacute;e. Reproductible d&egrave;s la premi&egrave;re ligne.</p>
+ </div>
+ <div class="i18n-card">
+ <div class="pill">kolm run</div>
+ <h3>Ex&eacute;cuter.</h3>
+ <p>L'artefact tourne sur votre GPU, votre Mac, votre p&eacute;riph&eacute;rique edge ou votre baie de serveurs. Aucun rappel r&eacute;seau, aucune voie sortante &agrave; filtrer.</p>
+ </div>
+ <div class="i18n-card">
+ <div class="pill">kolm verify</div>
+ <h3>V&eacute;rifier.</h3>
+ <p>Chaque appel laisse une quittance sign&eacute;e. Toute d&eacute;rive est d&eacute;tect&eacute;e. Toute succession est tra&ccedil;able. Les auditeurs v&eacute;rifient l'artefact hors ligne.</p>
+ </div>
+ </div>
+ </section>
+
+ <section class="i18n-section">
+ <h2>Pour les acheteurs r&eacute;gul&eacute;s en France et en Europe.</h2>
+ <p class="sec-lede">kolm est con&ccedil;u pour les charges r&eacute;gul&eacute;es: RGPD article 28, IA Act et r&eacute;sidence des donn&eacute;es UE sont des propri&eacute;t&eacute;s du compilateur, pas des options ajout&eacute;es apr&egrave;s coup.</p>
+ <div class="i18n-cards">
+ <div class="i18n-card">
+ <div class="pill">RGPD</div>
+ <h3>Sous-traitance ma&icirc;tris&eacute;e.</h3>
+ <p>Vous &ecirc;tes responsable de traitement, kolm est sous-traitant. Les sous-traitants ult&eacute;rieurs sont list&eacute;s en toute transparence, les acc&egrave;s sont audit&eacute;s et r&eacute;versibles. Schrems II est r&eacute;solu en ne quittant jamais l'UE.</p>
+ </div>
+ <div class="i18n-card">
+ <div class="pill">R&egrave;glement IA</div>
+ <h3>Conforme haut risque.</h3>
+ <p>La documentation technique pr&eacute;vue par l'article 11 fait partie de l'artefact .kolm. Registre des risques, lign&eacute;e des donn&eacute;es et axes du K-score sont sign&eacute;s &agrave; chaque compilation.</p>
+ </div>
+ <div class="i18n-card">
+ <div class="pill">R&eacute;sidence</div>
+ <h3>L'UE reste dans l'UE.</h3>
+ <p>Compilez &agrave; Paris, Francfort, Stockholm ou Milan. Donn&eacute;es, poids et quittances restent l&agrave; o&ugrave; vous les avez plac&eacute;s, pour tout le cycle de vie.</p>
+ </div>
+ </div>
+ </section>
+
+</main>
+
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Construire</h4>
+ <a href="/quickstart">D&eacute;marrage rapide</a>
+ <a href="/docs/fr">Documentation</a>
+ <a href="/spec/rs-1">Sp&eacute;cification RS-1</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>D&eacute;ployer</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/enterprise/self-hosted">Auto-h&eacute;berg&eacute;</a>
+ <a href="/eu">R&eacute;sidence UE</a>
+ </div>
+ <div>
+ <h4>Langue</h4>
+ <a href="/">English</a>
+ <a href="/lang/de">Deutsch</a>
+ <a href="/lang/fr">Fran&ccedil;ais</a>
+ <a href="/lang/ja">&#26085;&#26412;&#35486;</a>
+ </div>
+ <div>
+ <h4>Preuve</h4>
+ <a href="/verify-prod">V&eacute;rifier un artefact</a>
+ <a href="/baa">BAA / DPA</a>
+ <a href="/privacy">Confidentialit&eacute;</a>
+ <a href="/security">S&eacute;curit&eacute;</a>
+ </div>
+ <div>
+ <h4>Soci&eacute;t&eacute;</h4>
+ <a href="/pricing">Tarifs</a>
+ <a href="/enterprise">Entreprise</a>
+ <a href="/contact">Contact</a>
+ <a href="/changelog">Changelog</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai &middot; Fabriqu&eacute; avec .kolm &middot; Apache-2.0</span>
+ <span>Quittances sign&eacute;es en CI. V&eacute;rifiez tout artefact sur /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+</body>
+</html>

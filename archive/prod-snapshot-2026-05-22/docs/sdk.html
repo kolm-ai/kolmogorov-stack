@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>SDK reference · kolm.ai</title>
+<meta name="description" content="Reference for the kolm.ai JS SDK plus equivalent invocations in Python, Rust, and Go. One HTTP API, four idiomatic call sites.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="SDK reference · kolm.ai">
+<meta property="og:description" content="Reference for the kolm.ai JS SDK plus equivalent invocations in Python, Rust, and Go. One HTTP API, four idiomatic call sites.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/docs/sdk">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="SDK reference · kolm.ai">
+<meta name="twitter:description" content="Reference for the kolm.ai JS SDK plus equivalent invocations in Python, Rust, and Go. One HTTP API, four idiomatic call sites.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/docs/sdk">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"SDK reference","description":"Reference for the kolm.ai JS SDK plus equivalent invocations in Python, Rust, and Go.","url":"https://kolm.ai/docs/sdk","programmingLanguage":["JavaScript","Python","Rust","Go"],"datePublished":"2026-05-18","dateModified":"2026-05-18","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Docs","item":"https://kolm.ai/docs"},{"@type":"ListItem","position":3,"name":"SDK reference","item":"https://kolm.ai/docs/sdk"}]}</script>
+<style>
+:root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--accent-soft:rgba(16,185,129,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.skip-link{position:absolute;left:-9999px}
+.skip-link:focus{position:static;background:var(--accent);color:#fff;padding:8px 14px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+header.site-header{padding:18px 0;border-bottom:1px solid var(--line)}
+header.site-header .wrap{display:flex;justify-content:space-between;align-items:center}
+header.site-header nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px;flex-wrap:wrap}
+header.site-header nav a{color:inherit;text-decoration:none}
+header.site-header .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 36px}
+h2{font-size:24px;font-weight:500;letter-spacing:-0.018em;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:17px;font-weight:500;letter-spacing:-0.01em;margin:32px 0 8px;max-width:840px;font-family:var(--mono);display:flex;align-items:center;gap:10px;flex-wrap:wrap;scroll-margin-top:80px}
+h3 .method-purpose{font-family:-apple-system,Inter,system-ui,sans-serif;font-size:14px;color:var(--ink-mute);font-weight:400;letter-spacing:normal}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:10px 0 14px}
+pre code{background:none;border:none;padding:0;color:inherit;font:inherit}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
+li{margin:4px 0}
+.toc-grid{column-count:2;column-gap:24px;list-style:none;padding:0;margin:18px 0 32px;font-size:13.5px;font-family:var(--mono)}
+@media(max-width:820px){.toc-grid{column-count:1}}
+.toc-grid li{margin:2px 0;break-inside:avoid}
+.toc-grid a{color:var(--ink);text-decoration:none;border-bottom:1px dashed var(--line)}
+.method-block{margin:18px 0 30px;padding:18px 20px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev)}
+.method-block h3{margin-top:0}
+.tabs{display:flex;gap:2px;margin:14px 0 -1px;font-family:var(--mono);font-size:12px;flex-wrap:wrap}
+.tab{padding:9px 18px;background:var(--bg);border:1px solid var(--line);border-bottom:none;border-radius:8px 8px 0 0;color:var(--ink-mute);cursor:pointer;user-select:none;font-family:inherit;font-size:inherit}
+.tab[aria-selected="true"]{background:#06080a;color:var(--accent);border-color:var(--line)}
+.tab:focus{outline:2px solid var(--accent);outline-offset:2px}
+.tabpanel{display:none;border:1px solid var(--line);border-radius:0 10px 10px 10px;margin-top:0}
+.tabpanel[data-active="true"]{display:block}
+.tabpanel pre{margin:0;border:none;border-radius:0 10px 10px 10px}
+.no-js .tabpanel{display:block}
+.no-js .tabs{display:none}
+.no-js .tabpanel pre{border-radius:10px;border:1px solid var(--line);margin:8px 0}
+.meta{margin:14px 0 0;padding-top:12px;border-top:1px solid var(--line);font-size:13.5px;line-height:1.6}
+.meta-row{margin:6px 0;display:flex;gap:10px;flex-wrap:wrap}
+.meta-label{font-family:var(--mono);font-size:11.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-faint);min-width:80px;flex-shrink:0}
+.meta-body{color:var(--ink-mute);flex:1;min-width:280px}
+.status-pill{display:inline-block;padding:1px 7px;border-radius:4px;background:rgba(236,231,220,0.06);color:var(--ink);font-family:var(--mono);font-size:11.5px;margin-right:4px}
+.status-pill.s-2{background:rgba(16,185,129,0.16);color:var(--accent)}
+.status-pill.s-4{background:rgba(214,177,94,0.16);color:#d6b15e}
+.status-pill.s-5{background:rgba(220,138,138,0.16);color:#dc8a8a}
+.related{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:16px}
+@media(max-width:820px){.related{grid-template-columns:1fr}}
+.related a{padding:18px 20px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:6px}
+.related a:hover{border-color:var(--accent-soft)}
+.related b{font-size:14px;color:var(--ink);font-weight:500}
+.related span{font-size:13px;color:var(--ink-mute);line-height:1.5}
+footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
+footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.brand-anchor{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+</style>
+ <link rel="stylesheet" href="/brand-refresh.css">
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<span class="brand-anchor" aria-hidden="true">kolm.ai SDK reference</span>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header"><div class="wrap">
+ <a class="logo" href="/">kolm.ai</a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+</div></header>
+
+<main id="main"><div class="wrap">
+
+<p class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / sdk</p>
+
+<h1>SDK reference</h1>
+<p class="lede">kolm.ai exposes one HTTP API and one official JS SDK. Other languages (Python, Rust, Go) call the same HTTP endpoints idiomatically.</p>
+
+<h2 id="contents">Contents</h2>
+<ul class="toc-grid">
+ <li><a href="#install">Install</a></li>
+ <li><a href="#authentication">Authentication</a></li>
+ <li><a href="#constructor">new Recipe()</a></li>
+ <li><a href="#load">load()</a></li>
+ <li><a href="#list">list()</a></li>
+ <li><a href="#run">run()</a></li>
+ <li><a href="#run-all">runAll()</a></li>
+ <li><a href="#verified">verified()</a></li>
+ <li><a href="#capture-proxy">provider capture base URLs</a></li>
+ <li><a href="#wrap">wrap()</a></li>
+ <li><a href="#verify-receipt">verifyReceipt()</a></li>
+ <li><a href="#error-handling">Error handling</a></li>
+ <li><a href="#see-also">See also</a></li>
+</ul>
+
+<h2 id="install">Install</h2>
+<p>The JS SDK is a single ES module served from <code>https://kolm.ai/sdk.js</code>. Python, Rust, and Go call the HTTP API directly with their language's standard HTTP client.</p>
+
+<div class="tabs" role="tablist" aria-label="Install snippets by language">
+ <button class="tab" role="tab" id="t-install-js" aria-selected="true" aria-controls="p-install-js" tabindex="0" data-tab="install-js">JavaScript</button>
+ <button class="tab" role="tab" id="t-install-py" aria-selected="false" aria-controls="p-install-py" tabindex="-1" data-tab="install-py">Python</button>
+ <button class="tab" role="tab" id="t-install-rs" aria-selected="false" aria-controls="p-install-rs" tabindex="-1" data-tab="install-rs">Rust</button>
+ <button class="tab" role="tab" id="t-install-go" aria-selected="false" aria-controls="p-install-go" tabindex="-1" data-tab="install-go">Go</button>
+</div>
+<div class="tabpanel" id="p-install-js" role="tabpanel" aria-labelledby="t-install-js" data-tab="install-js" data-active="true">
+<pre><code>// Browser, Deno, Bun, Cloudflare Workers, Node 22+. No install step.
+import { recipe, Recipe } from 'https://kolm.ai/sdk.js';
+
+// Or pin a version (recommended for production):
+import { recipe } from 'https://kolm.ai/sdk@1.js';</code></pre>
+</div>
+<div class="tabpanel" id="p-install-py" role="tabpanel" aria-labelledby="t-install-py" data-tab="install-py" data-active="false">
+<pre><code># Python 3.10+. Stdlib only, no install required for the HTTP path.
+import json, urllib.request, urllib.error
+
+# The Python wrapper ships with the CLI install (vendored helpers).
+# See /docs/cli for the install path; no separate Python package today.
+from recipe import RecipeClient</code></pre>
+</div>
+<div class="tabpanel" id="p-install-rs" role="tabpanel" aria-labelledby="t-install-rs" data-tab="install-rs" data-active="false">
+<pre><code># Cargo.toml
+[dependencies]
+reqwest = { version = "0.12", features = ["json", "blocking"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"</code></pre>
+</div>
+<div class="tabpanel" id="p-install-go" role="tabpanel" aria-labelledby="t-install-go" data-tab="install-go" data-active="false">
+<pre><code>// Go 1.21+. Stdlib only, no module install required.
+import (
+ "bytes"
+ "encoding/json"
+ "net/http"
+)</code></pre>
+</div>
+
+<h2 id="authentication">Authentication</h2>
+<p>All authenticated routes accept a bearer token via <code>Authorization: Bearer ks_...</code>. Public registry, health, and signup routes do not require a key. Keys can be issued from <a href="/account">/account</a>.</p>
+
+<div class="tabs" role="tablist" aria-label="Authentication patterns by language">
+ <button class="tab" role="tab" id="t-auth-js" aria-selected="true" aria-controls="p-auth-js" tabindex="0" data-tab="auth-js">JavaScript</button>
+ <button class="tab" role="tab" id="t-auth-py" aria-selected="false" aria-controls="p-auth-py" tabindex="-1" data-tab="auth-py">Python</button>
+ <button class="tab" role="tab" id="t-auth-rs" aria-selected="false" aria-controls="p-auth-rs" tabindex="-1" data-tab="auth-rs">Rust</button>
+ <button class="tab" role="tab" id="t-auth-go" aria-selected="false" aria-controls="p-auth-go" tabindex="-1" data-tab="auth-go">Go</button>
+</div>
+<div class="tabpanel" id="p-auth-js" role="tabpanel" aria-labelledby="t-auth-js" data-tab="auth-js" data-active="true">
+<pre><code>import { Recipe } from 'https://kolm.ai/sdk.js';
+
+const r = new Recipe({
+ apiKey: process.env.KOLM_KEY, // 'ks_live_...'
+ base: 'https://kolm.ai',
+});</code></pre>
+</div>
+<div class="tabpanel" id="p-auth-py" role="tabpanel" aria-labelledby="t-auth-py" data-tab="auth-py" data-active="false">
+<pre><code>import os, urllib.request
+
+KEY = os.environ['KOLM_KEY']
+BASE = 'https://kolm.ai'
+
+def auth_request(path, method='GET', body=None):
+ data = json.dumps(body).encode() if body else None
+ req = urllib.request.Request(BASE + path, data=data, method=method)
+ req.add_header('Authorization', 'Bearer ' + KEY)
+ if data: req.add_header('Content-Type', 'application/json')
+ return req</code></pre>
+</div>
+<div class="tabpanel" id="p-auth-rs" role="tabpanel" aria-labelledby="t-auth-rs" data-tab="auth-rs" data-active="false">
+<pre><code>use reqwest::blocking::Client;
+
+let key = std::env::var("KOLM_KEY").expect("KOLM_KEY required");
+let client = Client::builder()
+ .default_headers({
+ let mut h = reqwest::header::HeaderMap::new();
+ h.insert("Authorization", format!("Bearer {}", key).parse().unwrap());
+ h
+ })
+ .build()?;</code></pre>
+</div>
+<div class="tabpanel" id="p-auth-go" role="tabpanel" aria-labelledby="t-auth-go" data-tab="auth-go" data-active="false">
+<pre><code>import (
+ "net/http"
+ "os"
+)
+
+key := os.Getenv("KOLM_KEY")
+base := "https://kolm.ai"
+
+req, _ := http.NewRequest("GET", base+"/v1/registry/export", nil)
+req.Header.Set("Authorization", "Bearer "+key)</code></pre>
+</div>
+
+<h2 id="core-operations">Core operations</h2>
+<p>Every public method on the JS SDK is documented below with the equivalent HTTP request in Python, Rust, and Go.</p>
+
+<div class="method-block" id="constructor">
+ <h3>new Recipe(opts) <span class="method-purpose">construct a client bound to a base URL and API key</span></h3>
+ <p>The constructor accepts <code>{base, apiKey, cache, unsafeMode, timeoutMs}</code>. None are required. Defaults: base resolves from the import URL origin, cache uses localStorage, recipes execute inside a Web Worker sandbox, and the per-recipe timeout is 1000ms.</p>
+ <div class="tabs" role="tablist" aria-label="Constructor by language">
+ <button class="tab" role="tab" id="t-ctor-js" aria-selected="true" aria-controls="p-ctor-js" tabindex="0" data-tab="ctor-js">JavaScript</button>
+ <button class="tab" role="tab" id="t-ctor-py" aria-selected="false" aria-controls="p-ctor-py" tabindex="-1" data-tab="ctor-py">Python</button>
+ <button class="tab" role="tab" id="t-ctor-rs" aria-selected="false" aria-controls="p-ctor-rs" tabindex="-1" data-tab="ctor-rs">Rust</button>
+ <button class="tab" role="tab" id="t-ctor-go" aria-selected="false" aria-controls="p-ctor-go" tabindex="-1" data-tab="ctor-go">Go</button>
+ </div>
+ <div class="tabpanel" id="p-ctor-js" role="tabpanel" aria-labelledby="t-ctor-js" data-tab="ctor-js" data-active="true">
+<pre><code>import { Recipe } from 'https://kolm.ai/sdk.js';
+
+const r = new Recipe({
+ base: 'https://kolm.ai',
+ apiKey: 'ks_live_...',
+ cache: true,
+ unsafeMode: false,
+ timeoutMs: 1000,
+});</code></pre>
+ </div>
+ <div class="tabpanel" id="p-ctor-py" role="tabpanel" aria-labelledby="t-ctor-py" data-tab="ctor-py" data-active="false">
+<pre><code># There is no Python "Recipe" object that loads + executes recipes locally
+# (recipes are JS source). The HTTP client surface is the equivalent.
+class Client:
+ def __init__(self, api_key, base='https://kolm.ai', timeout=60):
+ self.api_key = api_key
+ self.base = base.rstrip('/')
+ self.timeout = timeout
+
+c = Client(api_key=os.environ['KOLM_KEY'])</code></pre>
+ </div>
+ <div class="tabpanel" id="p-ctor-rs" role="tabpanel" aria-labelledby="t-ctor-rs" data-tab="ctor-rs" data-active="false">
+<pre><code>struct KolmClient {
+ base: String,
+ api_key: String,
+ http: reqwest::blocking::Client,
+}
+
+let c = KolmClient {
+ base: "https://kolm.ai".into(),
+ api_key: std::env::var("KOLM_KEY")?,
+ http: reqwest::blocking::Client::new(),
+};</code></pre>
+ </div>
+ <div class="tabpanel" id="p-ctor-go" role="tabpanel" aria-labelledby="t-ctor-go" data-tab="ctor-go" data-active="false">
+<pre><code>type Client struct {
+ Base string
+ APIKey string
+ HTTP *http.Client
+}
+
+c := &amp;Client{
+ Base: "https://kolm.ai",
+ APIKey: os.Getenv("KOLM_KEY"),
+ HTTP: &amp;http.Client{Timeout: 60 * time.Second},
+}</code></pre>
+ </div>
+ <div class="meta">
+ <div class="meta-row"><span class="meta-label">Returns</span><span class="meta-body">A <code>Recipe</code> instance with <code>recipes</code> (Map), <code>registry</code> (object or null), and <code>runs</code> (array) state.</span></div>
+ <div class="meta-row"><span class="meta-label">Errors</span><span class="meta-body">Constructor itself does not throw. Subsequent calls may raise the codes listed under each method.</span></div>
+ </div>
+</div>
+
+<div class="method-block" id="load">
+ <h3>load() <span class="method-purpose">hydrate the public recipe registry once</span></h3>
+ <p>Calls <code>GET /v1/registry/export</code> and caches the response in <code>localStorage</code> under <code>recipe.registry.v1</code>. Subsequent calls return the cached registry. Each recipe entry holds its source, source hash, and version id.</p>
+ <div class="tabs" role="tablist" aria-label="load by language">
+ <button class="tab" role="tab" id="t-load-js" aria-selected="true" aria-controls="p-load-js" tabindex="0" data-tab="load-js">JavaScript</button>
+ <button class="tab" role="tab" id="t-load-py" aria-selected="false" aria-controls="p-load-py" tabindex="-1" data-tab="load-py">Python</button>
+ <button class="tab" role="tab" id="t-load-rs" aria-selected="false" aria-controls="p-load-rs" tabindex="-1" data-tab="load-rs">Rust</button>
+ <button class="tab" role="tab" id="t-load-go" aria-selected="false" aria-controls="p-load-go" tabindex="-1" data-tab="load-go">Go</button>
+ </div>
+ <div class="tabpanel" id="p-load-js" role="tabpanel" aria-labelledby="t-load-js" data-tab="load-js" data-active="true">
+<pre><code>const env = await r.load();
+// env.registry_hash, env.recipes[]</code></pre>
+ </div>
+ <div class="tabpanel" id="p-load-py" role="tabpanel" aria-labelledby="t-load-py" data-tab="load-py" data-active="false">
+<pre><code>req = urllib.request.Request(BASE + '/v1/registry/export')
+with urllib.request.urlopen(req, timeout=30) as resp:
+ env = json.loads(resp.read())
+print(env['registry_hash'], len(env['recipes']))</code></pre>
+ </div>
+ <div class="tabpanel" id="p-load-rs" role="tabpanel" aria-labelledby="t-load-rs" data-tab="load-rs" data-active="false">
+<pre><code>let env: serde_json::Value = client
+ .get(format!("{}/v1/registry/export", base))
+ .send()?
+ .json()?;
+println!("{}", env["registry_hash"]);</code></pre>
+ </div>
+ <div class="tabpanel" id="p-load-go" role="tabpanel" aria-labelledby="t-load-go" data-tab="load-go" data-active="false">
+<pre><code>resp, err := http.Get(base + "/v1/registry/export")
+if err != nil { return err }
+defer resp.Body.Close()
+var env map[string]interface{}
+json.NewDecoder(resp.Body).Decode(&amp;env)</code></pre>
+ </div>
+ <div class="meta">
+ <div class="meta-row"><span class="meta-label">Returns</span><span class="meta-body">Envelope <code>{registry_hash, recipes: [{name, version_id, source, source_hash, ...}]}</code>.</span></div>
+ <div class="meta-row"><span class="meta-label">Errors</span><span class="meta-body"><span class="status-pill s-2">200</span> ok <span class="status-pill s-5">503</span> registry unavailable (falls back to cache when present)</span></div>
+ </div>
+</div>
+
+<div class="method-block" id="list">
+ <h3>list() <span class="method-purpose">return a snapshot of the locally hydrated recipes</span></h3>
+ <p>Synchronous. Returns an array of <code>meta</code> objects, one per recipe loaded by <code>load()</code>. Each entry contains <code>name</code>, <code>version_id</code>, <code>source_hash</code>, and tags. The source field is omitted from the copy.</p>
+ <div class="tabs" role="tablist" aria-label="list by language">
+ <button class="tab" role="tab" id="t-list-js" aria-selected="true" aria-controls="p-list-js" tabindex="0" data-tab="list-js">JavaScript</button>
+ <button class="tab" role="tab" id="t-list-py" aria-selected="false" aria-controls="p-list-py" tabindex="-1" data-tab="list-py">Python</button>
+ <button class="tab" role="tab" id="t-list-rs" aria-selected="false" aria-controls="p-list-rs" tabindex="-1" data-tab="list-rs">Rust</button>
+ <button class="tab" role="tab" id="t-list-go" aria-selected="false" aria-controls="p-list-go" tabindex="-1" data-tab="list-go">Go</button>
+ </div>
+ <div class="tabpanel" id="p-list-js" role="tabpanel" aria-labelledby="t-list-js" data-tab="list-js" data-active="true">
+<pre><code>await r.load();
+const all = r.list();
+for (const m of all) console.log(m.name, m.version_id);</code></pre>
+ </div>
+ <div class="tabpanel" id="p-list-py" role="tabpanel" aria-labelledby="t-list-py" data-tab="list-py" data-active="false">
+<pre><code># Python equivalent: hit GET /v1/recipes for the indexed registry.
+req = urllib.request.Request(BASE + '/v1/recipes')
+req.add_header('Authorization', 'Bearer ' + KEY)
+with urllib.request.urlopen(req, timeout=30) as resp:
+ data = json.loads(resp.read())
+for m in data['recipes']:
+ print(m['name'], m['version_id'])</code></pre>
+ </div>
+ <div class="tabpanel" id="p-list-rs" role="tabpanel" aria-labelledby="t-list-rs" data-tab="list-rs" data-active="false">
+<pre><code>let data: serde_json::Value = client
+ .get(format!("{}/v1/recipes", base))
+ .send()?
+ .json()?;
+for m in data["recipes"].as_array().unwrap() {
+ println!("{} {}", m["name"], m["version_id"]);
+}</code></pre>
+ </div>
+ <div class="tabpanel" id="p-list-go" role="tabpanel" aria-labelledby="t-list-go" data-tab="list-go" data-active="false">
+<pre><code>req, _ := http.NewRequest("GET", base+"/v1/recipes", nil)
+req.Header.Set("Authorization", "Bearer "+key)
+resp, _ := c.HTTP.Do(req)
+defer resp.Body.Close()
+var data struct {
+ Recipes []struct{ Name, VersionID string `json:"name,version_id"` }
+}
+json.NewDecoder(resp.Body).Decode(&amp;data)</code></pre>
+ </div>
+ <div class="meta">
+ <div class="meta-row"><span class="meta-label">Returns</span><span class="meta-body">Array of recipe metadata objects.</span></div>
+ <div class="meta-row"><span class="meta-label">Errors</span><span class="meta-body">JS path is local and cannot fail once <code>load()</code> succeeded. HTTP path: <span class="status-pill s-2">200</span> ok <span class="status-pill s-4">401</span> missing key.</span></div>
+ </div>
+</div>
+
+<div class="method-block" id="run">
+ <h3>run(name, input) <span class="method-purpose">execute one recipe on this device, return signed receipt</span></h3>
+ <p>Runs the named recipe inside a Web Worker sandbox by default (no <code>window</code>, <code>fetch</code>, or <code>localStorage</code> access). Falls back to in-page compile only on runtimes without Worker support. Records the run in <code>recipe.runs</code>. The HTTP equivalent is <code>POST /v1/run</code>.</p>
+ <div class="tabs" role="tablist" aria-label="run by language">
+ <button class="tab" role="tab" id="t-run-js" aria-selected="true" aria-controls="p-run-js" tabindex="0" data-tab="run-js">JavaScript</button>
+ <button class="tab" role="tab" id="t-run-py" aria-selected="false" aria-controls="p-run-py" tabindex="-1" data-tab="run-py">Python</button>
+ <button class="tab" role="tab" id="t-run-rs" aria-selected="false" aria-controls="p-run-rs" tabindex="-1" data-tab="run-rs">Rust</button>
+ <button class="tab" role="tab" id="t-run-go" aria-selected="false" aria-controls="p-run-go" tabindex="-1" data-tab="run-go">Go</button>
+ </div>
+ <div class="tabpanel" id="p-run-js" role="tabpanel" aria-labelledby="t-run-js" data-tab="run-js" data-active="true">
+<pre><code>await r.load();
+const log = await r.run('summarize-pr', { diff: '...' });
+console.log(log.output);
+console.log(log.receipt.input_hash, log.receipt.output_hash);
+console.log(log.latency_us, log.receipt.runtime);</code></pre>
+ </div>
+ <div class="tabpanel" id="p-run-py" role="tabpanel" aria-labelledby="t-run-py" data-tab="run-py" data-active="false">
+<pre><code>body = json.dumps({
+ 'concept_id': 'summarize-pr',
+ 'input': {'diff': '...'},
+ 'use_cache': True,
+}).encode()
+req = urllib.request.Request(BASE + '/v1/run', data=body, method='POST')
+req.add_header('Authorization', 'Bearer ' + KEY)
+req.add_header('Content-Type', 'application/json')
+with urllib.request.urlopen(req, timeout=60) as resp:
+ log = json.loads(resp.read())
+print(log['output'], log['receipt']['input_hash'])</code></pre>
+ </div>
+ <div class="tabpanel" id="p-run-rs" role="tabpanel" aria-labelledby="t-run-rs" data-tab="run-rs" data-active="false">
+<pre><code>let body = serde_json::json!({
+ "concept_id": "summarize-pr",
+ "input": {"diff": "..."},
+ "use_cache": true,
+});
+let log: serde_json::Value = client
+ .post(format!("{}/v1/run", base))
+ .json(&amp;body)
+ .send()?
+ .json()?;
+println!("{}", log["output"]);</code></pre>
+ </div>
+ <div class="tabpanel" id="p-run-go" role="tabpanel" aria-labelledby="t-run-go" data-tab="run-go" data-active="false">
+<pre><code>body, _ := json.Marshal(map[string]interface{}{
+ "concept_id": "summarize-pr",
+ "input": map[string]string{"diff": "..."},
+ "use_cache": true,
+})
+req, _ := http.NewRequest("POST", base+"/v1/run", bytes.NewReader(body))
+req.Header.Set("Authorization", "Bearer "+key)
+req.Header.Set("Content-Type", "application/json")
+resp, _ := c.HTTP.Do(req)
+defer resp.Body.Close()
+var log map[string]interface{}
+json.NewDecoder(resp.Body).Decode(&amp;log)</code></pre>
+ </div>
+ <div class="meta">
+ <div class="meta-row"><span class="meta-label">Returns</span><span class="meta-body"><code>{name, input, output, error, latency_us, receipt: {spec, source_hash, input_hash, output_hash, version_id, runtime, issued_at, cache_hit, latency_us, worker_latency_us}}</code>.</span></div>
+ <div class="meta-row"><span class="meta-label">Errors</span><span class="meta-body"><span class="status-pill s-2">200</span> ok <span class="status-pill s-4">404</span> recipe not found <span class="status-pill s-4">408</span> recipe timeout <span class="status-pill s-4">429</span> rate limited <span class="status-pill s-5">503</span> upstream model down</span></div>
+ </div>
+</div>
+
+<div class="method-block" id="run-all">
+ <h3>runAll(input) <span class="method-purpose">execute every registry recipe against one input</span></h3>
+ <p>Iterates the local recipe map sequentially and returns one run log per recipe. Useful for fan-out comparisons across the public registry, or for the device-showcase view. There is no batch HTTP endpoint; callers in other languages should fan out their own requests.</p>
+ <div class="tabs" role="tablist" aria-label="runAll by language">
+ <button class="tab" role="tab" id="t-runall-js" aria-selected="true" aria-controls="p-runall-js" tabindex="0" data-tab="runall-js">JavaScript</button>
+ <button class="tab" role="tab" id="t-runall-py" aria-selected="false" aria-controls="p-runall-py" tabindex="-1" data-tab="runall-py">Python</button>
+ <button class="tab" role="tab" id="t-runall-rs" aria-selected="false" aria-controls="p-runall-rs" tabindex="-1" data-tab="runall-rs">Rust</button>
+ <button class="tab" role="tab" id="t-runall-go" aria-selected="false" aria-controls="p-runall-go" tabindex="-1" data-tab="runall-go">Go</button>
+ </div>
+ <div class="tabpanel" id="p-runall-js" role="tabpanel" aria-labelledby="t-runall-js" data-tab="runall-js" data-active="true">
+<pre><code>await r.load();
+const results = await r.runAll({ text: 'classify this' });
+for (const log of results) {
+ console.log(log.name, log.output, log.latency_us);
+}</code></pre>
+ </div>
+ <div class="tabpanel" id="p-runall-py" role="tabpanel" aria-labelledby="t-runall-py" data-tab="runall-py" data-active="false">
+<pre><code># Pull the registry then fan out POST /v1/run per recipe.
+req = urllib.request.Request(BASE + '/v1/registry/export')
+with urllib.request.urlopen(req) as resp:
+ env = json.loads(resp.read())
+results = []
+for meta in env['recipes']:
+ body = json.dumps({'version_id': meta['version_id'], 'input': {'text': 'classify this'}}).encode()
+ r = urllib.request.Request(BASE + '/v1/run', data=body, method='POST')
+ r.add_header('Authorization', 'Bearer ' + KEY)
+ r.add_header('Content-Type', 'application/json')
+ with urllib.request.urlopen(r) as resp:
+ results.append(json.loads(resp.read()))</code></pre>
+ </div>
+ <div class="tabpanel" id="p-runall-rs" role="tabpanel" aria-labelledby="t-runall-rs" data-tab="runall-rs" data-active="false">
+<pre><code>let env: serde_json::Value = client
+ .get(format!("{}/v1/registry/export", base))
+ .send()?
+ .json()?;
+let mut results = Vec::new();
+for meta in env["recipes"].as_array().unwrap() {
+ let body = serde_json::json!({
+ "version_id": meta["version_id"],
+ "input": {"text": "classify this"},
+ });
+ let log: serde_json::Value = client
+ .post(format!("{}/v1/run", base))
+ .json(&amp;body)
+ .send()?
+ .json()?;
+ results.push(log);
+}</code></pre>
+ </div>
+ <div class="tabpanel" id="p-runall-go" role="tabpanel" aria-labelledby="t-runall-go" data-tab="runall-go" data-active="false">
+<pre><code>resp, _ := http.Get(base + "/v1/registry/export")
+var env struct{ Recipes []struct{ VersionID string `json:"version_id"` } }
+json.NewDecoder(resp.Body).Decode(&amp;env)
+resp.Body.Close()
+
+var results []map[string]interface{}
+for _, m := range env.Recipes {
+ body, _ := json.Marshal(map[string]interface{}{
+ "version_id": m.VersionID,
+ "input": map[string]string{"text": "classify this"},
+ })
+ req, _ := http.NewRequest("POST", base+"/v1/run", bytes.NewReader(body))
+ req.Header.Set("Authorization", "Bearer "+key)
+ req.Header.Set("Content-Type", "application/json")
+ r, _ := c.HTTP.Do(req)
+ var log map[string]interface{}
+ json.NewDecoder(r.Body).Decode(&amp;log)
+ r.Body.Close()
+ results = append(results, log)
+}</code></pre>
+ </div>
+ <div class="meta">
+ <div class="meta-row"><span class="meta-label">Returns</span><span class="meta-body">Array of run logs (same shape as <code>run()</code>), one per recipe in the registry.</span></div>
+ <div class="meta-row"><span class="meta-label">Errors</span><span class="meta-body">Any one recipe error is captured in the per-log <code>error</code> field; the loop does not abort. HTTP fan-out callers should check each response.</span></div>
+ </div>
+</div>
+
+<div class="method-block" id="verified">
+ <h3>verified(opts) <span class="method-purpose">Lane 2 verified inference: sample k frontier candidates, return the verified winner</span></h3>
+ <p>Posts to <code>/v1/verified-inference</code>. The server samples k candidates from a frontier model, runs them through the supplied test cases (or judge recipe), and returns the chosen output plus a receipt and per-candidate stats.</p>
+ <div class="tabs" role="tablist" aria-label="verified by language">
+ <button class="tab" role="tab" id="t-ver-js" aria-selected="true" aria-controls="p-ver-js" tabindex="0" data-tab="ver-js">JavaScript</button>
+ <button class="tab" role="tab" id="t-ver-py" aria-selected="false" aria-controls="p-ver-py" tabindex="-1" data-tab="ver-py">Python</button>
+ <button class="tab" role="tab" id="t-ver-rs" aria-selected="false" aria-controls="p-ver-rs" tabindex="-1" data-tab="ver-rs">Rust</button>
+ <button class="tab" role="tab" id="t-ver-go" aria-selected="false" aria-controls="p-ver-go" tabindex="-1" data-tab="ver-go">Go</button>
+ </div>
+ <div class="tabpanel" id="p-ver-js" role="tabpanel" aria-labelledby="t-ver-js" data-tab="ver-js" data-active="true">
+<pre><code>const out = await r.verified({
+ model: 'qwen-3.5-27b',
+ prompt: 'Extract the SKU from this invoice line',
+ k: 5,
+ test_cases: [
+ { input: 'Line 1: 3x SKU-0019', expected: 'SKU-0019' },
+ { input: 'qty 2 sku_044', expected: 'sku_044' },
+ ],
+});
+console.log(out.chosen, out.receipt.k, out.receipt.passed);</code></pre>
+ </div>
+ <div class="tabpanel" id="p-ver-py" role="tabpanel" aria-labelledby="t-ver-py" data-tab="ver-py" data-active="false">
+<pre><code>body = json.dumps({
+ 'model': 'qwen-3.5-27b',
+ 'prompt': 'Extract the SKU from this invoice line',
+ 'k': 5,
+ 'test_cases': [
+ {'input': 'Line 1: 3x SKU-0019', 'expected': 'SKU-0019'},
+ {'input': 'qty 2 sku_044', 'expected': 'sku_044'},
+ ],
+}).encode()
+req = urllib.request.Request(BASE + '/v1/verified-inference', data=body, method='POST')
+req.add_header('Content-Type', 'application/json')
+with urllib.request.urlopen(req, timeout=120) as resp:
+ out = json.loads(resp.read())
+print(out['chosen'])</code></pre>
+ </div>
+ <div class="tabpanel" id="p-ver-rs" role="tabpanel" aria-labelledby="t-ver-rs" data-tab="ver-rs" data-active="false">
+<pre><code>let body = serde_json::json!({
+ "model": "qwen-3.5-27b",
+ "prompt": "Extract the SKU from this invoice line",
+ "k": 5,
+ "test_cases": [
+ {"input": "Line 1: 3x SKU-0019", "expected": "SKU-0019"},
+ {"input": "qty 2 sku_044", "expected": "sku_044"},
+ ],
+});
+let out: serde_json::Value = client
+ .post(format!("{}/v1/verified-inference", base))
+ .json(&amp;body)
+ .send()?
+ .json()?;</code></pre>
+ </div>
+ <div class="tabpanel" id="p-ver-go" role="tabpanel" aria-labelledby="t-ver-go" data-tab="ver-go" data-active="false">
+<pre><code>body, _ := json.Marshal(map[string]interface{}{
+ "model": "qwen-3.5-27b",
+ "prompt": "Extract the SKU from this invoice line",
+ "k": 5,
+ "test_cases": []map[string]string{
+ {"input": "Line 1: 3x SKU-0019", "expected": "SKU-0019"},
+ {"input": "qty 2 sku_044", "expected": "sku_044"},
+ },
+})
+req, _ := http.NewRequest("POST", base+"/v1/verified-inference", bytes.NewReader(body))
+req.Header.Set("Content-Type", "application/json")
+resp, _ := c.HTTP.Do(req)
+defer resp.Body.Close()
+var out map[string]interface{}
+json.NewDecoder(resp.Body).Decode(&amp;out)</code></pre>
+ </div>
+ <div class="meta">
+ <div class="meta-row"><span class="meta-label">Returns</span><span class="meta-body"><code>{chosen: string, candidates: [{text, score, passed}], receipt: {k, passed, source_hash, issued_at}}</code>.</span></div>
+ <div class="meta-row"><span class="meta-label">Errors</span><span class="meta-body"><span class="status-pill s-2">200</span> ok <span class="status-pill s-4">400</span> invalid test_cases <span class="status-pill s-4">429</span> rate limited <span class="status-pill s-5">503</span> upstream model down</span></div>
+ </div>
+</div>
+
+<div class="method-block" id="capture-proxy">
+ <h3>Provider capture base URLs <span class="method-purpose">Lane 3: proxy upstream SDK calls and record captures</span></h3>
+ <p>Point provider SDKs at the live capture routes. Anthropic uses <code>/v1/capture/anthropic</code>; OpenAI-compatible clients use the hosted OpenAI-compatible base under <code>/v1</code>. The capture routes require a Kolm key plus the upstream provider key in <code>x-upstream-api-key</code>. Do not use the old generic passthrough placeholder; it is not part of the hosted API.</p>
+ <div class="tabs" role="tablist" aria-label="passthrough by language">
+ <button class="tab" role="tab" id="t-pt-js" aria-selected="true" aria-controls="p-pt-js" tabindex="0" data-tab="pt-js">JavaScript</button>
+ <button class="tab" role="tab" id="t-pt-py" aria-selected="false" aria-controls="p-pt-py" tabindex="-1" data-tab="pt-py">Python</button>
+ <button class="tab" role="tab" id="t-pt-rs" aria-selected="false" aria-controls="p-pt-rs" tabindex="-1" data-tab="pt-rs">Rust</button>
+ <button class="tab" role="tab" id="t-pt-go" aria-selected="false" aria-controls="p-pt-go" tabindex="-1" data-tab="pt-go">Go</button>
+ </div>
+ <div class="tabpanel" id="p-pt-js" role="tabpanel" aria-labelledby="t-pt-js" data-tab="pt-js" data-active="true">
+<pre><code>import Anthropic from '@anthropic-ai/sdk';
+
+const client = new Anthropic({
+ baseURL: 'https://kolm.ai/v1/capture/anthropic',
+ apiKey: process.env.KOLM_API_KEY,
+ defaultHeaders: { 'x-upstream-api-key': process.env.ANTHROPIC_API_KEY },
+});
+
+const reply = await client.messages.create({
+ model: 'claude-opus-4-7',
+ messages: [{ role: 'user', content: 'Hello' }],
+ max_tokens: 200,
+});
+console.log(reply.content[0].text);</code></pre>
+ </div>
+ <div class="tabpanel" id="p-pt-py" role="tabpanel" aria-labelledby="t-pt-py" data-tab="pt-py" data-active="false">
+<pre><code>body = json.dumps({
+ 'model': 'claude-opus-4-7',
+ 'messages': [{'role': 'user', 'content': 'Hello'}],
+ 'max_tokens': 200,
+}).encode()
+req = urllib.request.Request(BASE + '/v1/capture/anthropic', data=body, method='POST')
+req.add_header('Authorization', 'Bearer ' + KEY)
+req.add_header('x-upstream-api-key', ANTHROPIC_API_KEY)
+req.add_header('Content-Type', 'application/json')
+with urllib.request.urlopen(req, timeout=60) as resp:
+ reply = json.loads(resp.read())
+print(reply['content'][0]['text'])</code></pre>
+ </div>
+ <div class="tabpanel" id="p-pt-rs" role="tabpanel" aria-labelledby="t-pt-rs" data-tab="pt-rs" data-active="false">
+<pre><code>let body = serde_json::json!({
+ "model": "claude-opus-4-7",
+ "messages": [{"role": "user", "content": "Hello"}],
+ "max_tokens": 200,
+});
+let reply: serde_json::Value = client
+ .post(format!("{}/v1/capture/anthropic", base))
+ .header("authorization", format!("Bearer {}", key))
+ .header("x-upstream-api-key", anthropic_api_key)
+ .json(&amp;body)
+ .send()?
+ .json()?;</code></pre>
+ </div>
+ <div class="tabpanel" id="p-pt-go" role="tabpanel" aria-labelledby="t-pt-go" data-tab="pt-go" data-active="false">
+<pre><code>body, _ := json.Marshal(map[string]interface{}{
+ "model": "claude-opus-4-7",
+ "messages": []map[string]string{{"role": "user", "content": "Hello"}},
+ "max_tokens": 200,
+})
+req, _ := http.NewRequest("POST", base+"/v1/capture/anthropic", bytes.NewReader(body))
+req.Header.Set("Authorization", "Bearer "+key)
+req.Header.Set("x-upstream-api-key", anthropicAPIKey)
+req.Header.Set("Content-Type", "application/json")
+resp, _ := c.HTTP.Do(req)
+defer resp.Body.Close()
+var reply map[string]interface{}
+json.NewDecoder(resp.Body).Decode(&amp;reply)</code></pre>
+ </div>
+ <div class="meta">
+ <div class="meta-row"><span class="meta-label">Returns</span><span class="meta-body">The provider's native response shape, unchanged.</span></div>
+ <div class="meta-row"><span class="meta-label">Errors</span><span class="meta-body"><span class="status-pill s-2">200</span> ok <span class="status-pill s-4">401</span> provider key missing <span class="status-pill s-4">404</span> unknown provider <span class="status-pill s-4">429</span> provider rate limited <span class="status-pill s-5">502</span> provider upstream error <span class="status-pill s-5">503</span> provider down</span></div>
+ </div>
+</div>
+
+<div class="method-block" id="wrap">
+ <h3>wrap(client, opts) <span class="method-purpose">proxy your existing AI SDK client and route messages.create through verified inference</span></h3>
+ <p>Returns a Proxy over your existing client (Anthropic, OpenAI, etc.). When <code>opts.verified</code> is set, <code>client.messages.create(...)</code> is intercepted and routed to <code>/v1/wrap/verified</code>. The server samples k candidates, runs them through the verifier, and returns the winner shaped exactly like a native <code>messages.create</code> response with an added <code>_kolm</code> block. Pass <code>opts.corpus_namespace</code> to ground every k-sample in your qmd corpus.</p>
+ <div class="tabs" role="tablist" aria-label="wrap by language">
+ <button class="tab" role="tab" id="t-wrap-js" aria-selected="true" aria-controls="p-wrap-js" tabindex="0" data-tab="wrap-js">JavaScript</button>
+ <button class="tab" role="tab" id="t-wrap-py" aria-selected="false" aria-controls="p-wrap-py" tabindex="-1" data-tab="wrap-py">Python</button>
+ <button class="tab" role="tab" id="t-wrap-rs" aria-selected="false" aria-controls="p-wrap-rs" tabindex="-1" data-tab="wrap-rs">Rust</button>
+ <button class="tab" role="tab" id="t-wrap-go" aria-selected="false" aria-controls="p-wrap-go" tabindex="-1" data-tab="wrap-go">Go</button>
+ </div>
+ <div class="tabpanel" id="p-wrap-js" role="tabpanel" aria-labelledby="t-wrap-js" data-tab="wrap-js" data-active="true">
+<pre><code>import Anthropic from '@anthropic-ai/sdk';
+import { recipe } from 'https://kolm.ai/sdk.js';
+
+const upstream = new Anthropic();
+const wrapped = recipe.wrap(upstream, {
+ verified: { k: 5, test_cases: [{ input: 'ping', expected_contains: 'pong' }] },
+ corpus_namespace: 'support-faq',
+});
+const reply = await wrapped.messages.create({
+ model: 'claude-opus-4-7',
+ messages: [{ role: 'user', content: 'How do I rotate my key?' }],
+ max_tokens: 400,
+});
+console.log(reply.content[0].text);
+console.log(reply._kolm.receipt);</code></pre>
+ </div>
+ <div class="tabpanel" id="p-wrap-py" role="tabpanel" aria-labelledby="t-wrap-py" data-tab="wrap-py" data-active="false">
+<pre><code># Python has no Proxy primitive, so call /v1/wrap/verified directly.
+body = json.dumps({
+ 'messages': [{'role': 'user', 'content': 'How do I rotate my key?'}],
+ 'model': 'claude-opus-4-7',
+ 'max_tokens': 400,
+ 'verified': {'k': 5, 'test_cases': [{'input': 'ping', 'expected_contains': 'pong'}]},
+ 'corpus_namespace': 'support-faq',
+}).encode()
+req = urllib.request.Request(BASE + '/v1/wrap/verified', data=body, method='POST')
+req.add_header('Authorization', 'Bearer ' + KEY)
+req.add_header('Content-Type', 'application/json')
+with urllib.request.urlopen(req, timeout=120) as resp:
+ reply = json.loads(resp.read())</code></pre>
+ </div>
+ <div class="tabpanel" id="p-wrap-rs" role="tabpanel" aria-labelledby="t-wrap-rs" data-tab="wrap-rs" data-active="false">
+<pre><code>let body = serde_json::json!({
+ "messages": [{"role": "user", "content": "How do I rotate my key?"}],
+ "model": "claude-opus-4-7",
+ "max_tokens": 400,
+ "verified": {
+ "k": 5,
+ "test_cases": [{"input": "ping", "expected_contains": "pong"}],
+ },
+ "corpus_namespace": "support-faq",
+});
+let reply: serde_json::Value = client
+ .post(format!("{}/v1/wrap/verified", base))
+ .json(&amp;body)
+ .send()?
+ .json()?;</code></pre>
+ </div>
+ <div class="tabpanel" id="p-wrap-go" role="tabpanel" aria-labelledby="t-wrap-go" data-tab="wrap-go" data-active="false">
+<pre><code>body, _ := json.Marshal(map[string]interface{}{
+ "messages": []map[string]string{{"role": "user", "content": "How do I rotate my key?"}},
+ "model": "claude-opus-4-7",
+ "max_tokens": 400,
+ "verified": map[string]interface{}{"k": 5, "test_cases": []map[string]string{{"input": "ping", "expected_contains": "pong"}}},
+ "corpus_namespace": "support-faq",
+})
+req, _ := http.NewRequest("POST", base+"/v1/wrap/verified", bytes.NewReader(body))
+req.Header.Set("Authorization", "Bearer "+key)
+req.Header.Set("Content-Type", "application/json")
+resp, _ := c.HTTP.Do(req)
+defer resp.Body.Close()
+var reply map[string]interface{}
+json.NewDecoder(resp.Body).Decode(&amp;reply)</code></pre>
+ </div>
+ <div class="meta">
+ <div class="meta-row"><span class="meta-label">Returns</span><span class="meta-body">A response shaped exactly like the upstream provider's <code>messages.create</code> reply, with an added <code>_kolm: {receipt, candidates}</code> block.</span></div>
+ <div class="meta-row"><span class="meta-label">Errors</span><span class="meta-body"><span class="status-pill s-2">200</span> ok <span class="status-pill s-4">400</span> invalid verified payload <span class="status-pill s-4">401</span> missing key <span class="status-pill s-4">429</span> rate limited <span class="status-pill s-5">502</span> provider error <span class="status-pill s-5">503</span> verifier down</span></div>
+ </div>
+</div>
+
+<div class="method-block" id="verify-receipt">
+ <h3>verifyReceipt(receipt, input, output) <span class="method-purpose">round-trip check a receipt against its declared input and output</span></h3>
+ <p>Posts to <code>/v1/receipts/verify</code>. The server recomputes the input and output hashes, checks the source-hash chain, and returns a verdict. Use this when a downstream party hands you a receipt and you want to confirm it matches the payloads in front of you.</p>
+ <div class="tabs" role="tablist" aria-label="verifyReceipt by language">
+ <button class="tab" role="tab" id="t-vr-js" aria-selected="true" aria-controls="p-vr-js" tabindex="0" data-tab="vr-js">JavaScript</button>
+ <button class="tab" role="tab" id="t-vr-py" aria-selected="false" aria-controls="p-vr-py" tabindex="-1" data-tab="vr-py">Python</button>
+ <button class="tab" role="tab" id="t-vr-rs" aria-selected="false" aria-controls="p-vr-rs" tabindex="-1" data-tab="vr-rs">Rust</button>
+ <button class="tab" role="tab" id="t-vr-go" aria-selected="false" aria-controls="p-vr-go" tabindex="-1" data-tab="vr-go">Go</button>
+ </div>
+ <div class="tabpanel" id="p-vr-js" role="tabpanel" aria-labelledby="t-vr-js" data-tab="vr-js" data-active="true">
+<pre><code>const log = await r.run('summarize-pr', { diff: '...' });
+const verdict = await r.verifyReceipt(log.receipt, log.input, log.output);
+console.log(verdict.valid, verdict.input_hash_match, verdict.output_hash_match);</code></pre>
+ </div>
+ <div class="tabpanel" id="p-vr-py" role="tabpanel" aria-labelledby="t-vr-py" data-tab="vr-py" data-active="false">
+<pre><code>body = json.dumps({
+ 'receipt': receipt,
+ 'input': input_payload,
+ 'output': output_payload,
+}).encode()
+req = urllib.request.Request(BASE + '/v1/receipts/verify', data=body, method='POST')
+req.add_header('Content-Type', 'application/json')
+with urllib.request.urlopen(req, timeout=30) as resp:
+ verdict = json.loads(resp.read())
+print(verdict['valid'])</code></pre>
+ </div>
+ <div class="tabpanel" id="p-vr-rs" role="tabpanel" aria-labelledby="t-vr-rs" data-tab="vr-rs" data-active="false">
+<pre><code>let body = serde_json::json!({
+ "receipt": receipt,
+ "input": input_payload,
+ "output": output_payload,
+});
+let verdict: serde_json::Value = client
+ .post(format!("{}/v1/receipts/verify", base))
+ .json(&amp;body)
+ .send()?
+ .json()?;</code></pre>
+ </div>
+ <div class="tabpanel" id="p-vr-go" role="tabpanel" aria-labelledby="t-vr-go" data-tab="vr-go" data-active="false">
+<pre><code>body, _ := json.Marshal(map[string]interface{}{
+ "receipt": receipt,
+ "input": inputPayload,
+ "output": outputPayload,
+})
+req, _ := http.NewRequest("POST", base+"/v1/receipts/verify", bytes.NewReader(body))
+req.Header.Set("Content-Type", "application/json")
+resp, _ := c.HTTP.Do(req)
+defer resp.Body.Close()
+var verdict map[string]interface{}
+json.NewDecoder(resp.Body).Decode(&amp;verdict)</code></pre>
+ </div>
+ <div class="meta">
+ <div class="meta-row"><span class="meta-label">Returns</span><span class="meta-body"><code>{valid: bool, input_hash_match: bool, output_hash_match: bool, source_hash_match: bool, reason?: string}</code>.</span></div>
+ <div class="meta-row"><span class="meta-label">Errors</span><span class="meta-body"><span class="status-pill s-2">200</span> ok (the verdict may still be <code>valid: false</code>) <span class="status-pill s-4">400</span> malformed receipt</span></div>
+ </div>
+</div>
+
+<h2 id="error-handling">Error handling</h2>
+<p>kolm.ai returns standard HTTP status codes. The common failure cases are 401 (missing or rotated key), 429 (rate limited, retry with backoff), 503 (upstream model or verifier briefly unavailable), and plain network errors. The pattern below catches each cleanly in every language.</p>
+
+<div class="tabs" role="tablist" aria-label="Error handling by language">
+ <button class="tab" role="tab" id="t-err-js" aria-selected="true" aria-controls="p-err-js" tabindex="0" data-tab="err-js">JavaScript</button>
+ <button class="tab" role="tab" id="t-err-py" aria-selected="false" aria-controls="p-err-py" tabindex="-1" data-tab="err-py">Python</button>
+ <button class="tab" role="tab" id="t-err-rs" aria-selected="false" aria-controls="p-err-rs" tabindex="-1" data-tab="err-rs">Rust</button>
+ <button class="tab" role="tab" id="t-err-go" aria-selected="false" aria-controls="p-err-go" tabindex="-1" data-tab="err-go">Go</button>
+</div>
+<div class="tabpanel" id="p-err-js" role="tabpanel" aria-labelledby="t-err-js" data-tab="err-js" data-active="true">
+<pre><code>async function withRetry(fn, max = 3) {
+ let attempt = 0, lastErr;
+ while (attempt++ &lt; max) {
+ try {
+ return await fn();
+ } catch (e) {
+ lastErr = e;
+ const status = e.status || 0;
+ if (status === 429 || status === 503) {
+ const wait = Math.min(1000 * 2 ** attempt, 8000);
+ await new Promise(r =&gt; setTimeout(r, wait));
+ continue;
+ }
+ if (status === 401) throw new Error('rotate your KOLM_KEY');
+ throw e; // network or 4xx: do not retry
+ }
+ }
+ throw lastErr;
+}
+
+const out = await withRetry(() =&gt; recipe.verified({ /* ... */ }));</code></pre>
+</div>
+<div class="tabpanel" id="p-err-py" role="tabpanel" aria-labelledby="t-err-py" data-tab="err-py" data-active="false">
+<pre><code>import time, json, urllib.request, urllib.error
+
+def with_retry(fn, max_attempts=3):
+ for attempt in range(1, max_attempts + 1):
+ try:
+ return fn()
+ except urllib.error.HTTPError as e:
+ if e.code == 401:
+ raise RuntimeError('rotate your KOLM_KEY') from None
+ if e.code in (429, 503):
+ wait = min(2 ** attempt, 8)
+ time.sleep(wait)
+ continue
+ raise
+ except urllib.error.URLError:
+ if attempt == max_attempts:
+ raise
+ time.sleep(2 ** attempt)
+ raise RuntimeError('exhausted retries')</code></pre>
+</div>
+<div class="tabpanel" id="p-err-rs" role="tabpanel" aria-labelledby="t-err-rs" data-tab="err-rs" data-active="false">
+<pre><code>use std::{thread, time::Duration};
+
+fn with_retry&lt;F, T&gt;(mut fn_: F, max: u32) -&gt; Result&lt;T, reqwest::Error&gt;
+where F: FnMut() -&gt; Result&lt;reqwest::blocking::Response, reqwest::Error&gt; + Sized,
+ T: serde::de::DeserializeOwned,
+{
+ let mut attempt = 0;
+ loop {
+ attempt += 1;
+ let r = fn_()?;
+ let status = r.status().as_u16();
+ if status == 401 { panic!("rotate KOLM_KEY"); }
+ if (status == 429 || status == 503) &amp;&amp; attempt &lt; max {
+ thread::sleep(Duration::from_secs(1 &lt;&lt; attempt.min(3)));
+ continue;
+ }
+ return r.json();
+ }
+}</code></pre>
+</div>
+<div class="tabpanel" id="p-err-go" role="tabpanel" aria-labelledby="t-err-go" data-tab="err-go" data-active="false">
+<pre><code>func withRetry(c *http.Client, req *http.Request, max int) (*http.Response, error) {
+ var last error
+ for attempt := 1; attempt &lt;= max; attempt++ {
+ resp, err := c.Do(req)
+ if err != nil {
+ last = err
+ time.Sleep(time.Duration(1&lt;&lt;attempt) * time.Second)
+ continue
+ }
+ if resp.StatusCode == 401 {
+ return nil, fmt.Errorf("rotate KOLM_KEY")
+ }
+ if resp.StatusCode == 429 || resp.StatusCode == 503 {
+ resp.Body.Close()
+ time.Sleep(time.Duration(1&lt;&lt;attempt) * time.Second)
+ continue
+ }
+ return resp, nil
+ }
+ return nil, last
+}</code></pre>
+</div>
+
+<h2 id="see-also">See also</h2>
+<p>kolm.ai exposes the same value loop across four surfaces. The links below are the canonical entry points for the others.</p>
+<div class="related">
+ <a href="/docs/api"><b>HTTP API reference</b><span>Every route on kolm.ai, auto-generated from the router.</span></a>
+ <a href="/quickstart/sdk"><b>SDK quickstart</b><span>Five-step flow: import, capture, distill, verify, run.</span></a>
+ <a href="/quickstart/api"><b>HTTP API quickstart</b><span>Five curl commands. No client install.</span></a>
+ <a href="/quickstart/cli"><b>CLI quickstart</b><span>Five terminal commands. No editor switch.</span></a>
+</div>
+
+</div></main>
+
+<footer><div class="wrap">
+ <span>kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a></span>
+</div></footer>
+
+<script>
+// Tab handler with full keyboard support (Left/Right/Up/Down between tabs, Home/End).
+(function () {
+ document.documentElement.classList.remove('no-js');
+ document.querySelectorAll('.tabs[role="tablist"]').forEach(function (tabs) {
+ var buttons = Array.prototype.slice.call(tabs.querySelectorAll('button.tab'));
+ var panels = Array.prototype.slice.call(tabs.parentElement.querySelectorAll(':scope > .tabpanel'));
+ function select(idx) {
+ buttons.forEach(function (b, i) {
+ var on = i === idx;
+ b.setAttribute('aria-selected', on ? 'true' : 'false');
+ b.setAttribute('tabindex', on ? '0' : '-1');
+ });
+ var target = buttons[idx].getAttribute('data-tab');
+ panels.forEach(function (p) {
+ p.setAttribute('data-active', p.getAttribute('data-tab') === target ? 'true' : 'false');
+ });
+ }
+ buttons.forEach(function (btn, i) {
+ btn.addEventListener('click', function () { select(i); btn.focus(); });
+ btn.addEventListener('keydown', function (e) {
+ var k = e.key;
+ if (k === 'ArrowRight' || k === 'ArrowDown') {
+ e.preventDefault();
+ var next = (i + 1) % buttons.length;
+ select(next); buttons[next].focus();
+ } else if (k === 'ArrowLeft' || k === 'ArrowUp') {
+ e.preventDefault();
+ var prev = (i - 1 + buttons.length) % buttons.length;
+ select(prev); buttons[prev].focus();
+ } else if (k === 'Home') {
+ e.preventDefault(); select(0); buttons[0].focus();
+ } else if (k === 'End') {
+ e.preventDefault(); select(buttons.length - 1); buttons[buttons.length - 1].focus();
+ }
+ });
+ });
+ });
+})();
+</script>
+<script src="/nav.js" defer></script>
+</body>
+</html>

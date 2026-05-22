@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>HN launch template kolm community · kolm.ai</title>
+<meta name="description" content="Show HN launch post template for kolm. Plain text, copy-verbatim. After-post checklist. Team-facing.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<style>
+ .hn-wrap{max-width:880px;margin:0 auto;padding:0 32px}
+ .hn-hero{padding:64px 0 28px;border-bottom:1px solid var(--line)}
+ .hn-hero .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint,#737c73);margin:0 0 14px}
+ .hn-hero .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ .hn-hero h1{font-size:clamp(28px,3.6vw,40px);line-height:1.12;margin:0 0 12px;letter-spacing:-0.02em;font-weight:500;color:var(--fg,#faf2e1)}
+ .hn-hero .lede{font-size:15.5px;line-height:1.65;color:var(--ink-mute,#b5bdb1);max-width:70ch;margin:0}
+ .hn-section{padding:36px 0;border-bottom:1px solid var(--line)}
+ .hn-section h2{margin:0 0 12px;font-size:20px;font-weight:500;letter-spacing:-0.01em;color:var(--fg,#faf2e1)}
+ .hn-section p{margin:0 0 12px;color:var(--ink-mute,#b5bdb1);font-size:14.5px;line-height:1.7;max-width:70ch}
+ .hn-section code{font-family:var(--mono);font-size:12.5px;color:var(--fg,#faf2e1);background:rgba(255,255,255,0.04);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ .hn-meta{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint,#737c73);margin:0 0 10px;text-transform:uppercase;letter-spacing:0.05em}
+ pre.hn-post{background:var(--bg-2,#11151b);border:1px solid var(--line);border-radius:12px;padding:24px 26px;margin:8px 0 0;font-family:var(--mono);font-size:13.5px;line-height:1.65;color:var(--fg,#faf2e1);white-space:pre-wrap;overflow-x:auto;tab-size:2}
+ .hn-list{margin:8px 0 0;padding-left:22px;color:var(--ink-mute,#b5bdb1);font-size:14.5px;line-height:1.7}
+ .hn-list li{margin:0 0 6px}
+ .hn-list li b{color:var(--fg,#faf2e1);font-weight:500}
+</style>
+<link rel="canonical" href="https://kolm.ai/community/hn-launch">
+<meta property="og:title" content="HN launch template kolm community · kolm.ai">
+<meta property="og:description" content="Show HN launch post template for kolm. Plain text, copy-verbatim. After-post checklist. Team-facing.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/community/hn-launch">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="HN launch template kolm community · kolm.ai">
+<meta name="twitter:description" content="Show HN launch post template for kolm. Plain text, copy-verbatim. After-post checklist. Team-facing.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+ <div class="wrap">
+ <a class="logo" href="/">k o l m</a>
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <nav class="primary">
+ <a href="/quickstart">quickstart</a>
+ <a href="/docs">docs</a>
+ <a href="/community">community</a>
+ <a href="/pricing">pricing</a>
+ </nav>
+ </div>
+</header>
+
+<main id="main">
+<section class="hn-hero">
+ <div class="hn-wrap">
+ <p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; <a href="/community">community</a> &nbsp;/&nbsp; hn launch</p>
+ <h1>Show HN: kolm - compile any frontier to a signed, verifiable artifact.</h1>
+ <p class="lede">Template body below. Copy verbatim into the HN submission. Tweak the title only if HN flags the colon. After-post checklist below the body.</p>
+ </div>
+</section>
+
+<section class="hn-section">
+ <div class="hn-wrap">
+ <h2>Post body.</h2>
+ <p class="hn-meta">word count 308 / paste into the comment field</p>
+<pre class="hn-post">Hi HN - I work on kolm (kolm.ai).
+
+We built kolm because we kept hitting the same wall in shipping AI to regulated customers: every output from a closed-API model was unprovable. A hospital's compliance reviewer asks "what model produced this discharge summary on March 14 at 09:23?" and the evidenced answer was "the one OpenAI was hosting under gpt-4o at that time, which has since been updated." That is not a receipt you can defend.
+
+kolm is a CLI and SDK that compiles a frontier model + a task + an evaluator + a compliance pack into a single signed .kolm artifact. The artifact is a zip with a canonical manifest, a CID (cidv1:sha256:hex of canonical-JSON), a signature, and an Ed25519 receipt chain. Every run emits a receipt over (cid, input_sha, output_sha, ts). Months later, anyone with the .kolm and the receipt can replay and verify.
+
+A few engineering choices that matter:
+
+- The verifier SDK is pure-stdlib. No jszip, no third-party deps. The thing whose job is verifying supply chain has no supply chain.
+- 18 backends ship with the CLI: 6 local (CPU, CUDA, MPS, MLX, ROCm, DirectML), 8 remote (Modal, RunPod, Together, Vast, Lambda, Replicate, fal, SSH), 4 serving engines (vLLM, SGLang, TGI, TRT-LLM). The CLI picks the cheapest backend that meets your air-gap constraint.
+- K-score is a 5-term weighted score (accuracy 0.40, safety 0.15, latency 0.15, cost 0.15, verifiability 0.15). The compile fails if you are below your k_min floor.
+
+Numbers from our benchmark-gated sample runs show lower local p50 and lower sustained cost on the same task. The exact multipliers live in the reproducible reports, not in this launch copy. Both paths are replayable from receipts.
+
+Two things we'd love feedback on:
+
+1. The RS-1 spec at kolm.ai/spec/rs-1. We are weeks from freezing v1.0 and we want the receipt-chain shape to be something other tools can adopt.
+
+2. The compliance-pack model (HIPAA, SR 11-7, NIST AI RMF, EU AI Act). Are we naming and slicing these the way your auditor would want? kolm.ai/compliance.
+
+Free tier is 50 compiles a month. dev@kolm.ai is the direct line.</pre>
+ </div>
+</section>
+
+<section class="hn-section">
+ <div class="hn-wrap">
+ <h2>After posting.</h2>
+ <p>Five things in the first 90 minutes after the post goes live. Set a timer.</p>
+ <ul class="hn-list">
+ <li><b>Reply to the first 10 comments within 1 hour.</b> HN's algorithm rewards direct team engagement in the first window. Short, specific replies. Acknowledge the criticism, give the number, link the page.</li>
+ <li><b>Share the permalink to X and LinkedIn.</b> Once it's on the front page, drop the X thread (<a href="/community/twitter-thread" style="color:inherit;border-bottom:1px dashed var(--line)">/community/twitter-thread</a>) with the HN link in tweet 7.</li>
+ <li><b>Pin the post URL in /community.</b> Update <code>public/community.html</code> card 03 with the actual permalink. Redeploy.</li>
+ <li><b>Archive the post permalink to /changelog.</b> Add a one-line entry on the date with the HN URL. This is the canonical "what shipped, when" record.</li>
+ <li><b>Measure conversion via <code>/signup?ref=hn</code>.</b> The signup form already reads the ref param. Check the dashboard at +1h, +6h, +24h. Capture the top three referring HN comment threads for the launch retro.</li>
+ </ul>
+ </div>
+</section>
+
+<section class="hn-section" style="border-bottom:0">
+ <div class="hn-wrap">
+ <h2>Tone notes.</h2>
+ <p>HN sniffs out marketing. Three rules: lead with what we built and why, not what it could do; give one specific number with the methodology link; close with two questions that invite real engineering critique. No emojis, no hyperbole, no "we are excited to share" framing.</p>
+ </div>
+</section>
+</main>
+
+<footer class="site-footer">
+ <div class="wrap">
+ <div class="meta">
+ kolm v0.1.0 / MIT SDK / <a href="https://github.com/sneaky-hippo/kolm-stack">github</a> / <a href="/status">status</a>
+ </div>
+ <div class="links">
+ <div>
+ <div class="col-h">build</div>
+ <a href="/captures">captures</a>
+ <a href="/compile">compile</a>
+ <a href="/run">run</a>
+ </div>
+ <div>
+ <div class="col-h">community</div>
+ <a href="/community">overview</a>
+ <a href="/community/hn-launch">hn launch</a>
+ <a href="/community/twitter-thread">x thread</a>
+ <a href="/community/devto-article">dev.to article</a>
+ <a href="/community/discord-bootstrap">discord bootstrap</a>
+ </div>
+ <div>
+ <div class="col-h">proof</div>
+ <a href="/benchmarks">benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/spec/rs-1">rs-1 spec</a>
+ <a href="/compliance">compliance</a>
+ </div>
+ </div>
+ <small class="footer-tag">
+ <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/terms">terms</a> &middot; <a href="https://github.com/sneaky-hippo/kolm-stack">github</a> &middot; kolm.ai
+ </small>
+ </div>
+</footer>
+<script src="/nav.js" defer></script>
+</body>
+</html>

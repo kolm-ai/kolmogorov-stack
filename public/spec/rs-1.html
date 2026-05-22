@@ -55,8 +55,7 @@
  footer{padding:32px 0;border-top:1px solid var(--line);color:var(--ink-faint);font-size:13px;margin-top:64px}
  footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
-<link rel="stylesheet" href="/styles.css">
- <link rel="stylesheet" href="/brand-refresh.css">
+
 <meta property="og:title" content="RS-1 v2.0: A Reproducible Signed-artifact format for · kolm.ai">
 <meta property="og:description" content="The K-score formula, the .kolm artifact layout, the four recipe classes, the HMAC+Ed25519+sigstore signature cascade, the seeds.jsonl train/holdout...">
 <meta property="og:type" content="website">
@@ -66,117 +65,31 @@
 <meta name="twitter:title" content="RS-1 v2.0: A Reproducible Signed-artifact format for · kolm.ai">
 <meta name="twitter:description" content="The K-score formula, the .kolm artifact layout, the four recipe classes, the HMAC+Ed25519+sigstore signature cascade, the seeds.jsonl train/holdout...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
-<link rel="stylesheet" href="/surface-polish.css">
+<link rel="stylesheet" href="/ks.css">
 </head>
-<body>
-<a class="skip-link" href="#main">Skip to content</a>
-<header class="site-header">
- <div class="wrap">
- <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
-  <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
-  <!-- KOLM_NAV_BEGIN (W221) -->
-  <nav class="site-nav" aria-label="Primary">
-  <div class="nav-item nav-item--product has-mega">
-  <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
-  <div class="mega-menu" role="menu" aria-label="product menu">
-  <div class="mega-col">
-  <p class="mega-h">Start</p>
-  <a href="/product">Overview</a>
-  <a href="/quickstart">Quickstart</a>
-  <a href="/capture">Gateway</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Build</p>
-  <a href="/training">Training</a>
-  <a href="/distill">Distill</a>
-  <a href="/compile">Compile</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Deploy</p>
-  <a href="/runtimes">Runtimes</a>
-  <a href="/docs/devices">Devices</a>
-  <a href="/trust">Verify</a>
-  </div>
-  </div>
-  </div>
-  <div class="nav-item nav-item--models has-mega">
-  <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
-  <div class="mega-menu" role="menu" aria-label="models menu">
-  <div class="mega-col">
-  <p class="mega-h">Choose</p>
-  <a href="/models">Model catalog</a>
-  <a href="/build-your-own">Build your own</a>
-  <a href="/docs/runtime">Runtime targets</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Deploy</p>
-  <a href="/compute">Compute</a>
-  <a href="/runtimes">Mobile and edge</a>
-  </div>
-  </div>
-  </div>
-  <div class="nav-item nav-item--docs has-mega">
-  <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
-  <div class="mega-menu" role="menu" aria-label="docs menu">
-  <div class="mega-col">
-  <p class="mega-h">Start</p>
-  <a href="/capture">API gateway</a>
-  <a href="/docs/cli">CLI</a>
-  <a href="/docs/sdk">SDKs</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Reference</p>
-  <a href="/docs">Docs home</a>
-  <a href="/docs/api">API reference</a>
-  <a href="/api">HTTP routes</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Operate</p>
-  <a href="/integrations">Integrations</a>
-  <a href="/docs/privacy">Privacy membrane</a>
-  <a href="/docs/datasets">Datasets</a>
-  <a href="/docs/distillation">Distillation</a>
-  <a href="/docs/verify">Verification</a>
-  </div>
-  </div>
-  </div>
-  <div class="nav-item nav-item--pricing has-mega">
-  <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
-  <div class="mega-menu" role="menu" aria-label="pricing menu">
-  <div class="mega-col">
-  <p class="mega-h">Buy</p>
-  <a href="/pricing">Plans</a>
-  <a href="/pricing#roi">ROI calculator</a>
-  <a href="/nonprofits">Nonprofits</a>
-  </div>
-  </div>
-  </div>
-  <div class="nav-item nav-item--enterprise has-mega">
-  <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
-  <div class="mega-menu" role="menu" aria-label="enterprise menu">
-  <div class="mega-col">
-  <p class="mega-h">Deploy</p>
-  <a href="/enterprise">Enterprise overview</a>
-  <a href="/self-host">Self-host</a>
-  <a href="/airgap">Air-gap</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Trust</p>
-  <a href="/trust">Trust center</a>
-  <a href="/security">Security</a>
-  <a href="/compliance">Compliance</a>
-  <a href="/baa">BAA</a>
-  </div>
-  </div>
-  </div>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    </div>
   </nav>
-  <!-- KOLM_NAV_END (W221) -->
- <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
- <a href="/signin" class="ghost">sign in</a>
- <a href="/signup" class="cta">Get API Key &rarr;</a>
- </div>
- </div>
-</header>
+  <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+  </div>
+</div>
 <main id="main">
 <section class="paper">
 <div class="wrap">
@@ -285,7 +198,7 @@
 <pre>holdout = { row | sha256(row.input + split_seed) % 5 == 0 }
 train = seeds \\ holdout</pre>
 <p>The recipe is synthesized or distilled from the <b>train</b> partition only. K-score's A axis is computed as <code>correct_on_holdout / |holdout|</code> using the recipe-declared comparator (<code>exact</code>, <code>json-subset</code>, <code>regex</code>, <code>semantic</code>, or <code>human-reviewed</code>). The receipt chain extends to <code>seeds_hash</code> + <code>split_seed</code> + <code>train_hash</code> + <code>holdout_hash</code>; the verifier rebuilds the split from <code>seeds.jsonl</code> + <code>split_seed</code> and confirms <code>train_hash &cap; holdout_hash = &empty;</code>. An artifact whose train and holdout intersect is rejected pre-signature.</p>
-<p>Artifacts whose seeds were generated by <code>kolm seeds bootstrap</code> (synthetic starter rows) carry <code>eval_source: "synthetic_starter"</code> and product surfaces display "K-score measured on synthetic data &mdash; replace seeds with real captured IO before relying on this number." Tenant-captured seeds carry <code>eval_source: "tenant_captured"</code>.</p>
+<p>Artifacts whose seeds were generated by <code>kolm seeds bootstrap</code> (synthetic starter rows) carry <code>eval_source: "synthetic_starter"</code> and product surfaces display "K-score measured on synthetic data, replace seeds with real captured IO before relying on this number." Tenant-captured seeds carry <code>eval_source: "tenant_captured"</code>.</p>
 
 <h2>5. Receipt chain &amp; signature cascade</h2>
 <p>Every build produces a receipt that hash-chains the canonical slots:</p>
@@ -316,19 +229,19 @@ train = seeds \\ holdout</pre>
 <p>The K-score is a reproducibility criterion gated at compile time. The V1 composite:</p>
 <div class="eq">K = 0.40&middot;A + 0.15&middot;S + 0.15&middot;L + 0.15&middot;C + 0.15&middot;V</div>
 <ul>
-<li><b>A . Accuracy</b> (0&ndash;1) &mdash; correct_on_holdout / |holdout| using the recipe-declared comparator. See section 4.</li>
-<li><b>S . Sampling determinism</b> (0&ndash;1) &mdash; 1 if seeded inference produces byte-identical output across n runs; geometric decay otherwise. Trivially 1.0 for <code>rule</code> and <code>compiled_rule</code>; meaningful for <code>distilled_model</code>.</li>
-<li><b>L . Latency stability</b> (0&ndash;1) &mdash; 1 if p99 latency &le; 1.5&middot;p50 over a 1k-sample bench.</li>
-<li><b>C . Calibration</b> (0&ndash;1) &mdash; 1 minus expected calibration error binned at 10 confidence buckets.</li>
-<li><b>V . Verifier coverage</b> (0&ndash;1) &mdash; fraction of receipt fields the reference verifier checks.</li>
+<li><b>A . Accuracy</b> (0&ndash;1), correct_on_holdout / |holdout| using the recipe-declared comparator. See section 4.</li>
+<li><b>S . Sampling determinism</b> (0&ndash;1), 1 if seeded inference produces byte-identical output across n runs; geometric decay otherwise. Trivially 1.0 for <code>rule</code> and <code>compiled_rule</code>; meaningful for <code>distilled_model</code>.</li>
+<li><b>L . Latency stability</b> (0&ndash;1), 1 if p99 latency &le; 1.5&middot;p50 over a 1k-sample bench.</li>
+<li><b>C . Calibration</b> (0&ndash;1), 1 minus expected calibration error binned at 10 confidence buckets.</li>
+<li><b>V . Verifier coverage</b> (0&ndash;1), fraction of receipt fields the reference verifier checks.</li>
 </ul>
 <p>V2 scaffolding (in <code>src/kscore.js</code>) adds optional axes used by regulated verticals and by cross-vendor distillation:</p>
 <ul>
-<li><b>R . Real-world independence</b> &mdash; supplements A with an external public benchmark (Presidio, i2b2 2014, MIMIC-III for PHI; CMS / NCQA for claims). Sourcing and verifier check shipped in wave 164 (N+3 external benchmarks + N+4 adversarial cross-family holdouts); see &sect;7.12.</li>
-<li><b>F . Fairness</b> &mdash; equal performance across declared subgroups in seeds.jsonl tags.</li>
-<li><b>E . Eval-source label</b> &mdash; categorical (<code>synthetic_starter</code>, <code>tenant_captured</code>, <code>external_public</code>, <code>adversarial_pair</code>, <code>auditor_witnessed</code>).</li>
-<li><b>Z . Drift</b> &mdash; running comparison against a fresh holdout collected post-ship. Snapshot/report/cron mechanism + verifier check shipped in wave 167 (M+3 drift detection + M+4 supersession chain); see &sect;7.15.</li>
-<li><b>T . Teacher-delta</b> (distilled_model only) &mdash; T = teacher accuracy on same holdout; reported as A/T ratio. A/T=1.0 means student matches teacher; A/T=0.9 means student is at 90 percent of teacher on the same eval.</li>
+<li><b>R . Real-world independence</b>, supplements A with an external public benchmark (Presidio, i2b2 2014, MIMIC-III for PHI; CMS / NCQA for claims). Sourcing and verifier check shipped in wave 164 (N+3 external benchmarks + N+4 adversarial cross-family holdouts); see &sect;7.12.</li>
+<li><b>F . Fairness</b>, equal performance across declared subgroups in seeds.jsonl tags.</li>
+<li><b>E . Eval-source label</b>, categorical (<code>synthetic_starter</code>, <code>tenant_captured</code>, <code>external_public</code>, <code>adversarial_pair</code>, <code>auditor_witnessed</code>).</li>
+<li><b>Z . Drift</b>, running comparison against a fresh holdout collected post-ship. Snapshot/report/cron mechanism + verifier check shipped in wave 167 (M+3 drift detection + M+4 supersession chain); see &sect;7.15.</li>
+<li><b>T . Teacher-delta</b> (distilled_model only), T = teacher accuracy on same holdout; reported as A/T ratio. A/T=1.0 means student matches teacher; A/T=0.9 means student is at 90 percent of teacher on the same eval.</li>
 </ul>
 <p>The compile-time K-score is recorded in <code>manifest.json</code> and in every inference receipt. A compile is gated by the recipe-declared <code>min_k</code>; the compile fails if K &lt; min_k.</p>
 
@@ -464,10 +377,10 @@ $ KOLM_VERIFY_REBUILD=1 kolm verify artifact.kolm
 <p>Frontier-API teachers (Anthropic Opus, OpenAI GPT-5, Google Gemini, xAI Grok) cannot legally see raw PHI for a HIPAA-covered tenant  - even with a BAA in place, the minimum-necessary standard pushes toward sending the <i>least</i> protected information required for the task. For most narrow distillation tasks that minimum is zero. The Wave Q+3a pattern: redact the 18 HIPAA Safe Harbor identifiers (plus the kolm extensions for NPI, DEA, and Medicaid provider IDs) before the teacher call; substitute reversible placeholder tokens of the form <code>[PHI_&lt;CLASS&gt;_&lt;INDEX&gt;]</code>; re-inject the original values into the teacher response on the way back. The teacher only ever sees redacted text. The raw values stay inside the tenant boundary.</p>
 <p>RS-1 v2.0 makes this pattern auditable. The <code>manifest.training</code> block carries four fields when the recipe was distilled with a redactor in the loop:</p>
 <ul>
-<li><code>redact_class</code> &mdash; one of <code>none</code> / <code>phi</code> / <code>pci</code> / <code>multi</code> / <code>auto</code>. Records which redactor profile was applied.</li>
-<li><code>redaction_map_hash</code> &mdash; sha256 of the canonical-JSON serialization of the placeholder substitution table. Lets an auditor confirm the same mapping was applied across the whole training corpus.</li>
-<li><code>teacher_call_log_hash</code> &mdash; sha256 of <code>teacher-call-log.jsonl</code>: one line per teacher invocation with the redacted input, system prompt, and response.</li>
-<li><code>reinjection_log_hash</code> &mdash; sha256 of <code>reinjection-log.jsonl</code>: one line per call with per-row token counts and a <code>preservation_ok</code> flag (true when every token in the redacted input appeared verbatim in the teacher response, false when the teacher dropped or invented a replacement token).</li>
+<li><code>redact_class</code>, one of <code>none</code> / <code>phi</code> / <code>pci</code> / <code>multi</code> / <code>auto</code>. Records which redactor profile was applied.</li>
+<li><code>redaction_map_hash</code>, sha256 of the canonical-JSON serialization of the placeholder substitution table. Lets an auditor confirm the same mapping was applied across the whole training corpus.</li>
+<li><code>teacher_call_log_hash</code>, sha256 of <code>teacher-call-log.jsonl</code>: one line per teacher invocation with the redacted input, system prompt, and response.</li>
+<li><code>reinjection_log_hash</code>, sha256 of <code>reinjection-log.jsonl</code>: one line per call with per-row token counts and a <code>preservation_ok</code> flag (true when every token in the redacted input appeared verbatim in the teacher response, false when the teacher dropped or invented a replacement token).</li>
 </ul>
 <p><b>Check #14 ("PHI redactor receipt integrity")</b> is the verifier-side gate. When <code>manifest.training.redact_class</code> is anything other than <code>none</code>, all three log hashes are <i>required</i>. Missing any of them is an immediate <code>fail</code> - the recorded claim "we redacted" cannot stand without the offline-replay surface that lets a third party verify it. When the artifact additionally bundles the <code>teacher-call-log.jsonl</code> file (kolm artifacts may carry it; the manifest hash claims are sufficient on their own), check #14 also (a) re-hashes the bundled log against <code>training.teacher_call_log_hash</code> and fails on any mismatch; (b) re-runs the redactor over every <code>redacted_input</code> / <code>redacted_system</code> / <code>redacted_response</code> line in the log and fails on any new token detected - the redactor finding new identifiers in fields it had already masked means raw PHI was carried into the log, breaking the tenant-boundary guarantee.</p>
 <pre><code># Default  - verify a redactor-equipped artifact
@@ -499,15 +412,15 @@ $ kolm verify forged.kolm
 <p>The <code>kolm-distill-worker</code> accepts five teacher vendors (<code>anthropic</code>, <code>openai</code>, <code>google</code>, <code>xai</code>, <code>local</code>) and thirteen catalog-known student bases. The single source of truth is <code>workers/distill/catalog.mjs</code>, which exports <code>VENDORS</code> + <code>VENDOR_PROFILES</code> + <code>STUDENT_BASES</code> + <code>DISTILLATION_METHODS</code> as JS data so third-party tooling can consume the same allow-list the worker enforces. The CLI surface <code>kolm distill --local-worker --list-catalog</code> dumps the catalog in a human-readable form. Catalog SKUs that need counsel review carry a <code>verify_before_ship: true</code> flag, rendered as <code>[VERIFY]</code>; the flag is a review marker, not a legal opinion.</p>
 <p>RS-1 v2.0 extends <code>manifest.training</code> with seven cross-vendor provenance fields when the lineage source is <code>distillation</code>:</p>
 <ul>
-<li><code>teacher_vendor</code> &mdash; one of the five canonical vendors. Required.</li>
-<li><code>teacher_model</code> &mdash; the vendor's model SKU (e.g., <code>claude-opus-4-7</code>, <code>gpt-5</code>, <code>gemini-2.5-pro</code>, <code>grok-3</code>). Required.</li>
-<li><code>teacher_version</code> &mdash; the vendor's response version string when the API exposes one. Informational; pins the exact teacher snapshot a verifier would replay against.</li>
-<li><code>student_base</code> &mdash; the catalog slug (e.g., <code>qwen2.5-0.5b</code>) or an arbitrary HF repo when invoked with <code>--allow-unknown-student-base</code>. Required.</li>
-<li><code>student_base_repo</code> &mdash; the canonical HF repo path (e.g., <code>Qwen/Qwen2.5-0.5B</code>). Populated from the catalog when the slug is known.</li>
-<li><code>student_base_origin</code> &mdash; <code>western</code> or <code>chinese</code>. Lets a tenant filter for residency or licensing posture without parsing repo names.</li>
-<li><code>student_base_license</code> &mdash; the license tag (<code>Apache-2.0</code>, <code>MIT</code>, <code>Llama-3.2-Community</code>, <code>Qwen-Research</code>, <code>Gemma-Terms-of-Use</code>, <code>GLM-4-License</code>). The receipt chain self-describes the weights' license terms so a downstream consumer doesn't have to chase a HuggingFace lookup to know what they're shipping.</li>
-<li><code>student_base_revision</code> &mdash; the HF commit hash pin. Lets a verifier rebuild the exact corpus + weights that produced the LoRA.</li>
-<li><code>distillation_method</code> &mdash; one of <code>lora</code>, <code>qlora</code>, <code>full-ft</code>, <code>prompt-distill</code>. Required.</li>
+<li><code>teacher_vendor</code>, one of the five canonical vendors. Required.</li>
+<li><code>teacher_model</code>, the vendor's model SKU (e.g., <code>claude-opus-4-7</code>, <code>gpt-5</code>, <code>gemini-2.5-pro</code>, <code>grok-3</code>). Required.</li>
+<li><code>teacher_version</code>, the vendor's response version string when the API exposes one. Informational; pins the exact teacher snapshot a verifier would replay against.</li>
+<li><code>student_base</code>, the catalog slug (e.g., <code>qwen2.5-0.5b</code>) or an arbitrary HF repo when invoked with <code>--allow-unknown-student-base</code>. Required.</li>
+<li><code>student_base_repo</code>, the canonical HF repo path (e.g., <code>Qwen/Qwen2.5-0.5B</code>). Populated from the catalog when the slug is known.</li>
+<li><code>student_base_origin</code>, <code>western</code> or <code>chinese</code>. Lets a tenant filter for residency or licensing posture without parsing repo names.</li>
+<li><code>student_base_license</code>, the license tag (<code>Apache-2.0</code>, <code>MIT</code>, <code>Llama-3.2-Community</code>, <code>Qwen-Research</code>, <code>Gemma-Terms-of-Use</code>, <code>GLM-4-License</code>). The receipt chain self-describes the weights' license terms so a downstream consumer doesn't have to chase a HuggingFace lookup to know what they're shipping.</li>
+<li><code>student_base_revision</code>, the HF commit hash pin. Lets a verifier rebuild the exact corpus + weights that produced the LoRA.</li>
+<li><code>distillation_method</code>, one of <code>lora</code>, <code>qlora</code>, <code>full-ft</code>, <code>prompt-distill</code>. Required.</li>
 </ul>
 <p><b>Check #15 ("Cross-vendor distillation provenance")</b> is the verifier-side gate. It fires when <code>manifest.lineage.source === 'distillation'</code> and demands all four required fields above (<code>teacher_vendor</code>, <code>teacher_model</code>, <code>student_base</code>, <code>distillation_method</code>). Missing any of them is an immediate <code>fail</code> - the lineage block's "we distilled from X teacher" claim cannot stand without the manifest fields that name X. When all four are present, the check passes with a self-describing detail line that surfaces the full provenance so a reader can identify the teacher/student combination, the optional version pins, the license tag, and the training corpus hash without opening the lineage block:</p>
 <pre><code># Pass  - every required field present, license self-described
@@ -533,14 +446,14 @@ $ kolm verify suspect.kolm
 <p>The K-score v2 envelope ships the T axis as the distillation-honesty signal. Cost and offline execution are not enough by themselves; a buyer needs to know whether the local artifact is close to the teacher on the same holdout. The verifier records teacher identity, student holdout accuracy, teacher holdout accuracy, and the A/T ratio so the tradeoff is visible without reading the manifest by hand.</p>
 <p><b>The two inputs.</b> The T axis is degenerate without both halves. The <code>kolm-distill-worker</code> writes both fields into <code>manifest.training</code> when invoked with <code>--teacher-holdout=&lt;path&gt;.jsonl</code>:</p>
 <ul>
-<li><code>holdout_accuracy</code> &mdash; the student model's accuracy on the holdout rows the recipe never saw at training time. Required for the R axis as well. Computed by running the compiled artifact over the holdout inputs and exact-matching against holdout outputs (or the recipe-declared comparator).</li>
-<li><code>teacher_holdout_accuracy</code> &mdash; the teacher's accuracy on the <i>same</i> holdout rows. Same comparator. The worker writes a per-row <code>teacher-holdout-log.jsonl</code> alongside the corpus and seals its sha256 in <code>teacher_holdout_log_hash</code> so a verifier can re-run the teacher offline and confirm the number.</li>
-<li><code>teacher_fidelity_score</code> &mdash; the T axis value, <code>clamp01(student_holdout_accuracy / teacher_holdout_accuracy)</code>. This is what feeds the K-score V2 composite at weight 0.05 (or higher when other v2 axes are absent and weight redistributes).</li>
+<li><code>holdout_accuracy</code>, the student model's accuracy on the holdout rows the recipe never saw at training time. Required for the R axis as well. Computed by running the compiled artifact over the holdout inputs and exact-matching against holdout outputs (or the recipe-declared comparator).</li>
+<li><code>teacher_holdout_accuracy</code>, the teacher's accuracy on the <i>same</i> holdout rows. Same comparator. The worker writes a per-row <code>teacher-holdout-log.jsonl</code> alongside the corpus and seals its sha256 in <code>teacher_holdout_log_hash</code> so a verifier can re-run the teacher offline and confirm the number.</li>
+<li><code>teacher_fidelity_score</code>, the T axis value, <code>clamp01(student_holdout_accuracy / teacher_holdout_accuracy)</code>. This is what feeds the K-score V2 composite at weight 0.05 (or higher when other v2 axes are absent and weight redistributes).</li>
 </ul>
 <p><b>Check #16 ("K-score teacher-delta (A/T)")</b> is the verifier-side gate. It fires when <code>manifest.lineage.source === 'distillation'</code> and branches on the distillation method:</p>
 <ul>
-<li><b>lora, qlora, full-ft</b> &mdash; methods that produce real student weights are <i>required</i> to carry both holdout accuracies. Missing either is an immediate <code>fail</code>: an artifact that claims to ship distilled weights at 5x cost reduction but does not record what the teacher would have scored on the same holdout cannot honestly report fidelity. The fail detail names the missing field and points at the <code>--teacher-holdout</code> flag so the operator knows the exact remediation.</li>
-<li><b>prompt-distill</b> &mdash; teacher-as-judge codegen (no fine-tune; the recipe is a templated function selected for matching teacher outputs). The T axis is informational only here because there is no student model, only a function whose performance is the K-score's A axis. Missing fidelity inputs are a <code>warn</code>, not a fail; present inputs still render the A/T ratio for legibility.</li>
+<li><b>lora, qlora, full-ft</b>, methods that produce real student weights are <i>required</i> to carry both holdout accuracies. Missing either is an immediate <code>fail</code>: an artifact that claims to ship distilled weights at 5x cost reduction but does not record what the teacher would have scored on the same holdout cannot honestly report fidelity. The fail detail names the missing field and points at the <code>--teacher-holdout</code> flag so the operator knows the exact remediation.</li>
+<li><b>prompt-distill</b>, teacher-as-judge codegen (no fine-tune; the recipe is a templated function selected for matching teacher outputs). The T axis is informational only here because there is no student model, only a function whose performance is the K-score's A axis. Missing fidelity inputs are a <code>warn</code>, not a fail; present inputs still render the A/T ratio for legibility.</li>
 </ul>
 <pre><code># Pass  - both holdout accuracies present, A/T reported
 $ kolm verify health-insurance-prior-auth.kolm
@@ -937,9 +850,9 @@ $ kolm verify acme-claims-stale.kolm
 <h2>9. Reference implementations</h2>
 <p>Three reference verifiers exist, each pure-stdlib and free of network dependency for the verify path:</p>
 <ul>
-<li><b>JavaScript / Node 20+</b> &mdash; <code>src/binder.js</code>, <code>src/recipe-class.js</code>, <code>src/ed25519.js</code>, <code>src/sigstore.js</code>. Uses <code>node:crypto</code>, <code>node:fs/promises</code>, <code>node:zlib</code>. The CLI <code>kolm verify &lt;artifact&gt;.kolm</code> runs the full chain.</li>
-<li><b>Python 3.11+</b> &mdash; <code>sdk/python/kolm/</code>, mirror surface, uses stdlib <code>hashlib</code>, <code>hmac</code>, <code>zipfile</code>, <code>cryptography</code> (for Ed25519).</li>
-<li><b>Rust (read-side)</b> &mdash; <code>sdk/rust/</code>, the verifier bundled with the CLI binary release.</li>
+<li><b>JavaScript / Node 20+</b>, <code>src/binder.js</code>, <code>src/recipe-class.js</code>, <code>src/ed25519.js</code>, <code>src/sigstore.js</code>. Uses <code>node:crypto</code>, <code>node:fs/promises</code>, <code>node:zlib</code>. The CLI <code>kolm verify &lt;artifact&gt;.kolm</code> runs the full chain.</li>
+<li><b>Python 3.11+</b>, <code>sdk/python/kolm/</code>, mirror surface, uses stdlib <code>hashlib</code>, <code>hmac</code>, <code>zipfile</code>, <code>cryptography</code> (for Ed25519).</li>
+<li><b>Rust (read-side)</b>, <code>sdk/rust/</code>, the verifier bundled with the CLI binary release.</li>
 </ul>
 <p>All three produce byte-identical canonical-JSON serializations, byte-identical CIDs, and byte-identical receipt verification results. This is enforced by an interop test suite.</p>
 
@@ -993,57 +906,31 @@ $ kolm verify acme-claims-stale.kolm
 </div>
 </section>
 </main>
-<footer class="site">
- <div class="wrap" style="max-width: 1180px;">
- <div class="footer-grid">
- <div>
- <h4>Build</h4>
- <a href="/quickstart">Quickstart</a>
- <a href="/docs">Docs</a>
- <a href="/spec/rs-1">RS-1 spec</a>
- <a href="/openapi.json">OpenAPI</a>
- <a href="/cli">CLI</a>
- </div>
- <div>
- <h4>Deploy</h4>
- <a href="/compute">Backends</a>
- <a href="/airgap">Air-gap</a>
- <a href="/integrations/cloudflare">Cloudflare</a>
- <a href="/integrations/github-actions">GitHub Actions</a>
- <a href="/integrations/gitlab-ci">GitLab CI</a>
- </div>
- <div>
- <h4>Proof</h4>
- <a href="/verify-prod">Verify a .kolm</a>
- <a href="/badge">Embed badge</a>
- <a href="/benchmarks">Benchmarks</a>
- <a href="/compare">Compare</a>
- <a href="/registry">Registry</a>
- <a href="/case-studies">Case studies</a>
- </div>
- <div>
- <h4>Industries</h4>
- <a href="/healthcare">Healthcare</a>
- <a href="/finance">Finance</a>
- <a href="/legal">Legal</a>
- <a href="/compliance">Compliance</a>
- <a href="/insure">Insurance</a>
- </div>
- <div>
- <h4>Company</h4>
- <a href="/pricing">Pricing</a>
- <a href="/changelog">Changelog</a>
- <a href="/security">Security</a>
- <a href="/community">Community</a>
- <a href="/contact">Contact</a>
- </div>
- </div>
- <div class="footer-tag">
- <span>kolm.ai - Made with .kolm - Apache-2.0</span>
- <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
- </div>
- </div>
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/integrations">Integrations</a></li><li><a href="/docs/api">API reference</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
 </footer>
-<script src="/nav.js" defer></script>
+
 </body>
 </html>

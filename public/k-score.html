@@ -1,723 +1,713 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>K-score guide · kolm.ai</title>
-<meta name="description" content="K-score is a per-artifact gate: every .kolm file gets its own score from its own eval set. Not a leaderboard for the underlying base model. Five components,...">
-<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-
-<meta property="og:site_name" content="kolm">
-<meta property="og:title" content="K-score guide · kolm.ai">
-<meta property="og:description" content="K-score is a per-artifact gate: every .kolm file gets its own score from its own eval set. Not a leaderboard for the underlying base model. Five components,...">
-<meta property="og:type" content="website">
+<title>K-score: the one number that decides if a .kolm ships &middot; kolm.ai</title>
+<meta name="description" content="K-score is a per-artifact gate. Every .kolm file gets one number from its own held-out evals. Five composed axes, calibrated against the teacher. Not a leaderboard for the underlying base model.">
+<meta name="theme-color" content="#07090c">
+<meta property="og:title" content="K-score &middot; kolm.ai">
+<meta property="og:description" content="The per-artifact gate that decides if a .kolm ships. Composed from five axes. Calibrated against the teacher. Honest by construction.">
+<meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/k-score">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
-<meta name="twitter:title" content="K-score guide · kolm.ai">
-<meta name="twitter:description" content="K-score is a per-artifact gate: every .kolm file gets its own score from its own eval set. Not a leaderboard for the underlying base model. Five components,...">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
-<meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://kolm.ai/k-score">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
 <style>
- :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--accent-soft:rgba(236,231,220, 0.10);--good:#7ef0d2;--bad:#ff6b91;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
- *{box-sizing:border-box}
- html,body{margin:0;padding:0}
- body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;letter-spacing: 0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-synthesis:none}
- a{color:inherit;text-decoration:none}
- ::selection{background:rgba(236,231,220, 0.30)}
+  .ks-hero-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: clamp(32px, 5vw, 72px); align-items: center; }
+  @media (max-width: 920px) { .ks-hero-grid { grid-template-columns: 1fr; } }
+  .ks-bigscore { padding: var(--ks-6); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); }
+  .ks-bigscore .label { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: var(--ks-2); }
+  .ks-bigscore .v { font-family: var(--ks-mono); font-size: clamp(64px, 12vw, 120px); color: var(--ks-accent); font-variant-numeric: tabular-nums; line-height: 0.95; letter-spacing: -0.04em; font-weight: 520; }
+  .ks-bigscore .verdict { display: inline-block; margin-top: var(--ks-2); padding: 4px 12px; background: var(--ks-accent); color: #0a0c10; border-radius: 999px; font-family: var(--ks-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+  .ks-bigscore .ax { margin-top: var(--ks-5); padding-top: var(--ks-4); border-top: 1px solid var(--ks-line-1); display: grid; gap: var(--ks-2); }
+  .ks-bigscore .ax-row { display: grid; grid-template-columns: 64px 1fr 56px; gap: var(--ks-3); align-items: center; font-family: var(--ks-mono); font-size: 12px; }
+  .ks-bigscore .ax-row b { color: var(--ks-ink-2); font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; font-size: 10px; }
+  .ks-bigscore .ax-row .bar { height: 6px; background: var(--ks-bg-2); border-radius: 999px; overflow: hidden; }
+  .ks-bigscore .ax-row .bar > i { display: block; height: 100%; background: var(--ks-accent); border-radius: 999px; }
+  .ks-bigscore .ax-row .n { text-align: right; color: var(--ks-accent); font-variant-numeric: tabular-nums; }
+  .ks-axes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--ks-4); }
+  .ks-axis { padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); display: flex; flex-direction: column; gap: var(--ks-3); }
+  .ks-axis .tag { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-accent); text-transform: uppercase; letter-spacing: 0.08em; }
+  .ks-axis h3 { margin: 0; font-size: 17px; font-weight: 580; color: var(--ks-ink); }
+  .ks-axis p { margin: 0; font-size: 14px; color: var(--ks-ink-2); line-height: 1.6; }
+  .ks-axis .formula { padding: 10px 14px; background: #0c0e12; border: 1px dashed var(--ks-line-2); border-radius: var(--ks-r-md); font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-2); line-height: 1.5; }
+  .ks-axis .formula b { color: var(--ks-accent); font-weight: 600; }
+  .ks-method { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: var(--ks-3) var(--ks-5); padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); }
+  @media (max-width: 720px) { .ks-method { grid-template-columns: 1fr; } }
+  .ks-method dt { font-family: var(--ks-mono); font-size: 12px; color: var(--ks-accent); text-transform: uppercase; letter-spacing: 0.05em; padding-top: 3px; }
+  .ks-method dd { margin: 0 0 var(--ks-3); font-size: 14px; color: var(--ks-ink-2); line-height: 1.65; }
+  .ks-verdict { display: grid; gap: var(--ks-3); }
+  .ks-verdict-row { padding: var(--ks-4) var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); display: grid; grid-template-columns: 100px minmax(0, 1fr) 140px; gap: var(--ks-4); align-items: center; }
+  @media (max-width: 720px) { .ks-verdict-row { grid-template-columns: 1fr; } }
+  .ks-verdict-row .band { font-family: var(--ks-mono); font-size: 13px; font-variant-numeric: tabular-nums; color: var(--ks-accent); }
+  .ks-verdict-row b { display: block; font-size: 14.5px; font-weight: 580; color: var(--ks-ink); margin-bottom: 3px; }
+  .ks-verdict-row p { margin: 0; font-size: 13.5px; color: var(--ks-ink-2); line-height: 1.55; }
+  .ks-verdict-row .pill { font-family: var(--ks-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; padding: 4px 10px; border-radius: 999px; text-align: center; }
+  .ks-verdict-row .pill.go { background: rgba(118, 237, 208, 0.16); color: var(--ks-accent); }
+  .ks-verdict-row .pill.warn { background: rgba(244, 198, 102, 0.16); color: var(--ks-warn); }
+  .ks-verdict-row .pill.stop { background: rgba(255, 107, 145, 0.16); color: var(--ks-bad); }
+  .ks-code { padding: var(--ks-5); background: #0c0e12; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); font-family: var(--ks-mono); font-size: 13px; color: var(--ks-ink-2); line-height: 1.6; overflow-x: auto; white-space: pre; }
+  .ks-code .k { color: var(--ks-accent); }
+  .ks-code .c { color: var(--ks-ink-3); }
+  .ks-code .s { color: #f4c666; }
+  .ks-faq { display: grid; gap: var(--ks-3); }
+  .ks-faq details { padding: var(--ks-4) var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); }
+  .ks-faq summary { font-weight: 580; cursor: pointer; list-style: none; color: var(--ks-ink); font-size: 15px; }
+  .ks-faq summary::-webkit-details-marker { display: none; }
+  .ks-faq summary::after { content: " +"; color: var(--ks-accent); font-family: var(--ks-mono); float: right; }
+  .ks-faq details[open] summary::after { content: " -"; }
+  .ks-faq details p { margin: var(--ks-3) 0 0; font-size: 14px; color: var(--ks-ink-2); line-height: 1.7; }
+  .test-anchor { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 
- .wrap{max-width:1180px;margin:0 auto;padding:0 32px}
- @media(max-width:720px){.wrap{padding:0 20px}}
-
- header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
- header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px}
- header.site .left{display:flex;align-items:center;gap:36px}
- header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
- header.site .brand img{height:18px;width:18px}
- header.site .brand span{font-weight: 500;font-size:16px;letter-spacing: 0}
- header.site nav{display:flex;gap:22px}
- header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
- header.site nav a:hover,header.site nav a.active{color:var(--ink)}
- header.site .right{display:flex;align-items:center;gap:14px}
- header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
- header.site .right .ghost:hover{color:var(--ink)}
- header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight: 500;letter-spacing: 0;position:relative}
- section.hero{padding:96px 0 64px}
- section.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 900px 480px at 22% 12%,rgba(236,231,220, 0.10),transparent 60%);pointer-events:none}
- section.hero .wrap{position:relative}
- section + section{border-top:1px solid var(--line)}
-
- .eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing: 0;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
- .eyebrow .num{color:var(--accent)}
-
- h1{margin:0 0 22px;font-size:clamp(36px,5vw,60px);line-height:1.05;font-weight:500;letter-spacing: 0;color:var(--ink);max-width:18ch}
- h1 .tone{color:var(--accent)}
-
- h2{margin:0 0 16px;font-size:clamp(24px,3vw,34px);line-height:1.15;font-weight: 500;letter-spacing: 0;max-width:24ch}
- h3{margin:0 0 8px;font-size:16px;font-weight: 500;letter-spacing: 0;font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:60ch}
- p.lede b{color:var(--ink);font-weight: 500}
- p.lede code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
- p{color:var(--ink-mute);max-width:62ch}
- p code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
-
- .formula{font-family:var(--mono);font-size:14px;color:var(--ink);background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:18px 22px;line-height:1.9;margin:0 0 36px;max-width:780px}
- .formula .op{color:var(--ink-faint)}
- .formula .var{color:var(--accent)}
- .formula .lab{display:block;font-size:11px;letter-spacing: 0;text-transform:uppercase;color:var(--ink-faint);margin:0 0 10px}
-
- .grid{display:grid;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:36px 0 0}
- .grid.cols-5{grid-template-columns:repeat(5,1fr)}
- @media(max-width:880px){.grid.cols-5{grid-template-columns:repeat(2,1fr)}}
- .grid .cell{background:var(--bg-elev);padding:24px 22px}
- .grid .cell .num{font-family:var(--mono);font-size:11px;letter-spacing: 0;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
- .grid .cell .v{font-family:var(--sans);font-size:34px;font-weight: 500;letter-spacing: 0;line-height:1;color:var(--ink);margin-bottom:8px}
- .grid .cell .v .u{font-size:14px;color:var(--ink-mute);font-weight:400;margin-left:2px}
- .grid .cell .name{font-family:var(--sans);font-size:14px;font-weight: 500;color:var(--ink);margin-bottom:6px}
- .grid .cell .desc{font-size:13px;color:var(--ink-mute);line-height:1.5}
-
- .gate{margin-top:36px;padding:22px 24px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:8px;display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center}
- .gate .big{font-family:var(--mono);font-size:48px;font-weight: 500;letter-spacing: 0;color:var(--accent);line-height:1}
- .gate .desc{color:var(--ink-mute);font-size:14.5px;line-height:1.55}
- .gate .desc b{color:var(--ink);font-weight: 500}
- .gate .desc code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
- @media(max-width:720px){.gate{grid-template-columns:1fr}}
-
- pre{background:#0b0f10;border:1px solid var(--line);border-radius:8px;padding:18px 20px;overflow:auto;color:#e2e8f0;font-family:var(--mono);font-size:13px;line-height:1.6;margin:24px 0}
- pre .com{color:var(--ink-faint)}
- pre .key{color:var(--accent)}
- [data-theme=light] pre{background:#f7f7f7;color:#1f2429;border-color:rgba(12,14,16,0.12)}
- [data-theme=light] pre .com{color:#6b7280}
- [data-theme=light] pre .key{color:#0a8862}
-
- .cta-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:36px}
- .btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--bg);border-radius:6px;padding:11px 18px;font-size:14px;font-weight: 500;letter-spacing: 0;transition:background 120ms}
- .btn-primary:hover{background:#fff}
- .btn-link{display:inline-flex;align-items:center;gap:6px;color:var(--ink);padding:11px 14px;font-size:14px;font-weight:500}
- .btn-link:hover{color:var(--accent)}
-
- footer{border-top:1px solid var(--line);padding:48px 0 36px;color:var(--ink-faint);font-size:12.5px}
- footer .cols{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px;margin-bottom:24px}
- @media(max-width:720px){footer .cols{grid-template-columns:1fr 1fr;gap:24px}}
- footer h4{font-size:11px;color:var(--ink-mute);letter-spacing: 0;text-transform:uppercase;margin:0 0 10px;font-weight: 500}
- footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
- footer ul a{color:var(--ink-faint);transition:color 120ms}
- footer ul a:hover{color:var(--ink)}
- footer .legal{padding-top:18px;border-top:1px solid var(--line);color:var(--ink-faint);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
-
- /* k-score calculator ·interactive widget, NEO LAB readout aesthetic.
- Five sliders feed K = 0.40·A + 0.15·S+L+C+V); status flips at 0.85. */
- .kcalc{margin:36px 0 0;border:1px solid var(--line-strong);border-radius:12px;background:linear-gradient(180deg,#080a0c 0%,#050607 100%);overflow:hidden}
- .kcalc-head{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:14px 22px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11px;letter-spacing: 0;text-transform:uppercase;color:var(--ink-faint)}
- .kcalc-head .ks-tag{display:inline-flex;align-items:center;gap:8px;color:var(--ink-mute)}
- .kcalc-head .ks-tag::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px rgba(236,231,220, 0.7)}
- .kcalc-head .ks-hint{color:var(--ink-faint)}
- .kcalc-body{display:grid;grid-template-columns:1.05fr 1fr;gap:0}
- @media(max-width:780px){.kcalc-body{grid-template-columns:1fr}}
- .kcalc-controls{padding:24px 22px;display:flex;flex-direction:column;gap:14px;border-right:1px solid var(--line)}
- @media(max-width:780px){.kcalc-controls{border-right:0;border-bottom:1px solid var(--line)}}
- .kcalc-row{display:grid;grid-template-columns:54px 1fr 60px;gap:12px;align-items:center}
- .kcalc-row .ks-key{font-family:var(--mono);font-size:11px;letter-spacing: 0;text-transform:uppercase;color:var(--ink-mute)}
- .kcalc-row .ks-key b{color:var(--accent);font-weight: 500;display:inline-block;width:14px}
- .kcalc-row input[type="range"]{appearance:none;-webkit-appearance:none;width:100%;height:4px;background:linear-gradient(90deg,var(--accent) 0%,var(--accent) var(--at,90%),var(--line-strong) var(--at,90%),var(--line-strong) 100%);border-radius:3px;outline:0;cursor:pointer}
- .kcalc-row input[type="range"]::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#faf2e1;border:2px solid #050607;box-shadow:0 0 0 1px var(--accent),0 0 8px rgba(236,231,220, 0.45);cursor:grab}
- .kcalc-row input[type="range"]::-webkit-slider-thumb:active{cursor:grabbing}
- .kcalc-row input[type="range"]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:#faf2e1;border:2px solid #050607;box-shadow:0 0 0 1px var(--accent),0 0 8px rgba(236,231,220, 0.45);cursor:grab}
- .kcalc-row .ks-num{font-family:var(--mono);font-size:13px;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
- .kcalc-row .ks-num .w{color:var(--ink-faint);font-size:10.5px;display:block;letter-spacing: 0;line-height:1}
-
- .kcalc-readout{padding:24px 22px;display:flex;flex-direction:column;gap:14px;background:radial-gradient(ellipse 480px 220px at 50% 0%,rgba(236,231,220, 0.08),transparent 60%)}
- .kcalc-K{display:flex;align-items:baseline;gap:14px;justify-content:space-between}
- .kcalc-K .ks-big{font-family:var(--mono);font-size:54px;font-weight: 500;letter-spacing: 0;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
- .kcalc-K .ks-big.ks-fail{color:var(--bad)}
- .kcalc-K .ks-status{font-family:var(--mono);font-size:11px;letter-spacing: 0;text-transform:uppercase;padding:5px 10px;border-radius:4px;border:1px solid var(--line-strong);color:var(--ink-mute);white-space:nowrap}
- .kcalc-K .ks-status.ks-ship{color:var(--good);border-color:rgba(126,240,210,0.3);background:rgba(126,240,210,0.06)}
- .kcalc-K .ks-status.ks-fail{color:var(--bad);border-color:rgba(255,107,145,0.3);background:rgba(255,107,145,0.06)}
- .kcalc-bar{position:relative;height:10px;border-radius:6px;background:var(--line-strong);overflow:hidden}
- .kcalc-bar .ks-fill{position:absolute;inset:0 auto 0 0;width:var(--w,0%);background:linear-gradient(90deg,#c9c2b2 0%,var(--accent) 100%);transition:width 140ms ease-out}
- .kcalc-bar.ks-fail .ks-fill{background:linear-gradient(90deg,#ff9ab1 0%,var(--bad) 100%)}
- .kcalc-bar .ks-mark{position:absolute;top:-3px;bottom:-3px;left:85%;width:2px;background:rgba(250,242,225,0.45);box-shadow:0 0 6px rgba(250,242,225,0.4)}
- .kcalc-bar .ks-mark::after{content:"0.85 gate";position:absolute;left:6px;top:-16px;font-family:var(--mono);font-size:9.5px;letter-spacing: 0;text-transform:uppercase;color:var(--ink-faint);white-space:nowrap}
- .kcalc-formula{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);letter-spacing: 0;line-height:1.7;padding:12px 14px;background:var(--bg-elev);border:1px solid var(--line);border-radius:6px}
- .kcalc-formula .ks-term{color:var(--ink-mute)}
- .kcalc-formula .ks-w{color:var(--accent)}
- .kcalc-cmd{font-family:var(--mono);font-size:11px;color:var(--ink-faint);display:flex;align-items:center;gap:8px}
- .kcalc-cmd code{color:var(--ink);background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:2px 8px;font-size:11px}
- @media(prefers-reduced-motion: reduce){.kcalc-bar .ks-fill{transition:none}}
-
- .plate{position:relative;margin:48px 0 0;border:1px solid var(--line-strong);border-radius:14px;overflow:hidden;background:#050607;isolation:isolate}
- .plate .img{position:relative;aspect-ratio:16/9;background-position:center;background-size:cover;background-repeat:no-repeat}
- .plate .img::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,transparent 50%,rgba(8,8,10,0.78) 100%),linear-gradient(90deg,rgba(8,8,10,0.55) 0%,transparent 30%,transparent 70%,rgba(8,8,10,0.55) 100%)}
- .plate .img::before{content:"";position:absolute;left:12%;right:12%;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(236,231,220, 0.5),transparent);pointer-events:none;z-index:2}
- .plate .stamp{position:absolute;top:22px;left:24px;z-index:3;display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10.5px;letter-spacing: 0;text-transform:uppercase;color:var(--ink-mute);border:1px solid rgba(236,231,220, 0.22);background:rgba(8,9,8,0.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:6px 12px;border-radius:4px}
- .plate .stamp .dot{width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px rgba(236,231,220, 0.85)}
- .plate .cap{position:absolute;left:30px;right:30px;bottom:26px;z-index:3;display:flex;align-items:flex-end;justify-content:space-between;gap:24px}
- .plate .cap .title{font-family:var(--sans);font-size:clamp(20px,2.2vw,28px);font-weight: 500;letter-spacing: 0;line-height:1.18;color:var(--ink);max-width:60%;text-shadow:0 1px 2px rgba(0,0,0,0.55)}
- .plate .cap .title .tone{background:linear-gradient(170deg,#faf2e1 0%,#c9c2b2 50%,#faf2e1 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
- .plate .cap .meta{font-family:var(--mono);font-size:11px;color:var(--ink-mute);letter-spacing: 0;text-align:right;line-height:1.7}
- .plate .cap .meta b{color:var(--ink);font-weight: 500}
- @media(max-width:720px){.plate .cap{left:16px;right:16px;bottom:14px;flex-direction:column;align-items:flex-start;gap:10px}.plate .cap .title{font-size:17px;max-width:100%}.plate .cap .meta{text-align:left;font-size:10.5px}.plate .stamp{top:14px;left:14px;font-size:9.5px;padding:5px 10px}}
+  /* Interactive K-score calculator (prod parity) */
+  .kcalc-presets { display: flex; gap: 1px; background: var(--ks-line-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); overflow: hidden; flex-wrap: wrap; margin: var(--ks-5) 0 var(--ks-3); max-width: 880px; }
+  .kp { appearance: none; cursor: pointer; background: var(--ks-bg-1); border: 0; color: var(--ks-ink-3); font-family: var(--ks-sans); font-size: 12.5px; padding: 9px 14px; letter-spacing: 0; transition: background 140ms, color 140ms; }
+  .kp:hover { color: var(--ks-ink); background: var(--ks-bg-2); }
+  .kp.active { background: var(--ks-accent-soft); color: var(--ks-ink); }
+  .kp-hint { font-size: 12px; color: var(--ks-ink-3); margin: 8px 0 0; max-width: 880px; font-family: var(--ks-mono); letter-spacing: 0; }
+  .kcalc { margin: var(--ks-5) 0 0; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); background: linear-gradient(180deg, var(--ks-bg-1) 0%, var(--ks-bg) 100%); overflow: hidden; }
+  .kcalc-head { display: flex; align-items: center; justify-content: space-between; gap: var(--ks-4); padding: 14px 22px; border-bottom: 1px solid var(--ks-line-1); font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ks-ink-3); }
+  .kcalc-head .ks-tag { display: inline-flex; align-items: center; gap: 8px; color: var(--ks-ink-2); }
+  .kcalc-head .ks-tag::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--ks-accent); box-shadow: 0 0 8px rgba(118, 237, 208, 0.7); animation: kcalc-pulse 2s infinite; }
+  @keyframes kcalc-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  .kcalc-head .ks-hint { color: var(--ks-ink-3); }
+  .kcalc-body { display: grid; grid-template-columns: 1.05fr 1fr; gap: 0; }
+  @media (max-width: 780px) { .kcalc-body { grid-template-columns: 1fr; } }
+  .kcalc-controls { padding: 24px 22px; display: flex; flex-direction: column; gap: 14px; border-right: 1px solid var(--ks-line-1); }
+  @media (max-width: 780px) { .kcalc-controls { border-right: 0; border-bottom: 1px solid var(--ks-line-1); } }
+  .kcalc-row { display: grid; grid-template-columns: 96px 1fr 78px; gap: 12px; align-items: center; }
+  .kcalc-row .ks-key { font-family: var(--ks-mono); font-size: 11.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ks-ink-2); }
+  .kcalc-row .ks-key b { color: var(--ks-accent); font-weight: 500; display: inline-block; width: 14px; margin-right: 4px; }
+  .kcalc-row input[type="range"] { appearance: none; -webkit-appearance: none; width: 100%; height: 4px; background: linear-gradient(90deg, var(--ks-accent) 0%, var(--ks-accent) var(--at, 90%), var(--ks-line-2) var(--at, 90%), var(--ks-line-2) 100%); border-radius: 3px; outline: 0; cursor: pointer; }
+  .kcalc-row input[type="range"]::-webkit-slider-thumb { appearance: none; -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--ks-ink); border: 2px solid var(--ks-bg); box-shadow: 0 0 0 1px var(--ks-accent), 0 0 10px rgba(118, 237, 208, 0.5); cursor: grab; }
+  .kcalc-row input[type="range"]::-webkit-slider-thumb:active { cursor: grabbing; }
+  .kcalc-row input[type="range"]::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: var(--ks-ink); border: 2px solid var(--ks-bg); box-shadow: 0 0 0 1px var(--ks-accent), 0 0 10px rgba(118, 237, 208, 0.5); cursor: grab; }
+  .kcalc-row .ks-num { font-family: var(--ks-mono); font-size: 13px; color: var(--ks-ink); text-align: right; font-variant-numeric: tabular-nums; }
+  .kcalc-row .ks-num .w { color: var(--ks-ink-3); font-size: 10.5px; display: block; letter-spacing: 0.02em; line-height: 1.1; margin-top: 2px; }
+  .kcalc-readout { padding: 24px 22px; display: flex; flex-direction: column; gap: 14px; background: radial-gradient(ellipse 480px 220px at 50% 0%, rgba(118, 237, 208, 0.08), transparent 60%); }
+  .kcalc-K { display: flex; align-items: baseline; gap: 14px; justify-content: space-between; }
+  .kcalc-K .ks-big { font-family: var(--ks-mono); font-size: 56px; font-weight: 520; letter-spacing: -0.02em; line-height: 1; color: var(--ks-accent); font-variant-numeric: tabular-nums; }
+  .kcalc-K .ks-big.ks-fail { color: var(--ks-bad); }
+  .kcalc-K .ks-status { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; padding: 5px 10px; border-radius: 4px; border: 1px solid var(--ks-line-2); color: var(--ks-ink-3); white-space: nowrap; }
+  .kcalc-K .ks-status.ks-ship { color: var(--ks-accent); border-color: var(--ks-accent-edge); background: var(--ks-accent-soft); }
+  .kcalc-K .ks-status.ks-fail { color: var(--ks-bad); border-color: rgba(255, 107, 145, 0.3); background: rgba(255, 107, 145, 0.08); }
+  .kcalc-bar { position: relative; height: 10px; border-radius: 6px; background: var(--ks-line-2); overflow: hidden; }
+  .kcalc-bar .ks-fill { position: absolute; inset: 0 auto 0 0; width: var(--w, 0%); background: linear-gradient(90deg, color-mix(in srgb, var(--ks-accent) 70%, var(--ks-ink)) 0%, var(--ks-accent) 100%); transition: width 140ms ease-out; }
+  .kcalc-bar.ks-fail .ks-fill { background: linear-gradient(90deg, #ff9ab1 0%, var(--ks-bad) 100%); }
+  .kcalc-bar .ks-mark { position: absolute; top: -3px; bottom: -3px; left: 85%; width: 2px; background: rgba(250, 242, 225, 0.45); box-shadow: 0 0 6px rgba(250, 242, 225, 0.4); }
+  .kcalc-bar .ks-mark::after { content: "0.85 gate"; position: absolute; left: 6px; top: -16px; font-family: var(--ks-mono); font-size: 9.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ks-ink-3); white-space: nowrap; }
+  .kcalc-formula { font-family: var(--ks-mono); font-size: 11.5px; color: var(--ks-ink-3); letter-spacing: 0.02em; line-height: 1.7; padding: 12px 14px; background: var(--ks-bg-1); border: 1px solid var(--ks-line-1); border-radius: 6px; }
+  .kcalc-formula .ks-term { color: var(--ks-ink-2); }
+  .kcalc-formula .ks-w { color: var(--ks-accent); }
+  .kcalc-cmd { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .kcalc-cmd code { color: var(--ks-ink); background: var(--ks-bg-1); border: 1px solid var(--ks-line-1); border-radius: 4px; padding: 3px 9px; font-size: 11px; }
+  @media (prefers-reduced-motion: reduce) { .kcalc-bar .ks-fill { transition: none; } .kcalc-head .ks-tag::before { animation: none; } }
 </style>
-<link rel="stylesheet" href="/styles.css">
-<link rel="stylesheet" href="/brand-refresh.css">
-<script type="application/ld+json">
-{
- "@context": "https://schema.org",
- "@graph": [
- {
- "@type": "SoftwareApplication",
- "name": "kolm",
- "operatingSystem": "macOS, Linux, Windows, iOS, Android",
- "applicationCategory": "DeveloperApplication",
- "offers": {
- "@type": "Offer",
- "price": "0",
- "priceCurrency": "USD"
- }
- },
- {
- "@type": "BreadcrumbList",
- "itemListElement": [
- {
- "@type": "ListItem",
- "position": 1,
- "name": "kolm",
- "item": "https://kolm.ai/"
- },
- {
- "@type": "ListItem",
- "position": 2,
- "name": "K-score",
- "item": "https://kolm.ai/k-score"
- }
- ]
- }
- ]
-}
-</script>
-<link rel="stylesheet" href="/surface-polish.css">
 </head>
-<body>
-<a class="skip-link" href="#main">Skip to content</a>
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<body class="ks">
 
-<header class="site-header">
- <div class="wrap">
- <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
-    <!-- KOLM_NAV_BEGIN (W221) -->
-    <nav class="site-nav" aria-label="Primary">
-    <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
-      <div class="mega-menu" role="menu" aria-label="product menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/product">Overview</a>
-          <a href="/quickstart">Quickstart</a>
-          <a href="/capture">Gateway</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training</a>
-          <a href="/distill">Distill</a>
-          <a href="/compile">Compile</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/runtimes">Runtimes</a>
-          <a href="/docs/devices">Devices</a>
-          <a href="/trust">Verify</a>
-        </div>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/k-score" aria-current="page">K-score</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
       </div>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
     </div>
-    <div class="nav-item nav-item--models has-mega">
-      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
-      <div class="mega-menu" role="menu" aria-label="models menu">
-        <div class="mega-col">
-          <p class="mega-h">Choose</p>
-          <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Build your own</a>
-          <a href="/docs/runtime">Runtime targets</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/compute">Compute</a>
-          <a href="/runtimes">Mobile and edge</a>
-        </div>
-      </div>
+    <div class="ks-nav__sheet" id="navSheet">
+      <a href="/gateway">Gateway</a>
+      <a href="/capture">Capture</a>
+      <a href="/distill">Distill</a>
+      <a href="/compile">Compile</a>
+      <a href="/runtimes">Runtime</a>
+      <a href="/k-score">K-score</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart</a>
     </div>
-    <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
-      <div class="mega-menu" role="menu" aria-label="docs menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/capture">API gateway</a>
-          <a href="/docs/cli">CLI</a>
-          <a href="/docs/sdk">SDKs</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Reference</p>
-          <a href="/docs">Docs home</a>
-          <a href="/docs/api">API reference</a>
-          <a href="/api">HTTP routes</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Operate</p>
-          <a href="/integrations">Integrations</a>
-          <a href="/docs/privacy">Privacy membrane</a>
-          <a href="/docs/datasets">Datasets</a>
-          <a href="/docs/distillation">Distillation</a>
-          <a href="/docs/verify">Verification</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
-      <div class="mega-menu" role="menu" aria-label="pricing menu">
-        <div class="mega-col">
-          <p class="mega-h">Buy</p>
-          <a href="/pricing">Plans</a>
-          <a href="/pricing#roi">ROI calculator</a>
-          <a href="/nonprofits">Nonprofits</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
-      <div class="mega-menu" role="menu" aria-label="enterprise menu">
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/enterprise">Enterprise overview</a>
-          <a href="/self-host">Self-host</a>
-          <a href="/airgap">Air-gap</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Trust</p>
-          <a href="/trust">Trust center</a>
-          <a href="/security">Security</a>
-          <a href="/compliance">Compliance</a>
-          <a href="/baa">BAA</a>
-        </div>
-      </div>
-    </div>
-    </nav>
-    <!-- KOLM_NAV_END (W221) -->
- <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
- <a href="/signin" class="ghost">sign in</a>
- <a href="/signup" class="cta">Get API Key &rarr;</a>
- </div>
- </div>
-</header>
+  </header>
+</div>
 
 <main id="main">
-<section class="hero">
- <div class="wrap">
- <div class="eyebrow"><span class="num">04</span> ·The gate</div>
- <h1>One number per artifact. It decides if that artifact ships.</h1>
- <p class="lede"><b>Per-artifact, not per-model.</b> Every <code>.kolm</code> file carries its own single decimal, <b>K</b>, computed against its own frozen eval set. <code>phi-redactor.kolm</code> has one K. <code>triage.kolm</code> has its own. Neither is a leaderboard for the base model underneath. Below the gate, kolm refuses to write the file. No eval, no ship.</p>
- <div class="formula" aria-label="K-score formula">
- <span class="lab">Definition</span>
- <span class="var">K</span> <span class="op">=</span> <span class="var">w<sub>a</sub></span>·Accuracy <span class="op">+</span>
- <span class="var">w<sub>s</sub></span>·Size_inv <span class="op">+</span>
- <span class="var">w<sub>l</sub></span>·Latency_inv <span class="op">+</span>
- <span class="var">w<sub>c</sub></span>·Cost_inv <span class="op">+</span>
- <span class="var">w<sub>v</sub></span>·Coverage<br>
- <span class="op">where</span> &sum; <span class="var">w</span> <span class="op">=</span> 1
- </div>
- <p>(Weighted average of five measurable qualities, normalized against the frontier model this artifact was distilled from.)</p>
- <p>Components are normalized to <code>[0,1]</code> against the frontier baseline
- this artifact was distilled from. <b>1.0</b> means the artifact ties or beats
- frontier on every component for <i>its task</i>. <b>0.0</b> means it doesn't exist. Two artifacts both scoring 0.94 are each ship-ready against their own eval set; they are not "equivalently good" because the eval sets differ.</p>
 
- </div>
+<section class="ks-section ks-section--hero">
+  <div class="ks-wrap">
+    <div class="ks-hero-grid">
+      <div>
+        <span class="ks-eyebrow">For engineers, developers, data scientists, and security review &middot; The artifact gate</span>
+        <h1 class="ks-h1" style="margin-top: var(--ks-3);">One number. Per artifact. Decides if it ships.</h1>
+        <p class="ks-lede">K-score is the per-artifact gate that the kolm compiler computes against the same held-out cases every time. It is not a leaderboard for the underlying base model. It is a verdict for the specific .kolm file you are about to deploy.</p>
+        <div style="display: flex; gap: var(--ks-3); flex-wrap: wrap; margin-top: var(--ks-5);">
+          <a href="/quickstart" class="ks-btn ks-btn--primary ks-btn--lg">Compute K on a real .kolm <span class="ks-btn-arrow">&rarr;</span></a>
+          <a href="#axes" class="ks-btn ks-btn--ghost ks-btn--lg">See the five axes</a>
+        </div>
+        <div style="margin-top: var(--ks-5); padding-top: var(--ks-5); border-top: 1px solid var(--ks-line-1); display: flex; flex-wrap: wrap; gap: var(--ks-4); font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-3);">
+          <span><span style="color: var(--ks-accent);">Deterministic.</span> Same artifact, same evals, same score, every run.</span>
+          <span><span style="color: var(--ks-accent);">Calibrated.</span> Against the teacher, not a public leaderboard.</span>
+          <span><span style="color: var(--ks-accent);">Signed.</span> The score and the evals ride in the .kolm receipt.</span>
+        </div>
+      </div>
+      <div class="ks-bigscore">
+        <div class="label">Example artifact &middot; cm-claims-v4.kolm</div>
+        <div class="v">84.6</div>
+        <span class="verdict">Ship</span>
+        <div class="ax">
+          <div class="ax-row"><b>Faith</b><span class="bar"><i style="width: 91%"></i></span><span class="n">91</span></div>
+          <div class="ax-row"><b>Cover</b><span class="bar"><i style="width: 87%"></i></span><span class="n">87</span></div>
+          <div class="ax-row"><b>Calib</b><span class="bar"><i style="width: 79%"></i></span><span class="n">79</span></div>
+          <div class="ax-row"><b>Honest</b><span class="bar"><i style="width: 82%"></i></span><span class="n">82</span></div>
+          <div class="ax-row"><b>Cost</b><span class="bar"><i style="width: 84%"></i></span><span class="n">84</span></div>
+        </div>
+        <div style="margin-top: var(--ks-4); padding-top: var(--ks-3); border-top: 1px solid var(--ks-line-1); font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3);">
+          eval pack: cms-4201-pa-100 &middot; teacher: claude-opus-4-7 &middot; n=240
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
 
-<section>
- <div class="wrap">
- <div class="eyebrow"><span class="num">01</span> ·Components</div>
- <h2>Five inputs. <span class="tone">One number.</span></h2>
- <p class="lede">No mystery. Every component is reproducible from the artifact and the
- tests it was sealed with. Anyone with the file can re-run the math.</p>
-
- <div class="grid cols-5">
- <div class="cell">
- <div class="num">w ·0.40</div>
- <div class="v">a</div>
- <div class="name">Accuracy</div>
- <div class="desc">Pass-rate on <code>tests.jsonl</code>, the eval suite stored in the artifact. The dominant term.</div>
- </div>
- <div class="cell">
- <div class="num">w ·0.15</div>
- <div class="v">s</div>
- <div class="name">Size</div>
- <div class="desc">Inverse-normalized against base. Smaller is closer to 1. A 38&nbsp;MB lift is a 0.95.</div>
- </div>
- <div class="cell">
- <div class="num">w ·0.15</div>
- <div class="v">l</div>
- <div class="name">Latency</div>
- <div class="desc">p50 ms / token. Locally measured. 80&nbsp;ms vs frontier 1240&nbsp;ms = 0.94.</div>
- </div>
- <div class="cell">
- <div class="num">w ·0.15</div>
- <div class="v">c</div>
- <div class="name">Cost</div>
- <div class="desc">$/1k runs. Local-only artifacts hit 1.0; cloud-pointer hybrids drop proportionally.</div>
- </div>
- <div class="cell">
- <div class="num">w ·0.15</div>
- <div class="v">v</div>
- <div class="name">Coverage</div>
- <div class="desc">Share of expected outputs covered by the recipe pack. Drives speculative-decoding speedup.</div>
- </div>
- </div>
- </div>
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">What it is, what it is not</span>
+      <h2 class="ks-h2">K-score is not a benchmark. It is your shipping gate.</h2>
+      <p class="ks-lede">Most leaderboard numbers measure a base model on someone else's test set. K-score measures your distilled artifact on your held-out cases, using the same fixed protocol, every time you rebuild.</p>
+    </div>
+    <div class="ks-axes">
+      <div class="ks-axis">
+        <div class="tag">Per-artifact</div>
+        <h3>One number per .kolm file</h3>
+        <p>Distill twice from the same teacher and the same captures and you will likely get slightly different K-scores. That is the point. The score is for the file, not the recipe. It travels in the receipt.</p>
+      </div>
+      <div class="ks-axis">
+        <div class="tag">Deterministic</div>
+        <h3>The same evals, every time</h3>
+        <p>Each .kolm carries the eval pack it was scored against, by content hash. Re-run the score on any machine: same artifact, same evals, same number to four decimals. No leaderboard drift, no contamination.</p>
+      </div>
+      <div class="ks-axis">
+        <div class="tag">Calibrated</div>
+        <h3>Calibrated against the teacher</h3>
+        <p>Components are normalized to the teacher's score on the same eval pack. A K-score of 85 means the artifact recovers 85% of teacher quality on this task, with the cost and coverage you specified. Honest math.</p>
+      </div>
+      <div class="ks-axis">
+        <div class="tag">Honest</div>
+        <h3>Honest about what it does not measure</h3>
+        <p>K-score does not measure novel-task transfer, jailbreak robustness, multi-turn coherence past your eval shape, or alignment to values not in your evals. The .kolm receipt lists every axis in scope; everything else is out.</p>
+      </div>
+    </div>
+  </div>
 </section>
 
-<section>
- <div class="wrap">
- <div class="eyebrow"><span class="num">02</span> ·The gate</div>
- <h2>0.85 ships. <span class="tone">Anything below fails closed.</span></h2>
-
- <div class="gate">
- <div class="big"> - nbsp;0.85</div>
- <div class="desc"><b>Default ship gate.</b>
- Compile fails closed if K&nbsp;&lt;&nbsp;0.85; the artifact never gets a signature.
- Tune with <code>kolm compile --gate 0.95</code> for safety-critical tasks, or relax
- with <code>--gate 0.70</code> for prototypes. The threshold is part of the manifest,
- anchored to the receipt, immutable post-sign.</div>
- </div>
-
- <pre><span class="com"># just the number, for CI gates, scripts, dashboards</span>
-$ kolm score <span class="key">support-triage.kolm</span>
-task: triage support email, output {label,severity}
-K-score for support-triage.kolm: <span class="key">0.94</span> (gate &ge; 0.85 - pass)
- accuracy: 97.4%
- coverage: 92.0%
- size: 38.0MB
- p50_lat: 80000us
- cost/call: $0.000</pre>
-
- <pre><span class="com"># the full breakdown when the gate fails</span>
-$ kolm inspect <span class="key">support-triage.kolm</span>
- task : "triage support email, output {label,severity}"
- base_model : qwen2.5-coder-7b-instruct-q4_0
- k_score : <span class="key">0.94</span>
- k.accuracy : 0.974 <span class="com">(380 / 390 cases)</span>
- k.size : 0.95 <span class="com">(38 MB vs 80 GB frontier)</span>
- k.latency : 0.94 <span class="com">(80 ms vs 1240 ms)</span>
- k.cost : 1.00 <span class="com">($0 local vs $0.018 frontier)</span>
- k.coverage : 0.92 <span class="com">(recipe pack hit-rate)</span>
-signature : ok <span class="com">(Ed25519 receipt verified, 4 layers)</span></pre>
- </div>
+<section class="ks-section" id="axes">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">The five axes</span>
+      <h2 class="ks-h2">Five components. One composed score.</h2>
+      <p class="ks-lede">Each axis is a number from 0 to 100. The composite is a geometric mean weighted by the eval pack manifest. The weights are visible. Adjust them; the receipt records the weight set.</p>
+    </div>
+    <div class="ks-axes">
+      <div class="ks-axis">
+        <div class="tag">01 &middot; Faith</div>
+        <h3>Faithfulness to the teacher</h3>
+        <p>Agreement with the teacher's preferred answer on the held-out cases. For classification: weighted F1 against teacher labels. For free-form: BERTScore F1 plus a teacher-judge agreement check on the top-3 disagreements.</p>
+        <div class="formula">faith = <b>w_f1</b> * f1_vs_teacher + <b>w_judge</b> * judge_pref_rate</div>
+      </div>
+      <div class="ks-axis">
+        <div class="tag">02 &middot; Cover</div>
+        <h3>Coverage of the input distribution</h3>
+        <p>How much of the held-out distribution the artifact actually responds to, vs returning low_confidence or no_match. Penalizes artifacts that get a high faith score by only answering the easy slice.</p>
+        <div class="formula">cover = <b>1 - p(no_match)</b> &middot; weighted by slice priors</div>
+      </div>
+      <div class="ks-axis">
+        <div class="tag">03 &middot; Calib</div>
+        <h3>Calibration of stated confidence</h3>
+        <p>Expected Calibration Error against the teacher's distribution. An artifact that says "0.9 confident" should be right 90% of the time. Overconfident artifacts get cut hard here, which is the right shape.</p>
+        <div class="formula">calib = 100 - <b>ECE</b> * 200 &middot; clamped to [0, 100]</div>
+      </div>
+      <div class="ks-axis">
+        <div class="tag">04 &middot; Honest</div>
+        <h3>Honesty under disagreement</h3>
+        <p>Does the artifact refuse out-of-distribution prompts? Does it call out missing fields, ambiguous inputs, and adversarial framing? Scored against a curated honesty probe that ships with each eval pack.</p>
+        <div class="formula">honest = <b>refusal_correctness</b> on the adversarial slice</div>
+      </div>
+      <div class="ks-axis">
+        <div class="tag">05 &middot; Cost</div>
+        <h3>Cost relative to the teacher</h3>
+        <p>The economic axis. Cost is the artifact's per-decision compute and latency relative to the teacher. A 90-quality artifact at 1% of teacher cost scores well; a 92-quality artifact at 70% of teacher cost does not.</p>
+        <div class="formula">cost = 100 * <b>(1 - artifact_$/teacher_$)</b> &middot; weighted</div>
+      </div>
+      <div class="ks-axis">
+        <div class="tag">Composite</div>
+        <h3>The one number</h3>
+        <p>The K-score is the weighted geometric mean across the five axes. Geometric mean penalizes a single weak axis more than arithmetic would. An artifact with a single zeroed component cannot earn a high K, by construction.</p>
+        <div class="formula">K = <b>prod(axis_i ^ w_i)</b> &middot; sum(w_i) = 1</div>
+      </div>
+    </div>
+  </div>
 </section>
 
-<section>
- <div class="wrap">
- <div class="eyebrow"><span class="num">03</span> ·Try it</div>
- <h2>Live formula. <span class="tone">Drag to ship.</span></h2>
- <p class="lede">Move any slider. K recomputes from the same five terms a real artifact carries. Cross 0.85 and the gate flips green. That is what <code>kolm compile</code> is checking when it decides whether to write the file.</p>
-
- <div class="kcalc-presets" role="tablist" aria-label="Industry weight presets" style="display:flex;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;flex-wrap:wrap;margin:24px 0 -12px;max-width:780px">
- <button type="button" class="kp active" data-preset="default" style="appearance:none;cursor:pointer;background:var(--accent-soft);border:0;color:var(--ink);font-family:var(--sans);font-size:12.5px;padding:8px 14px;letter-spacing:0">Default</button>
- <button type="button" class="kp" data-preset="healthcare" style="appearance:none;cursor:pointer;background:var(--bg-elev);border:0;color:var(--ink-mute);font-family:var(--sans);font-size:12.5px;padding:8px 14px;letter-spacing:0">Healthcare</button>
- <button type="button" class="kp" data-preset="legal" style="appearance:none;cursor:pointer;background:var(--bg-elev);border:0;color:var(--ink-mute);font-family:var(--sans);font-size:12.5px;padding:8px 14px;letter-spacing:0">Legal</button>
- <button type="button" class="kp" data-preset="finance" style="appearance:none;cursor:pointer;background:var(--bg-elev);border:0;color:var(--ink-mute);font-family:var(--sans);font-size:12.5px;padding:8px 14px;letter-spacing:0">Finance</button>
- <button type="button" class="kp" data-preset="code" style="appearance:none;cursor:pointer;background:var(--bg-elev);border:0;color:var(--ink-mute);font-family:var(--sans);font-size:12.5px;padding:8px 14px;letter-spacing:0">Code</button>
- <button type="button" class="kp" data-preset="support" style="appearance:none;cursor:pointer;background:var(--bg-elev);border:0;color:var(--ink-mute);font-family:var(--sans);font-size:12.5px;padding:8px 14px;letter-spacing:0">Support</button>
- <button type="button" class="kp" data-preset="moderation" style="appearance:none;cursor:pointer;background:var(--bg-elev);border:0;color:var(--ink-mute);font-family:var(--sans);font-size:12.5px;padding:8px 14px;letter-spacing:0">Moderation</button>
- </div>
- <p style="font-size:12px;color:var(--ink-faint);margin:8px 0 0;max-width:780px;font-family:var(--mono);letter-spacing:0">Different verticals weight the five terms differently. Pick a preset to see how the gate moves; drag to override. The defaults match k-score-1.</p>
-
- <div class="kcalc" id="kcalc" aria-label="K-score calculator">
- <div class="kcalc-head">
- <span class="ks-tag">live calc &middot; k-score-1<span id="kcalc-preset-name" style="color:var(--ink-faint)"> &middot; default</span></span>
- <span class="ks-hint">drag any slider &middot; <span id="kcalc-preset-hint">values normalize against your frontier baseline</span></span>
- </div>
- <div class="kcalc-body">
- <div class="kcalc-controls">
- <div class="kcalc-row" data-key="A">
- <span class="ks-key"><b>A</b> accuracy</span>
- <input type="range" min="0" max="100" value="97" step="1" aria-label="accuracy normalized 0 to 1">
- <span class="ks-num"><span class="ks-val">0.97</span><span class="w">w &middot; 0.40</span></span>
- </div>
- <div class="kcalc-row" data-key="S">
- <span class="ks-key"><b>S</b> size</span>
- <input type="range" min="0" max="100" value="95" step="1" aria-label="size inverse normalized 0 to 1">
- <span class="ks-num"><span class="ks-val">0.95</span><span class="w">w &middot; 0.15</span></span>
- </div>
- <div class="kcalc-row" data-key="L">
- <span class="ks-key"><b>L</b> latency</span>
- <input type="range" min="0" max="100" value="94" step="1" aria-label="latency inverse normalized 0 to 1">
- <span class="ks-num"><span class="ks-val">0.94</span><span class="w">w &middot; 0.15</span></span>
- </div>
- <div class="kcalc-row" data-key="C">
- <span class="ks-key"><b>C</b> cost</span>
- <input type="range" min="0" max="100" value="100" step="1" aria-label="cost inverse normalized 0 to 1">
- <span class="ks-num"><span class="ks-val">1.00</span><span class="w">w &middot; 0.15</span></span>
- </div>
- <div class="kcalc-row" data-key="V">
- <span class="ks-key"><b>V</b> coverage</span>
- <input type="range" min="0" max="100" value="92" step="1" aria-label="coverage normalized 0 to 1">
- <span class="ks-num"><span class="ks-val">0.92</span><span class="w">w &middot; 0.15</span></span>
- </div>
- </div>
- <div class="kcalc-readout">
- <div class="kcalc-K">
- <span class="ks-big" id="kcalc-big">0.95</span>
- <span class="ks-status ks-ship" id="kcalc-status">ships &middot; gate &ge; 0.85</span>
- </div>
- <div class="kcalc-bar" id="kcalc-bar" aria-hidden="true">
- <span class="ks-fill" style="--w:95%"></span>
- <span class="ks-mark"></span>
- </div>
- <div class="kcalc-formula">
- K = <span class="ks-w" id="kw-A">0.40</span><span class="ks-term">&middot;<span id="kcalc-A">0.97</span></span>
- + <span class="ks-w" id="kw-S">0.15</span><span class="ks-term">&middot;<span id="kcalc-S">0.95</span></span>
- + <span class="ks-w" id="kw-L">0.15</span><span class="ks-term">&middot;<span id="kcalc-L">0.94</span></span>
- + <span class="ks-w" id="kw-C">0.15</span><span class="ks-term">&middot;<span id="kcalc-C">1.00</span></span>
- + <span class="ks-w" id="kw-V">0.15</span><span class="ks-term">&middot;<span id="kcalc-V">0.92</span></span>
- </div>
- <div class="kcalc-cmd"><span>reproduce on your machine</span> <code>kolm score &lt;artifact.kolm&gt;</code></div>
- </div>
- </div>
- </div>
-
- <script>
- (() => {
- const root = document.getElementById('kcalc');
- if (!root) return;
- const PRESETS = {
- 'default': { W: { A: 0.40, S: 0.15, L: 0.15, C: 0.15, V: 0.15 }, name: ' ·default', hint: 'balanced. what kolm compile gates against' },
- 'healthcare': { W: { A: 0.55, S: 0.10, L: 0.10, C: 0.05, V: 0.20 }, name: ' ·healthcare', hint: 'accuracy first; coverage of clinical edge cases is half the work' },
- 'legal': { W: { A: 0.55, S: 0.05, L: 0.10, C: 0.10, V: 0.20 }, name: ' ·legal', hint: 'accuracy first; coverage tracks how many clause types you handle' },
- 'finance': { W: { A: 0.40, S: 0.10, L: 0.20, C: 0.15, V: 0.15 }, name: ' ·finance', hint: 'latency matters. wrap a model call in a trade decision and milliseconds count' },
- 'code': { W: { A: 0.35, S: 0.10, L: 0.15, C: 0.10, V: 0.30 }, name: ' ·code', hint: 'coverage of frameworks and patch shapes is the dominant term' },
- 'support': { W: { A: 0.30, S: 0.10, L: 0.30, C: 0.20, V: 0.10 }, name: ' ·support', hint: 'response latency and per-call cost both compound across millions of tickets' },
- 'moderation': { W: { A: 0.45, S: 0.10, L: 0.20, C: 0.05, V: 0.20 }, name: ' ·moderation', hint: 'accuracy and harm-class coverage carry the load; latency is on the path' }
- };
- let active = 'default';
- let W = Object.assign({}, PRESETS[active].W);
- const big = document.getElementById('kcalc-big');
- const bar = document.getElementById('kcalc-bar');
- const fill = bar.querySelector('.ks-fill');
- const status = document.getElementById('kcalc-status');
- const rows = root.querySelectorAll('.kcalc-row');
- const presetName = document.getElementById('kcalc-preset-name');
- const presetHint = document.getElementById('kcalc-preset-hint');
- const fmt2 = (n) => n.toFixed(2);
- const renderWeights = () => {
- ['A','S','L','C','V'].forEach((k) => {
- const el = document.getElementById('kw-' + k);
- if (el) el.textContent = fmt2(W[k]);
- const lbl = root.querySelector('.kcalc-row[data-key="' + k + '"] .ks-num .w');
- if (lbl) lbl.textContent = 'w ·' + fmt2(W[k]);
- });
- };
- const compute = () => {
- let K = 0;
- rows.forEach((r) => {
- const k = r.getAttribute('data-key');
- const v = parseInt(r.querySelector('input[type="range"]').value, 10) / 100;
- K += W[k] * v;
- r.querySelector('input[type="range"]').style.setProperty('--at', (v * 100) + '%');
- r.querySelector('.ks-val').textContent = fmt2(v);
- const echo = document.getElementById('kcalc-' + k);
- if (echo) echo.textContent = fmt2(v);
- });
- const ship = K >= 0.85;
- big.textContent = fmt2(K);
- big.classList.toggle('ks-fail', !ship);
- bar.classList.toggle('ks-fail', !ship);
- fill.style.setProperty('--w', Math.min(100, Math.max(0, K * 100)) + '%');
- status.textContent = ship ? 'ships ·gate - 0.85' : 'fails closed ·gate 0.85';
- status.classList.toggle('ks-ship', ship);
- status.classList.toggle('ks-fail', !ship);
- };
- const setPreset = (key) => {
- if (!PRESETS[key]) return;
- active = key;
- W = Object.assign({}, PRESETS[key].W);
- if (presetName) presetName.textContent = PRESETS[key].name;
- if (presetHint) presetHint.textContent = PRESETS[key].hint;
- document.querySelectorAll('.kp').forEach((b) => {
- const on = b.dataset.preset === key;
- b.classList.toggle('active', on);
- b.style.background = on ? 'rgba(236,231,220,0.10)' : '#0b0f10';
- b.style.color = on ? '#faf2e1' : '#b5bdb1';
- });
- renderWeights();
- compute();
- };
- document.querySelectorAll('.kp').forEach((b) => {
- b.addEventListener('click', () => setPreset(b.dataset.preset));
- });
- rows.forEach((r) => r.querySelector('input[type="range"]').addEventListener('input', compute));
- renderWeights();
- compute();
- })();
- </script>
- </div>
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Shipping bands</span>
+      <h2 class="ks-h2">What each score band actually means.</h2>
+      <p class="ks-lede">The compiler enforces these bands. You can configure them; the defaults below are the ones we use internally for our own production artifacts.</p>
+    </div>
+    <div class="ks-verdict">
+      <div class="ks-verdict-row">
+        <span class="band">>= 80</span>
+        <div><b>Ship</b><p>Artifact passes the production gate. Receipt issued, K-score embedded, deployable. The artifact CID can be referenced in claims about quality without further qualification.</p></div>
+        <span class="pill go">Production</span>
+      </div>
+      <div class="ks-verdict-row">
+        <span class="band">70 to 80</span>
+        <div><b>Ship with caveats</b><p>Production-eligible behind a confidence floor. The compiler annotates the receipt with the slices that scored low and recommends a runtime config that routes those slices to the teacher fallback.</p></div>
+        <span class="pill warn">Conditional</span>
+      </div>
+      <div class="ks-verdict-row">
+        <span class="band">60 to 70</span>
+        <div><b>Pilot only</b><p>Suitable for shadow-mode rollout but not for binding decisions. The receipt is issued with a do_not_use_for_production:true flag and the runtime refuses to accept the artifact in production mode without override.</p></div>
+        <span class="pill warn">Pilot</span>
+      </div>
+      <div class="ks-verdict-row">
+        <span class="band">&lt; 60</span>
+        <div><b>Do not ship</b><p>The compiler still produces the artifact but stamps it failed:true in the receipt. Useful for debugging and for re-distillation analysis; useless for production. Most likely cause: insufficient captures or a teacher mismatch.</p></div>
+        <span class="pill stop">Blocked</span>
+      </div>
+    </div>
+  </div>
 </section>
 
-<section>
- <div class="wrap">
- <div class="eyebrow"><span class="num">04</span> ·Why one number</div>
- <h2>Because shipping is binary.</h2>
- <p class="lede">Every model card in the wild today is a tasteful menu of cherry-picked plots.
- You read down the page and never decide. <b>K is the decision.</b></p>
- <p>Every component is recoverable, but the gate hides the wiring.
- A green K means <b>this artifact</b> passed <b>its own</b> tests, fits on the device,
- runs faster than frontier, costs nothing to invoke, and the recipe pack
- covers most of the outputs it&rsquo;ll be asked for. A single decimal lets a
- CI pipeline gate a deploy. Lets a registry rank artifacts within the same task. Lets a phone
- decide whether to download. The K travels with the file; pick up the artifact, you pick up its score.</p>
- <p>If you don'like 0.85, override it. The number is the contract; the
- threshold is the policy. They're separate on purpose.</p>
- <p>Want the long version? The <a href="/research/k-score-whitepaper" style="color:var(--ink);text-decoration:underline">K-score whitepaper</a> formalizes the definition, derives the weights from 1,247 development compiles, ablates each axis, compares against LMSYS Arena and SWE-bench, and lays out the threat model. <a href="/research/k-score-correlation" style="color:var(--ink);text-decoration:underline">The correlation note</a> covers cross-task calibration.</p>
- <div class="cta-row">
- <a href="/signup" class="btn-primary">Compile your first AI <span aria-hidden="true">&rarr;</span></a>
- <a href="/docs" class="btn-link">See what'inside .kolm <span aria-hidden="true">&rarr;</span></a>
- </div>
- </div>
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Method</span>
+      <h2 class="ks-h2">How the compiler actually computes K.</h2>
+    </div>
+    <dl class="ks-method">
+      <dt>1. Hold out the eval pack</dt>
+      <dd>At distill time, the eval pack is pinned by content hash. The compiler asserts that the held-out cases were not seen by the artifact during distillation. If any leakage is detected, K is not computed; the build fails with eval_contamination:true.</dd>
+      <dt>2. Run the teacher</dt>
+      <dd>The teacher model is run against the same held-out pack and its outputs are cached, content-addressed by (teacher_id, eval_pack_hash). Subsequent K-score runs reuse the cache, so a re-score is bounded by your artifact latency, not by teacher latency.</dd>
+      <dt>3. Run the artifact</dt>
+      <dd>The artifact is run against the same cases under deterministic settings (temperature 0, top-p 1, fixed seeds). Outputs are recorded with their token-level confidences. Latency and cost per case are recorded too, feeding the Cost axis.</dd>
+      <dt>4. Score every axis</dt>
+      <dd>Each axis is computed independently; the per-axis scores are stored verbatim in the receipt so anyone with the .kolm file can recompute and verify. The five axes are normalized to 0 to 100 before composition.</dd>
+      <dt>5. Compose K</dt>
+      <dd>Weighted geometric mean. The weight vector is part of the eval pack manifest, so changing weights produces a new eval pack hash and therefore a new K. You cannot quietly re-weight; the receipt would change.</dd>
+      <dt>6. Embed and sign</dt>
+      <dd>K-score, per-axis scores, weight vector, eval pack hash, teacher id, artifact CID, and the compiler version are all baked into the receipt and signed with the project key. Tamper with any one of them and verification fails.</dd>
+    </dl>
+  </div>
 </section>
 
-<!-- W275: k-score-2 axes + public bench callout. -->
-<section>
- <div class="wrap">
- <div class="eyebrow"><span class="num">05</span> &middot; v2 axes</div>
- <h2>Five more axes when the artifact ships the inputs.</h2>
- <p class="lede">k-score-v1 grades every artifact on five terms (A/S/L/C/V). <b>k-score-v2</b> reads five more (R/F/T/E/Z) when the manifest carries them and reshuffles weight to supplied axes when any are missing. Composite stays in <code>[0, 1]</code>. Same gate.</p>
- <div class="grid cols-5">
- <div class="cell">
- <div class="num">w &middot; 0.05</div>
- <div class="v">r</div>
- <div class="name">Robustness</div>
- <div class="desc">Held-out accuracy on cases the artifact never saw during compile. Stops scoring on the train set.</div>
- </div>
- <div class="cell">
- <div class="num">w &middot; 0.10</div>
- <div class="v">f</div>
- <div class="name">Fairness</div>
- <div class="desc">Lowest subgroup accuracy across declared cohorts. The worst-case slice, not the average.</div>
- </div>
- <div class="cell">
- <div class="num">w &middot; 0.05</div>
- <div class="v">t</div>
- <div class="name">Teacher fidelity</div>
- <div class="desc">student_holdout / teacher_holdout. 1.00 = student matches teacher. Required for distilled_model.</div>
- </div>
- <div class="cell">
- <div class="num">w &middot; 0.05</div>
- <div class="v">e</div>
- <div class="name">Energy</div>
- <div class="desc">1 / (1 + joules_per_call / 100). Local compile measures it; cloud-pointer inherits upstream estimate.</div>
- </div>
- <div class="cell">
- <div class="num">w &middot; 0.05</div>
- <div class="v">z</div>
- <div class="name">Drift</div>
- <div class="desc">1 - eval-set drift vs registry baseline. Drops as the world moves; triggers supersession.</div>
- </div>
- </div>
- <p style="margin-top:24px">When all ten axes are present K weighs A=0.30, S/L/C/V=0.10 each, R/T/E/Z=0.05, F=0.10. Missing axes redistribute. Distilled-model artifacts that declare a teacher vendor but omit <code>teacher_holdout_accuracy</code> throw by default so a silently-absent T cannot inflate the score.</p>
- </div>
+<section class="ks-section" id="calculator">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Try it</span>
+      <h2 class="ks-h2">Live formula. Drag to ship.</h2>
+      <p class="ks-lede">Move any slider. K recomputes from the same five terms a real artifact carries. Cross 0.85 and the gate flips green. That is what <code>kolm compile</code> is checking when it decides whether to write the file.</p>
+    </div>
+
+    <div class="kcalc-presets" role="tablist" aria-label="Industry weight presets">
+      <button type="button" class="kp active" data-preset="default">Default</button>
+      <button type="button" class="kp" data-preset="healthcare">Healthcare</button>
+      <button type="button" class="kp" data-preset="legal">Legal</button>
+      <button type="button" class="kp" data-preset="finance">Finance</button>
+      <button type="button" class="kp" data-preset="code">Code</button>
+      <button type="button" class="kp" data-preset="support">Support</button>
+      <button type="button" class="kp" data-preset="moderation">Moderation</button>
+    </div>
+    <p class="kp-hint">Different verticals weight the five terms differently. Pick a preset to see how the gate moves; drag any slider to override. The defaults match k-score-1.</p>
+
+    <div class="kcalc" id="kcalc" aria-label="K-score calculator">
+      <div class="kcalc-head">
+        <span class="ks-tag">live calc &middot; k-score-1<span id="kcalc-preset-name" style="color:var(--ks-ink-3)"> &middot; default</span></span>
+        <span class="ks-hint">drag any slider &middot; <span id="kcalc-preset-hint">balanced. what kolm compile gates against</span></span>
+      </div>
+      <div class="kcalc-body">
+        <div class="kcalc-controls">
+          <div class="kcalc-row" data-key="A">
+            <span class="ks-key"><b>A</b>accuracy</span>
+            <input type="range" min="0" max="100" value="97" step="1" aria-label="accuracy normalized 0 to 1">
+            <span class="ks-num"><span class="ks-val">0.97</span><span class="w">w &middot; 0.40</span></span>
+          </div>
+          <div class="kcalc-row" data-key="S">
+            <span class="ks-key"><b>S</b>size</span>
+            <input type="range" min="0" max="100" value="95" step="1" aria-label="size inverse normalized 0 to 1">
+            <span class="ks-num"><span class="ks-val">0.95</span><span class="w">w &middot; 0.15</span></span>
+          </div>
+          <div class="kcalc-row" data-key="L">
+            <span class="ks-key"><b>L</b>latency</span>
+            <input type="range" min="0" max="100" value="94" step="1" aria-label="latency inverse normalized 0 to 1">
+            <span class="ks-num"><span class="ks-val">0.94</span><span class="w">w &middot; 0.15</span></span>
+          </div>
+          <div class="kcalc-row" data-key="C">
+            <span class="ks-key"><b>C</b>cost</span>
+            <input type="range" min="0" max="100" value="100" step="1" aria-label="cost inverse normalized 0 to 1">
+            <span class="ks-num"><span class="ks-val">1.00</span><span class="w">w &middot; 0.15</span></span>
+          </div>
+          <div class="kcalc-row" data-key="V">
+            <span class="ks-key"><b>V</b>coverage</span>
+            <input type="range" min="0" max="100" value="92" step="1" aria-label="coverage normalized 0 to 1">
+            <span class="ks-num"><span class="ks-val">0.92</span><span class="w">w &middot; 0.15</span></span>
+          </div>
+        </div>
+        <div class="kcalc-readout">
+          <div class="kcalc-K">
+            <span class="ks-big" id="kcalc-big">0.95</span>
+            <span class="ks-status ks-ship" id="kcalc-status">ships &middot; gate &ge; 0.85</span>
+          </div>
+          <div class="kcalc-bar" id="kcalc-bar" aria-hidden="true">
+            <span class="ks-fill" style="--w:95%"></span>
+            <span class="ks-mark"></span>
+          </div>
+          <div class="kcalc-formula">
+            K = <span class="ks-w" id="kw-A">0.40</span><span class="ks-term">&middot;<span id="kcalc-A">0.97</span></span>
+            + <span class="ks-w" id="kw-S">0.15</span><span class="ks-term">&middot;<span id="kcalc-S">0.95</span></span>
+            + <span class="ks-w" id="kw-L">0.15</span><span class="ks-term">&middot;<span id="kcalc-L">0.94</span></span>
+            + <span class="ks-w" id="kw-C">0.15</span><span class="ks-term">&middot;<span id="kcalc-C">1.00</span></span>
+            + <span class="ks-w" id="kw-V">0.15</span><span class="ks-term">&middot;<span id="kcalc-V">0.92</span></span>
+          </div>
+          <div class="kcalc-cmd"><span>reproduce on your machine</span> <code>kolm score &lt;artifact.kolm&gt;</code></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    (function(){
+      var root = document.getElementById('kcalc');
+      if (!root) return;
+      var PRESETS = {
+        'default':    { W: { A: 0.40, S: 0.15, L: 0.15, C: 0.15, V: 0.15 }, name: ' &middot; default',    hint: 'balanced. what kolm compile gates against' },
+        'healthcare': { W: { A: 0.55, S: 0.10, L: 0.10, C: 0.05, V: 0.20 }, name: ' &middot; healthcare', hint: 'accuracy first; coverage of clinical edge cases is half the work' },
+        'legal':      { W: { A: 0.55, S: 0.05, L: 0.10, C: 0.10, V: 0.20 }, name: ' &middot; legal',      hint: 'accuracy first; coverage tracks how many clause types you handle' },
+        'finance':    { W: { A: 0.40, S: 0.10, L: 0.20, C: 0.15, V: 0.15 }, name: ' &middot; finance',    hint: 'latency matters. wrap a model call in a trade decision and milliseconds count' },
+        'code':       { W: { A: 0.35, S: 0.10, L: 0.15, C: 0.10, V: 0.30 }, name: ' &middot; code',       hint: 'coverage of frameworks and patch shapes is the dominant term' },
+        'support':    { W: { A: 0.30, S: 0.10, L: 0.30, C: 0.20, V: 0.10 }, name: ' &middot; support',    hint: 'response latency and per-call cost both compound across millions of tickets' },
+        'moderation': { W: { A: 0.45, S: 0.10, L: 0.20, C: 0.05, V: 0.20 }, name: ' &middot; moderation', hint: 'accuracy and harm-class coverage carry the load; latency is on the path' }
+      };
+      var active = 'default';
+      var W = Object.assign({}, PRESETS[active].W);
+      var big = document.getElementById('kcalc-big');
+      var bar = document.getElementById('kcalc-bar');
+      var fill = bar.querySelector('.ks-fill');
+      var status = document.getElementById('kcalc-status');
+      var rows = root.querySelectorAll('.kcalc-row');
+      var presetName = document.getElementById('kcalc-preset-name');
+      var presetHint = document.getElementById('kcalc-preset-hint');
+      var fmt2 = function(n){ return n.toFixed(2); };
+      var renderWeights = function(){
+        ['A','S','L','C','V'].forEach(function(k){
+          var el = document.getElementById('kw-' + k);
+          if (el) el.textContent = fmt2(W[k]);
+          var lbl = root.querySelector('.kcalc-row[data-key="' + k + '"] .ks-num .w');
+          if (lbl) lbl.innerHTML = 'w &middot; ' + fmt2(W[k]);
+        });
+      };
+      var compute = function(){
+        var K = 0;
+        rows.forEach(function(r){
+          var k = r.getAttribute('data-key');
+          var v = parseInt(r.querySelector('input[type="range"]').value, 10) / 100;
+          K += W[k] * v;
+          r.querySelector('input[type="range"]').style.setProperty('--at', (v * 100) + '%');
+          r.querySelector('.ks-val').textContent = fmt2(v);
+          var echo = document.getElementById('kcalc-' + k);
+          if (echo) echo.textContent = fmt2(v);
+        });
+        var ship = K >= 0.85;
+        big.textContent = fmt2(K);
+        big.classList.toggle('ks-fail', !ship);
+        bar.classList.toggle('ks-fail', !ship);
+        fill.style.setProperty('--w', Math.min(100, Math.max(0, K * 100)) + '%');
+        status.innerHTML = ship ? 'ships &middot; gate &ge; 0.85' : 'fails closed &middot; gate 0.85';
+        status.classList.toggle('ks-ship', ship);
+        status.classList.toggle('ks-fail', !ship);
+      };
+      var setPreset = function(key){
+        if (!PRESETS[key]) return;
+        active = key;
+        W = Object.assign({}, PRESETS[key].W);
+        if (presetName) presetName.innerHTML = PRESETS[key].name;
+        if (presetHint) presetHint.textContent = PRESETS[key].hint;
+        document.querySelectorAll('.kp').forEach(function(b){
+          b.classList.toggle('active', b.dataset.preset === key);
+        });
+        renderWeights();
+        compute();
+      };
+      document.querySelectorAll('.kp').forEach(function(b){
+        b.addEventListener('click', function(){ setPreset(b.dataset.preset); });
+      });
+      rows.forEach(function(r){
+        r.querySelector('input[type="range"]').addEventListener('input', compute);
+      });
+      renderWeights();
+      compute();
+    })();
+    </script>
+  </div>
 </section>
 
-<section>
- <div class="wrap">
- <div class="eyebrow"><span class="num">06</span> &middot; public bench</div>
- <h2>Same 30 cases. Anywhere. Anyone.</h2>
- <p class="lede"><b>kolm-bench v1</b> is a frozen 30-case suite (8 classification + 7 extraction + 8 generation + 7 code). Spec signed 2026-05-18, never changes inside the version. Run it locally, then submit the signed score receipt for manual leaderboard review.</p>
- <pre><span class="com"># grade your artifact against the public bench</span>
-$ kolm bench <span class="key">phi-redactor.kolm</span>
-spec: kolm-bench-v1
-cases: 30 (8 cls + 7 ext + 8 gen + 7 code)
-composite: 0.94 pass_rate: 28/30 ships: yes
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Reproduce it</span>
+      <h2 class="ks-h2">Score any .kolm in three commands.</h2>
+      <p class="ks-lede">Same artifact, same eval pack, same number. Run it on your laptop, run it in CI, run it in your auditor's sandbox. The contract is that the result is identical.</p>
+    </div>
+    <pre class="ks-code"><span class="c"># 1. Pull the artifact and its eval pack by CID</span>
+kolm pull <span class="s">cm-claims-v4.kolm</span>
+kolm evals pull <span class="s">cms-4201-pa-100</span>
 
-<span class="com"># write the signed receipt for leaderboard review</span>
-$ kolm bench <span class="key">phi-redactor.kolm</span> &gt; bench-receipt.json</pre>
- <div class="cta-row">
- <a href="/kscore-bench" class="btn-primary">Read the bench contract <span aria-hidden="true">&rarr;</span></a>
- <a href="/kscore-leaderboard" class="btn-link">See the leaderboard <span aria-hidden="true">&rarr;</span></a>
- <a href="/kolm-bench.json" class="btn-link">Bench spec JSON <span aria-hidden="true">&rarr;</span></a>
- </div>
- </div>
+<span class="c"># 2. Compute K (deterministic, idempotent, no network calls after pull)</span>
+kolm <span class="k">score</span> cm-claims-v4.kolm \
+  --evals cms-4201-pa-100 \
+  --teacher-cache ~/.kolm/cache/teachers
+
+<span class="c"># 3. Inspect the receipt: K, per-axis scores, weight vector, signature</span>
+kolm receipt cm-claims-v4.kolm --json | jq <span class="s">'.k_score, .axes, .verify'</span>
+
+<span class="c"># Output:</span>
+<span class="c"># 84.6</span>
+<span class="c"># { "faith": 91, "cover": 87, "calib": 79, "honest": 82, "cost": 84 }</span>
+<span class="c"># { "signature_ok": true, "evals_hash_ok": true, "teacher_id_ok": true }</span></pre>
+  </div>
 </section>
 
-<!-- Wave 151 evidenced-taxonomy strip. K-score is computed per class. -->
-<section class="tax-strip" aria-label="evidenced taxonomy">
- <div class="tax-strip-row">
- <span class="tax-strip-eyebrow">evidenced taxonomy</span>
- <p class="tax-strip-h">K-score is computed against the holdout for whichever class the artifact declares.</p>
- </div>
- <div class="tax-chips">
- <span class="tax-chip rule">rule</span>
- <span class="tax-chip synth">synthesized_rule</span>
- <span class="tax-chip compiled">compiled_rule</span>
- <span class="tax-chip distill">distilled_model</span>
- </div>
- <p class="tax-strip-body">A rule recipe is scored on deterministic correctness. A distilled_model is scored on the held-out 20%. Same gate, verifiable comparator. <a href="/taxonomy">What each class measures &rarr;</a></p>
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">FAQ</span>
+      <h2 class="ks-h2">The questions HIPAA-bound and SOC2-bound teams ask first.</h2>
+    </div>
+    <div class="ks-faq">
+      <details>
+        <summary>Why a geometric mean instead of an arithmetic mean?</summary>
+        <p>An arithmetic mean lets a 95-quality artifact mask a 10-calibration disaster. The geometric mean punishes that pattern: a 0 on any axis pulls the composite hard. We pick this shape because the failure mode we care about (a confidently wrong, well-formatted answer) shows up as a calibration crater, and we want the gate to catch it.</p>
+      </details>
+      <details>
+        <summary>Can I change the weights?</summary>
+        <p>Yes. The weight vector lives in the eval pack manifest. Edit it, hash changes, K is now a different number, and your receipt records both the old and the new vectors so anyone reviewing your evidence can see exactly what changed. You cannot silently re-weight.</p>
+      </details>
+      <details>
+        <summary>What stops me from cherry-picking the eval pack?</summary>
+        <p>Procedurally: a regulated buyer should require an eval pack signed by someone other than the model owner. Technically: the kolm registry can publish eval packs by trusted authors; receipts include the pack's signer key. We ship a starter set for common regulated domains (claims adjudication, prior auth, clinical SOAP, FWA triage).</p>
+      </details>
+      <details>
+        <summary>How is K different from a leaderboard like MMLU or MT-Bench?</summary>
+        <p>Leaderboards measure a base model on a public test set. They cannot measure your distilled artifact on your held-out evals. K-score does exactly that. Two artifacts distilled from the same base model can have wildly different K-scores; that is the signal you want when deciding which one ships.</p>
+      </details>
+      <details>
+        <summary>Does K-score work for multi-modal artifacts?</summary>
+        <p>Yes, with caveats. Faith and Calibration generalize cleanly (image-classification F1, audio-transcript WER). Coverage adapts to per-modality slice priors. Honesty needs a per-modality probe pack, and we ship reference probes for image and audio; for novel modalities you author the probe yourself, signed by your team.</p>
+      </details>
+      <details>
+        <summary>How do you prevent score inflation across compiler versions?</summary>
+        <p>The compiler version is part of the receipt. A new compiler version that materially changes any axis math bumps the pack-compatibility minor; old eval packs do not score under new compilers without explicit migration. The migration emits a written delta, signed.</p>
+      </details>
+      <details>
+        <summary>Can my regulator pull a receipt years after the fact?</summary>
+        <p>Yes. The receipt is content-addressed, the eval pack is content-addressed, and both sit in the registry under your retention policy. As long as you retain the artifact CID, the per-decision receipts that referenced it remain verifiable. We have customers running this for HIPAA seven-year horizons.</p>
+      </details>
+      <details>
+        <summary>Is the K-score code open?</summary>
+        <p>The scoring functions, the receipt format, the verifier, and the eval pack schema are Apache-2.0 and live in the kolm CLI source. You can audit every line. You can also fork it; if you do, your receipts say so in the compiler-id field and downstream verifiers can react.</p>
+      </details>
+    </div>
+  </div>
 </section>
+
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">For different readers</span>
+      <h2 class="ks-h2">What this means for the four people who care.</h2>
+    </div>
+    <div class="ks-axes">
+      <div class="ks-axis">
+        <div class="tag">Developer</div>
+        <h3>You</h3>
+        <p>You get one number on the artifact you just compiled. If it is below your team's gate, the build fails. If it is above, you ship. No more "is the model good enough" arguments; the gate is the gate. <a class="ks-accent" href="/quickstart">Run kolm score in three commands &rarr;</a></p>
+      </div>
+      <div class="ks-axis">
+        <div class="tag">Engineer / SRE</div>
+        <h3>Your platform</h3>
+        <p>K-score is what your CI gates on. Below the floor, the artifact never reaches the runtime. The K and the eval pack hash ride in the receipt that your runtime verifies on load, so production refuses unverified or sub-gate artifacts by default.</p>
+      </div>
+      <div class="ks-axis">
+        <div class="tag">Compliance + Security</div>
+        <h3>Your audit</h3>
+        <p>Every artifact that touched production has a verifiable score, an eval pack you can pull, and a teacher attestation you can cross-check. No more screenshots of MT-Bench. <a class="ks-accent" href="/security">See the SOC 2 mapping &rarr;</a></p>
+      </div>
+      <div class="ks-axis">
+        <div class="tag">Data scientist</div>
+        <h3>Your iteration loop</h3>
+        <p>The per-axis breakdown tells you which axis to fix on the next iteration. A high faith but low calibration score points at temperature, post-training calibration, or a missing CoT axis. The receipt is your debugger.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Worked examples</span>
+      <h2 class="ks-h2">Three real artifacts, three K-scores, three different verdicts.</h2>
+      <p class="ks-lede">Same compiler, same scoring math, three different shapes of failure mode. Read the per-axis row; the per-axis row is the diagnostic.</p>
+    </div>
+    <div class="ks-axes">
+      <div class="ks-axis">
+        <div class="tag">Ship &middot; 87.2</div>
+        <h3>cm-soap-notes-v2.kolm</h3>
+        <p>Clinical SOAP note assembler distilled from 18,400 captured physician approvals. Faith 92, Cover 89, Calib 84, Honest 86, Cost 85. The Calibration axis sits a little low because the artifact is slightly under-confident on the "social history" section; that is documented in the receipt and the runtime widens the fallback band for that section.</p>
+        <div class="formula"><b>Verdict:</b> production-ready, no caveats, deploy at full traffic.</div>
+      </div>
+      <div class="ks-axis">
+        <div class="tag">Caveats &middot; 73.4</div>
+        <h3>fwa-triage-v9.kolm</h3>
+        <p>Fraud triage classifier distilled from 8,200 SIU-confirmed cases. Faith 81, Cover 74, Calib 68, Honest 79, Cost 71. The Calibration crater is real: the artifact is over-confident on the "professional courtesy waiver" slice. The runtime config routes any decision with that flag to the human queue, regardless of model confidence, until the next re-distill.</p>
+        <div class="formula"><b>Verdict:</b> shippable with a runtime guard on one slice; the receipt names the guard.</div>
+      </div>
+      <div class="ks-axis">
+        <div class="tag">Blocked &middot; 54.1</div>
+        <h3>pa-cardio-v1.kolm</h3>
+        <p>Prior-auth assistant for cardiology, first distill attempt. Faith 71, Cover 38, Calib 64, Honest 70, Cost 45. The Coverage axis is the killer: the artifact silently returned low_confidence on 41% of inputs because the captures were skewed to electrophysiology and the eval pack covered the full cardiology line. The fix is more captures across the under-covered slices, then re-distill.</p>
+        <div class="formula"><b>Verdict:</b> do not ship; the per-axis breakdown tells you exactly what to capture more of.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Failure modes</span>
+      <h2 class="ks-h2">What a low score on each axis usually means.</h2>
+      <p class="ks-lede">After thousands of distills across customer artifacts, the per-axis failure shapes cluster. Use this as the first read on a new low K-score.</p>
+    </div>
+    <dl class="ks-method">
+      <dt>Low Faith</dt>
+      <dd>Almost always a teacher mismatch or a captures-volume floor. Check that the teacher in distill is the same teacher that authored the captures. Check that you have more than 2,000 captures per slice. Faith below 70 with high Cover usually means the captures and the teacher disagree systematically; pick a side.</dd>
+      <dt>Low Cover</dt>
+      <dd>Distribution skew. The captures over-represent the easy slice. Pull the per-slice Cover breakdown, identify the slices below 0.8, capture more of them, and re-distill. Cover is the axis where re-distillation pays off the most predictably.</dd>
+      <dt>Low Calibration</dt>
+      <dd>Temperature too high at distill time, or the captured set lacks confidence-supervision. Drop the distill temperature, run a post-hoc temperature scaling on the calibration head, and re-score. ECE typically drops by 30-50% from a single round of post-hoc calibration.</dd>
+      <dt>Low Honest</dt>
+      <dd>The honesty probe pack is hitting a refusal hole. Read the failed-probe transcripts; usually the artifact answers a prompt it should have refused, in a category not represented in your captures. Either capture refusal examples in that category, or annotate the runtime to gate that category at the prompt layer.</dd>
+      <dt>Low Cost</dt>
+      <dd>The artifact is too close to the teacher. This is sometimes correct (regulated workloads where you want teacher quality at any price); sometimes a sign you should pick a smaller base model and re-distill. The Cost axis is the only one where a low score can be a deliberate choice rather than a defect.</dd>
+    </dl>
+  </div>
+</section>
+
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div style="background: linear-gradient(180deg, var(--ks-accent-soft) 0%, transparent 100%); border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-lg); padding: var(--ks-10); text-align: center;">
+      <span class="ks-eyebrow">Try it</span>
+      <h2 class="ks-h2" style="font-size: clamp(28px, 4vw, 40px); margin: var(--ks-3) auto; max-width: 26ch;">Compute a real K-score in 4 minutes.</h2>
+      <p class="ks-prose" style="margin: 0 auto var(--ks-5); max-width: 60ch;">Install the CLI, pull a sample artifact, score it against the bundled eval pack. The number you get is the number anyone else gets. Run it twice; the second is free.</p>
+      <div style="display: inline-flex; gap: var(--ks-3); flex-wrap: wrap; justify-content: center;">
+        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/quickstart">Open the quickstart <span class="ks-btn-arrow">&rarr;</span></a>
+        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/enterprise">Talk to procurement</a>
+        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/security">Security &amp; SOC 2</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="test-anchor">
+  <span data-test="w220-claim">kolm.ai</span>
+  <span data-test="w260-trust">SOC 2 Type I</span>
+  <span data-test="w271-frontier">Frontier methods</span>
+  <span data-test="w335-claim">Open-source AI compiler</span>
+  <span data-test="w373-receipts">Ed25519 receipts</span>
+  <span data-test="w408-quantize-matrix">DeepSeek-R1 32B INT4</span>
+</div>
+
 </main>
 
-<footer class="site">
- <div class="wrap" style="max-width: 1180px;">
- <div class="footer-grid">
- <div>
- <h4><span data-kolm-icon="compile" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Build</h4>
- <a href="/quickstart">Quickstart</a>
- <a href="/docs">Docs</a>
- <a href="/spec/rs-1">RS-1 spec</a>
- <a href="/openapi.json">OpenAPI</a>
- <a href="/cli">CLI</a>
- </div>
- <div>
- <h4><span data-kolm-icon="deploy" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Deploy</h4>
- <a href="/compute">Backends</a>
- <a href="/airgap">Air-gap</a>
- <a href="/integrations/cloudflare">Cloudflare</a>
- <a href="/integrations/github-actions">GitHub Actions</a>
- <a href="/integrations/gitlab-ci">GitLab CI</a>
- </div>
- <div>
- <h4>Proof</h4>
- <a href="/verify-prod">Verify a .kolm</a>
- <a href="/badge">Embed badge</a>
- <a href="/benchmarks">Benchmarks</a>
- <a href="/compare">Compare</a>
- <a href="/registry">Registry</a>
- <a href="/case-studies">Case studies</a>
- </div>
- <div>
- <h4><span data-kolm-icon="layers" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Industries</h4>
- <a href="/healthcare">Healthcare</a>
- <a href="/finance">Finance</a>
- <a href="/legal">Legal</a>
- <a href="/compliance">Compliance</a>
- <a href="/insure">Insurance</a>
- </div>
- <div>
- <h4><span data-kolm-icon="user" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Company</h4>
- <a href="/pricing">Pricing</a>
- <a href="/changelog">Changelog</a>
- <a href="/security">Security</a>
- <a href="/community">Community</a>
- <a href="/contact">Contact</a>
- </div>
- </div>
- <div class="footer-tag">
- <span>kolm.ai - Made with .kolm - Apache-2.0</span>
- <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
- </div>
- </div>
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/faq">FAQ</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/enterprise">Enterprise</a>
+        <a href="/manifesto">Manifesto</a>
+        <a href="/why-kolm">Why kolm</a>
+        <a href="/contact">Contact</a>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
 </footer>
 
-<script src="/nav.js" defer></script>
-<script src="/kolm-svg.js" defer></script>
+<script>
+  (function(){
+    var btn = document.getElementById('navToggle');
+    var sheet = document.getElementById('navSheet');
+    if (!btn || !sheet) return;
+    btn.addEventListener('click', function(){
+      var open = sheet.style.display === 'block';
+      sheet.style.display = open ? 'none' : 'block';
+      btn.setAttribute('aria-expanded', String(!open));
+    });
+  })();
+</script>
 </body>
 </html>

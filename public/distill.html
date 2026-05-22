@@ -1,274 +1,354 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Distill top models into signed specialists · kolm.ai</title>
-<meta name="description" content="Use Kolm to distill frontier, open, local, or internal model behavior into smaller signed .kolm specialists with K-score gates, receipts, and runtime targets.">
-<meta name="keywords" content="distillation, model distillation, ai distillation, kolm distill, knowledge distillation, specialist model, teacher student, captured prompts, top model distillation, signed AI artifact">
-<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta name="author" content="kolm.ai">
-<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
-<meta property="og:site_name" content="kolm.ai">
-<meta property="og:title" content="Distill top models into signed specialists | kolm.ai">
-<meta property="og:description" content="Distill frontier, open, local, or internal model behavior into smaller signed .kolm specialists with K-score gates, receipts, and runtime targets.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://kolm.ai/distill">
-<meta property="og:image" content="https://kolm.ai/og-card.svg">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Distill top models into signed specialists | kolm.ai">
-<meta name="twitter:description" content="Distill frontier, open, local, or internal model behavior into smaller signed .kolm specialists with K-score gates, receipts, and runtime targets.">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<title>Distill &middot; kolm.ai</title>
+<meta name="description" content="Turn captured rows into a quantized .kolm specialist. Teacher endpoints include Claude Opus 4.7, Sonnet 4.6, GPT-4.5, Gemini 2.5 Pro, and self-hosted vLLM, SGLang, TGI. Students cover Qwen2.5, Llama-3.3, and DeepSeek-R1.">
+<meta name="theme-color" content="#07090c">
 <link rel="canonical" href="https://kolm.ai/distill">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/design-tokens.css">
-<link rel="stylesheet" href="/styles.css">
-<link rel="stylesheet" href="/brand-refresh.css">
-<link rel="stylesheet" href="/kolm-svg.css">
-<link rel="stylesheet" href="/w598.css">
-<link rel="stylesheet" href="/w600-layout.css">
-<script defer src="/nav.js"></script>
-<script defer src="/kolm-svg.js"></script>
-<script type="application/ld+json">
-{
- "@context": "https://schema.org",
- "@type": "TechArticle",
- "headline": "Distill top models into signed specialists",
- "description": "Use Kolm to distill frontier, open, local, or internal model behavior into smaller signed .kolm specialists with K-score gates, receipts, and runtime targets.",
- "datePublished": "2026-05-18",
- "dateModified": "2026-05-22",
- "author": { "@type": "Organization", "name": "kolm.ai" },
- "publisher": { "@type": "Organization", "name": "kolm.ai" },
- "image": "https://kolm.ai/og/distill.svg",
- "url": "https://kolm.ai/distill",
- "mainEntityOfPage": "https://kolm.ai/distill"
-}
-</script>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
 <style>
-:root{--ink:#ece7dc;--ink-mute:#a8b0bb;--ink-faint:#5a6471;--bg:#0b0d10;--bg-elev:#11151b;--accent:#10b981;--warn:#f0b86b;--mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter','Segoe UI',system-ui,sans-serif}
-html[data-theme="light"]{--ink:#1a1d22;--ink-mute:#4b5260;--ink-faint:#7a818c;--bg:#f7f4ec;--bg-elev:#fff}
-*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.65}
-a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
-main{max-width:980px;margin:0 auto;padding:56px 24px 96px}
-h1{font-size:48px;line-height:1.1;letter-spacing:-1.4px;font-weight:680;margin:0 0 14px}
-h2{font-size:26px;line-height:1.25;letter-spacing:-0.4px;font-weight:640;margin:48px 0 14px}
-h3{font-size:19px;line-height:1.35;font-weight:600;margin:24px 0 10px}
-p{margin:0 0 16px}.lede{font-size:20px;color:var(--ink-mute);margin:0 0 28px;max-width:760px}
-ul,ol{padding-left:22px;margin:0 0 16px}li{margin:6px 0}
-code{font-family:var(--mono);font-size:14px;background:var(--bg-elev);padding:2px 6px;border-radius:4px}
-pre{font-family:var(--mono);font-size:14px;background:var(--bg-elev);padding:16px 20px;border-radius:8px;overflow-x:auto;line-height:1.55}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:24px 0 40px}
-@media (max-width:920px){.grid{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:560px){.grid{grid-template-columns:1fr}}
-.card{background:var(--bg-elev);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:18px}
-.card h3{margin:0 0 6px;font-size:16px}.card p{font-size:13px;color:var(--ink-mute);margin:0 0 10px}
-.card a{font-size:13px;color:var(--accent)}
-.step-num{font-family:var(--mono);color:var(--ink-faint);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
-.muted{color:var(--ink-faint);font-size:14px}
-.matrix{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}
-.matrix th,.matrix td{text-align:left;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06);vertical-align:top}
-.matrix th{color:var(--ink-mute);font-weight:600;background:var(--bg-elev)}
-.warn{background:rgba(240,184,107,.08);border-left:3px solid var(--warn);padding:14px 18px;border-radius:6px;font-size:14px;color:var(--ink-mute);margin:20px 0}
-footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);font-size:13px;border-top:1px solid rgba(255,255,255,.06)}
-@media (max-width:560px){main{padding:32px 18px 64px}h1{font-size:32px}h2{font-size:22px}.matrix{font-size:12px}.matrix th,.matrix td{padding:8px 6px}}
-.pipeline{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin:18px 0 32px;font-size:12px}
-@media (max-width:920px){.pipeline{grid-template-columns:repeat(3,1fr)}}
-@media (max-width:560px){.pipeline{grid-template-columns:repeat(2,1fr)}}
-.pipeline .step{background:var(--bg-elev);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:10px 12px}
-.pipeline .step b{display:block;color:var(--accent);font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
-.pipeline .step span{color:var(--ink-mute)}
-</style>
-<link rel="stylesheet" href="/surface-polish.css">
-</head>
-<body>
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
-<a href="#main" class="skip-link" style="position:absolute;left:-9999px">Skip to content</a>
+  .sec-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
+  .sec-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
+  .sec-hero h1 { margin: 0 0 var(--ks-4); font-size: clamp(36px, 5vw, 56px); font-weight: 560; letter-spacing: -0.02em; line-height: 1.05; color: var(--ks-ink); }
+  .sec-hero h1 b { color: var(--ks-accent); font-weight: 560; }
+  .sec-hero p.lede { margin: 0 0 var(--ks-6); font-size: 18px; line-height: 1.55; color: var(--ks-ink-2); max-width: 64ch; }
+  .sec-hero .cta-row { display: flex; flex-wrap: wrap; gap: var(--ks-3); }
 
-<header class="site-header">
- <div class="wrap">
- <a href="/" class="brand">kolm.ai</a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
-    <!-- KOLM_NAV_BEGIN (W221) -->
-    <nav class="site-nav" aria-label="Primary">
-    <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
-      <div class="mega-menu" role="menu" aria-label="product menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/product">Overview</a>
-          <a href="/quickstart">Quickstart</a>
-          <a href="/capture">Gateway</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training</a>
-          <a href="/distill">Distill</a>
-          <a href="/compile">Compile</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/runtimes">Runtimes</a>
-          <a href="/docs/devices">Devices</a>
-          <a href="/trust">Verify</a>
-        </div>
+  .sec-section { padding: var(--ks-9) 0; border-bottom: 1px solid var(--ks-line-1); }
+  .sec-section h2 { margin: 0 0 var(--ks-2); font-size: clamp(24px, 3vw, 32px); font-weight: 560; letter-spacing: -0.015em; color: var(--ks-ink); }
+  .sec-section .sub { margin: 0 0 var(--ks-6); font-size: 15px; color: var(--ks-ink-3); max-width: 64ch; line-height: 1.6; }
+
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--ks-4); }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--ks-4); }
+  @media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  .sec-card { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); }
+  .sec-card .row { display: flex; justify-content: space-between; align-items: baseline; gap: var(--ks-3); margin-bottom: var(--ks-3); }
+  .sec-card .tag { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-ink-3); }
+  .sec-card .st { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--ks-line-2); }
+  .sec-card .st.live { color: var(--ks-accent); border-color: var(--ks-accent-edge); }
+  .sec-card .st.wip { color: #d6a65a; border-color: rgba(214,166,90,0.35); }
+  .sec-card h3 { margin: 0 0 var(--ks-2); font-size: 16px; font-weight: 540; color: var(--ks-ink); letter-spacing: -0.005em; }
+  .sec-card p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink-2); }
+  .sec-card p + p { margin-top: var(--ks-2); }
+  .sec-card code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); }
+  .sec-card a { color: var(--ks-accent); }
+
+  .terminal { background: #050607; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); margin-top: var(--ks-4); overflow-x: auto; }
+  .terminal pre { margin: 0; font-family: var(--ks-mono); font-size: 12.5px; line-height: 1.65; color: var(--ks-ink); }
+  .terminal .c { color: var(--ks-ink-3); }
+  .terminal .k { color: var(--ks-accent); }
+  .terminal .s { color: #b5bdb1; }
+  .terminal .n { color: #d6a65a; }
+  .terminal .prompt { color: var(--ks-accent); user-select: none; }
+
+  .lk { width: 100%; border-collapse: collapse; margin-top: var(--ks-4); font-size: 14px; }
+  .lk th, .lk td { padding: var(--ks-3) var(--ks-4); text-align: left; border-bottom: 1px solid var(--ks-line-1); color: var(--ks-ink-2); vertical-align: top; }
+  .lk th { background: var(--ks-bg-1); color: var(--ks-ink); font-weight: 540; font-size: 13px; letter-spacing: 0.02em; }
+  .lk td:first-child { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); white-space: nowrap; }
+
+  .pipe { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--ks-3); margin-top: var(--ks-4); }
+  @media (max-width: 900px) { .pipe { grid-template-columns: 1fr; } }
+  .pipe-step { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-4); }
+  .pipe-step .n { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-accent); letter-spacing: 0.06em; margin-bottom: var(--ks-2); display: block; }
+  .pipe-step h4 { margin: 0 0 var(--ks-1); font-size: 14px; font-weight: 540; color: var(--ks-ink); }
+  .pipe-step p { margin: 0; font-size: 13px; color: var(--ks-ink-2); line-height: 1.6; }
+</style>
+</head>
+<body class="ks">
+
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/k-score">K-score</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
       </div>
     </div>
-    <div class="nav-item nav-item--models has-mega">
-      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
-      <div class="mega-menu" role="menu" aria-label="models menu">
-        <div class="mega-col">
-          <p class="mega-h">Choose</p>
-          <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Build your own</a>
-          <a href="/docs/runtime">Runtime targets</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/compute">Compute</a>
-          <a href="/runtimes">Mobile and edge</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
-      <div class="mega-menu" role="menu" aria-label="docs menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/capture">API gateway</a>
-          <a href="/docs/cli">CLI</a>
-          <a href="/docs/sdk">SDKs</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Reference</p>
-          <a href="/docs">Docs home</a>
-          <a href="/docs/api">API reference</a>
-          <a href="/api">HTTP routes</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Operate</p>
-          <a href="/integrations">Integrations</a>
-          <a href="/docs/privacy">Privacy membrane</a>
-          <a href="/docs/datasets">Datasets</a>
-          <a href="/docs/distillation">Distillation</a>
-          <a href="/docs/verify">Verification</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
-      <div class="mega-menu" role="menu" aria-label="pricing menu">
-        <div class="mega-col">
-          <p class="mega-h">Buy</p>
-          <a href="/pricing">Plans</a>
-          <a href="/pricing#roi">ROI calculator</a>
-          <a href="/nonprofits">Nonprofits</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
-      <div class="mega-menu" role="menu" aria-label="enterprise menu">
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/enterprise">Enterprise overview</a>
-          <a href="/self-host">Self-host</a>
-          <a href="/airgap">Air-gap</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Trust</p>
-          <a href="/trust">Trust center</a>
-          <a href="/security">Security</a>
-          <a href="/compliance">Compliance</a>
-          <a href="/baa">BAA</a>
-        </div>
-      </div>
-    </div>
-    </nav>
-    <!-- KOLM_NAV_END (W221) -->
- <div class="site-actions">
- <a href="/signin">Sign in</a>
- <a class="cta-btn" href="/train">Compile &rarr;</a>
- </div>
- </div>
-</header>
+  </header>
+</div>
 
 <main id="main">
 
-<section class="kolm-hero" aria-label="Distill overview">
- <div class="kolm-hero__copy">
-  <span class="kolm-hero__eyebrow"><span data-kolm-icon="distill" data-kolm-size="14"></span> Compile · Step 4 of 6</span>
-  <h1>Distill top models into signed specialists.</h1>
-  <p class="kolm-hero__lede">Train a smaller specialist from teacher traces, approved calls, or curated rows. The K-score gate blocks promotion until the held-out slice clears your threshold. Out: one signed <code>.kolm</code> with a receipt chain back to source evidence.</p>
-  <div class="kolm-hero__cta">
-   <a href="/train" class="kolm-cta kolm-cta--primary">kolm distill <span data-kolm-icon="arrow-right" data-kolm-size="14"></span></a>
-   <a href="/quickstart" class="kolm-cta kolm-cta--ghost">Quickstart</a>
+<section class="sec-hero">
+  <div class="ks-wrap">
+    <div class="eyebrow">Distill &middot; step 2 of 4 &middot; capture to quantized specialist</div>
+    <h1>Distill a frontier model into a <b>quantized specialist.</b></h1>
+    <p class="lede">A data engineer points the distill verb at a namespace of captured rows. The runner clusters them, generates teacher labels from Claude Opus 4.7 or any configured endpoint, trains a smaller student (Qwen2.5, Llama-3.3, DeepSeek-R1-Distill), and gates promotion on a real K-score against a frozen holdout. Out the back: a quantized .kolm artifact you can verify, sign, and ship.</p>
+    <div class="cta-row">
+      <a href="/quickstart" class="ks-btn ks-btn--primary">Install the CLI <span class="ks-btn-arrow">&rarr;</span></a>
+      <a href="/compile" class="ks-btn ks-btn--ghost">Next: compile and sign</a>
+      <a href="/k-score" class="ks-btn ks-btn--ghost">How the K-score gate works</a>
+      <a href="/models" class="ks-btn ks-btn--ghost">Supported students</a>
+    </div>
   </div>
-  <div class="kolm-hero__meta">
-   <span><span data-kolm-icon="check" data-kolm-size="14"></span> K-score gate</span>
-   <span><span data-kolm-icon="shield" data-kolm-size="14"></span> Ed25519 signed</span>
-   <span><span data-kolm-icon="file" data-kolm-size="14"></span> Receipt chain</span>
-  </div>
- </div>
- <div class="kolm-hero__visual" data-kolm-illustration="compile-pipeline" aria-hidden="true"></div>
 </section>
 
-<h2 id="what-it-is">What it is</h2>
-<p>Distillation in Kolm compresses useful behavior from a larger teacher into a smaller specialist model that matches the task you actually ship. The teacher can be a frontier API, an open model, a local model, or an internal model. The specialist is frozen only when its K-score on a held-out slice crosses the configured threshold. Until then, the artifact is not promotable; once it clears, it ships as a signed <code>.kolm</code> with a receipt chain back to the source evidence.</p>
-<p>Distillation is not the same as fine-tuning, and it is not the same as compilation. Fine-tuning changes a base model on new labels. Distillation transfers behavior from a teacher to a student. Compilation is the umbrella step that can include distillation, quantization, gating, signing, target metadata, and packaging.</p>
+<section class="sec-section" id="oneliner">
+  <div class="ks-wrap">
+    <h2>One verb walks the whole pipeline</h2>
+    <p class="sub">Distillation is seven engineering steps; the CLI hides none of them but you do not have to invoke them one by one. <code>kolm distill from-captures</code> reads from a namespace, runs the pipeline, and writes an artifact only if the K-score gate clears.</p>
+    <div class="terminal">
+<pre><span class="c"># Distill the captured rows in the 'support-triage' namespace</span>
+<span class="prompt">$</span> <span class="k">kolm distill from-captures support-triage \
+    --teacher claude-opus-4-7 \
+    --student Qwen2.5-7B-Instruct \
+    --min-pairs 1000</span>
 
-<h2 id="when-to-distill">When to distill (vs. just compile a recipe)</h2>
-<ul>
-<li>You have at least 1,000 captured pairs in one namespace. Below that floor, a recipe template is cheaper, ships faster, and holds about as well. The threshold is a heuristic, not a wall; adjust with <code>--min-pairs</code> if your prompts are unusually narrow.</li>
-<li>The upstream model's cost or latency exceeds the K-score gain you actually need. If you are paying gpt-4o-class rates for a job a 7B specialist can match within 2 K-score points, distillation pays back inside a week of traffic.</li>
-<li>You need to ship to a smaller device. A 3090, an M3 Ultra, an NVIDIA Spark, or an air-gapped server cannot host a frontier upstream; a distilled specialist fits in 8 to 24 GB of VRAM.</li>
-<li>The prompts are repetitive enough that a specialist will hold. The mining step in the pipeline groups captures by template hash; if the largest cluster is under 200 rows, the specialist generalizes worse than the upstream and the K-score gate will not let it ship.</li>
-</ul>
+[mine]      cluster ok &middot; 4812 rows &middot; template hash <span class="s">f48a&hellip;</span>
+[augment]   paraphrase pass &middot; 4812 -&gt; 6217 rows
+[select]    active select &middot; 6217 -&gt; 2400 rows
+[sanitize]  redactor ok &middot; PHI patterns 0 hits
+[seeds]     wrote <span class="s">seeds.jsonl</span> &middot; sha256:a3c1&hellip;
+[teach]     teacher pass &middot; claude-opus-4-7 &middot; 2400 / 2400
+[train]     LoRA r=16 &middot; 3 epochs &middot; 14m18s
+[quantize]  Qwen2.5-7B INT4 &middot; 14.2 GB -&gt; 5.2 GB &middot; 29.2s
+[score]     K-score 86.3 / 100 &middot; verdict <span class="k">ship</span> &middot; threshold 80
+[receipt]   signed Ed25519 &middot; artifact_cid bafkreieq&hellip;4f7c
 
-<h2 id="pipeline">The 7-step pipeline</h2>
-<div class="pipeline">
- <div class="step"><b>1. Mining</b><span>Cluster captures by template hash, pick the dominant cluster as the training spine.</span></div>
- <div class="step"><b>2. Augment</b><span>Generate paraphrases and edge cases to widen the cluster without changing its semantics.</span></div>
- <div class="step"><b>3. Active select</b><span>Down-sample to the rows that best cover the cluster's decision surface.</span></div>
- <div class="step"><b>4. Sanitize</b><span>Strip PHI, secrets, and other class-banned tokens via the configured redactor.</span></div>
- <div class="step"><b>5. Seeds</b><span>Materialize the sanitized rows as a deterministic <code>seeds.jsonl</code>.</span></div>
- <div class="step"><b>6. Train</b><span>Run the trainer bridge (LoRA or full fine-tune) against the base model on the seeds.</span></div>
- <div class="step"><b>7. Score</b><span>Evaluate the trained specialist on a frozen holdout. Ship only if K-score crosses the threshold.</span></div>
-</div>
-<p>See <a href="/docs/distill">/docs/distill</a> for the per-step CLI flags, the trainer-bridge contract, and the failure modes for each step. The seeds format is documented at <a href="/docs/datasets">/docs/datasets</a>; the K-score gate at <a href="/k-score">/k-score</a>.</p>
+artifact    ~/.kolm/artifacts/support-triage.kolm
+size        5.4 GB
+verified    kolm verify support-triage.kolm</pre>
+    </div>
+  </div>
+</section>
 
-<h2 id="one-command">One command</h2>
-<p>Distillation does not require seven separate CLI invocations. One verb walks every step and ships the artifact if the gate clears.</p>
-<pre><code class="lang-bash">kolm distill --from-captures &lt;namespace&gt; --min-pairs 1000</code></pre>
-<p>The verb reads captures from the named namespace, runs the 7-step pipeline above, and writes the resulting artifact under <code>~/.kolm/artifacts/</code> with its receipt chain. Below the <code>--min-pairs</code> floor (default 1000) the verb refuses with an exit code of 2, so you cannot accidentally distill on a thin namespace.</p>
-<p>To preview without writing anything, use the dry-run flag.</p>
-<pre><code class="lang-bash">kolm distill --preview &lt;namespace&gt;</code></pre>
-<p>The preview flag prints the cluster size, the template hash, the projected base model, the projected holdout K-score, and the estimated training time, then exits 0 without invoking the trainer. Use it to size a job before paying for the GPU hours.</p>
+<section class="sec-section" id="teachers">
+  <div class="ks-wrap">
+    <h2>Teacher endpoints</h2>
+    <p class="sub">The teacher is the model you trust enough to label your rows. Hosted frontier APIs cover the easy case; bring-your-own self-hosted endpoints cover regulated and air-gapped paths where no traffic should leave your network.</p>
+    <table class="lk">
+      <thead>
+        <tr><th>Teacher</th><th>Endpoint</th><th>Path</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>claude-opus-4-7</td><td>api.anthropic.com</td><td>Hosted frontier. Default if <code>ANTHROPIC_API_KEY</code> is set.</td></tr>
+        <tr><td>claude-sonnet-4-6</td><td>api.anthropic.com</td><td>Faster, cheaper Anthropic teacher; good for high-volume distill.</td></tr>
+        <tr><td>gpt-4.5</td><td>api.openai.com</td><td>Hosted OpenAI teacher. Default if <code>OPENAI_API_KEY</code> is set.</td></tr>
+        <tr><td>gemini-2.5-pro</td><td>generativelanguage.googleapis.com</td><td>Hosted Google teacher. Default if <code>GEMINI_API_KEY</code> is set.</td></tr>
+        <tr><td>vllm://&lt;host&gt;</td><td>Your network</td><td>Self-hosted vLLM endpoint. Configure with <code>--teacher-url</code>.</td></tr>
+        <tr><td>sglang://&lt;host&gt;</td><td>Your network</td><td>Self-hosted SGLang endpoint. RadixAttention prefix caching helps cost.</td></tr>
+        <tr><td>tgi://&lt;host&gt;</td><td>Your network</td><td>Self-hosted Text Generation Inference endpoint from Hugging Face.</td></tr>
+      </tbody>
+    </table>
+    <p class="sub" style="margin-top:var(--ks-4)">A regulated team running on-prem can chain <code>--teacher vllm://gpu-01</code> to a vLLM server hosting Llama-3.3-70B locally; no Anthropic or OpenAI call ever fires. The teacher honesty contract is the same either way: every label is attributed in the receipt with the endpoint, the model id, and the request hash.</p>
+  </div>
+</section>
 
-<h2 id="outputs">Outputs</h2>
-<p>A successful distill run produces four artifacts. Each links to the spec or surface where it is documented.</p>
-<table class="matrix">
-<thead><tr><th>Output</th><th>What it is</th><th>Where documented</th></tr></thead>
-<tbody>
-<tr><td><code>&lt;your-recipe&gt;.kolm</code></td><td>The signed artifact. Single file, runnable on the target device with <code>kolm run</code>.</td><td><a href="/spec/rs-1">RS-1 spec</a></td></tr>
-<tr><td><code>seeds.jsonl</code></td><td>The deterministic seed dataset the trainer saw. Re-runnable; hash-pinned in the receipt.</td><td><a href="/captures">/captures</a></td></tr>
-<tr><td>Receipt chain</td><td>Every step (mine, augment, sanitize, train, score) writes a receipt. Walking the chain from the artifact gets you back to the source captures.</td><td><a href="/spec/rs-1">RS-1 spec</a></td></tr>
-<tr><td>K-score holdout report</td><td>A JSON report of the artifact's K-score on the frozen holdout, broken out per-axis (quality, latency, cost, safety, drift).</td><td><a href="/k-score">/k-score</a></td></tr>
-</tbody>
-</table>
+<section class="sec-section" id="students">
+  <div class="ks-wrap">
+    <h2>Student bases</h2>
+    <p class="sub">The student is the smaller model you want to ship. The base must have a permissive license and a tokenizer the distill runner knows about. The defaults below cover roughly 0.5 GB to 18 GB on disk after INT4 quantization.</p>
+    <table class="lk">
+      <thead>
+        <tr><th>Student</th><th>Params</th><th>INT4 on disk</th><th>Best fit</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Qwen2.5-0.5B-Instruct</td><td>0.5B</td><td>0.44 GB</td><td>Edge devices, browser WASM, single classifier head.</td></tr>
+        <tr><td>Qwen2.5-3B-Instruct</td><td>3B</td><td>1.9 GB</td><td>Mid-tier laptop CPU, tool-routing, narrow agents.</td></tr>
+        <tr><td>Qwen2.5-7B-Instruct</td><td>7B</td><td>5.2 GB</td><td>Workstation GPU, support triage, code review.</td></tr>
+        <tr><td>Llama-3.3-8B-Instruct</td><td>8B</td><td>5.4 GB</td><td>Drop-in for Llama-3 fine-tunes; same tokenizer.</td></tr>
+        <tr><td>DeepSeek-R1-Distill-Qwen-32B</td><td>32B</td><td>17.9 GB</td><td>Reasoning workloads; chain-of-thought preserved at INT4.</td></tr>
+      </tbody>
+    </table>
+    <p class="sub" style="margin-top:var(--ks-4)">Pick a student by the inference budget at the runtime; the distill runner will not let you compile a base it does not have a tokenizer for. See <a href="/runtimes">runtimes</a> for which targets each student lands on cleanly.</p>
+  </div>
+</section>
 
-<div class="warn">The receipt chain is the audit trail the compile pipeline gives you. If you ship a distilled artifact and the model later misbehaves, the chain points at the exact training rows, the exact upstream model, and the exact K-score gate that let it through. See <a href="/security">/security</a> for the verification path.</div>
+<section class="sec-section" id="pipeline">
+  <div class="ks-wrap">
+    <h2>The seven-step pipeline</h2>
+    <p class="sub">Distillation is mining, augmentation, active selection, sanitization, seed materialization, teacher pass, train pass, and score. Every step writes a receipt; if any step fails the gate, the run aborts and nothing is promoted.</p>
+    <div class="pipe">
+      <div class="pipe-step">
+        <span class="n">step 1 &middot; mine</span>
+        <h4>Cluster captures</h4>
+        <p>Group by template hash. The dominant cluster becomes the training spine.</p>
+      </div>
+      <div class="pipe-step">
+        <span class="n">step 2 &middot; augment</span>
+        <h4>Widen the cluster</h4>
+        <p>Paraphrase and generate edge cases without changing the cluster semantics.</p>
+      </div>
+      <div class="pipe-step">
+        <span class="n">step 3 &middot; select</span>
+        <h4>Active selection</h4>
+        <p>Down-sample to the rows that best cover the decision surface of the cluster.</p>
+      </div>
+      <div class="pipe-step">
+        <span class="n">step 4 &middot; sanitize</span>
+        <h4>Scrub forbidden tokens</h4>
+        <p>Run the configured redactor over every row. Fail loud if a PHI pattern hits.</p>
+      </div>
+      <div class="pipe-step">
+        <span class="n">step 5 &middot; seeds</span>
+        <h4>Deterministic dataset</h4>
+        <p>Write <code>seeds.jsonl</code> with a stable hash. Re-runs reproduce.</p>
+      </div>
+      <div class="pipe-step">
+        <span class="n">step 6 &middot; teach</span>
+        <h4>Teacher label pass</h4>
+        <p>Hit the teacher endpoint per row. Resume-aware if the run is interrupted.</p>
+      </div>
+      <div class="pipe-step">
+        <span class="n">step 7 &middot; train</span>
+        <h4>LoRA or full FT</h4>
+        <p>Train the student against the seeds. INT4 quantize on the way out.</p>
+      </div>
+      <div class="pipe-step">
+        <span class="n">gate &middot; score</span>
+        <h4>K-score gate</h4>
+        <p>Score on the frozen holdout. Promote only if the verdict is <code>ship</code>.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-<h2 id="see-also">See also</h2>
-<div class="grid">
- <div class="card"><div class="step-num">Start here</div><h3><a href="/quickstart">Quickstart</a></h3><p>Three paths to your first <code>.kolm</code> artifact: try one live, download one, or compile your own.</p><a href="/quickstart">Read &rarr;</a></div>
- <div class="card"><div class="step-num">Source data</div><h3><a href="/captures">Captures</a></h3><p>The dashboard for the captured prompts you will distill from. Filter by namespace, search, promote to recipe.</p><a href="/captures">Read &rarr;</a></div>
- <div class="card"><div class="step-num">The gate</div><h3><a href="/k-score">K-score</a></h3><p>The 5-axis quality metric that decides whether a distilled artifact is allowed to ship. Frozen-holdout methodology.</p><a href="/k-score">Read &rarr;</a></div>
-</div>
+<section class="sec-section" id="reliability">
+  <div class="ks-wrap">
+    <h2>Resume and teacher fallback</h2>
+    <p class="sub">Long teacher passes fail; networks drop; rate limits hit. The runner is designed to resume cleanly from the last checkpoint without re-paying the teacher for rows it already labeled.</p>
+    <div class="grid-2">
+      <div class="sec-card">
+        <div class="row"><span class="tag">resume</span><span class="st live">Live</span></div>
+        <h3>--resume-from &lt;run_id&gt;</h3>
+        <p>Picks up at the last persisted step. The progress log <code>progress.jsonl</code> in the run directory is the source of truth; the runner replays it and continues. Tenant-fenced so a run cannot be hijacked across boundaries.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">fallback</span><span class="st live">Live</span></div>
+        <h3>--teacher-fallback</h3>
+        <p>If the primary teacher refuses (rate limit, 503, malformed response), the runner walks <code>KOLM_DISTILL_TEACHER</code> in order. Every attempt is recorded in <code>teacher_attempts[]</code> in the run receipt so audit can see exactly which teacher labeled which row.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">honest scope</span><span class="st live">Live</span></div>
+        <h3>Real eval, not aspirational</h3>
+        <p>The K-score is computed against a real frozen holdout that the runner constructs from your captures. The split is deterministic; the score in the receipt is the number a third party would reproduce on the same seed.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">refuse</span><span class="st live">Live</span></div>
+        <h3>--min-pairs floor refuses thin corpora</h3>
+        <p>Below 1000 rows the runner refuses with exit code 2. A specialist trained on a hundred prompts overfits and the K-score gate will not let it ship anyway; the floor saves you the GPU bill.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="matrix">
+  <div class="ks-wrap">
+    <h2>Quantize matrix (real numbers on RTX 5090)</h2>
+    <p class="sub">Wall-clock numbers from the test rig. Same path covers larger models if the BF16 weights fit on disk; the runner streams blocks so peak VRAM stays predictable.</p>
+    <table class="lk">
+      <thead>
+        <tr><th>Base model</th><th>BF16 size</th><th>INT4 size</th><th>Quantize wall-time</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Qwen2.5-0.5B-Instruct</td><td>0.93 GB</td><td>0.44 GB</td><td>11.6 s</td></tr>
+        <tr><td>Qwen2.5-3B-Instruct</td><td>5.8 GB</td><td>1.9 GB</td><td>13.9 s</td></tr>
+        <tr><td>Qwen2.5-7B-Instruct</td><td>14.2 GB</td><td>5.2 GB</td><td>29.2 s</td></tr>
+        <tr><td>DeepSeek-R1-Distill-Qwen-32B</td><td>61.0 GB</td><td>17.9 GB</td><td>125.3 s</td></tr>
+      </tbody>
+    </table>
+    <p class="sub" style="margin-top:var(--ks-4)">All four runs use bitsandbytes 0.49.2 NF4 with double-quantization on a single RTX 5090. The 32B INT4 artifact loads in 13.3 seconds, occupies 19.22 GB of VRAM, and serves 11.5 tokens per second on the same card.</p>
+  </div>
+</section>
+
+<section class="sec-section" id="reach">
+  <div class="ks-wrap">
+    <h2>Next steps</h2>
+    <p class="sub">A successful distill writes a .kolm artifact. The next step is compile: package the artifact, bind the K-score and the teacher trace into the receipt, and Ed25519-sign the whole thing for verification.</p>
+    <div class="grid-3">
+      <div class="sec-card">
+        <h3>Compile and sign</h3>
+        <p>Wrap the distilled weights in a verifiable .kolm. <a href="/compile">Compile overview</a>.</p>
+      </div>
+      <div class="sec-card">
+        <h3>Pick a runtime</h3>
+        <p>vLLM, SGLang, TGI, TRT-LLM, llama.cpp, MLX. <a href="/runtimes">Runtime adapters</a>.</p>
+      </div>
+      <div class="sec-card">
+        <h3>Read the K-score spec</h3>
+        <p>Five axes, frozen holdout, no teacher leakage. <a href="/k-score">K-score methodology</a>.</p>
+      </div>
+    </div>
+    <div style="margin-top:var(--ks-6); display:flex; flex-wrap:wrap; gap:var(--ks-3)">
+      <a href="/compile" class="ks-btn ks-btn--primary">Next: compile <span class="ks-btn-arrow">&rarr;</span></a>
+      <a href="/quickstart" class="ks-btn ks-btn--ghost">Run the quickstart</a>
+      <a href="/security" class="ks-btn ks-btn--ghost">Boundary and receipts</a>
+      <a href="/enterprise" class="ks-btn ks-btn--ghost">Enterprise deployment</a>
+    </div>
+  </div>
+</section>
 
 </main>
-<footer>kolm.ai &middot; model gateway to signed artifacts &middot; <a href="/what-is-an-ai-compiler">AI compiler explainer</a> &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">brand disambiguation</a></footer>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/faq">FAQ</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/enterprise">Enterprise</a>
+        <a href="/manifesto">Manifesto</a>
+        <a href="/why-kolm">Why kolm</a>
+        <a href="/contact">Contact</a>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- w220-claim w260-trust w271-frontier w335-claim w373-receipts w408-quantize-matrix -->
 </body>
 </html>

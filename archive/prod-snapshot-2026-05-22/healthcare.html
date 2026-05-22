@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>HIPAA-compliant AI on your hospital hardware · kolm.ai</title>
+<meta name="description" content="kolm compiles approved clinical tasks into signed .kolm artifacts that run inside the BAA-scoped hosts your team controls, and every inference returns an...">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta property="og:title" content="HIPAA-compliant AI on your hospital hardware · kolm.ai">
+<meta property="og:description" content="kolm compiles approved clinical tasks into signed .kolm artifacts that run inside the BAA-scoped hosts your team controls, and every inference returns an...">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="HIPAA-compliant AI on your hospital hardware · kolm.ai">
+<meta name="twitter:description" content="kolm compiles approved clinical tasks into signed .kolm artifacts that run inside the BAA-scoped hosts your team controls, and every inference returns an...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/healthcare">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/healthcare">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+ :root {
+ --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+ --accent: #faf2e1; --accent-soft: rgba(236,231,220, 0.10); --accent-strong: #c9c2b2;
+ --good: #7ef0d2; --bad: #ff6b91;
+ --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+ --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+ }
+ * { box-sizing: border-box; }
+ html, body { margin: 0; padding: 0; }
+ body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; letter-spacing: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+ a { color: inherit; text-decoration: none; }
+ .wrap { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+ @media (max-width: 720px) { .wrap { padding: 0 20px; } }
+
+ header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
+ header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
+ header.site .left { display: flex; align-items: center; gap: 36px; }
+ header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); }
+ header.site .brand img { height: 18px; width: 18px; }
+ header.site .brand span { font-weight: 500; font-size: 16px; letter-spacing: 0; }
+ header.site nav { display: flex; gap: 22px; }
+ header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
+ header.site nav a:hover { color: var(--ink); }
+ header.site .right { display: flex; align-items: center; gap: 14px; }
+ header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
+ header.site .right .ghost:hover { color: var(--ink); }
+ header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
+ header.site .right .cta:hover { background: #fff; }
+ @media (max-width: 720px) { header.site nav { display: none; } }
+
+ section.hero { padding: 104px 0 64px; position: relative; overflow: hidden; }
+ section.hero::before {
+ content: ""; position: absolute; inset: 0; pointer-events: none;
+ background:
+ radial-gradient(ellipse 1100px 540px at 22% 10%, rgba(126,240,210, 0.07), transparent 60%),
+ radial-gradient(ellipse 700px 400px at 88% 90%, rgba(236,231,220, 0.04), transparent 60%);
+ }
+ section.hero::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.36; background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%237ef0d2' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%237ef0d2' stop-opacity='0.18'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke='url(%23g)' stroke-width='0.7'%3E%3Cpath d='M -200 720 Q 200 660 540 700 T 1240 680 T 1700 690'/%3E%3Cpath d='M -200 660 Q 240 590 580 640 T 1280 620 T 1700 630'/%3E%3Cpath d='M -200 600 Q 280 520 620 580 T 1320 560 T 1700 570'/%3E%3Cpath d='M -200 540 Q 320 450 660 520 T 1360 500 T 1700 510'/%3E%3Cpath d='M -200 480 Q 360 380 700 460 T 1400 440 T 1700 450'/%3E%3Cpath d='M -200 420 Q 400 310 740 400 T 1440 380 T 1700 390'/%3E%3C/g%3E%3C/svg%3E"); background-size: cover; background-position: center top; mask-image: radial-gradient(ellipse 1000px 700px at 50% 80%, #000 0%, rgba(0,0,0,0.4) 50%, transparent 95%); -webkit-mask-image: radial-gradient(ellipse 1000px 700px at 50% 80%, #000 0%, rgba(0,0,0,0.4) 50%, transparent 95%); }
+ section.hero .wrap { position: relative; z-index: 2; }
+
+ .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 6px 14px; background: rgba(8,9,8,0.62); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+ .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 10px #7ef0d2; animation: pulse-dot 2.4s ease-in-out infinite; }
+ @keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.3); } }
+
+ h1 { margin: 26px 0 22px; font-size: clamp(48px, 7vw, 104px); line-height: 0.94; font-weight: 500; letter-spacing: -0.04em; max-width: 14ch; }
+ h1 .tone { background: linear-gradient(170deg, #faf2e1 0%, #7ef0d2 50%, #faf2e1 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+ p.lede { margin: 0 0 32px; font-size: clamp(16px, 1.3vw, 18.5px); line-height: 1.55; color: var(--ink-mute); max-width: 56ch; }
+ p.lede b { color: var(--ink); font-weight: 500; }
+ p.lede code { font-family: var(--mono); font-size: 0.9em; background: var(--bg-card); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; color: var(--ink); }
+
+ .cta-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+ a.btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--ink); color: var(--bg); border-radius: 6px; padding: 11px 18px; font-size: 14px; font-weight: 500; transition: background 120ms; }
+ a.btn-primary:hover { background: #fff; }
+ a.btn-link { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); padding: 11px 14px; font-size: 14px; font-weight: 500; transition: color 120ms; }
+ a.btn-link:hover { color: var(--accent); }
+
+ section { padding: 80px 0; }
+ section + section { border-top: 1px solid var(--line); }
+ .eyebrow { display: inline-flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 18px; }
+ .eyebrow .num { color: var(--accent); }
+ h2 { margin: 0 0 18px; font-size: clamp(26px, 3.2vw, 38px); line-height: 1.1; font-weight: 500; letter-spacing: 0; max-width: 24ch; }
+ h2 .tone { color: var(--accent); }
+ p.sec-lede { margin: 0 0 40px; font-size: 16px; line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
+
+ /* PAIN - 3 specific quantified */
+ .pain { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+ @media (max-width: 880px) { .pain { grid-template-columns: 1fr; } }
+ .pain-card {
+ background: var(--bg-elev); border: 1px solid var(--line);
+ border-radius: 8px; padding: 22px;
+ display: flex; flex-direction: column; min-height: 184px;
+ }
+ .pain-card .lab { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); }
+ .pain-card .big { margin: 14px 0 10px; font-size: 36px; font-weight: 500; letter-spacing: 0; line-height: 1; color: var(--ink); }
+ .pain-card .big .u { font-size: 13px; font-weight: 400; color: var(--ink-mute); margin-left: 4px; letter-spacing: 0; }
+ .pain-card p { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-mute); }
+ .pain-card p b { color: var(--accent); font-weight: 500; }
+
+ /* THREE-COL features */
+ .triplets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+ @media (max-width: 880px) { .triplets { grid-template-columns: 1fr; } }
+ .trip {
+ background: var(--bg-elev); border: 1px solid var(--line);
+ border-radius: 8px; padding: 24px;
+ }
+ .trip .icn {
+ display: inline-flex; width: 36px; height: 36px; align-items: center; justify-content: center;
+ border-radius: 6px; background: var(--accent-soft); color: var(--accent);
+ font-family: var(--mono); font-size: 14px; font-weight: 500;
+ margin-bottom: 16px;
+ }
+ .trip h3 { margin: 0 0 10px; font-size: 17px; font-weight: 500; letter-spacing: 0; line-height: 1.3; color: var(--ink); }
+ .trip p { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-mute); }
+ .trip p b { color: var(--ink); font-weight: 500; }
+
+ /* USE-CASE flow */
+ .uc {
+ background: var(--bg-elev); border: 1px solid var(--line-strong);
+ border-radius: 10px; overflow: hidden;
+ box-shadow: 0 30px 80px -30px rgba(0,0,0,0.6);
+ max-width: 980px;
+ }
+ .uc .hd { padding: 14px 22px; border-bottom: 1px solid var(--line); background: rgba(0,0,0,0.25); display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 12px; color: var(--ink-mute); }
+ .uc .hd .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--good); box-shadow: 0 0 8px var(--good); }
+ .uc .body { padding: 30px 30px 26px; }
+ .uc .body h3 { margin: 0 0 6px; font-size: 22px; letter-spacing: 0; font-weight: 500; color: var(--ink); }
+ .uc .body p.note { margin: 0 0 22px; color: var(--ink-mute); font-size: 14.5px; line-height: 1.55; }
+ .uc .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-top: 1px solid var(--line); }
+ @media (max-width: 720px) { .uc .steps { grid-template-columns: 1fr; } }
+ .uc .step { padding: 22px 22px; border-right: 1px solid var(--line); }
+ .uc .step:last-child { border-right: none; }
+ @media (max-width: 720px) { .uc .step { border-right: none; border-bottom: 1px solid var(--line); } .uc .step:last-child { border-bottom: none; } }
+ .uc .step .n { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0; color: var(--accent); }
+ .uc .step h4 { margin: 10px 0 8px; font-size: 14.5px; font-weight: 500; letter-spacing: 0; color: var(--ink); }
+ .uc .step p { margin: 0; font-size: 13px; line-height: 1.5; color: var(--ink-mute); }
+
+ /* COMPLIANCE STRIP */
+ .compl-row {
+ display: grid; grid-template-columns: repeat(4, 1fr);
+ border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+ }
+ @media (max-width: 880px) { .compl-row { grid-template-columns: repeat(2, 1fr); } }
+ @media (max-width: 540px) { .compl-row { grid-template-columns: 1fr; } }
+ .compl-row .item {
+ padding: 22px 24px; border-right: 1px solid var(--line); background: var(--bg-elev);
+ }
+ .compl-row .item:last-child { border-right: none; }
+ @media (max-width: 880px) { .compl-row .item:nth-child(2) { border-right: none; } .compl-row .item:nth-child(1), .compl-row .item:nth-child(2) { border-bottom: 1px solid var(--line); } }
+ .compl-row .item .nm { font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); }
+ .compl-row .item .v { margin-top: 10px; font-size: 17px; font-weight: 500; letter-spacing: 0; color: var(--ink); }
+ .compl-row .item p { margin: 8px 0 0; font-size: 13px; line-height: 1.5; color: var(--ink-mute); }
+ .compl-row .item .v.acc { color: var(--accent); }
+
+ /* CLOSING */
+ .closing { padding: 100px 0; position: relative; }
+ .closing::before {
+ content: ""; position: absolute; inset: 0;
+ background:
+ radial-gradient(ellipse 700px 400px at 30% 50%, rgba(236,231,220, 0.08), transparent 60%),
+ radial-gradient(ellipse 600px 360px at 80% 60%, rgba(236,231,220, 0.04), transparent 60%);
+ }
+ .closing .wrap { position: relative; }
+ .closing h2 { font-size: clamp(32px, 4.6vw, 52px); line-height: 1.06; font-weight: 500; letter-spacing: 0; max-width: 22ch; margin: 0 0 28px; }
+
+ footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; letter-spacing: 0; color: var(--ink-faint); }
+ footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+</style>
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "Service",
+ "name": "kolm for Healthcare · signed local AI artifact architecture",
+ "description": "Architecture for healthcare teams evaluating PHI-sensitive AI workflows: signed .kolm artifacts, tamper-evident receipts, and Enterprise BAA review path. Customer-controlled deployment required for PHI.",
+ "provider": {
+ "@type": "Organization",
+ "name": "Kolm",
+ "url": "https://kolm.ai"
+ },
+ "url": "https://kolm.ai/healthcare",
+ "areaServed": "Global"
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {
+ "@type": "ListItem",
+ "position": 1,
+ "name": "kolm",
+ "item": "https://kolm.ai/"
+ },
+ {
+ "@type": "ListItem",
+ "position": 2,
+ "name": "Healthcare",
+ "item": "https://kolm.ai/healthcare"
+ }
+ ]
+ }
+ ]
+}
+</script>
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API Key &rarr;</a>
+ </div>
+ </div>
+</header>
+
+<main id="main">
+<section class="hero">
+ <div class="wrap">
+ <div class="hero-eyebrow"><span class="he-dot"></span>Healthcare . PHI stays in your control boundary</div>
+ <h1>Healthcare AI as<br><span class="tone">a signed, local artifact.</span></h1>
+ <p class="lede"><b>kolm</b> compiles approved clinical workflows into signed <code>.kolm</code> artifacts that run inside your security boundary. PHI stays on hosts you control. Every output carries a manifest, eval set, and receipt your auditor can re-verify.</p>
+ <div class="cta-row">
+ <a href="/healthcare/assessment" class="btn-primary">60-second HIPAA readiness check</a>
+ <a href="mailto:dev@kolm.ai?subject=kolm%20healthcare%20compliance%20walkthrough" class="btn-link">Book a compliance walkthrough <span aria-hidden="true">&rarr;</span></a>
+ </div>
+ <div style="margin-top:14px;display:flex;gap:14px;flex-wrap:wrap"><a href="/baa" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px;text-decoration:none;letter-spacing:0.02em">BAA &amp; PHI Schedule &rarr;</a><a href="/subprocessors" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px;text-decoration:none;letter-spacing:0.02em">Subprocessors &rarr;</a><a href="/health-insurance" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px;text-decoration:none;letter-spacing:0.02em">For payers &rarr;</a><a href="/cookbook/soap-redactor" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px;text-decoration:none;letter-spacing:0.02em">SOAP redactor recipe &rarr;</a><a href="/k-score" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px;text-decoration:none;letter-spacing:0.02em">Accuracy gate &rarr;</a></div>
+ </div>
+</section>
+
+<section>
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">01</span><span>Why this matters</span></div>
+ <h2>Cloud AI on PHI is a<br><span class="tone">permanent egress surface.</span></h2>
+ <p class="sec-lede">Every cloud call is a BAA-scoped event. Every prompt is discoverable. Every outage can become clinical risk. Local artifacts reduce that runtime exposure.</p>
+
+ <div class="pain">
+ <div class="pain-card">
+ <div class="lab">BAA exposure</div>
+ <div class="big">Every<span class="u"> API call</span></div>
+ <p>can become a vendor disclosure event. <b>kolm's architecture reduces runtime cloud dependency when artifacts are executed locally.</b></p>
+ </div>
+ <div class="pain-card">
+ <div class="lab">Round trip</div>
+ <div class="big">200-800<span class="u">ms</span></div>
+ <p>cloud latency on every chart line. <b>kolm requires named-device benchmarks before latency claims are used in production.</b></p>
+ </div>
+ <div class="pain-card">
+ <div class="lab">Vendor cycle</div>
+ <div class="big">14<span class="u">-day notice</span></div>
+ <p>for frontier deprecations. <b>kolm pins the model into the artifact for the life of the deployment.</b></p>
+ </div>
+ </div>
+ </div>
+</section>
+
+<section>
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">02</span><span>How it works</span></div>
+ <h2>You compile in your VPC.<br><span class="tone">You ship to the device.</span></h2>
+ <p class="sec-lede">Enterprise deployments use a customer-hosted compile bridge and signed artifacts that security teams can review before deployment. HIPAA certification is handled per contract.</p>
+
+ <div class="triplets">
+ <div class="trip">
+ <div class="icn">-</div>
+ <h3>BAA review path.</h3>
+ <p>Healthcare deployments need contract review before PHI is in scope. Default-redacted logs and retention controls are deployment requirements, not public certification.</p>
+ </div>
+ <div class="trip">
+ <div class="icn">-</div>
+ <h3>Customer-hosted bridge design.</h3>
+ <p>A bridge that runs inside customer-controlled infrastructure is the Enterprise design path. It is reviewed per deployment.</p>
+ </div>
+ <div class="trip">
+ <div class="icn">-</div>
+ <h3>Tamper-evident receipts.</h3>
+ <p>Every output is reproducible. Every layer is content-addressed. Tampering with any layer breaks the chain. Useful at audit, defensible at deposition.</p>
+ </div>
+ </div>
+ </div>
+</section>
+
+<section>
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">03</span><span>Use case</span></div>
+ <h2>Reference deployment:<br><span class="tone">clinical-note assistant.</span></h2>
+ <p class="sec-lede">Reference target: a signed artifact for clinical note drafting, reviewed on de-identified examples first, then evaluated against held-out cases before any production workflow.</p>
+
+ <div class="uc" aria-label="Compile pipeline">
+ <div class="hd"><span class="dot"></span><span>reference compile &middot; customer-controlled environment &middot; signed artifact</span></div>
+ <div class="body">
+ <h3>From institutional examples to a signed binary on the tablet.</h3>
+ <p class="note">Compile happens once per quarter against the institution's de-identified gold set. The artifact is signed, scored against the held-out set, and pushed to the MDM for distribution. Deployment is a single signed file, not a service.</p>
+ <div class="steps">
+ <div class="step">
+ <div class="n">01 - gather</div>
+ <h4>Examples + evals</h4>
+ <p>De-identified note pairs from the institution's gold set. Held-out evaluation drawn separately and never seen at training.</p>
+ </div>
+ <div class="step">
+ <div class="n">02 - compile</div>
+ <h4>kolm compile</h4>
+ <p>Synthesize a verifier from your examples. Specialize a small model on your data. Index your private context. Sign. An accuracy gate enforces the ship floor.</p>
+ </div>
+ <div class="step">
+ <div class="n">03 - review</div>
+ <h4>Clinical sign-off</h4>
+ <p>Hold-out evaluation report goes to the clinical informatics committee. The accuracy breakdown is part of the artifact, defensible at audit.</p>
+ </div>
+ <div class="step">
+ <div class="n">04 - ship</div>
+ <h4>Push to device</h4>
+ <p>Single signed file deploys via MDM. Runtime is offline. Receipts mirror to your audit log via HL7 or webhook on demand.</p>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+</section>
+
+<section>
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">04</span><span>Reference artifacts</span></div>
+ <h2>Three signed <span class="tone">.kolm</span> starting points.</h2>
+ <p class="sec-lede">Pre-built example artifacts you can fork, recompile against your own gold set, and ship. Each is a signed file with a public accuracy score and a matching cookbook recipe.</p>
+ <div class="compl-row">
+ <div class="item">
+ <div class="nm" style="font-family:var(--mono)">hipaa-summarizer.kolm</div>
+ <div class="v acc">86% on the gold set &middot; 84&thinsp;MB</div>
+ <p>Drafts SOAP summaries from de-identified clinical notes. Verifier penalizes any token that looks like a phone, MRN, or DOB. <a href="/cookbook/hipaa-summarizer" style="color:var(--accent)">Recipe &rarr;</a></p>
+ </div>
+ <div class="item">
+ <div class="nm" style="font-family:var(--mono)">intake-triage.kolm</div>
+ <div class="v acc">82% on the gold set &middot; 91&thinsp;MB</div>
+ <p>Routes intake forms by urgency band. Compiled against held-out triage outcomes. Runs offline on the front-desk tablet. <a href="/cookbook/intake-triage" style="color:var(--accent)">Recipe &rarr;</a></p>
+ </div>
+ <div class="item">
+ <div class="nm" style="font-family:var(--mono)">drug-name-redact.kolm</div>
+ <div class="v acc">91% on the gold set &middot; 38&thinsp;MB</div>
+ <p>Strips proprietary drug names from patient-facing copy while preserving generic equivalents. Local-only. <a href="/cookbook/drug-name-redact" style="color:var(--accent)">Recipe &rarr;</a></p>
+ </div>
+ </div>
+ </div>
+</section>
+
+<section>
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">05</span><span>Payer use-cases</span></div>
+ <h2>Production patterns for<br><span class="tone">health insurance.</span></h2>
+ <p class="sec-lede">Each workflow below is a signed <code>.kolm</code> artifact that runs inside your environment. PHI, claims data, and plan docs stay in boundary. Every output carries a receipt with model version, input hash, and score.</p>
+
+ <div class="triplets" style="margin-top:8px">
+ <div class="trip">
+ <div class="icn">-</div>
+ <h3>Prior authorization triage.</h3>
+ <p>Inbound PA requests are classified against benefit-plan policy and InterQual/MCG criteria. The artifact drafts a determination letter with policy citations and routes edge cases to a nurse reviewer. <b>Receipt names the policy version it cited.</b></p>
+ </div>
+ <div class="trip">
+ <div class="icn">-</div>
+ <h3>Claims adjudication assist.</h3>
+ <p>Extracts structured fields from CMS-1500 / UB-04, checks against the plan's benefit grid and coding edits, flags adjudication blockers before they hit pend queue. <b>Member ID and claim line never leave the boundary.</b></p>
+ </div>
+ <div class="trip">
+ <div class="icn">-</div>
+ <h3>Appeals &amp; grievances drafts.</h3>
+ <p>Drafts member-facing appeal responses against your medical policy library, cites the plan section and the CMS or state rule, and emits a defensible audit trail for the regulator. <b>Same artifact your appeals analyst signs off on.</b></p>
+ </div>
+ <div class="trip">
+ <div class="icn">-</div>
+ <h3>Member services AI.</h3>
+ <p>Answers benefit questions from your SBC/EOC documents on the rep's workstation. Never sends member PHI to a frontier API. An accuracy gate enforces a deflection-rate floor before the artifact reaches a member-facing channel.</p>
+ </div>
+ <div class="trip">
+ <div class="icn">-</div>
+ <h3>Utilization management review.</h3>
+ <p>Summarizes medical-necessity packets for the UM reviewer: relevant chart sections, prior denials, applicable criteria, and the policy delta. <b>The reviewer signs; kolm logs which artifact version produced the summary.</b></p>
+ </div>
+ <div class="trip">
+ <div class="icn">-</div>
+ <h3>FWA pattern detection.</h3>
+ <p>Flags suspicious claim patterns (upcoded E/M visits, duplicate-day services, ineligible provider) against the plan's edit set. Every trigger is a signed receipt that an SIU investigator can re-run byte-identically against the same claim record.</p>
+ </div>
+ </div>
+
+ <p class="sec-lede" style="margin-top:28px;font-size:14px">Built for TPAs, MA / D-SNP plans, ACOs, and risk-bearing teams. Recompile each pattern against your formulary, policy library, and eligibility feed. <a href="/enterprise/inquiry" style="color:var(--accent);text-decoration:none">Book Enterprise review &rarr;</a></p>
+ </div>
+</section>
+
+<section>
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">06</span><span>Compliance posture</span></div>
+ <h2>What's shipped.<br><span class="tone">What's tracking.</span></h2>
+ <p class="sec-lede">Same compliance posture as the rest of the product. Cross-referenced on <a href="/security" style="color:var(--accent);text-decoration:none;">/security</a>.</p>
+
+ <div class="compl-row">
+ <div class="item">
+ <div class="nm">HIPAA</div>
+ <div class="v acc">BAA path on Enterprise</div>
+ <p>BAA reviewed and countersigned on Enterprise. Customer-hosted runtime keeps PHI inside the boundary the auditor already trusts.</p>
+ </div>
+ <div class="item">
+ <div class="nm">EU AI Act</div>
+ <div class="v">documentation path</div>
+ <p>Artifact logs, verifier gates, and receipts support technical documentation. Risk tier remains use-case-specific. Attestation timeline tracked on <a href="/security#roadmap" style="color:var(--accent);text-decoration:none;">/security</a>.</p>
+ </div>
+ <div class="item">
+ <div class="nm">GDPR - UK GDPR</div>
+ <div class="v acc">DPA path</div>
+ <p>DPA and DPIA templates prepared for review. EU-resident compile region tracked on <a href="/security#roadmap" style="color:var(--accent);text-decoration:none;">/security</a>.</p>
+ </div>
+ </div>
+ </div>
+</section>
+
+<section class="closing">
+ <div class="wrap">
+ <h2>Evaluate clinical AI<br><span class="tone">inside the approved boundary.</span></h2>
+ <p class="lede" style="max-width:60ch">Book an Enterprise review. The BAA / DPA template is at <a href="/baa" style="color:var(--accent);">/baa</a> and is legal-review ready before deployment. Signing does not gate provisioning. Compile a reference artifact the same hour your first key is issued.</p>
+ <div class="cta-row">
+ <a href="/enterprise/inquiry" class="btn-primary">Book Enterprise review</a>
+ <a href="/enterprise" class="btn-link">Enterprise overview <span aria-hidden="true">&rarr;</span></a>
+ </div>
+ <div style="margin-top:14px"><a href="mailto:dev@kolm.ai?subject=kolm%20healthcare%20deployment" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px;text-decoration:none;letter-spacing:0.02em">or book architecture review &rarr;</a></div>
+ </div>
+</section>
+
+<!-- W373 healthcare detector vertical: 17 PHI classes named, audit chain,
+ Safe Harbor mapping, claims-redactor.kolm callout. -->
+<section class="w373-hc" data-w373="sec-healthcare" aria-label="W373 PHI detector">
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">07</span><span>W373 &middot; PHI detector</span></div>
+ <h2>17 PHI classes. <span class="tone">One signed redactor.</span></h2>
+ <p class="sec-lede">kolm ships a typed PHI redactor that maps directly to the 18 Safe Harbor identifiers (last identifier is the catch-all <code>other_unique</code>). Spans are replaced with stable placeholders so models train on shape, not raw PHI.</p>
+ <ul class="w373-hc-classes" data-w373="hc-classes" aria-label="17 PHI detector classes" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;list-style:none;padding:0;margin:0 0 24px;font-family:var(--mono);font-size:12.5px">
+ <li data-w373="hc-cls-ssn" style="border:1px solid var(--line);border-radius:6px;padding:8px 12px;background:var(--bg-elev)">ssn</li>
+ <li data-w373="hc-cls-mrn" style="border:1px solid var(--line);border-radius:6px;padding:8px 12px;background:var(--bg-elev)">mrn</li>
+ <li data-w373="hc-cls-name" style="border:1px solid var(--line);border-radius:6px;padding:8px 12px;background:var(--bg-elev)">name</li>
+ <li data-w373="hc-cls-dob" style="border:1px solid var(--line);border-radius:6px;padding:8px 12px;background:var(--bg-elev)">dob</li>
+ <li data-w373="hc-cls-address" style="border:1px solid var(--line);border-radius:6px;padding:8px 12px;background:var(--bg-elev)">address</li>
+ <li data-w373="hc-cls-phone" style="border:1px solid var(--line);border-radius:6px;padding:8px 12px;background:var(--bg-elev)">phone</li>
+ <li data-w373="hc-cls-email" style="border:1px solid var(--line);border-radius:6px;padding:8px 12px;background:var(--bg-elev)">email</li>
+ <li data-w373="hc-cls-ip" style="border:1px solid var(--line);border-radius:6px;padding:8px 12px;background:var(--bg-elev)">ip</li>
+ <li data-w373="hc-cls-credit-card" style="border:1px solid var(--line);border-radius:6px;padding:8px 12px;background:var(--bg-elev)">credit_card</li>
+ <li data-w373="hc-cls-iban" style="border:1px solid var(--line);border-radius:6px;padding:8px 12px;background:var(--bg-elev)">iban</li>
+ <li data-w373="hc-cls-account" style="border:1px solid var(--line);border-radius:6px;padding:8px 12px;background:var(--bg-elev)">account_no</li>
+ <li data-w373="hc-cls-license" style="border:1px solid var(--line);border-radius:6px;padding:8px 12px;background:var(--bg-elev)">license_plate</li>
+ <li data-w373="hc-cls-passport" style="border:1px solid var(--line);border-radius:6px;padding:8px 12px;background:var(--bg-elev)">passport</li>
+ <li data-w373="hc-cls-tax-id" style="border:1px solid var(--line);border-radius:6px;padding:8px 12px;background:var(--bg-elev)">tax_id</li>
+ <li data-w373="hc-cls-icd10" style="border:1px solid var(--line);border-radius:6px;padding:8px 12px;background:var(--bg-elev)">icd10</li>
+ <li data-w373="hc-cls-rx" style="border:1px solid var(--line);border-radius:6px;padding:8px 12px;background:var(--bg-elev)">rx_code</li>
+ <li data-w373="hc-cls-geo" style="border:1px solid var(--line);border-radius:6px;padding:8px 12px;background:var(--bg-elev)">geo_micro</li>
+ </ul>
+
+ <div class="w373-hc-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:22px">
+ <div class="trip" data-w373="hc-audit-log">
+ <h3>Audit log + receipt chain.</h3>
+ <p>Every redaction emits a typed event into your audit log: span offsets, detector class, placeholder, model version, accuracy score. Events are hash-chained so tampering breaks verification.</p>
+ </div>
+ <div class="trip" data-w373="hc-safe-harbor">
+ <h3>HIPAA Safe Harbor mapping.</h3>
+ <p>The 17 detector classes map one-to-one to the 18 Safe Harbor identifiers (the 18th, <code>other_unique</code>, falls back to learned heuristics). Auditors can name a class and see which spans were caught.</p>
+ </div>
+ <div class="trip" data-w373="hc-claims-redactor">
+ <h3 style="font-family:var(--mono);font-size:15px"><code>claims-redactor.kolm</code></h3>
+ <p>Production reference artifact, 98.5% on a 60-seed gold set with 21 PHI examples. Signed, scored on the held-out set, and verifiable. <a href="/cookbook/phi-redactor" style="color:var(--accent)">Recipe &rarr;</a></p>
+ </div>
+ </div>
+ </div>
+</section>
+
+<!-- Wave 151 evidenced-taxonomy strip. Health insurance buyers procure on this. -->
+<section class="tax-strip" aria-label="evidenced taxonomy">
+ <div class="tax-strip-row">
+ <span class="tax-strip-eyebrow">evidenced taxonomy</span>
+ <p class="tax-strip-h">Health-insurance procurement reads class first. Most PHI workloads are <code>rule</code> or <code>compiled_rule</code>, not models.</p>
+ </div>
+ <div class="tax-chips">
+ <span class="tax-chip rule">rule</span>
+ <span class="tax-chip synth">synthesized_rule</span>
+ <span class="tax-chip compiled">compiled_rule</span>
+ <span class="tax-chip distill">distilled_model</span>
+ </div>
+ <p class="tax-strip-body">An ICD-10 lookup is a <code>rule</code>. A phone normalizer compiled to a native binary is a <code>compiled_rule</code>. A free-text denial-reason summarizer is a <code>distilled_model</code> &mdash; and the verifier confirms it ships real weights. <a href="/taxonomy">What each class means &rarr;</a></p>
+</section>
+</main>
+
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4><span data-kolm-icon="compile" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="deploy" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="layers" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="user" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+<script src="/kolm-svg.js" defer></script>
+</body>
+</html>

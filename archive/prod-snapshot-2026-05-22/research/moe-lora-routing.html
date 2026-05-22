@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Mixture of LoRA experts learned routing across signed · kolm.ai</title>
+<meta name="description" content="Train one router that picks among N domain-specific LoRA adapters on the same base. Switch-Transformer top-1 and Mixtral-style top-k, with router z-loss and...">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta property="og:title" content="Mixture of LoRA experts learned routing across signed · kolm.ai">
+<meta property="og:description" content="Train one router that picks among N domain-specific LoRA adapters on the same base. Switch-Transformer top-1 and Mixtral-style top-k, with router z-loss and...">
+<meta property="og:type" content="website">
+<meta property="article:published_time" content="2026-05-15">
+<meta property="article:author" content="Kolm">
+<meta property="article:section" content="training">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Mixture of LoRA experts learned routing across signed · kolm.ai">
+<meta name="twitter:description" content="Train one router that picks among N domain-specific LoRA adapters on the same base. Switch-Transformer top-1 and Mixtral-style top-k, with router z-loss and...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/research/moe-lora-routing">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/research/moe-lora-routing">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script src="/escape.js"></script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "TechArticle",
+ "headline": "Mixture of LoRA experts: learned routing across signed adapters",
+ "description": "A small learned router that picks among N domain-specific LoRA adapters. Switch-Transformer and Mixtral-style routing, z-loss and load-balance auxiliary terms.",
+ "url": "https://kolm.ai/research/moe-lora-routing",
+ "author": {"@type": "Organization", "name": "Kolm"},
+ "publisher": {"@type": "Organization", "name": "Kolm", "url": "https://kolm.ai"},
+ "datePublished": "2026-05-15",
+ "articleSection": "training",
+ "keywords": "MoE, mixture of experts, LoRA, routing, Switch Transformer, Mixtral, AdaMix, MoLE, z-loss, load balance",
+ "citation": [
+ "Shazeer et al, 2017, arXiv:1701.06538 (original MoE layer)",
+ "Lepikhin et al, 2020, arXiv:2006.16668 (GShard z-loss)",
+ "Fedus, Zoph & Shazeer, 2022, arXiv:2101.03961 (Switch Transformer)",
+ "Jiang et al, 2024, arXiv:2401.04088 (Mixtral)",
+ "Liu et al, 2023, arXiv:2310.18339 (MoLE)"
+ ],
+ "license": "https://creativecommons.org/licenses/by/4.0/"
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+ {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
+ {"@type": "ListItem", "position": 3, "name": "Mixture of LoRA experts", "item": "https://kolm.ai/research/moe-lora-routing"}
+ ]
+ }
+ ]
+}
+</script>
+
+<style>
+ :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--good:#7ef0d2;--warn:#ffd479;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+ *{box-sizing:border-box}
+ html,body{margin:0;padding:0}
+ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15.5px;line-height:1.65;letter-spacing:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-synthesis:none;min-height:100vh;display:flex;flex-direction:column}
+ a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line-strong)}
+ a:hover{border-bottom-color:var(--ink)}
+ .nb{border:0}
+ ::selection{background:rgba(236,231,220,0.30)}
+ .wrap{max-width:760px;margin:0 auto;padding:0 32px;width:100%}
+ @media(max-width:720px){.wrap{padding:0 20px}}
+ header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+ header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px;max-width:1180px;margin:0 auto;padding:0 32px}
+ @media(max-width:720px){header.site .row{padding:0 20px}}
+ header.site .left{display:flex;align-items:center;gap:36px}
+ header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink);border:0}
+ header.site .brand span{font-weight:500;font-size:16px;letter-spacing:0}
+ header.site nav{display:flex;gap:22px}
+ header.site nav a{color:var(--ink-mute);font-size:13.5px;border:0}
+ header.site nav a:hover,header.site nav a.active{color:var(--ink)}
+ header.site .right{display:flex;align-items:center;gap:14px}
+ header.site .right .ghost{color:var(--ink-mute);font-size:13.5px;border:0}
+ header.site .right .ghost:hover{color:var(--ink)}
+ header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500;border:0}
+ main{padding:80px 0 96px;flex:1}
+ .hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 22px;border:1px solid var(--line-strong);border-radius:999px;padding:6px 14px;background:rgba(8,9,8,0.62)}
+ .hero-eyebrow .he-dot{width:6px;height:6px;border-radius:50%;background:#7ef0d2;box-shadow:0 0 10px #7ef0d2;animation:pulse-dot 2.4s ease-in-out infinite}
+ @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
+ h1{font-weight:500;letter-spacing:-0.03em;line-height:1.04;font-size:clamp(32px,4.2vw,52px);margin:0 0 16px}
+ .lede{color:var(--ink-mute);font-size:17.5px;margin:0 0 36px;line-height:1.55}
+ h2{font-weight:500;letter-spacing:0;font-size:23px;margin:46px 0 14px;border-top:1px solid var(--line);padding-top:32px}
+ h3{font-weight:500;letter-spacing:0;font-size:17px;margin:24px 0 6px}
+ p{color:var(--ink-mute);margin:0 0 14px}
+ p strong{color:var(--ink);font-weight:500}
+ code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+ pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink);line-height:1.55}
+ ul{padding-left:22px;margin:0 0 14px;color:var(--ink-mute)}
+ ul li{margin:6px 0}
+ .meta-line{display:flex;flex-wrap:wrap;gap:14px;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;margin:0 0 28px}
+ .table{width:100%;border-collapse:collapse;margin:18px 0;border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:13px}
+ .table th,.table td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+ .table th{font-weight:500;color:var(--ink-faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;background:var(--bg-elev)}
+ .table tr:last-child td{border-bottom:0}
+ .citations{color:var(--ink-faint);font-size:12.5px;font-family:var(--mono);line-height:1.55;border-top:1px solid var(--line);padding-top:18px;margin-top:36px}
+ .citations a{color:var(--ink-mute)}
+ footer{border-top:1px solid var(--line);padding:32px 32px 28px;color:var(--ink-faint);font-size:12.5px;text-align:center}
+ footer a{color:var(--ink-mute);border:0}
+ footer a:hover{color:var(--ink)}
+ .footer-row{margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint);justify-content:center;display:flex}
+ .footer-row a{color:inherit}
+</style>
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API Key &rarr;</a>
+ </div>
+ </div>
+</header>
+
+<main id="main">
+ <div class="wrap">
+ <div class="hero-eyebrow"><span class="he-dot"></span>research . training . 9 min read</div>
+ <h1>Mixture of LoRA experts.</h1>
+ <p class="lede">A buyer's product handles many narrow tasks. The refund flagger, the PHI redactor, the tone classifier, and the lead scorer all share an inbox. Training one giant LoRA on the union is dilutive. Loading four LoRAs and switching at the application layer is fragile. The router learns the switch.</p>
+
+ <div class="meta-line">
+ <span>May 15, 2026</span>
+ <span>&middot;</span>
+ <span>Kolm research</span>
+ <span>&middot;</span>
+ <span>apps/trainer/moe.py</span>
+ </div>
+
+ <h2>The shape of the problem</h2>
+
+ <p>kolm artifacts are domain-specific by construction. The compile loop produces a refund-flagger artifact, a PHI-redactor artifact, and a tone-classifier artifact as three separately signed files. Each has its own K-score on its own eval pack. Each is small (30-50 MB), each is independently revocable, each carries its own audit trail.</p>
+
+ <p>At inference time, a single product surface needs to route the incoming prompt to the right expert. The simple option is application-layer routing: the buyer writes <code>if &quot;refund&quot; in subject: use refund_flag.kolm</code>. This works for two or three obvious lanes. It does not scale to ten lanes with overlapping vocabulary, where a tone-and-refund email needs both a tone score and a refund flag, and a PHI redactor needs to run first on anything from a healthcare sender.</p>
+
+ <p>The MoE router learns the routing function from labeled examples.</p>
+
+ <h2>The architecture</h2>
+
+ <p>The router is a one-layer MLP: prompt-embedding &rarr; hidden &rarr; expert logits.</p>
+
+ <pre>class Router(nn.Module):
+ def __init__(self, hidden_size, n_experts, router_hidden=256):
+ super().__init__()
+ self.fc1 = nn.Linear(hidden_size, router_hidden)
+ self.act = nn.GELU()
+ self.fc2 = nn.Linear(router_hidden, n_experts)
+ def forward(self, h):
+ return self.fc2(self.act(self.fc1(h)))</pre>
+
+ <p>The prompt embedding comes from the base model's mean-pooled last hidden state. The base is loaded read-only and shared across experts at inference; only the router is trained. A trained router weighs <code>O(hidden_size * router_hidden + router_hidden * n_experts)</code> parameters, ~1-5 MB on disk for typical kolm setups.</p>
+
+ <h2>Top-1 versus top-k</h2>
+
+ <table class="table">
+ <thead><tr><th>Mode</th><th>Inference cost</th><th>Lineage</th><th>When to use</th></tr></thead>
+ <tbody>
+ <tr><td>top-1 (Switch)</td><td>1 expert runs per input</td><td>Fedus 2022</td><td>Experts are mutually exclusive (refund vs PHI vs tone)</td></tr>
+ <tr><td>top-k (Mixtral)</td><td>k experts run; outputs weighted by router probabilities</td><td>Jiang 2024</td><td>Experts overlap (legal-finance, code-math); k=2 is the canonical choice</td></tr>
+ </tbody>
+ </table>
+
+ <p>The top-k aggregation is a weighted sum of expert outputs, weights from the router's softmax. The Mixtral 8x7B model runs k=2 of 8 experts per token; we apply the same idea at per-sequence granularity. Higher k buys quality at linear inference cost. Lower k is cheaper and easier to attribute (the receipt records exactly which expert ran).</p>
+
+ <h2>The two auxiliary losses</h2>
+
+ <p>Cross-entropy on the supervised routing label is necessary but not sufficient. Two extra terms keep training stable:</p>
+
+ <ul>
+ <li><strong>Router z-loss</strong> (Lepikhin 2020). Penalizes large logit magnitudes via <code>(logsumexp(logits))<sup>2</sup></code>. Without it the softmax saturates: one expert hits probability ~1, gradients flow only to that expert, and the router stops learning. Weight 1e-3 is the published default.</li>
+ <li><strong>Load-balance loss</strong> (Shazeer 2017). Penalizes the router for sending most inputs to a single expert. Computed as <code>N * sum_i (f_i * P_i)</code>, where <code>f_i</code> is the empirical fraction of inputs routed to expert i and <code>P_i</code> is the mean router probability for expert i. Minimized when both are uniform across experts. Weight 1e-2 is the typical setting.</li>
+ </ul>
+
+ <p>Both terms can be disabled by setting the weight to zero. The kolm default is z-loss on, load-balance on, because the labeled routing data is usually imbalanced (the buyer has 70% of one expert's class) and the auxiliary loss broadens the router's coverage without sacrificing accuracy on the majority class.</p>
+
+ <h2>Routing granularity</h2>
+
+ <p>Two choices: route at sequence level (one expert per input prompt) or token level (one expert per generated token). The kolm default is sequence; token-level is supported through the runtime adapter pool but adds two surfaces:</p>
+
+ <ul>
+ <li>Per-token forward passes through the base while sampling, so the router can re-decide between tokens. The <a href="/research/multi-lora-serving">multi-LoRA serving runtime</a> already handles concurrent adapters; per-token routing is the logical extension.</li>
+ <li>Per-token auxiliary loss aggregation, since one sequence visits multiple experts and the load-balance must sum over both batch and time dimensions.</li>
+ </ul>
+
+ <p>For the typical kolm artifact (a domain expert), the domain rarely switches mid-utterance, and sequence-level is the right choice. The Mixtral and Switch Transformer recipes both did token-level because the experts were language-modeling sub-networks, not domain specializations; the unit of routing matched the unit of generation.</p>
+
+ <h2>Inference: route, then forward</h2>
+
+ <pre>def route(router_ckpt, base_model, prompt, k=1):
+ base = AutoModel.from_pretrained(base_model)
+ router = Router(...); router.load_state_dict(ckpt['router_state_dict'])
+ h = mean_pool(base(prompt))
+ probs = softmax(router(h))
+ return [(name, p) for p, name in topk(probs, k)]</pre>
+
+ <p>The application layer reads the result, loads the chosen adapter from the registry (or from the in-process adapter pool), and runs inference. The receipt of the response records both the routing distribution (which expert won, and the runners-up) and the CID of the expert that actually ran.</p>
+
+ <h2>What ships</h2>
+
+ <p>The trained router lands as a small <code>*.router.kolm</code> artifact alongside the existing expert artifacts. The manifest pins:</p>
+
+ <ul>
+ <li>The base model CID (shared across experts and consulted for embedding).</li>
+ <li>The expert names and their CIDs (so the binder can re-fetch each expert and re-verify its independent signature).</li>
+ <li>The router weights (sub-MB) and the auxiliary-loss weights used during training.</li>
+ <li>Held-out routing accuracy and the per-expert load distribution from the eval pack.</li>
+ </ul>
+
+ <p>None of the experts are altered. Each one is still a separately signed file with its own receipt; the router is a thin layer on top that does not affect any individual expert's audit trail.</p>
+
+ <h2>What the receipt records</h2>
+
+ <pre>"router": {
+ "method": "moe_lora_router",
+ "base_model": "Qwen/Qwen2.5-3B-Instruct",
+ "experts": {
+ "refund_flag": "cidv1:sha256:8e1a...",
+ "phi_redactor": "cidv1:sha256:1bcf...",
+ "tone_classify": "cidv1:sha256:c4a9..."
+ },
+ "config": {
+ "routing": "top_1",
+ "k": 1,
+ "z_loss_weight": 1e-3,
+ "load_balance_weight": 1e-2,
+ "router_hidden": 256
+ },
+ "n_train_rows": 4200,
+ "n_eval_rows": 460,
+ "n_experts": 3,
+ "loss_final": 0.092,
+ "eval_accuracy": 0.943,
+ "papers": [
+ "arXiv:1701.06538",
+ "arXiv:2006.16668",
+ "arXiv:2101.03961",
+ "arXiv:2401.04088",
+ "arXiv:2310.18339"
+ ]
+}</pre>
+
+ <p>The auditor can re-fetch each expert by CID, replay the eval set, and recompute the routing accuracy. The expert CIDs are the binding contract: a router signed against a set of CIDs only works with those CIDs; swapping in a different refund-flagger artifact invalidates the receipt.</p>
+
+ <h2>Edge cases worth naming</h2>
+
+ <p><strong>Cold-start with one example per expert.</strong> A router needs enough labeled traffic per expert to learn the boundary. Below ~50 examples per expert, the load-balance loss tilts the router toward uniform and the held-out accuracy collapses. The remedy is upstream: capture more traffic, or run the simple application-layer rule (substring match) until the router catches up.</p>
+
+ <p><strong>Adding an expert after training.</strong> The router's final layer has a fixed output dimension. Adding a new expert means retraining the router from scratch on the union of old labels plus new-expert labels; the old experts do not need to be retouched. This is cheap because the router is a few hundred kilobytes.</p>
+
+ <p><strong>Drift.</strong> The router's training distribution can diverge from production traffic. The receipt records the routing distribution per evaluation; a captured-traffic monitor compares the distribution against the receipt and flags drift before it shows up as a quality regression. <a href="/research/eval-set-drift">Eval-set drift</a> covers the broader pattern.</p>
+
+ <p><strong>Adversarial prompts.</strong> A prompt crafted to confuse the router (mixing refund-language and medical-language to force ambiguous routing) maps to whichever expert wins by a thin margin. For high-stakes domains the runtime can ignore the top-1 and run top-k with a margin-of-confidence check, refusing if the top-2 are within a threshold.</p>
+
+ <h2>Where this fits in the kolm compile loop</h2>
+
+ <p>The router is a layer above the existing artifact pipeline. Each expert is compiled normally (<code>capture &rarr; train &rarr; K-score &rarr; sign</code>). The router is a separate compile step that consumes the experts' CIDs and a routing-labeled capture. The deployment unit is the router plus its referenced experts; the runtime resolves CIDs at request time. The <a href="/research/multi-lora-serving">multi-LoRA serving page</a> covers the runtime's adapter pool and concurrent execution.</p>
+
+ <div class="citations">
+ <p><strong>Citations</strong></p>
+ <p>Shazeer, N. et al. <em>Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer</em>. arXiv:1701.06538, 2017. The original MoE layer and the load-balance auxiliary loss.</p>
+ <p>Lepikhin, D. et al. <em>GShard: Scaling Giant Models with Conditional Computation and Automatic Sharding</em>. arXiv:2006.16668, 2020. Router z-loss.</p>
+ <p>Fedus, W., Zoph, B. &amp; Shazeer, N. <em>Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity</em>. arXiv:2101.03961, 2022. Top-1 routing, simplified.</p>
+ <p>Jiang, A. Q. et al. <em>Mixtral of Experts</em>. arXiv:2401.04088, 2024. Top-2 routing with weighted-sum aggregation.</p>
+ <p>Liu, X. et al. <em>MoLE: Mixture of LoRA Experts</em>. arXiv:2310.18339, 2023. The first published LoRA-MoE recipe with learnable temperature.</p>
+ <p>Wang, Y. et al. <em>AdaMix: Mixture-of-Adapters for Parameter-Efficient Fine-Tuning</em>. arXiv:2205.12410, 2022. The mixture-of-adapters precursor; informs the per-sequence routing choice here.</p>
+ </div>
+
+ <div class="meta-line" style="margin-top:36px">
+ <a class="nb" href="/research">&larr; Back to research</a>
+ <span>&middot;</span>
+ <a class="nb" href="/research#moe-router">Frontier reference &middot; MoE LoRA routing</a>
+ <span>&middot;</span>
+ <a class="nb" href="/spec">RS-1 spec</a>
+ </div>
+ </div>
+</main>
+
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+<script src="/nav.js"></script>
+</body>
+</html>

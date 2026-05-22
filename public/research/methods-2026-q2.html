@@ -143,120 +143,33 @@
  footer.site{padding:56px 0 40px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
  footer.site .row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
 </style>
-<link rel="stylesheet" href="/styles.css">
-<link rel="stylesheet" href="/brand-refresh.css">
-<link rel="stylesheet" href="/surface-polish.css">
-</head>
-<body>
-<a class="skip-link" href="#main">Skip to content</a>
 
-<header class="site-header">
- <div class="wrap">
- <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
-    <!-- KOLM_NAV_BEGIN (W221) -->
-    <nav class="site-nav" aria-label="Primary">
-    <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
-      <div class="mega-menu" role="menu" aria-label="product menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/product">Overview</a>
-          <a href="/quickstart">Quickstart</a>
-          <a href="/capture">Gateway</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training</a>
-          <a href="/distill">Distill</a>
-          <a href="/compile">Compile</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/runtimes">Runtimes</a>
-          <a href="/docs/devices">Devices</a>
-          <a href="/trust">Verify</a>
-        </div>
-      </div>
+
+<link rel="stylesheet" href="/ks.css">
+</head>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
     </div>
-    <div class="nav-item nav-item--models has-mega">
-      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
-      <div class="mega-menu" role="menu" aria-label="models menu">
-        <div class="mega-col">
-          <p class="mega-h">Choose</p>
-          <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Build your own</a>
-          <a href="/docs/runtime">Runtime targets</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/compute">Compute</a>
-          <a href="/runtimes">Mobile and edge</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
-      <div class="mega-menu" role="menu" aria-label="docs menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/capture">API gateway</a>
-          <a href="/docs/cli">CLI</a>
-          <a href="/docs/sdk">SDKs</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Reference</p>
-          <a href="/docs">Docs home</a>
-          <a href="/docs/api">API reference</a>
-          <a href="/api">HTTP routes</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Operate</p>
-          <a href="/integrations">Integrations</a>
-          <a href="/docs/privacy">Privacy membrane</a>
-          <a href="/docs/datasets">Datasets</a>
-          <a href="/docs/distillation">Distillation</a>
-          <a href="/docs/verify">Verification</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
-      <div class="mega-menu" role="menu" aria-label="pricing menu">
-        <div class="mega-col">
-          <p class="mega-h">Buy</p>
-          <a href="/pricing">Plans</a>
-          <a href="/pricing#roi">ROI calculator</a>
-          <a href="/nonprofits">Nonprofits</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
-      <div class="mega-menu" role="menu" aria-label="enterprise menu">
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/enterprise">Enterprise overview</a>
-          <a href="/self-host">Self-host</a>
-          <a href="/airgap">Air-gap</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Trust</p>
-          <a href="/trust">Trust center</a>
-          <a href="/security">Security</a>
-          <a href="/compliance">Compliance</a>
-          <a href="/baa">BAA</a>
-        </div>
-      </div>
-    </div>
-    </nav>
-    <!-- KOLM_NAV_END (W221) -->
- <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
- <a href="/signin" class="ghost">sign in</a>
- <a href="/signup" class="cta">Get API Key &rarr;</a>
- </div>
- </div>
-</header>
+  </nav>
+  <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+  </div>
+</div>
 <main id="main">
 
 <section class="hero">
@@ -274,12 +187,12 @@
  <div class="toc">
  <h5>Contents</h5>
  <ol>
- <li><a href="#distillation">Distillation methods &mdash; state of the art</a></li>
- <li><a href="#sample-efficiency">Sample efficiency &mdash; how much data is enough</a></li>
+ <li><a href="#distillation">Distillation methods, state of the art</a></li>
+ <li><a href="#sample-efficiency">Sample efficiency, how much data is enough</a></li>
  <li><a href="#base-models">Base-model picks for distillation targets, 2026</a></li>
- <li><a href="#quantization">Quantization formats &mdash; trade-offs</a></li>
- <li><a href="#data-creation">Training-data creation &mdash; reputable open methods</a></li>
- <li><a href="#nl-to-recipe">Natural language &rarr; recipe &mdash; state of the art</a></li>
+ <li><a href="#quantization">Quantization formats, trade-offs</a></li>
+ <li><a href="#data-creation">Training-data creation, reputable open methods</a></li>
+ <li><a href="#nl-to-recipe">Natural language &rarr; recipe, state of the art</a></li>
  <li><a href="#rule-of-thumb">Rule-of-thumb: data needed per recipe class</a></li>
  <li><a href="#what-ships">What ships in kolm today vs. roadmap</a></li>
  </ol>
@@ -287,38 +200,38 @@
 
  <p>This is a synthesis of the 2026-Q2 frontier in post-training methods, framed against what the kolm pipeline already does. The intent is to make Kolm&rsquo;s grounding legible: every claim below is anchored to a published paper, a vendor blog, or a &gt;5k-star OSS repo, and the closing section walks through how the shipped <code>src/tune.js</code>, <code>src/synthesis.js</code>, <code>src/assistant.js</code>, <code>src/recipe-class.js</code>, <code>distill-onpolicy.js</code>, <code>distill-preference.js</code>, and <code>spec-decode.js</code> modules cover each frontier method. Items the underlying research dump verified against second sources carry a <span class="verify-tag">cross-verified</span> tag below.</p>
 
- <h2 id="distillation">1. Distillation methods &mdash; state of the art.</h2>
+ <h2 id="distillation">1. Distillation methods, state of the art.</h2>
 
  <h3>1.1 Pure knowledge distillation (logit / hidden-state matching).</h3>
  <p>The classical Hinton-style soft-target distillation (minimise KL between teacher and student logits at temperature T) remains the workhorse, but 2025 work has shifted toward <b>sparse</b>, <b>adaptive</b>, and <b>feature-level</b> variants.</p>
  <ul>
  <li><b>Sparse Logit Sampling</b> (Bhardwaj et al., 2025, <a href="https://arxiv.org/abs/2503.16870" rel="noopener">arXiv:2503.16870</a>). Importance-sampling-based sparsification gives unbiased estimates of the teacher distribution and drops logit-cache storage by ~10&times; without measurable quality loss. Teacher logits can be precomputed once and reused across student runs.</li>
- <li><b>AdaKD &mdash; Token-Adaptive Knowledge Distillation</b> (<a href="https://arxiv.org/html/2510.11615" rel="noopener">arXiv:2510.11615</a>). Loss-driven adaptive token focusing concentrates distillation pressure on the small tail of hard tokens that carry the signal.</li>
+ <li><b>AdaKD, Token-Adaptive Knowledge Distillation</b> (<a href="https://arxiv.org/html/2510.11615" rel="noopener">arXiv:2510.11615</a>). Loss-driven adaptive token focusing concentrates distillation pressure on the small tail of hard tokens that carry the signal.</li>
  <li><b>Flex-KD</b> (<a href="https://arxiv.org/html/2507.10155v2" rel="noopener">arXiv:2507.10155</a>). Distils between teacher and student with differing hidden sizes; final-layer-only distillation suffices, dodging CKA&rsquo;s all-layer requirement.</li>
  <li><b>Probe-KD</b>. Train an MLP probe on teacher hidden states across all layers, then use the probe&rsquo;s soft predictions to supervise the student via KL. Cheaper than full feature distillation.</li>
  <li><b>DistilBERT / TinyBERT</b> logit + hidden-state legacy combination remains the standard baseline in 2025 surveys (<a href="https://arxiv.org/pdf/2503.12067" rel="noopener">arXiv:2503.12067</a>, <a href="https://arxiv.org/pdf/2504.14772" rel="noopener">arXiv:2504.14772</a>).</li>
  </ul>
 
- <h3>1.2 LoRA fine-tuning on teacher outputs &mdash; the kolm default path.</h3>
- <p>Teacher (frontier API or large open-weight) generates <code>(prompt, response)</code> pairs from the train split; a small base is LoRA-fine-tuned on those pairs; the adapter is quantised and exported. The seminal paper is <b>QLoRA</b> (Dettmers et al., NeurIPS 2023, <a href="https://arxiv.org/abs/2305.14314" rel="noopener">arXiv:2305.14314</a>) &mdash; 4-bit NF4 base + 16-bit LoRA adapters lets a 65B model fine-tune on a single 48&nbsp;GB GPU without loss vs. full 16-bit fine-tuning.</p>
+ <h3>1.2 LoRA fine-tuning on teacher outputs, the kolm default path.</h3>
+ <p>Teacher (frontier API or large open-weight) generates <code>(prompt, response)</code> pairs from the train split; a small base is LoRA-fine-tuned on those pairs; the adapter is quantised and exported. The seminal paper is <b>QLoRA</b> (Dettmers et al., NeurIPS 2023, <a href="https://arxiv.org/abs/2305.14314" rel="noopener">arXiv:2305.14314</a>), 4-bit NF4 base + 16-bit LoRA adapters lets a 65B model fine-tune on a single 48&nbsp;GB GPU without loss vs. full 16-bit fine-tuning.</p>
  <p>The current best-practice stack pairs QLoRA with the <b>Unsloth</b> runtime (<a href="https://github.com/unslothai/unsloth" rel="noopener">github.com/unslothai/unsloth</a>, &gt;25k stars), which delivers ~2&times; faster training and ~70&nbsp;% less VRAM than vanilla PEFT through hand-written Triton kernels. Thinking Machines Lab&rsquo;s &ldquo;<a href="https://thinkingmachines.ai/blog/lora/" rel="noopener">LoRA Without Regret</a>&rdquo; blog (Oct&nbsp;2025) showed empirically that LoRA matches full fine-tuning on reasoning/math benchmarks when (i)&nbsp;rank is sufficient for the task complexity and (ii)&nbsp;the dataset is in-distribution for the base.</p>
 
  <h3>1.3 Preference distillation: DPO / SimPO / KTO / SLiC / ORPO.</h3>
  <p>A 2025 post-training stack typically chains SFT &rarr; preference step rather than picking one preference method.</p>
  <ul>
- <li><b>DPO</b> (Rafailov et al., 2023, <a href="https://arxiv.org/abs/2305.18290" rel="noopener">arXiv:2305.18290</a>) &mdash; single logistic loss over (chosen, rejected) replaces PPO + reward model. Universal baseline; OpenAI, Microsoft Azure, and Together all expose DPO endpoints.</li>
+ <li><b>DPO</b> (Rafailov et al., 2023, <a href="https://arxiv.org/abs/2305.18290" rel="noopener">arXiv:2305.18290</a>), single logistic loss over (chosen, rejected) replaces PPO + reward model. Universal baseline; OpenAI, Microsoft Azure, and Together all expose DPO endpoints.</li>
  <li><b>SimPO</b> (Meng et al., NeurIPS 2024, <a href="https://arxiv.org/abs/2405.14734" rel="noopener">arXiv:2405.14734</a>). Removes the reference log-ratio term, length-normalises the implicit reward, and outperforms DPO by up to 6.4&nbsp;pts on AlpacaEval&nbsp;2 and 7.5&nbsp;pts on Arena-Hard. <a href="https://github.com/princeton-nlp/SimPO" rel="noopener">princeton-nlp/SimPO</a> &gt;1.5k stars.</li>
- <li><b>KTO &mdash; Kahneman-Tversky Optimization</b> (Ethayarajh et al., 2024, <a href="https://arxiv.org/abs/2402.01306" rel="noopener">arXiv:2402.01306</a>). Works on <b>binary</b> good/bad labels instead of paired preferences, so it consumes thumb-up/thumb-down logs directly.</li>
+ <li><b>KTO, Kahneman-Tversky Optimization</b> (Ethayarajh et al., 2024, <a href="https://arxiv.org/abs/2402.01306" rel="noopener">arXiv:2402.01306</a>). Works on <b>binary</b> good/bad labels instead of paired preferences, so it consumes thumb-up/thumb-down logs directly.</li>
  <li><b>SLiC</b> (Zhao et al., 2023). Margin-based ranking loss; superseded in 2025 benchmarks.</li>
- <li><b>ORPO &mdash; Odds-Ratio Preference Optimization</b> (Hong et al., 2024, <a href="https://arxiv.org/abs/2403.07691" rel="noopener">arXiv:2403.07691</a>). Fuses SFT and preference in one pass; no reference model.</li>
- <li><b>TVKD &mdash; Teacher Value-based KD</b> (Kwon et al., 2025, <a href="https://arxiv.org/pdf/2509.16965" rel="noopener">arXiv:2509.16965</a>). Injects soft reward labels from a teacher&rsquo;s value function as an auxiliary term on top of DPO.</li>
+ <li><b>ORPO, Odds-Ratio Preference Optimization</b> (Hong et al., 2024, <a href="https://arxiv.org/abs/2403.07691" rel="noopener">arXiv:2403.07691</a>). Fuses SFT and preference in one pass; no reference model.</li>
+ <li><b>TVKD, Teacher Value-based KD</b> (Kwon et al., 2025, <a href="https://arxiv.org/pdf/2509.16965" rel="noopener">arXiv:2509.16965</a>). Injects soft reward labels from a teacher&rsquo;s value function as an auxiliary term on top of DPO.</li>
  </ul>
  <p>Modern consensus: <b>SimPO for stability under noisy labels, ORPO when you can fuse SFT, KTO when you only have binary signal, DPO as the universal default polish step.</b></p>
 
  <h3>1.4 Reasoning distillation (Quiet-STaR, CoT, agent distillation).</h3>
  <ul>
  <li><b>Quiet-STaR</b> (Zelikman et al., 2024, <a href="https://arxiv.org/abs/2403.09629" rel="noopener">arXiv:2403.09629</a>, <a href="https://github.com/ezelikman/quiet-star" rel="noopener">ezelikman/quiet-star</a>). LMs learn to generate token-by-token rationales that improve next-token prediction. After Quiet-STaR continued-pretraining, GSM8K rose 5.9 &rarr; 10.9 and CommonsenseQA 36.3 &rarr; 47.2 zero-shot.</li>
- <li><b>Fast Quiet-STaR</b> (EMNLP&nbsp;2025 Findings). Same inference cost as base, but stronger downstream &mdash; thinking without thought tokens.</li>
+ <li><b>Fast Quiet-STaR</b> (EMNLP&nbsp;2025 Findings). Same inference cost as base, but stronger downstream, thinking without thought tokens.</li>
  <li><b>Agent Distillation</b> (NeurIPS&nbsp;2025 poster, <i>Distilling LLM Agent into Small Models with Retrieval and Code Tools</i>). 0.5B / 1.5B / 3B sLMs match next-tier 1.5B / 3B / 7B CoT-distilled baselines when distilled with the full agentic loop (retrieval + tools), not just rationales.</li>
  <li><b>Chain-of-Thought Curriculum Distillation</b> (ISAIE&nbsp;2025). Step-by-step CoT supervision ordered by difficulty.</li>
  </ul>
@@ -331,12 +244,12 @@
  </ul>
 
  <h3>1.6 On-policy distillation (the late-2025 direction).</h3>
- <p>Thinking Machines Lab&rsquo;s <a href="https://thinkingmachines.ai/blog/on-policy-distillation/" rel="noopener"><i>On-Policy Distillation</i></a> (Oct&nbsp;2025) is the most-cited new direction in late-2025 distillation work. Student samples its own trajectories on-policy, and the teacher provides <b>dense per-token reverse-KL supervision</b> on those trajectories. Information-theoretically distillation teaches O(N) bits per episode versus RL&rsquo;s O(1), so on-policy distillation gets RL&rsquo;s exposure-bias mitigation at a fraction of the data cost. Reverse KL is mode-seeking &mdash; it locks onto the teacher&rsquo;s specific behaviour rather than smearing across distributions. A <b>Black-Box On-Policy Distillation</b> adaptation from Microsoft is at <a href="https://arxiv.org/pdf/2511.10643" rel="noopener">arXiv:2511.10643</a>.</p>
+ <p>Thinking Machines Lab&rsquo;s <a href="https://thinkingmachines.ai/blog/on-policy-distillation/" rel="noopener"><i>On-Policy Distillation</i></a> (Oct&nbsp;2025) is the most-cited new direction in late-2025 distillation work. Student samples its own trajectories on-policy, and the teacher provides <b>dense per-token reverse-KL supervision</b> on those trajectories. Information-theoretically distillation teaches O(N) bits per episode versus RL&rsquo;s O(1), so on-policy distillation gets RL&rsquo;s exposure-bias mitigation at a fraction of the data cost. Reverse KL is mode-seeking, it locks onto the teacher&rsquo;s specific behaviour rather than smearing across distributions. A <b>Black-Box On-Policy Distillation</b> adaptation from Microsoft is at <a href="https://arxiv.org/pdf/2511.10643" rel="noopener">arXiv:2511.10643</a>.</p>
 
- <h3>1.7 Mixed objectives &mdash; the dominant 2025 recipe.</h3>
+ <h3>1.7 Mixed objectives, the dominant 2025 recipe.</h3>
  <p>Empirically dominant pipeline in 2025: <b>SFT on teacher-generated demonstrations &rarr; DPO/SimPO on a preference set sampled from the same teacher</b>. This is the recipe behind <b>Tulu&nbsp;3</b>, <b>SmolLM2-Instruct</b>, and <b>Llama-3.2-Instruct</b>. Doing DPO without an SFT warm-up usually under-performs; OpenAI&rsquo;s DPO cookbook explicitly recommends SFT-first.</p>
 
- <h2 id="sample-efficiency">2. Sample efficiency &mdash; how much data is enough?</h2>
+ <h2 id="sample-efficiency">2. Sample efficiency, how much data is enough?</h2>
 
  <h3>2.1 LoRA on a small specialised task.</h3>
  <ul>
@@ -357,13 +270,13 @@
  <ul>
  <li><b>UltraFeedback</b> (Cui et al., 2023, <a href="https://github.com/OpenBMB/UltraFeedback" rel="noopener">OpenBMB/UltraFeedback</a>): <b>~64k prompts</b> with 4-aspect preference annotations across UltraChat / ShareGPT / Evol-Instruct / TruthfulQA / FalseQA / FLAN. De-facto open baseline.</li>
  <li><b>Tulu 3 preference mix</b>: on-policy completions generated <i>by the model being trained</i>; significantly outperforms UltraFeedback-alone, especially at 70B scale (per Tulu&nbsp;3 paper, Allen AI 2025).</li>
- <li>OpenAI&rsquo;s official DPO cookbook walks through a <b>500-pair</b> demonstration &mdash; enough for narrow behavioural shaping (response-format preferences, single-axis tone changes). For general alignment expect <b>10k&ndash;60k pairs</b>.</li>
+ <li>OpenAI&rsquo;s official DPO cookbook walks through a <b>500-pair</b> demonstration, enough for narrow behavioural shaping (response-format preferences, single-axis tone changes). For general alignment expect <b>10k&ndash;60k pairs</b>.</li>
  </ul>
 
  <h3>2.4 Reasoning / CoT distillation.</h3>
  <ul>
  <li>Agent Distillation (NeurIPS&nbsp;2025): a 0.5B sLM closes a 1B&ndash;7B gap with <b>~10k&ndash;50k rationale-augmented trajectories</b> from a stronger teacher.</li>
- <li>Quiet-STaR&rsquo;s continued pretraining used OpenWebMath + web text at the scale of millions of tokens &mdash; the rationale-pretraining regime, not the few-thousand-pair fine-tune regime.</li>
+ <li>Quiet-STaR&rsquo;s continued pretraining used OpenWebMath + web text at the scale of millions of tokens, the rationale-pretraining regime, not the few-thousand-pair fine-tune regime.</li>
  </ul>
 
  <h2 id="base-models">3. Base-model picks for distillation targets, 2026.</h2>
@@ -395,7 +308,7 @@
  <li><b>Reasoning-heavy specialised task</b>: Phi-4 14B (MIT) or Qwen2.5-7B with on-policy distillation from a frontier teacher.</li>
  </ul>
 
- <h2 id="quantization">4. Quantization formats &mdash; trade-offs.</h2>
+ <h2 id="quantization">4. Quantization formats, trade-offs.</h2>
 
  <table>
  <thead><tr><th>Format</th><th>Bit-width</th><th>Typical size (7B base)</th><th>Quality retention</th><th>Speed</th><th>Notes</th></tr></thead>
@@ -407,14 +320,14 @@
  <tr><td><b>AWQ INT4</b></td><td>4-bit</td><td>~4.0 GB</td><td><b>~95&nbsp;%</b></td><td>GPU</td><td>Activation-aware. At 70B scale, AWQ consistently beats GPTQ for accuracy; Marlin-AWQ 741 tok/s vs.&nbsp;68 vanilla = 10.9&times; speedup.</td></tr>
  <tr><td><b>bitsandbytes 4-bit NF4 (QLoRA)</b></td><td>4-bit</td><td>~4.5 GB</td><td>full fine-tune parity</td><td>GPU only</td><td>QLoRA paper (Dettmers et al., <a href="https://arxiv.org/abs/2305.14314" rel="noopener">arXiv:2305.14314</a>). Standard for <i>training</i>, not shipping.</td></tr>
  <tr><td><b>SmoothQuant W8A8</b></td><td>8-bit weights + 8-bit acts</td><td>~7 GB</td><td>high</td><td>GPU</td><td>Migrates outliers from activations to weights; MIT HAN Lab. Suitable for server-side inference.</td></tr>
- <tr><td><b>SpQR</b></td><td>mixed</td><td>&mdash;</td><td>high</td><td>GPU</td><td>Sparse-quantised; handles outlier weights at higher precision. Niche; <span class="verify-tag">verify before ship</span> &mdash; llama.cpp integration story still unclear in 2025.</td></tr>
- <tr><td><b>llama.cpp imatrix</b></td><td>works with all GGUF Q*</td><td>same as base format</td><td>+10&ndash;30&nbsp;% perplexity reduction vs.&nbsp;naive</td><td>&mdash;</td><td>Importance-matrix calibration before quantisation. <b>Strongly recommended for any GGUF below Q5_K_M.</b></td></tr>
+ <tr><td><b>SpQR</b></td><td>mixed</td><td>,</td><td>high</td><td>GPU</td><td>Sparse-quantised; handles outlier weights at higher precision. Niche; <span class="verify-tag">verify before ship</span>, llama.cpp integration story still unclear in 2025.</td></tr>
+ <tr><td><b>llama.cpp imatrix</b></td><td>works with all GGUF Q*</td><td>same as base format</td><td>+10&ndash;30&nbsp;% perplexity reduction vs.&nbsp;naive</td><td>,</td><td>Importance-matrix calibration before quantisation. <b>Strongly recommended for any GGUF below Q5_K_M.</b></td></tr>
  </tbody>
  </table>
 
- <p>Key practitioner finding from 2025: <b>IFEval is the most quantization-sensitive eval</b> &mdash; models can lose &gt;10&nbsp;% instruction-following accuracy at INT4, suggesting decoder alignment becomes unstable in very low-bit formats. For instruction-tuned kolm students, ship Q5_K_M or AWQ-INT4 with imatrix, not naked Q4_0.</p>
+ <p>Key practitioner finding from 2025: <b>IFEval is the most quantization-sensitive eval</b>, models can lose &gt;10&nbsp;% instruction-following accuracy at INT4, suggesting decoder alignment becomes unstable in very low-bit formats. For instruction-tuned kolm students, ship Q5_K_M or AWQ-INT4 with imatrix, not naked Q4_0.</p>
 
- <h2 id="data-creation">5. Training-data creation &mdash; reputable open methods.</h2>
+ <h2 id="data-creation">5. Training-data creation, reputable open methods.</h2>
 
  <h3>5.1 Self-Instruct &rarr; Stanford Alpaca &rarr; Evol-Instruct.</h3>
  <ul>
@@ -423,7 +336,7 @@
  <li><b>WizardCoder</b> and <b>WizardMath</b> (ICLR&nbsp;2024) apply the same evolution to coding and math domains.</li>
  </ul>
 
- <h3>5.2 Magpie &mdash; seed-free synthesis (ICLR 2025).</h3>
+ <h3>5.2 Magpie, seed-free synthesis (ICLR 2025).</h3>
  <p><b>Magpie</b> (Xu et al., <a href="https://arxiv.org/html/2406.08464v1" rel="noopener">arXiv:2406.08464</a>, ICLR&nbsp;2025, <a href="https://github.com/magpie-align/magpie" rel="noopener">magpie-align/magpie</a>). Exploits the chat template of an aligned LLM: feed the pre-fill template alone, and the aligned LLM hallucinates <i>both</i> a user query and a response. No seed instructions, no Evol-Instruct chain. Llama-3-8B-Base fine-tuned on Magpie data outperforms Evol-Instruct- and UltraChat-derived datasets and approaches Llama-3-8B-Instruct quality with a <b>much smaller dataset</b>. t-SNE shows Magpie covers Alpaca + Evol-Instruct + UltraChat combined.</p>
 
  <h3>5.3 Synthetic data via teacher API.</h3>
@@ -438,23 +351,23 @@
 
  <h3>5.4 Constitutional AI and refusal training.</h3>
  <p><b>Constitutional AI</b> (Bai et al., Anthropic, 2022, <a href="https://arxiv.org/abs/2212.08073" rel="noopener">arXiv:2212.08073</a>). Use a written constitution to (a)&nbsp;generate critique prompts that produce revised model outputs, then (b)&nbsp;generate AI-feedback preference labels for RLHF / RLAIF.</p>
- <p><b>Constitutional Classifiers</b> and <b>Constitutional Classifiers++</b> (Anthropic, Feb&nbsp;2025 and follow-up). Train input/output classifiers on synthetic constitution-violation data. Deployment on Claude Sonnet 4.5 hit <b>0.05&nbsp;% refusal rate on harmless queries</b> &mdash; 87&nbsp;% drop from the original. Reference: <a href="https://www.anthropic.com/research/constitutional-classifiers" rel="noopener">anthropic.com/research/constitutional-classifiers</a>.</p>
+ <p><b>Constitutional Classifiers</b> and <b>Constitutional Classifiers++</b> (Anthropic, Feb&nbsp;2025 and follow-up). Train input/output classifiers on synthetic constitution-violation data. Deployment on Claude Sonnet 4.5 hit <b>0.05&nbsp;% refusal rate on harmless queries</b>, 87&nbsp;% drop from the original. Reference: <a href="https://www.anthropic.com/research/constitutional-classifiers" rel="noopener">anthropic.com/research/constitutional-classifiers</a>.</p>
  <p>For kolm: a tenant-supplied constitution &rarr; synthetic refusal corpus &rarr; small classifier head is a credible add-on for the redactor companion modules.</p>
 
  <h3>5.5 Persona-driven generation.</h3>
- <p><b>Scaling Synthetic Data Creation with 1,000,000,000 Personas</b> (Chan et al., Tencent AI Lab, 2024, <a href="https://arxiv.org/abs/2406.20094" rel="noopener">arXiv:2406.20094</a>, <a href="https://github.com/tencent-ailab/persona-hub" rel="noopener">tencent-ailab/persona-hub</a>). <b>Persona Hub</b> &mdash; 1B personas curated via Text-to-Persona (&ldquo;who would read/write/like this?&rdquo;) + Persona-to-Persona (interpersonal-relationship expansion). Inject one persona per generation prompt to dramatically diversify outputs. Applications: math/logic problems, instructions, knowledge-rich text, NPC dialogue, tool/function calls.</p>
+ <p><b>Scaling Synthetic Data Creation with 1,000,000,000 Personas</b> (Chan et al., Tencent AI Lab, 2024, <a href="https://arxiv.org/abs/2406.20094" rel="noopener">arXiv:2406.20094</a>, <a href="https://github.com/tencent-ailab/persona-hub" rel="noopener">tencent-ailab/persona-hub</a>). <b>Persona Hub</b>, 1B personas curated via Text-to-Persona (&ldquo;who would read/write/like this?&rdquo;) + Persona-to-Persona (interpersonal-relationship expansion). Inject one persona per generation prompt to dramatically diversify outputs. Applications: math/logic problems, instructions, knowledge-rich text, NPC dialogue, tool/function calls.</p>
  <p>This is the cheapest way to <b>diversify</b> a small seed set without manual curation; combine with Magpie or Evol-Instruct to get topic coverage and difficulty range simultaneously.</p>
 
  <h3>5.6 Anchor open datasets (cite-able pedigree).</h3>
  <ul>
- <li><b>OpenHermes-2.5</b> &mdash; Teknium / Nous (~1M GPT-4 multi-turn).</li>
- <li><b>UltraChat</b> &mdash; THUNLP (1.5M multi-round).</li>
- <li><b>UltraFeedback</b> &mdash; OpenBMB (64k 4-aspect preference).</li>
- <li><b>Tulu 3 mix</b> &mdash; Allen AI (SFT + preference + safety + IF; ~939k SFT, on-policy DPO).</li>
- <li><b>Magpie-Pro / Magpie-Air</b> &mdash; Magpie-Align (seed-free; multiple sizes from 100k to 1M).</li>
+ <li><b>OpenHermes-2.5</b>, Teknium / Nous (~1M GPT-4 multi-turn).</li>
+ <li><b>UltraChat</b>, THUNLP (1.5M multi-round).</li>
+ <li><b>UltraFeedback</b>, OpenBMB (64k 4-aspect preference).</li>
+ <li><b>Tulu 3 mix</b>, Allen AI (SFT + preference + safety + IF; ~939k SFT, on-policy DPO).</li>
+ <li><b>Magpie-Pro / Magpie-Air</b>, Magpie-Align (seed-free; multiple sizes from 100k to 1M).</li>
  </ul>
 
- <h2 id="nl-to-recipe">6. Natural language &rarr; recipe &mdash; state of the art.</h2>
+ <h2 id="nl-to-recipe">6. Natural language &rarr; recipe, state of the art.</h2>
 
  <h3>6.1 Function calling / tool use for structured output.</h3>
  <p>Anthropic, OpenAI, Google, Mistral, Cohere, and most open Instruct models now support tool / function calling natively. Authoritative benchmark: <b>Berkeley Function Calling Leaderboard (BFCL) V4</b> (ICML&nbsp;2025, <a href="https://gorilla.cs.berkeley.edu/leaderboard.html" rel="noopener">gorilla.cs.berkeley.edu/leaderboard.html</a>). Real-world question-function-answer pairs across Python / Java / JavaScript / REST; AST-based scoring. As of mid-2026: Claude Opus 4.1 at 70.36&nbsp;% (2nd), Claude Sonnet&nbsp;4 at 70.29&nbsp;% (3rd), GPT-5 at 59.22&nbsp;% (7th).</p>
@@ -465,23 +378,23 @@
  <li><b>XGrammar</b> (<a href="https://github.com/mlc-ai/xgrammar" rel="noopener">mlc-ai/xgrammar</a>). Default structured-generation backend for vLLM, SGLang, and TensorRT-LLM since March&nbsp;2026. Under 40&nbsp;&micro;s/token, near-zero JSON overhead. <span class="verify-tag">cross-verified</span> vendor docs updated frequently.</li>
  <li><b>llguidance</b> (Microsoft, <a href="https://github.com/guidance-ai/llguidance" rel="noopener">guidance-ai/llguidance</a>). Rust Earley parser at ~50&nbsp;&micro;s/token; OpenAI publicly credited llguidance for the foundational work underpinning their May-2025 Structured Outputs.</li>
  <li><b>Outlines</b>. Compiles JSON schemas to FSM index for O(1) valid-token lookup. JSONSchemaBench flagged complex-schema compile times of 40&nbsp;s&ndash;10&nbsp;min; <b>best for simple, hand-curated schemas</b>, weaker for arbitrary user input.</li>
- <li><b>lm-format-enforcer</b> (Gat, <a href="https://github.com/noamgat/lm-format-enforcer" rel="noopener">noamgat/lm-format-enforcer</a>). Permits LLM to control whitespace, optional fields, field ordering &mdash; more permissive than rigid grammar enforcers.</li>
- <li><b>JSON mode / response_format</b> &mdash; OpenAI (Aug&nbsp;2024), Anthropic (Nov&nbsp;2025), Google, Mistral. The cheapest path when you only need valid JSON, not a specific schema.</li>
+ <li><b>lm-format-enforcer</b> (Gat, <a href="https://github.com/noamgat/lm-format-enforcer" rel="noopener">noamgat/lm-format-enforcer</a>). Permits LLM to control whitespace, optional fields, field ordering, more permissive than rigid grammar enforcers.</li>
+ <li><b>JSON mode / response_format</b>, OpenAI (Aug&nbsp;2024), Anthropic (Nov&nbsp;2025), Google, Mistral. The cheapest path when you only need valid JSON, not a specific schema.</li>
  </ul>
  <p>For kolm: use <b>vendor-native function-calling for teachers we can target</b> (Anthropic / OpenAI), with <b>XGrammar or llguidance as the local fallback</b> when the user requested an open-weight teacher.</p>
 
  <h3>6.3 DSL synthesis (NL &rarr; executable program).</h3>
- <p>The &ldquo;Code as Policies&rdquo; / &ldquo;ProgPrompt&rdquo; line of work (2022&ndash;2023) demonstrated that LLMs can translate NL into executable DSL when given (i)&nbsp;DSL syntax in-context, (ii)&nbsp;~5&ndash;15 input/output exemplars, (iii)&nbsp;system instructions. The 2024&ndash;2025 follow-ups &mdash; <b>DSL Assistant</b> (<a href="https://arxiv.org/pdf/2408.09766" rel="noopener">arXiv:2408.09766</a>), <b>Natural Language Commanding via Program Synthesis</b> (Gandhi, Microsoft, <a href="https://arxiv.org/pdf/2306.03460" rel="noopener">arXiv:2306.03460</a>), <b>Towards Formal Verification of LLM-Generated Code from Natural Language Prompts</b> (<a href="https://arxiv.org/html/2507.13290v1" rel="noopener">arXiv:2507.13290</a>) &mdash; treat the DSL as a typed schema and the LLM as the parser. Recurring success recipe: keep the DSL tight, expose ~10 in-context examples, run a syntactic validator (the AST check kolm already has in <code>src/synthesis.js</code>), and bounce on first parse failure.</p>
+ <p>The &ldquo;Code as Policies&rdquo; / &ldquo;ProgPrompt&rdquo; line of work (2022&ndash;2023) demonstrated that LLMs can translate NL into executable DSL when given (i)&nbsp;DSL syntax in-context, (ii)&nbsp;~5&ndash;15 input/output exemplars, (iii)&nbsp;system instructions. The 2024&ndash;2025 follow-ups, <b>DSL Assistant</b> (<a href="https://arxiv.org/pdf/2408.09766" rel="noopener">arXiv:2408.09766</a>), <b>Natural Language Commanding via Program Synthesis</b> (Gandhi, Microsoft, <a href="https://arxiv.org/pdf/2306.03460" rel="noopener">arXiv:2306.03460</a>), <b>Towards Formal Verification of LLM-Generated Code from Natural Language Prompts</b> (<a href="https://arxiv.org/html/2507.13290v1" rel="noopener">arXiv:2507.13290</a>), treat the DSL as a typed schema and the LLM as the parser. Recurring success recipe: keep the DSL tight, expose ~10 in-context examples, run a syntactic validator (the AST check kolm already has in <code>src/synthesis.js</code>), and bounce on first parse failure.</p>
 
  <h3>6.4 Verifier loops (self-debug, AlphaCodium).</h3>
  <p><b>AlphaCodium</b> (Ridnik et al., Codium AI, Jan&nbsp;2024, <a href="https://arxiv.org/abs/2401.08500" rel="noopener">arXiv:2401.08500</a>, <a href="https://github.com/Codium-ai/AlphaCodium" rel="noopener">Codium-ai/AlphaCodium</a>). Two-phase flow:</p>
  <ul>
- <li><b>Pre-processing</b> &mdash; model summarises goal/inputs/outputs/rules as bullets, generates and ranks candidate solutions.</li>
- <li><b>Iteration</b> &mdash; generate candidate, execute against public + AI-generated tests, refine based on failure mode.</li>
+ <li><b>Pre-processing</b>, model summarises goal/inputs/outputs/rules as bullets, generates and ranks candidate solutions.</li>
+ <li><b>Iteration</b>, generate candidate, execute against public + AI-generated tests, refine based on failure mode.</li>
  </ul>
  <p>GPT-4 pass@5 rose from 19&nbsp;% (single-prompt) &rarr; 44&nbsp;% (AlphaCodium). Crucially, only <b>~100 LLM calls per problem</b> vs.&nbsp;AlphaCode&rsquo;s ~1M. The lesson kolm steals: <b>synthesising tests is easier than synthesising correct code; use the verifier-rejection signal as the gradient</b>. Maps cleanly onto the existing verifier loop in <code>src/synthesis.js</code>.</p>
 
- <h2 id="rule-of-thumb">7. Rule-of-thumb &mdash; data needed per recipe class.</h2>
+ <h2 id="rule-of-thumb">7. Rule-of-thumb, data needed per recipe class.</h2>
  <p>The recipe-class taxonomy is the one declared in <code>src/recipe-class.js</code>. The data-volume column reflects the modal practitioner recommendation from &sect;2.</p>
 
  <table>
@@ -490,10 +403,10 @@
  <tr><td><b>rule</b></td><td>Hand-authored JS</td><td><b>0</b></td><td>Deterministic; verifier sees fixed source. Holdout for K-score still needed.</td></tr>
  <tr><td><b>synthesized_rule</b></td><td>Teacher emits DSL / JS, AST-validated</td><td><b>5&ndash;50 in-context exemplars</b> (no fine-tune)</td><td>Few-shot prompting against a strong teacher; verifier loop catches failures. Magpie / Evol-Instruct can grow exemplars if seed is small.</td></tr>
  <tr><td><b>compiled_rule</b></td><td>Lower an existing rule / synth-rule to C / Rust / WASM</td><td><b>Same as source</b> (rule is the spec)</td><td>Native compile is mechanical; no new training data. Differential tests against source are the gate.</td></tr>
- <tr><td><b>distilled_model</b> &mdash; sharp / narrow</td><td>LoRA on teacher pairs</td><td><b>500&ndash;2,000</b> (LIMA anchor + Databricks / Unsloth practitioner consensus)</td><td>E.g.&nbsp;denial-code classifier with neural fallback, ICD-10 free-text &rarr; code.</td></tr>
- <tr><td><b>distilled_model</b> &mdash; moderate domain assistant</td><td>LoRA + DPO / SimPO</td><td><b>5k&ndash;30k SFT + 1k&ndash;10k preference</b></td><td>E.g.&nbsp;clinical-notes summariser, customer-support persona. Use Magpie + Persona-Hub for seeds.</td></tr>
- <tr><td><b>distilled_model</b> &mdash; generalist chat</td><td>Full SFT + preference stack</td><td><b>100k&ndash;1M SFT + 10k&ndash;60k preference</b></td><td>Reference: Tulu&nbsp;3 939k SFT + UltraFeedback 64k. kolm unlikely to serve this tier directly; recommend tenant uses a published base.</td></tr>
- <tr><td><b>distilled_model</b> &mdash; reasoning-augmented</td><td>On-policy distillation or CoT distillation</td><td><b>10k&ndash;50k trajectories</b></td><td>Agent Distillation NeurIPS&nbsp;2025 anchor. Reverse-KL on student rollouts.</td></tr>
+ <tr><td><b>distilled_model</b>, sharp / narrow</td><td>LoRA on teacher pairs</td><td><b>500&ndash;2,000</b> (LIMA anchor + Databricks / Unsloth practitioner consensus)</td><td>E.g.&nbsp;denial-code classifier with neural fallback, ICD-10 free-text &rarr; code.</td></tr>
+ <tr><td><b>distilled_model</b>, moderate domain assistant</td><td>LoRA + DPO / SimPO</td><td><b>5k&ndash;30k SFT + 1k&ndash;10k preference</b></td><td>E.g.&nbsp;clinical-notes summariser, customer-support persona. Use Magpie + Persona-Hub for seeds.</td></tr>
+ <tr><td><b>distilled_model</b>, generalist chat</td><td>Full SFT + preference stack</td><td><b>100k&ndash;1M SFT + 10k&ndash;60k preference</b></td><td>Reference: Tulu&nbsp;3 939k SFT + UltraFeedback 64k. kolm unlikely to serve this tier directly; recommend tenant uses a published base.</td></tr>
+ <tr><td><b>distilled_model</b>, reasoning-augmented</td><td>On-policy distillation or CoT distillation</td><td><b>10k&ndash;50k trajectories</b></td><td>Agent Distillation NeurIPS&nbsp;2025 anchor. Reverse-KL on student rollouts.</td></tr>
  </tbody>
  </table>
 
@@ -540,11 +453,11 @@
  </div>
  </div>
 
- <h3>Deferred &mdash; explicitly out of scope.</h3>
+ <h3>Deferred, explicitly out of scope.</h3>
  <ul>
- <li><b>SpQR integration</b> &mdash; niche; llama.cpp story unclear in 2025. <span class="verify-tag">verify before ship</span></li>
- <li><b>Variational Speculative Decoding</b> &mdash; single recent preprint; covered by the EAGLE-3 path in <code>src/spec-decode.js</code>. <span class="verify-tag">verify before ship</span></li>
- <li><b>Quiet-STaR rationale-pretraining</b> &mdash; compute-prohibitive for tenant-scale runs; viable only for fleet-wide base updates.</li>
+ <li><b>SpQR integration</b>, niche; llama.cpp story unclear in 2025. <span class="verify-tag">verify before ship</span></li>
+ <li><b>Variational Speculative Decoding</b>, single recent preprint; covered by the EAGLE-3 path in <code>src/spec-decode.js</code>. <span class="verify-tag">verify before ship</span></li>
+ <li><b>Quiet-STaR rationale-pretraining</b>, compute-prohibitive for tenant-scale runs; viable only for fleet-wide base updates.</li>
  </ul>
 
  <blockquote>
@@ -584,58 +497,31 @@
 
 
 </main>
-<footer class="site">
- <div class="wrap" style="max-width: 1180px;">
- <div class="footer-grid">
- <div>
- <h4>Build</h4>
- <a href="/quickstart">Quickstart</a>
- <a href="/docs">Docs</a>
- <a href="/spec/rs-1">RS-1 spec</a>
- <a href="/openapi.json">OpenAPI</a>
- <a href="/cli">CLI</a>
- </div>
- <div>
- <h4>Deploy</h4>
- <a href="/compute">Backends</a>
- <a href="/airgap">Air-gap</a>
- <a href="/integrations/cloudflare">Cloudflare</a>
- <a href="/integrations/github-actions">GitHub Actions</a>
- <a href="/integrations/gitlab-ci">GitLab CI</a>
- </div>
- <div>
- <h4>Proof</h4>
- <a href="/verify-prod">Verify a .kolm</a>
- <a href="/badge">Embed badge</a>
- <a href="/benchmarks">Benchmarks</a>
- <a href="/compare">Compare</a>
- <a href="/registry">Registry</a>
- <a href="/case-studies">Case studies</a>
- </div>
- <div>
- <h4>Industries</h4>
- <a href="/healthcare">Healthcare</a>
- <a href="/finance">Finance</a>
- <a href="/legal">Legal</a>
- <a href="/compliance">Compliance</a>
- <a href="/insure">Insurance</a>
- </div>
- <div>
- <h4>Company</h4>
- <a href="/pricing">Pricing</a>
- <a href="/changelog">Changelog</a>
- <a href="/security">Security</a>
- <a href="/community">Community</a>
- <a href="/contact">Contact</a>
- </div>
- </div>
- <div class="footer-tag">
- <span>kolm.ai - Made with .kolm - Apache-2.0</span>
- <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
- </div>
- </div>
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/integrations">Integrations</a></li><li><a href="/docs/api">API reference</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
 </footer>
 
-<script src="/nav.js" defer></script>
 </body>
 </html>

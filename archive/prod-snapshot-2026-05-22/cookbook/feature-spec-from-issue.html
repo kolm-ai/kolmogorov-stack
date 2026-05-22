@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Feature spec from issue recipe · kolm cookbook · kolm.ai</title>
+<meta name="description" content="Compile a signed local model that turns a GitHub issue into a 4-section feature spec: problem, scope, success criteria, open questions. 80 gold pairs, runs...">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta property="og:title" content="Feature spec from issue recipe · kolm cookbook · kolm.ai">
+<meta property="og:description" content="Compile a signed local model that turns a GitHub issue into a 4-section feature spec: problem, scope, success criteria, open questions. 80 gold pairs, runs...">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Feature spec from issue recipe · kolm cookbook · kolm.ai">
+<meta name="twitter:description" content="Compile a signed local model that turns a GitHub issue into a 4-section feature spec: problem, scope, success criteria, open questions. 80 gold pairs, runs...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/cookbook/feature-spec-from-issue">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/cookbook/feature-spec-from-issue">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/cookbook/_recipe.css">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "HowTo",
+ "name": "Feature-spec recipe",
+ "description": "Local issue-to-PRD writer. Brand-voice tuned, signed, offline.",
+ "url": "https://kolm.ai/cookbook/feature-spec-from-issue",
+ "totalTime": "PT5M",
+ "tool": [
+ {
+ "@type": "HowToTool",
+ "name": "kolm CLI"
+ }
+ ],
+ "step": [
+ {
+ "@type": "HowToStep",
+ "name": "Install",
+ "text": "npm i -g github:sneaky-hippo/kolm-stack"
+ },
+ {
+ "@type": "HowToStep",
+ "name": "Compile",
+ "text": "kolm compile feature-spec-from-issue.toml"
+ },
+ {
+ "@type": "HowToStep",
+ "name": "Run",
+ "text": "kolm run feature-spec-from-issue.kolm"
+ }
+ ]
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {
+ "@type": "ListItem",
+ "position": 1,
+ "name": "kolm",
+ "item": "https://kolm.ai/"
+ },
+ {
+ "@type": "ListItem",
+ "position": 2,
+ "name": "Cookbook",
+ "item": "https://kolm.ai/cookbook"
+ },
+ {
+ "@type": "ListItem",
+ "position": 3,
+ "name": "Feature spec from issue recipe",
+ "item": "https://kolm.ai/cookbook/feature-spec-from-issue"
+ }
+ ]
+ }
+ ]
+}
+</script>
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API Key &rarr;</a>
+ </div>
+ </div>
+</header>
+<main id="main">
+
+<section class="hero">
+ <div class="wrap">
+ <div class="crumbs"><a href="/docs">cookbook</a> &middot; product &middot; feature-spec-from-issue</div>
+ <span class="pill">Recipe &middot; product</span>
+ <h1>Issue in, <span class="tone">spec out.</span></h1>
+ <p class="lede">A local <code>.kolm</code> file that takes a GitHub / Linear / Jira issue and writes a 4-section feature spec: <em>problem, scope, success criteria, open questions</em>. Trained on 80 of your team's past specs, so the voice and granularity match what your reviewers expect.</p>
+
+ <div class="meta-row">
+ <div class="item"><span class="label">base model</span><span class="value">qwen2.5-7b-instruct</span></div>
+ <div class="item"><span class="label">gold pairs</span><span class="value">80 (40 train / 40 eval)</span></div>
+ <div class="item"><span class="label">k-score floor</span><span class="value">0.80</span></div>
+ <div class="item"><span class="label">artifact size</span><span class="value">2.6 GB</span></div>
+ <div class="item"><span class="label">compile time</span><span class="value">~28 min</span></div>
+ <div class="item"><span class="label">spec source</span><span class="value">JSON Schema + style verifier</span></div>
+ </div>
+ </div>
+</section>
+
+<article>
+ <div class="wrap">
+
+ <div class="group">
+ <h2>What this recipe does</h2>
+ <p>A PM gets a 3-paragraph issue. Before they can scope it, they spend 20 minutes restructuring it into a spec. Same template every time. This recipe does the restructure pass and stops there · it doesn't decide product strategy or set priorities, it only turns prose into the shape your team reviews.</p>
+ <p>The verifier enforces (a) all four sections present, (b) each "success criterion" is testable (must contain a measurable verb), (c) the brand-voice gate from the docstring recipe · your prevailing tone, not a generic LLM voice.</p>
+ </div>
+
+ <div class="group">
+ <h2>The spec</h2>
+ <pre class="code">{
+ <span class="k">"output_kind"</span>: <span class="k">"json"</span>,
+ <span class="k">"schema"</span>: {
+ <span class="k">"required"</span>: [<span class="k">"problem"</span>, <span class="k">"scope"</span>, <span class="k">"success_criteria"</span>, <span class="k">"open_questions"</span>],
+ <span class="k">"properties"</span>: {
+ <span class="k">"problem"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span>, <span class="k">"maxLength"</span>: 600 },
+ <span class="k">"scope"</span>: { <span class="k">"type"</span>: <span class="k">"object"</span>,
+ <span class="k">"required"</span>: [<span class="k">"in"</span>, <span class="k">"out"</span>],
+ <span class="k">"properties"</span>: {
+ <span class="k">"in"</span>: { <span class="k">"type"</span>: <span class="k">"array"</span>, <span class="k">"items"</span>: {<span class="k">"type"</span>:<span class="k">"string"</span>} },
+ <span class="k">"out"</span>: { <span class="k">"type"</span>: <span class="k">"array"</span>, <span class="k">"items"</span>: {<span class="k">"type"</span>:<span class="k">"string"</span>} }
+ }
+ },
+ <span class="k">"success_criteria"</span>: { <span class="k">"type"</span>: <span class="k">"array"</span>, <span class="k">"items"</span>: {<span class="k">"type"</span>:<span class="k">"string"</span>}, <span class="k">"minItems"</span>: 2 },
+ <span class="k">"open_questions"</span>: { <span class="k">"type"</span>: <span class="k">"array"</span>, <span class="k">"items"</span>: {<span class="k">"type"</span>:<span class="k">"string"</span>} }
+ }
+ },
+ <span class="k">"verifier"</span>: {
+ <span class="k">"success_criterion_must_contain_verb"</span>: <span class="ok">true</span>,
+ <span class="k">"style_corpus"</span>: <span class="k">"prior-specs/"</span>,
+ <span class="k">"max_words_per_section"</span>: 200
+ }
+}</pre>
+ </div>
+
+ <div class="group">
+ <h2>Gold pairs (1 of 80 shown)</h2>
+
+ <div class="pair">
+ <div class="pair-h">input - github issue</div>
+ <pre class="code">title: feed loads slow for users with &gt;200 saved items
+body:
+Customers on the high-volume saved list (top 5%) report the feed taking
+4-7 seconds to render. Telemetry confirms: p95 feed-render at 3.8s for users
+above 200 saved items, vs 480ms for everyone else. We've seen it in support
+tickets twice this week. Likely the N+1 query in feed.py:118 · we know
+about it but never prioritized it. Should we?</pre>
+ <div class="pair-h">output</div>
+ <pre class="code">{
+ <span class="k">"problem"</span>: <span class="k">"Customers with &gt;200 saved items see p95 feed-render at 3.8s vs 480ms baseline. Affects ~5% of active users; surfaced in 2 support tickets this week. Source is the N+1 query at feed.py:118."</span>,
+ <span class="k">"scope"</span>: {
+ <span class="k">"in"</span>: [
+ <span class="k">"Eliminate the N+1 query at feed.py:118 (use prefetch_related)"</span>,
+ <span class="k">"Add p95-by-saved-count chart to the feed perf dashboard"</span>
+ ],
+ <span class="k">"out"</span>: [
+ <span class="k">"Pagination redesign (separate work)"</span>,
+ <span class="k">"Caching layer (consider after this fix lands)"</span>
+ ]
+ },
+ <span class="k">"success_criteria"</span>: [
+ <span class="k">"p95 feed-render reduces below 800ms for users with 200+ saved items"</span>,
+ <span class="k">"DB query count for the feed endpoint drops below 12 per render (currently scales with saved count)"</span>,
+ <span class="k">"Zero new feed-perf support tickets in the 14 days after release"</span>
+ ],
+ <span class="k">"open_questions"</span>: [
+ <span class="k">"Do we backfill prefetch hints into the existing serializer, or write a new one?"</span>,
+ <span class="k">"What's the rollout plan · flag-gated for high-volume users first?"</span>
+ ]
+}</pre>
+ </div>
+ </div>
+
+ <div class="group">
+ <h2>Compile</h2>
+ <pre class="code">kolm compile <span class="k">"github issue to 4-section feature spec"</span> \
+ --base qwen2.5-7b-instruct \
+ --pairs pairs.jsonl \
+ --style-corpus prior-specs/ \
+ --verifier success-criterion-testable \
+ --k-floor 0.80 \
+ --output feature-spec.kolm
+
+<span class="ok">ok</span> wrote <span class="k">feature-spec.kolm</span>
+ k_score=0.84 signature=ed25519</pre>
+ </div>
+
+ <div class="group">
+ <h2>K-score gate</h2>
+ <div class="k-bar">
+ <span class="k-label">K-score</span>
+ <span class="k-value">0.84</span>
+ <span class="k-detail">held-out 40 specs &middot; schema-pass 100% &middot; success-criteria-testable 96% &middot; PM-rated useful 86%</span>
+ </div>
+ <p>The "testable verb" check is the hardest gate · it kills outputs like "feed should be faster" (no measurable threshold) and forces "p95 feed-render reduces below 800ms" (concrete, observable, falsifiable).</p>
+ </div>
+
+ <div class="group">
+ <h2>Run-time profile</h2>
+ <div class="lat-grid">
+ <div class="cell"><div class="h">M2 MacBook</div><div class="v">2.2<span class="u">s</span></div></div>
+ <div class="cell"><div class="h">RTX 5090</div><div class="v">510<span class="u">ms</span></div></div>
+ <div class="cell"><div class="h">iPhone 15 Pro</div><div class="v">5.8<span class="u">s</span></div></div>
+ <div class="cell"><div class="h">CPU x86 (server)</div><div class="v">7.4<span class="u">s</span></div></div>
+ </div>
+ </div>
+
+ <div class="group">
+ <h2>Deploy</h2>
+ <pre class="code"><span class="c"># github action · runs on every issue with label `needs-spec`:</span>
+on:
+ issues:
+ types: [labeled]
+jobs:
+ draft-spec:
+ if: github.event.label.name == <span class="k">'needs-spec'</span>
+ runs-on: ubuntu-latest
+ steps:
+ - run: |
+ spec=$(kolm run feature-spec.kolm --input <span class="k">"$ISSUE_BODY"</span>)
+ gh issue comment $NUM --body <span class="k">"$spec"</span></pre>
+ </div>
+
+ <div class="group">
+ <h2>Related recipes</h2>
+ <div class="related">
+ <a href="/cookbook/support-reply"><div class="h">Support reply</div><div class="d">Ticket -> empathy-tuned, brand-faithful reply.</div></a>
+ <a href="/cookbook/pricing-quote"><div class="h">Pricing quote</div><div class="d">Customer info -> quote with a deterministic price-table verifier.</div></a>
+ <a href="/cookbook/refactor"><div class="h">Refactor</div><div class="d">Suggest structural changes with rationale.</div></a>
+ </div>
+ </div>
+
+ </div>
+</article>
+
+
+</main>
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+</body>
+</html>

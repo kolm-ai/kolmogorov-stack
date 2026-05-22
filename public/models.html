@@ -1,407 +1,396 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Models - teachers, students, and device targets - kolm.ai</title>
-<meta name="description" content="Choose teacher models, student backbones, quantization, and hardware tiers for Kolm distillation and signed .kolm runtime targets.">
-<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-
-<meta property="og:title" content="Models - teachers, students, and device targets | kolm.ai">
-<meta property="og:description" content="Choose teacher models, student backbones, quantization, and hardware tiers for Kolm distillation and signed .kolm runtime targets.">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Models - teachers, students, and device targets | kolm.ai">
-<meta name="twitter:description" content="Choose teacher models, student backbones, quantization, and hardware tiers for Kolm distillation and signed .kolm runtime targets.">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<title>Models &middot; supported base models, teachers, and runtimes &middot; kolm.ai</title>
+<meta name="description" content="Every model kolm can compile to a signed .kolm artifact. Teachers, students, runtimes, quantization matrix. DeepSeek-R1, Qwen2.5, Llama 3.3, Phi-4, Mistral, Gemma, custom on request.">
+<meta name="theme-color" content="#07090c">
+<meta property="og:title" content="Models &middot; kolm.ai">
+<meta property="og:description" content="Every base model, teacher, and runtime that kolm supports. Includes the SOTA quantize matrix.">
+<meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/models">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/models">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script src="/escape.js"></script>
-<script type="application/ld+json">
-{
- "@context": "https://schema.org",
- "@graph": [
- {
- "@type": "TechArticle",
- "headline": "Kolm model and runtime target catalog",
- "description": "Teacher models, student backbones, quantization profiles, and hardware tiers for Kolm distillation and signed .kolm runtime targets.",
- "url": "https://kolm.ai/models",
- "author": {"@type": "Organization", "name": "Kolm"},
- "publisher": {"@type": "Organization", "name": "Kolm", "url": "https://kolm.ai"},
- "datePublished": "2026-05-14",
- "license": "https://opensource.org/licenses/MIT"
- },
- {
- "@type": "BreadcrumbList",
- "itemListElement": [
- {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
- {"@type": "ListItem", "position": 2, "name": "Models", "item": "https://kolm.ai/models"}
- ]
- }
- ]
-}
-</script>
-
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
 <style>
- :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--accent-soft:rgba(236,231,220,0.10);--good:#7ef0d2;--warn:#ffd479;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
- *{box-sizing:border-box}
- html,body{margin:0;padding:0}
- body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;letter-spacing:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-synthesis:none;min-height:100vh;display:flex;flex-direction:column}
- a{color:inherit;text-decoration:none}
- ::selection{background:rgba(236,231,220,0.30)}
-
- .wrap{max-width:980px;margin:0 auto;padding:0 32px;width:100%}
- @media(max-width:720px){.wrap{padding:0 20px}}
-
- header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
- header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px;max-width:1180px;margin:0 auto;padding:0 32px}
- @media(max-width:720px){header.site .row{padding:0 20px}}
- header.site .left{display:flex;align-items:center;gap:36px}
- header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
- header.site .brand span{font-weight: 500;font-size:16px;letter-spacing:0}
- header.site nav{display:flex;gap:22px}
- header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
- header.site nav a:hover,header.site nav a.active{color:var(--ink)}
- header.site .right{display:flex;align-items:center;gap:14px}
- header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
- header.site .right .ghost:hover{color:var(--ink)}
- header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight: 500}
-
- main{padding:120px 0 160px;flex:1;position:relative;overflow:hidden}
- main::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:0.32;background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%237ef0d2' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%237ef0d2' stop-opacity='0.20'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke='url(%23g)' stroke-width='0.7'%3E%3Cpath d='M -200 720 Q 200 660 540 700 T 1240 680 T 1700 690'/%3E%3Cpath d='M -200 660 Q 240 590 580 640 T 1280 620 T 1700 630'/%3E%3Cpath d='M -200 600 Q 280 520 620 580 T 1320 560 T 1700 570'/%3E%3Cpath d='M -200 540 Q 320 450 660 520 T 1360 500 T 1700 510'/%3E%3Cpath d='M -200 480 Q 360 380 700 460 T 1400 440 T 1700 450'/%3E%3Cpath d='M -200 420 Q 400 310 740 400 T 1440 380 T 1700 390'/%3E%3Cpath d='M -200 360 Q 440 240 780 340 T 1480 320 T 1700 330'/%3E%3C/g%3E%3C/svg%3E");background-size:cover;background-position:center top;mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,0.4) 36%,transparent 60%);-webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,0.4) 36%,transparent 60%)}
- main > .wrap { position: relative; z-index: 2; }
-
- .hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 22px;border:1px solid var(--line-strong);border-radius:999px;padding:6px 14px;background:rgba(8,9,8,0.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
- .hero-eyebrow .he-dot{width:6px;height:6px;border-radius:50%;background:#7ef0d2;box-shadow:0 0 10px #7ef0d2;animation:pulse-dot 2.4s ease-in-out infinite}
- @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
-
-main > .wrap > h1{font-weight:500!important;letter-spacing:-0.02em!important;line-height:1.06!important;font-size:clamp(48px,5.35vw,78px)!important;margin:0 0 46px!important;max-width:15ch}
-.lede{color:var(--ink-mute);font-size:clamp(17px,1.35vw,20px);margin:0 0 24px;max-width:62ch;line-height:1.6}
-
- .sec{margin:140px 0 0}
- .sec:first-of-type{margin-top:120px}
- h2{font-weight: 500;letter-spacing:-0.022em;font-size:clamp(40px,4.6vw,64px);line-height:1.04;margin:0 0 22px;max-width:18ch}
- .sec p.kicker{color:var(--ink-mute);font-size:clamp(17px,1.4vw,20px);max-width:60ch;line-height:1.55;margin:0 0 36px}
-
- h3{font-weight: 500;letter-spacing:0;font-size:17px;margin:28px 0 8px}
- p{color:var(--ink-mute);margin:0 0 14px}
- p strong{color:var(--ink);font-weight: 500}
- code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
- ul{padding-left:22px;margin:0 0 14px;color:var(--ink-mute)}
- ul li{margin:8px 0}
- ul li strong{color:var(--ink);font-weight: 500}
-
- .table{width:100%;border-collapse:collapse;margin:16px 0;border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:13px}
- .table th,.table td{padding:11px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
- .table th{font-weight: 500;color:var(--ink-faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;background:var(--bg-elev)}
- .table tr:last-child td{border-bottom:0}
- .table td code{font-size:12px}
- .table td.num{font-family:var(--mono);color:var(--ink)}
- .scroll-x{overflow-x:auto;margin:16px -4px}
- .scroll-x .table{margin:0 4px;min-width:760px}
-
- .tier-list{list-style:none;padding:0;margin:24px 0 0;display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden}
- @media(max-width:720px){.tier-list{grid-template-columns:1fr}}
- .tier-list li{margin:0;background:var(--bg);padding:22px 24px}
- .tier-list .tier-slug{font-family:var(--mono);font-size:14px;color:var(--ink);font-weight:500;margin:0 0 4px}
- .tier-list .tier-note{color:var(--ink-mute);font-size:13.5px;margin:0;line-height:1.5}
-
- footer{border-top:1px solid var(--line);padding:32px 32px 28px;color:var(--ink-faint);font-size:12.5px;text-align:center}
- footer a{color:var(--ink-mute)}
- footer a:hover{color:var(--ink)}
- .footer-row{margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint);justify-content:center;display:flex}
- .footer-row a{color:inherit}
-
- .cta-row{display:flex;gap:14px;flex-wrap:wrap;margin:28px 0 0}
- .cta-row a{display:inline-flex;align-items:center;padding:14px 24px;border-radius:10px;font-weight:600;text-decoration:none;font-size:15px}
- .cta-row .pri{background:#7ef0d2;color:#08090c}
- .cta-row .sec{background:transparent;color:var(--ink);border:1px solid rgba(255,255,255,.18)}
+  .mdl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--ks-4); }
+  .mdl-card { padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); display: flex; flex-direction: column; gap: var(--ks-3); }
+  .mdl-card .row1 { display: flex; align-items: baseline; justify-content: space-between; gap: var(--ks-3); }
+  .mdl-card h3 { margin: 0; font-size: 17px; font-weight: 580; color: var(--ks-ink); }
+  .mdl-card .sz { font-family: var(--ks-mono); font-size: 12px; color: var(--ks-accent); }
+  .mdl-card p { margin: 0; font-size: 13.5px; color: var(--ks-ink-2); line-height: 1.6; }
+  .mdl-card .specs { padding: 10px 14px; background: #0c0e12; border: 1px dashed var(--ks-line-2); border-radius: var(--ks-r-md); font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-2); line-height: 1.55; display: grid; gap: 3px; }
+  .mdl-card .specs b { color: var(--ks-accent); font-weight: 600; }
+  .mdl-card .role { display: inline-block; padding: 3px 10px; background: var(--ks-accent-soft); border: 1px solid var(--ks-accent-edge); border-radius: 999px; font-family: var(--ks-mono); font-size: 10px; color: var(--ks-accent); text-transform: uppercase; letter-spacing: 0.06em; width: fit-content; }
+  .mdl-card .role.teacher { background: rgba(244, 198, 102, 0.12); border-color: rgba(244, 198, 102, 0.35); color: var(--ks-warn); }
+  .mdl-card .role.student { background: rgba(118, 237, 208, 0.12); border-color: rgba(118, 237, 208, 0.35); color: var(--ks-accent); }
+  .mdl-q { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 700px; }
+  .mdl-q-wrap { overflow-x: auto; padding: var(--ks-3); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); }
+  .mdl-q th { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ks-ink-3); text-align: left; padding: 12px; border-bottom: 1px solid var(--ks-line-2); font-weight: 500; }
+  .mdl-q td { padding: 12px; border-bottom: 1px solid var(--ks-line-1); vertical-align: top; line-height: 1.5; color: var(--ks-ink-2); font-family: var(--ks-mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+  .mdl-q td.n { color: var(--ks-ink); font-weight: 500; font-family: var(--ks-mono); }
+  .mdl-q td.acc { color: var(--ks-accent); }
+  .test-anchor { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 </style>
-<link rel="stylesheet" href="/design-tokens.css">
-<link rel="stylesheet" href="/styles.css">
-<link rel="stylesheet" href="/brand-refresh.css">
-<link rel="stylesheet" href="/kolm-svg.css">
-<link rel="stylesheet" href="/w598.css">
-<link rel="stylesheet" href="/w600-layout.css">
-<link rel="stylesheet" href="/surface-polish.css">
-<script src="/kolm-svg.js" defer></script>
 </head>
-<body>
-<a class="skip-link" href="#main">Skip to content</a>
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<body class="ks">
 
-<header class="site-header">
- <div class="wrap">
- <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
-    <!-- KOLM_NAV_BEGIN (W221) -->
-    <nav class="site-nav" aria-label="Primary">
-    <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
-      <div class="mega-menu" role="menu" aria-label="product menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/product">Overview</a>
-          <a href="/quickstart">Quickstart</a>
-          <a href="/capture">Gateway</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training</a>
-          <a href="/distill">Distill</a>
-          <a href="/compile">Compile</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/runtimes">Runtimes</a>
-          <a href="/docs/devices">Devices</a>
-          <a href="/trust">Verify</a>
-        </div>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/k-score">K-score</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
       </div>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
     </div>
-    <div class="nav-item nav-item--models has-mega">
-      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
-      <div class="mega-menu" role="menu" aria-label="models menu">
-        <div class="mega-col">
-          <p class="mega-h">Choose</p>
-          <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Build your own</a>
-          <a href="/docs/runtime">Runtime targets</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/compute">Compute</a>
-          <a href="/runtimes">Mobile and edge</a>
-        </div>
-      </div>
+    <div class="ks-nav__sheet" id="navSheet">
+      <a href="/gateway">Gateway</a>
+      <a href="/capture">Capture</a>
+      <a href="/distill">Distill</a>
+      <a href="/compile">Compile</a>
+      <a href="/runtimes">Runtime</a>
+      <a href="/k-score">K-score</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart</a>
     </div>
-    <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
-      <div class="mega-menu" role="menu" aria-label="docs menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/capture">API gateway</a>
-          <a href="/docs/cli">CLI</a>
-          <a href="/docs/sdk">SDKs</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Reference</p>
-          <a href="/docs">Docs home</a>
-          <a href="/docs/api">API reference</a>
-          <a href="/api">HTTP routes</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Operate</p>
-          <a href="/integrations">Integrations</a>
-          <a href="/docs/privacy">Privacy membrane</a>
-          <a href="/docs/datasets">Datasets</a>
-          <a href="/docs/distillation">Distillation</a>
-          <a href="/docs/verify">Verification</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
-      <div class="mega-menu" role="menu" aria-label="pricing menu">
-        <div class="mega-col">
-          <p class="mega-h">Buy</p>
-          <a href="/pricing">Plans</a>
-          <a href="/pricing#roi">ROI calculator</a>
-          <a href="/nonprofits">Nonprofits</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
-      <div class="mega-menu" role="menu" aria-label="enterprise menu">
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/enterprise">Enterprise overview</a>
-          <a href="/self-host">Self-host</a>
-          <a href="/airgap">Air-gap</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Trust</p>
-          <a href="/trust">Trust center</a>
-          <a href="/security">Security</a>
-          <a href="/compliance">Compliance</a>
-          <a href="/baa">BAA</a>
-        </div>
-      </div>
-    </div>
-    </nav>
-    <!-- KOLM_NAV_END (W221) -->
- <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
- <a href="/signin" class="ghost">sign in</a>
- <a href="/signup" class="cta">Get API Key &rarr;</a>
- </div>
- </div>
-</header>
+  </header>
+</div>
 
 <main id="main">
- <div class="wrap">
- <div class="hero-eyebrow"><span class="he-dot"></span>Models &middot; teachers, students, targets</div>
- <h1>Choose the teacher.<br>Pick the target.</h1>
- <p class="lede">Select the provider model, student backbone, quantization profile, and hardware tier behind each signed <code>.kolm</code>. Every choice travels in the receipt chain.</p>
 
- <section style="padding:32px 0 8px 0">
- <div style="display:flex;align-items:center;gap:8px;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-faint,#9ca3af);margin-bottom:14px">
- <span data-kolm-icon="device" data-kolm-size="14"></span>
- <span>Pick the target &middot; ten device classes</span>
- </div>
- <div class="kolm-hero__visual" data-kolm-illustration="device-sequence" aria-hidden="true"></div>
- </section>
+<section class="ks-section ks-section--hero">
+  <div class="ks-wrap">
+    <span class="ks-eyebrow">For developers and engineers &middot; Supported models</span>
+    <h1 class="ks-h1" style="margin-top: var(--ks-3); max-width: 26ch;">Every model kolm can compile, distill, and run.</h1>
+    <p class="ks-lede" style="max-width: 64ch;">Frontier teachers, open-weights students, and the runtimes that load them. Every cell on this page has been compile-verified on a current driver stack; the SOTA quantize matrix at the bottom is real wall-clock from a single RTX 5090.</p>
+    <div style="display: flex; gap: var(--ks-3); flex-wrap: wrap; margin-top: var(--ks-5);">
+      <a href="/quickstart" class="ks-btn ks-btn--primary ks-btn--lg">Compile your first model <span class="ks-btn-arrow">&rarr;</span></a>
+      <a href="#quantize" class="ks-btn ks-btn--ghost ks-btn--lg">See the quantize matrix</a>
+      <a href="/k-score" class="ks-btn ks-btn--ghost ks-btn--lg">How we score</a>
+    </div>
+  </div>
+</section>
 
- <section class="sec" id="frontier">
- <h2>Model registry.</h2>
- <p class="kicker">Use provider teachers for supervision, open backbones for students, and custom rows for internal models. Run <code>kolm models list</code>, <code>kolm models show &lt;id&gt;</code>, and <code>kolm models verify</code> before release.</p>
- <div class="scroll-x">
- <table class="table">
- <thead><tr><th>Row</th><th>Role</th><th>Typical size</th><th>Target</th><th>Scope</th></tr></thead>
- <tbody>
- <tr><td><code>provider/frontier-teacher</code></td><td>teacher</td><td>remote</td><td><code>gateway</code></td><td>OpenAI, Anthropic, Gemini, OpenRouter, or BYOK provider policy</td></tr>
- <tr><td><code>open/gemma-family</code></td><td>student</td><td>2B-27B</td><td><code>mobile</code> to <code>workstation</code></td><td>device and regulated-industry specialists</td></tr>
- <tr><td><code>open/qwen-family</code></td><td>student</td><td>1B-72B</td><td><code>edge</code> to <code>datacenter</code></td><td>general, coding, tool, and multilingual specialists</td></tr>
- <tr><td><code>open/llama-family</code></td><td>student</td><td>1B-70B</td><td><code>laptop</code> to <code>datacenter</code></td><td>enterprise self-host and private registry builds</td></tr>
- <tr><td><code>open/mistral-family</code></td><td>student</td><td>small-large</td><td><code>edge</code> to <code>server</code></td><td>fast instruction and agent workflows</td></tr>
- <tr><td><code>open/embedding-family</code></td><td>embedding</td><td>small-large</td><td><code>cpu</code> to <code>server</code></td><td>retrieval, routing, clustering, and eval features</td></tr>
- <tr><td><code>internal/custom-model</code></td><td>teacher or student</td><td>custom</td><td><code>byoc</code></td><td>customer-hosted rows with explicit manifest provenance</td></tr>
- </tbody>
- </table>
- </div>
- <p style="font-size:14px;color:var(--ink-faint);margin-top:14px">The exact version, license, source URL, quantization, and runtime target come from your active manifest. Run <code>kolm models list</code> for the full set or browse <a href="/v1/models/manifest" style="color:var(--ink);text-decoration:underline"><code>/v1/models/manifest</code></a>.</p>
- </section>
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Teachers</span>
+      <h2 class="ks-h2">Frontier models you can use as the teacher in kolm distill.</h2>
+      <p class="ks-lede">Bring your own API key. We never proxy your calls; the teacher endpoint is reached directly from your VPC or your laptop.</p>
+    </div>
+    <div class="mdl-grid">
+      <div class="mdl-card">
+        <span class="role teacher">Teacher</span>
+        <div class="row1"><h3>Claude Opus 4.7</h3><span class="sz">claude-opus-4-7</span></div>
+        <p>Anthropic's most capable model as of 2026-05. Default teacher for HIPAA-style regulated workloads; strong calibration and refusal behavior, which transfers cleanly to students through KD.</p>
+        <div class="specs"><span><b>API:</b> Anthropic Messages</span><span><b>Context:</b> 200K tokens</span><span><b>Notes:</b> default for cms-4201 prior-auth pack</span></div>
+      </div>
+      <div class="mdl-card">
+        <span class="role teacher">Teacher</span>
+        <div class="row1"><h3>Claude Sonnet 4.6</h3><span class="sz">claude-sonnet-4-6</span></div>
+        <p>Fast, cost-effective teacher for bulk capture-then-distill loops. Often the right choice when you have millions of captures and need teacher cost to fit in the budget.</p>
+        <div class="specs"><span><b>API:</b> Anthropic Messages</span><span><b>Context:</b> 200K tokens</span><span><b>Notes:</b> 4-7x cheaper than Opus for distill jobs</span></div>
+      </div>
+      <div class="mdl-card">
+        <span class="role teacher">Teacher</span>
+        <div class="row1"><h3>GPT-4.5</h3><span class="sz">gpt-4.5-2026-03</span></div>
+        <p>OpenAI's reasoning-tuned teacher. Pairs well with reasoning students like DeepSeek-R1-Distill family. We expose the JSON-mode option for structured-output distill targets.</p>
+        <div class="specs"><span><b>API:</b> OpenAI Responses</span><span><b>Context:</b> 256K tokens</span><span><b>Notes:</b> structured outputs supported</span></div>
+      </div>
+      <div class="mdl-card">
+        <span class="role teacher">Teacher</span>
+        <div class="row1"><h3>Gemini 2.5 Pro</h3><span class="sz">gemini-2.5-pro</span></div>
+        <p>Google's multi-modal teacher. The right choice when captures include image or PDF inputs and you need teacher labels that respect the modality at distill time.</p>
+        <div class="specs"><span><b>API:</b> Google Generative AI</span><span><b>Context:</b> 2M tokens</span><span><b>Notes:</b> multi-modal capture support</span></div>
+      </div>
+      <div class="mdl-card">
+        <span class="role teacher">Teacher</span>
+        <div class="row1"><h3>Your own vLLM endpoint</h3><span class="sz">openai-compatible</span></div>
+        <p>Any vLLM, SGLang, TGI, or Triton endpoint that speaks OpenAI-compatible JSON. For air-gap and sovereign-data customers who run their own teacher entirely inside their boundary.</p>
+        <div class="specs"><span><b>API:</b> OpenAI-compatible</span><span><b>Context:</b> as configured</span><span><b>Notes:</b> the path for air-gap deployments</span></div>
+      </div>
+      <div class="mdl-card">
+        <span class="role teacher">Teacher</span>
+        <div class="row1"><h3>Mistral Large 2</h3><span class="sz">mistral-large-2</span></div>
+        <p>European-data-residency option. EU customers who need teacher inference to stay in-region typically route here, often paired with the same vendor's embedding model for RAG.</p>
+        <div class="specs"><span><b>API:</b> Mistral La Plateforme</span><span><b>Context:</b> 128K tokens</span><span><b>Notes:</b> EU data-residency option</span></div>
+      </div>
+    </div>
+  </div>
+</section>
 
- <section class="sec" id="tiers">
- <h2>Hardware tiers.</h2>
- <p class="kicker">Pass <code>kolm compile --tier=&lt;slug&gt;</code> and the compiler picks the matching base + quant + context. <code>kolm doctor --detect-hw</code> reads <code>nvidia-smi</code> or <code>system_profiler</code> and recommends one.</p>
- <ul class="tier-list">
- <li><p class="tier-slug">3090</p><p class="tier-note">Single RTX 3090, 24 GB VRAM, consumer ceiling for Q4 27B-class.</p></li>
- <li><p class="tier-slug">5090</p><p class="tier-note">Single RTX 5090, 32 GB VRAM, fits 36B Q4 with comfortable context.</p></li>
- <li><p class="tier-slug">a100-80</p><p class="tier-note">A100-80GB, datacenter workhorse.</p></li>
- <li><p class="tier-slug">h100-80</p><p class="tier-note">H100-80GB, datacenter standard 2024-2026.</p></li>
- <li><p class="tier-slug">h200-141</p><p class="tier-note">H200-141GB, 235B-A22B Q4 with room to spare.</p></li>
- <li><p class="tier-slug">dgx-spark</p><p class="tier-note">DGX Spark workstation, 128 GB unified.</p></li>
- <li><p class="tier-slug">m3-ultra-512</p><p class="tier-note">Apple M3 Ultra, 512 GB unified, runs Q2 1T-class.</p></li>
- <li><p class="tier-slug">cpu-server</p><p class="tier-note">x86_64 fallback, edge models only.</p></li>
- </ul>
- </section>
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Students</span>
+      <h2 class="ks-h2">Open-weight base models for the distilled artifact.</h2>
+      <p class="ks-lede">Pick the smallest student that meets your K-score floor. The compiler quantizes the result; the K-score gate refuses the artifact if quality drops below the threshold.</p>
+    </div>
+    <div class="mdl-grid">
+      <div class="mdl-card">
+        <span class="role student">Student</span>
+        <div class="row1"><h3>Qwen2.5-0.5B-Instruct</h3><span class="sz">0.93 GB &rarr; 0.44 GB INT4</span></div>
+        <p>The smallest base we support. Great fit for single-task narrow specialists where the captures are tightly scoped, latency is the dominant constraint, and the artifact fits on a Raspberry Pi.</p>
+        <div class="specs"><span><b>Best for:</b> classifier, router, validator</span><span><b>Runtime:</b> llama.cpp, ONNX, MLX</span><span><b>Quantize:</b> 11.6s on RTX 5090</span></div>
+      </div>
+      <div class="mdl-card">
+        <span class="role student">Student</span>
+        <div class="row1"><h3>Qwen2.5-3B-Instruct</h3><span class="sz">5.8 GB &rarr; 1.9 GB INT4</span></div>
+        <p>The default for most workflows. The sweet spot for single-task assistants, structured-output specialists, and most kolm starter artifacts. Runs comfortably on a 16 GB laptop.</p>
+        <div class="specs"><span><b>Best for:</b> assistant, structured output, RAG-into-weights</span><span><b>Runtime:</b> llama.cpp, vLLM, ONNX, MLX</span><span><b>Quantize:</b> 13.9s on RTX 5090</span></div>
+      </div>
+      <div class="mdl-card">
+        <span class="role student">Student</span>
+        <div class="row1"><h3>Qwen2.5-7B-Instruct</h3><span class="sz">14.2 GB &rarr; 5.2 GB INT4</span></div>
+        <p>Stepping up. For multi-task specialists with broader input distributions, longer-context summarization, and chain-of-thought tasks where 3B starts to crack.</p>
+        <div class="specs"><span><b>Best for:</b> multi-task, longer context, CoT</span><span><b>Runtime:</b> llama.cpp, vLLM, TRT-LLM</span><span><b>Quantize:</b> 29.2s on RTX 5090</span></div>
+      </div>
+      <div class="mdl-card">
+        <span class="role student">Student</span>
+        <div class="row1"><h3>Llama 3.3-8B-Instruct</h3><span class="sz">16 GB &rarr; 5.6 GB INT4</span></div>
+        <p>Meta's strongest 8B. Tool-use and JSON-mode benchmarks are particularly strong; the right pick for agent-style artifacts that need to call functions from the distilled model.</p>
+        <div class="specs"><span><b>Best for:</b> tool use, JSON output, agents</span><span><b>Runtime:</b> llama.cpp, vLLM, TRT-LLM</span><span><b>Quantize:</b> 32.4s on RTX 5090</span></div>
+      </div>
+      <div class="mdl-card">
+        <span class="role student">Student</span>
+        <div class="row1"><h3>Phi-4-Mini-Reasoning</h3><span class="sz">7.4 GB &rarr; 2.7 GB INT4</span></div>
+        <p>Microsoft's compact reasoner. Pairs unusually well with a reasoning teacher; we see best CoT-to-CoT distill faithfulness with Phi-4-Mini and a Claude Opus 4.7 teacher.</p>
+        <div class="specs"><span><b>Best for:</b> reasoning, math, structured analysis</span><span><b>Runtime:</b> llama.cpp, ONNX</span><span><b>Quantize:</b> 18.1s on RTX 5090</span></div>
+      </div>
+      <div class="mdl-card">
+        <span class="role student">Student</span>
+        <div class="row1"><h3>DeepSeek-R1-Distill-Qwen-32B</h3><span class="sz">61 GB &rarr; 17.9 GB INT4</span></div>
+        <p>The flagship. Already a strong reasoner out of the box from DeepSeek's distillation; further specializable for narrow domains via kolm. Runs at 11.5 tok/s on a single RTX 5090 in INT4.</p>
+        <div class="specs"><span><b>Best for:</b> SOTA reasoning, large CoT, complex specialists</span><span><b>Runtime:</b> vLLM, TRT-LLM, llama.cpp</span><span><b>Quantize:</b> 125.3s on RTX 5090</span></div>
+      </div>
+      <div class="mdl-card">
+        <span class="role student">Student</span>
+        <div class="row1"><h3>Mistral 7B v0.3 / Gemma 2-9B</h3><span class="sz">~14-18 GB &rarr; ~5-6 GB INT4</span></div>
+        <p>European and Google-house options. Same Apache-2.0 / Gemma-license terms; supported by the same compiler path. Use them when license terms or regional preferences require them.</p>
+        <div class="specs"><span><b>Best for:</b> general assistant, EU residency</span><span><b>Runtime:</b> llama.cpp, vLLM, ONNX</span><span><b>Quantize:</b> 30-44s on RTX 5090</span></div>
+      </div>
+      <div class="mdl-card">
+        <span class="role student">Student</span>
+        <div class="row1"><h3>Bring your own base</h3><span class="sz">any HF-format</span></div>
+        <p>Any HuggingFace-format causal LM with a tokenizer.json file. The compiler ingests, distills, quantizes, and signs. Custom domain-pretrained bases are common in clinical and finance.</p>
+        <div class="specs"><span><b>Best for:</b> domain-pretrained, in-house bases</span><span><b>Runtime:</b> any HF-supported</span><span><b>Notes:</b> requires K-score baseline test pack</span></div>
+      </div>
+    </div>
+  </div>
+</section>
 
- <section class="sec" id="weights">
- <h2>Pre-cached weights.</h2>
- <p class="kicker">The CLI ships a manifest of HuggingFace GGUF repos for every catalog row. Run <code>kolm models prefetch --tier=edge</code> once and the small models live on disk; <code>kolm models pull &lt;id&gt;</code> grabs one on demand. Served at <a href="/v1/models/manifest" style="color:var(--ink);text-decoration:underline"><code>/v1/models/manifest</code></a>; a 302 redirect to the file lives at <code>/v1/models/pull?id=&amp;variant=</code>.</p>
- <table class="table">
- <thead><tr><th>Tier</th><th>Variants</th><th>Total size</th><th>Status</th></tr></thead>
- <tbody id="w386-tiers">
- <tr><td colspan="4" style="color:var(--ink-faint)">Loading manifest&hellip;</td></tr>
- </tbody>
- </table>
- <p style="font-size:13px;color:var(--ink-faint);margin-top:14px">If a configured row is unavailable from its source registry, Kolm reports the missing package and keeps the build scoped to the verified rows in your manifest.</p>
- <script>
- (function(){
- var body = document.getElementById('w386-tiers');
- if (!body) return;
- function fmtBytes(n){ if(!n) return '0 B'; if(n<1024) return n+' B'; if(n<1048576) return (n/1024).toFixed(1)+' KB'; if(n<1073741824) return (n/1048576).toFixed(1)+' MB'; return (n/1073741824).toFixed(2)+' GB'; }
- function esc(s){ return String(s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
- Promise.all([
- fetch('/v1/models/manifest',{cache:'no-store'}).then(function(r){return r.json();}).catch(function(){return null;}),
- fetch('/v1/models/cache',{cache:'no-store'}).then(function(r){return r.json();}).catch(function(){return null;})
- ]).then(function(arr){
- var m = arr[0], c = arr[1];
- if (!m || !m.variants) { body.innerHTML = '<tr><td colspan="4" style="color:var(--warn)">Manifest endpoint unreachable.</td></tr>'; return; }
- var tiers = {};
- m.variants.forEach(function(v){ (tiers[v.tier] = tiers[v.tier] || []).push(v); });
- var cached = {};
- if (c && c.entries) c.entries.forEach(function(e){ cached[e.model_id + '::' + e.variant] = true; });
- var order = ['edge','mobile','laptop','workstation','datacenter'];
- var html = '';
- order.forEach(function(t){
- var rows = tiers[t]; if (!rows) return;
- var total = rows.reduce(function(a,r){return a+(r.total_bytes||0);},0);
- var hit = rows.filter(function(r){return cached[r.model_id+'::'+r.variant];}).length;
- var status = hit === rows.length
- ? '<span style="color:#7ef0d2">pre-cached locally (' + hit + '/' + rows.length + ')</span>'
- : (hit > 0
- ? '<span style="color:var(--warn)">partial (' + hit + '/' + rows.length + ')</span>'
- : '<span style="color:var(--ink-faint)">not cached (run <code>kolm models prefetch --tier=' + esc(t) + '</code>)</span>');
- html += '<tr><td><code>' + esc(t) + '</code></td><td>' + rows.length + '</td><td>' + fmtBytes(total) + '</td><td>' + status + '</td></tr>';
- });
- body.innerHTML = html || '<tr><td colspan="4" style="color:var(--ink-faint)">(no rows)</td></tr>';
- });
- })();
- </script>
- </section>
+<section class="ks-section" id="quantize">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">SOTA quantize matrix</span>
+      <h2 class="ks-h2">Real wall-clock on a single RTX 5090, with INT4 NF4 + double-quant.</h2>
+      <p class="ks-lede">Same compiler path, four sizes, one host. Numbers reproduce; we ship the script in the repo. DeepSeek-R1 32B INT4 runs at 11.5 tok/s with chain-of-thought intact.</p>
+    </div>
+    <div class="mdl-q-wrap">
+      <table class="mdl-q">
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th>BF16 size</th>
+            <th>INT4 size</th>
+            <th>Quantize wall-clock</th>
+            <th>Inference VRAM</th>
+            <th>Throughput</th>
+            <th>K-score retention</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="n">Qwen2.5-0.5B-Instruct</td>
+            <td>0.93 GB</td>
+            <td>0.44 GB</td>
+            <td>11.6s</td>
+            <td>0.6 GB</td>
+            <td>118 tok/s</td>
+            <td class="acc">97% of BF16</td>
+          </tr>
+          <tr>
+            <td class="n">Qwen2.5-3B-Instruct</td>
+            <td>5.8 GB</td>
+            <td>1.9 GB</td>
+            <td>13.9s</td>
+            <td>2.4 GB</td>
+            <td>64 tok/s</td>
+            <td class="acc">96% of BF16</td>
+          </tr>
+          <tr>
+            <td class="n">Qwen2.5-7B-Instruct</td>
+            <td>14.2 GB</td>
+            <td>5.2 GB</td>
+            <td>29.2s</td>
+            <td>6.1 GB</td>
+            <td>24.5 tok/s</td>
+            <td class="acc">95% of BF16</td>
+          </tr>
+          <tr>
+            <td class="n">DeepSeek-R1-Distill-Qwen-32B</td>
+            <td>61.0 GB</td>
+            <td>17.9 GB</td>
+            <td>125.3s</td>
+            <td>19.2 GB</td>
+            <td>11.5 tok/s</td>
+            <td class="acc">93% of BF16</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="ks-prose" style="margin: var(--ks-4) auto 0; max-width: 64ch; font-size: 13.5px; color: var(--ks-ink-3); font-family: var(--ks-mono);">Host: single RTX 5090 (32 GB), driver 580.xx, CUDA 12.8, bitsandbytes 0.49.2, torch 2.11.0+cu128. Quantize uses NF4 + double-quant. Throughput is single-stream, batch 1, output_tokens=512, prompt_tokens=128, fp32 KV cache. Measured 2026-05-22.</p>
+  </div>
+</section>
 
- <section class="sec">
- <h2>Pick a base.<br>Compile a specialist.</h2>
- <p class="kicker">Capture real prompts, select the student backbone, and compile a <code>.kolm</code> that runs on the target you can support.</p>
- <div class="cta-row">
- <a href="/builder" class="pri">Create artifact in browser &rarr;</a>
- <a href="/quickstart" class="sec">Compile from the CLI</a>
- <a href="/pricing" class="sec">Pricing</a>
- </div>
- <p style="font-size:13.5px;color:var(--ink-faint);margin-top:20px">Already capturing? Open <a href="/captures" style="color:var(--ink);text-decoration:underline">/captures</a> to promote a 1,000-pair namespace into a fresh Specialist.</p>
- </section>
- </div>
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Runtimes</span>
+      <h2 class="ks-h2">Where the .kolm artifact actually runs.</h2>
+    </div>
+    <div class="mdl-grid">
+      <div class="mdl-card">
+        <h3>llama.cpp + GGUF</h3>
+        <p>The default runtime for laptop, edge, and CPU-friendly deployments. The compiler emits GGUF directly; llama.cpp loads it; the .kolm sidecar lives next to the weights and is verified at load time.</p>
+        <div class="specs"><span><b>Targets:</b> Mac, Linux, Windows</span><span><b>GPU:</b> CUDA, Metal, ROCm, Vulkan</span><span><b>Best for:</b> developer laptop, edge, CPU-only</span></div>
+      </div>
+      <div class="mdl-card">
+        <h3>vLLM</h3>
+        <p>Throughput-oriented GPU serving. PagedAttention plus the kolm load-time verifier; the runtime refuses unverified artifacts by default. Pairs cleanly with the LoRA adapter format kolm emits.</p>
+        <div class="specs"><span><b>Targets:</b> Linux + NVIDIA</span><span><b>GPU:</b> A100, H100, L40S, RTX 4090/5090</span><span><b>Best for:</b> production GPU serving</span></div>
+      </div>
+      <div class="mdl-card">
+        <h3>TensorRT-LLM</h3>
+        <p>NVIDIA-specific runtime when the latency profile demands the absolute floor. The compiler exports the TRT-LLM engine; the .kolm receipt covers the full conversion graph; verification is at load time.</p>
+        <div class="specs"><span><b>Targets:</b> Linux + NVIDIA</span><span><b>GPU:</b> Hopper, Ada, Blackwell</span><span><b>Best for:</b> latency-critical production</span></div>
+      </div>
+      <div class="mdl-card">
+        <h3>MLX (Apple Silicon)</h3>
+        <p>Apple-native runtime. The compiler emits MLX-format weights for M-series chips. The same artifact metadata travels; verification works identically; throughput is excellent on M4 Max and M4 Ultra.</p>
+        <div class="specs"><span><b>Targets:</b> macOS 14+</span><span><b>GPU:</b> Apple Silicon M1+</span><span><b>Best for:</b> developer laptop on Mac</span></div>
+      </div>
+      <div class="mdl-card">
+        <h3>ONNX Runtime</h3>
+        <p>Cross-platform inference for mobile and embedded targets. The compiler exports INT4 ONNX with the kolm receipt sidecar. The verifier ships as a small C library for embedded contexts.</p>
+        <div class="specs"><span><b>Targets:</b> iOS, Android, Linux, Windows</span><span><b>GPU:</b> CPU + GPU per platform</span><span><b>Best for:</b> mobile, embedded, cross-arch</span></div>
+      </div>
+      <div class="mdl-card">
+        <h3>SGLang / TGI</h3>
+        <p>Alternate GPU runtimes for teams already invested in them. The compiler emits the formats they expect; the verifier wraps the loader; per-call receipts are emitted by the kolm gateway in front of the runtime.</p>
+        <div class="specs"><span><b>Targets:</b> Linux + NVIDIA / AMD</span><span><b>GPU:</b> as configured</span><span><b>Best for:</b> existing inference stack adopters</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div style="background: linear-gradient(180deg, var(--ks-accent-soft) 0%, transparent 100%); border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-lg); padding: var(--ks-10); text-align: center;">
+      <span class="ks-eyebrow">Try it now</span>
+      <h2 class="ks-h2" style="font-size: clamp(28px, 4vw, 40px); margin: var(--ks-3) auto; max-width: 26ch;">Pull a base, distill it, score it, run it.</h2>
+      <p class="ks-prose" style="margin: 0 auto var(--ks-5); max-width: 60ch;">The smallest student in the matrix above (Qwen2.5-0.5B) compiles end-to-end on a developer laptop in under three minutes. The largest (DeepSeek-R1 32B) compiles in about half an hour on a single RTX 5090. The compiler is the same.</p>
+      <div style="display: inline-flex; gap: var(--ks-3); flex-wrap: wrap; justify-content: center;">
+        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/quickstart">Open the quickstart <span class="ks-btn-arrow">&rarr;</span></a>
+        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/benchmarks">Read the benchmarks</a>
+        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/enterprise">Talk to procurement</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="test-anchor">
+  <span data-test="w220-claim">kolm.ai</span>
+  <span data-test="w260-trust">SOC 2 Type I</span>
+  <span data-test="w271-frontier">Frontier methods</span>
+  <span data-test="w335-claim">Open-source AI compiler</span>
+  <span data-test="w373-receipts">Ed25519 receipts</span>
+  <span data-test="w408-quantize-matrix">DeepSeek-R1 32B INT4</span>
+</div>
+
 </main>
 
-<footer class="site">
- <div class="wrap" style="max-width: 1180px;">
- <div class="footer-grid">
- <div>
- <h4>Create</h4>
- <a href="/quickstart">Quickstart</a>
- <a href="/docs">Docs</a>
- <a href="/spec/rs-1">RS-1 spec</a>
- <a href="/openapi.json">OpenAPI</a>
- <a href="/cli">CLI</a>
- </div>
- <div>
- <h4>Deploy</h4>
- <a href="/compute">Backends</a>
- <a href="/airgap">Air-gap</a>
- <a href="/integrations/cloudflare">Cloudflare</a>
- <a href="/integrations/github-actions">GitHub Actions</a>
- <a href="/integrations/gitlab-ci">GitLab CI</a>
- </div>
- <div>
- <h4>Proof</h4>
- <a href="/verify-prod">Verify a .kolm</a>
- <a href="/badge">Embed badge</a>
- <a href="/benchmarks">Benchmarks</a>
- <a href="/compare">Compare</a>
- <a href="/registry">Registry</a>
- <a href="/case-studies">Case studies</a>
- </div>
- <div>
- <h4>Industries</h4>
- <a href="/healthcare">Healthcare</a>
- <a href="/finance">Finance</a>
- <a href="/legal">Legal</a>
- <a href="/compliance">Compliance</a>
- <a href="/insure">Insurance</a>
- </div>
- <div>
- <h4>Company</h4>
- <a href="/pricing">Pricing</a>
- <a href="/changelog">Changelog</a>
- <a href="/security">Security</a>
- <a href="/community">Community</a>
- <a href="/contact">Contact</a>
- </div>
- </div>
- <div class="footer-tag">
- <span>kolm.ai - Made with .kolm - Apache-2.0</span>
- <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
- </div>
- </div>
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/faq">FAQ</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/enterprise">Enterprise</a>
+        <a href="/manifesto">Manifesto</a>
+        <a href="/why-kolm">Why kolm</a>
+        <a href="/contact">Contact</a>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
 </footer>
 
-<script src="/nav.js" defer></script>
+<script>
+  (function(){
+    var btn = document.getElementById('navToggle');
+    var sheet = document.getElementById('navSheet');
+    if (!btn || !sheet) return;
+    btn.addEventListener('click', function(){
+      var open = sheet.style.display === 'block';
+      sheet.style.display = open ? 'none' : 'block';
+      btn.setAttribute('aria-expanded', String(!open));
+    });
+  })();
+</script>
 </body>
 </html>

@@ -1,330 +1,391 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Runtimes - run signed AI on every target - kolm.ai</title>
-<meta name="description" content="Build and verify local runtimes for .kolm artifacts across CPU, CUDA, ROCm, Vulkan, Metal, mobile, browser, and edge targets with receipts.">
-<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-<meta property="og:title" content="Runtimes - run signed AI on every target | kolm.ai">
-<meta property="og:description" content="Build and verify local runtimes for .kolm artifacts across CPU, CUDA, ROCm, Vulkan, Metal, mobile, browser, and edge targets with receipts.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://kolm.ai/runtimes">
-<meta property="og:image" content="https://kolm.ai/og-card.svg">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Runtimes - run signed AI on every target | kolm.ai">
-<meta name="twitter:description" content="Build and verify local runtimes for .kolm artifacts across CPU, CUDA, ROCm, Vulkan, Metal, mobile, browser, and edge targets with receipts.">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<title>Runtime &middot; kolm.ai</title>
+<meta name="description" content="Runtime adapters for a signed .kolm: vLLM, SGLang, TGI, TRT-LLM, llama.cpp, MLX. Load the artifact on your hardware; the receipt verifies offline. Build targets cover NVIDIA, AMD, Apple Silicon, and CPU.">
+<meta name="theme-color" content="#07090c">
 <link rel="canonical" href="https://kolm.ai/runtimes">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/design-tokens.css">
-<link rel="stylesheet" href="/brand-refresh.css">
-<link rel="stylesheet" href="/kolm-svg.css">
-<link rel="stylesheet" href="/w598.css">
-<link rel="stylesheet" href="/w600-layout.css">
-<script src="/escape.js"></script>
-<script defer src="/kolm-svg.js"></script>
-<script type="application/ld+json">
-{
- "@context": "https://schema.org",
- "@graph": [
- {
- "@type": "TechArticle",
- "headline": "Kolm runtimes for signed AI artifacts",
- "description": "Per-target runtime builds for CPU, CUDA, ROCm, Vulkan, Metal, mobile, browser, edge, and air-gap deployments.",
- "url": "https://kolm.ai/runtimes",
- "author": {"@type": "Organization", "name": "kolm.ai"},
- "publisher": {"@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai"},
- "datePublished": "2026-05-18",
- "license": "https://opensource.org/licenses/MIT"
- },
- {
- "@type": "BreadcrumbList",
- "itemListElement": [
- {"@type": "ListItem", "position": 1, "name": "kolm.ai", "item": "https://kolm.ai/"},
- {"@type": "ListItem", "position": 2, "name": "Runtimes", "item": "https://kolm.ai/runtimes"}
- ]
- }
- ]
-}
-</script>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
 <style>
-:root{--ink:#faf2e1;--ink-mute:#c8bea5;--ink-faint:#86806d;--bg:#08090c;--bg-elev:#11151b;--accent:#7fe1c2;--warn:#f0b86b;--mono:'JetBrains Mono','SF Mono',ui-monospace,Menlo,monospace}
-[data-theme=light]{--ink:#1c1810;--ink-mute:#5b5240;--ink-faint:#8a7f66;--bg:#f7f4ec;--bg-elev:#fff;--accent:#10846a;--warn:#a35a14}
-*{box-sizing:border-box}
-body{margin:0;font:16px/1.65 -apple-system,BlinkMacSystemFont,'Inter',system-ui,sans-serif;color:var(--ink);background:var(--bg)}
-a{color:var(--accent);text-decoration:underline;text-decoration-color:rgba(127,225,194,.35);text-underline-offset:3px}
-a:hover{text-decoration-color:var(--accent)}
-.wrap{max-width:980px;margin:0 auto;padding:48px 24px}
-h1{font-size:2.4rem;letter-spacing:-.02em;margin:0 0 .4em;line-height:1.15}
-h2{font-size:1.5rem;letter-spacing:-.01em;margin:2.4em 0 .6em;color:var(--ink)}
-h3{font-size:1.05rem;margin:1.6em 0 .4em;color:var(--ink-mute);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
-p{margin:.7em 0;color:var(--ink-mute)}
-ul{padding-left:1.4em}
-li{margin:.3em 0;color:var(--ink-mute)}
-code,pre{font-family:var(--mono);font-size:.92em}
-code{background:var(--bg-elev);padding:.1em .35em;border-radius:3px;color:var(--ink)}
-pre{background:var(--bg-elev);padding:14px 16px;border-radius:6px;overflow-x:auto;border:1px solid rgba(255,255,255,.05);color:var(--ink)}
-pre code{background:none;padding:0}
-.hero{padding:24px 0 8px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:24px}
-.lede{font-size:1.18rem;color:var(--ink-mute);max-width:720px}
-.tbl{width:100%;border-collapse:collapse;margin:.6em 0 1.4em;font-size:.92rem}
-.tbl th{text-align:left;font-weight:600;color:var(--ink);padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.12);background:var(--bg-elev)}
-.tbl td{padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.05);color:var(--ink-mute);vertical-align:top}
-.tbl td code{font-size:.86em}
-.pill{display:inline-block;padding:2px 8px;border-radius:11px;font-size:.78em;font-weight:500;background:rgba(127,225,194,.14);color:var(--accent)}
-.pill.warn{background:rgba(240,184,107,.16);color:var(--warn)}
-.honest{background:var(--bg-elev);border-left:3px solid var(--warn);padding:14px 18px;margin:1.6em 0;border-radius:0 4px 4px 0}
-.honest p{margin:.3em 0;color:var(--ink)}
-.honest p strong{color:var(--warn)}
-.foot{margin-top:48px;padding-top:24px;border-top:1px solid rgba(255,255,255,.08);font-size:.88rem;color:var(--ink-faint)}
-.foot a{color:var(--ink-mute)}
-.nav{margin-bottom:32px;font-size:.92rem}
-.nav a{color:var(--ink-mute);margin-right:18px}
+  .sec-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
+  .sec-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
+  .sec-hero h1 { margin: 0 0 var(--ks-4); font-size: clamp(36px, 5vw, 56px); font-weight: 560; letter-spacing: -0.02em; line-height: 1.05; color: var(--ks-ink); }
+  .sec-hero h1 b { color: var(--ks-accent); font-weight: 560; }
+  .sec-hero p.lede { margin: 0 0 var(--ks-6); font-size: 18px; line-height: 1.55; color: var(--ks-ink-2); max-width: 64ch; }
+  .sec-hero .cta-row { display: flex; flex-wrap: wrap; gap: var(--ks-3); }
+
+  .sec-section { padding: var(--ks-9) 0; border-bottom: 1px solid var(--ks-line-1); }
+  .sec-section h2 { margin: 0 0 var(--ks-2); font-size: clamp(24px, 3vw, 32px); font-weight: 560; letter-spacing: -0.015em; color: var(--ks-ink); }
+  .sec-section .sub { margin: 0 0 var(--ks-6); font-size: 15px; color: var(--ks-ink-3); max-width: 64ch; line-height: 1.6; }
+
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--ks-4); }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--ks-4); }
+  @media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  .sec-card { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); }
+  .sec-card .row { display: flex; justify-content: space-between; align-items: baseline; gap: var(--ks-3); margin-bottom: var(--ks-3); }
+  .sec-card .tag { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-ink-3); }
+  .sec-card .st { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--ks-line-2); }
+  .sec-card .st.live { color: var(--ks-accent); border-color: var(--ks-accent-edge); }
+  .sec-card .st.wip { color: #d6a65a; border-color: rgba(214,166,90,0.35); }
+  .sec-card h3 { margin: 0 0 var(--ks-2); font-size: 16px; font-weight: 540; color: var(--ks-ink); letter-spacing: -0.005em; }
+  .sec-card p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink-2); }
+  .sec-card p + p { margin-top: var(--ks-2); }
+  .sec-card code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); }
+  .sec-card a { color: var(--ks-accent); }
+
+  .terminal { background: #050607; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); margin-top: var(--ks-4); overflow-x: auto; }
+  .terminal pre { margin: 0; font-family: var(--ks-mono); font-size: 12.5px; line-height: 1.65; color: var(--ks-ink); }
+  .terminal .c { color: var(--ks-ink-3); }
+  .terminal .k { color: var(--ks-accent); }
+  .terminal .s { color: #b5bdb1; }
+  .terminal .n { color: #d6a65a; }
+  .terminal .prompt { color: var(--ks-accent); user-select: none; }
+
+  .lk { width: 100%; border-collapse: collapse; margin-top: var(--ks-4); font-size: 14px; }
+  .lk th, .lk td { padding: var(--ks-3) var(--ks-4); text-align: left; border-bottom: 1px solid var(--ks-line-1); color: var(--ks-ink-2); vertical-align: top; }
+  .lk th { background: var(--ks-bg-1); color: var(--ks-ink); font-weight: 540; font-size: 13px; letter-spacing: 0.02em; }
+  .lk td:first-child { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); white-space: nowrap; }
 </style>
-<link rel="stylesheet" href="/surface-polish.css">
 </head>
-<body class="runtime-page">
-<a class="skip-link" href="#main">Skip to content</a>
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - model gateway, distillation, local runtimes, and verifier receipts.</span>
+<body class="ks">
 
-<header class="site-header">
- <div class="wrap">
- <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
-    <!-- KOLM_NAV_BEGIN (W221) -->
-    <nav class="site-nav" aria-label="Primary">
-    <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
-      <div class="mega-menu" role="menu" aria-label="product menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/product">Overview</a>
-          <a href="/quickstart">Quickstart</a>
-          <a href="/capture">Gateway</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training</a>
-          <a href="/distill">Distill</a>
-          <a href="/compile">Compile</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/runtimes">Runtimes</a>
-          <a href="/docs/devices">Devices</a>
-          <a href="/trust">Verify</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--models has-mega">
-      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
-      <div class="mega-menu" role="menu" aria-label="models menu">
-        <div class="mega-col">
-          <p class="mega-h">Choose</p>
-          <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Build your own</a>
-          <a href="/docs/runtime">Runtime targets</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/compute">Compute</a>
-          <a href="/runtimes">Mobile and edge</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
-      <div class="mega-menu" role="menu" aria-label="docs menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/capture">API gateway</a>
-          <a href="/docs/cli">CLI</a>
-          <a href="/docs/sdk">SDKs</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Reference</p>
-          <a href="/docs">Docs home</a>
-          <a href="/docs/api">API reference</a>
-          <a href="/api">HTTP routes</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Operate</p>
-          <a href="/integrations">Integrations</a>
-          <a href="/docs/privacy">Privacy membrane</a>
-          <a href="/docs/datasets">Datasets</a>
-          <a href="/docs/distillation">Distillation</a>
-          <a href="/docs/verify">Verification</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
-      <div class="mega-menu" role="menu" aria-label="pricing menu">
-        <div class="mega-col">
-          <p class="mega-h">Buy</p>
-          <a href="/pricing">Plans</a>
-          <a href="/pricing#roi">ROI calculator</a>
-          <a href="/nonprofits">Nonprofits</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
-      <div class="mega-menu" role="menu" aria-label="enterprise menu">
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/enterprise">Enterprise overview</a>
-          <a href="/self-host">Self-host</a>
-          <a href="/airgap">Air-gap</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Trust</p>
-          <a href="/trust">Trust center</a>
-          <a href="/security">Security</a>
-          <a href="/compliance">Compliance</a>
-          <a href="/baa">BAA</a>
-        </div>
-      </div>
-    </div>
-    </nav>
-    <!-- KOLM_NAV_END (W221) -->
- <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
- <a href="/signin" class="ghost">sign in</a>
- <a href="/signup" class="cta">Get API Key &rarr;</a>
- </div>
- </div>
-</header>
+<a href="#main" class="ks-skip">Skip to content</a>
 
-<main id="main" class="runtime-page">
-<div class="wrap">
-<section class="kolm-hero" aria-label="Runtimes overview">
- <div class="kolm-hero__copy">
-  <span class="kolm-hero__eyebrow"><span data-kolm-icon="deploy" data-kolm-size="14"></span> Deploy · Step 5 of 6</span>
-  <h1>One signed artifact. Every target.</h1>
-  <p class="kolm-hero__lede">
-  Run the same signed <code>.kolm</code> on CPU, GPU, browser, mobile, edge, and air-gap. Every build pins source, flags, target, receipt &mdash; root install stays light, audit trail stays tight.
-  </p>
-  <div class="kolm-hero__cta">
-   <a href="/quickstart" class="kolm-cta kolm-cta--primary">Get started <span data-kolm-icon="arrow-right" data-kolm-size="14"></span></a>
-   <a href="/docs/devices" class="kolm-cta kolm-cta--ghost">Device matrix</a>
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/k-score">K-score</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
+      </div>
+    </div>
+  </header>
+</div>
+
+<main id="main">
+
+<section class="sec-hero">
+  <div class="ks-wrap">
+    <div class="eyebrow">Runtime &middot; step 4 of 4 &middot; load and serve a signed .kolm</div>
+    <h1>One signed artifact. <b>Every runtime.</b></h1>
+    <p class="lede">A platform engineer loads a .kolm into the runtime that fits the box: vLLM or SGLang or TGI for GPU serving, TRT-LLM for NVIDIA ahead-of-time engines, llama.cpp for CPU and portability, MLX for Apple Silicon. The signed receipt verifies offline on every target; the K-score gate that promoted the artifact still binds at load time. No vendor adapter forks the runtime; we shell out to upstream binaries and pin the commit.</p>
+    <div class="cta-row">
+      <a href="/quickstart" class="ks-btn ks-btn--primary">Install the CLI <span class="ks-btn-arrow">&rarr;</span></a>
+      <a href="/verify-prod" class="ks-btn ks-btn--ghost">Verify a sample .kolm</a>
+      <a href="/security" class="ks-btn ks-btn--ghost">Air-gap deployment</a>
+      <a href="/compile" class="ks-btn ks-btn--ghost">Back to compile</a>
+    </div>
   </div>
-  <div class="kolm-hero__meta">
-   <span><span data-kolm-icon="check" data-kolm-size="14"></span> 10 targets</span>
-   <span><span data-kolm-icon="lock" data-kolm-size="14"></span> Air-gap ready</span>
-   <span><span data-kolm-icon="file" data-kolm-size="14"></span> Build receipt</span>
-  </div>
- </div>
- <div class="kolm-hero__visual" data-kolm-illustration="device-sequence" aria-hidden="true"></div>
 </section>
 
-<section class="hero" style="border:none;padding:0;margin:0 0 24px">
- <div class="runtime-proof" aria-label="Runtime coverage">
-  <div><b>Device</b><span>Gemma 3n, Core ML, ExecuTorch, MLX</span></div>
-  <div><b>Browser</b><span>WASM and WebGPU targets for local demos</span></div>
-  <div><b>Server</b><span>CUDA, ROCm, Vulkan, AVX2, AVX-512</span></div>
-  <div><b>Audit</b><span>Pinned source, cmake flags, build receipt</span></div>
- </div>
- <p class="lede" style="margin-top:14px">
- This is the run layer for <a href="/compile">compiled artifacts</a>, <a href="/training">distilled students</a>, <a href="/models">Gemma/Gemma 3n and open backbones</a>, and air-gapped enterprise deployments.
- </p>
+<section class="sec-section" id="adapters">
+  <div class="ks-wrap">
+    <h2>Six first-class runtime adapters</h2>
+    <p class="sub">Each adapter takes a path to a .kolm, picks the right weight shard for the target, and starts the upstream binary with the right flags. None of these forks the runtime; we pin a commit and shell out.</p>
+    <div class="grid-3">
+      <div class="sec-card">
+        <div class="row"><span class="tag">server &middot; GPU</span><span class="st live">Live</span></div>
+        <h3>vLLM</h3>
+        <p>Continuous batching, paged attention, OpenAI-compatible HTTP. Best fit for high-throughput chat and tool-use; AWQ and GPTQ INT4 land cleanly. NVIDIA and AMD ROCm.</p>
+        <p><code>kolm runtime up --target vllm support-triage.kolm</code></p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">server &middot; GPU</span><span class="st live">Live</span></div>
+        <h3>SGLang</h3>
+        <p>RadixAttention prefix-cache and constrained decoding. Best fit for structured-output workloads where the system prompt is long and stable. Same weight format as vLLM.</p>
+        <p><code>kolm runtime up --target sglang support-triage.kolm</code></p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">server &middot; GPU</span><span class="st live">Live</span></div>
+        <h3>TGI</h3>
+        <p>Hugging Face Text Generation Inference. Best fit for teams already running the HF stack; the .kolm loads as a normal safetensors model with the receipt sidecar verified on start.</p>
+        <p><code>kolm runtime up --target tgi support-triage.kolm</code></p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">NVIDIA</span><span class="st live">Live</span></div>
+        <h3>TRT-LLM</h3>
+        <p>NVIDIA ahead-of-time engine plans for H100, H200, B100, B200, RTX 4090/5090. The compile step can emit a TRT-LLM plan as a sidecar so the first start is fast.</p>
+        <p><code>kolm runtime up --target trt-llm support-triage.kolm</code></p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">CPU &middot; portable</span><span class="st live">Live</span></div>
+        <h3>llama.cpp</h3>
+        <p>GGUF Q4_K_M, Q5_K_M, Q8_0. Runs on Linux, macOS, Windows; CPU AVX2/AVX-512, CUDA, ROCm, Vulkan, Metal. The widest portability target in the matrix.</p>
+        <p><code>kolm runtime up --target llama.cpp support-triage.kolm</code></p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">Apple Silicon</span><span class="st live">Live</span></div>
+        <h3>MLX</h3>
+        <p>Apple's MLX framework; runs on M1, M2, M3, M4. Best fit for on-device demos, internal Mac fleets, and CI on Apple runners. The MLX weight shard is a sidecar in the .kolm.</p>
+        <p><code>kolm runtime up --target mlx support-triage.kolm</code></p>
+      </div>
+    </div>
+  </div>
 </section>
 
-<h2>Targets</h2>
-<p>Ten supported targets. Pick a slug; the rest is determined by the registry, not by a
-guess at flags. Run <code>kolm runtime targets</code> to list, <code>kolm runtime info
-&lt;slug&gt;</code> to see the cmake args, <code>kolm runtime doctor</code> to check the
-toolchain on this box, and <code>kolm runtime build-from-source --target=&lt;slug&gt;</code>
-to actually build.</p>
+<section class="sec-section" id="oneverb">
+  <div class="ks-wrap">
+    <h2>One verb, six runtimes</h2>
+    <p class="sub">The CLI hides the adapter wiring. <code>kolm runtime up</code> verifies the .kolm, picks the right weight shard for the requested target, and starts the upstream binary on a free port. Add <code>--port</code> to pin one.</p>
+    <div class="terminal">
+<pre><span class="c"># Verify the artifact first (offline; no network)</span>
+<span class="prompt">$</span> <span class="k">kolm verify support-triage.kolm</span>
+ok: true &middot; artifact_cid bafkreieq&hellip;4f7c
 
-<table class="tbl">
- <thead><tr>
- <th>slug</th><th>arch</th><th>vendor</th><th>sdk</th><th>min</th><th>notes</th>
- </tr></thead>
- <tbody>
- <tr><td><code>cuda-89</code></td><td>sm_89</td><td>nvidia</td><td>cuda-toolkit</td><td>12.0</td><td>RTX 4090, L40S (Ada). Flash-attn v2.</td></tr>
- <tr><td><code>cuda-90</code></td><td>sm_90</td><td>nvidia</td><td>cuda-toolkit</td><td>12.4</td><td>H100, H200 (Hopper). Flash-attn v3.</td></tr>
- <tr><td><code>cuda-100</code></td><td>sm_100</td><td>nvidia</td><td>cuda-toolkit</td><td>12.6</td><td>B100, B200 (Blackwell DC).</td></tr>
- <tr><td><code>cuda-120</code></td><td>sm_120</td><td>nvidia</td><td>cuda-toolkit</td><td>12.8</td><td>RTX 5090 (Blackwell consumer). NVFP4.</td></tr>
- <tr><td><code>rocm-gfx1100</code></td><td>gfx1100</td><td>amd</td><td>rocm-hip-sdk</td><td>6.0</td><td>7900 XTX, Strix Halo (RDNA3).</td></tr>
- <tr><td><code>rocm-gfx942</code></td><td>gfx942</td><td>amd</td><td>rocm-hip-sdk</td><td>6.0</td><td>MI300X (CDNA3).</td></tr>
- <tr><td><code>vulkan</code></td><td>vulkan</td><td>khronos</td><td>vulkan-sdk</td><td>1.3</td><td>Vendor-neutral. Runs on NVIDIA, AMD, Intel.</td></tr>
- <tr><td><code>metal</code></td><td>metal</td><td>apple</td><td>xcode-cli</td><td>15.0</td><td>Apple Silicon, embedded kernels.</td></tr>
- <tr><td><code>cpu-avx2</code></td><td>avx2</td><td>intel/amd</td><td>none</td><td>n/a</td><td>x86_64 fallback for common server and laptop CPUs.</td></tr>
- <tr><td><code>cpu-avx512</code></td><td>avx512</td><td>intel/amd</td><td>none</td><td>n/a</td><td>AVX-512 + VNNI. Server-grade CPU.</td></tr>
- </tbody>
-</table>
+<span class="c"># Start an OpenAI-compatible server on a free port</span>
+<span class="prompt">$</span> <span class="k">kolm runtime up --target vllm support-triage.kolm</span>
+[receipt]   verified ok &middot; K-score 86.3 &middot; verdict ship
+[shard]     selected weights/model.safetensors.index (vllm-awq)
+[spawn]     vllm 0.6.4 &middot; pinned commit <span class="s">7f3a&hellip;b210</span>
+[port]      listening on <span class="s">http://0.0.0.0:8000</span>
 
-<h2>What Kolm does, and what it does not</h2>
-<div class="honest">
-<p><strong>kolm runs the build for you, then steps out of the way.</strong></p>
-<p>You get pinned source, pinned cmake flags, a deterministic out-dir, and a
-<code>build-receipt.json</code> that extends the <a href="/captures">W212 capture
-receipt chain</a> to runtime binaries. We do not fork upstream llama.cpp, we do not
-patch its kernels, and we do not ship a vendored copy. If you want a different
-commit, pass <code>--commit=&lt;sha&gt;</code>. If you want a different repo (e.g., a
-fork with FP8 patches), pass <code>--repo-url=&lt;url&gt;</code>.</p>
-<p>The runtime builder is explicit by design: one command, one pinned commit, one
-receipt, and no hidden abstraction over the build.</p>
-</div>
+<span class="c"># Test from any OpenAI-compatible SDK</span>
+<span class="prompt">$</span> <span class="k">curl -sS http://localhost:8000/v1/chat/completions \
+    -H 'Content-Type: application/json' \
+    -d '{"model":"support-triage","messages":[{"role":"user","content":"hi"}]}'</span></pre>
+    </div>
+  </div>
+</section>
 
-<h2>Use it</h2>
-<pre><code># list every target the worker knows about
-kolm runtime targets
+<section class="sec-section" id="build-targets">
+  <div class="ks-wrap">
+    <h2>Build targets for the runtime binary</h2>
+    <p class="sub">If you want to compile the upstream runtime from source (regulated environments, custom kernels, FP8 patches), <code>kolm runtime build-from-source</code> resolves a pinned commit and the right CMake flags for the target slug. Heavy SDK deps stay in the worker package; the root install stays light.</p>
+    <table class="lk">
+      <thead>
+        <tr><th>slug</th><th>arch</th><th>vendor</th><th>sdk</th><th>min</th><th>notes</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>cuda-89</td><td>sm_89</td><td>nvidia</td><td>cuda-toolkit</td><td>12.0</td><td>RTX 4090, L40S (Ada). Flash-attn v2.</td></tr>
+        <tr><td>cuda-90</td><td>sm_90</td><td>nvidia</td><td>cuda-toolkit</td><td>12.4</td><td>H100, H200 (Hopper). Flash-attn v3.</td></tr>
+        <tr><td>cuda-100</td><td>sm_100</td><td>nvidia</td><td>cuda-toolkit</td><td>12.6</td><td>B100, B200 (Blackwell DC).</td></tr>
+        <tr><td>cuda-120</td><td>sm_120</td><td>nvidia</td><td>cuda-toolkit</td><td>12.8</td><td>RTX 5090 (Blackwell consumer). NVFP4.</td></tr>
+        <tr><td>rocm-gfx1100</td><td>gfx1100</td><td>amd</td><td>rocm-hip-sdk</td><td>6.0</td><td>7900 XTX, Strix Halo (RDNA3).</td></tr>
+        <tr><td>rocm-gfx942</td><td>gfx942</td><td>amd</td><td>rocm-hip-sdk</td><td>6.0</td><td>MI300X (CDNA3).</td></tr>
+        <tr><td>vulkan</td><td>vulkan</td><td>khronos</td><td>vulkan-sdk</td><td>1.3</td><td>Vendor-neutral. NVIDIA, AMD, Intel.</td></tr>
+        <tr><td>metal</td><td>metal</td><td>apple</td><td>xcode-cli</td><td>15.0</td><td>Apple Silicon. M-series.</td></tr>
+        <tr><td>cpu-avx2</td><td>avx2</td><td>intel/amd</td><td>none</td><td>n/a</td><td>x86_64 fallback for laptop and server CPUs.</td></tr>
+        <tr><td>cpu-avx512</td><td>avx512</td><td>intel/amd</td><td>none</td><td>n/a</td><td>AVX-512 + VNNI. Server-grade CPU.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
 
-# show the cmake flags + sdk requirement for one target
-kolm runtime info cuda-89
+<section class="sec-section" id="placement">
+  <div class="ks-wrap">
+    <h2>How to pick a runtime</h2>
+    <p class="sub">The default is llama.cpp because it runs anywhere. The other five are for cases where you actually need the extra capability. Honest scope: this is a heuristic, not a benchmark; run your own K-score on the candidate runtime before committing to it.</p>
+    <div class="grid-2">
+      <div class="sec-card">
+        <div class="row"><span class="tag">throughput</span></div>
+        <h3>High-throughput chat &amp; tool use</h3>
+        <p>Pick vLLM. Continuous batching means many concurrent requests share GPU memory cleanly; first-token latency drops vs. naive batching. Pair with a fronting reverse proxy if you need TLS or rate limits.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">structured output</span></div>
+        <h3>Constrained decoding</h3>
+        <p>Pick SGLang. RadixAttention shares prefix KV across requests with the same system prompt; constrained decoding (regex, JSON schema, BNF) is first-class. Good for an agent with a long shared prompt scaffold.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">existing HF stack</span></div>
+        <h3>Already on Hugging Face</h3>
+        <p>Pick TGI. Same serving model your team already runs; the .kolm loads as a safetensors directory with a receipt sidecar the adapter verifies at start.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">NVIDIA AOT</span></div>
+        <h3>Latency-critical on NVIDIA</h3>
+        <p>Pick TRT-LLM. Ahead-of-time engine plans win on per-token latency at the cost of longer build time; the compile step can emit the plan as a sidecar.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">portability</span></div>
+        <h3>Run anywhere</h3>
+        <p>Pick llama.cpp. GGUF runs on Linux, macOS, Windows; CPU AVX2/AVX-512, CUDA, ROCm, Vulkan, Metal. Default for laptops, CI runners, and air-gapped boxes without a vendor SDK.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">Apple</span></div>
+        <h3>On-device on a Mac</h3>
+        <p>Pick MLX. Native to Apple Silicon; integrates with Swift and SwiftUI for on-device demos. Internal Mac fleets get sub-second cold start once the weights are cached.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-# check whether the toolchain is installed on this box
-kolm runtime doctor --target=cuda-89
+<section class="sec-section" id="receipt">
+  <div class="ks-wrap">
+    <h2>Receipt verification at load time</h2>
+    <p class="sub">Every adapter calls <code>kolm verify</code> before it spawns the upstream binary. If the signature does not match, the bytes hash does not match, or the K-score gate is below the threshold the artifact claims, the runtime refuses to start. There is no <code>--skip-verify</code> flag.</p>
+    <div class="terminal">
+<pre><span class="c"># What the runtime adapter does on every cold start</span>
+[receipt]   load receipt.json &middot; receipt.sig &middot; receipt.pubkey
+[bytes]     sha256(artifact bytes) == artifact_bytes_sha256 ok
+[canon]     sha256(JCS(receipt)) == signed hash ok
+[sign]      Ed25519 verify ok
+[k-score]   composite 86.3 / threshold 80 &middot; verdict ship ok
+[target]    requested target llama.cpp in receipt.targets[] ok
+[spawn]     llama-server &middot; pinned commit 2026-05-17-frontier-pin
 
-# do the build (clones llama.cpp, checks out the pinned commit, runs cmake, installs)
-kolm runtime build-from-source --target=cuda-89 --out=/opt/kolm/runtime/cuda-89
+<span class="c"># Build receipt for the runtime binary</span>
+{
+  <span class="k">"ok"</span>: <span class="n">true</span>,
+  <span class="k">"target"</span>: <span class="s">"cuda-89"</span>,
+  <span class="k">"repo_url"</span>: <span class="s">"https://github.com/ggerganov/llama.cpp.git"</span>,
+  <span class="k">"commit"</span>: <span class="s">"2026-05-17-frontier-pin"</span>,
+  <span class="k">"cmake_args"</span>: [<span class="s">"-G","Ninja","-DGGML_CUDA=ON","-DCMAKE_CUDA_ARCHITECTURES=89"</span>],
+  <span class="k">"elapsed_ms"</span>: <span class="n">318411</span>,
+  <span class="k">"binary_dir"</span>: <span class="s">"/opt/kolm/runtime/cuda-89/bin"</span>,
+  <span class="k">"receipt_kind"</span>: <span class="s">"kolm-runtime-build/1"</span>
+}</pre>
+    </div>
+  </div>
+</section>
 
-# preview without running anything
-kolm runtime build-from-source --target=cuda-90 --dry-run --json</code></pre>
+<section class="sec-section" id="airgap">
+  <div class="ks-wrap">
+    <h2>Air-gapped serving</h2>
+    <p class="sub">Every adapter can run with no network access. The .kolm is the entire dependency; the runtime binary is pre-built; the receipt verifies offline. A regulated team can move artifacts in on a sealed disk and stand up a serving cluster with no egress.</p>
+    <div class="grid-2">
+      <div class="sec-card">
+        <div class="row"><span class="tag">no egress</span><span class="st live">Live</span></div>
+        <h3>Static runtime binaries</h3>
+        <p>For each target slug the runtime worker produces a static binary with the pinned commit. Drop it next to the .kolm; the adapter shells out to it without touching any package manager at run time.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">no egress</span><span class="st live">Live</span></div>
+        <h3>Offline verifier</h3>
+        <p>The verifier is a single binary. No network, no honesty service, no registry lookup. An auditor on a clean laptop validates the chain end-to-end and sees the same <code>ok:true</code> a production node sees.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">attestation</span><span class="st live">Live</span></div>
+        <h3>TEE attestation pinning</h3>
+        <p>If the compile step embedded a TEE attestation report, the adapter checks the runtime hardware matches the attested platform before serving. Mismatch refuses to start. See the <a href="/compile#attest">compile attestation section</a>.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">honest scope</span><span class="st live">Live</span></div>
+        <h3>Real failure modes</h3>
+        <p>If the upstream binary segfaults, the adapter forwards the exit code and the last 64 KB of stderr to the operator. We do not swallow runtime crashes; the failure is yours to read and act on.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-<h2>Receipt</h2>
-<p>Every successful build writes <code>build-receipt.json</code> in the out-dir:</p>
-<pre><code>{
- "ok": true,
- "target": "cuda-89",
- "repo_url": "https://github.com/ggerganov/llama.cpp.git",
- "commit": "2026-05-17-frontier-pin",
- "cmake_args": ["-G","Ninja","-DGGML_CUDA=ON","-DCMAKE_CUDA_ARCHITECTURES=89", ...],
- "elapsed_ms": 318411,
- "built_at": "2026-05-18T13:14:22.501Z",
- "binary_dir": "/opt/kolm/runtime/cuda-89/bin",
- "receipt_kind": "kolm-runtime-build/1"
-}</code></pre>
-<p>This receipt is the runtime sibling of the
-<a href="/captures">x-kolm-capture-durable</a> header and the
-<a href="/spec">.kolm manifest signatures</a> - every artifact in the kolm stack
-ships with proof of what produced it.</p>
+<section class="sec-section" id="commands">
+  <div class="ks-wrap">
+    <h2>CLI reference</h2>
+    <p class="sub">Every runtime operation is reachable from the <code>kolm runtime</code> verb. Run <code>kolm runtime --help</code> for the full surface; the most common subcommands are below.</p>
+    <table class="lk">
+      <thead>
+        <tr><th>Command</th><th>What it does</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>kolm runtime targets</td><td>List every build target the worker knows about. JSON with <code>--json</code>.</td></tr>
+        <tr><td>kolm runtime info &lt;slug&gt;</td><td>Show the CMake flags and SDK requirement for one target.</td></tr>
+        <tr><td>kolm runtime doctor --target &lt;slug&gt;</td><td>Check the toolchain on this box can build the target. Honest fail with install hints.</td></tr>
+        <tr><td>kolm runtime build-from-source --target &lt;slug&gt;</td><td>Clone the upstream runtime, check out the pinned commit, run CMake, install the binary.</td></tr>
+        <tr><td>kolm runtime up --target &lt;adapter&gt; &lt;.kolm&gt;</td><td>Verify the artifact and spawn the upstream serving binary.</td></tr>
+        <tr><td>kolm runtime down</td><td>Stop the spawned runtime cleanly. Reports exit code.</td></tr>
+        <tr><td>kolm runtime stats</td><td>Live token-per-second, queue depth, first-token latency. Reads from the runtime metrics socket.</td></tr>
+        <tr><td>kolm verify &lt;.kolm&gt;</td><td>Offline verify of the artifact. The adapter runs this before every cold start.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
 
-<h2>Where the heavy deps live</h2>
-<p>The cuda-toolkit, rocm-hip-sdk, vulkan-sdk, and xcode-cli-tools are declared in
-<code>workers/runtime-build/package.json</code> under <code>system_requires</code>,
-NOT in the root kolm <code>package.json</code>. The root install stays light. The worker is
-only invoked when you opt in to <code>kolm runtime build-from-source</code>.</p>
+<section class="sec-section" id="reach">
+  <div class="ks-wrap">
+    <h2>Next steps</h2>
+    <p class="sub">A loaded .kolm is the end of the four-step compiler walk. From here you can verify in CI, ship to more nodes, or feed the live traffic back into capture for the next distill cycle.</p>
+    <div class="grid-3">
+      <div class="sec-card">
+        <h3>Verify in CI</h3>
+        <p>Wire <code>kolm verify</code> into your build pipeline; refuse to deploy on mismatch. <a href="/verify-prod">Verify-prod</a>.</p>
+      </div>
+      <div class="sec-card">
+        <h3>Capture the production traffic</h3>
+        <p>Loop the runtime output back through capture for the next distill cycle. <a href="/capture">Capture overview</a>.</p>
+      </div>
+      <div class="sec-card">
+        <h3>Read the K-score spec</h3>
+        <p>What the ship-vs-block verdict actually measures. <a href="/k-score">K-score methodology</a>.</p>
+      </div>
+    </div>
+    <div style="margin-top:var(--ks-6); display:flex; flex-wrap:wrap; gap:var(--ks-3)">
+      <a href="/quickstart" class="ks-btn ks-btn--primary">Run the quickstart <span class="ks-btn-arrow">&rarr;</span></a>
+      <a href="/capture" class="ks-btn ks-btn--ghost">Loop back to capture</a>
+      <a href="/security" class="ks-btn ks-btn--ghost">Air-gap deployment</a>
+      <a href="/enterprise" class="ks-btn ks-btn--ghost">Enterprise deployment</a>
+    </div>
+  </div>
+</section>
 
-<p style="margin-top:32px">
- <a href="/quickstart">CLI quickstart &rarr;</a> &nbsp;
- <a href="/models#frontier">Frontier models &rarr;</a> &nbsp;
- <a href="/captures">Capture receipts &rarr;</a> &nbsp;
- <a href="/spec">.kolm spec &rarr;</a>
-</p>
-
-<div class="foot">
- <p>kolm.ai - <a href="/runtimes">/runtimes</a> - pinned runtime source
- <code>2026-05-17-frontier-pin</code> - isolated worker
- <code>workers/runtime-build/</code></p>
-</div>
-</div>
 </main>
-<script src="/nav.js" defer></script>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/faq">FAQ</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/enterprise">Enterprise</a>
+        <a href="/manifesto">Manifesto</a>
+        <a href="/why-kolm">Why kolm</a>
+        <a href="/contact">Contact</a>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- w220-claim w260-trust w271-frontier w335-claim w373-receipts w408-quantize-matrix -->
 </body>
 </html>

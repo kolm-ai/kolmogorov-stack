@@ -1,615 +1,457 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Enterprise AI from cloud to device - kolm.ai</title>
-<meta name="description" content="Kolm routes model APIs, distills approved behavior, and runs signed .kolm artifacts inside VPC, on-prem, browser, phone, edge, and air-gap environments with BAA, SSO, audit logs, SBOM/SLSA, private registry, and architecture review.">
-<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-
-<meta property="og:title" content="Enterprise AI from cloud to device | kolm.ai">
-<meta property="og:description" content="Route model APIs, distill approved behavior, and run signed .kolm artifacts inside VPC, on-prem, browser, phone, edge, and air-gap environments.">
-<meta property="og:type" content="website">
+<title>Enterprise: BYOC, SSO, BAA, air-gap, signed receipts · kolm.ai</title>
+<meta name="description" content="Procurement-ready: SAML/SCIM, BYOC and on-prem, regional residency, BAA on request, SOC 2 Type II in flight, signed Ed25519 receipts on every artifact. The full evaluation pack is on this page.">
+<meta name="theme-color" content="#07090c">
+<meta property="og:title" content="Enterprise · kolm.ai">
+<meta property="og:description" content="SSO, SCIM, BAA, BYOC, air-gap, signed receipts. Built for procurement, security, and compliance teams.">
+<meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/enterprise">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
-<meta name="twitter:title" content="Enterprise AI from cloud to device | kolm.ai">
-<meta name="twitter:description" content="Route model APIs, distill approved behavior, and run signed .kolm artifacts inside VPC, on-prem, browser, phone, edge, and air-gap environments.">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
-<meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://kolm.ai/enterprise">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/styles.css">
-<link rel="stylesheet" href="/design-tokens.css">
-<link rel="stylesheet" href="/brand-refresh.css">
-<link rel="stylesheet" href="/kolm-svg.css">
-<link rel="stylesheet" href="/w598.css">
-<link rel="stylesheet" href="/w600-layout.css">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
 <style>
- /* elite demo on /enterprise: an animated, 4-step CLI walk-through that
- shows the team-private publish flow end-to-end. No JS dependencies; the auto-advance is a setInterval that toggles an `is-active` class;
- keyboard arrows and click-to-jump still work even if JS is blocked. */
- .ed-wrap { margin: 56px auto 96px; max-width: 1180px; padding: 0 32px; }
- .ed-head { display: flex; align-items: end; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-bottom: 22px; }
- .ed-head h2 { font-size: 30px; font-weight: 500; letter-spacing: -0.01em; margin: 0; max-width: 38ch; line-height: 1.12; }
- .ed-head .ed-lede { color: var(--ink-mute, #b5bdb1); font-size: 14.5px; max-width: 52ch; margin: 0; }
- .ed-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 24px; align-items: stretch; }
- @media (max-width: 880px) { .ed-grid { grid-template-columns: 1fr; } }
- .ed-term { background: #0b0f10; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 12px; overflow: hidden; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
- .ed-term-head { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--line, rgba(255,255,255,0.06)); font-size: 11.5px; color: var(--ink-faint, #737c73); }
- .ed-dot { width: 9px; height: 9px; border-radius: 50%; background: #5a635a; }
- .ed-dot.green { background: #7ef0d2; }
- .ed-dot.amber { background: #ffb84d; }
- .ed-dot.red { background: #ff6b91; }
- .ed-term-title { margin-left: 6px; letter-spacing: 0.04em; }
- .ed-term-body { padding: 18px 20px; min-height: 260px; font-size: 13px; line-height: 1.65; color: #d6dccf; }
- .ed-term-body pre { margin: 0; white-space: pre-wrap; word-break: break-word; font: inherit; }
- .ed-term-body .cmd { color: #faf2e1; }
- .ed-term-body .ok { color: #7ef0d2; }
- .ed-term-body .lo { color: #737c73; }
- .ed-term-body .hi { color: #ffd97a; }
- .ed-term-body .fail{ color: #ff6b91; }
- .ed-step { display: none; }
- .ed-step.is-active { display: block; }
- .ed-side { display: flex; flex-direction: column; gap: 14px; }
- .ed-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
- .ed-tab { appearance: none; border: 1px solid var(--line, rgba(255,255,255,0.10)); background: transparent; color: var(--ink-mute, #b5bdb1); border-radius: 8px; padding: 10px 12px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px; letter-spacing: 0.04em; cursor: pointer; text-align: left; transition: border-color 120ms, color 120ms, background 120ms; }
- .ed-tab .ed-num { color: var(--ink-faint, #737c73); margin-right: 7px; font-variant-numeric: tabular-nums; }
- .ed-tab:hover { color: var(--ink, #faf2e1); border-color: var(--line-2, rgba(255,255,255,0.18)); }
- .ed-tab.is-active { color: var(--ink, #faf2e1); border-color: var(--ink, #faf2e1); background: rgba(236,231,220,0.04); }
- .ed-tab.is-active .ed-num { color: var(--ink, #faf2e1); }
- .ed-detail { background: rgba(255,255,255,0.025); border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 10px; padding: 18px 20px; flex: 1; }
- .ed-detail .ed-d-eye { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint, #737c73); margin-bottom: 8px; }
- .ed-detail h3 { font-size: 18px; font-weight: 500; margin: 0 0 8px; line-height: 1.2; }
- .ed-detail p { font-size: 14px; color: var(--ink-mute, #b5bdb1); margin: 0 0 10px; line-height: 1.55; }
- .ed-detail p:last-child { margin-bottom: 0; }
- .ed-detail .ed-d-pill { display: inline-flex; align-items: center; gap: 6px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; color: var(--ink, #faf2e1); border: 1px solid var(--line-2, rgba(255,255,255,0.18)); padding: 4px 9px; border-radius: 999px; margin-top: 10px; }
- .ed-foot { margin-top: 18px; display: flex; gap: 14px; flex-wrap: wrap; align-items: center; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px; color: var(--ink-faint, #737c73); }
- .ed-foot a { color: var(--ink, #faf2e1); border-bottom: 1px solid var(--line-2, rgba(255,255,255,0.18)); padding-bottom: 1px; }
- .ed-foot a:hover { border-color: var(--ink, #faf2e1); }
- .ed-cap { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 10.5px; letter-spacing: 0.06em; color: var(--ink-faint, #737c73); text-transform: uppercase; }
- [data-theme="light"] .ed-term { background: #fbf8f0; border-color: #e8e3d6; }
- [data-theme="light"] .ed-term-head { background: rgba(0,0,0,0.025); border-bottom-color: #e8e3d6; color: #6a695f; }
- [data-theme="light"] .ed-term-body { color: #1f2120; }
- [data-theme="light"] .ed-term-body .cmd { color: #0c0d10; }
- [data-theme="light"] .ed-term-body .lo { color: #8a8a7a; }
- [data-theme="light"] .ed-term-body .ok { color: #138a6a; }
- [data-theme="light"] .ed-term-body .hi { color: #8a6800; }
- [data-theme="light"] .ed-detail { background: rgba(0,0,0,0.025); border-color: #e8e3d6; }
- [data-theme="light"] .ed-detail .ed-d-eye, [data-theme="light"] .ed-cap, [data-theme="light"] .ed-foot { color: #6a695f; }
- [data-theme="light"] .ed-detail p { color: #4a4945; }
- [data-theme="light"] .ed-tab { color: #4a4945; border-color: #e8e3d6; }
- [data-theme="light"] .ed-tab.is-active { color: #0c0d10; border-color: #0c0d10; background: rgba(0,0,0,0.03); }
- [data-theme="light"] .ed-tab.is-active .ed-num { color: #0c0d10; }
- /* Wave 208 mobile audit: ed-tabs collapses to 2 columns at narrow widths
- so the four-step CLI walk-through fits in a 360px viewport. */
- .kvtable { overflow-x: auto; -webkit-overflow-scrolling: touch; }
- .kvtable table { min-width: 520px; }
- @media (max-width: 560px) {
- .ed-wrap { margin: 36px auto 56px; padding: 0 18px; }
- .ed-head h2 { font-size: 24px; }
- .ed-tabs { grid-template-columns: repeat(2, 1fr); }
- .ed-term-body { padding: 14px 16px; font-size: 12px; min-height: 220px; }
- .ed-detail { padding: 14px 16px; }
- .ed-detail h3 { font-size: 16px; }
- }
- /* W406 Apple-style restraint pass (2026-05-19): bigger H1/H2, more
- whitespace between sections, one big claim per section. Beats
- brand-refresh.css's global `h1 { font-size: clamp(44px, 6.8vw, 96px) !important; }`. */
- main > section.hero { padding: 120px 0 80px; }
- main > section.hero h1 {
- font-size: clamp(48px, 6.4vw, 80px) !important;
- line-height: 1.02 !important;
- letter-spacing: -0.025em;
- margin: 18px 0 22px;
- max-width: 18ch;
- }
- main > section.hero p.lede {
- font-size: clamp(17px, 1.4vw, 20px);
- line-height: 1.5;
- margin: 0 0 28px;
- max-width: 58ch;
- }
- main > section.hero .actions { margin-top: 14px; }
- main > section.section { padding: 140px 0; }
- main > section.section h2 {
- font-size: clamp(40px, 4.6vw, 64px);
- line-height: 1.05;
- letter-spacing: -0.02em;
- margin: 14px 0 20px;
- max-width: 20ch;
- }
- main > section.section .sec-lede {
- font-size: clamp(16px, 1.2vw, 19px);
- line-height: 1.55;
- margin: 0 0 36px;
- max-width: 60ch;
- }
- @media (max-width: 720px) {
- main > section.hero { padding: 64px 0 48px; }
- main > section.section { padding: 72px 0; }
- main > section.section h2 { font-size: clamp(32px, 7vw, 44px); margin-bottom: 16px; }
- }
+  .en-hero-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: clamp(32px, 5vw, 72px); align-items: center; }
+  @media (max-width: 920px) { .en-hero-grid { grid-template-columns: 1fr; } }
+  .en-stats { display: grid; grid-template-columns: 1fr 1fr; gap: var(--ks-3); padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); }
+  .en-stat { padding: var(--ks-3) var(--ks-4); }
+  .en-stat b { display: block; font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; font-weight: 500; }
+  .en-stat span { font-family: var(--ks-mono); font-size: 18px; color: var(--ks-accent); font-variant-numeric: tabular-nums; }
+  .en-pillars { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--ks-4); }
+  .en-pillar { padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); }
+  .en-pillar .ico { width: 38px; height: 38px; background: var(--ks-accent-soft); border: 1px solid var(--ks-accent-edge); border-radius: 10px; display: grid; place-items: center; margin-bottom: var(--ks-3); color: var(--ks-accent); }
+  .en-pillar h3 { margin: 0 0 var(--ks-2); font-size: 17px; font-weight: 580; color: var(--ks-ink); }
+  .en-pillar p { margin: 0; font-size: 14px; color: var(--ks-ink-2); line-height: 1.6; }
+  .en-deploy { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--ks-4); }
+  .en-deploy-card { padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); }
+  .en-deploy-card .tier { font-family: var(--ks-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ks-accent); margin-bottom: 6px; }
+  .en-deploy-card h3 { margin: 0 0 var(--ks-3); font-size: 19px; font-weight: 580; color: var(--ks-ink); }
+  .en-deploy-card p { margin: 0 0 var(--ks-3); font-size: 14px; color: var(--ks-ink-2); line-height: 1.6; }
+  .en-deploy-card ul { margin: 0; padding-left: 16px; font-size: 13.5px; color: var(--ks-ink-2); line-height: 1.7; }
+  .en-deploy-card li::marker { color: var(--ks-accent); }
+  .en-deploy-card pre { margin: var(--ks-3) 0 0; padding: 12px 14px; background: #0c0e12; border: 1px solid var(--ks-line-1); border-radius: var(--ks-r-md); font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-2); line-height: 1.55; overflow-x: auto; }
+  .en-compliance { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--ks-3); }
+  .en-comp { padding: var(--ks-4); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); }
+  .en-comp .stat { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .en-comp .stat.ok { color: var(--ks-pos); }
+  .en-comp .stat.warn { color: var(--ks-warn); }
+  .en-comp b { display: block; font-size: 15px; font-weight: 580; color: var(--ks-ink); margin-bottom: 3px; }
+  .en-comp p { margin: 0; font-size: 13px; color: var(--ks-ink-3); line-height: 1.55; }
+  .en-pack { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: var(--ks-5); padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); margin: var(--ks-4) 0; }
+  @media (max-width: 720px) { .en-pack { grid-template-columns: 1fr; } }
+  .en-pack .lab { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-accent); text-transform: uppercase; letter-spacing: 0.08em; padding-top: 4px; }
+  .en-pack h3 { margin: 0 0 var(--ks-2); font-size: 17px; font-weight: 580; color: var(--ks-ink); }
+  .en-pack p { margin: 0 0 var(--ks-2); font-size: 14px; color: var(--ks-ink-2); line-height: 1.65; }
+  .en-pack a.dl { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--ks-accent-soft); border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-pill); font-family: var(--ks-mono); font-size: 12px; color: var(--ks-accent); margin-right: 6px; margin-top: 6px; }
+  .en-pack a.dl:hover { background: var(--ks-accent-edge); color: var(--ks-ink); }
+  .en-faq { display: grid; gap: 0; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); overflow: hidden; }
+  .en-faq details { border-bottom: 1px solid var(--ks-line-1); }
+  .en-faq details:last-child { border-bottom: 0; }
+  .en-faq summary { padding: 18px var(--ks-6); cursor: pointer; font-size: 15.5px; font-weight: 500; color: var(--ks-ink); list-style: none; display: flex; justify-content: space-between; gap: var(--ks-3); }
+  .en-faq summary::-webkit-details-marker { display: none; }
+  .en-faq summary::after { content: "+"; font-family: var(--ks-mono); color: var(--ks-ink-3); font-size: 20px; transition: transform 200ms; }
+  .en-faq details[open] summary::after { transform: rotate(45deg); }
+  .en-faq .a { padding: 0 var(--ks-6) var(--ks-5); font-size: 14.5px; color: var(--ks-ink-2); line-height: 1.7; max-width: 70ch; }
+  .en-faq .a code { background: var(--ks-bg-2); padding: 1px 5px; border-radius: 4px; font-size: 12.5px; }
+  .test-anchor { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 </style>
-<script type="application/ld+json">
-{
- "@context": "https://schema.org",
- "@type": "SoftwareApplication",
- "name": "kolm",
- "applicationCategory": "DeveloperApplication",
- "operatingSystem": "Linux, macOS, Windows (WSL)",
- "url": "https://kolm.ai/enterprise",
- "description": "Kolm routes model APIs, distills approved behavior, and runs signed .kolm artifacts inside VPC, on-prem, browser, phone, edge, and air-gap environments with BAA, SSO, audit logs, SBOM/SLSA, private registry, and architecture review.",
- "offers": {
- "@type": "Offer",
- "price": "0",
- "priceCurrency": "USD"
- },
- "publisher": {
- "@type": "Organization",
- "name": "kolm.ai",
- "@id": "https://kolm.ai/#org"
- }
-}
-</script>
-<link rel="stylesheet" href="/surface-polish.css">
 </head>
-<body>
-<a class="skip-link" href="#main">Skip to content</a>
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<body class="ks">
 
-<header class="site-header">
- <div class="wrap">
- <a href="/" class="brand"><span>kolm.ai</span></a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
-    <!-- KOLM_NAV_BEGIN (W221) -->
-    <nav class="site-nav" aria-label="Primary">
-    <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
-      <div class="mega-menu" role="menu" aria-label="product menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/product">Overview</a>
-          <a href="/quickstart">Quickstart</a>
-          <a href="/capture">Gateway</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training</a>
-          <a href="/distill">Distill</a>
-          <a href="/compile">Compile</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/runtimes">Runtimes</a>
-          <a href="/docs/devices">Devices</a>
-          <a href="/trust">Verify</a>
-        </div>
-      </div>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand">
+      <span class="ks-nav__mark">k</span>
+      <span>kolm<b>.ai</b></span>
+    </a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="/enterprise" aria-current="page">Enterprise</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/contact?topic=enterprise" class="ks-btn ks-btn--primary ks-btn--sm">Talk to sales <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
     </div>
-    <div class="nav-item nav-item--models has-mega">
-      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
-      <div class="mega-menu" role="menu" aria-label="models menu">
-        <div class="mega-col">
-          <p class="mega-h">Choose</p>
-          <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Build your own</a>
-          <a href="/docs/runtime">Runtime targets</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/compute">Compute</a>
-          <a href="/runtimes">Mobile and edge</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
-      <div class="mega-menu" role="menu" aria-label="docs menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/capture">API gateway</a>
-          <a href="/docs/cli">CLI</a>
-          <a href="/docs/sdk">SDKs</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Reference</p>
-          <a href="/docs">Docs home</a>
-          <a href="/docs/api">API reference</a>
-          <a href="/api">HTTP routes</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Operate</p>
-          <a href="/integrations">Integrations</a>
-          <a href="/docs/privacy">Privacy membrane</a>
-          <a href="/docs/datasets">Datasets</a>
-          <a href="/docs/distillation">Distillation</a>
-          <a href="/docs/verify">Verification</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
-      <div class="mega-menu" role="menu" aria-label="pricing menu">
-        <div class="mega-col">
-          <p class="mega-h">Buy</p>
-          <a href="/pricing">Plans</a>
-          <a href="/pricing#roi">ROI calculator</a>
-          <a href="/nonprofits">Nonprofits</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
-      <div class="mega-menu" role="menu" aria-label="enterprise menu">
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/enterprise">Enterprise overview</a>
-          <a href="/self-host">Self-host</a>
-          <a href="/airgap">Air-gap</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Trust</p>
-          <a href="/trust">Trust center</a>
-          <a href="/security">Security</a>
-          <a href="/compliance">Compliance</a>
-          <a href="/baa">BAA</a>
-        </div>
-      </div>
-    </div>
-    </nav>
-    <!-- KOLM_NAV_END (W221) -->
- <div class="site-actions">
- <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
- <a href="/signin">sign in</a>
- <a href="/signup" class="cta">Get API key &rarr;</a>
- </div>
- </div>
-</header>
+  </nav>
+  <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a>
+    <a href="/pricing">Pricing</a>
+    <a href="/docs">Docs</a>
+    <a href="/enterprise">Enterprise</a>
+    <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
+    <a href="/signup?intent=login">Sign in</a>
+    <a href="/contact?topic=enterprise">Talk to sales &rarr;</a>
+  </div>
+</div>
 
 <main id="main">
- <section class="hero frontier-bg">
- <div class="wrap">
- <div class="hero-copy">
- <div class="hero-eyebrow"><span class="he-dot"></span>Enterprise &middot; AI from cloud to device</div>
- <h1>Enterprise AI, down to every device.</h1>
- <p class="lede">Route model APIs through one gateway. Distill approved behavior into signed <code>.kolm</code> artifacts. Deploy inside VPC, on-prem, browser, phone, edge, or air-gap. Receipts, logs, BAA, SBOM, and SLSA evidence stay attached.</p>
- <div class="actions">
- <a href="/enterprise/inquiry" class="btn primary electric">Book architecture review &rarr;</a>
- <a href="mailto:dev@kolm.ai?subject=kolm%20enterprise" class="btn ghost">Contact us</a>
- <a href="/baa" class="btn ghost">BAA / DPA template</a>
- <a href="/security" class="btn accent">Security posture</a>
- </div>
- </div>
- </div>
- </section>
 
- <div class="wrap" style="max-width:1080px;padding:0 24px;margin:32px auto 0">
-  <div class="kolm-hero__visual" data-kolm-illustration="scale-horizon" aria-hidden="true"></div>
- </div>
+<section class="ks-hero">
+  <div class="ks-hero__bg" aria-hidden="true"></div>
+  <div class="ks-wrap">
+    <div class="en-hero-grid">
+      <div>
+        <span class="ks-eyebrow">For procurement, security, and compliance</span>
+        <h1 class="ks-hero__h1" style="font-size: clamp(38px, 5.5vw, 64px); max-width: 18ch;">
+          AI infrastructure your <span class="grad">compliance team</span> can sign off on.
+        </h1>
+        <p class="ks-hero__lede">
+          BYOC on AWS, GCP, or Azure. On-prem on Kubernetes or bare metal. Air-gap on appliance. SAML and SCIM out of the box. BAA on request. Every artifact ships with a signed receipt your auditor can verify without our cooperation.
+        </p>
+        <div class="ks-hero__ctas">
+          <a class="ks-btn ks-btn--primary ks-btn--lg" href="/contact?topic=enterprise">Talk to sales <span class="ks-btn-arrow">&rarr;</span></a>
+          <a class="ks-btn ks-btn--ghost ks-btn--lg" href="#pack">Get the evaluation pack</a>
+        </div>
+        <p class="ks-hero__meta">
+          <span style="color: var(--ks-pos);">&#9679;</span> 30-day enterprise trial on your cloud, with your data, against your evals.
+        </p>
+      </div>
+      <div class="en-stats">
+        <div class="en-stat"><b>SOC 2 Type I</b><span>Available</span></div>
+        <div class="en-stat"><b>SOC 2 Type II</b><span>Q3 2026</span></div>
+        <div class="en-stat"><b>HIPAA BAA</b><span>On request</span></div>
+        <div class="en-stat"><b>ISO 27001</b><span>In flight</span></div>
+        <div class="en-stat"><b>GDPR DPA</b><span>Standard</span></div>
+        <div class="en-stat"><b>EU AI Act</b><span>Article 13 ready</span></div>
+        <div class="en-stat"><b>Residency</b><span>US / EU / APAC</span></div>
+        <div class="en-stat"><b>Signed receipts</b><span>Ed25519 default</span></div>
+      </div>
+    </div>
+  </div>
+</section>
 
- <section data-w260="external-review" style="padding:40px 0;border-top:1px solid rgba(255,255,255,0.06);border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.015)">
- <div class="wrap" style="max-width:1080px">
- <div style="display:flex;align-items:flex-start;gap:24px;flex-wrap:wrap">
- <div style="flex:0 0 auto;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint,#737c73);padding-top:4px">
- procurement fit
- </div>
- <blockquote style="margin:0;flex:1 1 520px;font-size:18px;line-height:1.5;color:var(--ink,#faf2e1);max-width:780px">
- &ldquo;Kolm is built for teams that cannot send every AI workload through a hosted black box:
- route providers, distill approved work, run artifacts in-boundary, and export proof for security review.&rdquo;
- <footer style="margin-top:14px;font-size:13px;color:var(--ink-mute,#b5bdb1);font-style:normal">
- Enterprise architecture review scope
- </footer>
- </blockquote>
- </div>
- </div>
- </section>
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Four guarantees</span>
+      <h2 class="ks-h2">The four things every regulated buyer asks for.</h2>
+      <p class="ks-lede">Every kolm install ships these by default. Not a roadmap. Not a paywall. Apache-2.0 source on GitHub, verifiable in your VPC.</p>
+    </div>
+    <div class="en-pillars">
+      <div class="en-pillar">
+        <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        <h3>Tenant isolation</h3>
+        <p>Per-tenant data fences enforced at the storage layer. Cross-tenant reads are not a permission check; they are physically impossible. Verified by tests on every release.</p>
+      </div>
+      <div class="en-pillar">
+        <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v6h-6"/></svg></div>
+        <h3>Signed receipts</h3>
+        <p>Every artifact and every distill run produces an Ed25519-signed receipt with a public CID. Your auditor verifies independently. No vendor portal required.</p>
+      </div>
+      <div class="en-pillar">
+        <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></div>
+        <h3>BYOC or on-prem</h3>
+        <p>Helm chart, Docker Compose, and a bare-metal install script. Runs entirely in your VPC. Your KMS, your bucket, your audit trail. No outbound calls.</p>
+      </div>
+      <div class="en-pillar">
+        <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+        <h3>Real-time auditability</h3>
+        <p>Per-request immutable audit log streamed to your SIEM (Splunk, Datadog, Elastic). Each entry references the receipt that produced it. Full chain of custody.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
- <div class="ed-wrap">
- <div class="ed-head">
- <div>
- <div class="ed-cap">live demo &middot; team-private publish</div>
- <h2>How a team releases an audited model in four commands.</h2>
- </div>
- <p class="ed-lede">Compile inside the boundary. Publish privately. Pull by SHA pin. Audit every run.</p>
- </div>
- <div class="ed-grid">
- <div class="ed-term" aria-label="kolm terminal demo">
- <div class="ed-term-head"><span class="ed-dot red"></span><span class="ed-dot amber"></span><span class="ed-dot green"></span><span class="ed-term-title">acme-health &middot; engineer-workstation-04</span></div>
- <div class="ed-term-body">
-<div class="ed-step is-active" data-step="1">
-<pre><span class="lo">$</span> <span class="cmd">kolm compile --spec phi-redactor.spec.json --examples gold.jsonl</span>
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Five deployment patterns</span>
+      <h2 class="ks-h2">Pick the topology that matches your risk model.</h2>
+      <p class="ks-lede">Same product. Same artifacts. Different placement.</p>
+    </div>
+    <div class="en-deploy">
+      <div class="en-deploy-card">
+        <div class="tier">01 SaaS multi-tenant</div>
+        <h3>Hosted on kolm.ai</h3>
+        <p>The fastest path. Tenant-isolated database, regional residency (US, EU, APAC), SOC 2 controls applied to the shared infrastructure. Most teams start here, then graduate.</p>
+        <ul>
+          <li>5-minute setup, no infra</li>
+          <li>Same uptime SLA as the Pro plan</li>
+          <li>Optional VPC peering (Enterprise)</li>
+        </ul>
+      </div>
+      <div class="en-deploy-card">
+        <div class="tier">02 SaaS dedicated</div>
+        <h3>Hosted, but single-tenant</h3>
+        <p>Your own database, your own queue, your own region. We operate it; you own the data plane. Adds a dedicated VPN for ingress and your KMS for signing keys.</p>
+        <ul>
+          <li>Dedicated database, dedicated workers</li>
+          <li>Bring-your-own KMS (AWS / GCP / Azure)</li>
+          <li>Custom domain, custom TLS</li>
+        </ul>
+      </div>
+      <div class="en-deploy-card">
+        <div class="tier">03 BYOC</div>
+        <h3>Your cloud, our control plane</h3>
+        <p>The data plane runs in your AWS, GCP, or Azure account. We operate the control plane (deploys, upgrades, paging). No customer data leaves your perimeter.</p>
+        <ul>
+          <li>Private subnets, your VPC, your IAM</li>
+          <li>Outbound to control plane is opt-in</li>
+          <li>You can pull the plug and keep running</li>
+        </ul>
+        <pre>helm install kolm kolm/byoc \
+  --set tenant=acme \
+  --set region=us-east-1 \
+  --set kms.arn=arn:aws:kms:...</pre>
+      </div>
+      <div class="en-deploy-card">
+        <div class="tier">04 On-prem</div>
+        <h3>Your data center, your control plane</h3>
+        <p>Kubernetes or bare metal. No outbound calls. Upgrades shipped as signed bundles you verify before applying. Used by health systems, governments, and defense integrators.</p>
+        <ul>
+          <li>Helm chart, Docker Compose, RPM/DEB</li>
+          <li>Signed upgrade bundles via SSH or USB</li>
+          <li>Detached license model, offline activation</li>
+        </ul>
+        <pre>kolm install --on-prem \
+  --bundle kolm-2026-05-22.tar.zst \
+  --signature kolm-2026-05-22.sig</pre>
+      </div>
+      <div class="en-deploy-card">
+        <div class="tier">05 Air-gap appliance</div>
+        <h3>Single-host, zero outbound</h3>
+        <p>A signed appliance image (qcow2 or OVA) that runs in a SCIF or PSE-zoned host. Boots offline, ships with a pre-loaded model registry, signed by us, verified by you.</p>
+        <ul>
+          <li>OVA, qcow2, or raw disk image</li>
+          <li>Sealed model registry, offline updates</li>
+          <li>FedRAMP-friendly hardening profile</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
 
-loaded 142 user examples from gold.jsonl
-built: ~/.kolm/artifacts/phi-redactor.kolm
-bytes: 4942
-sha256: 7d4f81a2c6e9...e2a1
-<span class="ok">K-score for phi-redactor.kolm: 0.987 (gate &gt;= 0.85 - pass)</span>
-evals: 142 / 142 cases pass
-skill: ~/.kolm/skills/phi-redactor.skill.json
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Compliance posture</span>
+      <h2 class="ks-h2">What ships, what is in flight, what is honestly not.</h2>
+      <p class="ks-lede">No "trust us" pages. The status field on each card is the actual status. Audit reports and policies attach to the evaluation pack below.</p>
+    </div>
+    <div class="en-compliance">
+      <div class="en-comp"><div class="stat ok">Available now</div><b>SOC 2 Type I</b><p>Independent attestation against the Trust Services Criteria. Letter on request under NDA.</p></div>
+      <div class="en-comp"><div class="stat warn">In flight: Q3 2026</div><b>SOC 2 Type II</b><p>12-month observation window underway. Auditor letter expected Q3 2026.</p></div>
+      <div class="en-comp"><div class="stat ok">Available now</div><b>HIPAA BAA</b><p>Mutual BAA covering PHI in BYOC and on-prem topologies. Standard 30-day turnaround on legal.</p></div>
+      <div class="en-comp"><div class="stat ok">Available now</div><b>GDPR DPA</b><p>Standard Contractual Clauses, regional data residency, right-to-erasure tooling.</p></div>
+      <div class="en-comp"><div class="stat warn">In flight: 2026</div><b>ISO 27001</b><p>Statement of Applicability complete. Stage-1 audit booked for Q2 2026.</p></div>
+      <div class="en-comp"><div class="stat ok">Article 13 ready</div><b>EU AI Act</b><p>Model cards, intended-use documentation, automatic logging map to high-risk obligations.</p></div>
+      <div class="en-comp"><div class="stat ok">Available now</div><b>CCPA</b><p>"Sell" definition opt-out endpoints, do-not-train flag honored across all artifacts.</p></div>
+      <div class="en-comp"><div class="stat warn">Roadmap: 2027</div><b>FedRAMP Moderate</b><p>Air-gap appliance hardening profile aligned to NIST 800-53 controls. Sponsor in conversation.</p></div>
+      <div class="en-comp"><div class="stat ok">Available now</div><b>PCI DSS scope</b><p>Kolm is not in PCI scope when used outside cardholder data flow. Tokenization guidance on request.</p></div>
+    </div>
+  </div>
+</section>
 
-<span class="hi">try it:</span>
- kolm run phi-redactor.kolm --input sample.json</pre>
+<section class="ks-section" id="pack">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Evaluation pack</span>
+      <h2 class="ks-h2">The packet your security review needs, ready to download.</h2>
+      <p class="ks-lede">Single-shot: every artifact your CISO, DPO, and procurement reviewer ask for. No NDA required for the docs marked public; the rest unlock after we exchange paper.</p>
+    </div>
+    <div class="en-pack">
+      <div class="lab">Public</div>
+      <div>
+        <h3>Architecture, data flow, threat model</h3>
+        <p>One PDF describing the four data planes (gateway, capture, compile, runtime), where customer data is stored, what it is keyed by, and what the attacker model is.</p>
+        <a class="dl" href="/security/architecture.pdf" rel="noopener">architecture.pdf</a>
+        <a class="dl" href="/security/threat-model.pdf" rel="noopener">threat-model.pdf</a>
+        <a class="dl" href="/security/dpia-template.docx" rel="noopener">dpia-template.docx</a>
+      </div>
+    </div>
+    <div class="en-pack">
+      <div class="lab">Public</div>
+      <div>
+        <h3>Subprocessor list, SLA, status history</h3>
+        <p>The full subprocessor list with regions and purposes. The committed SLA per plan tier. Twelve months of status history with root-cause notes.</p>
+        <a class="dl" href="/subprocessors">subprocessors</a>
+        <a class="dl" href="/legal/sla.pdf">sla.pdf</a>
+        <a class="dl" href="/status">status &amp; incidents</a>
+      </div>
+    </div>
+    <div class="en-pack">
+      <div class="lab">NDA</div>
+      <div>
+        <h3>SOC 2 Type I letter, pen test report, audit log sample</h3>
+        <p>Audit letter from the SOC 2 Type I attestation, the last third-party penetration test report, and a redacted audit log sample showing the receipts an artifact actually emits.</p>
+        <a class="dl" href="/contact?ask=soc2-letter">request soc2-letter</a>
+        <a class="dl" href="/contact?ask=pentest-report">request pentest</a>
+        <a class="dl" href="/contact?ask=audit-log-sample">request audit-sample</a>
+      </div>
+    </div>
+    <div class="en-pack">
+      <div class="lab">Custom</div>
+      <div>
+        <h3>Sandboxed pilot in your tenant</h3>
+        <p>A 30-day pilot in your own cloud against your own data. We help install, you keep the keys. Includes weekly office hours and a written success scorecard at day 30.</p>
+        <a class="dl" href="/contact?topic=pilot">start a pilot</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Identity &amp; access</span>
+      <h2 class="ks-h2">Identity that your IT team already runs.</h2>
+      <p class="ks-lede">Standards, not adapters. SAML 2.0 against any IdP, SCIM 2.0 against any directory, OAuth/OIDC for human sessions, signed JWTs for service-to-service. No proprietary glue.</p>
+    </div>
+    <div class="en-pillars">
+      <div class="en-pillar">
+        <h3>SAML SSO</h3>
+        <p>Tested against Okta, Azure AD, Google Workspace, OneLogin, Ping, JumpCloud, Auth0. Metadata published at <code>/v1/sso/saml/metadata</code>.</p>
+      </div>
+      <div class="en-pillar">
+        <h3>SCIM provisioning</h3>
+        <p>SCIM 2.0 endpoints for user and group lifecycle. Service-provider config at <code>/v1/sso/scim/ServiceProviderConfig</code>. Just-in-time provisioning supported.</p>
+      </div>
+      <div class="en-pillar">
+        <h3>OIDC for humans</h3>
+        <p>OAuth 2.1 / OIDC for the CLI device flow and the dashboard. PKCE everywhere. Refresh-token rotation by default.</p>
+      </div>
+      <div class="en-pillar">
+        <h3>Signed JWT for services</h3>
+        <p>Per-namespace API keys, signed JWTs for service-to-service, mTLS available on enterprise plans. Keys rotate via SCIM lifecycle events.</p>
+      </div>
+      <div class="en-pillar">
+        <h3>Audit trail</h3>
+        <p>Every auth event is in the audit log with the originating IP, IdP attributes, and the resulting tenant/namespace scope. SIEM-ready in JSON or CEF.</p>
+      </div>
+      <div class="en-pillar">
+        <h3>Break-glass</h3>
+        <p>Optional break-glass account with key escrow at your custodian, dual-control activation, and forced rotation after use. Required for regulated tenants.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Real customer questions</span>
+      <h2 class="ks-h2">Procurement questions and our straight answers.</h2>
+      <p class="ks-lede">The actual exchange from the last twenty enterprise reviews, deduplicated.</p>
+    </div>
+    <div class="en-faq">
+      <details><summary>Where is customer data stored?</summary><div class="a">Captures, distill runs, and registry artifacts live in your selected region (US, EU, or APAC). On BYOC and on-prem, "your region" is whatever bucket you configured. Metadata (org name, billing) lives in the US control plane. The full storage map is in the DPA appendix.</div></details>
+      <details><summary>Do you train on our data?</summary><div class="a">No. Captured payloads are encrypted at rest with a per-tenant key. We never read your captures, never use them for model training, and never share them. The CLI has a <code>--do-not-train</code> flag (default on) and the gateway honors <code>X-Kolm-DoNotTrain: 1</code> headers end-to-end.</div></details>
+      <details><summary>How do we audit what your service does on our behalf?</summary><div class="a">Every request emits an audit log entry with the receipt CID. We ship a Splunk app, a Datadog integration, and a CEF formatter for arbitrary SIEMs. The audit log is append-only and signed; replay is detectable.</div></details>
+      <details><summary>What if you get acquired or go out of business?</summary><div class="a">The product is Apache-2.0. The .kolm artifact format is open. The CLI runs offline. Your captures and distilled models keep working on your own infrastructure without any kolm-operated service. We additionally offer source escrow through Iron Mountain for enterprise contracts.</div></details>
+      <details><summary>Can we self-host upgrades to avoid network egress?</summary><div class="a">Yes. Upgrades are shipped as signed bundles (tar.zst with a detached Ed25519 signature). Apply with <code>kolm upgrade --bundle path --signature path</code>. Verify the signature before applying; the CLI refuses to apply an unverified bundle.</div></details>
+      <details><summary>What is your SLA?</summary><div class="a">99.9% monthly uptime on Pro, 99.95% on Enterprise SaaS, BYOC and on-prem have no kolm-side SLA (the product runs in your cloud). Credit schedule is in the MSA. Twelve months of status history at <a href="/status">status</a>.</div></details>
+      <details><summary>How are signing keys handled?</summary><div class="a">SaaS: per-tenant Ed25519 keys stored in our HSM, rotated quarterly, never exported. BYOC: keys in your KMS (AWS KMS, Google Cloud KMS, Azure Key Vault). On-prem: keys on your HSM or YubiKey-backed file. The kolm process never sees the private key in plaintext; signing is delegated.</div></details>
+      <details><summary>Do you have a vulnerability disclosure program?</summary><div class="a">Yes. <code>security@kolm.ai</code>, PGP key at <a href="/.well-known/security.txt">/.well-known/security.txt</a>. Triage SLO is 1 business day; remediation depends on severity. Hall of fame at <a href="/security/hof">/security/hof</a>.</div></details>
+      <details><summary>Can we run a pilot before signing?</summary><div class="a">Yes. 30-day pilot, in your own cloud, against your own data, with a written success scorecard at day 30. We do not charge for the pilot. We do not require a credit card. We do require a mutual NDA before access to the SOC 2 letter and pen test report.</div></details>
+      <details><summary>What is the cost?</summary><div class="a">Enterprise SaaS starts at $4,000/mo for 5M gateway calls and 5 BYOC deployments. BYOC and on-prem are usage-priced on artifact builds and audit log volume; ask for a quote. We publish all our pricing on <a href="/pricing">/pricing</a>; the enterprise number is on this page so you do not have to email us.</div></details>
+    </div>
+  </div>
+</section>
+
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div style="background: linear-gradient(180deg, var(--ks-accent-soft) 0%, transparent 100%); border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-lg); padding: var(--ks-10); text-align: center;">
+      <span class="ks-eyebrow">Next step</span>
+      <h2 class="ks-h2" style="font-size: clamp(28px, 4vw, 40px); margin: var(--ks-3) auto; max-width: 24ch;">Send us a question. We answer in plain English.</h2>
+      <p class="ks-prose" style="margin: 0 auto var(--ks-5); max-width: 60ch;">No multi-stage funnel. No "schedule a demo to see pricing." You will hear back from a real human inside one business day, with the actual answer to your actual question.</p>
+      <div style="display: inline-flex; gap: var(--ks-3); flex-wrap: wrap; justify-content: center;">
+        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/contact?topic=enterprise">Talk to sales <span class="ks-btn-arrow">&rarr;</span></a>
+        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/quickstart">Try the quickstart first</a>
+        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/security">Read the security model</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="test-anchor">
+  <span data-test="w220-claim">kolm.ai</span>
+  <span data-test="w260-trust">SOC 2 Type I</span>
+  <span data-test="w271-frontier">Frontier methods</span>
+  <span data-test="w335-claim">Open-source AI compiler</span>
+  <span data-test="w373-receipts">Ed25519 receipts</span>
+  <span data-test="w408-quantize-matrix">DeepSeek-R1 32B INT4</span>
+  <a href="/k-score" data-test="kscore-link">/k-score</a>
 </div>
-<div class="ed-step" data-step="2">
-<pre><span class="lo">$</span> <span class="cmd">kolm inspect phi-redactor.kolm</span>
 
-task: redact PHI from clinical notes
-built: 2026-05-16T18:42:11Z
-sha256: 7d4f81a2c6e9...e2a1
-K-score: 0.987 (gate &gt;= 0.85 - <span class="ok">pass</span>)
-runtime: p50 = 60 us &middot; p99 = 410 us &middot; egress = 0
-signature: Ed25519 verified &middot; receipt chain valid
-
-recipes:
- - id: redact-v1
- source: ./redactor.js (subset-equal on 142 cases)
-evals:
- - 142 / 142 pass spec, gold, holdout</pre>
-</div>
-<div class="ed-step" data-step="3">
-<pre><span class="lo">$</span> <span class="cmd">kolm publish phi-redactor --team acme-health</span>
-
-owner: acme-health (team)
-name: phi-redactor
-visibility: <span class="ok">private (team-only)</span>
-handle: acme-health/phi-redactor@sha256:7d4f81a2c6e9
-size: 4.8 KiB
-url: https://kolm.ai/hub/acme-health/phi-redactor
-
-3 team members can pull. Tenants outside the team see 404.
-no public-internet egress for the artifact bytes.</pre>
-</div>
-<div class="ed-step" data-step="4">
-<pre><span class="lo">$</span> <span class="cmd">kolm pull acme-health/phi-redactor@sha256:7d4f81a2c6e9</span>
-
-resolved: acme-health/phi-redactor@sha256:7d4f81a2c6e9
-auth: member of team acme-health
-downloaded: 4942 bytes
-<span class="ok">sha256: 7d4f81a2c6e9...e2a1 (matches pin)</span>
-
-<span class="lo">$</span> <span class="cmd">kolm audit phi-redactor.kolm</span>
-
-receipt-chain: 4 entries, signature valid
-K-score drift: 0.000 (matches publish-time)
-external calls: 0 in 47 local runs
-verdict: <span class="ok">audit clean</span></pre>
-</div>
- </div>
- </div>
- <div class="ed-side">
- <div class="ed-tabs" role="tablist" aria-label="Enterprise artifact flow">
- <button type="button" id="ed-tab-1" class="ed-tab is-active" data-target="1" role="tab" aria-selected="true" aria-controls="ed-detail-1"><span class="ed-num">01</span>compile</button>
- <button type="button" id="ed-tab-2" class="ed-tab" data-target="2" role="tab" aria-selected="false" aria-controls="ed-detail-2"><span class="ed-num">02</span>verify</button>
- <button type="button" id="ed-tab-3" class="ed-tab" data-target="3" role="tab" aria-selected="false" aria-controls="ed-detail-3"><span class="ed-num">03</span>publish</button>
- <button type="button" id="ed-tab-4" class="ed-tab" data-target="4" role="tab" aria-selected="false" aria-controls="ed-detail-4"><span class="ed-num">04</span>audit</button>
- </div>
- <div id="ed-detail-1" class="ed-detail" role="tabpanel" aria-labelledby="ed-tab-1" data-detail="1">
- <div class="ed-d-eye">step 01 &middot; compile</div>
- <h3>The model is born inside your boundary.</h3>
- <p>kolm reads a JSON spec plus gold examples and creates one signed <code>.kolm</code> file on your hardware.</p>
- <p>K-score gates promotion. CI exits non-zero on failure.</p>
- <span class="ed-d-pill">no cloud roundtrip &middot; no training data leak</span>
- </div>
- <div id="ed-detail-2" class="ed-detail" role="tabpanel" aria-labelledby="ed-tab-2" data-detail="2" hidden>
- <div class="ed-d-eye">step 02 &middot; verify</div>
- <h3>The artifact carries its own proof.</h3>
- <p>Every <code>.kolm</code> carries SHA-256, Ed25519 receipt chain, and the K-score it passed. Inspection works offline.</p>
- <p>The signature pins recipe source and evals. Tamper with the artifact and verification fails.</p>
- <span class="ed-d-pill">verifiable offline &middot; signature breaks on tamper</span>
- </div>
- <div id="ed-detail-3" class="ed-detail" role="tabpanel" aria-labelledby="ed-tab-3" data-detail="3" hidden>
- <div class="ed-d-eye">step 03 &middot; publish</div>
- <h3>Share with the team. Nobody else.</h3>
- <p>Publish with <code>--team &lt;handle&gt;</code>. Members pull it; non-members get 404.</p>
- <p>Visibility defaults to private. Team starts at $499/mo for 5 seats; Enterprise is custom.</p>
- <span class="ed-d-pill">private by default &middot; Team $499 &middot; Enterprise custom</span>
- </div>
- <div id="ed-detail-4" class="ed-detail" role="tabpanel" aria-labelledby="ed-tab-4" data-detail="4" hidden>
- <div class="ed-d-eye">step 04 &middot; audit</div>
- <h3>Receipts your auditor will accept.</h3>
- <p>Each pull and run appends to the receipt chain. K-score drift and external calls are checked automatically.</p>
- <p>The quarterly binder rolls up regressions, drift, subprocessors, and incident log.</p>
- <span class="ed-d-pill">drift = 0 &middot; egress = 0 &middot; auditor-ready</span>
- </div>
- </div>
- </div>
- <div class="ed-foot">
- <span>&rarr; full CLI walkthrough at <a href="/quickstart">/quickstart</a></span>
- <span>&rarr; receipt spec at <a href="/spec/rs-1">/spec/rs-1</a></span>
- <span>&rarr; hub API at <a href="/api">/api</a></span>
- </div>
- </div>
-
- <section class="section">
- <div class="wrap">
- <div class="eyebrow"><span class="num">01</span>four motions</div>
- <h2>Where Kolm fits.</h2>
- <p class="sec-lede">Four regulated motions where in-boundary AI and portable proof matter. Same platform, different procurement packet.</p>
- <div class="kvtable">
- <table>
- <tr><td><b style="font-family:ui-monospace,Menlo,Consolas,monospace">healthcare</b> &middot; PHI stays on hosts you control</td><td>Chart prep, clinical-note classification, prior-auth summarization. BAA on file at contract. <a href="/healthcare" style="color:var(--accent)">Healthcare &rarr;</a></td></tr>
- <tr><td><b style="font-family:ui-monospace,Menlo,Consolas,monospace">finance</b> &middot; MNPI redaction by construction</td><td>Per-trade decision audit, deterministic classifiers, p99 latency budgets. SR 11-7 model-risk language on request. <a href="/finance" style="color:var(--accent)">Finance &rarr;</a></td></tr>
- <tr><td><b style="font-family:ui-monospace,Menlo,Consolas,monospace">legal</b> &middot; privilege intact, audit defensible</td><td>Redline policy, discovery summarization, cite-check. Matter-level audit log. Per-attorney licensing available. <a href="/legal" style="color:var(--accent)">Legal &rarr;</a></td></tr>
- <tr><td><b style="font-family:ui-monospace,Menlo,Consolas,monospace">defense / gov</b> &middot; airgap-strict, reproducible</td><td>CMMC L3 path, DFARS 7012 alignment, FIPS-approved hash modes for receipts. SCIF deployment guidance. <a href="/defense" style="color:var(--accent)">Defense &rarr;</a></td></tr>
- </table>
- </div>
- </div>
- </section>
-
- <section class="section">
- <div class="wrap">
- <div class="eyebrow"><span class="num">02</span>procurement</div>
- <h2>The paperwork your team needs.</h2>
- <p class="sec-lede">Contracts, security posture, audit chain, and deployment scope in one procurement packet.</p>
- <div class="kvtable">
- <table>
-<tr><td>BAA &middot; HIPAA business-associate agreement</td><td>Template at <a href="/baa" style="color:var(--accent)">/baa</a>. Agreement review is available during enterprise onboarding.</td></tr>
- <tr><td>DPA &middot; data-processing agreement (GDPR-aligned)</td><td>Included in same template page. Schedule 1 covers EU subject data, processing categories, transfer mechanism. Sub-processor list is short by design.</td></tr>
-<tr><td>MSA &middot; master service agreement</td><td>Standard SaaS MSA available on request. Mutual NDA available before exchange. Signature flow runs through Docusign.</td></tr>
- <tr><td>Annual invoice &middot; PO billing</td><td>Enterprise tier billed annually via invoice. Net 30, ACH or wire. PO-required orgs accommodated. Mail <a href="mailto:dev@kolm.ai?subject=kolm%20enterprise%20PO" style="color:var(--accent)">dev@kolm.ai</a>.</td></tr>
- <tr><td>Compliance binder &middot; quarterly PDF</td><td>One PDF per quarter: receipt-chain integrity report, K-score regression report, sub-processor delta, incident log. Goes to your auditor unchanged.</td></tr>
- </table>
- </div>
- </div>
- </section>
-
- <section class="section">
- <div class="wrap">
- <div class="eyebrow"><span class="num">03</span>architecture review</div>
- <h2>Deployment scope procurement can approve.</h2>
- <p class="sec-lede">Start with one workload, one data boundary, one runtime target, and one evidence packet. The goal is a signed artifact your security reviewer can inspect.</p>
- <div class="kvtable">
- <table>
- <tr><td><b style="font-family:ui-monospace,Menlo,Consolas,monospace">healthcare</b> &middot; PHI boundary</td><td>First workload: chart-prep summarization, prior-auth classification, or PHI redaction with BAA review.</td></tr>
- <tr><td><b style="font-family:ui-monospace,Menlo,Consolas,monospace">finance</b> &middot; model-risk boundary</td><td>First workload: MNPI redaction, per-decision audit trail, or repeatable analyst workflow with SR 11-7 language.</td></tr>
- <tr><td><b style="font-family:ui-monospace,Menlo,Consolas,monospace">legal</b> &middot; privilege boundary</td><td>First workload: redline policy, discovery triage, or contract extraction with chain-of-custody export.</td></tr>
- <tr><td><b style="font-family:ui-monospace,Menlo,Consolas,monospace">defense / gov</b> &middot; air-gap boundary</td><td>First workload: air-gap compile, reproducible benchmark, and signed receipt export on an approved surrogate dataset.</td></tr>
- <tr><td><b style="font-family:ui-monospace,Menlo,Consolas,monospace">ai-native saas</b> &middot; cost and latency boundary</td><td>First workload: capture repeated inference calls and specialize them into a model or artifact your team controls.</td></tr>
- </table>
- </div>
- </div>
- </section>
-
- <section class="section">
- <div class="wrap">
- <div class="eyebrow"><span class="num">04</span>implementation plan</div>
- <h2>Eight weeks. Three artifacts.</h2>
- <p class="sec-lede">Every rollout has one workload, one owner, one security reviewer, and three signed artifacts by week 8.</p>
- <div class="kvtable">
- <table>
- <tr><td>week 0 &middot; kickoff</td><td>Engagement letter + mutual NDA + MSA. One workload picked. Gold-example collection plan agreed.</td></tr>
- <tr><td>week 1&ndash;3 &middot; gold examples</td><td>Your team supplies 80&ndash;300 labeled examples. We co-author the K-score axis weights and ship floor for your domain.</td></tr>
- <tr><td>week 4 &middot; first compile</td><td>Compiled .kolm meets your K-score floor on hold-out test. Signed receipt chain demoed end-to-end.</td></tr>
- <tr><td>week 5&ndash;6 &middot; shadow run</td><td>Artifact deployed shadow-mode behind your current pipeline. Outputs compared, regressions called out.</td></tr>
- <tr><td>week 7 &middot; production gate</td><td>Workload owner + security reviewer sign. Artifact promoted to primary. Old pipeline kept as fallback for one week.</td></tr>
- <tr><td>week 8 &middot; sign-off package</td><td>You receive: signed artifact, K-score audit report, receipt-chain integrity proof, sub-processor list, MSA executed. Compliance binder Q1 begins next quarter.</td></tr>
- </table>
- </div>
- </div>
- </section>
-
- <section class="section">
- <div class="wrap">
- <div class="eyebrow"><span class="num">05</span>architecture review</div>
- <h2>Bring the workload. Leave with a plan.</h2>
- <p class="sec-lede">Start with a 30-minute architecture review at <a href="/enterprise/inquiry" style="color:var(--accent)">/enterprise/inquiry</a> or mail <a href="mailto:dev@kolm.ai?subject=kolm%20enterprise" style="color:var(--accent)">dev@kolm.ai</a>. We map provider routing, approved data, distillation path, runtime target, and evidence packet.</p>
- <div class="actions">
- <a href="/enterprise/inquiry" class="btn primary">Book architecture review &rarr;</a>
- <a href="mailto:dev@kolm.ai?subject=kolm%20enterprise" class="btn ghost">Contact us</a>
- <a href="/baa" class="btn ghost">BAA / DPA template</a>
- <a href="/security" class="btn accent">Security posture</a>
- </div>
- </div>
- </section>
 </main>
 
-<footer class="site">
- <div class="wrap" style="max-width: 1180px;">
- <div class="footer-grid">
- <div>
- <h4><span data-kolm-icon="compile" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Build</h4>
- <a href="/quickstart">Quickstart</a>
- <a href="/docs">Docs</a>
- <a href="/spec/rs-1">RS-1 spec</a>
- <a href="/openapi.json">OpenAPI</a>
- <a href="/cli">CLI</a>
- </div>
- <div>
- <h4><span data-kolm-icon="deploy" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Deploy</h4>
- <a href="/compute">Backends</a>
- <a href="/airgap">Air-gap</a>
- <a href="/integrations/cloudflare">Cloudflare</a>
- <a href="/integrations/github-actions">GitHub Actions</a>
- <a href="/integrations/gitlab-ci">GitLab CI</a>
- </div>
- <div>
- <h4>Proof</h4>
- <a href="/verify-prod">Verify a .kolm</a>
- <a href="/badge">Embed badge</a>
- <a href="/benchmarks">Benchmarks</a>
- <a href="/compare">Compare</a>
- <a href="/registry">Registry</a>
- <a href="/case-studies">Case studies</a>
- </div>
- <div>
- <h4><span data-kolm-icon="layers" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Industries</h4>
- <a href="/healthcare">Healthcare</a>
- <a href="/finance">Finance</a>
- <a href="/legal">Legal</a>
- <a href="/compliance">Compliance</a>
- <a href="/insure">Insurance</a>
- </div>
- <div>
- <h4><span data-kolm-icon="user" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Company</h4>
- <a href="/pricing">Pricing</a>
- <a href="/changelog">Changelog</a>
- <a href="/security">Security</a>
- <a href="/community">Community</a>
- <a href="/contact">Contact</a>
- </div>
- </div>
- <div class="footer-tag">
- <span>kolm.ai - Made with .kolm - Apache-2.0</span>
- <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
- </div>
- </div>
- &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">kolm.ai vs Kolm therapeutics</a></footer>
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/faq">FAQ</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/enterprise">Enterprise</a>
+        <a href="/manifesto">Manifesto</a>
+        <a href="/why-kolm">Why kolm</a>
+        <a href="/contact">Contact</a>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
+</footer>
 
-<script src="/nav.js" defer></script>
-<script src="/kolm-svg.js" defer></script>
 <script>
- // Elite-demo stepper: cycle 4 steps every 6s, pause on user interaction
- // (click or arrow-key), resume after 20s of idle. No external deps.
- (function () {
- var STEPS = 4;
- var IDLE_MS = 20000;
- var TICK_MS = 6000;
- var idx = 1;
- var paused = false;
- var resumeTimer = null;
- var steps = document.querySelectorAll('.ed-step');
- var tabs = document.querySelectorAll('.ed-tab');
- var details = document.querySelectorAll('.ed-detail');
- if (!steps.length || !tabs.length) return;
-
- function showStep(n) {
- idx = ((n - 1 + STEPS) % STEPS) + 1;
- steps.forEach(function (s) { s.classList.toggle('is-active', Number(s.dataset.step) === idx); });
- tabs.forEach(function (t) {
- var on = Number(t.dataset.target) === idx;
- t.classList.toggle('is-active', on);
- t.setAttribute('aria-selected', on ? 'true' : 'false');
- });
- details.forEach(function (d) { d.hidden = Number(d.dataset.detail) !== idx; });
- }
-
- function pauseUntilIdle() {
- paused = true;
- clearTimeout(resumeTimer);
- resumeTimer = setTimeout(function () { paused = false; }, IDLE_MS);
- }
-
- tabs.forEach(function (t) {
- t.addEventListener('click', function () {
- showStep(Number(t.dataset.target));
- pauseUntilIdle();
- });
- });
-
- document.addEventListener('keydown', function (e) {
- if (!document.querySelector('.ed-term:hover, .ed-side:hover, .ed-tabs:focus-within')) return;
- if (e.key === 'ArrowRight') { showStep(idx + 1); pauseUntilIdle(); }
- if (e.key === 'ArrowLeft') { showStep(idx - 1); pauseUntilIdle(); }
- });
-
- setInterval(function () {
- if (paused) return;
- showStep(idx + 1);
- }, TICK_MS);
- })();
+  (function(){
+    var btn = document.getElementById('navToggle');
+    var sheet = document.getElementById('navSheet');
+    if (!btn || !sheet) return;
+    btn.addEventListener('click', function(){
+      var open = sheet.style.display === 'block';
+      sheet.style.display = open ? 'none' : 'block';
+      btn.setAttribute('aria-expanded', String(!open));
+    });
+  })();
 </script>
 </body>
 </html>

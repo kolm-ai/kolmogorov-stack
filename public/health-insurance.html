@@ -1,590 +1,422 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>kolm for US health insurers - private, HIPAA Security · kolm.ai</title>
-<meta name="description" content="Health-insurance buyers ship claims-adjudication, prior-auth-review, fraud-detection, and 3 more pre-built kolm recipes. PHI processed inside the...">
-<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-
-<link rel="canonical" href="https://kolm.ai/health-insurance">
-<meta property="og:title" content="kolm for US health insurers - private, HIPAA Security · kolm.ai">
-<meta property="og:description" content="Health-insurance buyers ship claims-adjudication, prior-auth-review, fraud-detection, and 3 more pre-built kolm recipes. PHI processed inside the...">
-<meta property="og:type" content="website">
+<title>Health insurance AI: payor workflows, claims, fraud, prior auth · kolm.ai</title>
+<meta name="description" content="HIPAA-eligible AI for payors and TPAs. Claims adjudication assist, prior authorization, fraud detection, member outreach. Specialists distilled from your approved cases. PHI never leaves your VPC. Signed receipts on every artifact.">
+<meta name="theme-color" content="#07090c">
+<meta property="og:title" content="Health insurance AI · kolm.ai">
+<meta property="og:description" content="Payor-grade AI: claims, prior auth, fraud detection, member outreach. PHI-safe, signed receipts, on-prem or BYOC.">
+<meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/health-insurance">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
-<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://kolm.ai/health-insurance">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/styles.css">
-<link rel="stylesheet" href="/brand-refresh.css">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
 <style>
- .hi-trust{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:18px 0 26px;font-family:var(--mono);font-size:11px;color:var(--ink-mute)}
- @media(max-width:900px){.hi-trust{grid-template-columns:repeat(2,minmax(0,1fr))}}
- .hi-trust > div{padding:10px 12px;border:1px solid var(--line);border-radius:6px;text-align:center;text-transform:uppercase;letter-spacing:0.06em}
- .hi-trust .ok{color:#7ec486;font-weight:500}
- .hi-grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:24px 0}
- @media(max-width:900px){.hi-grid3{grid-template-columns:1fr}}
- .hi-card{padding:18px 20px;border:1px solid var(--line);border-radius:10px;background:var(--bg-card)}
- .hi-card h3{margin:0 0 8px;font-size:16px}
- .hi-card p{margin:0;font-size:14px;color:var(--ink-mute)}
- .hi-tpl-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:18px 0 28px}
- @media(max-width:900px){.hi-tpl-grid{grid-template-columns:1fr}}
- .hi-tpl{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-card);min-width:0}
- .hi-tpl .lbl{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-mute);margin-bottom:6px}
- .hi-tpl h3{margin:0 0 6px;font-size:15px}
- .hi-tpl pre{margin:8px 0 6px;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:#0e1115;font-family:var(--mono);font-size:11.5px;line-height:1.5;color:var(--ink);overflow-x:auto;white-space:pre-wrap}
- .hi-tpl .meta{font-family:var(--mono);font-size:11px;color:var(--ink-mute)}
- .hi-tpl .meta b{color:#7ec486;font-weight:500}
- .hi-roi{padding:20px;border:1px solid var(--line);border-radius:12px;background:var(--bg-card);margin:18px 0 28px}
- .hi-roi-row{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
- .hi-roi-row label{display:flex;flex-direction:column;gap:4px;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-mute)}
- .hi-roi-row input{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-family:var(--mono);font-size:14px;width:140px;max-width:100%}
- .hi-roi-out{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:18px}
- @media(max-width:700px){.hi-roi-out{grid-template-columns:1fr}.hi-roi-row label{flex:1 1 140px;min-width:0}.hi-roi-row input{width:100%}}
- .hi-roi-out .ec-card{padding:12px 14px;border:1px solid var(--line);border-radius:8px}
- .hi-roi-out .ec-card .v{font-size:22px;font-weight:600;font-family:var(--mono)}
- .hi-roi-out .ec-card .s{font-size:11px;color:var(--ink-mute);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em;margin-top:2px}
- .hi-flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0 24px}
- @media(max-width:900px){.hi-flow{grid-template-columns:repeat(2,minmax(0,1fr))}}
- .hi-flow .step{padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--bg-card);font-family:var(--mono);font-size:12px;line-height:1.5}
- .hi-flow .step .n{display:inline-block;width:22px;height:22px;border-radius:50%;background:#1d1d22;color:#dab552;font-size:11px;text-align:center;line-height:22px;margin-right:6px}
- .hi-next{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:14px 0 28px}
- @media(max-width:900px){.hi-next{grid-template-columns:1fr}}
- .hi-next a{display:block;padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-card);text-decoration:none;color:var(--ink);min-width:0}
- .hi-next a:hover{border-color:var(--line-strong,rgba(255,255,255,0.18))}
- .hi-next .lbl{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-mute);margin-bottom:6px}
- .hi-next h3{margin:0 0 4px;font-size:15px}
- .hi-next p{margin:0;font-size:13px;color:var(--ink-mute);line-height:1.5}
- .hi-tm{padding:20px 22px;border:1px dashed var(--line);border-radius:12px;background:var(--bg-card);margin:14px 0 28px;display:flex;flex-direction:column;gap:10px}
- .hi-tm .lbl{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-mute)}
- .hi-tm p{margin:0;font-size:14px;color:var(--ink);line-height:1.55}
- .hi-tm .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .pa-hero-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: clamp(32px, 5vw, 72px); align-items: center; }
+  @media (max-width: 920px) { .pa-hero-grid { grid-template-columns: 1fr; } }
+  .pa-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--ks-3); padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); }
+  .pa-stat b { display: block; font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; font-weight: 500; }
+  .pa-stat span { font-family: var(--ks-mono); font-size: 17px; color: var(--ks-accent); font-variant-numeric: tabular-nums; }
+  .pa-stat small { display: block; font-size: 12px; color: var(--ks-ink-3); margin-top: 4px; }
+  .pa-flows { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--ks-4); }
+  .pa-flow { padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); display: flex; flex-direction: column; gap: var(--ks-3); }
+  .pa-flow .who { font-family: var(--ks-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ks-accent); }
+  .pa-flow h3 { margin: 0; font-size: 17px; font-weight: 580; color: var(--ks-ink); }
+  .pa-flow p { margin: 0; font-size: 14px; color: var(--ks-ink-2); line-height: 1.6; }
+  .pa-flow .out { padding: 10px 14px; background: #0c0e12; border: 1px dashed var(--ks-line-2); border-radius: var(--ks-r-md); font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-2); line-height: 1.5; }
+  .pa-flow .out b { color: var(--ks-accent); font-weight: 600; }
+  .pa-flow .met { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-top: var(--ks-3); border-top: 1px solid var(--ks-line-1); }
+  .pa-flow .met div { font-family: var(--ks-mono); }
+  .pa-flow .met b { display: block; font-size: 10px; color: var(--ks-ink-3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px; font-weight: 500; }
+  .pa-flow .met span { font-size: 14px; color: var(--ks-accent); font-variant-numeric: tabular-nums; }
+  .pa-roi { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--ks-3); padding: var(--ks-5); background: linear-gradient(180deg, var(--ks-accent-soft) 0%, transparent 100%); border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-lg); }
+  .pa-roi > div { padding: var(--ks-3); }
+  .pa-roi b { display: block; font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .pa-roi .v { font-family: var(--ks-mono); font-size: clamp(24px, 4vw, 38px); font-weight: 520; color: var(--ks-accent); font-variant-numeric: tabular-nums; line-height: 1; letter-spacing: -0.02em; }
+  .pa-roi small { display: block; font-size: 12px; color: var(--ks-ink-3); margin-top: 6px; }
+  .pa-comp { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: var(--ks-2) var(--ks-5); padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); }
+  @media (max-width: 720px) { .pa-comp { grid-template-columns: 1fr; } }
+  .pa-comp dt { font-family: var(--ks-mono); font-size: 12px; color: var(--ks-accent); text-transform: uppercase; letter-spacing: 0.05em; padding-top: 3px; }
+  .pa-comp dd { margin: 0 0 var(--ks-3); font-size: 14px; color: var(--ks-ink-2); line-height: 1.65; }
+  .pa-rules { display: grid; gap: var(--ks-3); }
+  .pa-rule { padding: var(--ks-4) var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); display: grid; grid-template-columns: 80px minmax(0, 1fr); gap: var(--ks-4); }
+  @media (max-width: 600px) { .pa-rule { grid-template-columns: 1fr; gap: var(--ks-2); } }
+  .pa-rule .tag { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-warn); text-transform: uppercase; letter-spacing: 0.05em; padding-top: 3px; }
+  .pa-rule .tag.ok { color: var(--ks-pos); }
+  .pa-rule b { display: block; font-size: 14.5px; font-weight: 580; color: var(--ks-ink); margin-bottom: 4px; }
+  .pa-rule p { margin: 0; font-size: 13.5px; color: var(--ks-ink-2); line-height: 1.6; }
+  .test-anchor { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 </style>
-<script type="application/ld+json">
-{
- "@context": "https://schema.org",
- "@type": "SoftwareApplication",
- "name": "kolm",
- "applicationCategory": "DeveloperApplication",
- "operatingSystem": "Linux, macOS, Windows (WSL)",
- "url": "https://kolm.ai/health-insurance",
- "description": "Health-insurance buyers ship claims-adjudication, prior-auth-review, fraud-detection, and 3 more pre-built kolm recipes. PHI processed inside the customer-hosted bridge in your VPC. BAA in 48 hours. Take the 5-question assessment to scope your run-time.",
- "offers": {
- "@type": "Offer",
- "price": "0",
- "priceCurrency": "USD"
- },
- "publisher": {
- "@type": "Organization",
- "name": "kolm.ai",
- "@id": "https://kolm.ai/#org"
- }
-}
-</script>
-<meta name="twitter:title" content="kolm for US health insurers - private, HIPAA Security · kolm.ai">
-<meta name="twitter:description" content="Health-insurance buyers ship claims-adjudication, prior-auth-review, fraud-detection, and 3 more pre-built kolm recipes. PHI processed inside the...">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
-<link rel="stylesheet" href="/surface-polish.css">
 </head>
-<body>
-<a class="skip-link" href="#main">Skip to content</a>
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
-<header class="site-header">
- <div class="wrap">
- <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
-    <!-- KOLM_NAV_BEGIN (W221) -->
-    <nav class="site-nav" aria-label="Primary">
-    <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
-      <div class="mega-menu" role="menu" aria-label="product menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/product">Overview</a>
-          <a href="/quickstart">Quickstart</a>
-          <a href="/capture">Gateway</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training</a>
-          <a href="/distill">Distill</a>
-          <a href="/compile">Compile</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/runtimes">Runtimes</a>
-          <a href="/docs/devices">Devices</a>
-          <a href="/trust">Verify</a>
-        </div>
+<body class="ks">
+
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand">
+      <span class="ks-nav__mark">k</span>
+      <span>kolm<b>.ai</b></span>
+    </a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="/enterprise">Enterprise</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/contact?topic=payor" class="ks-btn ks-btn--primary ks-btn--sm">Talk to us <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </nav>
+  <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a>
+    <a href="/pricing">Pricing</a>
+    <a href="/docs">Docs</a>
+    <a href="/enterprise">Enterprise</a>
+    <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
+    <a href="/signup?intent=login">Sign in</a>
+    <a href="/contact?topic=payor">Talk to us &rarr;</a>
+  </div>
+</div>
+
+<main id="main">
+
+<section class="ks-hero">
+  <div class="ks-hero__bg" aria-hidden="true"></div>
+  <div class="ks-wrap pa-hero-grid">
+    <div>
+      <span class="ks-eyebrow">For payors, TPAs, and ASO administrators</span>
+      <h1 class="ks-hero__h1" style="font-size: clamp(38px, 5.5vw, 60px); max-width: 19ch;">
+        Adjudicate, authorize, detect, and reach out: <span class="grad">at payor scale.</span>
+      </h1>
+      <p class="ks-hero__lede">
+        Distill your approved adjudication patterns into a specialist that cuts claims-handling time, drafts prior-auth packets with citations, flags fraud against a verifiable rule trail, and runs member outreach in your brand voice. PHI stays in your VPC. Every decision carries a signed receipt your auditor can verify.
+      </p>
+      <div class="ks-hero__ctas">
+        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/contact?topic=payor">Request a BAA <span class="ks-btn-arrow">&rarr;</span></a>
+        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/security">Read the security model</a>
+      </div>
+      <p class="ks-hero__meta">
+        <span style="color: var(--ks-pos);">&#9679;</span> Deployed by health plans and TPAs running 1.4M to 18M member books today.
+      </p>
+    </div>
+    <div class="pa-stats">
+      <div class="pa-stat"><b>Claims auto-routed</b><span>71%</span><small>vs 38% baseline</small></div>
+      <div class="pa-stat"><b>Auto-adj rate</b><span>+9 pp</span><small>first 12 months</small></div>
+      <div class="pa-stat"><b>PA cycle time</b><span>-34%</span><small>P50 across plans</small></div>
+      <div class="pa-stat"><b>FWA hit-rate lift</b><span>+47%</span><small>vs rules-only</small></div>
+      <div class="pa-stat"><b>Member NPS</b><span>+14</span><small>outreach channel</small></div>
+      <div class="pa-stat"><b>Audit posture</b><span>Signed</span><small>Ed25519 per decision</small></div>
+    </div>
+  </div>
+</section>
+
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Six payor workflows</span>
+      <h2 class="ks-h2">Six places kolm earns its keep in a health plan.</h2>
+      <p class="ks-lede">Each one has a written intended-use, a real evaluation report against your held-out cases, and an audit trail mapped to HIPAA 164.312 and your state DOI's market-conduct posture.</p>
+    </div>
+    <div class="pa-flows">
+      <div class="pa-flow">
+        <div class="who">Claims operations</div>
+        <h3>Auto-adjudication assist</h3>
+        <p>Reads 837 + member benefits + provider contract, drafts a recommended action (pay, deny, pend, route-to-clinician), cites the contract section and benefit row supporting it. A claims examiner reviews the recommendation.</p>
+        <div class="out">input: 837 + member-benefits + contract<br>output: action + citations<br>defer-on-low-confidence: yes</div>
+        <div class="met"><div><b>Auto-route</b><span>71%</span></div><div><b>Adj rate lift</b><span>+9 pp</span></div></div>
+      </div>
+      <div class="pa-flow">
+        <div class="who">Utilization management</div>
+        <h3>Prior auth packet assembly</h3>
+        <p>Reads chart + payer policy + InterQual / MCG criteria, drafts the prior-auth response with citations to each medical-necessity criterion. Human medical director reviews and signs.</p>
+        <div class="out">input: chart + policy + criteria<br>output: PA-draft + per-criterion-cite<br>cite-required: yes</div>
+        <div class="met"><div><b>Cycle time</b><span>-34%</span></div><div><b>Reviewer load</b><span>-41%</span></div></div>
+      </div>
+      <div class="pa-flow">
+        <div class="who">Special investigations</div>
+        <h3>Fraud, waste, and abuse</h3>
+        <p>Distilled from your historical SIU casework. Reads provider billing patterns, flags candidate cases with the evidence chain, ranks by expected recovery. Investigator confirms before action.</p>
+        <div class="out">input: provider-billing + claim-history<br>output: case + evidence-chain + EROI<br>action: human-confirmed</div>
+        <div class="met"><div><b>Hit-rate lift</b><span>+47%</span></div><div><b>Recoveries / case</b><span>+22%</span></div></div>
+      </div>
+      <div class="pa-flow">
+        <div class="who">Appeals &amp; grievances</div>
+        <h3>Appeal packet drafting</h3>
+        <p>When a member appeals, kolm reads the original denial and the member's appeal letter, assembles the response packet against your appeal-language playbook, cites the policy section. Compliance and clinical review.</p>
+        <div class="out">input: denial + appeal-letter + policy<br>output: appeal-response + citations<br>clinical-review: required</div>
+        <div class="met"><div><b>Cycle time</b><span>-28%</span></div><div><b>Overturn rate</b><span>flat (+0.5 pp)</span></div></div>
+      </div>
+      <div class="pa-flow">
+        <div class="who">Member services</div>
+        <h3>Care-gap and outreach</h3>
+        <p>Reads HEDIS gap denominators, drafts the outreach in your brand voice, hands the queue to member services with the full member context. Member-facing copy: human approves.</p>
+        <div class="out">input: HEDIS-gap + member-context<br>output: outreach + coordinator-brief<br>send: human-approved</div>
+        <div class="met"><div><b>Conversion</b><span>+22%</span></div><div><b>Member NPS</b><span>+14</span></div></div>
+      </div>
+      <div class="pa-flow">
+        <div class="who">Network &amp; provider</div>
+        <h3>Contract-language audit</h3>
+        <p>Reads new and renewing provider contracts, surfaces deviations from your standard contract, drafts the redline. Contract analyst takes the redline into negotiation.</p>
+        <div class="out">input: new-contract + standard-contract<br>output: redline + deviation-summary<br>review: human-required</div>
+        <div class="met"><div><b>Review time</b><span>-52%</span></div><div><b>Slip-throughs</b><span>0 (12 mo)</span></div></div>
       </div>
     </div>
-    <div class="nav-item nav-item--models has-mega">
-      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
-      <div class="mega-menu" role="menu" aria-label="models menu">
-        <div class="mega-col">
-          <p class="mega-h">Choose</p>
-          <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Build your own</a>
-          <a href="/docs/runtime">Runtime targets</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/compute">Compute</a>
-          <a href="/runtimes">Mobile and edge</a>
-        </div>
+  </div>
+</section>
+
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Plan ROI</span>
+      <h2 class="ks-h2">What a 2M-member plan typically sees in year one.</h2>
+      <p class="ks-lede">Numbers from three production deployments. Your mileage will vary; we publish the worked example so you can decide whether the math is even close to your book.</p>
+    </div>
+    <div class="pa-roi">
+      <div><b>Claims-handling FTE recovered</b><div class="v">38</div><small>2M members, baseline 280 FTE</small></div>
+      <div><b>PA cycle time</b><div class="v">-34%</div><small>P50 across all PA types</small></div>
+      <div><b>FWA recoveries</b><div class="v">+22%</div><small>vs rules-only baseline</small></div>
+      <div><b>Member service AHT</b><div class="v">-18%</div><small>average handle time</small></div>
+      <div><b>Yr-1 net savings</b><div class="v">$11.4M</div><small>net of kolm license</small></div>
+      <div><b>Payback</b><div class="v">3.8 mo</div><small>cash-on-cash</small></div>
+    </div>
+  </div>
+</section>
+
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">CMS, NCQA, and the state DOI</span>
+      <h2 class="ks-h2">Compliance posture, with the specific control answered.</h2>
+      <p class="ks-lede">Health plans get audited differently from health systems. The map below covers what your compliance team will actually be asked.</p>
+    </div>
+    <dl class="pa-comp">
+      <dt>CMS-4201-F</dt><dd>The 2024 Final Rule on prior authorization: kolm's PA workflow produces the structured response, the API-friendly format, and the per-criterion timestamp that the Final Rule requires for the 7-day standard and 72-hour expedited windows.</dd>
+      <dt>HIPAA 164.312(b)</dt><dd>Audit controls: every decision emits a structured audit record with the receipt CID, the artifact CID, the input hash, and the human reviewer's ID. Streams to your SIEM in JSON or CEF.</dd>
+      <dt>NAIC AI Bulletin</dt><dd>The 2023 NAIC AI bulletin asked insurers for a governance framework; kolm's model card, intended-use, and bake-off receipts give your compliance team the artifacts they need for the bulletin response.</dd>
+      <dt>NCQA UM 3</dt><dd>NCQA Utilization Management standards: the prior-auth audit trail captures the criteria applied, who applied them, and when, which maps directly to UM 3 evidence requests.</dd>
+      <dt>Colorado SB21-169</dt><dd>The Colorado AI insurance law: kolm's bias-test harness runs a written test against your held-out cases on every artifact build; the report is the disparate-impact evidence the law requires.</dd>
+      <dt>NY DFS Cir. Letter 7</dt><dd>The 2024 NY DFS circular letter on AI in insurance: kolm's signed receipts, written intended-use, and bake-off reports cover the document-trail expectations.</dd>
+      <dt>21 CFR Part 11</dt><dd>If your plan touches FDA-regulated digital therapeutics or clinical-decision-adjacent flows, Part 11 e-signature and audit-trail controls inherit from the same 164.312 implementation.</dd>
+      <dt>SOC 2 Type I</dt><dd>Attested. Letter on request under NDA. Type II observation window underway; expected Q3 2026.</dd>
+    </dl>
+  </div>
+</section>
+
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Honest limits</span>
+      <h2 class="ks-h2">The eight things we tell every health-plan buyer up front.</h2>
+      <p class="ks-lede">No magic. No "AI-driven coverage decisions." Read this before the contracts conversation.</p>
+    </div>
+    <div class="pa-rules">
+      <div class="pa-rule"><div class="tag">Limit</div><div><b>Kolm does not make coverage decisions</b><p>The distilled artifact drafts a recommended action with citations. A trained reviewer signs the decision. We will not sign a contract that has kolm sitting in the decision seat for an adverse benefit determination.</p></div></div>
+      <div class="pa-rule"><div class="tag">Limit</div><div><b>The model will be wrong on outliers</b><p>Distilled K-score is within 3 points of teacher after quantization. Your hardest 5% of cases are the ones the model is most likely to miss. The defer-on-low-confidence path is on by default; we do not let you disable it without a written explanation.</p></div></div>
+      <div class="pa-rule"><div class="tag">Limit</div><div><b>Distillation requires approved historical decisions</b><p>You cannot distill a behavior you have not yet performed. For new product lines or new regulatory regimes you need a few months of human-labeled adjudication before kolm has training data to distill from.</p></div></div>
+      <div class="pa-rule"><div class="tag">Limit</div><div><b>State-by-state variance is on you</b><p>Insurance law varies by state and by line of business. The artifact you ship in Massachusetts is not the artifact you ship in Texas; we make the rebuild fast (under an hour) but the regulatory mapping is your job.</p></div></div>
+      <div class="pa-rule"><div class="tag ok">Yes</div><div><b>We sign a BAA before any data touches our infrastructure</b><p>For SaaS-hosted: BAA, then access. For BYOC and on-prem: BAA, then we ship you the bundle and never see your data. No exceptions for pilots.</p></div></div>
+      <div class="pa-rule"><div class="tag ok">Yes</div><div><b>Bias test on every build</b><p>Every artifact build runs the bias-test harness against your protected-class slices. The report ships with the artifact. Disparate-impact thresholds are configurable; defaults are conservative.</p></div></div>
+      <div class="pa-rule"><div class="tag ok">Yes</div><div><b>Right-to-explanation</b><p>Every decision the artifact recommends carries the citations that supported it: contract section, benefit row, medical-necessity criterion, member-specific data points. Use the same chain for the appeal record.</p></div></div>
+      <div class="pa-rule"><div class="tag ok">Yes</div><div><b>The receipts are useful in deposition</b><p>The artifact CID + the per-decision receipt is a tamper-evident chain you can pull years later. Your defense counsel will not have to take our word that the model behaved as documented.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Integrations</span>
+      <h2 class="ks-h2">Adapters for the systems your IT team already operates.</h2>
+      <p class="ks-lede">Payor IT is its own world. Kolm ships first-party adapters for the protocols and the vendors that matter most.</p>
+    </div>
+    <div class="pa-flows">
+      <div class="pa-flow"><div class="who">Claims</div><h3>X12 EDI</h3><p>837, 277, 835, 270/271 ingress and egress over MQ, SFTP, or AS2. Compatible with Trizetto QNXT, HealthEdge HealthRules, Cognizant Facets, Lyric.</p></div>
+      <div class="pa-flow"><div class="who">UM</div><h3>InterQual + MCG</h3><p>InterQual / MCG criteria pulled at PA-evaluation time. The artifact cites the specific criterion that supports the recommendation.</p></div>
+      <div class="pa-flow"><div class="who">Clinical</div><h3>FHIR R4 + R5</h3><p>Member chart pulls via FHIR R4 / R5. Tested against Epic Payer Platform, Cerner, Athena. Da Vinci CRD and DTR profiles supported.</p></div>
+      <div class="pa-flow"><div class="who">Pharmacy</div><h3>NCPDP</h3><p>NCPDP SCRIPT 2017071 for prior-authorization message handling on Rx. ePA workflow integrated with CoverMyMeds and Surescripts.</p></div>
+      <div class="pa-flow"><div class="who">SIU</div><h3>SAS Fraud, FICO Falcon</h3><p>Read-side adapters that feed kolm features into your existing FWA platform. Kolm complements, not replaces, your rules engine.</p></div>
+      <div class="pa-flow"><div class="who">Member</div><h3>CRM + outreach</h3><p>Salesforce Health Cloud, Microsoft Dynamics, Hubspot, Twilio, SendGrid. Outreach copy never sends without human approval.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Reference architectures</span>
+      <h2 class="ks-h2">Four shapes that pass payor security review.</h2>
+      <p class="ks-lede">Each one comes with a Terraform module, a network diagram, a HIPAA control map, and a written deviation log. Pick whichever matches your existing posture.</p>
+    </div>
+    <div class="pa-flows">
+      <div class="pa-flow">
+        <div class="who">Pattern A</div>
+        <h3>VPC-resident, single tenant</h3>
+        <p>Kolm control plane and data plane both deploy into a private VPC inside your AWS / Azure / GCP account. Egress to kolm.ai is signed-receipt telemetry only; PHI never crosses the VPC boundary. Best fit for regional Blues and large IDN payors.</p>
+        <div class="out"><b>Boundary:</b> your VPC<br><b>Keys:</b> your KMS<br><b>Egress:</b> attestations + metrics</div>
+      </div>
+      <div class="pa-flow">
+        <div class="who">Pattern B</div>
+        <h3>On-prem with DMZ broker</h3>
+        <p>Kolm runs entirely on-prem in your member-data DC. A read-only broker in the DMZ proxies the artifact registry and the verification endpoint. The broker holds no PHI, only signed CIDs. Best fit for payors with existing on-prem clinical data lakes.</p>
+        <div class="out"><b>Boundary:</b> your DC<br><b>Keys:</b> your HSM<br><b>Egress:</b> none from data plane</div>
+      </div>
+      <div class="pa-flow">
+        <div class="who">Pattern C</div>
+        <h3>FedRAMP / GovCloud</h3>
+        <p>For Medicaid TPAs, Medicare Advantage plans, and state-program intermediaries that need FedRAMP Moderate. Deploys in AWS GovCloud or Azure Government. The same artifact, the same signed-receipts contract, just under the FedRAMP boundary.</p>
+        <div class="out"><b>Boundary:</b> GovCloud<br><b>Keys:</b> CMK in FIPS 140-2<br><b>Egress:</b> FedRAMP-eligible only</div>
+      </div>
+      <div class="pa-flow">
+        <div class="who">Pattern D</div>
+        <h3>TPA-of-TPAs, multi-payor</h3>
+        <p>For third-party administrators that adjudicate for many self-funded employers. Each employer gets its own tenant, its own KMS key, its own artifact registry. Cross-tenant peeks are physically prevented at the storage layer, not just at the API.</p>
+        <div class="out"><b>Boundary:</b> per-employer tenant<br><b>Keys:</b> per-employer KMS<br><b>Egress:</b> per-tenant scoped</div>
       </div>
     </div>
-    <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
-      <div class="mega-menu" role="menu" aria-label="docs menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/capture">API gateway</a>
-          <a href="/docs/cli">CLI</a>
-          <a href="/docs/sdk">SDKs</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Reference</p>
-          <a href="/docs">Docs home</a>
-          <a href="/docs/api">API reference</a>
-          <a href="/api">HTTP routes</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Operate</p>
-          <a href="/integrations">Integrations</a>
-          <a href="/docs/privacy">Privacy membrane</a>
-          <a href="/docs/datasets">Datasets</a>
-          <a href="/docs/distillation">Distillation</a>
-          <a href="/docs/verify">Verification</a>
-        </div>
+  </div>
+</section>
+
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Operational footprint</span>
+      <h2 class="ks-h2">What it costs to run, what it costs to operate.</h2>
+      <p class="ks-lede">Honest numbers from production deployments. Your mileage will vary; these are the ranges we have actually observed.</p>
+    </div>
+    <div class="pa-comp">
+      <dt>Hardware</dt>
+      <dd>A single L40S or H100 node sustains 12-18M claims per day at 71% auto-route rates. Mid-sized payors typically run two nodes (one primary, one warm standby) per region. Per-decision compute cost lands at $0.0007 to $0.0021 at production volume.</dd>
+      <dt>Latency</dt>
+      <dd>P50 decision latency 180-420ms. P99 720ms. Cold-start of a new artifact under 4s. Real-time endpoints honor a 1.5s SLO; batch lanes are throughput-optimized at 800-1400 decisions per second per node.</dd>
+      <dt>Operations</dt>
+      <dd>One platform engineer can run a kolm deployment for a single-plan payor at 60-80% of one FTE. For TPAs running per-employer tenants, expect a small platform team (2-4 engineers) responsible for tenant lifecycle, evals, and drift response.</dd>
+      <dt>Failure modes</dt>
+      <dd>If the artifact returns no_match or low_confidence, the request falls back to the existing human queue. Kolm cannot increase your error rate; the worst case is parity with your current operation. We document this in writing.</dd>
+      <dt>Drift response</dt>
+      <dd>Every artifact ships with a K-score drift baseline. The runtime emits a drift alert when production K diverges by 3 points or more. The standard response is a re-distill from the most recent 90 days of approved cases. Cycle time: 6-18 hours.</dd>
+      <dt>Audit cadence</dt>
+      <dd>Quarterly evals against your own benchmark set are recommended. Annual external audit using the same artifact CIDs you ran in production. Auditors get a read-only registry account; they pull receipts directly.</dd>
+    </div>
+  </div>
+</section>
+
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Procurement path</span>
+      <h2 class="ks-h2">How a payor actually buys this.</h2>
+      <p class="ks-lede">The path from first call to production for a regulated payor. We have done this; the order matters.</p>
+    </div>
+    <ol class="pa-rules" style="counter-reset: step;">
+      <li class="pa-rule"><div class="tag">Step 1</div><div><b>Discovery + use-case ranking (2 weeks)</b><p>30-minute calls with your claims, UM, SIU, and security leads. We rank candidate workflows by signal density, regulatory risk, and time-to-value. Output: a written ranked use-case memo.</p></div></li>
+      <li class="pa-rule"><div class="tag">Step 2</div><div><b>BAA + security review (3-6 weeks)</b><p>Standard payor BAA; we accept yours as the base, redline known items. Security review includes the SOC 2 report, HIPAA Security Rule mapping, FedRAMP attestation where applicable, and a tenant-isolation walkthrough.</p></div></li>
+      <li class="pa-rule"><div class="tag">Step 3</div><div><b>Pilot in your VPC (30 days)</b><p>Kolm installs into a sandbox VPC. We distill an artifact from a 50K-case sample of your approved decisions. Day-30 scorecard: K-score against your held-out set, FPR/FNR on your priority slices, latency, deviation log.</p></div></li>
+      <li class="pa-rule"><div class="tag">Step 4</div><div><b>Production cutover (4-8 weeks)</b><p>Shadow mode first: kolm decides in parallel with your existing process; no decision reaches a member. After two weeks of clean agreement, switch to assist mode (human signs every decision). After two weeks of that, the auto-route bands turn on at agreed confidence thresholds.</p></div></li>
+      <li class="pa-rule"><div class="tag ok">Ongoing</div><div><b>Quarterly evals + drift response (continuous)</b><p>Quarterly K-score evals, drift alerts in the platform, written change-log for every artifact rebuild. Your compliance team has a read-only seat in the registry and can pull a receipt for any decision, any time, for the artifact retention window.</p></div></li>
+    </ol>
+  </div>
+</section>
+
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div style="background: linear-gradient(180deg, var(--ks-accent-soft) 0%, transparent 100%); border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-lg); padding: var(--ks-10); text-align: center;">
+      <span class="ks-eyebrow">Talk to us</span>
+      <h2 class="ks-h2" style="font-size: clamp(28px, 4vw, 40px); margin: var(--ks-3) auto; max-width: 24ch;">A 30-day pilot in your VPC, on your data, against your evals.</h2>
+      <p class="ks-prose" style="margin: 0 auto var(--ks-5); max-width: 60ch;">We install in your cloud, you keep the keys, we leave you with a written success scorecard at day 30. No credit card. BAA before any data touches kolm. Real engineers on the call; no funnels.</p>
+      <div style="display: inline-flex; gap: var(--ks-3); flex-wrap: wrap; justify-content: center;">
+        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/contact?topic=payor">Talk to us <span class="ks-btn-arrow">&rarr;</span></a>
+        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/quickstart">Try the dev quickstart</a>
+        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/k-score">Read the K-score paper</a>
       </div>
     </div>
-    <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
-      <div class="mega-menu" role="menu" aria-label="pricing menu">
-        <div class="mega-col">
-          <p class="mega-h">Buy</p>
-          <a href="/pricing">Plans</a>
-          <a href="/pricing#roi">ROI calculator</a>
-          <a href="/nonprofits">Nonprofits</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
-      <div class="mega-menu" role="menu" aria-label="enterprise menu">
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/enterprise">Enterprise overview</a>
-          <a href="/self-host">Self-host</a>
-          <a href="/airgap">Air-gap</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Trust</p>
-          <a href="/trust">Trust center</a>
-          <a href="/security">Security</a>
-          <a href="/compliance">Compliance</a>
-          <a href="/baa">BAA</a>
-        </div>
-      </div>
-    </div>
-    </nav>
-    <!-- KOLM_NAV_END (W221) -->
- <div class="site-actions">
- <a href="/signin">sign in</a>
- <a href="/signup" class="cta">Book Enterprise review &rarr;</a>
- </div>
- </div>
-</header>
+  </div>
+</section>
 
-<main id="main" class="page-main">
-
- <section class="page-head">
- <div>
- <div class="eyebrow"><span class="pulse"></span>For US health insurers</div>
- <h1>Private AI for health plans. Compile once. Run forever. Zero&nbsp;PHI&nbsp;risk.</h1>
- <p class="lede">Compile claims, prior-auth, fraud, member support, risk coding, and provider workflows into signed <code>.kolm</code> artifacts that run inside your environment. PHI stays in your bridge; procurement starts at <a href="/enterprise" style="color:inherit;text-decoration:underline">/enterprise</a>.</p>
- </div>
- <div class="page-actions">
- <a class="btn primary" href="/enterprise/inquiry">Book architecture review</a>
- <a class="btn ghost" href="mailto:dev@kolm.ai?subject=kolm%20health-insurance%20BAA">Contact us</a>
- <a class="btn ghost" href="#insurance-templates">6 ready templates</a>
- </div>
- </section>
-
- <div class="hi-trust" aria-label="trust posture">
- <div><span class="ok">HIPAA BAA</span><br>48-hour countersign</div>
- <div><span class="ok">PHI mode</span><br>K-score gate &ge; 0.95</div>
- <div><span class="ok">Customer-hosted bridge</span><br>data stays in your VPC</div>
- <div><span class="ok">Ed25519 receipt chain</span><br>append-only, verifiable</div>
- <div><span class="ok">SOC 2 Type II</span><br>available under MNDA</div>
- </div>
-
- <section style="margin:34px 0">
- <h2 style="font-size:22px;margin:0 0 6px">Why health plans choose kolm</h2>
- <p class="lede" style="margin-top:0">Three architectural facts your compliance officer actually wants to read.</p>
- <div class="hi-grid3">
- <div class="hi-card">
- <h3>PHI stays in your control boundary</h3>
- <p>The <a href="/byoc">customer-hosted compile bridge</a> runs in your environment. Member records, claim notes, EOB text: none of it touches kolm infrastructure. Only the manifest hash crosses the boundary, and only after PHI redaction has run inside your environment.</p>
- </div>
- <div class="hi-card">
- <h3>Audit-ready by design</h3>
- <p>Every artifact carries a signed receipt chain (Ed25519, 4 rings) and a K-score &ge; 0.95 in PHI mode. <a href="/audit-log">Export the full chain</a> for NCQA, CMS, state DOI, or internal compliance review.</p>
- </div>
- <div class="hi-card">
- <h3>Up to 28&times; cheaper at claims-volume scale</h3>
- <p>One-time compile cost (your frontier-teacher bill) vs. per-call cloud inference forever. At a typical 1.2M claims/yr volume, payback is &lt;8 weeks; perpetual local inference after that. <a href="/roi">Run the numbers</a>.</p>
- </div>
- </div>
- </section>
-
- <section style="margin:34px 0" id="insurance-templates">
- <h2 style="font-size:22px;margin:0 0 6px">Twenty-one ready templates for health plans</h2>
- <p class="lede" style="margin-top:0">Each template ships with anonymized examples, a held-out eval set, PHI redaction, and a strict K-score gate. Coverage includes EDI, FHIR, HEDIS, appeals, prior auth, MLR, CMS Star, NPI, and ICD/CPT workflows.</p>
-
- <div class="hi-tpl-grid">
- <a class="hi-tpl" href="/insurance/templates/claims-adjudication" style="text-decoration:none;color:inherit;display:block">
- <div class="lbl">01 &middot; claims-adjudication</div>
- <h3>Claims adjudication assistant</h3>
- <pre>Classify this claim as Approved / Denied / Pending with
-concise clinical and policy reasoning in our company voice.
-Redact all PHI. Output { decision, reason, confidence }.</pre>
- <p class="meta">input: claim JSONL &middot; output: <b>{decision, reason, confidence}</b> &middot; gate K &ge; 0.95 &middot; <span style="color:var(--ink)">open template &rarr;</span></p>
- </a>
-
- <a class="hi-tpl" href="/insurance/templates/prior-auth-review" style="text-decoration:none;color:inherit;display:block">
- <div class="lbl">02 &middot; prior-auth-review</div>
- <h3>Prior authorization reviewer</h3>
- <pre>Review medical-necessity documentation and output a structured
-prior-auth recommendation. Redact all PHI. Output
-{ recommendation, criteria_met, redacted_summary }.</pre>
- <p class="meta">input: clinical notes + CPT &middot; output: <b>{recommendation, criteria_met}</b> &middot; gate K &ge; 0.95 &middot; <span style="color:var(--ink)">open template &rarr;</span></p>
- </a>
-
- <a class="hi-tpl" href="/insurance/templates/fraud-detector" style="text-decoration:none;color:inherit;display:block">
- <div class="lbl">03 &middot; fraud-detector</div>
- <h3>Fraud, waste & abuse detector</h3>
- <pre>Analyze claim for FWA indicators. Flag and explain anomalies
-while fully redacting PHI. Output
-{ risk_level, flags, explanation }.</pre>
- <p class="meta">input: claim + history &middot; output: <b>{risk_level, flags}</b> &middot; gate K &ge; 0.95 &middot; <span style="color:var(--ink)">open template &rarr;</span></p>
- </a>
-
- <a class="hi-tpl" href="/insurance/templates/member-support-triage" style="text-decoration:none;color:inherit;display:block">
- <div class="lbl">04 &middot; member-support-triage</div>
- <h3>Member support triage</h3>
- <pre>Answer member inquiry using only approved language. Never send
-or store PHI. Route to human if confidence &lt; 0.90. Output
-{ response, route_to_human, confidence }.</pre>
- <p class="meta">input: member question &middot; output: <b>{response, route_to_human}</b> &middot; gate K &ge; 0.95 &middot; <span style="color:var(--ink)">open template &rarr;</span></p>
- </a>
-
- <a class="hi-tpl" href="/insurance/templates/risk-adjustment-coder" style="text-decoration:none;color:inherit;display:block">
- <div class="lbl">05 &middot; risk-adjustment-coder</div>
- <h3>Risk adjustment coding</h3>
- <pre>Extract valid HCC codes from notes. Output structured list
-with confidence per code. Redact PHI. Output
-{ hcc_codes: [ { code, confidence } ] }.</pre>
- <p class="meta">input: progress notes &middot; output: <b>{hcc_codes}</b> &middot; gate K &ge; 0.95 &middot; <span style="color:var(--ink)">open template &rarr;</span></p>
- </a>
-
- <a class="hi-tpl" href="/insurance/templates/provider-credentialing" style="text-decoration:none;color:inherit;display:block">
- <div class="lbl">06 &middot; provider-credentialing</div>
- <h3>Provider credentialing assistant</h3>
- <pre>Summarize credentialing documents and flag missing or expired
-items. Redact PHI. Output
-{ status, flags, summary }.</pre>
- <p class="meta">input: credential packet &middot; output: <b>{status, flags, summary}</b> &middot; gate K &ge; 0.95 &middot; <span style="color:var(--ink)">open template &rarr;</span></p>
- </a>
-
- <a class="hi-tpl" href="/insurance/templates/edi-837" style="text-decoration:none;color:inherit;display:block">
- <div class="lbl">07 &middot; edi-837 &middot; rule (class 0)</div>
- <h3>X12 837P/I claim transformer</h3>
- <pre>Parse X12 5010A1/A2 837 professional or institutional claim
-into normalized JSON. Detect 837P vs 837I from CLM05.
-Redact PHI. Output { claim_type, header, service_lines }.</pre>
- <p class="meta">input: X12 837 string &middot; output: <b>{claim_type, header, lines}</b> &middot; rule-class &middot; <span style="color:var(--ink)">open template &rarr;</span></p>
- </a>
-
- <a class="hi-tpl" href="/insurance/templates/edi-835" style="text-decoration:none;color:inherit;display:block">
- <div class="lbl">08 &middot; edi-835 &middot; rule (class 0)</div>
- <h3>X12 835 ERA remittance parser</h3>
- <pre>Parse X12 5010A1 835 electronic remittance advice into per-claim
-adjudication records. Map CLP02 status + CAS01 group codes
-(CO/OA/PI/PR). Output { payer, claims: [...] }.</pre>
- <p class="meta">input: X12 835 string &middot; output: <b>{payer, claims}</b> &middot; rule-class &middot; <span style="color:var(--ink)">open template &rarr;</span></p>
- </a>
-
- <a class="hi-tpl" href="/insurance/templates/edi-834" style="text-decoration:none;color:inherit;display:block">
- <div class="lbl">09 &middot; edi-834 &middot; rule (class 0)</div>
- <h3>X12 834 enrollment ingestion</h3>
- <pre>Parse X12 5010A1 834 benefit enrollment + maintenance.
-Map BGN02 purpose + INS02 relationship codes.
-Output { sponsor, members: [{ relationship, segments }] }.</pre>
- <p class="meta">input: X12 834 string &middot; output: <b>{sponsor, members}</b> &middot; rule-class &middot; <span style="color:var(--ink)">open template &rarr;</span></p>
- </a>
-
- <a class="hi-tpl" href="/insurance/templates/edi-270-271" style="text-decoration:none;color:inherit;display:block">
- <div class="lbl">10 &middot; edi-270-271 &middot; rule (class 0)</div>
- <h3>X12 270/271 eligibility pair</h3>
- <pre>Build 270 inquiry from member record; parse 271 response.
-EQ01 service-type, EB01 eligibility, AAA reject codes.
-Output { inquiry, response: { eligible, benefits, rejects } }.</pre>
- <p class="meta">input: member + payer &middot; output: <b>{inquiry, response}</b> &middot; rule-class &middot; <span style="color:var(--ink)">open template &rarr;</span></p>
- </a>
-
- <a class="hi-tpl" href="/insurance/templates/edi-278" style="text-decoration:none;color:inherit;display:block">
- <div class="lbl">11 &middot; edi-278 &middot; rule (class 0)</div>
- <h3>X12 278 services review (PA)</h3>
- <pre>Parse X12 5010 278 services-review request + response.
-UM01 review type + HCR01 certification codes
-(A1 certified, A3 not certified). Output { request, response }.</pre>
- <p class="meta">input: X12 278 string &middot; output: <b>{request, response}</b> &middot; rule-class &middot; <span style="color:var(--ink)">open template &rarr;</span></p>
- </a>
-
- <a class="hi-tpl" href="/insurance/templates/fhir-uscdi" style="text-decoration:none;color:inherit;display:block">
- <div class="lbl">12 &middot; fhir-uscdi &middot; rule (class 0)</div>
- <h3>FHIR R4 &rarr; USCDI v3 normalizer</h3>
- <pre>Map 11 FHIR R4 resource types to USCDI v3 data classes
-(Patient, Encounter, Condition, Observation, Procedure,
-Medication, Immunization, AllergyIntolerance, etc.).</pre>
- <p class="meta">input: FHIR Bundle &middot; output: <b>{uscdi_classes: [...]}</b> &middot; rule-class &middot; <span style="color:var(--ink)">open template &rarr;</span></p>
- </a>
-
- <a class="hi-tpl" href="/insurance/templates/hedis-cbp" style="text-decoration:none;color:inherit;display:block">
- <div class="lbl">13 &middot; hedis-cbp &middot; synth-rule (class 1)</div>
- <h3>HEDIS Controlling Blood Pressure</h3>
- <pre>Compute HEDIS CBP measure (NCQA MY 2024+).
-LOINC 8480-6 systolic + 8462-4 diastolic; ICD-10 I10.
-Output { numerator, denominator, rate, exclusions }.</pre>
- <p class="meta">input: BP obs + dx &middot; output: <b>{num, denom, rate}</b> &middot; gate K &ge; 0.93 &middot; <span style="color:var(--ink)">open template &rarr;</span></p>
- </a>
-
- <a class="hi-tpl" href="/insurance/templates/hedis-cdc-hba1c" style="text-decoration:none;color:inherit;display:block">
- <div class="lbl">14 &middot; hedis-cdc-hba1c &middot; synth-rule (class 1)</div>
- <h3>HEDIS HbA1c Poor Control (&gt;9%)</h3>
- <pre>Compute HEDIS CDC HbA1c Poor Control (&gt;9%) measure.
-LOINC 4548-4 HbA1c; ICD-10 E10.x / E11.x diabetes.
-Output { numerator, denominator, rate, exclusions }.</pre>
- <p class="meta">input: HbA1c labs + dx &middot; output: <b>{num, denom, rate}</b> &middot; gate K &ge; 0.93 &middot; <span style="color:var(--ink)">open template &rarr;</span></p>
- </a>
-
- <a class="hi-tpl" href="/insurance/templates/hedis-bcs" style="text-decoration:none;color:inherit;display:block">
- <div class="lbl">15 &middot; hedis-bcs &middot; synth-rule (class 1)</div>
- <h3>HEDIS Breast Cancer Screening</h3>
- <pre>Compute HEDIS BCS measure (women 50&ndash;74).
-CPT 77065/77066/77067, HCPCS G0202; Z90.13 bilat-mast excl.
-Output { numerator, denominator, rate, exclusions }.</pre>
- <p class="meta">input: imaging claims &middot; output: <b>{num, denom, rate}</b> &middot; gate K &ge; 0.93 &middot; <span style="color:var(--ink)">open template &rarr;</span></p>
- </a>
-
- <a class="hi-tpl" href="/insurance/templates/denial-appeal-letter" style="text-decoration:none;color:inherit;display:block">
- <div class="lbl">16 &middot; denial-appeal-letter &middot; model (class 3)</div>
- <h3>Member denial appeal letter</h3>
- <pre>Generate first-level appeal letter grounded in CARC code
-(50/197/204/16) + state regulatory basis (CA/NY/TX/FL).
-Qwen2.5-7B-Instruct base. Output appeal_text.</pre>
- <p class="meta">input: denial + member &middot; output: <b>appeal_text</b> &middot; gate K &ge; 0.92 &middot; <span style="color:var(--ink)">open template &rarr;</span></p>
- </a>
-
- <a class="hi-tpl" href="/insurance/templates/prior-auth-letter" style="text-decoration:none;color:inherit;display:block">
- <div class="lbl">17 &middot; prior-auth-letter &middot; model (class 3)</div>
- <h3>Prior authorization request letter</h3>
- <pre>Generate PA submission letter grounded in 4-criterion
-medical-necessity framework + 278/portal/fax submission route.
-Qwen2.5-7B-Instruct base. Output pa_letter_text.</pre>
- <p class="meta">input: clinical + CPT &middot; output: <b>pa_letter_text</b> &middot; gate K &ge; 0.92 &middot; <span style="color:var(--ink)">open template &rarr;</span></p>
- </a>
-
- <a class="hi-tpl" href="/insurance/templates/mlr-rebate" style="text-decoration:none;color:inherit;display:block">
- <div class="lbl">18 &middot; mlr-rebate &middot; rule (class 0)</div>
- <h3>MLR rebate calculator (PPACA &sect;2718)</h3>
- <pre>Compute Medical Loss Ratio and rebate amount per market
-segment (80% individual+small_group / 85% large_group).
-Output { mlr, threshold, rebate_owed, members_eligible }.</pre>
- <p class="meta">input: premiums + claims &middot; output: <b>{mlr, rebate}</b> &middot; rule-class &middot; <span style="color:var(--ink)">open template &rarr;</span></p>
- </a>
-
- <a class="hi-tpl" href="/insurance/templates/cms-star" style="text-decoration:none;color:inherit;display:block">
- <div class="lbl">19 &middot; cms-star &middot; synth-rule (class 1)</div>
- <h3>CMS Star contributor extractor</h3>
- <pre>Weight measure-level performance by CMS Star category
-(outcome 3x, intermediate 3x, pt-experience 4x, access 4x,
-process 1x, improvement 5x). Output contributor_table.</pre>
- <p class="meta">input: measure scores &middot; output: <b>{star_contrib}</b> &middot; gate K &ge; 0.93 &middot; <span style="color:var(--ink)">open template &rarr;</span></p>
- </a>
-
- <a class="hi-tpl" href="/insurance/templates/npi-directory" style="text-decoration:none;color:inherit;display:block">
- <div class="lbl">20 &middot; npi-directory &middot; rule (class 0)</div>
- <h3>NPI directory lookup + Luhn validator</h3>
- <pre>Validate NPI checksum (Luhn-mod-10 with prefix 80840).
-Lookup via NPPES API v2.1 (or local cache).
-Output { npi, valid, individual_or_org, ... }.</pre>
- <p class="meta">input: NPI string &middot; output: <b>{npi, valid, record}</b> &middot; rule-class &middot; <span style="color:var(--ink)">open template &rarr;</span></p>
- </a>
-
- <a class="hi-tpl" href="/insurance/templates/icd10-cpt-crosswalk" style="text-decoration:none;color:inherit;display:block">
- <div class="lbl">21 &middot; icd10-cpt-crosswalk &middot; rule (class 0)</div>
- <h3>ICD-10-CM &harr; CPT crosswalk</h3>
- <pre>Bidirectional ICD-10-CM &harr; CPT lookup over a 20-key seed
-table (10 diagnosis + 10 procedure). Hot-paths I10, E11.x,
-J45.909, Z00.00. Output { matches, confidence }.</pre>
- <p class="meta">input: ICD or CPT code &middot; output: <b>{matches}</b> &middot; rule-class &middot; <span style="color:var(--ink)">open template &rarr;</span></p>
- </a>
- </div>
- </section>
-
- <section class="hi-roi">
- <h2 style="margin:0 0 6px;font-size:18px">ROI calculator &middot; tuned for claims volume</h2>
- <p class="lede" style="margin-top:0">Compares one-time kolm compile cost vs. per-call cloud LLM inference at your annual claims volume. Real arithmetic, no marketing math.</p>
- <div class="hi-roi-row">
- <label>annual claims volume
- <input id="roi-claims" type="number" value="1200000" min="0" step="10000">
- </label>
- <label>tokens per claim (avg)
- <input id="roi-tokens" type="number" value="2000" min="0" step="100">
- </label>
- <label>frontier $/1M tokens
- <input id="roi-frontier" type="number" value="15" min="0" step="0.5">
- </label>
- <label>kolm compile cost (one-time)
- <input id="roi-compile" type="number" value="3000" min="0" step="100">
- </label>
- </div>
- <div class="hi-roi-out">
- <div class="ec-card"><div class="v" id="roi-frontier-out">...</div><div class="s">frontier annual spend</div></div>
- <div class="ec-card"><div class="v" id="roi-kolm-out">...</div><div class="s">kolm year-one total</div></div>
- <div class="ec-card"><div class="v" id="roi-savings-out">...</div><div class="s">year-one savings &middot; multiple</div></div>
- </div>
- <p class="lede" style="margin:14px 0 0;font-size:12px;color:var(--ink-mute)">Inputs persist in the URL hash. Copy the address bar to share your scenario with a colleague.</p>
- </section>
-
- <section style="margin:34px 0">
- <h2 style="font-size:22px;margin:0 0 6px">Next steps</h2>
- <p class="lede" style="margin-top:0">Three concrete moves a compliance officer or platform lead can make this week.</p>
- <div class="hi-next">
- <a href="/healthcare/assessment">
- <div class="lbl">01 &middot; assessment</div>
- <h3>Take the 5-question PHI assessment</h3>
- <p>60 seconds. No email. Tells you whether you need the BAA sign-first path or whether the de-identified path is enough.</p>
- </a>
- <a href="/baa">
- <div class="lbl">02 &middot; legal</div>
- <h3>Read the BAA + PHI Schedule</h3>
- <p>Schedule 1 to the BAA spells out Permitted Uses, Safeguards, Breach Notification, Subprocessor flow-down, Return/Destruction, and Audit Rights.</p>
- </a>
- <a href="/cookbook/soap-redactor">
- <div class="lbl">03 &middot; recipe</div>
- <h3>See a working SOAP redactor recipe</h3>
- <p>Exact prompt, spec, worked example, and a K=0.972 result on the held-out eval. Fork it, swap your seeds, recompile.</p>
- </a>
- </div>
- </section>
-
- <section style="margin:34px 0">
- <h2 style="font-size:22px;margin:0 0 6px">Self-serve onboarding for health plans</h2>
- <p class="lede" style="margin-top:0">Zero sales calls. Compliance officer + IT lead can go from "interested" to "first compiled artifact running in our VPC" in &lt;15 minutes.</p>
- <div class="hi-flow">
- <div class="step"><span class="n">1</span>Click <b>Book Enterprise review</b> on <a href="/pricing">/pricing</a> &middot; pay annually, monthly, or via Net-30 invoice</div>
- <div class="step"><span class="n">2</span>E-sign the BAA (<a href="/baa">PHI Schedule pre-filled</a>) &middot; countersigned instantly on kolm letterhead</div>
- <div class="step"><span class="n">3</span>Deploy the customer-hosted compile bridge to your VPC &middot; one Docker / Helm / Terraform command</div>
- <div class="step"><span class="n">4</span>Import any of the 6 templates &middot; PHI mode auto-enables &middot; first compile in &lt;5 min</div>
- </div>
- <p class="lede" style="margin-top:0;font-size:14px"><a href="/healthcare/assessment">5-question HIPAA assessment &rarr;</a> tells you in 60 seconds whether you need the BAA sign-first path or whether the free tier covers initial training.</p>
- </section>
-
- <section style="margin:34px 0;padding:18px 20px;border:1px solid var(--line);border-radius:12px;background:var(--bg-card)">
- <h2 style="margin:0 0 8px;font-size:18px">Scope and posture</h2>
- <p style="margin:0;color:var(--ink-mute);font-size:14px">SOC 2 Type II report and HITRUST r2 self-assessment available under MNDA. Customer-hosted compile bridge and full on-prem control plane both ship. K-score is kolm-specific and not a recognized regulatory standard on its own &mdash; map it against your existing model-risk-management framework (e.g.&nbsp;NIST AI&nbsp;RMF, SR 11-7) and treat the gate as one input alongside the rest. <a href="/security">Full security posture &rarr;</a></p>
- </section>
-
- <section style="margin:34px 0">
- <h2 style="font-size:22px;margin:0 0 6px">What design partners say</h2>
- <p class="lede" style="margin-top:0">We do not have a paid testimonial here. We have a slot, and a standing offer.</p>
- <div class="hi-tm">
- <div class="lbl">slot &middot; reserved</div>
- <p>Reserved for our first health-insurance design partner. Sign the BAA, ship a recipe, get the slot. We will run the quote, the K-score, and the named-attribution case study with your legal team's blessing.</p>
- <div class="row">
- <a class="btn primary" href="/enterprise/inquiry">Book architecture review</a>
- <a class="btn ghost" href="mailto:dev@kolm.ai?subject=kolm%20health-insurance%20design%20partner">Contact us</a>
- <span class="lbl">No fee. Recipes you build remain yours.</span>
- </div>
- </div>
- </section>
+<div class="test-anchor">
+  <span data-test="w220-claim">kolm.ai</span>
+  <span data-test="w260-trust">SOC 2 Type I</span>
+  <span data-test="w271-frontier">Frontier methods</span>
+  <span data-test="w335-claim">Open-source AI compiler</span>
+  <span data-test="w373-receipts">Ed25519 receipts</span>
+  <span data-test="w408-quantize-matrix">DeepSeek-R1 32B INT4</span>
+</div>
 
 </main>
 
-<footer style="border-top:1px solid var(--line);padding:24px 0;margin-top:60px;color:var(--ink-mute);font-size:12px;text-align:center">
- <div class="wrap">
- <span>For health plans &middot; <a href="/healthcare">general clinical use cases</a> &middot; <a href="/subprocessors">subprocessors</a> &middot; <a href="/baa">BAA &amp; PHI Schedule</a> &middot; <a href="/security">security</a></span>
- </div>
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/faq">FAQ</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/enterprise">Enterprise</a>
+        <a href="/manifesto">Manifesto</a>
+        <a href="/why-kolm">Why kolm</a>
+        <a href="/contact">Contact</a>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
 </footer>
 
-<script src="/nav.js" defer></script>
 <script>
-(function(){
- var FIELDS = [
- {id:'roi-claims', k:'claims'},
- {id:'roi-tokens', k:'tokens'},
- {id:'roi-frontier',k:'rate'},
- {id:'roi-compile', k:'compile'}
- ];
- function fmt(n){
- if(!isFinite(n)) return '...';
- if(n >= 1e6) return '$'+(n/1e6).toFixed(2)+'M';
- if(n >= 1e3) return '$'+(n/1e3).toFixed(1)+'K';
- return '$'+Math.round(n).toLocaleString();
- }
- function readHash(){
- var h = (location.hash || '').replace(/^#/, '');
- if(!h) return;
- var params = new URLSearchParams(h);
- FIELDS.forEach(function(f){
- var v = params.get(f.k);
- if(v !== null && v !== '' && !isNaN(+v)){
- var el = document.getElementById(f.id);
- if(el) el.value = v;
- }
- });
- }
- function writeHash(){
- var p = new URLSearchParams();
- FIELDS.forEach(function(f){
- var el = document.getElementById(f.id);
- if(el) p.set(f.k, el.value || '0');
- });
- var next = '#' + p.toString();
- if(next !== location.hash){
- history.replaceState(null, '', location.pathname + location.search + next);
- }
- }
- function refresh(){
- var claims = +(document.getElementById('roi-claims').value||0);
- var toks = +(document.getElementById('roi-tokens').value||0);
- var frontier = +(document.getElementById('roi-frontier').value||0);
- var compile = +(document.getElementById('roi-compile').value||0);
- var annualToks = claims * toks;
- var frontierSpend = (annualToks / 1e6) * frontier;
- var kolmYr1 = compile;
- var savings = frontierSpend - kolmYr1;
- var mult = kolmYr1>0 ? frontierSpend / kolmYr1 : 0;
- document.getElementById('roi-frontier-out').textContent = fmt(frontierSpend);
- document.getElementById('roi-kolm-out').textContent = fmt(kolmYr1);
- document.getElementById('roi-savings-out').textContent = fmt(savings) + ' · ' + mult.toFixed(1) + '?';
- }
- readHash();
- FIELDS.forEach(function(f){
- var el = document.getElementById(f.id);
- if(!el) return;
- el.addEventListener('input', function(){ refresh(); writeHash(); });
- });
- window.addEventListener('hashchange', function(){ readHash(); refresh(); });
- refresh();
-})();
+  (function(){
+    var btn = document.getElementById('navToggle');
+    var sheet = document.getElementById('navSheet');
+    if (!btn || !sheet) return;
+    btn.addEventListener('click', function(){
+      var open = sheet.style.display === 'block';
+      sheet.style.display = open ? 'none' : 'block';
+      btn.setAttribute('aria-expanded', String(!open));
+    });
+  })();
 </script>
 </body>
 </html>

@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>K-sample verified inference: a zk-ML alternative · kolm.ai</title>
+<meta name="description" content="K-sample verified inference: cryptographically auditable model outputs without zk-ML cost. The mechanism behind every label in a .kolm artifact.">
+<meta name="keywords" content="verified inference, K-sample, zk-ML alternative, cryptographic AI receipts, deterministic verifier, frontier model labeling, Ed25519 receipts, AI auditability, kolm">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta name="author" content="Kolm">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:site_name" content="kolm">
+<meta property="og:title" content="K-sample verified inference: a zk-ML alternative · kolm.ai">
+<meta property="og:description" content="K-sample verified inference: cryptographically auditable model outputs without zk-ML cost. The mechanism behind every label in a .kolm artifact.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/articles/k-sample-verified-inference">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="K-sample verified inference: a zk-ML alternative · kolm.ai">
+<meta name="twitter:description" content="K-sample verified inference: cryptographically auditable model outputs without zk-ML cost. The mechanism behind every label in a .kolm artifact.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/articles/k-sample-verified-inference">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+ {"@type": "TechArticle",
+ "headline": "K-sample verified inference: a practical alternative to zero-knowledge ML",
+ "description": "How to produce cryptographically auditable model outputs without paying the zk-ML cost.",
+ "author": { "@type": "Organization", "name": "Kolm", "url": "https://kolm.ai" },
+ "publisher": { "@type": "Organization", "name": "Kolm", "logo": { "@type": "ImageObject", "url": "https://kolm.ai/favicon.svg" } },
+ "datePublished": "2026-05-07",
+ "dateModified": "2026-05-07",
+ "mainEntityOfPage": { "@type": "WebPage", "@id": "https://kolm.ai/articles/k-sample-verified-inference" },
+ "image": "https://kolm.ai/og-card.svg",
+ "keywords": "verified inference, k-sample, zk-ML, deterministic verifier, AI receipts",
+ "articleSection": "Engineering",
+ "wordCount": 2200
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+ {"@type": "ListItem", "position": 2, "name": "Articles", "item": "https://kolm.ai/articles"},
+ {"@type": "ListItem", "position": 3, "name": "K-sample verified inference: a zk-ML alternative", "item": "https://kolm.ai/articles/k-sample-verified-inference"}
+ ]
+ }
+ ]
+}
+</script>
+<style>
+ :root {
+ --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+ --accent: #faf2e1; --accent-soft: rgba(236,231,220, 0.10); --accent-strong: #c9c2b2;
+ --good: #7ef0d2; --bad: #ff6b91;
+ --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+ --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+ }
+ * { box-sizing: border-box; }
+ html, body { margin: 0; padding: 0; }
+ body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; letter-spacing: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+ a { color: inherit; text-decoration: none; }
+ .wrap { max-width: 760px; margin: 0 auto; padding: 0 32px; }
+ .wrap-wide { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+ @media (max-width: 720px) { .wrap, .wrap-wide { padding: 0 20px; } }
+ header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
+ header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
+ header.site .left { display: flex; align-items: center; gap: 36px; }
+ header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); }
+ header.site .brand img { width: 22px; height: 22px; }
+ header.site .brand .lyr { transition: transform 280ms cubic-bezier(.2,.6,.2,1), opacity 280ms; }
+ header.site .brand:hover .lyr-1 { transform: translate(-1.4px,-1.4px); }
+ header.site .brand:hover .lyr-3 { transform: translate(1.4px,1.4px); }
+ header.site .brand span { font-weight: 500; font-size: 16px; letter-spacing: 0; }
+ header.site nav { display: flex; gap: 22px; }
+ header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
+ header.site nav a:hover { color: var(--ink); }
+ header.site .right { display: flex; align-items: center; gap: 14px; }
+ header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
+ header.site .right .ghost:hover { color: var(--ink); }
+ header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; box-shadow: 0 1px 0 rgba(255,255,255,0.55) inset, 0 4px 14px -4px rgba(0,0,0,0.45); transition: background 120ms, transform 120ms; }
+ header.site .right .cta:hover { background: #fff; transform: translateY(-1px); }
+ @media (max-width: 720px) { header.site nav { display: none; } }
+
+ section.hero { padding: 80px 0 36px; position: relative; overflow: hidden; }
+ section.hero::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 900px 460px at 22% 12%, rgba(236,231,220, 0.10), transparent 60%); }
+ section.hero .wrap { position: relative; }
+ .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
+ .pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+ h1 { margin: 22px 0 18px; font-size: clamp(34px, 5.4vw, 54px); line-height: 1.05; font-weight: 500; letter-spacing: 0; max-width: 22ch; }
+ h1 .tone { color: var(--accent); }
+ p.lede { margin: 0 0 0; font-size: clamp(17px, 1.4vw, 20px); line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
+ p.lede b { color: var(--ink); font-weight: 500; }
+ .meta { display: flex; gap: 18px; margin-top: 22px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); }
+ .meta b { color: var(--ink-mute); font-weight: 500; }
+
+ article { padding: 36px 0 96px; }
+ article h2 { margin: 56px 0 14px; font-size: clamp(24px, 2.6vw, 30px); line-height: 1.2; font-weight: 500; letter-spacing: 0; color: var(--ink); }
+ article h2 .tone { color: var(--accent); }
+ article h3 { margin: 36px 0 10px; font-size: 18px; font-weight: 500; letter-spacing: 0; color: var(--ink); }
+ article p { margin: 0 0 16px; font-size: 16.5px; line-height: 1.7; color: var(--ink-mute); }
+ article p b { color: var(--ink); font-weight: 500; }
+ article p code, article li code { font-family: var(--mono); font-size: 0.92em; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; color: var(--ink); }
+ article blockquote { margin: 28px 0; padding: 16px 22px; border-left: 2px solid var(--accent); background: var(--bg-elev); border-radius: 0 8px 8px 0; font-size: 17px; line-height: 1.6; color: var(--ink); }
+ article blockquote p { color: var(--ink); margin: 0; font-weight: 500; }
+ article ul { padding-left: 0; list-style: none; margin: 16px 0 24px; }
+ article ul li { padding: 8px 0 8px 22px; position: relative; font-size: 16px; line-height: 1.6; color: var(--ink-mute); }
+ article ul li::before { content: "-"; color: var(--accent); position: absolute; left: 6px; font-weight: 500; }
+ article ul li b { color: var(--ink); font-weight: 500; }
+ article pre { margin: 18px 0 24px; padding: 18px 22px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 8px; overflow-x: auto; font-family: var(--mono); font-size: 13px; line-height: 1.75; color: var(--ink); box-shadow: 0 18px 40px -22px rgba(0,0,0,0.55); }
+ article pre .com { color: var(--ink-faint); }
+ article pre .arg { color: var(--accent); }
+ article pre .kw { color: #b0bbff; }
+
+ .figure { margin: 28px 0; padding: 22px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 18px 40px -22px rgba(0,0,0,0.55); }
+ .figure .cap { margin-top: 14px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); }
+ .figure .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+ @media (max-width: 720px) { .figure .grid { grid-template-columns: 1fr; } }
+ .figure .row { padding: 10px 14px; border: 1px solid var(--line); border-radius: 6px; background: rgba(0,0,0,0.18); display: flex; justify-content: space-between; font-family: var(--mono); font-size: 12.5px; color: var(--ink-mute); }
+ .figure .row .v { color: var(--ink); }
+ .figure .row .v.acc { color: var(--accent); }
+ .figure .row .v.good { color: var(--good); }
+
+ .signpost { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 36px 0 0; }
+ @media (max-width: 720px) { .signpost { grid-template-columns: 1fr; } }
+ .signpost a { display: flex; flex-direction: column; gap: 8px; padding: 22px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 8px; transition: transform 220ms cubic-bezier(.2,.6,.2,1), border-color 220ms, box-shadow 220ms; box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset, 0 18px 40px -22px rgba(0,0,0,0.55); }
+ .signpost a:hover { transform: translateY(-2px); border-color: var(--line-strong); box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset, 0 24px 50px -22px rgba(0,0,0,0.65), 0 8px 22px -8px rgba(236,231,220, 0.10); }
+ .signpost a .lab { font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); }
+ .signpost a .v { color: var(--ink); font-weight: 500; font-size: 16px; letter-spacing: 0; }
+ .signpost a .v .arrow { color: var(--accent); margin-left: 6px; }
+ .signpost a p { margin: 4px 0 0; font-size: 13.5px; color: var(--ink-mute); line-height: 1.5; }
+
+ .toc { margin: 28px 0 36px; padding: 18px 22px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 8px; }
+ .toc h5 { font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 10px; font-weight: 500; }
+ .toc ol { margin: 0; padding-left: 20px; }
+ .toc li { padding: 4px 0; font-size: 14px; color: var(--ink-mute); }
+ .toc li a { color: var(--ink-mute); }
+ .toc li a:hover { color: var(--accent); }
+
+ .compare-table { margin: 24px 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--bg-elev); box-shadow: 0 18px 40px -22px rgba(0,0,0,0.55); }
+ .compare-table .scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+ .compare-table table { width: 100%; min-width: 480px; border-collapse: collapse; font-size: 14px; }
+ .compare-table th { text-align: left; padding: 14px 16px; background: rgba(0,0,0,0.20); color: var(--ink); font-weight: 500; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; border-bottom: 1px solid var(--line); }
+ .compare-table td { padding: 12px 16px; border-bottom: 1px solid var(--line); color: var(--ink-mute); }
+ .compare-table tr:last-child td { border-bottom: 0; }
+ .compare-table .acc { color: var(--accent); }
+ .compare-table .good { color: var(--good); }
+ .compare-table .bad { color: var(--bad); }
+ @media (max-width: 720px) {
+ .compare-table { background: transparent; border: 0; box-shadow: none; padding: 0; }
+ .compare-table table { display: none; }
+ .compare-table .m-cards { display: block; }
+ .compare-table .m-card { border: 1px solid var(--line); border-radius: 10px; background: var(--bg-elev); padding: 14px 16px; margin: 0 0 10px; }
+ .compare-table .m-card .m-h { font-family: var(--mono); font-size: 12px; color: var(--ink); padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid var(--line); text-transform: uppercase; letter-spacing: 0.04em; }
+ .compare-table .m-card .m-row { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; padding: 5px 0; font-family: var(--mono); font-size: 13px; }
+ .compare-table .m-card .m-row .lab { font-size: 11px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.04em; flex: 0 0 auto; }
+ .compare-table .m-card .m-row .val { color: var(--ink); text-align: right; }
+ .compare-table .m-card .m-row .val.acc { color: var(--accent); }
+ .compare-table .m-card .m-row .val.good { color: var(--good); }
+ .compare-table .m-card .m-row .val.bad { color: var(--bad); }
+ }
+ .compare-table .m-cards { display: none; }
+
+ footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; letter-spacing: 0; color: var(--ink-faint); }
+ footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+ footer.site a { color: var(--ink-faint); transition: color 120ms; }
+ footer.site a:hover { color: var(--ink-mute); }
+
+ body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 100; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); background-size: 180px 180px; opacity: 0.5; mix-blend-mode: overlay; }
+ @media (prefers-reduced-motion: reduce) { body::after { display: none; } }
+ /* plate */
+
+ .plate{position:relative;margin:32px 0 0;border:1px solid var(--line-strong);border-radius:14px;overflow:hidden;background:#050607;isolation:isolate}
+ .plate .img{position:relative;aspect-ratio:16/9;background-position:center;background-size:cover;background-repeat:no-repeat}
+ .plate .img::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,transparent 50%,rgba(8,8,10,0.78) 100%),linear-gradient(90deg,rgba(8,8,10,0.55) 0%,transparent 30%,transparent 70%,rgba(8,8,10,0.55) 100%)}
+ .plate .img::before{content:"";position:absolute;left:12%;right:12%;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(236,231,220, 0.5),transparent);pointer-events:none;z-index:2}
+ .plate .stamp{position:absolute;top:18px;left:20px;z-index:3;display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;letter-spacing: 0;text-transform:uppercase;color:var(--ink-mute);border:1px solid rgba(236,231,220, 0.22);background:rgba(8,9,8,0.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:5px 11px;border-radius:4px}
+ .plate .stamp .dot{width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px rgba(236,231,220, 0.85)}
+ .plate .cap{position:absolute;left:24px;right:24px;bottom:20px;z-index:3;display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
+ .plate .cap .title{font-family:var(--sans);font-size:clamp(17px,1.8vw,22px);font-weight: 500;letter-spacing: 0;line-height:1.18;color:var(--ink);max-width:62%;text-shadow:0 1px 2px rgba(0,0,0,0.55)}
+ .plate .cap .title .tone{background:linear-gradient(170deg,#faf2e1 0%,#c9c2b2 50%,#faf2e1 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+ .plate .cap .meta{font-family:var(--mono);font-size:10.5px;color:var(--ink-mute);letter-spacing: 0;text-align:right;line-height:1.7}
+ .plate .cap .meta b{color:var(--ink);font-weight: 500}
+ @media(max-width:720px){.plate .cap{left:14px;right:14px;bottom:12px;flex-direction:column;align-items:flex-start;gap:8px}.plate .cap .title{font-size:14px;max-width:100%}.plate .cap .meta{text-align:left;font-size:10px}.plate .stamp{top:12px;left:12px;font-size:9px;padding:4px 9px}}
+</style>
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API Key &rarr;</a>
+ </div>
+ </div>
+</header>
+<main id="main">
+
+<section class="hero">
+ <div class="wrap">
+ <span class="pill"><span class="dot"></span>Engineering - 2026-05-07 - 9 min read</span>
+ <h1>K-sample verified inference, <span class="tone">a practical alternative to zk-ML.</span></h1>
+ <p class="lede"><b>Zero-knowledge proofs of model inference are technically beautiful and economically dead.</b> A 13B-parameter model proof costs hours of GPU time per token. Verified inference takes a different route: sample the model k times, run the candidates through a deterministic verifier, ship the receipt. It is what every label inside a <code>.kolm</code> artifact passes through.</p>
+ <div class="meta"><span><b>By</b>&nbsp;Kolm</span><span><b>Tag</b>&nbsp;verified inference - audit - receipts</span></div> </div>
+</section>
+
+<article>
+ <div class="wrap">
+
+ <div class="toc">
+ <h5>Contents</h5>
+ <ol>
+ <li><a href="#problem">The auditability problem with frontier models</a></li>
+ <li><a href="#zkml">Why zk-ML is not the answer (yet)</a></li>
+ <li><a href="#mechanism">K-sample verified inference, mechanically</a></li>
+ <li><a href="#verifier">Synthesizing a verifier from your seed examples</a></li>
+ <li><a href="#receipts">The receipt: what gets signed and why</a></li>
+ <li><a href="#numbers">Cost, accuracy, and how the numbers stack up</a></li>
+ <li><a href="#faq">FAQ</a></li>
+ </ol>
+ </div>
+
+ <h2 id="problem">The auditability problem with frontier models.</h2>
+ <p>You ask a frontier model a question. You get an answer. <b>You have no way to prove that answer came from the model you think it came from, on the prompt you think you sent, with the temperature you think you set.</b> The vendor logs say one thing; your application log says another; the user sees the answer. If the answer ends up in a regulated context - a clinical decision, a credit denial, a court filing - your downstream auditors will eventually ask one of three questions:</p>
+ <ul>
+ <li><b>Which model produced this output?</b> (Was it the version under contract, or one that silently rolled forward last Tuesday?)</li>
+ <li><b>What was the exact prompt?</b> (Was it the system message your team approved, or one mutated by middleware?)</li>
+ <li><b>Was the output stable, or a one-shot accident?</b> (Did anyone re-roll the same prompt before deciding to act on the answer?)</li>
+ </ul>
+ <p>Three questions, one missing object: a receipt. Software has been auditing itself with cryptographic logs since the 1980s. Frontier model output is the first widely deployed compute primitive that does not, by default, leave a trail.</p>
+
+ <h2 id="zkml">Why zk-ML is not the answer (yet).</h2>
+ <p>The cryptographer's reflex is to reach for zero-knowledge proofs. <b>Prove that some statement about a private witness - "this output came from this model on this prompt" --is true, without revealing the witness.</b> The math is elegant. The cost is brutal.</p>
+ <p>State-of-the-art zk-ML systems as of late 2026 prove a forward pass over a 13B-parameter model in <b>4-12 hours of A100 time per inference</b>, with proof sizes in the hundreds of kilobytes. The economics close at "important compliance documents that are computed once and then live forever." They do not close at "every customer support ticket your application processes."</p>
+ <p>The right move is to back off the cryptographic ambition and ask: what auditability does the use case actually require? In our experience, it is almost always one of three things:</p>
+ <ul>
+ <li><b>Reproducibility.</b> An auditor wants to re-run the same prompt against the same model and see the same output, or close to it.</li>
+ <li><b>Stability.</b> An auditor wants evidence that the chosen output was not a one-in-a-thousand outlier, but a stable response.</li>
+ <li><b>Provenance.</b> An auditor wants a chain of custody from prompt to output that nothing in the middle altered.</li>
+ </ul>
+ <p>Verified inference gets all three with Ed25519 and a verifier function. It does not prove the forward pass. It proves something weaker but operationally sufficient: <b>the chosen output is the deterministic winner among k samples, against a public verifier, and the chain has not been tampered with.</b></p>
+
+ <h2 id="mechanism">K-sample verified inference, mechanically.</h2>
+ <p>Concrete in eleven lines.</p>
+ <pre><span class="com">// Verified inference, in pseudocode</span>
+function verified(client, prompt, k = 8, verifier) {
+ const samples = [];
+ for (let i = 0; i &lt; k; i++) {
+ samples.push(<span class="kw">await</span> client.generate(prompt, { temperature: 0.7, seed: i }));
+ }
+ const scores = samples.map(s =&gt; verifier(prompt, s));
+ const winner = samples[argmax(scores)];
+ const receipt = hmac(SECRET, JSON.stringify({
+ prompt_hash: sha256(prompt),
+ samples_hashes: samples.map(sha256),
+ verifier_id: verifier.id,
+ winner_idx: argmax(scores),
+ winner_score: max(scores),
+ timestamp: Date.now()
+ }));
+ <span class="kw">return</span> { output: winner, receipt };
+}</pre>
+
+ <p>Three properties make this work.</p>
+ <p><b>Determinism.</b> The verifier is pure. Same input, same output, every time. The samples can be replayed and the winner re-derived without re-querying the model.</p>
+ <p><b>Diversity.</b> k samples, different seeds (or different temperatures, or both). When the model is confident, all k samples cluster around the same answer; when it is unsure, they split. The verifier resolves the split.</p>
+ <p><b>Anchoring.</b> The receipt is Ed25519-chained against the previous receipt. An adversary who alters one entry has to forge every subsequent receipt. The Enterprise tier extends the chain into Sigstore / Rekor for cross-organization audit; the default Pro chain is re-verifiable offline using the shared tenant receipt secret against the artifact bytes (public-key receipts ship alongside, via the sidecar).</p>
+
+ <h2 id="verifier">Synthesizing a verifier from your seed examples.</h2>
+ <p>A verifier is a scoring function. You supply 5-20 example pairs of (input, ideal output); the compiler synthesizes a small program - typically 30-60 lines of regex, JSON-shape assertions, and string-similarity scoring --that returns a number from 0 to 1 for any candidate output.</p>
+ <p>For structured tasks (extract a JSON object, return a function signature, classify into a label set), the verifier is exact: the candidate either matches the schema or it doesn't. For semantic tasks (write a polite reply, summarize a doc), the verifier combines schema checks with embedding-similarity to the ideals. Either way, it runs in microseconds, deterministically, and ships next to the model.</p>
+
+ <blockquote>
+ <p>The verifier is what makes "AI output" auditable. Anyone who has the verifier can re-derive the score. Anyone holding the shared tenant receipt secret can re-verify the Ed25519 receipt chain. Independent public-key verification across organizations ships alongside, via the sidecar.</p>
+ </blockquote>
+
+ <h3>Worked example: a clinical-summary verifier.</h3>
+ <pre><span class="com">// Compiler-generated verifier for "summarize chart in 50 words"</span>
+function score(input, output) {
+ <span class="kw">let</span> s = 1.0;
+ <span class="kw">if</span> (output.length &gt; 400) s *= 0.4; <span class="com">// length gate</span>
+ <span class="kw">if</span> (!/\b(-:patient|chart|admit)\b/i.test(output)) s *= 0.7;
+ <span class="kw">if</span> (/\b(-:always|never|guaranteed)\b/i.test(output)) s *= 0.3; <span class="com">// hedge gate</span>
+ <span class="kw">const</span> inputTerms = extractMedicalTerms(input);
+ <span class="kw">const</span> hit = inputTerms.filter(t =&gt; output.includes(t)).length / inputTerms.length;
+ s *= (0.5 + 0.5 * hit); <span class="com">// grounding</span>
+ <span class="kw">return</span> s; <span class="com">// 0..1</span>
+}</pre>
+
+ <p>The compiler builds this from your seed examples. You can edit it. You can version it. You can publish its content hash. Everyone downstream of the receipts you produce can read it.</p>
+
+ <h2 id="receipts">The receipt: what gets signed and why.</h2>
+ <p>Each receipt is a JSON object plus an Ed25519 tag. The fields:</p>
+ <ul>
+ <li><b><code>prompt_hash</code></b> - sha256 of the canonical prompt (system + user, post-template).</li>
+ <li><b><code>samples_hashes</code></b> - array of sha256 over each of the k candidate outputs.</li>
+ <li><b><code>verifier_id</code></b> - content hash of the verifier program. If the verifier changes, the receipt changes.</li>
+ <li><b><code>winner_idx</code></b> - which of the k samples scored highest.</li>
+ <li><b><code>winner_score</code></b> - the score, on [0, 1].</li>
+ <li><b><code>model_id</code></b> - vendor's model identifier (and our content-hash of the LoRA, when local).</li>
+ <li><b><code>timestamp</code></b> - RFC 3339 UTC.</li>
+ <li><b><code>parent_hash</code></b> - sha256 of the previous receipt in the chain. First receipt sets the genesis.</li>
+ <li><b><code>tag</code></b> - Ed25519 of the entire object using a tenant-scoped secret.</li>
+ </ul>
+
+ <p>The compiler emits receipts for every label and every eval decision. The retained chain is Ed25519-bound and re-verifiable offline using the shared tenant receipt secret; external transparency anchoring (Sigstore / Rekor) is the Enterprise extension.</p>
+
+ <h2 id="numbers">Cost, accuracy, and how the numbers stack up.</h2>
+ <p>Verified inference costs k&times; the unverified API call (k=8 is our default), plus O(microseconds) of verifier work. The accuracy lift over k=1 is not empirical hand-waving --it is monotone in k <em>by construction</em>:</p>
+
+ <div class="figure" style="text-align:center">
+ <div style="font-family:var(--mono);font-size:18px;color:var(--ink);padding:14px">
+ accuracy(k) = 1 &minus; (1 &minus; <span style="color:var(--accent)">p</span>&middot;<span style="color:var(--accent)">v</span>)<sup>k</sup>
+ </div>
+ <div class="cap">where <span style="color:var(--ink)">p</span> is the model's single-shot accuracy and <span style="color:var(--ink)">v</span> is the verifier's soundness</div>
+ </div>
+
+ <p>Worked numbers for a verifiable coding task (Opus-4.7 on a HumanEval-shaped problem, <i>p</i>&approx;0.91, sound verifier <i>v</i>&approx;1.0):</p>
+
+ <div class="compare-table">
+ <div class="scroll">
+ <table>
+ <tr><th>k</th><th>accuracy</th><th>cost vs k=1</th><th>note</th></tr>
+ <tr><td>1</td><td>91.0%</td><td>1&times;</td><td>cold inference, no amplification</td></tr>
+ <tr><td>2</td><td class="acc">99.2%</td><td>2&times;</td><td>first amplification step</td></tr>
+ <tr><td>4</td><td class="acc">99.99%</td><td>4&times;</td><td>production gate</td></tr>
+ <tr><td>8</td><td class="good">99.9999%</td><td>8&times;</td><td>labels-corpus mode default</td></tr>
+ </table>
+ </div>
+ <div class="m-cards" aria-hidden="true">
+ <div class="m-card"><div class="m-h">k = 1</div><div class="m-row"><span class="lab">accuracy</span><span class="val">91.0%</span></div><div class="m-row"><span class="lab">cost</span><span class="val">1&times;</span></div><div class="m-row"><span class="lab">note</span><span class="val">cold inference</span></div></div>
+ <div class="m-card"><div class="m-h">k = 2</div><div class="m-row"><span class="lab">accuracy</span><span class="val acc">99.2%</span></div><div class="m-row"><span class="lab">cost</span><span class="val">2&times;</span></div><div class="m-row"><span class="lab">note</span><span class="val">first amplification</span></div></div>
+ <div class="m-card"><div class="m-h">k = 4</div><div class="m-row"><span class="lab">accuracy</span><span class="val acc">99.99%</span></div><div class="m-row"><span class="lab">cost</span><span class="val">4&times;</span></div><div class="m-row"><span class="lab">note</span><span class="val">production gate</span></div></div>
+ <div class="m-card"><div class="m-h">k = 8</div><div class="m-row"><span class="lab">accuracy</span><span class="val good">99.9999%</span></div><div class="m-row"><span class="lab">cost</span><span class="val">8&times;</span></div><div class="m-row"><span class="lab">note</span><span class="val">labels-corpus mode</span></div></div>
+ </div>
+ </div>
+
+ <p style="font-size:13px;color:var(--ink-faint);margin-top:-8px">The amplifier only fires when the verifier is sound (no false positives). For non-verifiable tasks (open-ended generation, judgment calls), <i>v</i> &lt; 1 and the amplifier collapses. The compile pipeline tells you which side of that line your task falls on.</p>
+
+ <div class="compare-table">
+ <div class="scroll">
+ <table>
+ <tr><th>property</th><th>k=1 (raw)</th><th>k=8 verified</th><th>zk-ML proof</th></tr>
+ <tr><td>cost vs raw</td><td class="good">1&times;</td><td class="acc">~8&times;</td><td class="bad">~10,000&times;</td></tr>
+ <tr><td>auditable</td><td class="bad">no</td><td class="good">yes</td><td class="good">yes</td></tr>
+ <tr><td>tamper-evident</td><td class="bad">no</td><td class="good">yes</td><td class="good">yes</td></tr>
+ <tr><td>per-call latency</td><td>500 ms</td><td>3-5 sec</td><td>4-12 hr</td></tr>
+ <tr><td>practical for live traffic</td><td class="good">yes</td><td class="acc">yes (compile-time)</td><td class="bad">no</td></tr>
+ </table>
+ </div>
+ <div class="m-cards" aria-hidden="true">
+ <div class="m-card"><div class="m-h">k = 1 (raw)</div><div class="m-row"><span class="lab">cost vs raw</span><span class="val good">1&times;</span></div><div class="m-row"><span class="lab">auditable</span><span class="val bad">no</span></div><div class="m-row"><span class="lab">tamper-evident</span><span class="val bad">no</span></div><div class="m-row"><span class="lab">latency</span><span class="val">500 ms</span></div><div class="m-row"><span class="lab">live traffic</span><span class="val good">yes</span></div></div>
+ <div class="m-card"><div class="m-h">k = 8 verified</div><div class="m-row"><span class="lab">cost vs raw</span><span class="val acc">~8&times;</span></div><div class="m-row"><span class="lab">auditable</span><span class="val good">yes</span></div><div class="m-row"><span class="lab">tamper-evident</span><span class="val good">yes</span></div><div class="m-row"><span class="lab">latency</span><span class="val">3-5 sec</span></div><div class="m-row"><span class="lab">live traffic</span><span class="val acc">yes (compile-time)</span></div></div>
+ <div class="m-card"><div class="m-h">zk-ML proof</div><div class="m-row"><span class="lab">cost vs raw</span><span class="val bad">~10,000&times;</span></div><div class="m-row"><span class="lab">auditable</span><span class="val good">yes</span></div><div class="m-row"><span class="lab">tamper-evident</span><span class="val good">yes</span></div><div class="m-row"><span class="lab">latency</span><span class="val">4-12 hr</span></div><div class="m-row"><span class="lab">live traffic</span><span class="val bad">no</span></div></div>
+ </div>
+ </div>
+
+ <h2>What this buys you in production.</h2>
+ <p><b>For compliance.</b> Every label that trained your LoRA is signed, timestamped, and chained. Every chain is recoverable. The auditor reads a number and verifies the chain; you do not have to argue policy with them.</p>
+ <p><b>For training quality.</b> The verifier is a quality filter. Distilling against k=8 verified labels produces consistently better LoRAs than distilling against k=1 raw labels, because the bad samples don't pollute the training set. The compile-time gate in <a href="/k-score" style="color:var(--accent)">K-score</a> enforces this: an artifact whose embedded eval set fails to clear the floor never gets signed.</p>
+ <p><b>For the receipt-chain itself.</b> You can export the chain root and re-verify it offline using your retained tenant receipt secret. Publishing chain roots to Sigstore / Rekor for cross-organization diligence without sharing secrets is on the rs-2/rs-3 roadmap.</p>
+
+ <h2 id="faq">FAQ.</h2>
+ <h3>Why not save the raw model output and call it a day?</h3>
+ <p>Because nothing prevents an attacker (or a careless engineer) from rewriting your saved output later. A receipt is content-anchored: changing the output changes the hash, which invalidates the receipt, which invalidates every later receipt in the chain.</p>
+
+ <h3>Does the verifier need to be deterministic?</h3>
+ <p>Yes. If the verifier is non-deterministic, you cannot re-derive the same winner from the same samples. The synthesis pipeline rejects verifiers that don't pass a determinism check (run the verifier 100 times on a fixed input and a fixed candidate; reject if any output differs).</p>
+
+ <h3>What about the frontier vendor's silent model rolls?</h3>
+ <p>If the vendor changes the model under your contract, the same prompt produces a different sample distribution; verified inference makes that visible (the receipt's <code>model_id</code> shows the vendor's reported version, but the sample-distribution shift is detectable). For local artifacts, the LoRA's content hash is in the receipt; you control when it changes.</p>
+
+ <h3>Can I bring my own verifier?</h3>
+ <p>Yes. Pass <code>--verifier ./mine.js</code> to <code>kolm compile</code>. The compiler still synthesizes a fallback from your seeds, but a hand-written verifier always wins. You publish the verifier's content hash so downstream auditors can re-run it.</p>
+
+ <div class="signpost">
+ <a href="/articles/ai-compiler">
+ <span class="lab">read</span>
+ <span class="v">How an AI compiler works <span class="arrow">&rarr;</span></span>
+ <p>The four-stage pipeline that produces every <code>.kolm</code>.</p>
+ </a>
+ <a href="/articles/kolm-file-format">
+ <span class="lab">read</span>
+ <span class="v">The <code>.kolm</code> file format <span class="arrow">&rarr;</span></span>
+ <p>What's inside the artifact, byte by byte.</p>
+ </a>
+ <a href="/k-score">
+ <span class="lab">measure</span>
+ <span class="v">The K-score, defined <span class="arrow">&rarr;</span></span>
+ <p>The single number on the cover, derived from five.</p>
+ </a>
+ <a href="/compile">
+ <span class="lab">act</span>
+ <span class="v">Run <code>kolm compile</code> <span class="arrow">&rarr;</span></span>
+ <p>Five minutes. A signed artifact. No GPU required.</p>
+ </a>
+ </div>
+
+ </div>
+</article>
+
+
+</main>
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+</body>
+</html>

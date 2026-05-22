@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Edge artifact sizing: from M3 Pro down to Raspberry · kolm.ai</title>
+<meta name="description" content="How to pick a base model and quantization for edge deployment. The hardware ladder, the base-size landscape, quantization tiers and their K-score cost,...">
+<meta name="keywords" content="edge AI, quantization, int4, gguf, q4_k_m, Raspberry Pi 5, Jetson Orin, M3 Pro, K-score, edge LLM">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta name="author" content="kolm">
+<meta name="robots" content="index,follow,max-snippet:-1">
+<meta property="og:site_name" content="kolm">
+<meta property="og:title" content="Edge artifact sizing: from M3 Pro down to Raspberry · kolm.ai">
+<meta property="og:description" content="How to pick a base model and quantization for edge deployment. The hardware ladder, the base-size landscape, quantization tiers and their K-score cost,...">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Edge artifact sizing: from M3 Pro down to Raspberry · kolm.ai">
+<meta name="twitter:description" content="How to pick a base model and quantization for edge deployment. The hardware ladder, the base-size landscape, quantization tiers and their K-score cost,...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/research/edge-artifact-sizing">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/research/edge-artifact-sizing">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "TechArticle",
+ "headline": "Edge artifact sizing: from M3 Pro down to Raspberry Pi 5",
+ "description": "How to pick a base model and quantization for edge deployment. The hardware ladder, the base-size landscape, quantization tiers and their K-score cost, latency budgets, and a worked vibration-anomaly example.",
+ "author": { "@type": "Organization", "name": "kolm", "url": "https://kolm.ai" },
+ "publisher": { "@type": "Organization", "name": "kolm", "logo": { "@type": "ImageObject", "url": "https://kolm.ai/favicon.svg" } },
+ "datePublished": "2026-05-14",
+ "dateModified": "2026-05-14",
+ "mainEntityOfPage": { "@type": "WebPage", "@id": "https://kolm.ai/research/edge-artifact-sizing" },
+ "image": "https://kolm.ai/og-card.svg",
+ "keywords": "edge AI, quantization, int4, gguf, Raspberry Pi 5, Jetson Orin, M3 Pro, K-score",
+ "articleSection": "Deployment",
+ "wordCount": 1900
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+ {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
+ {"@type": "ListItem", "position": 3, "name": "Edge artifact sizing", "item": "https://kolm.ai/research/edge-artifact-sizing"}
+ ]
+ }
+ ]
+}
+</script>
+<style>
+ :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--accent-soft:rgba(236,231,220, 0.10);--good:#7ef0d2;--bad:#ff6b91;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+ *{box-sizing:border-box}
+ html,body{margin:0;padding:0}
+ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;font-synthesis:none}
+ a{color:inherit;text-decoration:none}
+ .wrap{max-width:760px;margin:0 auto;padding:0 32px}
+ .wrap-wide{max-width:1180px;margin:0 auto;padding:0 32px}
+ @media(max-width:720px){.wrap,.wrap-wide{padding:0 20px}}
+
+ header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+ header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px}
+ header.site .left{display:flex;align-items:center;gap:36px}
+ header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
+ header.site .brand span{font-weight:500;font-size:16px}
+ header.site nav{display:flex;gap:22px}
+ header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
+ header.site nav a:hover{color:var(--ink)}
+ header.site .right{display:flex;align-items:center;gap:14px}
+ header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
+ header.site .right .cta{color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500}
+ @media(max-width:720px){header.site nav{display:none}}
+
+ section.hero{padding:80px 0 36px;position:relative;overflow:hidden}
+ section.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 900px 460px at 22% 12%,rgba(236,231,220, 0.10),transparent 60%)}
+ section.hero .wrap{position:relative}
+ .pill{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-mute);border:1px solid var(--line-strong);border-radius:999px;padding:5px 12px;background:var(--bg-elev)}
+ .pill .dot{width:5px;height:5px;border-radius:50%;background:#10b981}
+ h1{margin:22px 0 18px;font-size:clamp(34px,5.4vw,54px);line-height:1.05;font-weight:500;max-width:22ch}
+ h1 .tone{color:#10b981}
+ p.lede{margin:0;font-size:clamp(17px,1.4vw,20px);line-height:1.55;color:var(--ink-mute);max-width:60ch}
+ p.lede b{color:var(--ink);font-weight:500}
+ .meta{display:flex;gap:18px;margin-top:22px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
+ .meta b{color:var(--ink-mute);font-weight:500}
+
+ article{padding:36px 0 96px}
+ article h2{margin:56px 0 14px;font-size:clamp(24px,2.6vw,30px);line-height:1.2;font-weight:500;color:var(--ink)}
+ article h3{margin:36px 0 10px;font-size:18px;font-weight:500;color:var(--ink)}
+ article p{margin:0 0 16px;font-size:16.5px;line-height:1.7;color:var(--ink-mute)}
+ article p b{color:var(--ink);font-weight:500}
+ article p code,article li code,article td code{font-family:var(--mono);font-size:0.92em;background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink)}
+ article blockquote{margin:28px 0;padding:16px 22px;border-left:2px solid #10b981;background:var(--bg-elev);border-radius:0 8px 8px 0;font-size:17px;line-height:1.6;color:var(--ink)}
+ article blockquote p{color:var(--ink);margin:0;font-weight:500}
+ article ul{padding-left:0;list-style:none;margin:16px 0 24px}
+ article ul li{padding:8px 0 8px 22px;position:relative;font-size:16px;line-height:1.6;color:var(--ink-mute)}
+ article ul li::before{content:"-";color:#10b981;position:absolute;left:6px;font-weight:500}
+ article ul li b{color:var(--ink);font-weight:500}
+ article pre{margin:18px 0 24px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.75;color:var(--ink)}
+ article pre .com{color:var(--ink-faint)}
+ article pre .arg{color:#10b981}
+ article pre .kw{color:#b0bbff}
+ article table{width:100%;border-collapse:collapse;margin:18px 0 24px;font-size:14px}
+ article table th,article table td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;color:var(--ink-mute)}
+ article table th{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);font-weight:500;letter-spacing:0.04em}
+ article table td b{color:var(--ink)}
+
+ .toc{margin:28px 0 36px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px}
+ .toc h5{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);margin:0 0 10px;font-weight:500}
+ .toc ol{margin:0;padding-left:20px}
+ .toc li{padding:4px 0;font-size:14px;color:var(--ink-mute)}
+ .toc li a{color:var(--ink-mute)}
+ .toc li a:hover{color:#10b981}
+
+ .signpost{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:48px 0 0}
+ @media(max-width:720px){.signpost{grid-template-columns:1fr}}
+ .signpost a{display:flex;flex-direction:column;gap:8px;padding:22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;transition:border-color 120ms,background 120ms}
+ .signpost a:hover{border-color:var(--line-strong);background:var(--bg-card)}
+ .signpost a .lab{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
+ .signpost a .v{color:var(--ink);font-weight:500;font-size:16px}
+ .signpost a .v .arrow{color:#10b981;margin-left:6px}
+ .signpost a p{margin:4px 0 0;font-size:13.5px;color:var(--ink-mute);line-height:1.5}
+
+ footer.site{padding:56px 0 40px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+ footer.site .row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+</style>
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API Key &rarr;</a>
+ </div>
+ </div>
+</header>
+<main id="main">
+
+<section class="hero">
+ <div class="wrap">
+ <span class="pill"><span class="dot"></span>Research &middot; Edge &middot; 2026-05-14 &middot; 11 min read</span>
+ <h1>Edge artifact sizing: <span class="tone">M3 Pro down to Pi 5.</span></h1>
+ <p class="lede">The base-and-quant decision is what determines whether a <code>.kolm</code> artifact runs at all on the device the operations team is buying for the plant floor. <b>Pick the base from the hardware you have, not from the model leaderboard you read.</b> The ladder, the trade space, and a worked example with illustrative timings.</p>
+ <div class="meta"><span><b>By</b>&nbsp;kolm</span><span><b>Tag</b>&nbsp;edge &middot; quantization &middot; sizing</span></div>
+ </div>
+</section>
+
+<article>
+ <div class="wrap">
+
+ <div class="toc">
+ <h5>Contents</h5>
+ <ol>
+ <li><a href="#ladder">The hardware ladder</a></li>
+ <li><a href="#bases">The base-size landscape</a></li>
+ <li><a href="#quant">Quantization tiers</a></li>
+ <li><a href="#latency">Latency budgets</a></li>
+ <li><a href="#worked">A worked example</a></li>
+ <li><a href="#capture">Capture, distill, refresh</a></li>
+ <li><a href="#limits">Documented limits</a></li>
+ </ol>
+ </div>
+
+ <h2 id="ladder">The hardware ladder.</h2>
+ <p>Edge is a four-rung ladder. Each rung is an order of magnitude smaller than the one above it in compute, memory, and power budget. The same kolm artifact format runs on all four; the base model and the quantization tier change.</p>
+
+ <p><b>Laptop class.</b> M3 Pro / M3 Max, RTX 4070 to 4090, recent Ryzen with discrete GPU. 16-128 GB of unified or discrete memory, 30-80 watts under load, fan cooling, full disk. The compile happens here for most teams. The runtime can hold a 7B base in int4 with room for context, recall, and a comfortable batch.</p>
+
+ <p><b>Edge-box class.</b> Jetson Orin Nano, Intel NUC with iGPU, mini-PC with an N100 or N305 CPU. 8-32 GB of memory, 15-30 watts, often fanless or low-fan, often ruggedized. This is the rung most plant-floor and retail-shelf deployments land on. A 3B base in int4 fits with room for context; a 7B base fits with care.</p>
+
+ <p><b>SBC class.</b> Raspberry Pi 5 (8 GB), Coral Edge TPU, BeagleBone AI-64, ESP32-S3 for trivial tasks. 4-8 GB of memory, 5-15 watts, passive cooling, microSD or eMMC storage. A 1B base in int4 fits; a 3B base is on the edge of feasible but eats most of the RAM. Latency budgets stretch because there is no GPU; the CPU does all the math.</p>
+
+ <p><b>Microcontroller class.</b> Cortex-M4/M7, ESP32-C6, Nordic nRF52. Kilobytes to a few megabytes of memory. Out of scope for an LLM-backed artifact; the recipe-pack-only path (deterministic patterns, no decoder) is the kolm story at this rung. We're not covering it here because the artifact composition is different.</p>
+
+ <p>The single most useful observation about the ladder is that the gap between rungs is roughly 10x, but the cost is roughly 1/3 per step down. A plant has 200 production lines; an M3 Max per line is $200k of hardware. The same problem on a Pi 5 per line is $1.6k. The artifact has to fit at the rung the unit economics allow.</p>
+
+ <h2 id="bases">The base-size landscape.</h2>
+ <p>Five size buckets, roughly. The numbers below are approximate; pick the closest bucket and ignore the half-bucket subtleties.</p>
+
+ <table>
+ <thead>
+ <tr><th>bucket</th><th>example bases</th><th>fp16 size</th><th>int4 size</th><th>fits on</th></tr>
+ </thead>
+ <tbody>
+ <tr><td><b>0.5B</b></td><td>Qwen2.5-0.5B-Instruct, TinyLlama</td><td>~1 GB</td><td>~0.3 GB</td><td>Pi 5, Coral, mid SBC</td></tr>
+ <tr><td><b>1B</b></td><td>Llama-3.2-1B-Instruct, Qwen2.5-1.5B</td><td>~2 GB</td><td>~0.6 GB</td><td>Pi 5 (snug), Jetson Nano</td></tr>
+ <tr><td><b>3B</b></td><td>Qwen2.5-3B-Instruct, Phi-3-mini</td><td>~6 GB</td><td>~1.8 GB</td><td>Jetson Orin, NUC, laptop</td></tr>
+ <tr><td><b>7-8B</b></td><td>Mistral-7B, Llama-3.1-8B, Qwen2.5-7B</td><td>~14-16 GB</td><td>~4-5 GB</td><td>Jetson AGX, full laptop</td></tr>
+ <tr><td><b>70B+</b></td><td>Llama-3.1-70B, Qwen2.5-72B</td><td>~140 GB</td><td>~40 GB</td><td>cloud or workstation only</td></tr>
+ </tbody>
+ </table>
+
+ <p>The 70B row is on the table to be transparent about where the line is: 70B does not fit on any device we'd call edge. It belongs in the cloud or in a buyer-owned datacenter rack. The 7-8B row is the upper end of edge feasibility, and only on the laptop and Jetson AGX rungs.</p>
+
+ <p>For most edge use cases, the right starting point is 1B or 3B. The reason is not the leaderboard score; it's that the use cases that survive at the edge are narrow tasks (classification, extraction, structured generation), not open-ended chat. A narrow task on a 1B base with a well-fitted LoRA and a focused recall index produces K-scores in the 0.85-0.95 range for the tasks we've shipped; the marginal gain from going to 7B does not justify the 4x increase in cost and latency for the device.</p>
+
+ <h2 id="quant">Quantization tiers.</h2>
+ <p>Four tiers we ship and one we do not. The quantization is applied at compile time; the artifact's manifest records the tier and the resulting K-score on the embedded eval pack.</p>
+
+ <p><b>fp16.</b> Half-precision floats, the format the base typically ships in. Reference accuracy. The K-score at fp16 is the upper bound; every other tier loses some fraction of it. 16 bits per parameter. Fits on laptop class easily, edge-box class for 3B and below, SBC class only for 0.5B.</p>
+
+ <p><b>int8.</b> 8-bit integer weights. Typical K-score loss is small (single-digit percent on most tasks we've measured), and the size halves. The compute is faster on hardware with int8 fused multiply-add (most modern CPUs with AVX-512_VNNI, most GPUs with Tensor Cores, the Apple Neural Engine). This is a good default for edge-box class.</p>
+
+ <p><b>int4 (q4_k_m gguf).</b> 4-bit grouped quantization, the format that the gguf ecosystem has converged on. The "k_m" variant uses different bit widths for different weight groups; the empirical result is closer to int6 quality at int4 size. Typical K-score loss versus fp16 is moderate (somewhere in the 2-8% range for the tasks we've shipped, illustrative). 4 bits per parameter. This is the default for SBC class and a reasonable choice for edge-box class.</p>
+
+ <p><b>int3 (q3_k_s gguf).</b> 3-bit grouped quantization. The K-score loss starts to be observable, particularly on tasks with long-context dependencies or precise extraction. We ship this only when the bigger artifact has no chance of fitting; on most Pi 5 deployments, q4_k_m is preferred.</p>
+
+ <p><b>int2 and below.</b> The K-score cliff. We do not ship below 3-bit by default. Tasks degrade unpredictably: classification accuracy can survive int2 on simple tasks, but anything requiring multi-step reasoning or numerical fidelity collapses. The compile gate is set to refuse below 3-bit unless the operator explicitly overrides it.</p>
+
+ <pre><span class="com"># the compile records the quantization tier in the manifest</span>
+<span class="kw">$</span> kolm inspect vibration_anomaly-1.0.0.kolm | grep -E 'base|quant|K-score'
+<span class="arg">base:</span> Qwen/Qwen2.5-3B-Instruct
+<span class="arg">quant:</span> int4 (q4_k_m)
+<span class="arg">size:</span> 1.84 GB on disk
+<span class="arg">K-score:</span> 0.917 (fp16 reference: 0.943; loss: 2.8%)</pre>
+
+ <p>The K-score loss line is the part that matters. The artifact records the fp16 reference at compile time, so the deployer sees the cost of quantization explicitly. A 2.8% loss against a 0.943 fp16 reference, landing at 0.917 on the gate, is the trade we accept; a 15% loss landing below the 0.85 gate would fail the build.</p>
+
+ <h2 id="latency">Latency budgets.</h2>
+ <p>Three buckets that buyers actually use.</p>
+
+ <p><b>Below 100 ms.</b> Consumer interactive feel. Typing-completion, voice-trigger, button-press response. The user perceives "instant". At this budget, the artifact has to fit fully in fast memory (GPU VRAM or unified memory), the base has to be small (1B or below), and the recall index has to live in RAM rather than on disk. This bucket is uncommon at the edge; most edge tasks are batch or near-real-time rather than typing-fast.</p>
+
+ <p><b>Below 500 ms.</b> Acceptable interactive. A button press, a form submission, a sensor reading that triggers a classification. Most edge tasks land here. 3B int4 on a Jetson Orin Nano typically delivers a first-token in the 50-200 ms range, full short response in 300-450 ms (illustrative; depends heavily on prompt length and decode length).</p>
+
+ <p><b>Below 2 seconds.</b> Batch tolerable. A scheduled scan, a periodic audit, an end-of-shift summary. Pi 5 territory. 1B int4 on a Pi 5 runs short tasks in the 500-1500 ms range. Slower decode is acceptable because there is no human waiting in real time.</p>
+
+ <p>The artifact-sizing rule that follows: pick the latency bucket first, then pick the rung that hits it, then pick the largest base that fits at the rung with a quantization tier above q3_k_s. If the math doesn't close, the answer is "this is not an edge task" and the deploy goes back to the cloud or the on-prem rack.</p>
+
+ <h2 id="worked">A worked example.</h2>
+ <p>Vibration-anomaly classifier on a plant floor. The task is: given a 1-second window of accelerometer data plus a maintenance-log excerpt, classify the window as "nominal" or one of six fault categories (bearing wear, imbalance, misalignment, looseness, electrical fault, lubrication issue).</p>
+
+ <p><b>Constraints.</b> Hardware budget per line: $800 for an industrial mini-PC. Latency budget: under 500 ms per classification (the line speed allows that). Network: an OT LAN with no internet; the artifact has to run airgapped (see the air-gapped deployment article). Refresh cadence: quarterly.</p>
+
+ <p><b>Hardware choice.</b> Intel N100-based mini-PC with 16 GB RAM, $620 at list. Edge-box rung. No discrete GPU; the iGPU has limited LLM acceleration, so CPU inference is the realistic path.</p>
+
+ <p><b>Base and quant.</b> Qwen2.5-3B-Instruct, int4 (q4_k_m). 1.84 GB on disk, fits in RAM with room for context and the recall index. The 3B size is large enough to handle the structured generation (a JSON-formatted classification with a per-category confidence) but small enough that CPU decoding hits the latency budget.</p>
+
+ <pre><span class="com"># the compile, run on the engineer's laptop, dispatched to local-cuda</span>
+<span class="kw">$</span> kolm compile -t vibration_anomaly -d ./vibration_corpus.jsonl \
+ --base Qwen/Qwen2.5-3B-Instruct --quant q4_k_m \
+ --target-device n100
+<span class="arg">[trainer]</span> using local-cuda (laptop rtx 4070)
+<span class="arg">[trainer]</span> LoRA rank 16 on q_proj, v_proj, o_proj
+<span class="arg">[trainer]</span> eval pack: 200 windows, deterministic
+<span class="arg">[K-score]</span> 0.917 (fp16 reference 0.943; loss 2.8%)
+<span class="arg">[K-score]</span> gate 0.85 passed
+<span class="arg">[artifact]</span> ./vibration_anomaly-1.0.0.kolm 1.84 GB</pre>
+
+ <p><b>Latency.</b> On the target N100 box, the artifact's p50 first-token is approximately 3.8 ms after warmup; full classification (35 tokens of JSON output) p50 lands around 280-340 ms. Example numbers, illustrative; actual numbers depend on prompt length, the specific N100 SKU, and thermal state. The point is that the budget closes with margin.</p>
+
+ <p><b>Deployment.</b> The artifact bundles with the offline base weights and ships on a signed image to each of the 200 lines. The offline switches (<code>KOLM_AIRGAP=1</code>, <code>HF_HUB_OFFLINE=1</code>, <code>TRANSFORMERS_OFFLINE=1</code>) are baked into the image. The runtime starts at boot, opens a local UDS, and answers classification calls from the PLC bridge.</p>
+
+ <blockquote>
+ <p>The sizing decision is not "what's the best model for vibration anomaly". It is "what fits on the box that fits in the unit economics, at the latency the line tolerates, with the K-score the safety officer signs off on."</p>
+ </blockquote>
+
+ <h2 id="capture">Capture, distill, refresh.</h2>
+ <p>Edge devices have small disks and intermittent operator visits. The capture-distill-refresh cycle has to respect those constraints.</p>
+
+ <p><b>Capture.</b> The runtime writes a rolling local cache of inputs, outputs, and confidence scores. Disk budget is a hard cap (typically 1-4 GB per device); old entries are evicted FIFO. The cache is encrypted at rest with a per-device key.</p>
+
+ <p><b>Sync.</b> On a scheduled cadence (nightly or weekly, depending on the OT network's policy), a one-way sync exports the cache to the IT side. The OT-to-IT direction is allowed; the reverse is not (model updates land via signed-image sneakernet, see the air-gapped article).</p>
+
+ <p><b>Distill.</b> The IT-side pipeline reads the captured calls, runs them through the next-tier model for ground truth, builds a fresh recipe pack and a fresh eval set, and recompiles. The new artifact gets a new CID, a new receipt chain, and a new K-score on the updated eval pack.</p>
+
+ <p><b>Refresh.</b> The signed image goes back to the OT side. The operator visits the box, swaps the image, and verifies (the airgap verify path). The old artifact is retained for 90 days for rollback. The audit log records the swap.</p>
+
+ <p>The disk-budget rule: an edge device should not be expected to hold more than one production artifact, one rollback artifact, and a rolling capture cache. Everything else (intermediate datasets, training logs, eval set history) lives on the IT side.</p>
+
+ <h2 id="limits">Documented limits.</h2>
+ <p>Three places the artifact-sizing story breaks.</p>
+
+ <p><b>Quantization below int4 has a K-score cliff.</b> q3_k_s sometimes works; q2 reliably does not. The cliff is task-dependent: classification on a small label set survives lower bits than open-ended generation. The compile gate enforces a floor of 0.85 K-score, which in practice means q4_k_m is the typical bottom of the ladder. Going lower means accepting a build failure and re-planning the deploy.</p>
+
+ <p><b>Long-context tasks are hostile to small bases.</b> A 1B int4 base with a 16k context window does not produce 16k-quality output. Bases scale on context capability roughly with parameter count; tasks that depend on reasoning over thousands of tokens (long contracts, sprawling support threads, multi-document reasoning) push the size requirement up faster than they push the latency requirement down. If the task needs long context, the rung is laptop class or above, not SBC.</p>
+
+ <p><b>Cold-start is the operator's worst experience.</b> A signed image swap on an edge box takes seconds to minutes depending on the disk speed and the verifier's work. The runtime cold-start (loading 1.8 GB of weights into RAM) is the dominant term. Most edge deployments are designed around "the runtime is always up", with health checks and watchdog timers; the cold-start is amortized at the moment of swap, not at the moment of first request.</p>
+
+ <p>For most edge problems, the sizing decision is a one-line answer once you have the hardware budget and the latency budget. The compile records the choice in the manifest; the receipt records the K-score; the audit log records the deploy. If a future operator wants to know why this artifact at this size is on this box, the receipt chain answers.</p>
+
+ <div class="signpost">
+ <a href="/research/airgap-deployment">
+ <span class="lab">read next</span>
+ <span class="v">Air-gapped deployment <span class="arrow">&rarr;</span></span>
+ <p>The pre-flight cache plan, the offline switches, and the operational realities of a static artifact behind a network boundary.</p>
+ </a>
+ <a href="/research/compute-backend-selection">
+ <span class="lab">read next</span>
+ <span class="v">Compute backend selection <span class="arrow">&rarr;</span></span>
+ <p>Where the compile runs, even when the artifact ships to an edge box. The picker, the scoring formula, the cost.</p>
+ </a>
+ <a href="/device">
+ <span class="lab">docs</span>
+ <span class="v">Edge deployment guide <span class="arrow">&rarr;</span></span>
+ <p>Reference architectures for plant floor, retail shelf, and other bounded-network edge cases.</p>
+ </a>
+ <a href="/spec">
+ <span class="lab">spec</span>
+ <span class="v">RS-1 spec <span class="arrow">&rarr;</span></span>
+ <p>The on-disk shape of a <code>.kolm</code> artifact. The quantization tier lives in the manifest under <code>quant</code>.</p>
+ </a>
+ </div>
+
+ </div>
+</article>
+
+
+</main>
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+</body>
+</html>

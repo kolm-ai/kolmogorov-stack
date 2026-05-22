@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>kolm publish | CLI reference | kolm.ai</title>
+<meta name="description" content="Reference for the kolm publish CLI verb: usage, flags, examples, and links to related docs.">
+<link rel="canonical" href="https://kolm.ai/docs/cli/publish">
+<meta property="og:title" content="kolm publish | CLI reference | kolm.ai">
+<meta property="og:description" content="Reference for the kolm publish CLI verb: usage, flags, examples, and links to related docs.">
+<meta property="og:url" content="https://kolm.ai/docs/cli/publish">
+<meta property="og:type" content="article">
+<meta property="og:image" content="/og/docs-cli.svg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
+<script src="/nav.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm publish","description":"Reference for the kolm publish CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/publish","mainEntityOfPage":"https://kolm.ai/docs/cli/publish","author":{"@type":"Organization","name":"kolm.ai"}}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+<main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="publish">
+<nav aria-label="Breadcrumb" class="crumbs">
+  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>publish</span>
+</nav>
+<section class="kolm-surface-media kolm-surface-media--inline" aria-label="CLI workflow proof">
+  <div class="media-terminal">
+    <span class="media-kicker">CLI contract</span>
+    <span class="media-line"><span class="ok">$</span> kolm publish --help</span>
+    <span class="media-line"><span class="ok">$</span> kolm publish --json</span>
+    <p>Every reference page is generated from the command source, keeps usage and examples close to the product, and links into the same API, account, and artifact workflow.</p>
+  </div>
+  <div class="media-proof">
+    <span class="media-kicker">Operational proof</span>
+    <p>Use this verb inside the capture, dataset, distill, compile, verify, or runtime loop. Scripts can pin JSON output, humans get the same flow in the account console and TUI.</p>
+  </div>
+</section>
+<h1>kolm publish</h1>
+<p>Publish a <code>.kolm</code> artifact to the marketplace or a private registry. The artifact must pass <code>kolm verify</code> before publish is allowed.</p>
+<h2>Usage</h2>
+<pre><code>
+kolm publish &lt;artifact.kolm&gt; # default registry
+kolm publish &lt;artifact.kolm&gt; --registry &lt;url&gt; # private registry
+kolm publish &lt;artifact.kolm&gt; --visibility public # marketplace listing
+kolm publish &lt;artifact.kolm&gt; --visibility unlisted # private link
+kolm publish &lt;artifact.kolm&gt; --tag &lt;semver&gt; # explicit version tag
+</code></pre>
+<h2>Pre-publish checks</h2>
+<ol>
+<li><code>kolm verify</code> must succeed on the artifact.</li>
+<li>The actor key must hold <code>publish</code> scope for the target namespace.</li>
+<li>The frozen-eval K-score must meet the gate declared in the recipe.</li>
+<li>The license file must declare a non-empty license id.</li>
+</ol>
+<h2>After publish</h2>
+<p>The registry returns a content-addressed URL. Anyone with the URL can <code>kolm install &lt;url&gt;</code> if the visibility allows it. The publish action itself is signed and appended to the receipt chain.</p>
+<h2>See also</h2>
+<ul>
+<li><code>kolm verify</code> for the pre-publish 7-check audit.</li>
+<li><code>kolm team</code> for managing publisher roles.</li>
+<li><code>/marketplace</code> to browse public recipes.</li>
+</ul>
+<section class="see-also" aria-labelledby="see-also-h">
+  <h2 id="see-also-h">See also</h2>
+  <ul>
+    <li><a href="/docs/cli">All CLI verbs</a></li>
+    <li><a href="/quickstart">Quickstart</a></li>
+    <li><a href="/docs/api">HTTP API reference</a></li>
+    <li><a href="/docs/sdk">SDK reference</a></li>
+  </ul>
+</section>
+</main>
+</body>
+</html>

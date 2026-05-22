@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>HIPAA summarizer recipe · kolm cookbook · kolm.ai</title>
+<meta name="description" content="Compile a signed local workflow that summarizes clinical notes after PHI scrubbing, with reviewed training rows, redaction evidence, and receipt metadata.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta property="og:title" content="HIPAA summarizer recipe · kolm cookbook · kolm.ai">
+<meta property="og:description" content="Compile a signed local workflow that summarizes clinical notes after PHI scrubbing, with reviewed training rows, redaction evidence, and receipt metadata.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="HIPAA summarizer recipe · kolm cookbook · kolm.ai">
+<meta name="twitter:description" content="Compile a signed local workflow that summarizes clinical notes after PHI scrubbing, with reviewed training rows, redaction evidence, and receipt metadata.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/cookbook/hipaa-summarizer">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/cookbook/hipaa-summarizer">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/cookbook/_recipe.css">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "HowTo",
+ "name": "HIPAA-summarizer recipe",
+ "description": "Local clinical-note summarizer with PHI redaction. Signed, offline.",
+ "url": "https://kolm.ai/cookbook/hipaa-summarizer",
+ "totalTime": "PT5M",
+ "tool": [
+ {
+ "@type": "HowToTool",
+ "name": "kolm CLI"
+ }
+ ],
+ "step": [
+ {
+ "@type": "HowToStep",
+ "name": "Install",
+ "text": "npm i -g github:sneaky-hippo/kolm-stack"
+ },
+ {
+ "@type": "HowToStep",
+ "name": "Compile",
+ "text": "kolm compile hipaa-summarizer.toml"
+ },
+ {
+ "@type": "HowToStep",
+ "name": "Run",
+ "text": "kolm run hipaa-summarizer.kolm"
+ }
+ ]
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {
+ "@type": "ListItem",
+ "position": 1,
+ "name": "kolm",
+ "item": "https://kolm.ai/"
+ },
+ {
+ "@type": "ListItem",
+ "position": 2,
+ "name": "Cookbook",
+ "item": "https://kolm.ai/cookbook"
+ },
+ {
+ "@type": "ListItem",
+ "position": 3,
+ "name": "HIPAA summarizer recipe",
+ "item": "https://kolm.ai/cookbook/hipaa-summarizer"
+ }
+ ]
+ }
+ ]
+}
+</script>
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API Key &rarr;</a>
+ </div>
+ </div>
+</header>
+<main id="main">
+
+<section class="hero">
+ <div class="wrap">
+ <div class="crumbs"><a href="/docs">cookbook</a> &middot; vertical &middot; hipaa-summarizer</div>
+ <span class="pill">Recipe &middot; vertical</span>
+ <h1>Clinical notes, <span class="tone">summarized behind PHI controls.</span></h1>
+ <p class="lede">A local <code>.kolm</code> file that summarizes a clinical note into <em>(chief_complaint, history, assessment, plan)</em>. PHI (HIPAA's 18 identifiers) is redacted before training and the verifier rejects any output that contains an HIPAA identifier or hallucinates a finding not supported by the input. Compiled in your VPC; the artifact runs on the EHR host.</p>
+
+ <div class="meta-row">
+ <div class="item"><span class="label">base model</span><span class="value">qwen2.5-7b-instruct</span></div>
+ <div class="item"><span class="label">gold notes</span><span class="value">600 (420 train / 180 eval)</span></div>
+ <div class="item"><span class="label">k-score floor</span><span class="value">0.88</span></div>
+ <div class="item"><span class="label">artifact size</span><span class="value">2.6 GB</span></div>
+ <div class="item"><span class="label">compile time</span><span class="value">~62 min (in your VPC)</span></div>
+ <div class="item"><span class="label">spec source</span><span class="value">redactor + grounded</span></div>
+ </div>
+ </div>
+</section>
+
+<article>
+ <div class="wrap">
+
+ <div class="group">
+ <h2>What this recipe does</h2>
+ <p>Most "AI summary" of clinical notes is impossible at most hospitals because the data can't leave the network. This recipe compiles in your environment: the gold corpus is never seen by us, the base weights are pulled from a signed mirror, the artifact is delivered to the EHR host. PHI handling is enforced both at training (regex+NER redactor strips the 18 identifiers from gold pairs) and at run time (output is blocked if a regex match fires on any HIPAA pattern).</p>
+ <p>The "grounded" verifier rejects any clinical claim that doesn't trace to text in the input. The model can summarize, condense, and structure · it cannot invent.</p>
+ </div>
+
+ <div class="group">
+ <h2>The spec</h2>
+ <pre class="code">{
+ <span class="k">"output_kind"</span>: <span class="k">"json"</span>,
+ <span class="k">"schema"</span>: {
+ <span class="k">"required"</span>: [<span class="k">"chief_complaint"</span>, <span class="k">"history"</span>, <span class="k">"assessment"</span>, <span class="k">"plan"</span>],
+ <span class="k">"properties"</span>: {
+ <span class="k">"chief_complaint"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span>, <span class="k">"maxLength"</span>: 200 },
+ <span class="k">"history"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span>, <span class="k">"maxLength"</span>: 800 },
+ <span class="k">"assessment"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span>, <span class="k">"maxLength"</span>: 600 },
+ <span class="k">"plan"</span>: { <span class="k">"type"</span>: <span class="k">"array"</span>, <span class="k">"items"</span>: {<span class="k">"type"</span>:<span class="k">"string"</span>}, <span class="k">"maxItems"</span>: 8 }
+ }
+ },
+ <span class="k">"verifier"</span>: {
+ <span class="k">"redact_before_train"</span>: <span class="ok">true</span>,
+ <span class="k">"redact_pattern_file"</span>: <span class="k">"hipaa-18.regex"</span>,
+ <span class="k">"output_must_not_contain_phi"</span>: <span class="ok">true</span>,
+ <span class="k">"clinical_claim_must_be_grounded"</span>: <span class="ok">true</span>
+ }
+}</pre>
+ </div>
+
+ <div class="group">
+ <h2>Compile (inside the customer VPC)</h2>
+ <pre class="code">kolm compile <span class="k">"clinical-note summarizer with PHI redaction and grounded claims"</span> \
+ --base qwen2.5-7b-instruct \
+ --pairs ./gold-notes/*.jsonl \
+ --redactor ./hipaa-18.regex \
+ --verifier no-phi-in-output,clinical-claim-grounded \
+ --offline-base-mirror ./base-models/ \
+ --k-floor 0.88 \
+ --output hipaa-summarizer.kolm
+
+<span class="ok">ok</span> wrote <span class="k">hipaa-summarizer.kolm</span>
+ k_score=0.91 signature=ed25519
+ no PHI detected in 180/180 held-out summaries</pre>
+ </div>
+
+ <div class="group">
+ <h2>K-score gate</h2>
+ <div class="k-bar">
+ <span class="k-label">K-score</span>
+ <span class="k-value">0.91</span>
+ <span class="k-detail">held-out 180 notes &middot; PHI redaction 100% (4 levels: regex, NER, span-suppress, output-block) &middot; grounded-claim 100% &middot; clinician-rated faithful 89%</span>
+ </div>
+ <p>Clinician rating: a sample of 60 held-out notes were re-read by an attending and the summary was scored "faithful" / "minor edits" / "wrong." 89% faithful, 11% minor edits, 0% wrong (none claimed a finding not in the note).</p>
+ </div>
+
+ <div class="group">
+ <h2>Run-time profile</h2>
+ <div class="lat-grid">
+ <div class="cell"><div class="h">Hospital server</div><div class="v">2.4<span class="u">s</span></div></div>
+ <div class="cell"><div class="h">RTX 5090</div><div class="v">510<span class="u">ms</span></div></div>
+ <div class="cell"><div class="h">Mac mini</div><div class="v">2.8<span class="u">s</span></div></div>
+ <div class="cell"><div class="h">CPU x86</div><div class="v">3.6<span class="u">s</span></div></div>
+ </div>
+ </div>
+
+ <div class="group">
+ <h2>Deploy</h2>
+ <pre class="code"><span class="c"># EHR background job · summarize new notes for the chart-prep pane:</span>
+on_note_signed = (note) =&gt; {
+ const sum = kolm.run(<span class="k">'hipaa-summarizer.kolm'</span>, note.text);
+ ehr.attach(note.id, <span class="k">'ai-summary'</span>, sum);
+ audit.log({ artifact: <span class="k">'hipaa-summarizer.kolm'</span>, note_id: note.id, k_score: sum.receipt.k_score });
+};</pre>
+ <p>Audit log includes the artifact's signed receipt · every summary is traceable to the exact compiled model that produced it.</p>
+ </div>
+
+ <div class="group">
+ <h2>Related recipes</h2>
+ <div class="related">
+ <a href="/cookbook/finance-disclosure-redact"><div class="h">Finance disclosure</div><div class="d">SEC filing -> redacted public draft.</div></a>
+ <a href="/cookbook/legal-clause-extract"><div class="h">Legal clause extract</div><div class="d">Contract -> labeled clause set.</div></a>
+ <a href="/cookbook/embedded-sensor-classifier"><div class="h">Sensor classifier</div><div class="d">Edge sensor stream -> labeled events.</div></a>
+ </div>
+ </div>
+
+ </div>
+</article>
+
+
+</main>
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+</body>
+</html>

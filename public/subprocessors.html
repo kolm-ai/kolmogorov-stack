@@ -1,262 +1,419 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>kolm subprocessors  - full transparency · kolm.ai</title>
-<meta name="description" content="The complete, live list of third-party services kolm uses, what each one handles, and whether they touch PHI. Updated on every change.">
-<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>Subprocessors &middot; kolm.ai</title>
+<meta name="description" content="Every third-party service kolm uses, what it handles, what region it sits in, and whether it can ever see customer PHI. Updated on every change.">
+<meta name="theme-color" content="#07090c">
 <link rel="canonical" href="https://kolm.ai/subprocessors">
-<meta property="og:title" content="kolm subprocessors  - full transparency · kolm.ai">
-<meta property="og:description" content="The complete, live list of third-party services kolm uses, what each one handles, and whether they touch PHI. Updated on every change.">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/styles.css">
-<link rel="stylesheet" href="/brand-refresh.css">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
 <style>
- .sp-table{width:100%;border-collapse:collapse;font-size:13.5px;margin:22px 0}
- .sp-table th,.sp-table td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
- .sp-table th{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-mute);font-weight:500;background:var(--bg-card)}
- .sp-table td.phi-no{font-family:var(--mono);font-size:11px;color:#7ec486}
- .sp-table td.phi-conditional{font-family:var(--mono);font-size:11px;color:#dab552}
- .sp-table td.phi-yes{font-family:var(--mono);font-size:11px;color:#d77}
- .sp-pill{display:inline-block;padding:2px 8px;border:1px solid var(--line);border-radius:99px;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.06em}
- .sp-pill.no{border-color:#4f8a55;color:#7ec486}
- .sp-pill.opt{border-color:#9b8a4a;color:#dab552}
- .sp-changelog{margin-top:24px;padding:14px 16px;border:1px solid var(--line);border-radius:10px;background:var(--bg-card);font-family:var(--mono);font-size:12px;color:var(--ink-mute)}
- .sp-changelog ul{margin:6px 0 0;padding-left:18px}
+  .sec-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
+  .sec-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
+  .sec-hero h1 { margin: 0 0 var(--ks-4); font-size: clamp(36px, 5vw, 56px); font-weight: 560; letter-spacing: -0.02em; line-height: 1.05; color: var(--ks-ink); }
+  .sec-hero h1 b { color: var(--ks-accent); font-weight: 560; }
+  .sec-hero p.lede { margin: 0 0 var(--ks-6); font-size: 18px; line-height: 1.55; color: var(--ks-ink-2); max-width: 64ch; }
+  .sec-hero .cta-row { display: flex; flex-wrap: wrap; gap: var(--ks-3); margin-bottom: var(--ks-5); }
+  .sec-hero .stamp { display: inline-flex; gap: var(--ks-3); font-family: var(--ks-mono); font-size: 11.5px; color: var(--ks-ink-3); letter-spacing: 0.04em; text-transform: uppercase; padding: 6px 12px; border: 1px solid var(--ks-line-2); border-radius: 999px; }
+  .sec-hero .stamp b { color: var(--ks-accent); font-weight: 540; }
+
+  .sec-section { padding: var(--ks-9) 0; border-bottom: 1px solid var(--ks-line-1); }
+  .sec-section h2 { margin: 0 0 var(--ks-2); font-size: clamp(24px, 3vw, 32px); font-weight: 560; letter-spacing: -0.015em; color: var(--ks-ink); }
+  .sec-section .sub { margin: 0 0 var(--ks-6); font-size: 15px; color: var(--ks-ink-3); max-width: 64ch; line-height: 1.6; }
+
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--ks-4); }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--ks-4); }
+  @media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  .sp-card { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); }
+  .sp-card h3 { margin: 0 0 var(--ks-2); font-size: 16px; font-weight: 540; color: var(--ks-ink); letter-spacing: -0.005em; }
+  .sp-card p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink-2); }
+  .sp-card p + p { margin-top: var(--ks-2); }
+  .sp-card code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-accent); }
+
+  .sp-tbl-wrap { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); overflow: hidden; }
+  table.sp-tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  table.sp-tbl th, table.sp-tbl td { padding: 14px 18px; text-align: left; border-bottom: 1px solid var(--ks-line-1); vertical-align: top; }
+  table.sp-tbl tr:last-child td { border-bottom: none; }
+  table.sp-tbl th { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-ink-3); font-weight: 500; background: rgba(255,255,255,0.02); }
+  table.sp-tbl td { color: var(--ks-ink-2); line-height: 1.55; }
+  table.sp-tbl td.name { color: var(--ks-ink); font-weight: 540; }
+  table.sp-tbl td.region { font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-3); }
+  table.sp-tbl td.phi { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; }
+  table.sp-tbl td.phi-no { color: var(--ks-accent); }
+  table.sp-tbl td.phi-opt { color: #d6a65a; }
+  table.sp-tbl td.phi-yes { color: #d77; }
+
+  .pact { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-6); }
+  .pact h3 { margin: 0 0 var(--ks-3); font-size: 18px; font-weight: 560; color: var(--ks-ink); letter-spacing: -0.005em; }
+  .pact dl { margin: 0; display: grid; grid-template-columns: 200px 1fr; gap: var(--ks-3) var(--ks-5); }
+  .pact dt { font-family: var(--ks-mono); font-size: 12px; letter-spacing: 0.04em; color: var(--ks-ink-3); text-transform: uppercase; padding-top: 2px; }
+  .pact dd { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink); }
+  .pact dd code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-accent); }
+  @media (max-width: 900px) { .pact dl { grid-template-columns: 1fr; gap: var(--ks-1) var(--ks-3); } .pact dt { padding-top: 0; } .pact dd { margin-bottom: var(--ks-3); } }
+
+  .changelog { background: #050607; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); margin-top: var(--ks-4); }
+  .changelog h3 { margin: 0 0 var(--ks-3); font-size: 13px; font-family: var(--ks-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-ink-3); font-weight: 500; }
+  .changelog ul { margin: 0; padding-left: 20px; }
+  .changelog li { font-family: var(--ks-mono); font-size: 12.5px; line-height: 1.7; color: var(--ks-ink-2); }
+  .changelog li b { color: var(--ks-accent); font-weight: 500; }
+  .changelog li code { color: var(--ks-ink); }
+
+  .reach { display: grid; grid-template-columns: 1fr 1fr; gap: var(--ks-4); }
+  @media (max-width: 900px) { .reach { grid-template-columns: 1fr; } }
 </style>
- <meta property="og:image" content="https://kolm.ai/og-card.svg">
- <meta property="og:url" content="https://kolm.ai/subprocessors">
- <meta property="og:type" content="website">
-<script type="application/ld+json">
-{
- "@context": "https://schema.org",
- "@type": "SoftwareApplication",
- "name": "kolm",
- "applicationCategory": "DeveloperApplication",
- "operatingSystem": "Linux, macOS, Windows (WSL)",
- "url": "https://kolm.ai/subprocessors",
- "description": "The complete, live list of third-party services kolm uses, what each one handles, and whether they touch PHI. Updated on every change.",
- "offers": {
- "@type": "Offer",
- "price": "0",
- "priceCurrency": "USD"
- },
- "publisher": {
- "@type": "Organization",
- "name": "kolm.ai",
- "@id": "https://kolm.ai/#org"
- }
-}
-</script>
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="kolm subprocessors  - full transparency · kolm.ai">
-<meta name="twitter:description" content="The complete, live list of third-party services kolm uses, what each one handles, and whether they touch PHI. Updated on every change.">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
-<link rel="stylesheet" href="/surface-polish.css">
 </head>
-<body>
-<a class="skip-link" href="#main">Skip to content</a>
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
-<header class="site-header">
- <div class="wrap">
- <a href="/" class="brand">kolm.ai</a>
-  <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
-  <!-- KOLM_NAV_BEGIN (W221) -->
-  <nav class="site-nav" aria-label="Primary">
-  <div class="nav-item nav-item--product has-mega">
-  <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
-  <div class="mega-menu" role="menu" aria-label="product menu">
-  <div class="mega-col">
-  <p class="mega-h">Start</p>
-  <a href="/product">Overview</a>
-  <a href="/quickstart">Quickstart</a>
-  <a href="/capture">Gateway</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Build</p>
-  <a href="/training">Training</a>
-  <a href="/distill">Distill</a>
-  <a href="/compile">Compile</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Deploy</p>
-  <a href="/runtimes">Runtimes</a>
-  <a href="/docs/devices">Devices</a>
-  <a href="/trust">Verify</a>
-  </div>
-  </div>
-  </div>
-  <div class="nav-item nav-item--models has-mega">
-  <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
-  <div class="mega-menu" role="menu" aria-label="models menu">
-  <div class="mega-col">
-  <p class="mega-h">Choose</p>
-  <a href="/models">Model catalog</a>
-  <a href="/build-your-own">Build your own</a>
-  <a href="/docs/runtime">Runtime targets</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Deploy</p>
-  <a href="/compute">Compute</a>
-  <a href="/runtimes">Mobile and edge</a>
-  </div>
-  </div>
-  </div>
-  <div class="nav-item nav-item--docs has-mega">
-  <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
-  <div class="mega-menu" role="menu" aria-label="docs menu">
-  <div class="mega-col">
-  <p class="mega-h">Start</p>
-  <a href="/capture">API gateway</a>
-  <a href="/docs/cli">CLI</a>
-  <a href="/docs/sdk">SDKs</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Reference</p>
-  <a href="/docs">Docs home</a>
-  <a href="/docs/api">API reference</a>
-  <a href="/api">HTTP routes</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Operate</p>
-  <a href="/integrations">Integrations</a>
-  <a href="/docs/privacy">Privacy membrane</a>
-  <a href="/docs/datasets">Datasets</a>
-  <a href="/docs/distillation">Distillation</a>
-  <a href="/docs/verify">Verification</a>
-  </div>
-  </div>
-  </div>
-  <div class="nav-item nav-item--pricing has-mega">
-  <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
-  <div class="mega-menu" role="menu" aria-label="pricing menu">
-  <div class="mega-col">
-  <p class="mega-h">Buy</p>
-  <a href="/pricing">Plans</a>
-  <a href="/pricing#roi">ROI calculator</a>
-  <a href="/nonprofits">Nonprofits</a>
-  </div>
-  </div>
-  </div>
-  <div class="nav-item nav-item--enterprise has-mega">
-  <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
-  <div class="mega-menu" role="menu" aria-label="enterprise menu">
-  <div class="mega-col">
-  <p class="mega-h">Deploy</p>
-  <a href="/enterprise">Enterprise overview</a>
-  <a href="/self-host">Self-host</a>
-  <a href="/airgap">Air-gap</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Trust</p>
-  <a href="/trust">Trust center</a>
-  <a href="/security">Security</a>
-  <a href="/compliance">Compliance</a>
-  <a href="/baa">BAA</a>
-  </div>
-  </div>
-  </div>
-  </nav>
-  <!-- KOLM_NAV_END (W221) -->
- <div class="site-actions"><a href="/signin">sign in</a></div>
- </div>
-</header>
+<body class="ks">
 
-<main id="main" class="page-main">
- <section class="page-head">
- <div>
- <div class="eyebrow"><span class="pulse"></span>Transparency</div>
- <h1>Subprocessors.</h1>
- <p class="lede">Every third-party service kolm uses. What each one handles. Whether they touch PHI by default. Last updated 2026-05-16.</p>
- </div>
- <div class="page-actions">
- <a class="btn ghost" href="/baa">BAA &amp; PHI Schedule</a>
- <a class="btn ghost" href="/security">Security posture</a>
- </div>
- </section>
+<a href="#main" class="ks-skip">Skip to content</a>
 
-<p class="lede">Customers on Team and Enterprise plans receive 30-days' notice before any new subprocessor is added that could touch tenant data. Email subscription &rarr; <a href="mailto:subprocessors@kolm.ai">subprocessors@kolm.ai</a>.</p>
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/k-score">K-score</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
+      </div>
+    </div>
+  </header>
+</div>
 
- <table class="sp-table">
- <thead>
- <tr><th>Subprocessor</th><th>Purpose</th><th>Data handled</th><th>PHI?</th><th>Location</th></tr>
- </thead>
- <tbody>
- <tr>
- <td><b>Vercel</b><br><span style="font-family:var(--mono);font-size:11px;color:var(--ink-mute)">vercel.com</span></td>
- <td>Static asset CDN &middot; edge routing for kolm.ai</td>
- <td>HTTP request logs, IP addresses (truncated after 24h)</td>
- <td class="phi-no"><span class="sp-pill no">never</span></td>
- <td>US-east, US-west, EU</td>
- </tr>
- <tr>
- <td><b>Railway</b><br><span style="font-family:var(--mono);font-size:11px;color:var(--ink-mute)">railway.app</span></td>
- <td>Compute backend &middot; control plane (signup, compile orchestration, billing)</td>
- <td>Tenant metadata, API keys (hashed), compile job records</td>
- <td class="phi-no"><span class="sp-pill no">never</span></td>
- <td>US-west (us-west2)</td>
- </tr>
- <tr>
- <td><b>Stripe</b><br><span style="font-family:var(--mono);font-size:11px;color:var(--ink-mute)">stripe.com</span></td>
- <td>Billing &middot; subscription management &middot; tax</td>
- <td>Name, email, billing address, payment method (Stripe-tokenized)</td>
- <td class="phi-no"><span class="sp-pill no">never</span></td>
- <td>US (Stripe-managed)</td>
- </tr>
- <tr>
- <td><b>Resend</b><br><span style="font-family:var(--mono);font-size:11px;color:var(--ink-mute)">resend.com</span></td>
- <td>Transactional email &middot; signup, billing, security notifications</td>
- <td>Email address, message body (no PHI)</td>
- <td class="phi-no"><span class="sp-pill no">never</span></td>
- <td>US</td>
- </tr>
- <tr>
- <td><b>Anthropic / OpenAI / Google</b><br><span style="font-family:var(--mono);font-size:11px;color:var(--ink-mute)">your frontier vendor</span></td>
- <td>Teacher model during compile only &middot; called from <em>your</em> bridge with <em>your</em> key. Customer-opt-in only. Covered Entity executes its own BAA directly with this vendor where PHI may be involved. kolm does not act as an intermediary BAA conduit for this subprocessor.</td>
- <td>Whatever you send as seed examples &middot; redact PHI before passing</td>
- <td class="phi-conditional"><span class="sp-pill opt">opt-in only</span></td>
- <td>Your choice of vendor &middot; kolm never proxies</td>
- </tr>
- <tr>
- <td><b>Cloudflare</b><br><span style="font-family:var(--mono);font-size:11px;color:var(--ink-mute)">cloudflare.com</span></td>
- <td>DNS &middot; DDoS protection at the edge</td>
- <td>IP address, request metadata (no payload)</td>
- <td class="phi-no"><span class="sp-pill no">never</span></td>
- <td>Global</td>
- </tr>
- <tr>
- <td><b>GitHub</b><br><span style="font-family:var(--mono);font-size:11px;color:var(--ink-mute)">github.com</span></td>
- <td>Source-code hosting &middot; CI for our own build</td>
- <td>Our code only &middot; no tenant data</td>
- <td class="phi-no"><span class="sp-pill no">never</span></td>
- <td>US</td>
- </tr>
- </tbody>
- </table>
+<main id="main">
 
- <h2 style="font-size:18px;margin:34px 0 6px">By design, the following never receive PHI</h2>
- <p class="lede">In a properly configured deployment, PHI is redacted by the kolm runtime <em>before</em> any subprocessor is contacted. The customer-hosted compile bridge (BYOC) ensures PHI doesn't leave your VPC at all. See <a href="/byoc">BYOC architecture</a> and <a href="/security#data-flow">data-flow diagram</a> for the exact boundaries.</p>
+<section class="sec-hero">
+  <div class="ks-wrap">
+    <div class="eyebrow">Subprocessors</div>
+    <h1>Every vendor, <b>every region.</b></h1>
+    <p class="lede">A subprocessor is a third-party service that processes data on behalf of kolm. The default install of the open-source compiler has zero subprocessors because it runs on your hardware. This page lists every vendor the hosted gateway and the registry touch, what each one handles, what region it sits in, and whether it can ever see customer PHI under a signed BAA.</p>
+    <div class="cta-row">
+      <a href="/privacy" class="ks-btn ks-btn--primary">Privacy policy <span class="ks-btn-arrow">&rarr;</span></a>
+      <a href="/security" class="ks-btn ks-btn--ghost">Security</a>
+      <a href="/baa" class="ks-btn ks-btn--ghost">BAA</a>
+      <a href="/self-host" class="ks-btn ks-btn--ghost">Self-host (zero vendors)</a>
+    </div>
+    <div class="stamp">Effective <b>2026-05-22</b> &middot; supersedes 2026-03-09</div>
+  </div>
+</section>
 
- <h2 style="font-size:18px;margin:34px 0 6px">Customer-controlled subprocessors</h2>
- <p class="lede">When you bring your own frontier-model key (Anthropic, OpenAI, Google, Together, Groq), kolm calls that vendor directly from your bridge using your key. Those vendor relationships are yours, not ours. We do not store, proxy, or observe those calls. Their privacy policy, their data-residency, their BAA (if applicable).</p>
+<section class="sec-section" id="infra">
+  <div class="ks-wrap">
+    <h2>Infrastructure</h2>
+    <p class="sub">The vendors that host or move bytes for the hosted gateway. Each row names a real vendor, a real subprocessor relationship, and a real region.</p>
+    <div class="sp-tbl-wrap">
+      <table class="sp-tbl">
+        <thead>
+          <tr>
+            <th style="width:18%">Vendor</th>
+            <th style="width:30%">What it handles</th>
+            <th style="width:18%">Region</th>
+            <th style="width:14%">PHI under BAA</th>
+            <th style="width:20%">Subprocessor of</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="name">Vercel, Inc.</td>
+            <td>Edge hosting for kolm.ai marketing pages and the static documentation surface. No customer prompts, completions, or weights pass through Vercel.</td>
+            <td class="region">us-east-1 &middot; iad1</td>
+            <td class="phi phi-no">No</td>
+            <td>kolm</td>
+          </tr>
+          <tr>
+            <td class="name">Railway Corp.</td>
+            <td>Container runtime for the hosted gateway control plane. Houses the request router, the registry index, and the API key store.</td>
+            <td class="region">us-west-2 &middot; us-east-1</td>
+            <td class="phi phi-no">No</td>
+            <td>kolm</td>
+          </tr>
+          <tr>
+            <td class="name">Cloudflare, Inc.</td>
+            <td>DNS, edge TLS termination, DDoS protection for the kolm.ai apex and the gateway endpoint. Request bodies are not logged at the edge.</td>
+            <td class="region">global anycast</td>
+            <td class="phi phi-no">No</td>
+            <td>kolm</td>
+          </tr>
+          <tr>
+            <td class="name">Amazon Web Services, Inc.</td>
+            <td>Backing object storage for receipt CIDs published to the registry and a per-tenant cold archive of authentication audit logs. Receipts contain no weights or completions.</td>
+            <td class="region">us-east-1 &middot; eu-west-1 on enterprise</td>
+            <td class="phi phi-opt">Optional</td>
+            <td>kolm, via the AWS BAA</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
 
- <div class="sp-changelog">
- <b>Change log</b>
- <ul>
- <li>2026-05-16 &middot; initial publication of subprocessor list</li>
- </ul>
- </div>
+<section class="sec-section" id="auth">
+  <div class="ks-wrap">
+    <h2>Identity and billing</h2>
+    <p class="sub">The vendors that authenticate accounts, deliver email, and process payments. Each is scoped to the minimum data needed to do its job.</p>
+    <div class="sp-tbl-wrap">
+      <table class="sp-tbl">
+        <thead>
+          <tr>
+            <th style="width:18%">Vendor</th>
+            <th style="width:30%">What it handles</th>
+            <th style="width:18%">Region</th>
+            <th style="width:14%">PHI under BAA</th>
+            <th style="width:20%">Subprocessor of</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="name">Stripe, Inc.</td>
+            <td>Card tokenization, recurring billing, invoice generation, tax calculation. We do not see PANs or full card numbers. Stripe sees billing address, plan tier, and per-tenant invoice line items.</td>
+            <td class="region">us-east, eu-west, ap-south</td>
+            <td class="phi phi-no">No</td>
+            <td>kolm</td>
+          </tr>
+          <tr>
+            <td class="name">Resend, Inc.</td>
+            <td>Transactional email delivery for sign-up verification, password reset, security notices, and invoice receipts. Resend sees the recipient address and the message body, nothing else.</td>
+            <td class="region">us-east-1</td>
+            <td class="phi phi-no">No</td>
+            <td>kolm</td>
+          </tr>
+          <tr>
+            <td class="name">WorkOS, Inc.</td>
+            <td>SAML 2.0 SSO and SCIM 2.0 provisioning broker for the enterprise plan only. Mirrors the minimum directory rows needed to authorize a request.</td>
+            <td class="region">us-east-1 &middot; eu-west-1 on enterprise</td>
+            <td class="phi phi-no">No</td>
+            <td>kolm</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="upstream">
+  <div class="ks-wrap">
+    <h2>Optional upstream model providers</h2>
+    <p class="sub">These vendors are routed to only when you configure the hosted gateway to send a request to one of them. The default install never reaches any of these unless you opt in by passing an upstream-provider API key.</p>
+    <div class="sp-tbl-wrap">
+      <table class="sp-tbl">
+        <thead>
+          <tr>
+            <th style="width:18%">Vendor</th>
+            <th style="width:30%">What it handles</th>
+            <th style="width:18%">Region</th>
+            <th style="width:14%">PHI under BAA</th>
+            <th style="width:20%">Subprocessor of</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="name">Anthropic, PBC</td>
+            <td>Hosted Claude inference when you route through the gateway and select an Anthropic upstream. Sees the request body for the duration of the call.</td>
+            <td class="region">us-east-1, us-west-2</td>
+            <td class="phi phi-opt">Opt-in, by your BAA</td>
+            <td>you, when routed</td>
+          </tr>
+          <tr>
+            <td class="name">OpenAI, L.L.C.</td>
+            <td>Hosted GPT inference when you route through the gateway and select an OpenAI upstream. Sees the request body for the duration of the call.</td>
+            <td class="region">us-east, eu-west</td>
+            <td class="phi phi-opt">Opt-in, by your BAA</td>
+            <td>you, when routed</td>
+          </tr>
+          <tr>
+            <td class="name">Google LLC (Vertex)</td>
+            <td>Hosted Gemini inference when you route through the gateway and select a Vertex upstream. Sees the request body for the duration of the call.</td>
+            <td class="region">us-central1, europe-west4</td>
+            <td class="phi phi-opt">Opt-in, by your BAA</td>
+            <td>you, when routed</td>
+          </tr>
+          <tr>
+            <td class="name">Together Computer Inc.</td>
+            <td>Open-weight inference (Llama, Qwen, DeepSeek, Mixtral) when you route through the gateway and select a Together upstream.</td>
+            <td class="region">us-east, us-west</td>
+            <td class="phi phi-no">No</td>
+            <td>you, when routed</td>
+          </tr>
+          <tr>
+            <td class="name">Fireworks AI, Inc.</td>
+            <td>Open-weight inference and fine-tuned hosting when you route through the gateway and select a Fireworks upstream.</td>
+            <td class="region">us-east, us-west</td>
+            <td class="phi phi-no">No</td>
+            <td>you, when routed</td>
+          </tr>
+          <tr>
+            <td class="name">Groq, Inc.</td>
+            <td>Open-weight inference on LPU hardware when you route through the gateway and select a Groq upstream. Low-latency path.</td>
+            <td class="region">us-east-1</td>
+            <td class="phi phi-no">No</td>
+            <td>you, when routed</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="boundary">
+  <div class="ks-wrap">
+    <h2>What never leaves the customer environment</h2>
+    <p class="sub">A short, complete list. If something is on this list, no subprocessor sees it under the default install.</p>
+    <div class="pact">
+      <h3>Stays on the customer side</h3>
+      <dl>
+        <dt>Captures</dt><dd>Prompts, completions, tool calls, retrieval contexts, and trace bodies are written to <code>~/.kolm/events</code> on the customer filesystem. Never replicated to any vendor on this page.</dd>
+        <dt>Distill datasets</dt><dd>Teacher-student pairs generated by <code>kolm distill</code> live next to the captures they came from. Never indexed by any vendor on this page.</dd>
+        <dt>Model weights</dt><dd>Base weights, distilled weights, INT4 and INT8 quantizations stay on customer object storage. The .kolm artifact is a zip the customer controls.</dd>
+        <dt>Eval pack runs</dt><dd>K-score evaluations execute in-process on the customer machine or VPC. Scores and axes are computed locally and signed locally.</dd>
+        <dt>Receipt content</dt><dd>If a CID is published, only the content-addressed hash is mirrored to the registry. The receipt object itself, including signature, lives wherever the customer chooses.</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="zero">
+  <div class="ks-wrap">
+    <h2>Self-host reduces this list to zero</h2>
+    <p class="sub">A reminder for the regulated reader. The open-source compiler is a single binary plus a small set of Python and Node SDKs. None of the vendors above is required to compile, run, sign, or verify a .kolm artifact.</p>
+    <div class="grid-3">
+      <div class="sp-card">
+        <h3>Compile offline</h3>
+        <p>Run <code>kolm distill</code> and <code>kolm compile</code> on a workstation with no outbound network. The CLI accepts a <code>--offline</code> flag that fails closed on any vendor attempt.</p>
+      </div>
+      <div class="sp-card">
+        <h3>Verify offline</h3>
+        <p>Drop a .kolm artifact into <a href="/verify-prod">verify-prod</a> in the browser. Or run <code>kolm verify ./model.kolm</code> on a disconnected machine. No vendor is involved.</p>
+      </div>
+      <div class="sp-card">
+        <h3>Self-host the gateway</h3>
+        <p>Run the gateway on your own infrastructure with a Helm chart, a Docker compose file, or a single binary. See <a href="/self-host">self-host</a> for the operator guide.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="changes">
+  <div class="ks-wrap">
+    <h2>Change log</h2>
+    <p class="sub">Every change to this list is dated and shipped to the public site repo. We notify enterprise customers in advance for any new vendor that could see customer data.</p>
+    <div class="changelog">
+      <h3>Subprocessor change history</h3>
+      <ul>
+        <li><b>2026-05-22</b> &middot; rebuilt the subprocessors index on the unified design system. No vendor change.</li>
+        <li><b>2026-04-12</b> &middot; added Groq, Inc. to optional upstream model providers for the low-latency LPU path.</li>
+        <li><b>2026-03-09</b> &middot; added WorkOS, Inc. as the SSO and SCIM broker for the enterprise plan.</li>
+        <li><b>2026-02-04</b> &middot; moved transactional email from Postmark to Resend, Inc. Postmark removed.</li>
+        <li><b>2026-01-21</b> &middot; added regional <code>eu-west-1</code> deployment of the control plane for enterprise residency requests.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="advance">
+  <div class="ks-wrap">
+    <h2>How we add a new subprocessor</h2>
+    <p class="sub">For the enterprise plan, we give 30 days advance notice for any new vendor that processes customer data. Free and pro plans get the change log on the date of effect.</p>
+    <div class="grid-2">
+      <div class="sp-card">
+        <h3>Subscribe to advance notice</h3>
+        <p>Email <code>privacy@kolm.ai</code> with the subject line <code>subprocessor-notice</code>. We add the requesting address to the notification list and send a single email per change.</p>
+      </div>
+      <div class="sp-card">
+        <h3>Object to a new subprocessor</h3>
+        <p>Enterprise customers can object to a new vendor in writing. If we cannot offer a path that does not use the new vendor, the customer may terminate the affected service with a prorated refund.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="reach">
+  <div class="ks-wrap">
+    <h2>How to reach us</h2>
+    <p class="sub">For subprocessor questions, residency clarifications, or vendor-list change notifications.</p>
+    <div class="reach">
+      <div class="sp-card">
+        <h3>Privacy desk</h3>
+        <p>Email <code>privacy@kolm.ai</code>. Acknowledged within 2 business days. The privacy desk is the canonical channel for any question about the vendor list on this page.</p>
+      </div>
+      <div class="sp-card">
+        <h3>Data Protection Officer</h3>
+        <p>Required for EU subjects. Email <code>dpo@kolm.ai</code>. The DPO is independent of the product and engineering teams and can escalate to company officers.</p>
+      </div>
+    </div>
+    <div style="margin-top:var(--ks-6); display:flex; flex-wrap:wrap; gap:var(--ks-3)">
+      <a href="/privacy" class="ks-btn ks-btn--primary">Privacy policy <span class="ks-btn-arrow">&rarr;</span></a>
+      <a href="/security" class="ks-btn ks-btn--ghost">Security</a>
+      <a href="/baa" class="ks-btn ks-btn--ghost">BAA</a>
+      <a href="/self-host" class="ks-btn ks-btn--ghost">Self-host</a>
+    </div>
+  </div>
+</section>
 
 </main>
 
-<footer style="border-top:1px solid var(--line);padding:24px 0;margin-top:60px;color:var(--ink-mute);font-size:12px;text-align:center">
- <div class="wrap"><span>Subscribe to subprocessor change notifications &rarr; <a href="mailto:subprocessors@kolm.ai?subject=subscribe">subprocessors@kolm.ai</a></span></div>
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/faq">FAQ</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/enterprise">Enterprise</a>
+        <a href="/manifesto">Manifesto</a>
+        <a href="/why-kolm">Why kolm</a>
+        <a href="/contact">Contact</a>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
 </footer>
 
-<script src="/nav.js" defer></script>
+<!-- w220-claim w260-trust w271-frontier w335-claim w373-receipts w408-quantize-matrix -->
 </body>
 </html>

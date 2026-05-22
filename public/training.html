@@ -20,8 +20,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="canonical" href="https://kolm.ai/training">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-<link rel="stylesheet" href="/styles.css">
-<link rel="stylesheet" href="/brand-refresh.css">
+
 <style>
  :root {
  --bg: #050607; --bg-elev: #0b0f10; --bg-card: #0e1314; --bg-card-2: #131918;
@@ -205,114 +204,34 @@
 }
 </script>
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
-<link rel="stylesheet" href="/surface-polish.css">
+<link rel="stylesheet" href="/ks.css">
 </head>
-<body>
-<a class="skip-link" href="#main">Skip to content</a>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    </div>
+  </nav>
+  <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+  </div>
+</div>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
-<header class="site-header">
- <div class="wrap">
- <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
-    <!-- KOLM_NAV_BEGIN (W221) -->
-    <nav class="site-nav" aria-label="Primary">
-    <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
-      <div class="mega-menu" role="menu" aria-label="product menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/product">Overview</a>
-          <a href="/quickstart">Quickstart</a>
-          <a href="/capture">Gateway</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training</a>
-          <a href="/distill">Distill</a>
-          <a href="/compile">Compile</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/runtimes">Runtimes</a>
-          <a href="/docs/devices">Devices</a>
-          <a href="/trust">Verify</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--models has-mega">
-      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
-      <div class="mega-menu" role="menu" aria-label="models menu">
-        <div class="mega-col">
-          <p class="mega-h">Choose</p>
-          <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Build your own</a>
-          <a href="/docs/runtime">Runtime targets</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/compute">Compute</a>
-          <a href="/runtimes">Mobile and edge</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
-      <div class="mega-menu" role="menu" aria-label="docs menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/capture">API gateway</a>
-          <a href="/docs/cli">CLI</a>
-          <a href="/docs/sdk">SDKs</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Reference</p>
-          <a href="/docs">Docs home</a>
-          <a href="/docs/api">API reference</a>
-          <a href="/api">HTTP routes</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Operate</p>
-          <a href="/integrations">Integrations</a>
-          <a href="/docs/privacy">Privacy membrane</a>
-          <a href="/docs/datasets">Datasets</a>
-          <a href="/docs/distillation">Distillation</a>
-          <a href="/docs/verify">Verification</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
-      <div class="mega-menu" role="menu" aria-label="pricing menu">
-        <div class="mega-col">
-          <p class="mega-h">Buy</p>
-          <a href="/pricing">Plans</a>
-          <a href="/pricing#roi">ROI calculator</a>
-          <a href="/nonprofits">Nonprofits</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
-      <div class="mega-menu" role="menu" aria-label="enterprise menu">
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/enterprise">Enterprise overview</a>
-          <a href="/self-host">Self-host</a>
-          <a href="/airgap">Air-gap</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Trust</p>
-          <a href="/trust">Trust center</a>
-          <a href="/security">Security</a>
-          <a href="/compliance">Compliance</a>
-          <a href="/baa">BAA</a>
-        </div>
-      </div>
-    </div>
-    </nav>
-    <!-- KOLM_NAV_END (W221) -->
- </div>
-</header>
+
 
 <main id="main">
 <section class="hero">
@@ -473,7 +392,7 @@ kolm run dist/phone-normalizer.kolm "+1 (415) 555-2671"</pre>
  <span class="tier-callout synth">LLM-authored code</span>
  <span class="tier-callout synth">AST-validated</span>
  <span class="tier-callout synth">no weights</span>
- <p><b>What it is.</b> A frontier model emits candidate JavaScript that satisfies the spec. The candidate is parsed into a constrained AST (no I/O, no FFI, bounded loops), fuzzed against the train split, and gated on K-score against the holdout. The final artifact contains <em>rule code</em>, not weights &mdash; but the rule code was authored by an LLM, not by a human. Verifiable distinction: this is rule code generation, not knowledge distillation.</p>
+ <p><b>What it is.</b> A frontier model emits candidate JavaScript that satisfies the spec. The candidate is parsed into a constrained AST (no I/O, no FFI, bounded loops), fuzzed against the train split, and gated on K-score against the holdout. The final artifact contains <em>rule code</em>, not weights, but the rule code was authored by an LLM, not by a human. Verifiable distinction: this is rule code generation, not knowledge distillation.</p>
  <p><b>Why a step up from tier 0.</b> Fifty seeds give the synthesizer enough coverage to find edge cases (e.g., extension numbers, vanity letters, international prefixes) that a five-seed hand-author misses. The teacher_vendor + teacher_model lands in the manifest so a verifier can replay.</p>
  <pre>kolm compile recipes/denial-code-classifier.spec.json \
  --class synthesized_rule \
@@ -505,7 +424,7 @@ kolm verify dist/denial-code-classifier.kolm
  <span class="tier-callout distill">INT4 quantized</span>
  <span class="tier-callout distill">on-device</span>
  <p><b>What it is.</b> A real neural network. The teacher (Claude Sonnet, GPT-5-mini, Gemini Flash) generates training pairs from your train split, the PHI redactor strips Safe Harbor identifiers before the call, the reinjector restores them after. A small open-weight base (Qwen2.5-0.5B, SmolLM2-360M, or Llama-3.2-1B) is LoRA-fine-tuned, GPTQ/AWQ-quantized to INT4, and exported as GGUF.</p>
- <p><b>When it earns its keep.</b> When the task has too many edge cases for a rule to cover (free-text classification, intent extraction, summarization with strict structure) and you want the artifact to run on the user's device. iPhone 15 Pro, M3 Mac, Jetson Orin Nano &mdash; all run a quantized 0.5B inline.</p>
+ <p><b>When it earns its keep.</b> When the task has too many edge cases for a rule to cover (free-text classification, intent extraction, summarization with strict structure) and you want the artifact to run on the user's device. iPhone 15 Pro, M3 Mac, Jetson Orin Nano, all run a quantized 0.5B inline.</p>
  <pre>kolm distill recipes/prior-auth-extractor.spec.json \
  --teacher anthropic:claude-sonnet-4-6 \
  --student-base qwen2.5-0.5b \
@@ -639,12 +558,12 @@ kolm verify dist/denial-code-classifier.kolm
  <td><b>0</b><span>rule</span></td>
  <td>5</td>
  <td class="good">rule</td>
- <td>&mdash;</td>
- <td>&mdash;</td>
+ <td>,</td>
+ <td>,</td>
  <td>50&ndash;200 KB</td>
  <td>&lt; 1 ms</td>
  <td class="good">0.70&ndash;0.95</td>
- <td>&mdash;</td>
+ <td>,</td>
  <td>any JS runtime</td>
  </tr>
  <tr>
@@ -652,11 +571,11 @@ kolm verify dist/denial-code-classifier.kolm
  <td>50</td>
  <td class="violet">synthesized_rule</td>
  <td>sonnet / mini</td>
- <td>&mdash;</td>
+ <td>,</td>
  <td>120&ndash;400 KB</td>
  <td>1&ndash;3 ms</td>
  <td class="violet">0.85&ndash;0.97</td>
- <td>&mdash;</td>
+ <td>,</td>
  <td>any JS runtime</td>
  </tr>
  <tr>
@@ -937,7 +856,7 @@ kolm verify dist/denial-code-classifier.kolm
 
 <section class="receipt">
  <div class="wrap">
- <h2>The receipt chain &mdash; same shape at every tier</h2>
+ <h2>The receipt chain, same shape at every tier</h2>
  <p class="lede">Each box hashes the box before it. The verifier walks the chain backward and refuses on any break. Wave 156 made the build step itself reproducible; <code>kolm verify --rebuild</code> recompiles from the recorded toolchain and confirms <code>binary_hash</code> matches.</p>
  <div class="receipt-svg-wrap">
  <svg viewBox="0 0 1080 240" role="img" aria-label="Receipt chain diagram">
@@ -1000,19 +919,19 @@ kolm verify dist/denial-code-classifier.kolm
  <h2>CLI reference, by tier</h2>
  <p class="lede">Same binary. Same auth. Same artifact format. The flags pick up tier capability when you opt in.</p>
 
- <h3>Tier 0 &mdash; rule</h3>
+ <h3>Tier 0, rule</h3>
 <pre>kolm seeds bootstrap &lt;task&gt;
 kolm compile &lt;task&gt;.spec.json --class rule
 kolm run dist/&lt;task&gt;.kolm "&lt;input&gt;"
 kolm verify dist/&lt;task&gt;.kolm</pre>
 
- <h3>Tier 1 &mdash; synthesized rule</h3>
+ <h3>Tier 1, synthesized rule</h3>
 <pre>kolm compile &lt;task&gt;.spec.json \
  --class synthesized_rule \
  --teacher anthropic:claude-sonnet-4-6
 kolm verify dist/&lt;task&gt;.kolm # check #15 fires: validates lineage fields</pre>
 
- <h3>Tier 2&ndash;4 &mdash; distilled</h3>
+ <h3>Tier 2&ndash;4, distilled</h3>
 <pre>kolm distill &lt;task&gt;.spec.json \
  --teacher anthropic:claude-opus-4-7 \
  --student-base qwen2.5-1.5b \
@@ -1022,7 +941,7 @@ kolm verify dist/&lt;task&gt;.kolm # check #15 fires: validates lineage fields</
  --eval-gate 0.92 \
  --quantize int4-gptq</pre>
 
- <h3>Tier 5 &mdash; compose MoE</h3>
+ <h3>Tier 5, compose MoE</h3>
 <pre>kolm compose dist/bundle.kolm \
  --expert &lt;name&gt;=&lt;path.kolm&gt; \
  --expert &lt;name&gt;=&lt;path.kolm&gt; \
@@ -1164,6 +1083,31 @@ kolm inspect &lt;file&gt;.kolm # full manifest pretty-print</pre>
 </footer>
 
 <script type="module" src="/sdk.js"></script>
-<script src="/nav.js" defer></script>
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/integrations">Integrations</a></li><li><a href="/docs/api">API reference</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+
 </body>
 </html>

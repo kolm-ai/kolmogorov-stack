@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Threat model · kolm.ai</title>
+<meta name="description" content="What kolm defends against and what it does not. Ed25519 receipt chain, K-score gate, manifest signing, recall integrity. Verifiable scope.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta property="og:title" content="Threat model · kolm.ai">
+<meta property="og:description" content="What kolm defends against and what it does not. Ed25519 receipt chain, K-score gate, manifest signing, recall integrity. Verifiable scope.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Threat model · kolm.ai">
+<meta name="twitter:description" content="What kolm defends against and what it does not. Ed25519 receipt chain, K-score gate, manifest signing, recall integrity. Verifiable scope.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/threat-model">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/threat-model">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<style>
+ :root {
+ --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+ --accent: #faf2e1; --accent-strong: #c9c2b2; --good: #7ef0d2; --bad: #ff6b91;
+ --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+ --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+ }
+ * { box-sizing: border-box; }
+ html, body { margin: 0; padding: 0; }
+ body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+ a { color: inherit; text-decoration: none; }
+ .wrap { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
+ .wrap-wide { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+ @media (max-width: 720px) { .wrap, .wrap-wide { padding: 0 20px; } }
+
+ header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
+ header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
+ header.site .left { display: flex; align-items: center; gap: 36px; }
+ header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 500; font-size: 16px; }
+ header.site nav { display: flex; gap: 22px; }
+ header.site nav a { color: var(--ink-mute); font-size: 13.5px; }
+ header.site nav a:hover { color: var(--ink); }
+ header.site .right { display: flex; align-items: center; gap: 14px; }
+ header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
+ header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
+ @media (max-width: 720px) { header.site nav { display: none; } }
+
+ section.hero { padding: 88px 0 32px; }
+ .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
+ h1 { margin: 22px 0 16px; font-size: clamp(36px, 5vw, 52px); line-height: 1.05; font-weight: 500; max-width: 22ch; }
+ h1 .tone { color: var(--accent); }
+ p.lede { margin: 0 0 24px; font-size: 17px; line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
+
+ .group { margin: 56px 0 0; padding-top: 32px; border-top: 1px solid var(--line); }
+ .group h2 { margin: 0 0 14px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 500; }
+ .group p { margin: 0 0 12px; color: var(--ink-mute); font-size: 15px; line-height: 1.65; max-width: 64ch; }
+
+ .threat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 18px 0 0; }
+ @media (max-width: 760px) { .threat-grid { grid-template-columns: 1fr; } }
+ .card { padding: 20px 22px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-elev); }
+ .card.defends { border-color: rgba(126,240,210,0.22); }
+ .card.does-not { border-color: rgba(255,107,145,0.22); }
+ .card .tag { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
+ .card.defends .tag { color: var(--good); }
+ .card.does-not .tag { color: var(--bad); }
+ .card h3 { margin: 0 0 8px; font-size: 15.5px; font-weight: 500; color: var(--ink); }
+ .card p { margin: 0; font-size: 13.5px; color: var(--ink-mute); line-height: 1.55; }
+
+ pre.code { font-family: var(--mono); font-size: 13px; line-height: 1.55; background: var(--bg-card); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; overflow-x: auto; color: var(--ink); margin: 14px 0; white-space: pre; }
+ @media (max-width: 720px) { pre.code { white-space: pre-wrap; word-break: break-word; } }
+ pre.code .c { color: var(--ink-faint); }
+ pre.code .ok { color: var(--good); }
+ pre.code .k { color: var(--accent-strong); }
+
+ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; margin: 14px 0 0; }
+ table.tbl th, table.tbl td { border-bottom: 1px solid var(--line); padding: 12px 12px; text-align: left; vertical-align: top; }
+ table.tbl th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; font-weight: 500; }
+ table.tbl td { color: var(--ink-mute); }
+ table.tbl td b { color: var(--ink); font-weight: 500; }
+ table.tbl td.row-h { color: var(--ink); font-weight: 500; font-family: var(--mono); font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.02em; width: 28%; }
+ @media (max-width: 720px) {
+ table.tbl, table.tbl tbody, table.tbl tr, table.tbl td { display: block; width: 100%; }
+ table.tbl thead { display: none; }
+ table.tbl tr { padding: 14px 0; border-bottom: 1px solid var(--line); }
+ table.tbl td { border: 0; padding: 4px 0; }
+ table.tbl td.row-h { font-size: 12px; margin-bottom: 6px; }
+ table.tbl td::before { display: block; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; margin-bottom: 2px; }
+ table.tbl td[data-l]::before { content: attr(data-l); }
+ }
+
+ .verdict { padding: 28px 32px; border: 1px solid var(--line-strong); border-radius: 12px; background: linear-gradient(180deg, rgba(236,231,220, 0.04), rgba(236,231,220, 0.01)); margin: 24px 0 0; }
+ .verdict h3 { margin: 0 0 8px; font-size: 18px; font-weight: 500; color: var(--ink); }
+ .verdict p { margin: 0 0 8px; font-size: 14.5px; color: var(--ink-mute); line-height: 1.6; }
+ .verdict p:last-child { margin-bottom: 0; }
+ .verdict b { color: var(--ink); font-weight: 500; }
+
+ footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-faint); margin-top: 80px; }
+ footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+ footer.site a { color: var(--ink-mute); }
+</style>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {
+ "@type": "ListItem",
+ "position": 1,
+ "name": "kolm",
+ "item": "https://kolm.ai/"
+ },
+ {
+ "@type": "ListItem",
+ "position": 2,
+ "name": "Threat model",
+ "item": "https://kolm.ai/threat-model"
+ }
+ ]
+}
+</script>
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API Key &rarr;</a>
+ </div>
+ </div>
+</header>
+<main id="main">
+
+<section class="hero">
+ <div class="wrap">
+ <span class="pill">threat model</span>
+ <h1>What it defends. <span class="tone">What it doesn't.</span></h1>
+ <p class="lede">A signed artifact is only useful if the threat scope is verifiable. The attacks the receipt chain catches, the ones it doesn't, and the primitives behind both.</p>
+ </div>
+</section>
+
+<article>
+ <div class="wrap">
+
+ <div class="group">
+ <h2>Primitive: the receipt chain</h2>
+ <p>Every <code>.kolm</code> artifact emits a chain of Ed25519 hashes anchored on the manifest. The verifier walks the chain backwards from output to manifest hash; any tampered link breaks verification.</p>
+ <pre class="code"><span class="c">// at compile time</span>
+manifest_hash = SHA256(manifest.json)
+model_hash = SHA256(model.gguf)
+lora_hash = SHA256(lora.bin)
+recipes_hash = SHA256(recipes.json)
+recall_hash = SHA256(recall.sqlite-vec)
+
+artifact_root = Ed25519(secret, manifest_hash || model_hash ||
+ lora_hash || recipes_hash || recall_hash)
+
+<span class="c">// at run time, every output gets a fresh receipt</span>
+output_receipt = Ed25519(secret, artifact_root ||
+ SHA256(prompt) || SHA256(output) ||
+ timestamp || run_nonce)
+
+<span class="c">// verification (v0.1: shared-secret Ed25519, issuer or shared-secret holder)</span>
+<span class="c">// public-key (Ed25519) verifier ships alongside, via the sidecar</span>
+verify(output, receipt, artifact, secret) =&gt; <span class="ok">ok</span> | <span style="color:var(--bad);">tampered</span></pre>
+ </div>
+
+ <div class="group">
+ <h2>What kolm defends against</h2>
+ <div class="threat-grid">
+
+ <div class="card defends">
+ <div class="tag">defends · t1</div>
+ <h3>Artifact tampering</h3>
+ <p>Modifying model.gguf, lora.bin, recipes.json, or recall.sqlite-vec inside a <code>.kolm</code> breaks the chain; <code>kolm inspect</code> fails immediately.</p>
+ </div>
+
+ <div class="card defends">
+ <div class="tag">defends · t2</div>
+ <h3>Output substitution</h3>
+ <p>Forged outputs don't chain to a valid artifact_root; verifier rejects.</p>
+ </div>
+
+ <div class="card defends">
+ <div class="tag">defends · t3</div>
+ <h3>Manifest forgery</h3>
+ <p>A forged manifest's hash diverges from <code>artifact_root</code>; verification fails on the first link.</p>
+ </div>
+
+ <div class="card defends">
+ <div class="tag">defends · t4</div>
+ <h3>Recall index poisoning</h3>
+ <p>Editing the bundled sqlite-vec index changes recall_hash; chain breaks. (Why we ship the index <em>inside</em> the artifact.)</p>
+ </div>
+
+ <div class="card defends">
+ <div class="tag">defends · t5</div>
+ <h3>Replay across artifacts</h3>
+ <p>A valid receipt from A copied to B fails: receipts embed artifact_root, A's root &ne; B's root.</p>
+ </div>
+
+ <div class="card defends">
+ <div class="tag">defends · t6</div>
+ <h3>Quality regression smuggling</h3>
+ <p>A trojan-trained LoRA fails the per-artifact K-score gate at compile time; manifest records this artifact's K-score and held-out test set hash.</p>
+ </div>
+
+ </div>
+ </div>
+
+ <div class="group">
+ <h2>What kolm does <em>not</em> defend against</h2>
+ <div class="threat-grid">
+
+ <div class="card does-not">
+ <div class="tag">out of scope · n1</div>
+ <h3>Model-level adversarial prompts</h3>
+ <p>A jailbroken prompt will be signed as-is. Receipts prove <em>provenance</em>, not <em>safety</em>. Use guardrail layers separately.</p>
+ </div>
+
+ <div class="card does-not">
+ <div class="tag">out of scope · n2</div>
+ <h3>Compromised compile environment</h3>
+ <p>If the machine running <code>kolm compile</code> is compromised, the attacker can sign a valid artifact with poisoned weights. Use a clean build; consider air-gapped compile for high-stakes work.</p>
+ </div>
+
+ <div class="card does-not">
+ <div class="tag">out of scope · n3</div>
+ <h3>Side-channel timing inference</h3>
+ <p>Inference-timing attacks on shared hardware may infer input or output. Receipts are an integrity primitive, not confidentiality. Use trusted hardware (SEV, TDX) for adversarial multi-tenant.</p>
+ </div>
+
+ <div class="card does-not">
+ <div class="tag">out of scope · n4</div>
+ <h3>Human at the keyboard</h3>
+ <p>Receipts prove what the artifact said, not that a human acted on it correctly. Audit trail ends at the model output; downstream business logic is yours.</p>
+ </div>
+
+ <div class="card does-not">
+ <div class="tag">out of scope · n5</div>
+ <h3>Recipe sandbox escapes (v0.1)</h3>
+ <p>v0.1 executes JS recipes in <code>node:vm</code> with a frozen <code>lib</code> global. <code>node:vm</code> is <b>defence-in-depth, not a hard security boundary</b>. Synthesized recipes are scanned for canonical escape primitives (<code>process</code>, <code>require</code>, <code>constructor</code>, <code>Function</code>, <code>eval</code>) and rejected on match. For untrusted third-party recipes, run kolm under a hardened isolation layer (isolated-vm, Wasmtime, Firecracker). Roadmap: switch the default sandbox to isolated-vm.</p>
+ </div>
+
+ </div>
+ </div>
+
+ <div class="group">
+ <h2>Trust roots</h2>
+ <table class="tbl">
+ <thead>
+ <tr><th>component</th><th>signs</th><th>verifies against</th></tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td class="row-h" data-l="component">user secret</td>
+ <td data-l="signs">all artifacts you produce locally</td>
+ <td data-l="verifies against">your own pubkey (or registry-stored fingerprint)</td>
+ </tr>
+ <tr>
+ <td class="row-h" data-l="component">Kolm registry</td>
+ <td data-l="signs">co-signs published artifacts; signs spec versions (rs-2 tier)</td>
+ <td data-l="verifies against">published keys at <code>/v1/keys/public</code> (Ed25519 publication ships alongside via the sidecar; v0.1 receipts use Ed25519 + shared tenant secret)</td>
+ </tr>
+ <tr>
+ <td class="row-h" data-l="component">Recipe registry</td>
+ <td data-l="signs">deterministic-pattern packs (recipes.json)</td>
+ <td data-l="verifies against">RS-1 spec hash, MIT-licensed at <code>/docs/rs-1.md</code></td>
+ </tr>
+ <tr>
+ <td class="row-h" data-l="component">on-chain anchor (enterprise)</td>
+ <td data-l="signs">root hash anchored in on-chain transaction or content-anchor service (rs-3 spec)</td>
+ <td data-l="verifies against">block height + tx hash, public</td>
+ </tr>
+ </tbody>
+ </table>
+ </div>
+
+ <div class="group">
+ <h2>What an attacker would have to compromise</h2>
+ <p>To forge a legitimate-verifying artifact, an attacker needs <b>simultaneously</b>: (a) the user's signing secret <em>or</em> the registry's, (b) a SHA-256 second-preimage on the manifest, (c) if co-signed, a second registry compromise.</p>
+ <p>On-chain anchored artifacts (enterprise) also require rewriting the anchored block at chain-attack cost via rs-3 anchoring.</p>
+ </div>
+
+ <div class="group">
+ <h2>Reporting</h2>
+ <p>Found a way around any of T1 through T6? Email <a href="mailto:security@kolm.ai" style="color:var(--accent);">security@kolm.ai</a> with repro steps. Bounty brackets on <a href="/trust" style="color:var(--accent);">trust</a>. Coordinated disclosure: 90 days standard, 14 days for actively exploited.</p>
+ </div>
+
+ <div class="verdict">
+ <h3>Verifiable scope</h3>
+ <p>kolm is an <b>integrity</b> primitive, not a <b>safety</b> primitive. Receipts prove <em>what was said by which artifact</em>, not that the output is safe or policy-aligned.</p>
+ <p>Pair with prompt-side guardrails, output filters, and downstream business logic.</p>
+ <p><a href="/trust" style="color:var(--accent);">trust center</a> · <a href="/security" style="color:var(--accent);">security policy</a> · <a href="/docs/rs-1.md" style="color:var(--accent);">RS-1 spec</a></p>
+ </div>
+
+ </div>
+</article>
+
+
+</main>
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4><span data-kolm-icon="compile" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="deploy" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="layers" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="user" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+<script src="/kolm-svg.js" defer></script>
+</body>
+</html>

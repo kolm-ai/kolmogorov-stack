@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>RS-1 artifact specification · kolm.ai</title>
+<meta name="description" content="RS-1 normative text, BNF grammar, JSON schemas, receipt format, and the RFC process for RS-2. MIT-licensed.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta property="og:title" content="RS-1 artifact specification · kolm.ai">
+<meta property="og:description" content="RS-1 normative text, BNF grammar, JSON schemas, receipt format, and the RFC process for RS-2. MIT-licensed.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="RS-1 artifact specification · kolm.ai">
+<meta name="twitter:description" content="RS-1 normative text, BNF grammar, JSON schemas, receipt format, and the RFC process for RS-2. MIT-licensed.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/spec">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/spec">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "TechArticle",
+ "headline": "The .kolm specification · RS-1 and beyond",
+ "description": "Specification index for the .kolm artifact format. RS-1 normative text, BNF grammar, schemas, and the RFC process.",
+ "url": "https://kolm.ai/spec",
+ "author": {
+ "@type": "Organization",
+ "name": "Kolm"
+ },
+ "publisher": {
+ "@type": "Organization",
+ "name": "Kolm",
+ "url": "https://kolm.ai"
+ },
+ "datePublished": "2026-05-09",
+ "license": "https://opensource.org/licenses/MIT"
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {
+ "@type": "ListItem",
+ "position": 1,
+ "name": "kolm",
+ "item": "https://kolm.ai/"
+ },
+ {
+ "@type": "ListItem",
+ "position": 2,
+ "name": "Spec",
+ "item": "https://kolm.ai/spec"
+ }
+ ]
+ }
+ ]
+}
+</script>
+
+<style>
+ :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--accent-soft:rgba(236,231,220,0.10);--good:#7ef0d2;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+ *{box-sizing:border-box}
+ html,body{margin:0;padding:0}
+ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;letter-spacing:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-synthesis:none;min-height:100vh;display:flex;flex-direction:column}
+ a{color:inherit;text-decoration:none}
+ ::selection{background:rgba(236,231,220,0.30)}
+
+ .wrap{max-width:880px;margin:0 auto;padding:0 32px;width:100%}
+ @media(max-width:720px){.wrap{padding:0 20px}}
+
+ header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+ header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px;max-width:1180px;margin:0 auto;padding:0 32px}
+ @media(max-width:720px){header.site .row{padding:0 20px}}
+ header.site .left{display:flex;align-items:center;gap:36px}
+ header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
+ header.site .brand span{font-weight: 500;font-size:16px;letter-spacing:0}
+ header.site nav{display:flex;gap:22px}
+ header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
+ header.site nav a:hover,header.site nav a.active{color:var(--ink)}
+ header.site .right{display:flex;align-items:center;gap:14px}
+ header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
+ header.site .right .ghost:hover{color:var(--ink)}
+ header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight: 500}
+
+ main{padding:88px 0 96px;flex:1;position:relative;overflow:hidden}
+ main::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:0.32;background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%237ef0d2' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%237ef0d2' stop-opacity='0.20'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke='url(%23g)' stroke-width='0.7'%3E%3Cpath d='M -200 720 Q 200 660 540 700 T 1240 680 T 1700 690'/%3E%3Cpath d='M -200 660 Q 240 590 580 640 T 1280 620 T 1700 630'/%3E%3Cpath d='M -200 600 Q 280 520 620 580 T 1320 560 T 1700 570'/%3E%3Cpath d='M -200 540 Q 320 450 660 520 T 1360 500 T 1700 510'/%3E%3Cpath d='M -200 480 Q 360 380 700 460 T 1400 440 T 1700 450'/%3E%3Cpath d='M -200 420 Q 400 310 740 400 T 1440 380 T 1700 390'/%3E%3Cpath d='M -200 360 Q 440 240 780 340 T 1480 320 T 1700 330'/%3E%3C/g%3E%3C/svg%3E");background-size:cover;background-position:center top;mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,0.4) 36%,transparent 60%);-webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,0.4) 36%,transparent 60%)}
+ main > .wrap { position: relative; z-index: 2; }
+ .eyebrow,.hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 22px;border:1px solid var(--line-strong);border-radius:999px;padding:6px 14px;background:rgba(8,9,8,0.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+ .eyebrow .num{color:#7ef0d2}
+ .eyebrow .he-dot,.hero-eyebrow .he-dot{width:6px;height:6px;border-radius:50%;background:#7ef0d2;box-shadow:0 0 10px #7ef0d2;animation:pulse-dot 2.4s ease-in-out infinite}
+ @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
+ h1{font-weight: 500;letter-spacing:-0.035em;line-height:0.96;font-size:clamp(48px,6.4vw,92px);margin:0 0 22px;max-width:13ch}
+ .lede{color:var(--ink-mute);font-size:clamp(16px,1.3vw,18px);margin:0 0 48px;max-width:64ch;line-height:1.55}
+ h2{font-weight: 500;letter-spacing:0;font-size:24px;margin:48px 0 16px;border-top:1px solid var(--line);padding-top:32px}
+ h3{font-weight: 500;letter-spacing:0;font-size:17px;margin:28px 0 8px}
+ p{color:var(--ink-mute);margin:0 0 14px}
+ p strong{color:var(--ink);font-weight: 500}
+ code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+ pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink);line-height:1.55}
+ ul{padding-left:22px;margin:0 0 14px;color:var(--ink-mute)}
+ ul li{margin:6px 0}
+ ul li strong{color:var(--ink);font-weight: 500}
+
+ .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:24px 0}
+ @media(max-width:720px){.grid{grid-template-columns:1fr}}
+ .card{display:block;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:20px 22px;transition:border-color 120ms,background 120ms;color:inherit}
+ .card:hover{border-color:var(--line-strong);background:var(--bg-card)}
+ .card .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+ .card .name{font-size:15px;font-weight: 500;color:var(--ink)}
+ .card .tag{font-family:var(--mono);font-size:10.5px;color:var(--good);background:rgba(126,240,210,0.10);border:1px solid rgba(126,240,210,0.20);border-radius:4px;padding:2px 6px;letter-spacing:0}
+ .card .tag.draft{color:#ffd479;background:rgba(255,212,121,0.08);border-color:rgba(255,212,121,0.20)}
+ .card .tag.idea{color:var(--ink-faint);background:transparent;border-color:var(--line-strong)}
+ .card .desc{color:var(--ink-mute);font-size:13.5px;line-height:1.55;margin:0}
+
+ .table-scroll{margin:16px 0;border:1px solid var(--line);border-radius:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;position:relative}
+ .table{width:100%;border-collapse:collapse;margin:0;font-size:13.5px}
+ @media(min-width:721px){.table{min-width:0}}
+ .table th,.table td{padding:10px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+ .table th{font-weight: 500;color:var(--ink-faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;background:var(--bg-elev)}
+ .table tr:last-child td{border-bottom:0}
+ .table td code{font-size:12px}
+ @media(max-width:720px){.table-scroll{border-radius:8px}.table{min-width:560px;font-size:13px}.table th,.table td{padding:9px 12px}}
+ .table-scroll-hint{display:none;font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);letter-spacing:0.04em;text-transform:uppercase;margin:-8px 0 16px}
+ @media(max-width:720px){.table-scroll-hint{display:block}}
+
+ footer{border-top:1px solid var(--line);padding:32px 32px 28px;color:var(--ink-faint);font-size:12.5px;text-align:center}
+ footer a{color:var(--ink-mute)}
+ footer a:hover{color:var(--ink)}
+ .footer-row{margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint);justify-content:center;display:flex}
+ .footer-row a{color:inherit}
+
+ /* Mobile UX: bigger tap targets in footer grid */
+ @media (max-width: 720px) {
+ footer.site .footer-grid > div { gap: 8px !important; }
+ footer.site .footer-grid a { display: inline-flex; align-items: center; min-height: 32px; padding: 4px 0; line-height: 1.3; }
+ .card { padding: 18px 18px; }
+ .card .name { font-size: 14.5px; }
+ }
+</style>
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API Key &rarr;</a>
+ </div>
+ </div>
+</header>
+
+<main id="main">
+ <div class="wrap">
+ <div class="hero-eyebrow"><span class="he-dot"></span>The .kolm spec . v0.1</div>
+ <h1>The <code style="font-family:var(--mono);font-size:0.70em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:4px 14px;vertical-align:0.04em">.kolm</code> spec.</h1>
+ <p class="lede">The contract that makes one <code>.kolm</code> byte-identical to another given the same inputs, signed end-to-end, and runnable on any device that can read the format. Open, MIT-licensed, small enough to read in one sitting.</p>
+
+ <h2>Documents</h2>
+ <div class="grid">
+ <a class="card" href="/docs/rs-1.md">
+ <div class="top"><span class="name">RS-1 · the artifact contract</span><span class="tag">stable v0.1</span></div>
+ <p class="desc">The normative spec for the file shape, manifest, recipes, receipt chain, and reproducibility rules.</p>
+ </a>
+ <a class="card" href="/spec/grammar">
+ <div class="top"><span class="name">RS-1 grammar (BNF)</span><span class="tag">stable v0.1</span></div>
+ <p class="desc">A formal BNF grammar for the manifest and receipt JSON. Use it to write a parser without reading the prose.</p>
+ </a>
+ <a class="card" href="/docs/manifest-v0.1.json">
+ <div class="top"><span class="name">manifest-v0.1.json</span><span class="tag">stable v0.1</span></div>
+ <p class="desc">The JSON Schema for <code>manifest.json</code>. Wire this into your validator.</p>
+ </a>
+ <a class="card" href="/docs/receipt-v0.1.json">
+ <div class="top"><span class="name">receipt-v0.1.json</span><span class="tag">stable v0.1</span></div>
+ <p class="desc">The JSON Schema for <code>receipt.json</code>. Drives the third-party receipt walker at <a href="/k-score" style="color:var(--ink);text-decoration:underline">/k-score</a>.</p>
+ </a>
+ <a class="card" href="/docs/kolm-yaml-v0.1.json">
+ <div class="top"><span class="name">kolm-yaml-v0.1.json</span><span class="tag">stable v0.1</span></div>
+ <p class="desc">The JSON Schema for the <code>kolm.yaml</code> project file. Declares artifacts, MCP transport, bench suite, hooks, and skills_dir. Run <code>kolm init</code> to scaffold one.</p>
+ </a>
+ <a class="card" href="/k-score">
+ <div class="top"><span class="name">K-score formula</span><span class="tag">stable v0.1</span></div>
+ <p class="desc">The composite score on the box: 0.40·accuracy + 0.15·size + 0.15·latency + 0.15·cost + 0.15·coverage.</p>
+ </a>
+ <a class="card" href="/spec/codebase">
+ <div class="top"><span class="name">Codebase architecture</span><span class="tag">v1.0</span></div>
+ <p class="desc">The shipped runtime in one sitting. Modules, trust boundaries, persistence, compile pipeline, CLI surface. ~16k lines of plain JavaScript, Apache-2.0.</p>
+ </a>
+ <a class="card" href="/models">
+ <div class="top"><span class="name">Models &amp; devices</span><span class="tag">stable v0.1</span></div>
+ <p class="desc">The 16-model + 14-device registry kolm compiles against. Defaults per device, licenses, VRAM, device-fit contract.</p>
+ </a>
+ <a class="card" href="/compute">
+ <div class="top"><span class="name">Compute &amp; rental</span><span class="tag">stable v1.0</span></div>
+ <p class="desc">The 14-backend rental surface. Local + cloud + SSH. Quote-first, budget-gated, teardown contract, receipt provenance.</p>
+ </a>
+ <a class="card" href="/research#reference">
+ <div class="top"><span class="name">Frontier reference</span><span class="tag">research</span></div>
+ <p class="desc">The forty-two techniques kolm ships, grouped by training, decoding, serving, evaluation, data, and observability. Paper, file path, and gating condition for each.</p>
+ </a>
+ <a class="card" href="https://github.com/sneaky-hippo/kolm-stack/blob/main/public/docs/rs-1.md" rel="noopener">
+ <div class="top"><span class="name">Source on GitHub</span><span class="tag">MIT</span></div>
+ <p class="desc">Read the spec on GitHub, propose changes via PR, raise issues against the language.</p>
+ </a>
+ </div>
+
+ <h2>Roadmap</h2>
+ <div class="table-scroll">
+ <table class="table">
+ <thead><tr><th>Spec</th><th>Status</th><th>Adds</th></tr></thead>
+ <tbody>
+ <tr><td><code>rs-1</code></td><td>Stable v0.1</td><td>Manifest, recipes, receipt, reproducibility floor.</td></tr>
+ <tr><td><code>rs-2</code></td><td>Draft (RFC open)</td><td>Multi-LoRA stacking, registry-pinned tokenizer, deterministic streaming.</td></tr>
+ <tr><td><code>rs-3</code></td><td>Idea</td><td>Cryptographic anchoring (Sigstore Rekor + L2), per-tenant attestations.</td></tr>
+ <tr><td><code>k-score-2</code></td><td>Idea</td><td>Vertical weight presets (healthcare, legal, finance), human-eval term.</td></tr>
+ </tbody>
+ </table>
+ </div>
+ <p class="table-scroll-hint">Scroll horizontally &rarr;</p>
+
+ <h2>Signature scheme</h2>
+ <p>RS-1 v0.1 is intentionally narrow on cryptography. One scheme is active in RS-1; the next scheme is tracked in the versioned roadmap.</p>
+ <div class="table-scroll">
+ <table class="table">
+ <thead><tr><th>Version</th><th>Scheme</th><th>Coverage</th><th>Verification</th></tr></thead>
+ <tbody>
+ <tr><td><code>v0.1</code> · tenant-local</td><td>HMAC-SHA256 over canonical JSON</td><td>Receipt chain integrity inside one tenant boundary</td><td>Issuer, or a party that holds the shared tenant receipt secret</td></tr>
+ <tr><td><code>v0.2</code> · public distribution</td><td>Ed25519 over canonical JSON</td><td>Detached public-key signature over manifest, receipt, and eval evidence</td><td>Anyone with the publisher's Ed25519 public key. No shared secret required.</td></tr>
+ </tbody>
+ </table>
+ </div>
+ <p class="table-scroll-hint">Scroll horizontally &rarr;</p>
+ <p>The v0.1 chain remains reproducible and tamper-evident under the issuer-or-shared-secret trust model that fits a single org or a contractually bound pair. Ed25519 is the public distribution mode: a registry, marketplace, or partner network can verify an artifact without holding the issuer's tenant secret.</p>
+ <p>Detached signatures, deterministic canonical-JSON encoding, and key rotation through the registry are part of the public verifier contract.</p>
+
+ <h2>RFC process</h2>
+ <p>RS-1 is the floor; everything beyond gets a numbered RFC.</p>
+ <ul>
+ <li><strong>Open</strong> a discussion on <a href="https://github.com/sneaky-hippo/kolm-stack/discussions" rel="noopener" style="color:var(--ink);text-decoration:underline">GitHub Discussions</a>. One paragraph: what changes, what breaks.</li>
+ <li><strong>Draft</strong> a PR against <code>public/docs/</code> with the new spec as <code>rs-N.md</code> and a JSON Schema if applicable. Mark the prose as <em>draft</em> in the front matter.</li>
+ <li><strong>Iterate</strong> until the breaking-change column is empty or unanimous. Two reviewers sign off.</li>
+ <li><strong>Promote</strong> by removing the draft marker and bumping the registry signature key version. The reproducibility floor (§6 of RS-1) holds across the bump.</li>
+ </ul>
+ <p>If you ship a runtime that implements an RFC before it lands, that is fine. Flag the artifact with <code>"spec": "rs-N-rcM"</code> so legacy runtimes refuse it cleanly.</p>
+
+ <h2>Why a spec at all</h2>
+ <p>A signed binary you cannot reproduce is trust theater. The <code>.kolm</code> format earns its weight when a holder of the inputs can re-derive the chain, validate the manifest, and re-run <i>that artifact's</i> K-score to the same numbers. Each .kolm carries its own eval set and its own K, so the recomputation is byte-deterministic for that file. RS-1 now separates tenant-local integrity from public distribution: HMAC covers shared-secret deployments, while Ed25519 covers third-party verification without sharing a tenant key.</p>
+ <p>Compare <code>.kolm</code> to other formats:</p>
+ <div class="table-scroll">
+ <table class="table">
+ <thead><tr><th>Format</th><th>Spec</th><th>Reproducible</th><th>Signed</th></tr></thead>
+ <tbody>
+ <tr><td><code>.gguf</code></td><td>llama.cpp readme</td><td>No (model-only)</td><td>No</td></tr>
+ <tr><td><code>safetensors</code></td><td>HF blog</td><td>No (model-only)</td><td>Optional</td></tr>
+ <tr><td><code>peft</code> LoRA</td><td>Hugging Face</td><td>Partial</td><td>No</td></tr>
+ <tr><td><code>.kolm</code></td><td><a href="/docs/rs-1.md" style="color:var(--ink);text-decoration:underline">RS-1, MIT</a></td><td>Yes (byte-identical)</td><td>Yes (Ed25519 receipt + Rekor optional)</td></tr>
+ </tbody>
+ </table>
+ </div>
+ <p class="table-scroll-hint">Scroll horizontally &rarr;</p>
+
+ <h2>License</h2>
+ <p>All specs in this repository are published under <a href="https://opensource.org/licenses/MIT" rel="noopener" style="color:var(--ink);text-decoration:underline">MIT</a>. The intent is that any runtime (ours, a competitor's, an academic project) can implement the spec without asking permission. The receipt anchor (the registry public key) is the only externally-mutable input; everything else is self-describing.</p>
+ </div>
+</main>
+
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4><span data-kolm-icon="compile" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="deploy" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="layers" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="user" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+<script src="/kolm-svg.js" defer></script>
+</body>
+</html>

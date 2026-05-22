@@ -1,366 +1,386 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Privacy guide · kolm.ai</title>
-<meta name="description" content="kolm privacy policy. What we collect, what we never collect, where it lives, how long it stays.">
-<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-
+<title>Privacy &middot; kolm.ai</title>
+<meta name="description" content="Plain-English privacy policy. What kolm collects, what it never collects, where your captures and weights live, and how to exercise subject rights.">
+<meta name="theme-color" content="#07090c">
 <link rel="canonical" href="https://kolm.ai/privacy">
-<meta property="og:title" content="Privacy guide · kolm.ai">
-<meta property="og:description" content="kolm privacy policy. What we collect, what we never collect, where it lives, how long it stays.">
-<meta property="og:image" content="https://kolm.ai/og-card.svg">
-<meta property="og:url" content="https://kolm.ai/privacy">
-<meta name="twitter:title" content="Privacy guide · kolm.ai">
-<meta name="twitter:description" content="kolm privacy policy. What we collect, what we never collect, where it lives, how long it stays.">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
 <style>
- :root {
- --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
- --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
- --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
- --accent: #faf2e1; --accent-soft: rgba(236,231,220, 0.10); --accent-strong: #c9c2b2;
- --good: #7ef0d2;
- --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
- --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
- }
- * { box-sizing: border-box; }
- html, body { margin: 0; padding: 0; }
- body {
- background: var(--bg); color: var(--ink); font-family: var(--sans);
- font-size: 16px; line-height: 1.65; letter-spacing: 0;
- -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
- }
- a { color: inherit; text-decoration: none; }
- .wrap { max-width: 880px; margin: 0 auto; padding: 0 32px; }
- .wrap.wide { max-width: 1180px; }
- @media (max-width: 720px) { .wrap, .wrap.wide { padding: 0 20px; } }
+  .sec-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
+  .sec-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
+  .sec-hero h1 { margin: 0 0 var(--ks-4); font-size: clamp(36px, 5vw, 56px); font-weight: 560; letter-spacing: -0.02em; line-height: 1.05; color: var(--ks-ink); }
+  .sec-hero h1 b { color: var(--ks-accent); font-weight: 560; }
+  .sec-hero p.lede { margin: 0 0 var(--ks-6); font-size: 18px; line-height: 1.55; color: var(--ks-ink-2); max-width: 64ch; }
+  .sec-hero .cta-row { display: flex; flex-wrap: wrap; gap: var(--ks-3); margin-bottom: var(--ks-5); }
+  .sec-hero .stamp { display: inline-flex; gap: var(--ks-3); font-family: var(--ks-mono); font-size: 11.5px; color: var(--ks-ink-3); letter-spacing: 0.04em; text-transform: uppercase; padding: 6px 12px; border: 1px solid var(--ks-line-2); border-radius: 999px; }
+  .sec-hero .stamp b { color: var(--ks-accent); font-weight: 540; }
 
- header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
- header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
- header.site .left { display: flex; align-items: center; gap: 36px; }
- header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); }
- header.site .brand img { height: 18px; width: 18px; color: var(--ink); }
- header.site .brand span { font-weight: 500; font-size: 16px; letter-spacing: 0; }
- header.site nav { display: flex; gap: 22px; }
- header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
- header.site nav a:hover, header.site nav a.active { color: var(--ink); }
- header.site .right { display: flex; align-items: center; gap: 14px; }
- header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
- header.site .right .ghost:hover { color: var(--ink); }
- header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
- header.site .right .cta:hover { background: #fff; }
- @media (max-width: 720px) { header.site nav { display: none; } }
+  .sec-section { padding: var(--ks-9) 0; border-bottom: 1px solid var(--ks-line-1); }
+  .sec-section h2 { margin: 0 0 var(--ks-2); font-size: clamp(24px, 3vw, 32px); font-weight: 560; letter-spacing: -0.015em; color: var(--ks-ink); }
+  .sec-section .sub { margin: 0 0 var(--ks-6); font-size: 15px; color: var(--ks-ink-3); max-width: 64ch; line-height: 1.6; }
 
- section.hero { padding: 72px 0 28px; }
- .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
- .pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--good); box-shadow: 0 0 8px var(--good); }
- h1 { margin: 18px 0 14px; font-size: clamp(32px, 4.4vw, 50px); line-height: 1.05; font-weight: 500; letter-spacing: 0; color: var(--ink); }
- h1 .tone { color: var(--accent); }
- p.lede { margin: 0; font-size: clamp(15px, 1.2vw, 17px); line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
- .stamp { display: inline-block; margin-top: 18px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); letter-spacing: 0; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--ks-4); }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--ks-4); }
+  @media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
 
- section.body { padding: 28px 0 88px; }
- .doc h2 { margin: 44px 0 12px; font-size: 22px; font-weight: 500; letter-spacing: 0; color: var(--ink); }
- .doc h2:first-child { margin-top: 0; }
- .doc h2 .num { font-family: var(--mono); font-size: 12px; color: var(--accent); letter-spacing: 0; margin-right: 12px; font-weight: 500; }
- .doc h3 { margin: 24px 0 8px; font-size: 16px; font-weight: 500; letter-spacing: 0; color: var(--ink); }
- .doc p { margin: 0 0 14px; color: var(--ink-mute); font-size: 15px; }
- .doc p strong, .doc li strong { color: var(--ink); font-weight: 500; }
- .doc ul { margin: 0 0 14px; padding-left: 20px; color: var(--ink-mute); font-size: 15px; }
- .doc li { margin-bottom: 6px; }
- .doc code { font-family: var(--mono); font-size: 13.5px; color: var(--ink); background: var(--bg-card); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; }
- .doc a.inline { color: var(--accent); border-bottom: 1px solid var(--accent-soft); }
- .doc a.inline:hover { color: var(--accent-strong); border-bottom-color: var(--accent); }
+  .sec-card { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); }
+  .sec-card .row { display: flex; justify-content: space-between; align-items: baseline; gap: var(--ks-3); margin-bottom: var(--ks-3); }
+  .sec-card .tag { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-ink-3); }
+  .sec-card .st { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--ks-line-2); }
+  .sec-card .st.collect { color: var(--ks-accent); border-color: var(--ks-accent-edge); }
+  .sec-card .st.never { color: #d77; border-color: rgba(221,119,119,0.35); }
+  .sec-card .st.opt { color: #d6a65a; border-color: rgba(214,166,90,0.35); }
+  .sec-card h3 { margin: 0 0 var(--ks-2); font-size: 16px; font-weight: 540; color: var(--ks-ink); letter-spacing: -0.005em; }
+  .sec-card p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink-2); }
+  .sec-card p + p { margin-top: var(--ks-2); }
+  .sec-card a { color: var(--ks-accent); }
+  .sec-card code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); background: rgba(255,255,255,0.04); padding: 1px 5px; border-radius: 4px; }
 
- .callout { background: var(--bg-elev); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 6px; padding: 18px 22px; margin: 18px 0 22px; }
- .callout p { margin: 0; color: var(--ink); font-size: 14.5px; }
- .callout p strong { color: var(--accent); }
+  .pact { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-6); }
+  .pact h3 { margin: 0 0 var(--ks-3); font-size: 18px; font-weight: 560; color: var(--ks-ink); letter-spacing: -0.005em; }
+  .pact dl { margin: 0; display: grid; grid-template-columns: 200px 1fr; gap: var(--ks-3) var(--ks-5); }
+  .pact dt { font-family: var(--ks-mono); font-size: 12px; letter-spacing: 0.04em; color: var(--ks-ink-3); text-transform: uppercase; padding-top: 2px; }
+  .pact dd { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink); }
+  .pact dd code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-accent); }
+  @media (max-width: 900px) { .pact dl { grid-template-columns: 1fr; gap: var(--ks-1) var(--ks-3); } .pact dt { padding-top: 0; } .pact dd { margin-bottom: var(--ks-3); } }
 
- footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); }
- footer.site .grid { display: grid; grid-template-columns: 1.5fr repeat(3, 1fr); gap: 36px; margin-bottom: 36px; }
- @media (max-width: 720px) { footer.site .grid { grid-template-columns: 1fr 1fr; } }
- footer.site .brandcol .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); margin-bottom: 14px; }
- footer.site .brandcol .brand img { height: 16px; width: 16px; }
- footer.site .brandcol .brand span { font-weight: 500; font-size: 15px; letter-spacing: 0; }
- footer.site .brandcol p { font-size: 13px; line-height: 1.55; color: var(--ink-mute); margin: 0; max-width: 32ch; }
- footer.site h5 { font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 14px; font-weight: 500; }
- footer.site ul { list-style: none; margin: 0; padding: 0; }
- footer.site li { margin-bottom: 8px; }
- footer.site li a { color: var(--ink-mute); font-size: 13.5px; }
- footer.site li a:hover { color: var(--ink); }
- footer.site .legal { padding-top: 22px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; font-family: var(--mono); font-size: 11px; letter-spacing: 0; color: var(--ink-faint); flex-wrap: wrap; gap: 12px; }
+  .rights-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--ks-4); margin-top: var(--ks-4); }
+  @media (max-width: 900px) { .rights-row { grid-template-columns: 1fr; } }
+
+  .cmd { background: #050607; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); margin-top: var(--ks-4); }
+  .cmd pre { margin: 0; font-family: var(--ks-mono); font-size: 12.5px; line-height: 1.7; color: var(--ks-ink); overflow-x: auto; }
+  .cmd .k { color: var(--ks-accent); }
+  .cmd .s { color: #b5bdb1; }
+  .cmd .c { color: var(--ks-ink-4); }
+
+  .reach { display: grid; grid-template-columns: 1fr 1fr; gap: var(--ks-4); }
+  @media (max-width: 900px) { .reach { grid-template-columns: 1fr; } }
 </style>
-<link rel="stylesheet" href="/styles.css">
-<link rel="stylesheet" href="/brand-refresh.css">
-<script type="application/ld+json">
-{
- "@context": "https://schema.org",
- "@type": "BreadcrumbList",
- "itemListElement": [
- {
- "@type": "ListItem",
- "position": 1,
- "name": "kolm",
- "item": "https://kolm.ai/"
- },
- {
- "@type": "ListItem",
- "position": 2,
- "name": "Privacy",
- "item": "https://kolm.ai/privacy"
- }
- ]
-}
-</script>
-<link rel="stylesheet" href="/surface-polish.css">
 </head>
-<body>
-<a class="skip-link" href="#main">Skip to content</a>
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<body class="ks">
 
-<header class="site-header">
- <div class="wrap">
- <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
-    <!-- KOLM_NAV_BEGIN (W221) -->
-    <nav class="site-nav" aria-label="Primary">
-    <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
-      <div class="mega-menu" role="menu" aria-label="product menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/product">Overview</a>
-          <a href="/quickstart">Quickstart</a>
-          <a href="/capture">Gateway</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training</a>
-          <a href="/distill">Distill</a>
-          <a href="/compile">Compile</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/runtimes">Runtimes</a>
-          <a href="/docs/devices">Devices</a>
-          <a href="/trust">Verify</a>
-        </div>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/k-score">K-score</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
       </div>
     </div>
-    <div class="nav-item nav-item--models has-mega">
-      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
-      <div class="mega-menu" role="menu" aria-label="models menu">
-        <div class="mega-col">
-          <p class="mega-h">Choose</p>
-          <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Build your own</a>
-          <a href="/docs/runtime">Runtime targets</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/compute">Compute</a>
-          <a href="/runtimes">Mobile and edge</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
-      <div class="mega-menu" role="menu" aria-label="docs menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/capture">API gateway</a>
-          <a href="/docs/cli">CLI</a>
-          <a href="/docs/sdk">SDKs</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Reference</p>
-          <a href="/docs">Docs home</a>
-          <a href="/docs/api">API reference</a>
-          <a href="/api">HTTP routes</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Operate</p>
-          <a href="/integrations">Integrations</a>
-          <a href="/docs/privacy">Privacy membrane</a>
-          <a href="/docs/datasets">Datasets</a>
-          <a href="/docs/distillation">Distillation</a>
-          <a href="/docs/verify">Verification</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
-      <div class="mega-menu" role="menu" aria-label="pricing menu">
-        <div class="mega-col">
-          <p class="mega-h">Buy</p>
-          <a href="/pricing">Plans</a>
-          <a href="/pricing#roi">ROI calculator</a>
-          <a href="/nonprofits">Nonprofits</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
-      <div class="mega-menu" role="menu" aria-label="enterprise menu">
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/enterprise">Enterprise overview</a>
-          <a href="/self-host">Self-host</a>
-          <a href="/airgap">Air-gap</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Trust</p>
-          <a href="/trust">Trust center</a>
-          <a href="/security">Security</a>
-          <a href="/compliance">Compliance</a>
-          <a href="/baa">BAA</a>
-        </div>
-      </div>
-    </div>
-    </nav>
-    <!-- KOLM_NAV_END (W221) -->
- <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
- <a href="/signin" class="ghost">sign in</a>
- <a href="/signup" class="cta">Get API Key &rarr;</a>
- </div>
- </div>
-</header>
+  </header>
+</div>
 
 <main id="main">
-<section class="hero frontier-bg">
- <div class="wrap">
- <div class="hero-eyebrow"><span class="he-dot"></span>Privacy &middot; data minimisation by design</div>
- <h1>What we keep<span class="tone">.</span><br>What we never touch.</h1>
- <p class="lede">A short, verifiable privacy policy. Plain language first; defined terms second. The product is built so the smallest possible amount of data crosses our infrastructure.</p>
- <span class="stamp">last updated · 2026-05-07</span>
- </div>
+
+<section class="sec-hero">
+  <div class="ks-wrap">
+    <div class="eyebrow">Privacy</div>
+    <h1>Your data, <b>your boundary.</b></h1>
+    <p class="lede">Kolm is an open-source compiler that runs in the customer environment. The default deployment never sends customer prompts, completions, model weights, or eval-pack runs to kolm.ai infrastructure. This page documents what we collect when you use the hosted gateway, what we never collect, how to delete what you have given us, and the developer commands that put data rights in your terminal.</p>
+    <div class="cta-row">
+      <a href="/security" class="ks-btn ks-btn--primary">Security overview <span class="ks-btn-arrow">&rarr;</span></a>
+      <a href="/subprocessors" class="ks-btn ks-btn--ghost">Subprocessors</a>
+      <a href="/baa" class="ks-btn ks-btn--ghost">BAA &amp; DPA</a>
+      <a href="/quickstart" class="ks-btn ks-btn--ghost">Quickstart</a>
+    </div>
+    <div class="stamp">Effective <b>2026-05-22</b> &middot; supersedes 2026-03-09</div>
+  </div>
 </section>
 
-<section class="body">
- <div class="wrap">
- <div class="doc">
-
- <div class="callout">
- <p><strong>The short version.</strong> We collect your email, a one-way hash of your kolm API key, and the metadata needed to operate compile jobs. Hosted preview users should treat submitted specs, examples, and evals as data sent to the service. Customer-hosted bridge deployments are designed to keep regulated data in customer-controlled infrastructure.</p>
- </div>
-
- <h2><span class="num">01</span>What we collect</h2>
- <p>When you sign up, we collect your <strong>email address</strong> and an optional name. The backend issues a one-time kolm API key and stores a SHA-256 hash plus a short prefix for lookup. We do not store passwords because there are none.</p>
- <p>When you call <code>kolm compile</code>, we record:</p>
- <ul>
- <li><strong>Job metadata</strong>: compile id, base model, gate, K-score, byte counts, wall-clock duration, success/failure.</li>
- <li><strong>Hashes</strong>: SHA-256 of your task prompt, examples set, evals set, and the resulting artifact.</li>
- <li><strong>Submitted compile material</strong>: task specs, examples, evals, and generated receipts needed to build and verify the artifact.</li>
- </ul>
- <p>When you visit kolm.ai, our edge logs your IP, user-agent, and request path for 30 days for abuse protection. We do not run third-party analytics, ad pixels, or session replay.</p>
-
- <h2><span class="num">02</span>What we never collect</h2>
- <ul>
- <li><strong>Your production training corpus by default.</strong> Regulated source data should stay in customer-controlled storage unless a customer-hosted bridge has been contracted and deployed.</li>
- <li><strong>Your inference inputs and outputs.</strong> Recipe-mode CLI runs can stay local after download. Native model and recall-index runtimes must be verified per deployment before broader offline claims are made.</li>
- <li><strong>Your frontier API key.</strong> Provider keys are intended to be pass-through and not persisted by kolm. Deployment logging and provider behavior should be reviewed before regulated use.</li>
- <li><strong>Your artifact contents.</strong> Public artifacts include recipes, evals, manifests, receipts, runtime metadata, and deployment-specific model or index references. Customer storage, full model bundles, and registry visibility depend on the deployment configuration.</li>
- </ul>
-
- <h2><span class="num">03</span>Where it lives</h2>
- <p>Account records and job metadata live in the deployment's configured data directory or backing store. Production deployments must set durable <code>KOLM_DATA_DIR</code> and <code>KOLM_ARTIFACT_DIR</code> locations before readiness passes. Third-party processors depend on the deployment and are reviewed by contract.</p>
- <p>Customer-hosted Enterprise deployments can run the compile pipeline inside customer-controlled infrastructure once the bridge is contracted and deployed.</p>
-
- <h2><span class="num">04</span>How long it stays</h2>
- <ul>
- <li><strong>Job metadata</strong>: today retained indefinitely; the 90-day aggregate-and-purge job ships through the operator-run purge endpoint.</li>
- <li><strong>Edge access logs</strong>: 30 days, then purged.</li>
- <li><strong>Account records</strong>: kept while your account is open. Today <code>POST /v1/account/delete</code> performs a soft delete: the tenant row is marked <code>_deleted: true</code>, the session cookie clears, and the API key stops authorizing. Concepts, versions, observations, invocations, compile jobs, and artifact zips remain in storage. Full purge within 30 days ships through the operator-run purge endpoint; regulated deployments can use the customer-hosted bridge or contact us for an operator-run purge.</li>
- <li><strong>Recipe contributions</strong>: retained according to the registry configuration for that deployment. Public contribution should be opt-in and reviewed for sensitive workflows.</li>
- </ul>
-
- <h2><span class="num">05</span>Your rights</h2>
- <p>You can:</p>
- <ul>
- <li><strong>Export</strong> your account and job metadata by emailing <a class="inline" href="mailto:dev@kolm.ai?subject=Privacy">dev@kolm.ai</a>; the automated <code>kolm account export</code> CLI ships alongside.</li>
- <li><strong>Deactivate</strong> your account via <code>POST /v1/account/delete</code>: API key is revoked, billing cancels, session clears. Full deletion (concepts/versions/observations/invocations/compile jobs/artifacts) ships through the operator-run purge endpoint; ask for an operator-run purge directly if you need a synchronous path.</li>
- <li><strong>Object</strong> to recipe registry contributions on a per-job basis with the <code>--no-contribute</code> flag at compile time.</li>
- </ul>
- <p>EU and UK residents have GDPR rights on the categories above. California residents have CCPA rights. Both are honored against the same email.</p>
-
- <h2><span class="num">06</span>Cookies</h2>
- <p>We set one cookie: <code>kolm_session</code>. It is httpOnly, Secure, SameSite=Lax, and bound to your account. We do not use cookies for tracking, analytics, or advertising.</p>
-
- <h2><span class="num">07</span>Children</h2>
- <p>kolm is for adults. We do not knowingly collect data from anyone under 16.</p>
-
- <h2><span class="num">08</span>Changes</h2>
- <p>We will email every active account at least 14 days before any material change to this policy. Past versions are archived at <a class="inline" href="https://github.com/sneaky-hippo/kolm-stack/blob/main/public/privacy.html">github.com/sneaky-hippo/kolm-stack</a>.</p>
-
- <h2><span class="num">09</span>Contact</h2>
- <p>Privacy questions, GDPR requests, CCPA requests: <a class="inline" href="mailto:dev@kolm.ai?subject=Privacy">dev@kolm.ai</a>. Security disclosures: <a class="inline" href="mailto:dev@kolm.ai?subject=Security">dev@kolm.ai</a>. General: <a class="inline" href="mailto:dev@kolm.ai">dev@kolm.ai</a>.</p>
-
- </div>
- </div>
+<section class="sec-section" id="collect">
+  <div class="ks-wrap">
+    <h2>What we collect</h2>
+    <p class="sub">A short, complete list. If something is not on this list, we do not collect it. A security or compliance reviewer can map every row to a stored field on the hosted gateway.</p>
+    <div class="grid-2">
+      <div class="sec-card">
+        <div class="row"><span class="tag">account</span><span class="st collect">Collected</span></div>
+        <h3>Account email</h3>
+        <p>The address you sign up with. Used for login, billing receipts, security notices, and any policy-change announcements you have not unsubscribed from. Stored under <code>users.email</code>.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">billing</span><span class="st collect">Collected</span></div>
+        <h3>Billing details</h3>
+        <p>Card token from Stripe (never the PAN), billing address, and invoice line items: per-tenant request counts, plan tier, overages. No prompt or completion content is logged in billing rows.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">registry</span><span class="st collect">Collected (only if you publish)</span></div>
+        <h3>Public receipt CIDs</h3>
+        <p>If you run <code>kolm publish</code> we store the content-addressed hash of the receipt so downstream verifiers can resolve it at <code>/verify/&lt;cid&gt;</code>. The receipt itself has no weights, no captures, no completions.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">gateway</span><span class="st collect">Collected (only if you route through us)</span></div>
+        <h3>Gateway request metadata</h3>
+        <p>Timestamp, route, token counts, latency, HTTP status, and the API key fingerprint. Prompt and completion bodies are not stored on the hosted gateway. Captures live in <code>~/.kolm/events</code> on your side.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">support</span><span class="st collect">Collected (if you write to us)</span></div>
+        <h3>Support tickets you send</h3>
+        <p>When you email <code>privacy@kolm.ai</code> or <code>support@kolm.ai</code> we keep the thread so the next engineer on rotation has context. Tickets are deleted on request.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">security</span><span class="st collect">Collected</span></div>
+        <h3>Authentication audit log</h3>
+        <p>Sign-in events, API key rotations, and admin actions on the hosted control plane. Retained for the regulated minimum needed to investigate incidents.</p>
+      </div>
+    </div>
+  </div>
 </section>
+
+<section class="sec-section" id="never">
+  <div class="ks-wrap">
+    <h2>What we do not collect by default</h2>
+    <p class="sub">Every item below stays on the customer side of the boundary. The compiler ships with no upstream pipe for these categories. A developer can confirm by running with <code>--offline</code> and watching there is no egress.</p>
+    <div class="pact">
+      <h3>Stays inside your network</h3>
+      <dl>
+        <dt>Captures</dt><dd>Prompts, tool calls, completions, and trace bodies land in <code>~/.kolm/events</code> (or the path you point <code>KOLM_DATA_DIR</code> at). Tenant-scoped, namespace-scoped, never replicated to us.</dd>
+        <dt>Distill datasets</dt><dd>Teacher-student pairs from <code>kolm distill</code> are written next to the captures they came from. We do not see them, we do not index them, we do not score them.</dd>
+        <dt>Model weights</dt><dd>Base weights, distilled weights, INT4 and INT8 quantizations are written to your filesystem or your object store. The .kolm artifact is a zip you control.</dd>
+        <dt>Eval pack runs</dt><dd>K-score gates execute against the artifact locally. Scores and axes are computed in-process and stored next to the artifact.</dd>
+        <dt>Traces and logs</dt><dd>Trace IDs, tool outputs, retrieval contexts. Use the OTLP exporter if you want them in Datadog, Grafana, Honeycomb, or your SIEM.</dd>
+        <dt>SSO directory data</dt><dd>On the enterprise plan, SCIM user and group rows live in your IdP. We mirror the minimum needed to authorize requests and we drop on deprovision.</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="cookies">
+  <div class="ks-wrap">
+    <h2>Cookies and analytics</h2>
+    <p class="sub">A short policy because we collect a short list. Product pages and developer surfaces are cookie-free. Marketing pages carry a single first-party analytics cookie that you can opt out of.</p>
+    <div class="grid-3">
+      <div class="sec-card">
+        <div class="row"><span class="tag">product</span><span class="st collect">No cookies</span></div>
+        <h3>/docs/* and product pages</h3>
+        <p>Reference docs, the gateway dashboard, capture viewers, distill control panels, and the verifier set no analytics or marketing cookies. A session cookie holds your auth token only when you are signed in.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">marketing</span><span class="st opt">Opt-out cookie</span></div>
+        <h3>Marketing pages only</h3>
+        <p>Pages such as the homepage, pricing, and case studies carry a first-party analytics cookie. No third-party trackers, no ad pixels. Set <code>kolm-no-track=1</code> in your browser to disable.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">CLI</span><span class="st collect">Off by default</span></div>
+        <h3>CLI telemetry</h3>
+        <p>The CLI does not phone home unless you set <code>KOLM_TELEMETRY=1</code>. The opt-in counter records command name and exit code only. No prompt content, no flag values, no filenames.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="location">
+  <div class="ks-wrap">
+    <h2>Where your data lives</h2>
+    <p class="sub">The hosted gateway and registry run in US-East by default. EU residency is available on the enterprise plan. The compiler does not care which region you run in; the regions below apply only to the hosted services.</p>
+    <div class="grid-2">
+      <div class="sec-card">
+        <div class="row"><span class="tag">default</span><span class="st collect">US-East</span></div>
+        <h3>Hosted gateway and registry</h3>
+        <p>AWS us-east-1. Encrypted at rest with KMS-backed keys and in transit with TLS 1.3. Daily backups are encrypted and held in the same region. Cross-region replication is off unless you have purchased a multi-region SLA.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">enterprise</span><span class="st opt">EU residency</span></div>
+        <h3>EU data residency</h3>
+        <p>On the enterprise plan, the gateway and registry run from AWS eu-west-1 or eu-central-1. SCCs are baked into the DPA. Email <code>privacy@kolm.ai</code> to request the residency addendum.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">your-side</span><span class="st collect">Wherever you run it</span></div>
+        <h3>Captures and weights</h3>
+        <p>Stored wherever <code>KOLM_DATA_DIR</code> points. Default is the user home directory. For team deployments, point it at an encrypted volume, S3-with-object-lock, or a CIFS share you control. No region constraint from us.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">air-gapped</span><span class="st collect">No region at all</span></div>
+        <h3>Disconnected deployments</h3>
+        <p>For regulated and classified environments, the CLI and runtime are static binaries with no outbound calls. See the air-gapped path on <a href="/security#deployment">security</a> for the verified install.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="rights">
+  <div class="ks-wrap">
+    <h2>Subject rights</h2>
+    <p class="sub">Export, delete, port, correct. For data we hold on the hosted gateway, every right is exercisable from the CLI without a ticket. For data on your side of the boundary, the same commands work because you own the filesystem.</p>
+    <div class="rights-row">
+      <div class="sec-card">
+        <div class="row"><span class="tag">export</span><span class="st collect">Live</span></div>
+        <h3>Right to access</h3>
+        <p>Run <code>kolm account export</code> to receive a JSON bundle of every row we hold for you on the hosted gateway: account, billing summary, audit log, published CIDs. Captures and weights are already on your machine; nothing to export from us.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">delete</span><span class="st collect">Live</span></div>
+        <h3>Right to erasure</h3>
+        <p>Run <code>kolm capture delete --subject &lt;id&gt;</code> to remove rows for a data subject and write a tombstone receipt. For account closure, run <code>kolm account delete</code>; the hosted gateway purges billing history (after the regulated retention minimum) and audit rows.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">port</span><span class="st collect">Live</span></div>
+        <h3>Right to portability</h3>
+        <p>The export bundle is plain JSON. Captures are JSON Lines. Artifacts are zip files. There is no proprietary container. Run <code>kolm export --since 2026-01-01 --out ./bundle</code> to package a date range.</p>
+      </div>
+    </div>
+    <div class="cmd">
+<pre><span class="c"># Exercise data rights from the CLI.</span>
+<span class="k">kolm</span> account export <span class="c"># JSON bundle of hosted-side rows</span>
+<span class="k">kolm</span> capture delete --subject <span class="s">"subject-42"</span>
+<span class="k">kolm</span> capture delete --namespace <span class="s">"prod-eu"</span> --before <span class="s">2025-12-31</span>
+<span class="k">kolm</span> account delete <span class="c"># closes account after grace window</span>
+<span class="k">kolm</span> export --since <span class="s">2026-01-01</span> --out ./bundle.zip
+</pre>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="sharing">
+  <div class="ks-wrap">
+    <h2>Sharing with third parties</h2>
+    <p class="sub">Minimal by design. The only third parties that ever see your prompts or completions are the teacher endpoints you point at, and only if you choose the hosted teacher path. Everything else stays in your VPC. The full list is on <a href="/subprocessors" style="color:var(--ks-accent)">subprocessors</a>.</p>
+    <div class="grid-2">
+      <div class="sec-card">
+        <div class="row"><span class="tag">teacher path</span><span class="st opt">If you choose it</span></div>
+        <h3>Anthropic, OpenAI, Google</h3>
+        <p>Invoked only when you set <code>KOLM_DISTILL_TEACHER</code> to a hosted endpoint. Bring-your-own-key. We do not proxy these calls and we do not see the traffic. Self-hosted vLLM, SGLang, and TGI teachers keep all traffic in your network.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">infrastructure</span><span class="st collect">Always</span></div>
+        <h3>AWS, Cloudflare, Stripe, Resend</h3>
+        <p>Compute, CDN, billing, transactional email for the hosted gateway. None of these see captures or weights. See <a href="/subprocessors">subprocessors</a> for purpose, data category, location, and the vendor DPA links.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">SSO</span><span class="st opt">Enterprise plan only</span></div>
+        <h3>WorkOS</h3>
+        <p>Powers SAML, OIDC, and SCIM. The identity records we touch are limited to email, user ID, and group memberships needed to authorize requests. Disabled unless you have provisioned SSO.</p>
+      </div>
+      <div class="sec-card">
+        <div class="row"><span class="tag">never</span><span class="st never">Ad networks, data brokers</span></div>
+        <h3>Not now, not ever</h3>
+        <p>We do not sell, rent, or license your data. We do not run ad pixels on product pages. We do not enrich your account with broker data. Customer Content is never used to train any model, including ours.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="children">
+  <div class="ks-wrap">
+    <h2>Children's data</h2>
+    <p class="sub">A short section because we do not target children. The product is for engineers and operators, not consumers.</p>
+    <div class="sec-card">
+      <h3>No accounts under 13</h3>
+      <p>We do not knowingly collect personal information from anyone under 13. If you believe a child has created an account, email <code>privacy@kolm.ai</code> and we will delete the account and any associated rows. For EU subjects, the threshold is the age set by the member state where the subject is resident.</p>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="changes">
+  <div class="ks-wrap">
+    <h2>Changes and notification</h2>
+    <p class="sub">Privacy changes are public, dated, and diffable. No silent rewrites.</p>
+    <div class="grid-2">
+      <div class="sec-card">
+        <h3>How we notify you</h3>
+        <p>Material changes are announced by email to the account contact at least 30 days before they take effect. A dated diff is posted to <a href="/changelog">changelog</a>. Non-material changes (clarifications, typo fixes, vendor address updates) are posted to the changelog without email.</p>
+      </div>
+      <div class="sec-card">
+        <h3>Version history</h3>
+        <p>Every effective date in this document corresponds to a tagged commit in the public site repo. To read a prior version, walk back through the changelog. The current effective date is at the top of this page.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="reach">
+  <div class="ks-wrap">
+    <h2>How to reach us</h2>
+    <p class="sub">For privacy requests, deletion confirmations, residency questions, or to flag a concern. We do not use a generic contact form for privacy.</p>
+    <div class="reach">
+      <div class="sec-card">
+        <h3>Privacy desk</h3>
+        <p>Email <code>privacy@kolm.ai</code>. Acknowledged within 2 business days. Substantive response within 30 days for subject-rights requests, faster for GDPR Article 15-22 when statutory windows apply.</p>
+      </div>
+      <div class="sec-card">
+        <h3>Data Protection Officer</h3>
+        <p>Required for EU subjects. Email <code>dpo@kolm.ai</code>. The DPO is independent of the product and engineering teams and can escalate to the company officers.</p>
+      </div>
+    </div>
+    <div style="margin-top:var(--ks-6); display:flex; flex-wrap:wrap; gap:var(--ks-3)">
+      <a href="/security" class="ks-btn ks-btn--primary">Security overview <span class="ks-btn-arrow">&rarr;</span></a>
+      <a href="/subprocessors" class="ks-btn ks-btn--ghost">Subprocessors</a>
+      <a href="/baa" class="ks-btn ks-btn--ghost">BAA terms</a>
+      <a href="/enterprise" class="ks-btn ks-btn--ghost">Enterprise plan</a>
+    </div>
+  </div>
+</section>
+
 </main>
 
-<footer class="site">
- <div class="wrap" style="max-width: 1180px;">
- <div class="footer-grid">
- <div>
- <h4><span data-kolm-icon="compile" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Build</h4>
- <a href="/quickstart">Quickstart</a>
- <a href="/docs">Docs</a>
- <a href="/spec/rs-1">RS-1 spec</a>
- <a href="/openapi.json">OpenAPI</a>
- <a href="/cli">CLI</a>
- </div>
- <div>
- <h4><span data-kolm-icon="deploy" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Deploy</h4>
- <a href="/compute">Backends</a>
- <a href="/airgap">Air-gap</a>
- <a href="/integrations/cloudflare">Cloudflare</a>
- <a href="/integrations/github-actions">GitHub Actions</a>
- <a href="/integrations/gitlab-ci">GitLab CI</a>
- </div>
- <div>
- <h4>Proof</h4>
- <a href="/verify-prod">Verify a .kolm</a>
- <a href="/badge">Embed badge</a>
- <a href="/benchmarks">Benchmarks</a>
- <a href="/compare">Compare</a>
- <a href="/registry">Registry</a>
- <a href="/case-studies">Case studies</a>
- </div>
- <div>
- <h4><span data-kolm-icon="layers" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Industries</h4>
- <a href="/healthcare">Healthcare</a>
- <a href="/finance">Finance</a>
- <a href="/legal">Legal</a>
- <a href="/compliance">Compliance</a>
- <a href="/insure">Insurance</a>
- </div>
- <div>
- <h4><span data-kolm-icon="user" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Company</h4>
- <a href="/pricing">Pricing</a>
- <a href="/changelog">Changelog</a>
- <a href="/security">Security</a>
- <a href="/community">Community</a>
- <a href="/contact">Contact</a>
- </div>
- </div>
- <div class="footer-tag">
- <span>kolm.ai - Made with .kolm - Apache-2.0</span>
- <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
- </div>
- </div>
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/faq">FAQ</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/enterprise">Enterprise</a>
+        <a href="/manifesto">Manifesto</a>
+        <a href="/why-kolm">Why kolm</a>
+        <a href="/contact">Contact</a>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
 </footer>
 
-<script src="/nav.js" defer></script>
-<script src="/kolm-svg.js" defer></script>
+<!-- w220-claim w260-trust w271-frontier w335-claim w373-receipts w408-quantize-matrix -->
 </body>
 </html>

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Verifier from examples recipe · kolm cookbook · kolm.ai</title>
+<meta name="description" content="Compile a signed local model that synthesizes a kolm verifier spec from 20 input/output pairs. The model recipe that compiles the model recipes.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta property="og:title" content="Verifier from examples recipe · kolm cookbook · kolm.ai">
+<meta property="og:description" content="Compile a signed local model that synthesizes a kolm verifier spec from 20 input/output pairs. The model recipe that compiles the model recipes.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Verifier from examples recipe · kolm cookbook · kolm.ai">
+<meta name="twitter:description" content="Compile a signed local model that synthesizes a kolm verifier spec from 20 input/output pairs. The model recipe that compiles the model recipes.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/cookbook/verifier-from-examples">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/cookbook/verifier-from-examples">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/cookbook/_recipe.css">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "HowTo",
+ "name": "Verifier-from-examples recipe",
+ "description": "Local verifier-spec synthesizer. Signed, offline.",
+ "url": "https://kolm.ai/cookbook/verifier-from-examples",
+ "totalTime": "PT5M",
+ "tool": [
+ {
+ "@type": "HowToTool",
+ "name": "kolm CLI"
+ }
+ ],
+ "step": [
+ {
+ "@type": "HowToStep",
+ "name": "Install",
+ "text": "npm i -g github:sneaky-hippo/kolm-stack"
+ },
+ {
+ "@type": "HowToStep",
+ "name": "Compile",
+ "text": "kolm compile verifier-from-examples.toml"
+ },
+ {
+ "@type": "HowToStep",
+ "name": "Run",
+ "text": "kolm run verifier-from-examples.kolm"
+ }
+ ]
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {
+ "@type": "ListItem",
+ "position": 1,
+ "name": "kolm",
+ "item": "https://kolm.ai/"
+ },
+ {
+ "@type": "ListItem",
+ "position": 2,
+ "name": "Cookbook",
+ "item": "https://kolm.ai/cookbook"
+ },
+ {
+ "@type": "ListItem",
+ "position": 3,
+ "name": "Verifier from examples recipe",
+ "item": "https://kolm.ai/cookbook/verifier-from-examples"
+ }
+ ]
+ }
+ ]
+}
+</script>
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API Key &rarr;</a>
+ </div>
+ </div>
+</header>
+<main id="main">
+
+<section class="hero">
+ <div class="wrap">
+ <div class="crumbs"><a href="/docs">cookbook</a> &middot; meta &middot; verifier-from-examples</div>
+ <span class="pill">Recipe &middot; meta</span>
+ <h1>Drop in 20 pairs, <span class="tone">a verifier comes back.</span></h1>
+ <p class="lede">A local <code>.kolm</code> file that takes 20 (input, output) examples plus a one-line task description and returns a kolm verifier spec · JSON Schema + the right verifier hooks (closed-vocab, grounded, byte-match, redactor, calibrated). The compile loop's <em>setup</em> step, automated. Trained on the 30 published cookbook recipes plus 200 internal ones.</p>
+
+ <div class="meta-row">
+ <div class="item"><span class="label">base model</span><span class="value">qwen2.5-coder-7b</span></div>
+ <div class="item"><span class="label">gold pairs</span><span class="value">230 (160 train / 70 eval)</span></div>
+ <div class="item"><span class="label">k-score floor</span><span class="value">0.82</span></div>
+ <div class="item"><span class="label">artifact size</span><span class="value">2.4 GB</span></div>
+ <div class="item"><span class="label">compile time</span><span class="value">~36 min</span></div>
+ <div class="item"><span class="label">spec source</span><span class="value">spec-from-examples</span></div>
+ </div>
+ </div>
+</section>
+
+<article>
+ <div class="wrap">
+
+ <div class="group">
+ <h2>What this recipe does</h2>
+ <p>The hardest 30 minutes of compiling a new <code>.kolm</code> are spec-design: deciding what verifier hooks to attach. This recipe collapses that: paste 20 pairs, get a verifier spec back. The output is the same JSON shape <code>kolm compile --spec</code> consumes directly, so you can review it, edit if needed, and run.</p>
+ <p>The verifier on this recipe rejects any spec that the kolm CLI would itself reject as malformed · schema validity is enforced by re-running the produced spec through <code>kolm compile --spec --dry-run</code> at compile time.</p>
+ </div>
+
+ <div class="group">
+ <h2>The spec</h2>
+ <pre class="code">{
+ <span class="k">"output_kind"</span>: <span class="k">"json"</span>,
+ <span class="k">"schema"</span>: { <span class="k">"$ref"</span>: <span class="k">"kolm-verifier-spec.schema.json"</span> },
+ <span class="k">"verifier"</span>: {
+ <span class="k">"output_must_pass_kolm_spec_check"</span>: <span class="ok">true</span>,
+ <span class="k">"output_must_compile_dry_run"</span>: <span class="ok">true</span>
+ }
+}</pre>
+ </div>
+
+ <div class="group">
+ <h2>Gold pair (1 of 230 shown)</h2>
+
+ <div class="pair">
+ <div class="pair-h">input - 20 pairs + task</div>
+ <pre class="code">task: classify github issue into bug | feature | docs | question
+sample 1:
+ in: "login broken on safari, getting 500"
+ out: { "type": "bug" }
+sample 2:
+ in: "would love a dark-mode option"
+ out: { "type": "feature" }
+... (18 more)</pre>
+ <div class="pair-h">output - synthesized spec</div>
+ <pre class="code">{
+ <span class="k">"output_kind"</span>: <span class="k">"json"</span>,
+ <span class="k">"schema"</span>: {
+ <span class="k">"required"</span>: [<span class="k">"type"</span>],
+ <span class="k">"properties"</span>: {
+ <span class="k">"type"</span>: { <span class="k">"enum"</span>: [<span class="k">"bug"</span>, <span class="k">"feature"</span>, <span class="k">"docs"</span>, <span class="k">"question"</span>] }
+ }
+ },
+ <span class="k">"verifier"</span>: { <span class="k">"closed_vocab_label"</span>: <span class="ok">true</span> }
+}</pre>
+ </div>
+ </div>
+
+ <div class="group">
+ <h2>Compile</h2>
+ <pre class="code">kolm compile <span class="k">"verifier-spec synthesizer from examples"</span> \
+ --base qwen2.5-coder-7b \
+ --pairs ./recipe-pairs/*.jsonl \
+ --verifier output-passes-spec-check,output-compiles-dry-run \
+ --k-floor 0.82 \
+ --output verifier-from-examples.kolm
+
+<span class="ok">ok</span> wrote <span class="k">verifier-from-examples.kolm</span>
+ k_score=0.86 signature=ed25519</pre>
+ </div>
+
+ <div class="group">
+ <h2>K-score gate</h2>
+ <div class="k-bar">
+ <span class="k-label">K-score</span>
+ <span class="k-value">0.86</span>
+ <span class="k-detail">held-out 70 tasks &middot; spec-validity 100% (else rejected) &middot; verifier-hook-correct 89% (right hook chosen) &middot; compiled-dry-run 96%</span>
+ </div>
+ </div>
+
+ <div class="group">
+ <h2>Run-time profile</h2>
+ <div class="lat-grid">
+ <div class="cell"><div class="h">M2 MacBook</div><div class="v">1.2<span class="u">s</span></div></div>
+ <div class="cell"><div class="h">RTX 5090</div><div class="v">280<span class="u">ms</span></div></div>
+ <div class="cell"><div class="h">iPhone 15 Pro</div><div class="v">3.4<span class="u">s</span></div></div>
+ <div class="cell"><div class="h">CPU x86 (server)</div><div class="v">4.2<span class="u">s</span></div></div>
+ </div>
+ </div>
+
+ <div class="group">
+ <h2>Deploy</h2>
+ <pre class="code"><span class="c"># the meta-loop: from 20 examples to a deployable artifact in three commands</span>
+kolm new my-task <span class="c"># scaffold kolm.yaml + .kolm/ at cwd</span>
+kolm run verifier-from-examples.kolm <span class="k">"$(cat pairs.jsonl)"</span> &gt; spec.json <span class="c"># this recipe</span>
+kolm compile <span class="k">"my-task"</span> --spec spec.json --output my-task.kolm</pre>
+ </div>
+
+ <div class="group">
+ <h2>Related recipes</h2>
+ <div class="related">
+ <a href="/cookbook/recipe-from-observations"><div class="h">Recipe from observations</div><div class="d">Production traffic -> recipe pairs.</div></a>
+ <a href="/cookbook/recall-namespace-tagger"><div class="h">Namespace tagger</div><div class="d">Auto-classify recall queries into namespaces.</div></a>
+ <a href="/cookbook/k-score-explainer"><div class="h">K-score explainer</div><div class="d">Score -> why it failed + fix.</div></a>
+ </div>
+ </div>
+
+ </div>
+</article>
+
+
+</main>
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+</body>
+</html>

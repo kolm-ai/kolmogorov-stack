@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Device transfer: pick a base, a quant, and a target box · kolm.ai</title>
+<meta name="description" content="Pick a .kolm artifact, a compression tier, and a target device. See the estimated size, speed, accuracy drop, fit verdict, and the exact export command...">
+<meta name="keywords" content="local AI, on-device AI, edge AI, model compression, Raspberry Pi, Jetson, Mac, iPhone, Android">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta name="author" content="kolm">
+<meta name="robots" content="index,follow,max-snippet:-1">
+<meta property="og:site_name" content="kolm">
+<meta property="og:title" content="Device transfer: pick a base, a quant, and a target box · kolm.ai">
+<meta property="og:description" content="Pick a .kolm artifact, a compression tier, and a target device. See the estimated size, speed, accuracy drop, fit verdict, and the exact export command...">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Device transfer: pick a base, a quant, and a target box · kolm.ai">
+<meta name="twitter:description" content="Pick a .kolm artifact, a compression tier, and a target device. See the estimated size, speed, accuracy drop, fit verdict, and the exact export command...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/device-transfer">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/device-transfer">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+ :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--accent-soft:rgba(236,231,220, 0.10);--good:#7ef0d2;--bad:#ff6b91;--warn:#f1c777;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+ *{box-sizing:border-box}
+ html,body{margin:0;padding:0}
+ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;font-synthesis:none}
+ a{color:inherit;text-decoration:none}
+ .wrap{max-width:960px;margin:0 auto;padding:0 32px}
+ .wrap-wide{max-width:1180px;margin:0 auto;padding:0 32px}
+ @media(max-width:720px){.wrap,.wrap-wide{padding:0 20px}}
+
+ header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+ header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px}
+ header.site .left{display:flex;align-items:center;gap:36px}
+ header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
+ header.site .brand span{font-weight:500;font-size:16px}
+ header.site nav{display:flex;gap:22px}
+ header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
+ header.site nav a:hover{color:var(--ink)}
+ header.site .right{display:flex;align-items:center;gap:14px}
+ header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
+ header.site .right .cta{color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500}
+ @media(max-width:720px){header.site nav{display:none}}
+
+ section.hero{padding:72px 0 28px;position:relative;overflow:hidden}
+ section.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 900px 460px at 22% 12%,rgba(236,231,220, 0.08),transparent 60%)}
+ section.hero .wrap{position:relative}
+ .pill{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-mute);border:1px solid var(--line-strong);border-radius:999px;padding:5px 12px;background:var(--bg-elev)}
+ .pill .dot{width:5px;height:5px;border-radius:50%;background:#10b981}
+ h1{margin:18px 0 14px;font-size:clamp(30px,4.6vw,46px);line-height:1.05;font-weight:500;max-width:22ch}
+ h1 .tone{color:#10b981}
+ p.lede{margin:0;font-size:clamp(15.5px,1.3vw,18px);line-height:1.55;color:var(--ink-mute);max-width:62ch}
+ p.lede b{color:var(--ink);font-weight:500}
+ .meta{display:flex;gap:18px;margin-top:18px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
+ .meta b{color:var(--ink-mute);font-weight:500}
+
+ section.picker{padding:28px 0 36px}
+ .picker-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+ @media(max-width:780px){.picker-grid{grid-template-columns:1fr}}
+
+ .panel{background:var(--bg-elev);border:1px solid var(--line);border-radius:10px;padding:20px 22px}
+ .panel h3{margin:0 0 12px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);font-weight:500;letter-spacing:0.04em}
+ .panel label{display:block;font-size:13px;color:var(--ink-mute);margin:0 0 6px}
+ .panel select, .panel input[type=text]{width:100%;background:var(--bg);color:var(--ink);border:1px solid var(--line-strong);border-radius:6px;padding:10px 12px;font-family:var(--sans);font-size:14px;outline:none}
+ .panel select:focus, .panel input:focus{border-color:#10b981}
+
+ .quants{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+ .quants button{flex:1;min-width:64px;background:var(--bg);color:var(--ink-mute);border:1px solid var(--line-strong);border-radius:6px;padding:8px 10px;font-family:var(--mono);font-size:12px;cursor:pointer;transition:border-color 120ms,color 120ms,background 120ms}
+ .quants button:hover{color:var(--ink);border-color:var(--ink-faint)}
+ .quants button[aria-pressed=true]{background:rgba(16,185,129,0.12);color:#10b981;border-color:#10b981}
+
+ .forecast{margin-top:22px;background:var(--bg-card);border:1px solid var(--line-strong);border-radius:10px;padding:0;overflow:hidden}
+ .forecast .head{padding:14px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);letter-spacing:0.04em}
+ .forecast .head .verdict{padding:3px 10px;border-radius:999px;font-size:10.5px;font-weight:500}
+ .verdict.fit{background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.4)}
+ .verdict.tight{background:rgba(241,199,119,0.15);color:var(--warn);border:1px solid rgba(241,199,119,0.4)}
+ .verdict.over{background:rgba(255,107,145,0.12);color:var(--bad);border:1px solid rgba(255,107,145,0.35)}
+
+ .rows{display:grid;grid-template-columns:auto 1fr;gap:0;font-family:var(--mono);font-size:13px}
+ .rows .k{padding:11px 22px;color:var(--ink-faint);text-transform:uppercase;font-size:10.5px;letter-spacing:0.04em;border-bottom:1px solid var(--line);display:flex;align-items:center}
+ .rows .v{padding:11px 22px;color:var(--ink);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+ .rows .row-last .k, .rows .row-last .v{border-bottom:none}
+ .rows .v b{color:var(--ink);font-weight:500}
+ .rows .v .sub{color:var(--ink-faint);font-size:12px}
+ .rows .v .good{color:#10b981}
+ .rows .v .warn{color:var(--warn)}
+ .rows .v .bad{color:var(--bad)}
+
+ .cmdbox{margin-top:18px;background:var(--bg-elev);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+ .cmdbox .head{padding:10px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);letter-spacing:0.04em}
+ .cmdbox .head button{background:transparent;border:1px solid var(--line-strong);color:var(--ink-mute);font-family:var(--mono);font-size:11px;border-radius:5px;padding:4px 10px;cursor:pointer;transition:color 120ms,border-color 120ms}
+ .cmdbox .head button:hover{color:#10b981;border-color:#10b981}
+ .cmdbox pre{margin:0;padding:18px 22px;background:transparent;font-family:var(--mono);font-size:13px;line-height:1.7;color:var(--ink);white-space:pre-wrap;word-break:break-word}
+ .cmdbox pre .com{color:var(--ink-faint)}
+ .cmdbox pre .arg{color:#10b981}
+ .cmdbox pre .kw{color:#b0bbff}
+
+ section.flow{padding:8px 0 28px}
+ .flow-head{display:flex;justify-content:space-between;align-items:baseline;margin:18px 0 12px;gap:18px;flex-wrap:wrap}
+ .flow-head h2{margin:0;font-size:clamp(20px,2.2vw,26px);line-height:1.2;font-weight:500;color:var(--ink)}
+ .flow-head .flow-sub{font-size:13.5px;color:var(--ink-mute);max-width:54ch}
+ .flow-head button.copy-all{background:transparent;border:1px solid var(--line-strong);color:var(--ink-mute);font-family:var(--mono);font-size:12px;border-radius:6px;padding:7px 14px;cursor:pointer;transition:color 120ms,border-color 120ms;white-space:nowrap}
+ .flow-head button.copy-all:hover{color:#10b981;border-color:#10b981}
+ .steps{display:grid;grid-template-columns:1fr;gap:14px}
+ .step{background:var(--bg-elev);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+ .step-head{display:flex;align-items:center;gap:12px;padding:14px 22px;border-bottom:1px solid var(--line)}
+ .step-num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:rgba(16,185,129,0.12);color:#10b981;font-family:var(--mono);font-size:12px;border:1px solid rgba(16,185,129,0.4);flex-shrink:0}
+ .step-title{font-size:15px;color:var(--ink);font-weight:500}
+ .step-note{margin-left:auto;font-family:var(--mono);font-size:10.5px;text-transform:uppercase;color:var(--ink-faint);letter-spacing:0.04em}
+ .step-body{padding:16px 22px 18px}
+ .step-body p{margin:0 0 10px;font-size:13.5px;color:var(--ink-mute);line-height:1.6}
+ .step-body p:last-child{margin-bottom:0}
+ .step-body p b{color:var(--ink);font-weight:500}
+ .step-body p a{color:#10b981;text-decoration:underline;text-decoration-color:rgba(16,185,129,0.4);text-underline-offset:3px}
+ .step-body p a:hover{text-decoration-color:#10b981}
+ .step-cmd{margin:6px 0 10px;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.65;color:var(--ink);white-space:pre-wrap;word-break:break-word;overflow-x:auto}
+ .step-cmd .com{color:var(--ink-faint)}
+ .step-cmd .arg{color:#10b981}
+ .step-cmd .kw{color:#b0bbff}
+ .step-cmd .str{color:var(--warn)}
+ .toolchain-line{margin-top:8px;font-size:12.5px;color:var(--ink-faint);font-family:var(--mono)}
+ .toolchain-line code{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink)}
+
+ section.body{padding:36px 0 80px}
+ section.body h2{margin:48px 0 14px;font-size:clamp(22px,2.4vw,28px);line-height:1.2;font-weight:500;color:var(--ink)}
+ section.body p{margin:0 0 16px;font-size:16px;line-height:1.7;color:var(--ink-mute)}
+ section.body p b{color:var(--ink);font-weight:500}
+ section.body p code, section.body td code{font-family:var(--mono);font-size:0.92em;background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink)}
+ section.body table{width:100%;border-collapse:collapse;margin:18px 0 24px;font-size:14px}
+ section.body table th, section.body table td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;color:var(--ink-mute)}
+ section.body table th{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);font-weight:500;letter-spacing:0.04em}
+ section.body table td b{color:var(--ink)}
+
+ .signpost{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:40px 0 0}
+ @media(max-width:720px){.signpost{grid-template-columns:1fr}}
+ .signpost a{display:flex;flex-direction:column;gap:8px;padding:20px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;transition:border-color 120ms,background 120ms}
+ .signpost a:hover{border-color:var(--line-strong);background:var(--bg-card)}
+ .signpost a .lab{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
+ .signpost a .v{color:var(--ink);font-weight:500;font-size:16px}
+ .signpost a .v .arrow{color:#10b981;margin-left:6px}
+ .signpost a p{margin:4px 0 0;font-size:13.5px;color:var(--ink-mute);line-height:1.5}
+
+ footer.site{padding:48px 0 36px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+ .footer-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:24px;margin-bottom:24px}
+ @media(max-width:780px){.footer-grid{grid-template-columns:repeat(2,1fr)}}
+ .footer-grid h4{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-mute);margin:0 0 10px;font-weight:500;letter-spacing:0.04em}
+ .footer-grid a{display:block;padding:4px 0;color:var(--ink-faint);font-family:var(--sans);font-size:13px;text-transform:none;letter-spacing:0;transition:color 120ms}
+ .footer-grid a:hover{color:var(--ink)}
+ .footer-tag{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding-top:18px;border-top:1px solid var(--line);color:var(--ink-faint)}
+</style>
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "SoftwareApplication",
+ "name": "kolm",
+ "applicationCategory": "DeveloperApplication",
+ "operatingSystem": "Linux, macOS, Windows (WSL)",
+ "url": "https://kolm.ai/device-transfer",
+ "description": "Pick a .kolm artifact, a compression tier, and a target device. See the estimated size, speed, accuracy drop, fit verdict, and the exact export command before you buy hardware.",
+ "offers": {
+ "@type": "Offer",
+ "price": "0",
+ "priceCurrency": "USD"
+ },
+ "publisher": {
+ "@type": "Organization",
+ "name": "kolm.ai",
+ "@id": "https://kolm.ai/#org"
+ }
+}
+</script>
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API Key &rarr;</a>
+ </div>
+ </div>
+</header>
+<main id="main">
+
+<section class="hero">
+ <div class="wrap">
+ <span class="pill"><span class="dot"></span>Device transfer &middot; size / speed estimator</span>
+ <h1>Build it on a laptop. <span class="tone">Ship it to a Pi.</span></h1>
+ <p class="lede">Pick your <code>.kolm</code> artifact, the compression tier, and the target device. See the <b>size on disk</b>, <b>tokens per second</b>, <b>accuracy drop</b>, and the exact <code>kolm export</code> command before you commit hardware. Throughput rows are forecasts from public llama.cpp, MLX, and CoreML benchmarks. Measure on the real device before you finalize.</p>
+ <div class="meta"><span><b>Backends</b>&nbsp;GGUF / MLX / ONNX / CoreML / TensorRT</span><span><b>Updated</b>&nbsp;2026-05-15</span></div>
+ </div>
+</section>
+
+<section class="picker">
+ <div class="wrap">
+
+ <div class="picker-grid">
+ <div class="panel">
+ <h3>01 source artifact</h3>
+ <label for="src">Pick a base, or upload your own <code>.kolm</code>.</label>
+ <select id="src" aria-label="Source artifact">
+ <option value="llama-3.1-8b">Llama-3.1-8B</option>
+ <option value="llama-3.2-3b" selected>Llama-3.2-3B</option>
+ <option value="llama-3.2-1b">Llama-3.2-1B</option>
+ <option value="phi-3-mini">Phi-3-mini-3.8B</option>
+ <option value="mistral-7b">Mistral-7B</option>
+ <option value="kolm-upload">your-artifact.kolm (custom)</option>
+ </select>
+ </div>
+
+ <div class="panel">
+ <h3>02 quantization</h3>
+ <label>Lower bits, smaller file, more K-loss.</label>
+ <div class="quants" role="radiogroup" aria-label="Quantization tier">
+ <button type="button" data-q="fp16" aria-pressed="false">fp16</button>
+ <button type="button" data-q="int8" aria-pressed="false">int8</button>
+ <button type="button" data-q="int4" aria-pressed="true">int4 (q4_k_m)</button>
+ <button type="button" data-q="int3" aria-pressed="false">int3</button>
+ </div>
+ </div>
+
+ <div class="panel" style="grid-column:1/-1">
+ <h3>03 target device</h3>
+ <label for="dev">Where the artifact runs at inference time.</label>
+ <select id="dev" aria-label="Target device">
+ <optgroup label="SBC">
+ <option value="pi5-4">Raspberry Pi 5 (4GB)</option>
+ <option value="pi5-8">Raspberry Pi 5 (8GB)</option>
+ </optgroup>
+ <optgroup label="Edge box">
+ <option value="jetson-orin-nano">Jetson Orin Nano (8GB)</option>
+ <option value="jetson-agx-32">Jetson AGX Orin (32GB)</option>
+ <option value="jetson-agx-64">Jetson AGX Orin (64GB)</option>
+ <option value="steam-deck">Steam Deck (16GB)</option>
+ </optgroup>
+ <optgroup label="Laptop / desktop">
+ <option value="m3-pro" selected>M3 Pro MacBook Pro (18GB)</option>
+ <option value="m3-max">M3 Max MacBook Pro (36GB)</option>
+ <option value="snapdragon-x-elite">Snapdragon X Elite laptop (32GB)</option>
+ <option value="rtx-4090">NVIDIA RTX 4090 desktop (24GB VRAM)</option>
+ </optgroup>
+ <optgroup label="Phone">
+ <option value="iphone-15-pro">iPhone 15 Pro (8GB)</option>
+ <option value="pixel-8">Pixel 8 (8GB)</option>
+ </optgroup>
+ </select>
+ </div>
+ </div>
+
+ <div class="forecast" id="forecast" aria-live="polite">
+ <div class="head">
+ <span>forecast</span>
+ <span class="verdict fit" id="verdict">fits</span>
+ </div>
+ <div class="rows" id="rows">
+ <!-- populated by render() -->
+ </div>
+ </div>
+
+ <div class="cmdbox">
+ <div class="head">
+ <span>generate command</span>
+ <button type="button" id="copy-cmd">copy</button>
+ </div>
+ <pre id="cmd">$ kolm export</pre>
+ </div>
+
+ </div>
+</section>
+
+<section class="flow">
+ <div class="wrap">
+ <div class="flow-head">
+ <div>
+ <h2>Transfer flow.</h2>
+ <p class="flow-sub">The four steps below update with your picker selection. Real commands, real toolchains. Run them in order on the source machine, then on the target device.</p>
+ </div>
+ <button type="button" class="copy-all" id="copy-all">Copy all 4 steps</button>
+ </div>
+
+ <div class="steps">
+
+ <div class="step" id="step-1">
+ <div class="step-head">
+ <span class="step-num">1</span>
+ <span class="step-title">Build the export from your <code>.kolm</code>.</span>
+ <span class="step-note">on source machine</span>
+ </div>
+ <div class="step-body">
+ <p>Convert the <code>.kolm</code> artifact into a <b id="s1-backend">gguf</b> file for the picked target. The export embeds the manifest, the quant tier, the K-score on the eval pack, and a SHA-256 of the resulting payload.</p>
+ <pre class="step-cmd" id="s1-cmd">$ kolm export</pre>
+ <p class="toolchain-line">Requires the <b id="s1-toolchain">llama.cpp</b> toolchain. <span id="s1-install"></span></p>
+ </div>
+ </div>
+
+ <div class="step" id="step-2">
+ <div class="step-head">
+ <span class="step-num">2</span>
+ <span class="step-title">Move it to the device.</span>
+ <span class="step-note" id="s2-note">via scp</span>
+ </div>
+ <div class="step-body">
+ <p id="s2-prose">Copy the exported file onto the target box.</p>
+ <pre class="step-cmd" id="s2-cmd">$ scp ./out user@device:~/</pre>
+ <p class="toolchain-line" id="s2-tip">Tip: signed transfer is optional but recommended. See <a href="/airgap">/airgap</a> for sneakernet patterns.</p>
+ </div>
+ </div>
+
+ <div class="step" id="step-3">
+ <div class="step-head">
+ <span class="step-num">3</span>
+ <span class="step-title">Run on the target device.</span>
+ <span class="step-note" id="s3-note">runtime</span>
+ </div>
+ <div class="step-body">
+ <p id="s3-prose">Invoke the runtime that matches the backend. Output goes to stdout. Bind to a local port to wire up an OpenAI-compat client.</p>
+ <pre class="step-cmd" id="s3-cmd">$ run</pre>
+ <p class="toolchain-line" id="s3-alt"></p>
+ </div>
+ </div>
+
+ <div class="step" id="step-4">
+ <div class="step-head">
+ <span class="step-num">4</span>
+ <span class="step-title">Verify the artifact stayed verifiable.</span>
+ <span class="step-note">optional</span>
+ </div>
+ <div class="step-body">
+ <p>On the source machine, regenerate the binder and compare. Compression can drop the K-score by a fraction of a point. Confirm the drop is acceptable for your task before you ship to a fleet.</p>
+ <pre class="step-cmd" id="s4-cmd">$ kolm inspect</pre>
+ <p class="toolchain-line">Audit-grade evidence: <a href="/verify-prod">/verify-prod</a> accepts the same <code>.kolm</code> in the browser and runs the same six checks.</p>
+ </div>
+ </div>
+
+ </div>
+ </div>
+</section>
+
+<section class="body">
+ <div class="wrap">
+
+ <h2>What the numbers mean.</h2>
+ <p><b>Size on disk.</b> The packed artifact, including base weights at the chosen quantization tier. Add roughly 1 GB at runtime for kv-cache, tokenizer, and the runtime working set. The fit verdict accounts for that overhead.</p>
+ <p><b>Throughput.</b> Tokens per second at the chosen compression, taken from published llama.cpp, MLX, and CoreML community benchmarks (refreshed 2026). These are point estimates, not measurements on your device. Compression scaling assumes the standard memory-bandwidth-bound regime (int4 roughly 1.0x reference, int8 roughly 0.55x, fp16 roughly 0.30x, int3 roughly 1.15x).</p>
+ <p><b>K-score loss.</b> The delta versus the fp16 reference on the artifact's embedded eval pack. Typical: int8 loses about 0.5 points, int4 about 2 points, int3 about 5 points. Task-dependent. The compile gate refuses K below 0.85 by default.</p>
+ <p><b>Fit verdict.</b> Pass if (artifact size + 1 GB runtime overhead) is at most 80 percent of device RAM. Tight if 80 to 100 percent. Over if it exceeds device RAM. RTX 4090 row uses VRAM, not system RAM.</p>
+ <p><b>Recommended backend.</b> GGUF for llama.cpp targets (Pi, Jetson, x86 laptops, Steam Deck, Snapdragon, RTX). MLX for Apple Silicon. CoreML for iPhone. ONNX for Android via ORT. TensorRT for NVIDIA serving rigs.</p>
+
+ <h2>Source artifact sizes.</h2>
+ <p>Reference numbers used by the picker. fp16 is the canonical export from the Hugging Face checkpoint; int4 uses the q4_k_m gguf variant.</p>
+ <table>
+ <thead><tr><th>base</th><th>fp16</th><th>int8</th><th>int4 (q4_k_m)</th><th>int3 (q3_k_s)</th></tr></thead>
+ <tbody>
+ <tr><td><b>Llama-3.1-8B</b></td><td>16 GB</td><td>8 GB</td><td>4.4 GB</td><td>3.3 GB</td></tr>
+ <tr><td><b>Llama-3.2-3B</b></td><td>6 GB</td><td>3 GB</td><td>1.7 GB</td><td>1.3 GB</td></tr>
+ <tr><td><b>Llama-3.2-1B</b></td><td>2 GB</td><td>1 GB</td><td>0.58 GB</td><td>0.44 GB</td></tr>
+ <tr><td><b>Phi-3-mini-3.8B</b></td><td>7.6 GB</td><td>3.8 GB</td><td>2.1 GB</td><td>1.6 GB</td></tr>
+ <tr><td><b>Mistral-7B</b></td><td>14 GB</td><td>7 GB</td><td>3.9 GB</td><td>2.9 GB</td></tr>
+ </tbody>
+ </table>
+
+ <h2>Reference throughput at int4.</h2>
+ <p>Tokens per second sampled from refreshed 2026 community benchmarks. Reads as: a 7B int4 artifact on this device at this rate, when memory permits. SBC and phone rows assume a 3B int4 artifact because 7B does not realistically fit.</p>
+ <table>
+ <thead><tr><th>device</th><th>typical artifact</th><th>tok/s</th><th>backend</th></tr></thead>
+ <tbody>
+ <tr><td><b>Raspberry Pi 5</b></td><td>3B int4</td><td>3 to 5</td><td>GGUF / llama.cpp</td></tr>
+ <tr><td><b>Jetson Orin Nano</b></td><td>7B int4</td><td>10 to 15</td><td>GGUF / llama.cpp CUDA</td></tr>
+ <tr><td><b>Jetson AGX Orin</b></td><td>7B int4</td><td>25 to 40</td><td>GGUF or TensorRT</td></tr>
+ <tr><td><b>M3 Pro</b></td><td>7B int4</td><td>25 to 35</td><td>MLX</td></tr>
+ <tr><td><b>M3 Max</b></td><td>7B int4</td><td>50 to 70</td><td>MLX</td></tr>
+ <tr><td><b>iPhone 15 Pro</b></td><td>3B int4</td><td>10 to 15</td><td>CoreML</td></tr>
+ <tr><td><b>Pixel 8</b></td><td>3B int4</td><td>8 to 12</td><td>ONNX Runtime / Mobile</td></tr>
+ <tr><td><b>Steam Deck</b></td><td>7B int4</td><td>12 to 18</td><td>GGUF / llama.cpp Vulkan</td></tr>
+ <tr><td><b>Snapdragon X Elite</b></td><td>7B int4</td><td>30 to 50</td><td>GGUF or ONNX</td></tr>
+ <tr><td><b>RTX 4090</b></td><td>7B int4</td><td>150 to 200</td><td>GGUF / llama.cpp CUDA</td></tr>
+ </tbody>
+ </table>
+
+ <h2>What the forecast does not promise.</h2>
+ <p><b>Real throughput depends on context length, decode length, prompt cache, thermal state, and the build of the runtime.</b> Long contexts hurt small bases faster than they hurt large ones. Cold-start (loading weights into RAM) is the dominant term for many edge boxes and is not in the rate. The picker rate is a steady-state decode estimate after warmup.</p>
+ <p><b>We have not measured every device row.</b> Apple Silicon and NVIDIA GPU rows are the most-validated. SBC and phone rows are point estimates from the community. Treat the picker as a sizing sketch, not a benchmark report. Run <code>kolm bench &lt;artifact.kolm&gt; --device &lt;name&gt;</code> on the actual box to get a number you can sign off on.</p>
+ <p><b>The quantization tier records in the manifest.</b> Every export stamps <code>quant</code>, the base, the K-score on the embedded eval pack, and the fp16 reference. A reviewer can recompute everything from the artifact later.</p>
+
+ <h2>One command after you pick.</h2>
+ <p>The generated command runs end to end against the local Python toolchain (<code>llama.cpp</code> for gguf, <code>mlx-lm</code> for mlx, <code>optimum-cli</code> for onnx, <code>trtllm-build</code> for tensorrt). The <code>--preview</code> flag returns the same forecast as JSON without invoking the toolchain, which is useful in CI or on a box that does not have the converter installed.</p>
+
+ <h2>Per-device quickstarts.</h2>
+ <p>Five devices have full install-and-run quickstarts that go beyond the live picker: hardware-specific toolchain setup, transfer mechanics, runtime sanity checks, and the inevitable Apple/Linux/iOS/NVIDIA/browser-specific footnotes.</p>
+ <div class="signpost">
+ <a href="/device-transfer/raspberry-pi-5">
+ <span class="lab">quickstart</span>
+ <span class="v">Raspberry Pi 5 <span class="arrow">&rarr;</span></span>
+ <p>apt + llama.cpp from source on ARM64, scp from the source Mac/Linux box, then <code>llama-cli</code> or <code>llama-server</code>. 4GB vs 8GB realism.</p>
+ </a>
+ <a href="/device-transfer/m3-mac">
+ <span class="lab">quickstart</span>
+ <span class="v">M3 Mac <span class="arrow">&rarr;</span></span>
+ <p>venv + <code>mlx-lm</code>, no transfer (local run), and an <code>mlx_lm.server</code> on :8080. The Apple Silicon unified-memory ceiling explained.</p>
+ </a>
+ <a href="/device-transfer/iphone-15-pro">
+ <span class="lab">quickstart</span>
+ <span class="v">iPhone 15 Pro <span class="arrow">&rarr;</span></span>
+ <p>CoreML export + Xcode bundle + the personal-team vs paid Developer Program paths. Why there is no <code>scp</code> path to a stock iPhone.</p>
+ </a>
+ <a href="/device-transfer/jetson-orin-nano">
+ <span class="lab">quickstart</span>
+ <span class="v">Jetson Orin Nano <span class="arrow">&rarr;</span></span>
+ <p>TensorRT-LLM engine build (or ONNX Runtime CUDA fallback), scp the engine to the Jetson, run at about 38 tok/s on a 25W edge box. First-run JIT cost explained.</p>
+ </a>
+ <a href="/device-transfer/browser-wasm">
+ <span class="lab">quickstart</span>
+ <span class="v">Browser (WASM) <span class="arrow">&rarr;</span></span>
+ <p>Export a wasm bundle, host with <code>kolm serve</code>, the user clicks Run in the tab. No CLI required for the end user, weights cached in IndexedDB.</p>
+ </a>
+ </div>
+
+ <div class="signpost">
+ <a href="/research/edge-artifact-sizing">
+ <span class="lab">read next</span>
+ <span class="v">Edge artifact sizing <span class="arrow">&rarr;</span></span>
+ <p>The full technical doc: the hardware ladder, the quantization tiers, the latency budgets, and a worked plant-floor example.</p>
+ </a>
+ <a href="/device">
+ <span class="lab">docs</span>
+ <span class="v">Device deployment <span class="arrow">&rarr;</span></span>
+ <p>Reference architectures for plant floor, retail shelf, vehicle, and other bounded-network edge cases. Same .kolm across ARM, x86, RISC-V.</p>
+ </a>
+ <a href="/airgap">
+ <span class="lab">read</span>
+ <span class="v">Air-gapped deployment <span class="arrow">&rarr;</span></span>
+ <p>Pre-flight cache plan, offline switches, signed-image sneakernet. The artifact ships and stays.</p>
+ </a>
+ <a href="/spec/rs-1">
+ <span class="lab">spec</span>
+ <span class="v">RS-1 spec <span class="arrow">&rarr;</span></span>
+ <p>On-disk shape of a <code>.kolm</code>. <code>quant</code>, <code>base</code>, and <code>k_score</code> live in the manifest.</p>
+ </a>
+ </div>
+
+ </div>
+</section>
+
+
+</main>
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4><span data-kolm-icon="compile" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="deploy" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/device">Device</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/device-transfer">Device transfer</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="layers" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="user" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+
+<script>
+(function(){
+ // Single source of truth for the picker. Keep in sync with cli/kolm.js
+ // cmdExport --preview (search: DEVICE_TRANSFER_TABLE).
+ var BASES = {
+ 'llama-3.1-8b': { label: 'Llama-3.1-8B', params_b: 8.0, sizes_gb: { fp16: 16.0, int8: 8.0, int4: 4.4, int3: 3.3 }, fp16_k: 0.94 },
+ 'llama-3.2-3b': { label: 'Llama-3.2-3B', params_b: 3.2, sizes_gb: { fp16: 6.0, int8: 3.0, int4: 1.7, int3: 1.3 }, fp16_k: 0.93 },
+ 'llama-3.2-1b': { label: 'Llama-3.2-1B', params_b: 1.2, sizes_gb: { fp16: 2.0, int8: 1.0, int4: 0.58, int3: 0.44 }, fp16_k: 0.90 },
+ 'phi-3-mini': { label: 'Phi-3-mini-3.8B', params_b: 3.8, sizes_gb: { fp16: 7.6, int8: 3.8, int4: 2.1, int3: 1.6 }, fp16_k: 0.92 },
+ 'mistral-7b': { label: 'Mistral-7B', params_b: 7.2, sizes_gb: { fp16: 14.0, int8: 7.0, int4: 3.9, int3: 2.9 }, fp16_k: 0.93 },
+ 'kolm-upload': { label: 'your-artifact.kolm', params_b: 3.2, sizes_gb: { fp16: 6.0, int8: 3.0, int4: 1.7, int3: 1.3 }, fp16_k: 0.91 }
+ };
+
+ // K-loss vs fp16 baseline. Negative numbers, additive to fp16_k.
+ var K_LOSS = { fp16: 0.0, int8: -0.005, int4: -0.02, int3: -0.05 };
+
+ // Quantization throughput scaling vs int4 reference rate.
+ // Memory-bandwidth-bound regime: lower precision means faster decode.
+ var QUANT_RATE_SCALE = { fp16: 0.30, int8: 0.55, int4: 1.0, int3: 1.15 };
+
+ // Devices. ram_gb is system RAM (or VRAM for GPU); base_rate is tokens/sec
+ // for a 7B int4 artifact unless typical_class is '3b' in which case it's
+ // the rate for a 3B int4 artifact. backend is the canonical export backend.
+ var DEVICES = {
+ 'pi5-4': { label: 'Raspberry Pi 5 (4GB)', ram_gb: 4, base_rate: 4, typical_class: '3b', backend: 'gguf' },
+ 'pi5-8': { label: 'Raspberry Pi 5 (8GB)', ram_gb: 8, base_rate: 4, typical_class: '3b', backend: 'gguf' },
+ 'jetson-orin-nano': { label: 'Jetson Orin Nano (8GB)', ram_gb: 8, base_rate: 12, typical_class: '7b', backend: 'gguf' },
+ 'jetson-agx-32': { label: 'Jetson AGX Orin (32GB)', ram_gb: 32, base_rate: 32, typical_class: '7b', backend: 'tensorrt' },
+ 'jetson-agx-64': { label: 'Jetson AGX Orin (64GB)', ram_gb: 64, base_rate: 35, typical_class: '7b', backend: 'tensorrt' },
+ 'steam-deck': { label: 'Steam Deck (16GB)', ram_gb: 16, base_rate: 15, typical_class: '7b', backend: 'gguf' },
+ 'm3-pro': { label: 'M3 Pro MacBook Pro (18GB)', ram_gb: 18, base_rate: 30, typical_class: '7b', backend: 'mlx' },
+ 'm3-max': { label: 'M3 Max MacBook Pro (36GB)', ram_gb: 36, base_rate: 60, typical_class: '7b', backend: 'mlx' },
+ 'snapdragon-x-elite': { label: 'Snapdragon X Elite laptop', ram_gb: 32, base_rate: 40, typical_class: '7b', backend: 'onnx' },
+ 'rtx-4090': { label: 'NVIDIA RTX 4090 desktop', ram_gb: 24, base_rate: 175, typical_class: '7b', backend: 'gguf' },
+ 'iphone-15-pro': { label: 'iPhone 15 Pro (8GB)', ram_gb: 8, base_rate: 12, typical_class: '3b', backend: 'coreml' },
+ 'pixel-8': { label: 'Pixel 8 (8GB)', ram_gb: 8, base_rate: 10, typical_class: '3b', backend: 'onnx' }
+ };
+
+ var BACKEND_EXT = { gguf: 'gguf', mlx: 'mlx', onnx: 'onnx', coreml: 'mlpackage', tensorrt: 'engine' };
+
+ // Toolchain metadata per backend. Used by Step 1 prose and the install hint.
+ var TOOLCHAIN = {
+ gguf: { name: 'llama.cpp', install: 'Install: <code>git clone https://github.com/ggerganov/llama.cpp &amp;&amp; cd llama.cpp &amp;&amp; make</code>.' },
+ mlx: { name: 'mlx_lm', install: 'Install: <code>pip install mlx mlx-lm</code>.' },
+ onnx: { name: 'onnxruntime', install: 'Install: <code>pip install onnxruntime optimum[exporters]</code>.' },
+ coreml: { name: 'coremltools', install: 'Install: <code>pip install coremltools</code>. Bundle through Xcode for on-device.' },
+ tensorrt: { name: 'TensorRT-LLM', install: 'TensorRT-LLM build is involved. See the <a href="https://nvidia.github.io/TensorRT-LLM/" rel="noopener">NVIDIA TensorRT-LLM docs</a>.' }
+ };
+
+ // Per-device transfer recipe. Drives Step 2 prose, Step 3 run line, Step 3 alt.
+ // Each function returns { s2_note, s2_prose, s2_cmd, s2_tip, s3_note, s3_cmd, s3_alt }.
+ // The picker passes the export filename and the backend.
+ function transferRecipe(devKey, outName, backend){
+ var safe = outName.replace(/[^a-z0-9._\-]/gi, '_');
+ var promptStr = '"Summarize this paragraph in one sentence."';
+
+ // STEP 3 templates, keyed by backend.
+ function runLine(b){
+ if (b === 'gguf') {
+ return {
+ cmd: '$ llama-cli -m ' + safe + ' \\\n -p ' + promptStr + ' \\\n -n 256 --temp 0.2',
+ alt: 'Or via Ollama: <code>ollama create my-kolm -f Modelfile &amp;&amp; ollama run my-kolm</code>. The Modelfile points <code>FROM</code> at the local <code>' + safe + '</code>.'
+ };
+ }
+ if (b === 'mlx') {
+ var modelDir = safe.replace(/\.mlx$/, '');
+ return {
+ cmd: '$ python -m mlx_lm.generate \\\n --model ./' + modelDir + ' \\\n --prompt ' + promptStr + ' \\\n --max-tokens 256',
+ alt: 'For a server: <code>python -m mlx_lm.server --model ./' + modelDir + ' --port 8080</code> exposes an OpenAI-compat endpoint.'
+ };
+ }
+ if (b === 'onnx') {
+ return {
+ cmd: '$ python - <<\'PY\'\nimport onnxruntime as ort\nsess = ort.InferenceSession("' + safe + '")\n# tokenize input, build inputs dict, then:\nout = sess.run(None, inputs)\nprint(out)\nPY',
+ alt: 'On Android, link the same <code>.onnx</code> against ONNX Runtime Mobile. On Snapdragon X Elite laptops, use the DirectML EP for NPU offload.'
+ };
+ }
+ if (b === 'coreml') {
+ return {
+ cmd: '// In Xcode, add the .mlpackage to your target.\n// Then in Swift:\nlet model = try MyKolmModel(configuration: MLModelConfiguration())\nlet out = try model.prediction(input: input)',
+ alt: 'iOS deployment ships through Xcode and TestFlight or App Store. See the <a href="https://developer.apple.com/documentation/coreml" rel="noopener">Apple CoreML docs</a> for the full app-side wiring.'
+ };
+ }
+ if (b === 'tensorrt') {
+ var engineDir = safe.replace(/\.engine$/, '');
+ return {
+ cmd: '$ trtllm-build --checkpoint_dir ./' + engineDir + '/ckpt \\\n --output_dir ./' + engineDir + '/engine \\\n --gemm_plugin float16\n$ trtllm-serve ./' + engineDir + '/engine --port 8000',
+ alt: 'On Jetson AGX, prefer <code>trtllm-serve</code> over <code>llama-cli</code> for sustained-throughput workloads. See the <a href="https://nvidia.github.io/TensorRT-LLM/" rel="noopener">TensorRT-LLM serve guide</a>.'
+ };
+ }
+ return { cmd: '$ run ' + safe, alt: '' };
+ }
+
+ var run = runLine(backend);
+
+ // STEP 2 prose and command per device family.
+ var apple = (devKey === 'm3-pro' || devKey === 'm3-max');
+ var iphone = (devKey === 'iphone-15-pro');
+ var android = (devKey === 'pixel-8');
+ var rtx = (devKey === 'rtx-4090');
+ var steam = (devKey === 'steam-deck');
+
+ if (apple) {
+ return {
+ s2_note: 'on-disk (local Mac)',
+ s2_prose: 'No transfer needed. Apple Silicon runs MLX natively against the local working directory. Keep <code>' + safe + '</code> next to your project.',
+ s2_cmd: '$ mv ./exports/' + safe + ' ~/models/\n$ ls -lh ~/models/' + safe,
+ s2_tip: 'For a remote Mac (e.g. Mac mini in a closet): use <code>scp ./exports/' + safe + ' user@mac-mini.local:~/models/</code>.',
+ s3_note: 'mlx_lm runtime',
+ s3_cmd: run.cmd,
+ s3_alt: run.alt
+ };
+ }
+ if (iphone) {
+ return {
+ s2_note: 'via Xcode bundle',
+ s2_prose: 'CoreML packages ship inside an iOS app bundle. Drag <code>' + safe + '</code> into your Xcode project, then build for device or push to TestFlight. There is no <code>scp</code> path to a stock iPhone.',
+ s2_cmd: '// In Xcode: Project Navigator > drag ' + safe + ' into the target.\n// Target Membership: check the app target.\n// Build > Run on connected device.',
+ s2_tip: 'Sideload requires a paid Apple Developer account. For a non-Apple path on iOS, see <a href="https://developer.apple.com/documentation/coreml" rel="noopener">Apple CoreML</a>.',
+ s3_note: 'CoreML in-app',
+ s3_cmd: run.cmd,
+ s3_alt: run.alt
+ };
+ }
+ if (android) {
+ return {
+ s2_note: 'via adb push',
+ s2_prose: 'Android ships ONNX through ONNX Runtime Mobile inside an app. Push the <code>' + safe + '</code> file into the app sandbox during install, or place it in the assets folder before building.',
+ s2_cmd: '$ adb push ./exports/' + safe + ' /sdcard/Android/data/com.your.app/files/\n# Or bundle in app/src/main/assets/ and read at runtime.',
+ s2_tip: 'For Pixel 8 Tensor G3 NPU offload, build ONNX Runtime with the QNN EP. <a href="https://onnxruntime.ai/docs/execution-providers/QNN-ExecutionProvider.html" rel="noopener">ORT QNN docs</a>.',
+ s3_note: 'ONNX Runtime',
+ s3_cmd: run.cmd,
+ s3_alt: run.alt
+ };
+ }
+ if (rtx) {
+ return {
+ s2_note: 'local copy',
+ s2_prose: 'A 4090 desktop typically is the box you exported from. Move the file into your local model directory.',
+ s2_cmd: '$ mv ./exports/' + safe + ' ~/models/\n$ ls -lh ~/models/' + safe,
+ s2_tip: 'For a remote workstation, use <code>scp ./exports/' + safe + ' user@workstation.local:~/models/</code>.',
+ s3_note: 'GGUF + CUDA',
+ s3_cmd: run.cmd,
+ s3_alt: run.alt + ' Build llama.cpp with <code>make GGML_CUDA=1</code> for full 4090 throughput.'
+ };
+ }
+ if (steam) {
+ return {
+ s2_note: 'local copy or scp',
+ s2_prose: 'Steam Deck runs Linux. Either copy the file directly over network share, or SSH in and pull.',
+ s2_cmd: '$ scp ./exports/' + safe + ' deck@steamdeck.local:~/models/',
+ s2_tip: 'Enable SSH on the Deck via Desktop Mode first. llama.cpp Vulkan build runs against the RDNA2 iGPU: <code>make GGML_VULKAN=1</code>.',
+ s3_note: 'GGUF + Vulkan',
+ s3_cmd: run.cmd,
+ s3_alt: run.alt
+ };
+ }
+
+ // Default SSH-able Linux box (Pi 5, Jetson, Snapdragon X Elite running Linux).
+ var userHost;
+ if (devKey === 'pi5-4' || devKey === 'pi5-8') userHost = 'pi@raspberrypi.local';
+ else if (devKey === 'jetson-orin-nano' || devKey === 'jetson-agx-32' || devKey === 'jetson-agx-64') userHost = 'nvidia@jetson.local';
+ else if (devKey === 'snapdragon-x-elite') userHost = 'user@laptop.local';
+ else userHost = 'user@device.local';
+ return {
+ s2_note: 'via scp',
+ s2_prose: 'The target is SSH-able. Copy the export over the network with <code>scp</code> (or <code>rsync</code> for resumable transfers on large files).',
+ s2_cmd: '$ scp ./exports/' + safe + ' ' + userHost + ':~/models/\n# resumable alternative:\n$ rsync -avP ./exports/' + safe + ' ' + userHost + ':~/models/',
+ s2_tip: 'For disconnected hosts, write the artifact to a USB key and sneakernet it. See <a href="/airgap">/airgap</a>.',
+ s3_note: backend === 'tensorrt' ? 'TensorRT-LLM' : 'GGUF runtime',
+ s3_cmd: run.cmd,
+ s3_alt: run.alt
+ };
+ }
+
+ function forecast(srcKey, qKey, devKey){
+ var base = BASES[srcKey];
+ var dev = DEVICES[devKey];
+ var sizeGb = base.sizes_gb[qKey];
+ var kLoss = K_LOSS[qKey];
+ var kEst = Math.max(0, base.fp16_k + kLoss);
+ // Scale device tok/s by quant and by params ratio vs reference class.
+ // Reference rate is at 7B for '7b' class devices, 3B for '3b'.
+ var refParams = dev.typical_class === '3b' ? 3.2 : 7.2;
+ var paramScale = refParams / base.params_b;
+ // memory-bound: rate scales roughly inversely with params for same precision.
+ var rate = dev.base_rate * QUANT_RATE_SCALE[qKey] * paramScale;
+ rate = Math.round(rate * 10) / 10;
+ // Fit: artifact + 1 GB runtime overhead vs device RAM.
+ var needGb = sizeGb + 1.0;
+ var fitPct = needGb / dev.ram_gb;
+ var verdict = 'fit';
+ if (fitPct > 1.0) verdict = 'over';
+ else if (fitPct > 0.80) verdict = 'tight';
+ var ms = rate > 0 ? Math.round(1000 / rate * 10) / 10 : null;
+ return {
+ device: dev.label,
+ device_key: devKey,
+ quant: qKey,
+ base: base.label,
+ base_key: srcKey,
+ size_gb: sizeGb,
+ size_mb: Math.round(sizeGb * 1024),
+ need_gb: Math.round(needGb * 10) / 10,
+ device_ram_gb: dev.ram_gb,
+ verdict: verdict,
+ fits: verdict !== 'over',
+ tok_per_s: rate,
+ estimated_latency_ms: ms,
+ k_score_fp16: base.fp16_k,
+ k_loss: kLoss,
+ k_score_est: Math.round(kEst * 1000) / 1000,
+ backend: dev.backend,
+ backend_ext: BACKEND_EXT[dev.backend]
+ };
+ }
+
+ function fmtSize(gb){
+ if (gb < 1) return (gb * 1024).toFixed(0) + ' MB';
+ return gb.toFixed(2) + ' GB';
+ }
+
+ function render(){
+ var src = document.getElementById('src').value;
+ var dev = document.getElementById('dev').value;
+ var q = document.querySelector('.quants button[aria-pressed=true]').dataset.q;
+ var f = forecast(src, q, dev);
+
+ var verdictLabel = { fit: 'fits with headroom', tight: 'tight fit', over: 'will not fit' };
+ var verdictClass = { fit: 'fit', tight: 'tight', over: 'over' };
+ var ve = document.getElementById('verdict');
+ ve.textContent = verdictLabel[f.verdict];
+ ve.className = 'verdict ' + verdictClass[f.verdict];
+
+ var rows = document.getElementById('rows');
+ var fitClass = f.verdict === 'over' ? 'bad' : (f.verdict === 'tight' ? 'warn' : 'good');
+ var sizeStr = fmtSize(f.size_gb);
+ var latLine = f.estimated_latency_ms != null ? f.estimated_latency_ms + ' ms/token' : 'n/a';
+ var lossStr = f.k_loss === 0 ? '0.000 (reference)' : f.k_loss.toFixed(3);
+ rows.innerHTML = [
+ '<div class="k">artifact size</div>',
+ '<div class="v"><b>' + sizeStr + '</b><span class="sub">' + f.base + ' at ' + f.quant + '</span></div>',
+ '<div class="k">throughput</div>',
+ '<div class="v"><b>' + f.tok_per_s + ' tok/s</b><span class="sub">on ' + f.device + ' (' + latLine + ')</span></div>',
+ '<div class="k">k-score loss vs fp16</div>',
+ '<div class="v"><b>' + lossStr + '</b><span class="sub">est K = ' + f.k_score_est.toFixed(3) + ', fp16 ref = ' + f.k_score_fp16.toFixed(2) + '</span></div>',
+ '<div class="k">fits in memory</div>',
+ '<div class="v"><b class="' + fitClass + '">' + (f.fits ? 'yes' : 'no') + '</b><span class="sub">needs ' + f.need_gb + ' GB (artifact + 1 GB runtime), device has ' + f.device_ram_gb + ' GB</span></div>',
+ '<div class="k row-last">recommended backend</div>',
+ '<div class="v row-last"><b>' + f.backend + '</b><span class="sub">writes .' + f.backend_ext + ' on disk</span></div>'
+ ].join('');
+
+ // Build the command.
+ var artifactName = src === 'kolm-upload' ? 'your-artifact.kolm' : (src + '.kolm');
+ var outName = src + '-' + q + '.' + f.backend_ext;
+ var devFlag = JSON.stringify(f.device);
+ var cmd = [
+ '<span class="kw">$</span> kolm export ' + artifactName + ' \\\\',
+ ' <span class="arg">--backend</span> ' + f.backend + ' \\\\',
+ ' <span class="arg">--device</span> ' + devFlag + ' \\\\',
+ ' <span class="arg">--quant</span> ' + q + ' \\\\',
+ ' <span class="arg">--output</span> ' + outName,
+ '',
+ '<span class="com"># preview only (no toolchain, prints JSON)</span>',
+ '<span class="kw">$</span> kolm export ' + artifactName + ' \\\\',
+ ' <span class="arg">--preview</span> \\\\',
+ ' <span class="arg">--device</span> ' + devFlag + ' \\\\',
+ ' <span class="arg">--quant</span> ' + q
+ ].join('\n');
+ document.getElementById('cmd').innerHTML = cmd;
+
+ // Stash plain-text command for copy.
+ var exportCmdPlain =
+ 'kolm export ' + artifactName +
+ ' --backend ' + f.backend +
+ ' --device ' + devFlag +
+ ' --quant ' + q +
+ ' --output ' + outName;
+ window._kolmExportCmd = exportCmdPlain;
+
+ // === Transfer flow steps (Part A): update live with picker state.
+ var tc = TOOLCHAIN[f.backend];
+ document.getElementById('s1-backend').textContent = f.backend;
+ document.getElementById('s1-toolchain').textContent = tc.name;
+ document.getElementById('s1-install').innerHTML = tc.install;
+ var s1HighlightedCmd = [
+ '<span class="kw">$</span> kolm export ' + artifactName + ' \\',
+ ' <span class="arg">--backend</span> ' + f.backend + ' \\',
+ ' <span class="arg">--device</span> ' + devFlag + ' \\',
+ ' <span class="arg">--quant</span> ' + q + ' \\',
+ ' <span class="arg">--out</span> ./exports/'
+ ].join('\n');
+ document.getElementById('s1-cmd').innerHTML = s1HighlightedCmd;
+ var s1Plain =
+ 'kolm export ' + artifactName +
+ ' --backend ' + f.backend +
+ ' --device ' + devFlag +
+ ' --quant ' + q +
+ ' --out ./exports/';
+
+ var recipe = transferRecipe(dev, outName, f.backend);
+ document.getElementById('s2-note').textContent = recipe.s2_note;
+ document.getElementById('s2-prose').innerHTML = recipe.s2_prose;
+ document.getElementById('s2-cmd').textContent = recipe.s2_cmd;
+ document.getElementById('s2-tip').innerHTML = recipe.s2_tip;
+ document.getElementById('s3-note').textContent = recipe.s3_note;
+ document.getElementById('s3-cmd').textContent = recipe.s3_cmd;
+ document.getElementById('s3-alt').innerHTML = recipe.s3_alt;
+
+ var s4Cmd = 'kolm inspect ' + artifactName + ' --binder report.html';
+ document.getElementById('s4-cmd').innerHTML =
+ '<span class="kw">$</span> kolm inspect ' + artifactName + ' <span class="arg">--binder</span> report.html\n' +
+ '<span class="com"># compare K-score forecast against your eval set</span>\n' +
+ '<span class="kw">$</span> kolm bench ' + artifactName + ' <span class="arg">--device</span> ' + devFlag + ' <span class="arg">--evals</span> ./your-evals.jsonl';
+
+ // Stash plain-text per-step strings for the runbook copy.
+ window._kolmRunbook = {
+ base: f.base,
+ device: f.device,
+ quant: f.quant,
+ backend: f.backend,
+ s1: s1Plain,
+ s2: recipe.s2_cmd,
+ s3: recipe.s3_cmd,
+ s4: s4Cmd
+ };
+ }
+
+ document.getElementById('src').addEventListener('change', render);
+ document.getElementById('dev').addEventListener('change', render);
+ Array.prototype.forEach.call(document.querySelectorAll('.quants button'), function(btn){
+ btn.addEventListener('click', function(){
+ Array.prototype.forEach.call(document.querySelectorAll('.quants button'), function(b){ b.setAttribute('aria-pressed', 'false'); });
+ btn.setAttribute('aria-pressed', 'true');
+ render();
+ });
+ });
+
+ document.getElementById('copy-cmd').addEventListener('click', function(){
+ var txt = window._kolmExportCmd || '';
+ if (navigator.clipboard && navigator.clipboard.writeText) {
+ navigator.clipboard.writeText(txt).then(function(){
+ var b = document.getElementById('copy-cmd');
+ var prev = b.textContent;
+ b.textContent = 'copied';
+ setTimeout(function(){ b.textContent = prev; }, 1200);
+ });
+ }
+ });
+
+ function stripShellPrefix(s){
+ return s.split('\n').map(function(line){
+ return line.replace(/^\$ /, '').replace(/^# /, '# ');
+ }).join('\n');
+ }
+
+ document.getElementById('copy-all').addEventListener('click', function(){
+ var r = window._kolmRunbook;
+ if (!r) return;
+ var md = [
+ '# kolm device transfer runbook',
+ '',
+ '- base: ' + r.base,
+ '- device: ' + r.device,
+ '- quant: ' + r.quant,
+ '- backend: ' + r.backend,
+ '',
+ '## Step 1. Build the export',
+ '',
+ '```bash',
+ r.s1,
+ '```',
+ '',
+ '## Step 2. Move it to the device',
+ '',
+ '```bash',
+ stripShellPrefix(r.s2),
+ '```',
+ '',
+ '## Step 3. Run on the target device',
+ '',
+ '```bash',
+ stripShellPrefix(r.s3),
+ '```',
+ '',
+ '## Step 4. Verify',
+ '',
+ '```bash',
+ r.s4,
+ '```',
+ '',
+ 'See https://kolm.ai/device-transfer for the live picker.'
+ ].join('\n');
+ if (navigator.clipboard && navigator.clipboard.writeText) {
+ navigator.clipboard.writeText(md).then(function(){
+ var b = document.getElementById('copy-all');
+ var prev = b.textContent;
+ b.textContent = 'Copied runbook';
+ setTimeout(function(){ b.textContent = prev; }, 1400);
+ });
+ }
+ });
+
+ render();
+})();
+</script>
+
+<script src="/nav.js" defer></script>
+<script src="/kolm-svg.js" defer></script>
+</body>
+</html>

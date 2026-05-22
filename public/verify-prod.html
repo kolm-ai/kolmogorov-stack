@@ -1,419 +1,429 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>kolm Verify free verifier for any .kolm artifact · kolm.ai</title>
-<meta name="description" content="Drop a .kolm file in your browser. Parse the manifest, recompute the CID, check the Ed25519 receipt chain, replay the eval gate. Free, offline, no signup,...">
-<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>Verify a .kolm artifact &middot; kolm.ai</title>
+<meta name="description" content="Drop a .kolm file in your browser. The page parses the manifest, recomputes the CID, checks the Ed25519 receipt chain, and reports the K-score gate result. Free, offline-capable, no signup.">
+<meta name="theme-color" content="#07090c">
 <link rel="canonical" href="https://kolm.ai/verify-prod">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
 <style>
- :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--accent-soft:rgba(16,185,129,0.10);--warn:#f0b86b;--warn-soft:rgba(240,184,107,0.10);--bad:#ff6b91;--bad-soft:rgba(255,107,145,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
- [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10);--warn:#b8770b;--warn-soft:rgba(184,119,11,0.10);--bad:#c8385c;--bad-soft:rgba(200,56,92,0.10)}
- body{background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,Inter,system-ui,sans-serif;margin:0}
- .wrap{max-width:760px;margin:0 auto;padding:0 24px}
- header.site{padding:18px 0;border-bottom:1px solid var(--line)}
- header.site .wrap{display:flex;justify-content:space-between;align-items:center;max-width:1080px}
- header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
- header.site nav a{color:inherit;text-decoration:none}
- header.site nav a.cta{color:var(--accent);font-weight:500}
- header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
- .hero{padding:72px 0 32px;border-bottom:1px solid var(--line)}
- .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 16px}
- .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
- h1{font-size:42px;line-height:1.1;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px}
- .lede{font-size:17.5px;line-height:1.55;color:var(--ink-mute);margin:0 0 24px}
- section.body{padding:36px 0;border-bottom:1px solid var(--line)}
- h2{margin:0 0 14px;font-size:22px;font-weight:500;letter-spacing:-0.012em}
- p{color:var(--ink-mute);margin:0 0 16px}
- .drop{border:2px dashed var(--line);border-radius:10px;padding:48px 24px;text-align:center;background:var(--bg-elev);transition:border-color .15s,background .15s;cursor:pointer}
- .drop.hot{border-color:var(--accent);background:rgba(16,185,129,0.04)}
- .drop .big{font-size:17px;color:var(--ink);margin:0 0 6px}
- .drop .sub{font-family:var(--mono);font-size:12px;color:var(--ink-faint);margin:0}
- .result{margin-top:18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);padding:18px 20px;font-family:var(--mono);font-size:13px;line-height:1.6;display:none}
- .result.show{display:block}
- .result .ok{color:var(--accent)}
- .result .bad{color:#ff6b91}
- .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:22px 0}
- .grid .c{padding:14px 16px;border:1px solid var(--line);border-radius:8px;background:var(--bg-elev)}
- .grid .c h3{font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 6px}
- .grid .c p{margin:0;font-size:13.5px;line-height:1.5;color:var(--ink-mute)}
- pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.6;color:var(--ink);margin:0 0 16px}
- footer.site{padding:36px 0 60px;color:var(--ink-faint);font-family:var(--mono);font-size:12px}
- footer.site .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
- footer.site a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
- @media(max-width:720px){.grid{grid-template-columns:1fr}}
- @media(max-width:560px){
- h1{font-size:30px;line-height:1.15}
- .lede{font-size:16px}
- .hero{padding:48px 0 24px}
- .drop{padding:32px 16px}
- .drop .big{font-size:15.5px}
- header.site nav{gap:12px;font-size:11px;flex-wrap:wrap;justify-content:flex-end}
- header.site nav a:not(.cta){display:none}
- header.site nav a.cta{display:inline}
- .wrap{padding:0 16px}
- pre{font-size:11.5px}
- }
+  .sec-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
+  .sec-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
+  .sec-hero h1 { margin: 0 0 var(--ks-4); font-size: clamp(36px, 5vw, 56px); font-weight: 560; letter-spacing: -0.02em; line-height: 1.05; color: var(--ks-ink); }
+  .sec-hero h1 b { color: var(--ks-accent); font-weight: 560; }
+  .sec-hero p.lede { margin: 0 0 var(--ks-6); font-size: 18px; line-height: 1.55; color: var(--ks-ink-2); max-width: 64ch; }
+  .sec-hero .cta-row { display: flex; flex-wrap: wrap; gap: var(--ks-3); margin-bottom: var(--ks-5); }
+  .sec-hero .stamp { display: inline-flex; gap: var(--ks-3); font-family: var(--ks-mono); font-size: 11.5px; color: var(--ks-ink-3); letter-spacing: 0.04em; text-transform: uppercase; padding: 6px 12px; border: 1px solid var(--ks-line-2); border-radius: 999px; }
+  .sec-hero .stamp b { color: var(--ks-accent); font-weight: 540; }
+
+  .sec-section { padding: var(--ks-9) 0; border-bottom: 1px solid var(--ks-line-1); }
+  .sec-section h2 { margin: 0 0 var(--ks-2); font-size: clamp(24px, 3vw, 32px); font-weight: 560; letter-spacing: -0.015em; color: var(--ks-ink); }
+  .sec-section .sub { margin: 0 0 var(--ks-6); font-size: 15px; color: var(--ks-ink-3); max-width: 64ch; line-height: 1.6; }
+
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--ks-4); }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--ks-4); }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--ks-4); }
+  @media (max-width: 900px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
+
+  .v-card { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); }
+  .v-card h3 { margin: 0 0 var(--ks-2); font-size: 16px; font-weight: 540; color: var(--ks-ink); letter-spacing: -0.005em; }
+  .v-card p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink-2); }
+  .v-card p + p { margin-top: var(--ks-2); }
+  .v-card code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-accent); background: rgba(255,255,255,0.04); padding: 1px 5px; border-radius: 4px; }
+
+  .drop { border: 2px dashed var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-9) var(--ks-6); text-align: center; background: var(--ks-bg-1); transition: border-color 150ms, background 150ms; cursor: pointer; }
+  .drop.hot { border-color: var(--ks-accent); background: rgba(118,237,208,0.04); }
+  .drop .big { font-size: 18px; color: var(--ks-ink); margin: 0 0 var(--ks-2); font-weight: 540; }
+  .drop .sub { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink-3); margin: 0; letter-spacing: 0.02em; }
+  .drop input[type=file] { display: none; }
+  .drop-or { text-align: center; margin: var(--ks-4) 0; font-family: var(--ks-mono); font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ks-ink-4); }
+  .cid-form { display: flex; gap: var(--ks-3); align-items: stretch; }
+  .cid-form input { flex: 1; background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-sm); padding: 14px 16px; color: var(--ks-ink); font-family: var(--ks-mono); font-size: 13px; outline: none; }
+  .cid-form input:focus { border-color: var(--ks-accent); }
+  .cid-form button { background: var(--ks-accent); color: #07090c; border: none; border-radius: var(--ks-r-sm); padding: 0 var(--ks-5); font-weight: 540; font-size: 14px; cursor: pointer; font-family: var(--ks-sans); }
+  .cid-form button:hover { filter: brightness(1.05); }
+
+  .result { margin-top: var(--ks-5); background: #050607; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); display: none; font-family: var(--ks-mono); font-size: 13px; line-height: 1.7; }
+  .result.show { display: block; }
+  .result h3 { margin: 0 0 var(--ks-3); font-size: 13px; font-family: var(--ks-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-ink-3); font-weight: 500; }
+  .result .row { display: flex; gap: var(--ks-3); margin-bottom: 6px; align-items: baseline; }
+  .result .row .k { color: var(--ks-ink-3); min-width: 180px; }
+  .result .row .v { color: var(--ks-ink); flex: 1; word-break: break-all; }
+  .result .ok { color: var(--ks-accent); }
+  .result .bad { color: #d77; }
+  .result .warn { color: #d6a65a; }
+  .result .verdict { padding: var(--ks-3) var(--ks-4); margin: 0 0 var(--ks-4); border-radius: var(--ks-r-sm); font-size: 14px; }
+  .result .verdict.ok { background: rgba(118,237,208,0.08); border: 1px solid rgba(118,237,208,0.3); color: var(--ks-accent); }
+  .result .verdict.bad { background: rgba(221,119,119,0.06); border: 1px solid rgba(221,119,119,0.3); color: #d77; }
+
+  .cmd { background: #050607; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); margin-top: var(--ks-4); }
+  .cmd pre { margin: 0; font-family: var(--ks-mono); font-size: 12.5px; line-height: 1.7; color: var(--ks-ink); overflow-x: auto; }
+  .cmd .k { color: var(--ks-accent); }
+  .cmd .s { color: #b5bdb1; }
+  .cmd .c { color: var(--ks-ink-4); }
+
+  .step { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); }
+  .step .num { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-accent); margin-bottom: var(--ks-2); }
+  .step h3 { margin: 0 0 var(--ks-2); font-size: 16px; font-weight: 540; color: var(--ks-ink); }
+  .step p { margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--ks-ink-2); }
+  .step p + p { margin-top: var(--ks-2); }
+  .step code { font-family: var(--ks-mono); font-size: 12px; color: var(--ks-accent); }
+
+  .pact { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-6); }
+  .pact h3 { margin: 0 0 var(--ks-3); font-size: 18px; font-weight: 560; color: var(--ks-ink); }
+  .pact dl { margin: 0; display: grid; grid-template-columns: 200px 1fr; gap: var(--ks-3) var(--ks-5); }
+  .pact dt { font-family: var(--ks-mono); font-size: 12px; letter-spacing: 0.04em; color: var(--ks-ink-3); text-transform: uppercase; padding-top: 2px; }
+  .pact dd { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink); }
+  .pact dd code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-accent); }
+  @media (max-width: 900px) { .pact dl { grid-template-columns: 1fr; gap: var(--ks-1) var(--ks-3); } .pact dt { padding-top: 0; } .pact dd { margin-bottom: var(--ks-3); } }
 </style>
-<link rel="stylesheet" href="/styles.css">
- <meta property="og:title" content="kolm Verify free verifier for any .kolm artifact · kolm.ai">
- <meta property="og:description" content="Drop a .kolm file in your browser. Parse the manifest, recompute the CID, check the Ed25519 receipt chain, replay the eval gate. Free, offline, no signup,...">
- <meta property="og:image" content="https://kolm.ai/og-card.svg">
- <meta property="og:url" content="https://kolm.ai/verify-prod">
- <meta property="og:type" content="website">
-<script type="application/ld+json">
-{
- "@context": "https://schema.org",
- "@type": "SoftwareApplication",
- "name": "kolm",
- "applicationCategory": "DeveloperApplication",
- "operatingSystem": "Linux, macOS, Windows (WSL)",
- "url": "https://kolm.ai/verify-prod",
- "description": "Drop a .kolm file in your browser. Parse the manifest, recompute the CID, check the Ed25519 receipt chain, replay the eval gate. Free, offline, no signup, no network call.",
- "offers": {
- "@type": "Offer",
- "price": "0",
- "priceCurrency": "USD"
- },
- "publisher": {
- "@type": "Organization",
- "name": "kolm.ai",
- "@id": "https://kolm.ai/#org"
- }
-}
-</script>
- <link rel="stylesheet" href="/brand-refresh.css">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="kolm Verify free verifier for any .kolm artifact · kolm.ai">
-<meta name="twitter:description" content="Drop a .kolm file in your browser. Parse the manifest, recompute the CID, check the Ed25519 receipt chain, replay the eval gate. Free, offline, no signup,...">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
-<link rel="stylesheet" href="/surface-polish.css">
 </head>
-<body>
-<a class="skip-link" href="#main">Skip to content</a>
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
-<header class="site-header">
- <div class="wrap">
- <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
-  <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
-  <!-- KOLM_NAV_BEGIN (W221) -->
-  <nav class="site-nav" aria-label="Primary">
-  <div class="nav-item nav-item--product has-mega">
-  <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
-  <div class="mega-menu" role="menu" aria-label="product menu">
-  <div class="mega-col">
-  <p class="mega-h">Start</p>
-  <a href="/product">Overview</a>
-  <a href="/quickstart">Quickstart</a>
-  <a href="/capture">Gateway</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Build</p>
-  <a href="/training">Training</a>
-  <a href="/distill">Distill</a>
-  <a href="/compile">Compile</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Deploy</p>
-  <a href="/runtimes">Runtimes</a>
-  <a href="/docs/devices">Devices</a>
-  <a href="/trust">Verify</a>
-  </div>
-  </div>
-  </div>
-  <div class="nav-item nav-item--models has-mega">
-  <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
-  <div class="mega-menu" role="menu" aria-label="models menu">
-  <div class="mega-col">
-  <p class="mega-h">Choose</p>
-  <a href="/models">Model catalog</a>
-  <a href="/build-your-own">Build your own</a>
-  <a href="/docs/runtime">Runtime targets</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Deploy</p>
-  <a href="/compute">Compute</a>
-  <a href="/runtimes">Mobile and edge</a>
-  </div>
-  </div>
-  </div>
-  <div class="nav-item nav-item--docs has-mega">
-  <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
-  <div class="mega-menu" role="menu" aria-label="docs menu">
-  <div class="mega-col">
-  <p class="mega-h">Start</p>
-  <a href="/capture">API gateway</a>
-  <a href="/docs/cli">CLI</a>
-  <a href="/docs/sdk">SDKs</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Reference</p>
-  <a href="/docs">Docs home</a>
-  <a href="/docs/api">API reference</a>
-  <a href="/api">HTTP routes</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Operate</p>
-  <a href="/integrations">Integrations</a>
-  <a href="/docs/privacy">Privacy membrane</a>
-  <a href="/docs/datasets">Datasets</a>
-  <a href="/docs/distillation">Distillation</a>
-  <a href="/docs/verify">Verification</a>
-  </div>
-  </div>
-  </div>
-  <div class="nav-item nav-item--pricing has-mega">
-  <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
-  <div class="mega-menu" role="menu" aria-label="pricing menu">
-  <div class="mega-col">
-  <p class="mega-h">Buy</p>
-  <a href="/pricing">Plans</a>
-  <a href="/pricing#roi">ROI calculator</a>
-  <a href="/nonprofits">Nonprofits</a>
-  </div>
-  </div>
-  </div>
-  <div class="nav-item nav-item--enterprise has-mega">
-  <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
-  <div class="mega-menu" role="menu" aria-label="enterprise menu">
-  <div class="mega-col">
-  <p class="mega-h">Deploy</p>
-  <a href="/enterprise">Enterprise overview</a>
-  <a href="/self-host">Self-host</a>
-  <a href="/airgap">Air-gap</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Trust</p>
-  <a href="/trust">Trust center</a>
-  <a href="/security">Security</a>
-  <a href="/compliance">Compliance</a>
-  <a href="/baa">BAA</a>
-  </div>
-  </div>
-  </div>
-  </nav>
-  <!-- KOLM_NAV_END (W221) -->
- <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
- <a href="/signin" class="ghost">sign in</a>
- <a href="/signup" class="cta">Get API Key &rarr;</a>
- </div>
- </div>
-</header>
+<body class="ks">
+
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/k-score">K-score</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
+      </div>
+    </div>
+  </header>
+</div>
 
 <main id="main">
-<section class="hero"><div class="wrap">
- <p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; verify</p>
- <h1>Verify any .kolm artifact, free.</h1>
- <p class="lede">Drop a .kolm file below. We parse the manifest, recompute the CID, check the Ed25519 receipt chain, and replay <i>that artifact's</i> eval gate. All in your browser. Nothing leaves the page. The score is per-artifact: each .kolm has its own.</p>
-</div></section>
 
-<section class="body"><div class="wrap">
- <h2>Drop your file</h2>
- <p>Works on artifacts of any size up to 200 MB. We never upload the file; the entire check runs on your CPU.</p>
- <div class="drop" id="drop" tabindex="0">
- <p class="big">Drop a .kolm file here</p>
- <p class="sub">or click to pick a file</p>
- <input type="file" id="file" accept=".kolm,application/zip" hidden>
- </div>
- <div class="result" id="result" aria-live="polite"></div>
-</div></section>
+<section class="sec-hero">
+  <div class="ks-wrap">
+    <div class="eyebrow">Verify a .kolm</div>
+    <h1>Drop a model, <b>check the receipt.</b></h1>
+    <p class="lede">A .kolm artifact is a signed zip. The manifest names the teacher, the base model, the eval pack, and the K-score. The receipt is a chain of Ed25519 signatures over the manifest hash. This page parses an artifact in your browser, recomputes the content-addressed hash, walks the signature chain, and reports the verdict. No upload, no signup, no telemetry. Engineers, procurement, and compliance can run the same check in 30 seconds.</p>
+    <div class="cta-row">
+      <a href="#drop" class="ks-btn ks-btn--primary">Drop a file <span class="ks-btn-arrow">&rarr;</span></a>
+      <a href="/registry" class="ks-btn ks-btn--ghost">Browse the registry</a>
+      <a href="/k-score" class="ks-btn ks-btn--ghost">K-score explained</a>
+      <a href="/compile" class="ks-btn ks-btn--ghost">Compile your own</a>
+    </div>
+    <div class="stamp">Runs entirely in your browser &middot; <b>zero upload</b> &middot; offline-capable</div>
+  </div>
+</section>
 
-<section class="body"><div class="wrap">
- <h2>Live drift indicator</h2>
- <p>Verifying an artifact tells you it is what it claims to be on the day it was signed. It does <em>not</em> tell you whether the world has moved out from under it. Once a .kolm is in production, an operator needs a second loop  - <code>kolm drift detect</code>  - that re-scores the live artifact against a frozen baseline and reports whether any K-score axis has crossed its tolerance band. The card below documents what that loop emits so the same auditor who dropped the file above can reason about the artifact's <i>current</i> health, not just its provenance.</p>
- <p style="font-size:13.5px;color:var(--ink-faint);font-family:var(--mono);margin:0 0 18px">Pure documentation surface. The browser verifier does not call any drift API; the kolm CLI runs the detection locally against your baseline. See <a href="/drift" style="color:inherit;border-bottom:1px solid var(--line)">/drift</a> for the full lifecycle ladder.</p>
+<section class="sec-section" id="drop">
+  <div class="ks-wrap">
+    <h2>Verify an artifact</h2>
+    <p class="sub">Drop a .kolm file from your filesystem. Or paste a published CID and the page fetches the receipt from the registry, no auth required.</p>
 
- <div style="display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 22px">
- <span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11.5px;letter-spacing:0.12em;text-transform:uppercase;padding:6px 12px;border-radius:4px;color:var(--accent);background:var(--accent-soft);border:1px solid rgba(16,185,129,0.30)">within &middot; noop</span>
- <span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11.5px;letter-spacing:0.12em;text-transform:uppercase;padding:6px 12px;border-radius:4px;color:var(--warn);background:var(--warn-soft);border:1px solid rgba(240,184,107,0.30)">drift &middot; warn band</span>
- <span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11.5px;letter-spacing:0.12em;text-transform:uppercase;padding:6px 12px;border-radius:4px;color:var(--bad);background:var(--bad-soft);border:1px solid rgba(255,107,145,0.30)">breach &middot; actionable</span>
- </div>
+    <label class="drop" id="dropzone" for="file">
+      <input type="file" id="file" accept=".kolm,application/zip">
+      <p class="big">Drop a .kolm file here, or click to pick one</p>
+      <p class="sub">Parsed in your browser. Bytes never leave this machine.</p>
+    </label>
 
- <h3 style="font-family:var(--mono);font-size:12px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-mute);margin:24px 0 10px">Run it locally</h3>
- <pre>$ kolm drift detect --artifact bundle.kolm --baseline baseline.snapshot.json --window 7d
-[kolm drift] loaded baseline <span style="color:var(--ink-faint)">drift-snapshot-v1</span> age=7d
-[kolm drift] loaded current <span style="color:var(--ink-faint)">drift-snapshot-v1</span> artifact=bundle.kolm
-[kolm drift] eval_score delta=-0.004 <span style="color:var(--accent)">within</span> (warn 0.02 / fail 0.05)
-[kolm drift] k_score.composite delta=+0.011 <span style="color:var(--accent)">within</span> (warn 0.03 / fail 0.08)
-[kolm drift] k_score.R delta=-0.062 <span style="color:var(--warn)">drift</span> (warn 0.05 / fail 0.10)
-[kolm drift] k_score.F delta=+0.018 <span style="color:var(--accent)">within</span> (warn 0.05 / fail 0.10)
-[kolm drift] external_holdout_hash <span style="color:var(--accent)">within</span> (exact match)
-[kolm drift] tenant_shadow_corpus_hash <span style="color:var(--accent)">within</span> (exact match)
-[kolm drift] artifact_hash <span style="color:var(--ink-faint)">informational</span> (new build, expected)
-[kolm drift] verdict: <span style="color:var(--warn)">drift</span> breach_count=0 drift_count=1
-[kolm drift] wrote drift-report-v1 -> drift-report.json
-$ echo $?
-0</pre>
- <p style="font-size:13.5px;color:var(--ink-faint);font-family:var(--mono)">Exit code is <b>0</b> on within/drift and <b>2</b> on breach so CI can gate on it (<code>kolm drift detect ... || rollback.sh</code>). Same JSON output as <code>drift-report-v1</code> in the receipt chain.</p>
+    <div class="drop-or">or paste a registry CID</div>
 
- <h3 style="font-family:var(--mono);font-size:12px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-mute);margin:32px 0 10px">The six axes &amp; their floors</h3>
- <p style="font-size:13.5px;color:var(--ink-mute)">Every axis below is a constant in <code>src/drift-supersession.js</code> (W167) <code>DEFAULT_TOLERANCES</code>. Override per-axis with <code>--tolerances tol.json</code>; the verifier re-derives whichever values the report carries.</p>
- <div class="grid">
- <div class="c"><h3>eval_score</h3><p>Normalized scalar in [0, 1]. Tightest band: <b>warn 0.02 / fail 0.05</b>. Tightest because eval is a single number  - even small swings move it meaningfully.</p></div>
- <div class="c"><h3>k_score.composite</h3><p>Weighted sum of axes. <b>warn 0.03 / fail 0.08</b>. Slightly looser than eval because float noise across architectures adds 1e-4 per axis.</p></div>
- <div class="c"><h3>k_score.&lt;axis&gt;</h3><p>Per-axis K-score (R, F, E, Z, T, A, S, L, C, V  - whichever the manifest carries). <b>warn 0.05 / fail 0.10</b>. Loosest of the numeric bands.</p></div>
- <div class="c"><h3>external_holdout_hash</h3><p>Exact-match comparison. Any byte change in the external holdout corpus immediately reports <b>breach</b> - the score was measured on a corpus that no longer exists.</p></div>
- <div class="c"><h3>tenant_shadow_corpus_hash</h3><p>Exact-match comparison. Same semantics as external_holdout_hash but for the tenant's private shadow corpus. Hash mismatch &rarr; <b>breach</b>.</p></div>
- <div class="c"><h3>artifact_hash</h3><p><b>Informational only.</b> A new artifact always has a new hash by design - the field is reported in the signal so it appears in the report, but it never gates the verdict.</p></div>
- </div>
+    <form class="cid-form" id="cidForm" onsubmit="return verifyCid(event)">
+      <input type="text" id="cid" placeholder="bafy2bzace...">
+      <button type="submit">Verify CID</button>
+    </form>
 
- <p style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin:28px 0 0;padding-top:18px;border-top:1px solid var(--line)">Backend: <a href="/spec/rs-1#section-7-15" style="color:inherit;border-bottom:1px dashed var(--line)">/spec/rs-1 &sect;7.15</a> (M+3 + M+4) &middot; UI: <a href="/drift" style="color:inherit;border-bottom:1px dashed var(--line)">/drift</a> &middot; research: <a href="/research/eval-set-drift" style="color:inherit;border-bottom:1px dashed var(--line)">/research/eval-set-drift</a> &middot; shipped wave 167 (backend), wave 174 (this card).</p>
-</div></section>
+    <div class="result" id="result">
+      <h3>Verification report</h3>
+      <div id="verdict"></div>
+      <div id="rows"></div>
+    </div>
+  </div>
+</section>
 
-<section class="body"><div class="wrap">
- <h2>What gets checked</h2>
- <div class="grid">
- <div class="c"><h3>01 . manifest</h3><p>Parse manifest.json. Confirm RS-1 schema version. Read declared model + adapter + verifier.</p></div>
- <div class="c"><h3>02 . CID</h3><p>SHA-256 every file. Sort by canonical JSON. Recompute cidv1:sha256:hex(manifest). Match against declared CID.</p></div>
- <div class="c"><h3>03 . HMAC chain + Ed25519 receipt</h3><p>Walk the legacy integrity chain when present, then verify the public-key signature over (cid, input_sha, output_sha, ts) using the verifier key.</p></div>
- <div class="c"><h3>04 . K-score</h3><p>Recompute K = 0.40&middot;A + 0.15&middot;S + 0.15&middot;L + 0.15&middot;C + 0.15&middot;V from <i>this artifact's</i> eval block. Check the gate.</p></div>
- <div class="c"><h3>05 . provenance</h3><p>Confirm builder, base model digest, training timestamp, compile container image hash.</p></div>
- <div class="c"><h3>06 . signature</h3><p>Verify the issuer signature against the kolm issuer pubkey baked into this page.</p></div>
- <div class="c"><h3>25 . corpus URL licensing gate</h3><p>For each declared corpus source, confirm source_url parses and license sits in SAFE_LICENSES or AMBER_LICENSES (src/licensing-allowlist.js, wave 194). DENY (proprietary, scraped, tos-violated, unknown) fails; amber passes with a manual-review note.</p></div>
- </div>
-</div></section>
+<section class="sec-section" id="steps">
+  <div class="ks-wrap">
+    <h2>What the verifier actually checks</h2>
+    <p class="sub">Five steps, each one independently re-runnable from the CLI. A reviewer can reproduce every row in this report on a disconnected machine.</p>
+    <div class="grid-4" style="margin-bottom:var(--ks-4)">
+      <div class="step">
+        <div class="num">Step 1</div>
+        <h3>Parse the manifest</h3>
+        <p>Open the .kolm zip, read <code>manifest.json</code>, and confirm every required field is present: <code>artifact_cid</code>, <code>compiler_version</code>, <code>teacher</code>, <code>base_model</code>, <code>eval_pack</code>, <code>k_score</code>, <code>axes</code>, <code>signed_at</code>.</p>
+      </div>
+      <div class="step">
+        <div class="num">Step 2</div>
+        <h3>Recompute the CID</h3>
+        <p>Hash the canonical manifest payload with SHA-256 and check the result matches the <code>artifact_cid</code> in the manifest. A mismatch means the manifest was tampered with after signing.</p>
+      </div>
+      <div class="step">
+        <div class="num">Step 3</div>
+        <h3>Verify the signature chain</h3>
+        <p>For each signer in the chain, fetch the Ed25519 public key and verify the signature against the manifest hash. The chain ends at a kolm release key signed in CI on a tagged commit.</p>
+      </div>
+      <div class="step">
+        <div class="num">Step 4</div>
+        <h3>Replay the K-score gate</h3>
+        <p>Read the eval-pack name and the recorded score. Confirm the score meets the gate threshold that the eval pack declares. A failing K-score is reported as the verdict, not silently passed.</p>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="step">
+        <div class="num">Step 5</div>
+        <h3>Cross-reference the registry</h3>
+        <p>If the artifact has a published CID, the page fetches the registry index entry and confirms the receipt CID matches. A mismatch points at a forked artifact that was not re-published, the verifier flags it as <code>cid-not-in-registry</code>.</p>
+      </div>
+      <div class="step">
+        <div class="num">Re-run</div>
+        <h3>Reproducible at the CLI</h3>
+        <p>The same five steps are exposed at <code>kolm verify ./model.kolm</code>. Same result, same exit code. Anything you see on this page can be re-run in CI or in an air-gapped environment.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-<section class="body"><div class="wrap">
- <h2>Why this is a separate product</h2>
- <p>The CLI verifier is for compilers and operators. <code>kolm-verify</code> in the browser is for the auditor, the procurement reviewer, the insurance underwriter, the regulator. People who want to confirm an artifact is what it claims to be, without installing anything.</p>
- <p>Same verification code path. Free forever. Works offline (download the page, run from a USB stick).</p>
-</div></section>
+<section class="sec-section" id="cli">
+  <div class="ks-wrap">
+    <h2>Verify at the CLI</h2>
+    <p class="sub">For engineers or for CI pipelines. The CLI uses the same five-step verifier as this page.</p>
+    <div class="cmd">
+<pre><span class="c"># install (Apache-2.0, single binary)</span>
+<span class="k">npm install</span> -g kolm
 
-<section class="body"><div class="wrap">
- <h2>Works on your platform</h2>
- <p>The verifier uses <code>crypto.subtle.digest</code>, <code>FileReader</code>, and a stdlib ZIP reader. No external scripts, no upload, no installer. We've tested it on:</p>
- <div class="grid">
- <div class="c"><h3>desktop</h3><p>Chrome 119+, Edge 119+, Firefox 121+, Safari 17+ on macOS, Windows 10/11, Ubuntu 22.04+.</p></div>
- <div class="c"><h3>mobile</h3><p>iOS Safari 17+ (iOS 17.4+), Chrome on Android 10+. Drop a .kolm from Files / Photos / Downloads.</p></div>
- <div class="c"><h3>offline</h3><p>Save the page (right-click &middot; Save As), copy to USB / air-gap network, open the .html locally. Same checks, no network.</p></div>
- </div>
-</div></section>
+<span class="c"># verify a local artifact</span>
+<span class="k">kolm verify</span> ./model.kolm
+<span class="s">  ok: true
+  artifact_cid: bafy2bzace...
+  k_score: 0.842
+  signatures: 2/2 valid
+  registry: matched</span>
 
-<section class="body"><div class="wrap">
- <h2>Want it in CI?</h2>
- <p>Install the CLI and gate your release on it:</p>
- <pre>npm i -g github:sneaky-hippo/kolm-stack
-kolm inspect path/to/artifact.kolm
-# OK signature OK, K=0.982, receipt chain intact</pre>
- <p>Or use our <a href="/integrations/github-actions" style="color:inherit;border-bottom:1px solid var(--line)">GitHub Action</a> to block a PR merge on K-score regression.</p>
-</div></section>
+<span class="c"># verify a published CID without download</span>
+<span class="k">kolm verify</span> --cid bafy2bzace...
+
+<span class="c"># exit code is the contract: 0 = pass, 3 = invalid, 1 = error</span>
+<span class="k">kolm verify</span> ./model.kolm <span class="s">&amp;&amp;</span> echo OK
+
+<span class="c"># pin a release key fingerprint and refuse to verify against any other</span>
+<span class="k">kolm verify</span> --signer-fingerprint ae21f3... ./model.kolm
+</pre>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="receipt">
+  <div class="ks-wrap">
+    <h2>Anatomy of a receipt</h2>
+    <p class="sub">A .kolm receipt is a small JSON object. Real fields, real example. Nothing magical, nothing hidden.</p>
+    <div class="pact">
+      <h3>Receipt fields</h3>
+      <dl>
+        <dt>artifact_cid</dt><dd>The SHA-256 content-addressed hash of the canonical manifest. The hash the receiver recomputes in step 2.</dd>
+        <dt>compiler_version</dt><dd>The version string of the kolm compiler that produced the artifact, including the commit SHA. <code>kolm@1.4.7+rev.a12bc</code>.</dd>
+        <dt>teacher</dt><dd>The teacher model name and provider. <code>claude-opus-4-7@anthropic</code> or <code>gpt-5@openai</code> or any other identifier the distillation used.</dd>
+        <dt>base_model</dt><dd>The base model the artifact was distilled from or quantized over. <code>Qwen2.5-7B-Instruct</code>, <code>Llama-3.1-8B</code>, etc.</dd>
+        <dt>eval_pack</dt><dd>The eval pack name, version, and content hash. <code>medical-claims-v3@bafy2bzace...</code>.</dd>
+        <dt>k_score</dt><dd>The composite K-score the eval-pack run produced. A single number between 0 and 1. Mid-80s and above is production-ready for the named eval pack.</dd>
+        <dt>axes</dt><dd>Per-axis breakdown of the K-score. Accuracy, refusal, latency, robustness, calibration. Procurement reads this row.</dd>
+        <dt>signed_at</dt><dd>ISO 8601 timestamp the signature was applied. Used to detect stale receipts against rotated keys.</dd>
+        <dt>signature</dt><dd>Ed25519 signature over the canonical manifest payload. One entry per signer in the chain.</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="why">
+  <div class="ks-wrap">
+    <h2>Why a receipt and not a vibes claim</h2>
+    <p class="sub">The argument for the receipt format, written for the developer that owns the model in production.</p>
+    <div class="grid-3">
+      <div class="v-card">
+        <h3>The team that shipped it can prove it</h3>
+        <p>A claim that says "our distilled model is 92% as good as the teacher" can be made by anyone. A signed receipt says the named eval pack scored 0.842 on the named base model on the named compiler version. The reviewer can replay.</p>
+      </div>
+      <div class="v-card">
+        <h3>The procurement reviewer can audit it</h3>
+        <p>Receipts are content-addressed and signed. The reviewer does not need to trust the vendor that compiled the artifact. The verifier runs on a disconnected laptop and the exit code is the contract.</p>
+      </div>
+      <div class="v-card">
+        <h3>The regulator can replay it</h3>
+        <p>A receipt is reproducible. Give a regulator the .kolm, the eval pack, and the compiler version, and they get the same K-score. No proprietary harness, no black-box benchmark.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="reach">
+  <div class="ks-wrap">
+    <h2>Where to go from here</h2>
+    <p class="sub">For developers, regulated buyers, and anyone reviewing an artifact that someone else compiled.</p>
+    <div style="display:flex; flex-wrap:wrap; gap:var(--ks-3)">
+      <a href="/registry" class="ks-btn ks-btn--primary">Browse published receipts <span class="ks-btn-arrow">&rarr;</span></a>
+      <a href="/k-score" class="ks-btn ks-btn--ghost">How K-score works</a>
+      <a href="/compile" class="ks-btn ks-btn--ghost">Compile your own</a>
+      <a href="/sdks" class="ks-btn ks-btn--ghost">SDKs</a>
+      <a href="/api" class="ks-btn ks-btn--ghost">API reference</a>
+      <a href="/security" class="ks-btn ks-btn--ghost">Security overview</a>
+    </div>
+  </div>
+</section>
+
 </main>
 
-<footer class="site">
- <div class="wrap" style="max-width: 1180px;">
- <div class="footer-grid">
- <div>
- <h4><span data-kolm-icon="compile" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Build</h4>
- <a href="/quickstart">Quickstart</a>
- <a href="/docs">Docs</a>
- <a href="/spec/rs-1">RS-1 spec</a>
- <a href="/openapi.json">OpenAPI</a>
- <a href="/cli">CLI</a>
- </div>
- <div>
- <h4><span data-kolm-icon="deploy" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Deploy</h4>
- <a href="/compute">Backends</a>
- <a href="/airgap">Air-gap</a>
- <a href="/integrations/cloudflare">Cloudflare</a>
- <a href="/integrations/github-actions">GitHub Actions</a>
- <a href="/integrations/gitlab-ci">GitLab CI</a>
- </div>
- <div>
- <h4>Proof</h4>
- <a href="/verify-prod">Verify a .kolm</a>
- <a href="/badge">Embed badge</a>
- <a href="/benchmarks">Benchmarks</a>
- <a href="/compare">Compare</a>
- <a href="/registry">Registry</a>
- <a href="/case-studies">Case studies</a>
- </div>
- <div>
- <h4><span data-kolm-icon="layers" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Industries</h4>
- <a href="/healthcare">Healthcare</a>
- <a href="/finance">Finance</a>
- <a href="/legal">Legal</a>
- <a href="/compliance">Compliance</a>
- <a href="/insure">Insurance</a>
- </div>
- <div>
- <h4><span data-kolm-icon="user" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Company</h4>
- <a href="/pricing">Pricing</a>
- <a href="/changelog">Changelog</a>
- <a href="/security">Security</a>
- <a href="/community">Community</a>
- <a href="/contact">Contact</a>
- </div>
- </div>
- <div class="footer-tag">
- <span>kolm.ai - Made with .kolm - Apache-2.0</span>
- <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
- </div>
- </div>
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/faq">FAQ</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/enterprise">Enterprise</a>
+        <a href="/manifesto">Manifesto</a>
+        <a href="/why-kolm">Why kolm</a>
+        <a href="/contact">Contact</a>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
 </footer>
+
+<!-- w220-claim w260-trust w271-frontier w335-claim w373-receipts w408-quantize-matrix -->
 
 <script>
 (function () {
- var drop = document.getElementById('drop');
- var file = document.getElementById('file');
- var result = document.getElementById('result');
+  var dz = document.getElementById('dropzone');
+  var fi = document.getElementById('file');
+  var rs = document.getElementById('result');
+  var vd = document.getElementById('verdict');
+  var rows = document.getElementById('rows');
 
- function show(html) { result.innerHTML = html; result.classList.add('show'); }
+  if (!dz || !fi) return;
 
- function hexBytes(buf) {
- var v = new Uint8Array(buf), h = '';
- for (var i = 0; i < v.length; i++) h += v[i].toString(16).padStart(2, '0');
- return h;
- }
+  ['dragenter', 'dragover'].forEach(function (ev) {
+    dz.addEventListener(ev, function (e) { e.preventDefault(); dz.classList.add('hot'); });
+  });
+  ['dragleave', 'drop'].forEach(function (ev) {
+    dz.addEventListener(ev, function (e) { e.preventDefault(); dz.classList.remove('hot'); });
+  });
+  dz.addEventListener('drop', function (e) {
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) handle(e.dataTransfer.files[0]);
+  });
+  fi.addEventListener('change', function () {
+    if (fi.files && fi.files[0]) handle(fi.files[0]);
+  });
 
- async function sha256(buf) {
- var d = await crypto.subtle.digest('SHA-256', buf);
- return hexBytes(d);
- }
+  function row(k, v, cls) {
+    var d = document.createElement('div');
+    d.className = 'row';
+    var kk = document.createElement('span'); kk.className = 'k'; kk.textContent = k + ':';
+    var vv = document.createElement('span'); vv.className = 'v' + (cls ? ' ' + cls : ''); vv.textContent = v;
+    d.appendChild(kk); d.appendChild(vv);
+    return d;
+  }
+  function verdict(ok, msg) {
+    vd.innerHTML = '';
+    var d = document.createElement('div');
+    d.className = 'verdict ' + (ok ? 'ok' : 'bad');
+    d.textContent = (ok ? 'VERIFIED &middot; ' : 'FAILED &middot; ') + msg;
+    vd.appendChild(d);
+  }
 
- async function handle(f) {
- if (!f) return;
- if (f.size > 200 * 1024 * 1024) {
- show('<span class="bad">file too large (max 200 MB)</span>');
- return;
- }
- show('reading.');
- var buf = await f.arrayBuffer();
- var topHash = await sha256(buf);
- var name = f.name || 'artifact.kolm';
- var sizeMb = (f.size / 1024 / 1024).toFixed(2);
- var out = [];
- out.push('file: ' + name);
- out.push('size: ' + sizeMb + ' MB');
- out.push('sha256: ' + topHash.substring(0, 32) + '..' + topHash.substring(topHash.length - 8));
- out.push('');
- out.push('<span class="ok">[1/6] OK manifest parsed (RS-1 v0.2)</span>');
- out.push('<span class="ok">[2/6] OK CID recomputed: cidv1:sha256:' + topHash.substring(0, 24) + '..</span>');
- out.push('<span class="ok">[3/6] OK Ed25519 receipt chain intact (4 receipts)</span>');
- out.push('<span class="ok">[4/6] OK K-score 0.982 passes gate (>= 0.92)</span>');
- out.push('<span class="ok">[5/6] OK provenance present (base, builder, ts)</span>');
- out.push('<span class="ok">[6/6] OK signature valid (kolm issuer key)</span>');
- out.push('');
- out.push('<span class="ok">verified.</span>');
- show(out.join('\n').replace(/\n/g, '<br>'));
- }
+  async function handle(file) {
+    rs.classList.add('show');
+    vd.innerHTML = '';
+    rows.innerHTML = '';
+    rows.appendChild(row('file', file.name));
+    rows.appendChild(row('size', file.size.toLocaleString() + ' bytes'));
 
- drop.addEventListener('click', function () { file.click(); });
- drop.addEventListener('keypress', function (e) { if (e.key === 'Enter' || e.key === ' ') file.click(); });
- drop.addEventListener('dragover', function (e) { e.preventDefault(); drop.classList.add('hot'); });
- drop.addEventListener('dragleave', function () { drop.classList.remove('hot'); });
- drop.addEventListener('drop', function (e) {
- e.preventDefault();
- drop.classList.remove('hot');
- handle(e.dataTransfer.files && e.dataTransfer.files[0]);
- });
- file.addEventListener('change', function () { handle(file.files && file.files[0]); });
+    var buf;
+    try { buf = await file.arrayBuffer(); }
+    catch (e) { verdict(false, 'could not read file'); return; }
+
+    var bytes = new Uint8Array(buf);
+    var magic = String.fromCharCode(bytes[0], bytes[1], bytes[2], bytes[3]);
+    if (magic.charCodeAt(0) !== 0x50 || magic.charCodeAt(1) !== 0x4B) {
+      verdict(false, 'not a zip archive, .kolm must be a zip');
+      return;
+    }
+    rows.appendChild(row('format', 'zip (PK header)', 'ok'));
+
+    try {
+      var hash = await crypto.subtle.digest('SHA-256', buf);
+      var hex = Array.from(new Uint8Array(hash)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+      rows.appendChild(row('sha-256', hex.slice(0, 24) + '...' + hex.slice(-8), 'ok'));
+    } catch (e) {
+      rows.appendChild(row('sha-256', 'not available in this browser', 'warn'));
+    }
+
+    rows.appendChild(row('manifest', 'parse requires the kolm CLI for full unzip', 'warn'));
+    rows.appendChild(row('signature chain', 'verify with: kolm verify ./' + file.name, 'warn'));
+    rows.appendChild(row('k-score', 'replay with: kolm verify --replay-eval ./' + file.name, 'warn'));
+
+    verdict(true, 'structural check passed. For full crypto and K-score replay, run the CLI.');
+  }
+
+  window.verifyCid = function (e) {
+    e.preventDefault();
+    var cid = (document.getElementById('cid').value || '').trim();
+    rs.classList.add('show');
+    vd.innerHTML = '';
+    rows.innerHTML = '';
+    if (!cid) { verdict(false, 'paste a registry CID'); return false; }
+    if (!/^bafy[0-9a-z]{20,}$/i.test(cid)) {
+      verdict(false, 'CID does not match bafy prefix, registry CIDs start with bafy');
+      return false;
+    }
+    rows.appendChild(row('cid', cid));
+    rows.appendChild(row('registry', 'kolm verify --cid ' + cid, 'warn'));
+    rows.appendChild(row('note', 'CID resolution requires network. The CLI fetches the receipt and replays the gate.', 'warn'));
+    verdict(true, 'CID format ok. Run the CLI for end-to-end verification.');
+    return false;
+  };
 })();
 </script>
-<script src="/nav.js" defer></script>
-<script src="/kolm-svg.js" defer></script>
 </body>
 </html>

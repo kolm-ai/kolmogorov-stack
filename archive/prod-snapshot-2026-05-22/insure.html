@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>kolm Insure AI inference receipts as underwriting · kolm.ai</title>
+<meta name="description" content="When a model output triggers a claim, the .kolm receipt is the audit trail. CID-anchored, Ed25519-chained, replay-verifiable months later. Built for...">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<link rel="canonical" href="https://kolm.ai/insure">
+<style>
+ :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
+ body{background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,Inter,system-ui,sans-serif;margin:0}
+ .wrap{max-width:760px;margin:0 auto;padding:0 24px}
+ header.site{padding:18px 0;border-bottom:1px solid var(--line)}
+ header.site .wrap{display:flex;justify-content:space-between;align-items:center;max-width:1080px}
+ header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
+ header.site nav a{color:inherit;text-decoration:none}
+ header.site nav a.cta{color:var(--accent);font-weight:500}
+ header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+ .hero{padding:72px 0 32px;border-bottom:1px solid var(--line)}
+ .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 16px}
+ .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ h1{font-size:42px;line-height:1.1;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px}
+ .lede{font-size:17.5px;line-height:1.55;color:var(--ink-mute);margin:0}
+ section.body{padding:36px 0;border-bottom:1px solid var(--line)}
+ h2{margin:0 0 14px;font-size:22px;font-weight:500;letter-spacing:-0.012em}
+ p{color:var(--ink-mute);margin:0 0 16px}
+ .scenarios{display:grid;grid-template-columns:1fr;gap:14px;margin:22px 0}
+ .scn{padding:18px 20px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev)}
+ .scn .who{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--accent);margin:0 0 6px}
+ .scn h3{margin:0 0 8px;font-size:17px;font-weight:500;color:var(--ink)}
+ .scn p{margin:0 0 10px;font-size:14.5px;line-height:1.55}
+ .scn .ev{font-family:var(--mono);font-size:12px;color:var(--ink-faint);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px 12px;margin:8px 0 0;line-height:1.5}
+ pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.6;color:var(--ink);margin:0 0 16px}
+ .tier{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:18px 0}
+ .tc{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev)}
+ .tc .h{font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 6px}
+ .tc .v{font-size:20px;font-weight:500;color:var(--ink);margin:0 0 6px}
+ .tc .u{font-size:13.5px;color:var(--ink-mute);margin:0;line-height:1.5}
+ footer.site{padding:36px 0 60px;color:var(--ink-faint);font-family:var(--mono);font-size:12px}
+ footer.site .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+ footer.site a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+</style>
+<link rel="stylesheet" href="/styles.css">
+ <meta property="og:title" content="kolm Insure AI inference receipts as underwriting · kolm.ai">
+ <meta property="og:description" content="When a model output triggers a claim, the .kolm receipt is the audit trail. CID-anchored, Ed25519-chained, replay-verifiable months later. Built for...">
+ <meta property="og:image" content="https://kolm.ai/og-card.svg">
+ <meta property="og:url" content="https://kolm.ai/insure">
+ <meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "SoftwareApplication",
+ "name": "kolm",
+ "applicationCategory": "DeveloperApplication",
+ "operatingSystem": "Linux, macOS, Windows (WSL)",
+ "url": "https://kolm.ai/insure",
+ "description": "When a model output triggers a claim, the .kolm receipt is the audit trail. CID-anchored, Ed25519-chained, replay-verifiable months later. Built for underwriters of AI liability, E&O, and cyber policies.",
+ "offers": {
+ "@type": "Offer",
+ "price": "0",
+ "priceCurrency": "USD"
+ },
+ "publisher": {
+ "@type": "Organization",
+ "name": "kolm.ai",
+ "@id": "https://kolm.ai/#org"
+ }
+}
+</script>
+ <link rel="stylesheet" href="/brand-refresh.css">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="kolm Insure AI inference receipts as underwriting · kolm.ai">
+<meta name="twitter:description" content="When a model output triggers a claim, the .kolm receipt is the audit trail. CID-anchored, Ed25519-chained, replay-verifiable months later. Built for...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API Key &rarr;</a>
+ </div>
+ </div>
+</header>
+<main id="main">
+
+<section class="hero"><div class="wrap">
+ <p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; insure</p>
+ <h1>The receipt is the underwriter's evidence.</h1>
+ <p class="lede">Every kolm-compiled .kolm artifact emits a tamper-evident receipt for every inference: CID of the model that ran, hash of the input, hash of the output, K-score gate decision, Ed25519 receipt chain. When a claim hits, you have the audit trail.</p>
+</div></section>
+
+<section class="body"><div class="wrap">
+ <h2>Three scenarios underwriters care about</h2>
+ <div class="scenarios">
+ <div class="scn">
+ <div class="who">misclassification / E&amp;O</div>
+ <h3>A claims-routing model misroutes a hurricane claim to standard processing.</h3>
+ <p>Without a receipt, the carrier argues: was it the model, or was it the adjuster? With a kolm receipt, the underwriter sees the artifact CID, the input hash, the output hash, and the K-score at decision time. If K-score was below the carrier's stated gate, the carrier was operating an unsanctioned model. If above, the model performed as documented.</p>
+ <p class="ev">receipt.k_score: 0.91 / gate: 0.95 / decision: gate_bypassed_at_runtime</p>
+ </div>
+ <div class="scn">
+ <div class="who">hallucination / professional liability</div>
+ <h3>A legal-research assistant cites a non-existent case in a client memo.</h3>
+ <p>The artifact's manifest declares its verifier (constrained citation lookup). The receipt records whether the verifier was invoked and what it returned. If the verifier was bypassed (e.g., a fall-through path) the receipt names which code path. The carrier sees exactly where the chain broke.</p>
+ <p class="ev">receipt.verifier_invoked: false / fallthrough: prompt_too_long_truncated</p>
+ </div>
+ <div class="scn">
+ <div class="who">PHI / PII leak / cyber</div>
+ <h3>A redactor lets a patient name through to a downstream call-center transcript.</h3>
+ <p>The receipt anchors the artifact CID + redaction-pass count at the time of failure. The underwriter compares the failing artifact against the carrier's stated production CID. If they differ, the production stack drifted from the certified model. That is a finding the carrier owes.</p>
+ <p class="ev">declared_cid: cidv1:sha256:1bcf.. / actual_cid: cidv1:sha256:9a3f.. / drift: true</p>
+ </div>
+ </div>
+</div></section>
+
+<section class="body"><div class="wrap">
+ <h2>What a receipt records</h2>
+ <pre>{
+ "artifact_cid": "cidv1:sha256:9a3f4e1b..",
+ "input_sha": "sha256:8c2d1fa0..",
+ "output_sha": "sha256:4e1a90c3..",
+ "k_score": 0.982,
+ "gate": 0.92,
+ "verifier_ok": true,
+ "ts": "2026-05-15T13:42:08Z",
+ "issuer_pubkey": "kolm-issuer-2026q2",
+ "hmac": "b7c41e87.."
+}</pre>
+ <p>Replayable months later. The carrier exports a JSONL of receipts; the underwriter spot-checks any of them against the artifact CID and re-runs the same input through their own kolm-verify install.</p>
+</div></section>
+
+<section class="body"><div class="wrap">
+ <h2>Pricing for carriers</h2>
+ <div class="tier">
+ <div class="tc"><div class="h">Bring your own carrier</div><div class="v">$0</div><p class="u">Your insureds use kolm Cloud or self-host. You request the receipt JSONL during claim review. No platform fee from us.</p></div>
+ <div class="tc"><div class="h">Underwriter pack</div><div class="v">$2,499 / mo</div><p class="u">Hosted receipt vault scoped to your book. Bulk export, replay against historic artifacts, named-account SLA.</p></div>
+ <div class="tc"><div class="h">Insurer reference</div><div class="v">talk to us</div><p class="u">White-label deployment inside your insureds' kolm Cloud tenants. Co-branded verifier UI, custom K-score gates.</p></div>
+ </div>
+</div></section>
+
+<section class="body"><div class="wrap">
+ <h2>What we are not</h2>
+ <p>We do not underwrite the policy. We do not opine on whether a model is safe to deploy. We do not certify a carrier's risk model. We are the audit trail.</p>
+ <p>Your underwriters do the underwriting. Our receipt is the artifact they cite when explaining a claim outcome to a regulator, an arbitrator, or a court.</p>
+ <p><a href="mailto:underwriting@kolm.ai" style="color:inherit;border-bottom:1px solid var(--line)">underwriting@kolm.ai</a> for carrier conversations.</p>
+</div></section>
+
+
+</main>
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4><span data-kolm-icon="compile" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="deploy" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="layers" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="user" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+<script src="/nav.js" defer></script>
+<script src="/kolm-svg.js" defer></script>
+</body>
+</html>

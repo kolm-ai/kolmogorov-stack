@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>K-sampling at compile time: choosing among many · kolm.ai</title>
+<meta name="description" content="K-sampling at compile time: choosing among many: capture AI calls, review datasets, distill repeated work, and run signed local AI artifacts.">
+<meta name="keywords" content="K-sampling, candidate selection, diversity, embedding clustering, speculative decoding, draft cache, kolm trainer">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta name="author" content="kolm">
+<meta name="robots" content="index,follow,max-snippet:-1">
+<meta property="og:site_name" content="kolm">
+<meta property="og:title" content="K-sampling at compile time: choosing among many · kolm.ai">
+<meta property="og:description" content="K-sampling at compile time: choosing among many: capture AI calls, review datasets, distill repeated work, and run signed local AI artifacts.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="K-sampling at compile time: choosing among many · kolm.ai">
+<meta name="twitter:description" content="K-sampling at compile time: choosing among many: capture AI calls, review datasets, distill repeated work, and run signed local AI artifacts.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/research/k-sampling">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/research/k-sampling">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "TechArticle",
+ "headline": "K-sampling at compile time: choosing among many candidates",
+ "description": "How the trainer's K-sampling step selects K of N teacher candidates for the training set. Embedding-cluster diversity, reward-signal ranking, diversity-weighted selection, and the speculative draft cache on the v0.2 research agenda.",
+ "author": { "@type": "Organization", "name": "kolm", "url": "https://kolm.ai" },
+ "publisher": { "@type": "Organization", "name": "kolm", "logo": { "@type": "ImageObject", "url": "https://kolm.ai/favicon.svg" } },
+ "datePublished": "2026-05-14",
+ "dateModified": "2026-05-14",
+ "mainEntityOfPage": { "@type": "WebPage", "@id": "https://kolm.ai/research/k-sampling" },
+ "image": "https://kolm.ai/og-card.svg",
+ "keywords": "K-sampling, candidate selection, diversity, embedding clustering, speculative decoding",
+ "articleSection": "Methods",
+ "wordCount": 1820
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+ {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
+ {"@type": "ListItem", "position": 3, "name": "K-sampling at compile time", "item": "https://kolm.ai/research/k-sampling"}
+ ]
+ }
+ ]
+}
+</script>
+<style>
+ :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--accent-soft:rgba(236,231,220, 0.10);--good:#7ef0d2;--bad:#ff6b91;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+ *{box-sizing:border-box}
+ html,body{margin:0;padding:0}
+ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;font-synthesis:none}
+ a{color:inherit;text-decoration:none}
+ .wrap{max-width:760px;margin:0 auto;padding:0 32px}
+ .wrap-wide{max-width:1180px;margin:0 auto;padding:0 32px}
+ @media(max-width:720px){.wrap,.wrap-wide{padding:0 20px}}
+
+ header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+ header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px}
+ header.site .left{display:flex;align-items:center;gap:36px}
+ header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
+ header.site .brand span{font-weight:500;font-size:16px}
+ header.site nav{display:flex;gap:22px}
+ header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
+ header.site nav a:hover{color:var(--ink)}
+ header.site .right{display:flex;align-items:center;gap:14px}
+ header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
+ header.site .right .cta{color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500}
+ @media(max-width:720px){header.site nav{display:none}}
+
+ section.hero{padding:80px 0 36px;position:relative;overflow:hidden}
+ section.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 900px 460px at 22% 12%,rgba(236,231,220, 0.10),transparent 60%)}
+ section.hero .wrap{position:relative}
+ .pill{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-mute);border:1px solid var(--line-strong);border-radius:999px;padding:5px 12px;background:var(--bg-elev)}
+ .pill .dot{width:5px;height:5px;border-radius:50%;background:#10b981}
+ h1{margin:22px 0 18px;font-size:clamp(34px,5.4vw,54px);line-height:1.05;font-weight:500;max-width:22ch}
+ h1 .tone{color:#10b981}
+ p.lede{margin:0;font-size:clamp(17px,1.4vw,20px);line-height:1.55;color:var(--ink-mute);max-width:60ch}
+ p.lede b{color:var(--ink);font-weight:500}
+ .meta{display:flex;gap:18px;margin-top:22px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
+ .meta b{color:var(--ink-mute);font-weight:500}
+
+ article{padding:36px 0 96px}
+ article h2{margin:56px 0 14px;font-size:clamp(24px,2.6vw,30px);line-height:1.2;font-weight:500;color:var(--ink)}
+ article h3{margin:36px 0 10px;font-size:18px;font-weight:500;color:var(--ink)}
+ article p{margin:0 0 16px;font-size:16.5px;line-height:1.7;color:var(--ink-mute)}
+ article p b{color:var(--ink);font-weight:500}
+ article p code,article li code,article td code{font-family:var(--mono);font-size:0.92em;background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink)}
+ article blockquote{margin:28px 0;padding:16px 22px;border-left:2px solid #10b981;background:var(--bg-elev);border-radius:0 8px 8px 0;font-size:17px;line-height:1.6;color:var(--ink)}
+ article blockquote p{color:var(--ink);margin:0;font-weight:500}
+ article ul{padding-left:0;list-style:none;margin:16px 0 24px}
+ article ul li{padding:8px 0 8px 22px;position:relative;font-size:16px;line-height:1.6;color:var(--ink-mute)}
+ article ul li::before{content:"-";color:#10b981;position:absolute;left:6px;font-weight:500}
+ article ul li b{color:var(--ink);font-weight:500}
+ article pre{margin:18px 0 24px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.75;color:var(--ink)}
+ article pre .com{color:var(--ink-faint)}
+ article pre .arg{color:#10b981}
+ article pre .kw{color:#b0bbff}
+ article table{width:100%;border-collapse:collapse;margin:18px 0 24px;font-size:14px}
+ article table th,article table td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;color:var(--ink-mute)}
+ article table th{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);font-weight:500;letter-spacing:0.04em}
+ article table td b{color:var(--ink)}
+
+ .toc{margin:28px 0 36px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px}
+ .toc h5{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);margin:0 0 10px;font-weight:500}
+ .toc ol{margin:0;padding-left:20px}
+ .toc li{padding:4px 0;font-size:14px;color:var(--ink-mute)}
+ .toc li a{color:var(--ink-mute)}
+ .toc li a:hover{color:#10b981}
+
+ .signpost{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:48px 0 0}
+ @media(max-width:720px){.signpost{grid-template-columns:1fr}}
+ .signpost a{display:flex;flex-direction:column;gap:8px;padding:22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;transition:border-color 120ms,background 120ms}
+ .signpost a:hover{border-color:var(--line-strong);background:var(--bg-card)}
+ .signpost a .lab{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
+ .signpost a .v{color:var(--ink);font-weight:500;font-size:16px}
+ .signpost a .v .arrow{color:#10b981;margin-left:6px}
+ .signpost a p{margin:4px 0 0;font-size:13.5px;color:var(--ink-mute);line-height:1.5}
+
+ footer.site{padding:56px 0 40px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+ footer.site .row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+</style>
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API Key &rarr;</a>
+ </div>
+ </div>
+</header>
+<main id="main">
+
+<section class="hero">
+ <div class="wrap">
+ <span class="pill"><span class="dot"></span>Research &middot; Methods &middot; 2026-05-14 &middot; 10 min read</span>
+ <h1>K-sampling at compile time: <span class="tone">choosing among many candidates.</span></h1>
+ <p class="lede">The teacher returns N candidate outputs per spec input. <b>The trainer keeps K, where K is the most-diverse, most-aligned subset.</b> Embedding clusters do the diversity work; verifier or reward scores do the ranking. The N-minus-K rejects are not free, and one of the open problems on the v0.2 agenda is what to do with them.</p>
+ <div class="meta"><span><b>By</b>&nbsp;kolm</span><span><b>Tag</b>&nbsp;sampling &middot; diversity &middot; data</span></div>
+ </div>
+</section>
+
+<article>
+ <div class="wrap">
+
+ <div class="toc">
+ <h5>Contents</h5>
+ <ol>
+ <li><a href="#problem">The N-to-K problem</a></li>
+ <li><a href="#algorithm">The selection algorithm</a></li>
+ <li><a href="#failure">The cluster-gap failure mode</a></li>
+ <li><a href="#mitigation">Diversity-weighted selection</a></li>
+ <li><a href="#draft-cache">Open problem: the speculative draft cache</a></li>
+ <li><a href="#economics">The cost arithmetic</a></li>
+ </ol>
+ </div>
+
+ <h2 id="problem">The N-to-K problem.</h2>
+ <p>Synthesis-time and distillation-time both end in the same situation. The teacher has produced N candidate outputs for one spec input. Which N do you keep, and which do you drop?</p>
+ <p>The naive answer is: keep all of them. This is wrong. Candidates from the same teacher under the same prompt with one temperature draw are correlated. Their embeddings cluster. Their lexical surface repeats. Training on the full pool teaches the student to memorize the teacher's surface, not the underlying task. The K-score drops by 4 to 8 percentage points when the trainer is fed the unfiltered pool versus a properly K-sampled subset.</p>
+ <p>The slightly less naive answer is: keep the top-K by some score. This is closer but still wrong if the score is computed candidate-by-candidate without considering the relationships between them. Top-K by raw verifier score will reliably pick K near-duplicates of the highest-scoring candidate, because the underlying scoring function is monotonically related to surface similarity to the spec.</p>
+ <p><b>The right answer is to pick K such that the kept candidates maximize a joint objective: high per-candidate score plus high inter-candidate distance.</b> That is what K-sampling means inside the kolm compile loop.</p>
+
+ <h2 id="algorithm">The selection algorithm.</h2>
+ <p>The trainer runs a two-step selection. The first step is clustering; the second is in-cluster ranking. The implementation lives in the synthesis layer and is invoked per spec slice.</p>
+
+ <pre><span class="com"># pseudocode for the K-sampling loop</span>
+<span class="kw">def</span> k_sample(candidates, K, embed_fn, score_fn):
+ <span class="com"># 1. embed every candidate</span>
+ embs = [embed_fn(c.text) <span class="kw">for</span> c <span class="kw">in</span> candidates]
+
+ <span class="com"># 2. cluster by cosine distance; target K clusters</span>
+ clusters = agglomerative_cluster(embs, n_clusters=K, metric=<span class="arg">"cosine"</span>)
+
+ <span class="com"># 3. inside each cluster, rank by per-candidate score</span>
+ selected = []
+ <span class="kw">for</span> cluster_id <span class="kw">in</span> range(K):
+ members = [c <span class="kw">for</span> c, k <span class="kw">in</span> zip(candidates, clusters) <span class="kw">if</span> k == cluster_id]
+ members.sort(key=score_fn, reverse=<span class="kw">True</span>)
+ selected.append(members[0])
+ <span class="kw">return</span> selected</pre>
+
+ <p>The embedding function is a small open model; the cluster count is the target K passed in by the caller; the score function is whichever of three signals is available:</p>
+ <ul>
+ <li><b>Reward signal.</b> If a task has a learned reward model (rare for our compile pipelines, but present for some RLHF-style tasks), the reward is the ranking score.</li>
+ <li><b>Verifier score.</b> The default. The verifier in <code>src/verifier.js</code> returns an accuracy score in [0, 1] per candidate against the spec; this is the ranking score for synthesis-time selection.</li>
+ <li><b>Teacher log-prob.</b> Fallback. If no verifier is available for the task, the teacher's own log-probability of the candidate (when exposed by the API) is the ranking score. This is the weakest of the three, because it correlates with confidence rather than correctness, but it beats random.</li>
+ </ul>
+
+ <p>The agglomerative-cluster step is the load-bearing one. It is what turns N correlated candidates into K representative ones. The cluster count is the user-facing knob: smaller K means more aggressive deduplication; larger K means more raw data with more redundancy. The trainer defaults to K = N/3 for synthesis-time, K = N/2 for distillation-time, and exposes both as overrides in the recipe pack.</p>
+
+ <h2 id="failure">The cluster-gap failure mode.</h2>
+ <p>The selection algorithm is correct when the candidate pool has clean clusters. It breaks when the clusters overlap.</p>
+ <p>Consider a spec slice for which the teacher has produced 12 candidates. Eleven of them are near-paraphrases of each other (cluster A); one is a clean outlier (cluster B). You ask for K=4. The agglomerative clusterer correctly identifies two natural clusters at the top of the dendrogram, but you forced it to produce four. So it artificially splits cluster A into three subclusters at very small inter-cluster distances. The four selected candidates are: three near-duplicates from the artificially-split cluster A, and one from cluster B. <b>The selection is technically four clusters but is effectively a 3+1 split.</b></p>
+
+ <p>The tell shows up in the cluster-cohesion log:</p>
+
+ <pre><span class="com"># cluster-gap detection log</span>
+<span class="arg">slice 2/5</span> policy_clarification
+ candidates: 12 K target: 4
+ natural clusters: 2 (silhouette 0.61)
+ forced K=4 split: silhouette 0.18 &lt;-- bad
+ smallest inter-cluster cosine: 0.04
+ <span class="kw">WARN</span> cluster-gap detected; degenerate split</pre>
+
+ <p>The trainer logs the warning, but the warning alone does not fix the training data. The mitigation is one of three.</p>
+ <ul>
+ <li><b>Drop K.</b> Honor the natural cluster count. Take K' &lt; K candidates if the natural cluster count is below K. This is the default fallback and is documented in the receipt as <code>k_actual</code> vs <code>k_requested</code>.</li>
+ <li><b>Resynthesize.</b> If K is load-bearing (e.g. the trainer needs at least K pairs per slice for budget reasons), the loop goes back to the teacher and requests N' &gt; N candidates with a higher temperature, hoping to surface more clusters.</li>
+ <li><b>Refactor the slice.</b> The slice itself may be too narrow. Splitting "policy_clarification" into "policy_clarification_refund" and "policy_clarification_shipping" can produce two slices that each cluster cleanly.</li>
+ </ul>
+
+ <h2 id="mitigation">Diversity-weighted selection.</h2>
+ <p>The default selection above is greedy: one pick per cluster, by score, no interaction across clusters. The diversity-weighted variant is slightly more expensive and produces better training distributions on hard tasks.</p>
+
+ <p>The objective: maximize a sum-of-scores subject to a minimum inter-pick distance. Concretely:</p>
+
+ <pre><span class="com"># diversity-weighted variant</span>
+maximize sum(score(c_i) <span class="kw">for</span> c_i <span class="kw">in</span> selected)
+ minus lambda * sum(1 / (1 + dist(c_i, c_j)) <span class="kw">for</span> c_i, c_j <span class="kw">in</span> selected)
+subject to |selected| == K</pre>
+
+ <p>The penalty term pushes the optimizer away from picks that are close to each other in embedding space. Lambda is the diversity weight; the trainer's default is 0.3 (a fairly mild diversity preference) and is tunable per recipe. At lambda=0 the algorithm reduces to top-K by score; at high lambda it reduces to maximally-spread selection regardless of score.</p>
+
+ <p>The diversity-weighted variant is solved approximately with a determinantal point process or with a simple greedy-with-marginal-gain heuristic; the trainer ships the greedy version because it is good enough on the corpus sizes we see (hundreds of candidates per slice, not millions). The DPP version is on the v0.2 list, behind the speculative draft cache.</p>
+
+ <blockquote>
+ <p>Diversity is not a free lunch. A diversity-weighted selection guarantees coverage at the cost of average per-pick quality. The right lambda is the one that pushes the post-distill K-score up; for most tasks we have measured, lambda = 0.3 is the sweet spot.</p>
+ </blockquote>
+
+ <h2 id="draft-cache">Open problem: the speculative draft cache.</h2>
+ <p>Every K-sampling pass throws away N-K candidates. For N=12, K=4, that is two-thirds of the teacher's output. The wall-clock cost of producing those rejected candidates is paid in full; the dollar cost (in the cloud-teacher case) is paid in full. The candidates themselves are coherent text, scored by the verifier, embedded, clustered.</p>
+
+ <p>The question on the v0.2 research agenda: <b>can the rejected N-K be cached as speculative drafts for future similar specs?</b></p>
+
+ <p>The intuition is the same intuition that makes speculative decoding work at inference time. A small draft model proposes tokens; a large verifier model accepts or rejects them. When the proposal is accepted, the large model has done less work than it would have done generating the token from scratch. The wall-clock saving scales with the acceptance rate.</p>
+
+ <p>At compile time, the analogous setup looks like this: the trainer has built a corpus of (spec_slice, candidate_text, verifier_score, embedding) tuples from past compiles. When a new spec slice arrives, the trainer queries the cache for embeddings within a threshold distance. The cached candidates are <em>drafts</em>: the new compile presents them to the teacher and asks "would you have produced this?" If the teacher accepts, the draft becomes a candidate at zero teacher-API cost. If the teacher rejects, the draft is discarded and the trainer falls back to generating fresh candidates.</p>
+
+ <p>The framework is borrowed directly from Chen et al., <em>Accelerating Large Language Model Decoding with Speculative Sampling</em> (<a href="https://arxiv.org/abs/2302.01318" rel="noopener">arxiv 2302.01318</a>). The translation is: at inference time, the large model is the bottleneck; at compile time, the teacher API is the bottleneck. The same speculative pattern that compresses inference-time latency should compress compile-time cost.</p>
+
+ <p>The reason this is on the v0.2 agenda and not in the v0.1 shipping code: the verification step is harder than it looks. A draft candidate from spec slice <em>X</em> last week is not automatically a valid candidate for spec slice <em>Y</em> this week. The cosine distance threshold for "similar enough to reuse" is a hyperparameter we have not yet calibrated, and getting it wrong means the cache leaks signal across tasks. The probable shape of the v0.2 implementation is a per-tenant cache, scoped to the same task family, with a published draft-acceptance rate inside the receipt chain.</p>
+
+ <h2 id="economics">The cost arithmetic.</h2>
+ <p>The reason K-sampling is worth the engineering complexity is the cost of the alternative.</p>
+
+ <p>For a synth-then-distill compile of a refund-classifier, the teacher API call is the dominant cost line. A typical compile asks the teacher for 240 candidate inputs (pass one) and 240 candidate labels (pass two). At ~500 tokens per candidate output and ~$5 per million output tokens (the published rates for frontier teachers as of early 2026), that is $2.40 per compile in teacher costs alone.</p>
+
+ <p>If the trainer takes all 240 inputs through the distill pass without K-sampling, the post-distill K-score lands around 0.85 to 0.88 (right at the gate, with no margin). If the trainer K-samples down to 80 inputs, the post-distill K-score lands around 0.89 to 0.92, and the budget for pass two is now $0.80 (one-third the cost). The K-sampled run is both better and cheaper.</p>
+
+ <p>The wider pattern is the load-bearing one for the kolm compile economics. <em>More candidates is not better. Better candidates is better.</em> The teacher API bill follows the candidate count linearly; the artifact quality follows the candidate quality, which is an integer scaled by diversity. K-sampling is the operator that converts a quantitative spend into a qualitative gain.</p>
+
+ <h2 id="related">Related work.</h2>
+ <ul>
+ <li><b>Accelerating Large Language Model Decoding with Speculative Sampling</b> (Chen et al., <a href="https://arxiv.org/abs/2302.01318" rel="noopener">arxiv 2302.01318</a>). The draft-and-verify framework the speculative draft cache borrows from.</li>
+ <li><b>Fast Inference from Transformers via Speculative Decoding</b> (Leviathan et al., <a href="https://arxiv.org/abs/2211.17192" rel="noopener">arxiv 2211.17192</a>). The companion paper on speculative decoding; same core idea.</li>
+ <li><b>Determinantal Point Processes for Machine Learning</b> (Kulesza and Taskar, 2012). The diversity-weighted selection formalism; the trainer uses a greedy approximation.</li>
+ <li><b><a href="/research/synthesis-then-distillation">Synthesis-then-distillation</a></b>. The pipeline that produces the candidate pool K-sampling consumes.</li>
+ <li><b><a href="/research/case-for-adapters">The case for adapters</a></b>. What the K-selected pairs become after the distill pass: a 30-200 MB LoRA.</li>
+ <li><b><a href="/research/k-score-correlation">K-score correlation</a></b>. The metric that proves K-sampled training pairs produce better artifacts than unfiltered pools.</li>
+ </ul>
+
+ <div class="signpost">
+ <a href="/research/synthesis-then-distillation">
+ <span class="lab">read next</span>
+ <span class="v">Synthesis-then-distillation <span class="arrow">&rarr;</span></span>
+ <p>The two-pass pipeline that produces the N candidates K-sampling chooses among.</p>
+ </a>
+ <a href="/research/k-score-correlation">
+ <span class="lab">read next</span>
+ <span class="v">K-score correlation <span class="arrow">&rarr;</span></span>
+ <p>The metric that lets you measure whether K-sampling actually helped.</p>
+ </a>
+ <a href="/docs">
+ <span class="lab">docs</span>
+ <span class="v">kolm compile reference <span class="arrow">&rarr;</span></span>
+ <p>K-sampling parameters in the recipe pack: <code>n_candidates</code>, <code>k_select</code>, <code>diversity_lambda</code>.</p>
+ </a>
+ <a href="/spec">
+ <span class="lab">spec</span>
+ <span class="v">RS-1 spec <span class="arrow">&rarr;</span></span>
+ <p>The on-disk shape of a <code>.kolm</code> artifact. K-sampling logs land in <code>training_stats.k_sampling</code>.</p>
+ </a>
+ </div>
+
+ </div>
+</article>
+
+
+</main>
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+</body>
+</html>

@@ -1,334 +1,129 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Page not found | kolm.ai</title>
-<meta name="description" content="This kolm.ai page was not found. Return to the product, docs, quickstart, pricing, or account pages.">
-<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-
-<meta name="robots" content="noindex,follow">
+<title>Not found &middot; kolm.ai</title>
+<meta name="description" content="The page you were looking for moved, was renamed, or never existed. Try the quickstart, the docs, or the homepage.">
+<meta name="theme-color" content="#07090c">
+<meta name="robots" content="noindex,nofollow">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
 <style>
- :root {
- --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
- --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
- --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
- --accent: #faf2e1; --accent-soft: rgba(236,231,220, 0.10); --accent-strong: #c9c2b2;
- --good: #7ef0d2;
- --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
- --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
- }
- * { box-sizing: border-box; }
- html, body { margin: 0; padding: 0; }
- body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; letter-spacing: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; min-height: 100vh; display: flex; flex-direction: column; }
- a { color: inherit; text-decoration: none; }
- .wrap { max-width: 1180px; width: 100%; margin: 0 auto; padding: 0 32px; }
- @media (max-width: 720px) { .wrap { padding: 0 20px; } }
-
- header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
- header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
- header.site .left { display: flex; align-items: center; gap: 36px; }
- header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); }
- header.site .brand img { height: 18px; width: 18px; color: var(--ink); }
- header.site .brand span { font-weight: 500; font-size: 16px; letter-spacing: 0; }
- header.site nav { display: flex; gap: 22px; }
- header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
- header.site nav a:hover { color: var(--ink); }
- header.site .right { display: flex; align-items: center; gap: 14px; }
- header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
- header.site .right .ghost:hover { color: var(--ink); }
- header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
- header.site .right .cta:hover { background: #fff; }
- @media (max-width: 720px) { header.site nav { display: none; } }
-
- main { flex: 1; display: flex; align-items: center; padding: 64px 0; position: relative; overflow: hidden; }
- main::before {
- content: ""; position: absolute; inset: 0;
- background:
- radial-gradient(ellipse 800px 400px at 30% 30%, rgba(236,231,220, 0.08), transparent 60%),
- radial-gradient(ellipse 600px 300px at 80% 80%, rgba(236,231,220, 0.04), transparent 60%);
- pointer-events: none;
- }
- main .grid {
- position: relative;
- display: grid; grid-template-columns: 1.1fr 1fr; gap: 56px; align-items: center;
- }
- @media (max-width: 880px) { main .grid { grid-template-columns: 1fr; gap: 40px; } }
-
- .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
- .pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
-
- h1.code {
- margin: 22px 0 4px;
- font-family: var(--mono); font-size: clamp(96px, 14vw, 168px);
- line-height: 1; font-weight: 500; letter-spacing: 0;
- color: var(--ink);
- }
- h1.code .tone { color: var(--accent); }
- h2 { margin: 4px 0 16px; font-size: clamp(22px, 2.8vw, 30px); line-height: 1.15; font-weight: 500; letter-spacing: 0; color: var(--ink); }
- p.lede { margin: 0 0 28px; font-size: 16px; line-height: 1.55; color: var(--ink-mute); max-width: 50ch; }
- p.lede code { font-family: var(--mono); font-size: 0.92em; color: var(--ink); background: var(--bg-card); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; }
-
- .cta-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
- a.btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--ink); color: var(--bg); border-radius: 6px; padding: 11px 18px; font-size: 14px; font-weight: 500; letter-spacing: 0; transition: background 120ms; }
- a.btn-primary:hover { background: #fff; }
- a.btn-link { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); padding: 11px 14px; font-size: 14px; font-weight: 500; transition: color 120ms; }
- a.btn-link:hover { color: var(--accent); }
-
- .term { background: linear-gradient(180deg, var(--bg-elev), var(--bg-card)); border: 1px solid var(--line-strong); border-radius: 10px; overflow: hidden; box-shadow: 0 30px 80px -30px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.02); }
- .term .head { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--line); background: rgba(0,0,0,0.25); }
- .term .head .ctl { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,0.12); }
- .term .head .file { margin-left: 10px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); letter-spacing: 0; }
- .term .body { padding: 22px 22px; font-family: var(--mono); font-size: 13px; line-height: 1.85; color: var(--ink); white-space: pre; overflow-x: auto; }
- .term .body .com { color: var(--ink-faint); }
- .term .body .arg { color: var(--accent); }
- .term .body .ok { color: var(--good); }
- .term .body .dim { color: var(--ink-faint); }
-
- .links { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 28px; max-width: 480px; }
- .links a { display: block; padding: 12px 14px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 6px; font-size: 13.5px; color: var(--ink-mute); transition: border-color 120ms, color 120ms; }
- .links a:hover { border-color: var(--line-strong); color: var(--ink); }
- .links a span.path { font-family: var(--mono); color: var(--accent); margin-right: 8px; font-size: 12.5px; }
-
- footer.site { padding: 32px 0 32px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; letter-spacing: 0; color: var(--ink-faint); }
- footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+  .nf-wrap { min-height: 70vh; display: flex; align-items: center; justify-content: center; padding: var(--ks-8) var(--ks-4); }
+  .nf-card { max-width: 580px; width: 100%; padding: var(--ks-8); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); text-align: center; }
+  .nf-code { font-family: var(--ks-mono); font-size: clamp(56px, 12vw, 96px); color: var(--ks-accent); font-variant-numeric: tabular-nums; line-height: 1; letter-spacing: -0.04em; font-weight: 520; margin-bottom: var(--ks-3); }
+  .nf-card h1 { margin: 0 0 var(--ks-3); font-size: 24px; font-weight: 580; color: var(--ks-ink); letter-spacing: -0.01em; }
+  .nf-card p { margin: 0 0 var(--ks-5); font-size: 15px; color: var(--ks-ink-2); line-height: 1.65; }
+  .nf-card .stack { display: flex; flex-wrap: wrap; gap: var(--ks-2); justify-content: center; margin-bottom: var(--ks-5); }
+  .nf-card .stack a { padding: 6px 14px; background: var(--ks-bg-2); border: 1px solid var(--ks-line-2); border-radius: 999px; font-size: 13px; color: var(--ks-ink-2); text-decoration: none; }
+  .nf-card .stack a:hover { color: var(--ks-accent); border-color: var(--ks-accent-edge); }
+  .nf-meta { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); margin-top: var(--ks-5); padding-top: var(--ks-4); border-top: 1px solid var(--ks-line-1); }
 </style>
-<link rel="stylesheet" href="/brand-refresh.css">
-<link rel="canonical" href="https://kolm.ai/404">
-<meta property="og:title" content="Page not found | kolm.ai">
-<meta property="og:description" content="This kolm.ai page was not found. Return to the product, docs, quickstart, pricing, or account pages.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://kolm.ai/404">
-<meta property="og:image" content="https://kolm.ai/og-card.svg">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Page not found | kolm.ai">
-<meta name="twitter:description" content="This kolm.ai page was not found. Return to the product, docs, quickstart, pricing, or account pages.">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
-<link rel="stylesheet" href="/surface-polish.css">
 </head>
-<body>
-<a class="skip-link" href="#main">Skip to content</a>
+<body class="ks">
 
-<header class="site-header">
- <div class="wrap">
- <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
-    <!-- KOLM_NAV_BEGIN (W221) -->
-    <nav class="site-nav" aria-label="Primary">
-    <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
-      <div class="mega-menu" role="menu" aria-label="product menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/product">Overview</a>
-          <a href="/quickstart">Quickstart</a>
-          <a href="/capture">Gateway</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training</a>
-          <a href="/distill">Distill</a>
-          <a href="/compile">Compile</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/runtimes">Runtimes</a>
-          <a href="/docs/devices">Devices</a>
-          <a href="/trust">Verify</a>
-        </div>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/k-score">K-score</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
       </div>
     </div>
-    <div class="nav-item nav-item--models has-mega">
-      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
-      <div class="mega-menu" role="menu" aria-label="models menu">
-        <div class="mega-col">
-          <p class="mega-h">Choose</p>
-          <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Build your own</a>
-          <a href="/docs/runtime">Runtime targets</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/compute">Compute</a>
-          <a href="/runtimes">Mobile and edge</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
-      <div class="mega-menu" role="menu" aria-label="docs menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/capture">API gateway</a>
-          <a href="/docs/cli">CLI</a>
-          <a href="/docs/sdk">SDKs</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Reference</p>
-          <a href="/docs">Docs home</a>
-          <a href="/docs/api">API reference</a>
-          <a href="/api">HTTP routes</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Operate</p>
-          <a href="/integrations">Integrations</a>
-          <a href="/docs/privacy">Privacy membrane</a>
-          <a href="/docs/datasets">Datasets</a>
-          <a href="/docs/distillation">Distillation</a>
-          <a href="/docs/verify">Verification</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
-      <div class="mega-menu" role="menu" aria-label="pricing menu">
-        <div class="mega-col">
-          <p class="mega-h">Buy</p>
-          <a href="/pricing">Plans</a>
-          <a href="/pricing#roi">ROI calculator</a>
-          <a href="/nonprofits">Nonprofits</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
-      <div class="mega-menu" role="menu" aria-label="enterprise menu">
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/enterprise">Enterprise overview</a>
-          <a href="/self-host">Self-host</a>
-          <a href="/airgap">Air-gap</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Trust</p>
-          <a href="/trust">Trust center</a>
-          <a href="/security">Security</a>
-          <a href="/compliance">Compliance</a>
-          <a href="/baa">BAA</a>
-        </div>
-      </div>
-    </div>
-    </nav>
-    <!-- KOLM_NAV_END (W221) -->
- <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
- <a href="/signin" class="ghost">sign in</a>
- <a href="/signup" class="cta">Get API Key &rarr;</a>
- </div>
- </div>
-</header>
+  </header>
+</div>
 
 <main id="main">
- <div class="wrap">
- <div class="grid">
- <div>
- <span class="pill"><span class="dot"></span>not found</span>
- <h1 class="code">4<span class="tone">0</span>4</h1>
- <h2>That artifact is not in our cache.</h2>
- <p class="lede">The path you asked for does not resolve. The good news: the rest of <code>kolm</code> still does. Pick a route, or jump straight to <code>kolm compile</code>.</p>
 
- <div class="cta-row">
- <a href="/" class="btn-primary">Back home</a>
- <a href="/compile" class="btn-link">Open /compile</a>
- <a href="/docs" class="btn-link">Open /docs</a>
- </div>
+<section class="nf-wrap">
+  <div class="nf-card">
+    <div class="nf-code">404</div>
+    <h1>That route is not in the registry.</h1>
+    <p>The page you asked for moved, was renamed, or never existed. The kolm site is content-addressed; if you have a URL from a year ago, the underlying CID may still resolve via the registry.</p>
+    <div class="stack">
+      <a href="/">Homepage</a>
+      <a href="/quickstart">Quickstart</a>
+      <a href="/docs">Docs</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/enterprise">Enterprise</a>
+      <a href="/security">Security</a>
+      <a href="/k-score">K-score</a>
+      <a href="/compare">Compare</a>
+      <a href="/manifesto">Manifesto</a>
+      <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
+    </div>
+    <a class="ks-btn ks-btn--primary" href="/">Take me home <span class="ks-btn-arrow">&rarr;</span></a>
+    <div class="nf-meta">If you arrived here from a kolm.ai link, please <a class="ks-accent" href="https://github.com/sneaky-hippo/kolmogorov-stack/issues" rel="noopener">open an issue</a> so we can fix the broken link.</div>
+  </div>
+</section>
 
- <div class="links">
- <a href="/compile"><span class="path">/compile</span>Turn a task into a .kolm</a>
- <a href="/runtimes"><span class="path">/runtimes</span>Run any artifact as MCP</a>
- <a href="/docs"><span class="path">/docs</span>Inside the .kolm file</a>
- <a href="/k-score"><span class="path">/k-score</span>One number, ship gate</a>
- <a href="/leaderboard"><span class="path">/leaderboard</span>Public artifact browser</a>
- <a href="/pricing"><span class="path">/pricing</span>Free / Pro $49 / Team $499 / custom Enterprise</a>
- </div>
- </div>
-
- <div class="term" aria-label="Terminal output">
- <div class="head">
- <span class="ctl"></span><span class="ctl"></span><span class="ctl"></span>
- <span class="file">~/router</span>
- </div>
- <div class="body"><span class="com">$</span> curl -I <span class="arg">$REQUESTED_PATH</span>
-
-<span class="dim"> - status </span>404 | not found
-<span class="dim"> - reason </span>no static, no alias, no spec
-<span class="dim"> - closest </span>/compile | /serve | /anatomy
-<span class="dim"> - hint </span>try /docs or /quickstart
-
-<span class="ok">ok</span> registry is healthy
-<span class="ok">ok</span> compile pipeline is healthy
-<span class="ok">ok</span> auth is healthy
-
-<span class="dim"># every other route returns 200.</span>
-<span class="dim"># this one does not exist yet.</span>
-</div>
- </div>
- </div>
- </div>
 </main>
 
-<footer class="site-footer">
- <div class="wrap">
- <div class="meta">
- kolm v0.1.0 / MIT SDK / <a href="https://github.com/sneaky-hippo/kolm-stack">github</a> / <a href="/status">status</a>
- </div>
- <div class="links">
- <div>
- <div class="col-h">build</div>
- <a href="/captures">captures</a>
- <a href="/compile">compile</a>
- <a href="/run">run</a>
- <a href="/docs">recall</a>
- <a href="/builder">builder</a>
- <a href="/sdks">sdks</a>
- <a href="/quickstart">quickstart</a>
- <a href="/cli">cli</a>
- </div>
- <div>
- <div class="col-h">deploy</div>
- <a href="/teams">teams</a>
- <a href="/tunnels">remote access</a>
- <a href="/byoc">byoc cloud</a>
- <a href="/airgap">airgap</a>
- <a href="/enterprise">enterprise</a>
- </div>
- <div>
- <div class="col-h">proof</div>
- <a href="/benchmarks">benchmarks</a>
- <a href="/compare">Compare</a>
- <a href="/research">research</a>
- <a href="/k-score">k-score</a>
- <a href="/leaderboard">registry</a>
- <a href="/spec">rs-1 spec</a>
- <a href="/case-studies">case studies</a>
- </div>
- <div>
- <div class="col-h">industries</div>
- <a href="/healthcare">healthcare</a>
- <a href="/finance">finance</a>
- <a href="/legal">legal</a>
- <a href="/device">device</a>
- <a href="/docs">cookbook</a>
- <a href="/compliance-packs">compliance packs</a>
- </div>
- <div>
- <div class="col-h">company</div>
- <a href="/pricing">pricing</a>
- <a href="/docs">docs</a>
- <a href="/roadmap">roadmap</a>
- <a href="/manifesto">manifesto</a>
- <a href="/roi">roi</a>
- </div>
- </div>
- <small class="footer-tag">
- <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/terms">terms</a> &middot; <a href="/faq">faq</a> &middot; <a href="/glossary">glossary</a> &middot; <a href="/troubleshooting">troubleshooting</a> &middot; <a href="/why-now">why now</a> &middot; <a href="/press">press</a> &middot; <a href="https://github.com/sneaky-hippo/kolm-stack">github</a> &middot; kolm.ai &middot; MIT licensed runtime
- </small>
- </div>
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/faq">FAQ</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/enterprise">Enterprise</a>
+        <a href="/manifesto">Manifesto</a>
+        <a href="/why-kolm">Why kolm</a>
+        <a href="/contact">Contact</a>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
 </footer>
 
-<script src="/nav.js" defer></script>
 </body>
 </html>

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Press kit · kolm.ai</title>
+<meta name="description" content="kolm press kit: boilerplate, logo SVG, screenshots, benchmark numbers, and direct contact. Everything an editor or analyst needs to write about">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta property="og:title" content="Press kit · kolm.ai">
+<meta property="og:description" content="kolm press kit: boilerplate, logo SVG, screenshots, benchmark numbers, and direct contact. Everything an editor or analyst needs to write about">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Press kit · kolm.ai">
+<meta name="twitter:description" content="kolm press kit: boilerplate, logo SVG, screenshots, benchmark numbers, and direct contact. Everything an editor or analyst needs to write about">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/press">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/press">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+ :root {
+ --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+ --accent: #faf2e1; --accent-strong: #c9c2b2;
+ --good: #7ef0d2;
+ --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+ --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+ }
+ * { box-sizing: border-box; }
+ html, body { margin: 0; padding: 0; }
+ body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+ a { color: inherit; text-decoration: none; }
+ .wrap { max-width: 980px; margin: 0 auto; padding: 0 32px; }
+ .wrap-wide { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+ @media (max-width: 720px) { .wrap, .wrap-wide { padding: 0 20px; } }
+
+ header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
+ header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
+ header.site .left { display: flex; align-items: center; gap: 36px; }
+ header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 500; font-size: 16px; }
+ header.site nav { display: flex; gap: 22px; }
+ header.site nav a { color: var(--ink-mute); font-size: 13.5px; }
+ header.site nav a:hover { color: var(--ink); }
+ header.site .right { display: flex; align-items: center; gap: 14px; }
+ header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
+ header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
+ @media (max-width: 720px) { header.site nav { display: none; } }
+
+ section.hero { padding: 88px 0 32px; }
+ .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
+ h1 { margin: 22px 0 12px; font-size: clamp(36px, 5vw, 48px); line-height: 1.05; font-weight: 500; }
+ h1 .tone { color: var(--accent); }
+ p.lede { margin: 0 0 24px; font-size: 17px; line-height: 1.55; color: var(--ink-mute); max-width: 56ch; }
+
+ .group { margin: 48px 0 0; padding-top: 28px; border-top: 1px solid var(--line); }
+ .group h2 { margin: 0 0 12px; font-size: clamp(22px, 2.4vw, 26px); font-weight: 500; }
+ .group p { margin: 0 0 12px; color: var(--ink-mute); font-size: 15px; line-height: 1.65; max-width: 64ch; }
+
+ .grid { display: grid; gap: 14px; grid-template-columns: repeat(2, 1fr); margin: 14px 0 0; }
+ @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+
+ .asset { border: 1px solid var(--line); border-radius: 10px; padding: 22px; background: var(--bg-elev); }
+ .asset .label { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; margin-bottom: 8px; }
+ .asset h3 { margin: 0 0 6px; font-size: 16px; font-weight: 500; color: var(--ink); }
+ .asset p { margin: 0 0 12px; color: var(--ink-mute); font-size: 14px; line-height: 1.6; }
+ .asset a { color: var(--accent); font-family: var(--mono); font-size: 12px; text-transform: uppercase; }
+ .asset a:hover { color: var(--accent-strong); }
+ .asset .preview { margin: 14px 0 0; padding: 18px; background: var(--bg-card); border: 1px solid var(--line); border-radius: 8px; display: flex; align-items: center; justify-content: center; min-height: 80px; }
+ .asset .preview img { max-width: 100%; max-height: 60px; }
+
+ blockquote.boil { margin: 18px 0 0; padding: 22px 24px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 10px; font-size: 15px; line-height: 1.7; color: var(--ink-mute); position: relative; }
+ blockquote.boil b { color: var(--ink); font-weight: 500; }
+ blockquote.boil .cite { display: block; margin-top: 12px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); text-transform: uppercase; }
+
+ .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 18px 0 0; }
+ @media (max-width: 720px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+ .stat { padding: 18px 20px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-elev); }
+ .stat .n { font-family: var(--mono); font-size: 26px; color: var(--ink); font-weight: 500; letter-spacing: -0.02em; }
+ .stat .l { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); margin-top: 4px; }
+ .stat .src { font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint); margin-top: 8px; }
+ .stat .src a { color: var(--accent); }
+
+ pre.code { font-family: var(--mono); font-size: 13px; line-height: 1.55; background: var(--bg-card); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; overflow-x: auto; color: var(--ink); margin: 12px 0 0; white-space: pre; }
+ @media (max-width: 720px) { pre.code { white-space: pre-wrap; word-break: break-word; } }
+
+ footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-faint); }
+ footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+ footer.site a { color: var(--ink-mute); }
+</style>
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "SoftwareApplication",
+ "name": "kolm",
+ "applicationCategory": "DeveloperApplication",
+ "operatingSystem": "Linux, macOS, Windows (WSL)",
+ "url": "https://kolm.ai/press",
+ "description": "kolm press kit: boilerplate, logo SVG, screenshots, benchmark numbers, and direct contact. Everything an editor or analyst needs to write about the AI compiler.",
+ "offers": {
+ "@type": "Offer",
+ "price": "0",
+ "priceCurrency": "USD"
+ },
+ "publisher": {
+ "@type": "Organization",
+ "name": "kolm.ai",
+ "@id": "https://kolm.ai/#org"
+ }
+}
+</script>
+<link rel="stylesheet" href="/surface-polish.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API Key &rarr;</a>
+ </div>
+ </div>
+</header>
+<main id="main">
+
+<section class="hero">
+ <div class="wrap">
+ <span class="pill">Press kit</span>
+ <h1>Everything to write about <span class="tone">kolm.</span></h1>
+ <p class="lede">Boilerplate, logo SVG, screenshots, benchmark numbers, contact. Use whatever helps you cover the story. If you need something not on this page, mail <a href="mailto:press@kolm.ai" style="color:var(--accent);">press@kolm.ai</a>.</p>
+ </div>
+</section>
+
+<article>
+ <div class="wrap">
+
+ <div class="group" id="boilerplate">
+ <h2>Boilerplate</h2>
+ <p>Drop-in copy for the lede or about-section. Cleared for use in any publication.</p>
+ <blockquote class="boil">
+ <b>kolm</b> is the AI compiler. It takes a task description, your data, and a frontier model API key, and produces a portable, signed <code style="font-family:var(--mono);background:var(--bg-card);padding:1px 6px;border-radius:4px;">.kolm</code> artifact (a sub-3GB ZIP) that runs fully offline on phone, laptop, browser, server, or edge. Every output is cryptographically receiptable; every release is gated on a held-out K-score. Built by Kolm; v0.1 live at <b>kolm.ai</b>.
+ <span class="cite">- 65 words / company-approved</span>
+ </blockquote>
+ <blockquote class="boil" style="margin-top:14px;">
+ <b>Short version (twitter / sub-headline):</b><br>
+ Compile any AI task into a single signed file you own. Runs offline. Verifiable.
+ <span class="cite">- 17 words</span>
+ </blockquote>
+ </div>
+
+ <div class="group" id="numbers">
+ <h2>Headline numbers</h2>
+ <p>All numbers are properties of the binary, not leaderboard claims. Each links to the harness and the raw spec.</p>
+ <div class="stats">
+ <div class="stat">
+ <div class="n">egress=0</div>
+ <div class="l">enforced by bench harness</div>
+ <div class="src"><a href="/benchmarks">harness &rarr;</a><a href="/compare" hidden aria-hidden="true">compare</a></div>
+ </div>
+ <div class="stat">
+ <div class="n">&micro;s</div>
+ <div class="l">local-execution latency</div>
+ <div class="src">process.hrtime.bigint, per case</div>
+ </div>
+ <div class="stat">
+ <div class="n">~27&times;</div>
+ <div class="l">cheaper at 100k MAU</div>
+ <div class="src"><a href="/roi">ROI calc &rarr;</a></div>
+ </div>
+ <div class="stat">
+ <div class="n">&le;3 GB</div>
+ <div class="l">artifact size on disk</div>
+ <div class="src"><a href="/docs">format &rarr;</a></div>
+ </div>
+ </div>
+ <p style="margin-top:18px;font-size:13.5px;color:var(--ink-faint);">Every <code>.kolm</code> ships with the eval set it was gated on. <code>kolm bench file.kolm</code> reruns those evals offline, monitors network egress (fetch / http / https / net / tls / dns are patched), and emits a JSON report conforming to spec <code>kolm-benchmark-1</code>. The artifact is its own benchmark; the harness is one file in <code>src/benchmark.js</code>.</p>
+ </div>
+
+ <div class="group" id="logos">
+ <h2>Logo &amp; brand</h2>
+ <p>Vector marks for use in articles, decks, and embeds. Periwinkle (#faf2e1) on dark backgrounds; ink (#FAF2E1) on light. Do not recolor.</p>
+ <div class="grid">
+ <div class="asset">
+ <div class="label">primary mark</div>
+ <h3>kolm logo</h3>
+ <p>Square SVG. 22 &times; 22 base. Use as favicon, app icon, or inline brand glyph.</p>
+ <div class="preview"><img src="/logo-mark.svg" alt="kolm logo mark" style="max-height:48px;"></div>
+ <a href="/logo-mark.svg" download>download SVG &rarr;</a>
+ </div>
+ <div class="asset">
+ <div class="label">wordmark</div>
+ <h3>kolm lockup</h3>
+ <p>Mark + wordmark together. Use for press headers, slide footers, badge embeds.</p>
+ <div class="preview"><img src="/logo-lockup.svg" alt="kolm lockup" style="max-height:36px;"></div>
+ <a href="/logo-lockup.svg" download>download SVG &rarr;</a>
+ </div>
+ <div class="asset">
+ <div class="label">share image</div>
+ <h3>OG card</h3>
+ <p>1200 &times; 630 SVG used as the default share-card across all routes. Editorial-safe.</p>
+ <div class="preview"><img src="/og-card.svg" alt="kolm OG card" style="max-height:80px;"></div>
+ <a href="/og-card.svg" download>download SVG &rarr;</a>
+ </div>
+ <div class="asset">
+ <div class="label">favicon</div>
+ <h3>favicon</h3>
+ <p>SVG favicon. Renders crisply at any size.</p>
+ <div class="preview"><img src="/favicon.svg" alt="kolm favicon" style="max-height:32px;"></div>
+ <a href="/favicon.svg" download>download SVG &rarr;</a>
+ </div>
+ </div>
+ </div>
+
+ <div class="group" id="screenshots">
+ <h2>Screenshots</h2>
+ <p>Architecture diagrams and product screenshots cleared for editorial use. Tag <b>kolm.ai</b> when running.</p>
+ <div class="grid">
+ <div class="asset">
+ <div class="label">hero</div>
+ <h3>kolm wordmark + .kolm anatomy</h3>
+ <p>Wordmark and seven-layer anatomy block. Use the live <a href="/docs" style="color:var(--accent);">/docs</a> render as the canonical screenshot.</p>
+ <div class="preview" style="font-family:var(--mono);font-size:10px;color:var(--ink-mute);text-align:left;width:100%;line-height:1.6;">support-bot.kolm <span style="color:var(--ink-faint)">(target)</span><br>&nbsp;model.gguf <span style="color:var(--ink-faint)">v0.1 · pointer</span><br>&nbsp;lora.bin <span style="color:var(--ink-faint)">v0.1 · KOLMPACK</span><br>&nbsp;recipes.json<br>&nbsp;index.sqlite-vec <span style="color:var(--ink-faint)">v0.1 · KOLMIDX</span><br>&nbsp;verifier.json<br>&nbsp;manifest.json<br>&nbsp;signature.sig</div>
+ <a href="/docs">view live &rarr;</a>
+ </div>
+ <div class="asset">
+ <div class="label">terminal</div>
+ <h3>kolm compile session</h3>
+ <p>Use the on-page terminal block at <a href="/" style="color:var(--accent);">kolm.ai/</a> as the canonical CLI screenshot.</p>
+ <div class="preview" style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-align:left;width:100%;">$ kolm compile "classify patient messages"<br>ok wrote patient-intake.kolm k_score=0.92</div>
+ <a href="/">view live &rarr;</a>
+ </div>
+ </div>
+ </div>
+
+ <div class="group" id="brand">
+ <h2>Brand details</h2>
+ <p style="font-family:var(--mono);font-size:13px;line-height:1.85;color:var(--ink-mute);">
+ <b style="color:var(--ink);">Company:</b> Kolm<br>
+ <b style="color:var(--ink);">Product:</b> kolm (lowercase, monospaced when surrounded by code)<br>
+ <b style="color:var(--ink);">Tagline:</b> The AI compiler.<br>
+ <b style="color:var(--ink);">Spelling:</b> kolm, not Kolm or KOLM. The artifact extension is <code>.kolm</code>.<br>
+ <b style="color:var(--ink);">Domain:</b> kolm.ai<br>
+ <b style="color:var(--ink);">License posture:</b> RS-1 spec MIT. SDK MIT. Compile cache + registry are paid managed surface.<br>
+ <b style="color:var(--ink);">Periwinkle:</b> #faf2e1<br>
+ <b style="color:var(--ink);">Ink:</b> #FAF2E1<br>
+ <b style="color:var(--ink);">Type:</b> system-ui sans for body, ui-monospace for code/labels.<br>
+ </p>
+ </div>
+
+ <div class="group" id="contact">
+ <h2>Contact</h2>
+ <p>For interviews, embargoed access, or fact-checks, mail <a href="mailto:press@kolm.ai" style="color:var(--accent);">press@kolm.ai</a>. We respond same-business-day.</p>
+ <p>For security disclosures: <a href="mailto:security@kolm.ai" style="color:var(--accent);">security@kolm.ai</a> (PGP key at <a href="/.well-known/security.txt" style="color:var(--accent);">/.well-known/security.txt</a>).</p>
+ <p>For developer relations: <a href="mailto:dev@kolm.ai" style="color:var(--accent);">dev@kolm.ai</a>.</p>
+ <p>For trust &amp; compliance: <a href="mailto:trust@kolm.ai" style="color:var(--accent);">trust@kolm.ai</a>.</p>
+ </div>
+
+ <p style="margin: 64px 0 0; color: var(--ink-faint); font-family: var(--mono); font-size: 11.5px;">Last updated 2026-05-08 / kolm v0.1.0</p>
+
+ </div>
+</article>
+
+
+</main>
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4><span data-kolm-icon="compile" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="deploy" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="layers" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="user" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+<script src="/kolm-svg.js" defer></script>
+</body>
+</html>

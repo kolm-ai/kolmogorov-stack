@@ -82,130 +82,44 @@
  }
 }
 </script>
- <link rel="stylesheet" href="/brand-refresh.css">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="kolm + LoRAX: build the adapter, serve it at scale · kolm.ai">
 <meta name="twitter:description" content="LoRAX is Apache-2.0 multi-LoRA serving - the strongest adapter-serving infrastructure in market. kolm builds the signed adapter LoRAX serves. Complement,...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
-<link rel="stylesheet" href="/surface-polish.css">
+<link rel="stylesheet" href="/ks.css">
 </head>
-<body>
-<a class="skip-link" href="#main">Skip to content</a>
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
-<header class="site-header">
- <div class="wrap">
- <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
-  <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
-  <!-- KOLM_NAV_BEGIN (W221) -->
-  <nav class="site-nav" aria-label="Primary">
-  <div class="nav-item nav-item--product has-mega">
-  <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
-  <div class="mega-menu" role="menu" aria-label="product menu">
-  <div class="mega-col">
-  <p class="mega-h">Start</p>
-  <a href="/product">Overview</a>
-  <a href="/quickstart">Quickstart</a>
-  <a href="/capture">Gateway</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Build</p>
-  <a href="/training">Training</a>
-  <a href="/distill">Distill</a>
-  <a href="/compile">Compile</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Deploy</p>
-  <a href="/runtimes">Runtimes</a>
-  <a href="/docs/devices">Devices</a>
-  <a href="/trust">Verify</a>
-  </div>
-  </div>
-  </div>
-  <div class="nav-item nav-item--models has-mega">
-  <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
-  <div class="mega-menu" role="menu" aria-label="models menu">
-  <div class="mega-col">
-  <p class="mega-h">Choose</p>
-  <a href="/models">Model catalog</a>
-  <a href="/build-your-own">Build your own</a>
-  <a href="/docs/runtime">Runtime targets</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Deploy</p>
-  <a href="/compute">Compute</a>
-  <a href="/runtimes">Mobile and edge</a>
-  </div>
-  </div>
-  </div>
-  <div class="nav-item nav-item--docs has-mega">
-  <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
-  <div class="mega-menu" role="menu" aria-label="docs menu">
-  <div class="mega-col">
-  <p class="mega-h">Start</p>
-  <a href="/capture">API gateway</a>
-  <a href="/docs/cli">CLI</a>
-  <a href="/docs/sdk">SDKs</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Reference</p>
-  <a href="/docs">Docs home</a>
-  <a href="/docs/api">API reference</a>
-  <a href="/api">HTTP routes</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Operate</p>
-  <a href="/integrations">Integrations</a>
-  <a href="/docs/privacy">Privacy membrane</a>
-  <a href="/docs/datasets">Datasets</a>
-  <a href="/docs/distillation">Distillation</a>
-  <a href="/docs/verify">Verification</a>
-  </div>
-  </div>
-  </div>
-  <div class="nav-item nav-item--pricing has-mega">
-  <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
-  <div class="mega-menu" role="menu" aria-label="pricing menu">
-  <div class="mega-col">
-  <p class="mega-h">Buy</p>
-  <a href="/pricing">Plans</a>
-  <a href="/pricing#roi">ROI calculator</a>
-  <a href="/nonprofits">Nonprofits</a>
-  </div>
-  </div>
-  </div>
-  <div class="nav-item nav-item--enterprise has-mega">
-  <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
-  <div class="mega-menu" role="menu" aria-label="enterprise menu">
-  <div class="mega-col">
-  <p class="mega-h">Deploy</p>
-  <a href="/enterprise">Enterprise overview</a>
-  <a href="/self-host">Self-host</a>
-  <a href="/airgap">Air-gap</a>
-  </div>
-  <div class="mega-col">
-  <p class="mega-h">Trust</p>
-  <a href="/trust">Trust center</a>
-  <a href="/security">Security</a>
-  <a href="/compliance">Compliance</a>
-  <a href="/baa">BAA</a>
-  </div>
-  </div>
-  </div>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    </div>
   </nav>
-  <!-- KOLM_NAV_END (W221) -->
- <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
- <a href="/signin" class="ghost">sign in</a>
- <a href="/signup" class="cta">Get API Key &rarr;</a>
- </div>
- </div>
-</header>
+  <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+  </div>
+</div>
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+
 <main id="main">
 
 <section class="hero">
  <div class="wrap">
  <p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; <a href="/compare">compare</a> &nbsp;/&nbsp; how kolm relates to LoRAX</p>
  <h1>kolm builds the adapter. LoRAX serves it.</h1>
- <p class="lede">Predibase's LoRAX (<a href="https://github.com/predibase/lorax" style="color:var(--accent)">github.com/predibase/lorax</a>) is Apache-2.0 multi-LoRA serving infrastructure &mdash; heterogeneous continuous batching, adapter exchange scheduling, the SGMV kernel. It's the strongest adapter-serving infra in market. It is not a build tool, and kolm is not a serving cluster. The production-ready shape is both.</p>
+ <p class="lede">Predibase's LoRAX (<a href="https://github.com/predibase/lorax" style="color:var(--accent)">github.com/predibase/lorax</a>) is Apache-2.0 multi-LoRA serving infrastructure, heterogeneous continuous batching, adapter exchange scheduling, the SGMV kernel. It's the strongest adapter-serving infra in market. It is not a build tool, and kolm is not a serving cluster. The production-ready shape is both.</p>
  <p class="stamp">Wave 169 &middot; reviewed 2026-05-17 &middot; complement, not competitor</p>
  </div>
 </section>
@@ -225,10 +139,10 @@
  <div class="wrap">
  <h2>What LoRAX does (well).</h2>
  <ul>
- <li><b>Multi-LoRA serving</b> &mdash; thousands of fine-tuned models on a single GPU via Heterogeneous Continuous Batching + Adapter Exchange Scheduling + the SGMV kernel.</li>
- <li><b>OpenAI-compatible API</b> &mdash; existing OpenAI SDK consumers can switch to LoRAX with a base-URL change.</li>
- <li><b>Base model breadth</b> &mdash; Llama, CodeLlama, Mistral, Zephyr, Qwen. Loadable in fp16, bitsandbytes, GPT-Q, AWQ.</li>
- <li><b>Production deployment</b> &mdash; Docker + Kubernetes/Helm. Apache-2.0 license, no SaaS tax.</li>
+ <li><b>Multi-LoRA serving</b>, thousands of fine-tuned models on a single GPU via Heterogeneous Continuous Batching + Adapter Exchange Scheduling + the SGMV kernel.</li>
+ <li><b>OpenAI-compatible API</b>, existing OpenAI SDK consumers can switch to LoRAX with a base-URL change.</li>
+ <li><b>Base model breadth</b>, Llama, CodeLlama, Mistral, Zephyr, Qwen. Loadable in fp16, bitsandbytes, GPT-Q, AWQ.</li>
+ <li><b>Production deployment</b>, Docker + Kubernetes/Helm. Apache-2.0 license, no SaaS tax.</li>
  </ul>
  <p>Where LoRAX is silent: it doesn't build the adapter, it doesn't sign anything, it doesn't gate on an eval, it doesn't ship offline / on-device / compiled native, and it doesn't carry a cryptographically verifiable provenance chain. Those are all kolm's surface.</p>
  </div>
@@ -240,12 +154,12 @@
  <table class="matrix">
  <thead><tr><th>Axis</th><th>LoRAX alone</th><th>kolm + LoRAX</th></tr></thead>
  <tbody>
- <tr><td class="axis">Adapter origin</td><td>opaque &mdash; whatever LoRA file you uploaded</td><td class="kolm"><b>signed receipt chain</b> &middot; seeds.jsonl &rarr; train/holdout &rarr; teacher call (W157 PHI redactor) &rarr; LoRA train &rarr; eval &rarr; Ed25519 sig (W161) &rarr; Sigstore/Rekor (W162)</td></tr>
- <tr><td class="axis">Eval gate</td><td>none &mdash; serve whatever you load</td><td class="kolm"><b>K-score V2 gate</b> &middot; compile blocks if eval &lt; threshold; R/F/E/Z axes incl. external + adversarial holdouts (W164)</td></tr>
+ <tr><td class="axis">Adapter origin</td><td>opaque, whatever LoRA file you uploaded</td><td class="kolm"><b>signed receipt chain</b> &middot; seeds.jsonl &rarr; train/holdout &rarr; teacher call (W157 PHI redactor) &rarr; LoRA train &rarr; eval &rarr; Ed25519 sig (W161) &rarr; Sigstore/Rekor (W162)</td></tr>
+ <tr><td class="axis">Eval gate</td><td>none, serve whatever you load</td><td class="kolm"><b>K-score V2 gate</b> &middot; compile blocks if eval &lt; threshold; R/F/E/Z axes incl. external + adversarial holdouts (W164)</td></tr>
  <tr><td class="axis">Tenant-data residency</td><td>raw PHI/PII in your training pipeline</td><td class="kolm"><b>Wave 157 PHI redactor</b> &middot; 18 HIPAA Safe Harbor + 3 kolm extensions; verifier check #14 confirms no raw PHI leaked into adapter weights</td></tr>
  <tr><td class="axis">Teacher provenance</td><td>not tracked</td><td class="kolm"><b>Wave 158 cross-vendor manifest</b> &middot; teacher_vendor + teacher_model + student_base + distillation_method; check #15</td></tr>
  <tr><td class="axis">Drift detection</td><td>none</td><td class="kolm"><b>Wave 167 drift cron</b> &middot; snapshot/report/cron with supersession chain bound into artifact_hash; checks #23+#24</td></tr>
- <tr><td class="axis">Third-party verifiability</td><td>endpoint behavior &mdash; black box</td><td class="kolm"><b>auditor attestation</b> &middot; Wave 166 N+7: external auditor signs eval_result with own Ed25519 key</td></tr>
+ <tr><td class="axis">Third-party verifiability</td><td>endpoint behavior, black box</td><td class="kolm"><b>auditor attestation</b> &middot; Wave 166 N+7: external auditor signs eval_result with own Ed25519 key</td></tr>
  </tbody>
  </table>
  </div>
@@ -281,7 +195,7 @@ $ <b>kolm verify</b> phone-normalizer.kolm
 <section class="section">
  <div class="wrap">
  <h2>When LoRAX alone is the right answer.</h2>
- <p>Your team already controls the LoRA training pipeline, the data isn't regulated, and you don't need a portable signed file. LoRAX is excellent and Apache-2.0 &mdash; running it bare is the cheapest path to multi-tenant adapter serving. Don't pay kolm tax for a workflow that doesn't need the receipt.</p>
+ <p>Your team already controls the LoRA training pipeline, the data isn't regulated, and you don't need a portable signed file. LoRAX is excellent and Apache-2.0, running it bare is the cheapest path to multi-tenant adapter serving. Don't pay kolm tax for a workflow that doesn't need the receipt.</p>
  <h2 style="margin-top:32px">When kolm + LoRAX is the right shape.</h2>
  <p>Your compliance team needs to know what each adapter was trained on, your auditor needs a third-party-verifiable signature on the eval, your tenant data can't leave its boundary, and you still want LoRAX's throughput. The signed .kolm is the contract between the build team and the serve team.</p>
  <div class="actions">
@@ -293,16 +207,31 @@ $ <b>kolm verify</b> phone-normalizer.kolm
 </section>
 
 </main>
-
-<footer class="site">
- <div class="wrap">
- <div class="ft-row">
- <span>kolm.ai &middot; Apache-2.0 &middot; <a href="/spec/rs-1">RS-1 v2.1</a></span>
- <span><a href="/compare">/compare</a> &middot; <a href="/how-vs-predibase">vs Predibase</a> &middot; <a href="/how-vs-openpipe">vs OpenPipe</a> &middot; <a href="/how-vs-diy">vs DIY</a> &middot; <a href="/how-vs-hyperscaler">vs hyperscaler</a></span>
- </div>
- </div>
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/integrations">Integrations</a></li><li><a href="/docs/api">API reference</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
 </footer>
 
-<script src="/nav.js" defer></script>
 </body>
 </html>

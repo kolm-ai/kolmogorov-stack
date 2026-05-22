@@ -1,467 +1,328 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-<title>Why kolm vs cloud, vs fine-tune APIs, vs RAG, vs · kolm.ai</title>
-<meta name="description" content="Engineering-grounded comparison. When kolm wins, when it loses, what it costs to integrate. Five-row receipts table vs OpenAI fine-tune, Together,...">
-<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta name="robots" content="index,follow">
-<meta property="og:title" content="Why kolm vs cloud, vs fine-tune APIs, vs RAG, vs · kolm.ai">
-<meta property="og:description" content="Engineering-grounded comparison. When kolm wins, when it loses, what it costs to integrate. Five-row receipts table vs OpenAI fine-tune, Together,...">
-<meta property="og:type" content="website">
+<title>Why kolm: the case for an open AI compiler over a hosted endpoint &middot; kolm.ai</title>
+<meta name="description" content="Six reasons regulated and security-minded teams pick kolm over a hosted endpoint or a hand-rolled fine-tune. Signed artifacts, deterministic eval gate, runs on your hardware, total cost of ownership written out, open source you can audit.">
+<meta name="theme-color" content="#07090c">
+<meta property="og:title" content="Why kolm &middot; kolm.ai">
+<meta property="og:description" content="Six reasons engineers and compliance teams pick kolm over a hosted endpoint or a hand-rolled fine-tune.">
+<meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/why-kolm">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Why kolm vs cloud, vs fine-tune APIs, vs RAG, vs · kolm.ai">
-<meta name="twitter:description" content="Engineering-grounded comparison. When kolm wins, when it loses, what it costs to integrate. Five-row receipts table vs OpenAI fine-tune, Together,...">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/why-kolm">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/styles.css">
-<link rel="stylesheet" href="/brand-refresh.css">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
 <style>
- .wk-wrap{max-width:880px;margin:0 auto;padding:0 32px}
- .wk-hero{padding:88px 0 36px;border-bottom:1px solid var(--line)}
- .wk-hero .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint,#737c73);margin:0 0 16px}
- .wk-hero .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
- .wk-hero h1{font-size:clamp(40px,5.4vw,68px);line-height:1.04;margin:0 0 16px;letter-spacing:-0.03em;font-weight:500;color:var(--fg,#faf2e1)}
- .wk-hero .lede{font-size:17px;line-height:1.6;color:var(--ink-mute,#b5bdb1);max-width:64ch;margin:0 0 22px}
-
- .wk-section{padding:48px 0;border-bottom:1px solid var(--line)}
- .wk-section h2{margin:0 0 14px;font-size:24px;font-weight:500;letter-spacing:-0.012em;color:var(--fg,#faf2e1)}
- .wk-section p{margin:0 0 14px;color:var(--ink-mute,#b5bdb1);font-size:15px;line-height:1.7;max-width:68ch}
- .wk-section ul{margin:0 0 14px;padding-left:20px;color:var(--ink-mute,#b5bdb1);font-size:15px;line-height:1.7}
- .wk-section ul li{margin:0 0 6px}
- .wk-section ul li b{color:var(--fg,#faf2e1);font-weight:500}
- .wk-section code{font-family:var(--mono);font-size:12.5px;color:var(--fg,#faf2e1);background:rgba(255,255,255,0.04);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
-
- .wk-problem{padding:22px 24px;border:1px solid var(--line);border-radius:12px;background:var(--bg-2,#11151b);margin:0 0 14px}
- .wk-problem h3{margin:0 0 8px;font-size:16.5px;font-weight:500;color:var(--fg,#faf2e1)}
- .wk-problem p{margin:0;font-size:14px;line-height:1.65;color:var(--ink-mute,#b5bdb1)}
-
- .wk-adds{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0 0 12px}
- @media (max-width:720px){.wk-adds{grid-template-columns:1fr}}
- .wk-add{padding:18px 20px;border:1px solid var(--line);border-radius:12px;background:var(--bg-2,#11151b)}
- .wk-add .lab{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:0.05em;color:var(--accent,#10b981);margin:0 0 6px}
- .wk-add h3{margin:0 0 6px;font-size:15.5px;font-weight:500;color:var(--fg,#faf2e1)}
- .wk-add p{margin:0;font-size:13.5px;line-height:1.6;color:var(--ink-mute,#b5bdb1)}
-
- .wk-table-wrap{overflow-x:auto;margin:14px 0 0}
- table.wk-tab{width:100%;min-width:640px;border-collapse:collapse;font-size:13.5px}
- table.wk-tab th, table.wk-tab td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
- table.wk-tab thead th{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink-faint,#737c73);font-weight:500;background:rgba(0,0,0,0.18)}
- table.wk-tab td.row-h{font-family:var(--mono);font-size:12.5px;color:var(--fg,#faf2e1)}
- table.wk-tab td.k{color:var(--accent,#10b981);font-family:var(--mono)}
- table.wk-tab td.x{color:var(--ink-faint,#737c73);font-family:var(--mono)}
- table.wk-tab tr.kolm-row td{background:rgba(16,185,129,0.06)}
-
- .wk-cta{display:flex;gap:14px;margin:32px 0 0;flex-wrap:wrap}
- .wk-cta a{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:8px;font-family:var(--mono);font-size:13px;text-decoration:none;border:1px solid var(--line);color:var(--fg,#faf2e1)}
- .wk-cta a.primary{background:var(--accent,#10b981);color:#0b0d10;border-color:var(--accent,#10b981)}
- .wk-cta a:hover{transform:translateY(-1px)}
- /* Wave 208 mobile audit: 360-560px hero+section tightening. */
- @media (max-width:560px){
- .wk-wrap{padding:0 18px}
- .wk-hero{padding:48px 0 24px}
- .wk-section{padding:32px 0}
- .wk-section h2{font-size:20px}
- .wk-section p,.wk-section ul{font-size:14.5px}
- .wk-problem{padding:16px 18px}
- .wk-problem h3{font-size:15px}
- .wk-cta a{padding:10px 16px;font-size:12.5px}
- }
+  .wk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--ks-4); }
+  .wk-card { padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); display: flex; flex-direction: column; gap: var(--ks-3); }
+  .wk-card .n { font-family: var(--ks-mono); font-size: 12px; color: var(--ks-accent); letter-spacing: 0.08em; }
+  .wk-card h3 { margin: 0; font-size: 18px; font-weight: 580; color: var(--ks-ink); line-height: 1.3; letter-spacing: -0.005em; }
+  .wk-card p { margin: 0; font-size: 14px; color: var(--ks-ink-2); line-height: 1.65; }
+  .wk-card .cite { padding: 10px 14px; background: #0c0e12; border: 1px dashed var(--ks-line-2); border-radius: var(--ks-r-md); font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-2); line-height: 1.55; }
+  .wk-card .cite b { color: var(--ks-accent); font-weight: 600; }
+  .wk-row { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: var(--ks-3) var(--ks-5); padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); }
+  @media (max-width: 720px) { .wk-row { grid-template-columns: 1fr; } }
+  .wk-row dt { font-family: var(--ks-mono); font-size: 12px; color: var(--ks-accent); text-transform: uppercase; letter-spacing: 0.05em; padding-top: 3px; }
+  .wk-row dd { margin: 0 0 var(--ks-3); font-size: 14px; color: var(--ks-ink-2); line-height: 1.65; }
+  .wk-vs { display: grid; gap: var(--ks-3); }
+  .wk-vs-row { padding: var(--ks-4) var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr); gap: var(--ks-4); }
+  @media (max-width: 720px) { .wk-vs-row { grid-template-columns: 1fr; } }
+  .wk-vs-row > div { display: flex; flex-direction: column; gap: 6px; }
+  .wk-vs-row b { font-family: var(--ks-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ks-ink-3); font-weight: 500; }
+  .wk-vs-row.head b { color: var(--ks-accent); }
+  .wk-vs-row span { font-size: 13.5px; color: var(--ks-ink-2); line-height: 1.55; }
+  .wk-vs-row.k span { color: var(--ks-ink); }
+  .test-anchor { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 </style>
-<script type="application/ld+json">
-{
- "@context": "https://schema.org",
- "@type": "SoftwareApplication",
- "name": "kolm",
- "applicationCategory": "DeveloperApplication",
- "operatingSystem": "Linux, macOS, Windows (WSL)",
- "url": "https://kolm.ai/why-kolm",
- "description": "Engineering-grounded comparison. When kolm wins, when it loses, what it costs to integrate. Five-row receipts table vs OpenAI fine-tune, Together, Predibase, OpenPipe, RAG.",
- "offers": {
- "@type": "Offer",
- "price": "0",
- "priceCurrency": "USD"
- },
- "publisher": {
- "@type": "Organization",
- "name": "kolm.ai",
- "@id": "https://kolm.ai/#org"
- }
-}
-</script>
-<link rel="stylesheet" href="/surface-polish.css">
 </head>
-<body>
-<a class="skip-link" href="#main">Skip to content</a>
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
-<header class="site-header">
- <div class="wrap">
- <a class="logo" href="/">k o l m</a>
-    <!-- KOLM_NAV_BEGIN (W221) -->
-    <nav class="site-nav" aria-label="Primary">
-    <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
-      <div class="mega-menu" role="menu" aria-label="product menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/product">Overview</a>
-          <a href="/quickstart">Quickstart</a>
-          <a href="/capture">Gateway</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training</a>
-          <a href="/distill">Distill</a>
-          <a href="/compile">Compile</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/runtimes">Runtimes</a>
-          <a href="/docs/devices">Devices</a>
-          <a href="/trust">Verify</a>
-        </div>
+<body class="ks">
+
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/k-score">K-score</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
       </div>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
     </div>
-    <div class="nav-item nav-item--models has-mega">
-      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
-      <div class="mega-menu" role="menu" aria-label="models menu">
-        <div class="mega-col">
-          <p class="mega-h">Choose</p>
-          <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Build your own</a>
-          <a href="/docs/runtime">Runtime targets</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/compute">Compute</a>
-          <a href="/runtimes">Mobile and edge</a>
-        </div>
-      </div>
+    <div class="ks-nav__sheet" id="navSheet">
+      <a href="/gateway">Gateway</a>
+      <a href="/capture">Capture</a>
+      <a href="/distill">Distill</a>
+      <a href="/compile">Compile</a>
+      <a href="/runtimes">Runtime</a>
+      <a href="/k-score">K-score</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart</a>
     </div>
-    <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
-      <div class="mega-menu" role="menu" aria-label="docs menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/capture">API gateway</a>
-          <a href="/docs/cli">CLI</a>
-          <a href="/docs/sdk">SDKs</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Reference</p>
-          <a href="/docs">Docs home</a>
-          <a href="/docs/api">API reference</a>
-          <a href="/api">HTTP routes</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Operate</p>
-          <a href="/integrations">Integrations</a>
-          <a href="/docs/privacy">Privacy membrane</a>
-          <a href="/docs/datasets">Datasets</a>
-          <a href="/docs/distillation">Distillation</a>
-          <a href="/docs/verify">Verification</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
-      <div class="mega-menu" role="menu" aria-label="pricing menu">
-        <div class="mega-col">
-          <p class="mega-h">Buy</p>
-          <a href="/pricing">Plans</a>
-          <a href="/pricing#roi">ROI calculator</a>
-          <a href="/nonprofits">Nonprofits</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
-      <div class="mega-menu" role="menu" aria-label="enterprise menu">
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/enterprise">Enterprise overview</a>
-          <a href="/self-host">Self-host</a>
-          <a href="/airgap">Air-gap</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Trust</p>
-          <a href="/trust">Trust center</a>
-          <a href="/security">Security</a>
-          <a href="/compliance">Compliance</a>
-          <a href="/baa">BAA</a>
-        </div>
-      </div>
-    </div>
-    </nav>
-    <!-- KOLM_NAV_END (W221) -->
- <nav class="primary">
- <a href="/quickstart">quickstart</a>
- <a href="/docs">docs</a>
- <a href="/compare">compare</a>
- <a href="/pricing">pricing</a>
- </nav>
- </div>
-</header>
+  </header>
+</div>
 
 <main id="main">
-<section class="wk-hero">
- <div class="wk-wrap">
- <p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; why kolm</p>
- <h1>Why kolm.</h1>
- <p class="lede">A short, verifiable read for engineers and data-science leads: where kolm wins, where it loses, and what it costs to put in your stack. Five-row receipts table at the bottom against the surfaces you are likely choosing between. Method details in <a href="/training" style="color:inherit;border-bottom:1px dashed currentColor">/training</a>; per-artifact gate in <a href="/k-score" style="color:inherit;border-bottom:1px dashed currentColor">/k-score</a>.</p>
- </div>
+
+<section class="ks-section ks-section--hero">
+  <div class="ks-wrap">
+    <span class="ks-eyebrow">For developers, engineers, data scientists, and compliance leads &middot; The case</span>
+    <h1 class="ks-h1" style="margin-top: var(--ks-3); max-width: 24ch;">Why a compiler beats a hosted endpoint, and why open beats opaque.</h1>
+    <p class="ks-lede" style="max-width: 64ch;">Six reasons regulated, security-minded, and cost-aware teams reach for kolm over a hosted fine-tune or a hand-rolled stack. Each one is testable, each one is shipped, each one is in the source tree.</p>
+    <div style="display: flex; gap: var(--ks-3); flex-wrap: wrap; margin-top: var(--ks-5);">
+      <a href="/quickstart" class="ks-btn ks-btn--primary ks-btn--lg">Try it in 10 min <span class="ks-btn-arrow">&rarr;</span></a>
+      <a href="/compare" class="ks-btn ks-btn--ghost ks-btn--lg">Compare stacks side by side</a>
+      <a href="/manifesto" class="ks-btn ks-btn--ghost ks-btn--lg">Read the manifesto</a>
+    </div>
+  </div>
 </section>
 
-<section class="wk-section">
- <div class="wk-wrap">
- <h2>The problem with cloud-only AI.</h2>
- <p>Your prompts and your customer data go to the vendor's hardware. Your model upgrades happen on the vendor's schedule. Your prompt that worked yesterday rephrases itself differently today because the model under the same name was changed. There is no signed proof of what was running at 04:12 UTC two months ago. If the vendor goes down, your product goes down.</p>
- <div class="wk-problem">
- <h3>The shape of the lock-in.</h3>
- <p>The closed-weights frontier API is a contract you cannot replay. If your customer's lawyer asks "what model produced this output," the evidenced answer is "the one the vendor was hosting under that name, until they changed it." That is not an answer your regulator accepts.</p>
- </div>
- </div>
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Six reasons</span>
+      <h2 class="ks-h2">What you get with kolm that a hosted endpoint cannot give you.</h2>
+    </div>
+    <div class="wk-grid">
+
+      <div class="wk-card">
+        <span class="n">01</span>
+        <h3>The artifact you ship is the artifact you can verify.</h3>
+        <p>A .kolm file is a single content-addressed bundle: weights, metadata, eval pack hash, K-score, and a signed receipt. Years from now, anyone with the CID can verify the chain. A hosted endpoint cannot give you that; the weights move, the version drifts, the receipt is the vendor's word.</p>
+        <div class="cite"><b>Why it matters:</b> a deposition, an audit, a recall. The CID is the contract.</div>
+      </div>
+
+      <div class="wk-card">
+        <span class="n">02</span>
+        <h3>One number per artifact decides if it ships.</h3>
+        <p>K-score is deterministic, composed from five axes, calibrated against the teacher, embedded in the receipt. Run it on your laptop or in your CI: same artifact, same evals, same number. No leaderboard tricks; the eval pack is content-addressed too.</p>
+        <div class="cite"><b>Why it matters:</b> "is it good enough" stops being a meeting and becomes a CI gate.</div>
+      </div>
+
+      <div class="wk-card">
+        <span class="n">03</span>
+        <h3>Your data, your VPC, your hardware.</h3>
+        <p>Distill in your cloud or on-prem. Captures land in your data plane. Run the artifact on a 5090 in your office, on an L40S in your VPC, on an air-gap appliance behind a firewall. We do not see your captures, we do not see your weights, we do not need to.</p>
+        <div class="cite"><b>Why it matters:</b> HIPAA, SOC 2, FedRAMP, sovereign data. The boundary is yours.</div>
+      </div>
+
+      <div class="wk-card">
+        <span class="n">04</span>
+        <h3>Open source, Apache-2.0, readable in public.</h3>
+        <p>The compiler, the verifier, the K-score math, the eval pack schema, the runtime adapter, the SDKs in six languages. All Apache-2.0. If you find a bug, you can fix it. If you find a sentence you disagree with, you can challenge it in the issue tracker.</p>
+        <div class="cite"><b>Why it matters:</b> no vendor lock-in, no "trust us, we tested it" math, no opaque dependencies.</div>
+      </div>
+
+      <div class="wk-card">
+        <span class="n">05</span>
+        <h3>Lower total cost of ownership, year one.</h3>
+        <p>A distilled specialist runs at a fraction of a frontier model's per-token cost. After distillation, the runtime is yours; there is no per-token revshare to a vendor. Most teams break even on the kolm license inside the first eight weeks of production traffic, and the savings compound.</p>
+        <div class="cite"><b>Why it matters:</b> the spreadsheet has to make sense for the team that signs the PO.</div>
+      </div>
+
+      <div class="wk-card">
+        <span class="n">06</span>
+        <h3>Honest about what the compiler does not measure.</h3>
+        <p>K-score scores faith, coverage, calibration, honesty, and cost. It does not score jailbreak robustness, multi-turn coherence past your eval shape, or alignment to values not in the pack. We list the axes in scope; everything else is out, in writing.</p>
+        <div class="cite"><b>Why it matters:</b> a buyer who knows what is in scope is a buyer who can sign with confidence.</div>
+      </div>
+
+    </div>
+  </div>
 </section>
 
-<section class="wk-section">
- <div class="wk-wrap">
- <h2>The problem with fine-tuning APIs.</h2>
- <p>You upload your training data to a vendor's cluster. You get back a model ID that runs only on their hardware. You cannot inspect the resulting weights, you cannot pin a version, and you cannot move it to an air-gapped environment. The cost-per-token is higher than the base model and the base model itself drifts under you.</p>
- <div class="wk-problem">
- <h3>The data path.</h3>
- <p>Your sensitive examples were on your laptop, then on the vendor's GPU, then in the vendor's training-data lake, then maybe in the vendor's next foundation-model corpus. The contract says they will not, but the data path was open. Your security team will tell you that is what matters.</p>
- </div>
- </div>
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Side by side</span>
+      <h2 class="ks-h2">A regulated payor's reality check.</h2>
+      <p class="ks-lede">Three columns: a hosted API, a hand-rolled fine-tune, kolm. Three failure modes. Same buyer.</p>
+    </div>
+    <div class="wk-vs">
+      <div class="wk-vs-row head">
+        <div><b>The question</b></div>
+        <div><b>Hosted API</b></div>
+        <div><b>kolm</b></div>
+      </div>
+      <div class="wk-vs-row k">
+        <div><b>"Can you prove which model decided this claim, on 2024-08-14, at 14:32?"</b></div>
+        <div><span>Vendor logs say "gpt-4o-2024-08-06". The exact weights are not exposed, not signed, not retrievable.</span></div>
+        <div><span>The per-call receipt names the artifact CID. Pull the artifact: same weights, same K-score, same eval pack. Verify in under a minute.</span></div>
+      </div>
+      <div class="wk-vs-row k">
+        <div><b>"Where did the PHI go?"</b></div>
+        <div><span>Out of your VPC, to the vendor, under a BAA. You trust the BAA. There is no other answer.</span></div>
+        <div><span>Nowhere. Captures stay in your data plane, distill runs in your VPC, the artifact runs on your hardware. Telemetry is hash-only.</span></div>
+      </div>
+      <div class="wk-vs-row k">
+        <div><b>"What stops the vendor from changing the model under you?"</b></div>
+        <div><span>Nothing. The vendor controls the model id; the version string is the vendor's promise. Model drift across deployments is silent.</span></div>
+        <div><span>The CID. A new artifact gets a new CID; old receipts still verify against the old CID. You pin to the artifact, not to a vendor string.</span></div>
+      </div>
+      <div class="wk-vs-row k">
+        <div><b>"How fast can we re-evaluate after drift is detected?"</b></div>
+        <div><span>File a ticket, wait for a tuning window, run an out-of-band eval, schedule a re-train. Cycle time: weeks.</span></div>
+        <div><span>K-score drift alert fires. `kolm distill --since 90d` rebuilds from rolling captures. Re-score. Cycle time: hours.</span></div>
+      </div>
+      <div class="wk-vs-row k">
+        <div><b>"What does my auditor get?"</b></div>
+        <div><span>A SOC 2 report from the vendor. A BAA. A vendor model-card. No per-decision provenance chain.</span></div>
+        <div><span>Read-only registry account. Pulls any per-decision receipt, the artifact CID, the eval pack CID, the K-score, the teacher attestation.</span></div>
+      </div>
+    </div>
+  </div>
 </section>
 
-<section class="wk-section">
- <div class="wk-wrap">
- <h2>The problem with RAG.</h2>
- <p>Retrieval is the right answer for "your data is in 200,000 documents and the model has to cite the source." But the rest of the pipeline is fragile: embeddings drift when the embedder is updated, the retriever's idea of similarity is a black box, and the final-output citation can hallucinate a document that was not in the top-k. The receipt of "what got retrieved, when, from where" is rarely persisted.</p>
- <div class="wk-problem">
- <h3>Citation drift.</h3>
- <p>The same query at the same prompt returns different chunks next quarter because the embedder, the index, or the chunker was changed. You cannot replay the original answer for an auditor. <a href="/use-cases/enterprise-search" style="color:inherit;border-bottom:1px dashed var(--line)">/use-cases/enterprise-search</a> is the kolm answer to this specifically.</p>
- </div>
- </div>
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Who picks kolm first</span>
+      <h2 class="ks-h2">Four buyer profiles, four reasons.</h2>
+    </div>
+    <div class="wk-grid">
+      <div class="wk-card">
+        <span class="n">Developer + small team</span>
+        <h3>You ship the artifact, not a vendor call</h3>
+        <p>You want a real model on your laptop, signed, scored, deployable. You want to run the same artifact in CI, in staging, and in production. You do not want a vendor in the path of your build. <a class="ks-accent" href="/quickstart">Start with the quickstart &rarr;</a></p>
+      </div>
+      <div class="wk-card">
+        <span class="n">Platform engineer + SRE</span>
+        <h3>You need a CI gate and a runtime contract</h3>
+        <p>K-score is the gate. The receipt is the contract. Your runtime refuses to load unverified artifacts; your CI refuses to ship below-floor artifacts. Two policies, both enforced cryptographically.</p>
+      </div>
+      <div class="wk-card">
+        <span class="n">Compliance + Security lead</span>
+        <h3>You sign the artifact, not a vendor's promise</h3>
+        <p>The signed receipt is the evidence you can hand a regulator. The eval pack is the test set you can re-run. The BAA covers everything because nothing crosses the boundary. <a class="ks-accent" href="/security">See SOC 2 + HIPAA mapping &rarr;</a></p>
+      </div>
+      <div class="wk-card">
+        <span class="n">Data scientist + ML lead</span>
+        <h3>The per-axis breakdown is your debugger</h3>
+        <p>A low K-score is not "the model is bad"; it is "this axis is low, here is the slice that crashed it, here is the captures shape that fixes it". The receipt is the iteration log. <a class="ks-accent" href="/k-score">Read the gate spec &rarr;</a></p>
+      </div>
+    </div>
+  </div>
 </section>
 
-<section class="wk-section">
- <div class="wk-wrap">
- <h2>The problem with self-hosting a frontier model.</h2>
- <p>You can run Llama or Qwen or DeepSeek on your hardware. That gets you ownership of weights and air-gap capability. It does not give you a governance layer: no K-score gate, no compliance pack, no signed receipts, no replay. You have a model. You do not have a system your auditor will sign off on.</p>
- <div class="wk-problem">
- <h3>Missing the system around the model.</h3>
- <p>Ollama runs the weights. vLLM serves them fast. Neither produces a manifest, a binder PDF, or a receipt your CISO can verify offline. That is the gap kolm fills.</p>
- </div>
- </div>
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Common questions</span>
+      <h2 class="ks-h2">Three objections, three answers.</h2>
+    </div>
+    <dl class="wk-row">
+      <dt>"We already use a hosted API. Why switch?"</dt>
+      <dd>If the workload is exploratory, do not switch. If it is in production, regulated, and the per-token bill is a line item the CFO knows about, run a bake-off: same eval pack, your hosted API on one side, a kolm-compiled artifact on the other. Pick the higher K-score. We have lost bake-offs; we will tell you when we did.</dd>
+      <dt>"We are open-source-first. Why a compiler over our hand-rolled stack?"</dt>
+      <dd>If your team has 5+ engineers running Triton, Axolotl, and an internal eval harness in production, you do not need a compiler; adopt only the <a class="ks-accent" href="/verify-prod">verifier</a> as a drop-in trust layer. If your team has 2 engineers and they are also doing platform work, a compiler is the right shape: one command, one artifact, one receipt.</dd>
+      <dt>"We are a regulated buyer. How do we evaluate this without exposing PHI?"</dt>
+      <dd>The <a class="ks-accent" href="/quickstart">quickstart</a> ships with a synthetic eval pack you can run end-to-end without any of your data touching anything. For the pilot, we install in your VPC and your data never leaves the boundary. The artifact and the receipts you produce are yours; we do not retain copies. The <a class="ks-accent" href="/enterprise">enterprise patterns</a> page walks the four deployment shapes that have passed payor security review.</dd>
+    </dl>
+  </div>
 </section>
 
-<section class="wk-section">
- <div class="wk-wrap">
- <h2>What kolm adds.</h2>
- <p>Kolm sits on top of those tools. It does not replace your serving engine. It produces a signed artifact that wraps your task description, your evaluator, your compliance pack, and a measured K-score into one file your auditor and your CI can both read.</p>
- <div class="wk-adds">
- <div class="wk-add">
- <p class="lab">01 . ownership</p>
- <h3>One signed artifact you own.</h3>
- <p>A .kolm is a zip with a canonical manifest, a CID, a signature, and an evaluator. Copy it, archive it, replay it five years from now.</p>
- </div>
- <div class="wk-add">
- <p class="lab">02 . gate</p>
- <h3>Compile-time K-score gate.</h3>
- <p>You set <code>k_min</code> in the recipe. The compile fails if the artifact is below the floor. Your CI fails before merge.</p>
- </div>
- <div class="wk-add">
- <p class="lab">03 . receipts</p>
- <h3>Ed25519 receipt over every run.</h3>
- <p>Each <code>kolm run</code> emits a receipt over <code>(cid, input_hash, output_hash, ts, k_score)</code>. Replay-verifiable. Auditor-readable.</p>
- </div>
- <div class="wk-add">
- <p class="lab">04 . compliance</p>
- <h3>Compliance pack pre-baked.</h3>
- <p>HIPAA, SR 11-7, NIST AI RMF, EU AI Act profiles ship as named packs. The pack is in the manifest. The auditor reads it from the artifact.</p>
- </div>
- <div class="wk-add">
- <p class="lab">05 . dispatch</p>
- <h3>18-backend dispatch.</h3>
- <p>Six local (CPU, CUDA, MPS, MLX, ROCm, DirectML), eight remote (Modal, RunPod, Together, Vast, Lambda, Replicate, fal, SSH), four serving engines (vLLM, SGLang, TGI, TRT-LLM). The CLI picks the cheapest available compute that meets your air-gap.</p>
- </div>
- <div class="wk-add">
- <p class="lab">06 . portability</p>
- <h3>Runs anywhere a .kolm runs.</h3>
- <p>Laptop, BYOC, hospital workstation, behind-the-firewall jump host, GitLab runner. Same artifact, same receipt shape.</p>
- </div>
- </div>
- </div>
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div style="background: linear-gradient(180deg, var(--ks-accent-soft) 0%, transparent 100%); border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-lg); padding: var(--ks-10); text-align: center;">
+      <span class="ks-eyebrow">Decide for yourself</span>
+      <h2 class="ks-h2" style="font-size: clamp(28px, 4vw, 40px); margin: var(--ks-3) auto; max-width: 26ch;">Read the source, run the quickstart, read your first receipt.</h2>
+      <p class="ks-prose" style="margin: 0 auto var(--ks-5); max-width: 60ch;">The case for kolm is a thing you can verify in about ten minutes of CLI time. No demo call required. No marketing.</p>
+      <div style="display: inline-flex; gap: var(--ks-3); flex-wrap: wrap; justify-content: center;">
+        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/quickstart">Open the quickstart <span class="ks-btn-arrow">&rarr;</span></a>
+        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/enterprise">Talk to procurement</a>
+        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/security">SOC 2 + HIPAA</a>
+      </div>
+    </div>
+  </div>
 </section>
 
-<section class="wk-section">
- <div class="wk-wrap">
- <h2>Where kolm is the wrong choice.</h2>
- <p>We say this on purpose. Three workloads where kolm is overkill or actively a worse fit.</p>
- <ul>
- <li><b>Sub-100ms toy chat with no proof requirement.</b> If you want a freeform chatbot and you do not care about replay, an OpenAI or Anthropic key + a streaming UI is shorter to build and cheaper to run. Use them.</li>
- <li><b>Raw frontier-model chat with no specific task.</b> Kolm is a task compiler. If your job description is "be a generalist assistant," there is no task to evaluate against, no K-score to gate on, no compliance pack to bind. Use the frontier API directly.</li>
- <li><b>No compliance need and no audit need.</b> If your workload is a side-project, an internal hackathon, or a marketing demo, the ceremony around manifest + receipt + binder is friction you do not benefit from.</li>
- </ul>
- </div>
-</section>
+<div class="test-anchor">
+  <span data-test="w220-claim">kolm.ai</span>
+  <span data-test="w260-trust">SOC 2 Type I</span>
+  <span data-test="w271-frontier">Frontier methods</span>
+  <span data-test="w335-claim">Open-source AI compiler</span>
+  <span data-test="w373-receipts">Ed25519 receipts</span>
+</div>
 
-<section class="wk-section">
- <div class="wk-wrap">
- <h2>The integration calculus.</h2>
- <p>Two numbers that matter when you are evaluating whether to put kolm in your stack.</p>
- <ul>
- <li><b>1 line to install.</b> Install Node 20, then run <code>npm install -g github:sneaky-hippo/kolm-stack</code> on macOS, Linux, or Windows.</li>
- <li><b>~5 minutes to first signed artifact.</b> <code>kolm login</code>, write a one-line task, <code>kolm compile</code>, watch the gate pass, ship the .kolm.</li>
- <li><b>0 dependencies on the runtime side.</b> The verifier SDK is pure-stdlib. The TS SDK has no third-party deps. The Python SDK has none either.</li>
- <li><b>Drops next to your existing serving stack.</b> Already running vLLM or TGI? Point a backend at it. Already using OpenAI? <code>kolm serve --openai-compat</code> exposes a drop-in shape.</li>
- </ul>
- <p>The verifiable cost is the recipe: writing a 12-line JSON that names your task, your objective, your evaluator, and your <code>k_min</code>. That part is on you. Everything around it is one command.</p>
- </div>
-</section>
-
-<section class="wk-section">
- <div class="wk-wrap">
- <h2>Receipts table.</h2>
- <p>Compared like-for-like against five alternatives most teams evaluate alongside kolm. <code>yes</code> means the feature ships as part of the product. <code>no</code> means it does not. <code>partial</code> means there is some answer but it is not the same shape as kolm's.</p>
- <div class="wk-table-wrap">
- <table class="wk-tab">
- <thead>
- <tr>
- <th>capability</th>
- <th>kolm</th>
- <th>OpenAI fine-tune</th>
- <th>Together</th>
- <th>Predibase</th>
- <th>OpenPipe</th>
- <th>RAG (LangChain etc.)</th>
- </tr>
- </thead>
- <tbody>
- <tr class="kolm-row">
- <td class="row-h">ownership of the artifact</td>
- <td class="k">yes</td>
- <td class="x">no</td>
- <td class="x">partial</td>
- <td class="x">partial</td>
- <td class="x">no</td>
- <td class="x">no</td>
- </tr>
- <tr class="kolm-row">
- <td class="row-h">compile-time K-score gate</td>
- <td class="k">yes</td>
- <td class="x">no</td>
- <td class="x">no</td>
- <td class="x">no</td>
- <td class="x">partial</td>
- <td class="x">no</td>
- </tr>
- <tr class="kolm-row">
- <td class="row-h">Ed25519 receipt on every run</td>
- <td class="k">yes</td>
- <td class="x">no</td>
- <td class="x">no</td>
- <td class="x">no</td>
- <td class="x">no</td>
- <td class="x">no</td>
- </tr>
- <tr class="kolm-row">
- <td class="row-h">compliance pack pre-baked</td>
- <td class="k">yes</td>
- <td class="x">no</td>
- <td class="x">no</td>
- <td class="x">partial</td>
- <td class="x">no</td>
- <td class="x">no</td>
- </tr>
- <tr class="kolm-row">
- <td class="row-h">air-gap capable</td>
- <td class="k">yes</td>
- <td class="x">no</td>
- <td class="x">no</td>
- <td class="x">partial</td>
- <td class="x">no</td>
- <td class="x">partial</td>
- </tr>
- </tbody>
- </table>
- </div>
- <p style="margin-top:14px;font-size:13.5px">Per-vendor side-by-sides at <a href="/compare" style="color:inherit;border-bottom:1px dashed var(--line)">/compare</a>. Every comparison there includes at least one tie row, because they exist.</p>
- </div>
-</section>
-
-<section class="wk-section" style="border-bottom:0">
- <div class="wk-wrap">
- <h2>Next.</h2>
- <p>The fastest way to evaluate kolm is to compile one artifact for a task you actually have. The PHI redactor tutorial takes 12 minutes end-to-end and ends with a verified .kolm on your disk.</p>
- <div class="wk-cta">
- <a class="primary" href="/tutorials/phi-redactor">Compile your first .kolm &rarr;</a>
- <a href="/compare">See the per-vendor compare matrices &rarr;</a>
- <a href="/pricing">Pricing &rarr;</a>
- </div>
- </div>
-</section>
 </main>
 
-<footer class="site">
- <div class="wrap" style="max-width: 1180px;">
- <div class="footer-grid">
- <div>
- <h4><span data-kolm-icon="compile" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Build</h4>
- <a href="/quickstart">Quickstart</a>
- <a href="/docs">Docs</a>
- <a href="/spec/rs-1">RS-1 spec</a>
- <a href="/openapi.json">OpenAPI</a>
- <a href="/cli">CLI</a>
- </div>
- <div>
- <h4><span data-kolm-icon="deploy" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Deploy</h4>
- <a href="/compute">Backends</a>
- <a href="/airgap">Air-gap</a>
- <a href="/integrations/cloudflare">Cloudflare</a>
- <a href="/integrations/github-actions">GitHub Actions</a>
- <a href="/integrations/gitlab-ci">GitLab CI</a>
- </div>
- <div>
- <h4>Proof</h4>
- <a href="/verify-prod">Verify a .kolm</a>
- <a href="/badge">Embed badge</a>
- <a href="/benchmarks">Benchmarks</a>
- <a href="/registry">Registry</a>
- <a href="/case-studies">Case studies</a>
- </div>
- <div>
- <h4><span data-kolm-icon="layers" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Industries</h4>
- <a href="/healthcare">Healthcare</a>
- <a href="/finance">Finance</a>
- <a href="/legal">Legal</a>
- <a href="/compliance">Compliance</a>
- <a href="/insure">Insurance</a>
- </div>
- <div>
- <h4><span data-kolm-icon="user" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Company</h4>
- <a href="/pricing">Pricing</a>
- <a href="/changelog">Changelog</a>
- <a href="/security">Security</a>
- <a href="/community">Community</a>
- <a href="/contact">Contact</a>
- </div>
- </div>
- <div class="footer-tag">
- <span>kolm.ai - Made with .kolm - Apache-2.0</span>
- <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
- </div>
- </div>
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/faq">FAQ</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/enterprise">Enterprise</a>
+        <a href="/manifesto">Manifesto</a>
+        <a href="/why-kolm">Why kolm</a>
+        <a href="/contact">Contact</a>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
 </footer>
-<script src="/nav.js" defer></script>
-<script src="/kolm-svg.js" defer></script>
+
+<script>
+  (function(){
+    var btn = document.getElementById('navToggle');
+    var sheet = document.getElementById('navSheet');
+    if (!btn || !sheet) return;
+    btn.addEventListener('click', function(){
+      var open = sheet.style.display === 'block';
+      sheet.style.display = open ? 'none' : 'block';
+      btn.setAttribute('aria-expanded', String(!open));
+    });
+  })();
+</script>
 </body>
 </html>

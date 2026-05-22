@@ -92,6 +92,121 @@
       "permanent": true
     },
     {
+      "source": "/api-routes.json",
+      "destination": "/openapi.json",
+      "permanent": true
+    },
+    {
+      "source": "/gateway",
+      "destination": "/capture",
+      "permanent": true
+    },
+    {
+      "source": "/helm",
+      "destination": "/self-host",
+      "permanent": true
+    },
+    {
+      "source": "/retail",
+      "destination": "/enterprise",
+      "permanent": true
+    },
+    {
+      "source": "/limits",
+      "destination": "/pricing",
+      "permanent": true
+    },
+    {
+      "source": "/docs/ci-cd",
+      "destination": "/integrations/github-actions",
+      "permanent": true
+    },
+    {
+      "source": "/safety",
+      "destination": "/security",
+      "permanent": true
+    },
+    {
+      "source": "/dpa",
+      "destination": "/privacy",
+      "permanent": true
+    },
+    {
+      "source": "/dpia",
+      "destination": "/security",
+      "permanent": true
+    },
+    {
+      "source": "/iso-27001",
+      "destination": "/security",
+      "permanent": true
+    },
+    {
+      "source": "/msa",
+      "destination": "/enterprise",
+      "permanent": true
+    },
+    {
+      "source": "/telemetry",
+      "destination": "/privacy",
+      "permanent": true
+    },
+    {
+      "source": "/docs/runtimes",
+      "destination": "/runtimes",
+      "permanent": true
+    },
+    {
+      "source": "/status/history",
+      "destination": "/status",
+      "permanent": true
+    },
+    {
+      "source": "/office-hours",
+      "destination": "/community",
+      "permanent": true
+    },
+    {
+      "source": "/events",
+      "destination": "/community",
+      "permanent": true
+    },
+    {
+      "source": "/blog",
+      "destination": "/changelog",
+      "permanent": true
+    },
+    {
+      "source": "/careers",
+      "destination": "/manifesto",
+      "permanent": true
+    },
+    {
+      "source": "/security/architecture.pdf",
+      "destination": "/security",
+      "permanent": true
+    },
+    {
+      "source": "/security/threat-model.pdf",
+      "destination": "/security",
+      "permanent": true
+    },
+    {
+      "source": "/security/dpia-template.docx",
+      "destination": "/security",
+      "permanent": true
+    },
+    {
+      "source": "/legal/sla.pdf",
+      "destination": "/enterprise",
+      "permanent": true
+    },
+    {
+      "source": "/security/hof",
+      "destination": "/security",
+      "permanent": true
+    },
+    {
       "source": "/playground",
       "destination": "/quickstart",
       "permanent": true
@@ -120,6 +235,36 @@
       "source": "/openai",
       "destination": "/compare/kolm-vs-openai-fine-tune",
       "permanent": true
+    },
+    {
+      "source": "/changelog",
+      "destination": "/manifesto",
+      "permanent": true
+    },
+    {
+      "source": "/roadmap",
+      "destination": "/manifesto",
+      "permanent": true
+    },
+    {
+      "source": "/status",
+      "destination": "/security",
+      "permanent": true
+    },
+    {
+      "source": "/trust",
+      "destination": "/security",
+      "permanent": true
+    },
+    {
+      "source": "/how-it-works",
+      "destination": "/quickstart",
+      "permanent": true
+    },
+    {
+      "source": "/community",
+      "destination": "https://github.com/sneaky-hippo/kolmogorov-stack",
+      "permanent": true
     }
   ],
   "rewrites": [
@@ -142,6 +287,14 @@
     {
       "source": "/product",
       "destination": "/product.html"
+    },
+    {
+      "source": "/wrapper",
+      "destination": "/wrapper.html"
+    },
+    {
+      "source": "/studio",
+      "destination": "/studio.html"
     },
     {
       "source": "/tui",

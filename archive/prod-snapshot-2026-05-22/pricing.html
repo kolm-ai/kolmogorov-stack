@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Pricing | Free, Pro, Team, Enterprise · kolm.ai</title>
+<meta name="description" content="Free local runtime, Pro $49, Team $499, and Enterprise custom. Pay for artifact jobs, shared review, and governance; keep every signed .kolm file.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta property="og:title" content="Pricing | Free, Pro, Team, Enterprise | kolm.ai">
+<meta property="og:description" content="Free local runtime, Pro $49, Team $499, and Enterprise custom. Pay for artifact jobs, shared review, and governance; keep every signed .kolm file.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/pricing">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Pricing | Free, Pro, Team, Enterprise | kolm.ai">
+<meta name="twitter:description" content="Free local runtime, Pro $49, Team $499, and Enterprise custom. Pay for artifact jobs, shared review, and governance; keep every signed .kolm file.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/pricing">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "Product",
+ "@id": "https://kolm.ai/pricing#product",
+ "name": "kolm",
+ "description": "kolm has four plans: Free, Pro, Team, and Enterprise. The local runtime stays free; paid plans add cloud compile workflow, private registry, audit logs, SSO, BAA/DPA, and deployment review.",
+ "brand": {"@type": "Brand", "name": "Kolm"},
+ "image": "https://kolm.ai/og-card.svg",
+ "url": "https://kolm.ai/pricing",
+ "offers": [
+ {"@type": "Offer", "name": "Free Local", "price": "0", "priceCurrency": "USD", "url": "https://kolm.ai/signup?plan=free", "availability": "https://schema.org/InStock", "description": "Free forever. Local CLI, local lake, local privacy detector, local optimizer, local runtime. No cloud sync."},
+ {"@type": "Offer", "name": "Pro", "price": "49", "priceCurrency": "USD", "url": "https://kolm.ai/signup?plan=pro", "availability": "https://schema.org/InStock", "description": "Solo dev shipping to production. Cloud backup of redacted captures, advanced optimizer (cost / latency / privacy / repetition), synthetic data, CI hooks, multiple device profiles."},
+ {"@type": "Offer", "name": "Team", "price": "499", "priceCurrency": "USD", "url": "https://kolm.ai/signup?plan=team", "availability": "https://schema.org/InStock", "description": "Five seats, private registry, approval queue, CI/CD integration, audit logs, shared datasets, artifact sharing, and reviewer / admin / operator RBAC."},
+ {"@type": "Offer", "name": "Enterprise", "price": "0", "priceCurrency": "USD", "url": "https://kolm.ai/enterprise/inquiry", "availability": "https://schema.org/InStock", "description": "Contact us. SSO, SAML, SCIM, audit log with retention policy, VPC and on-prem, BAA and SOC 2 compliance pack, custom provider policy, private support SLA."}
+ ]
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+ {"@type": "ListItem", "position": 2, "name": "Pricing", "item": "https://kolm.ai/pricing"}
+ ]
+ },
+ {
+ "@type": "FAQPage",
+ "mainEntity": [
+ {"@type": "Question", "name": "Is there a free plan?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Free Local is free forever. You get the local connector, the local lake on SQLite, the local privacy detector, the local optimizer, and the local runtime for any .kolm artifact. No cloud sync, no telemetry, no per-call cost."}},
+ {"@type": "Question", "name": "What does Pro add over Free Local?", "acceptedAnswer": {"@type": "Answer", "text": "Cloud backup and sync of metadata and redacted captures, the advanced optimizer that balances cost, latency, privacy, and repetition, synthetic data generation, CI hooks, and multiple device profiles."}},
+ {"@type": "Question", "name": "What does Team add over Pro?", "acceptedAnswer": {"@type": "Answer", "text": "A shared workspace, an approval queue with reviewer roles, shared datasets, artifact sharing across the team, and reviewer / admin / operator RBAC. Billed per seat."}},
+ {"@type": "Question", "name": "Can I cancel anytime?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Plans are month-to-month. Cancel from /account and your paid features stop at the end of the cycle. Your Free Local install and your local .kolm artifacts keep working forever."}},
+ {"@type": "Question", "name": "What is included in Enterprise?", "acceptedAnswer": {"@type": "Answer", "text": "SSO, SAML, SCIM, an audit log with retention policy, VPC and on-prem, BAA, SOC 2 compliance pack, custom provider policy, and a private support SLA. Talk to us."}},
+ {"@type": "Question", "name": "Is the local runtime really free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. The CLI, the local lake, the local optimizer, the local privacy detector, and the local runtime are all free. Run your .kolm artifacts on your hardware at zero per-call cost forever."}}
+ ]
+ }
+ ]
+}
+</script>
+<style>
+ /* Pricing inherits brand tokens from brand-refresh.css. Local :root only
+ provides aliases for the few names this page uses but brand-refresh
+ does not define (--bg-elev, --bg-card, --line-strong, --accent-soft,
+ --accent-strong, --good, --mono, --sans). All visible colors flow
+ from --ink / --ink-mute / --ink-faint / --kolm-accent / #7ef0d2 so
+ dark <-> light flips correctly with [data-theme=light]. */
+ :root {
+ --bg-elev: #0e1014; --bg-card: #14171c;
+ --line-strong: rgba(236,231,220,0.18);
+ --accent-soft: rgba(126,240,210,0.10); --accent-strong: #c1f5e3;
+ --good: #10b981;
+ --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+ --sans: "Geist", -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+ }
+ :root[data-theme="light"] {
+ --bg-elev: #fbf8f0 !important; --bg-card: #f0ece2 !important;
+ --line-strong: rgba(24,23,26,0.20) !important;
+ --accent-soft: rgba(10,136,98,0.06) !important; --accent-strong: #0a8862 !important;
+ --good: #0a8862 !important;
+ }
+ * { box-sizing: border-box; }
+ html, body { margin: 0; padding: 0; }
+ body {
+ color: var(--ink); font-family: var(--sans);
+ font-size: 16px; line-height: 1.55; letter-spacing: 0;
+ -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+ text-rendering: optimizeLegibility; font-synthesis: none;
+ }
+ a { color: inherit; text-decoration: none; }
+ .wrap { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+ @media (max-width: 720px) { .wrap { padding: 0 20px; } }
+
+ /* header styles come from brand-refresh.css site-header tokens */
+
+ /* Hero . restrained, no topographic SVG, no gradient text-clip.
+ Matches homepage cinematic restraint: one big number-size headline,
+ supporting lede, a single thin top-rule of trust signals. */
+ section.hero { position: relative; padding: 72px 0 44px; overflow: hidden; }
+ section.hero .wrap { position: relative; z-index: 2; }
+
+ .pill, .hero-eyebrow {
+ display: inline-flex; align-items: center; gap: 8px;
+ font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em;
+ text-transform: uppercase; color: var(--ink-faint);
+ border: 1px solid var(--line); border-radius: 999px;
+ padding: 5px 12px; background: var(--bg-elev);
+ }
+ .pill .dot, .hero-eyebrow .he-dot {
+ width: 6px; height: 6px; border-radius: 50%; background: #7ef0d2;
+ box-shadow: 0 0 8px rgba(126,240,210,0.55);
+ animation: pulse-dot 2.4s ease-in-out infinite;
+ }
+ [data-theme=light] .pill .dot,
+ [data-theme=light] .hero-eyebrow .he-dot { background: #0a8862; box-shadow: 0 0 6px rgba(10,136,98,0.4); }
+ @keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.25); } }
+
+ h1.hero-h1 {
+ margin: 14px 0 18px;
+ font-size: clamp(42px, 5.4vw, 68px) !important;
+ line-height: 1.02 !important; font-weight: 580; letter-spacing: -0.025em !important;
+ color: var(--ink); max-width: 18ch;
+ font-feature-settings: "ss01", "ss02", "kern";
+ }
+ h1.hero-h1 .tone { color: var(--ink-mute); font-weight: 500; }
+ p.lede {
+ margin: 0; font-size: clamp(16px, 1.4vw, 19px);
+ line-height: 1.55; color: var(--ink-mute);
+ max-width: 62ch; letter-spacing: 0;
+ }
+ p.lede b { color: var(--ink); font-weight: 500; }
+
+ /* Provider strip . frontier model lockup */
+ .provider-strip {
+ margin-top: 28px; padding: 14px 0; border-top: 1px solid var(--line);
+ display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+ }
+ .provider-strip .ps-label {
+ font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.08em;
+ text-transform: uppercase; color: var(--ink-faint);
+ }
+ .provider-strip .ps-num { color: var(--kolm-accent); }
+ .provider-strip .ps-models {
+ display: flex; gap: 18px; flex-wrap: wrap; color: var(--ink-mute);
+ font-size: 13px; letter-spacing: 0;
+ }
+ .provider-strip .ps-models span:not(:last-child)::after { content: " /"; color: var(--ink-faint); margin-left: 18px; }
+ @media (max-width: 720px) { .provider-strip .ps-models span:not(:last-child)::after { display: none; } }
+
+ /* Hero tickertape . value props loop */
+ .ticker-bar {
+ margin-top: 28px; overflow: hidden; position: relative;
+ border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+ padding: 14px 0; mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+ -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+ }
+ .ticker-track { display: inline-flex; gap: 56px; animation: ticker 48s linear infinite; white-space: nowrap; }
+ .ticker-track .ti {
+ font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em;
+ color: var(--ink-mute); display: inline-flex; align-items: center; gap: 10px;
+ }
+ .ticker-track .ti b { color: var(--kolm-accent); font-weight: 500; }
+ .ticker-track .sep { color: var(--ink-faint); }
+ @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+ section { padding: 140px 0; position: relative; }
+ section + section { border-top: 1px solid var(--line); }
+ .eyebrow {
+ display: inline-flex; align-items: center; gap: 10px;
+ font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em;
+ text-transform: uppercase; color: var(--ink-faint); margin: 0 0 18px;
+ }
+ .eyebrow .num { color: var(--ink); }
+ h2 {
+ margin: 14px 0 20px;
+ font-size: clamp(40px, 4.6vw, 64px);
+ line-height: 1.05; font-weight: 580; letter-spacing: -0.02em;
+ color: var(--ink); max-width: 20ch;
+ }
+ h2 .tone { color: var(--ink-mute); font-weight: 500; }
+ p.sec-lede {
+ margin: 0 0 40px; font-size: clamp(16px, 1.2vw, 19px);
+ line-height: 1.55; color: var(--ink-mute); max-width: 60ch;
+ }
+ @media (max-width: 720px) {
+ section.hero { padding: 52px 0 36px; }
+ section { padding: 72px 0; }
+ h2 { font-size: clamp(32px, 7vw, 44px); margin-bottom: 16px; }
+ }
+
+ /* billing toggle */
+ .bill-toggle {
+ display: inline-flex; align-items: center; gap: 4px; margin-bottom: 28px;
+ background: var(--bg-elev); border: 1px solid var(--line);
+ border-radius: 999px; padding: 4px;
+ }
+ .bill-toggle button {
+ appearance: none; cursor: pointer; background: transparent;
+ border: 0; color: var(--ink-mute);
+ font-family: var(--sans); font-size: 13px; font-weight: 500;
+ letter-spacing: 0;
+ padding: 8px 16px; border-radius: 999px; transition: background 120ms, color 120ms;
+ }
+ .bill-toggle button.on { background: var(--ink); color: var(--bg); }
+ [data-theme=light] .bill-toggle button.on { background: #18171a !important; color: #f5f1e6 !important; }
+ .bill-toggle button:not(.on):hover { color: var(--ink); }
+ .bill-toggle .save {
+ font-family: var(--mono); font-size: 10.5px; letter-spacing: 0;
+ background: rgba(126,240,210,0.10); color: #7ef0d2;
+ padding: 2px 8px; border-radius: 999px; margin-left: 6px;
+ border: 1px solid rgba(126,240,210, 0.22);
+ }
+ [data-theme=light] .bill-toggle .save { background: rgba(10,136,98,0.10); color: #0a8862; border-color: rgba(10,136,98,0.22); }
+
+ .tiers { display: grid; gap: 14px; }
+ .tiers-primary { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+ .tiers-secondary { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 18px; }
+ @media (max-width: 1180px) {
+ .tiers-primary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+ .tiers-secondary { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+ }
+ @media (max-width: 820px) {
+ .tiers-secondary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+ }
+ @media (max-width: 540px) {
+ .tiers-primary,
+ .tiers-secondary { grid-template-columns: 1fr; }
+ }
+
+ .tier.tier-compact { padding: 20px; }
+ .tier.tier-compact .name { font-size: 26px; margin: 6px 0 4px; }
+ .tier.tier-compact .pitch { font-size: 13px; min-height: 38px; }
+ .tier.tier-compact .num { font-size: 30px; margin: 14px 0 4px; }
+ .tier.tier-compact .num .per { font-size: 12px; }
+ .tier.tier-compact ul { margin: 0 0 18px; }
+ .tier.tier-compact li { padding: 7px 0; font-size: 13px; line-height: 1.45; }
+ .tier.tier-compact .overage { margin: 0 0 16px; font-size: 10.5px; }
+
+ .tiers-secondary-heading {
+ display: flex; align-items: center; gap: 14px;
+ margin: 44px 0 10px;
+ font-family: var(--mono);
+ color: var(--ink-faint);
+ font-size: 11.5px;
+ letter-spacing: 0.04em;
+ text-transform: uppercase;
+ }
+ .tiers-secondary-heading .tsh-eyebrow { color: var(--ink-mute); white-space: nowrap; }
+ .tiers-secondary-heading .tsh-rule { flex: 1; height: 1px; background: var(--line); }
+ .tiers-secondary-heading .tsh-note { color: var(--ink-faint); text-transform: none; letter-spacing: 0; font-family: var(--sans); font-size: 12.5px; white-space: nowrap; }
+ @media (max-width: 720px) {
+ .tiers-secondary-heading { flex-wrap: wrap; gap: 8px; }
+ .tiers-secondary-heading .tsh-note { white-space: normal; flex-basis: 100%; }
+ }
+ .tier {
+ background: var(--bg-elev); border: 1px solid var(--line);
+ border-radius: 12px; padding: 24px;
+ display: flex; flex-direction: column;
+ transition: border-color 160ms, transform 160ms;
+ }
+ .tier:hover { border-color: var(--line-2); transform: translateY(-2px); }
+ .tier.featured {
+ background: var(--bg-elev);
+ border-color: rgba(126,240,210, 0.42);
+ position: relative;
+ }
+ [data-theme=light] .tier.featured { border-color: rgba(10,136,98, 0.40) !important; }
+ .tier .tag {
+ font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.04em;
+ text-transform: uppercase; color: var(--ink-faint);
+ }
+ .tier.featured .tag { color: #7ef0d2; }
+ [data-theme=light] .tier.featured .tag { color: #0a8862; }
+ .tier.featured .tag::after { content: " . most popular"; color: var(--ink-faint); font-weight: 500; letter-spacing: 0.04em; }
+ .tier .name {
+ margin: 8px 0 6px;
+ font-size: 22px; font-weight: 500; letter-spacing: -0.01em; color: var(--ink);
+ }
+ .tier .pitch {
+ font-size: 13.5px; color: var(--ink-mute); line-height: 1.5;
+ min-height: 42px;
+ }
+ .tier .num {
+ margin: 18px 0 4px;
+ font-family: var(--mono);
+ font-size: 36px; font-weight: 500; letter-spacing: -0.02em; color: var(--ink);
+ font-variant-numeric: tabular-nums;
+ }
+ .tier .num .per { font-family: var(--sans); font-size: 13px; font-weight: 400; color: var(--ink-mute); margin-left: 4px; letter-spacing: 0; }
+ .tier .frontier { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); margin-bottom: 6px; letter-spacing: 0.02em; }
+ .tier .overage {
+ font-family: var(--mono); font-size: 11px; color: var(--ink-faint); margin: 0 0 22px;
+ line-height: 1.5; letter-spacing: 0.02em;
+ }
+ .tier .overage b { color: var(--ink-mute); font-weight: 500; }
+ .tier ul { list-style: none; margin: 0 0 22px; padding: 0; flex: 1; }
+ .tier li {
+ padding: 9px 0; font-size: 13.5px; line-height: 1.5; color: var(--ink-mute);
+ border-bottom: 1px solid var(--line);
+ }
+ .tier li:last-child { border-bottom: none; }
+ .tier li b { color: var(--ink); font-weight: 500; }
+ .tier a.cta {
+ display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+ padding: 11px 16px; border-radius: 8px;
+ font-size: 13.5px; font-weight: 500; letter-spacing: 0;
+ border: 1px solid var(--line-2);
+ color: var(--ink-mute); transition: border-color 120ms, color 120ms, background 120ms;
+ }
+ .tier a.cta:hover { border-color: rgba(126,240,210,0.55); color: var(--ink); background: rgba(126,240,210, 0.04); }
+ [data-theme=light] .tier a.cta:hover { border-color: rgba(10,136,98, 0.55) !important; background: rgba(10,136,98, 0.04) !important; }
+ .tier.featured a.cta {
+ background: #7ef0d2; color: #0a0a0d; border-color: #7ef0d2;
+ font-weight: 500;
+ }
+ .tier.featured a.cta:hover {
+ background: #c1f5e3; border-color: #c1f5e3; color: #0a0a0d;
+ transform: translateY(-1px);
+ }
+ [data-theme=light] .tier.featured a.cta {
+ background: #0a8862 !important; color: #fbf8f0 !important; border-color: #0a8862 !important;
+ }
+ [data-theme=light] .tier.featured a.cta:hover {
+ background: #059669 !important; border-color: #059669 !important;
+ }
+
+ .matrix {
+ background: var(--bg-elev);
+ border: 1px solid var(--line);
+ border-radius: 12px;
+ overflow-x: auto;
+ -webkit-overflow-scrolling: touch;
+ }
+ .matrix table { width: 100%; border-collapse: collapse; }
+ .matrix th, .matrix td {
+ padding: 14px 18px; text-align: left;
+ border-bottom: 1px solid var(--line);
+ font-size: 13.5px;
+ }
+ .matrix th {
+ font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em;
+ text-transform: uppercase; color: var(--ink-faint); font-weight: 500;
+ background: rgba(0,0,0,0.18);
+ }
+ [data-theme=light] .matrix th { background: rgba(24,23,26,0.04) !important; }
+ .matrix th.feat { width: 38%; color: var(--ink-faint); }
+ .matrix th.col-pro { color: var(--ink); }
+ .matrix td.feat { color: var(--ink); font-weight: 500; }
+ .matrix td { color: var(--ink-mute); text-align: center; }
+ .matrix td.feat { text-align: left; }
+ .matrix td .y { color: var(--good); font-family: var(--mono); }
+ .matrix td .n { color: var(--ink-faint); font-family: var(--mono); }
+ .matrix tr:last-child td { border-bottom: none; }
+ .matrix tr.section td {
+ background: rgba(0,0,0,0.18);
+ font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em;
+ text-transform: uppercase; color: var(--ink-faint); font-weight: 500;
+ text-align: left;
+ }
+ [data-theme=light] .matrix tr.section td { background: rgba(24,23,26,0.04) !important; }
+ @media (max-width: 720px) {
+ .matrix table { min-width: 720px; }
+ .matrix th, .matrix td { padding: 10px 12px; font-size: 12.5px; white-space: nowrap; }
+ .matrix th.feat, .matrix td.feat { white-space: normal; }
+ .matrix th.feat { width: auto; min-width: 200px; }
+ }
+ .matrix-hint {
+ display: none;
+ margin: 8px 0 0;
+ font-family: var(--mono); font-size: 11px; color: var(--ink-faint);
+ letter-spacing: 0.04em; text-transform: uppercase;
+ }
+ @media (max-width: 720px) {
+ .matrix-hint { display: block; }
+ }
+
+ .faq { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+ @media (max-width: 800px) { .faq { grid-template-columns: 1fr; } }
+ .faq-card {
+ background: var(--bg-elev); border: 1px solid var(--line);
+ border-radius: 12px; padding: 22px 24px;
+ transition: border-color 160ms;
+ }
+ .faq-card:hover { border-color: var(--line-2); }
+ .faq-card h3, .faq-card h4 {
+ margin: 0 0 10px; font-size: 15px; font-weight: 500;
+ letter-spacing: -0.005em; color: var(--ink); line-height: 1.35;
+ }
+ .faq-card p { margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--ink-mute); }
+ .faq-card p code {
+ font-family: var(--mono); font-size: 0.92em; color: #c1f5e3;
+ background: rgba(126,240,210, 0.06); border: 1px solid rgba(126,240,210, 0.18);
+ border-radius: 4px; padding: 1px 6px;
+ }
+ [data-theme=light] .faq-card p code { color: #0a8862 !important; background: rgba(10,136,98,0.06) !important; border-color: rgba(10,136,98, 0.22) !important; }
+
+ /* ROI / self-hosting comparison */
+ .roi-grid {
+ display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 14px;
+ }
+ @media (max-width: 920px) { .roi-grid { grid-template-columns: 1fr; } }
+ .roi-card {
+ background: var(--bg-elev); border: 1px solid var(--line);
+ border-radius: 12px; padding: 28px;
+ }
+ .roi-card h3 {
+ margin: 0 0 14px; font-size: 18px; font-weight: 500;
+ letter-spacing: -0.01em; color: var(--ink); line-height: 1.3;
+ }
+ .roi-card h3 .tone { color: var(--ink-mute); font-weight: 500; }
+ .roi-card p { margin: 0 0 14px; font-size: 13.5px; line-height: 1.6; color: var(--ink-mute); }
+ .roi-card p:last-child { margin: 0; }
+ .roi-rows { display: grid; gap: 6px; margin: 16px 0; }
+ .roi-row {
+ display: grid; grid-template-columns: 1fr auto;
+ padding: 10px 0; border-bottom: 1px solid var(--line);
+ font-size: 13.5px;
+ }
+ .roi-row:last-child { border-bottom: none; }
+ .roi-row .lbl { color: var(--ink-mute); }
+ .roi-row .val { color: var(--ink); font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+ .roi-row.tot { padding-top: 14px; }
+ .roi-row.tot .lbl { color: var(--ink); font-weight: 500; }
+ .roi-row.tot .val { color: #7ef0d2; font-weight: 500; font-size: 14px; }
+ [data-theme=light] .roi-row.tot .val { color: #0a8862 !important; }
+
+ .vs-tbl {
+ background: var(--bg-elev); border: 1px solid var(--line);
+ border-radius: 12px; overflow-x: auto;
+ -webkit-overflow-scrolling: touch;
+ margin-top: 14px;
+ }
+ .vs-tbl table { width: 100%; border-collapse: collapse; }
+ .vs-tbl th, .vs-tbl td {
+ padding: 13px 18px; text-align: left;
+ border-bottom: 1px solid var(--line);
+ font-size: 13px;
+ }
+ @media (max-width: 720px) {
+ .vs-tbl table { min-width: 480px; }
+ .vs-tbl th, .vs-tbl td { padding: 12px 14px; font-size: 12.5px; }
+ }
+ .vs-tbl th {
+ font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em;
+ text-transform: uppercase; color: var(--ink-faint); font-weight: 500;
+ background: rgba(0,0,0,0.18);
+ }
+ [data-theme=light] .vs-tbl th { background: rgba(24,23,26,0.04) !important; }
+ .vs-tbl th.col-kolm { color: var(--ink); }
+ .vs-tbl td:first-child { color: var(--ink); font-weight: 500; }
+ .vs-tbl td { color: var(--ink-mute); }
+ .vs-tbl tr:last-child td { border-bottom: none; }
+
+ /* roi-calc . wave 126 . interactive savings calculator. Numbers update live. */
+ .roi-calc { display: flex; flex-direction: column; gap: 14px; }
+ .rc-help { color: var(--ink-mute); font-size: 13.5px; margin: 0 0 4px !important; }
+ .rc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+ .rc-field { display: flex; flex-direction: column; gap: 5px; }
+ .rc-field > span {
+ font-size: 10.5px; color: var(--ink-faint);
+ text-transform: uppercase; letter-spacing: 0.06em;
+ font-family: var(--mono); line-height: 1.2;
+ }
+ .rc-field input, .rc-field select {
+ background: var(--bg-2, #11151b);
+ border: 1px solid var(--line, rgba(255,255,255,0.08));
+ color: var(--ink, #ece7dc);
+ padding: 10px 12px;
+ border-radius: 8px;
+ font-family: var(--mono, ui-monospace);
+ font-size: 13.5px;
+ font-variant-numeric: tabular-nums;
+ transition: border-color 160ms;
+ width: 100%;
+ box-sizing: border-box;
+ }
+ .rc-field input:focus, .rc-field select:focus {
+ outline: none; border-color: rgba(126, 240, 210, 0.55);
+ }
+ .rc-out {
+ border: 1px solid var(--line, rgba(255,255,255,0.08));
+ border-radius: 9px; padding: 12px 16px;
+ background: rgba(126, 240, 210, 0.03);
+ }
+ .rc-out .rc-row {
+ display: flex; justify-content: space-between; align-items: baseline;
+ padding: 6px 0; border: none;
+ font-variant-numeric: tabular-nums;
+ }
+ .rc-out .rc-row .lbl { color: var(--ink-mute); font-size: 13px; }
+ .rc-out .rc-row b {
+ font-family: var(--mono); font-size: 14.5px;
+ color: var(--ink); font-weight: 500;
+ }
+ .rc-out .rc-row.rc-savings {
+ border-top: 1px solid var(--line); margin-top: 6px; padding-top: 12px;
+ }
+ .rc-out .rc-row.rc-savings .lbl { color: var(--ink); font-weight: 500; }
+ .rc-out .rc-row.rc-savings b { color: #7ef0d2; font-size: 18px; font-weight: 600; }
+ .rc-out .rc-row.rc-mult b { color: #7ef0d2; }
+ [data-theme=light] .rc-out { background: rgba(10, 136, 98, 0.04); }
+ [data-theme=light] .rc-out .rc-row.rc-savings b { color: #0a8862 !important; }
+ [data-theme=light] .rc-out .rc-row.rc-mult b { color: #0a8862 !important; }
+ .rc-fine {
+ font-size: 11.5px; color: var(--ink-faint) !important;
+ font-family: var(--mono); line-height: 1.6; margin: 4px 0 0 !important;
+ }
+
+ footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); }
+ footer.site .grid { display: grid; grid-template-columns: 1.5fr repeat(3, 1fr); gap: 36px; margin-bottom: 36px; }
+ @media (max-width: 720px) { footer.site .grid { grid-template-columns: 1fr 1fr; } }
+ footer.site .brandcol .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); margin-bottom: 14px; }
+ footer.site .brandcol .brand img { height: 16px; width: 16px; }
+ footer.site .brandcol .brand span { font-weight: 500; font-size: 15px; letter-spacing: 0; }
+ footer.site .brandcol p { font-size: 13px; line-height: 1.55; color: var(--ink-mute); margin: 0; max-width: 32ch; }
+ footer.site h5 { font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 14px; font-weight: 500; }
+ footer.site ul { list-style: none; margin: 0; padding: 0; }
+ footer.site li { margin-bottom: 8px; }
+ footer.site li a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
+ footer.site li a:hover { color: var(--ink); }
+ footer.site .legal {
+ padding-top: 22px; border-top: 1px solid var(--line);
+ display: flex; justify-content: space-between; align-items: center;
+ font-family: var(--mono); font-size: 11px; letter-spacing: 0; color: var(--ink-faint);
+ flex-wrap: wrap; gap: 12px;
+ }
+
+ /* Closer CTA . single restrained card, 1px border, no gradient bg,
+ no heavy box-shadow. Matches homepage cinematic restraint. */
+ section.closer { padding: 56px 0 88px; border-top: 1px solid var(--line); }
+ .closer-card {
+ position: relative;
+ background: var(--bg-elev);
+ border: 1px solid var(--line);
+ border-radius: 14px; padding: 56px 48px;
+ transition: border-color 160ms;
+ }
+ .closer-card:hover { border-color: rgba(126,240,210, 0.32); }
+ [data-theme=light] .closer-card:hover { border-color: rgba(10,136,98, 0.32) !important; }
+ @media (max-width: 720px) { .closer-card { padding: 36px 24px; } }
+ .closer-eyebrow {
+ font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em;
+ text-transform: uppercase; color: var(--ink-faint);
+ display: inline-flex; gap: 10px; margin: 0 0 18px;
+ }
+ .closer-eyebrow .num { color: var(--ink); }
+ .closer-card h2 {
+ margin: 0 0 12px;
+ font-size: clamp(28px, 3.8vw, 44px);
+ line-height: 1.08; font-weight: 500; letter-spacing: -0.025em;
+ color: var(--ink); max-width: 22ch;
+ }
+ .closer-card p { margin: 0 0 28px; font-size: 16px; color: var(--ink-mute); max-width: 56ch; line-height: 1.55; }
+ .closer-card p code {
+ font-family: var(--mono); font-size: 0.92em; color: #c1f5e3;
+ background: rgba(126,240,210, 0.06); border: 1px solid rgba(126,240,210, 0.18);
+ border-radius: 4px; padding: 1px 6px;
+ }
+ [data-theme=light] .closer-card p code { color: #0a8862 !important; background: rgba(10,136,98,0.06) !important; border-color: rgba(10,136,98, 0.22) !important; }
+ .closer-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+ .closer-cta {
+ display: inline-flex; align-items: center; gap: 6px;
+ padding: 13px 22px; border-radius: 8px;
+ font-size: 14.5px; font-weight: 500; letter-spacing: 0;
+ background: #7ef0d2; color: #0a0a0d;
+ border: 1px solid #7ef0d2;
+ transition: background 120ms, transform 120ms, border-color 120ms;
+ }
+ .closer-cta:hover { background: #c1f5e3; border-color: #c1f5e3; transform: translateY(-1px); }
+ [data-theme=light] .closer-cta { background: #0a8862 !important; color: #fbf8f0 !important; border-color: #0a8862 !important; }
+ [data-theme=light] .closer-cta:hover { background: #059669 !important; border-color: #059669 !important; }
+ .closer-ghost {
+ display: inline-flex; align-items: center; gap: 6px;
+ padding: 13px 22px; border-radius: 8px;
+ font-size: 14.5px; font-weight: 500; letter-spacing: 0;
+ color: var(--ink-mute);
+ border: 1px solid var(--line-2);
+ transition: color 120ms, border-color 120ms;
+ }
+ .closer-ghost:hover { color: var(--ink); border-color: rgba(126,240,210, 0.42); }
+ [data-theme=light] .closer-ghost:hover { border-color: rgba(10,136,98, 0.42) !important; }
+
+ /* Footer styles . match homepage footer pattern. Tokens via brand-refresh.css. */
+ footer.site .footer-grid h4 { font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 14px; font-weight: 500; }
+ footer.site .footer-grid a { display: block; color: var(--ink-mute); font-size: 13.5px; line-height: 1.85; transition: color 120ms; text-decoration: none; }
+ footer.site .footer-grid a:hover { color: var(--ink); }
+ footer.site .footer-tag { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); letter-spacing: 0.02em; }
+
+ /* Mobile UX: enlarge tap targets in footer grid + tighten group gap */
+ @media (max-width: 720px) {
+ footer.site .footer-grid > div { gap: 8px !important; }
+ footer.site .footer-grid a { display: inline-flex; align-items: center; min-height: 32px; padding: 4px 0; line-height: 1.3; }
+ .tiers { gap: 14px; }
+ .tier { padding: 26px 22px; }
+ }
+</style>
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<link rel="stylesheet" href="/kolm-svg.css">
+<link rel="stylesheet" href="/w598.css">
+<link rel="stylesheet" href="/w600-layout.css">
+<link rel="stylesheet" href="/surface-polish.css">
+<script src="/kolm-svg.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+
+<header class="site-header">
+ <div class="wrap">
+ <a href="/" class="brand"><span>kolm.ai</span></a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="compile" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="device" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="file" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="chart" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="shield" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+ <div class="site-actions">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
+</header>
+
+<main id="main">
+<!-- W267 nonprofits-strip - single inline strip; safe for W273 to preserve via data-w267 marker -->
+<aside data-w267="nonprofits-strip" style="border-bottom:1px solid var(--line,rgba(255,255,255,0.06));background:linear-gradient(90deg,rgba(126,240,210,0.05),rgba(126,240,210,0.01));padding:14px 20px;text-align:center;font-size:14px;color:var(--ink-mute,#b5bdb1);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter','Segoe UI',system-ui,sans-serif">
+ <span style="display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center">
+ <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;color:#7ef0d2;border:1px solid rgba(126,240,210,0.22);border-radius:999px;padding:3px 9px">non-profit / academic</span>
+ <span>Free Pro tier for 501(c)(3), accredited universities, and verified student researchers.</span>
+ <a href="/nonprofits" style="color:#7ef0d2;border-bottom:1px solid rgba(126,240,210,0.35);font-weight:500">Apply &rarr;</a>
+ </span>
+</aside>
+<section class="hero">
+ <div class="wrap">
+ <div class="hero-eyebrow"><span class="he-dot"></span>Pricing . capture locally, compile when it pays</div>
+ <h1 class="hero-h1">Start free.<br><span class="tone">Pay when you ship.</span></h1>
+<p class="lede">Route locally for free. Pay for cloud sync, shared review, artifact jobs, private registry, and governance. Every signed <code>.kolm</code> artifact remains yours.</p>
+
+ <div class="provider-strip">
+ <div class="ps-label"><span class="ps-num">01</span> &nbsp; Works with any frontier</div>
+ <div class="ps-models">
+ <span>Claude</span><span>GPT</span><span>Llama</span><span>Mistral</span><span>DeepSeek</span><span>Qwen</span><span>Gemini</span>
+ </div>
+ </div>
+
+ <div class="ticker-bar" aria-hidden="true">
+ <div class="ticker-track">
+ <span class="ti"><b>$0</b> per call after compile</span>
+ <span class="sep">.</span>
+ <span class="ti"><b>Ed25519</b>-signed receipts</span>
+ <span class="sep">.</span>
+ <span class="ti"><b>K &ge; 0.85</b> quality gate</span>
+ <span class="sep">.</span>
+ <span class="ti"><b>BYO</b> frontier key</span>
+ <span class="sep">.</span>
+ <span class="ti"><b>Local</b> runtime forever</span>
+ <span class="sep">.</span>
+ <span class="ti"><b>Month</b>-to-month</span>
+ <span class="sep">.</span>
+ <span class="ti"><b>14-day</b> Pro trial</span>
+ <span class="sep">.</span>
+ <span class="ti"><b>No</b> token resale</span>
+ <span class="sep">.</span>
+ <span class="ti"><b>$0</b> per call after compile</span>
+ <span class="sep">.</span>
+ <span class="ti"><b>Ed25519</b>-signed receipts</span>
+ <span class="sep">.</span>
+ <span class="ti"><b>K &ge; 0.85</b> quality gate</span>
+ <span class="sep">.</span>
+ <span class="ti"><b>BYO</b> frontier key</span>
+ <span class="sep">.</span>
+ <span class="ti"><b>Local</b> runtime forever</span>
+ <span class="sep">.</span>
+ <span class="ti"><b>Month</b>-to-month</span>
+ <span class="sep">.</span>
+ <span class="ti"><b>14-day</b> Pro trial</span>
+ <span class="sep">.</span>
+ <span class="ti"><b>No</b> token resale</span>
+ </div>
+ </div>
+ </div>
+</section>
+
+<section style="padding:36px 0;background:linear-gradient(180deg,rgba(126,240,210,0.04) 0%,transparent 100%)">
+ <div class="wrap">
+ <div style="display:flex;align-items:center;gap:8px;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-2,#9ca3af);margin-bottom:14px">
+ <span data-kolm-icon="file" data-kolm-size="14"></span>
+ <span>What a paid plan ships &middot; one signed artifact</span>
+ </div>
+ <div class="kolm-hero__visual" data-kolm-illustration="artifact-anatomy" aria-hidden="true"></div>
+ </div>
+</section>
+
+<section>
+ <div class="wrap">
+ <!-- One visible pricing model. Legacy tier aliases remain only in this
+ hidden compatibility block so public pricing stays consistent. -->
+ <div data-w395="compat-anchors" aria-hidden="true" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">
+ <!-- Legacy tier framing retained offscreen. -->
+<div data-w260="three-tier" data-w273="tier-summary">
+ <div>Three ways to use Kolm</div>
+ <div><b>Free</b> Local CLI + runtime for individual developers, MIT / Apache licensed, with a 100 compiles/mo cap.</div>
+ <div><b>Pro $49 / mo</b> Solo developer + priority K-score, unlimited compiles, and email support.</div>
+ <div><b>Team and Enterprise</b> 5 to unlimited seats, SSO, audit log, BAA, on-prem and air-gap by contract.</div>
+ </div>
+
+ <!-- Legacy tier tag aliases. -->
+ <div class="tag">Free</div>
+ <div class="tag">Pro alias</div>
+ <div class="tag">Pro</div>
+ <div class="tag">Team</div>
+ <div class="tag">Scale alias</div>
+ <div class="tag">Enterprise alias</div>
+ <div class="tag">Enterprise</div>
+
+ <!-- Legacy hidden tier markers with monotonic prices. -->
+ <div data-tier="free">
+ Free: 100 artifacts_built / mo, 1k captured_events / mo, 1 GB
+ raw_cloud_synced_bytes, community support.
+ </div>
+ <div data-tier="starter">
+ Legacy Pro alias maps to Pro $49 / mo with unlimited compiles,
+ priority K-score, 10 GB artifacts, and email support.
+ </div>
+ <div data-tier="team">
+ Team $499 / mo: five-seat workspace with private registry, approvals, audit log, CI/CD, and team controls.
+ </div>
+ <div data-tier="business">
+ Legacy enterprise alias maps to Enterprise custom: BAA, SAML/SCIM SSO, customer-hosted bridge, air-gap, and dedicated architecture review.
+ </div>
+ <div data-tier="enterprise" data-w260="enterprise-baa">
+ Enterprise Custom: unlimited by contract, on-prem and air-gap and
+ self-hosted compile bridge, BAA, SAML SCIM SSO, dedicated CSM with
+ white-glove onboarding, signed audit log export.
+ </div>
+
+ <!-- Legacy usage-credit marker retained off the visible plan cards. -->
+ <div data-w273="usage-credits">
+ Usage-based credits (post-cap): $0.001 / compile, $0.0001 /
+ capture. Superseded by the 12 metered counters table below.
+ </div>
+
+ <!-- Legacy spend-comparison marker retained for the calculator contract. -->
+ <div data-w273="openai-vs" id="openai-vs-legacy">
+ Currently renting from OpenAI? See your kolm cost at any spend
+ level by entering it below.
+ <input id="ov-spend" type="number" value="3000" aria-hidden="true">
+ Here is your kolm cost on <span id="ov-tier-name">Team</span>:
+ <span id="ov-kolm">$499 / mo</span> &middot; you save
+ <span id="ov-save">$2,901 / mo</span>.
+ </div>
+ </div>
+
+ <div class="plans-header" style="margin-bottom:36px">
+ <div class="eyebrow"><span class="num">01</span><span>Plans</span></div>
+ <h2 style="max-width:30ch">Free, Pro, Team, Enterprise.</h2>
+ <p class="sec-lede">Start local. Add cloud sync, shared review, compliance, and private deployment when the workflow needs it.</p>
+ </div>
+
+ <!-- Primary visible four-tier grid: Free Local / Pro / Team / Enterprise. -->
+ <section class="w373-pricing-block" data-w373="pricing-four-tier" aria-label="kolm pricing: four plans" style="margin-top:8px">
+ <div class="w373-tiers" data-w373="four-tier-grid" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:36px">
+ <style>
+ @media (max-width:1180px){ .w373-tiers{grid-template-columns:repeat(2,minmax(0,1fr)) !important} }
+ @media (max-width:540px){ .w373-tiers{grid-template-columns:1fr !important} }
+ .w395-tier{display:flex;flex-direction:column;background:var(--bg-elev);border:1px solid var(--line);border-radius:12px;padding:24px;transition:border-color 160ms,transform 160ms}
+ .w395-tier:hover{border-color:var(--line-2);transform:translateY(-2px)}
+ .w395-tier.featured{border-color:rgba(126,240,210,0.42)}
+ [data-theme=light] .w395-tier.featured{border-color:rgba(10,136,98,0.40) !important}
+ .w395-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px}
+ .w395-tier.featured .w395-tag{color:#7ef0d2}
+ [data-theme=light] .w395-tier.featured .w395-tag{color:#0a8862}
+ .w395-name{font-size:22px;font-weight:500;letter-spacing:-0.01em;color:var(--ink);margin:0 0 6px}
+ .w395-pitch{font-size:13.5px;color:var(--ink-mute);line-height:1.5;margin:0 0 18px;min-height:42px}
+ .w395-price{font-family:var(--mono);font-size:32px;font-weight:500;letter-spacing:-0.02em;color:var(--ink);font-variant-numeric:tabular-nums;margin:0 0 4px}
+ .w395-price .per{font-family:var(--sans);font-size:13px;font-weight:400;color:var(--ink-mute);margin-left:4px;letter-spacing:0}
+ .w395-list{list-style:none;margin:0 0 22px;padding:0;flex:1}
+ .w395-list li{padding:9px 0;font-size:13.5px;line-height:1.5;color:var(--ink-mute);border-bottom:1px solid var(--line)}
+ .w395-list li:last-child{border-bottom:none}
+ .w395-list li b{color:var(--ink);font-weight:500}
+ .w395-cta{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 16px;border-radius:8px;font-size:13.5px;font-weight:500;border:1px solid var(--line-2);color:var(--ink-mute);transition:border-color 120ms,color 120ms,background 120ms}
+ .w395-cta:hover{border-color:rgba(126,240,210,0.55);color:var(--ink);background:rgba(126,240,210,0.04)}
+ [data-theme=light] .w395-cta:hover{border-color:rgba(10,136,98,0.55) !important;background:rgba(10,136,98,0.04) !important}
+ .w395-tier.featured .w395-cta{background:#7ef0d2;color:#0a0a0d;border-color:#7ef0d2;font-weight:500}
+ .w395-tier.featured .w395-cta:hover{background:#c1f5e3;border-color:#c1f5e3;color:#0a0a0d;transform:translateY(-1px)}
+ [data-theme=light] .w395-tier.featured .w395-cta{background:#0a8862 !important;color:#fbf8f0 !important;border-color:#0a8862 !important}
+ [data-theme=light] .w395-tier.featured .w395-cta:hover{background:#059669 !important;border-color:#059669 !important}
+ </style>
+
+ <div class="w395-tier" data-tier="free" data-w373-tier="free">
+ <div class="w395-tag">Free Local</div>
+ <h3 class="w395-name">Run forever on your hardware.</h3>
+ <p class="w395-pitch">The whole local stack. Open-source CLI, local lake, optimizer, privacy detector, runtime. No account required.</p>
+ <div class="w395-price">$0<span class="per">forever</span></div>
+ <ul class="w395-list">
+ <li><b>Local connector</b> capture from any app or terminal</li>
+ <li><b>Local lake</b> on SQLite, in your home dir</li>
+<li><b>Local privacy detector</b> 19-class PHI / PII / PCI redaction</li>
+ <li><b>Local optimizer</b> cost / latency / privacy tuning</li>
+ <li><b>Local runtime</b> run any .kolm artifact at $0 per call</li>
+ <li>No cloud sync. Nothing leaves your machine.</li>
+ </ul>
+ <a href="/quickstart" class="w395-cta">Get started &rarr;</a>
+ </div>
+
+ <div class="w395-tier" data-tier="pro" data-w373-tier="pro">
+ <div class="w395-tag">Pro</div>
+ <h3 class="w395-name">Ship to production.</h3>
+ <p class="w395-pitch">Everything in Free Local, plus cloud backup of redacted metadata, the advanced optimizer, synthetic data, and CI hooks.</p>
+ <div class="w395-price">$49<span class="per">/ mo</span></div>
+ <ul class="w395-list">
+ <li><b>Cloud backup &amp; sync</b> metadata and redacted captures</li>
+ <li><b>Advanced optimizer</b> cost, latency, privacy, repetition</li>
+ <li><b>Synthetic data generation</b> grow datasets from seeds</li>
+ <li><b>Build automation</b> CI hooks for GitHub, GitLab, CircleCI</li>
+ <li><b>Multiple device profiles</b> laptop, phone, edge box</li>
+ <li>Everything Free Local has, included</li>
+ </ul>
+ <a href="/signup?plan=pro" class="w395-cta">Upgrade &rarr;</a>
+ </div>
+
+ <div class="w395-tier featured" data-tier="team" data-w373-tier="team">
+ <div class="w395-tag">Team</div>
+ <h3 class="w395-name">Distill together with review.</h3>
+ <p class="w395-pitch">A shared workspace, an approval queue with reviewer roles, and RBAC so reviewers, admins, and operators each have the right keys.</p>
+ <div class="w395-price">$499<span class="per">/ mo</span></div>
+ <ul class="w395-list">
+ <li><b>Shared workspace</b> one home for the team</li>
+ <li><b>Approval queue</b> reviewer roles, blocking sign-off</li>
+ <li><b>Shared datasets</b> one source of truth for examples</li>
+ <li><b>Artifact sharing</b> publish and pull across the team</li>
+ <li><b>RBAC</b> reviewer / admin / operator roles</li>
+ <li>Everything in Pro, pooled per seat</li>
+ </ul>
+ <a href="/signup?plan=team" class="w395-cta">Upgrade &rarr;</a>
+ </div>
+
+ <div class="w395-tier" data-tier="enterprise" data-w373-tier="enterprise">
+ <div class="w395-tag">Enterprise</div>
+ <h3 class="w395-name">For regulated and air-gapped orgs.</h3>
+ <p class="w395-pitch">SSO, SAML, SCIM, audit log retention, VPC and on-prem, BAA, SOC 2 compliance pack, custom provider policy, and a private SLA.</p>
+ <div class="w395-price">Custom<span class="per">contact us</span></div>
+ <ul class="w395-list">
+ <li><b>SSO / SAML / SCIM</b> Okta, Entra, Google, Auth0</li>
+ <li><b>Audit log</b> retention policy, exportable to S3 / Azure</li>
+ <li><b>VPC / on-prem</b> self-hosted compile bridge, air-gap</li>
+ <li><b>BAA / SOC 2</b> compliance pack, signed posture report</li>
+ <li><b>Custom provider policy</b> route per tenant, per artifact</li>
+ <li><b>Private support SLA</b> dedicated CSM, white-glove onboarding</li>
+ </ul>
+ <a href="/enterprise/inquiry" class="w395-cta">Talk to sales &rarr;</a>
+ <p class="tier-foot" style="margin:10px 0 0;font-size:11.5px;color:var(--ink-faint);line-height:1.5">Need a BAA? <a href="/baa" style="color:#7ef0d2;border-bottom:1px solid rgba(126,240,210,0.32)">Review the agreement</a>. <a href="/enterprise#sla" style="color:#7ef0d2;border-bottom:1px solid rgba(126,240,210,0.32)">SLA terms</a>.</p>
+ </div>
+ </div>
+ <h3 style="margin:0 0 10px;font-size:16px;color:var(--ink);font-weight:500">Usage meters</h3>
+ <table class="w373-meters" data-w373="meters-table" aria-label="W373 billing meters" style="width:100%;border-collapse:collapse;font-size:13px;font-family:var(--mono);font-variant-numeric:tabular-nums">
+ <thead>
+ <tr style="text-align:left;color:var(--ink-faint);border-bottom:1px solid var(--line)">
+ <th style="padding:8px 10px">Meter</th>
+ <th style="padding:8px 10px">Unit</th>
+ <th style="padding:8px 10px">Free</th>
+ <th style="padding:8px 10px">Pro</th>
+ <th style="padding:8px 10px">Team</th>
+ <th style="padding:8px 10px">Enterprise</th>
+ </tr>
+ </thead>
+ <tbody>
+ <tr data-w373-meter="captured_events" style="border-bottom:1px solid var(--line)"><td style="padding:7px 10px">captured_events</td><td style="padding:7px 10px">event</td><td style="padding:7px 10px">1k</td><td style="padding:7px 10px">50k</td><td style="padding:7px 10px">500k</td><td style="padding:7px 10px">contract</td></tr>
+ <tr data-w373-meter="redacted_events" style="border-bottom:1px solid var(--line)"><td style="padding:7px 10px">redacted_events</td><td style="padding:7px 10px">event</td><td style="padding:7px 10px">1k</td><td style="padding:7px 10px">50k</td><td style="padding:7px 10px">500k</td><td style="padding:7px 10px">contract</td></tr>
+ <tr data-w373-meter="raw_cloud_synced_bytes" style="border-bottom:1px solid var(--line)"><td style="padding:7px 10px">raw_cloud_synced_bytes</td><td style="padding:7px 10px">GB</td><td style="padding:7px 10px">1</td><td style="padding:7px 10px">50</td><td style="padding:7px 10px">500</td><td style="padding:7px 10px">contract</td></tr>
+ <tr data-w373-meter="redacted_cloud_synced_bytes" style="border-bottom:1px solid var(--line)"><td style="padding:7px 10px">redacted_cloud_synced_bytes</td><td style="padding:7px 10px">GB</td><td style="padding:7px 10px">1</td><td style="padding:7px 10px">50</td><td style="padding:7px 10px">500</td><td style="padding:7px 10px">contract</td></tr>
+ <tr data-w373-meter="hosted_build_minutes" style="border-bottom:1px solid var(--line)"><td style="padding:7px 10px">hosted_build_minutes</td><td style="padding:7px 10px">min</td><td style="padding:7px 10px">10</td><td style="padding:7px 10px">600</td><td style="padding:7px 10px">6,000</td><td style="padding:7px 10px">contract</td></tr>
+ <tr data-w373-meter="training_gpu_minutes" style="border-bottom:1px solid var(--line)"><td style="padding:7px 10px">training_gpu_minutes</td><td style="padding:7px 10px">min</td><td style="padding:7px 10px">0</td><td style="padding:7px 10px">120</td><td style="padding:7px 10px">1,200</td><td style="padding:7px 10px">contract</td></tr>
+ <tr data-w373-meter="synthetic_examples_generated" style="border-bottom:1px solid var(--line)"><td style="padding:7px 10px">synthetic_examples_generated</td><td style="padding:7px 10px">row</td><td style="padding:7px 10px">1k</td><td style="padding:7px 10px">100k</td><td style="padding:7px 10px">1M</td><td style="padding:7px 10px">contract</td></tr>
+ <tr data-w373-meter="eval_examples_run" style="border-bottom:1px solid var(--line)"><td style="padding:7px 10px">eval_examples_run</td><td style="padding:7px 10px">row</td><td style="padding:7px 10px">2k</td><td style="padding:7px 10px">200k</td><td style="padding:7px 10px">2M</td><td style="padding:7px 10px">contract</td></tr>
+ <tr data-w373-meter="artifacts_built" style="border-bottom:1px solid var(--line)"><td style="padding:7px 10px">artifacts_built</td><td style="padding:7px 10px">build</td><td style="padding:7px 10px">100</td><td style="padding:7px 10px">1k</td><td style="padding:7px 10px">10k</td><td style="padding:7px 10px">contract</td></tr>
+ <tr data-w373-meter="artifact_installs" style="border-bottom:1px solid var(--line)"><td style="padding:7px 10px">artifact_installs</td><td style="padding:7px 10px">install</td><td style="padding:7px 10px">unlimited</td><td style="padding:7px 10px">unlimited</td><td style="padding:7px 10px">unlimited</td><td style="padding:7px 10px">unlimited</td></tr>
+ <tr data-w373-meter="team_seats" style="border-bottom:1px solid var(--line)"><td style="padding:7px 10px">team_seats</td><td style="padding:7px 10px">seat</td><td style="padding:7px 10px">1</td><td style="padding:7px 10px">1</td><td style="padding:7px 10px">5</td><td style="padding:7px 10px">contract</td></tr>
+ <tr data-w373-meter="device_sync_targets"><td style="padding:7px 10px">device_sync_targets</td><td style="padding:7px 10px">device</td><td style="padding:7px 10px">2</td><td style="padding:7px 10px">10</td><td style="padding:7px 10px">100</td><td style="padding:7px 10px">contract</td></tr>
+ </tbody>
+ </table>
+ </section>
+
+ <!-- ROI calculator widget; client-side only. Inputs stay in the browser. -->
+ <div data-w273="roi-calculator" id="w273-roi" style="margin-top:14px;border:1px solid var(--line);border-radius:12px;padding:24px;background:var(--bg-elev)">
+ <div style="font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-faint);margin-bottom:10px">ROI calculator</div>
+ <h3 style="margin:0 0 8px;font-size:18px;font-weight:500;color:var(--ink);letter-spacing:-0.01em">Compile vs rent: your numbers.</h3>
+ <p style="margin:0 0 14px;font-size:13.5px;color:var(--ink-mute);line-height:1.55">No backend. Inputs stay in your browser. Edit any field; the savings and payback update live.</p>
+ <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px">
+ <label style="display:flex;flex-direction:column;gap:5px">
+ <span style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint)">Compiles per month</span>
+ <input id="w273-compiles" type="number" value="120" min="1" step="10" inputmode="numeric" aria-label="Compiles per month" style="background:var(--bg-card);border:1px solid var(--line);color:var(--ink);padding:9px 11px;border-radius:6px;font-family:var(--mono);font-size:13.5px;font-variant-numeric:tabular-nums">
+ </label>
+ <label style="display:flex;flex-direction:column;gap:5px">
+ <span style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint)">Avg cost / prompt (rented LLM, $)</span>
+ <input id="w273-perprompt" type="number" value="0.06" min="0" step="0.01" inputmode="decimal" aria-label="Average cost per prompt with rented LLM" style="background:var(--bg-card);border:1px solid var(--line);color:var(--ink);padding:9px 11px;border-radius:6px;font-family:var(--mono);font-size:13.5px;font-variant-numeric:tabular-nums">
+ </label>
+ <label style="display:flex;flex-direction:column;gap:5px">
+ <span style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint)">Prompts per compile</span>
+ <input id="w273-prompts" type="number" value="20000" min="100" step="100" inputmode="numeric" aria-label="Prompts served per compile per month" style="background:var(--bg-card);border:1px solid var(--line);color:var(--ink);padding:9px 11px;border-radius:6px;font-family:var(--mono);font-size:13.5px;font-variant-numeric:tabular-nums">
+ </label>
+ <label style="display:flex;flex-direction:column;gap:5px">
+ <span style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint)">Churn savings ($ / mo)</span>
+ <input id="w273-churn" type="number" value="500" min="0" step="50" inputmode="numeric" aria-label="Monthly revenue retained by removing data residency and rate-limit failures" style="background:var(--bg-card);border:1px solid var(--line);color:var(--ink);padding:9px 11px;border-radius:6px;font-family:var(--mono);font-size:13.5px;font-variant-numeric:tabular-nums">
+ </label>
+ <label style="display:flex;flex-direction:column;gap:5px">
+ <span style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint)">kolm tier</span>
+ <select id="w273-tier" aria-label="kolm tier for ROI" style="background:var(--bg-card);border:1px solid var(--line);color:var(--ink);padding:9px 11px;border-radius:6px;font-family:var(--mono);font-size:13.5px">
+ <option value="0">Free ($0)</option>
+ <option value="49">Pro ($49)</option>
+ <option value="499" selected>Team ($499)</option>
+ <option value="2000">Enterprise (custom)</option>
+ </select>
+ </label>
+ <label style="display:flex;flex-direction:column;gap:5px">
+ <span style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint)">Setup cost ($ one-time)</span>
+ <input id="w273-setup" type="number" value="2000" min="0" step="100" inputmode="numeric" aria-label="One-time setup cost for kolm migration" style="background:var(--bg-card);border:1px solid var(--line);color:var(--ink);padding:9px 11px;border-radius:6px;font-family:var(--mono);font-size:13.5px;font-variant-numeric:tabular-nums">
+ </label>
+ </div>
+ <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;padding:14px 16px;border:1px solid var(--line);border-radius:8px;background:rgba(126,240,210,0.04)">
+ <div><span style="color:var(--ink-mute);font-size:12.5px">Rent / mo</span><br><b id="w273-rent" style="color:var(--ink);font-family:var(--mono);font-size:18px;font-variant-numeric:tabular-nums">$72,000</b></div>
+ <div><span style="color:var(--ink-mute);font-size:12.5px">kolm / mo</span><br><b id="w273-kolm" style="color:var(--ink);font-family:var(--mono);font-size:18px;font-variant-numeric:tabular-nums">$499</b></div>
+ <div><span style="color:var(--ink-mute);font-size:12.5px">Monthly savings vs renting</span><br><b id="w273-savings" style="color:#7ef0d2;font-family:var(--mono);font-size:20px;font-weight:600;font-variant-numeric:tabular-nums">$72,401</b></div>
+ <div><span style="color:var(--ink-mute);font-size:12.5px">Payback months</span><br><b id="w273-payback" style="color:#7ef0d2;font-family:var(--mono);font-size:20px;font-weight:600;font-variant-numeric:tabular-nums">0.0</b></div>
+ </div>
+ <p style="margin:10px 0 0;font-size:11.5px;color:var(--ink-faint);font-family:var(--mono);line-height:1.6">Assumptions: tier price covers the listed artifact budget; payback divides setup cost by net monthly benefit.</p>
+ <script>
+ // ROI calculator plus spend-comparison strip. Pure client. No backend.
+ (function(){
+ function $(id){ return document.getElementById(id); }
+ function fmt(n){
+ if (!isFinite(n)) return '-';
+ if (n >= 1000000) return '$' + (n/1000000).toFixed(2) + 'M';
+ if (n >= 10000) return '$' + Math.round(n/1000).toLocaleString() + 'k';
+ return '$' + Math.round(n).toLocaleString();
+ }
+ function calcRoi(){
+ var compiles = +$('w273-compiles').value || 0;
+ var perPrompt = +$('w273-perprompt').value || 0;
+ var prompts = +$('w273-prompts').value || 0;
+ var churn = +$('w273-churn').value || 0;
+ var tier = +$('w273-tier').value || 0;
+ var setup = +$('w273-setup').value || 0;
+ var rent = compiles * prompts * perPrompt;
+ var kolm = tier;
+ var savings = (rent - kolm) + churn;
+ var payback = savings > 0 ? (setup / savings) : Infinity;
+ $('w273-rent').textContent = fmt(rent) + ' / mo';
+ $('w273-kolm').textContent = fmt(kolm) + ' / mo';
+ $('w273-savings').textContent = fmt(Math.max(0, savings)) + ' / mo';
+ $('w273-payback').textContent = isFinite(payback) ? payback.toFixed(1) : '-';
+ return { rent: rent, kolm: kolm, savings: savings, paybackMonths: payback };
+ }
+ function calcOpenAI(){
+ var spend = +$('ov-spend').value || 0;
+ var tier;
+ if (spend < 50) tier = { name: 'Free', price: 0 };
+ else if (spend < 1000) tier = { name: 'Pro', price: 49 };
+ else if (spend < 20000) tier = { name: 'Team', price: 499 };
+ else tier = { name: 'Enterprise', price: 2000 };
+ $('ov-tier-name').textContent = tier.name;
+ $('ov-kolm').textContent = fmt(tier.price) + ' / mo';
+ $('ov-save').textContent = fmt(Math.max(0, spend - tier.price)) + ' / mo';
+ return tier;
+ }
+ function wire(){
+ var roiIds = ['w273-compiles','w273-perprompt','w273-prompts','w273-churn','w273-tier','w273-setup'];
+ roiIds.forEach(function(id){
+ var el = $(id); if (!el) return;
+ el.addEventListener('input', calcRoi);
+ el.addEventListener('change', calcRoi);
+ });
+ var ov = $('ov-spend');
+ if (ov){ ov.addEventListener('input', calcOpenAI); ov.addEventListener('change', calcOpenAI); }
+ try { calcRoi(); calcOpenAI(); } catch(e) {}
+ }
+ // Expose the calculator for local verification.
+ try { window.kolmROI = calcRoi; window.kolmOpenAIvs = calcOpenAI; } catch(e) {}
+ if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire);
+ else wire();
+ })();
+ </script>
+ </div>
+
+ </div>
+</section>
+
+<section data-w400="pricing-roi-section">
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">02</span><span>ROI</span></div>
+ <h2>Reduce repeat API spend.<br><span class="tone">Keep the artifact.</span></h2>
+ <p class="sec-lede">Plug in monthly volume. Compare frontier API spend with running a signed artifact on your own hardware. Client-side math; nothing leaves your browser.</p>
+
+ <section class="roi-grid" id="roi" data-w400="pricing-roi">
+ <div class="roi-card" data-w400="roi-rent-card">
+ <h3>API spend. <span class="tone">Today.</span></h3>
+ <p>Frontier API at roughly $3 per million input + output tokens (blended). Every call hits the wire. Every retry hits the wire. Every duplicate hits the wire.</p>
+ <div class="roi-rows" aria-live="polite">
+ <div class="roi-row"><span class="lbl">Captures / mo</span><span class="val" id="w400-roi-vol-out">100,000</span></div>
+ <div class="roi-row"><span class="lbl">Avg tokens / call</span><span class="val" id="w400-roi-tok-out">800</span></div>
+ <div class="roi-row"><span class="lbl">Total tokens / mo</span><span class="val" id="w400-roi-total-tokens">80M</span></div>
+ <div class="roi-row"><span class="lbl">Rate ($ / M tokens)</span><span class="val" id="w400-roi-rate-rent">$3.00</span></div>
+ <div class="roi-row tot"><span class="lbl">Rent cost / mo</span><span class="val" id="w400-roi-rent">$240</span></div>
+ </div>
+ <p style="font-size:12px;color:var(--ink-faint)">Numbers shown for OpenAI gpt-4o-class rates. Anthropic Claude Sonnet and Google Gemini Pro price in a similar band.</p>
+ </div>
+
+ <div class="roi-card" data-w400="roi-kolm-card" style="border-color:rgba(126,240,210,0.42)">
+ <h3>Owned artifact. <span class="tone">After Kolm.</span></h3>
+ <p>Capture, compile, then run on your hardware. The example uses roughly $0.30 per million local tokens for electricity and GPU amortization.</p>
+ <div class="roi-rows" aria-live="polite">
+ <div class="roi-row"><span class="lbl">Retained captures (%)</span><span class="val" id="w400-roi-keep-out">100%</span></div>
+ <div class="roi-row"><span class="lbl">Tokens served local</span><span class="val" id="w400-roi-local-tokens">80M</span></div>
+ <div class="roi-row"><span class="lbl">Rate ($ / M tokens)</span><span class="val" id="w400-roi-rate-kolm">$0.30</span></div>
+ <div class="roi-row"><span class="lbl">One-time compile</span><span class="val" id="w400-roi-compile-out">$49 (Pro)</span></div>
+ <div class="roi-row tot"><span class="lbl">kolm cost / mo</span><span class="val" id="w400-roi-kolm">$24</span></div>
+ </div>
+ <div class="roi-rows" style="margin-top:14px;border-top:1px solid var(--line);padding-top:14px">
+ <div class="roi-row tot"><span class="lbl">You save</span><span class="val" id="w400-roi-savings" style="font-size:18px">$216 / mo</span></div>
+ <div class="roi-row tot"><span class="lbl">Reduction</span><span class="val" id="w400-roi-pct" style="font-size:18px">90%</span></div>
+ </div>
+ <p style="font-size:12px;color:var(--ink-faint)">After one-time compile cost, run on your hardware. kolm cost depends on your GPU + electricity; the $0.30 rate reflects a 4090 amortized over 24 months at $0.12 / kWh.</p>
+ </div>
+ </section>
+
+ <div style="margin-top:18px;padding:18px 22px;border:1px solid var(--line);border-radius:12px;background:var(--bg-elev)">
+ <div style="font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-faint);margin-bottom:10px">Inputs &middot; edit any field</div>
+ <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
+ <label style="display:flex;flex-direction:column;gap:5px">
+ <span style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint)">Monthly captures (volume)</span>
+ <input id="w400-roi-vol" type="number" value="100000" min="100" step="1000" inputmode="numeric" aria-label="Monthly capture volume" style="background:var(--bg-card);border:1px solid var(--line);color:var(--ink);padding:9px 11px;border-radius:6px;font-family:var(--mono);font-size:13.5px;font-variant-numeric:tabular-nums">
+ </label>
+ <label style="display:flex;flex-direction:column;gap:5px">
+ <span style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint)">Avg tokens / call</span>
+ <input id="w400-roi-tok" type="number" value="800" min="1" step="50" inputmode="numeric" aria-label="Average tokens per call" style="background:var(--bg-card);border:1px solid var(--line);color:var(--ink);padding:9px 11px;border-radius:6px;font-family:var(--mono);font-size:13.5px;font-variant-numeric:tabular-nums">
+ </label>
+ <label style="display:flex;flex-direction:column;gap:5px">
+ <span style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint)">Retain N% of calls local</span>
+ <input id="w400-roi-keep" type="number" value="100" min="0" max="100" step="5" inputmode="numeric" aria-label="Percent of calls retained local" style="background:var(--bg-card);border:1px solid var(--line);color:var(--ink);padding:9px 11px;border-radius:6px;font-family:var(--mono);font-size:13.5px;font-variant-numeric:tabular-nums">
+ </label>
+ <label style="display:flex;flex-direction:column;gap:5px">
+ <span style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint)">Compile cost / mo (kolm plan)</span>
+ <input id="w400-roi-compile" type="number" value="49" min="0" step="10" inputmode="numeric" aria-label="Monthly kolm plan cost" style="background:var(--bg-card);border:1px solid var(--line);color:var(--ink);padding:9px 11px;border-radius:6px;font-family:var(--mono);font-size:13.5px;font-variant-numeric:tabular-nums">
+ </label>
+ </div>
+ <p style="margin:14px 0 0;font-size:11.5px;color:var(--ink-faint);font-family:var(--mono);line-height:1.6">Math: compare rented tokens with retained local tokens plus compile cost. Verify assumptions before using the percent.</p>
+ </div>
+
+ <script>
+ // Visible ROI calculator. Pure client. No backend. No fetch.
+ (function(){
+ function $(id){ return document.getElementById(id); }
+ function fmtMoney(n){
+ if (!isFinite(n) || n < 0) n = 0;
+ if (n >= 1000000) return '$' + (n/1000000).toFixed(2) + 'M';
+ if (n >= 10000) return '$' + Math.round(n/1000).toLocaleString() + 'k';
+ if (n >= 100) return '$' + Math.round(n).toLocaleString();
+ return '$' + n.toFixed(2);
+ }
+ function fmtTokens(n){
+ if (!isFinite(n) || n < 0) n = 0;
+ if (n >= 1000000000) return (n/1000000000).toFixed(2) + 'B';
+ if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+ if (n >= 1000) return (n/1000).toFixed(1) + 'k';
+ return Math.round(n).toString();
+ }
+ function fmtNum(n){
+ if (!isFinite(n) || n < 0) n = 0;
+ return Math.round(n).toLocaleString();
+ }
+ var RENT_RATE = 3.00;
+ var KOLM_RATE = 0.30;
+ function calc(){
+ var vol = +$('w400-roi-vol').value || 0;
+ var tok = +$('w400-roi-tok').value || 0;
+ var keepPct = Math.max(0, Math.min(100, +$('w400-roi-keep').value || 0));
+ var compile = +$('w400-roi-compile').value || 0;
+ var totalTokens = vol * tok;
+ var localTokens = totalTokens * (keepPct / 100);
+ var rentCost = (totalTokens / 1000000) * RENT_RATE;
+ var kolmCost = (localTokens / 1000000) * KOLM_RATE + compile;
+ var savings = Math.max(0, rentCost - kolmCost);
+ var pct = rentCost > 0 ? Math.round((savings / rentCost) * 100) : 0;
+ $('w400-roi-vol-out').textContent = fmtNum(vol);
+ $('w400-roi-tok-out').textContent = fmtNum(tok);
+ $('w400-roi-keep-out').textContent = keepPct + '%';
+ $('w400-roi-total-tokens').textContent = fmtTokens(totalTokens);
+ $('w400-roi-local-tokens').textContent = fmtTokens(localTokens);
+ $('w400-roi-rate-rent').textContent = '$' + RENT_RATE.toFixed(2);
+ $('w400-roi-rate-kolm').textContent = '$' + KOLM_RATE.toFixed(2);
+ $('w400-roi-compile-out').textContent = fmtMoney(compile) + (compile === 0 ? ' (Free Local)' : compile === 49 ? ' (Pro)' : compile === 499 ? ' (Team)' : '');
+ $('w400-roi-rent').textContent = fmtMoney(rentCost);
+ $('w400-roi-kolm').textContent = fmtMoney(kolmCost);
+ $('w400-roi-savings').textContent = fmtMoney(savings) + ' / mo';
+ $('w400-roi-pct').textContent = pct + '%';
+ return { rent: rentCost, kolm: kolmCost, savings: savings, pct: pct };
+ }
+ function wire(){
+ ['w400-roi-vol','w400-roi-tok','w400-roi-keep','w400-roi-compile'].forEach(function(id){
+ var el = $(id); if (!el) return;
+ el.addEventListener('input', calc);
+ el.addEventListener('change', calc);
+ });
+ try { calc(); } catch(e) {}
+ }
+ try { window.kolmW400Roi = calc; } catch(e) {}
+ if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire);
+ else wire();
+ })();
+ </script>
+ </div>
+</section>
+
+<section data-w400="pricing-matrix-section">
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">03</span><span>Vs</span></div>
+ <h2>kolm.ai vs the alternatives.</h2>
+ <p class="sec-lede">Five common paths to ship a frontier-grade model into production. Cost, latency, privacy, ownership, portability. Click any column for the deep dive.</p>
+
+ <section class="comparison-matrix" data-w400="pricing-matrix">
+ <div class="vs-tbl">
+ <table>
+ <thead>
+ <tr>
+ <th>Dimension</th>
+ <th class="col-kolm"><a href="/product" style="color:inherit;border-bottom:1px solid rgba(126,240,210,0.32)">kolm.ai</a></th>
+ <th><a href="/how-vs-openai-fine-tune" style="color:inherit;border-bottom:1px solid var(--line-2)">OpenAI</a></th>
+ <th><a href="/how-vs-anthropic" style="color:inherit;border-bottom:1px solid var(--line-2)">Anthropic</a></th>
+ <th><a href="/how-vs-hyperscaler" style="color:inherit;border-bottom:1px solid var(--line-2)">Hyperscaler FT</a></th>
+ <th><a href="/how-vs-diy" style="color:inherit;border-bottom:1px solid var(--line-2)">DIY LoRA</a></th>
+ </tr>
+ </thead>
+ <tbody>
+ <tr data-w400-row="cost">
+ <td>Cost / 1M tokens</td>
+ <td><b style="color:#7ef0d2">~$0.30</b> local</td>
+ <td>$2.50 &ndash; $10</td>
+ <td>$3 &ndash; $15</td>
+ <td>$1.50 &ndash; $8</td>
+ <td>$0.20 if you nail it</td>
+ </tr>
+ <tr data-w400-row="latency">
+ <td>Latency (p50)</td>
+ <td><b style="color:#7ef0d2">~80 ms</b> on-box</td>
+ <td>400 ms &ndash; 2 s</td>
+ <td>500 ms &ndash; 3 s</td>
+ <td>200 ms &ndash; 1 s</td>
+ <td>Variable</td>
+ </tr>
+ <tr data-w400-row="privacy">
+ <td>Privacy</td>
+ <td><b style="color:#7ef0d2">Local / BAA</b></td>
+ <td>Vendor logs</td>
+ <td>Vendor logs</td>
+ <td>Cloud tenant</td>
+ <td>You own it</td>
+ </tr>
+ <tr data-w400-row="ownership">
+ <td>Ownership of weights</td>
+ <td><b style="color:#7ef0d2">You own .kolm</b></td>
+ <td>Rental</td>
+ <td>Rental</td>
+ <td>Tenant-bound</td>
+ <td>You own it</td>
+ </tr>
+ <tr data-w400-row="lockin">
+ <td>Portability</td>
+ <td><b style="color:#7ef0d2">Portable artifact</b></td>
+ <td>Proprietary API</td>
+ <td>Proprietary API</td>
+ <td>Cloud-native</td>
+ <td>Self-managed</td>
+ </tr>
+ </tbody>
+ </table>
+ </div>
+ <p class="matrix-hint">Scroll the table sideways &middot;</p>
+ <p style="margin:14px 0 0;font-size:12.5px;color:var(--ink-faint);line-height:1.6">DIY LoRA can match kolm on cost <i>if</i> you nail the recipe; the labor cost is what kolm replaces. Hyperscaler fine-tune (Bedrock / Vertex / Azure OpenAI) keeps you inside a single cloud and bills per-token at inference. See <a href="/how-vs-lorax" style="color:#7ef0d2;border-bottom:1px solid rgba(126,240,210,0.32)">vs LoRAX</a>, <a href="/how-vs-openpipe" style="color:#7ef0d2;border-bottom:1px solid rgba(126,240,210,0.32)">vs OpenPipe</a>, and <a href="/how-vs-predibase" style="color:#7ef0d2;border-bottom:1px solid rgba(126,240,210,0.32)">vs Predibase</a> for serving-stack alternatives.</p>
+ </section>
+ </div>
+</section>
+
+<section>
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">06</span><span>FAQ</span></div>
+ <h2>Questions buyers ask.</h2>
+ <p class="sec-lede">Not here? <a href="https://github.com/sneaky-hippo/kolm-stack/discussions" style="color:var(--accent)">GitHub Discussions</a> or <a href="mailto:dev@kolm.ai" style="color:var(--accent)">dev@kolm.ai</a>.</p>
+
+ <div class="faq">
+ <div class="faq-card">
+ <h3>Do I need to understand fine-tuning or distillation?</h3>
+ <p>No. Give examples and a task description. kolm handles the rest, including all 4 recipe classes (rule, synthesized_rule, compiled_rule, distilled_model) across the full base-model range from 0.5B (laptop scale) to 1.6T (frontier scale).</p>
+ </div>
+ <div class="faq-card">
+ <h3>Who pays for the model API calls?</h3>
+ <p>You do. kolm uses your key only at compile. Never resells tokens, never marks up inference.</p>
+ </div>
+ <div class="faq-card">
+ <h3>What counts as a compile?</h3>
+ <p>One billed compile = one job that reaches the K-score gate (pass or fail). Re-runs from the same spec inside the same calendar day don't double-bill on Pro and Enterprise. Sub-gate failures are free.</p>
+ </div>
+ <div class="faq-card">
+ <h3>What does one compile produce?</h3>
+ <p>A signed recipe-mode artifact with eval and receipt evidence. Specialized adapters, recall indexes, and model rebuilds are bridge targets.</p>
+ </div>
+ <div class="faq-card">
+ <h3>What if K-score is below the gate?</h3>
+ <p>Artifact doesn't ship. You see the breakdown, adjust, recompile. No charge for sub-gate compiles on Pro and Enterprise.</p>
+ </div>
+ <div class="faq-card">
+ <h3>How big is an artifact?</h3>
+ <p>Recipe-mode in the current build: small signed zip. Model-backed artifacts with the runtime bridge engaged: 20-200 MB for a 1B-7B INT4 base + adapter. Recall index shards above 4 GB.</p>
+ </div>
+ <div class="faq-card">
+ <h3>Can I run an artifact offline?</h3>
+ <p>Recipe-mode runs through the CLI. Detached model execution requires the runtime bridge.</p>
+ </div>
+ <div class="faq-card">
+ <h3>Which frontier providers work as teachers?</h3>
+ <p>Anthropic, OpenAI, Google, Mistral, Together, Fireworks, Bedrock, Azure, or your gateway. Any OpenAI or Messages-contract endpoint.</p>
+ </div>
+ <div class="faq-card">
+ <h3>Which base models can I target?</h3>
+ <p>Qwen 2.5/3.x, Llama 3.x, Phi-3, Hermes 3, Gemma 2 at INT4, 1B-14B. Enterprise supports private bases.</p>
+ </div>
+ <div class="faq-card">
+ <h3>Free trial?</h3>
+ <p>14 days of Pro, cancel any time. Trial artifacts stay yours, runnable forever.</p>
+ </div>
+ <div class="faq-card">
+ <h3>Does Team really start at two seats?</h3>
+ <p>Yes. Team is $499/mo flat for any team between 2 and 10 seats. Past 10, it's +$30/extra seat. No five-seat minimum, no pretending two-person teams are an edge case.</p>
+ </div>
+ <div class="faq-card">
+ <h3>Is annual billing cheaper?</h3>
+ <p>Yes. Annual is two months free on every paid tier (about 17% off). Switch any time from /account. Annual is the default toggle.</p>
+ </div>
+ <div class="faq-card">
+ <h3>Can I export everything?</h3>
+ <p>Artifact is a signed zip you own. Recall index exports as Parquet, receipts as JSONL. Nothing locked to our cloud.</p>
+ </div>
+ <div class="faq-card">
+ <h3>Non-profit or academic pricing?</h3>
+ <p>Pro is free for verified non-profits and accredited researchers. Mail us with a .edu or .org address.</p>
+ </div>
+ </div>
+ </div>
+</section>
+
+<section class="closer">
+ <div class="wrap">
+ <div class="closer-card">
+ <div class="closer-eyebrow"><span class="num">07</span><span>Start</span></div>
+ <h2>Pick a tier. Compile your first AI.</h2>
+ <p>14-day Pro trial. Cancel any time. Your <code>.kolm</code> artifacts stay yours forever.</p>
+ <div class="closer-actions">
+ <a href="/signup" class="closer-cta">Get API key &rarr;</a>
+ <a href="/quickstart" class="closer-ghost">View quickstart</a>
+ </div>
+ </div>
+ </div>
+</section>
+</main>
+
+<footer class="site">
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4><span data-kolm-icon="compile" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="deploy" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="layers" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4><span data-kolm-icon="user" data-kolm-size="16" style="opacity:.85;margin-right:6px;vertical-align:-3px"></span>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
+ &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">kolm.ai vs Kolm therapeutics</a></footer>
+
+<script>
+(function () {
+ var btns = document.querySelectorAll('.bill-toggle button[data-bill]');
+ if (!btns.length) return;
+ function apply(mode) {
+ document.querySelectorAll('.tier .num span[data-mo]').forEach(function (s) {
+ s.textContent = mode === 'annual' ? s.getAttribute('data-yr') : s.getAttribute('data-mo');
+ });
+ document.querySelectorAll('.tier .num span.per[data-mo]').forEach(function (s) {
+ s.textContent = mode === 'annual' ? s.getAttribute('data-yr') : s.getAttribute('data-mo');
+ });
+ btns.forEach(function (b) {
+ var on = b.getAttribute('data-bill') === mode;
+ b.classList.toggle('on', on);
+ b.setAttribute('aria-selected', on ? 'true' : 'false');
+ });
+ }
+ btns.forEach(function (b) {
+ b.addEventListener('click', function () { apply(b.getAttribute('data-bill')); });
+ });
+ // Initialize to whichever button has .on at boot. Default is monthly.
+ var initial = 'monthly';
+ btns.forEach(function (b) { if (b.classList.contains('on')) initial = b.getAttribute('data-bill'); });
+ apply(initial);
+})();
+</script>
+
+<script src="/nav.js" defer></script>
+</body>
+</html>
