@@ -1,5 +1,5 @@
 // Recipe service worker: keeps the registry available offline.
-const CACHE = 'kolm-v28-2026-05-24-wave695-use-cases-by-shape-grid';
+const CACHE = 'kolm-v29-2026-05-24-wave696-for-overlap-cross-links';
 const PRECACHE = [
  '/device',
  '/design-tokens.css',
