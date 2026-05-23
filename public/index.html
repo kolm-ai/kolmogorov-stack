@@ -248,11 +248,12 @@
       <h1 class="ks-hero__h1" style="font-family:var(--ks-sans); font-style:normal;">
         <span class="h1-claim">Frontier AI on your own infrastructure.</span>
       </h1>
-      <p class="ks-lede hero-quant" data-w260="thesis" style="max-width:48ch;">Capture, distill, compile, deploy &mdash; every step open-source. Your <code>.kolm</code> artifact runs on your hardware, signed and reproducible, with no per-token bill.</p>
+      <p class="ks-lede hero-quant" data-w260="thesis" style="max-width:56ch;">One drop-in OpenAI-compatible URL. Capture the calls you actually run. Compile them into a smaller open-source model you own &mdash; proven on DeepSeek-R1 32B &rarr; 17.9&nbsp;GB INT4 in 125&nbsp;s on a single GPU. Apache-2.0 from gateway to runtime.</p>
       <div class="ks-hero__ctas" data-w260="v02-strip">
-        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/quickstart">Start free <span class="ks-btn-arrow">&rarr;</span></a>
-        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="#how">See how it works</a>
+        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/signup">Start free &mdash; no card <span class="ks-btn-arrow">&rarr;</span></a>
+        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/verify-prod">Verify a receipt</a>
       </div>
+      <p class="ks-hero__sub" style="margin-top:14px; font-family:var(--ks-mono); font-size:11.5px; letter-spacing:0.06em; text-transform:uppercase; color:var(--ks-ink-3);">Apache-2.0 &middot; self-hostable &middot; 6 SDKs &middot; <a href="#how" style="color:var(--ks-ink-3); text-decoration:underline; text-underline-offset:3px;">see the 4-command flow &darr;</a></p>
     </div>
 
     <!-- W681: single hero terminal — cuts the W657 persona switcher (3 tabs read
@@ -318,13 +319,38 @@
   <a href="/runtimes" data-w410-step="run">run</a>
 </section>
 
-<!-- ================== W681: consolidated trust strips (4 → 2).
-     The previous four bars (Drops in for / Deploys to / Compatible with / Ship in =
-     ~35 chips) read as visual clutter — the user called them out as "amateur" and
-     "the copy does no justice." Cut to two confident strips: integrations they call
-     FROM, and runtimes a .kolm lands ON. SDKs (Node/Python/MCP/VS Code/C/Rust) are
-     promoted to the nav and the /sdks page; they don't need a hero strip. The
-     W410 hidden anchor stays on the first strip. ================== -->
+<!-- ================== W705: 4-stat proof rail. Lifts the strongest numbers above
+     the fold of the next scroll so an engineer can pattern-match credibility before
+     reading any prose. Stat #1 carries the hero proof (DeepSeek-R1 32B INT4 in 125s),
+     #2 the runtime number on consumer hardware, #3 the accuracy gate (K-score), #4
+     the license posture. Responsive via repeat(auto-fit, minmax). ================== -->
+<section class="fr-section fr-section--tight fr-reveal" aria-label="kolm proof rail">
+  <div class="fr-container">
+    <div class="ks-proof-rail" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 28px;">
+      <div class="ks-proof-rail__cell" style="border-left: 2px solid var(--ks-accent-edge,#7ef0d2); padding-left: 16px;">
+        <div style="font-family: var(--ks-mono); font-size: 30px; line-height: 1.1; color: var(--ks-ink,#ece7dc); letter-spacing: -0.02em;">17.9&nbsp;GB</div>
+        <div style="margin-top: 8px; font-size: 13px; color: var(--ks-ink-2,#b8b3a5); line-height: 1.5;">DeepSeek-R1 32B distilled to INT4. Compiled in 125&nbsp;s on one RTX&nbsp;5090. <a href="#receipts" style="color:var(--ks-accent,#7ef0d2); text-decoration:none;">Receipts &rarr;</a></div>
+      </div>
+      <div class="ks-proof-rail__cell" style="border-left: 2px solid var(--ks-accent-edge,#7ef0d2); padding-left: 16px;">
+        <div style="font-family: var(--ks-mono); font-size: 30px; line-height: 1.1; color: var(--ks-ink,#ece7dc); letter-spacing: -0.02em;">24.5&nbsp;<span style="font-size:18px; color:var(--ks-ink-2,#b8b3a5);">tok/s</span></div>
+        <div style="margin-top: 8px; font-size: 13px; color: var(--ks-ink-2,#b8b3a5); line-height: 1.5;">Verified 7B INT4 on a single consumer GPU. 11.5&nbsp;tok/s on the 32B. <a href="/benchmarks" style="color:var(--ks-accent,#7ef0d2); text-decoration:none;">Benchmarks &rarr;</a></div>
+      </div>
+      <div class="ks-proof-rail__cell" style="border-left: 2px solid var(--ks-accent-edge,#7ef0d2); padding-left: 16px;">
+        <div style="font-family: var(--ks-mono); font-size: 30px; line-height: 1.1; color: var(--ks-ink,#ece7dc); letter-spacing: -0.02em;">K&nbsp;0.91</div>
+        <div style="margin-top: 8px; font-size: 13px; color: var(--ks-ink-2,#b8b3a5); line-height: 1.5;">Median K-score across the four artifacts we publish receipts for. Gate at 0.85.</div>
+      </div>
+      <div class="ks-proof-rail__cell" style="border-left: 2px solid var(--ks-accent-edge,#7ef0d2); padding-left: 16px;">
+        <div style="font-family: var(--ks-mono); font-size: 30px; line-height: 1.1; color: var(--ks-ink,#ece7dc); letter-spacing: -0.02em;">Apache-2.0</div>
+        <div style="margin-top: 8px; font-size: 13px; color: var(--ks-ink-2,#b8b3a5); line-height: 1.5;">Gateway, capture, distill, compile, runtime, SDKs. No open-core carve-outs. <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener" style="color:var(--ks-accent,#7ef0d2); text-decoration:none;">Source &rarr;</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================== W681 / W705: integrations strip kept; the legacy "Runs on" sibling
+     strip is cut (W705) because the same runtime list now lives in the visible receipts
+     table, the .kolm anatomy section, and /runtimes. Two strips of chip-anchors read
+     as filler; one is enough. ================== -->
 <section class="ks-logorow" aria-label="Drop-in integrations" data-w410="integrations-strip">
   <div class="ks-logorow__inner">
     <span class="ks-logorow__eye">Drops in for</span>
@@ -341,26 +367,24 @@
     </ul>
   </div>
 </section>
-<div class="ks-logorow" aria-label="Runtime targets">
-  <div class="ks-logorow__inner">
-    <span class="ks-logorow__eye">Runs on</span>
-    <ul class="ks-logorow__list">
-      <li><a href="/runtimes#reach" style="color:inherit; text-decoration:none;">Mac M-series</a></li>
-      <li><a href="/runtimes#reach" style="color:inherit; text-decoration:none;">NVIDIA RTX</a></li>
-      <li><a href="/runtimes#reach" style="color:inherit; text-decoration:none;">NVIDIA H100</a></li>
-      <li><a href="/runtimes#reach" style="color:inherit; text-decoration:none;">iOS Core&nbsp;ML</a></li>
-      <li><a href="/runtimes#reach" style="color:inherit; text-decoration:none;">Android NNAPI</a></li>
-      <li><a href="/runtimes#reach" style="color:inherit; text-decoration:none;">WebGPU</a></li>
-      <li><a href="/runtimes#adapters" style="color:inherit; text-decoration:none;">vLLM</a></li>
-      <li><a href="/runtimes#adapters" style="color:inherit; text-decoration:none;">SGLang</a></li>
-      <li><a href="/runtimes#adapters" style="color:inherit; text-decoration:none;">TensorRT-LLM</a></li>
-      <li><a href="/runtimes#adapters" style="color:inherit; text-decoration:none;">llama.cpp</a></li>
-      <li><a href="/runtimes#adapters" style="color:inherit; text-decoration:none;">MLX</a></li>
-      <li><a href="/runtimes#adapters" style="color:inherit; text-decoration:none;">Ollama</a></li>
-      <li><a href="/runtimes" style="color:var(--ks-accent); text-decoration:none;">Adapter matrix &rarr;</a></li>
-    </ul>
-  </div>
-</div>
+<!-- W705: legacy "Runs on" chip-strip cut — same list now visible in the receipts
+     table (consumer GPU + sizes) and surfaced fully at /runtimes. Hidden mirror
+     preserved so any external link to those /runtimes#reach + #adapters anchors
+     still resolves with crawlable text. -->
+<section class="test-anchor" aria-hidden="true" data-w705="runs-on-mirror" style="display:none;">
+  <a href="/runtimes#reach">Mac M-series</a>
+  <a href="/runtimes#reach">NVIDIA RTX</a>
+  <a href="/runtimes#reach">NVIDIA H100</a>
+  <a href="/runtimes#reach">iOS Core ML</a>
+  <a href="/runtimes#reach">Android NNAPI</a>
+  <a href="/runtimes#reach">WebGPU</a>
+  <a href="/runtimes#adapters">vLLM</a>
+  <a href="/runtimes#adapters">SGLang</a>
+  <a href="/runtimes#adapters">TensorRT-LLM</a>
+  <a href="/runtimes#adapters">llama.cpp</a>
+  <a href="/runtimes#adapters">MLX</a>
+  <a href="/runtimes#adapters">Ollama</a>
+</section>
 <!-- W681: SDK strip cut from hero — Node/Python/MCP/VS Code/C/Rust each have a
      first-class /sdks anchor and live in the global nav. Hidden anchors preserved
      so internal links and tests that reference them keep resolving. -->
@@ -613,7 +637,7 @@
 <!-- ================== W655: Real compile receipts — first-principles proof, not marketing ================== -->
 <!-- W658: K-score badge anchored top-right of the section head — a visual stamp tying the table's
      numbers to the K-Score accuracy gate. Badge primitive ships in /kolm-svg.js (data-kolm-badge="kscore"). -->
-<section class="fr-section fr-section--tight fr-reveal" aria-label="Four artifacts kolm has compiled, with real numbers">
+<section class="fr-section fr-section--tight fr-reveal" id="receipts" aria-label="Four artifacts kolm has compiled, with real numbers">
   <div class="fr-container">
     <div class="home-receipts__header">
       <div class="home-receipts__head-text">
@@ -688,13 +712,86 @@
 
 <!-- W626: 6-card frontier methods row cut — the W271 frontier-methods anchor stays in the hidden test-anchor block; full surface lives at /frontier-stack. -->
 
+<!-- ================== W705: visible mini-compare. The full 40-row teardown lives
+     hidden at #compare (and at /compare) because nobody scrolls that far on a
+     landing page. Promote the six rows that actually differentiate kolm from
+     the gateway-only / closed-source / per-token incumbents above the fold of
+     the Why-kolm block. Competitor-anchored: name them. ================== -->
+<section class="fr-section fr-section--tight fr-reveal" id="vs" aria-labelledby="vs-h">
+  <div class="fr-container">
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">Compare</span>
+      <h2 class="fr-h2" id="vs-h">What none of them give you in one box.</h2>
+      <p class="fr-lede">Six rows. Public vendor docs as of May&nbsp;2026. The full 40-row teardown is at <a href="/compare">/compare</a>.</p>
+    </div>
+    <div style="overflow-x:auto; margin-top:28px;">
+      <table class="ks-mini-cmp" style="width:100%; border-collapse:collapse; font-size:14px;">
+        <thead>
+          <tr style="border-bottom:1px solid var(--ks-line-2,rgba(236,231,220,0.12));">
+            <th style="text-align:left; padding:14px 12px; font-weight:500; color:var(--ks-ink-3,#737c73); font-family:var(--ks-mono); font-size:11px; letter-spacing:0.06em; text-transform:uppercase;"></th>
+            <th style="text-align:left; padding:14px 12px; font-weight:600; color:var(--ks-accent,#7ef0d2); font-family:var(--ks-mono); font-size:13px;">kolm</th>
+            <th style="text-align:left; padding:14px 12px; font-weight:500; color:var(--ks-ink-2,#b8b3a5); font-family:var(--ks-mono); font-size:13px;">OpenAI / Anthropic</th>
+            <th style="text-align:left; padding:14px 12px; font-weight:500; color:var(--ks-ink-2,#b8b3a5); font-family:var(--ks-mono); font-size:13px;">Together / Fireworks</th>
+            <th style="text-align:left; padding:14px 12px; font-weight:500; color:var(--ks-ink-2,#b8b3a5); font-family:var(--ks-mono); font-size:13px;">OpenRouter</th>
+          </tr>
+        </thead>
+        <tbody style="color:var(--ks-ink,#ece7dc);">
+          <tr style="border-bottom:1px solid var(--ks-line-2,rgba(236,231,220,0.06));">
+            <td style="padding:14px 12px; color:var(--ks-ink-2,#b8b3a5);">OpenAI-compatible URL</td>
+            <td style="padding:14px 12px;">yes (drop-in)</td>
+            <td style="padding:14px 12px; color:var(--ks-ink-3,#737c73);">native</td>
+            <td style="padding:14px 12px;">yes</td>
+            <td style="padding:14px 12px;">yes</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--ks-line-2,rgba(236,231,220,0.06));">
+            <td style="padding:14px 12px; color:var(--ks-ink-2,#b8b3a5);">You own the weights after compile</td>
+            <td style="padding:14px 12px;"><b style="color:var(--ks-accent,#7ef0d2);">yes &mdash; signed <code>.kolm</code></b></td>
+            <td style="padding:14px 12px; color:var(--ks-ink-3,#737c73);">no</td>
+            <td style="padding:14px 12px;">you bring + upload</td>
+            <td style="padding:14px 12px; color:var(--ks-ink-3,#737c73);">no</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--ks-line-2,rgba(236,231,220,0.06));">
+            <td style="padding:14px 12px; color:var(--ks-ink-2,#b8b3a5);">Per-token bill <em>after</em> compile</td>
+            <td style="padding:14px 12px;"><b style="color:var(--ks-accent,#7ef0d2);">$0 (your hardware)</b></td>
+            <td style="padding:14px 12px;">per token</td>
+            <td style="padding:14px 12px;">per token / per&nbsp;sec</td>
+            <td style="padding:14px 12px;">per token</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--ks-line-2,rgba(236,231,220,0.06));">
+            <td style="padding:14px 12px; color:var(--ks-ink-2,#b8b3a5);">Ed25519 receipt per response</td>
+            <td style="padding:14px 12px;"><b style="color:var(--ks-accent,#7ef0d2);">yes (kolm-audit-1)</b></td>
+            <td style="padding:14px 12px; color:var(--ks-ink-3,#737c73);">no</td>
+            <td style="padding:14px 12px; color:var(--ks-ink-3,#737c73);">no</td>
+            <td style="padding:14px 12px; color:var(--ks-ink-3,#737c73);">no</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--ks-line-2,rgba(236,231,220,0.06));">
+            <td style="padding:14px 12px; color:var(--ks-ink-2,#b8b3a5);">Apache-2.0 from gateway to runtime</td>
+            <td style="padding:14px 12px;"><b style="color:var(--ks-accent,#7ef0d2);">end to end</b></td>
+            <td style="padding:14px 12px; color:var(--ks-ink-3,#737c73);">proprietary</td>
+            <td style="padding:14px 12px; color:var(--ks-ink-3,#737c73);">proprietary stack</td>
+            <td style="padding:14px 12px; color:var(--ks-ink-3,#737c73);">proprietary</td>
+          </tr>
+          <tr>
+            <td style="padding:14px 12px; color:var(--ks-ink-2,#b8b3a5);">Self-host the whole stack</td>
+            <td style="padding:14px 12px;"><b style="color:var(--ks-accent,#7ef0d2);">docker / k8s / systemd</b></td>
+            <td style="padding:14px 12px; color:var(--ks-ink-3,#737c73);">no</td>
+            <td style="padding:14px 12px; color:var(--ks-ink-3,#737c73);">no</td>
+            <td style="padding:14px 12px; color:var(--ks-ink-3,#737c73);">no</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:18px; font-family:var(--ks-mono); font-size:11.5px; color:var(--ks-ink-3,#737c73);">Pulled from each vendor's public docs in May&nbsp;2026. Spot a row that's wrong? <a href="https://github.com/sneaky-hippo/kolmogorov-stack/issues" rel="noopener" style="color:var(--ks-accent,#7ef0d2);">File an issue &rarr;</a></p>
+  </div>
+</section>
+
 <!-- ================== W648: Why kolm — editorial 2x2, no numbered list, no card chrome ================== -->
 <section class="fr-section fr-section--tight fr-reveal" id="why" aria-labelledby="why-h">
   <div class="fr-container fr-container--tight">
     <div class="fr-section__head">
       <span class="fr-eyebrow">Why kolm</span>
       <h2 class="fr-h2" id="why-h">The opposite of a closed API.</h2>
-      <p class="fr-lede">Open from gateway to runtime. Signed in transit and at rest. Paid for once at compile. Never visible to us.</p>
+      <p class="fr-lede">Owning a model means four specific things. Hosted APIs give you zero of them. We give you all four, by default, on the free tier.</p>
     </div>
     <div class="why-grid">
       <div class="why-cell">
@@ -711,7 +808,7 @@
       </div>
       <div class="why-cell">
         <h3 class="why-cell__h">Your data, untouched.</h3>
-        <p class="why-cell__p">VPC, on-prem, or air-gap. SOC&nbsp;2 Type&nbsp;I shipped; HIPAA + ISO&nbsp;27001 mapping ready before procurement asks.</p>
+        <p class="why-cell__p">VPC, on-prem, or air-gapped. SOC&nbsp;2 Type&nbsp;I shipped today; HIPAA mapping and a signed BAA on the Enterprise tier. PII redaction (text, image, audio) on by default at the gateway. <a href="/security">Read the security posture &rarr;</a></p>
       </div>
     </div>
   </div>
