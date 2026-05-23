@@ -46,6 +46,7 @@
 <link rel="stylesheet" href="/ks.css">
 </head>
 <body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
@@ -79,6 +80,59 @@
  <p class="lede">Keys, spend, provider routing, distillation defaults, artifact targets, billing, storage, and governance.</p>
  <p class="lede" data-w204="honest-scope">What this page does: it links to the authenticated account workspaces and shows the intended operating loop. What this page does not do: it does not expose tenant data until you sign in.</p>
  </div>
+ </section>
+
+ <section data-w702="dashboard-quick-nav" style="margin:0 0 28px">
+ <div style="display:flex;align-items:baseline;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:0 0 14px">
+ <div>
+ <div class="eyebrow" style="margin:0 0 6px">Dashboard surfaces</div>
+ <h2 style="margin:0;font-size:20px;letter-spacing:-0.005em">Open the workbench &rarr;</h2>
+ </div>
+ <a href="/account/overview" class="btn primary">Open overview</a>
+ </div>
+ <div class="metric-grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
+ <a class="metric-card" href="/account/overview" style="text-decoration:none;display:block">
+ <div class="label">Overview</div>
+ <div class="value" style="font-size:15px;margin:6px 0 4px">Operating loop &amp; signal</div>
+ <p style="margin:0;font-size:12.5px;color:var(--ink-mute)">Plan, spend, the four-step loop, what each surface is for.</p>
+ </a>
+ <a class="metric-card" href="/account/captured" style="text-decoration:none;display:block">
+ <div class="label">Captured calls</div>
+ <div class="value" style="font-size:15px;margin:6px 0 4px">Live capture tail</div>
+ <p style="margin:0;font-size:12.5px;color:var(--ink-mute)">Every call through the gateway with prompt, response, latency, cost.</p>
+ </a>
+ <a class="metric-card" href="/account/datasets" style="text-decoration:none;display:block">
+ <div class="label">Datasets</div>
+ <div class="value" style="font-size:15px;margin:6px 0 4px">Labeled rows &amp; holdouts</div>
+ <p style="margin:0;font-size:12.5px;color:var(--ink-mute)">Promoted from accepted labels with a disjoint holdout for honest eval.</p>
+ </a>
+ <a class="metric-card" href="/account/builds" style="text-decoration:none;display:block">
+ <div class="label">Artifact jobs</div>
+ <div class="value" style="font-size:15px;margin:6px 0 4px">Distill, train, compile</div>
+ <p style="margin:0;font-size:12.5px;color:var(--ink-mute)">Job queue with K-score, eval gates, receipt, and rollback metadata.</p>
+ </a>
+ <a class="metric-card" href="/account/artifacts" style="text-decoration:none;display:block">
+ <div class="label">Artifacts</div>
+ <div class="value" style="font-size:15px;margin:6px 0 4px">Signed .kolm registry</div>
+ <p style="margin:0;font-size:12.5px;color:var(--ink-mute)">Every shipped artifact with verifier state, runtimes, and lineage.</p>
+ </a>
+ <a class="metric-card" href="/account/devices" style="text-decoration:none;display:block">
+ <div class="label">Devices</div>
+ <div class="value" style="font-size:15px;margin:6px 0 4px">Fleet &amp; remote ops</div>
+ <p style="margin:0;font-size:12.5px;color:var(--ink-mute)">Registered devices, installs, tunnels, health checks, remote installs.</p>
+ </a>
+ <a class="metric-card" href="/account/billing" style="text-decoration:none;display:block">
+ <div class="label">Billing</div>
+ <div class="value" style="font-size:15px;margin:6px 0 4px">Spend &amp; meters</div>
+ <p style="margin:0;font-size:12.5px;color:var(--ink-mute)">Per-meter spend, namespace attribution, team rollup, invoices.</p>
+ </a>
+ <a class="metric-card" href="/account/audit-log" style="text-decoration:none;display:block">
+ <div class="label">Audit log</div>
+ <div class="value" style="font-size:15px;margin:6px 0 4px">Every governed action</div>
+ <p style="margin:0;font-size:12.5px;color:var(--ink-mute)">Approvals, rotations, deletes, exports, all signed and queryable.</p>
+ </a>
+ </div>
+ <p style="margin:14px 0 0;font-size:12.5px;color:var(--ink-faint)">All 15 dashboard surfaces are reachable from <a href="/account/overview" style="color:var(--ink-mute);text-decoration:underline">/account/overview</a>'s sidebar &mdash; including connectors, privacy events, repeated workflows, opportunities, labeling, simulations, bakeoffs, and storage truth.</p>
  </section>
 
  <section id="acct-empty" class="card account-auth" hidden>
