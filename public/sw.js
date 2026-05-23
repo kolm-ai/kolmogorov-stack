@@ -1,5 +1,5 @@
 // Recipe service worker: keeps the registry available offline.
-const CACHE = 'kolm-v19-2026-05-24-wave683-color-token-surgery';
+const CACHE = 'kolm-v20-2026-05-24-wave686-kscore-badge-polish';
 const PRECACHE = [
  '/device',
  '/design-tokens.css',

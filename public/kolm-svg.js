@@ -330,16 +330,17 @@
       '<circle cx="60" cy="60" r="58" fill="none" stroke="currentColor" stroke-opacity=".18" stroke-width="1"/>' +
       // inner ring (slightly stronger)
       '<circle cx="60" cy="60" r="52" fill="none" stroke="currentColor" stroke-opacity=".28" stroke-width="1"/>' +
-      // top arc label: "K-SCORE"
-      '<text x="60" y="26" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="8.5" letter-spacing="0.18em" fill="currentColor" fill-opacity=".55">K-SCORE</text>' +
-      // big "K" mark in mint accent
-      '<text x="60" y="62" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="34" font-weight="700" fill="var(--ks-accent, #a3e7c7)">K</text>' +
+      // W686: top arc label tracked from 0.18em -> 0.22em for engraved feel
+      '<text x="60" y="26" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="8.5" letter-spacing="0.22em" fill="currentColor" fill-opacity=".60">K-SCORE</text>' +
+      // W686: K mark fallback #a3e7c7 -> #7ef0d2 (matches actual brand mint),
+      // weight 700 -> 600 for W665 monochrome discipline
+      '<text x="60" y="62" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="34" font-weight="600" fill="var(--ks-accent, #7ef0d2)">K</text>' +
       // divider
-      '<line x1="34" y1="72" x2="86" y2="72" stroke="currentColor" stroke-opacity=".25" stroke-width="1"/>' +
-      // score number
-      '<text x="60" y="90" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" font-weight="540" fill="currentColor">' + score + '</text>' +
-      // bottom-arc microtype
-      '<text font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="7" letter-spacing="0.20em" fill="currentColor" fill-opacity=".55">' +
+      '<line x1="34" y1="72" x2="86" y2="72" stroke="currentColor" stroke-opacity=".22" stroke-width="1"/>' +
+      // W686: score number weight 540 -> 500 (editorial)
+      '<text x="60" y="90" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" font-weight="500" fill="currentColor">' + score + '</text>' +
+      // W686: bottom-arc microtype tracked 0.20em -> 0.24em + slightly hotter for legibility
+      '<text font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="7" letter-spacing="0.24em" fill="currentColor" fill-opacity=".62">' +
         '<textPath href="#kbadge-arc" startOffset="50%" text-anchor="middle">VERIFIED BY KOLM.AI</textPath>' +
       '</text>' +
       '</svg>';

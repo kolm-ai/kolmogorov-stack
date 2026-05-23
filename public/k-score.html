@@ -23,7 +23,8 @@
      bars (audit flagged: "reads like a fitness app dashboard, not premium B2B"). The number
      IS the hero; the breakdown moved to its own #axes section below where it can breathe. */
   .ks-bigscore { padding: clamp(28px, 4vw, 48px); background: linear-gradient(180deg, rgba(126, 240, 210, 0.022), transparent 60%), var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); position: relative; overflow: hidden; }
-  .ks-bigscore::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(126, 240, 210, 0.55), transparent); }
+  /* W686: hairline opacity 0.55 -> 0.42 for editorial subtlety */
+  .ks-bigscore::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(126, 240, 210, 0.42), transparent); }
   .ks-bigscore .label { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: var(--ks-5); }
   .ks-bigscore__nrow { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--ks-4); margin-bottom: var(--ks-6); }
   .ks-bigscore .v { font-family: var(--ks-mono); font-size: clamp(88px, 14vw, 156px); color: var(--ks-accent); font-variant-numeric: tabular-nums; line-height: 0.88; letter-spacing: -0.05em; font-weight: 320; }
