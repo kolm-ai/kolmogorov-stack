@@ -1,5 +1,5 @@
 // Recipe service worker: keeps the registry available offline.
-const CACHE = 'kolm-v32-2026-05-24-wave699-product-two-products-framing';
+const CACHE = 'kolm-v33-2026-05-24-wave701-cookbook-hub-rebuild-docs-recipes-section';
 const PRECACHE = [
  '/device',
  '/design-tokens.css',

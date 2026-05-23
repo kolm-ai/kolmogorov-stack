@@ -41,8 +41,30 @@
   .doc-code .s { color: #f4c666; }
   .test-anchor { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/docs",
+  "description": "Documentation for the kolm AI compiler. Quickstart, CLI reference, SDKs, runtime, K-score, security, integrations, deployment patterns. Everything you need to ship a signed .kolm artifact into production.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
 </head>
 <body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <a href="#main" class="ks-skip">Skip to content</a>
 
@@ -95,6 +117,7 @@
       <aside class="doc-side" aria-label="Section index">
         <h4>On this page</h4>
         <a href="#start">Start</a>
+        <a href="#recipes">Cookbook</a>
         <a href="#cli">CLI reference</a>
         <a href="#sdk">SDKs</a>
         <a href="#runtimes">Runtimes</a>
@@ -139,6 +162,24 @@
         <p>Honest matrix across ten axes. Where we win, where we lose, when to pick each adjacent stack. Includes a "skip kolm if" section that names the cases we are not the right fit for.</p>
         <span class="arr">/compare &rarr;</span>
       </a>
+    </div>
+  </div>
+</section>
+
+<section class="ks-section" id="recipes" data-w701="cookbook-on-docs-hub">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Cookbook</span>
+      <h2 class="ks-h2">Thirty-five end-to-end recipes, by domain.</h2>
+      <p class="ks-lede">Each recipe is a full pipeline — capture, distill, compile, eval gate, deploy — for a real task. Start with the closest shape to what you actually do; the workflow is the same across all of them.</p>
+    </div>
+    <div class="doc-cards">
+      <a href="/docs/cookbook" class="doc-card"><span class="tag">Hub</span><h3>Cookbook index</h3><p>The full 35-recipe index organized by domain — dev, ops, healthcare, finance, support, analytics, legal, multimodal, edge &amp; defense.</p><span class="arr">/docs/cookbook &rarr;</span></a>
+      <a href="/cookbook/recipe-from-observations" class="doc-card"><span class="tag">Start here</span><h3>Recipe from observations</h3><p>The canonical capture → distill → compile loop, walked end-to-end in one page. The recipe you should write first.</p><span class="arr">/cookbook/recipe-from-observations &rarr;</span></a>
+      <a href="/cookbook/pr-review" class="doc-card"><span class="tag">Dev</span><h3>PR review</h3><p>Pre-merge review comments grounded in your team's actual past PRs. The dev productivity recipe people copy first.</p><span class="arr">/cookbook/pr-review &rarr;</span></a>
+      <a href="/cookbook/soap-redactor" class="doc-card"><span class="tag">Healthcare</span><h3>SOAP note redactor</h3><p>HIPAA-grade PHI removal from SOAP-structured clinical notes. The healthcare recipe with the most production deployments.</p><span class="arr">/cookbook/soap-redactor &rarr;</span></a>
+      <a href="/cookbook/incident-summarizer" class="doc-card"><span class="tag">Ops</span><h3>Incident summarizer</h3><p>Five-line incident summaries grounded in your runbook style. Pairs with /cookbook/runbook-step for the full on-call loop.</p><span class="arr">/cookbook/incident-summarizer &rarr;</span></a>
+      <a href="/cookbook/support-reply" class="doc-card"><span class="tag">Support</span><h3>Support reply</h3><p>First-draft replies grounded in your closed-ticket corpus. The recipe that anchors the support-automation use case.</p><span class="arr">/cookbook/support-reply &rarr;</span></a>
     </div>
   </div>
 </section>
@@ -188,7 +229,7 @@
     </div>
     <div class="doc-cards">
       <a href="/sdks#node" class="doc-card"><span class="tag">@kolm/sdk</span><h3>Node.js</h3><p>npm i @kolm/sdk. Promise-based, types included, OAuth + API key auth, streaming responses, retry policies. Used by VS Code extension.</p><span class="arr">/sdks/node &rarr;</span></a>
-      <a href="/sdks#python" class="doc-card"><span class="tag">kolm (PyPI)</span><h3>Python</h3><p>pip install kolm. Sync + async, type-stubbed, integrates with pytest. Used inside the kolm distill runner itself.</p><span class="arr">/sdks/python &rarr;</span></a>
+      <a href="/sdks#python" class="doc-card"><span class="tag">kolm (PyPI pending)</span><h3>Python</h3><p>Package release pending: pip install kolm. Current install path uses the source package; sync + async, type-stubbed, integrates with pytest.</p><span class="arr">/sdks/python &rarr;</span></a>
       <a href="/sdks#mcp" class="doc-card"><span class="tag">MCP server</span><h3>Claude / Cursor MCP</h3><p>Drop-in MCP server exposing kolm verbs to any MCP-capable host. Lets Claude or Cursor compile, score, and verify artifacts inline.</p><span class="arr">/sdks/mcp &rarr;</span></a>
       <a href="/sdks#vscode" class="doc-card"><span class="tag">VS Code</span><h3>VS Code extension</h3><p>Status bar K-score on the active .kolm, inline distill commands, receipt explorer, CI integration. Built on @kolm/sdk.</p><span class="arr">/sdks/vscode &rarr;</span></a>
       <a href="/sdks#c" class="doc-card"><span class="tag">stb-style</span><h3>C (single-header)</h3><p>kolm.h, define KOLM_IMPLEMENTATION in exactly one TU. libcurl-backed. For embedded contexts and CLI integrators who do not want a runtime.</p><span class="arr">/sdks/c &rarr;</span></a>
