@@ -4,15 +4,35 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+import sys
 import time
 import urllib.request
 import urllib.error
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable, Optional
+from typing import Any, Iterable, Iterator, Optional, Union
 
 
 DEFAULT_BASE = os.environ.get("KOLM_BASE", "https://kolm.ai")
+
+# W723 — Streaming load. Best-effort import of the per-shard streaming
+# loader from apps/runtime/. We do NOT make it a hard dependency: when
+# the SDK is installed from a wheel that does not ship apps/runtime,
+# stream=True falls back to an honest envelope.
+_STREAMING_LOAD_FN = None
+try:  # pragma: no cover - import-resolution side path
+    _here = Path(__file__).resolve()
+    # repo layout: <repo>/sdk/python/kolm/client.py + <repo>/apps/runtime/
+    for ancestor in _here.parents:
+        candidate = ancestor / "apps" / "runtime" / "streaming_load.py"
+        if candidate.exists():
+            if str(candidate.parent) not in sys.path:
+                sys.path.insert(0, str(candidate.parent))
+            from streaming_load import stream_artifact_layers as _saload  # type: ignore
+            _STREAMING_LOAD_FN = _saload
+            break
+except Exception:  # pragma: no cover - intentionally swallow; honest fallback handles it
+    _STREAMING_LOAD_FN = None
 
 
 class KolmError(Exception):
@@ -48,19 +68,27 @@ class Kolm:
     """
 
     def __init__(self, api_key: Optional[str] = None, base: str = DEFAULT_BASE, cli: str = "kolm"):
+        # api_key is only required for network operations (compile/status/
+        # wait). Local operations (run on a local .kolm, run stream=True,
+        # verify --offline) work without one. We defer the error to the
+        # first network call rather than raise at construction time.
         self.api_key = api_key or os.environ.get("KOLM_KEY")
-        if not self.api_key:
-            raise KolmError(401, "missing api key (pass api_key= or set KOLM_KEY env)")
         self.base = base.rstrip("/")
         self.cli = cli
+
+    def _require_api_key(self, op: str) -> str:
+        if not self.api_key:
+            raise KolmError(401, f"missing api key for {op} (pass api_key= or set KOLM_KEY env)")
+        return self.api_key
 
     # ----- HTTP -----
 
     def _http(self, method: str, path: str, body: Any = None) -> dict:
+        api_key = self._require_api_key(f"{method} {path}")
         url = self.base + path
         data = json.dumps(body).encode("utf-8") if body is not None else None
         req = urllib.request.Request(url, data=data, method=method)
-        req.add_header("Authorization", f"Bearer {self.api_key}")
+        req.add_header("Authorization", f"Bearer {api_key}")
         if data is not None:
             req.add_header("Content-Type", "application/json")
         try:
@@ -146,11 +174,56 @@ class Kolm:
 
     # ----- run / verify -----
 
-    def run(self, artifact_path: str | os.PathLike, input: str) -> RunResult:
-        """Run a .kolm locally via the CLI. Requires the Node CLI installed."""
-        cli = self._cli_or_raise("run")
-        artifact_path = Path(artifact_path).expanduser().resolve()
-        r = subprocess.run([cli, "run", str(artifact_path), "--in", input, "--json"], capture_output=True, text=True)
+    def run(
+        self,
+        artifact_path: str | os.PathLike,
+        input: str = "",
+        *,
+        stream: bool = False,
+    ) -> Union[RunResult, dict, Iterator[dict]]:
+        """Run a .kolm artifact locally.
+
+        Default (``stream=False``):
+            Shells out to the Node CLI, returns a ``RunResult`` dataclass
+            with the final response. Backward-compatible with v0.2.0.
+
+            If the Node CLI is not installed, returns an honest-envelope
+            ``dict`` instead of raising — so callers in test environments
+            can detect the missing dependency without ``try/except``.
+
+        W723 streaming (``stream=True``):
+            Returns an iterator that yields ``{event, shard_index,
+            total_shards, bytes_loaded, total_bytes, layer_names}`` events
+            as each weight shard surfaces from the artifact. The engine
+            can begin processing layer 0 the moment shard 0 arrives,
+            instead of waiting for the full artifact to load.
+
+            For remote artifacts (string starting with http:// or
+            https://), streaming is not yet wired through the HTTP
+            backend; the iterator yields a SINGLE honest-envelope dict
+            ``{ok: False, error: 'streaming_remote_not_yet_implemented',
+            hint: 'use local .kolm path'}`` and stops.
+        """
+        path_str = os.fspath(artifact_path)
+        looks_remote = path_str.startswith("http://") or path_str.startswith("https://")
+
+        if stream:
+            return self._run_stream(path_str, looks_remote=looks_remote)
+
+        # Non-streaming path: existing CLI-shelling behavior.
+        cli = self._cli_or_none()
+        if cli is None:
+            return {
+                "ok": False,
+                "error": "cli_not_installed",
+                "hint": "kolm CLI not installed; required for run. "
+                "Run: npm i -g github:sneaky-hippo/kolm-stack",
+            }
+        artifact_resolved = Path(path_str).expanduser().resolve()
+        r = subprocess.run(
+            [cli, "run", str(artifact_resolved), "--in", input, "--json"],
+            capture_output=True, text=True,
+        )
         if r.returncode != 0:
             raise KolmError(500, r.stderr.strip() or "cli run failed")
         payload = json.loads(r.stdout)
@@ -161,6 +234,43 @@ class Kolm:
             runtime_ms=payload.get("runtime_ms"),
             raw=payload,
         )
+
+    def _run_stream(self, path_str: str, *, looks_remote: bool) -> Iterator[dict]:
+        """W723 streaming generator. See :meth:`run` docstring."""
+        if looks_remote:
+            yield {
+                "ok": False,
+                "error": "streaming_remote_not_yet_implemented",
+                "hint": "use local .kolm path; remote HTTP streaming "
+                "lands in a follow-up wave",
+            }
+            return
+
+        if _STREAMING_LOAD_FN is None:
+            yield {
+                "ok": False,
+                "error": "streaming_loader_unavailable",
+                "hint": "apps/runtime/streaming_load.py is not importable "
+                "from this install — ensure the kolm repo layout is intact",
+            }
+            return
+
+        artifact_resolved = Path(path_str).expanduser().resolve()
+        if not artifact_resolved.exists():
+            yield {
+                "ok": False,
+                "error": "artifact_not_found",
+                "hint": f"no such file: {artifact_resolved}",
+            }
+            return
+
+        try:
+            for ev in _STREAMING_LOAD_FN(str(artifact_resolved)):
+                yield ev
+        except Exception as e:  # StreamingLoadError + any I/O blow-up
+            code = getattr(e, "code", "streaming_failed")
+            hint = getattr(e, "hint", str(e))
+            yield {"ok": False, "error": code, "hint": hint}
 
     def verify(self, artifact_path: str | os.PathLike, *, offline: bool = False) -> dict:
         """Verify the receipt chain on a .kolm. Returns the parsed report."""
@@ -185,3 +295,9 @@ class Kolm:
         if not cli:
             raise KolmError(503, f"kolm CLI not installed; required for {op}. Run: npm i -g github:sneaky-hippo/kolm-stack")
         return cli
+
+
+# W723 — expose ``Client`` as an alias for ``Kolm`` so callers using the
+# generic name (``from kolm.client import Client``) work the same way. The
+# canonical name remains ``Kolm`` (matches the brand and existing imports).
+Client = Kolm

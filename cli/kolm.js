@@ -3807,6 +3807,38 @@ EXAMPLE
   kolm shell-init --shell zsh
   eval "$(kolm shell-init --shell bash)"
 `,
+  'active-learn': `kolm active-learn - W815 active-learning coverage-gap detector.
+
+USAGE
+  kolm active-learn                              (top 10 gaps for default namespace)
+  kolm active-learn --namespace <ns>             [--top <N>] [--json]
+  kolm active-learn --tenant <id> --namespace ns [--top 25] [--min-captures 30]
+  kolm active-learn --feed-w720                  (also write gap rows into W720
+                                                 self-improvement event-store)
+
+FLAGS
+  --namespace, -n <ns>   restrict to one namespace (default: default)
+  --tenant <id>          override tenant (default: KOLM_TENANT_ID or local)
+  --top <N>              return top-N gaps (default 10, max 1000)
+  --min-captures <N>     lower coverage-analysis floor (default 30)
+  --feed-w720            also seed gap rows into the W720 self-improvement loop
+  --json                 deterministic JSON output
+
+OUTPUT
+  Each gap row carries {topic_cluster, gap_score, recommended_count,
+  current_count, capture_template}. Honest envelope when fewer than
+  --min-captures captures exist for the namespace: {ok:false,
+  error:"insufficient_captures_for_coverage", n, hint}.
+
+EXIT CODES
+  0 ok      (gaps found OR no gaps detected with sufficient sample)
+  3 auth    (no api key OR tenant resolve failed)
+  4 nodata  (insufficient_captures_for_coverage)
+
+EXAMPLE
+  kolm active-learn --namespace prod --top 25 --json
+  kolm active-learn --feed-w720
+`,
 };
 
 HELP.package = HELP.packages;
@@ -10782,6 +10814,255 @@ async function cmdRouteDoctor(args) {
   console.log('  last_decision_at:  ' + (env.summary.last_decision_at || '(none)'));
 }
 
+// W815 — `kolm active-learn` surfaces the coverage-gap detector + optional
+// W720 feed. Distinct from `kolm distill --resume-from-active-queue` (W710 —
+// pulls high-uncertainty rows from the queue) and `kolm route doctor` (W807
+// — confidence-router threshold report). This verb is the "what should I
+// capture NEXT" lens, ranking under-represented topic clusters.
+async function cmdActiveLearn(args) {
+  if (maybeHelp('active-learn', args)) return;
+  const wantJson = args.includes('--json');
+  const namespace = pickFlag(args, '--namespace') || pickFlag(args, '-n') || 'default';
+  let tenantId = pickFlag(args, '--tenant') || pickFlag(args, '--tenant-id') || null;
+  const topRaw = pickFlag(args, '--top');
+  const top = topRaw != null ? Math.max(1, Math.min(1000, Math.trunc(Number(topRaw)))) : 10;
+  const minCapRaw = pickFlag(args, '--min-captures');
+  const minCaptures = minCapRaw != null ? Math.max(1, Math.trunc(Number(minCapRaw))) : null;
+  const feedW720 = args.includes('--feed-w720');
+
+  // Tenant resolution: explicit > env > whoami > local-tenant fallback.
+  if (!tenantId) tenantId = process.env.KOLM_TENANT_ID || null;
+  if (!tenantId) {
+    // Best-effort whoami — silently fall back to local-tenant if offline.
+    try {
+      const c = loadConfig();
+      if (c && c.api_key && c.base) {
+        const base = c.base.replace(/\/+$/, '');
+        const res = await fetch(base + '/v1/whoami', { headers: { ...authHeaders(c) } });
+        if (res.ok) {
+          const j = await res.json().catch(() => ({}));
+          tenantId = j && (j.id || j.tenant_id || (j.tenant && j.tenant.id)) || null;
+        }
+      }
+    } catch (_) { /* offline / no auth — fall through */ }
+  }
+  if (!tenantId) tenantId = 'local-tenant';
+
+  let alMod;
+  try { alMod = await import('../src/active-learning.js'); }
+  catch (e) {
+    const env = {
+      ok: false,
+      error: 'active_learning_module_missing',
+      detail: e && e.message ? e.message : String(e),
+      hint: 'src/active-learning.js must be importable',
+      version: 'w815-v1',
+    };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else console.error('error: ' + env.error + ' - ' + env.detail);
+    process.exit(EXIT.MISSING_PREREQ);
+  }
+
+  let env;
+  try {
+    env = await alMod.recommendNextCaptures(tenantId, namespace, {
+      top_k: top,
+      ...(minCaptures != null ? { min_captures: minCaptures } : {}),
+    });
+  } catch (e) {
+    const out = {
+      ok: false,
+      error: 'recommend_next_captures_failed',
+      detail: e && e.message ? e.message : String(e),
+      version: 'w815-v1',
+    };
+    if (wantJson) console.log(JSON.stringify(out, null, 2));
+    else console.error('error: ' + out.error + ' - ' + out.detail);
+    process.exit(EXIT.EXECUTION);
+  }
+
+  // Optional W720 feed when --feed-w720 + ok:true with gaps.
+  let feedResult = null;
+  if (feedW720 && env && env.ok && Array.isArray(env.recommendations) && env.recommendations.length > 0) {
+    const gaps = env.recommendations.map((r) => ({
+      cluster_id: r.topic_cluster || r.cluster_id,
+      gap_score: r.gap_score,
+      recommended_count: r.recommended_count,
+    }));
+    try {
+      feedResult = await alMod.feedToSelfImprovement(tenantId, namespace, gaps);
+    } catch (e) {
+      feedResult = { ok: false, error: 'feed_to_self_improvement_failed', detail: String(e && e.message || e) };
+    }
+  }
+
+  if (wantJson) {
+    const out = { ...env };
+    if (feedResult) out.w720_feed = feedResult;
+    console.log(JSON.stringify(out, null, 2));
+    if (!env.ok) {
+      if (env.error === 'insufficient_captures_for_coverage') process.exit(EXIT.EXECUTION);
+      if (env.error === 'missing_tenant_id') process.exit(EXIT.MISSING_PREREQ);
+      process.exit(EXIT.EXECUTION);
+    }
+    return;
+  }
+
+  // Human-readable fallback.
+  if (!env.ok) {
+    console.error('active-learn: ' + env.error);
+    if (env.hint) console.error('  hint: ' + env.hint);
+    if (env.error === 'insufficient_captures_for_coverage') process.exit(EXIT.EXECUTION);
+    if (env.error === 'missing_tenant_id') process.exit(EXIT.MISSING_PREREQ);
+    process.exit(EXIT.EXECUTION);
+  }
+  const recs = env.recommendations || [];
+  console.log('active-learning coverage gaps (tenant=' + tenantId + ', namespace=' + namespace + ')');
+  console.log('  captures analyzed: ' + (env.n || 0));
+  console.log('  total buckets:     ' + (env.total_buckets || 0));
+  console.log('  median bucket:     ' + (env.median_bucket_size || 0));
+  console.log('  gaps reported:     ' + recs.length + ' (top ' + top + ')');
+  console.log('');
+  if (recs.length === 0) {
+    console.log('  no coverage gaps detected — corpus is well-distributed.');
+  } else {
+    for (let i = 0; i < recs.length; i++) {
+      const r = recs[i];
+      console.log('  #' + (i + 1)
+        + '  cluster=' + (r.topic_cluster || '-')
+        + '  gap=' + (Number(r.gap_score) || 0).toFixed(3)
+        + '  have=' + (r.current_count || 0)
+        + '  rec=' + (r.recommended_count || 0));
+      if (r.sample_synthetic_input) {
+        const s = r.sample_synthetic_input.replace(/\s+/g, ' ').slice(0, 96);
+        console.log('         e.g. "' + s + (r.sample_synthetic_input.length > 96 ? '..."' : '"'));
+      }
+    }
+  }
+  if (feedResult) {
+    console.log('');
+    console.log('w720 feed: ' + (feedResult.ok ? 'ok' : 'failed')
+      + ' written=' + (feedResult.written || 0) + '/' + (feedResult.attempted || 0));
+  }
+}
+
+// W812 — `kolm failure-modes` reports the cluster regression table. Distinct
+// from `kolm route doctor` (W807) and `kolm distill improve --detect` (W720)
+// even though all three read the same event-store — this verb is the
+// failure-mode VISUALIZATION lens (topic + length + vendor class clusters),
+// the others are routing-side / candidate-side reports.
+async function cmdFailureModes(args) {
+  if (maybeHelp('failure-modes', args)) return;
+  const wantJson = args.includes('--json');
+  const namespace = pickFlag(args, '--namespace') || pickFlag(args, '-n') || null;
+  const tenant = pickFlag(args, '--tenant') || pickFlag(args, '--tenant-id') || process.env.KOLM_TENANT_ID || 'local-tenant';
+  const topRaw = pickFlag(args, '--top');
+  const top = topRaw != null ? Math.max(0, Math.trunc(Number(topRaw))) : 20;
+  const windowRaw = pickFlag(args, '--window-days');
+  const windowDays = windowRaw != null ? Number(windowRaw) : 30;
+  const minDeltaRaw = pickFlag(args, '--min-delta');
+  const minDelta = minDeltaRaw != null ? Number(minDeltaRaw) : 0.05;
+  const inspect = pickFlag(args, '--inspect') || null;
+  const emit = args.includes('--emit-signals');
+
+  let fmMod;
+  try { fmMod = await import('../src/failure-modes.js'); }
+  catch (e) {
+    const env = {
+      ok: false,
+      error: 'failure_modes_module_missing',
+      detail: e && e.message ? e.message : String(e),
+      hint: 'src/failure-modes.js must be importable',
+      version: 'w812-v1',
+    };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else console.error('error: ' + env.error + ' - ' + env.detail);
+    process.exit(EXIT.MISSING_PREREQ);
+  }
+
+  if (inspect) {
+    let env;
+    try {
+      env = await fmMod.clusterSamples({ cluster_id: inspect, tenant_id: tenant, namespace, window_days: windowDays });
+    } catch (e) {
+      const out = { ok: false, error: 'cluster_samples_failed', detail: String(e && e.message || e), version: fmMod.FAILURE_MODES_VERSION };
+      if (wantJson) console.log(JSON.stringify(out, null, 2));
+      else console.error('error: ' + out.error + ' - ' + out.detail);
+      process.exit(EXIT.EXECUTION);
+    }
+    if (wantJson) { console.log(JSON.stringify(env, null, 2)); return; }
+    if (!env.ok) {
+      console.error('error: ' + env.error + (env.hint ? '\nhint: ' + env.hint : ''));
+      process.exit(EXIT.NOT_FOUND);
+    }
+    console.log('cluster ' + env.cluster_id + ' - ' + env.samples.length + ' sample(s)');
+    env.samples.forEach((s, i) => {
+      console.log('');
+      console.log('--- sample ' + (i + 1) + ' ---');
+      console.log('prompt:  ' + (s.prompt || '(none)'));
+      console.log('student: ' + (s.student_response || '(none)') + (s.student_kscore != null ? '  [K=' + s.student_kscore.toFixed(3) + ']' : ''));
+      console.log('teacher: ' + (s.teacher_response || '(none)') + (s.teacher_kscore != null ? '  [K=' + s.teacher_kscore.toFixed(3) + ']' : ''));
+    });
+    return;
+  }
+
+  let env;
+  try {
+    env = await fmMod.clusterCaptures({ tenant_id: tenant, namespace, window_days: windowDays, top });
+  } catch (e) {
+    const out = { ok: false, error: 'cluster_captures_failed', detail: String(e && e.message || e), version: fmMod.FAILURE_MODES_VERSION };
+    if (wantJson) console.log(JSON.stringify(out, null, 2));
+    else console.error('error: ' + out.error + ' - ' + out.detail);
+    process.exit(EXIT.EXECUTION);
+  }
+
+  let emitResult = null;
+  if (emit && env.ok) {
+    try {
+      emitResult = await fmMod.emitClusterFailureSignals({ tenant_id: tenant, namespace, min_delta: minDelta, top });
+    } catch (e) {
+      emitResult = { ok: false, error: 'emit_failed', detail: String(e && e.message || e) };
+    }
+  }
+
+  if (wantJson) {
+    const out = { ...env };
+    if (emitResult) out.emit = emitResult;
+    console.log(JSON.stringify(out, null, 2));
+    return;
+  }
+
+  if (!env.ok) {
+    console.error('error: ' + env.error + (env.hint ? '\nhint: ' + env.hint : ''));
+    process.exit(EXIT.NOT_FOUND);
+  }
+  console.log('failure-modes (tenant=' + tenant + ', namespace=' + (namespace || '(all)') + ', window=' + windowDays + 'd)');
+  console.log('  events scanned:    ' + (env.totals.events_scanned || 0));
+  console.log('  clusters total:    ' + (env.totals.clusters_total || 0));
+  console.log('  clusters returned: ' + (env.totals.clusters_returned || 0));
+  console.log('');
+  if (env.clusters.length === 0) {
+    console.log('  no clusters above min_samples threshold yet');
+  } else {
+    console.log('  ' + 'topic'.padEnd(16) + ' ' + 'len'.padEnd(8) + ' ' + 'n'.padStart(5) + ' ' + 'stu_k'.padStart(7) + ' ' + 'tea_k'.padStart(7) + ' ' + 'delta'.padStart(7));
+    for (const c of env.clusters) {
+      console.log(
+        '  ' + String(c.topic_seed || '-').slice(0, 16).padEnd(16)
+        + ' ' + String(c.length_bucket || '-').padEnd(8)
+        + ' ' + String(c.sample_count || 0).padStart(5)
+        + ' ' + (c.student_kscore_mean != null ? c.student_kscore_mean.toFixed(3) : '-').padStart(7)
+        + ' ' + (c.teacher_kscore_mean != null ? c.teacher_kscore_mean.toFixed(3) : '-').padStart(7)
+        + ' ' + (c.kscore_delta != null ? (c.kscore_delta >= 0 ? '+' : '') + c.kscore_delta.toFixed(3) : '-').padStart(7)
+      );
+    }
+  }
+  if (emitResult) {
+    console.log('');
+    if (emitResult.ok) console.log('  emitted ' + emitResult.emitted.length + ' weakness signal(s) into W720 (skipped=' + (emitResult.skipped || 0) + ')');
+    else console.log('  emit failed: ' + (emitResult.error || 'unknown'));
+  }
+}
+
 async function cmdJobs(args) {
   if (maybeHelp('jobs', args)) return;
   const jobs = await import('../src/jobs.js');
@@ -13320,8 +13601,10 @@ async function cmdDrift(args) {
   const sub = args[0];
   const rest = args.slice(1);
   if (!sub) {
-    console.error('usage: kolm drift <detect|cron|verify> [...]');
+    console.error('usage: kolm drift <detect|cron|verify|alerts> [...]');
     console.error('  kolm drift detect <current.kolm> --baseline <baseline.kolm> [--out report.json]');
+    console.error('  kolm drift detect --namespace <ns> [--tenant <id>] [--json]   (W813 traffic drift)');
+    console.error('  kolm drift alerts [--namespace <ns>] [--tenant <id>] [--limit N] [--json]');
     console.error('  kolm drift cron --baseline <path> --current <path> --cadence "<cron-expr>"');
     console.error('  kolm drift verify <report.json>');
     process.exit(EXIT.BAD_ARGS);
@@ -13329,12 +13612,20 @@ async function cmdDrift(args) {
   if (sub === 'detect') return cmdDriftDetect(rest);
   if (sub === 'cron')   return cmdDriftCron(rest);
   if (sub === 'verify') return cmdDriftVerify(rest);
+  if (sub === 'alerts' || sub === 'alert') return cmdDriftAlerts(rest);
   console.error(`unknown subcommand: kolm drift ${sub}`);
-  console.error('try: kolm drift detect | cron | verify');
+  console.error('try: kolm drift detect | cron | verify | alerts');
   process.exit(EXIT.BAD_ARGS);
 }
 
 async function cmdDriftDetect(args) {
+  // W813 — traffic-distribution + K-Score drift, scoped per-namespace, run
+  // against the live event-store rather than two artifact snapshots. Triggered
+  // when --namespace is present (with no positional artifact path).
+  const namespaceFlag = pickFlag(args, '--namespace') || pickFlag(args, '-n');
+  if (namespaceFlag && !args.find(a => !a.startsWith('-') && /\.kolm$/i.test(a))) {
+    return await cmdDriftDetectNamespace(args, namespaceFlag);
+  }
   const {
     snapshotFromManifest, detectDrift, buildDriftReport, writeDriftReport,
     DEFAULT_TOLERANCES,
@@ -13348,6 +13639,7 @@ async function cmdDriftDetect(args) {
   const wantJson = args.includes('--json');
   if (!currentPath || !baselinePath) {
     console.error('usage: kolm drift detect <current.kolm> --baseline <baseline.kolm> [--out report.json] [--json] [--tolerances <file>]');
+    console.error('   or: kolm drift detect --namespace <ns> [--tenant <id>] [--json]   (W813 traffic drift)');
     process.exit(EXIT.BAD_ARGS);
   }
   if (!fs.existsSync(currentPath)) { console.error(`no such artifact: ${currentPath}`); process.exit(EXIT.NOT_FOUND); }
@@ -13396,6 +13688,116 @@ async function cmdDriftDetect(args) {
   }
   if (report.verdict === 'breach') {
     process.exit(EXIT.GATE_FAIL);
+  }
+}
+
+// W813 — traffic-distribution + K-Score drift, scoped per-namespace, evaluated
+// against the live event-store rather than two artifact snapshots. This is the
+// detector half of the W775-unblock contract: writes alerts to the alerts
+// table + event-store via runDetectAndAlert, exit non-zero if drift fires.
+async function cmdDriftDetectNamespace(args, namespace) {
+  const tenantId =
+    pickFlag(args, '--tenant')
+    || pickFlag(args, '--tenant-id')
+    || process.env.KOLM_TENANT_ID
+    || 'local-tenant';
+  const wantJson = args.includes('--json');
+  const noPersist = args.includes('--dry-run') || args.includes('--no-persist');
+  const drift = await import('../src/drift-detector.js');
+  let result;
+  try {
+    result = await drift.runDetectAndAlert({
+      tenant_id: tenantId,
+      namespace,
+      persist: !noPersist,
+    });
+  } catch (e) {
+    if (wantJson) {
+      console.log(JSON.stringify({ ok: false, error: 'detector_failed', message: e && e.message || String(e) }, null, 2));
+    } else {
+      console.error('drift detector failed: ' + (e && e.message || String(e)));
+    }
+    process.exit(EXIT.EXECUTION);
+  }
+  if (wantJson) {
+    console.log(JSON.stringify(result, null, 2));
+  } else {
+    const sig = result && result.signal || {};
+    const res = result && result.results || {};
+    console.log('W813 drift detect');
+    console.log('  tenant      : ' + tenantId);
+    console.log('  namespace   : ' + namespace);
+    console.log('  has_drift   : ' + String(!!sig.has_drift));
+    console.log('  magnitude   : ' + (typeof sig.magnitude === 'number' ? sig.magnitude.toFixed(4) : '-'));
+    if (sig.drift_kind) console.log('  worst kind  : ' + sig.drift_kind);
+    if (sig.threshold != null) console.log('  threshold   : ' + sig.threshold);
+    if (sig.error) console.log('  status      : ' + sig.error + (sig.hint ? (' (' + sig.hint + ')') : ''));
+    if (res.distribution) {
+      console.log('  --- capture_distribution_js ---');
+      console.log('    has_drift : ' + String(!!res.distribution.has_drift));
+      console.log('    magnitude : ' + (typeof res.distribution.magnitude === 'number' ? res.distribution.magnitude.toFixed(4) : '-'));
+      if (res.distribution.error) console.log('    status    : ' + res.distribution.error);
+    }
+    if (res.kscore) {
+      console.log('  --- kscore_drop ---');
+      console.log('    has_drift : ' + String(!!res.kscore.has_drift));
+      console.log('    magnitude : ' + (typeof res.kscore.magnitude === 'number' ? res.kscore.magnitude.toFixed(4) : '-'));
+      if (res.kscore.error) console.log('    status    : ' + res.kscore.error);
+    }
+    const alerts = (result && result.alerts) || [];
+    console.log('  alerts     : ' + alerts.length + (noPersist ? ' (dry-run, not persisted)' : ' (persisted)'));
+  }
+  // Non-zero exit when drift fired, so cron / CI can pick it up.
+  if (result && result.signal && result.signal.has_drift) {
+    process.exit(EXIT.GATE_FAIL || 5);
+  }
+}
+
+// W813 — `kolm drift alerts` lists the persisted alerts for a tenant
+// (optionally filtered by namespace). Honest-by-default: empty list is empty,
+// never silent-success.
+async function cmdDriftAlerts(args) {
+  if (maybeHelp('drift alerts', args)) return;
+  const tenantId =
+    pickFlag(args, '--tenant')
+    || pickFlag(args, '--tenant-id')
+    || process.env.KOLM_TENANT_ID
+    || 'local-tenant';
+  const namespace = pickFlag(args, '--namespace') || pickFlag(args, '-n') || null;
+  const limitRaw = pickFlag(args, '--limit');
+  const limit = limitRaw && /^\d+$/.test(limitRaw) ? Number(limitRaw) : 50;
+  const wantJson = args.includes('--json');
+  const drift = await import('../src/drift-detector.js');
+  let alerts;
+  try {
+    alerts = await drift.listAlerts({ tenant_id: tenantId, namespace, limit });
+  } catch (e) {
+    if (wantJson) {
+      console.log(JSON.stringify({ ok: false, error: 'list_alerts_failed', message: e && e.message || String(e) }, null, 2));
+    } else {
+      console.error('list alerts failed: ' + (e && e.message || String(e)));
+    }
+    process.exit(EXIT.EXECUTION);
+  }
+  if (wantJson) {
+    console.log(JSON.stringify({ ok: true, tenant_id: tenantId, namespace: namespace, alerts: alerts }, null, 2));
+    return;
+  }
+  console.log('W813 drift alerts');
+  console.log('  tenant     : ' + tenantId);
+  console.log('  namespace  : ' + (namespace || '(all)'));
+  console.log('  count      : ' + alerts.length);
+  if (alerts.length === 0) {
+    console.log('  (no alerts — either no drift has been detected for this tenant or detector has not run)');
+    return;
+  }
+  for (const a of alerts.slice(0, limit)) {
+    const ts = a.created_at || '';
+    const ns = a.namespace || 'default';
+    const kind = a.drift_kind || a.kind || '?';
+    const mag = (typeof a.magnitude === 'number') ? a.magnitude.toFixed(4) : '-';
+    const thr = (typeof a.threshold === 'number') ? a.threshold.toFixed(4) : '-';
+    console.log(`  [${ts}] ns=${ns} kind=${kind} magnitude=${mag} threshold=${thr}`);
   }
 }
 
@@ -15395,6 +15797,118 @@ async function cmdCapturesReview(args) {
     }
     if (staged.length > 50) console.log(`  ... ${staged.length - 50} more (use --json to dump all)`);
   }
+}
+
+// =============================================================================
+// W811 — `kolm captures analytics --namespace <ns> [--json|--csv]`
+//
+// Runs the W811 capture-analytics pipeline for one (tenant, namespace) bucket
+// and prints the dashboard envelope (or CSV) so operators don't have to load
+// the HTML page. Honest envelopes everywhere — never silent empty.
+//
+// Exit codes:
+//   0  ok
+//   1  bad-args (--csv + --json conflict; unknown flag)
+//   3  missing-prereq (tenant resolve fail; analytics returns honest error)
+// =============================================================================
+async function cmdCapturesAnalyticsW811(args) {
+  const wantJson = args.includes('--json');
+  const wantCsv = args.includes('--csv');
+  const emit = (env) => console.log(JSON.stringify(env, null, 2));
+  if (wantJson && wantCsv) {
+    const env = { ok: false, error: 'json_and_csv_are_mutually_exclusive', hint: 'pick one', version: 'w811-v1' };
+    if (wantJson) emit(env); else console.error('error: --json and --csv are mutually exclusive');
+    process.exit(EXIT.BAD_ARGS);
+  }
+  const tenantFlag = pickFlag(args, '--tenant') || pickFlag(args, '--tenant-id') || null;
+  const namespace = pickFlag(args, '--namespace') || pickFlag(args, '-n') || null;
+  const limitFlag = pickFlag(args, '--limit');
+  const limit = Number.isFinite(Number(limitFlag)) && Number(limitFlag) > 0
+    ? Math.trunc(Number(limitFlag)) : undefined;
+
+  const tenant_id = tenantFlag
+    || process.env.KOLM_TENANT_ID
+    || (process.env.KOLM_ENV === 'test' ? 'local' : null);
+  if (!tenant_id) {
+    const env = {
+      ok: false,
+      error: 'tenant_resolve_failed',
+      hint: 'pass --tenant <id> or set KOLM_TENANT_ID; run `kolm whoami` to find your tenant id',
+      version: 'w811-v1',
+    };
+    if (wantJson || wantCsv) emit(env); else console.error('error: ' + env.error);
+    process.exit(EXIT.MISSING_PREREQ);
+  }
+  if (!namespace) {
+    const env = {
+      ok: false,
+      error: 'missing_namespace',
+      hint: 'pass --namespace <ns> — analytics are per-namespace; pick one with `kolm captures list`',
+      version: 'w811-v1',
+    };
+    if (wantJson || wantCsv) emit(env); else console.error('usage: kolm captures analytics --namespace <ns> [--json|--csv]');
+    process.exit(EXIT.BAD_ARGS);
+  }
+
+  let anaMod;
+  try {
+    anaMod = await import('../src/capture-analytics.js');
+  } catch (e) {
+    const env = {
+      ok: false,
+      error: 'analytics_module_missing',
+      detail: e && e.message || String(e),
+      hint: 'src/capture-analytics.js must be importable',
+      version: 'w811-v1',
+    };
+    if (wantJson || wantCsv) emit(env); else console.error('error: ' + env.error);
+    process.exit(EXIT.MISSING_PREREQ);
+  }
+
+  if (wantCsv) {
+    const out = await anaMod.analyzeNamespaceCsv({ tenant_id, namespace, limit });
+    if (!out.ok) {
+      // CSV mode still emits a JSON envelope on error so machine consumers
+      // can distinguish "no data" from "no analytics".
+      emit(out);
+      process.exit(EXIT.MISSING_PREREQ);
+    }
+    // Plain CSV to stdout — no JSON wrapper on success.
+    process.stdout.write(out.csv);
+    return;
+  }
+
+  const out = await anaMod.analyzeNamespace({
+    tenant_id, namespace, limit,
+    emit_gap_signal: true,
+  });
+  if (!out.ok) {
+    if (wantJson) emit(out);
+    else console.error('error: ' + out.error + (out.hint ? ('\n  hint: ' + out.hint) : ''));
+    process.exit(EXIT.MISSING_PREREQ);
+  }
+  if (wantJson) {
+    emit(out);
+    return;
+  }
+  // Pretty TTY output.
+  console.log(`capture analytics: tenant=${tenant_id} namespace=${namespace}`);
+  console.log(`  total_n=${out.total_n} clusters=${out.clusters.length} overflow_n=${out.overflow_n}`);
+  console.log(`  idr_staleness_gauge=${out.idr.gauge} (recent_n=${out.idr.recent_n}, comparison_n=${out.idr.comparison_n}, status=${out.idr.status})`);
+  console.log(`  gap_signals_emitted=${out.gap_signals_emitted}`);
+  if (out.clusters.length === 0) {
+    console.log('  (no clusters - all rows had empty or unscored prompts)');
+    return;
+  }
+  const ksMap = new Map();
+  for (const b of (out.kscore_breakdown || [])) ksMap.set(b.cluster_id, b);
+  for (const c of out.clusters.slice(0, 20)) {
+    const b = ksMap.get(c.cluster_id) || {};
+    const ks = b.kscore == null ? '-' : b.kscore.toFixed(3);
+    const top = (c.top_tokens || []).slice(0, 3).join('+');
+    console.log(`  ${c.cluster_id.padEnd(36)} n=${String(c.n).padStart(5)}  kscore=${ks}  [${top}]`);
+  }
+  if (out.clusters.length > 20) console.log(`  ... ${out.clusters.length - 20} more (use --json to dump all)`);
 }
 
 // W711-CLI — `kolm distill --importance-weighted [--scorer-version w711-v1]
@@ -29536,6 +30050,10 @@ async function _dispatchVerb(verb, args) {
     keys: cmdKeys, auditor: cmdAuditor, quantize: cmdQuantize, runtime: cmdRuntime,
     // W807 — kolm route doctor: confidence-router threshold + recent splice summary.
     route: cmdRoute,
+    // W815 — kolm active-learn: coverage-gap detector + recommend-next-capture.
+    'active-learn': cmdActiveLearn,
+    // W812 — kolm failure-modes: cluster regression dashboard from the CLI.
+    'failure-modes': cmdFailureModes,
     jobs: cmdJobs, watch: cmdWatch, resume: cmdResume, rescue: cmdRescue,
     sessions: cmdSessions, checkpoint: cmdCheckpoint, 'import-chat': cmdImportChat,
     import: cmdImportChat, merge: cmdMerge, agent: cmdAgent, 'init-agent': cmdInitAgent,
@@ -29569,6 +30087,249 @@ async function _dispatchVerb(verb, args) {
   return withErrorContext(verb, () => fn(args || []));
 }
 
+// =============================================================================
+// W724 — Memory-aware Auto-Placement dispatcher for `kolm run`.
+//
+// Distinct-named per the W807/W808/W811 precedent (cmdConfidenceRoute_w807,
+// cmdPoisonScan_w808, cmdCapturesAnalyticsW811) so the W724 touch surface on
+// cli/kolm.js stays explicit and the existing cmdRun body is untouched.
+//
+// Behavior:
+//   --auto-place               Triggers this dispatcher (orchestrator wiring)
+//   --placement-only           Pure dry-run: print decision, exit 0, no load.
+//   --artifact <path>          Optional artifact path. If the file exists the
+//                              estimator uses its on-disk size; otherwise the
+//                              dry-run falls through with size_gb=0.
+//   --json                     Emit the full envelope as JSON instead of the
+//                              human-readable reasoning line.
+//
+// Honesty contract: every probe is best-effort; never silent fallthrough. The
+// envelope ALWAYS surfaces {version, tiers, decision, reasoning_line}; the
+// `placement:` and `expected_tok_per_s:` tokens ALWAYS appear in pretty mode
+// because downstream tests + operator scripts grep for them.
+// =============================================================================
+async function cmdRunAutoPlace_w724(rawArgs) {
+  const args = Array.isArray(rawArgs) ? rawArgs.slice() : [];
+  const placementOnly = args.includes('--placement-only');
+  const jsonOut = args.includes('--json');
+  const artifactFlag = pickFlag(args, '--artifact');
+
+  // Resolve artifact size in GB. If the path was given and exists, use the
+  // actual on-disk byte count. Otherwise the dry-run uses a zero stub so the
+  // estimator can still surface the tier table for capacity planning.
+  let sizeGb = 0;
+  let artifactResolvedPath = null;
+  if (artifactFlag) {
+    try {
+      if (fs.existsSync(artifactFlag)) {
+        artifactResolvedPath = artifactFlag;
+        const st = fs.statSync(artifactFlag);
+        // Preserve sub-GB artifacts (4-byte / 4-KB / 40-MB recipes) as
+        // POSITIVE fractions so the placement estimator does not treat them
+        // as the zero-byte phantom path. Floor at 0.001 GB (~1 MB) so the
+        // VRAM fit check still passes.
+        const rawGb = Number(st.size) / (1024 ** 3);
+        sizeGb = rawGb > 0 ? Math.max(0.001, Math.round(rawGb * 1000) / 1000) : 0;
+      }
+    } catch {
+      // honest-fail: leave sizeGb=0; the placement decision still prints.
+    }
+  }
+
+  // Load the W724 module dynamically so a missing-import surfaces as an
+  // honest envelope rather than a top-level import crash on older installs.
+  let mtMod;
+  try {
+    mtMod = await import('../src/memory-tier.js');
+  } catch (e) {
+    const env = {
+      ok: false,
+      error: 'memory_tier_module_missing',
+      detail: (e && e.message) || String(e),
+      hint: 'src/memory-tier.js must be importable; reinstall the kolm CLI',
+      version: 'w724-v1',
+    };
+    console.log(JSON.stringify(env, null, 2));
+    process.exit(EXIT.MISSING_PREREQ);
+  }
+
+  const decision = mtMod.applyAutoPlaceDecision(sizeGb);
+  const envelope = {
+    ok: true,
+    version: decision.version,
+    artifact_path: artifactResolvedPath,
+    artifact_size_gb: decision.artifact_size_gb,
+    tiers: decision.tiers,
+    decision: decision.decision,
+    reasoning_line: decision.reasoning_line,
+    placement_only: placementOnly,
+  };
+
+  if (jsonOut) {
+    // Machine-consumer mode: full envelope as JSON. Still includes the
+    // `placement:` + `expected_tok_per_s:` tokens for the dry-run grep
+    // pattern the W724 tests assert on (printed as a one-line summary
+    // BEFORE the JSON envelope so both flavors satisfy the contract).
+    console.log(`placement: ${decision.decision.placement}`);
+    console.log(`expected_tok_per_s: ${decision.decision.expected_tok_per_s}`);
+    console.log(JSON.stringify(envelope, null, 2));
+  } else {
+    // Pretty TTY output. The literal tokens `placement:` and
+    // `expected_tok_per_s:` are load-bearing — operator scripts and the
+    // W724 test suite both grep for them.
+    console.log(`placement: ${decision.decision.placement}`);
+    console.log(`expected_tok_per_s: ${decision.decision.expected_tok_per_s}`);
+    console.log(`tiers: vram=${decision.tiers.vram_gb}GB ram=${decision.tiers.ram_gb}GB nvme=${decision.tiers.nvme_gb}GB network=${decision.tiers.network_gbps === null ? 'unset' : (decision.tiers.network_gbps + 'Gbps')}`);
+    console.log(`reasoning: ${decision.reasoning_line}`);
+  }
+
+  if (placementOnly) {
+    // Pure dry-run. Exit 0 without delegating to cmdRun. The user got their
+    // placement decision; nothing was loaded.
+    process.exit(EXIT.OK);
+  }
+
+  // Hand off to the existing cmdRun flow with the W724 flags stripped so
+  // the artifact actually loads. cmdRun owns artifact resolution and the
+  // run path is unchanged — W724 is purely additive on top.
+  const handoff = [];
+  for (let i = 0; i < args.length; i += 1) {
+    const a = args[i];
+    if (a === '--auto-place' || a === '--placement-only') continue;
+    if (a === '--artifact') { i += 1; continue; }
+    handoff.push(a);
+  }
+  // If --artifact was provided AND no positional artifact was already on the
+  // tail, push the artifact path so cmdRun can resolve it through the normal
+  // path. We push it at position 0 of the handoff list (cmdRun reads it as
+  // positional[0]).
+  if (artifactFlag) {
+    handoff.unshift(artifactFlag);
+  }
+  await cmdRun(handoff);
+}
+
+// W726 — batch-vs-latency kernel selector CLI dispatchers.
+//
+// Two distinct-named extensions on top of cmdRun / cmdCompile (following
+// the W724 cmdRunAutoPlace_w724 + W807-W810 distinct-named pattern):
+//
+//   cmdRunWorkloadProbe_w726
+//     Handles `--workload <hint>` and `--workload-probe` on `kolm run`.
+//     When `--workload-probe` is set, the probe prints the auto-detected
+//     workload and exits 0 WITHOUT loading the artifact (dry-run only).
+//     When `--workload <hint>` is set without --workload-probe, the
+//     selected profile is printed for transparency and the flags are
+//     stripped before handing off to cmdRun for the actual execution.
+//
+//   cmdCompileWorkload_w726
+//     Handles `--workload <latency|batching|auto>` on `kolm compile`.
+//     Sets process.env.KOLM_WORKLOAD_PROFILE so src/spec-compile.js sees
+//     the chosen profile via its env-var fallback (opts arg still wins
+//     over env). The flag is stripped before handing off to cmdCompile.
+//
+// Both helpers are NEVER called for the no-flag default path so existing
+// cmdRun / cmdCompile behavior is untouched (W726-3 brief: decision is
+// at `kolm run --target` time, not manual config-time).
+async function cmdRunWorkloadProbe_w726(rawArgs) {
+  const args = Array.isArray(rawArgs) ? rawArgs.slice() : [];
+  // Pull off --workload <value> + --workload-probe so the handoff cmdRun
+  // call doesn't see flags it doesn't know about.
+  let hint = null;
+  const handoff = [];
+  let probeOnly = false;
+  for (let i = 0; i < args.length; i += 1) {
+    const a = args[i];
+    if (a === '--workload-probe') { probeOnly = true; continue; }
+    if (a === '--workload' && i + 1 < args.length) { hint = args[i + 1]; i += 1; continue; }
+    if (typeof a === 'string' && a.startsWith('--workload=')) { hint = a.slice('--workload='.length); continue; }
+    handoff.push(a);
+  }
+
+  // Honest validation: explicit hint must be one of the three accepted
+  // words. A typo is a loud failure not a silent fallback.
+  if (hint != null) {
+    const lc = String(hint).trim().toLowerCase();
+    if (lc !== 'latency' && lc !== 'batching' && lc !== 'auto'
+        && lc !== 'serving' && lc !== 'desktop') {
+      console.error(`error: --workload must be one of latency | batching | auto | serving | desktop (got ${JSON.stringify(hint)})`);
+      process.exit(EXIT.BAD_ARGS);
+    }
+  }
+
+  let ksMod;
+  try {
+    ksMod = await import('../src/kernel-selector.js');
+  } catch (e) {
+    const env = {
+      ok: false,
+      error: 'kernel_selector_module_missing',
+      detail: (e && e.message) || String(e),
+      hint: 'src/kernel-selector.js must be importable; reinstall the kolm CLI',
+      version: 'w726-v1',
+    };
+    console.log(JSON.stringify(env, null, 2));
+    process.exit(EXIT.MISSING_PREREQ);
+  }
+
+  // Resolve the chosen profile. Precedence: explicit --workload > probed
+  // runtime workload (env-only since the CLI never sees real socket counts
+  // at this point) > default 'latency'.
+  const probed = ksMod.probeRuntimeWorkload({
+    env: process.env,
+    concurrent_connections_seen: 0,
+  });
+  const profile = ksMod.selectKernelProfile({
+    workload_hint: hint != null ? hint : probed,
+    env: process.env,
+    concurrency_estimate: 0,
+  });
+
+  // Load-bearing output: the literal `workload:` token + the profile name
+  // are what the W726 test (and any operator script) greps for. Print on
+  // stdout so `kolm run --workload-probe | grep workload:` works.
+  console.log(`workload: ${profile}`);
+  console.log(`probed: ${probed}`);
+  console.log(`hint: ${hint == null ? '(none)' : hint}`);
+
+  if (probeOnly) {
+    // Pure dry-run. Exit 0 without delegating to cmdRun. The user got
+    // their workload probe; nothing was loaded.
+    process.exit(EXIT.OK);
+  }
+
+  // Hand off to the existing cmdRun flow with the W726 flags stripped.
+  // cmdRun owns artifact resolution and the run path is unchanged — the
+  // workload profile is advisory at run-time today (a future wave wires
+  // it into the kernel dispatcher).
+  await cmdRun(handoff);
+}
+
+async function cmdCompileWorkload_w726(rawArgs) {
+  const args = Array.isArray(rawArgs) ? rawArgs.slice() : [];
+  let workload = null;
+  const handoff = [];
+  for (let i = 0; i < args.length; i += 1) {
+    const a = args[i];
+    if (a === '--workload' && i + 1 < args.length) { workload = args[i + 1]; i += 1; continue; }
+    if (typeof a === 'string' && a.startsWith('--workload=')) { workload = a.slice('--workload='.length); continue; }
+    handoff.push(a);
+  }
+  if (workload != null) {
+    const lc = String(workload).trim().toLowerCase();
+    if (lc !== 'latency' && lc !== 'batching' && lc !== 'auto') {
+      console.error(`error: --workload must be one of latency | batching | auto (got ${JSON.stringify(workload)})`);
+      process.exit(EXIT.BAD_ARGS);
+    }
+    // Thread into spec-compile.js via env so cmdCompile + downstream
+    // compileSpec see the profile without us having to widen cmdCompile's
+    // surface. compileSpec falls back to KOLM_WORKLOAD_PROFILE when its
+    // opts.workload_profile arg is null (see src/spec-compile.js).
+    process.env.KOLM_WORKLOAD_PROFILE = lc;
+  }
+  await cmdCompile(handoff);
+}
+
 async function main() {
   ensureLocalReceiptSecretInEnv();
   const [, , cmd, ...rest] = process.argv;
@@ -29590,12 +30351,47 @@ async function main() {
       case 'key':      await withErrorContext('key',      () => cmdKey(rest)); break;
       case 'new':      await withErrorContext('new',      () => cmdNew(rest)); break;
       case 'build':    await withErrorContext('build',    () => cmdBuild(rest)); break;
-      case 'compile':  await withErrorContext('compile',  () => cmdCompile(rest)); break;
+      case 'compile': {
+        // W726 — when --workload <profile> is on the args, the W726
+        // dispatcher runs first to validate the flag, strip it, and stash
+        // KOLM_WORKLOAD_PROFILE in env so src/spec-compile.js sees the
+        // chosen profile via its env-var fallback. cmdCompile is invoked
+        // unchanged after the flag is stripped.
+        if ((rest || []).some(a => a === '--workload' || (typeof a === 'string' && a.startsWith('--workload=')))) {
+          await withErrorContext('compile --workload', () => cmdCompileWorkload_w726(rest));
+        } else {
+          await withErrorContext('compile', () => cmdCompile(rest));
+        }
+        break;
+      }
       case 'train':    await withErrorContext('train',    () => cmdTrain(rest)); break;
       // W359/360 — kolm make / kolm ship: unified pipeline UX.
       case 'make':     await withErrorContext('make',     () => cmdMake(rest)); break;
       case 'ship':     await withErrorContext('ship',     () => cmdShip(rest)); break;
-      case 'run':      await withErrorContext('run',      () => cmdRun(rest)); break;
+      case 'run': {
+        // W726 — when --workload-probe or --workload <hint> is on the
+        // args, the W726 dispatcher runs first to print the chosen
+        // kernel profile. --workload-probe exits early without loading;
+        // otherwise the W726 flags are stripped and we fall through to
+        // either the W724 path (if --auto-place is ALSO set) or the
+        // default cmdRun flow. Probe-only path has the highest priority
+        // so a user can ask "what workload would you pick?" without ever
+        // touching the artifact loader.
+        const w726Set = (rest || []).some(a => a === '--workload-probe' || a === '--workload'
+          || (typeof a === 'string' && a.startsWith('--workload=')));
+        if (w726Set) {
+          await withErrorContext('run --workload', () => cmdRunWorkloadProbe_w726(rest));
+        } else if ((rest || []).includes('--auto-place')) {
+          // W724 — when --auto-place is on the args, the W724 dispatcher runs
+          // first to print the placement decision line. --placement-only exits
+          // early without loading; otherwise we strip the W724 flags and hand
+          // off to the existing cmdRun flow so the load path is unchanged.
+          await withErrorContext('run --auto-place', () => cmdRunAutoPlace_w724(rest));
+        } else {
+          await withErrorContext('run', () => cmdRun(rest));
+        }
+        break;
+      }
       case 'eval':     await withErrorContext('eval',     () => cmdEval(rest)); break;
       case 'benchmark':
       case 'bench':    await withErrorContext('bench',    () => cmdBenchmark(rest)); break;
@@ -29626,8 +30422,14 @@ async function main() {
       case 'captures':
         if (rest[0] === 'review') {
           await withErrorContext('captures review', () => cmdCapturesReview(rest.slice(1)));
+        } else if (rest[0] === 'analytics') {
+          // W811 — capture analytics dashboard mirror (per-namespace clusters
+          // + K-Score breakdown + IDR staleness gauge + CSV export). Distinct
+          // dispatcher name (cmdCapturesAnalyticsW811) so the parallel-wave
+          // touch surface on this file stays explicit per W811 owner spec.
+          await withErrorContext('captures analytics', () => cmdCapturesAnalyticsW811(rest.slice(1)));
         } else {
-          console.error('usage: kolm captures review [--list-pending | --allow ID | --block ID --reason "..." | --auto-allow-since 24h]');
+          console.error('usage: kolm captures review [--list-pending | --allow ID | --block ID --reason "..." | --auto-allow-since 24h]\n       kolm captures analytics --namespace <ns> [--json|--csv]');
           process.exit(EXIT.BAD_ARGS);
         }
         break;
@@ -29658,6 +30460,20 @@ async function main() {
       // + the most-recent splice ratio so operators can confirm the router
       // is configured the way they expect without loading the dashboard.
       case 'route':    await withErrorContext('route',    () => cmdRoute(rest)); break;
+      // W815 — `kolm active-learn` reports coverage gaps (per cluster_id
+      // when W811 ships, else 3-gram fallback bucket) sorted by gap_score
+      // and optionally feeds them into W720 self-improvement as
+      // active_learning_gap rows. Pure-JS scorer, tenant-fenced reads,
+      // honest envelope on n<MIN_CAPTURES.
+      case 'active-learn':
+        await withErrorContext('active-learn', () => cmdActiveLearn(rest));
+        break;
+      // W812 — `kolm failure-modes` mirrors /account/failure-modes.html:
+      // cluster regression table + per-cluster inspector + optional emit
+      // of weakness signals into W720 self-improvement.
+      case 'failure-modes':
+        await withErrorContext('failure-modes', () => cmdFailureModes(rest));
+        break;
       case 'jobs':     await withErrorContext('jobs',     () => cmdJobs(rest)); break;
       // W369 data plane (lake / optimize / dataset / label).
       case 'lake':     await withErrorContext('lake',     () => cmdLake(rest)); break;
