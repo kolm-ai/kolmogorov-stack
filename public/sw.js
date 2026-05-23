@@ -1,5 +1,5 @@
 // Recipe service worker: keeps the registry available offline.
-const CACHE = 'kolm-v26-2026-05-24-wave693-drill-down-breadcrumbs';
+const CACHE = 'kolm-v27-2026-05-24-wave694-compliance-cluster-breadcrumbs';
 const PRECACHE = [
  '/device',
  '/design-tokens.css',
