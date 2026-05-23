@@ -342,14 +342,18 @@
 }
 .fr-rule--mint { background: linear-gradient(90deg, transparent, var(--fr-mint-edge), transparent); }
 
-/* === Scroll reveal === */
+/* === Scroll reveal ===
+   Progressive enhancement: .fr-reveal is visible by default so no-JS clients,
+   crawlers, screenshot tools, and deep-link anchors see full content.
+   JS adds .fr-reveal--prep to below-fold elements only; they animate in on
+   intersection via .fr-in. Above-fold and reduced-motion paths never get
+   the prep class, so they stay visible from first paint. */
 .fr-reveal {
-  opacity: 0;
-  transform: translateY(12px);
   transition: opacity var(--fr-duration-flow) var(--fr-ease-out),
               transform var(--fr-duration-flow) var(--fr-spring-base);
 }
-.fr-reveal.fr-in { opacity: 1; transform: translateY(0); }
+.fr-reveal--prep { opacity: 0; transform: translateY(12px); }
+.fr-reveal--prep.fr-in { opacity: 1; transform: translateY(0); }
 
 /* === Tilt === */
 .fr-tilt {
@@ -422,7 +426,7 @@
 
 /* === Reduced motion === */
 @media (prefers-reduced-motion: reduce) {
-  .fr-reveal { opacity: 1; transform: none; transition: none; }
+  .fr-reveal, .fr-reveal--prep { opacity: 1; transform: none; transition: none; }
   .fr-tilt { transform: none !important; }
   .fr-btn, .fr-card, .fr-matrix__cell { transition: none; }
 }

@@ -1,6 +1,6 @@
 {
   "surface": "kolm-public-frontend",
-  "version": "2026-05-23-w623-editorial-facelift-prune-25",
+  "version": "2026-05-23-w625-fr-reveal-no-js-fallback",
   "source_commit_at_edit_time": "pending-w623",
   "hero_h1": "Compile any AI model. Run it anywhere.",
   "hero_loop": "route -> capture -> compile -> run",
@@ -280,7 +280,12 @@
     "W624 trimmed FAQ from 15 questions to 10 by merging related answers: annual-pricing folded into bring-own-keys, custom-contract-MSA folded into data-resides, refund-period folded into cancel, enterprise-not-included folded into per-seat, usage-tiers-missing dropped (now redundant with usage-based credits panel)",
     "W624 added hidden W260+W273 contract anchor block (position absolute -9999px clip) with data-w260=three-tier / enterprise-baa / halborn / bug-bounty / baa-link + data-w273=tier-list / tier-alias-starter (starter=alias-for-Pro) / tier-alias-business (business=alias-for-Enterprise) / usage-credits-meter / openai-vs / roi-calculator-anchor + data-w220=category-claim / primary-cta - closes legacy W260/W273 markup contracts via hidden siblings, not by re-cluttering the visible page",
     "W624 extended JSON-LD: SoftwareApplication.offers expanded from single Offer to 4-tier Offer array (Free 0 / Pro 49 / Team 499 / Enterprise custom) + added Product LD block + FAQPage LD block (10 mainEntity Q&A from the trimmed FAQ) + BreadcrumbList LD (Home -> Pricing) - SEO-rich pricing surface, structured for Google rich-results",
-    "W624 sw.js cache key bumped to kolm-v7-2026-05-23-wave624-pricing-editorial-facelift"
+    "W624 sw.js cache key bumped to kolm-v7-2026-05-23-wave624-pricing-editorial-facelift",
+    "W625 fix-forward critical visibility bug introduced by W621 .fr-reveal: default opacity:0 made below-fold sections appear blank to no-JS clients, crawlers, screenshot tools, archive snapshots, and direct-to-anchor loads - exposed by a fullPage Playwright capture that showed a 19,212px homepage with a massive black void where the lower half of the page should be",
+    "W625 progressive enhancement rewrite: .fr-reveal now defaults to opacity:1 (visible) - the hidden state moved to a JS-applied .fr-reveal--prep class so HTML alone is fully readable",
+    "W625 frontier.js now measures each .fr-reveal getBoundingClientRect at init and only applies .fr-reveal--prep to elements where top >= 0.85 * viewport height - above-fold content is visible from first paint, below-fold content still animates in on intersection",
+    "W625 reduced-motion @media block updated to cover both .fr-reveal and .fr-reveal--prep, so even if a future code path applied prep under reduced-motion preference, the content would still render visible",
+    "W625 sw.js cache key bumped to kolm-v7-2026-05-23-wave625-fr-reveal-no-js-fallback"
   ],
   "production_verification_url": "https://kolm.ai/frontend-version.json"
 }

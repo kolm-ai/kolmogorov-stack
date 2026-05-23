@@ -7,19 +7,49 @@
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const fine = matchMedia('(pointer: fine)').matches;
 
-  // 1. Scroll reveal via IntersectionObserver
+  // 1. Scroll reveal — only animate on actual user scroll.
+  // Default state is visible (CSS), so no-JS clients, crawlers, screenshot
+  // tools (Playwright fullPage, archive.org, etc.) and direct-anchor loads
+  // all see content. Only after the user starts scrolling do we install
+  // the prep/reveal animation on still-below-fold elements. A 1500ms safety
+  // timer also unprepes any prepped element that never intersected — so a
+  // user who scrolls and then keeps scrolling fast can't strand sections.
   if (!reduce && 'IntersectionObserver' in window) {
-    const io = new IntersectionObserver((entries) => {
-      for (const e of entries) {
-        if (e.isIntersecting) {
-          e.target.classList.add('fr-in');
-          io.unobserve(e.target);
+    let armed = false;
+    const arm = () => {
+      if (armed) return;
+      armed = true;
+      window.removeEventListener('scroll', arm);
+      window.removeEventListener('wheel', arm);
+      window.removeEventListener('touchstart', arm);
+      window.removeEventListener('keydown', arm);
+      const vh = window.innerHeight || 800;
+      const foldLine = vh + 80;
+      const prepped = [];
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.classList.add('fr-in');
+            io.unobserve(e.target);
+          }
         }
-      }
-    }, { threshold: 0.08, rootMargin: '0px 0px -80px 0px' });
-    document.querySelectorAll('.fr-reveal').forEach((el) => io.observe(el));
-  } else {
-    document.querySelectorAll('.fr-reveal').forEach((el) => el.classList.add('fr-in'));
+      }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+      document.querySelectorAll('.fr-reveal').forEach((el) => {
+        const r = el.getBoundingClientRect();
+        if (r.top >= foldLine) {
+          el.classList.add('fr-reveal--prep');
+          prepped.push(el);
+          io.observe(el);
+        }
+      });
+      setTimeout(() => {
+        prepped.forEach((el) => el.classList.add('fr-in'));
+      }, 1500);
+    };
+    window.addEventListener('scroll', arm, { once: true, passive: true });
+    window.addEventListener('wheel', arm, { once: true, passive: true });
+    window.addEventListener('touchstart', arm, { once: true, passive: true });
+    window.addEventListener('keydown', arm, { once: true });
   }
 
   // 2. Magnetic CTAs (pointer-tracking, subtle)
