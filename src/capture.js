@@ -176,3 +176,132 @@ export async function forwardOpenRouter({ url, body, upstreamKey, referer = 'htt
 export function promptHash(prompt) {
   return crypto.createHash('sha256').update(prompt || '', 'utf8').digest('hex').slice(0, 16);
 }
+
+// W713-1 — reasoning-trace extraction.
+//
+// When the teacher is a reasoning model (Claude with thinking blocks, OpenAI
+// o1/o3 with reasoning_tokens, DeepSeek-R1 with <think>...</think>), we want
+// to capture the chain-of-thought, not just the final answer. The student
+// then learns to reproduce the reasoning process — see apps/trainer/distill_cot.py
+// for the training-side formatter and src/chat-templates.js (kolm-think) for
+// the chat-template wrapper that bytes-match this envelope.
+//
+// Honesty contract: returns null when no reasoning is detected (NOT {} — null
+// is the honest "no trace present" signal; {} would be confusable with "empty
+// trace recorded"). Never throws; malformed inputs return null.
+//
+// Output envelope shape (stable across providers — distill_cot.py reads this):
+//   {
+//     provider: 'anthropic' | 'openai' | 'generic',
+//     blocks?: [{ type: 'thinking', text: '...' }, { type: 'text', text: '...' }],
+//     reasoning_tokens?: number,            // OpenAI usage hint
+//     reasoning_text_if_present?: string,   // OpenAI o-series can return text
+//     total_thinking_chars: number,         // always present, may be 0
+//   }
+export function extractReasoningTrace(response, provider) {
+  if (!response || typeof response !== 'object') return null;
+  try {
+    if (provider === 'anthropic') return _extractAnthropicReasoning(response);
+    if (provider === 'openai' || provider === 'openrouter') return _extractOpenAIReasoning(response);
+    if (provider === 'generic' || provider === 'deepseek' || provider === 'ollama') {
+      return _extractGenericReasoning(response);
+    }
+    // Unknown provider — try generic as the best-effort fallback, never throw.
+    return _extractGenericReasoning(response);
+  } catch (_) {
+    return null;
+  }
+}
+
+function _extractAnthropicReasoning(response) {
+  const content = Array.isArray(response.content) ? response.content : null;
+  if (!content) return null;
+  const blocks = [];
+  let totalThinking = 0;
+  let sawThinking = false;
+  for (const b of content) {
+    if (!b || typeof b !== 'object') continue;
+    if (b.type === 'thinking') {
+      const text = typeof b.thinking === 'string' ? b.thinking
+        : (typeof b.text === 'string' ? b.text : '');
+      blocks.push({ type: 'thinking', text });
+      totalThinking += text.length;
+      sawThinking = true;
+    } else if (b.type === 'text') {
+      const text = typeof b.text === 'string' ? b.text : '';
+      blocks.push({ type: 'text', text });
+    }
+  }
+  if (!sawThinking) return null;
+  return {
+    provider: 'anthropic',
+    blocks,
+    total_thinking_chars: totalThinking,
+  };
+}
+
+function _extractOpenAIReasoning(response) {
+  const choices = Array.isArray(response.choices) ? response.choices : [];
+  const first = choices[0] || {};
+  const msg = first.message || {};
+  const usage = response.usage || {};
+  const ctd = usage.completion_tokens_details || {};
+  const reasoningTokens = Number(ctd.reasoning_tokens) || 0;
+  // o1/o3 sometimes attaches the reasoning text on message.reasoning (preview
+  // SDKs) or message.reasoning_content (DeepSeek-OpenAI-compatible adapter).
+  let reasoningText = '';
+  if (typeof msg.reasoning === 'string') reasoningText = msg.reasoning;
+  else if (msg.reasoning && typeof msg.reasoning.content === 'string') reasoningText = msg.reasoning.content;
+  else if (typeof msg.reasoning_content === 'string') reasoningText = msg.reasoning_content;
+  // No reasoning tokens AND no inline reasoning text — honest null.
+  if (reasoningTokens === 0 && !reasoningText) return null;
+  const out = {
+    provider: 'openai',
+    reasoning_tokens: reasoningTokens,
+    total_thinking_chars: reasoningText.length,
+  };
+  if (reasoningText) out.reasoning_text_if_present = reasoningText;
+  return out;
+}
+
+// Permissive <think>...</think> parser. Takes the FIRST </think> as the end
+// of the thinking block (DeepSeek-R1 emits exactly one). Unbalanced (no
+// closing tag) → returns null gracefully.
+export function parseThinkBlocks(text) {
+  if (typeof text !== 'string') return null;
+  const openIdx = text.indexOf('<think>');
+  if (openIdx === -1) return null;
+  const closeIdx = text.indexOf('</think>', openIdx);
+  if (closeIdx === -1) return null;  // unbalanced — honest null
+  const thinking = text.slice(openIdx + '<think>'.length, closeIdx);
+  const answer = text.slice(closeIdx + '</think>'.length);
+  return {
+    thinking,
+    answer,
+  };
+}
+
+function _extractGenericReasoning(response) {
+  // Three accepted shapes for generic / DeepSeek-R1:
+  //   1) { text: '<think>...</think>final' }
+  //   2) { content: '<think>...</think>final' } (Ollama-ish)
+  //   3) OpenAI-style choices[0].message.content with <think> inside
+  let raw = '';
+  if (typeof response.text === 'string') raw = response.text;
+  else if (typeof response.content === 'string') raw = response.content;
+  else if (Array.isArray(response.choices) && response.choices[0]) {
+    const m = response.choices[0].message || {};
+    if (typeof m.content === 'string') raw = m.content;
+  }
+  if (!raw) return null;
+  const parsed = parseThinkBlocks(raw);
+  if (!parsed) return null;
+  return {
+    provider: 'generic',
+    blocks: [
+      { type: 'thinking', text: parsed.thinking },
+      { type: 'text', text: parsed.answer },
+    ],
+    total_thinking_chars: parsed.thinking.length,
+  };
+}

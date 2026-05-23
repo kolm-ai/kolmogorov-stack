@@ -34,6 +34,26 @@
 const V1_WEIGHTS = { A: 0.40, S: 0.15, L: 0.15, C: 0.15, V: 0.15 };
 const V2_WEIGHTS = { A: 0.30, S: 0.10, L: 0.10, C: 0.10, V: 0.10, R: 0.05, T: 0.05, F: 0.10, E: 0.05, Z: 0.05 };
 const GATE = 0.85;
+
+// W714: contrastive separation sub-axis. OPT-IN, NULL by default.
+// `K_contrastive` is the bakeoff measurement:
+//   K_contrastive = mean(student-to-positive_similarity)
+//                 - mean(student-to-negative_similarity)
+// across an eval set that was assembled from contrastive captures (W714-1).
+// Higher = better contrastive separation; the student matches the strong
+// teacher and stays away from the cheap-teacher-rewritten-worse negatives.
+//
+// CRITICAL DESIGN NOTE: this sub-axis does NOT change the V2 composite
+// weights (A/S/L/C/V/R/T/F/E/Z stay exactly as specified). It is an
+// informational axis the verifier surfaces alongside the composite. Callers
+// who want to gate ship-eligibility on contrastive separation can read
+// `k_contrastive_score` independently. This preserves backward compat with
+// every K-Score consumer shipped before W714 — none of them know about the
+// axis, none of them are surprised by a shifted composite.
+//
+// Populates only if `input.contrastive_eval_present === true`. Otherwise
+// `k_contrastive_score` stays null.
+export const K_CONTRASTIVE_AXIS_VERSION = 'w714-v1';
 // W258-ML-1: honest floor for the A divisor when computing R/F/T ratios.
 // Without a real floor the 1e-6 epsilon used to dodge division-by-zero lets
 // a tiny declared accuracy inflate R/F/T to 1.0 via clamp01(holdout / 1e-6).
@@ -63,6 +83,31 @@ function energyScore(joules_per_call) {
 function driftScore(eval_set_drift) {
   if (eval_set_drift == null) return null;
   return clamp01(1 - eval_set_drift);
+}
+
+// W714: opt-in axis. Null when no contrastive eval present.
+// Inputs:
+//   input.contrastive_eval_present                    - gate: must be true
+//   input.contrastive_student_positive_similarity_mean - mean similarity
+//   input.contrastive_student_negative_similarity_mean - mean similarity
+// The bakeoff itself lives in apps/trainer/contrastive_distill.py and the
+// JS-side composer is src/negative-variant-gen.js + the future W714 bakeoff
+// runner. Similarities arrive in [0,1] (cosine on embeddings or a normalized
+// token-overlap proxy). Returns:
+//   null                              when not opted in
+//   clamp01(pos - neg + 0.5)          recentered to [0,1] so the report is
+//                                     comparable to the other [0,1] axes.
+//                                     A raw separation of 0 maps to 0.5;
+//                                     positive separation moves up.
+function contrastiveScore(input) {
+  if (input == null || input.contrastive_eval_present !== true) return null;
+  const pos = input.contrastive_student_positive_similarity_mean;
+  const neg = input.contrastive_student_negative_similarity_mean;
+  if (pos == null || neg == null) return null;
+  const p = clamp01(pos);
+  const n = clamp01(neg);
+  // separation in [-1, 1] -> recentered to [0, 1]
+  return clamp01(p - n + 0.5);
 }
 
 export function computeKScoreV1({ size_bytes, accuracy, coverage, p50_latency_us, cost_usd_per_call }) {
@@ -101,7 +146,12 @@ export function computeKScoreV1({ size_bytes, accuracy, coverage, p50_latency_us
 export function computeKScoreV2(input) {
   const hasV2 = ['holdout_accuracy', 'subgroup_min_accuracy', 'joules_per_call', 'eval_set_drift', 'teacher_holdout_accuracy']
     .some(k => input[k] != null);
-  if (!hasV2) return computeKScoreV1(input);
+  // W714: contrastive_eval_present (the opt-in flag) also promotes the
+  // envelope from v1 to v2 so the contrastive sub-axis can populate even
+  // when no other v2 axis was supplied. Without this, an artifact whose
+  // ONLY signal beyond v1 is contrastive separation would silently drop
+  // the k_contrastive_score field.
+  if (!hasV2 && input.contrastive_eval_present !== true) return computeKScoreV1(input);
 
   const A = clamp01(input.accuracy);
   const S = sizeScore(input.size_bytes);
@@ -149,6 +199,12 @@ export function computeKScoreV2(input) {
   for (const k of Object.keys(supplied)) composite += scaled[k] * supplied[k];
   composite = round4(composite);
 
+  // W714: contrastive sub-axis. Computed AFTER the composite so the
+  // existing weighted-axis math (A/S/L/C/V/R/T/F/E/Z) is untouched. The
+  // axis surfaces as `k_contrastive_score` + `k_contrastive_axis_version`
+  // on the envelope; null when the caller didn't supply contrastive_eval.
+  const K_contrastive = contrastiveScore(input);
+
   return {
     accuracy: round4(A),
     coverage: round4(V),
@@ -168,6 +224,18 @@ export function computeKScoreV2(input) {
     energy_score: E == null ? null : round4(E),
     eval_set_drift: input.eval_set_drift ?? null,
     drift_score: Z == null ? null : round4(Z),
+    // W714: opt-in sub-axis. Null unless contrastive_eval_present === true
+    // AND both pos/neg similarity means were supplied.
+    k_contrastive_score: K_contrastive == null ? null : round4(K_contrastive),
+    k_contrastive_axis_version: K_CONTRASTIVE_AXIS_VERSION,
+    contrastive_student_positive_similarity_mean:
+      input.contrastive_student_positive_similarity_mean == null
+        ? null
+        : round4(input.contrastive_student_positive_similarity_mean),
+    contrastive_student_negative_similarity_mean:
+      input.contrastive_student_negative_similarity_mean == null
+        ? null
+        : round4(input.contrastive_student_negative_similarity_mean),
     composite,
     ships: composite >= GATE,
     gate: GATE,

@@ -38,6 +38,7 @@ import {
   forwardAnthropic,
   forwardOpenAI,
   promptHash,
+  extractReasoningTrace,
 } from './capture.js';
 import * as teams from './teams.js';
 import * as tunnel from './tunnel.js';
@@ -9489,7 +9490,7 @@ export function buildRouter() {
   // to the SSE fan-out (W258-BE-2) so /v1/capture/stream pushes immediately
   // and the dashboard stops doing a 2 s poll-and-scan, and (b) check
   // threshold crossings (W258-BE-3) and fire alerts atomically.
-  async function recordCapture({ tenant, tenant_id, provider, model, namespace, prompt, response, latency_us, status, cost_usd, tokens_in, tokens_out, files, tool_calls, error: errorMsg }) {
+  async function recordCapture({ tenant, tenant_id, provider, model, namespace, prompt, response, latency_us, status, cost_usd, tokens_in, tokens_out, files, tool_calls, error: errorMsg, reasoning_trace }) {
     if (!prompt || response === undefined || response === null) return null;
     const hash = promptHash(prompt + '|' + (model || ''));
     const ns = namespace || 'default';
@@ -9527,6 +9528,11 @@ export function buildRouter() {
       corpus_namespace: ns,
       status,
       created_at: new Date().toISOString(),
+      // W713-1 — reasoning_trace is additive metadata. Honest null when the
+      // teacher didn't return chain-of-thought; never {} (which would be
+      // confusable with "empty trace recorded"). Sibling to response — we
+      // NEVER mutate response with the thinking text.
+      reasoning_trace: reasoning_trace != null ? reasoning_trace : null,
     };
     // insertCapture throws on disk-full / ephemeral-/tmp / driver failure.
     // We do NOT catch here — propagation is the whole point of the fix.
@@ -9885,6 +9891,12 @@ export function buildRouter() {
     // W411 — extract upstream token usage so the bridged canonical event
     // carries tokens_in/tokens_out the lake + opportunity engine need.
     const usageAnt = connectorExtractUsage(result.json || {}, 'anthropic');
+    // W713-1 — chain-of-thought capture for reasoning teachers.
+    // Anthropic returns content[].type==='thinking' when extended thinking is on.
+    // Null if absent (honest signal — sibling field, never mutates response).
+    const reasoningAnt = result.status >= 200 && result.status < 300
+      ? extractReasoningTrace(result.json, 'anthropic')
+      : null;
     // W258-BE-1: recordCaptureWithReceipt sets x-kolm-capture-id +
     // x-kolm-capture-durable + x-kolm-distill-ready when applicable, OR
     // sends a 503 + x-kolm-capture-durable:false on store failure (no
@@ -9902,6 +9914,7 @@ export function buildRouter() {
       tokens_in: usageAnt.prompt_tokens || 0,
       tokens_out: usageAnt.completion_tokens || 0,
       error: result.json && result.json.error ? String(result.json.error.message || result.json.error.type || '') : null,
+      reasoning_trace: reasoningAnt,
     });
     if (!obs && res.headersSent) return; // 503 already returned
     res.status(result.status).json(result.json);
@@ -9946,6 +9959,12 @@ export function buildRouter() {
       : '';
     // W411 — token usage for parity field names in the bridged event.
     const usageOAI = connectorExtractUsage(result.json || {}, 'openai');
+    // W713-1 — chain-of-thought capture for OpenAI o1/o3 reasoning models.
+    // Detects via usage.completion_tokens_details.reasoning_tokens > 0 OR
+    // message.reasoning text field. Null otherwise (honest no-trace signal).
+    const reasoningOAI = result.status >= 200 && result.status < 300
+      ? extractReasoningTrace(result.json, 'openai')
+      : null;
     const obs = await recordCaptureWithReceipt(req, res, {
       tenant: req.tenant,
       provider: 'openai',
@@ -9958,6 +9977,7 @@ export function buildRouter() {
       tokens_in: usageOAI.prompt_tokens || 0,
       tokens_out: usageOAI.completion_tokens || 0,
       error: result.json && result.json.error ? String(result.json.error.message || result.json.error.type || '') : null,
+      reasoning_trace: reasoningOAI,
     });
     if (!obs && res.headersSent) return; // 503 already returned
     res.status(result.status).json(result.json);
@@ -9982,6 +10002,11 @@ export function buildRouter() {
       provider: o.provider || null,
       latency_us: o.latency_us || (o.latency_ms || 0) * 1000,
       created_at: o.created_at,
+      // W713-1 — surface reasoning_trace so the distill --from-captures
+      // auto-detect (cli/kolm.js cmdDistillFromCaptures) can count traces
+      // and pick inline_think_tags vs response_only without round-tripping
+      // through the raw capture row endpoint.
+      reasoning_trace: o.reasoning_trace != null ? o.reasoning_trace : null,
     }));
     if (req.query?.count_only === '1' || req.query?.count_only === 'true') {
       return res.json({

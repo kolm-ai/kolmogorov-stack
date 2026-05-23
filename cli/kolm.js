@@ -13224,6 +13224,12 @@ async function cmdCapture(args) {
   if (maybeHelp('capture', args)) return;
   const sub = args[0];
   const jsonOut = args.includes('--json');
+  // W711 — `kolm capture importance [--top N] [--bottom N] [--namespace ns]`
+  // surfaces the W711-4 importance-distribution report block as JSON. This
+  // is the diagnostic UI for the W711-1 scorer.
+  if (sub === 'importance') {
+    return await cmdCaptureImportance(args.slice(1));
+  }
   if (sub === 'image') {
     // kolm capture image <path-or-url> [--prompt "..."] [--response "..."] [--ocr] [--namespace n] [--label l]
     const rest = args.slice(1);
@@ -13724,6 +13730,14 @@ async function cmdDistill(args) {
   // training rows (route='teacher'|'mixed') from the active-learning queue.
   // Hoisted before --detach so the W710 dispatch handles its own envelope.
   if (args.includes('--resume-from-active-queue')) return cmdDistillResumeFromActiveQueue(args);
+  // W711-1: --importance-weighted ranks captures by training value
+  // (capture-importance.js scoreCapture) and writes a JSONL the Python
+  // trainer consumes via --importance-weights. Hoisted before --detach so
+  // the W711 dispatch handles its own envelope (trainer-not-invoked etc).
+  if (args.includes('--importance-weighted')) return cmdDistillImportanceWeighted(args);
+  // W714-4: --contrastive generates negative variants + invokes the
+  // contrastive trainer; honest envelope on missing python/trainer.
+  if (args.includes('--contrastive')) return cmdDistillContrastive(args);
   // W480 - on-policy + preference orchestration subverbs. Local-only by default
   // (trainer is a tenant plug-in); --remote routes through /v1/distill/*.
   if (args[0] === 'onpolicy') return cmdDistillOnPolicy(args.slice(1));
@@ -14084,6 +14098,15 @@ async function cmdDistillFromCaptures(args) {
   const wantJson = args.includes('--json');
   const mode = pickFlag(args, '--mode'); // recipe | specialist
   const minPairs = pickFlag(args, '--min-pairs');
+  // W713-4 — chain-of-thought distillation toggle. When --no-cot is passed
+  // the training-data prep path uses mode='response_only' regardless of
+  // whether captures carry reasoning_trace (use this for short-context
+  // students that can't afford the extra thinking-token budget). When NOT
+  // passed (default): if reasoning_trace exists on >5% of captures, auto-pick
+  // inline_think_tags and surface the rate to the user. The detection +
+  // stamping into run-meta.json happens inside resolveCotMode() which calls
+  // the server preview endpoint to count traces.
+  const noCot = args.includes('--no-cot');
   const base = c.base.replace(/\/+$/, '');
 
   if (preview) {
@@ -14115,9 +14138,55 @@ async function cmdDistillFromCaptures(args) {
     return;
   }
 
+  // W713-4 — resolve CoT mode BEFORE we POST the distill request so the
+  // resolved mode goes into the request body and the server stamps
+  // run-meta.json with cot_mode + cot_capture_rate + cot_template_version.
+  // We sample the namespace's captures via /v1/labels/synthesize-corpus to
+  // detect whether reasoning_trace is present and at what rate.
+  let cotMode = noCot ? 'response_only' : null;  // null = decide after sampling
+  let cotCaptureRate = 0;
+  if (!noCot) {
+    try {
+      const sampleUrl = base + '/v1/labels/synthesize-corpus?namespace='
+        + encodeURIComponent(ns) + '&format=json&limit=500';
+      const sampleRes = await fetch(sampleUrl, { headers: { ...authHeaders(c) } });
+      if (sampleRes.ok) {
+        const sj = await sampleRes.json().catch(() => null);
+        const pairs = Array.isArray(sj && sj.pairs) ? sj.pairs : [];
+        if (pairs.length > 0) {
+          const withTrace = pairs.filter(p => p && p.reasoning_trace != null).length;
+          cotCaptureRate = withTrace / pairs.length;
+        }
+      }
+    } catch (_) {
+      // Sample call best-effort; if it fails the auto-detect just falls back
+      // to mode=null (server picks its own default) and we don't claim a rate.
+    }
+    // Auto-detection threshold: > 5% triggers inline_think_tags. The boundary
+    // condition (exactly 5%) triggers (>= 0.05) per W713 spec.
+    if (cotCaptureRate >= 0.05) cotMode = 'inline_think_tags';
+    else cotMode = 'response_only';
+  }
+  // Friendly message — show the user what was decided.
+  if (!wantJson) {
+    const pct = (cotCaptureRate * 100).toFixed(1);
+    if (noCot) {
+      console.log('Chain-of-thought distillation disabled (--no-cot).');
+    } else if (cotMode === 'inline_think_tags') {
+      console.log(`Detected reasoning traces on ${pct}% of captures. Using inline thinking tags. Pass --no-cot to disable.`);
+    } else {
+      console.log(`No chain-of-thought captures detected (${pct}%). Using response-only distillation.`);
+    }
+  }
+
   const body = { namespace: ns };
   if (mode) body.mode = mode;
   if (minPairs) body.min_pairs = Number(minPairs);
+  // W713-4 — server stamps run-meta.json with these so the resulting
+  // artifact carries provenance of the CoT decision.
+  body.cot_mode = cotMode;
+  body.cot_capture_rate = cotCaptureRate;
+  body.cot_template_version = 'w713-v1';
   const url = base + '/v1/distill/from-captures';
   const res = await fetch(url, {
     method: 'POST',
@@ -14149,13 +14218,23 @@ async function cmdDistillFromCaptures(args) {
     console.error(`error: http ${res.status} ${text.slice(0, 400)}`);
     process.exit(EXIT.EXECUTION);
   }
-  if (wantJson) { console.log(JSON.stringify(j, null, 2)); return; }
+  if (wantJson) {
+    // W713-4 — splice the cot decision into the JSON envelope so scripted
+    // consumers see what was negotiated (server may echo cot_mode back; if
+    // not, we surface the client-side decision).
+    j.cot_mode = j.cot_mode || cotMode;
+    if (j.cot_capture_rate === undefined) j.cot_capture_rate = cotCaptureRate;
+    j.cot_template_version = j.cot_template_version || 'w713-v1';
+    console.log(JSON.stringify(j, null, 2));
+    return;
+  }
   console.log('distill from-captures job started.');
   console.log('  mode:      ' + (j.mode || '?'));
   console.log('  namespace: ' + (j.namespace || ns));
   console.log('  job_id:    ' + (j.job_id || '?'));
   if (j.pair_count !== undefined) console.log('  pairs:     ' + j.pair_count);
   if (j.status_url) console.log('  status:    ' + j.status_url);
+  console.log('  cot_mode:  ' + cotMode);
 }
 
 // W710-2 — `kolm distill --resume-from-active-queue [--namespace ns] [--max N]`
@@ -14354,6 +14433,394 @@ async function cmdDistillResumeFromActiveQueue(args) {
     console.log('  namespace: ' + namespace);
     console.log('  remaining queued: ' + (after && after.queued));
   }
+  process.exit(0);
+}
+
+// W711-CLI — `kolm capture importance [--top N] [--bottom N] [--namespace ns]`
+// Surface the W711-4 importance-distribution report block as JSON. Pulls
+// captures from the local event-store (no network required), scores them
+// via src/capture-importance.js, and wraps in the report-block envelope
+// downstream W741 will consume.
+async function cmdCaptureImportance(args) {
+  const wantJson = args.includes('--json') || !args.includes('--pretty');
+  const namespace = pickFlag(args, '--namespace') || pickFlag(args, '-n') || null;
+  const topNFlag = pickFlag(args, '--top');
+  const bottomNFlag = pickFlag(args, '--bottom');
+  const topN = Number.isFinite(Number(topNFlag)) && Number(topNFlag) > 0
+    ? Math.trunc(Number(topNFlag)) : 10;
+  const bottomN = Number.isFinite(Number(bottomNFlag)) && Number(bottomNFlag) > 0
+    ? Math.trunc(Number(bottomNFlag)) : 10;
+  const limitFlag = pickFlag(args, '--limit');
+  const limit = Number.isFinite(Number(limitFlag)) && Number(limitFlag) > 0
+    ? Math.trunc(Number(limitFlag)) : 1000;
+
+  let captures = [];
+  let source = 'event_store';
+  try {
+    const es = await import('../src/event-store.js');
+    if (typeof es.listEvents === 'function') {
+      const query = { limit };
+      if (namespace) query.namespace = namespace;
+      captures = await es.listEvents(query) || [];
+    }
+  } catch (_) {
+    captures = [];
+    source = 'event_store_unavailable';
+  }
+
+  // Filter to capture-like rows (skip routing_decisions, alq rows, etc).
+  // We accept any event whose kind starts with 'capture' OR that has request+response.
+  captures = captures.filter(ev => {
+    if (!ev || typeof ev !== 'object') return false;
+    if (typeof ev.kind === 'string' && ev.kind.startsWith('capture')) return true;
+    if (ev.request && ev.response) return true;
+    if (typeof ev.prompt === 'string' && typeof ev.response === 'string') return true;
+    return false;
+  });
+
+  const importanceMod = await import('../src/capture-importance.js');
+  const blockMod = await import('../src/distill-report-blocks.js');
+
+  const top = importanceMod.topNByImportance(captures, topN);
+  const bottom = importanceMod.bottomNByImportance(captures, bottomN);
+  const block = blockMod.buildImportanceReportBlock({
+    topN: top,
+    bottomN: bottom,
+    scorerVersion: importanceMod.IMPORTANCE_VERSION,
+  });
+
+  const env = {
+    ok: true,
+    namespace: namespace || null,
+    source,
+    scored: captures.length,
+    block,
+  };
+  if (wantJson) {
+    console.log(JSON.stringify(env, null, 2));
+  } else {
+    console.log(`Scored ${captures.length} captures (namespace=${namespace || 'all'}).`);
+    console.log(`Top-${top.length}:`);
+    for (const r of top) console.log(`  ${r.capture_id}  score=${r.score.toFixed(4)}`);
+    console.log(`Bottom-${bottom.length}:`);
+    for (const r of bottom) console.log(`  ${r.capture_id}  score=${r.score.toFixed(4)}`);
+  }
+}
+
+// W711-CLI — `kolm distill --importance-weighted [--scorer-version w711-v1]
+//   [--out-weights-jsonl /path] [--namespace ns]`
+//
+// Rank captures by training value (src/capture-importance.js scoreCapture),
+// write a {capture_id, importance} JSONL the Python trainer consumes via
+// --importance-weights, then invoke the trainer subprocess. If the trainer
+// binary isn't available (KOLM_TRAINER_BIN unset and apps/trainer not on
+// PATH), exit 0 with a structured envelope including the weights_jsonl_path
+// so the user can run the trainer themselves later. NEVER silently no-op.
+async function cmdDistillImportanceWeighted(args) {
+  const wantJson = args.includes('--json');
+  const namespace = pickFlag(args, '--namespace') || pickFlag(args, '-n') || 'default';
+  const scorerVersion = pickFlag(args, '--scorer-version') || 'w711-v1';
+  const outWeightsFlag = pickFlag(args, '--out-weights-jsonl');
+  const limitFlag = pickFlag(args, '--limit');
+  const limit = Number.isFinite(Number(limitFlag)) && Number(limitFlag) > 0
+    ? Math.trunc(Number(limitFlag)) : 1000;
+
+  // 1. Pull captures.
+  let captures = [];
+  try {
+    const es = await import('../src/event-store.js');
+    if (typeof es.listEvents === 'function') {
+      const query = { limit };
+      if (namespace && namespace !== 'all') query.namespace = namespace;
+      captures = await es.listEvents(query) || [];
+    }
+  } catch (_) {
+    captures = [];
+  }
+  captures = captures.filter(ev => {
+    if (!ev || typeof ev !== 'object') return false;
+    if (typeof ev.kind === 'string' && ev.kind.startsWith('capture')) return true;
+    if (ev.request && ev.response) return true;
+    if (typeof ev.prompt === 'string' && typeof ev.response === 'string') return true;
+    return false;
+  });
+
+  // 2. Score + build the JSONL contents.
+  const importanceMod = await import('../src/capture-importance.js');
+  const rows = importanceMod.buildImportanceJsonlRows(captures);
+
+  // 3. Persist the JSONL.
+  const home = process.env.KOLM_HOME
+    || path.join(process.env.HOME || process.env.USERPROFILE || '.', '.kolm');
+  const outDir = path.join(home, 'importance');
+  try { fs.mkdirSync(outDir, { recursive: true }); } catch (_) {}
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const defaultPath = path.join(outDir, `weights-${namespace}-${stamp}.jsonl`);
+  const weightsPath = outWeightsFlag
+    ? path.resolve(outWeightsFlag)
+    : defaultPath;
+  try {
+    const lines = rows.map(r => JSON.stringify({
+      capture_id: r.capture_id,
+      importance: r.importance,
+    }));
+    fs.writeFileSync(weightsPath, lines.join('\n') + (lines.length > 0 ? '\n' : ''), 'utf8');
+  } catch (e) {
+    const env = {
+      ok: false,
+      error: 'weights_write_failed',
+      detail: e && e.message ? e.message : String(e),
+      hint: 'check that ' + outDir + ' is writable',
+    };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else console.error('error: ' + env.error + ': ' + env.detail);
+    process.exit(typeof EXIT !== 'undefined' && EXIT.EXECUTION ? EXIT.EXECUTION : 1);
+  }
+
+  // 4. Resolve the trainer binary. We try KOLM_TRAINER_BIN first, then a
+  //    sibling `kolm-trainer` shim, then fall back to honest envelope.
+  let trainerBin = process.env.KOLM_TRAINER_BIN || null;
+  let trainerExists = false;
+  if (trainerBin) {
+    try { trainerExists = fs.existsSync(trainerBin); } catch (_) { trainerExists = false; }
+  }
+  if (!trainerExists) {
+    const env = {
+      ok: true,
+      weights_jsonl_written: weightsPath,
+      trainer_not_invoked: true,
+      scored: rows.length,
+      scorer_version: importanceMod.IMPORTANCE_VERSION,
+      requested_scorer_version: scorerVersion,
+      namespace,
+      hint: 'pip install -e apps/trainer or set KOLM_TRAINER_BIN to the trainer binary path',
+    };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else {
+      console.log(`Wrote ${rows.length} importance-weight rows.`);
+      console.log('  out: ' + weightsPath);
+      console.log('  trainer: not invoked (' + env.hint + ')');
+    }
+    process.exit(0);
+  }
+
+  // 5. Trainer available — invoke it.
+  const trainerArgs = ['--importance-weights', weightsPath, '--namespace', namespace];
+  const r = spawnSync(trainerBin, trainerArgs, { encoding: 'utf8' });
+  const env = {
+    ok: r.status === 0,
+    weights_jsonl_written: weightsPath,
+    trainer_not_invoked: false,
+    scored: rows.length,
+    scorer_version: importanceMod.IMPORTANCE_VERSION,
+    namespace,
+    trainer_exit: r.status,
+    trainer_stdout_tail: (r.stdout || '').slice(-2000),
+    trainer_stderr_tail: (r.stderr || '').slice(-2000),
+  };
+  if (wantJson) console.log(JSON.stringify(env, null, 2));
+  else {
+    console.log(`Wrote ${rows.length} importance-weight rows.`);
+    console.log('  out: ' + weightsPath);
+    console.log('  trainer exit: ' + r.status);
+  }
+  process.exit(r.status || 0);
+}
+
+// W714-4 — `kolm distill --contrastive [--negative-teacher <vendor:model>]
+//                                       [--negatives-per-capture N]
+//                                       [--lambda L]
+//                                       [--namespace ns] [--limit N]
+//                                       [--out-jsonl <path>]
+//                                       [--student-model <name>]
+//                                       [--output-dir <path>]
+//                                       [--json]`
+//
+// Pipeline:
+//   1. Pull captures from the event-store (namespace-scoped).
+//   2. For each capture call generateNegativeVariants() (W714-1) → writes
+//      a JSONL where each row carries the positive (real teacher response)
+//      plus N negatives (cheap teacher rewrites-worse).
+//   3. Invoke the W714-2 contrastive trainer (`python -m apps.trainer.contrastive_distill`).
+//   4. If the trainer is missing OR Python is missing, exit 0 with an honest
+//      envelope that says the JSONL was written and how to install the trainer.
+//
+// Never silently no-op: every failure mode emits a structured envelope with
+// `ok` + `error` + `hint`.
+async function cmdDistillContrastive(args) {
+  const wantJson = args.includes('--json');
+  const namespace = pickFlag(args, '--namespace') || pickFlag(args, '-n') || 'default';
+  const negativeTeacher = pickFlag(args, '--negative-teacher')
+    || process.env.KOLM_NEGATIVE_TEACHER
+    || 'anthropic:claude-haiku-4-5-20251001';
+  const negCountFlag = pickFlag(args, '--negatives-per-capture');
+  const negCount = Number.isFinite(Number(negCountFlag)) && Number(negCountFlag) > 0
+    ? Math.trunc(Number(negCountFlag)) : 3;
+  const lamFlag = pickFlag(args, '--lambda');
+  const lam = Number.isFinite(Number(lamFlag)) ? Number(lamFlag) : 0.5;
+  const limitFlag = pickFlag(args, '--limit');
+  const limit = Number.isFinite(Number(limitFlag)) && Number(limitFlag) > 0
+    ? Math.trunc(Number(limitFlag)) : 1000;
+  const outJsonlFlag = pickFlag(args, '--out-jsonl');
+  const studentModel = pickFlag(args, '--student-model') || 'Qwen/Qwen2.5-3B-Instruct';
+  const outputDirFlag = pickFlag(args, '--output-dir');
+
+  // 1. Pull captures.
+  let captures = [];
+  try {
+    const es = await import('../src/event-store.js');
+    if (typeof es.listEvents === 'function') {
+      const query = { limit };
+      if (namespace && namespace !== 'all') query.namespace = namespace;
+      captures = await es.listEvents(query) || [];
+    }
+  } catch (_) {
+    captures = [];
+  }
+  captures = captures.filter((ev) => {
+    if (!ev || typeof ev !== 'object') return false;
+    if (typeof ev.kind === 'string' && ev.kind.startsWith('capture')) return true;
+    if (ev.request && ev.response) return true;
+    if (typeof ev.prompt === 'string' && (ev.response_text || ev.response)) return true;
+    return false;
+  });
+
+  // 2. Generate negatives per capture. The W714-1 module is honest about
+  //    unreachable teachers — we count both success and failure rows for
+  //    the receipt.
+  const { generateNegativeVariants, NEGATIVE_VARIANT_VERSION } = await import('../src/negative-variant-gen.js');
+  const contrastiveRows = [];
+  let positiveCount = 0;
+  let negativeCount = 0;
+  let failedRows = 0;
+  for (const c of captures) {
+    // eslint-disable-next-line no-await-in-loop
+    const result = await generateNegativeVariants(c, {
+      negativeTeacher,
+      count: negCount,
+    });
+    if (result.error) {
+      failedRows += 1;
+      // Skip rows where we couldn't synth negatives — the trainer needs both.
+      continue;
+    }
+    positiveCount += result.positives.length;
+    negativeCount += result.negatives.length;
+    contrastiveRows.push({
+      capture_id: result.capture_id,
+      prompt: c.prompt || c.variable_input || c.input || '',
+      positive: result.positives[0],
+      negatives: result.negatives,
+    });
+  }
+
+  // 3. Write the contrastive JSONL.
+  const home = process.env.KOLM_HOME
+    || path.join(process.env.HOME || process.env.USERPROFILE || '.', '.kolm');
+  const outDir = path.join(home, 'contrastive');
+  try { fs.mkdirSync(outDir, { recursive: true }); } catch (_) {}
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const defaultPath = path.join(outDir, `contrastive-${namespace}-${stamp}.jsonl`);
+  const jsonlPath = outJsonlFlag
+    ? path.resolve(outJsonlFlag)
+    : defaultPath;
+  try {
+    const lines = contrastiveRows.map((r) => JSON.stringify(r));
+    fs.writeFileSync(jsonlPath, lines.join('\n') + (lines.length > 0 ? '\n' : ''), 'utf8');
+  } catch (e) {
+    const env = {
+      ok: false,
+      error: 'contrastive_jsonl_write_failed',
+      detail: e && e.message ? e.message : String(e),
+      hint: 'check that ' + outDir + ' is writable',
+    };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else console.error('error: ' + env.error + ': ' + env.detail);
+    process.exit(typeof EXIT !== 'undefined' && EXIT.EXECUTION ? EXIT.EXECUTION : 1);
+  }
+
+  // 4. Resolve the Python trainer. Two paths:
+  //    a) $KOLM_TRAINER_BIN points at an executable that accepts
+  //       `--contrastive-jsonl <path>` (preferred for CI).
+  //    b) `python -m apps.trainer.contrastive_distill` runs the module.
+  //    Either path failing exits 0 with an honest envelope — we already
+  //    wrote the JSONL, so the work isn't lost.
+  const outputDir = outputDirFlag
+    ? path.resolve(outputDirFlag)
+    : path.join(outDir, `student-${namespace}-${stamp}`);
+  const trainerBin = process.env.KOLM_TRAINER_BIN || null;
+  let trainerArgs;
+  let trainerCmd;
+  if (trainerBin && fs.existsSync(trainerBin)) {
+    trainerCmd = trainerBin;
+    trainerArgs = [
+      '--jsonl', jsonlPath,
+      '--output', outputDir,
+      '--student-model', studentModel,
+      '--lambda', String(lam),
+      '--negatives-per-capture', String(negCount),
+    ];
+  } else {
+    // Fall back to `python -m apps.trainer.contrastive_distill`. This is
+    // the standard invocation; we attempt it but treat any failure (no
+    // python, no torch, no module) as a non-fatal "trainer kicked but
+    // failed" envelope rather than process-exit-non-zero.
+    const pythonBin = process.env.KOLM_PYTHON_BIN
+      || (process.platform === 'win32' ? 'python.exe' : 'python3');
+    trainerCmd = pythonBin;
+    trainerArgs = [
+      '-m', 'apps.trainer.contrastive_distill',
+      '--jsonl', jsonlPath,
+      '--output', outputDir,
+      '--student-model', studentModel,
+      '--lambda', String(lam),
+      '--negatives-per-capture', String(negCount),
+    ];
+  }
+
+  let trainerResult = null;
+  let trainerInvocationFailed = false;
+  try {
+    trainerResult = spawnSync(trainerCmd, trainerArgs, { encoding: 'utf8', timeout: 60_000 });
+    if (trainerResult.error) {
+      trainerInvocationFailed = true;
+    }
+  } catch (_) {
+    trainerInvocationFailed = true;
+  }
+
+  const trainerKicked = !trainerInvocationFailed && trainerResult && trainerResult.status === 0;
+  const env = {
+    ok: true,
+    contrastive_jsonl_written: jsonlPath,
+    contrastive_version: NEGATIVE_VARIANT_VERSION,
+    namespace,
+    negative_teacher: negativeTeacher,
+    positives: positiveCount,
+    negatives: negativeCount,
+    rows_in: captures.length,
+    rows_with_negatives: contrastiveRows.length,
+    rows_failed: failedRows,
+    lambda: lam,
+    negatives_per_capture: negCount,
+    student_model: studentModel,
+    output_dir: outputDir,
+    trainer_invocation_failed: trainerInvocationFailed || (trainerResult && trainerResult.status !== 0),
+    trainer_exit: trainerResult ? trainerResult.status : null,
+    trainer_stdout_tail: trainerResult ? (trainerResult.stdout || '').slice(-2000) : null,
+    trainer_stderr_tail: trainerResult ? (trainerResult.stderr || '').slice(-2000) : null,
+  };
+  if (!trainerKicked) {
+    env.hint = 'pip install -e apps/trainer or set KOLM_TRAINER_BIN to point at the trainer binary';
+  }
+
+  if (wantJson) {
+    console.log(JSON.stringify(env, null, 2));
+  } else {
+    console.log(`Generated ${positiveCount} positives + ${negativeCount} negatives. Contrastive JSONL at ${jsonlPath}. Trainer: ${trainerKicked ? 'kicked' : 'skipped'}.`);
+    if (!trainerKicked) console.log('  hint: ' + env.hint);
+  }
+  // Always exit 0 — even on trainer failure the JSONL is durable.
   process.exit(0);
 }
 

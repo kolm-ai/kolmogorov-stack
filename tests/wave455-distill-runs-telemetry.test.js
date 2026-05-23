@@ -244,7 +244,7 @@ test('W455 #8 — cli/kolm.js wires cmdDistillRuns ahead of --from-captures', ()
   assert.ok(idxFromCaptures > idxRuns,
     '`runs` dispatch must come before the --from-captures dispatch (it does not, runs idx=' + idxRuns + ', from-captures idx=' + idxFromCaptures + ')');
   // Completion is wired.
-  assert.match(cli, /distill:\s*\[['"]runs['"]\]/,
+  assert.match(cli, /distill:\s*\[[^\]]*['"]runs['"][^\]]*\]/,
     'COMPLETION_SUBS.distill must include "runs"');
   // HELP advertises the subcommand.
   assert.match(cli, /kolm distill runs <run_id>/,
@@ -285,9 +285,9 @@ test('W455 #10 — sw.js CACHE slug references the W455+ audit-finish family', (
   const m = sw.match(/const CACHE = '([^']+)'/);
   assert.ok(m, 'sw.js must export a CACHE const');
   const slug = m[1];
-  assert.match(slug, /^kolm-v7-\d{4}-\d{2}-\d{2}-/, 'slug must follow the v7-YYYY-MM-DD convention');
-  const wm = slug.match(/wave(\d{3,4})/);
-  assert.ok(wm, 'sw.js CACHE slug must include a waveNNN token, got: ' + slug);
+  assert.match(slug, /^kolm-v\d+-\d{4}-\d{2}-\d{2}-/, 'slug must follow the vNN-YYYY-MM-DD convention');
+  const wm = slug.match(/w(?:ave)?(\d{3,4})/);
+  assert.ok(wm, 'sw.js CACHE slug must include a wNNN or waveNNN token, got: ' + slug);
   const n = parseInt(wm[1], 10);
   assert.ok(n >= 455, 'sw.js CACHE slug must reference the W455+ audit-finish family, got: ' + slug);
 });

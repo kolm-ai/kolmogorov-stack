@@ -20,6 +20,31 @@ import crypto from 'node:crypto';
 
 export const TEMPLATE_REGISTRY_VERSION = '1.0.0';
 
+// W713-3 — kolm-think template version constant. MUST agree byte-for-byte
+// with apps/trainer/distill_cot.py KOLM_THINK_TEMPLATE_VERSION so a .kolm
+// artifact baked under one version is identified consistently on either side
+// of the JS/Python boundary. Bump on any change to wrapAssistantWithThinking()
+// output shape.
+export const KOLM_THINK_TEMPLATE_VERSION = 'w713-v1';
+
+// W713-3 — JS side of the kolm-think byte-exact contract. The Python helper
+// apps/trainer/distill_cot.format_capture_with_cot(mode='inline_think_tags')
+// MUST emit the same bytes for the same (assistantText, reasoningText) input.
+// Format: `<think>${reasoningText}</think>${assistantText}` — no whitespace,
+// no newlines inserted. The student learns to emit thinking before answer.
+// Honesty contract:
+//   - reasoningText == null / undefined / '' → returns assistantText unchanged
+//     (no empty <think></think> shell — that would teach the model a bad
+//     pattern of always opening a thinking block even when it has nothing).
+//   - assistantText == null / undefined → coerced to '' (we never throw from
+//     a formatter on the training-data path).
+export function wrapAssistantWithThinking(assistantText, reasoningText) {
+  const a = assistantText == null ? '' : String(assistantText);
+  const r = reasoningText == null ? '' : String(reasoningText);
+  if (!r) return a;
+  return `<think>${r}</think>${a}`;
+}
+
 // Canonical templates. Order matters: first match wins when `pickTemplate`
 // is asked to infer from a base-model name.
 export const TEMPLATES = Object.freeze({
@@ -135,6 +160,54 @@ export const TEMPLATES = Object.freeze({
     thinking: false,
     apply: (history) => history.map((m) => m.content).join('\n\n'),
   },
+  'kolm-think': {
+    // W713-3 — chain-of-thought template. On assistant turns where the caller
+    // provides reasoning_text (per-message field), we wrap the content with
+    // <think>...</think> using wrapAssistantWithThinking(). This is the
+    // training-time template the kolm distill pipeline uses when CoT mode
+    // is enabled. At inference time the runtime can strip the <think>...
+    // </think> envelope from end-user output unless x-kolm-keep-thinking: 1.
+    name: 'kolm-think',
+    version_id: 'kolm-think@' + KOLM_THINK_TEMPLATE_VERSION,
+    description: 'kolm chain-of-thought template (W713). Assistant turns with reasoning_text are wrapped <think>...</think>; ChatML-style boundary markers around all turns.',
+    matches: [/kolm-?think/i],
+    bos_token: '<|im_start|>',
+    eos_token: '<|im_end|>',
+    stop_tokens: ['<|im_end|>', '<|endoftext|>'],
+    thinking: true,
+    thinking_open: '<think>',
+    thinking_close: '</think>',
+    apply: (history) => {
+      const parts = [];
+      for (const m of history) {
+        if (!m) continue;
+        const role = m.role || 'user';
+        let content = m.content == null ? '' : String(m.content);
+        if (role === 'assistant') {
+          // Per-message override: if the caller stamped reasoning_text on the
+          // turn, wrap it. Otherwise pass content through unchanged so legacy
+          // assistant turns without CoT still render correctly.
+          if (m.reasoning_text) {
+            content = wrapAssistantWithThinking(content, m.reasoning_text);
+          }
+        }
+        parts.push(`<|im_start|>${role}\n${content}<|im_end|>`);
+      }
+      parts.push('<|im_start|>assistant\n');
+      return parts.join('\n');
+    },
+    // Inference-time helpers — strip the thinking envelope from the visible
+    // answer, or extract just the thinking block for telemetry.
+    extractAnswer: (text) => {
+      const s = String(text || '');
+      const idx = s.indexOf('</think>');
+      return idx === -1 ? s.trim() : s.slice(idx + '</think>'.length).trim();
+    },
+    extractThinking: (text) => {
+      const m = String(text || '').match(/<think>([\s\S]*?)<\/think>/);
+      return m ? m[1] : '';
+    },
+  },
 });
 
 export const TEMPLATE_NAMES = Object.freeze(Object.keys(TEMPLATES));
@@ -192,4 +265,6 @@ export default {
   getTemplate,
   apply,
   manifestBlock,
+  KOLM_THINK_TEMPLATE_VERSION,
+  wrapAssistantWithThinking,
 };

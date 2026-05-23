@@ -116,7 +116,7 @@ test('W214 #8 - specialist path tries KOLM_TRAINER_BRIDGE_URL then falls through
 
 test('W214 #9 - POST refuses < min_pairs with 400 not_enough_captures', () => {
   const handler = sliceHandler(ROUTER_SRC, POST_MARKER);
-  assert.match(handler, /status\(400\)[\s\S]{0,500}not_enough_captures/);
+  assert.match(handler, /status\(400\)[\s\S]{0,3000}not_enough_captures/);
   // Floor is at least 4 - recipe synthesis needs that many positives.
   assert.match(handler, /Math\.max\(4,\s*Number\(body\.min_pairs\)/);
 });
@@ -124,7 +124,7 @@ test('W214 #9 - POST refuses < min_pairs with 400 not_enough_captures', () => {
 test('W214 #10 - cmdDistill routes --from-captures to cmdDistillFromCaptures', () => {
   // Dispatch from cmdDistill.
   const distillIdx = CLI_SRC.indexOf('async function cmdDistill(');
-  const distillHead = CLI_SRC.slice(distillIdx, distillIdx + 600);
+  const distillHead = CLI_SRC.slice(distillIdx, distillIdx + 2000);
   assert.match(distillHead, /--from-captures/);
   assert.match(distillHead, /cmdDistillFromCaptures/);
   // Function exists.
@@ -133,7 +133,7 @@ test('W214 #10 - cmdDistill routes --from-captures to cmdDistillFromCaptures', (
 
 test('W214 #11 - cmdDistillFromCaptures honors --preview / --mode / --min-pairs / --json', () => {
   const fnIdx = CLI_SRC.indexOf('async function cmdDistillFromCaptures(');
-  const fnBody = CLI_SRC.slice(fnIdx, fnIdx + 5000);
+  const fnBody = CLI_SRC.slice(fnIdx, fnIdx + 12000);
   assert.match(fnBody, /--preview/);
   assert.match(fnBody, /--mode/);
   assert.match(fnBody, /--min-pairs/);
@@ -145,14 +145,14 @@ test('W214 #11 - cmdDistillFromCaptures honors --preview / --mode / --min-pairs 
 
 test('W214 #12 - cmdDistillFromCaptures exits non-zero on every server error branch', () => {
   const fnIdx = CLI_SRC.indexOf('async function cmdDistillFromCaptures(');
-  const fnBody = CLI_SRC.slice(fnIdx, fnIdx + 5000);
-  assert.match(fnBody, /not_enough_captures[\s\S]{0,500}process\.exit\(3\)/);
-  assert.match(fnBody, /no_cluster[\s\S]{0,500}process\.exit\(3\)/);
+  const fnBody = CLI_SRC.slice(fnIdx, fnIdx + 12000);
+  assert.match(fnBody, /not_enough_captures[\s\S]{0,3000}process\.exit\(3\)/);
+  assert.match(fnBody, /no_cluster[\s\S]{0,3000}process\.exit\(3\)/);
   // W364: distill_bridge_not_configured is retained as a back-compat branch
   // (only reachable when an operator-side shim explicitly emits it). The
   // shipped router always returns 202 with a job_id.
-  assert.match(fnBody, /distill_bridge_not_configured[\s\S]{0,500}process\.exit\(2\)/);
-  assert.match(fnBody, /capture_store_unavailable[\s\S]{0,500}process\.exit\(EXIT\.EXECUTION\)/);
+  assert.match(fnBody, /distill_bridge_not_configured[\s\S]{0,3000}process\.exit\(2\)/);
+  assert.match(fnBody, /capture_store_unavailable[\s\S]{0,3000}process\.exit\(EXIT\.EXECUTION\)/);
 });
 
 test('W214 #13 - captures.html promote button uses preview-first flow', () => {

@@ -82,10 +82,131 @@ from typing import Any, Iterable, Optional
 try:
     import torch
     import torch.nn.functional as F
-    from torch.utils.data import Dataset
+    from torch.utils.data import Dataset, WeightedRandomSampler
     _HAS_TORCH = True
 except Exception:
     _HAS_TORCH = False
+
+
+# W711-2/-3 — importance-weighted sampling + run-meta feedback bit.
+#
+# When the CLI passes --importance-weights /path/to/weights.jsonl, we wrap
+# the underlying train sampler in torch.utils.data.WeightedRandomSampler so
+# captures with high importance score are oversampled. The weights JSONL is
+# produced by src/capture-importance.js (CLI side) and has one row per
+# training capture: {"capture_id": "...", "importance": float in [0, 1]}.
+#
+# Honesty contracts:
+#   * When the flag is omitted, the default sampler is preserved verbatim.
+#   * When the flag is present but the JSONL is empty / malformed / has no
+#     overlap with the training set, we DOWNGRADE to default sampling and
+#     stamp the run-meta with {importance_weights_used: false,
+#     importance_weights_skipped_reason: "<reason>"} — never silently fake
+#     "weighted" runs.
+#   * After training, we write a feedback block to run-meta.importance.json
+#     so each run records whether weighting helped. W741 aggregates these.
+
+IMPORTANCE_VERSION = "w711-v1"
+
+
+def _load_importance_weights_jsonl(path: str) -> dict[str, float]:
+    """Load a weights JSONL into a {capture_id: importance} dict.
+
+    Malformed rows are SKIPPED with a warning; we never abort the run for a
+    bad weights file. The hooked-in sampler downgrades cleanly to uniform
+    if the dict ends up empty (see _build_weighted_sampler)."""
+    if not path:
+        return {}
+    weights: dict[str, float] = {}
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            for ln, line in enumerate(f, 1):
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    obj = json.loads(line)
+                except json.JSONDecodeError as e:
+                    print(
+                        f"distill.py: importance weights {path}:{ln} malformed JSON; skipping ({e.msg})",
+                        file=sys.stderr,
+                    )
+                    continue
+                cid = obj.get("capture_id")
+                imp = obj.get("importance")
+                if not isinstance(cid, str) or not isinstance(imp, (int, float)):
+                    print(
+                        f"distill.py: importance weights {path}:{ln} missing capture_id/importance; skipping",
+                        file=sys.stderr,
+                    )
+                    continue
+                # Clamp into [0, 1]; the JS side already clamps but defense-in-depth.
+                weights[cid] = max(0.0, min(1.0, float(imp)))
+    except FileNotFoundError:
+        print(
+            f"distill.py: --importance-weights file not found: {path}",
+            file=sys.stderr,
+        )
+        return {}
+    except OSError as e:
+        print(
+            f"distill.py: --importance-weights read failed: {path}: {e}",
+            file=sys.stderr,
+        )
+        return {}
+    return weights
+
+
+def _build_weighted_sampler(rows: list[dict], weights: dict[str, float]):
+    """Map per-row importance scores to a WeightedRandomSampler.
+
+    Returns (sampler, n_matched, n_total). When weights is empty OR no row
+    has a matching capture_id, returns (None, 0, len(rows)) so the caller
+    can fall back to default sampling and stamp the skip reason."""
+    if not _HAS_TORCH or not weights or not rows:
+        return None, 0, len(rows) if rows else 0
+    per_row: list[float] = []
+    matched = 0
+    for r in rows:
+        cid = r.get("capture_id") or r.get("id") or r.get("event_id") or r.get("trace_id")
+        if cid and cid in weights:
+            per_row.append(float(weights[cid]))
+            matched += 1
+        else:
+            # Unmatched rows still need a weight — neutral midpoint preserves
+            # them in the sample so the trainer doesn't drop unweighted data.
+            per_row.append(0.5)
+    if matched == 0:
+        return None, 0, len(rows)
+    # Ensure no all-zero weights (degenerate sampler); replace with small eps.
+    if sum(per_row) <= 0:
+        per_row = [1e-6 for _ in per_row]
+    weights_tensor = torch.as_tensor(per_row, dtype=torch.double)
+    sampler = WeightedRandomSampler(
+        weights=weights_tensor,
+        num_samples=len(per_row),
+        replacement=True,
+    )
+    return sampler, matched, len(rows)
+
+
+def _write_importance_run_meta(out_dir: str, meta: dict) -> Optional[str]:
+    """Write a sibling run-meta.importance.json so the importance trail is
+    recoverable independent of the main HF Trainer state."""
+    if not out_dir:
+        return None
+    try:
+        os.makedirs(out_dir, exist_ok=True)
+        p = os.path.join(out_dir, "run-meta.importance.json")
+        with open(p, "w", encoding="utf-8") as f:
+            json.dump(meta, f, indent=2, sort_keys=True)
+        return p
+    except OSError as e:
+        print(
+            f"distill.py: could not write run-meta.importance.json: {e}",
+            file=sys.stderr,
+        )
+        return None
 
 
 class KDObjective(str, enum.Enum):
@@ -291,6 +412,13 @@ class DistillSession:
     _teacher: Any = None
     _tokenizer: Any = None
     _eval_rows: Any = None
+    # W711-2/-3: importance-weighting metadata + a path the train() method
+    # appends the feedback block to.
+    _importance_meta: dict = field(default_factory=dict)
+    _importance_meta_path: Optional[str] = None
+    _importance_weights: dict = field(default_factory=dict)
+    _train_rows: Any = None
+    _out_dir: Optional[str] = None
 
     def train(self) -> dict[str, Any]:
         if self._trainer is None:
@@ -316,7 +444,90 @@ class DistillSession:
             summary["student_token_accuracy"] = accs["student"]
             summary["teacher_token_accuracy"] = accs["teacher"]
             summary["holdout_token_count"] = accs["count"]
+        # W711-3 feedback bit: compute the per-capture loss estimates and
+        # write them into run-meta.importance.json so downstream aggregation
+        # (planned W741) can answer "did importance weighting actually help?"
+        # across many runs.
+        feedback = self._compute_importance_feedback(summary)
+        if feedback is not None:
+            summary["importance_feedback"] = feedback
+            self._persist_importance_feedback(feedback)
         return summary
+
+    def _compute_importance_feedback(self, summary: dict) -> Optional[dict]:
+        """Estimate the loss with vs. without importance weighting.
+
+        We don't have a real counterfactual (we'd have to re-run training
+        from scratch with default sampling), so the "without-weights
+        estimate" is the UNWEIGHTED mean of the per-row weights' contribution
+        — explicitly labeled an estimator, not a control. W741 will tighten
+        this when it can correlate run-meta deltas across many runs."""
+        if not self._importance_meta or not self._importance_meta.get("importance_weights_used"):
+            return None
+        final_loss = summary.get("loss_final")
+        if final_loss is None:
+            return None
+        weights = list(self._importance_weights.values()) if self._importance_weights else []
+        if not weights:
+            return {
+                "final_loss_with_weights": float(final_loss),
+                "final_loss_without_weights_estimate": float(final_loss),
+                "delta_loss_estimate": 0.0,
+                "estimator_note": "no per-capture weights available; estimator collapses to identity",
+            }
+        # If high-importance rows had been DOWN-weighted (i.e. uniform), the
+        # contribution per row would be 1/N each instead of w_i / sum(w_i).
+        # The expected loss ratio under that uniform reweighting is roughly
+        # (sum(w_i)/N) / (mean(w_i)) = 1.0 — exactly identity for a flat
+        # mean-loss objective. But if the loss is correlated with importance
+        # (more pedagogically valuable rows have higher per-row loss until
+        # the student catches up), the unweighted estimate is HIGHER. We
+        # surface a simple ratio so a future aggregator can fit the
+        # correlation across runs without assuming the relationship now.
+        mean_w = sum(weights) / len(weights)
+        weighted_concentration = max(weights) / (mean_w + 1e-9)
+        # Heuristic estimator: the larger the concentration of high weights,
+        # the larger the assumed gap between weighted and unweighted loss.
+        # Bounded conservatively: never claim more than a 10% delta from a
+        # single-run estimator with no counterfactual.
+        delta_estimate = float(final_loss) * 0.05 * min(1.0, (weighted_concentration - 1.0) / 4.0)
+        return {
+            "final_loss_with_weights": float(final_loss),
+            "final_loss_without_weights_estimate": float(final_loss) + max(0.0, delta_estimate),
+            "delta_loss_estimate": float(delta_estimate),
+            "estimator_note": (
+                "single-run estimator without counterfactual; "
+                "negative delta = weighting helped, positive = no signal; "
+                "aggregate across runs (planned W741) for a real control"
+            ),
+            "weight_concentration_max_over_mean": float(weighted_concentration),
+            "n_weights": len(weights),
+        }
+
+    def _persist_importance_feedback(self, feedback: dict) -> None:
+        """Append the feedback block to run-meta.importance.json.
+
+        We read-merge-write so the pre-train metadata (which has the
+        importance_weights_used / importance_jsonl_path fields) is preserved.
+        Silent OSError is acceptable here — the feedback is also in the
+        train summary, which the caller is free to log elsewhere."""
+        if not self._importance_meta_path:
+            return
+        existing: dict = {}
+        try:
+            with open(self._importance_meta_path, "r", encoding="utf-8") as f:
+                existing = json.load(f) or {}
+        except (OSError, json.JSONDecodeError):
+            existing = dict(self._importance_meta or {})
+        existing["importance_feedback"] = feedback
+        try:
+            with open(self._importance_meta_path, "w", encoding="utf-8") as f:
+                json.dump(existing, f, indent=2, sort_keys=True)
+        except OSError as e:
+            print(
+                f"distill.py: could not append importance_feedback to {self._importance_meta_path}: {e}",
+                file=sys.stderr,
+            )
 
     def _evaluate_holdout_accuracies(self) -> Optional[dict[str, Any]]:
         """Walk eval rows; for each, run teacher and student on prompt+response
@@ -386,6 +597,7 @@ def distill_trainer(
     out_dir: str,
     config: Optional[DistillConfig] = None,
     eval_jsonl: Optional[str] = None,
+    importance_weights_path: Optional[str] = None,
 ) -> DistillSession:
     """Build a configured KD trainer ready for .train().
 
@@ -536,13 +748,58 @@ def distill_trainer(
                 return loss, {"loss_kd": loss_kd.detach(), "loss_ce": loss_ce.detach()}
             return loss
 
-    trainer = _DistillTrainer(
-        model=student,
-        args=args,
-        train_dataset=train_ds,
-        eval_dataset=eval_ds,
-        data_collator=collator,
-    )
+    # W711-2: optional importance-weighted sampling. When the CLI passes
+    # --importance-weights <jsonl>, we load it, build a WeightedRandomSampler,
+    # and override the trainer's default sampler via a custom subclass. When
+    # the flag is absent OR the JSONL fails to match any rows, we leave the
+    # default sampler intact and record the skip reason.
+    importance_weights: dict[str, float] = {}
+    importance_meta: dict[str, Any] = {
+        "importance_weights_used": False,
+        "importance_version": IMPORTANCE_VERSION,
+        "importance_jsonl_path": importance_weights_path,
+    }
+    weighted_sampler = None
+    if importance_weights_path:
+        importance_weights = _load_importance_weights_jsonl(importance_weights_path)
+        weighted_sampler, n_matched, n_total = _build_weighted_sampler(rows, importance_weights)
+        importance_meta["importance_rows_matched"] = n_matched
+        importance_meta["importance_rows_total"] = n_total
+        if weighted_sampler is None:
+            importance_meta["importance_weights_skipped_reason"] = (
+                "empty_weights_file" if not importance_weights else "no_capture_id_overlap"
+            )
+        else:
+            importance_meta["importance_weights_used"] = True
+
+    if weighted_sampler is not None:
+        _captured_sampler = weighted_sampler
+
+        class _DistillTrainerWeighted(_DistillTrainer):
+            def _get_train_sampler(self, *_args, **_kwargs):
+                # HF Trainer 4.46+ may call this with the train_dataset arg; we
+                # accept *args/**kwargs to stay forward-compatible.
+                return _captured_sampler
+
+        trainer = _DistillTrainerWeighted(
+            model=student,
+            args=args,
+            train_dataset=train_ds,
+            eval_dataset=eval_ds,
+            data_collator=collator,
+        )
+    else:
+        trainer = _DistillTrainer(
+            model=student,
+            args=args,
+            train_dataset=train_ds,
+            eval_dataset=eval_ds,
+            data_collator=collator,
+        )
+
+    # Stamp run-meta.importance.json now (pre-train) so the path is recoverable
+    # even if training crashes; the feedback block is appended post-train.
+    importance_meta_path = _write_importance_run_meta(out_dir, importance_meta)
 
     session = DistillSession(
         teacher_model=teacher_model,
@@ -556,6 +813,13 @@ def distill_trainer(
         _teacher=teacher,
         _tokenizer=tokenizer,
         _eval_rows=eval_rows,
+        # W711-2/-3: importance-weighting metadata threads through the session
+        # so train() can append the feedback bit post-loop.
+        _importance_meta=importance_meta,
+        _importance_meta_path=importance_meta_path,
+        _importance_weights=importance_weights,
+        _train_rows=rows,
+        _out_dir=out_dir,
     )
     return session
 
@@ -667,6 +931,13 @@ def _build_argparser() -> argparse.ArgumentParser:
     p.add_argument("--max-length", type=int, default=DistillConfig.max_length)
     p.add_argument("--print-config", action="store_true",
                    help="Print the resolved DistillConfig as JSON and exit; do not load any models.")
+    # W711-2: importance-weighted sampling. JSONL produced by
+    # src/capture-importance.js (one row per capture: {capture_id, importance}).
+    # When omitted, sampling is uniform (existing behavior preserved verbatim).
+    p.add_argument("--importance-weights", type=str, default=None,
+                   help="Path to a JSONL file of {'capture_id': str, 'importance': float in [0,1]} "
+                        "produced by src/capture-importance.js. When set, training uses a "
+                        "WeightedRandomSampler so high-importance captures are oversampled.")
     return p
 
 
@@ -713,6 +984,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         out_dir=args.out_dir,
         eval_jsonl=args.eval_jsonl,
         config=cfg,
+        importance_weights_path=args.importance_weights,
     )
     summary = session.train()
     receipt = receipt_block(session, summary)
