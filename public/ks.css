@@ -962,6 +962,55 @@ body { position: relative; }
   transform: translateY(-1px);
 }
 
+/* W689: footer trust ribbon. Single-line strip above the existing footer
+   on every page. Replaces scattered trust signals throughout the site
+   with one consistent rail. Injected by nav.js; styled here. */
+.ks-trust-ribbon {
+  border-top: 1px solid var(--ks-line-1);
+  border-bottom: 1px solid var(--ks-line-1);
+  background: linear-gradient(180deg, transparent 0%, rgba(126, 240, 210, 0.018) 100%), var(--ks-bg);
+  padding: 14px 0;
+}
+.ks-trust-ribbon__inner {
+  max-width: var(--ks-container);
+  margin: 0 auto;
+  padding: 0 var(--ks-pad-x);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(14px, 2.4vw, 32px);
+  flex-wrap: wrap;
+}
+.ks-trust-ribbon__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ks-ink-3);
+  text-decoration: none;
+  font-family: var(--ks-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  transition: color var(--ks-dur-1) var(--ks-ease), opacity var(--ks-dur-1) var(--ks-ease);
+}
+.ks-trust-ribbon__chip:hover {
+  color: var(--ks-ink);
+}
+.ks-trust-ribbon__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ks-accent);
+  opacity: 0.78;
+  flex: 0 0 6px;
+}
+.ks-trust-ribbon__chip:hover .ks-trust-ribbon__dot {
+  opacity: 1;
+}
+@media (max-width: 640px) {
+  .ks-trust-ribbon__chip { font-size: 11px; }
+  .ks-trust-ribbon__inner { gap: 14px; }
+}
+
 /* ----- 15. Marquee (final CTA section) --------------------------------- */
 .ks-finale {
   position: relative;

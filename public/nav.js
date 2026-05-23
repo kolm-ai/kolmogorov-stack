@@ -715,4 +715,24 @@ return profile('platform', 'Product map', 'Gateway, compiler, runtime, proof.', 
  }
  main.insertBefore(band, main.firstChild);
  })();
+
+ // W689: footer trust ribbon. Injected once above the existing site footer
+ // on every page. Four chips: license / signing / billing / contact.
+ // Idempotent. Skips if the page already has a hand-placed .ks-trust-ribbon.
+ (function injectTrustRibbon() {
+  if (document.querySelector('.ks-trust-ribbon')) return;
+  var foot = document.querySelector('footer.ks-footer, footer.ks-foot, footer.site-footer, footer.kolm-foot, footer.site, footer');
+  if (!foot || !foot.parentNode) return;
+  var ribbon = document.createElement('aside');
+  ribbon.className = 'ks-trust-ribbon';
+  ribbon.setAttribute('aria-label', 'Trust signals');
+  ribbon.innerHTML =
+   '<div class="ks-trust-ribbon__inner">' +
+    '<a class="ks-trust-ribbon__chip" href="/license"><span class="ks-trust-ribbon__dot" aria-hidden="true"></span>Apache-2.0</a>' +
+    '<a class="ks-trust-ribbon__chip" href="/verify-prod"><span class="ks-trust-ribbon__dot" aria-hidden="true"></span>Ed25519-signed</a>' +
+    '<a class="ks-trust-ribbon__chip" href="/pricing"><span class="ks-trust-ribbon__dot" aria-hidden="true"></span>No per-token bill</a>' +
+    '<a class="ks-trust-ribbon__chip" href="mailto:rodneyyesep@gmail.com"><span class="ks-trust-ribbon__dot" aria-hidden="true"></span>rodneyyesep@gmail.com</a>' +
+   '</div>';
+  foot.parentNode.insertBefore(ribbon, foot);
+ })();
 })();
