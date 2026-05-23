@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Prometheus and Grafana &middot; kolm.ai</title>
+<meta name="description" content="Scrape kolm runtime metrics with Prometheus and visualize them in Grafana. /metrics in Prometheus text format, six pre-registered metrics, one importable dashboard.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Prometheus and Grafana &middot; kolm.ai">
+<meta property="og:description" content="Scrape kolm runtime metrics with Prometheus and visualize them in Grafana. /metrics in Prometheus text format, six pre-registered metrics, one importable dashboard.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/docs/observability/prometheus">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Prometheus and Grafana &middot; kolm.ai">
+<meta name="twitter:description" content="Scrape kolm runtime metrics with Prometheus and visualize them in Grafana. /metrics in Prometheus text format, six pre-registered metrics, one importable dashboard.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/docs/observability/prometheus">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Prometheus and Grafana","description":"How to scrape kolm runtime metrics with Prometheus and visualize them in Grafana.","url":"https://kolm.ai/docs/observability/prometheus","datePublished":"2026-05-24","dateModified":"2026-05-24","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<link rel="stylesheet" href="/design-tokens.css">
+<style>
+:root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--accent-soft:rgba(16,185,129,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.skip-link{position:absolute;left:-9999px}
+.skip-link:focus{position:static;background:var(--accent);color:#fff;padding:8px 14px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+header.site{padding:18px 0;border-bottom:1px solid var(--line)}
+header.site .wrap{display:flex;justify-content:space-between;align-items:center}
+header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px;flex-wrap:wrap}
+header.site nav a{color:inherit;text-decoration:none}
+header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 36px}
+h2{font-size:24px;font-weight:500;letter-spacing:-0.018em;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:28px 0 8px;max-width:780px}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px}
+pre code{background:none;border:none;padding:0;color:inherit;font:inherit}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
+li{margin:4px 0}
+table{border-collapse:collapse;width:100%;max-width:920px;margin:14px 0;font-size:13.5px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink);font-weight:500}
+td code{font-size:12px}
+.related{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+@media(max-width:820px){.related{grid-template-columns:1fr}}
+.related a{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:4px}
+.related a:hover{border-color:var(--accent-soft)}
+.related b{font-size:14px;color:var(--ink);font-weight:500}
+.related span{font-size:12.5px;color:var(--ink-mute);line-height:1.5}
+.metric-card{border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:14px 0;background:var(--bg-elev)}
+.metric-card h3{margin:0 0 6px}
+.metric-card .meta{font-family:var(--mono);font-size:11.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
+footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+</style>
+
+<link rel="stylesheet" href="/ks.css">
+<!-- ds-shell W619 -->
+<link rel="stylesheet" href="/docs-shell.css">
+<script defer src="/docs-shell.js"></script>
+
+</head>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    </div>
+  </nav>
+  <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+  </div>
+</div>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / observability / prometheus</div>
+<h1>Prometheus and Grafana</h1>
+<p class="lede">Every kolm runtime exposes a <code>/metrics</code> endpoint in Prometheus text format. Six pre-registered metrics cover capture rate, load-queue depth, GPU memory by tier, kernel selection, speculative-decoding acceptance, and HTTP latency. Drop the bundled <code>dashboards/kolm-runtime.json</code> into Grafana and you have a working observability stack in two minutes.</p>
+
+<h2 id="scrape-config">Scrape config</h2>
+<p>Add a job to your <code>prometheus.yml</code>. The endpoint speaks <code>text/plain; version=0.0.4</code> so Prometheus 2.x and 3.x both scrape it natively without exporters.</p>
+
+<pre><code>scrape_configs:
+  - job_name: 'kolm'
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['kolm.example.com:443']
+    scheme: https
+    # Optional: if you set KOLM_METRICS_BEARER on the kolm side, send the
+    # matching bearer here so 401s don't pollute your scrape errors.
+    authorization:
+      type: Bearer
+      credentials: 'your-shared-bearer-token-here'
+</code></pre>
+
+<p>To gate the endpoint, set <code>KOLM_METRICS_BEARER=&lt;random-token&gt;</code> on the kolm process. The honest dev-default is no auth so local <code>curl localhost:8080/metrics</code> just works. On a missing or mismatched bearer the endpoint returns HTTP 401 with <code>{ok:false, error:'invalid_metrics_bearer'}</code> so a misconfigured scraper fails loud.</p>
+
+<h2 id="available-metrics">Available metrics</h2>
+<p>Six metrics are pre-registered at boot. They emit <code># HELP</code> and <code># TYPE</code> lines even when no samples have been written yet, so a fresh scrape never returns a blank page.</p>
+
+<table>
+  <thead><tr><th>Metric</th><th>Type</th><th>Labels</th><th>Help</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>kolm_capture_total</code></td>
+      <td>counter</td>
+      <td><code>tenant</code>, <code>namespace</code></td>
+      <td>Total capture events written to the event store.</td>
+    </tr>
+    <tr>
+      <td><code>kolm_load_queue_depth</code></td>
+      <td>gauge</td>
+      <td>&mdash;</td>
+      <td>Current depth of the W729 load queue (artifacts waiting to be paged in).</td>
+    </tr>
+    <tr>
+      <td><code>kolm_runtime_gpu_memory_bytes</code></td>
+      <td>gauge</td>
+      <td><code>device</code>, <code>tier</code></td>
+      <td>GPU memory usage in bytes by device and W724 tier (vram, ram, nvme, network).</td>
+    </tr>
+    <tr>
+      <td><code>kolm_runtime_kernel_selected_total</code></td>
+      <td>counter</td>
+      <td><code>profile_name</code></td>
+      <td>Count of W726 kernel-selector profile selections (latency vs batching).</td>
+    </tr>
+    <tr>
+      <td><code>kolm_accelerate_acceptance_rate</code></td>
+      <td>histogram</td>
+      <td><code>task_class</code></td>
+      <td>W727 speculative-decoding acceptance rate distribution by task class.</td>
+    </tr>
+    <tr>
+      <td><code>kolm_http_request_duration_seconds</code></td>
+      <td>histogram</td>
+      <td><code>method</code>, <code>route</code>, <code>status</code></td>
+      <td>HTTP request duration in seconds.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>You can also list the registered shape from the CLI:</p>
+
+<pre><code>kolm metrics list
+# Prints JSON with every metric's name, type, label names, and bucket array.
+kolm metrics show
+# Pipes renderMetrics() to stdout. Useful for cron + log shipping.
+</code></pre>
+
+<h2 id="grafana">Grafana dashboard import</h2>
+<p>The repo ships a ready-to-import Grafana dashboard at <code>dashboards/kolm-runtime.json</code>. It targets schema v38 (Grafana 10) and contains six panels &mdash; one per metric above.</p>
+
+<ol>
+  <li>In Grafana, open <strong>Dashboards &rarr; New &rarr; Import</strong>.</li>
+  <li>Upload <code>dashboards/kolm-runtime.json</code> (or paste the contents).</li>
+  <li>Pick your Prometheus datasource from the dropdown. The dashboard uses <code>${DS_PROMETHEUS}</code> as the datasource UID variable so any Prometheus instance works.</li>
+  <li>Save. The dashboard refreshes every 30 seconds and the default time window is <code>now-1h</code>.</li>
+</ol>
+
+<h3 id="panels">Panels</h3>
+<div class="metric-card">
+  <p class="meta">Panel 1</p>
+  <h3>Capture rate (per minute)</h3>
+  <p><code>rate(kolm_capture_total[1m])</code> sliced by <code>namespace</code>. Watch the green line trend up after you wire a new SDK; sustained drops to zero are an upstream outage signal.</p>
+</div>
+
+<div class="metric-card">
+  <p class="meta">Panel 2</p>
+  <h3>Load queue depth</h3>
+  <p><code>kolm_load_queue_depth</code> as a gauge with thresholds at 5 (orange) and 20 (red). Sustained non-zero values indicate the runtime is GPU-bound or NVMe-bound and you should provision more capacity.</p>
+</div>
+
+<div class="metric-card">
+  <p class="meta">Panel 3</p>
+  <h3>GPU memory by tier</h3>
+  <p><code>kolm_runtime_gpu_memory_bytes</code> grouped by device + tier. Stacked area chart so you can see VRAM fill before it spills to RAM, then to NVMe.</p>
+</div>
+
+<div class="metric-card">
+  <p class="meta">Panel 4</p>
+  <h3>Kernel selection histogram</h3>
+  <p><code>sum by (profile_name) (rate(kolm_runtime_kernel_selected_total[5m]))</code>. Bars per second showing how often the W726 selector chose <code>latency</code> vs <code>batching</code>. Drift toward <code>batching</code> means your traffic mix is shifting toward API-serving workloads.</p>
+</div>
+
+<div class="metric-card">
+  <p class="meta">Panel 5</p>
+  <h3>Acceleration acceptance rate</h3>
+  <p><code>histogram_quantile(0.50, rate(kolm_accelerate_acceptance_rate_bucket[5m])) by (task_class)</code>. Median speculative-decoding acceptance per task class. Values approaching 1.0 mean the speculator's drafts are nearly always accepted &mdash; the dream case.</p>
+</div>
+
+<div class="metric-card">
+  <p class="meta">Panel 6</p>
+  <h3>HTTP p95 latency</h3>
+  <p><code>histogram_quantile(0.95, rate(kolm_http_request_duration_seconds_bucket[5m])) by (route)</code>. Tail latency per route, for SLO conformance. Spikes localized to one route usually point to an upstream-provider regression.</p>
+</div>
+
+<h2 id="honesty">Honesty contract</h2>
+<ul>
+  <li>A registered metric with zero samples still emits <code>HELP</code> and <code>TYPE</code> lines &mdash; this is Prometheus-correct (the scraper reports <code>absent()</code> and the metric stays in the registry).</li>
+  <li>Histogram observations are non-negative finite numbers only. NaN, Infinity, and negatives raise at the callsite, not silently corrupt the wire format.</li>
+  <li>Label values are escaped for backslash, double-quote, and newline so a malicious or careless namespace name can never break a sample line.</li>
+  <li>The exporter version is pinned by <code>PROMETHEUS_EXPORTER_VERSION</code> (currently <code>w730-v1</code>) so a scrape can detect a schema migration.</li>
+  <li>The renderer is PURE &mdash; no I/O, no timers, no auto-scrape. Tests reset sample state via <code>_resetForTests()</code>; production never calls it.</li>
+</ul>
+
+<h2 id="next">Next steps</h2>
+<p>Read <a href="/docs/runtime/memory-tiers">memory-tiers</a> for the W724 placement decision the gpu_memory_bytes metric reflects. Read <a href="/docs/runtime">runtime</a> for how the kernel selector and accept-rate sources fit into the request-time flow. Read <a href="/docs/quickstart">/docs/quickstart</a> if you have not yet shipped an artifact.</p>
+
+<div class="related">
+  <a href="/docs/runtime/memory-tiers"><b>Memory tiers &rarr;</b><span>Where the GPU memory bytes come from.</span></a>
+  <a href="/docs/runtime"><b>Runtime &rarr;</b><span>Request-time decision chain.</span></a>
+  <a href="/docs/quickstart"><b>Quickstart &rarr;</b><span>Ship your first artifact in five minutes.</span></a>
+</div>
+
+</div></main>
+
+<footer><div class="wrap">
+ kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
+</div></footer>
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/integrations">Integrations</a></li><li><a href="/docs/api">API reference</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

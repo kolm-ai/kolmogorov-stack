@@ -1,5 +1,5 @@
 // Recipe service worker: keeps the registry available offline.
-const CACHE = 'kolm-v46-2026-05-24-w723-w724-w725-w726-runtime-layer';
+const CACHE = 'kolm-v47-2026-05-24-w727-w728-w729-w730-inference-scaling';
 const PRECACHE = [
  '/device',
  '/design-tokens.css',

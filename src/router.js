@@ -52,6 +52,11 @@ import * as traceCapture from './trace-capture.js';
 import * as workflowIr from './workflow-ir.js';
 import * as compileIr from './compile-ir.js';
 import * as traceCompile from './trace-compile.js';
+// W729 — graceful degradation under load. enqueue() gates the hot inference
+// routes with a FIFO + priority lane queue; queue_full / queue_timeout
+// rejections surface as HTTP 429 + Retry-After via the loadQueueMiddleware
+// defined below. Kill-switched by KOLM_LOAD_QUEUE_DISABLED=1.
+import { enqueue as __loadQueueEnqueue, getQueueStats as __loadQueueGetStats } from './load-queue.js';
 import * as deviceCaps from './device-capabilities.js';
 import * as confidentialCompute from './confidential-compute.js';
 import * as federatedLearning from './federated-learning.js';
@@ -819,6 +824,38 @@ export function buildRouter() {
     uptime_s: Math.round(process.uptime()),
     stats: storeStats(),
   }));
+
+  // W730 — Prometheus /metrics scrape endpoint. Mounted BEFORE
+  // authMiddleware so a Prometheus scraper can reach it without an API
+  // key, optionally gated by KOLM_METRICS_BEARER for prod deployments.
+  // The honest-dev-default is public; setting the env var requires
+  // `Authorization: Bearer <token>` and returns a structured 401 envelope
+  // on mismatch so misconfigured scrapers fail loud.
+  r.get('/metrics', async (req, res) => {
+    const requiredBearer = process.env.KOLM_METRICS_BEARER || '';
+    if (requiredBearer) {
+      const header = String(req.get('authorization') || req.get('Authorization') || '');
+      const expected = 'Bearer ' + requiredBearer;
+      // Length-mismatched strings can't constant-time compare safely; bail
+      // before the timing-safe call.
+      if (header.length !== expected.length
+          || !constantTimeEq(header, expected)) {
+        return res.status(401).json({ ok: false, error: 'invalid_metrics_bearer' });
+      }
+    }
+    try {
+      const mod = await import('./prometheus-exporter.js');
+      const body = mod.renderMetrics();
+      res.set('Content-Type', 'text/plain; version=0.0.4; charset=utf-8');
+      return res.status(200).send(body);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'prometheus_exporter_failed',
+        message: String((e && e.message) || e),
+      });
+    }
+  });
 
   // Status subscribe - email opt-in from the /status page. Validates the address,
   // dedupes by email (returns duplicate:true on re-subscribe), inserts into
@@ -3969,6 +4006,56 @@ export function buildRouter() {
     }
   }
 
+  // W729 — graceful-degradation middleware. Sits in front of the hot
+  // inference routes so a sustained-overload condition surfaces a clean
+  // HTTP 429 + Retry-After + queue_full envelope instead of a silent
+  // drop, an OOM, or an opaque proxy error. Tier-derived priority lets
+  // enterprise/business tenants jump the queue ahead of free under
+  // contention (W729-1 spec). Kill-switched at the module level by
+  // KOLM_LOAD_QUEUE_DISABLED=1 — the env-disabled path resolves
+  // immediately so the pre-W729 production hot path is preserved when
+  // the queue is off.
+  function __loadQueuePriorityFromReq(req) {
+    const plan = String((req.tenant_record && req.tenant_record.plan) || 'free').toLowerCase();
+    if (plan === 'enterprise' || plan === 'business' || plan === 'starter') return plan;
+    return 'free';
+  }
+  async function loadQueueMiddleware(req, res, next) {
+    try {
+      const slot = await __loadQueueEnqueue({
+        req,
+        priority: __loadQueuePriorityFromReq(req),
+        timeout_ms: 60_000,
+      });
+      // Release the slot when the response finishes. `finish` covers the
+      // happy path; `close` covers an abruptly disconnected client.
+      let released = false;
+      const _release = () => {
+        if (released) return;
+        released = true;
+        try { slot.release && slot.release(); } catch (_) {}
+      };
+      res.on('finish', _release);
+      res.on('close', _release);
+      next();
+    } catch (err) {
+      // W729-3 — surface Retry-After + structured envelope on overload.
+      // queue_full and queue_timeout both map to HTTP 429; the envelope
+      // tells the SDK how long to back off and exposes current depth so
+      // an operator dashboard can see contention live.
+      const stats = __loadQueueGetStats();
+      const retryAfter = Math.max(1, Number(err && err.retry_after_seconds) || 60);
+      res.set('Retry-After', String(retryAfter));
+      return res.status(429).json({
+        ok: false,
+        error: (err && err.code) || 'queue_full',
+        retry_after_seconds: retryAfter,
+        queue_depth: stats.depth,
+        capacity: stats.capacity,
+      });
+    }
+  }
+
   // OpenAI-compatible direct routes. /v1/chat/completions threads through the
   // hosted-inference metering wrapper above; the rest still flow to the
   // unmetered passthrough since they aren't on the billing-units catalog yet.
@@ -3977,7 +4064,104 @@ export function buildRouter() {
   // anonymous requests with 401 {error:'unauthorized'}. The local daemon
   // (KOLM_LOCAL_DAEMON=1 or developer laptop) stays unauthenticated; the gate
   // stamps req.tenant = 'local:<hostname>' so captures still carry a tenant.
-  r.post('/v1/chat/completions', __w411HostedAuthGate, (req, res) => __hostedInferenceWrapper('openai', '/v1/chat/completions', req, res));
+  // W729 — loadQueueMiddleware runs AFTER auth so the tenant record is on
+  // req when we read priority. Enterprise tier dequeues before free.
+  // W727 — when the caller passes ?accelerate=true on /v1/chat/completions,
+  // route through src/accelerate.js (student-as-draft speculative decoding).
+  // The accelerated envelope augments the response with {accelerated,
+  // acceptance_rate, draft_tokens_proposed/accepted, teacher_verifications}.
+  // When the speculative-decoding kernel is missing the route falls back to
+  // the standard hosted-inference path with accelerated:false on the body
+  // so the caller can still get a real chat completion. Defense-in-depth
+  // tenant fence: any accelerated call without req.tenant_record is hard
+  // 401-rejected — we never run the accelerated path anonymously, even on
+  // the local daemon, because the bench dashboard keys on tenant_id.
+  r.post('/v1/chat/completions', __w411HostedAuthGate, loadQueueMiddleware, async (req, res) => {
+    const accelerateFlag = String((req.query && req.query.accelerate) || '').toLowerCase() === 'true';
+    if (!accelerateFlag) {
+      return __hostedInferenceWrapper('openai', '/v1/chat/completions', req, res);
+    }
+    if (!req.tenant_record) {
+      // W411 hosted gate should have rejected this already; this is the
+      // defense-in-depth fence for any test path that bypasses the gate.
+      return res.status(401).json({
+        error: 'unauthorized',
+        reason: 'accelerate_requires_tenant_record',
+        version: 'w727-v1',
+      });
+    }
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    const messages = Array.isArray(body.messages) ? body.messages : [];
+    const namespace = String(body.namespace || body.corpus_namespace || req.headers['x-kolm-namespace'] || 'default');
+    let nDraft = Number(body.n_draft_tokens || (body.kolm_accelerate && body.kolm_accelerate.n_draft_tokens) || 4);
+    if (!Number.isFinite(nDraft) || nDraft <= 0) nDraft = 4;
+
+    let accel;
+    try {
+      const mod = await import('./accelerate.js');
+      accel = await mod.acceleratedChatCompletion({
+        messages,
+        namespace,
+        accelerate: true,
+        n_draft_tokens: nDraft,
+        tenant_id: req.tenant_record.id,
+        // Production: no in-process backend bridge yet. The honest
+        // no_kernel envelope below + fallback path keep callers working.
+        backend: null,
+      });
+    } catch (e) {
+      // Module load failure is honest infrastructure failure, not "no kernel".
+      return res.status(500).json({
+        error: 'accelerate_module_load_failed',
+        detail: (e && e.message) || String(e),
+        version: 'w727-v1',
+      });
+    }
+    if (accel && accel.ok === false) {
+      // Honest fallback: backend missing OR student propose/verify failed.
+      // We do NOT silently substitute the teacher (that would lie about
+      // the acceleration). Instead we run the normal hosted-inference
+      // path and stamp the response with {accelerated:false, fallback_*}
+      // so the caller knows acceleration was attempted but unavailable.
+      const origJson = res.json.bind(res);
+      res.json = (payload) => {
+        const env = (payload && typeof payload === 'object') ? { ...payload } : {};
+        env.accelerated = false;
+        env.fallback_reason = accel.error || 'no_kernel';
+        env.fallback_hint = accel.hint || null;
+        env.acceptance_rate = 0;
+        env.draft_tokens_proposed = 0;
+        env.draft_tokens_accepted = 0;
+        env.teacher_verifications = 0;
+        env.kolm_w727 = { version: accel.version || 'w727-v1', route: 'fallback' };
+        return origJson(env);
+      };
+      return __hostedInferenceWrapper('openai', '/v1/chat/completions', req, res);
+    }
+    return res.status(200).json({
+      accelerated: true,
+      acceptance_rate: accel.acceptance_rate,
+      draft_tokens_proposed: accel.draft_tokens_proposed,
+      draft_tokens_accepted: accel.draft_tokens_accepted,
+      teacher_verifications: accel.teacher_verifications,
+      route: accel.route,
+      speedup_x: accel.speedup_x,
+      wall_clock_ms: accel.wall_clock_ms,
+      cost_micro_usd: accel.cost_micro_usd,
+      // OpenAI-compatible surface: a single choice carrying the accepted
+      // text so SDK callers see a normal chat-completions response.
+      choices: [{
+        index: 0,
+        message: { role: 'assistant', content: accel.accepted_text || '' },
+        finish_reason: 'stop',
+      }],
+      kolm_w727: {
+        version: accel.version,
+        router: accel.router,
+        teacher_correction_text: accel.teacher_correction_text,
+      },
+    });
+  });
   // OpenAI-compatible passthrough for the responses, embeddings, and
   // moderations endpoints. Each routes through __connectorProxy('openai', ...)
   // so the upstream OpenAI API is reached with the configured key, and the
@@ -5575,7 +5759,10 @@ export function buildRouter() {
   //     alternatives: [{verb, command, confidence}], snapshot_summary }
   //
   // Auth-gated. Empty question returns 400. Classifier throw returns 500.
-  r.post('/v1/intent/ask', async (req, res) => {
+  // W729 — loadQueueMiddleware sheds load with HTTP 429 + Retry-After when
+  // the queue is saturated. Tier-derived priority lets paid tenants jump
+  // the queue ahead of free under contention.
+  r.post('/v1/intent/ask', loadQueueMiddleware, async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     const question = String((req.body && req.body.question) || '').trim();
     if (!question) {

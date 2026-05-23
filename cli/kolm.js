@@ -28672,7 +28672,15 @@ async function dispatchRepl(verb, rest) {
     case 'artifacts': return withErrorContext('artifacts', () => cmdArtifacts(rest));
     case 'status': return withErrorContext('status', () => cmdStatus(rest));
     case 'health': return withErrorContext('health', () => cmdHealth(rest));
-    case 'metrics': return withErrorContext('metrics', () => cmdMetrics(rest));
+    case 'metrics': {
+      // W730 — `kolm metrics show|list` routes to the Prometheus exporter
+      // dispatcher; everything else stays on the W245 jobs.jsonl summary.
+      const first = (rest && rest[0]) || '';
+      if (first === 'show' || first === 'list') {
+        return withErrorContext('metrics', () => cmdW730Metrics(rest));
+      }
+      return withErrorContext('metrics', () => cmdMetrics(rest));
+    }
     case 'changelog': return withErrorContext('changelog', () => cmdChangelog(rest));
     case 'support-bundle': return withErrorContext('support-bundle', () => cmdSupportBundle(rest));
     case 'key': return withErrorContext('key', () => cmdKey(rest));
@@ -30330,6 +30338,442 @@ async function cmdCompileWorkload_w726(rawArgs) {
   await cmdCompile(handoff);
 }
 
+// W729 — `kolm load queue --stats` / `kolm load queue --capacity <N>` mirror
+// of the server-side src/load-queue.js singleton. Distinct dispatcher name
+// (cmdW729LoadStatus) so parallel-wave agents don't collide on the same
+// function symbol — matches the W807-W810 distinct-named pattern.
+//
+//   --stats      Print the queue depth + capacity + per-priority counts as
+//                JSON on stdout. Always exits 0.
+//   --capacity N Adjust capacity. Admin-only: gates on
+//                process.env.KOLM_CLI_ROLE === 'admin' (mirrors how the
+//                server-side admin gate works via tenant.role). Non-admin
+//                callers see the {ok:false, error:'forbidden'} envelope on
+//                stdout and exit code 3.
+async function cmdW729LoadStatus(rawArgs) {
+  const args = Array.isArray(rawArgs) ? rawArgs.slice() : [];
+  let wantStats = false;
+  let newCapacity = null;
+  for (let i = 0; i < args.length; i += 1) {
+    const a = args[i];
+    if (a === '--stats') { wantStats = true; continue; }
+    if (a === '--capacity' && i + 1 < args.length) { newCapacity = args[i + 1]; i += 1; continue; }
+    if (typeof a === 'string' && a.startsWith('--capacity=')) { newCapacity = a.slice('--capacity='.length); continue; }
+  }
+
+  // Dynamic import so missing-module surfaces as an honest envelope rather
+  // than a top-level crash on older installs without src/load-queue.js.
+  let lqMod;
+  try {
+    lqMod = await import('../src/load-queue.js');
+  } catch (e) {
+    const env = {
+      ok: false,
+      error: 'load_queue_module_missing',
+      detail: (e && e.message) || String(e),
+      hint: 'src/load-queue.js must be importable; reinstall the kolm CLI',
+      version: 'w729-v1',
+    };
+    console.log(JSON.stringify(env, null, 2));
+    process.exit(EXIT.MISSING_PREREQ);
+  }
+
+  if (newCapacity != null) {
+    // Admin gate. The CLI mirrors the server's tenant.role === 'admin'
+    // requirement; operators set KOLM_CLI_ROLE=admin in their shell to
+    // signal they have authority to resize the queue.
+    const role = String(process.env.KOLM_CLI_ROLE || '').toLowerCase();
+    if (role !== 'admin') {
+      const env = {
+        ok: false,
+        error: 'forbidden',
+        detail: 'kolm load queue --capacity requires admin role',
+        hint: 'set KOLM_CLI_ROLE=admin and re-run; this mirrors the server-side tenant.role check',
+        version: lqMod.LOAD_QUEUE_VERSION,
+      };
+      console.log(JSON.stringify(env, null, 2));
+      process.exit(EXIT.MISSING_PREREQ);
+    }
+    try {
+      const n = lqMod.setCapacity(Number(newCapacity));
+      const stats = lqMod.getQueueStats();
+      console.log(JSON.stringify({
+        ok: true,
+        version: lqMod.LOAD_QUEUE_VERSION,
+        action: 'capacity_set',
+        capacity: n,
+        stats,
+      }, null, 2));
+    } catch (e) {
+      console.log(JSON.stringify({
+        ok: false,
+        error: 'bad_capacity',
+        detail: (e && e.message) || String(e),
+        version: lqMod.LOAD_QUEUE_VERSION,
+      }, null, 2));
+      process.exit(EXIT.BAD_ARGS);
+    }
+    return;
+  }
+
+  // Default + --stats: emit the snapshot.
+  const stats = lqMod.getQueueStats();
+  console.log(JSON.stringify({
+    ok: true,
+    version: lqMod.LOAD_QUEUE_VERSION,
+    stats,
+  }, null, 2));
+  void wantStats; // referenced for grep-completeness; the path is identical
+}
+
+// W727 — `kolm accelerate bench --task-class <name> --samples <N>` +
+// `kolm accelerate test --message <text>` — distinct-named dispatcher
+// (cmdW727Accelerate) so parallel-wave agents (W728/W729/W730) editing
+// neighboring lines never collide on the symbol. Matches the W724
+// (cmdRunAutoPlace_w724), W726 (cmdRunWorkloadProbe_w726), W729
+// (cmdW729LoadStatus) distinct-named pattern.
+//
+//   bench --task-class <extraction|generation|reasoning> --samples <N> [--json]
+//     Runs bench/wave727-acceleration-bench.js's runBench for one class
+//     (or all three when --task-class omitted). Honest no_kernel fallback
+//     when KOLM_SPEC_DECODE_BACKEND is unset.
+//
+//   test --message "<text>" [--n-draft-tokens N]
+//     One-shot accelerated completion. Detects backend and refuses with the
+//     honest no_kernel envelope when nothing is wired — never silently
+//     falls back to "just the teacher" because that would lie about the
+//     acceptance rate.
+async function cmdW727Accelerate(rawArgs) {
+  const args = Array.isArray(rawArgs) ? rawArgs.slice() : [];
+  const sub = args[0];
+  if (sub !== 'bench' && sub !== 'test') {
+    console.log(JSON.stringify({
+      ok: false,
+      error: 'bad_subcommand',
+      hint: 'usage: kolm accelerate bench [--task-class extraction|generation|reasoning] [--samples N] [--json]\n       kolm accelerate test --message "<text>" [--n-draft-tokens N]',
+      version: 'w727-v1',
+    }, null, 2));
+    process.exit(EXIT.BAD_ARGS);
+  }
+  const rest = args.slice(1);
+
+  // Dynamic import so the W727 module's absence surfaces as an honest
+  // envelope rather than a top-level crash on older installs.
+  let accelMod;
+  try {
+    accelMod = await import('../src/accelerate.js');
+  } catch (e) {
+    console.log(JSON.stringify({
+      ok: false,
+      error: 'accelerate_module_missing',
+      detail: (e && e.message) || String(e),
+      hint: 'src/accelerate.js must be importable; reinstall the kolm CLI',
+      version: 'w727-v1',
+    }, null, 2));
+    process.exit(EXIT.MISSING_PREREQ);
+  }
+
+  if (sub === 'bench') {
+    let taskClass = null;
+    let samples = 20;
+    for (let i = 0; i < rest.length; i += 1) {
+      const a = rest[i];
+      if (a === '--task-class' && i + 1 < rest.length) {
+        taskClass = String(rest[i + 1] || '').trim().toLowerCase();
+        i += 1;
+        continue;
+      }
+      if (typeof a === 'string' && a.startsWith('--task-class=')) {
+        taskClass = a.slice('--task-class='.length).toLowerCase();
+        continue;
+      }
+      if (a === '--samples' && i + 1 < rest.length) {
+        const n = Number(rest[i + 1]);
+        if (Number.isFinite(n) && n > 0) samples = Math.floor(n);
+        i += 1;
+        continue;
+      }
+      if (typeof a === 'string' && a.startsWith('--samples=')) {
+        const n = Number(a.slice('--samples='.length));
+        if (Number.isFinite(n) && n > 0) samples = Math.floor(n);
+        continue;
+      }
+    }
+    if (taskClass && !accelMod.TASK_CLASSES.includes(taskClass)) {
+      console.log(JSON.stringify({
+        ok: false,
+        error: 'unknown_task_class',
+        hint: 'task_class must be one of ' + accelMod.TASK_CLASSES.join('|'),
+        version: 'w727-v1',
+      }, null, 2));
+      process.exit(EXIT.BAD_ARGS);
+    }
+    let benchMod;
+    try {
+      benchMod = await import('../bench/wave727-acceleration-bench.js');
+    } catch (e) {
+      console.log(JSON.stringify({
+        ok: false,
+        error: 'bench_module_missing',
+        detail: (e && e.message) || String(e),
+        hint: 'bench/wave727-acceleration-bench.js must be importable',
+        version: 'w727-v1',
+      }, null, 2));
+      process.exit(EXIT.MISSING_PREREQ);
+    }
+    const report = await benchMod.runBench({ samples, task_class: taskClass || null });
+    console.log(JSON.stringify(report, null, 2));
+    // Exit semantics mirror the bench script: skipped (no kernel) = 0,
+    // ran-but-missed-baseline = 2, otherwise 0.
+    if (report.any_class_ran && report.all_classes_meet_baseline === false) {
+      process.exit(EXIT.GATE_FAIL);
+    }
+    process.exit(EXIT.OK);
+  }
+
+  // sub === 'test'
+  let message = null;
+  let nDraft = 4;
+  for (let i = 0; i < rest.length; i += 1) {
+    const a = rest[i];
+    if (a === '--message' && i + 1 < rest.length) {
+      message = String(rest[i + 1] || '');
+      i += 1;
+      continue;
+    }
+    if (typeof a === 'string' && a.startsWith('--message=')) {
+      message = a.slice('--message='.length);
+      continue;
+    }
+    if (a === '--n-draft-tokens' && i + 1 < rest.length) {
+      const n = Number(rest[i + 1]);
+      if (Number.isFinite(n) && n > 0) nDraft = Math.floor(n);
+      i += 1;
+      continue;
+    }
+  }
+  if (!message) {
+    console.log(JSON.stringify({
+      ok: false,
+      error: 'missing_message',
+      hint: 'usage: kolm accelerate test --message "<text>" [--n-draft-tokens N]',
+      version: 'w727-v1',
+    }, null, 2));
+    process.exit(EXIT.BAD_ARGS);
+  }
+  const r = await accelMod.acceleratedChatCompletion({
+    messages: [{ role: 'user', content: message }],
+    namespace: 'cli',
+    accelerate: true,
+    n_draft_tokens: nDraft,
+    backend: null,
+  });
+  console.log(JSON.stringify(r, null, 2));
+  if (r.ok === false) {
+    process.exit(EXIT.MISSING_PREREQ);
+  }
+  process.exit(EXIT.OK);
+}
+
+// =============================================================================
+// W728 — Inference-Time Compute Scaling dispatcher.
+//
+// Distinct-named per the W724/W726/W727/W729/W807 precedent
+// (cmdRunAutoPlace_w724, cmdCompileWorkload_w726, cmdW727Accelerate,
+// cmdW729LoadStatus, cmdConfidenceRoute_w807) so the W728 touch surface
+// on cli/kolm.js stays one function and parallel W730+ wave work does
+// not merge-conflict.
+//
+// Two subverbs under `kolm its`:
+//
+//   kolm its ask --prompt "<text>" [--base-n N] [--max-n N]
+//     End-to-end scale_inference call. Spawns
+//     `python3 -m apps.runtime.inference_time_scaling --prompt "<text>"`
+//     and pipes back the JSON envelope on stdout.
+//
+//   kolm its bench [--prompts N] [--seed S] [--json]
+//     Runs bench/wave728-its-bench.py with the supplied knobs and
+//     forwards its stdout (JSON when --json is on, pretty otherwise).
+//
+// Honesty contract: if python3 is missing on PATH we emit a structured
+// envelope on stdout and exit MISSING_PREREQ. Never silent.
+// =============================================================================
+async function cmdW728InferenceScale(rawArgs) {
+  const args = Array.isArray(rawArgs) ? rawArgs.slice() : [];
+  const sub = args.shift();
+  if (sub !== 'ask' && sub !== 'bench') {
+    console.error('usage: kolm its ask --prompt "<text>" [--base-n N] [--max-n N]');
+    console.error('       kolm its bench [--prompts N] [--seed S] [--json]');
+    process.exit(EXIT.BAD_ARGS);
+  }
+
+  // Resolve python3 binary. Same convention as cmdServe (--http path).
+  const py = process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
+
+  // Probe that python3 exists. Without this a missing interpreter surfaces
+  // as an opaque ENOENT from spawnSync; we want the structured envelope
+  // below so the operator sees an actionable hint.
+  const probe = spawnSync(py, ['--version'], { encoding: 'utf8' });
+  if (probe.error || (probe.status !== 0 && probe.status !== null)) {
+    const envelope = {
+      ok: false,
+      error: 'python3_missing',
+      detail: probe.error ? String(probe.error.message || probe.error) : `${py} --version exited ${probe.status}`,
+      hint: 'install python3.9+ (apt: sudo apt-get install -y python3; brew: brew install python@3.11)',
+      version: 'w728-v1',
+    };
+    console.log(JSON.stringify(envelope, null, 2));
+    process.exit(EXIT.MISSING_PREREQ);
+  }
+
+  // Resolve repo root from this file's location. Same pattern as cmdServe
+  // (--http path) — fileURLToPath gives a Windows-friendly absolute path so
+  // spawnSync's cwd is happy.
+  const repoRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
+
+  if (sub === 'ask') {
+    const promptIdx = args.indexOf('--prompt');
+    if (promptIdx < 0 || !args[promptIdx + 1]) {
+      console.error('usage: kolm its ask --prompt "<text>" [--base-n N] [--max-n N]');
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const prompt = args[promptIdx + 1];
+    const baseN = pickFlag(args, '--base-n');
+    const maxN = pickFlag(args, '--max-n');
+    const pyArgs = ['-m', 'apps.runtime.inference_time_scaling', '--prompt', prompt];
+    if (baseN) { pyArgs.push('--base-n', String(baseN)); }
+    if (maxN) { pyArgs.push('--max-n', String(maxN)); }
+    const r = spawnSync(py, pyArgs, {
+      cwd: repoRoot,
+      encoding: 'utf8',
+      timeout: 60_000,
+    });
+    if (r.error || r.status !== 0) {
+      const envelope = {
+        ok: false,
+        error: 'its_ask_failed',
+        detail: r.error ? String(r.error.message || r.error) : (r.stderr || '').slice(0, 2000),
+        exit_status: r.status,
+        version: 'w728-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.EXECUTION);
+    }
+    process.stdout.write(r.stdout || '');
+    if (!(r.stdout || '').endsWith('\n')) {
+      process.stdout.write('\n');
+    }
+    process.exit(EXIT.OK);
+  }
+
+  // sub === 'bench'
+  const benchPath = path.join(repoRoot, 'bench', 'wave728-its-bench.py');
+  const prompts = pickFlag(args, '--prompts');
+  const seed = pickFlag(args, '--seed');
+  const jsonOut = args.includes('--json');
+  const pyArgs = [benchPath];
+  if (prompts) { pyArgs.push('--prompts', String(prompts)); }
+  if (seed) { pyArgs.push('--seed', String(seed)); }
+  if (jsonOut) { pyArgs.push('--json'); }
+  const r = spawnSync(py, pyArgs, {
+    cwd: repoRoot,
+    encoding: 'utf8',
+    timeout: 120_000,
+  });
+  if (r.error || r.status !== 0) {
+    const envelope = {
+      ok: false,
+      error: 'its_bench_failed',
+      detail: r.error ? String(r.error.message || r.error) : (r.stderr || '').slice(0, 2000),
+      exit_status: r.status,
+      version: 'w728-v1',
+    };
+    console.log(JSON.stringify(envelope, null, 2));
+    process.exit(EXIT.EXECUTION);
+  }
+  process.stdout.write(r.stdout || '');
+  if (r.stderr) { process.stderr.write(r.stderr); }
+  process.exit(EXIT.OK);
+}
+
+// =============================================================================
+// W730 — Prometheus exporter CLI dispatcher.
+//
+// Distinct-named (cmdW730Metrics) per the W724/W726/W727/W728/W729 precedent
+// so parallel wave agents don't collide on the same symbol.
+//
+// Subcommands:
+//   `kolm metrics show`  — pipe renderMetrics() to stdout (Prometheus text
+//                          format). Useful for cron + log shipping pipelines
+//                          where the runtime is firewalled from Prometheus.
+//   `kolm metrics list`  — emit JSON listing every registered metric's name,
+//                          type, label names, bucket array, sample count.
+//
+// Honest fallbacks:
+//   * src/prometheus-exporter.js missing → JSON envelope on stdout +
+//     exit MISSING_PREREQ (3). Mirrors the W724/W726 import-failure pattern.
+//   * Unknown subcommand → usage line on stderr + exit BAD_ARGS (64).
+//
+// Routing in main() is via a guard inside the existing `case 'metrics':`
+// arm — when args[0] === 'show' || 'list' we hand off here; otherwise the
+// pre-existing cmdMetrics (jobs.jsonl local dashboard) keeps running.
+async function cmdW730Metrics(args) {
+  const sub = (args && args[0]) || '';
+  if (sub === 'show') {
+    let mod;
+    try {
+      mod = await import('../src/prometheus-exporter.js');
+    } catch (e) {
+      const envelope = {
+        ok: false,
+        error: 'prometheus_exporter_missing',
+        detail: (e && e.message) || String(e),
+        hint: 'src/prometheus-exporter.js must be importable; reinstall the kolm CLI',
+        version: 'w730-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.MISSING_PREREQ);
+      return;
+    }
+    // Pipe Prometheus text format to stdout exactly as the /metrics route
+    // would emit it. Operators pipe this into a file, a log shipper, or
+    // `curl --data-binary @- pushgateway:9091/metrics/job/kolm`.
+    process.stdout.write(mod.renderMetrics());
+    process.stdout.write('\n');
+    return;
+  }
+  if (sub === 'list') {
+    let mod;
+    try {
+      mod = await import('../src/prometheus-exporter.js');
+    } catch (e) {
+      const envelope = {
+        ok: false,
+        error: 'prometheus_exporter_missing',
+        detail: (e && e.message) || String(e),
+        hint: 'src/prometheus-exporter.js must be importable; reinstall the kolm CLI',
+        version: 'w730-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.MISSING_PREREQ);
+      return;
+    }
+    const out = {
+      ok: true,
+      version: mod.PROMETHEUS_EXPORTER_VERSION,
+      metrics: mod.listRegisteredMetrics(),
+    };
+    console.log(JSON.stringify(out, null, 2));
+    return;
+  }
+  // Unknown subcommand: print usage and bail with BAD_ARGS so scripted
+  // callers see a non-zero exit code.
+  console.error('usage: kolm metrics <show|list>');
+  console.error('  show  — render Prometheus text format to stdout');
+  console.error('  list  — emit JSON listing every registered metric');
+  process.exit(EXIT.BAD_ARGS);
+}
+
 async function main() {
   ensureLocalReceiptSecretInEnv();
   const [, , cmd, ...rest] = process.argv;
@@ -30342,7 +30786,17 @@ async function main() {
       case 'artifacts': await withErrorContext('artifacts', () => cmdArtifacts(rest)); break;
       case 'status':   await withErrorContext('status',   () => cmdStatus(rest)); break;
       case 'health':   await withErrorContext('health',   () => cmdHealth(rest)); break;
-      case 'metrics':  await withErrorContext('metrics',  () => cmdMetrics(rest)); break;
+      case 'metrics': {
+        // W730 — `kolm metrics show|list` routes to the Prometheus exporter
+        // dispatcher; everything else stays on the W245 jobs.jsonl summary.
+        const firstM = (rest && rest[0]) || '';
+        if (firstM === 'show' || firstM === 'list') {
+          await withErrorContext('metrics', () => cmdW730Metrics(rest));
+        } else {
+          await withErrorContext('metrics', () => cmdMetrics(rest));
+        }
+        break;
+      }
       // W456 — `kolm changelog` (public wave history; no auth).
       case 'changelog': await withErrorContext('changelog', () => cmdChangelog(rest)); break;
       // W409i — `kolm billing` (usage|plan|tiers|invoices).
@@ -30456,10 +30910,32 @@ async function main() {
       case 'settings': await withErrorContext('settings', () => cmdSettings(rest)); break;
       case 'quantize': await withErrorContext('quantize', () => cmdQuantize(rest)); break;
       case 'runtime':  await withErrorContext('runtime',  () => cmdRuntime(rest)); break;
+      // W729 — `kolm load queue --stats | --capacity <N>` mirrors the
+      // server-side src/load-queue.js singleton. Sub-verb routing keeps the
+      // top-level `load` namespace open for future siblings (e.g. shed).
+      case 'load':
+        if (rest && rest[0] === 'queue') {
+          await withErrorContext('load queue', () => cmdW729LoadStatus(rest.slice(1)));
+        } else {
+          console.error('usage: kolm load queue --stats | --capacity <N>');
+          process.exit(EXIT.BAD_ARGS);
+        }
+        break;
       // W807 — `kolm route doctor` reports the active confidence threshold
       // + the most-recent splice ratio so operators can confirm the router
       // is configured the way they expect without loading the dashboard.
       case 'route':    await withErrorContext('route',    () => cmdRoute(rest)); break;
+      // W727 — `kolm accelerate bench|test` student-as-draft speculative-
+      // decoding orchestrator. Distinct dispatcher (cmdW727Accelerate) so
+      // parallel-wave agents on W728/W729/W730 do not merge-conflict on
+      // the symbol. Honest no_kernel envelope when no backend is wired.
+      case 'accelerate': await withErrorContext('accelerate', () => cmdW727Accelerate(rest)); break;
+      // W728 — `kolm its ask|bench` inference-time compute scaling: composes
+      // best_of_n + self_verify + entropy_budget. Distinct dispatcher
+      // (cmdW728InferenceScale) so parallel W727/W729/W730 do not merge-
+      // conflict on the symbol. Honest python3_missing envelope on bare
+      // hosts, never silent.
+      case 'its':       await withErrorContext('its',       () => cmdW728InferenceScale(rest)); break;
       // W815 — `kolm active-learn` reports coverage gaps (per cluster_id
       // when W811 ships, else 3-gram fallback bucket) sorted by gap_score
       // and optionally feeds them into W720 self-improvement as
