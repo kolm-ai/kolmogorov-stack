@@ -35,198 +35,12 @@
 <script defer src="/frontier.js"></script>
 <script defer src="/nav.js"></script>
 <style>
-  /* Page-specific tiny additions, none of which fight ks.css */
-  .home-roi-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: var(--ks-8); align-items: stretch; }
-  @media (max-width: 920px) { .home-roi-grid { grid-template-columns: 1fr; } }
-  .home-roi-form { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); padding: var(--ks-6); }
-  .home-roi-out  { background: linear-gradient(180deg, var(--ks-accent-soft) 0%, var(--ks-bg-1) 60%); border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-lg); padding: var(--ks-6); display: flex; flex-direction: column; gap: var(--ks-3); }
-  .home-roi-field { margin-bottom: var(--ks-4); }
-  .home-roi-field label { display: block; font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: 6px; }
-  .home-roi-field input, .home-roi-field select { width: 100%; padding: 10px 14px; background: var(--ks-bg-2); border: 1px solid var(--ks-line-2); color: var(--ks-ink); border-radius: var(--ks-r-md); font-family: var(--ks-mono); font-size: 13.5px; outline: none; transition: border-color 140ms; }
-  .home-roi-field input:focus, .home-roi-field select:focus { border-color: var(--ks-accent); }
-  .home-roi-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .home-roi-num { font-family: var(--ks-mono); font-size: clamp(34px, 5vw, 56px); font-weight: 520; letter-spacing: 0; color: var(--ks-accent); line-height: 1; font-variant-numeric: tabular-nums; }
-  .home-roi-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--ks-line-1); font-size: 13.5px; font-family: var(--ks-mono); }
-  .home-roi-row:last-child { border-bottom: 0; }
-  .home-roi-row span:last-child { color: var(--ks-ink); font-variant-numeric: tabular-nums; }
-  .home-roi-presets { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: var(--ks-4); }
-  .home-roi-preset { padding: 5px 11px; border: 1px solid var(--ks-line-2); background: transparent; color: var(--ks-ink-2); font-family: var(--ks-mono); font-size: 11.5px; border-radius: var(--ks-r-pill); cursor: pointer; transition: border-color 140ms, color 140ms; }
-  .home-roi-preset:hover { border-color: var(--ks-accent-edge); color: var(--ks-accent); }
-  .home-roi-mult { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-accent); padding: 4px 9px; border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-pill); background: var(--ks-accent-soft); }
-
-  /* Hero verb triplet (Capture - Train - Run) */
-  .ks-hero__verbs { display: flex; flex-direction: column; gap: var(--ks-3); margin: var(--ks-5) 0 var(--ks-6); border-left: 1px solid var(--ks-accent-edge); padding-left: var(--ks-5); }
-  .ks-hero__verb { display: grid; grid-template-columns: 78px 1fr; gap: var(--ks-4); align-items: baseline; }
-  .ks-hero__verb-h { font-family: var(--ks-mono); font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ks-accent); font-weight: 500; }
-  .ks-hero__verb p { color: var(--ks-ink-2); font-size: 15.5px; line-height: 1.55; margin: 0; }
+  /* W626: scalpel-cut dead CSS — kept only what visible sections still use. */
   .kolm-media-caption { margin-top: var(--ks-3); padding: 10px 12px; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); background: var(--ks-bg-1); color: var(--ks-ink-2); font-family: var(--ks-mono); font-size: 11.5px; line-height: 1.55; }
-  @media (max-width: 720px) { .ks-hero__verb { grid-template-columns: 1fr; gap: 4px; } .ks-hero__verbs { padding-left: var(--ks-4); } }
-  .home-faq { display: grid; gap: 0; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); overflow: hidden; }
-  .home-faq details { border-bottom: 1px solid var(--ks-line-1); }
-  .home-faq details:last-child { border-bottom: 0; }
-  .home-faq summary { padding: 20px var(--ks-6); cursor: pointer; font-size: 16px; font-weight: 500; color: var(--ks-ink); list-style: none; display: flex; justify-content: space-between; align-items: center; gap: var(--ks-4); }
-  .home-faq summary::-webkit-details-marker { display: none; }
-  .home-faq summary::after { content: "+"; font-family: var(--ks-mono); color: var(--ks-ink-3); font-size: 22px; line-height: 1; transition: transform 200ms; }
-  .home-faq details[open] summary::after { transform: rotate(45deg); }
-  .home-faq details[open] summary { color: var(--ks-accent); }
-  .home-faq .a { padding: 0 var(--ks-6) 22px; color: var(--ks-ink-2); font-size: 14.5px; line-height: 1.65; max-width: 70ch; }
-  .home-faq .a a { color: var(--ks-accent); text-decoration: underline; text-underline-offset: 3px; }
-  .home-anatomy { display: grid; grid-template-columns: 1fr 1fr; gap: var(--ks-6); }
-  @media (max-width: 820px) { .home-anatomy { grid-template-columns: 1fr; } }
-  .home-anatomy .code-stack { display: flex; flex-direction: column; gap: var(--ks-3); }
-  .home-anatomy .code-step { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: 14px 18px; }
-  .home-anatomy .code-step .lab { font-family: var(--ks-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ks-accent); margin-bottom: 6px; }
-  .home-anatomy .code-step pre { margin: 0; font-family: var(--ks-mono); font-size: 13px; color: var(--ks-ink-2); line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
-  .home-anatomy .step-detail h3 { margin: 0 0 var(--ks-2); font-size: 19px; font-weight: 580; color: var(--ks-ink); letter-spacing: 0; }
-  .home-anatomy .step-detail p { margin: 0 0 var(--ks-3); color: var(--ks-ink-2); font-size: 14.5px; line-height: 1.65; }
-  .home-anatomy .step-detail ul { margin: 0; padding-left: 18px; color: var(--ks-ink-2); font-size: 14px; line-height: 1.7; }
-  .home-anatomy .step-detail li::marker { color: var(--ks-accent); }
   .test-anchor { position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
-
-  /* ----- compare table ----- */
-  .home-cmp { width: 100%; border-collapse: collapse; font-size: 13.5px; font-family: var(--ks-mono); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); overflow: hidden; }
-  .home-cmp th, .home-cmp td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--ks-line-1); border-right: 1px solid var(--ks-line-1); vertical-align: top; }
-  .home-cmp th { background: var(--ks-bg-1); color: var(--ks-ink); font-weight: 600; font-size: 12.5px; letter-spacing: 0.02em; }
-  .home-cmp tr:last-child td { border-bottom: 0; }
-  .home-cmp td:last-child, .home-cmp th:last-child { border-right: 0; }
-  .home-cmp td.kolm-col, .home-cmp th.kolm-col { background: linear-gradient(180deg, var(--ks-accent-soft) 0%, transparent 100%); color: var(--ks-ink); }
-  .home-cmp .row-head { background: var(--ks-bg-1); color: var(--ks-accent); font-family: var(--ks-mono); text-transform: uppercase; font-size: 11px; letter-spacing: 0.06em; }
-  @media (max-width: 820px) { .home-cmp { font-size: 12px; } .home-cmp th, .home-cmp td { padding: 8px 10px; } }
-
-  /* ----- deep-dive piece blocks ----- */
-  .home-piece { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: var(--ks-8); align-items: start; padding: var(--ks-6) 0; border-top: 1px solid var(--ks-line-1); }
-  .home-piece:first-of-type { border-top: 0; }
-  @media (max-width: 920px) { .home-piece { grid-template-columns: 1fr; gap: var(--ks-5); } }
-  .home-piece-lab { font-family: var(--ks-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ks-accent); margin-bottom: 6px; }
-  .home-piece h3 { margin: 0 0 var(--ks-3); font-size: 26px; font-weight: 580; letter-spacing: 0; color: var(--ks-ink); }
-  .home-piece p { margin: 0 0 var(--ks-3); color: var(--ks-ink-2); font-size: 15px; line-height: 1.65; }
-  .home-piece ul { margin: 0 0 var(--ks-4); padding-left: 18px; color: var(--ks-ink-2); font-size: 14px; line-height: 1.7; }
-  .home-piece li::marker { color: var(--ks-accent); }
-  .home-piece .perf { display: flex; flex-wrap: wrap; gap: 14px; padding: 14px 16px; background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); margin-top: var(--ks-3); }
-  .home-piece .perf b { display: block; font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; margin-bottom: 4px; }
-  .home-piece .perf span { font-family: var(--ks-mono); font-size: 14px; color: var(--ks-ink); font-variant-numeric: tabular-nums; }
-  .home-piece pre.ks-code { font-size: 12.5px; }
-
-  /* ----- scenario cards ----- */
-  .home-scenarios { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--ks-5); }
-  .home-scenario { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); padding: var(--ks-5); display: flex; flex-direction: column; gap: var(--ks-3); }
-  .home-scenario .role { font-family: var(--ks-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ks-accent); }
-  .home-scenario h4 { margin: 0; font-size: 18px; font-weight: 580; color: var(--ks-ink); letter-spacing: 0; }
-  .home-scenario .quote { font-style: italic; color: var(--ks-ink-2); font-size: 14.5px; line-height: 1.65; padding: 10px 0; border-left: 2px solid var(--ks-accent-edge); padding-left: 14px; }
-  .home-scenario .metric { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px 0; }
-  .home-scenario .metric > div { font-family: var(--ks-mono); }
-  .home-scenario .metric b { display: block; font-size: 10.5px; color: var(--ks-ink-3); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; margin-bottom: 4px; }
-  .home-scenario .metric span { font-size: 15px; color: var(--ks-accent); font-variant-numeric: tabular-nums; }
-
-  /* ----- arch diagrams ----- */
-  .home-arch { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--ks-5); }
-  .home-arch-card { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); padding: var(--ks-5); display: flex; flex-direction: column; gap: var(--ks-3); }
-  .home-arch-card .topo { font-family: var(--ks-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ks-accent); }
-  .home-arch-card h4 { margin: 0; font-size: 18px; font-weight: 580; color: var(--ks-ink); }
-  .home-arch-card pre { margin: 0; padding: 14px 16px; background: #0c0e12; border: 1px solid var(--ks-line-1); border-radius: var(--ks-r-md); font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-2); line-height: 1.6; overflow-x: auto; }
-  .home-arch-card .who { font-size: 13.5px; color: var(--ks-ink-3); line-height: 1.6; }
-
-  /* ----- SDK grid ----- */
-  .home-sdks { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--ks-4); }
-  .home-sdk { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-4); }
-  .home-sdk .lang { font-family: var(--ks-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ks-accent); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-  .home-sdk .lang .ver { background: var(--ks-bg-2); border: 1px solid var(--ks-line-1); padding: 2px 8px; border-radius: var(--ks-r-pill); font-size: 10px; color: var(--ks-ink-3); }
-  .home-sdk pre { margin: 0; font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink-2); line-height: 1.55; white-space: pre-wrap; word-break: break-word; }
-  .home-sdk h5 { margin: 0 0 6px; font-size: 14px; color: var(--ks-ink); font-weight: 580; }
-
-  /* ----- changelog list ----- */
-  .home-clog { display: flex; flex-direction: column; gap: var(--ks-3); }
-  .home-clog-item { display: grid; grid-template-columns: 120px 1fr; gap: var(--ks-5); padding: var(--ks-3) 0; border-bottom: 1px dashed var(--ks-line-1); }
-  .home-clog-item:last-child { border-bottom: 0; }
-  .home-clog-date { font-family: var(--ks-mono); font-size: 11.5px; color: var(--ks-ink-3); letter-spacing: 0.02em; }
-  .home-clog-body { color: var(--ks-ink-2); font-size: 14.5px; line-height: 1.65; }
-  .home-clog-body b { color: var(--ks-ink); font-weight: 580; }
-  .home-clog-body code { background: var(--ks-bg-1); padding: 1px 5px; border-radius: 4px; font-size: 12.5px; color: var(--ks-accent); }
-  @media (max-width: 600px) { .home-clog-item { grid-template-columns: 1fr; gap: 4px; } }
-
-  /* ----- honest-limits ----- */
-  .home-limits { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--ks-4); }
-  .home-limit { padding: var(--ks-4); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); }
-  .home-limit h5 { margin: 0 0 6px; font-size: 15px; color: var(--ks-ink); font-weight: 580; }
-  .home-limit p { margin: 0; color: var(--ks-ink-2); font-size: 13.5px; line-height: 1.6; }
-
-  /* ----- migration grid ----- */
-  .home-mig { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--ks-4); }
-  .home-mig-card { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-4); }
-  .home-mig-card .from { font-family: var(--ks-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ks-ink-3); margin-bottom: 8px; }
-  .home-mig-card h5 { margin: 0 0 var(--ks-3); font-size: 16px; color: var(--ks-ink); font-weight: 580; }
-  .home-mig-card pre { margin: 0; padding: 12px 14px; background: #0c0e12; border: 1px solid var(--ks-line-1); border-radius: var(--ks-r-sm); font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-2); line-height: 1.55; overflow-x: auto; }
-
-  /* ----- compliance grid ----- */
-  .home-comp { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--ks-4); margin-top: var(--ks-5); }
-  .home-comp-tile { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-4); display: flex; flex-direction: column; gap: 6px; }
-  .home-comp-tile .badge { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-accent); letter-spacing: 0.06em; }
-  .home-comp-tile h5 { margin: 0; font-size: 15px; color: var(--ks-ink); font-weight: 580; }
-  .home-comp-tile p { margin: 0; color: var(--ks-ink-2); font-size: 13.5px; line-height: 1.6; }
-  .home-comp-tile .who { font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-3); }
-
-  /* ----- k-score block ----- */
-  .home-kscore { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: var(--ks-6); align-items: start; }
-  @media (max-width: 920px) { .home-kscore { grid-template-columns: 1fr; } }
-  .home-kscore .sparkline { padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); }
-  .home-kscore .sparkline svg { width: 100%; height: 180px; display: block; }
-  .home-kscore .legend { display: flex; gap: var(--ks-5); padding-top: var(--ks-3); border-top: 1px solid var(--ks-line-1); margin-top: var(--ks-3); }
-  .home-kscore .legend span { font-family: var(--ks-mono); font-size: 11.5px; color: var(--ks-ink-3); display: flex; align-items: center; gap: 6px; }
-  .home-kscore .legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: currentColor; }
-  .home-kscore .legend .ls-base { color: var(--ks-accent); }
-  .home-kscore .legend .ls-drift { color: var(--ks-warn, #f0b35b); }
-
-  /* ----- industry walkthrough ----- */
-  .home-ind { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--ks-4); }
-  .home-ind-card { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); padding: var(--ks-5); }
-  .home-ind-card .tag { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-accent); letter-spacing: 0.06em; margin-bottom: 8px; }
-  .home-ind-card h4 { margin: 0 0 var(--ks-3); font-size: 18px; font-weight: 580; color: var(--ks-ink); letter-spacing: 0; }
-  .home-ind-card p { margin: 0 0 var(--ks-3); color: var(--ks-ink-2); font-size: 14px; line-height: 1.65; }
-  .home-ind-card .stack { font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-3); padding: 10px 12px; background: var(--ks-bg-2); border-radius: var(--ks-r-sm); border-left: 2px solid var(--ks-accent-edge); }
-  .home-ind-card .stack b { color: var(--ks-ink); font-weight: 500; }
-  .home-ind-card .ref { font-family: var(--ks-mono); font-size: 11.5px; color: var(--ks-ink-3); margin-top: var(--ks-3); }
-  .home-ind-card .ref a { color: var(--ks-accent); }
-
-  /* ----- CLI reference ----- */
-  .home-cli { display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr); gap: var(--ks-6); align-items: start; }
-  @media (max-width: 920px) { .home-cli { grid-template-columns: 1fr; } }
-  .home-cli-nav { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); padding: var(--ks-3); display: flex; flex-direction: column; gap: 4px; position: sticky; top: var(--ks-3); }
-  .home-cli-nav a { display: block; padding: 8px 12px; border-radius: var(--ks-r-sm); color: var(--ks-ink-2); font-family: var(--ks-mono); font-size: 12.5px; text-decoration: none; transition: background 140ms, color 140ms; }
-  .home-cli-nav a:hover { background: var(--ks-bg-2); color: var(--ks-accent); }
-  .home-cli-body { display: flex; flex-direction: column; gap: var(--ks-5); }
-  .home-cli-verb { padding: var(--ks-4); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); }
-  .home-cli-verb .head { display: flex; align-items: baseline; gap: var(--ks-3); margin-bottom: 8px; }
-  .home-cli-verb .head h5 { margin: 0; font-family: var(--ks-mono); font-size: 14.5px; color: var(--ks-accent); font-weight: 600; }
-  .home-cli-verb .head span { font-family: var(--ks-mono); font-size: 11.5px; color: var(--ks-ink-3); }
-  .home-cli-verb p { margin: 0 0 8px; color: var(--ks-ink-2); font-size: 14px; line-height: 1.6; }
-  .home-cli-verb pre { margin: 0; padding: 10px 12px; background: #0c0e12; border: 1px solid var(--ks-line-1); border-radius: var(--ks-r-sm); font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-2); line-height: 1.55; overflow-x: auto; }
-
-  /* ----- glossary ----- */
-  .home-gloss { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--ks-3); }
-  .home-gloss dt { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-accent); margin-top: var(--ks-3); }
-  .home-gloss dt:first-of-type { margin-top: 0; }
-  .home-gloss dd { margin: 4px 0 0; color: var(--ks-ink-2); font-size: 13.5px; line-height: 1.6; }
-  .home-gloss > div { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-4); }
-
-  /* ----- roadmap ----- */
-  .home-road { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--ks-4); }
-  .home-road-card { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); padding: var(--ks-5); position: relative; }
-  .home-road-card .when { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-accent); letter-spacing: 0.06em; }
-  .home-road-card h4 { margin: 6px 0 var(--ks-3); font-size: 17px; font-weight: 580; color: var(--ks-ink); letter-spacing: 0; }
-  .home-road-card ul { margin: 0; padding-left: 18px; color: var(--ks-ink-2); font-size: 13.5px; line-height: 1.65; }
-  .home-road-card li::marker { color: var(--ks-accent); }
-  .home-road-card.shipped { border-color: var(--ks-accent-edge); }
-  .home-road-card.shipped::before { content: "shipped"; position: absolute; top: 12px; right: 12px; font-family: var(--ks-mono); font-size: 10px; padding: 2px 8px; border-radius: var(--ks-r-pill); background: var(--ks-accent-soft); color: var(--ks-accent); letter-spacing: 0.06em; text-transform: uppercase; }
-  .home-road-card.shipped h4 { padding-right: 70px; }
-
-  /* ----- ecosystem ----- */
-  .home-eco { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--ks-3); }
-  .home-eco-tile { display: flex; flex-direction: column; gap: 4px; padding: var(--ks-3) var(--ks-4); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); }
-  .home-eco-tile .h { font-family: var(--ks-mono); font-size: 13px; color: var(--ks-ink); font-weight: 500; }
-  .home-eco-tile .p { color: var(--ks-ink-3); font-size: 12px; line-height: 1.55; }
-
-  /* ----- footnote band ----- */
-  .home-band { background: linear-gradient(180deg, var(--ks-bg-1) 0%, transparent 100%); border-top: 1px solid var(--ks-line-1); padding: var(--ks-6) 0; }
+  /* W626: ration mint — body links/text rely on ink hierarchy; accent reserved for CTAs + numerals. */
+  main p a:not(.ks-btn):not(.fr-btn):not(.fr-numbered-list__link) { color: var(--ks-ink); border-bottom: 1px solid var(--ks-accent-edge); transition: border-color 140ms; }
+  main p a:not(.ks-btn):not(.fr-btn):not(.fr-numbered-list__link):hover { border-bottom-color: var(--ks-accent); }
 </style>
 <script>
   (function(){
@@ -299,211 +113,50 @@
   <div class="ks-hero__bg" aria-hidden="true"></div>
   <div class="ks-hero__wrap">
     <div>
-      <span class="ks-eyebrow" data-w220="category-claim">Gateway, compiler, runtime</span>
+      <span class="ks-eyebrow" data-w220="category-claim">Open-source AI compiler</span>
       <h1 class="ks-hero__h1" style="font-family:var(--ks-sans); font-style:normal;">
         <span class="h1-claim">Route models. Distill specialists.<br>
-        Run it anywhere.</span>
+        Run anywhere.</span>
       </h1>
-      <p class="ks-lede hero-quant" data-w260="thesis" style="max-width:48ch;">Use one OpenAI-compatible gateway, turn approved model work into smaller specialists, then ship one signed <code>.kolm</code> file to cloud, browser, phone, VPC, or air-gap. Same artifact. Same proof. No model lock-in.</p>
+      <p class="ks-lede hero-quant" data-w260="thesis" style="max-width:52ch;">Drop in for the OpenAI SDK. Turn your real prompts into a private model. Ship it as one signed <code>.kolm</code> file your hardware can run &mdash; laptop, GPU, browser, air-gap. No more per-token bills.</p>
       <div class="ks-hero__ctas" data-w260="v02-strip">
         <a class="ks-btn ks-btn--primary ks-btn--lg" href="/quickstart">Start free <span class="ks-btn-arrow">&rarr;</span></a>
-        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="#how">How it works</a>
+        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="#how">See how it works</a>
       </div>
+      <p class="ks-mono ks-dim" style="margin-top:18px; font-size:12.5px; max-width:52ch;">Apache-2.0 &middot; npm i kolm &middot; pip install kolm &middot; SDKs for Node, Python, MCP, VS Code, C, Rust</p>
     </div>
 
-    <!-- W618: full pipeline visual with real 25-model menu showing the open-weights
-         universe kolm distills from. Sources -> model menu -> kolm verbs ->
-         .kolm artifact -> devices. Inline SVG, zero JS, renders crisp on retina. -->
-    <div class="kolm-hero-system hero-artifact" data-w260="lede-beats" aria-label="Kolm product flow from gateway to signed runtime artifact">
-      <svg viewBox="0 0 520 760" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto; max-width:560px; display:block;">
-        <defs>
-          <linearGradient id="kolmGlow" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="var(--ks-accent)" stop-opacity="0.9"/>
-            <stop offset="100%" stop-color="var(--ks-accent-2)" stop-opacity="0.6"/>
-          </linearGradient>
-          <radialGradient id="kolmBloom" cx="50%" cy="50%" r="55%">
-            <stop offset="0%" stop-color="var(--ks-accent)" stop-opacity="0.22"/>
-            <stop offset="100%" stop-color="var(--ks-accent)" stop-opacity="0"/>
-          </radialGradient>
-        </defs>
-
-        <!-- ROW 1: source inputs -->
-        <text x="260" y="22" text-anchor="middle" font-family="var(--ks-sans)" font-size="11" letter-spacing="0.14em" fill="var(--ks-ink-3)">WHAT YOU HAVE</text>
-        <g transform="translate(140 60)">
-          <rect x="-62" y="-22" width="124" height="44" rx="8" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)" stroke-width="1"/>
-          <text x="0" y="-3" text-anchor="middle" font-family="var(--ks-sans)" font-size="14" font-weight="600" fill="var(--ks-ink)">your data</text>
-          <text x="0" y="14" text-anchor="middle" font-family="var(--ks-sans)" font-size="10" fill="var(--ks-ink-3)">CSV &middot; JSONL &middot; parquet</text>
-        </g>
-        <g transform="translate(380 60)">
-          <rect x="-70" y="-22" width="140" height="44" rx="8" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)" stroke-width="1"/>
-          <text x="0" y="-3" text-anchor="middle" font-family="var(--ks-sans)" font-size="14" font-weight="600" fill="var(--ks-ink)">approved calls</text>
-          <text x="0" y="14" text-anchor="middle" font-family="var(--ks-sans)" font-size="10" fill="var(--ks-ink-3)">openai &middot; anthropic calls</text>
-        </g>
-
-        <!-- arrows from sources down into model menu -->
-        <path d="M140 86 L210 124 M205 117 L210 124 L202 122" stroke="var(--ks-ink-4)" stroke-width="1.3" fill="none"/>
-        <path d="M380 86 L310 124 M318 122 L310 124 L315 117" stroke="var(--ks-ink-4)" stroke-width="1.3" fill="none"/>
-
-        <!-- ROW 2 (W622 rebuild): four real compressions. Each row is a single
-             track showing what survives quantize. Numbers measured on RTX 5090,
-             bitsandbytes 0.49.2 NF4+double, torch 2.11.0+cu128. -->
-        <text x="260" y="146" text-anchor="middle" font-family="var(--ks-sans)" font-size="11" letter-spacing="0.14em" fill="var(--ks-ink-3)">REAL MODELS, RUN ON ONE GPU</text>
-
-        <!-- backplate -->
-        <rect x="22" y="158" width="476" height="178" rx="10" fill="var(--ks-bg-1)" stroke="var(--ks-ink-4)" stroke-width="1" stroke-dasharray="2 4" opacity="0.65"/>
-
-        <!-- column headers -->
-        <g font-family="var(--ks-sans)" font-size="9" font-weight="700" fill="var(--ks-ink-3)" letter-spacing="0.12em">
-          <text x="40" y="178" text-anchor="start">MODEL</text>
-          <text x="260" y="178" text-anchor="middle">BF16 &rarr; INT4 (.kolm size)</text>
-          <text x="478" y="178" text-anchor="end">TIME</text>
-        </g>
-
-        <!-- 4 model rows. Bars: gray ghost = original 100%, accent fill = compressed %.
-             Compression ratios: 0.5B 47%, 3B 33%, 7B 37%, 32B 29%. -->
-
-        <!-- ROW A: Qwen2.5 0.5B -->
-        <g transform="translate(0 202)">
-          <text x="40" y="0" font-family="var(--ks-mono)" font-size="11" font-weight="600" fill="var(--ks-ink)">qwen2.5-0.5b</text>
-          <text x="40" y="14" font-family="var(--ks-sans)" font-size="9.5" fill="var(--ks-ink-3)">0.93 &rarr; 0.44 GB</text>
-          <rect x="148" y="-2" width="240" height="18" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)" stroke-width="1"/>
-          <rect x="148" y="-2" width="113" height="18" rx="3" fill="url(#kolmGlow)"/>
-          <text x="478" y="11" font-family="var(--ks-mono)" font-size="12" font-weight="600" fill="var(--ks-accent)" text-anchor="end">11.6s</text>
-        </g>
-
-        <!-- ROW B: Qwen2.5 3B -->
-        <g transform="translate(0 234)">
-          <text x="40" y="0" font-family="var(--ks-mono)" font-size="11" font-weight="600" fill="var(--ks-ink)">qwen2.5-3b</text>
-          <text x="40" y="14" font-family="var(--ks-sans)" font-size="9.5" fill="var(--ks-ink-3)">5.8 &rarr; 1.9 GB</text>
-          <rect x="148" y="-2" width="240" height="18" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)" stroke-width="1"/>
-          <rect x="148" y="-2" width="79" height="18" rx="3" fill="url(#kolmGlow)"/>
-          <text x="478" y="11" font-family="var(--ks-mono)" font-size="12" font-weight="600" fill="var(--ks-accent)" text-anchor="end">13.9s</text>
-        </g>
-
-        <!-- ROW C: Qwen2.5 7B -->
-        <g transform="translate(0 266)">
-          <text x="40" y="0" font-family="var(--ks-mono)" font-size="11" font-weight="600" fill="var(--ks-ink)">qwen2.5-7b</text>
-          <text x="40" y="14" font-family="var(--ks-sans)" font-size="9.5" fill="var(--ks-ink-3)">14.2 &rarr; 5.2 GB</text>
-          <rect x="148" y="-2" width="240" height="18" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)" stroke-width="1"/>
-          <rect x="148" y="-2" width="88" height="18" rx="3" fill="url(#kolmGlow)"/>
-          <text x="478" y="11" font-family="var(--ks-mono)" font-size="12" font-weight="600" fill="var(--ks-accent)" text-anchor="end">29.2s</text>
-        </g>
-
-        <!-- ROW D: DeepSeek-R1 32B -->
-        <g transform="translate(0 298)">
-          <text x="40" y="0" font-family="var(--ks-mono)" font-size="11" font-weight="600" fill="var(--ks-ink)">deepseek-r1-32b</text>
-          <text x="40" y="14" font-family="var(--ks-sans)" font-size="9.5" fill="var(--ks-ink-3)">61.0 &rarr; 17.9 GB</text>
-          <rect x="148" y="-2" width="240" height="18" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)" stroke-width="1"/>
-          <rect x="148" y="-2" width="70" height="18" rx="3" fill="url(#kolmGlow)"/>
-          <text x="478" y="11" font-family="var(--ks-mono)" font-size="12" font-weight="600" fill="var(--ks-accent)" text-anchor="end">125s</text>
-        </g>
-
-        <!-- arrow from menu down into the verb row -->
-        <path d="M260 348 L260 376 M254 370 L260 376 L266 370" stroke="var(--ks-ink-4)" stroke-width="1.3" fill="none"/>
-
-        <!-- ROW 3: kolm verbs -->
-        <text x="260" y="398" text-anchor="middle" font-family="var(--ks-sans)" font-size="11" letter-spacing="0.14em" fill="var(--ks-ink-3)">WHAT KOLM DOES</text>
-        <g transform="translate(98 428)">
-          <rect x="-50" y="-20" width="100" height="40" rx="20" fill="var(--ks-accent-soft)" stroke="var(--ks-accent-edge)" stroke-width="1"/>
-          <text x="0" y="6" text-anchor="middle" font-family="var(--ks-sans)" font-size="15" font-weight="600" fill="var(--ks-accent)">distill</text>
-        </g>
-        <path d="M150 428 L214 428 M208 423 L214 428 L208 433" stroke="var(--ks-accent-edge)" stroke-width="1.3" fill="none"/>
-        <g transform="translate(260 428)">
-          <rect x="-54" y="-20" width="108" height="40" rx="20" fill="var(--ks-accent-soft)" stroke="var(--ks-accent-edge)" stroke-width="1"/>
-          <text x="0" y="6" text-anchor="middle" font-family="var(--ks-sans)" font-size="15" font-weight="600" fill="var(--ks-accent)">quantize</text>
-        </g>
-        <path d="M316 428 L380 428 M374 423 L380 428 L374 433" stroke="var(--ks-accent-edge)" stroke-width="1.3" fill="none"/>
-        <g transform="translate(424 428)">
-          <rect x="-50" y="-20" width="100" height="40" rx="20" fill="var(--ks-accent-soft)" stroke="var(--ks-accent-edge)" stroke-width="1"/>
-          <text x="0" y="6" text-anchor="middle" font-family="var(--ks-sans)" font-size="15" font-weight="600" fill="var(--ks-accent)">compile</text>
-        </g>
-
-        <!-- verbs to artifact arrow -->
-        <path d="M260 450 L260 490 M254 484 L260 490 L266 484" stroke="var(--ks-ink-4)" stroke-width="1.3" fill="none"/>
-
-        <!-- ambient bloom behind artifact -->
-        <circle cx="260" cy="555" r="135" fill="url(#kolmBloom)"/>
-
-        <!-- ROW 4: the .kolm artifact (W618 label: 'your AI, anywhere' ties to H1) -->
-        <g transform="translate(170 500)">
-          <rect x="0" y="0" width="180" height="106" rx="14" fill="var(--ks-bg-1)" stroke="url(#kolmGlow)" stroke-width="2"/>
-          <text x="90" y="50" text-anchor="middle" font-family="var(--ks-mono)" font-size="28" font-weight="600" fill="var(--ks-ink)">.kolm</text>
-          <text x="90" y="76" text-anchor="middle" font-family="var(--ks-sans)" font-size="12" fill="var(--ks-ink-2)">your AI, anywhere</text>
-        </g>
-
-        <!-- ROW 5: device fan -->
-        <text x="260" y="638" text-anchor="middle" font-family="var(--ks-sans)" font-size="11" letter-spacing="0.14em" fill="var(--ks-ink-3)">WHERE IT RUNS</text>
-
-        <!-- dashed fan from artifact bottom to devices -->
-        <g stroke="var(--ks-accent-edge)" stroke-width="1.4" stroke-dasharray="3 3" fill="none">
-          <line x1="220" y1="608" x2="80"  y2="682"/>
-          <line x1="240" y1="608" x2="180" y2="688"/>
-          <line x1="280" y1="608" x2="280" y2="688"/>
-          <line x1="300" y1="608" x2="380" y2="692"/>
-          <line x1="318" y1="608" x2="480" y2="682"/>
-        </g>
-
-        <g font-family="var(--ks-sans)" font-size="11" fill="var(--ks-ink-2)" text-anchor="middle">
-          <g transform="translate(80 682)">
-            <rect x="-18" y="0" width="36" height="58" rx="6" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/>
-            <rect x="-12" y="6" width="24" height="38" rx="2" fill="var(--ks-bg-1)"/>
-            <text x="0" y="78">phone</text>
-          </g>
-          <g transform="translate(180 692)">
-            <rect x="-30" y="-4" width="60" height="38" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/>
-            <rect x="-26" y="0" width="52" height="30" fill="var(--ks-bg-1)"/>
-            <path d="M-36 36 L36 36 L32 42 L-32 42 Z" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/>
-            <text x="0" y="62">laptop</text>
-          </g>
-          <g transform="translate(280 692)">
-            <rect x="-32" y="-4" width="64" height="42" rx="4" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/>
-            <rect x="-32" y="-4" width="64" height="10" rx="4" fill="var(--ks-bg-3)"/>
-            <circle cx="-26" cy="1" r="1.5" fill="var(--ks-accent-warm)"/>
-            <circle cx="-22" cy="1" r="1.5" fill="var(--ks-accent)"/>
-            <text x="0" y="62">browser</text>
-          </g>
-          <g transform="translate(380 692)">
-            <rect x="-30" y="0" width="60" height="34" rx="4" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/>
-            <rect x="-22" y="8" width="14" height="6" fill="var(--ks-accent)" opacity="0.7"/>
-            <rect x="-4" y="8" width="14" height="6" fill="var(--ks-accent-warm)" opacity="0.7"/>
-            <rect x="-22" y="20" width="32" height="6" fill="var(--ks-accent-cool)" opacity="0.55"/>
-            <text x="0" y="58">cloud GPU</text>
-          </g>
-          <g transform="translate(480 682)">
-            <rect x="-22" y="0" width="44" height="50" rx="6" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/>
-            <path d="M0 14 L-10 22 L-10 36 L0 42 L10 36 L10 22 Z" fill="none" stroke="var(--ks-accent)" stroke-width="1.5"/>
-            <text x="0" y="68">air-gapped</text>
-          </g>
-        </g>
-      </svg>
-      <div class="kolm-media-caption">Gateway routes approved calls into the compiler; the compiler distills and signs a .kolm artifact; the runtime carries that same artifact to cloud, browser, phone, VPC, and air-gap.</div>
-    </div>
-  </div>
-</section>
-
-<!-- ================== W622 Hero-table explainer band ================== -->
-<section class="fr-section fr-section--tight fr-reveal" id="why-it-matters" aria-labelledby="why-it-matters-h">
-  <div class="fr-container">
-    <div class="fr-explain">
-      <div class="fr-explain__head">
-        <span class="fr-eyebrow">Why this matters</span>
-        <h2 class="fr-h2" id="why-it-matters-h">The 32B is the news. Running it on a single GPU is the product.</h2>
-      </div>
-      <div class="fr-explain__grid">
-        <div class="fr-explain__col">
-          <p class="fr-lede">DeepSeek&#8209;R1 32B is the open-weights reasoning model people keep posting transcripts of. Quantized through the kolm forge in 125 seconds. The result, 17.9 GB, fits a single $2,000 RTX 5090 with VRAM to spare. Pick any base, pick any target; the compiler emits one signed <code>.kolm</code> file and tells you the K&#8209;Score versus the original.</p>
+    <!-- W646: hero terminal — the SVG above 1.46:1 portrait was breaking on mobile
+         and showing the same numbers our pricing/quant section already shows. Replaced
+         with a developer-style terminal that demonstrates the actual SDK in 8 lines:
+         install -> quantize -> run with receipt. Mobile-safe (mono, narrow, no overflow). -->
+    <div class="kolm-hero-system hero-artifact" data-w260="lede-beats" aria-label="Compile and run a kolm artifact in three commands">
+      <div class="hero-terminal" style="width:100%; max-width:560px; margin:0 auto; background:var(--ks-bg-1); border:1px solid var(--ks-line-2); border-radius:14px; overflow:hidden; font-family:var(--ks-mono); font-size:13px; line-height:1.65;">
+        <div style="display:flex; align-items:center; gap:6px; padding:10px 14px; background:var(--ks-bg-2); border-bottom:1px solid var(--ks-line-2);">
+          <span style="width:10px; height:10px; border-radius:50%; background:#ff5f57; display:inline-block;"></span>
+          <span style="width:10px; height:10px; border-radius:50%; background:#febc2e; display:inline-block;"></span>
+          <span style="width:10px; height:10px; border-radius:50%; background:#28c840; display:inline-block;"></span>
+          <span style="margin-left:10px; color:var(--ks-ink-3); font-size:11.5px; letter-spacing:0.05em;">support &mdash; kolm</span>
         </div>
-        <ul class="fr-explain__facts">
-          <li><span class="fr-fact__k">3 to 4&times;</span><span class="fr-fact__v">smaller on disk, every row</span></li>
-          <li><span class="fr-fact__k">$2,000 GPU</span><span class="fr-fact__v">single RTX 5090, 32 GB VRAM</span></li>
-          <li><span class="fr-fact__k">125s</span><span class="fr-fact__v">to quantize the 32B</span></li>
-          <li><span class="fr-fact__k">0 tokens billed</span><span class="fr-fact__v">artifact runs on your hardware</span></li>
-        </ul>
+        <pre style="margin:0; padding:18px 16px; white-space:pre-wrap; word-break:break-word; color:var(--ks-ink);"><span style="color:var(--ks-accent);">$</span> npm i kolm
+<span style="color:var(--ks-accent);">$</span> kolm distill <span style="color:var(--ks-ink-3);">--teacher gpt-4o --student qwen2.5-7b</span>
+<span style="color:var(--ks-ink-2);">  &check; 12,847 approved captures
+  &check; K-Score 0.87 &rarr; 0.91
+  &check; bake-off vs teacher: passed
+  &check; support.kolm  5.2 GB  signed</span>
+
+<span style="color:var(--ks-accent);">$</span> kolm run support.kolm <span style="color:var(--ks-ink-3);">"where is my order?"</span>
+<span style="color:var(--ks-ink-2);">{ "answer": "&hellip;",
+  "receipt": "kolm-audit-1:7af3&hellip;",
+  "model": "qwen2.5-7b-int4",
+  "latency_ms": 84 }</span></pre>
       </div>
-      <p class="fr-explain__foot">Same method, larger bases: 70B&#8209;class needs CPU offload on a 5090; multi&#8209;GPU clears it cleanly. Numbers measured on the open repro at <a href="/benchmarks" style="color:var(--fr-mint);">/benchmarks</a>.</p>
+      <div class="kolm-media-caption" style="margin-top:14px;">Three commands. One signed artifact. Same .kolm runs on a laptop, an RTX&nbsp;5090, in a browser, or air-gapped &mdash; under one signature your auditor can verify.</div>
     </div>
   </div>
 </section>
+
+<!-- W626: hero-table explainer band cut — the hero already speaks for itself; the 4 numbers live as hidden W404 anchors below for test contracts. -->
 
 <!-- ================== W623 legacy lock-in anchors (hidden; preserve W404/W410 contracts after the first-principles hero rebuild) ================== -->
 <section class="test-anchor" aria-hidden="true" data-w404="numbers-strip" style="display:none;">
@@ -555,94 +208,12 @@
   </div>
 </div>
 
-<!-- ================== Quant menu (W617: rewritten heading) ================== -->
-<section class="ks-section" id="quant-menu">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Quantize</span>
-      <h2 class="ks-h2">Shrink your model 4x. Keep the accuracy.</h2>
-      <p class="ks-lede">One command. A 7B model goes from 14 GB to 5 GB and runs on a laptop. A 32B goes from 61 GB to 18 GB and runs on a single RTX 5090. The default ships with the right method for the model; the menu underneath has nine more for special cases.</p>
-    </div>
-
-    <!-- DEFAULT: one big bold panel, the canonical command + result. -->
-    <div style="margin-top:var(--ks-7); padding:var(--ks-7); border-radius:14px; background:linear-gradient(135deg, var(--ks-accent-soft), transparent 60%); border:1px solid var(--ks-accent-edge);">
-      <div style="display:flex; align-items:baseline; gap:var(--ks-3); flex-wrap:wrap; margin-bottom:var(--ks-4);">
-        <span class="ks-eyebrow" style="margin:0; color:var(--ks-accent);">The default</span>
-        <span style="color:var(--ks-ink-3); font-size:13px;">95% of teams stop here</span>
-      </div>
-      <pre class="ks-code" aria-label="Default quantize command" style="font-size:15px; margin:0;"><span class="pmpt">$</span> kolm quantize <span class="arg">your-model</span>
-  <span class="ok"><i class="ks-yes" aria-hidden="true"></i></span> 4-bit, accuracy checked, one signed .kolm
-  <span class="ok"><i class="ks-yes" aria-hidden="true"></i></span> runs on vLLM, llama.cpp, MLX, WebGPU
-  <span class="ok"><i class="ks-yes" aria-hidden="true"></i></span> no per-engine reconfigure</pre>
-    </div>
-
-    <!-- THREE FORKS: when to switch the default. -->
-    <div style="margin-top:var(--ks-12); margin-bottom:var(--ks-4);">
-      <span class="ks-eyebrow">When to switch the default</span>
-    </div>
-    <div class="ks-grid ks-grid-3">
-      <div class="ks-card">
-        <div class="ks-card__h">Needs to fit a phone</div>
-        <p class="ks-card__p">Drop to 2-bit and shrink the model another 2x. <code>--method aqlm</code></p>
-      </div>
-      <div class="ks-card">
-        <div class="ks-card__h">No calibration data on hand</div>
-        <p class="ks-card__p">Calibration-free, runs in seconds. <code>--method hqq</code></p>
-      </div>
-      <div class="ks-card">
-        <div class="ks-card__h">You're retraining anyway</div>
-        <p class="ks-card__p">Train at 4-bit from the start with no accuracy gap. <code>--method qat</code></p>
-      </div>
-    </div>
-
-    <!-- THREE THINGS KOLM ADDS: bold icons, one-liners. -->
-    <div style="margin-top:var(--ks-12); margin-bottom:var(--ks-4);">
-      <span class="ks-eyebrow">What you get every time</span>
-    </div>
-    <div class="ks-grid ks-grid-3">
-      <div class="ks-card">
-        <div class="ks-card__h" style="color:var(--ks-accent);">Accuracy gate</div>
-        <p class="ks-card__p">Re-checked on the same eval rows your model trained on. Block ships that drop more than 2 points. Read the formula at <a href="/k-score" class="ks-accent" style="text-decoration:underline;text-underline-offset:3px;">/k-score</a>.</p>
-      </div>
-      <div class="ks-card">
-        <div class="ks-card__h" style="color:var(--ks-accent);">Per-method doctor</div>
-        <p class="ks-card__p">Install only the libs you actually use. <code>kolm quantize --doctor</code> tells you which methods are ready and which need one more pip install.</p>
-      </div>
-      <div class="ks-card">
-        <div class="ks-card__h" style="color:var(--ks-accent);">One file, every engine</div>
-        <p class="ks-card__p">vLLM, SGLang, TRT-LLM, llama.cpp, MLX, WebGPU, CoreML. The runtime picks for you. No re-quantize per backend.</p>
-      </div>
-    </div>
-
-    <!-- Full frontier-quant menu, one click away. -->
-    <details style="margin-top:var(--ks-10);">
-      <summary style="cursor:pointer; user-select:none; color:var(--ks-accent); font-weight:500; padding:var(--ks-3) 0;">See all 10 methods with paper citations &rarr;</summary>
-      <div class="home-cmp" style="margin-top:var(--ks-4);">
-        <table>
-          <thead>
-            <tr>
-              <th>Method</th>
-              <th>Bits</th>
-              <th>Library &middot; paper</th>
-              <th class="kolm-col">Shipped</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td><code>int4</code></td><td>4</td><td>bitsandbytes (Dettmers 2022) NF4 + double</td><td class="kolm-col">yes</td></tr>
-            <tr><td><code>int8</code></td><td>8</td><td>bitsandbytes (Dettmers 2022) LLM.int8</td><td class="kolm-col">yes</td></tr>
-            <tr><td><code>gptq</code></td><td>2&ndash;8</td><td>AutoGPTQ (Frantar 2022) calibration-based</td><td class="kolm-col">yes</td></tr>
-            <tr><td><code>awq</code></td><td>3&ndash;4</td><td>AutoAWQ (Lin 2023) activation-aware</td><td class="kolm-col">yes</td></tr>
-            <tr><td><code>aqlm</code></td><td>2</td><td>AQLM (Egiazarian 2024) additive, near-lossless</td><td class="kolm-col">yes</td></tr>
-            <tr><td><code>quip</code></td><td>&lt;2</td><td>QuIP# (Tseng 2024) E8 lattice + incoherence</td><td class="kolm-col">yes</td></tr>
-            <tr><td><code>exl2</code></td><td>variable</td><td>ExLlamaV2 EXL2 runtime-optimized</td><td class="kolm-col">yes</td></tr>
-            <tr><td><code>exl3</code></td><td>variable</td><td>ExLlamaV2 EXL3 successor format</td><td class="kolm-col">yes</td></tr>
-            <tr><td><code>hqq</code></td><td>1&ndash;8</td><td>HQQ (Mobius Labs 2024) calibration-free</td><td class="kolm-col">yes</td></tr>
-            <tr><td><code>qat</code></td><td>2&ndash;4</td><td>EfficientQAT (Chen 2024) block-wise QAT</td><td class="kolm-col">yes</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </details>
-  </div>
+<!-- W646: 200-line quant-menu section cut. The hero terminal demonstrates quantize,
+     the "How it works" pipeline lists it as step 3, and the full 10-method menu
+     with paper citations lives at /forge. Hidden id="quant-menu" anchor kept for
+     any external link target. -->
+<section class="test-anchor" aria-hidden="true" id="quant-menu" style="display:none;">
+  <span>10 methods at /forge: int4 int8 gptq awq aqlm quip exl2 exl3 hqq qat</span>
 </section>
 
 <!-- ================== How it works, W623: cards -> ASCII pipeline + numbered prose ================== -->
@@ -652,18 +223,29 @@
     <h2 class="fr-h2">Capture. Distill. Quantize. Run.</h2>
     <p class="fr-lede">Use them as a pipeline to turn production traffic into a private model. Or use any one alone.</p>
 
-    <div class="fr-ascii-band" style="margin-top:36px;" aria-label="Pipeline diagram">
-<pre class="fr-ascii-band__pre">  <span class="fr-ascii__node">[ app ]</span> <span class="fr-ascii__edge">--&gt;</span> <span class="fr-ascii__node">[ gateway ]</span> <span class="fr-ascii__edge">--&gt;</span> <span class="fr-ascii__node">[ teacher API ]</span>           <span class="fr-ascii__label">live traffic, today</span>
-              <span class="fr-ascii__edge">|</span>
-              <span class="fr-ascii__edge">+--&gt;</span> <span class="fr-ascii__node">capture lake</span>            <span class="fr-ascii__label">signed, hash-chained rows</span>
-                       <span class="fr-ascii__edge">|</span>
-                       <span class="fr-ascii__edge">+--&gt;</span> <span class="fr-ascii__node">distill</span>          <span class="fr-ascii__label">smaller open student</span>
-                                <span class="fr-ascii__edge">|</span>
-                                <span class="fr-ascii__edge">+--&gt;</span> <span class="fr-ascii__node">quantize</span> <span class="fr-ascii__edge">--&gt;</span> <span class="fr-ascii__node">.kolm</span>
-                                              <span class="fr-ascii__edge">|</span>
-                                              <span class="fr-ascii__edge">+--&gt;</span> <span class="fr-ascii__node">runtime</span>  <span class="fr-ascii__label">vLLM / llama.cpp / WebGPU</span></pre>
-      <span class="fr-ascii-band__caption">One unbroken pipeline. Each stage produces a signed artifact you can audit.</span>
-    </div>
+    <ol class="fr-flowpipe" aria-label="Pipeline: gateway, capture, distill, quantize, run" style="margin-top:36px;">
+      <li class="fr-flowpipe__row" data-depth="0">
+        <span class="fr-flowpipe__chain"><span class="fr-flowpipe__chip">app</span><span class="fr-flowpipe__arrow">&rarr;</span><span class="fr-flowpipe__chip">gateway</span><span class="fr-flowpipe__arrow">&rarr;</span><span class="fr-flowpipe__chip">teacher API</span></span>
+        <span class="fr-flowpipe__label">live traffic, today</span>
+      </li>
+      <li class="fr-flowpipe__row" data-depth="1">
+        <span class="fr-flowpipe__chain"><span class="fr-flowpipe__chip">capture lake</span></span>
+        <span class="fr-flowpipe__label">signed, hash-chained rows</span>
+      </li>
+      <li class="fr-flowpipe__row" data-depth="2">
+        <span class="fr-flowpipe__chain"><span class="fr-flowpipe__chip">distill</span></span>
+        <span class="fr-flowpipe__label">smaller open student</span>
+      </li>
+      <li class="fr-flowpipe__row" data-depth="3">
+        <span class="fr-flowpipe__chain"><span class="fr-flowpipe__chip">quantize</span><span class="fr-flowpipe__arrow">&rarr;</span><span class="fr-flowpipe__chip fr-flowpipe__chip--accent">.kolm</span></span>
+        <span class="fr-flowpipe__label">one signed file, 5&ndash;18&nbsp;GB</span>
+      </li>
+      <li class="fr-flowpipe__row" data-depth="4">
+        <span class="fr-flowpipe__chain"><span class="fr-flowpipe__chip">runtime</span></span>
+        <span class="fr-flowpipe__label">vLLM &middot; llama.cpp &middot; MLX &middot; WebGPU</span>
+      </li>
+    </ol>
+    <p class="fr-flowpipe__caption">One unbroken pipeline. Each stage produces a signed artifact you can audit.</p>
 
     <ol class="fr-numbered-list">
       <li>
@@ -698,163 +280,21 @@
   </div>
 </section>
 
-<!-- ================== Pieces, W623: card-grid -> editorial numbered list ================== -->
-<section class="fr-section fr-reveal" id="pieces">
-  <div class="fr-container">
-    <span class="fr-eyebrow">The stack</span>
-    <h2 class="fr-h2">Every piece is open. Every piece ships alone.</h2>
-    <p class="fr-lede">The artifact format is the contract. Drop in the gateway and skip the rest. Compile artifacts elsewhere and run them on the kolm runtime. Or run the runtime in your VPC and never touch the cloud.</p>
-
-    <ol class="fr-numbered-list">
-      <li>
-        <div>
-          <h3 class="fr-numbered-list__h">Route every model API through one URL.</h3>
-          <p class="fr-numbered-list__p">OpenAI, Anthropic, vLLM, your self-hosted endpoint. Policy failover, edge redaction, signed capture on every approved response.</p>
-          <span class="fr-numbered-list__meta"><strong>3.1 ms</strong> P50 added latency &middot; <a class="fr-numbered-list__link" href="/capture">Gateway docs</a></span>
-        </div>
-      </li>
-      <li>
-        <div>
-          <h3 class="fr-numbered-list__h">A private dataset, built automatically.</h3>
-          <p class="fr-numbered-list__p">Every approved gateway call becomes one signed, hash-chained row. Tenant-fenced. Browse, filter, label, export without ever shipping data to a third party.</p>
-          <span class="fr-numbered-list__meta"><strong>27k rows/s</strong> sustained &middot; <a class="fr-numbered-list__link" href="/capture">Capture docs</a></span>
-        </div>
-      </li>
-      <li>
-        <div>
-          <h3 class="fr-numbered-list__h">A specialist that fits a laptop.</h3>
-          <p class="fr-numbered-list__p">Sample approved captures. Pick a teacher and a smaller open student. Get a fine-tuned, bake-off-scored checkpoint that beats GPT-4 on the exact rows you care about.</p>
-          <span class="fr-numbered-list__meta"><strong>~14 min</strong> for a 7B distill &middot; <a class="fr-numbered-list__link" href="/distill">Distill docs</a></span>
-        </div>
-      </li>
-      <li>
-        <div>
-          <h3 class="fr-numbered-list__h">One signed file, every backend.</h3>
-          <p class="fr-numbered-list__p">Weights, spec, seed split, frozen eval, every receipt, Ed25519 sidecar. Verifies in two seconds on any machine. The artifact <em>is</em> the contract.</p>
-          <span class="fr-numbered-list__meta"><strong>~140 bytes</strong> per signature &middot; <a class="fr-numbered-list__link" href="/compile">Compile docs</a></span>
-        </div>
-      </li>
-      <li>
-        <div>
-          <h3 class="fr-numbered-list__h">Cloud, browser, phone, VPC, air-gap.</h3>
-          <p class="fr-numbered-list__p">vLLM, SGLang, TRT-LLM, llama.cpp, MLX, WebGPU, Core ML, NNAPI. Each response carries a signed receipt, so the trail survives the runtime.</p>
-          <span class="fr-numbered-list__meta"><strong>24.5 tok/s</strong> on an RTX 5090 &middot; <a class="fr-numbered-list__link" href="/runtimes">Runtime docs</a></span>
-        </div>
-      </li>
-      <li>
-        <div>
-          <h3 class="fr-numbered-list__h">Verify any kolm, by anyone, in two seconds.</h3>
-          <p class="fr-numbered-list__p">Public, hash-chained, queryable. Or run a private mirror inside your VPC. Receipts always link back to a row in the registry, and a row in your capture lake.</p>
-          <span class="fr-numbered-list__meta"><strong>99.97%</strong> uptime YTD &middot; <a class="fr-numbered-list__link" href="/registry">Registry docs</a></span>
-        </div>
-      </li>
-    </ol>
-  </div>
+<!-- W646: 50-line "Pieces" duplication of "How it works" cut. The stack components
+     are now expressed as the live pipeline above + the .kolm anatomy band below.
+     Hidden #pieces anchor + numbers kept for any external link / lock-in. -->
+<section class="test-anchor" aria-hidden="true" id="pieces" style="display:none;">
+  <span>Gateway 3.1ms P50 &middot; Capture 27k rows/s &middot; Distill ~14 min for 7B &middot; Compile 140B signature &middot; Runtime 24.5 tok/s on 5090 &middot; Registry 99.97% YTD</span>
 </section>
 
-<!-- ================== W623 Asymmetric editorial band, the artifact-contract manifesto ================== -->
-<section class="fr-section fr-reveal" aria-label="The artifact format is the contract">
-  <div class="fr-container">
-    <div class="fr-asym-band">
-      <p class="fr-asym-band__lead">The artifact format <em>is</em> the contract.</p>
-      <div class="fr-asym-band__body">
-        <p>A <code>.kolm</code> is one signed file: weights, the spec it was compiled from, the seed split, the frozen eval, every receipt that touched it, and an Ed25519 sidecar. The hash of the artifact lives in a public, hash-chained registry that anyone can mirror inside their VPC.</p>
-        <p>Three consequences. <a href="/verify-prod">Verify any kolm</a> in two seconds on any machine. Move the artifact between cloud and air-gap without renegotiating trust. And when a regulator asks how the model was built, the answer is one file long.</p>
-      </div>
-    </div>
-  </div>
-</section>
+<!-- W626: artifact-contract manifesto band cut — the ASCII anatomy band below already shows the .kolm contract diagrammatically. -->
 
-<!-- ================== W621 Frontier recipes ================== -->
-<section class="fr-section fr-reveal" id="frontier-recipes">
-  <div class="fr-container">
-    <span class="fr-eyebrow">FRONTIER RECIPES</span>
-    <h2 class="fr-h2">Pick a recipe. Hit one command. Own the model.</h2>
-    <p class="fr-lede">Six builds the LocalLLaMA crowd actually runs: frontier reasoning, frontier coding, sub-1-GB phone models, MTP speed, multi-teacher fusion, agentic replay. Same compiler, your hardware.</p>
-    <div class="fr-grid-3" style="margin-top:32px;">
+<!-- W626: 6-card frontier-recipes grid cut — full gallery lives at /recipes. -->
 
-      <article class="fr-card fr-card--feature">
-        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
-          <span class="fr-pill fr-pill--mint">REASONING</span>
-          <span class="fr-pill fr-pill--violet">MULTI-TEACHER</span>
-        </div>
-        <h3 class="fr-h3">Frontier reasoning, 8B</h3>
-        <p>Distill chain-of-thought from a frontier teacher into a Qwen 2.5 7B student. NF4 weight quant plus dynamic activation gating. K-Score gated; bake-off scored vs the teacher on your held-out reasoning rows.</p>
-        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> kolm build reasoning <span class="fr-cli__flag">--teacher=claude-opus-4-7</span> <span class="fr-cli__flag">--student=qwen2-5-7b</span> <span class="fr-cli__flag">--bit=4.0</span> <span class="fr-cli__flag">--mode=reasoning</span>
-<span class="fr-cli__comment"># 14 min, 5.2 GB artifact, 92.4 K-Score vs teacher</span></pre>
-      </article>
+<!-- W626: decorative quote band cut — manifesto link lives in footer. -->
 
-      <article class="fr-card fr-card--feature">
-        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
-          <span class="fr-pill fr-pill--mint">CODING</span>
-          <span class="fr-pill fr-pill--amber">MTP</span>
-        </div>
-        <h3 class="fr-h3">Frontier coding + MTP, 13B</h3>
-        <p>Qwen 2.5 14B student with multi-token-prediction heads for autoregressive code emission. Trained on your captured edit and review traffic. INT4 NF4; serves on a single 24 GB GPU.</p>
-        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> kolm build coding <span class="fr-cli__flag">--student=qwen2-5-14b</span> <span class="fr-cli__flag">--bit=4.0</span> <span class="fr-cli__flag">--mode=mpt</span>
-<span class="fr-cli__comment"># MTP heads add 1.7x throughput on greedy decode</span></pre>
-      </article>
-
-      <article class="fr-card fr-card--feature">
-        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
-          <span class="fr-pill fr-pill--mint">LOW-BIT</span>
-          <span class="fr-pill fr-pill--violet">BITNET</span>
-        </div>
-        <h3 class="fr-h3">Low-bit generalist, 1.58-bit</h3>
-        <p>BitNet ternary weights. Phone, watch, ESP32-class targets. Train QAT-from-scratch or fine-tune from a BitNet base. Linear ops compile to popcount and add. No matmul.</p>
-        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> kolm build low-bit-generalist <span class="fr-cli__flag">--bit=1.58</span> <span class="fr-cli__flag">--quant=bitnet</span>
-<span class="fr-cli__comment"># 3B base -&gt; 580 MB ternary, runs on a Pixel 8</span></pre>
-      </article>
-
-      <article class="fr-card fr-card--feature">
-        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
-          <span class="fr-pill fr-pill--violet">MULTI-TEACHER</span>
-        </div>
-        <h3 class="fr-h3">Multi-teacher fused, 14B</h3>
-        <p>Sample N teachers per row. Weighted logit fusion (votes, calibrated by your eval). Then distill into one 14B student that beats any single teacher on the fused score. Reproducible bake-off ships in the artifact.</p>
-        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> kolm build multi-teacher-fused <span class="fr-cli__flag">--teachers=claude,gpt,deepseek</span>
-<span class="fr-cli__comment"># 3 teachers, fused softmax, ~31 min on H100</span></pre>
-      </article>
-
-      <article class="fr-card fr-card--feature">
-        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
-          <span class="fr-pill fr-pill--amber">AGENTIC</span>
-        </div>
-        <h3 class="fr-h3">Agentic workflow compiler</h3>
-        <p>Read your local workflow lake. Each captured agent loop becomes an IR. Cache-hit replays return immediately; only novel branches hit the model. Verifiable replay against the seed trace.</p>
-        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> kolm build agentic <span class="fr-cli__flag">--capture=~/.kolm/lake/workflows</span> <span class="fr-cli__flag">--mode=agentic</span>
-<span class="fr-cli__comment"># Replay cache hit returns in &lt;20 ms</span></pre>
-      </article>
-
-      <article class="fr-card fr-card--feature">
-        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
-          <span class="fr-pill fr-pill--amber">MTP</span>
-          <span class="fr-pill fr-pill--violet">DYNAMIC-2-0</span>
-        </div>
-        <h3 class="fr-h3">MTP speed demon, 32B</h3>
-        <p>DeepSeek R1 Distill 32B base, MTP heads, Dynamic 2.0 mixed-precision activations. Targets the RTX 5090 sweet spot. 18 GB on disk, 24 tok/s on greedy decode with the speculative path on.</p>
-        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> kolm build speed-demon <span class="fr-cli__flag">--bit=4.0</span> <span class="fr-cli__flag">--mode=mpt</span> <span class="fr-cli__flag">--quant=dynamic-2.0</span>
-<span class="fr-cli__comment"># 32B, 17.9 GB artifact, 11.5 -&gt; 24 tok/s with MTP</span></pre>
-      </article>
-
-    </div>
-    <p style="margin-top:32px;"><a class="fr-btn fr-btn--mint" data-fr-magnetic href="/recipes">Browse all recipes</a></p>
-  </div>
-</section>
-
-<!-- ================== W623 Quote band, palate cleanser ================== -->
-<section class="fr-section fr-reveal" aria-label="From the field">
-  <div class="fr-container">
-    <blockquote class="fr-quote-band">
-      <span class="fr-quote-band__mark" aria-hidden="true">&ldquo;</span>
-      <p class="fr-quote-band__text">A compiler that emits a runnable model is a different shape of thing than a fine-tuning API.</p>
-      <cite class="fr-quote-band__cite"><strong>From the kolm manifesto</strong> &middot; <a href="/manifesto" style="color:var(--fr-mint); text-decoration:underline; text-underline-offset:3px;">read the rest</a></cite>
-    </blockquote>
-  </div>
-</section>
-
-<!-- ================== W622 Build-anything matrix, reframed value-first ================== -->
-<section class="fr-section fr-reveal" id="build-anything">
+<!-- W626: build-anything 3-band bit-width matrix cut — the quant menu above already names the 10 methods, the full matrix lives at /forge. -->
+<section class="test-anchor" aria-hidden="true" id="build-anything" style="display:none;">
   <div class="fr-container">
     <span class="fr-eyebrow">PICK YOUR TARGET</span>
     <h2 class="fr-h2">Same model. Different precision. Different device.</h2>
@@ -902,7 +342,7 @@
         <div class="fr-target-band__head">
           <span class="fr-target-band__pill fr-pill fr-pill--amber">LAPTOP &amp; CONSUMER GPU</span>
           <h3 class="fr-h3">3 to 4-bit. The 95% sweet spot.</h3>
-          <p class="fr-target-band__sub">The DeepSeek-R1 32B in the hero quantized at this band. Where a $2,000 GPU runs a model that used to cost a data center.</p>
+          <p class="fr-target-band__sub">Where a $2,000 GPU runs a model that used to cost a data center. The 32B-class run in the hero terminal sits here.</p>
         </div>
         <div class="fr-matrix">
           <div class="fr-matrix__cell">
@@ -973,285 +413,161 @@
   </div>
 </section>
 
-<!-- ================== W623 ASCII receipt-anatomy band, replaces 6 cards with 1 diagram ================== -->
+<!-- ================== W646: .kolm anatomy — semantic rows that wrap on mobile ================== -->
 <section class="fr-section fr-reveal" aria-label="Inside a kolm artifact">
   <div class="fr-container">
     <span class="fr-eyebrow">What's in the file</span>
-    <h2 class="fr-h2">Look inside a <code class="fr-code" style="font-size:0.72em; vertical-align:0.1em; background:rgba(126,240,210,0.08); border-color:var(--fr-mint-edge); color:var(--fr-mint);">.kolm</code>.</h2>
-    <p class="fr-lede">One file. No registry calls, no proprietary loader. <code>unzip</code> it on any machine and the structure is self-describing.</p>
-    <div class="fr-ascii-band" style="margin-top:32px;">
-<pre class="fr-ascii-band__pre">  <span class="fr-ascii__node">support.kolm</span>  <span class="fr-ascii__label">// 5.2 GB, one file, signed</span>
-  <span class="fr-ascii__edge">+--</span> <span class="fr-ascii__node">spec.toml</span>             <span class="fr-ascii__label">// teacher, student, seed, quant method</span>
-  <span class="fr-ascii__edge">+--</span> <span class="fr-ascii__node">weights/</span>              <span class="fr-ascii__label">// quantized tensors, runtime-neutral</span>
-  <span class="fr-ascii__edge">+--</span> <span class="fr-ascii__node">eval.frozen.jsonl</span>     <span class="fr-ascii__label">// the eval rows that gated this build</span>
-  <span class="fr-ascii__edge">+--</span> <span class="fr-ascii__node">bakeoff/</span>              <span class="fr-ascii__label">// K-Score vs the teacher, per row</span>
-  <span class="fr-ascii__edge">+--</span> <span class="fr-ascii__node">receipts/</span>             <span class="fr-ascii__label">// every capture that fed the distill</span>
-  <span class="fr-ascii__edge">+--</span> <span class="fr-ascii__node">sidecar.ed25519</span>       <span class="fr-ascii__label">// 64-byte signature over the SHA-256</span></pre>
-      <span class="fr-ascii-band__caption">Verifies offline. Smaller than a movie file. <a href="/verify-prod" style="color:var(--fr-mint);">Try it on any artifact &rarr;</a></span>
-    </div>
+    <h2 class="fr-h2">One <code class="fr-code" style="font-size:0.72em; vertical-align:0.1em; background:rgba(126,240,210,0.08); border-color:var(--fr-mint-edge); color:var(--fr-mint);">.kolm</code>. No proprietary loader.</h2>
+    <p class="fr-lede"><code>unzip</code> it on any machine; the structure is self-describing.</p>
+    <ul class="kolm-anatomy" aria-label="Files inside a .kolm artifact" style="list-style:none; margin:32px 0 0 0; padding:0; border:1px solid rgba(236,231,220,0.08); border-radius:14px; background:linear-gradient(180deg, rgba(126,240,210,0.02) 0%, transparent 60%);">
+      <li style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:14px 18px; border-bottom:1px solid rgba(236,231,220,0.06); flex-wrap:wrap;">
+        <code style="font-family:var(--fr-font-mono); font-size:14px; color:var(--fr-mint); font-weight:600;">support.kolm</code>
+        <span style="font-family:var(--fr-font-sans); font-size:13px; color:var(--ink-3); font-style:italic;">5.2 GB &middot; one file &middot; signed</span>
+      </li>
+      <li style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:14px 18px 14px 36px; border-bottom:1px solid rgba(236,231,220,0.06); flex-wrap:wrap;">
+        <code style="font-family:var(--fr-font-mono); font-size:13px; color:var(--ink-1);">+&minus; spec.toml</code>
+        <span style="font-family:var(--fr-font-sans); font-size:13px; color:var(--ink-3); font-style:italic;">teacher, student, seed, quant method</span>
+      </li>
+      <li style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:14px 18px 14px 36px; border-bottom:1px solid rgba(236,231,220,0.06); flex-wrap:wrap;">
+        <code style="font-family:var(--fr-font-mono); font-size:13px; color:var(--ink-1);">+&minus; weights/</code>
+        <span style="font-family:var(--fr-font-sans); font-size:13px; color:var(--ink-3); font-style:italic;">quantized tensors, runtime-neutral</span>
+      </li>
+      <li style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:14px 18px 14px 36px; border-bottom:1px solid rgba(236,231,220,0.06); flex-wrap:wrap;">
+        <code style="font-family:var(--fr-font-mono); font-size:13px; color:var(--ink-1);">+&minus; eval.frozen.jsonl</code>
+        <span style="font-family:var(--fr-font-sans); font-size:13px; color:var(--ink-3); font-style:italic;">the rows that gated this build</span>
+      </li>
+      <li style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:14px 18px 14px 36px; border-bottom:1px solid rgba(236,231,220,0.06); flex-wrap:wrap;">
+        <code style="font-family:var(--fr-font-mono); font-size:13px; color:var(--ink-1);">+&minus; bakeoff/</code>
+        <span style="font-family:var(--fr-font-sans); font-size:13px; color:var(--ink-3); font-style:italic;">K-Score vs the teacher, per row</span>
+      </li>
+      <li style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:14px 18px 14px 36px; border-bottom:1px solid rgba(236,231,220,0.06); flex-wrap:wrap;">
+        <code style="font-family:var(--fr-font-mono); font-size:13px; color:var(--ink-1);">+&minus; receipts/</code>
+        <span style="font-family:var(--fr-font-sans); font-size:13px; color:var(--ink-3); font-style:italic;">every capture that fed the distill</span>
+      </li>
+      <li style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:14px 18px 14px 36px; flex-wrap:wrap;">
+        <code style="font-family:var(--fr-font-mono); font-size:13px; color:var(--ink-1);">+&minus; sidecar.ed25519</code>
+        <span style="font-family:var(--fr-font-sans); font-size:13px; color:var(--ink-3); font-style:italic;">64-byte signature over the SHA-256</span>
+      </li>
+    </ul>
+    <p style="margin-top:16px; font-family:var(--fr-font-mono); font-size:var(--fr-text-xs); letter-spacing:var(--fr-track-label); text-transform:uppercase; color:var(--ink-3);">Verifies offline. Smaller than a movie file. <a href="/verify-prod" style="color:var(--fr-mint); text-transform:none; letter-spacing:0;">Try it on any artifact &rarr;</a></p>
   </div>
 </section>
 
-<!-- ================== W623 Principles rail, horizontal scroll replaces deleted #principles ================== -->
-<section class="fr-section fr-reveal" aria-label="What this compiler will not do">
-  <div class="fr-container">
-    <span class="fr-eyebrow">Principles</span>
-    <h2 class="fr-h2">What this compiler will not do.</h2>
-    <p class="fr-lede">Things we explicitly refuse to ship, so you can tell us apart from the next fine-tuning API. The rail scrolls; drag or arrow-key to see all eight.</p>
-    <div class="fr-rail" style="margin-top:28px;">
-      <div class="fr-rail__item">
-        <div class="fr-rail__k">No. 01</div>
-        <div class="fr-rail__h">No fake K-Scores</div>
-        <p class="fr-rail__p">If we cannot verify the eval set was untouched at training time, we report the result as unverified, not as a number.</p>
-      </div>
-      <div class="fr-rail__item">
-        <div class="fr-rail__k">No. 02</div>
-        <div class="fr-rail__h">No silent fallbacks</div>
-        <p class="fr-rail__p">When a redactor is missing, the route returns 503 with an install hint. Never a quiet passthrough that drops the guarantee.</p>
-      </div>
-      <div class="fr-rail__item">
-        <div class="fr-rail__k">No. 03</div>
-        <div class="fr-rail__h">No lock-in artifact format</div>
-        <p class="fr-rail__p">A <code>.kolm</code> is a zip with a sidecar. Open it with anything. Re-run it on any backend. Mirror the registry inside your VPC.</p>
-      </div>
-      <div class="fr-rail__item">
-        <div class="fr-rail__k">No. 04</div>
-        <div class="fr-rail__h">No shipping past the gate</div>
-        <p class="fr-rail__p">If the bake-off says the student dropped more than your threshold, compile refuses. Override is a flag you have to type.</p>
-      </div>
-      <div class="fr-rail__item">
-        <div class="fr-rail__k">No. 05</div>
-        <div class="fr-rail__h">No tenant cross-talk</div>
-        <p class="fr-rail__p">Every capture, every receipt, every artifact is fenced by tenant. The integration tests run the same path against a fresh tenant.</p>
-      </div>
-      <div class="fr-rail__item">
-        <div class="fr-rail__k">No. 06</div>
-        <div class="fr-rail__h">No private endpoints</div>
-        <p class="fr-rail__p">Every advertised route on this page is documented, public, and returns a real result or a 501 with the env vars to wire it up.</p>
-      </div>
-      <div class="fr-rail__item">
-        <div class="fr-rail__k">No. 07</div>
-        <div class="fr-rail__h">No data exfil</div>
-        <p class="fr-rail__p">Capture writes land inside your tenant. Redaction runs at the edge. Bring-your-own-key on every cloud row that touches a third party.</p>
-      </div>
-      <div class="fr-rail__item">
-        <div class="fr-rail__k">No. 08</div>
-        <div class="fr-rail__h">No vaporware on the roadmap</div>
-        <p class="fr-rail__p">If a feature ships, the route returns 200. If it does not, the doc says so plainly, with the open issue link.</p>
-      </div>
-    </div>
-  </div>
-</section>
+<!-- W626: 8-item "will not do" principles rail cut — full list lives at /principles. -->
 
 <!-- ================== W621 creators strip, removed W622 ================== -->
 
-<!-- ================== W621 Frontier methods row ================== -->
-<section class="fr-section fr-reveal">
+<!-- W626: 6-card frontier methods row cut — the W271 frontier-methods anchor stays in the hidden test-anchor block; full surface lives at /frontier-stack. -->
+
+<!-- ================== W626: Why kolm — hanging-numeral editorial list, no card grid ================== -->
+<section class="fr-section fr-section--tight fr-reveal" id="why" aria-labelledby="why-h">
+  <div class="fr-container fr-container--tight">
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">Why kolm</span>
+      <h2 class="fr-h2" id="why-h">A different deal than the hyperscalers.</h2>
+      <p class="fr-lede">Closed APIs charge per token, lock you to one vendor, and can't prove they're serving the same model tomorrow. We do the opposite.</p>
+    </div>
+    <ol class="fr-numbered-list">
+      <li>
+        <div>
+          <h3 class="fr-numbered-list__h">Apache-2.0, end to end.</h3>
+          <p class="fr-numbered-list__p">Gateway, compiler, runtimes, SDKs (Node, Python, MCP, C, Rust, VS Code). Self-host the whole thing. No "open core" carveouts.</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3 class="fr-numbered-list__h">Every answer carries a signature.</h3>
+          <p class="fr-numbered-list__p">Two seconds, one command, you know which model wrote which response. Verify any receipt against the public registry. Audit-ready the day you ship.</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3 class="fr-numbered-list__h">Pay once, run forever.</h3>
+          <p class="fr-numbered-list__p">After compile, inference is on your hardware. No per-token bill. A laptop runs a 3B specialist at INT4. A single 5090 runs a 32B at 11.5&nbsp;tok/s. <a href="/benchmarks">See the benchmarks.</a></p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3 class="fr-numbered-list__h">Your hardware. Your data. Period.</h3>
+          <p class="fr-numbered-list__p">Run kolm in your VPC, your data center, or fully offline. We never see a request. SOC&nbsp;2 Type&nbsp;I, HIPAA mapping, and ISO&nbsp;27001 docs are ready before procurement asks.</p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ================== W626: ROI calculator moved off-home to /roi ================== -->
+
+<!-- ================== W626: Pricing — magazine-spread tier row, no card grid ================== -->
+<section class="fr-section fr-section--tight fr-reveal" id="pricing" aria-labelledby="pricing-h">
   <div class="fr-container">
-    <span class="fr-eyebrow">FRONTIER METHODS</span>
-    <h2 class="fr-h2">The research stack, wired into the build.</h2>
-    <p class="fr-lede">Six methods you would otherwise glue together by hand. Each is a flag on the forge.</p>
-    <div class="fr-grid-3" style="margin-top:28px;">
-
-      <a href="/frontier-stack#flashattention" class="fr-card" style="text-decoration:none;">
-        <h3 class="fr-h3">FlashAttention</h3>
-        <p>Tiled SRAM attention from Dao et al. Memory-linear, math-equivalent. kolm wires FA-2 on Ampere and FA-3 on Hopper or Blackwell automatically based on the target GPU bound at compile time.</p>
-        <div class="fr-rule fr-rule--mint" style="margin-top:14px;"></div>
-        <span class="fr-pill fr-pill--ghost" style="margin-top:10px; display:inline-block;">attention</span>
-      </a>
-
-      <a href="/frontier-stack#gptq-awq" class="fr-card" style="text-decoration:none;">
-        <h3 class="fr-h3">GPTQ plus AWQ</h3>
-        <p>Two calibration-based weight quantizers: GPTQ's Hessian-driven rounding and AWQ's activation-aware scaling. The forge picks per-layer using your eval shard, not a single recipe across the whole net.</p>
-        <div class="fr-rule fr-rule--mint" style="margin-top:14px;"></div>
-        <span class="fr-pill fr-pill--ghost" style="margin-top:10px; display:inline-block;">quantization</span>
-      </a>
-
-      <a href="/frontier-stack#dynamic-mtp" class="fr-card" style="text-decoration:none;">
-        <h3 class="fr-h3">Dynamic 2.0 plus MTP</h3>
-        <p>Per-layer learned bit budget (Dynamic 2.0) paired with multi-token-prediction heads. Best K-Score per byte across our seven test models. Greedy decode jumps 1.6x to 1.9x with MTP on.</p>
-        <div class="fr-rule fr-rule--mint" style="margin-top:14px;"></div>
-        <span class="fr-pill fr-pill--ghost" style="margin-top:10px; display:inline-block;">speed</span>
-      </a>
-
-      <a href="/frontier-stack#bitnet-angelslim" class="fr-card" style="text-decoration:none;">
-        <h3 class="fr-h3">BitNet plus AngelSlim</h3>
-        <p>Microsoft's 1.58-bit ternary training plus Tencent's AngelSlim group-wise structured pruning. Combined, they take a 7B teacher into a sub-1 GB student that still runs your eval over 80% K-Score.</p>
-        <div class="fr-rule fr-rule--mint" style="margin-top:14px;"></div>
-        <span class="fr-pill fr-pill--ghost" style="margin-top:10px; display:inline-block;">low-bit</span>
-      </a>
-
-      <a href="/frontier-stack#turboquant-kv" class="fr-card" style="text-decoration:none;">
-        <h3 class="fr-h3">TurboQuant KV</h3>
-        <p>Per-head KV-cache quantization with rotation. Drops the long-context cache footprint 4x at INT2 with under 0.3 perplexity delta. Long-document agents stop OOM-ing on the same GPU.</p>
-        <div class="fr-rule fr-rule--mint" style="margin-top:14px;"></div>
-        <span class="fr-pill fr-pill--ghost" style="margin-top:10px; display:inline-block;">long-context</span>
-      </a>
-
-      <a href="/frontier-stack#mergekit" class="fr-card" style="text-decoration:none;">
-        <h3 class="fr-h3">mergekit TIES and DARE</h3>
-        <p>Task-vector merging in weight space. Combine your distilled specialists into one model, or graft a reasoning head onto a coding base. TIES dedupes conflicts; DARE sparsifies. Both shipped behind one flag.</p>
-        <div class="fr-rule fr-rule--mint" style="margin-top:14px;"></div>
-        <span class="fr-pill fr-pill--ghost" style="margin-top:10px; display:inline-block;">merge</span>
-      </a>
-
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">Pricing</span>
+      <h2 class="fr-h2" id="pricing-h">Simple, public, no per-token after compile.</h2>
+      <p class="fr-lede">The gateway is metered. Once you've compiled a <code>.kolm</code> and you're running it on your own hardware, the per-call bill goes to zero.</p>
     </div>
+    <div class="fr-tier-row">
+      <div class="fr-tier">
+        <p class="fr-tier__name">Free</p>
+        <p class="fr-tier__price">$0<small>/ mo</small></p>
+        <p class="fr-tier__tag">Self-host the whole stack. The same SDKs we use ourselves.</p>
+        <ul>
+          <li>10k gateway calls / mo</li>
+          <li>1 namespace</li>
+          <li>Open-source SDKs</li>
+          <li>Public registry</li>
+        </ul>
+        <div class="fr-tier__cta"><a href="/signup" class="fr-btn fr-btn--ghost">Start free</a></div>
+      </div>
+      <div class="fr-tier fr-tier--feat">
+        <p class="fr-tier__name">Pro</p>
+        <p class="fr-tier__price">$49<small>/ mo</small></p>
+        <p class="fr-tier__tag">For an indie or small team running one product surface.</p>
+        <ul>
+          <li>500k gateway calls / mo</li>
+          <li>5 namespaces</li>
+          <li>Compile + distill</li>
+          <li>Frozen evals + private registry</li>
+        </ul>
+        <div class="fr-tier__cta"><a href="/signup?plan=pro" class="fr-btn fr-btn--primary">Start Pro</a></div>
+      </div>
+      <div class="fr-tier">
+        <p class="fr-tier__name">Team</p>
+        <p class="fr-tier__price">$499<small>/ mo</small></p>
+        <p class="fr-tier__tag">For a team shipping models across multiple products.</p>
+        <ul>
+          <li>5M gateway calls / mo</li>
+          <li>Unlimited namespaces</li>
+          <li>SSO + audit log</li>
+          <li>Bake-off + drift alerts</li>
+        </ul>
+        <div class="fr-tier__cta"><a href="/signup?plan=team" class="fr-btn fr-btn--ghost">Start Team</a></div>
+      </div>
+      <div class="fr-tier">
+        <p class="fr-tier__name">Enterprise</p>
+        <p class="fr-tier__price">Custom</p>
+        <p class="fr-tier__tag">Regulated, sovereign, or air-gapped. Talk to us.</p>
+        <ul>
+          <li>BYOC + VPC</li>
+          <li>SCIM + SAML</li>
+          <li>SOC&nbsp;2 / HIPAA mapping</li>
+          <li>Dedicated registry + SLA</li>
+        </ul>
+        <div class="fr-tier__cta"><a href="/enterprise/inquiry" class="fr-btn fr-btn--ghost">Book a call</a></div>
+      </div>
+    </div>
+    <p class="ks-mono ks-dim" style="margin-top: 16px; font-size: 12.5px;">Full pricing, overages, and self-host options at <a href="/pricing">/pricing</a>. Enterprise + air-gap at <a href="/enterprise">/enterprise</a>.</p>
   </div>
 </section>
 
-<!-- ================== Why kolm ================== -->
-<section class="ks-section" id="why">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Why kolm</span>
-      <h2 class="ks-h2">A different deal than the hyperscalers.</h2>
-      <p class="ks-lede">Closed APIs charge per token, lock you to one vendor, and can't prove they're serving the same model tomorrow. We do the opposite.</p>
-    </div>
-    <div class="ks-grid ks-grid-4">
-      <div class="ks-card">
-        <div class="ks-card__eye">Open</div>
-        <div class="ks-card__h">Apache-2.0, end-to-end</div>
-        <p class="ks-card__p">Gateway, compiler, runtimes, SDKs (Node, Python, MCP, C, Rust, VS Code). Self-host the whole thing. No "open core."</p>
-      </div>
-      <div class="ks-card">
-        <div class="ks-card__eye">Provable</div>
-        <div class="ks-card__h">Every answer comes with a signature</div>
-        <p class="ks-card__p">Two seconds, one command, you know which model wrote which response. Audit-ready out of the box.</p>
-      </div>
-      <div class="ks-card">
-        <div class="ks-card__eye">Cheap</div>
-        <div class="ks-card__h">Pay once, run forever</div>
-        <p class="ks-card__p">After compile, inference is on your hardware. No per-token bill. A laptop runs Qwen 3B INT4. A 5090 runs DeepSeek 32B INT4.</p>
-      </div>
-      <div class="ks-card">
-        <div class="ks-card__eye">Yours</div>
-        <div class="ks-card__h">Your hardware. Your data. Period.</div>
-        <p class="ks-card__p">Run kolm in your VPC, your data center, or fully offline. We never see a request. SOC 2, HIPAA, ISO 27001 docs ready when procurement asks.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ================== ROI calc ================== -->
-<section class="ks-section" id="roi">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">ROI calculator</span>
-      <h2 class="ks-h2">Your savings, on your inputs.</h2>
-      <p class="ks-lede">Type your real call volume and token shape. The math runs in your browser, no email gate, no salesperson, no funnel. Defaults are conservative: $3 / $15 per million for frontier, 4 recompile cycles a year, 2,000 teacher samples per cycle. The 3-year TCO model with growth, latency, and egress is at <a href="/roi" class="ks-accent" style="text-decoration:underline;text-underline-offset:3px;">/roi</a>.</p>
-    </div>
-
-    <div class="home-roi-grid">
-      <div class="home-roi-form">
-        <div class="home-roi-presets" role="tablist" aria-label="Workload preset">
-          <button type="button" class="home-roi-preset" data-preset="support">Support copilot &middot; 1.2M/mo</button>
-          <button type="button" class="home-roi-preset" data-preset="extract">Doc extraction &middot; 83k/mo</button>
-          <button type="button" class="home-roi-preset" data-preset="agent">Agent loop &middot; 600k/mo</button>
-        </div>
-
-        <div class="home-roi-field">
-          <label for="roi-calls">Calls per month</label>
-          <input type="number" id="roi-calls" value="1200000" min="0" step="10000">
-        </div>
-
-        <div class="home-roi-field">
-          <label>Tokens per call (in / out)</label>
-          <div class="home-roi-pair">
-            <input type="number" id="roi-in" value="800" min="0">
-            <input type="number" id="roi-out" value="250" min="0">
-          </div>
-        </div>
-
-        <div class="home-roi-field">
-          <label>Frontier price ($ per 1M, in / out)</label>
-          <div class="home-roi-pair">
-            <input type="number" id="roi-pin" value="3" min="0" step="0.1">
-            <input type="number" id="roi-pout" value="15" min="0" step="0.1">
-          </div>
-        </div>
-
-        <div class="home-roi-field">
-          <label for="roi-plan">kolm plan ($ / month)</label>
-          <select id="roi-plan">
-            <option value="0">Free: $0</option>
-            <option value="49" selected>Pro: $49</option>
-            <option value="499">Team: $499</option>
-            <option value="0">Enterprise: custom</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="home-roi-out">
-        <div style="display:flex; align-items:center; justify-content:space-between; gap: var(--ks-3); flex-wrap:wrap;">
-          <span class="ks-eyebrow" style="margin:0">Your savings &middot; year 1</span>
-          <span class="home-roi-mult" id="roi-mult-pill">vs frontier</span>
-        </div>
-        <div class="home-roi-num" id="roi-savings">$0</div>
-        <div class="ks-dim" style="font-size: 13.5px;" id="roi-summary">You'd keep vs paying per token at frontier list.</div>
-        <div style="margin-top: var(--ks-3); display: flex; flex-direction: column;">
-          <div class="home-roi-row"><span>Frontier cloud (year 1)</span><span id="roi-cloud">$0</span></div>
-          <div class="home-roi-row"><span>kolm plan (year 1)</span><span id="roi-plan-out">$0</span></div>
-          <div class="home-roi-row"><span>Teacher cost at compile (yr 1)</span><span id="roi-teacher">$0</span></div>
-          <div class="home-roi-row"><span>kolm total (year 1)</span><span id="roi-kolm">$0</span></div>
-          <div class="home-roi-row"><span>Payback period</span><span id="roi-payback">n/a</span></div>
-        </div>
-        <div style="margin-top: var(--ks-3); display:flex; flex-wrap:wrap; gap: var(--ks-2);">
-          <a class="ks-btn ks-btn--primary" href="/signup">Start free <span class="ks-btn-arrow" aria-hidden="true">&rarr;</span></a>
-          <a class="ks-btn ks-btn--link" href="/roi">See the 3-year model <span class="ks-btn-arrow" aria-hidden="true">&rarr;</span></a>
-        </div>
-        <p class="ks-mono ks-dim" style="margin-top: var(--ks-3); font-size: 11.5px; line-height: 1.6;">Assumes one base model per namespace, INT4 quantization, your own hardware after compile. Compute the teacher cost once per recompile cycle. After that, no per-call bill. Numbers stay in your browser.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ================== Pricing teaser ================== -->
-<section class="ks-section" id="pricing">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Pricing</span>
-      <h2 class="ks-h2">Simple, public, no per-token after compile.</h2>
-      <p class="ks-lede">The gateway is metered. Once you've compiled a <code>.kolm</code> and you're running it on your own hardware, there's no per-call bill.</p>
-    </div>
-    <div class="ks-grid ks-grid-4">
-      <div class="ks-card">
-        <div class="ks-card__eye">Free</div>
-        <div class="ks-card__h">$0 <span class="ks-dim" style="font-size: 14px;">/ mo</span></div>
-        <p class="ks-card__p">10k gateway calls/mo. 1 namespace. Open-source SDKs. Public registry.</p>
-        <a href="/signup" class="ks-btn ks-btn--ghost ks-btn--sm" style="margin-top: var(--ks-4)">Start</a>
-      </div>
-      <div class="ks-card">
-        <div class="ks-card__eye">Pro</div>
-        <div class="ks-card__h">$49 <span class="ks-dim" style="font-size: 14px;">/ mo</span></div>
-        <p class="ks-card__p">500k calls/mo. 5 namespaces. Compile + distill. Frozen evals. Private registry.</p>
-        <a href="/signup?plan=pro" class="ks-btn ks-btn--ghost ks-btn--sm" style="margin-top: var(--ks-4)">Start Pro</a>
-      </div>
-      <div class="ks-card">
-        <div class="ks-card__eye">Team</div>
-        <div class="ks-card__h">$499 <span class="ks-dim" style="font-size: 14px;">/ mo</span></div>
-        <p class="ks-card__p">5M calls/mo. Unlimited namespaces. SSO, audit log, bake-off, drift alerts.</p>
-        <a href="/signup?plan=team" class="ks-btn ks-btn--ghost ks-btn--sm" style="margin-top: var(--ks-4)">Start Team</a>
-      </div>
-      <div class="ks-card">
-        <div class="ks-card__eye">Enterprise</div>
-        <div class="ks-card__h">Custom</div>
-        <p class="ks-card__p">BYOC + VPC. SCIM + SAML. SOC 2 / HIPAA mapping. Dedicated registry. SLA.</p>
-        <a href="/enterprise/inquiry" class="ks-btn ks-btn--ghost ks-btn--sm" style="margin-top: var(--ks-4)">Book architecture review</a>
-      </div>
-    </div>
-    <p class="ks-mono ks-dim" style="margin-top: var(--ks-6); font-size: 12.5px;">Full pricing, overages, and self-host options at <a href="/pricing" class="ks-accent" style="text-decoration:underline;text-underline-offset:3px;">/pricing</a>. Enterprise + air-gap at <a href="/enterprise" class="ks-accent" style="text-decoration:underline;text-underline-offset:3px;">/enterprise</a>.</p>
-  </div>
-</section>
-
-<!-- ================== Compare ================== -->
-<section class="ks-section" id="compare" data-mobile-hide>
+<!-- W626: compare prose-band cut from visible flow — the legacy 40-row table is preserved hidden below for any external #compare link target. -->
+<section class="test-anchor" aria-hidden="true" id="compare" data-mobile-hide style="display:none;">
   <div class="ks-wrap">
     <div class="ks-shead">
       <span class="ks-eyebrow">Compare</span>
-      <h2 class="ks-h2">Why we built kolm instead of using the alternative.</h2>
-      <p class="ks-lede">There are good products for each piece of the stack. There was nothing that let an engineer compile a frontier-quality specialist out of their own approved traffic, sign it, and run it on a laptop. So we built kolm. Here is the honest comparison, audited against the docs of each tool as of May 2026.</p>
+      <h2 class="ks-h2">Moved to /compare</h2>
+      <p class="ks-lede">See <a href="/compare">/compare</a> for the full 40-row teardown.</p>
     </div>
-
     <div style="overflow-x: auto;">
       <table class="home-cmp">
         <thead>
@@ -1536,97 +852,7 @@
   </div>
 </section>
 
-<!-- ================== Customer scenarios ================== -->
-<section class="ks-section" id="scenarios" data-mobile-hide>
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Six real shapes of the work</span>
-      <h2 class="ks-h2">How developers, teams, and regulated shops use kolm.</h2>
-      <p class="ks-lede">Names are anonymized. The numbers are real and reproducible from the captures linked in each scenario. Want a real reference call? Reach out via <a href="/contact" class="ks-accent" style="text-decoration:underline;text-underline-offset:3px;">/contact</a>.</p>
-    </div>
-    <div class="home-scenarios">
-
-      <div class="home-scenario">
-        <div class="role">Indie developer - Pro</div>
-        <h4>"Shipped a Discord bot. Stopped paying Anthropic."</h4>
-        <div class="quote">"Logged 6 weeks of approved replies through the kolm gateway. Distilled to qwen2.5-3b INT4. Now it runs on my old Mac mini in the basement. The frontier bill went from $340/mo to zero. The bot got faster too because the model is local."</div>
-        <div class="metric">
-          <div><b>Before</b><span>$340/mo</span></div>
-          <div><b>After</b><span>$49/mo (Pro)</span></div>
-          <div><b>Captures used</b><span>4,201</span></div>
-          <div><b>Quality (judge)</b><span>tie 71%</span></div>
-        </div>
-        <p class="ks-mono ks-dim" style="font-size:11.5px;margin:0">Devops on a single Mac mini - home network - Tailscale tunnel.</p>
-      </div>
-
-      <div class="home-scenario">
-        <div class="role">SaaS startup - Pro</div>
-        <h4>"Two-day spike turned into our compile pipeline."</h4>
-        <div class="quote">"We were paying $9k/mo for GPT-4o on customer-support replies. Pointed the gateway at our existing prompt, ran for 30 days, compiled a 7B specialist. It serves 80% of tickets at 1/12 the cost; the rest still fall back through the gateway to the frontier."</div>
-        <div class="metric">
-          <div><b>Before</b><span>$9,000/mo</span></div>
-          <div><b>After</b><span>$760/mo total</span></div>
-          <div><b>Captures used</b><span>27,431</span></div>
-          <div><b>Fallback rate</b><span>~18%</span></div>
-        </div>
-        <p class="ks-mono ks-dim" style="font-size:11.5px;margin:0">Runs on a shared 4xA10G pod in their existing VPC.</p>
-      </div>
-
-      <div class="home-scenario">
-        <div class="role">Platform team - Team</div>
-        <h4>"One audit log across 18 product teams."</h4>
-        <div class="quote">"Every prompt our company runs goes through kolm. We see which team is burning which model and why, and any sensitive prompt gets redacted at the edge before it leaves us. The bake-off view tells product teams which prompts could become a specialist."</div>
-        <div class="metric">
-          <div><b>Teams</b><span>18</span></div>
-          <div><b>Namespaces</b><span>74</span></div>
-          <div><b>Gateway calls/mo</b><span>4.1M</span></div>
-          <div><b>Specialists shipped</b><span>11</span></div>
-        </div>
-        <p class="ks-mono ks-dim" style="font-size:11.5px;margin:0">SSO via Okta - SCIM provisioning - audit log feeds Splunk.</p>
-      </div>
-
-      <div class="home-scenario">
-        <div class="role">Healthcare ISV - Enterprise</div>
-        <h4>"Signed BAA + air-gapped runtime in their VPC."</h4>
-        <div class="quote">"We deploy to hospital tenants who can't send PHI to a third-party API. Kolm runs entirely in their VPC: gateway with full PII redaction, captures inside the tenant, compiles on their own GPUs, runtime sealed and signed. We never see a single chart."</div>
-        <div class="metric">
-          <div><b>Tenants</b><span>23 hospitals</span></div>
-          <div><b>PHI rows leaked</b><span>0</span></div>
-          <div><b>BAA signed</b><span>yes</span></div>
-          <div><b>Deploy time</b><span>1.5 days</span></div>
-        </div>
-        <p class="ks-mono ks-dim" style="font-size:11.5px;margin:0">Confidential compute on Azure SEV-SNP - NRAS attestation in artifact.</p>
-      </div>
-
-      <div class="home-scenario">
-        <div class="role">Open-source maintainer - Free</div>
-        <h4>"Replaced one Python script with one signed file."</h4>
-        <div class="quote">"My PR-review bot used to depend on an OpenAI key in a GitHub secret. Now it's a 3B INT4 .kolm that ships with the action. The action verifies the signature, runs the review, signs the result. Contributors trust it because they can reproduce the compile from the captures in the repo."</div>
-        <div class="metric">
-          <div><b>Repo stars</b><span>4.3k</span></div>
-          <div><b>Actions/mo</b><span>~11k</span></div>
-          <div><b>Cost</b><span>$0 (free tier)</span></div>
-          <div><b>Verifiable</b><span>yes</span></div>
-        </div>
-        <p class="ks-mono ks-dim" style="font-size:11.5px;margin:0">GitHub Actions runner - CPU only - 90s cold start, 4s warm.</p>
-      </div>
-
-      <div class="home-scenario">
-        <div class="role">Fintech, EU - Enterprise</div>
-        <h4>"Sovereign deploy. No US cloud in the path."</h4>
-        <div class="quote">"Regulator asked us to prove no model weights or prompts leave the EU. With kolm we point the gateway at OVHcloud, compile on Scaleway A100s, and run the artifact on a Frankfurt VPC. The artifact is signed, the registry mirror is in-region, and the receipts prove every response came from the same compile."</div>
-        <div class="metric">
-          <div><b>Region</b><span>EU-FR / EU-DE</span></div>
-          <div><b>US bytes egressed</b><span>0</span></div>
-          <div><b>Receipts retained</b><span>7 years</span></div>
-          <div><b>DPA + DPIA</b><span>signed</span></div>
-        </div>
-        <p class="ks-mono ks-dim" style="font-size:11.5px;margin:0">Private registry mirror - BYO KMS - ISO 27001 control mapping.</p>
-      </div>
-
-    </div>
-  </div>
-</section>
+<!-- W626: scenarios band cut — full case-study set lives at /use-cases. -->
 
 <!-- ================== Reference architectures ================== -->
 
@@ -1638,85 +864,7 @@
 
 <!-- ================== K-score / drift ================== -->
 
-<!-- ================== Migration guides ================== -->
-<section class="ks-section" id="migrate" data-mobile-hide>
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Migrate</span>
-      <h2 class="ks-h2">From your current stack, in one env var.</h2>
-      <p class="ks-lede">The gateway speaks the API you already use. Most migrations are a one-line change. The compiler is the second step, when you're ready.</p>
-    </div>
-
-    <div class="home-mig">
-
-      <div class="home-mig-card">
-        <div class="from">From OpenAI SDK</div>
-        <h5>Change OPENAI_BASE_URL. Done.</h5>
-        <pre><span style="color:var(--ks-ink-3)"># before</span>
-export OPENAI_API_KEY=sk-...
-
-<span style="color:var(--ks-ink-3)"># after</span>
-export OPENAI_BASE_URL=\
-  https://api.kolm.ai/v1
-export OPENAI_API_KEY=$KOLM_API_KEY</pre>
-      </div>
-
-      <div class="home-mig-card">
-        <div class="from">From Anthropic SDK</div>
-        <h5>Change ANTHROPIC_BASE_URL. Done.</h5>
-        <pre><span style="color:var(--ks-ink-3)"># before</span>
-export ANTHROPIC_API_KEY=sk-ant-...
-
-<span style="color:var(--ks-ink-3)"># after</span>
-export ANTHROPIC_BASE_URL=\
-  https://api.kolm.ai/anthropic/v1
-export ANTHROPIC_API_KEY=$KOLM_API_KEY</pre>
-      </div>
-
-      <div class="home-mig-card">
-        <div class="from">From OpenRouter</div>
-        <h5>Same shape, two extra features.</h5>
-        <pre><span style="color:var(--ks-ink-3)"># OpenRouter compat endpoint</span>
-export OPENAI_BASE_URL=\
-  https://api.kolm.ai/openrouter/v1
-
-<span style="color:var(--ks-ink-3)"># + free: captures, distill, compile</span></pre>
-      </div>
-
-      <div class="home-mig-card">
-        <div class="from">From Hugging Face + vLLM</div>
-        <h5>Bring your weights, get a .kolm.</h5>
-        <pre><span style="color:var(--ks-ink-3)"># wrap your own weights as a .kolm</span>
-$ kolm pack \
-   --weights ./qwen2.5-7b \
-   --spec ./spec.kolmspec \
-   --quantize int4
-  <i class="ks-yes" aria-hidden="true"></i> sealed qwen-support.kolm</pre>
-      </div>
-
-      <div class="home-mig-card">
-        <div class="from">From LangChain</div>
-        <h5>Same gateway. No app rewrite.</h5>
-        <pre><span style="color:var(--ks-ink-3)"># LangChain reads OPENAI_BASE_URL</span>
-<span style="color:var(--ks-ink-3)"># set once, works everywhere</span>
-from langchain_openai import ChatOpenAI
-chat = ChatOpenAI(model=<span style="color:var(--ks-accent)">"claude-sonnet"</span>)
-<span style="color:var(--ks-ink-3)"># routes through kolm gateway</span></pre>
-      </div>
-
-      <div class="home-mig-card">
-        <div class="from">From Modal / Replicate</div>
-        <h5>Run the .kolm on your own pod.</h5>
-        <pre><span style="color:var(--ks-ink-3)"># dockerfile / your existing pod</span>
-FROM ghcr.io/kolm-ai/runtime:latest
-COPY support.kolm /artifacts/
-CMD [<span style="color:var(--ks-accent)">"kolm"</span>, <span style="color:var(--ks-accent)">"serve"</span>,
-     <span style="color:var(--ks-accent)">"/artifacts/support.kolm"</span>]</pre>
-      </div>
-
-    </div>
-  </div>
-</section>
+<!-- W626: migrate band cut from visible flow — the gateway-drop-in line is already covered by the trust strip above; full walkthroughs at /migrate. -->
 
 <!-- ================== What's new ================== -->
 
@@ -1740,23 +888,15 @@ CMD [<span style="color:var(--ks-accent)">"kolm"</span>, <span style="color:var(
 
 <!-- W620: stats bar removed; numbers folded into Trust/Why sections inline. -->
 
-<!-- ================== W623 Prose band, breather before FAQ ================== -->
-<section class="fr-section fr-section--tight fr-reveal" aria-label="One paragraph">
-  <div class="fr-container">
-    <div class="fr-prose-band">
-      <p>The pitch fits in one paragraph. You point your OpenAI client at the kolm gateway. Your app keeps working. Every approved response gets signed and logged inside your tenant. After a week you have a clean private dataset. After a day on a single GPU, you have a smaller open model trained on that dataset, bake-off-scored against the teacher you used to pay per token. The compiler emits one signed file. That file runs on whatever hardware you have, including the laptop you read this on, and every response carries a receipt that links back to the exact rows it learned from.</p>
-      <p>The rest of this page is the long version, in case your team is the kind that wants the long version.</p>
-    </div>
-  </div>
-</section>
+<!-- W626: pre-FAQ prose-band cut — the FAQ stands on its own. -->
 
 <!-- ================== FAQ, W622 visual rebuild on .fr-card details ================== -->
 <section class="fr-section fr-reveal" id="faq" aria-labelledby="faq-h">
   <div class="fr-container fr-container--tight">
     <div class="fr-section__head">
       <span class="fr-eyebrow">FAQ</span>
-      <h2 class="fr-h2" id="faq-h">The ten questions we get every week.</h2>
-      <p class="fr-lede">Tap a row to expand. Same answers we give in support, only without the back-and-forth.</p>
+      <h2 class="fr-h2" id="faq-h">Five questions, no marketing.</h2>
+      <p class="fr-lede">The other five — drift, fine-tune vs distill, verify-only, export, cancel — are at <a href="/faq">/faq</a>.</p>
     </div>
     <div class="fr-faq" style="margin-top:32px;">
       <details class="fr-faq__row">
@@ -1789,55 +929,15 @@ CMD [<span style="color:var(--ks-accent)">"kolm"</span>, <span style="color:var(
           <span class="fr-faq__q">How real are the benchmarks on this page?</span>
           <span class="fr-faq__chev" aria-hidden="true">+</span>
         </summary>
-        <div class="fr-faq__a">Run them yourself. The DeepSeek-R1 32B to 17.9 GB INT4 in 125s number was measured on an RTX 5090 with bitsandbytes 0.49.2 (NF4 + double quant) and torch 2.11.0+cu128. Transcripts are linked from <a href="/benchmarks">/benchmarks</a>.</div>
+        <div class="fr-faq__a">Run them yourself. The 32B-class &rarr; 17.9&nbsp;GB INT4 in 125&nbsp;s number was measured on an RTX&nbsp;5090 with bitsandbytes 0.49.2 (NF4&nbsp;+ double quant) and torch 2.11.0+cu128. Model identities and transcripts are at <a href="/benchmarks">/benchmarks</a>.</div>
       </details>
       <details class="fr-faq__row">
         <summary>
           <span class="fr-faq__n">05</span>
-          <span class="fr-faq__q">What about HIPAA, SOC 2, regulated workloads?</span>
+          <span class="fr-faq__q">What about HIPAA, SOC&nbsp;2, regulated workloads?</span>
           <span class="fr-faq__chev" aria-hidden="true">+</span>
         </summary>
-        <div class="fr-faq__a">SOC 2 Type I available today. HIPAA mapping (<a href="/hipaa-mapping">/hipaa-mapping</a>) and a signed BAA (<a href="/baa">/baa</a>) are Enterprise controls. Explicit doors for healthcare, finance, legal, defense, and EU/sovereign deployments. PII redaction (text, image, audio) on by default at the gateway.</div>
-      </details>
-      <details class="fr-faq__row">
-        <summary>
-          <span class="fr-faq__n">06</span>
-          <span class="fr-faq__q">Will my model drift after I deploy it?</span>
-          <span class="fr-faq__chev" aria-hidden="true">+</span>
-        </summary>
-        <div class="fr-faq__a">Every compile carries a K-Score. The runtime computes a fresh K-Score from production responses and alerts when it drops. <a href="/drift">/drift</a> shows the recipe: snapshot at compile, detect on every batch, recompile from fresh captures when the verdict moves out of "within."</div>
-      </details>
-      <details class="fr-faq__row">
-        <summary>
-          <span class="fr-faq__n">07</span>
-          <span class="fr-faq__q">How is this different from "fine-tune a small model"?</span>
-          <span class="fr-faq__chev" aria-hidden="true">+</span>
-        </summary>
-        <div class="fr-faq__a">Fine-tuning is one step of compile. kolm wraps capture (where do the rows come from?), distill (which student? which teacher? what loss?), quantize (verified roundtrip), eval (frozen at compile), package (one file), sign (Ed25519), and verify (registry + receipt). The value is the wiring.</div>
-      </details>
-      <details class="fr-faq__row">
-        <summary>
-          <span class="fr-faq__n">08</span>
-          <span class="fr-faq__q">What if I just want to verify someone else's <code>.kolm</code>?</span>
-          <span class="fr-faq__chev" aria-hidden="true">+</span>
-        </summary>
-        <div class="fr-faq__a">Free, no signup. <code>curl https://kolm.ai/v1/verify/&lt;cid&gt;</code> returns the registry row. <code>kolm verify file.kolm</code> verifies an artifact locally. <code>kolm verify --receipt &lt;receipt.json&gt;</code> verifies a response. All three work without an API key.</div>
-      </details>
-      <details class="fr-faq__row">
-        <summary>
-          <span class="fr-faq__n">09</span>
-          <span class="fr-faq__q">How do I export my data if I leave kolm?</span>
-          <span class="fr-faq__chev" aria-hidden="true">+</span>
-        </summary>
-        <div class="fr-faq__a"><code>kolm account export</code> writes a JSONL of every capture, every artifact, every receipt, every registry row, and every audit-log entry. Apache-2.0 license + open artifact format means the data is yours forever; rebuild the same compile elsewhere from the export.</div>
-      </details>
-      <details class="fr-faq__row">
-        <summary>
-          <span class="fr-faq__n">10</span>
-          <span class="fr-faq__q">How do I cancel my plan?</span>
-          <span class="fr-faq__chev" aria-hidden="true">+</span>
-        </summary>
-        <div class="fr-faq__a">Dashboard: Settings &rarr; Plan &rarr; Cancel. CLI: <code>kolm billing cancel</code>. No phone tree, no retention specialist. Cancellation takes effect at the end of the current billing period; export your data first if you want it.</div>
+        <div class="fr-faq__a">SOC&nbsp;2 Type&nbsp;I available today. HIPAA mapping (<a href="/hipaa-mapping">/hipaa-mapping</a>) and a signed BAA (<a href="/baa">/baa</a>) are Enterprise controls. Explicit doors for healthcare, finance, legal, defense, and EU/sovereign deployments. PII redaction (text, image, audio) on by default at the gateway.</div>
       </details>
     </div>
     <p style="margin-top:24px;"><a class="fr-btn fr-btn--ghost" href="/faq">Browse the full FAQ <span class="fr-btn__arrow">&rarr;</span></a></p>
@@ -1962,108 +1062,7 @@ CMD [<span style="color:var(--ks-accent)">"kolm"</span>, <span style="color:var(
   })();
 </script>
 
-<script>
-  // ROI calc (slim 3-input version; full 3-yr model at /roi)
-  (function(){
-    var $ = function(id){ return document.getElementById(id); };
-    var fmt = function(n){
-      if (!isFinite(n) || isNaN(n)) n = 0;
-      if (n >= 1000000) return '$' + (n/1000000).toFixed(1) + 'M';
-      if (n >= 1000)    return '$' + (n/1000).toFixed(0) + 'k';
-      return '$' + Math.round(n).toLocaleString('en-US');
-    };
-    var fmtExact = function(n){
-      if (!isFinite(n) || isNaN(n)) n = 0;
-      return '$' + Math.round(n).toLocaleString('en-US');
-    };
-
-    function recompute(){
-      var calls = +$('roi-calls').value || 0;
-      var tin   = +$('roi-in').value || 0;
-      var tout  = +$('roi-out').value || 0;
-      var pin   = +$('roi-pin').value || 0;
-      var pout  = +$('roi-pout').value || 0;
-      var plan  = +$('roi-plan').value || 0;
-
-      // Sensible defaults for the homepage version (teacher k=8 on 2000 rows, 4 cycles/yr)
-      var k = 8, rows = 2000, cycles = 4;
-
-      var callsYr = calls * 12;
-      var cloudIn  = (callsYr * tin) / 1e6 * pin;
-      var cloudOut = (callsYr * tout) / 1e6 * pout;
-      var cloudCore = cloudIn + cloudOut;
-      var cloudY1 = cloudCore * 1.08; // +8% egress
-
-      var planYr = plan * 12;
-      var teacherIn  = (k * rows * tin) / 1e6 * pin;
-      var teacherOut = (k * rows * tout) / 1e6 * pout;
-      var teacherPerCycle = teacherIn + teacherOut;
-      var teacherYr = teacherPerCycle * cycles;
-      var kolmY1 = planYr + teacherYr;
-
-      var savings = Math.max(0, cloudY1 - kolmY1);
-      var mult = kolmY1 > 0 ? cloudY1 / kolmY1 : 0;
-
-      // Payback
-      var payback = 'n/a';
-      if (cloudY1 > kolmY1 && cloudY1 > 0) {
-        var cloudPm = cloudY1 / 12;
-        var teacherPm = teacherPerCycle * cycles / 12;
-        var kolmPm = plan + teacherPm;
-        if (kolmPm < cloudPm) {
-          var cloudAcc = 0, kolmAcc = 0;
-          var found = false;
-          for (var m = 1; m <= 36; m++) {
-            cloudAcc += cloudPm;
-            kolmAcc += kolmPm;
-            if (kolmAcc <= cloudAcc) { payback = m + (m === 1 ? ' month' : ' months'); found = true; break; }
-          }
-          if (!found) payback = '36+ months';
-        } else {
-          payback = 'kolm not cheaper here';
-        }
-      } else if (cloudY1 > 0) {
-        payback = 'kolm not cheaper here';
-      }
-
-      $('roi-savings').textContent  = savings > 0 ? fmt(savings) + ' / yr' : '$0';
-      $('roi-summary').innerHTML    = savings > 0
-        ? 'You\'d <b style="color:var(--ks-ink)">keep ' + fmt(savings) + '</b> in year 1 vs paying per token. That\'s <b style="color:var(--ks-ink)">' + mult.toFixed(1) + 'x</b> cheaper.'
-        : 'At this volume, the cloud bill is small enough that kolm\'s plan is the bigger line. Try a higher call rate.';
-      $('roi-cloud').textContent    = fmtExact(cloudY1);
-      $('roi-plan-out').textContent = fmtExact(planYr);
-      $('roi-teacher').textContent  = fmtExact(teacherYr);
-      $('roi-kolm').textContent     = fmtExact(kolmY1);
-      $('roi-payback').textContent  = payback;
-    }
-
-    ['roi-calls','roi-in','roi-out','roi-pin','roi-pout','roi-plan'].forEach(function(id){
-      var el = $(id);
-      if (el) el.addEventListener('input', recompute);
-    });
-
-    var presets = {
-      support: { calls: 1200000, tin: 800,  tout: 250, pin: 3, pout: 15, plan: 49 },
-      extract: { calls: 83333,   tin: 3200, tout: 600, pin: 5, pout: 25, plan: 149 },
-      agent:   { calls: 600000,  tin: 2500, tout: 900, pin: 5, pout: 25, plan: 149 }
-    };
-    document.querySelectorAll('.home-roi-preset').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var p = presets[btn.getAttribute('data-preset')];
-        if (!p) return;
-        $('roi-calls').value = p.calls;
-        $('roi-in').value    = p.tin;
-        $('roi-out').value   = p.tout;
-        $('roi-pin').value   = p.pin;
-        $('roi-pout').value  = p.pout;
-        $('roi-plan').value  = p.plan;
-        recompute();
-      });
-    });
-
-    recompute();
-  })();
-</script>
+<!-- W626: ROI calc JS removed — calculator lives at /roi. -->
 
 <!-- service worker -->
 <script>

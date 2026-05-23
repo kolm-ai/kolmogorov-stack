@@ -715,25 +715,23 @@
 .fr-faq {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0;
+  border-bottom: 1px solid rgba(236, 231, 220, 0.07);
 }
 .fr-faq__row {
-  border: 1px solid rgba(236, 231, 220, 0.07);
-  border-radius: var(--radius-md, 12px);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.012) 0%, rgba(255,255,255,0.003) 100%),
-    var(--surface-1);
+  border: 0;
+  border-top: 1px solid rgba(236, 231, 220, 0.07);
+  border-radius: 0;
+  background: transparent;
   overflow: hidden;
   transition:
     border-color var(--fr-duration-quick) var(--fr-spring-base),
     box-shadow var(--fr-duration-flow) var(--fr-spring-base);
 }
-.fr-faq__row:hover { border-color: rgba(126, 240, 210, 0.20); }
+.fr-faq__row:hover { background: rgba(126, 240, 210, 0.012); }
 .fr-faq__row[open] {
-  border-color: var(--fr-mint-edge);
-  box-shadow: 0 0 0 1px rgba(126, 240, 210, 0.16), 0 14px 36px -16px rgba(126, 240, 210, 0.20);
-  background:
-    linear-gradient(180deg, rgba(126, 240, 210, 0.05) 0%, rgba(255, 255, 255, 0.005) 30%, var(--surface-1) 100%);
+  background: linear-gradient(90deg, rgba(126, 240, 210, 0.045) 0%, rgba(126, 240, 210, 0.008) 30%, transparent 80%);
+  box-shadow: inset 2px 0 0 var(--fr-mint);
 }
 .fr-faq__row > summary {
   list-style: none;
@@ -771,9 +769,11 @@
 }
 .fr-faq__chev {
   font-family: var(--fr-font-mono);
-  color: var(--ink-3);
+  color: var(--fr-mint);
+  opacity: 0.7;
   text-align: right;
-  font-size: 18px;
+  font-size: 20px;
+  font-weight: 500;
   line-height: 1;
   transition: transform var(--fr-duration-quick) var(--fr-spring-fast),
               color var(--fr-duration-quick) var(--fr-spring-base);
@@ -853,7 +853,7 @@
 .fr-numbered-list > li {
   position: relative;
   display: grid;
-  grid-template-columns: 88px minmax(0, 1fr);
+  grid-template-columns: 130px minmax(0, 1fr);
   gap: clamp(20px, 3vw, 36px);
   padding: 28px 0 32px;
   border-top: 1px solid rgba(236, 231, 220, 0.08);
@@ -862,6 +862,8 @@
 .fr-numbered-list > li::before {
   counter-increment: fr-num-list;
   content: counter(fr-num-list, decimal-leading-zero);
+  grid-column: 1;
+  grid-row: 1;
   font-family: var(--fr-font-mono);
   font-size: clamp(22px, 2.6vw, 30px);
   font-weight: 500;
@@ -871,6 +873,36 @@
   letter-spacing: 0;
   align-self: start;
   padding-top: 6px;
+}
+/* W629: when an __k label is present (named-key variant), it replaces the
+   auto-counter — pricing.html uses Free / Pro / Team / Enterprise as keys
+   rather than 01/02/03/04 because the names are more meaningful. */
+.fr-numbered-list > li:has(.fr-numbered-list__k)::before { display: none; }
+.fr-numbered-list__k {
+  grid-column: 1;
+  grid-row: 1;
+  font-family: var(--fr-font-mono);
+  font-size: var(--fr-text-xs);
+  font-weight: 500;
+  letter-spacing: var(--fr-track-label);
+  text-transform: uppercase;
+  color: var(--fr-mint);
+  align-self: start;
+  padding-top: 8px;
+  line-height: 1.35;
+  word-break: break-word;
+}
+/* W629: force all content children into the right column regardless of how
+   many flat siblings exist. Before this, a flat <li><span __k><h3 __h><p __p>
+   would land __h into the 88px gutter column and wrap mid-word. */
+.fr-numbered-list__h,
+.fr-numbered-list__p,
+.fr-numbered-list__meta,
+.fr-numbered-list__link,
+.fr-numbered-list > li > div,
+.fr-numbered-list > li > pre,
+.fr-numbered-list > li > .fr-cli {
+  grid-column: 2;
 }
 .fr-numbered-list__h {
   font-family: var(--fr-font-display);
@@ -921,8 +953,9 @@
 .fr-numbered-list__link:hover { gap: 10px; }
 .fr-numbered-list__link::after { content: '\2192'; opacity: 0.7; }
 @media (max-width: 640px) {
-  .fr-numbered-list > li { grid-template-columns: 56px minmax(0, 1fr); gap: 16px; padding: 22px 0 24px; }
+  .fr-numbered-list > li { grid-template-columns: 84px minmax(0, 1fr); gap: 16px; padding: 22px 0 24px; }
   .fr-numbered-list > li::before { font-size: 20px; padding-top: 4px; }
+  .fr-numbered-list__k { font-size: 11px; padding-top: 6px; }
   .fr-numbered-list__h { font-size: 18px; }
   .fr-numbered-list__p { font-size: 14.5px; }
 }
@@ -1040,6 +1073,85 @@
   color: var(--ink-3);
 }
 .fr-quote-band__cite strong { color: var(--ink-2); font-weight: 500; }
+
+/* --- .fr-flowpipe ---
+   Mobile-first pipeline. An ordered list of stages where each row carries
+   a chain of pill-shaped chips and a quiet right-aligned label. On wide
+   viewports rows indent by depth so it reads as a flow; on narrow viewports
+   indent collapses and label wraps under the chain. No horizontal scroll. */
+.fr-flowpipe {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid rgba(236, 231, 220, 0.08);
+}
+.fr-flowpipe__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 0;
+  border-bottom: 1px solid rgba(236, 231, 220, 0.08);
+}
+.fr-flowpipe__row[data-depth="1"] { padding-left: clamp(0px, 4vw, 48px); }
+.fr-flowpipe__row[data-depth="2"] { padding-left: clamp(0px, 8vw, 96px); }
+.fr-flowpipe__row[data-depth="3"] { padding-left: clamp(0px, 12vw, 144px); }
+.fr-flowpipe__row[data-depth="4"] { padding-left: clamp(0px, 16vw, 192px); }
+.fr-flowpipe__chain {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.fr-flowpipe__chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border: 1px solid rgba(236, 231, 220, 0.16);
+  border-radius: 999px;
+  background: rgba(236, 231, 220, 0.03);
+  font-family: var(--fr-font-mono);
+  font-size: 13px;
+  color: var(--ink-1);
+  letter-spacing: 0;
+}
+.fr-flowpipe__chip--accent {
+  border-color: var(--fr-mint-edge);
+  background: rgba(126, 240, 210, 0.10);
+  color: var(--fr-mint);
+  font-weight: 600;
+}
+.fr-flowpipe__arrow {
+  color: var(--fr-mint);
+  font-family: var(--fr-font-mono);
+  font-size: 14px;
+}
+.fr-flowpipe__label {
+  font-family: var(--fr-font-sans);
+  font-size: 13px;
+  color: var(--ink-3);
+  font-style: italic;
+  text-align: right;
+  flex-shrink: 0;
+}
+.fr-flowpipe__caption {
+  margin-top: 14px;
+  font-family: var(--fr-font-mono);
+  font-size: var(--fr-text-xs);
+  letter-spacing: var(--fr-track-label);
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+@media (max-width: 640px) {
+  .fr-flowpipe__row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding-left: 0 !important;
+  }
+  .fr-flowpipe__label { text-align: left; }
+  .fr-flowpipe__chip { font-size: 12.5px; padding: 3px 10px; }
+}
 
 /* --- .fr-ascii-band ---
    Mono ASCII diagram block — replaces flow cards with a single
@@ -1269,7 +1381,7 @@
 @media (max-width: 540px)  { .fr-tier-row { grid-template-columns: 1fr; } }
 .fr-tier {
   position: relative;
-  padding: clamp(24px, 2.4vw, 32px) clamp(20px, 2vw, 28px);
+  padding: clamp(40px, 4vw, 52px) clamp(20px, 2vw, 28px) clamp(24px, 2.4vw, 32px);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -1286,17 +1398,29 @@
   .fr-tier:last-child { border-bottom: 0; }
 }
 .fr-tier:hover { background: rgba(126, 240, 210, 0.025); }
-.fr-tier--feat { background: linear-gradient(180deg, rgba(126, 240, 210, 0.07) 0%, transparent 50%); }
+.fr-tier--feat {
+  background: linear-gradient(180deg, rgba(126, 240, 210, 0.10) 0%, rgba(126, 240, 210, 0.015) 60%, transparent 100%);
+  box-shadow: inset 0 3px 0 0 var(--fr-mint), 0 18px 50px -20px rgba(126, 240, 210, 0.28);
+  z-index: 1;
+}
 .fr-tier--feat::before {
   content: 'Most teams start here';
   position: absolute;
-  top: 16px; right: 16px;
+  top: 14px; left: 50%;
+  transform: translateX(-50%);
   font-family: var(--fr-font-mono);
-  font-size: 10px;
+  font-size: 10.5px;
   letter-spacing: var(--fr-track-label);
   text-transform: uppercase;
-  color: var(--fr-mint);
+  color: #0c1a16;
+  background: var(--fr-mint);
+  padding: 4px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+  font-weight: 600;
+  box-shadow: 0 6px 16px -4px rgba(126, 240, 210, 0.45);
 }
+.fr-tier--feat .fr-tier__price { color: var(--fr-mint); }
 .fr-tier__name {
   font-family: var(--fr-font-mono);
   font-size: var(--fr-text-xs);
@@ -1360,4 +1484,291 @@
   margin-top: 16px;
   padding-top: 16px;
   border-top: 1px solid rgba(236, 231, 220, 0.06);
+}
+
+/* ============================================================
+   W627 editorial primitives — hairline rule-list + three-col,
+   replacing card grids in the quantize section.
+   ============================================================ */
+.fr-rule-list {
+  list-style: none;
+  margin: clamp(20px, 2.4vw, 28px) 0;
+  padding: 0;
+  border-top: 1px solid rgba(236, 231, 220, 0.08);
+  border-bottom: 1px solid rgba(236, 231, 220, 0.08);
+}
+.fr-rule-list > li {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.9fr) minmax(160px, 0.8fr) minmax(0, 2fr);
+  gap: clamp(20px, 3vw, 40px);
+  align-items: baseline;
+  padding: clamp(18px, 2.2vw, 24px) 0;
+  border-top: 1px solid rgba(236, 231, 220, 0.06);
+}
+.fr-rule-list > li:first-child { border-top: 0; }
+.fr-rule-list__when {
+  font-family: var(--fr-font-sans);
+  font-size: var(--fr-text-base);
+  color: var(--ink-1);
+  font-weight: 500;
+  letter-spacing: -0.005em;
+}
+.fr-rule-list__flag {
+  font-family: var(--fr-font-mono);
+  font-size: 13.5px;
+  color: var(--fr-mint);
+  letter-spacing: 0;
+}
+.fr-rule-list__why {
+  font-family: var(--fr-font-sans);
+  font-size: 14.5px;
+  color: var(--ink-2);
+  line-height: 1.55;
+  margin: 0;
+}
+@media (max-width: 800px) {
+  .fr-rule-list > li { grid-template-columns: 1fr; gap: 6px; padding: 18px 0; }
+  .fr-rule-list__flag { font-size: 13px; }
+}
+
+.fr-three-col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  margin: clamp(20px, 2.4vw, 28px) 0;
+  border-top: 1px solid rgba(236, 231, 220, 0.08);
+  border-bottom: 1px solid rgba(236, 231, 220, 0.08);
+}
+.fr-three-col__col {
+  padding: clamp(18px, 2vw, 24px) clamp(16px, 2vw, 28px);
+  border-left: 1px solid rgba(236, 231, 220, 0.06);
+}
+.fr-three-col__col:first-child { border-left: 0; padding-left: 0; }
+.fr-three-col__col:last-child { padding-right: 0; }
+.fr-three-col__h {
+  font-family: var(--fr-font-display);
+  font-size: 17px;
+  font-weight: 540;
+  color: var(--fr-mint);
+  margin: 0 0 8px;
+  letter-spacing: -0.005em;
+}
+.fr-three-col__p {
+  font-family: var(--fr-font-sans);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  margin: 0;
+}
+.fr-three-col__p code {
+  font-family: var(--fr-font-mono);
+  font-size: 12.5px;
+  background: rgba(126,240,210,0.08);
+  border: 1px solid var(--fr-mint-edge);
+  border-radius: 3px;
+  padding: 1px 5px;
+}
+.fr-three-col__p a {
+  color: var(--fr-mint);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+@media (max-width: 800px) {
+  .fr-three-col { grid-template-columns: 1fr; }
+  .fr-three-col__col { border-left: 0; border-top: 1px solid rgba(236, 231, 220, 0.06); padding: 18px 0; }
+  .fr-three-col__col:first-child { border-top: 0; padding-top: 0; }
+  .fr-three-col__col:last-child { padding-bottom: 0; }
+}
+
+/* --- .fr-precision-table (W631) ---
+   Editorial replacement for the 12-cell .fr-matrix grid that read as
+   cramped rectangles. Three-column scan: mono bit-width on the left,
+   recipe name + caption flowing in the middle, status pill on the
+   right. Hairline borders between rows; no card backgrounds. Lets
+   long captions breathe across the full content width instead of
+   wrapping inside a 180px cell. Used on /compile precisions section. */
+.fr-precision-table {
+  margin: 32px 0 0;
+  border-top: 1px solid rgba(236, 231, 220, 0.10);
+}
+.fr-precision-table__row {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr) auto;
+  gap: clamp(20px, 3vw, 36px);
+  padding: 22px 0;
+  border-bottom: 1px solid rgba(236, 231, 220, 0.08);
+  align-items: start;
+  transition: background var(--fr-duration-quick) var(--fr-spring-base);
+}
+.fr-precision-table__row:hover { background: rgba(126, 240, 210, 0.025); }
+.fr-precision-table__bit {
+  font-family: var(--fr-font-mono);
+  font-size: clamp(20px, 2.2vw, 26px);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--fr-mint);
+  letter-spacing: -0.01em;
+  line-height: 1;
+  padding-top: 6px;
+  white-space: nowrap;
+}
+.fr-precision-table__bit-unit {
+  display: inline-block;
+  margin-left: 4px;
+  font-size: var(--fr-text-xs);
+  letter-spacing: var(--fr-track-label);
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-weight: 500;
+}
+.fr-precision-table__name {
+  font-family: var(--fr-font-display);
+  font-size: var(--fr-text-md);
+  font-weight: 560;
+  color: var(--ink-1);
+  line-height: 1.25;
+  margin: 0 0 6px;
+  letter-spacing: var(--fr-track-tight);
+}
+.fr-precision-table__desc {
+  font-family: var(--fr-font-sans);
+  font-size: var(--fr-text-sm);
+  color: var(--ink-2);
+  line-height: 1.55;
+  margin: 0;
+  max-width: 62ch;
+}
+.fr-precision-table__desc code {
+  font-family: var(--fr-font-mono);
+  font-size: 0.92em;
+  background: rgba(126, 240, 210, 0.08);
+  border: 1px solid var(--fr-mint-edge);
+  border-radius: 3px;
+  padding: 1px 5px;
+  color: var(--fr-mint);
+}
+.fr-precision-table__status {
+  align-self: start;
+  padding-top: 6px;
+  white-space: nowrap;
+}
+@media (max-width: 720px) {
+  .fr-precision-table__row {
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 14px 18px;
+    padding: 18px 0;
+  }
+  .fr-precision-table__bit { font-size: 18px; padding-top: 4px; }
+  .fr-precision-table__status {
+    grid-column: 2;
+    padding-top: 0;
+    margin-top: 4px;
+  }
+}
+
+/* --- .fr-spec-list (W631) ---
+   Editorial replacement for 3-col card grids of long-named entities
+   (model students, SDK packages). Each row gets full content width
+   for the description, a baseline-aligned header with the long name
+   + a mono mint delta/version pill, and inline mono spec metadata.
+   Hairline borders between rows; no card backgrounds. Lets long
+   names like "DeepSeek-R1-Distill-Qwen-32B" sit without wrapping. */
+.fr-spec-list {
+  list-style: none !important;
+  list-style-type: none !important;
+  margin: 32px 0 0;
+  padding: 0;
+  border-top: 1px solid rgba(236, 231, 220, 0.10);
+  counter-reset: none;
+}
+.fr-spec-list > li {
+  list-style: none !important;
+  list-style-type: none !important;
+  padding: 24px 0 28px;
+  border-bottom: 1px solid rgba(236, 231, 220, 0.08);
+  display: block;
+  transition: background var(--fr-duration-quick) var(--fr-spring-base);
+}
+.fr-spec-list > li::marker { content: '' !important; display: none; }
+.fr-spec-list > li:hover { background: rgba(126, 240, 210, 0.025); }
+.fr-spec-list__head {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.fr-spec-list__name {
+  font-family: var(--fr-font-display);
+  font-size: clamp(18px, 1.9vw, 22px);
+  font-weight: 560;
+  color: var(--ink-1);
+  margin: 0;
+  letter-spacing: var(--fr-track-tight);
+  line-height: 1.2;
+}
+.fr-spec-list__delta {
+  font-family: var(--fr-font-mono);
+  font-size: var(--fr-text-xs);
+  letter-spacing: var(--fr-track-label);
+  text-transform: uppercase;
+  color: var(--fr-mint);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.fr-spec-list__p {
+  font-family: var(--fr-font-sans);
+  font-size: var(--fr-text-base);
+  line-height: 1.6;
+  color: var(--ink-2);
+  margin: 0 0 14px;
+  max-width: 72ch;
+}
+.fr-spec-list__specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 24px;
+  font-family: var(--fr-font-mono);
+  font-size: var(--fr-text-xs);
+  color: var(--ink-3);
+  line-height: 1.5;
+}
+.fr-spec-list__specs strong {
+  color: var(--ink-2);
+  font-weight: 500;
+  padding-right: 6px;
+  text-transform: uppercase;
+  letter-spacing: var(--fr-track-label);
+}
+.fr-spec-list__specs strong::after { content: ' '; }
+.fr-spec-list__specs code,
+.fr-spec-list__p code {
+  font-family: var(--fr-font-mono);
+  font-size: 0.92em;
+  background: rgba(126, 240, 210, 0.08);
+  border: 1px solid var(--fr-mint-edge);
+  border-radius: 3px;
+  padding: 0 4px;
+  color: var(--fr-mint);
+}
+.fr-spec-list__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-family: var(--fr-font-mono);
+  font-size: var(--fr-text-xs);
+  letter-spacing: var(--fr-track-label);
+  text-transform: uppercase;
+  color: var(--fr-mint);
+  text-decoration: none;
+  transition: gap var(--fr-duration-quick) var(--fr-spring-fast);
+}
+.fr-spec-list__cta:hover { gap: 10px; }
+.fr-spec-list__cta::after { content: '\2192'; opacity: 0.7; }
+@media (max-width: 640px) {
+  .fr-spec-list > li { padding: 20px 0 22px; }
+  .fr-spec-list__name { font-size: 17px; }
+  .fr-spec-list__p { font-size: 14.5px; }
 }
