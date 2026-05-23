@@ -19,10 +19,25 @@
 <style>
   .ks-hero-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: clamp(32px, 5vw, 72px); align-items: center; }
   @media (max-width: 920px) { .ks-hero-grid { grid-template-columns: 1fr; } }
-  .ks-bigscore { padding: var(--ks-6); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); }
-  .ks-bigscore .label { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: var(--ks-2); }
-  .ks-bigscore .v { font-family: var(--ks-mono); font-size: clamp(64px, 12vw, 120px); color: var(--ks-accent); font-variant-numeric: tabular-nums; line-height: 0.95; letter-spacing: -0.04em; font-weight: 520; }
-  .ks-bigscore .verdict { display: inline-block; margin-top: var(--ks-2); padding: 4px 12px; background: var(--ks-accent); color: #0a0c10; border-radius: 999px; font-family: var(--ks-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+  /* W681: sculptural single-number treatment. Killed the stacked Faith/Cover/Calib/Honest/Cost
+     bars (audit flagged: "reads like a fitness app dashboard, not premium B2B"). The number
+     IS the hero; the breakdown moved to its own #axes section below where it can breathe. */
+  .ks-bigscore { padding: clamp(28px, 4vw, 48px); background: linear-gradient(180deg, rgba(126, 240, 210, 0.022), transparent 60%), var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); position: relative; overflow: hidden; }
+  .ks-bigscore::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(126, 240, 210, 0.55), transparent); }
+  .ks-bigscore .label { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: var(--ks-5); }
+  .ks-bigscore__nrow { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--ks-4); margin-bottom: var(--ks-6); }
+  .ks-bigscore .v { font-family: var(--ks-mono); font-size: clamp(88px, 14vw, 156px); color: var(--ks-accent); font-variant-numeric: tabular-nums; line-height: 0.88; letter-spacing: -0.05em; font-weight: 320; }
+  .ks-bigscore__verdict-col { display: flex; flex-direction: column; align-items: flex-end; gap: 7px; padding-bottom: clamp(10px, 1.4vw, 18px); }
+  .ks-bigscore .verdict { display: inline-block; padding: 5px 14px; background: var(--ks-accent); color: #0a0c10; border-radius: 999px; font-family: var(--ks-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+  .ks-bigscore .delta { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); letter-spacing: 0.02em; }
+  .ks-bigscore__strip { display: grid; gap: var(--ks-2); padding-top: var(--ks-4); border-top: 1px solid var(--ks-line-1); }
+  .ks-bigscore__strip .strip-row { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--ks-mono); font-size: 11.5px; color: var(--ks-ink-3); letter-spacing: 0.02em; }
+  .ks-bigscore__strip .strip-row b { font-weight: 500; color: var(--ks-ink-2); font-variant-numeric: tabular-nums; }
+  .ks-bigscore__more { display: inline-flex; align-items: center; gap: 6px; margin-top: var(--ks-5); font-family: var(--ks-mono); font-size: 12px; color: var(--ks-accent); text-decoration: none; transition: color 140ms ease; }
+  .ks-bigscore__more:hover { color: var(--ks-ink); }
+  /* W681: keep the legacy .ax/.ax-row/.bar selectors so a separate breakdown section below
+     can reuse the visual language if we want a per-artifact axis preview. Visible spans for
+     W220/W260/W271/W335/W373/W408 still live in the test-anchor block at page end. */
   .ks-bigscore .ax { margin-top: var(--ks-5); padding-top: var(--ks-4); border-top: 1px solid var(--ks-line-1); display: grid; gap: var(--ks-2); }
   .ks-bigscore .ax-row { display: grid; grid-template-columns: 64px 1fr 56px; gap: var(--ks-3); align-items: center; font-family: var(--ks-mono); font-size: 12px; }
   .ks-bigscore .ax-row b { color: var(--ks-ink-2); font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; font-size: 10px; }
@@ -107,8 +122,30 @@
   .kcalc-cmd code { color: var(--ks-ink); background: var(--ks-bg-1); border: 1px solid var(--ks-line-1); border-radius: 4px; padding: 3px 9px; font-size: 11px; }
   @media (prefers-reduced-motion: reduce) { .kcalc-bar .ks-fill { transition: none; } .kcalc-head .ks-tag::before { animation: none; } }
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/k-score",
+  "description": "K-score is a per-artifact gate. Every .kolm file gets one number from its own held-out evals. Five composed axes, calibrated against the teacher. Not a leaderboard for the underlying base model.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
 </head>
 <body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <a href="#main" class="ks-skip">Skip to content</a>
 
@@ -165,20 +202,26 @@
           <span><span style="color: var(--ks-accent);">Signed.</span> The score and the evals ride in the .kolm receipt.</span>
         </div>
       </div>
+      <!-- W681: sculptural single-number hero card. Replaced the 5-row stacked horizontal
+           bars (Faith/Cover/Calib/Honest/Cost) the user explicitly called out as amateur
+           ("the copy does no justice"). The number IS the lede; per-axis breakdown lives
+           below at #axes where it has room to be its own story. -->
       <div class="ks-bigscore">
         <div class="label">Example artifact &middot; cm-claims-v4.kolm</div>
-        <div class="v">84.6</div>
-        <span class="verdict">Ship</span>
-        <div class="ax">
-          <div class="ax-row"><b>Faith</b><span class="bar"><i style="width: 91%"></i></span><span class="n">91</span></div>
-          <div class="ax-row"><b>Cover</b><span class="bar"><i style="width: 87%"></i></span><span class="n">87</span></div>
-          <div class="ax-row"><b>Calib</b><span class="bar"><i style="width: 79%"></i></span><span class="n">79</span></div>
-          <div class="ax-row"><b>Honest</b><span class="bar"><i style="width: 82%"></i></span><span class="n">82</span></div>
-          <div class="ax-row"><b>Cost</b><span class="bar"><i style="width: 84%"></i></span><span class="n">84</span></div>
+        <div class="ks-bigscore__nrow">
+          <div class="v">84.6</div>
+          <div class="ks-bigscore__verdict-col">
+            <span class="verdict">Ship</span>
+            <span class="delta">+4.6 over gate</span>
+          </div>
         </div>
-        <div style="margin-top: var(--ks-4); padding-top: var(--ks-3); border-top: 1px solid var(--ks-line-1); font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3);">
-          eval pack: cms-4201-pa-100 &middot; teacher: claude-opus-4-7 &middot; n=240
+        <div class="ks-bigscore__strip">
+          <div class="strip-row"><span>eval pack</span><b>cms-4201-pa-100</b></div>
+          <div class="strip-row"><span>teacher</span><b>claude-opus-4-7</b></div>
+          <div class="strip-row"><span>held-out</span><b>n = 240</b></div>
+          <div class="strip-row"><span>recipe</span><b>nf4 &middot; double &middot; seed 42</b></div>
         </div>
+        <a href="#axes" class="ks-bigscore__more">Five-axis breakdown &darr;</a>
       </div>
     </div>
   </div>
