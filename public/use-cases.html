@@ -415,6 +415,40 @@
  </div>
 </section>
 
+<section class="verticals" aria-label="By problem shape (cross-vertical)" id="w695-by-shape" style="border-top:1px solid var(--ks-rule)">
+ <div class="wrap">
+ <h2>Or by problem shape.</h2>
+ <p class="sec-lede">If your problem cuts across industries &mdash; support tickets, multi-step agents, anything that has to fit on a phone or a Pi &mdash; start here. Same compilation flow as the vertical pages above; different surface.</p>
+ <div class="verts-spread vert-grid" data-w695="shape-grid" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+
+ <div class="vert-row vert" data-shape="support-automation">
+ <div class="vert-row__head"><span class="vert-row__tag">cost compression</span><h3 class="vert-row__h">Support automation</h3></div>
+ <p class="vert-row__p pain">Per-ticket cost on GPT-4-class is $0.03&ndash;$0.05. Volume scales linearly. The vendor bill is the line item finance keeps asking about.</p>
+ <p class="vert-row__solution solution">Distill the prompts that already work into a 3&ndash;7B INT4 specialist. The same triage, summarization, and disposition logic, running at ~$0.0002 per ticket on your own hardware.</p>
+ <div class="vert-row__chips chips"><span class="chip">$0.04 &rarr; $0.0002</span><span class="chip">3&ndash;7B INT4</span><span class="chip">OpenAI drop-in</span></div>
+ <a class="vert-row__cta" href="/for/support-automation">Open Support automation &rarr;</a>
+ </div>
+
+ <div class="vert-row vert" data-shape="agents">
+ <div class="vert-row__head"><span class="vert-row__tag">trace compile</span><h3 class="vert-row__h">Agents</h3></div>
+ <p class="vert-row__p pain">A 14-step LangChain trace burns 14 LLM calls per request. Each step is a billing event. Each retry doubles the bill. Tail latency is whatever the worst step decides.</p>
+ <p class="vert-row__solution solution">Capture the trace, compile it into a single-pass specialist that emits the same final output. Replay byte-identically. 14 calls collapse to 1. Caches turn into instant returns.</p>
+ <div class="vert-row__chips chips"><span class="chip">14 calls &rarr; 1</span><span class="chip">replay byte-exact</span><span class="chip">trace &rarr; .kolm</span></div>
+ <a class="vert-row__cta" href="/for/agents">Open Agents &rarr;</a>
+ </div>
+
+ <div class="vert-row vert" data-shape="edge-ai">
+ <div class="vert-row__head"><span class="vert-row__tag">device-side</span><h3 class="vert-row__h">Edge AI</h3></div>
+ <p class="vert-row__p pain">A frontier model is 70&ndash;700 GB. Your device has 4 GB of RAM, no GPU, no network most of the time. The cloud round-trip does not exist in this physical environment.</p>
+ <p class="vert-row__solution solution">INT4 distill the slice of behavior the device actually needs. Ships at 0.4&ndash;5 GB. Runs on Raspberry Pi, phones, WebGPU in the browser tab. Zero round-trip.</p>
+ <div class="vert-row__chips chips"><span class="chip">0.4&ndash;5 GB</span><span class="chip">Pi / phone / WebGPU</span><span class="chip">offline-capable</span></div>
+ <a class="vert-row__cta" href="/for/edge-ai">Open Edge AI &rarr;</a>
+ </div>
+
+ </div>
+ </div>
+</section>
+
 <section class="faq" aria-label="What's a use case page actually for?">
  <div class="wrap">
  <h2>What's a use case page actually for?</h2>
