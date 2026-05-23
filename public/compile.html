@@ -11,9 +11,22 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/frontier.css">
 <script defer src="/frontier.js"></script>
 <style>
+  /* W644 helpers — editorial fr-spec-list / fr-numbered-list scaffolding for compile.html */
+  .cp-tpl-list .fr-spec-list__delta--cat { color: var(--fr-mint, #6cbf8d); }
+  .cp-tpl-list .cp-tpl-cli { display:inline-block; margin-top: 12px; font-family: var(--ks-mono); font-size: 12.5px; padding: 8px 10px; background: #050607; border: 1px solid var(--ks-line-1); border-radius: 6px; color: var(--ks-ink); }
+  .cp-tpl-list .cp-tpl-cli .arg { color: var(--ks-accent); }
+  .cp-bk-list .fr-spec-list__delta { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.03em; }
+  .cp-bk-list .fr-spec-list__delta--violet { color: #c39bf8; border-color: rgba(195,155,248,0.45); }
+  .cp-bk-list .fr-spec-list__delta--amber  { color: #e8a86a; border-color: rgba(232,168,106,0.45); }
+  .cp-bk-list .fr-spec-list__delta--default { color: var(--fr-mint, #6cbf8d); }
+  .cp-dx-list .fr-spec-list__row { display: grid; grid-template-columns: 40px 1fr; gap: 16px; align-items: start; }
+  .cp-dx-list .cp-dx-ico { width: 30px; height: 30px; border-radius: 7px; display: flex; align-items: center; justify-content: center; background: var(--ks-accent-soft); border: 1px solid var(--ks-accent-edge); color: var(--ks-accent); margin-top: 4px; }
+  .cp-dx-list .cp-dx-body .fr-spec-list__head { gap: 12px; }
+
   .sec-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
   .sec-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
   .sec-hero h1 { margin: 0 0 var(--ks-4); font-size: clamp(36px, 5vw, 56px); font-weight: 560; letter-spacing: -0.02em; line-height: 1.05; color: var(--ks-ink); }
@@ -111,8 +124,35 @@
   .dx-card p { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ks-ink-2); }
   .dx-card code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); background: rgba(126,240,210,0.06); padding: 1px 5px; border-radius: 3px; }
 </style>
+  <meta property="og:title" content="Compile &middot; kolm.ai">
+  <meta property="og:description" content="The compiler step. Spec in, .kolm artifact out, Ed25519-signed receipt over a JCS-canonical SHA-256 hash. The artifact_cid binds weights, K-score, eval pack, and teacher trace into one verifiable object an auditor can validate offline.">
+  <meta property="og:image" content="https://kolm.ai/og/compile.svg">
+  <meta property="og:url" content="https://kolm.ai/compile">
+  <meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/compile",
+  "description": "The compiler step. Spec in, .kolm artifact out, Ed25519-signed receipt over a JCS-canonical SHA-256 hash. The artifact_cid binds weights, K-score, eval pack, and teacher trace into one verifiable object an auditor can validate offline.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
 </head>
 <body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <a href="#main" class="ks-skip">Skip to content</a>
 
@@ -188,38 +228,32 @@
   <div class="ks-wrap">
     <h2>Six tasks you can compile in five minutes</h2>
     <p class="sub">Run any of these against the seed corpus the template ships with. Each is a real artifact, with real evals, that ships at K &gt;= 0.85.</p>
-    <div class="tpls">
-      <div class="tpl">
-        <div class="cat">Email</div>
-        <h3>Reply to my inbox in my voice. Draft, never send.</h3>
-        <code><span class="arg">kolm compile</span> "draft inbox replies in my voice"</code>
-      </div>
-      <div class="tpl">
-        <div class="cat">Code</div>
-        <h3>Spot bugs in PRs the way our staff engineer would.</h3>
-        <code><span class="arg">kolm compile</span> "spot risky PR changes"</code>
-      </div>
-      <div class="tpl">
-        <div class="cat">Photos</div>
-        <h3>Find every photo from a trip and group by location.</h3>
-        <code><span class="arg">kolm compile</span> "group trip photos by location"</code>
-      </div>
-      <div class="tpl">
-        <div class="cat">Health</div>
-        <h3>Daily recap of activity, sleep, training load.</h3>
-        <code><span class="arg">kolm compile</span> "summarize daily health signals"</code>
-      </div>
-      <div class="tpl">
-        <div class="cat">Finance</div>
-        <h3>Categorize every transaction; flag the ones that look wrong.</h3>
-        <code><span class="arg">kolm compile</span> "classify transactions"</code>
-      </div>
-      <div class="tpl">
-        <div class="cat">Docs</div>
-        <h3>Answer questions grounded in our wiki, with citations.</h3>
-        <code><span class="arg">kolm compile</span> "answer wiki questions" --data ./wiki</code>
-      </div>
-    </div>
+    <ul class="fr-spec-list cp-tpl-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Reply to my inbox in my voice. Draft, never send.</h3><span class="fr-spec-list__delta fr-spec-list__delta--cat">EMAIL &middot; K &ge; 0.85</span></div>
+        <code class="cp-tpl-cli"><span class="arg">kolm compile</span> "draft inbox replies in my voice"</code>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Spot bugs in PRs the way our staff engineer would.</h3><span class="fr-spec-list__delta fr-spec-list__delta--cat">CODE &middot; K &ge; 0.85</span></div>
+        <code class="cp-tpl-cli"><span class="arg">kolm compile</span> "spot risky PR changes"</code>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Find every photo from a trip and group by location.</h3><span class="fr-spec-list__delta fr-spec-list__delta--cat">PHOTOS &middot; K &ge; 0.85</span></div>
+        <code class="cp-tpl-cli"><span class="arg">kolm compile</span> "group trip photos by location"</code>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Daily recap of activity, sleep, training load.</h3><span class="fr-spec-list__delta fr-spec-list__delta--cat">HEALTH &middot; K &ge; 0.85</span></div>
+        <code class="cp-tpl-cli"><span class="arg">kolm compile</span> "summarize daily health signals"</code>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Categorize every transaction; flag the ones that look wrong.</h3><span class="fr-spec-list__delta fr-spec-list__delta--cat">FINANCE &middot; K &ge; 0.85</span></div>
+        <code class="cp-tpl-cli"><span class="arg">kolm compile</span> "classify transactions"</code>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Answer questions grounded in our wiki, with citations.</h3><span class="fr-spec-list__delta fr-spec-list__delta--cat">DOCS &middot; K &ge; 0.85</span></div>
+        <code class="cp-tpl-cli"><span class="arg">kolm compile</span> "answer wiki questions" --data ./wiki</code>
+      </li>
+    </ul>
   </div>
 </section>
 
@@ -286,28 +320,36 @@ verify      kolm verify support-triage.kolm</pre>
   <div class="ks-wrap">
     <h2>Inside the compile pipeline</h2>
     <p class="sub">Four sub-steps, every one of which writes intermediate state into the run directory. A failure in any sub-step aborts the compile; nothing partial is ever signed.</p>
-    <div class="pipe">
-      <div class="pipe-step">
-        <span class="n">step 1 &middot; pack</span>
-        <h4>Build the zip</h4>
-        <p>Weights, tokenizer, eval pack snapshot, distill receipt chain, and target-specific sidecars (GGUF metadata, MLX manifest).</p>
-      </div>
-      <div class="pipe-step">
-        <span class="n">step 2 &middot; hash</span>
-        <h4>Content address</h4>
-        <p>SHA-256 over the canonical zip bytes; embedded in the receipt as <code>artifact_bytes_sha256</code>. Any post-compile edit breaks this.</p>
-      </div>
-      <div class="pipe-step">
-        <span class="n">step 3 &middot; canon</span>
-        <h4>JCS-canonical receipt</h4>
-        <p>The receipt JSON is JCS-canonicalized (RFC 8785), then hashed. The hash is the input to the Ed25519 signature.</p>
-      </div>
-      <div class="pipe-step">
-        <span class="n">step 4 &middot; sign</span>
-        <h4>Ed25519 over the hash</h4>
-        <p>Signed with the tenant key in <code>~/.kolm/keys</code>. Signature, public-key fingerprint, and receipt body all sit in the artifact zip.</p>
-      </div>
-    </div>
+    <ol class="fr-numbered-list cp-pipe-list">
+      <li class="fr-numbered-list__row">
+        <span class="fr-numbered-list__k">01 &middot; PACK</span>
+        <div class="fr-numbered-list__body">
+          <h3 class="fr-numbered-list__h">Build the zip</h3>
+          <p class="fr-numbered-list__p">Weights, tokenizer, eval pack snapshot, distill receipt chain, and target-specific sidecars (GGUF metadata, MLX manifest).</p>
+        </div>
+      </li>
+      <li class="fr-numbered-list__row">
+        <span class="fr-numbered-list__k">02 &middot; HASH</span>
+        <div class="fr-numbered-list__body">
+          <h3 class="fr-numbered-list__h">Content address</h3>
+          <p class="fr-numbered-list__p">SHA-256 over the canonical zip bytes; embedded in the receipt as <code>artifact_bytes_sha256</code>. Any post-compile edit breaks this.</p>
+        </div>
+      </li>
+      <li class="fr-numbered-list__row">
+        <span class="fr-numbered-list__k">03 &middot; CANON</span>
+        <div class="fr-numbered-list__body">
+          <h3 class="fr-numbered-list__h">JCS-canonical receipt</h3>
+          <p class="fr-numbered-list__p">The receipt JSON is JCS-canonicalized (RFC 8785), then hashed. The hash is the input to the Ed25519 signature.</p>
+        </div>
+      </li>
+      <li class="fr-numbered-list__row">
+        <span class="fr-numbered-list__k">04 &middot; SIGN</span>
+        <div class="fr-numbered-list__body">
+          <h3 class="fr-numbered-list__h">Ed25519 over the hash</h3>
+          <p class="fr-numbered-list__p">Signed with the tenant key in <code>~/.kolm/keys</code>. Signature, public-key fingerprint, and receipt body all sit in the artifact zip.</p>
+        </div>
+      </li>
+    </ol>
   </div>
 </section>
 
@@ -364,102 +406,114 @@ verify      kolm verify support-triage.kolm</pre>
     <span class="fr-eyebrow">PRECISIONS</span>
     <h2 class="fr-h2">Every bit-width. The compiler handles the calibration.</h2>
     <p class="fr-lede">From 1-bit ternary BitNet to FP8 and NVFP4. Activation-aware, imatrix-calibrated, K-score-gated. Cross-reference <a href="/forge">/forge</a> for runtime numbers and <a href="/benchmarks">/benchmarks</a> for end-to-end traces.</p>
-    <div class="fr-matrix">
+    <div class="fr-precision-table">
 
-      <div class="fr-matrix__cell">
-        <div class="fr-matrix__key"><span class="fr-num">1.0</span><span class="fr-num--unit">bit</span></div>
-        <div class="fr-matrix__val">BitNet b1.58 (binary)</div>
-        <div class="fr-matrix__caption">Ternary {-1, 0, +1} packed at 1.0-bit average. AngelSlim recipe; matmul becomes additions.</div>
-        <div class="fr-bar"><div class="fr-bar__fill" style="width:8%"></div></div>
-        <span class="fr-pill fr-pill--violet">research</span>
+      <div class="fr-precision-table__row">
+        <div class="fr-precision-table__bit">1.0<span class="fr-precision-table__bit-unit">bit</span></div>
+        <div>
+          <h3 class="fr-precision-table__name">BitNet b1.58 (binary)</h3>
+          <p class="fr-precision-table__desc">Ternary {-1, 0, +1} packed at 1.0-bit average. AngelSlim recipe; matmul becomes additions on CPU.</p>
+        </div>
+        <div class="fr-precision-table__status"><span class="fr-pill fr-pill--violet">research</span></div>
       </div>
 
-      <div class="fr-matrix__cell">
-        <div class="fr-matrix__key"><span class="fr-num">1.25</span><span class="fr-num--unit">bit</span></div>
-        <div class="fr-matrix__val">Sub-2-bit IQ1_M</div>
-        <div class="fr-matrix__caption">llama.cpp IQ1 family with imatrix calibration. Heavy K-score discount; preview only.</div>
-        <div class="fr-bar"><div class="fr-bar__fill" style="width:10%"></div></div>
-        <span class="fr-pill fr-pill--violet">preview</span>
+      <div class="fr-precision-table__row">
+        <div class="fr-precision-table__bit">1.25<span class="fr-precision-table__bit-unit">bit</span></div>
+        <div>
+          <h3 class="fr-precision-table__name">Sub-2-bit IQ1_M</h3>
+          <p class="fr-precision-table__desc">llama.cpp IQ1 family with imatrix calibration. Heavy K-score discount; preview only.</p>
+        </div>
+        <div class="fr-precision-table__status"><span class="fr-pill fr-pill--violet">preview</span></div>
       </div>
 
-      <div class="fr-matrix__cell">
-        <div class="fr-matrix__key"><span class="fr-num">1.58</span><span class="fr-num--unit">bit</span></div>
-        <div class="fr-matrix__val">BitNet ternary</div>
-        <div class="fr-matrix__caption">log2(3) = 1.58 bits per weight. Matmul-free inference path; CPU-friendly.</div>
-        <div class="fr-bar"><div class="fr-bar__fill" style="width:13%"></div></div>
-        <span class="fr-pill fr-pill--violet">research</span>
+      <div class="fr-precision-table__row">
+        <div class="fr-precision-table__bit">1.58<span class="fr-precision-table__bit-unit">bit</span></div>
+        <div>
+          <h3 class="fr-precision-table__name">BitNet ternary</h3>
+          <p class="fr-precision-table__desc">log&#8322;(3) = 1.58 bits per weight. Matmul-free inference path; CPU-friendly inference without specialized accelerators.</p>
+        </div>
+        <div class="fr-precision-table__status"><span class="fr-pill fr-pill--violet">research</span></div>
       </div>
 
-      <div class="fr-matrix__cell">
-        <div class="fr-matrix__key"><span class="fr-num">2.0</span><span class="fr-num--unit">bit</span></div>
-        <div class="fr-matrix__val">IQ2_XXS / IQ2_S</div>
-        <div class="fr-matrix__caption">2-bit imatrix quants. Useful for 70B+ teachers on a single 24 GB card.</div>
-        <div class="fr-bar"><div class="fr-bar__fill" style="width:17%"></div></div>
-        <span class="fr-pill fr-pill--amber">edge</span>
+      <div class="fr-precision-table__row">
+        <div class="fr-precision-table__bit">2.0<span class="fr-precision-table__bit-unit">bit</span></div>
+        <div>
+          <h3 class="fr-precision-table__name">IQ2_XXS / IQ2_S</h3>
+          <p class="fr-precision-table__desc">2-bit imatrix quants. The right landing zone for 70B+ teachers on a single 24 GB consumer card.</p>
+        </div>
+        <div class="fr-precision-table__status"><span class="fr-pill fr-pill--amber">edge</span></div>
       </div>
 
-      <div class="fr-matrix__cell">
-        <div class="fr-matrix__key"><span class="fr-num">2.25</span><span class="fr-num--unit">bit</span></div>
-        <div class="fr-matrix__val">SpQR + sparse residual</div>
-        <div class="fr-matrix__caption">Sparse-Quantized Representation. Outlier channels kept at 16-bit; rest at 2-bit.</div>
-        <div class="fr-bar"><div class="fr-bar__fill" style="width:19%"></div></div>
-        <span class="fr-pill fr-pill--amber">edge</span>
+      <div class="fr-precision-table__row">
+        <div class="fr-precision-table__bit">2.25<span class="fr-precision-table__bit-unit">bit</span></div>
+        <div>
+          <h3 class="fr-precision-table__name">SpQR + sparse residual</h3>
+          <p class="fr-precision-table__desc">Sparse-Quantized Representation. Outlier channels kept at 16-bit, the rest at 2-bit; the sparse residual lifts low-bit K-score at small zip-size cost.</p>
+        </div>
+        <div class="fr-precision-table__status"><span class="fr-pill fr-pill--amber">edge</span></div>
       </div>
 
-      <div class="fr-matrix__cell">
-        <div class="fr-matrix__key"><span class="fr-num">3.0</span><span class="fr-num--unit">bit</span></div>
-        <div class="fr-matrix__val">Q3_K_M / IQ3_M</div>
-        <div class="fr-matrix__caption">k-quants 3-bit. Common landing zone for 32B teachers on 16 GB consumer cards.</div>
-        <div class="fr-bar"><div class="fr-bar__fill" style="width:25%"></div></div>
-        <span class="fr-pill">ships</span>
+      <div class="fr-precision-table__row">
+        <div class="fr-precision-table__bit">3.0<span class="fr-precision-table__bit-unit">bit</span></div>
+        <div>
+          <h3 class="fr-precision-table__name">Q3_K_M / IQ3_M</h3>
+          <p class="fr-precision-table__desc">k-quants 3-bit. Common landing zone for 32B teachers on 16 GB consumer cards.</p>
+        </div>
+        <div class="fr-precision-table__status"><span class="fr-pill">ships</span></div>
       </div>
 
-      <div class="fr-matrix__cell">
-        <div class="fr-matrix__key"><span class="fr-num">4.0</span><span class="fr-num--unit">bit</span></div>
-        <div class="fr-matrix__val">NF4 (default)</div>
-        <div class="fr-matrix__caption">NormalFloat4 + double-quant via bitsandbytes 0.49.2. DeepSeek-R1 32B lands at 17.9 GB, 11.5 tok/s on RTX 5090.</div>
-        <div class="fr-bar"><div class="fr-bar__fill" style="width:33%"></div></div>
-        <span class="fr-pill">ships</span>
+      <div class="fr-precision-table__row">
+        <div class="fr-precision-table__bit">4.0<span class="fr-precision-table__bit-unit">bit</span></div>
+        <div>
+          <h3 class="fr-precision-table__name">NF4 (default)</h3>
+          <p class="fr-precision-table__desc">NormalFloat4 + double-quant via bitsandbytes 0.49.2. DeepSeek-R1 32B lands at 17.9 GB, 11.5 tok/s on a single RTX 5090.</p>
+        </div>
+        <div class="fr-precision-table__status"><span class="fr-pill">ships</span></div>
       </div>
 
-      <div class="fr-matrix__cell">
-        <div class="fr-matrix__key"><span class="fr-num">8.0</span><span class="fr-num--unit">bit</span></div>
-        <div class="fr-matrix__val">INT8 / Q8_0</div>
-        <div class="fr-matrix__caption">SmoothQuant activation smoothing or k-quants Q8_0. Near-lossless on most tasks.</div>
-        <div class="fr-bar"><div class="fr-bar__fill" style="width:66%"></div></div>
-        <span class="fr-pill">ships</span>
+      <div class="fr-precision-table__row">
+        <div class="fr-precision-table__bit">8.0<span class="fr-precision-table__bit-unit">bit</span></div>
+        <div>
+          <h3 class="fr-precision-table__name">INT8 / Q8_0</h3>
+          <p class="fr-precision-table__desc">SmoothQuant activation smoothing or k-quants Q8_0. Near-lossless on most tasks; the safe default when you have the VRAM.</p>
+        </div>
+        <div class="fr-precision-table__status"><span class="fr-pill">ships</span></div>
       </div>
 
-      <div class="fr-matrix__cell">
-        <div class="fr-matrix__key"><span class="fr-num">FP8</span></div>
-        <div class="fr-matrix__val">E4M3 / E5M2</div>
-        <div class="fr-matrix__caption">Native FP8 on H100 / RTX 5090. vLLM and TRT-LLM serve direct from FP8 weights.</div>
-        <div class="fr-bar"><div class="fr-bar__fill" style="width:66%"></div></div>
-        <span class="fr-pill">ships</span>
+      <div class="fr-precision-table__row">
+        <div class="fr-precision-table__bit">FP8</div>
+        <div>
+          <h3 class="fr-precision-table__name">E4M3 / E5M2</h3>
+          <p class="fr-precision-table__desc">Native FP8 on H100 and RTX 5090. vLLM and TRT-LLM serve direct from FP8 weights without dequantization.</p>
+        </div>
+        <div class="fr-precision-table__status"><span class="fr-pill">ships</span></div>
       </div>
 
-      <div class="fr-matrix__cell">
-        <div class="fr-matrix__key"><span class="fr-num">NVFP4</span></div>
-        <div class="fr-matrix__val">NVIDIA FP4 microscaling</div>
-        <div class="fr-matrix__caption">Blackwell-class FP4 with microscale blocks. Higher accuracy than INT4 at the same bit budget.</div>
-        <div class="fr-bar"><div class="fr-bar__fill" style="width:33%"></div></div>
-        <span class="fr-pill fr-pill--amber">preview</span>
+      <div class="fr-precision-table__row">
+        <div class="fr-precision-table__bit">NVFP4</div>
+        <div>
+          <h3 class="fr-precision-table__name">NVIDIA FP4 microscaling</h3>
+          <p class="fr-precision-table__desc">Blackwell-class FP4 with microscale blocks. Higher accuracy than INT4 at the same bit budget on B100-class hardware.</p>
+        </div>
+        <div class="fr-precision-table__status"><span class="fr-pill fr-pill--amber">preview</span></div>
       </div>
 
-      <div class="fr-matrix__cell">
-        <div class="fr-matrix__key"><span class="fr-num">Dyn</span><span class="fr-num--unit">2.0</span></div>
-        <div class="fr-matrix__val">Unsloth Dynamic 2.0</div>
-        <div class="fr-matrix__caption">Layer-wise mixed precision. Default for <code>kolm compile --quantize int4</code>; recovers ~1.5 K-score points vs. flat Q4.</div>
-        <div class="fr-bar"><div class="fr-bar__fill" style="width:33%"></div></div>
-        <span class="fr-pill">ships</span>
+      <div class="fr-precision-table__row">
+        <div class="fr-precision-table__bit">Dyn<span class="fr-precision-table__bit-unit">2.0</span></div>
+        <div>
+          <h3 class="fr-precision-table__name">Unsloth Dynamic 2.0</h3>
+          <p class="fr-precision-table__desc">Layer-wise mixed precision. Default for <code>kolm compile --quantize int4</code>; recovers ~1.5 K-score points over flat Q4.</p>
+        </div>
+        <div class="fr-precision-table__status"><span class="fr-pill">ships</span></div>
       </div>
 
-      <div class="fr-matrix__cell">
-        <div class="fr-matrix__key"><span class="fr-num">KV</span></div>
-        <div class="fr-matrix__val">TurboQuant KV-cache</div>
-        <div class="fr-matrix__caption">Per-channel KV-cache quantization to 4-bit. Cuts long-context VRAM ~3x with negligible K-score drift.</div>
-        <div class="fr-bar"><div class="fr-bar__fill" style="width:33%"></div></div>
-        <span class="fr-pill">ships</span>
+      <div class="fr-precision-table__row">
+        <div class="fr-precision-table__bit">KV</div>
+        <div>
+          <h3 class="fr-precision-table__name">TurboQuant KV-cache</h3>
+          <p class="fr-precision-table__desc">Per-channel KV-cache quantization to 4-bit. Cuts long-context VRAM ~3&times; with negligible K-score drift.</p>
+        </div>
+        <div class="fr-precision-table__status"><span class="fr-pill">ships</span></div>
       </div>
 
     </div>
@@ -472,63 +526,44 @@ verify      kolm verify support-triage.kolm</pre>
     <span class="fr-eyebrow">BACKENDS</span>
     <h2 class="fr-h2">Nine quantization backends. One compile verb.</h2>
     <p class="fr-lede">The compiler picks the right backend for the recipe and the runtime. Override with <code>--backend</code>. Cross-reference <a href="/distill">/distill</a> for the upstream step and <a href="/k-score">/k-score</a> for the gate.</p>
-    <div class="fr-grid-3">
-
-      <div class="fr-card fr-card--feature">
-        <h3 class="fr-h3">GPTQ</h3>
-        <p>Hessian-based per-layer optimization. Strong on 3-bit / 4-bit weight-only quantization; the workhorse for vLLM and SGLang serving paths.</p>
-        <span class="fr-pill">3-bit / 4-bit</span>
-      </div>
-
-      <div class="fr-card fr-card--feature">
-        <h3 class="fr-h3">AWQ</h3>
-        <p>Activation-aware Weight Quantization. Preserves the 1% of weight channels that handle the bulk of activations; better K-score than flat GPTQ at the same bit budget.</p>
-        <span class="fr-pill">4-bit weight-only</span>
-      </div>
-
-      <div class="fr-card fr-card--feature">
-        <h3 class="fr-h3">bitsandbytes NF4 / FP4</h3>
-        <p>NormalFloat4 + double-quant. The default for the <code>--quantize int4</code> flag. DeepSeek-R1 32B compiles to 17.9 GB in 125 seconds via bitsandbytes 0.49.2.</p>
-        <span class="fr-pill">NF4 + double-quant</span>
-      </div>
-
-      <div class="fr-card fr-card--feature">
-        <h3 class="fr-h3">imatrix</h3>
-        <p>llama.cpp importance-matrix calibration. Reads a few hundred prompts to weight the quantizer per channel; lifts every k-quant tier (Q2_K through Q6_K).</p>
-        <span class="fr-pill">calibration</span>
-      </div>
-
-      <div class="fr-card fr-card--mint">
-        <h3 class="fr-h3">Unsloth Dynamic 2.0</h3>
-        <p>Layer-wise mixed precision: keeps attention KQV at higher bits, drops MLP. Default for kolm compile; recovers ~1.5 K-score points over flat Q4.</p>
-        <span class="fr-pill">default</span>
-      </div>
-
-      <div class="fr-card fr-card--feature">
-        <h3 class="fr-h3">TurboQuant</h3>
-        <p>KV-cache quantization to 4-bit per channel. Cuts long-context VRAM ~3x; the receipt records the KV scheme alongside the weight scheme.</p>
-        <span class="fr-pill">KV-cache</span>
-      </div>
-
-      <div class="fr-card fr-card--feature">
-        <h3 class="fr-h3">AngelSlim</h3>
-        <p>BitNet ternary {-1, 0, +1} recipe. Matmul becomes additions; CPU-friendly. Honest scope: under 2-bit avg is research-tier, K-score gated.</p>
-        <span class="fr-pill fr-pill--violet">ternary</span>
-      </div>
-
-      <div class="fr-card fr-card--feature">
-        <h3 class="fr-h3">SmoothQuant</h3>
-        <p>Activation smoothing that migrates scaling from activations into weights. Pairs with INT8 weight + INT8 activation for full-INT inference paths.</p>
-        <span class="fr-pill">INT8 W/A</span>
-      </div>
-
-      <div class="fr-card fr-card--feature">
-        <h3 class="fr-h3">SpQR</h3>
-        <p>Sparse-Quantized Residual. Keeps outlier channels at 16-bit, the rest at 2- or 3-bit. The sparse residual lifts low-bit K-score at small zip-size cost.</p>
-        <span class="fr-pill fr-pill--amber">2-bit + sparse</span>
-      </div>
-
-    </div>
+    <ul class="fr-spec-list cp-bk-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>GPTQ</h3><span class="fr-spec-list__delta">3-BIT / 4-BIT &middot; weight-only</span></div>
+        <p class="fr-spec-list__p">Hessian-based per-layer optimization. Strong on 3-bit / 4-bit weight-only quantization; the workhorse for vLLM and SGLang serving paths.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>AWQ</h3><span class="fr-spec-list__delta">4-BIT &middot; activation-aware</span></div>
+        <p class="fr-spec-list__p">Activation-aware Weight Quantization. Preserves the 1% of weight channels that handle the bulk of activations; better K-score than flat GPTQ at the same bit budget.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>bitsandbytes NF4 / FP4</h3><span class="fr-spec-list__delta">NF4 &middot; double-quant</span></div>
+        <p class="fr-spec-list__p">NormalFloat4 + double-quant. The default for the <code>--quantize int4</code> flag. DeepSeek-R1 32B compiles to 17.9 GB in 125 seconds via bitsandbytes 0.49.2.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>imatrix</h3><span class="fr-spec-list__delta">CALIBRATION &middot; llama.cpp</span></div>
+        <p class="fr-spec-list__p">llama.cpp importance-matrix calibration. Reads a few hundred prompts to weight the quantizer per channel; lifts every k-quant tier (Q2_K through Q6_K).</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Unsloth Dynamic 2.0</h3><span class="fr-spec-list__delta fr-spec-list__delta--default">DEFAULT &middot; mixed precision</span></div>
+        <p class="fr-spec-list__p">Layer-wise mixed precision: keeps attention KQV at higher bits, drops MLP. Default for kolm compile; recovers ~1.5 K-score points over flat Q4.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>TurboQuant</h3><span class="fr-spec-list__delta">KV-CACHE &middot; 4-bit per chan</span></div>
+        <p class="fr-spec-list__p">KV-cache quantization to 4-bit per channel. Cuts long-context VRAM ~3x; the receipt records the KV scheme alongside the weight scheme.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>AngelSlim</h3><span class="fr-spec-list__delta fr-spec-list__delta--violet">TERNARY &middot; BitNet</span></div>
+        <p class="fr-spec-list__p">BitNet ternary {-1, 0, +1} recipe. Matmul becomes additions; CPU-friendly. Honest scope: under 2-bit avg is research-tier, K-score gated.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>SmoothQuant</h3><span class="fr-spec-list__delta">INT8 W/A &middot; full-INT</span></div>
+        <p class="fr-spec-list__p">Activation smoothing that migrates scaling from activations into weights. Pairs with INT8 weight + INT8 activation for full-INT inference paths.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>SpQR</h3><span class="fr-spec-list__delta fr-spec-list__delta--amber">2-BIT + SPARSE &middot; residual</span></div>
+        <p class="fr-spec-list__p">Sparse-Quantized Residual. Keeps outlier channels at 16-bit, the rest at 2- or 3-bit. The sparse residual lifts low-bit K-score at small zip-size cost.</p>
+      </li>
+    </ul>
   </div>
 </section>
 
@@ -554,28 +589,24 @@ verify      kolm verify support-triage.kolm</pre>
   <div class="ks-wrap">
     <h2>The artifact_cid binding</h2>
     <p class="sub">The <code>artifact_cid</code> is the field that ties everything together. It is a content-addressed id computed from the receipt, which itself names hashes of the weights, the eval pack, the teacher trace, and the K-score. Anything an attacker can edit shows up as a different cid.</p>
-    <div class="grid-2">
-      <div class="sec-card">
-        <div class="row"><span class="tag">tamper-evidence</span><span class="st live">Live</span></div>
-        <h3>Swap the weights, lose the signature</h3>
-        <p>The receipt embeds <code>artifact_bytes_sha256</code>. Editing the GGUF or the safetensors file changes the hash. The cid is computed over the receipt, which embeds the bytes hash, so a swap is detectable in one verify call.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">tamper-evidence</span><span class="st live">Live</span></div>
-        <h3>Rewrite the K-score, lose the signature</h3>
-        <p>The K-score axes and verdict sit inside the receipt JSON. Rewriting them changes the JCS-canonical hash, which breaks the Ed25519 verify; no honesty service is needed in the loop.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">replay protection</span><span class="st live">Live</span></div>
-        <h3>Teacher trace is bound</h3>
-        <p>Each row labeled by the teacher writes an attribution line in <code>trace/distill.jsonl</code>. The file's hash flows into <code>distill_run.seeds_sha256</code> in the receipt. An auditor can re-derive the same hash from the trace file.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">key rotation</span><span class="st live">Live</span></div>
-        <h3>Previous receipts stay verifiable</h3>
-        <p>Rotating the tenant key with <code>kolm keys rotate</code> generates a new keypair; old receipts continue to verify because the public-key fingerprint is embedded in each receipt at compile time.</p>
-      </div>
-    </div>
+    <ul class="fr-spec-list cp-bind-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Swap the weights, lose the signature</h3><span class="fr-spec-list__delta">TAMPER-EVIDENCE &middot; live</span></div>
+        <p class="fr-spec-list__p">The receipt embeds <code>artifact_bytes_sha256</code>. Editing the GGUF or the safetensors file changes the hash. The cid is computed over the receipt, which embeds the bytes hash, so a swap is detectable in one verify call.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Rewrite the K-score, lose the signature</h3><span class="fr-spec-list__delta">TAMPER-EVIDENCE &middot; live</span></div>
+        <p class="fr-spec-list__p">The K-score axes and verdict sit inside the receipt JSON. Rewriting them changes the JCS-canonical hash, which breaks the Ed25519 verify; no honesty service is needed in the loop.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Teacher trace is bound</h3><span class="fr-spec-list__delta">REPLAY-PROTECTION &middot; live</span></div>
+        <p class="fr-spec-list__p">Each row labeled by the teacher writes an attribution line in <code>trace/distill.jsonl</code>. The file's hash flows into <code>distill_run.seeds_sha256</code> in the receipt. An auditor can re-derive the same hash from the trace file.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Previous receipts stay verifiable</h3><span class="fr-spec-list__delta">KEY-ROTATION &middot; live</span></div>
+        <p class="fr-spec-list__p">Rotating the tenant key with <code>kolm keys rotate</code> generates a new keypair; old receipts continue to verify because the public-key fingerprint is embedded in each receipt at compile time.</p>
+      </li>
+    </ul>
   </div>
 </section>
 
@@ -610,23 +641,20 @@ public-key: ed25519:2dba&hellip;77c4</pre>
   <div class="ks-wrap">
     <h2>Optional attestation embed</h2>
     <p class="sub">For confidential-compute workloads, the compiler accepts a TEE attestation report and binds it into the receipt. The attestation hash becomes part of the artifact_cid so the receipt names both the weights and the hardware that produced them.</p>
-    <div class="grid-3">
-      <div class="sec-card">
-        <div class="row"><span class="tag">SGX</span><span class="st live">Live</span></div>
-        <h3>Intel PCCS</h3>
-        <p><code>--attestation-kind pccs</code> reads an Intel PCS report and embeds it into <code>confidential_compute</code>. The hash binds into <code>artifact_cid</code>.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">SEV-SNP</span><span class="st live">Live</span></div>
-        <h3>AMD SNP report</h3>
-        <p><code>--attestation-kind snp-report</code> embeds an AMD SEV-SNP attestation. Used by cloud confidential VMs.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">Nitro</span><span class="st live">Live</span></div>
-        <h3>AWS Nitro attestation</h3>
-        <p><code>--attestation-kind nitro-attestation</code> for AWS Nitro Enclaves. NSM token verification on the verifier side.</p>
-      </div>
-    </div>
+    <ul class="fr-spec-list cp-bind-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Intel PCCS</h3><span class="fr-spec-list__delta">SGX &middot; live</span></div>
+        <p class="fr-spec-list__p"><code>--attestation-kind pccs</code> reads an Intel PCS report and embeds it into <code>confidential_compute</code>. The hash binds into <code>artifact_cid</code>.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>AMD SNP report</h3><span class="fr-spec-list__delta">SEV-SNP &middot; live</span></div>
+        <p class="fr-spec-list__p"><code>--attestation-kind snp-report</code> embeds an AMD SEV-SNP attestation. Used by cloud confidential VMs.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>AWS Nitro attestation</h3><span class="fr-spec-list__delta">NITRO &middot; live</span></div>
+        <p class="fr-spec-list__p"><code>--attestation-kind nitro-attestation</code> for AWS Nitro Enclaves. NSM token verification on the verifier side.</p>
+      </li>
+    </ul>
     <p class="sub" style="margin-top:var(--ks-4)">Honest scope: the compiler can bind an attestation report into the receipt, but it does not crypto-verify the report by itself. A tenant registers a real verifier with <code>registerAttestationVerifier()</code>; until then, the receipt records <code>state:shape_ok, verified:false</code>.</p>
   </div>
 </section>
@@ -681,18 +709,16 @@ public-key: ed25519:2dba&hellip;77c4</pre>
   <div class="ks-wrap">
     <h2>Reproducibility envelope</h2>
     <p class="sub">A compile run is reproducible inside an envelope. The same spec, the same base-model hash, and the same eval-pack cid produce the same artifact_cid. The compiler records which inputs are inside the envelope and which (CUDA driver version, BLAS kernel) sit outside; an auditor can see exactly what is determinism-locked and what is not.</p>
-    <div class="grid-2">
-      <div class="sec-card">
-        <div class="row"><span class="tag">deterministic</span><span class="st live">Live</span></div>
-        <h3>Inside the envelope</h3>
-        <p>The spec, the seeds.jsonl, the base-model SHA-256, the quantize scheme, the eval pack snapshot, the K-score threshold. Two runs on the same machine with the same inputs produce the same artifact_cid.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">honest scope</span><span class="st live">Live</span></div>
-        <h3>Outside the envelope</h3>
-        <p>The exact CUDA driver, the BLAS kernel selection, the OS scheduler. These can shift floating-point rounding in the final per-axis K-score by under a tenth of a point; the verdict stays the same but the bytes hash can differ. The receipt records the toolchain so a third party can match it.</p>
-      </div>
-    </div>
+    <ul class="fr-spec-list cp-bind-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Inside the envelope</h3><span class="fr-spec-list__delta">DETERMINISTIC &middot; locked</span></div>
+        <p class="fr-spec-list__p">The spec, the seeds.jsonl, the base-model SHA-256, the quantize scheme, the eval pack snapshot, the K-score threshold. Two runs on the same machine with the same inputs produce the same artifact_cid.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Outside the envelope</h3><span class="fr-spec-list__delta">HONEST-SCOPE &middot; recorded</span></div>
+        <p class="fr-spec-list__p">The exact CUDA driver, the BLAS kernel selection, the OS scheduler. These can shift floating-point rounding in the final per-axis K-score by under a tenth of a point; the verdict stays the same but the bytes hash can differ. The receipt records the toolchain so a third party can match it.</p>
+      </li>
+    </ul>
   </div>
 </section>
 
@@ -700,38 +726,50 @@ public-key: ed25519:2dba&hellip;77c4</pre>
   <div class="ks-wrap">
     <h2>One command in the terminal. One step in CI.</h2>
     <p class="sub">No GPU on your laptop. No Docker. No multi-day MLOps. The compile pipeline runs locally or in the cloud; the artifact lives wherever you put it.</p>
-    <div class="dx">
-      <div class="dx-card">
-        <div class="ico"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M3 4 L7 8 L3 12 M9 12 L13 12"/></svg></div>
-        <h3>One command</h3>
-        <p><code>kolm compile</code> handles pack, hash, sign, and serve. CLI distributes via curl, npm, brew, pip.</p>
-      </div>
-      <div class="dx-card">
-        <div class="ico"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><circle cx="8" cy="8" r="5"/><path d="M8 5 L8 8 L10 9.5"/></svg></div>
-        <h3>Reproducible</h3>
-        <p>Same task + same examples + same base = byte-identical artifact (inside the determinism envelope). CI gates on K-score, not vibes.</p>
-      </div>
-      <div class="dx-card">
-        <div class="ico"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><rect x="2.5" y="2.5" width="11" height="11" rx="1.5"/><path d="M5 8 L7 10 L11 6"/></svg></div>
-        <h3>Inspectable</h3>
-        <p><code>kolm inspect a.kolm</code> shows the manifest, recipes, K-score, signature metadata. <code>kolm inspect a.kolm b.kolm</code> diffs two builds field by field.</p>
-      </div>
-      <div class="dx-card">
-        <div class="ico"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M3 8 L13 8 M9 4 L13 8 L9 12"/></svg></div>
-        <h3>BYO key</h3>
-        <p>Anthropic, OpenAI, Google, Mistral, Together, Fireworks, AWS Bedrock, Azure, or your own gateway. Keys never leave your machine.</p>
-      </div>
-      <div class="dx-card">
-        <div class="ico"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M2.5 5 L13.5 5 L13.5 13 L2.5 13 Z M5 5 L5 3 L11 3 L11 5"/></svg></div>
-        <h3>CI native</h3>
-        <p>GitHub Action, GitLab template, Jenkins step. Fail the build if K drops below your floor.</p>
-      </div>
-      <div class="dx-card">
-        <div class="ico"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><circle cx="8" cy="8" r="5.5"/><path d="M8 2.5 C5 5 5 11 8 13.5 M8 2.5 C11 5 11 11 8 13.5 M2.5 8 L13.5 8"/></svg></div>
-        <h3>Customer-hosted bridge</h3>
-        <p>A customer-hosted compile bridge is the Enterprise design path for private networks. The public CLI does not ship an <code>--air-gap</code> mode today.</p>
-      </div>
-    </div>
+    <ul class="fr-spec-list cp-dx-list">
+      <li class="fr-spec-list__row">
+        <div class="cp-dx-ico"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M3 4 L7 8 L3 12 M9 12 L13 12"/></svg></div>
+        <div class="cp-dx-body">
+          <div class="fr-spec-list__head"><h3>One command</h3><span class="fr-spec-list__delta">CLI &middot; curl/npm/brew/pip</span></div>
+          <p class="fr-spec-list__p"><code>kolm compile</code> handles pack, hash, sign, and serve. CLI distributes via curl, npm, brew, pip.</p>
+        </div>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="cp-dx-ico"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><circle cx="8" cy="8" r="5"/><path d="M8 5 L8 8 L10 9.5"/></svg></div>
+        <div class="cp-dx-body">
+          <div class="fr-spec-list__head"><h3>Reproducible</h3><span class="fr-spec-list__delta">DETERMINISM &middot; byte-identical</span></div>
+          <p class="fr-spec-list__p">Same task + same examples + same base = byte-identical artifact (inside the determinism envelope). CI gates on K-score, not vibes.</p>
+        </div>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="cp-dx-ico"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><rect x="2.5" y="2.5" width="11" height="11" rx="1.5"/><path d="M5 8 L7 10 L11 6"/></svg></div>
+        <div class="cp-dx-body">
+          <div class="fr-spec-list__head"><h3>Inspectable</h3><span class="fr-spec-list__delta">INSPECT &middot; diff two builds</span></div>
+          <p class="fr-spec-list__p"><code>kolm inspect a.kolm</code> shows the manifest, recipes, K-score, signature metadata. <code>kolm inspect a.kolm b.kolm</code> diffs two builds field by field.</p>
+        </div>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="cp-dx-ico"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M3 8 L13 8 M9 4 L13 8 L9 12"/></svg></div>
+        <div class="cp-dx-body">
+          <div class="fr-spec-list__head"><h3>BYO key</h3><span class="fr-spec-list__delta">9 PROVIDERS &middot; local key</span></div>
+          <p class="fr-spec-list__p">Anthropic, OpenAI, Google, Mistral, Together, Fireworks, AWS Bedrock, Azure, or your own gateway. Keys never leave your machine.</p>
+        </div>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="cp-dx-ico"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M2.5 5 L13.5 5 L13.5 13 L2.5 13 Z M5 5 L5 3 L11 3 L11 5"/></svg></div>
+        <div class="cp-dx-body">
+          <div class="fr-spec-list__head"><h3>CI native</h3><span class="fr-spec-list__delta">ACTIONS &middot; gates on K</span></div>
+          <p class="fr-spec-list__p">GitHub Action, GitLab template, Jenkins step. Fail the build if K drops below your floor.</p>
+        </div>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="cp-dx-ico"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><circle cx="8" cy="8" r="5.5"/><path d="M8 2.5 C5 5 5 11 8 13.5 M8 2.5 C11 5 11 11 8 13.5 M2.5 8 L13.5 8"/></svg></div>
+        <div class="cp-dx-body">
+          <div class="fr-spec-list__head"><h3>Customer-hosted bridge</h3><span class="fr-spec-list__delta">ENTERPRISE &middot; design path</span></div>
+          <p class="fr-spec-list__p">A customer-hosted compile bridge is the Enterprise design path for private networks. The public CLI does not ship an <code>--air-gap</code> mode today.</p>
+        </div>
+      </li>
+    </ul>
   </div>
 </section>
 
@@ -739,20 +777,20 @@ public-key: ed25519:2dba&hellip;77c4</pre>
   <div class="ks-wrap">
     <h2>Next steps</h2>
     <p class="sub">A signed .kolm is the unit you ship. The next step is loading it into a runtime: vLLM, SGLang, TGI, TRT-LLM, llama.cpp, or MLX, depending on where you serve.</p>
-    <div class="grid-3">
-      <div class="sec-card">
-        <h3>Load in a runtime</h3>
-        <p>Adapters for vLLM, SGLang, TGI, TRT-LLM, llama.cpp, MLX. <a href="/runtimes">Runtimes</a>.</p>
-      </div>
-      <div class="sec-card">
-        <h3>Read the K-score spec</h3>
-        <p>How the gate decides ship vs. block. <a href="/k-score">K-score methodology</a>.</p>
-      </div>
-      <div class="sec-card">
-        <h3>Boundary and signing</h3>
-        <p>What stays inside your network; what (only if you opt in) crosses it. <a href="/security">Security</a>.</p>
-      </div>
-    </div>
+    <ul class="fr-spec-list cp-bind-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Load in a runtime</h3><span class="fr-spec-list__delta">6 ADAPTERS &middot; vLLM / MLX</span></div>
+        <p class="fr-spec-list__p">Adapters for vLLM, SGLang, TGI, TRT-LLM, llama.cpp, MLX. <a href="/runtimes">Runtimes</a>.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Read the K-score spec</h3><span class="fr-spec-list__delta">METHODOLOGY &middot; gate spec</span></div>
+        <p class="fr-spec-list__p">How the gate decides ship vs. block. <a href="/k-score">K-score methodology</a>.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Boundary and signing</h3><span class="fr-spec-list__delta">SECURITY &middot; network shape</span></div>
+        <p class="fr-spec-list__p">What stays inside your network; what (only if you opt in) crosses it. <a href="/security">Security</a>.</p>
+      </li>
+    </ul>
     <div style="margin-top:var(--ks-6); display:flex; flex-wrap:wrap; gap:var(--ks-3)">
       <a href="/runtimes" class="ks-btn ks-btn--primary">Pick a runtime <span class="ks-btn-arrow">&rarr;</span></a>
       <a href="/quickstart" class="ks-btn ks-btn--ghost">Run the quickstart</a>

@@ -11,6 +11,22 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/frontier.css">
+<style>
+  /* W644 helpers — fr-spec-list scaffolding for registry.html */
+  .rg-list .fr-spec-list__delta { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.04em; }
+  .rg-list .fr-spec-list__delta--receipts { color: var(--fr-mint, #6cbf8d); }
+  .rg-list .fr-spec-list__delta--always   { color: var(--fr-mint, #6cbf8d); }
+  .rg-list .fr-spec-list__delta--howto    { color: var(--fr-mint, #6cbf8d); }
+  .rg-list .fr-spec-list__delta--scope    { color: #e8a86a; border-color: rgba(232,168,106,0.45); }
+  .rg-list .fr-spec-list__delta--policy   { color: var(--fr-mint, #6cbf8d); }
+  .rg-list .fr-spec-list__delta--audit    { color: #c39bf8; border-color: rgba(195,155,248,0.45); }
+  .rg-list .fr-spec-list__delta--source   { color: var(--fr-mint, #6cbf8d); }
+  .rg-list .fr-spec-list__delta--nonclaim { color: #e8a86a; border-color: rgba(232,168,106,0.45); }
+  .rg-list code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); padding: 1px 6px; border: 1px solid var(--ks-line-1); border-radius: 4px; background: rgba(255,255,255,0.02); }
+  .rg-list a { color: var(--ks-accent); }
+</style>
 <style>
   .sec-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
   .sec-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
@@ -78,8 +94,35 @@
   .mirror ul { margin: var(--ks-3) 0 0; padding-left: 18px; font-size: 13.5px; line-height: 1.65; color: var(--ks-ink-2); }
   .mirror ul li + li { margin-top: 4px; }
 </style>
+  <meta property="og:title" content="Registry &middot; kolm.ai">
+  <meta property="og:description" content="The public .kolm registry. A content-addressed index of signed artifacts; resolve a CID to a receipt body and verify offline. Receipts only, never weights.">
+  <meta property="og:image" content="https://kolm.ai/og/registry.svg">
+  <meta property="og:url" content="https://kolm.ai/registry">
+  <meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/registry",
+  "description": "The public .kolm registry. A content-addressed index of signed artifacts; resolve a CID to a receipt body and verify offline. Receipts only, never weights.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
 </head>
 <body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <a href="#main" class="ks-skip">Skip to content</a>
 
@@ -283,18 +326,16 @@ $ kolm publish ./artifacts/finance-q2.kolm \
     --tag finance --tag q2-2026 \
     --display <span class="s">"Acme Finance Triage v3"</span></pre>
     </div>
-    <div class="grid-2" style="margin-top:var(--ks-6);">
-      <div class="sec-card">
-        <div class="row"><span class="tag">payload</span><span class="st live">Receipts only</span></div>
-        <h3>What gets uploaded</h3>
-        <p>The Ed25519 signature, the receipt JSON body (a few KB), and your chosen tags. The .kolm zip stays on your filesystem; the model weights never leave your network unless you also push them to your own object store.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">offline-verify</span><span class="st live">Always</span></div>
-        <h3>Why publishing is optional</h3>
-        <p>Anyone with the artifact zip can still verify offline with <code>kolm verify path/to/artifact.kolm</code>. The registry just makes a receipt discoverable; it never changes whether an artifact is verifiable.</p>
-      </div>
-    </div>
+    <ul class="fr-spec-list rg-list" style="margin-top:var(--ks-6);">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>What gets uploaded</h3><span class="fr-spec-list__delta fr-spec-list__delta--receipts">PAYLOAD &middot; receipts only</span></div>
+        <p class="fr-spec-list__p">The Ed25519 signature, the receipt JSON body (a few KB), and your chosen tags. The .kolm zip stays on your filesystem; the model weights never leave your network unless you also push them to your own object store.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Why publishing is optional</h3><span class="fr-spec-list__delta fr-spec-list__delta--always">OFFLINE-VERIFY &middot; always</span></div>
+        <p class="fr-spec-list__p">Anyone with the artifact zip can still verify offline with <code>kolm verify path/to/artifact.kolm</code>. The registry just makes a receipt discoverable; it never changes whether an artifact is verifiable.</p>
+      </li>
+    </ul>
   </div>
 </section>
 
@@ -302,28 +343,24 @@ $ kolm publish ./artifacts/finance-q2.kolm \
   <div class="ks-wrap">
     <h2>Takedown policy</h2>
     <p class="sub">Anyone who can prove ownership of the signing key can request the receipt CID be removed from the public index. The receipt itself remains verifiable as long as someone holds the artifact zip.</p>
-    <div class="grid-2">
-      <div class="sec-card">
-        <div class="row"><span class="tag">how-to-request</span><span class="st live">Live</span></div>
-        <h3>Filing a takedown</h3>
-        <p>Email <a href="/trust">trust@kolm.ai</a> with the receipt CID and a signature over a takedown nonce we provide. The CID drops from <a href="/registry">/registry</a> search and the <code>/v1/registry/&lt;cid&gt;</code> resolve within 24 hours.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">what-takedown-does-not-do</span><span class="st wip">Honest scope</span></div>
-        <h3>What takedown does not erase</h3>
-        <p>The receipt is signed and content-addressed. A downstream verifier who pulled it before takedown still has a valid receipt body; <code>kolm verify</code> on their copy still passes. Takedown removes discovery, not provenance.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">policy-violations</span><span class="st live">Live</span></div>
-        <h3>Policy-driven removal</h3>
-        <p>We will remove a CID for malware, sanctions-list publishers, or court order. The receipts policy is in <a href="/trust">trust</a>. We never remove for an unfavorable K-score; that is the verifier's job to read.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">audit-trail</span><span class="st live">Live</span></div>
-        <h3>Takedown receipts</h3>
-        <p>Every takedown writes a tombstone receipt with the date and reason class. Auditors can prove the CID was once present and what category of removal applied without the receipt body being re-served.</p>
-      </div>
-    </div>
+    <ul class="fr-spec-list rg-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Filing a takedown</h3><span class="fr-spec-list__delta fr-spec-list__delta--howto">HOW-TO &middot; live</span></div>
+        <p class="fr-spec-list__p">Email <a href="/trust">trust@kolm.ai</a> with the receipt CID and a signature over a takedown nonce we provide. The CID drops from <a href="/registry">/registry</a> search and the <code>/v1/registry/&lt;cid&gt;</code> resolve within 24 hours.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>What takedown does not erase</h3><span class="fr-spec-list__delta fr-spec-list__delta--scope">HONEST SCOPE &middot; provenance survives</span></div>
+        <p class="fr-spec-list__p">The receipt is signed and content-addressed. A downstream verifier who pulled it before takedown still has a valid receipt body; <code>kolm verify</code> on their copy still passes. Takedown removes discovery, not provenance.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Policy-driven removal</h3><span class="fr-spec-list__delta fr-spec-list__delta--policy">POLICY &middot; live</span></div>
+        <p class="fr-spec-list__p">We will remove a CID for malware, sanctions-list publishers, or court order. The receipts policy is in <a href="/trust">trust</a>. We never remove for an unfavorable K-score; that is the verifier's job to read.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Takedown receipts</h3><span class="fr-spec-list__delta fr-spec-list__delta--audit">AUDIT-TRAIL &middot; tombstone</span></div>
+        <p class="fr-spec-list__p">Every takedown writes a tombstone receipt with the date and reason class. Auditors can prove the CID was once present and what category of removal applied without the receipt body being re-served.</p>
+      </li>
+    </ul>
   </div>
 </section>
 
@@ -360,18 +397,16 @@ $ kolm publish ./artifacts/finance-q2.kolm \
   <div class="ks-wrap">
     <h2>Honest scope</h2>
     <p class="sub">The registry is a discovery index, not the source of truth. The source of truth is the signed receipt embedded in the artifact zip. We want anyone, including someone who does not trust kolm.ai, to be able to verify the chain.</p>
-    <div class="grid-2">
-      <div class="sec-card">
-        <div class="row"><span class="tag">truth-of-record</span><span class="st live">Embedded receipt</span></div>
-        <h3>The receipt is the source of truth</h3>
-        <p>Each .kolm zip carries its own signed receipt. <code>kolm verify path/to/artifact.kolm</code> validates the receipt against the embedded public key, recomputes the artifact hash, and checks the K-score axes. The registry adds nothing the artifact does not already prove.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">non-claim</span><span class="st wip">What the registry is not</span></div>
-        <h3>What we do not promise</h3>
-        <p>The registry does not host model weights. It does not run the eval pack for you (use <code>kolm verify --recompute</code> for that). It does not certify a K-score is honest; only an independent re-run does. It is plumbing, not adjudication.</p>
-      </div>
-    </div>
+    <ul class="fr-spec-list rg-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>The receipt is the source of truth</h3><span class="fr-spec-list__delta fr-spec-list__delta--source">TRUTH-OF-RECORD &middot; embedded</span></div>
+        <p class="fr-spec-list__p">Each .kolm zip carries its own signed receipt. <code>kolm verify path/to/artifact.kolm</code> validates the receipt against the embedded public key, recomputes the artifact hash, and checks the K-score axes. The registry adds nothing the artifact does not already prove.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>What we do not promise</h3><span class="fr-spec-list__delta fr-spec-list__delta--nonclaim">NON-CLAIM &middot; plumbing not adjudication</span></div>
+        <p class="fr-spec-list__p">The registry does not host model weights. It does not run the eval pack for you (use <code>kolm verify --recompute</code> for that). It does not certify a K-score is honest; only an independent re-run does. It is plumbing, not adjudication.</p>
+      </li>
+    </ul>
     <div style="margin-top:var(--ks-6); display:flex; flex-wrap:wrap; gap:var(--ks-3)">
       <a href="/verify-prod" class="ks-btn ks-btn--primary">Verify a CID <span class="ks-btn-arrow">&rarr;</span></a>
       <a href="/quickstart" class="ks-btn ks-btn--ghost">Install the CLI</a>

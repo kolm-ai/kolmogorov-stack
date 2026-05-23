@@ -11,6 +11,28 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/frontier.css">
+<style>
+  /* W644 helpers — fr-spec-list scaffolding for runtimes.html */
+  .rt-list .fr-spec-list__delta { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.04em; }
+  .rt-list .fr-spec-list__delta--live    { color: var(--fr-mint, #6cbf8d); }
+  .rt-list .fr-spec-list__delta--gpu     { color: #c39bf8; border-color: rgba(195,155,248,0.45); }
+  .rt-list .fr-spec-list__delta--nvidia  { color: var(--fr-mint, #6cbf8d); }
+  .rt-list .fr-spec-list__delta--cpu     { color: #e8a86a; border-color: rgba(232,168,106,0.45); }
+  .rt-list .fr-spec-list__delta--apple   { color: #7fb6e8; border-color: rgba(127,182,232,0.45); }
+  .rt-list .fr-spec-list__delta--throughput { color: var(--fr-mint, #6cbf8d); }
+  .rt-list .fr-spec-list__delta--struct  { color: #c39bf8; border-color: rgba(195,155,248,0.45); }
+  .rt-list .fr-spec-list__delta--hf      { color: #e8a86a; border-color: rgba(232,168,106,0.45); }
+  .rt-list .fr-spec-list__delta--latency { color: var(--fr-mint, #6cbf8d); }
+  .rt-list .fr-spec-list__delta--portable { color: #7fb6e8; border-color: rgba(127,182,232,0.45); }
+  .rt-list .fr-spec-list__delta--ondev   { color: #c39bf8; border-color: rgba(195,155,248,0.45); }
+  .rt-list .fr-spec-list__delta--noeg    { color: #e8a86a; border-color: rgba(232,168,106,0.45); }
+  .rt-list .fr-spec-list__delta--tee     { color: #c39bf8; border-color: rgba(195,155,248,0.45); }
+  .rt-list .fr-spec-list__delta--honest  { color: var(--fr-mint, #6cbf8d); }
+  .rt-list code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); padding: 1px 6px; border: 1px solid var(--ks-line-1); border-radius: 4px; background: rgba(255,255,255,0.02); }
+  .rt-list a { color: var(--ks-accent); }
+</style>
 <style>
   .sec-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
   .sec-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
@@ -52,8 +74,35 @@
   .lk th { background: var(--ks-bg-1); color: var(--ks-ink); font-weight: 540; font-size: 13px; letter-spacing: 0.02em; }
   .lk td:first-child { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); white-space: nowrap; }
 </style>
+  <meta property="og:title" content="Runtime &middot; kolm.ai">
+  <meta property="og:description" content="Runtime adapters for a signed .kolm: vLLM, SGLang, TGI, TRT-LLM, llama.cpp, MLX. Load the artifact on your hardware; the receipt verifies offline. Build targets cover NVIDIA, AMD, Apple Silicon, and CPU.">
+  <meta property="og:image" content="https://kolm.ai/og/runtimes.svg">
+  <meta property="og:url" content="https://kolm.ai/runtimes">
+  <meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/runtimes",
+  "description": "Runtime adapters for a signed .kolm: vLLM, SGLang, TGI, TRT-LLM, llama.cpp, MLX. Load the artifact on your hardware; the receipt verifies offline. Build targets cover NVIDIA, AMD, Apple Silicon, and CPU.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
 </head>
 <body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <a href="#main" class="ks-skip">Skip to content</a>
 
@@ -98,44 +147,32 @@
   <div class="ks-wrap">
     <h2>Six first-class runtime adapters</h2>
     <p class="sub">Each adapter takes a path to a .kolm, picks the right weight shard for the target, and starts the upstream binary with the right flags. None of these forks the runtime; we pin a commit and shell out.</p>
-    <div class="grid-3">
-      <div class="sec-card">
-        <div class="row"><span class="tag">server &middot; GPU</span><span class="st live">Live</span></div>
-        <h3>vLLM</h3>
-        <p>Continuous batching, paged attention, OpenAI-compatible HTTP. Best fit for high-throughput chat and tool-use; AWQ and GPTQ INT4 land cleanly. NVIDIA and AMD ROCm.</p>
-        <p><code>kolm runtime up --target vllm support-triage.kolm</code></p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">server &middot; GPU</span><span class="st live">Live</span></div>
-        <h3>SGLang</h3>
-        <p>RadixAttention prefix-cache and constrained decoding. Best fit for structured-output workloads where the system prompt is long and stable. Same weight format as vLLM.</p>
-        <p><code>kolm runtime up --target sglang support-triage.kolm</code></p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">server &middot; GPU</span><span class="st live">Live</span></div>
-        <h3>TGI</h3>
-        <p>Hugging Face Text Generation Inference. Best fit for teams already running the HF stack; the .kolm loads as a normal safetensors model with the receipt sidecar verified on start.</p>
-        <p><code>kolm runtime up --target tgi support-triage.kolm</code></p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">NVIDIA</span><span class="st live">Live</span></div>
-        <h3>TRT-LLM</h3>
-        <p>NVIDIA ahead-of-time engine plans for H100, H200, B100, B200, RTX 4090/5090. The compile step can emit a TRT-LLM plan as a sidecar so the first start is fast.</p>
-        <p><code>kolm runtime up --target trt-llm support-triage.kolm</code></p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">CPU &middot; portable</span><span class="st live">Live</span></div>
-        <h3>llama.cpp</h3>
-        <p>GGUF Q4_K_M, Q5_K_M, Q8_0. Runs on Linux, macOS, Windows; CPU AVX2/AVX-512, CUDA, ROCm, Vulkan, Metal. The widest portability target in the matrix.</p>
-        <p><code>kolm runtime up --target llama.cpp support-triage.kolm</code></p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">Apple Silicon</span><span class="st live">Live</span></div>
-        <h3>MLX</h3>
-        <p>Apple's MLX framework; runs on M1, M2, M3, M4. Best fit for on-device demos, internal Mac fleets, and CI on Apple runners. The MLX weight shard is a sidecar in the .kolm.</p>
-        <p><code>kolm runtime up --target mlx support-triage.kolm</code></p>
-      </div>
-    </div>
+    <ul class="fr-spec-list rt-list rt-adapters-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>vLLM</h3><span class="fr-spec-list__delta fr-spec-list__delta--gpu">SERVER GPU &middot; live</span></div>
+        <p class="fr-spec-list__p">Continuous batching, paged attention, OpenAI-compatible HTTP. Best fit for high-throughput chat and tool-use; AWQ and GPTQ INT4 land cleanly. NVIDIA and AMD ROCm. <code>kolm runtime up --target vllm support-triage.kolm</code></p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>SGLang</h3><span class="fr-spec-list__delta fr-spec-list__delta--gpu">SERVER GPU &middot; live</span></div>
+        <p class="fr-spec-list__p">RadixAttention prefix-cache and constrained decoding. Best fit for structured-output workloads where the system prompt is long and stable. Same weight format as vLLM. <code>kolm runtime up --target sglang support-triage.kolm</code></p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>TGI</h3><span class="fr-spec-list__delta fr-spec-list__delta--gpu">SERVER GPU &middot; live</span></div>
+        <p class="fr-spec-list__p">Hugging Face Text Generation Inference. Best fit for teams already running the HF stack; the .kolm loads as a normal safetensors model with the receipt sidecar verified on start. <code>kolm runtime up --target tgi support-triage.kolm</code></p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>TRT-LLM</h3><span class="fr-spec-list__delta fr-spec-list__delta--nvidia">NVIDIA AOT &middot; live</span></div>
+        <p class="fr-spec-list__p">NVIDIA ahead-of-time engine plans for H100, H200, B100, B200, RTX 4090/5090. The compile step can emit a TRT-LLM plan as a sidecar so the first start is fast. <code>kolm runtime up --target trt-llm support-triage.kolm</code></p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>llama.cpp</h3><span class="fr-spec-list__delta fr-spec-list__delta--cpu">CPU &middot; portable &middot; live</span></div>
+        <p class="fr-spec-list__p">GGUF Q4_K_M, Q5_K_M, Q8_0. Runs on Linux, macOS, Windows; CPU AVX2/AVX-512, CUDA, ROCm, Vulkan, Metal. The widest portability target in the matrix. <code>kolm runtime up --target llama.cpp support-triage.kolm</code></p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>MLX</h3><span class="fr-spec-list__delta fr-spec-list__delta--apple">APPLE SILICON &middot; live</span></div>
+        <p class="fr-spec-list__p">Apple's MLX framework; runs on M1, M2, M3, M4. Best fit for on-device demos, internal Mac fleets, and CI on Apple runners. The MLX weight shard is a sidecar in the .kolm. <code>kolm runtime up --target mlx support-triage.kolm</code></p>
+      </li>
+    </ul>
   </div>
 </section>
 
@@ -191,38 +228,32 @@ ok: true &middot; artifact_cid bafkreieq&hellip;4f7c
   <div class="ks-wrap">
     <h2>How to pick a runtime</h2>
     <p class="sub">The default is llama.cpp because it runs anywhere. The other five are for cases where you actually need the extra capability. Honest scope: this is a heuristic, not a benchmark; run your own K-score on the candidate runtime before committing to it.</p>
-    <div class="grid-2">
-      <div class="sec-card">
-        <div class="row"><span class="tag">throughput</span></div>
-        <h3>High-throughput chat &amp; tool use</h3>
-        <p>Pick vLLM. Continuous batching means many concurrent requests share GPU memory cleanly; first-token latency drops vs. naive batching. Pair with a fronting reverse proxy if you need TLS or rate limits.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">structured output</span></div>
-        <h3>Constrained decoding</h3>
-        <p>Pick SGLang. RadixAttention shares prefix KV across requests with the same system prompt; constrained decoding (regex, JSON schema, BNF) is first-class. Good for an agent with a long shared prompt scaffold.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">existing HF stack</span></div>
-        <h3>Already on Hugging Face</h3>
-        <p>Pick TGI. Same serving model your team already runs; the .kolm loads as a safetensors directory with a receipt sidecar the adapter verifies at start.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">NVIDIA AOT</span></div>
-        <h3>Latency-critical on NVIDIA</h3>
-        <p>Pick TRT-LLM. Ahead-of-time engine plans win on per-token latency at the cost of longer build time; the compile step can emit the plan as a sidecar.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">portability</span></div>
-        <h3>Run anywhere</h3>
-        <p>Pick llama.cpp. GGUF runs on Linux, macOS, Windows; CPU AVX2/AVX-512, CUDA, ROCm, Vulkan, Metal. Default for laptops, CI runners, and air-gapped boxes without a vendor SDK.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">Apple</span></div>
-        <h3>On-device on a Mac</h3>
-        <p>Pick MLX. Native to Apple Silicon; integrates with Swift and SwiftUI for on-device demos. Internal Mac fleets get sub-second cold start once the weights are cached.</p>
-      </div>
-    </div>
+    <ul class="fr-spec-list rt-list rt-place-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>High-throughput chat &amp; tool use</h3><span class="fr-spec-list__delta fr-spec-list__delta--throughput">PICK &middot; vLLM</span></div>
+        <p class="fr-spec-list__p">Continuous batching means many concurrent requests share GPU memory cleanly; first-token latency drops vs. naive batching. Pair with a fronting reverse proxy if you need TLS or rate limits.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Constrained decoding</h3><span class="fr-spec-list__delta fr-spec-list__delta--struct">PICK &middot; SGLang</span></div>
+        <p class="fr-spec-list__p">RadixAttention shares prefix KV across requests with the same system prompt; constrained decoding (regex, JSON schema, BNF) is first-class. Good for an agent with a long shared prompt scaffold.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Already on Hugging Face</h3><span class="fr-spec-list__delta fr-spec-list__delta--hf">PICK &middot; TGI</span></div>
+        <p class="fr-spec-list__p">Same serving model your team already runs; the .kolm loads as a safetensors directory with a receipt sidecar the adapter verifies at start.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Latency-critical on NVIDIA</h3><span class="fr-spec-list__delta fr-spec-list__delta--latency">PICK &middot; TRT-LLM</span></div>
+        <p class="fr-spec-list__p">Ahead-of-time engine plans win on per-token latency at the cost of longer build time; the compile step can emit the plan as a sidecar.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Run anywhere</h3><span class="fr-spec-list__delta fr-spec-list__delta--portable">PICK &middot; llama.cpp</span></div>
+        <p class="fr-spec-list__p">GGUF runs on Linux, macOS, Windows; CPU AVX2/AVX-512, CUDA, ROCm, Vulkan, Metal. Default for laptops, CI runners, and air-gapped boxes without a vendor SDK.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>On-device on a Mac</h3><span class="fr-spec-list__delta fr-spec-list__delta--ondev">PICK &middot; MLX</span></div>
+        <p class="fr-spec-list__p">Native to Apple Silicon; integrates with Swift and SwiftUI for on-device demos. Internal Mac fleets get sub-second cold start once the weights are cached.</p>
+      </li>
+    </ul>
   </div>
 </section>
 
@@ -259,28 +290,24 @@ ok: true &middot; artifact_cid bafkreieq&hellip;4f7c
   <div class="ks-wrap">
     <h2>Air-gapped serving</h2>
     <p class="sub">Every adapter can run with no network access. The .kolm is the entire dependency; the runtime binary is pre-built; the receipt verifies offline. A regulated team can move artifacts in on a sealed disk and stand up a serving cluster with no egress.</p>
-    <div class="grid-2">
-      <div class="sec-card">
-        <div class="row"><span class="tag">no egress</span><span class="st live">Live</span></div>
-        <h3>Static runtime binaries</h3>
-        <p>For each target slug the runtime worker produces a static binary with the pinned commit. Drop it next to the .kolm; the adapter shells out to it without touching any package manager at run time.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">no egress</span><span class="st live">Live</span></div>
-        <h3>Offline verifier</h3>
-        <p>The verifier is a single binary. No network, no honesty service, no registry lookup. An auditor on a clean laptop validates the chain end-to-end and sees the same <code>ok:true</code> a production node sees.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">attestation</span><span class="st live">Live</span></div>
-        <h3>TEE attestation pinning</h3>
-        <p>If the compile step embedded a TEE attestation report, the adapter checks the runtime hardware matches the attested platform before serving. Mismatch refuses to start. See the <a href="/compile#attest">compile attestation section</a>.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">honest scope</span><span class="st live">Live</span></div>
-        <h3>Real failure modes</h3>
-        <p>If the upstream binary segfaults, the adapter forwards the exit code and the last 64 KB of stderr to the operator. We do not swallow runtime crashes; the failure is yours to read and act on.</p>
-      </div>
-    </div>
+    <ul class="fr-spec-list rt-list rt-air-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Static runtime binaries</h3><span class="fr-spec-list__delta fr-spec-list__delta--noeg">NO EGRESS &middot; live</span></div>
+        <p class="fr-spec-list__p">For each target slug the runtime worker produces a static binary with the pinned commit. Drop it next to the .kolm; the adapter shells out to it without touching any package manager at run time.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Offline verifier</h3><span class="fr-spec-list__delta fr-spec-list__delta--noeg">NO EGRESS &middot; live</span></div>
+        <p class="fr-spec-list__p">The verifier is a single binary. No network, no honesty service, no registry lookup. An auditor on a clean laptop validates the chain end-to-end and sees the same <code>ok:true</code> a production node sees.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>TEE attestation pinning</h3><span class="fr-spec-list__delta fr-spec-list__delta--tee">ATTESTATION &middot; live</span></div>
+        <p class="fr-spec-list__p">If the compile step embedded a TEE attestation report, the adapter checks the runtime hardware matches the attested platform before serving. Mismatch refuses to start. See the <a href="/compile#attest">compile attestation section</a>.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Real failure modes</h3><span class="fr-spec-list__delta fr-spec-list__delta--honest">HONEST SCOPE &middot; live</span></div>
+        <p class="fr-spec-list__p">If the upstream binary segfaults, the adapter forwards the exit code and the last 64 KB of stderr to the operator. We do not swallow runtime crashes; the failure is yours to read and act on.</p>
+      </li>
+    </ul>
   </div>
 </section>
 
@@ -310,20 +337,20 @@ ok: true &middot; artifact_cid bafkreieq&hellip;4f7c
   <div class="ks-wrap">
     <h2>Next steps</h2>
     <p class="sub">A loaded .kolm is the end of the four-step compiler walk. From here you can verify in CI, ship to more nodes, or feed the live traffic back into capture for the next distill cycle.</p>
-    <div class="grid-3">
-      <div class="sec-card">
-        <h3>Verify in CI</h3>
-        <p>Wire <code>kolm verify</code> into your build pipeline; refuse to deploy on mismatch. <a href="/verify-prod">Verify-prod</a>.</p>
-      </div>
-      <div class="sec-card">
-        <h3>Capture the production traffic</h3>
-        <p>Loop the runtime output back through capture for the next distill cycle. <a href="/capture">Capture overview</a>.</p>
-      </div>
-      <div class="sec-card">
-        <h3>Read the K-score spec</h3>
-        <p>What the ship-vs-block verdict actually measures. <a href="/k-score">K-score methodology</a>.</p>
-      </div>
-    </div>
+    <ul class="fr-spec-list rt-list rt-reach-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Verify in CI</h3><span class="fr-spec-list__delta fr-spec-list__delta--live">VERIFY &middot; offline</span></div>
+        <p class="fr-spec-list__p">Wire <code>kolm verify</code> into your build pipeline; refuse to deploy on mismatch. <a href="/verify-prod">Verify-prod</a>.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Capture the production traffic</h3><span class="fr-spec-list__delta fr-spec-list__delta--gpu">LOOP &middot; back to capture</span></div>
+        <p class="fr-spec-list__p">Loop the runtime output back through capture for the next distill cycle. <a href="/capture">Capture overview</a>.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Read the K-score spec</h3><span class="fr-spec-list__delta fr-spec-list__delta--cpu">K-SCORE &middot; 5 axes</span></div>
+        <p class="fr-spec-list__p">What the ship-vs-block verdict actually measures. <a href="/k-score">K-score methodology</a>.</p>
+      </li>
+    </ul>
     <div style="margin-top:var(--ks-6); display:flex; flex-wrap:wrap; gap:var(--ks-3)">
       <a href="/quickstart" class="ks-btn ks-btn--primary">Run the quickstart <span class="ks-btn-arrow">&rarr;</span></a>
       <a href="/capture" class="ks-btn ks-btn--ghost">Loop back to capture</a>
