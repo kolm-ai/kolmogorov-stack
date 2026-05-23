@@ -54,6 +54,7 @@ import http from 'node:http';
 import https from 'node:https';
 import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
 const VERSION = '0.2.6';
 const HOME = os.homedir();
@@ -337,10 +338,12 @@ COMMANDS
   whoami                           echo current tenant + plan + base
   new <name> [--from <template>]   scaffold a spec.json you can compile
   build <name> [--from <tpl>]      one-shot: new + seeds + compile + verify (the fastest path)
+  build plan [opts]                choose collect/RAG/train/distill/cloud/quant/runtime path before spend
   compile "<task>" [opts]          cloud-compile a task into a .kolm artifact
   compile --spec <file|->           offline build from a JSON spec (any author, AI included)
   train --spec <file>              alias for compile from a spec (training entry point)
   train --namespace <n>            alias for distill (after capture)
+  train plan <dataset> --strategy  choose rule/cache/SFT/KD/preference/on-policy before spend
   seeds <sub>                      local-first training-data helpers (new|generate|list|bootstrap)
   seeds new "<brief>" [opts]       free-text brief -> deterministic candidate seeds (Wave 199 air-gap)
   trace <sub>                      structured agent/workflow trace inspector (stats|chain|export|new|span)
@@ -382,8 +385,10 @@ COMMANDS
   rag <sub>                        airgapped local lookup (index|query|attach|list)
   team <sub>                       multi-tenant workspaces (create|list|show|invite|accept|members|role|remove)
   tunnel <sub>                     remote access to a self-hosted .kolm (new|list|start|close)
-  cloud <sub>                      real GPU train + BYOC deploy (train|targets|deploy|list|show|destroy)
+  cloud <sub>                      real GPU train + BYOC deploy (broker|train|targets|deploy|list|show|destroy)
   surfaces                         product journey map across account, CLI, TUI, API, cloud, privacy, and proof (--json)
+  packages <sub>                   SDK/runtime/installer package release readiness (release-readiness)
+  evidence <sub>                   local proof packets for open readiness gates
   airgap <sub>                     hard-offline mode (status|enable|disable|verify)
   compute <sub>                    where training runs (list|detect|pick|use|info|test|status)
   doctor                           sanity-check env (config, cloud, docker, project)
@@ -499,7 +504,8 @@ USAGE
 
 FLAGS
   --intent, --preview   Use /v1/intent/ask (same classifier as the web
-                        ask-bar). Returns the proposed command and waits ??                        never triggers a compile, capture, or job. Pair
+                        ask-bar). Returns the proposed command and waits;
+                        never triggers a compile, capture, or job. Pair
                         with --json for machine-readable envelope.
   --airgap, --offline   Force local parser (no network).
   --json                Machine-readable response envelope.
@@ -934,9 +940,11 @@ OPTIONS (spec)
 RECIPE SOURCE - two ways to author
   Inline:    "recipes": [{ "source": "function generate(input, lib) {...}" }]
   Sidecar:   "recipes": [{ "source_file": "./recipe.js" }]
-  source_file is resolved relative to the spec file. Use it to author JS in a
-  real editor with linting/highlighting instead of escaping a one-line string
-  inside JSON. If both fields exist on the same recipe, "source" wins.
+  source_file is resolved relative to the spec file. Bundled examples/... paths
+  also resolve from the installed repo so copied first-party specs still build.
+  Use it to author JS in a real editor with linting/highlighting instead of
+  escaping a one-line string inside JSON. If both fields exist on the same
+  recipe, "source" wins.
 
 FORBIDDEN IDENTIFIERS (sandbox guard, scanned in recipes[].source)
   process, require, module, global, globalThis, __dirname, __filename,
@@ -1119,7 +1127,7 @@ WINDOWS QUOTING NOTE
   Or use bash/zsh/git-bash where 'single-quoted JSON' works as written.
 
 The input is parsed as JSON when possible; otherwise passed as a bare string.
---input lets you skip shell-quoting pain on Windows cmd ??pass a file path or
+--input lets you skip shell-quoting pain on Windows cmd - pass a file path or
 '-' for stdin instead. --params lets you
 pass tenant-runtime config to the recipes (extra patterns, allowlists, vertical
 rules). Recipes read these via lib.params. Tenant params are never persisted by
@@ -1167,6 +1175,9 @@ EXAMPLE
 
 USAGE
   kolm bench <artifact.kolm> [opts]                  artifact-local benchmark JSON
+  kolm bench evidence [--summary|--json]             comparative benchmark evidence readiness
+  kolm bench evidence --template [--json]            provider/runtime lane manifest template
+  kolm bench evidence --validate <matrix.json>        validate a public provider benchmark matrix
   kolm bench --reproduce <suite> [opts]               public-reproducer suite (Docker)
   kolm bench --compare <artifact.kolm> [opts]         head-to-head: kolm vs LLM
 
@@ -1193,6 +1204,18 @@ OPTIONS (--compare mode)
     KOLM_BENCH_LLM_OUTPUT_RATE        override $/1M output tokens
     KOLM_BENCH_LOCAL_LLM_URL          local inference endpoint (default: http://127.0.0.1:11434)
     KOLM_BENCH_LOCAL_LLM_MODEL        local model name (default: llama3.2:1b)
+
+OPTIONS (evidence mode)
+  --catalog                    print required benchmark lanes and source artifacts
+  --template                   print the provider/runtime evidence matrix template
+  --validate <file>            validate reports/benchmarks/provider-matrix.json shape
+  --require-local-contract     fail if local benchmark evidence files are missing
+  --require-public-claim       fail until every public provider/runtime lane is complete
+
+EXAMPLES (evidence mode)
+  kolm bench evidence --summary
+  kolm bench evidence --template --json
+  kolm bench evidence --validate reports/benchmarks/provider-matrix.json --summary
 
 The artifact-mode report follows the kolm-benchmark-1 spec. It includes k_score,
 evals.accuracy, latency_us.p50/p95, privacy.runtime_egress_attempts,
@@ -1459,6 +1482,8 @@ HONEST SCOPE
   quantize: `kolm quantize - quantize a compiled adapter via the isolated quantize worker (wave 195).
 
 USAGE
+  kolm quantize oracle [--task <t>] [--device <id>] [--params-b N] [--json]
+  kolm quantize oracle --catalog [--json]
   kolm quantize --local-worker --method <method> --in <dir> --out <dir>
   kolm quantize --local-worker --doctor
 
@@ -1478,6 +1503,8 @@ METHODS (W614 — full SOTA quant menu, per-method doctor)
            drives \$EFFICIENT_QAT_REPO_PATH (OpenGVLab/EfficientQAT)
 
 FLAGS
+  oracle                 rank quantization methods before installing workers
+  --catalog              list oracle methods, runtimes, and worker/external status
   --local-worker          REQUIRED. Routes through workers/quantize/quantize.mjs. The
                           root kolm install has zero ML deps; every quant lib lives in
                           the isolated @kolm/quantize-worker package and is OPTIONAL.
@@ -1491,6 +1518,8 @@ FLAGS
   --json                  machine-readable JSON output
 
 EXAMPLES
+  kolm quantize oracle --task extraction --device rtx-4090-24gb --params-b 7 --calibration-rows 256 --json
+  kolm quantize oracle --catalog --json
   kolm quantize --local-worker --doctor
   kolm quantize --local-worker --doctor --method=hqq    # is HQQ specifically ready?
   kolm quantize --local-worker --method=int4 --in ./adapter --out ./adapter-int4
@@ -1850,6 +1879,8 @@ EXAMPLES
 
 USAGE
   kolm distill --namespace <n> [--base-model <name>] [--target <size>]
+  kolm distill strategy [--task <t>] [--real-pairs N] [--holdout-pairs N] [--json]
+  kolm distill strategy --catalog [--json]
   kolm distill --local-worker --spec <file> --seeds <file> --out <dir>
                               [--mode stub|collect|full|doctor]
                               [--teacher <vendor:model>] [--student-base <name>]
@@ -1925,6 +1956,8 @@ EXAMPLES
   kolm distill --local-worker --spec ./recipe.spec.json --seeds ./seeds.jsonl --out ./dist/
 
 SUBCOMMANDS — RUN TELEMETRY (wave 455)
+  kolm distill strategy             rank collect/rule/SFT/KD/preference/on-policy paths
+  kolm distill strategy --catalog   list the strategy catalog and gates
   kolm distill runs                  list local distill runs with step counts +
                                      final loss / k_score
   kolm distill runs <run_id>         show one run's metadata + per-step loss
@@ -2212,8 +2245,9 @@ SUBCOMMANDS
                 num_faces, num_plates, mode, output_path|output_b64,
                 redacted_image_sha256} on success. Honest envelope with
                 {ok:false, error:'no_detector_installed', install_hint:...}
-                when onnxruntime-node, sharp, or model files are missing ??                NEVER claims it redacted PII it could not see.
-  audio-doctor  W464 ??report whether the multimodal audio voiceprint scrub
+                when onnxruntime-node, sharp, or model files are missing;
+                NEVER claims it redacted PII it could not see.
+  audio-doctor  W464 - report whether the multimodal audio voiceprint scrub
                 worker has its external voiceprint redactor wired
                 (pyannote-audio-redact on PATH, $VOICEPRINT_REDACT_CMD env
                 override, or ~/.kolm/scripts/voiceprint-redact.py).
@@ -2365,7 +2399,7 @@ NOTES
   surfaces: `kolm surfaces - product journey map for users and operators.
 
 USAGE
-  kolm surfaces [--json] [--graph] [--readiness] [--closeout]
+  kolm surfaces [--json] [--graph] [--readiness] [--closeout] [--packages] [--benchmarks] [--quality]
 
 WHAT IT SHOWS
   - every major product surface and its account pages
@@ -2379,10 +2413,56 @@ FLAGS
   --graph       include the generated public product graph in JSON output
   --readiness   print requirement status counts and open readiness items
   --closeout    print the generated closeout ledger for external/package/benchmark/certification items
+  --packages    include local package-release readiness for SDK/runtime/install channels
+  --benchmarks  include comparative benchmark evidence readiness
+  --quality     include quality-judge calibration evidence
+  --frontier-lab include the research-to-build experiment portfolio contract
+  --frontier-contracts include the implementation-agent handoff contracts
+  --operator-kernels include the backend operator-kernel build contract
 
 WHY IT EXISTS
   This is the operator-readable contract that prevents account, CLI, TUI,
   hosted API, cloud, and local product flows from drifting apart.
+`,
+  packages: `kolm packages - package release readiness for SDK, runtime, and installer channels.
+
+USAGE
+  kolm packages release-readiness [--summary|--json]
+  kolm packages release-readiness --catalog [--json]
+  kolm packages release-readiness --target=<id> --json
+  kolm packages release-readiness --smoke-installers [--summary|--json]
+  kolm packages release-readiness --run-local-checks [--target=<id>] [--summary|--json]
+  kolm packages release-readiness --template [--json]
+  kolm packages release-readiness --validate reports/package-release-manifest.json [--summary|--json]
+
+FLAGS
+  --require-local-contract   fail if local manifests, docs, or package contracts are broken
+  --require-publish-ready    fail if package-manager publication evidence is still incomplete
+  --strict-local-checks      fail missing toolchains instead of classifying them as local skips
+
+SCOPE
+  Local only. This command never publishes packages, contacts registries, or prints secrets.
+`,
+  evidence: `kolm evidence - local proof packets for open product readiness gates.
+
+USAGE
+  kolm evidence [--summary|--json]
+  kolm evidence format-governance [--summary|--json|--catalog|--template]
+  kolm evidence runtime-adoption [--summary|--json|--catalog|--template]
+  kolm evidence compliance-certification [--summary|--json|--catalog|--template]
+  kolm evidence package-release [--summary|--json|--catalog|--template]
+  kolm evidence benchmark [--summary|--json|--catalog|--template]
+  kolm evidence quality [--summary|--json]
+
+ALIASES
+  format, governance          -> format-governance
+  runtime, adoption           -> runtime-adoption
+  compliance, certification   -> compliance-certification
+  packages, package           -> package-release
+  benchmarks                  -> benchmark
+
+SCOPE
+  Local only. Evidence commands validate packet shape and local proof files; they do not publish packages, contact registries, claim external adoption, or claim live certification.
 `,
   repl: `kolm repl - generic interactive REPL that dispatches any kolm verb.
 
@@ -2561,7 +2641,8 @@ INSTALL
   'kolm completion install' detects your shell from $SHELL and appends an
   'eval "$(kolm completion <shell>)"' line into the matching rc file. Use
   --shell to override detection and --rc to override the target file.
-  --dry-run prints the diff without writing. The install is idempotent ??  running it twice will not double-append.
+  --dry-run prints the diff without writing. The install is idempotent;
+  running it twice will not double-append.
 
 After installing, restart your shell or source the file.
 `,
@@ -3088,6 +3169,8 @@ USAGE
   kolm cloud readiness [--remote] [--json] local or deployed cloud/GPU/storage readiness matrix
   kolm cloud storage [--provider <id>] [--smoke] [--json]
                                            artifact object-store readiness and round-trip smoke
+  kolm cloud broker [--workload train] [--privacy standard|regulated|airgap] [--json]
+                                           pick local, SSH, rented GPU, managed train, or edge
   kolm cloud targets [--json]             list BYOC, edge, SSH, GPU, and managed train targets
   kolm cloud deploy-plan --target <t> --artifact <id> [--json]
                                            local, secret-safe deploy steps for any supported target
@@ -3640,15 +3723,34 @@ USAGE
   kolm pipeline distill  <dataset-id|path>     [--json]
   kolm pipeline compile  <dataset-id|path>     [--json]
   kolm pipeline full     <dataset-id|path>     [--json]
+  kolm pipeline run --continuous [--namespace ns] [--interval-ms 60000] [--once]   [W710]
 
 FLAGS
   --json                deterministic JSON output
+  --continuous          drive active-learning loop (W710 scaffold)
+  --namespace <n>       restrict continuous loop to one namespace
+  --interval-ms <ms>    sleep between iterations (default 60000)
+  --once                exit after one iteration (don't loop)
+
+ENVIRONMENT
+  KOLM_CONTINUOUS_DISTILL_FALLBACK_THRESHOLD  teacher-fallback ratio that
+                                              triggers a distill (default 0.10)
+  KOLM_CONTINUOUS_DISTILL_MIN_QUEUE           min active-learning queue depth
+                                              required to trigger (default 25)
+  KOLM_TENANT_ID                              tenant id for local mode
+                                              (default local-tenant)
 
 EXIT CODES
   0 ok   1 user error   2 server / pipeline error
 
 EXAMPLE
   kolm pipeline full ds_abc123 --json
+  kolm pipeline run --continuous --interval-ms 30000
+
+NOTE
+  Scaffold for continuous distillation. Production daemon arrives in W775.
+  This command DOES NOT fork a background process — either runs once
+  (--once) or blocks on an interval loop in the foreground.
 `,
   agents: `kolm agents - dev-agent telemetry (sessions, recommendations, failures). (W384)
 
@@ -3706,6 +3808,8 @@ EXAMPLE
   eval "$(kolm shell-init --shell bash)"
 `,
 };
+
+HELP.package = HELP.packages;
 
 function usage(topic) {
   console.log(HELP[topic] || HELP._root);
@@ -3836,7 +3940,8 @@ const SPEC_TEMPLATES = {
         '  var extras = (lib.params && lib.params.extra_patterns) || [];',
         "  for (var x=0;x<extras.length;x++){ var e=extras[x]; try { patterns.push({name:e.name,regex:new RegExp(e.regex,e.flags||'g'),replacement:e.replacement||('['+e.name+']')}); } catch(err){} }",
         '  var hits = {}, redacted = text;',
-        '  for (var n=0;n<patterns.length;n++){ var pat=patterns[n], count=0; redacted = redacted.replace(pat.regex, function(){ count++; return pat.replacement; }); if (count>0) hits[pat.name]=(hits[pat.name]||0)+count; }',
+        '  function applyReplacement(tpl,args){ return String(tpl).replace(/\\$(\\d+)/g,function(_,i){ return args[Number(i)] || ""; }); }',
+        '  for (var n=0;n<patterns.length;n++){ var pat=patterns[n], count=0; redacted = redacted.replace(pat.regex, function(){ count++; return applyReplacement(pat.replacement, arguments); }); if (count>0) hits[pat.name]=(hits[pat.name]||0)+count; }',
         '  var hitList = []; for (var key in hits) hitList.push({name:key,count:hits[key]});',
         '  hitList.sort(function(a,b){ return a.name<b.name?-1:a.name>b.name?1:0; });',
         '  return { redacted: redacted, hits: hitList };',
@@ -3850,6 +3955,7 @@ const SPEC_TEMPLATES = {
       description: 'starter identifier patterns — tenants extend via params.extra_patterns',
       enabled_builtins: ['email', 'phone', 'url', 'ipv4', 'date'],
       default_patterns: [
+        { name: 'PHONE', regex: '\\b((?:call|phone|tel|mobile|fax|contact)\\b[^\\n\\r]{0,40}?)(\\d{3}[-.]\\d{4})\\b', flags: 'gi', replacement: '$1[PHONE]' },
         { name: 'SSN_LIKE', regex: '\\b\\d{3}-\\d{2}-\\d{4}\\b', replacement: '[SSN]' },
       ],
     },
@@ -3860,9 +3966,10 @@ const SPEC_TEMPLATES = {
     },
     evals: {
       spec: 'rs-1-evals',
-      n: 2,
+      n: 3,
       cases: [
         { id: 'phone', input: { text: 'call 555-123-4567 today' }, expected: { redacted: 'call [PHONE] today', hits: [{ name: 'PHONE', count: 1 }] } },
+        { id: 'local-phone', input: { text: 'Call Jane at 555-1212' }, expected: { redacted: 'Call Jane at [PHONE]', hits: [{ name: 'PHONE', count: 1 }] } },
         { id: 'ssn',   input: { text: 'ssn 123-45-6789' },         expected: { redacted: 'ssn [SSN]',          hits: [{ name: 'SSN_LIKE', count: 1 }] } },
       ],
       coverage: 1.0,
@@ -4409,13 +4516,35 @@ async function cmdNew(args) {
 // "compile a rule" promise the homepage makes: a known-good recipe is the
 // starting point, not a stub. Curated baselines score K >= 0.95 on their own
 // seeds; the user can then plug their own --examples and re-run.
+function cliRepoRoot() {
+  // examples/ lives at <repo>/examples regardless of where the CLI is invoked.
+  // import.meta.url -> .../kolm-stack/cli/kolm.js -> repoRoot is two up.
+  const here = path.dirname(decodeURIComponent(new URL(import.meta.url).pathname).replace(/^\/([A-Za-z]):/, '$1:'));
+  return path.dirname(here);
+}
+
+function resolveRecipeSourceFile(sourceFile, baseDir) {
+  const sf = String(sourceFile || '');
+  const candidates = path.isAbsolute(sf)
+    ? [sf]
+    : [
+        path.resolve(baseDir || process.cwd(), sf),
+        path.resolve(cliRepoRoot(), sf),
+      ];
+  const seen = new Set();
+  for (const candidate of candidates) {
+    const resolved = path.resolve(candidate);
+    if (seen.has(resolved)) continue;
+    seen.add(resolved);
+    if (fs.existsSync(resolved)) return resolved;
+  }
+  return path.resolve(candidates[0]);
+}
+
 function findCuratedTemplate(name) {
   const slug = String(name || '').toLowerCase();
   if (!slug) return null;
-  // examples/ lives at <repo>/examples regardless of where the CLI is invoked.
-  // import.meta.url -> .../kolm-stack/cli/kolm.js -> repoRoot is two up.
-  const here = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]):/, '$1:'));
-  const repoRoot = path.dirname(here);
+  const repoRoot = cliRepoRoot();
   const dir = path.join(repoRoot, 'examples', slug);
   const specPath = path.join(dir, 'spec.json');
   const recipePath = path.join(dir, 'recipe.js');
@@ -4426,7 +4555,151 @@ function findCuratedTemplate(name) {
   return null;
 }
 
+function buildPlanFlag(args, name, fallback = undefined) {
+  const eq = args.find((a) => a.startsWith(name + '='));
+  if (eq) return eq.slice(name.length + 1);
+  const idx = args.indexOf(name);
+  if (idx >= 0 && args[idx + 1] && !args[idx + 1].startsWith('--')) return args[idx + 1];
+  return fallback;
+}
+
+function buildPlanNumber(args, names, fallback = undefined) {
+  for (const name of names) {
+    const raw = buildPlanFlag(args, name, undefined);
+    if (raw !== undefined) {
+      const n = Number(raw);
+      return Number.isFinite(n) ? n : fallback;
+    }
+  }
+  return fallback;
+}
+
+function buildPlanProfile(args) {
+  return {
+    task: buildPlanFlag(args, '--task', 'unknown'),
+    namespace: buildPlanFlag(args, '--namespace', buildPlanFlag(args, '--name', 'default')),
+    base_model: buildPlanFlag(args, '--base-model', buildPlanFlag(args, '--model', undefined)),
+    privacy: buildPlanFlag(args, '--privacy', buildPlanFlag(args, '--privacy-mode', 'standard')),
+    real_pairs: buildPlanNumber(args, ['--real-pairs', '--rows'], undefined),
+    synthetic_pairs: buildPlanNumber(args, ['--synthetic-pairs'], undefined),
+    holdout_pairs: buildPlanNumber(args, ['--holdout-pairs', '--holdout'], undefined),
+    preference_pairs: buildPlanNumber(args, ['--preference-pairs'], undefined),
+    repeat_rate: buildPlanNumber(args, ['--repeat-rate'], undefined),
+    label_noise: buildPlanNumber(args, ['--label-noise'], undefined),
+    teacher_agreement: buildPlanNumber(args, ['--teacher-agreement'], undefined),
+    target_latency_ms: buildPlanNumber(args, ['--target-latency-ms'], undefined),
+    budget_usd: buildPlanNumber(args, ['--budget-usd'], undefined),
+    params_b: buildPlanNumber(args, ['--params-b'], undefined),
+    context_tokens: buildPlanNumber(args, ['--context-tokens'], undefined),
+    calibration_rows: buildPlanNumber(args, ['--calibration-rows'], undefined),
+    device: buildPlanFlag(args, '--device', undefined),
+    runtime: buildPlanFlag(args, '--runtime', undefined),
+    no_local_gpu: args.includes('--no-local-gpu'),
+    existing_artifact: args.includes('--existing-artifact'),
+  };
+}
+
+function buildPlanEnv(args) {
+  const sim = buildPlanFlag(args, '--simulate', '');
+  if (!sim) return process.env;
+  if (sim === 'anthropic') return { ANTHROPIC_API_KEY: 'simulated-key' };
+  if (sim === 'openai') return { OPENAI_API_KEY: 'simulated-key' };
+  if (sim === 'runpod-r2') {
+    return {
+      ANTHROPIC_API_KEY: 'simulated-key',
+      KOLM_RUNPOD_TOKEN: 'simulated-token',
+      CLOUDFLARE_ACCOUNT_ID: 'simulated-account',
+      R2_ACCESS_KEY_ID: 'simulated-access',
+      R2_SECRET_ACCESS_KEY: 'simulated-secret',
+      R2_BUCKET: 'kolm-artifacts',
+    };
+  }
+  if (sim === 'empty') return {};
+  const err = new Error(`unknown --simulate ${sim}; use anthropic, openai, runpod-r2, empty`);
+  err.exitCode = EXIT.BAD_ARGS;
+  throw err;
+}
+
+function printBuildPlanHelp() {
+  console.log(`kolm build plan - choose the right path before spending compute
+
+USAGE
+  kolm build plan [--task classification|extraction|generation|redaction|code|chat|vision|medical|legal]
+                  [--rows N] [--synthetic-pairs N] [--holdout-pairs N]
+                  [--privacy standard|regulated|zero_retention|airgap]
+                  [--no-local-gpu] [--params-b N] [--context-tokens N]
+                  [--device <target>] [--runtime <target>] [--existing-artifact]
+                  [--simulate anthropic|openai|runpod-r2|empty] [--json]
+  kolm build plan --catalog [--json|--summary]
+
+EXAMPLES
+  kolm build plan --task extraction --rows 600 --holdout-pairs 120 --existing-artifact
+  kolm build plan --task generation --rows 1500 --holdout-pairs 300 --no-local-gpu --simulate runpod-r2
+  kolm build plan --task redaction --rows 120 --holdout-pairs 30 --privacy airgap --existing-artifact
+
+The planner never launches training. It ranks collect, prompt/RAG, route,
+train/distill, cloud compute, quantization, compile, and local runtime options
+without printing secret values.`);
+}
+
+async function cmdBuildPlan(args) {
+  if (args.includes('--help') || args.includes('-h')) {
+    printBuildPlanHelp();
+    return;
+  }
+  const wantJson = args.includes('--json');
+  const wantSummary = args.includes('--summary');
+  const requireReady = args.includes('--require-ready');
+  const { buildStrategyCatalog, planBuildStrategy } = await import('../src/build-strategy-brain.js');
+  if (args.includes('--catalog') || args[0] === 'catalog') {
+    const catalog = buildStrategyCatalog();
+    if (wantJson || !wantSummary) {
+      console.log(JSON.stringify(catalog, null, 2));
+      return;
+    }
+    console.log(`build strategy catalog: ${catalog.action_families.length} action families`);
+    console.log('surfaces: cli=' + catalog.surfaces.cli + ' api=' + catalog.surfaces.api);
+    return;
+  }
+
+  const plan = planBuildStrategy(buildPlanProfile(args), buildPlanEnv(args));
+  if (wantJson) {
+    console.log(JSON.stringify(plan, null, 2));
+  } else {
+    const rec = plan.recommendation || {};
+    const evidence = plan.evidence_chain || {};
+    const providers = Array.isArray(evidence.provider_ids_configured) && evidence.provider_ids_configured.length
+      ? evidence.provider_ids_configured.join(',')
+      : 'none';
+    const compute = evidence.compute_lane_id
+      ? `${evidence.compute_lane_id}${evidence.compute_state ? ':' + evidence.compute_state : ''}`
+      : 'none';
+    const quant = evidence.quantization_method || 'none';
+    console.log(`build plan: ${rec.id || 'none'} (${plan.ok ? 'actionable' : 'blocked'})`);
+    console.log(`task=${plan.profile.task} namespace=${plan.profile.namespace} privacy=${plan.profile.privacy}`);
+    console.log(`rows=${plan.profile.real_pairs} real / ${plan.profile.synthetic_pairs} synthetic / ${plan.profile.holdout_pairs} holdout`);
+    console.log(`providers=${providers} compute=${compute} quant=${quant}`);
+    if (rec.command) console.log('run: ' + rec.command);
+    if (rec.blockers?.length) console.log('blockers: ' + rec.blockers.join(', '));
+    const top = (plan.ranked || []).slice(0, 5);
+    if (top.length) {
+      console.log('ranked:');
+      for (const row of top) {
+        console.log(`  - ${row.id}: ${row.feasible ? 'ready' : 'blocked'} (${row.reason})`);
+      }
+    }
+    if (Array.isArray(plan.next_actions) && plan.next_actions.length) {
+      console.log('next:');
+      for (const action of plan.next_actions.slice(0, 6)) {
+        if (action.value) console.log('  - ' + action.value);
+      }
+    }
+  }
+  if (requireReady && !plan.ok) process.exitCode = EXIT.GATE_FAIL;
+}
+
 async function cmdBuild(args) {
+  if (args && args[0] === 'plan') return cmdBuildPlan(args.slice(1));
   if (maybeHelp('build', args)) return;
   const positional = args.find(a => !a.startsWith('--'));
   if (!positional) {
@@ -6292,10 +6565,11 @@ async function cmdCompile(args) {
     try { spec = JSON.parse(raw); }
     catch (e) { console.error(`error: spec is not valid JSON: ${e.message}`); process.exit(EXIT.BAD_ARGS); }
 
-    // recipes[i].source_file: <path>  — author-friendly alternative to embedding
+    // recipes[i].source_file: <path> - author-friendly alternative to embedding
     // the JS function as a JSON-escaped one-liner in recipes[i].source. Path is
-    // resolved relative to the spec file (or cwd for stdin specs). File contents
-    // become recipes[i].source so the rest of the pipeline is unchanged.
+    // resolved relative to the spec file (or cwd for stdin specs), with an
+    // installed repo-root fallback for bundled examples/... sidecars. File
+    // contents become recipes[i].source so the rest of the pipeline is unchanged.
     // If both source and source_file are set, source wins and a warning is logged.
     if (Array.isArray(spec.recipes) && specArg !== '-' && specArg !== '/dev/stdin') {
       const specDir = path.dirname(path.resolve(specArg));
@@ -6306,7 +6580,7 @@ async function cmdCompile(args) {
             console.error(`warning: recipe ${r.id || '?'} has both source and source_file; using source.`);
             continue;
           }
-          const sfPath = path.isAbsolute(sf) ? sf : path.resolve(specDir, sf);
+          const sfPath = resolveRecipeSourceFile(sf, specDir);
           try {
             r.source = fs.readFileSync(sfPath, 'utf8');
           } catch (e) {
@@ -6318,7 +6592,7 @@ async function cmdCompile(args) {
     } else if (Array.isArray(spec.recipes) && (specArg === '-' || specArg === '/dev/stdin')) {
       for (const r of spec.recipes) {
         if (r && typeof r === 'object' && typeof r.source_file === 'string' && (!r.source || !r.source.length)) {
-          const sfPath = path.isAbsolute(r.source_file) ? r.source_file : path.resolve(process.cwd(), r.source_file);
+          const sfPath = resolveRecipeSourceFile(r.source_file, process.cwd());
           try {
             r.source = fs.readFileSync(sfPath, 'utf8');
           } catch (e) {
@@ -7477,6 +7751,9 @@ async function cmdEval(args) {
 }
 
 async function cmdBenchmark(args) {
+  if (args && (args[0] === 'evidence' || args[0] === 'benchmark-evidence')) {
+    return cmdBenchmarkEvidence(args.slice(1));
+  }
   if (maybeHelp('benchmark', args)) return;
   // `kolm bench --reproduce <suite>` is the public-reproducer path documented at
   // /articles/how-we-benchmark. It runs in a pinned Docker image so the harness
@@ -7527,6 +7804,104 @@ async function cmdBenchmark(args) {
     appendRunLog({ command: 'bench', artifact: ap, runs: report.runs ?? null, k_composite: k, latency_us: lat, ok: true });
     await dispatchBench('PostBench', { command: 'bench', cwd: process.cwd(), artifact: ap, runs: report.runs, summary: report.summary || null }, { onResult: printHookResult });
   });
+}
+
+async function cmdBenchmarkEvidence(args) {
+  const help = args.includes('--help') || args.includes('-h');
+  if (help) {
+    console.log(`kolm bench evidence - benchmark claim readiness without provider calls
+
+USAGE
+  kolm bench evidence [--summary|--json]
+  kolm bench evidence --catalog [--json]
+  kolm bench evidence --template [--json]
+  kolm bench evidence --validate <matrix.json> [--summary|--json]
+
+FLAGS
+  --require-local-contract   fail if local benchmark evidence files are missing
+  --require-public-claim     fail until all public provider/runtime lanes are complete
+
+This command never calls model providers and never prints secret values. It
+keeps broad comparative claims gated until every required public lane has
+hashes, model ids, pricing snapshots, latency, quality, and hardware/runtime
+metadata.`);
+    return;
+  }
+  const wantJson = args.includes('--json');
+  const wantSummary = args.includes('--summary') || !wantJson;
+  const requireLocal = args.includes('--require-local-contract');
+  const requirePublic = args.includes('--require-public-claim');
+  const value = (flag) => {
+    const i = args.indexOf(flag);
+    if (i >= 0 && args[i + 1] && !args[i + 1].startsWith('--')) return args[i + 1];
+    const prefix = flag + '=';
+    const hit = args.find((arg) => arg.startsWith(prefix));
+    return hit ? hit.slice(prefix.length) : undefined;
+  };
+  const {
+    auditBenchmarkEvidence,
+    benchmarkEvidenceCatalog,
+    benchmarkEvidenceTemplate,
+    validateBenchmarkProviderMatrix,
+  } = await import('../src/benchmark-evidence.js');
+
+  if (args.includes('--catalog') || args[0] === 'catalog') {
+    const catalog = { ok: true, ...benchmarkEvidenceCatalog() };
+    if (wantJson && !wantSummary) {
+      console.log(JSON.stringify(catalog, null, 2));
+    } else {
+      console.log(`benchmark evidence catalog: lanes=${catalog.required_lanes.length} artifacts=${catalog.required_public_artifacts.length}`);
+      for (const lane of catalog.required_lanes) console.log(`  ${lane.id}: ${lane.required_fields.join(',')}`);
+    }
+    return;
+  }
+
+  if (args.includes('--template') || args[0] === 'template') {
+    const out = { ok: true, template: benchmarkEvidenceTemplate() };
+    if (wantJson && !wantSummary) {
+      console.log(JSON.stringify(out, null, 2));
+    } else {
+      console.log(JSON.stringify(out.template, null, 2));
+    }
+    return;
+  }
+
+  const validatePath = value('--validate') || (args[0] === 'validate' ? args[1] : undefined);
+  if (validatePath) {
+    let parsed;
+    try {
+      parsed = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), validatePath), 'utf8'));
+    } catch (e) {
+      const err = new Error(`cannot read benchmark matrix: ${String(e.message || e)}`);
+      err.exitCode = EXIT.BAD_ARGS;
+      throw err;
+    }
+    const validation = validateBenchmarkProviderMatrix(parsed);
+    if (wantJson && !wantSummary) {
+      console.log(JSON.stringify(validation, null, 2));
+    } else {
+      console.log(`benchmark matrix: ok=${validation.ok} lanes=${validation.counts.complete_lanes}/${validation.counts.required_lanes} failures=${validation.counts.failures}`);
+      for (const failure of validation.failures) console.log('  ' + failure);
+    }
+    if (!validation.ok) process.exitCode = EXIT.GATE_FAIL;
+    return;
+  }
+
+  const audit = auditBenchmarkEvidence();
+  if (wantJson && !wantSummary) {
+    console.log(JSON.stringify(audit, null, 2));
+  } else {
+    console.log(`benchmark evidence: local=${audit.ok ? 'ok' : 'blocked'} public_claim_ready=${audit.public_claim_ready ? 'yes' : 'no'} lanes=${audit.counts.complete_public_lanes}/${audit.counts.required_lanes} blockers=${audit.counts.blockers}`);
+    for (const lane of audit.lanes) {
+      const missing = lane.missing_fields.length ? ` missing=${lane.missing_fields.join(',')}` : '';
+      console.log(`  ${lane.id}: ${lane.status}${missing}`);
+    }
+    if (audit.blockers.length) {
+      console.log('next: publish/validate reports/benchmarks/provider-matrix.json before marketing broad comparative claims.');
+    }
+  }
+  if (requireLocal && !audit.ok) process.exitCode = EXIT.GATE_FAIL;
+  if (requirePublic && !audit.public_claim_ready) process.exitCode = EXIT.GATE_FAIL;
 }
 
 // `kolm bench --compare <artifact.kolm> [opts]`
@@ -8899,7 +9274,8 @@ async function cmdHub(args) {
       return;
     }
 
-    // Empty-state hint when the user surface is empty but seeds are present ??    // the fresh-tenant case the audit flagged.
+    // Empty-state hint when the user surface is empty but seeds are present:
+    // the fresh-tenant case the audit flagged.
     if (wantUser && wantSeeds && rows.length === 0 && seedRows.length > 0) {
       console.log(`showing ${seedRows.length} curated seeds (no user-published yet — try \`kolm publish\` to add yours)`);
       console.log('');
@@ -9197,7 +9573,7 @@ async function cmdSdk(args) {
   process.exit(EXIT.BAD_ARGS);
 }
 
-// W263 ??kolm marketplace {search|install|publish}
+// W263 - kolm marketplace {search|install|publish}
 //   kolm marketplace search [--category X] [--license Y] [--min-k N] [--verified] [--json]
 //   kolm marketplace install <slug> [--force] [--json]  fetches, sha256-verifies, productionReady()-gates,
 //                                                       then saves to ~/.kolm/artifacts/<slug>.kolm.
@@ -9864,6 +10240,64 @@ function pickFlagEq(args, name) {
   return null;
 }
 
+function quantOracleFlag(args, name, fallback = null) {
+  const eq = args.find((a) => a.startsWith(`${name}=`));
+  if (eq) return eq.slice(name.length + 1);
+  const i = args.indexOf(name);
+  if (i < 0) return fallback;
+  return args[i + 1] && !args[i + 1].startsWith('--') ? args[i + 1] : true;
+}
+
+function quantOracleProfile(args) {
+  return {
+    task: quantOracleFlag(args, '--task', 'chat'),
+    device: quantOracleFlag(args, '--device', null),
+    runtime: quantOracleFlag(args, '--runtime', null),
+    params_b: Number(quantOracleFlag(args, '--params-b', quantOracleFlag(args, '--params', 7))),
+    context_tokens: Number(quantOracleFlag(args, '--context', 4096)),
+    memory_gb: quantOracleFlag(args, '--memory-gb') == null ? undefined : Number(quantOracleFlag(args, '--memory-gb')),
+    calibration_rows: Number(quantOracleFlag(args, '--calibration-rows', 0)),
+    quality_floor: quantOracleFlag(args, '--quality-floor') == null ? undefined : Number(quantOracleFlag(args, '--quality-floor')),
+    privacy_mode: quantOracleFlag(args, '--privacy-mode', 'standard'),
+    preference_tuned: args.includes('--preference-tuned'),
+  };
+}
+
+async function cmdQuantizeOracle(args) {
+  const wantJson = args.includes('--json');
+  const { quantizationOracleCatalog, rankQuantizationStrategies } = await import('../src/quantization-oracle.js');
+  if (args.includes('--catalog') || args[0] === 'catalog') {
+    const catalog = quantizationOracleCatalog();
+    if (wantJson) {
+      console.log(JSON.stringify(catalog, null, 2));
+      return;
+    }
+    const entries = Object.entries(catalog.methods || {});
+    console.log(`quantization methods: ${entries.length}`);
+    for (const [id, m] of entries) {
+      console.log(`  ${id.padEnd(12)} ${String(m.execution_status || '-').padEnd(22)} bits=${m.bits} worker=${m.worker_method || '-'}`);
+    }
+    return;
+  }
+  const plan = rankQuantizationStrategies(quantOracleProfile(args));
+  if (wantJson) {
+    console.log(JSON.stringify(plan, null, 2));
+    if (plan.ok === false) process.exitCode = 1;
+    return;
+  }
+  const primary = plan.recommendation?.primary || {};
+  const fallback = plan.recommendation?.fallback || null;
+  console.log(`quantization oracle: ${primary.method || 'none'} (${primary.feasible ? 'feasible' : 'not feasible'})`);
+  console.log(`task=${plan.input.task} runtime=${plan.input.device.runtime} memory_gb=${plan.input.device.memory_gb} params_b=${plan.input.params_b}`);
+  if (primary.estimates) {
+    console.log(`estimate: memory=${primary.estimates.memory_gb}GB quality=${primary.estimates.quality} latency=${primary.estimates.latency_ms}ms`);
+  }
+  if (plan.recommendation?.command) console.log('run: ' + plan.recommendation.command);
+  if (fallback) console.log(`fallback: ${fallback.method} (${fallback.execution_status})`);
+  if (primary.warnings?.length) console.log('warnings: ' + primary.warnings.join(', '));
+  if (plan.ok === false) process.exitCode = 1;
+}
+
 // kolm quantize: wave 195 (Q+5). Quantize an adapter via the isolated
 // quantize worker. Without --local-worker prints a scaffolding message and
 // exits 0 (no work done). With --local-worker spawns workers/quantize/
@@ -9871,6 +10305,7 @@ function pickFlagEq(args, name) {
 // and falls back to an honest manifest if missing.
 async function cmdQuantize(args) {
   if (maybeHelp('quantize', args)) return;
+  if (args[0] === 'oracle') return cmdQuantizeOracle(args.slice(1));
   if (!args.includes('--local-worker')) {
     console.log('kolm quantize requires --local-worker flag.');
     console.log('The worker lives at workers/quantize/. Run:');
@@ -13187,9 +13622,97 @@ async function cmdLabels(args) {
 //                             [--no-redact] [--split-seed N]
 //   Runs the isolated distill worker at workers/distill/ instead of calling
 //   kolm cloud. No login required. Heavy ML deps stay in the worker package.
+function distillStrategyFlag(args, name, fallback = '') {
+  const eq = args.find((a) => a.startsWith(name + '='));
+  if (eq) return eq.slice(name.length + 1);
+  const idx = args.indexOf(name);
+  if (idx >= 0 && args[idx + 1] && !args[idx + 1].startsWith('--')) return args[idx + 1];
+  return fallback;
+}
+
+function distillStrategyNumber(args, names, fallback) {
+  for (const name of names) {
+    const raw = distillStrategyFlag(args, name, '');
+    if (raw !== '') {
+      const n = Number(raw);
+      return Number.isFinite(n) ? n : fallback;
+    }
+  }
+  return fallback;
+}
+
+function distillStrategyEnv(args) {
+  const sim = distillStrategyFlag(args, '--simulate', '');
+  if (!sim) return process.env;
+  if (sim === 'anthropic') return { ANTHROPIC_API_KEY: 'simulated-key' };
+  if (sim === 'openai') return { OPENAI_API_KEY: 'simulated-key' };
+  if (sim === 'local') return { KOLM_LOCAL_TEACHER_URL: 'http://127.0.0.1:8000' };
+  if (sim === 'empty') return {};
+  const err = new Error(`unknown --simulate ${sim}; use anthropic, openai, local, empty`);
+  err.exitCode = EXIT.BAD_ARGS;
+  throw err;
+}
+
+function distillStrategyProfile(args) {
+  const teachers = distillStrategyFlag(args, '--teachers', '');
+  return {
+    task: distillStrategyFlag(args, '--task', 'generation'),
+    namespace: distillStrategyFlag(args, '--namespace', distillStrategyFlag(args, '-n', 'default')),
+    base_model: distillStrategyFlag(args, '--base-model', distillStrategyFlag(args, '--model', 'Qwen/Qwen2.5-7B-Instruct')),
+    privacy: distillStrategyFlag(args, '--privacy', distillStrategyFlag(args, '--privacy-mode', 'standard')),
+    real_pairs: distillStrategyNumber(args, ['--real-pairs', '--rows'], 1000),
+    synthetic_pairs: distillStrategyNumber(args, ['--synthetic-pairs'], 0),
+    holdout_pairs: distillStrategyNumber(args, ['--holdout-pairs', '--holdout'], 200),
+    preference_pairs: distillStrategyNumber(args, ['--preference-pairs', '--ranked-pairs'], 0),
+    label_noise: distillStrategyNumber(args, ['--label-noise'], 0.05),
+    teacher_agreement: distillStrategyNumber(args, ['--teacher-agreement'], 0.8),
+    repeat_rate: distillStrategyNumber(args, ['--repeat-rate'], 0.2),
+    target_latency_ms: distillStrategyNumber(args, ['--target-latency-ms', '--latency-ms'], 120),
+    budget_usd: distillStrategyNumber(args, ['--budget-usd', '--budget'], 0),
+    existing_artifact: args.includes('--existing-artifact'),
+    teachers: teachers ? teachers.split(',').map((s) => s.trim()).filter(Boolean) : undefined,
+  };
+}
+
+async function cmdDistillStrategy(args) {
+  const wantJson = args.includes('--json');
+  const wantSummary = args.includes('--summary');
+  const requireReady = args.includes('--require-ready');
+  const { distillStrategyCatalog, planDistillStrategy } = await import('../src/distill-strategy.js');
+  if (args.includes('--catalog') || args[0] === 'catalog') {
+    const catalog = distillStrategyCatalog();
+    if (wantJson || !wantSummary) {
+      console.log(JSON.stringify(catalog, null, 2));
+      return;
+    }
+    console.log(`distill strategies: ${catalog.strategies.length}`);
+    for (const s of catalog.strategies) {
+      console.log(`  ${s.id.padEnd(28)} ${s.family.padEnd(12)} min=${s.min_real_pairs}/${s.min_holdout_pairs} teacher=${s.teacher_required ? 'yes' : 'no'}`);
+    }
+    return;
+  }
+  const plan = planDistillStrategy(distillStrategyProfile(args), distillStrategyEnv(args));
+  if (wantJson) {
+    console.log(JSON.stringify(plan, null, 2));
+  } else {
+    const rec = plan.recommendation || {};
+    console.log(`distill strategy: ${rec.id || 'none'} (${plan.ok ? 'ready' : 'needs configuration'})`);
+    console.log(`task=${plan.profile.task} namespace=${plan.profile.namespace} privacy=${plan.profile.privacy}`);
+    console.log(`pairs=${plan.profile.real_pairs} real / ${plan.profile.synthetic_pairs} synthetic / ${plan.profile.holdout_pairs} holdout`);
+    if (rec.command) console.log('run: ' + rec.command);
+    if (rec.blockers?.length) console.log('blockers: ' + rec.blockers.join(', '));
+    if (Array.isArray(plan.next_actions) && plan.next_actions.length) {
+      console.log('next:');
+      for (const action of plan.next_actions) console.log(`  - ${action.label}: ${action.value}`);
+    }
+  }
+  if (requireReady && !plan.ok) process.exit(EXIT.EXECUTION);
+}
+
 async function cmdDistill(args) {
   if (maybeHelp('distill', args)) return;
-  // W455 ??`kolm distill runs [<id>]` lists or shows local distill runs.
+  if (args[0] === 'strategy') return cmdDistillStrategy(args.slice(1));
+  // W455 - `kolm distill runs [<id>]` lists or shows local distill runs.
   // Dispatched BEFORE --from-captures so `kolm distill runs --from-captures`
   // is not hijacked (W455 #8 lock).
   if (args[0] === 'runs') return cmdDistillRuns(args.slice(1));
@@ -13197,7 +13720,11 @@ async function cmdDistill(args) {
   // Hoisted above --detach so the W214 dispatch lives in the first 600 chars
   // of the function (cmdDistillFromCaptures handles its own detach semantics).
   if (args.includes('--from-captures')) return cmdDistillFromCaptures(args);
-  // W480 ??on-policy + preference orchestration subverbs. Local-only by default
+  // W710-2: --resume-from-active-queue consumes routing-decision derived
+  // training rows (route='teacher'|'mixed') from the active-learning queue.
+  // Hoisted before --detach so the W710 dispatch handles its own envelope.
+  if (args.includes('--resume-from-active-queue')) return cmdDistillResumeFromActiveQueue(args);
+  // W480 - on-policy + preference orchestration subverbs. Local-only by default
   // (trainer is a tenant plug-in); --remote routes through /v1/distill/*.
   if (args[0] === 'onpolicy') return cmdDistillOnPolicy(args.slice(1));
   if (args[0] === 'preference' || args[0] === 'dpo' || args[0] === 'simpo') {
@@ -13284,7 +13811,7 @@ async function cmdDistill(args) {
 }
 
 // W455 — kolm distill runs [<id>] [--json] [--limit N] [--namespace NS]
-// W480 ??local on-policy / preference / spec-decode orchestration. Each
+// W480 - local on-policy / preference / spec-decode orchestration. Each
 // command surface mirrors the W454 `kolm media` pattern: a doctor subverb
 // + a primary action that calls into the orchestration module and prints
 // the envelope. The local module path is the default; --remote routes
@@ -13629,6 +14156,205 @@ async function cmdDistillFromCaptures(args) {
   console.log('  job_id:    ' + (j.job_id || '?'));
   if (j.pair_count !== undefined) console.log('  pairs:     ' + j.pair_count);
   if (j.status_url) console.log('  status:    ' + j.status_url);
+}
+
+// W710-2 — `kolm distill --resume-from-active-queue [--namespace ns] [--max N]`
+// Consume routing-decision derived training rows from the active-learning
+// queue (src/active-learning-queue.js) and feed them through the existing
+// distill pipeline. The queue is populated by W709 routing decisions whose
+// route was 'teacher' or 'mixed' — the prompts the student model couldn't
+// handle alone, i.e. exactly what the next distillation pass needs to learn.
+//
+// Honest envelopes only:
+//   - Not logged in -> exit 3 with {ok:false, error:'auth_required'}.
+//   - Empty queue   -> exit 0 with {ok:true, consumed:0, message:'...'}.
+//                      NEVER silently no-op or fabricate a job_id.
+//   - Otherwise     -> consume, write a temp captures.jsonl, and call into the
+//                      same /v1/distill/from-captures pipeline using the
+//                      synthesized capture file (the resume just changes how
+//                      we PICK rows; the trainer side is unchanged).
+async function cmdDistillResumeFromActiveQueue(args) {
+  const wantJson = args.includes('--json');
+  const namespace = pickFlag(args, '--namespace') || pickFlag(args, '-n') || 'default';
+  const maxFlag = pickFlag(args, '--max');
+  const max = Number.isFinite(Number(maxFlag)) && Number(maxFlag) > 0
+    ? Math.trunc(Number(maxFlag)) : 500;
+
+  // Auth gate first — never read the local queue under an ambient/unknown
+  // tenant. We require the local config to carry a key AND resolve the
+  // tenant_id via /v1/whoami so the queue read is fenced to the right tenant.
+  const c = loadConfig();
+  if (!c.api_key) {
+    const env = { ok: false, error: 'auth_required', hint: 'kolm login' };
+    if (wantJson) console.log(JSON.stringify(env));
+    else {
+      console.error('not logged in. run: kolm login');
+      console.error('  hint: ' + env.hint);
+    }
+    process.exit(3);
+  }
+
+  // Resolve tenant_id from the configured cloud. This is the only network
+  // call before reading the queue — it confirms the key still validates AND
+  // gives us the canonical id to fence the local store read on.
+  let tenantId = null;
+  try {
+    const base = c.base.replace(/\/+$/, '');
+    const res = await fetch(base + '/v1/whoami', { headers: { ...authHeaders(c) } });
+    if (res.ok) {
+      const j = await res.json().catch(() => ({}));
+      tenantId = j && (j.id || j.tenant_id || j.tenant?.id) || null;
+    } else if (res.status === 401 || res.status === 403) {
+      const env = { ok: false, error: 'auth_required', hint: 'kolm login' };
+      if (wantJson) console.log(JSON.stringify(env));
+      else console.error('cloud rejected the saved key. run: kolm login');
+      process.exit(3);
+    }
+  } catch (_) {
+    // Transport error -> the queue is local; we can still operate if the
+    // user has a KOLM_TENANT_ID env hint. Otherwise we cannot fence the
+    // read and must refuse.
+  }
+  if (!tenantId) tenantId = process.env.KOLM_TENANT_ID || null;
+  if (!tenantId) {
+    const env = { ok: false, error: 'tenant_resolve_failed', hint: 'kolm whoami or set KOLM_TENANT_ID' };
+    if (wantJson) console.log(JSON.stringify(env));
+    else {
+      console.error('could not resolve tenant id for queue fence.');
+      console.error('  hint: ' + env.hint);
+    }
+    process.exit(3);
+  }
+
+  const mod = await import('../src/active-learning-queue.js');
+  const before = mod.summarize(tenantId, namespace);
+  const rows = mod.consumeQueue(tenantId, namespace, max);
+  if (rows.length === 0) {
+    const env = {
+      ok: true,
+      consumed: 0,
+      namespace,
+      message: 'active-learning queue is empty; capture more or wait for routing decisions',
+      queue_summary_before: before,
+    };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else {
+      console.log('active-learning queue empty (namespace=' + namespace + ').');
+      console.log('  consumed: 0');
+      console.log('  hint: ' + env.message);
+    }
+    process.exit(0);
+  }
+
+  // Compute the priority percentiles BEFORE we hand the rows downstream so
+  // the user sees what they're about to distill.
+  const priorities = rows
+    .map(r => Number(r.priority))
+    .filter(Number.isFinite)
+    .sort((a, b) => a - b);
+  const p50 = priorities.length === 0 ? 0
+    : (priorities.length % 2 === 0
+        ? (priorities[priorities.length / 2 - 1] + priorities[priorities.length / 2]) / 2
+        : priorities[Math.floor(priorities.length / 2)]);
+
+  // Synthesize a capture jsonl file under ~/.kolm/active-learning/ so the
+  // downstream distill-from-captures path has a stable seed it can read.
+  // We do NOT secretly invent inputs/outputs — each line records the
+  // (trace_id, namespace, priority, decision) tuple so the trainer can
+  // hydrate the actual prompt/response by looking up the trace via the
+  // existing trace-capture API. The file is the receipt of WHAT we consumed.
+  const home = process.env.KOLM_HOME
+    || path.join(process.env.HOME || process.env.USERPROFILE || '.', '.kolm');
+  const seedDir = path.join(home, 'active-learning');
+  try { fs.mkdirSync(seedDir, { recursive: true }); } catch (_) {}
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const seedPath = path.join(seedDir, `resume-${namespace}-${stamp}.jsonl`);
+  try {
+    const lines = rows.map(r => JSON.stringify({
+      trace_id: r.trace_id,
+      namespace: r.namespace,
+      priority: r.priority,
+      enqueued_at_ms: r.enqueued_at_ms,
+      consumed_at_ms: r.consumed_at_ms,
+      source_routing_decision: r.source_routing_decision || null,
+    }));
+    fs.writeFileSync(seedPath, lines.join('\n') + '\n', 'utf8');
+  } catch (e) {
+    // If we cannot persist the receipt, we'd lose the audit trail. Refuse
+    // to claim the rows were trained on.
+    const env = {
+      ok: false,
+      error: 'seed_write_failed',
+      detail: e && e.message ? e.message : String(e),
+      hint: 'check that ' + seedDir + ' is writable',
+    };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else {
+      console.error('error: could not persist active-learning seed file.');
+      console.error('  ' + env.detail);
+      console.error('  hint: ' + env.hint);
+    }
+    process.exit(EXIT.EXECUTION);
+  }
+
+  // Try to kick the existing /v1/distill/from-captures pipeline so the user
+  // gets a job_id they can poll. This is best-effort — if the cloud is
+  // unreachable we still report consumed:N and seed_path so the rows aren't
+  // re-consumed by a retried command.
+  let job_id = null;
+  let bridge_error = null;
+  try {
+    const base = c.base.replace(/\/+$/, '');
+    const res = await fetch(base + '/v1/distill/from-captures', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', ...authHeaders(c) },
+      body: JSON.stringify({
+        namespace,
+        source: 'active_learning_queue',
+        active_learning_seed_path: seedPath,
+        consumed_count: rows.length,
+      }),
+    });
+    if (res.ok) {
+      const j = await res.json().catch(() => ({}));
+      job_id = j && (j.job_id || j.run_id) || null;
+    } else {
+      bridge_error = 'http_' + res.status;
+    }
+  } catch (e) {
+    bridge_error = e && e.message ? e.message : 'bridge_unreachable';
+  }
+
+  const after = mod.summarize(tenantId, namespace);
+  const env = {
+    ok: true,
+    consumed: rows.length,
+    namespace,
+    priority_p50: p50,
+    seed_path: seedPath,
+    job_id,
+    bridge_error,
+    queue_summary_before: before,
+    queue_summary_after: after,
+  };
+  if (wantJson) {
+    console.log(JSON.stringify(env, null, 2));
+  } else {
+    console.log(`Consumed ${rows.length} active-learning rows (priority p50=${p50.toFixed(3)}).`);
+    if (job_id) {
+      console.log(`Distill kicked off run_id=${job_id}.`);
+    } else if (bridge_error) {
+      console.log(`Distill bridge unreachable (${bridge_error}); rows persisted to:`);
+      console.log('  ' + seedPath);
+      console.log('  rerun once the cloud is reachable or feed the file to a local trainer.');
+    } else {
+      console.log('Distill kicked off run_id=(pending — cloud returned no job_id).');
+      console.log('  seed: ' + seedPath);
+    }
+    console.log('  namespace: ' + namespace);
+    console.log('  remaining queued: ' + (after && after.queued));
+  }
+  process.exit(0);
 }
 
 // Wave 216: kolm replay <concept_or_version_id> [--namespace ns] [--limit N]
@@ -14146,7 +14872,27 @@ async function cmdTrainPlan(args) {
   const positional = args.filter((a) => !a.startsWith('-'))[0];
   if (!positional) { console.error('error: kolm train plan <dataset_id|path|ds_*>'); process.exit(EXIT.BAD_ARGS); }
   const wantJson = args.includes('--json');
+  const includeStrategy = args.includes('--strategy') || args.includes('--distill-strategy');
   const p = await planner.plan(positional);
+  if (includeStrategy) {
+    const strategy = await import('../src/distill-strategy.js');
+    const s = strategy.planDistillStrategy({
+      task: p.task,
+      namespace: positional,
+      real_pairs: p.examples_real,
+      synthetic_pairs: p.examples_synthetic,
+      holdout_pairs: p.holdout_size,
+      privacy: p.sensitive_data_detected ? 'regulated' : 'standard',
+    }, process.env);
+    const out = { ...p, distill_strategy: s };
+    if (wantJson) { console.log(JSON.stringify(out, null, 2)); return; }
+    console.log(planner.planReport(p));
+    console.log('');
+    console.log('Distill strategy: ' + (s.recommendation?.id || 'none') + (s.ok ? ' (ready)' : ' (needs configuration)'));
+    if (s.recommendation?.command) console.log('  run: ' + s.recommendation.command);
+    if (s.recommendation?.blockers?.length) console.log('  blockers: ' + s.recommendation.blockers.join(', '));
+    return;
+  }
   if (wantJson) { console.log(JSON.stringify(p, null, 2)); return; }
   console.log(planner.planReport(p));
 }
@@ -14565,7 +15311,8 @@ async function cmdLoop(args) {
 
 async function cmdDoctor(args) {
   if (maybeHelp('doctor', args)) return;
-  // W298: --loop runs the full value-loop (capture ??bridges ??distill ??  // replay) against an in-process buildRouter() with a fresh anon tenant
+  // W298: --loop runs the full value-loop (capture -> bridges -> distill ->
+  // replay) against an in-process buildRouter() with a fresh anon tenant
   // so a brand-new install can prove end-to-end the four ladder rungs work
   // before bothering with real traffic. Exits 0 on full green, 1 on any
   // rung failure. JSON mode emits a structured report keyed by rung name.
@@ -14580,7 +15327,8 @@ async function cmdDoctor(args) {
     };
     const ok = (name, detail) => rungs.push({ name, status: 'ok', detail: String(detail || '') });
 
-    // walkLoop runs the five ladder rungs (capture ??health ??bridges ??    // distill ??replay) against any base URL with bearer-auth headers. The
+    // walkLoop runs the five ladder rungs (capture -> health -> bridges ->
+    // distill -> replay) against any base URL with bearer-auth headers. The
     // in-process and --remote modes share this body so the rung shapes stay
     // identical and the lock-in tests cover both code paths.
     // Use node:http directly (not fetch). The global undici dispatcher's
@@ -14737,7 +15485,8 @@ async function cmdDoctor(args) {
   // first-time evaluators (no key on disk yet) can still run doctor without
   // exit=3. The other checks (cloud reachable, receipt secret, node version,
   // toolchain) keep their normal severities. When the flag is on, the
-  // "logged_in:false" condition is still surfaced honestly in the output ??  // just not as a hard failure.
+  // "logged_in:false" condition is still surfaced honestly in the output,
+  // just not as a hard failure.
   const allowLoggedOut = args.includes('--allow-logged-out');
   const checks = [];
   const c = loadConfig();
@@ -14782,7 +15531,8 @@ async function cmdDoctor(args) {
         const msg = String((e && e.message) || e);
         const looksAuth = /401|invalid|unauthori[sz]ed|auth/i.test(msg);
         // W470 P0-4: server rejection of a stale local key is a BLOCKER, not
-        // a warning. Doctor must NOT surface stale local auth as healthy ??        // ok:true with a rejected server-side key is exactly the contradiction
+        // a warning. Doctor must NOT surface stale local auth as healthy:
+        // ok:true with a rejected server-side key is exactly the contradiction
         // the auditor flagged ("doctor says ok but whoami says invalid").
         // Recovery copy lists all three exits: rotate, sign up fresh, or
         // forget the bad key locally.
@@ -14791,7 +15541,7 @@ async function cmdDoctor(args) {
           status: looksAuth ? (allowLoggedOut ? 'warn' : 'missing') : 'warn',
           detail: looksAuth
             ? (allowLoggedOut
-              ? 'server rejected the key (rotated/revoked?) ??demoted to warn by --allow-logged-out. recover:  kolm login --key ks_...   |   kolm signup --email you@org.com   |   kolm logout'
+              ? 'server rejected the key (rotated/revoked?) - demoted to warn by --allow-logged-out. recover:  kolm login --key ks_...   |   kolm signup --email you@org.com   |   kolm logout'
               : 'server rejected the key (rotated/revoked?). recover:  kolm login --key ks_...   |   kolm signup --email you@org.com   |   kolm logout (forget local key)')
             : ('server validation failed: ' + msg),
         });
@@ -14807,7 +15557,7 @@ async function cmdDoctor(args) {
       name: 'api key (server)',
       status: allowLoggedOut ? 'warn' : 'missing',
       detail: allowLoggedOut
-        ? 'no key to validate ??demoted to warn by --allow-logged-out. start here:  kolm signup --email you@org.com   |   kolm login --key ks_...'
+        ? 'no key to validate - demoted to warn by --allow-logged-out. start here:  kolm signup --email you@org.com   |   kolm login --key ks_...'
         : 'no key to validate. start here:  kolm signup --email you@org.com   |   kolm login --key ks_...',
     });
   }
@@ -17954,6 +18704,47 @@ async function cmdCloud(args) {
     printObjectStorageReadiness(out, 'local-env');
     return;
   }
+  if (sub === 'broker' || sub === 'compute-plan') {
+    const wantJson = rest.includes('--json');
+    const catalog = rest.includes('--catalog');
+    const broker = await import('../src/cloud-compute-broker.js');
+    if (catalog) {
+      const out = broker.cloudComputeBrokerCatalog();
+      if (wantJson) { console.log(JSON.stringify(out, null, 2)); return; }
+      console.log('cloud compute broker lanes:');
+      for (const lane of out.lanes) {
+        console.log(`  ${lane.id.padEnd(22)} ${lane.category.padEnd(18)} ${lane.workloads.join('/')}`);
+      }
+      return;
+    }
+    const profile = {
+      workload: flag(rest, '--workload') || flag(rest, '--mode') || 'train',
+      privacy: flag(rest, '--privacy') || 'standard',
+      name: flag(rest, '--name') || 'kolm-job',
+      artifact: flag(rest, '--artifact') || 'artifact',
+      base_model: flag(rest, '--base') || flag(rest, '--base-model') || flag(rest, '--model') || 'Qwen/Qwen2.5-7B-Instruct',
+      dataset: flag(rest, '--seeds') || flag(rest, '--dataset') || 'seeds.jsonl',
+      params_b: Number(flag(rest, '--params-b') || 7),
+      rows: Number(flag(rest, '--rows') || 1000),
+      budget_usd: Number(flag(rest, '--budget') || flag(rest, '--budget-usd') || 0),
+      context_tokens: Number(flag(rest, '--context') || 8192),
+      no_local_gpu: rest.includes('--no-local-gpu'),
+    };
+    const out = broker.planCloudCompute(profile, process.env);
+    if (wantJson) { console.log(JSON.stringify(out, null, 2)); return; }
+    const rec = out.recommendation || {};
+    console.log(`cloud broker: ${out.ok ? 'ready' : 'needs configuration'}`);
+    console.log(`workload:     ${out.profile.workload}`);
+    console.log(`privacy:      ${out.profile.privacy}`);
+    console.log(`storage:      ${out.storage.selected_provider || '(none)'}${out.storage.cloud_ok ? ' (cloud ready)' : ''}`);
+    console.log(`recommend:    ${rec.id || '(none)'}${rec.state ? ' (' + rec.state + ')' : ''}`);
+    if (Array.isArray(rec.blockers) && rec.blockers.length) console.log(`blockers:     ${rec.blockers.join(', ')}`);
+    if (Array.isArray(rec.missing_env) && rec.missing_env.length) console.log(`missing env:  ${rec.missing_env.join(', ')}`);
+    if (rec.run_command) console.log(`run:          ${rec.run_command}`);
+    else if (rec.quote_command) console.log(`quote:        ${rec.quote_command}`);
+    console.log('secret values included: false');
+    return;
+  }
   if (sub === 'deploy-plan' || (sub === 'deploy' && rest.includes('--plan'))) {
     const target = flag(rest, '--target') || rest.find((a) => a && !a.startsWith('-') && a !== '--plan');
     const artifactId = flag(rest, '--artifact') || flag(rest, '--artifact-id') || '<artifact>';
@@ -18059,6 +18850,12 @@ async function cmdSurfaces(args) {
   const includeGraph = args.includes('--graph');
   const includeReadiness = args.includes('--readiness') || args.includes('--closeout') || includeGraph;
   const includeCloseout = args.includes('--closeout') || includeGraph;
+  const includePackages = args.includes('--packages') || includeGraph;
+  const includeBenchmarks = args.includes('--benchmarks') || includeGraph;
+  const includeQuality = args.includes('--quality') || includeGraph;
+  const includeFrontierLab = args.includes('--frontier-lab') || includeGraph;
+  const includeFrontierContracts = args.includes('--frontier-contracts') || includeGraph;
+  const includeOperatorKernels = args.includes('--operator-kernels') || includeGraph;
   const out = {
     ok: true,
     contract: validateProductExperience(),
@@ -18073,6 +18870,30 @@ async function cmdSurfaces(args) {
   if (includeReadiness && closeout && closeout.ok !== false) out.open_requirements = closeout.open_requirements || [];
   if (includeCloseout && closeout && closeout.ok !== false) out.closeout = closeout;
   if (includeGraph && graph && graph.ok !== false) out.graph = graph;
+  if (includePackages) {
+    const { auditPackageReleaseReadiness } = await import('../src/package-release-readiness.js');
+    out.package_release = auditPackageReleaseReadiness();
+  }
+  if (includeBenchmarks) {
+    const { auditBenchmarkEvidence } = await import('../src/benchmark-evidence.js');
+    out.benchmark_evidence = auditBenchmarkEvidence();
+  }
+  if (includeQuality) {
+    const { runQualityCalibration } = await import('../src/quality-calibration.js');
+    out.quality_calibration = runQualityCalibration();
+  }
+  if (includeFrontierLab) {
+    const { buildProductFrontierLab } = await import('../src/product-frontier-lab.js');
+    out.frontier_lab = buildProductFrontierLab();
+  }
+  if (includeFrontierContracts) {
+    const { buildProductFrontierContracts } = await import('../src/product-frontier-contracts.js');
+    out.frontier_contracts = buildProductFrontierContracts();
+  }
+  if (includeOperatorKernels) {
+    const { buildProductFrontierOperatorKernels } = await import('../src/product-frontier-operator-kernels.js');
+    out.operator_kernels = buildProductFrontierOperatorKernels();
+  }
   if (graph && graph.ok === false) out.graph_error = graph;
   if (closeout && closeout.ok === false) out.closeout_error = closeout;
   out.ok = out.contract.ok;
@@ -18096,6 +18917,34 @@ async function cmdSurfaces(args) {
     console.log('');
     console.log('readiness: ' + Object.entries(out.readiness_counts).map(([k, v]) => `${k}=${v}`).join('  '));
   }
+  if (out.package_release) {
+    console.log('');
+    console.log(`package release: local=${out.package_release.ok ? 'ok' : 'blocked'} publish_ready=${out.package_release.publish_ready ? 'yes' : 'no'} targets=${out.package_release.counts.targets}`);
+    for (const [id, req] of Object.entries(out.package_release.by_requirement)) {
+      console.log(`  ${id}: ${req.status} (${req.targets.join(', ')})`);
+    }
+  }
+  if (out.benchmark_evidence) {
+    console.log('');
+    console.log(`benchmark evidence: local=${out.benchmark_evidence.ok ? 'ok' : 'blocked'} public_claim_ready=${out.benchmark_evidence.public_claim_ready ? 'yes' : 'no'} lanes=${out.benchmark_evidence.counts.complete_public_lanes}/${out.benchmark_evidence.counts.required_lanes}`);
+    for (const lane of out.benchmark_evidence.lanes) {
+      console.log(`  ${lane.id}: ${lane.status}`);
+    }
+  }
+  if (out.quality_calibration) {
+    console.log('');
+    console.log(`quality calibration: local=${out.quality_calibration.ok ? 'ok' : 'blocked'} public_claim_ready=${out.quality_calibration.public_claim_ready ? 'yes' : 'no'} agreement=${out.quality_calibration.metrics.agreement} f1=${out.quality_calibration.metrics.f1}`);
+  }
+  if (out.frontier_lab) {
+    console.log('');
+    console.log(`frontier lab: local=${out.frontier_lab.ok ? 'ok' : 'blocked'} experiments=${out.frontier_lab.counts.experiments} categories=${out.frontier_lab.counts.categories} composite_delta=${out.frontier_lab.simulation.composite_delta}`);
+    console.log(`coverage: journeys=${out.frontier_lab.coverage.covered_journeys}/${out.frontier_lab.counts.journeys} dimensions=${out.frontier_lab.coverage.covered_dimensions}/${out.frontier_lab.counts.dimensions} open_requirements=${out.frontier_lab.coverage.covered_open_requirements}/${out.frontier_lab.counts.open_requirements}`);
+  }
+  if (out.frontier_contracts) {
+    console.log('');
+    console.log(`frontier contracts: local=${out.frontier_contracts.ok ? 'ok' : 'blocked'} contracts=${out.frontier_contracts.counts.contracts} research=${out.frontier_contracts.counts.implementation_research}`);
+    console.log(`coverage: experiments=${out.frontier_contracts.coverage.covered_experiments}/${out.frontier_contracts.counts.lab_experiments} journeys=${out.frontier_contracts.coverage.covered_journeys}/${out.frontier_contracts.counts.journeys} open_requirements=${out.frontier_contracts.coverage.covered_open_requirements}/${out.frontier_contracts.counts.open_requirements}`);
+  }
   if (includeReadiness && Array.isArray(out.open_requirements) && out.open_requirements.length) {
     console.log('');
     console.log('open closeout items:');
@@ -18106,6 +18955,104 @@ async function cmdSurfaces(args) {
   } else if (closeout && closeout.ok !== false && closeout.counts && closeout.counts.open_requirements) {
     console.log(`open closeout: ${closeout.counts.open_requirements} item(s); run \`kolm surfaces --readiness\`.`);
   }
+}
+
+function localScriptPath(rel) {
+  return path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', rel);
+}
+
+function runLocalNodeScript(rel, args) {
+  const script = localScriptPath(rel);
+  const result = spawnSync(process.execPath, [script, ...(args || [])], {
+    cwd: process.cwd(),
+    env: process.env,
+    stdio: 'inherit',
+  });
+  if (result.error) {
+    const err = new Error(`${rel} failed to start: ${result.error.message || result.error}`);
+    err.exitCode = EXIT.EXECUTION;
+    throw err;
+  }
+  if (result.status === null) {
+    const err = new Error(`${rel} exited without a status${result.signal ? ` (signal ${result.signal})` : ''}`);
+    err.exitCode = EXIT.EXECUTION;
+    throw err;
+  }
+  if (result.status !== 0) process.exit(result.status);
+}
+
+async function cmdPackages(args) {
+  args = args || [];
+  if (maybeHelp('packages', args)) return;
+  const sub = args[0];
+  let releaseArgs = args;
+  if (!sub) {
+    releaseArgs = ['--summary'];
+  } else if (sub === 'release-readiness' || sub === 'readiness') {
+    releaseArgs = args.slice(1);
+  } else if (sub === 'release' && (args[1] === 'readiness' || args[1] === 'release-readiness')) {
+    releaseArgs = args.slice(2);
+  } else if (!sub.startsWith('--')) {
+    console.error('unknown packages subcommand:', sub);
+    console.error('usage: kolm packages release-readiness [--summary|--json]');
+    process.exit(EXIT.BAD_ARGS);
+  }
+
+  runLocalNodeScript('scripts/package-release-readiness.mjs', releaseArgs);
+}
+
+async function cmdEvidence(args) {
+  args = args || [];
+  if (!args.length || args[0] === '--help' || args[0] === '-h' || args[0] === 'help') {
+    usage('evidence');
+    return;
+  }
+  const sub = args.find((arg) => !String(arg).startsWith('--'));
+  if (!sub) {
+    const { buildEvidenceReadiness } = await import('../src/evidence-readiness.js');
+    const out = buildEvidenceReadiness();
+    const gates = out.gates || [];
+    if (args.includes('--json') || !args.includes('--summary')) {
+      console.log(JSON.stringify(out, null, 2));
+    } else {
+      console.log(`ok=${out.ok} local_contract_ok=${out.local_contract_ok} external_ready=${out.external_ready} gates=${out.counts.gates} blockers=${out.counts.blockers}`);
+      for (const gate of gates) {
+        console.log(`${gate.id}: ${gate.status} local=${gate.local_contract_ok ? 'ok' : 'blocked'} blockers=${gate.blockers.length}`);
+      }
+    }
+    if (args.includes('--require-local-contract') && !out.local_contract_ok) process.exit(EXIT.EXECUTION);
+    if ((args.includes('--require-external-ready') || args.includes('--require-final')) && !out.external_ready) process.exit(EXIT.EXECUTION);
+    return;
+  }
+  const subIndex = args.indexOf(sub);
+  const rest = args.slice(0, subIndex).concat(args.slice(subIndex + 1));
+  const key = String(sub).toLowerCase();
+  const scripts = {
+    'format-governance': 'scripts/format-governance-packet.mjs',
+    format: 'scripts/format-governance-packet.mjs',
+    governance: 'scripts/format-governance-packet.mjs',
+    'runtime-adoption': 'scripts/runtime-adoption-packets.mjs',
+    runtime: 'scripts/runtime-adoption-packets.mjs',
+    adoption: 'scripts/runtime-adoption-packets.mjs',
+    'compliance-certification': 'scripts/compliance-certification-packet.mjs',
+    compliance: 'scripts/compliance-certification-packet.mjs',
+    certification: 'scripts/compliance-certification-packet.mjs',
+    'package-release': 'scripts/package-release-readiness.mjs',
+    packages: 'scripts/package-release-readiness.mjs',
+    package: 'scripts/package-release-readiness.mjs',
+    benchmark: 'scripts/benchmark-evidence.mjs',
+    benchmarks: 'scripts/benchmark-evidence.mjs',
+    'benchmark-evidence': 'scripts/benchmark-evidence.mjs',
+    quality: 'scripts/quality-calibration.mjs',
+    'quality-calibration': 'scripts/quality-calibration.mjs',
+  };
+  const script = scripts[key];
+  if (!script) {
+    console.error('unknown evidence subcommand:', sub);
+    console.error('usage: kolm evidence <format-governance|runtime-adoption|compliance-certification|package-release|benchmark|quality>');
+    process.exit(EXIT.BAD_ARGS);
+  }
+  runLocalNodeScript(script, rest);
 }
 
 // ---------- kolm cloud train ----------
@@ -18785,14 +19732,19 @@ const COMPLETION_VERBS = [
   // top-level verbs; team / sync / install / wrap already in the list but now
   // accept additional W384-local subverbs (see COMPLETION_SUBS below).
   'privacy', 'pipeline', 'agents', 'shell-init',
+  // Package release readiness has a dedicated operator command in addition to
+  // the script/API/product graph surfaces.
+  'packages', 'package',
+  'evidence',
 ];
 const COMPLETION_SUBS = {
   auditor: ['keygen', 'sign', 'verify'],
+  build: ['plan'],
   compute: ['list', 'detect', 'pick', 'use', 'info', 'test', 'status'],
   airgap:  ['status', 'enable', 'disable', 'verify'],
   team:    ['create', 'list', 'show', 'invite', 'accept', 'members', 'role', 'remove', 'transfer', 'delete'],
   tunnel:  ['new', 'list', 'start', 'close'],
-    cloud:   ['train', 'readiness', 'doctor', 'storage', 'targets', 'deploy-plan', 'deploy', 'list', 'show', 'destroy'],
+    cloud:   ['broker', 'compute-plan', 'train', 'readiness', 'doctor', 'storage', 'targets', 'deploy-plan', 'deploy', 'list', 'show', 'destroy'],
   surfaces: [],
   hub:     ['list', 'ls', 'show', 'seeds', 'pull'],
   tune:    ['init', 'capture-on', 'capture-off', 'step', 'eval', 'promote', 'rollback', 'watch', 'status'],
@@ -18804,12 +19756,17 @@ const COMPLETION_SUBS = {
   tail:    ['captures'],
   install: ['claude-code', 'cursor', 'continue', 'cline'],
   completion: ['bash', 'zsh', 'fish'],
+  bench: ['evidence'],
+  benchmark: ['evidence'],
+  packages: ['release-readiness', 'release', 'readiness'],
+  package: ['release-readiness', 'release', 'readiness'],
+  evidence: ['format-governance', 'runtime-adoption', 'compliance-certification', 'package-release', 'benchmark', 'quality'],
   models:  ['list', 'info', 'recommend', 'pin', 'devices', 'frontier', 'tiers', 'backends', 'benchmarks', 'verify-benchmarks', 'show', 'add', 'verify', 'pull', 'cache', 'prefetch', 'manifest'],
   gpu:     ['detect', 'doctor', 'setup', 'stress'],
   seeds:   ['new', 'generate', 'list', 'bootstrap', 'validate'],
   hmac:    ['status', 'rotate', 'prune'],
   keys:    ['list', 'rotate', 'fingerprint', 'export'],
-  quantize:['int4', 'int8', 'gptq', 'awq', 'doctor'],
+  quantize:['oracle', 'int4', 'int8', 'gptq', 'awq', 'doctor'],
   marketplace: ['search', 'install', 'publish', 'list', 'ls'],
   artifacts: ['list', 'ls', 'show', 'get', 'inspect', 'diff', 'compare'],
   runtime: ['targets', 'info', 'doctor', 'build-from-source', 'start', 'status', 'policy', 'install', 'decisions', 'stats'],
@@ -18848,11 +19805,11 @@ const COMPLETION_SUBS = {
   demo:     ['list', 'seed-log-triage', 'reset'],
   // W384 — new top-level verbs and extensions for existing verbs.
   privacy:    ['scan', 'test', 'smoke', 'policy', 'report'],
-  pipeline:   ['tokenize', 'distill', 'compile', 'full'],
+  pipeline:   ['tokenize', 'distill', 'compile', 'full', 'run'],
   // W454 — multimodal redaction worker (OCR / pdf-parse / whisper).
   media:      ['tokenize', 'doctor', 'redact-job'],
   // W455 — per-prompt loss telemetry: `kolm distill runs [<id>]`.
-  distill:    ['runs'],
+  distill:    ['runs', 'strategy'],
   agents:     ['stats', 'sessions', 'recommend', 'failing'],
   'shell-init': [],
   // W409i — billing surface subverbs.
@@ -19648,6 +20605,139 @@ async function cmdPipeline(args) {
       if (wantJson) { jsonErr(e.message, 'pipeline_error'); process.exit(EXIT.EXECUTION); }
       console.error('error: ' + e.message);
       process.exit(EXIT.EXECUTION);
+    }
+    return;
+  }
+  if (sub === 'run') {
+    // W710-3 — continuous active-learning loop scaffold.
+    //
+    // One iteration:
+    //   1. Read routing summary via summarizeRouting(tenant, namespace, 60_000)
+    //   2. Compute teacher-fallback ratio (teacher_count / total). If above
+    //      KOLM_CONTINUOUS_DISTILL_FALLBACK_THRESHOLD AND the active-learning
+    //      queue depth is at least KOLM_CONTINUOUS_DISTILL_MIN_QUEUE, trigger
+    //      a distill of the queued items via consumeQueue() + distill().
+    //   3. Emit one structured JSON log line per iteration so callers can tail.
+    //   4. Record the trigger to the event store so /account/active-learning
+    //      can show "last trigger" + a 24-hour timeline.
+    //
+    // Honesty contract: this is a SCAFFOLD, not the production daemon (W775).
+    // It runs in the foreground only; --once exits after one iteration.
+    if (!args.includes('--continuous')) {
+      if (wantJson) { jsonErr('usage: kolm pipeline run --continuous [--namespace ns] [--interval-ms 60000] [--once]', 'bad_args'); process.exit(EXIT.BAD_ARGS); }
+      console.error('usage: kolm pipeline run --continuous [--namespace ns] [--interval-ms 60000] [--once]');
+      console.error('note: scaffold for continuous distillation. production daemon arrives in W775.');
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const namespace = pickFlag(rest, '--namespace') || pickFlagEq(rest, '--namespace') || null;
+    const intervalRaw = pickFlag(rest, '--interval-ms') || pickFlagEq(rest, '--interval-ms') || '60000';
+    const intervalMs = Math.max(1000, parseInt(intervalRaw, 10) || 60000);
+    const once = args.includes('--once');
+    const tenantId = process.env.KOLM_TENANT_ID || 'local-tenant';
+    const fallbackThreshold = Math.max(0, Math.min(1, parseFloat(process.env.KOLM_CONTINUOUS_DISTILL_FALLBACK_THRESHOLD || '0.10')));
+    const minQueue = Math.max(0, parseInt(process.env.KOLM_CONTINUOUS_DISTILL_MIN_QUEUE || '25', 10) || 25);
+    const windowMs = 60_000;
+    const maxPerTrigger = 500;
+
+    let routingMod, queueMod, eventStoreMod, distillMod;
+    try { routingMod = await import('../src/routing-events.js'); }
+    catch (e) {
+      if (wantJson) { jsonErr('routing-events module unavailable: ' + e.message, 'missing_module'); process.exit(EXIT.MISSING_PREREQ); }
+      console.error('error: routing-events module unavailable:', e.message);
+      process.exit(EXIT.MISSING_PREREQ);
+    }
+    // active-learning-queue is built by W710-1/2 sibling agent. Be tolerant
+    // of it not being on disk yet — log a skip with reason and keep looping.
+    try { queueMod = await import('../src/active-learning-queue.js'); }
+    catch (_) { queueMod = null; }
+    try { eventStoreMod = await import('../src/event-store.js'); }
+    catch (_) { eventStoreMod = null; }
+
+    let iter = 0;
+    let stopping = false;
+    const onSig = () => { stopping = true; };
+    try { process.on('SIGINT', onSig); process.on('SIGTERM', onSig); } catch (_) {}
+
+    const emit = (obj) => {
+      try { process.stdout.write(JSON.stringify(obj) + '\n'); } catch (_) {}
+    };
+
+    while (!stopping) {
+      iter += 1;
+      const tsMs = Date.now();
+      let decided = 'skip';
+      let reason = 'unknown';
+      let triggered = null;
+      try {
+        const sinceIso = new Date(tsMs - windowMs).toISOString();
+        const summary = routingMod.summarizeRouting(tenantId, namespace, sinceIso) || {};
+        const total = summary.total || 0;
+        const teacherCount = (summary.by_route && summary.by_route.teacher) || 0;
+        const fallbackRatio = total > 0 ? teacherCount / total : 0;
+        let queueDepth = 0;
+        if (queueMod && typeof queueMod.summarize === 'function') {
+          try {
+            const qs = queueMod.summarize(tenantId, namespace) || {};
+            queueDepth = qs.queued || qs.depth || 0;
+          } catch (_) { queueDepth = 0; }
+        }
+        if (!queueMod) {
+          reason = 'active_learning_queue_module_missing';
+        } else if (total === 0) {
+          reason = 'no_routing_decisions_in_window';
+        } else if (fallbackRatio < fallbackThreshold) {
+          reason = 'fallback_ratio_below_threshold ratio=' + fallbackRatio.toFixed(3) + ' threshold=' + fallbackThreshold;
+        } else if (queueDepth < minQueue) {
+          reason = 'queue_depth_below_min depth=' + queueDepth + ' min=' + minQueue;
+        } else {
+          // Trigger path — consume up to maxPerTrigger items and run distill
+          // in-process. Sibling agent's consumeQueue returns the items it
+          // dequeued; we feed them into distill via teacher_namespace + a
+          // resume-marker. Real wiring of consumed items → distill payload
+          // arrives in W775; here we just record the trigger.
+          let consumed = [];
+          try {
+            if (typeof queueMod.consumeQueue === 'function') {
+              consumed = await queueMod.consumeQueue({ tenant_id: tenantId, namespace, max: maxPerTrigger }) || [];
+            }
+          } catch (e) { consumed = []; }
+          decided = 'trigger';
+          reason = 'fallback_ratio=' + fallbackRatio.toFixed(3) + ' queue_depth=' + queueDepth + ' consumed=' + consumed.length;
+          triggered = { consumed: consumed.length, namespace: namespace || 'default' };
+          if (eventStoreMod && typeof eventStoreMod.appendEvent === 'function') {
+            try {
+              await eventStoreMod.appendEvent({
+                tenant_id: tenantId,
+                namespace: namespace || 'default',
+                provider: 'kolm-active-learning',
+                vendor: 'kolm',
+                model: 'active-learning/trigger',
+                workflow_id: 'active_learning:trigger',
+                status: 'ok',
+                feedback: JSON.stringify({
+                  kind: 'active_learning_trigger',
+                  iter,
+                  fallback_ratio: fallbackRatio,
+                  threshold: fallbackThreshold,
+                  queue_depth: queueDepth,
+                  min_queue: minQueue,
+                  consumed_count: consumed.length,
+                  max_per_trigger: maxPerTrigger,
+                  scaffold: true,
+                  daemon_wave: 'W775',
+                }),
+              });
+            } catch (_) {}
+          }
+        }
+      } catch (e) {
+        reason = 'iter_error: ' + (e && e.message ? e.message : String(e));
+      }
+      emit({ iter, decided, reason, ts_ms: tsMs, triggered });
+      if (once) break;
+      if (stopping) break;
+      // Foreground blocking sleep. No backgrounding here — that's W775.
+      await new Promise(r => setTimeout(r, intervalMs));
     }
     return;
   }
@@ -23510,7 +24600,7 @@ async function cmdUpdate(args) {
     const source = 'github:sneaky-hippo/kolm-stack';
     const before = readPackageVersion();
 
-    // W484 P0-3 ??refuse to run `npm i -g` from a repo checkout. Without this
+    // W484 P0-3 - refuse to run `npm i -g` from a repo checkout. Without this
     // guard, a dev running `kolm update` from inside the cloned repo silently
     // clobbers their working tree with the global install. The audit flagged
     // this as "mutating in a repo checkout"; the fix is to detect, refuse, and
@@ -25634,7 +26724,8 @@ async function _dispatchVerb(verb, args) {
     mesh: cmdMesh, migrate: cmdMigrate, wrap: cmdWrap,
     tail: cmdTail, replay: cmdReplay, sync: cmdSync, profile: cmdProfile, bridges: cmdBridges,
     drift: cmdDrift, install: cmdInstall, tune: cmdTune, rag: cmdRag,
-    team: cmdTeam, tunnel: cmdTunnel, cloud: cmdCloud, surfaces: cmdSurfaces, airgap: cmdAirgap,
+    team: cmdTeam, tunnel: cmdTunnel, cloud: cmdCloud, surfaces: cmdSurfaces,
+    packages: cmdPackages, package: cmdPackages, evidence: cmdEvidence, airgap: cmdAirgap,
     compute: cmdCompute, doctor: cmdDoctor, loop: cmdLoop, logs: cmdLogs,
     ask: cmdAsk, chat: cmdChat, 'chat-tui': cmdChatTui, completion: cmdCompletion,
     upgrade: cmdUpgrade, update: cmdUpdate, 'self-update': cmdUpdate,
@@ -25706,7 +26797,7 @@ async function main() {
       case 'pull':     await withErrorContext('pull',     () => cmdPull(rest)); break;
       case 'hub':      await withErrorContext('hub',      () => cmdHub(rest)); break;
       case 'marketplace': await withErrorContext('marketplace', () => cmdMarketplace(rest)); break;
-      // W481 P1-12 ??`kolm sdk` introspects the six official SDK targets so
+      // W481 P1-12 - `kolm sdk` introspects the six official SDK targets so
       // `kolm sdk --help` no longer falls through to root help.
       case 'sdk':      await withErrorContext('sdk',      () => cmdSdk(rest)); break;
       case 'capture':  await withErrorContext('capture',  () => cmdCapture(rest)); break;
@@ -25779,6 +26870,9 @@ async function main() {
       case 'tunnel':   await withErrorContext('tunnel',   () => cmdTunnel(rest)); break;
       case 'cloud':    await withErrorContext('cloud',    () => cmdCloud(rest)); break;
       case 'surfaces': await withErrorContext('surfaces', () => cmdSurfaces(rest)); break;
+      case 'packages':
+      case 'package':  await withErrorContext('packages', () => cmdPackages(rest)); break;
+      case 'evidence': await withErrorContext('evidence', () => cmdEvidence(rest)); break;
       case 'airgap':   await withErrorContext('airgap',   () => cmdAirgap(rest)); break;
       case 'compute':  await withErrorContext('compute',  () => cmdCompute(rest)); break;
       case 'doctor':   await withErrorContext('doctor',   () => cmdDoctor(rest)); break;

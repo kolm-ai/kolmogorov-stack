@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f7f4ec";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Routing decisions - Account - kolm.ai</title>
-<meta name="description" content="Confidence-aware student / teacher routing for /v1/route/chat/completions. Per-decision route, reason, threshold, and an estimate of teacher calls saved.">
+<title>Active learning - Account - kolm.ai</title>
+<meta name="description" content="Captures the student couldn't handle locally become next round's training signal. Queue depth, recent enqueues, and continuous-distillation status for the active-learning loop.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<link rel="canonical" href="https://kolm.ai/account/routing">
-<meta property="og:title" content="Routing decisions &middot; Account &middot; kolm.ai">
-<meta property="og:description" content="Confidence-aware student / teacher routing for /v1/route/chat/completions. Per-decision route, reason, threshold, and an estimate of teacher calls saved.">
+<link rel="canonical" href="https://kolm.ai/account/active-learning">
+<meta property="og:title" content="Active learning &middot; Account &middot; kolm.ai">
+<meta property="og:description" content="Captures the student couldn't handle locally become next round's training signal.">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://kolm.ai/account/routing">
+<meta property="og:url" content="https://kolm.ai/account/active-learning">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Routing decisions - Account - kolm.ai","description":"Confidence-aware student / teacher routing for /v1/route/chat/completions.","url":"https://kolm.ai/account/routing","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"Routing decisions","item":"https://kolm.ai/account/routing"}]}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Active learning - Account - kolm.ai","description":"Captures the student couldn't handle locally become next round's training signal.","url":"https://kolm.ai/account/active-learning","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"Active learning","item":"https://kolm.ai/account/active-learning"}]}}</script>
 <style>
 .acct-shell{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:flex-start;max-width:1280px;margin:0 auto;padding:24px}
 #account-sidebar{position:sticky;top:24px;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13px}
@@ -46,9 +46,9 @@
 .ktable tr:hover td{background:var(--bg-elev)}
 .pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor}
 .pill.ok{color:var(--good)}.pill.warn{color:var(--warn)}.pill.bad{color:var(--bad)}.pill.mute{color:var(--ink-faint)}
-.pill.route-student{color:var(--good)}
-.pill.route-mixed{color:var(--warn)}
-.pill.route-teacher{color:var(--bad)}
+.pill.prio-high{color:var(--bad)}
+.pill.prio-medium{color:var(--warn)}
+.pill.prio-low{color:var(--ink-faint)}
 .empty{background:var(--bg-card);border:1px dashed var(--line);border-radius:8px;padding:18px;color:var(--ink-mute);font-size:13.5px;line-height:1.6}
 .empty code{background:var(--bg-elev);padding:2px 6px;border-radius:3px;font-size:12.5px;color:var(--accent)}
 .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center}
@@ -60,6 +60,7 @@
 .sparkbox .legend{font-family:var(--mono);font-size:11px;color:var(--ink-mute);margin-top:8px;display:flex;gap:14px;flex-wrap:wrap}
 .sparkbox .legend .dot{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;vertical-align:middle}
 .note{background:var(--bg-card);border-left:3px solid var(--ink-faint);padding:10px 14px;margin-top:18px;color:var(--ink-mute);font-size:12.5px;line-height:1.6}
+.note code{background:var(--bg-elev);padding:2px 6px;border-radius:3px;font-size:12px;color:var(--accent)}
 @media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}.metric-grid{grid-template-columns:repeat(2,1fr)}}
 </style>
 <link rel="stylesheet" href="/ks.css">
@@ -89,55 +90,54 @@
 
 <main id="main">
 <div class="acct-shell">
-<nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview">Overview</a></li><li><a href="/account/connectors">Connectors</a></li><li><a href="/account/captured">Captured calls</a></li><li><a href="/account/privacy-events">Privacy events</a></li><li><a href="/account/repeated-workflows">Repeated workflows</a></li><li><a href="/account/opportunities">Opportunities</a></li><li><a href="/account/labeling">Labeling queue</a></li><li><a href="/account/datasets">Datasets</a></li><li><a href="/account/simulations">Simulations</a></li><li><a href="/account/bakeoffs">Bakeoffs</a></li><li><a href="/account/builds">Artifact jobs</a></li><li><a href="/account/artifacts">Artifacts</a></li><li><a href="/account/devices">Devices</a></li><li><a href="/account/storage">Storage truth</a></li><li><a href="/account/billing">Billing</a></li><li><a href="/account/routing" aria-current="page">Routing decisions</a></li><li><a href="/account/active-learning">Active learning</a></li></ul></nav>
+<nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview">Overview</a></li><li><a href="/account/connectors">Connectors</a></li><li><a href="/account/captured">Captured calls</a></li><li><a href="/account/privacy-events">Privacy events</a></li><li><a href="/account/repeated-workflows">Repeated workflows</a></li><li><a href="/account/opportunities">Opportunities</a></li><li><a href="/account/labeling">Labeling queue</a></li><li><a href="/account/datasets">Datasets</a></li><li><a href="/account/simulations">Simulations</a></li><li><a href="/account/bakeoffs">Bakeoffs</a></li><li><a href="/account/builds">Artifact jobs</a></li><li><a href="/account/artifacts">Artifacts</a></li><li><a href="/account/devices">Devices</a></li><li><a href="/account/storage">Storage truth</a></li><li><a href="/account/billing">Billing</a></li><li><a href="/account/routing">Routing decisions</a></li><li><a href="/account/active-learning" aria-current="page">Active learning</a></li></ul></nav>
 <section class="acct-content">
 
-<p class="eyebrow">Confidence-aware student / teacher ratio (W709)</p>
-<h1>Routing decisions.</h1>
-<p class="lede">Every call to <code>/v1/route/chat/completions</code> picks a route based on the student's first-token entropy. A <strong>routing_decision</strong> row records which route ran, why, and the cost on both sides so you can see the local-vs-teacher ratio over time.</p>
+<p class="eyebrow">Active learning queue (W710)</p>
+<h1>Active learning loop.</h1>
+<p class="lede">Captures the student couldn't handle locally become next round's training signal. The router escalates to the teacher, the row lands in this queue, and the next distill picks it up via <code>kolm distill --resume-from-active-queue</code>.</p>
 
 <div class="toolbar">
   <label for="ns-input" style="color:var(--ink-faint);font-family:var(--mono);font-size:11px">Namespace</label>
   <input id="ns-input" type="text" placeholder="default" value="" style="min-width:160px">
   <button id="ns-apply" class="btn" type="button">Apply</button>
+  <a class="btn" href="/account/routing" rel="noopener">Routing decisions</a>
   <a class="btn" href="/docs/api" rel="noopener">API reference</a>
 </div>
 
 <div class="metric-grid">
-  <div class="metric-card"><div class="label">Decisions</div><div class="value" id="m-total">-</div><div class="delta" id="m-since">since first decision</div></div>
-  <div class="metric-card"><div class="label">% local</div><div class="value" id="m-local-pct">-</div><div class="delta" id="m-local-help">student + mixed routes</div></div>
-  <div class="metric-card"><div class="label">% teacher</div><div class="value" id="m-teacher-pct">-</div><div class="delta">escalated to teacher</div></div>
-  <div class="metric-card"><div class="label">% mixed</div><div class="value" id="m-mixed-pct">-</div><div class="delta">student + teacher merged</div></div>
-  <div class="metric-card"><div class="label">Est. cost saved</div><div class="value" id="m-saved">-</div><div class="delta">teacher cost avoided</div></div>
+  <div class="metric-card"><div class="label">Queued</div><div class="value" id="m-queued">-</div><div class="delta">awaiting next distill</div></div>
+  <div class="metric-card"><div class="label">Consumed 24h</div><div class="value" id="m-consumed">-</div><div class="delta">into a distill run</div></div>
+  <div class="metric-card"><div class="label">Dropped 24h</div><div class="value" id="m-dropped">-</div><div class="delta">stale or de-duped</div></div>
+  <div class="metric-card"><div class="label">Oldest queued</div><div class="value" id="m-oldest">-</div><div class="delta" id="m-oldest-help">relative time</div></div>
+  <div class="metric-card"><div class="label">Continuous</div><div class="value" id="m-continuous">off</div><div class="delta" id="m-continuous-help">last trigger</div></div>
 </div>
 
 <div class="kpanel">
-  <h2>Last 30 decisions</h2>
-  <p class="pdesc">Sparkline of the most recent 30 routing decisions, oldest on the left. Color encodes the route the router picked.</p>
+  <h2>Enqueue rate (last 24 hours)</h2>
+  <p class="pdesc">One bar per hour, oldest on the left. Bar height = rows enqueued in that hour.</p>
   <div class="sparkbox">
-    <svg id="spark" viewBox="0 0 600 60" preserveAspectRatio="none" aria-label="Last 30 routing decisions"></svg>
+    <svg id="spark" viewBox="0 0 600 60" preserveAspectRatio="none" aria-label="Enqueue rate per hour, last 24 hours"></svg>
     <div class="legend">
-      <span><span class="dot" style="background:var(--good,#7fbf3f)"></span>student</span>
-      <span><span class="dot" style="background:var(--warn,#d9a020)"></span>mixed</span>
-      <span><span class="dot" style="background:var(--bad,#cf4f3a)"></span>teacher</span>
+      <span><span class="dot" style="background:var(--accent,#7fbf3f)"></span>enqueued per hour</span>
     </div>
   </div>
 </div>
 
 <div class="kpanel">
-  <h2>10 most-recent decisions</h2>
-  <p class="pdesc">Newest first. <code>threshold</code> is the entropy threshold the router compared against; <code>reason</code> is the routing rule that fired.</p>
+  <h2>10 most-recent enqueues</h2>
+  <p class="pdesc">Newest first. <code>priority</code> is the queue priority assigned at enqueue time; <code>source</code> is the routing decision (typically <code>teacher_fallback</code>).</p>
   <table class="ktable">
-    <thead><tr><th>Timestamp</th><th>Namespace</th><th>Route</th><th>Reason</th><th>Threshold</th></tr></thead>
+    <thead><tr><th>Timestamp</th><th>Namespace</th><th>Trace</th><th>Priority</th><th>Source</th></tr></thead>
     <tbody id="recent-rows"></tbody>
   </table>
   <div id="recent-empty" class="empty" hidden>
-    <strong>No routing decisions yet.</strong> Call <code>/v1/route/chat/completions</code> at least once and the row will appear here within a few seconds.
+    <strong>No enqueues yet.</strong> When the W709 router escalates a request to the teacher, the failing capture lands here. Send traffic through <code>/v1/route/chat/completions</code> and rows will appear within a few seconds.
   </div>
 </div>
 
 <div class="note">
-  <strong>Honesty note.</strong> Decisions logged here include the <em>cost-of-student</em> (compute) and <em>cost-of-teacher</em> (API). Cost savings shown are estimates; settle against your invoice.
+  <strong>Honesty note.</strong> Continuous distillation scaffold arrives in W775. Today: queue + manual <code>kolm distill --resume-from-active-queue</code>. The <code>kolm pipeline run --continuous</code> scaffold in this build runs a single foreground loop and emits one structured JSON line per iteration; it does NOT fork a background daemon.
 </div>
 
 </section>
@@ -153,39 +153,56 @@
   if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
 })();
 
-function pct(n,total){if(!total||total<=0)return "0%";return Math.round((n/total)*100)+"%";}
-function fmtUsd(v){if(v==null)return "$0.00";return "$"+Number(v).toFixed(4);}
 function fmtTs(t){if(!t)return "-";var d=new Date(t);if(isNaN(d.getTime()))return String(t);return d.toISOString().replace("T"," ").slice(0,19)+"Z";}
-function routePill(r){var cls=r==="teacher"?"route-teacher":(r==="mixed"?"route-mixed":"route-student");return "<span class=\"pill "+cls+"\">"+window.kesc(r||"student")+"</span>";}
+function fmtRel(t){
+  if(!t)return "-";
+  var d=new Date(t);if(isNaN(d.getTime()))return String(t);
+  var diff=Date.now()-d.getTime();
+  if(diff<0)return "in future";
+  var s=Math.floor(diff/1000);
+  if(s<60)return s+"s ago";
+  var m=Math.floor(s/60);
+  if(m<60)return m+"m ago";
+  var h=Math.floor(m/60);
+  if(h<24)return h+"h ago";
+  var dy=Math.floor(h/24);
+  return dy+"d ago";
+}
+function shortId(s){if(!s)return "-";var v=String(s);if(v.length<=10)return v;return v.slice(0,10)+"...";}
+function prioPill(p){
+  var n=Number(p);
+  var cls="prio-low";
+  if(n>=8)cls="prio-high";else if(n>=4)cls="prio-medium";
+  return "<span class=\"pill "+cls+"\">"+window.kesc(String(p==null?"-":p))+"</span>";
+}
 
-function paintSparkline(recent){
+function paintSparkline(buckets){
   var svg=document.getElementById("spark");
   if(!svg)return;
   while(svg.firstChild)svg.removeChild(svg.firstChild);
-  // Recent comes back newest-first; flip for left=oldest.
-  var rows=(recent||[]).slice().reverse().slice(-30);
-  if(rows.length===0){
+  var bars=(buckets&&buckets.length)?buckets.slice(-24):[];
+  // Always render 24 slots so the chart layout is stable even when the
+  // tenant has fewer than 24h of history. Empty slots become zero bars.
+  while(bars.length<24)bars.unshift({hour:null,count:0});
+  if(bars.every(function(b){return (b.count||0)===0;})){
     var t=document.createElementNS("http://www.w3.org/2000/svg","text");
     t.setAttribute("x","8");t.setAttribute("y","34");
     t.setAttribute("fill","#888");t.setAttribute("font-family","monospace");t.setAttribute("font-size","12");
-    t.textContent="no decisions yet";svg.appendChild(t);return;
+    t.textContent="no enqueues in last 24h";svg.appendChild(t);return;
   }
-  var w=600,h=60,n=rows.length,bw=Math.max(4,Math.floor(w/n)-2);
+  var w=600,h=60,n=bars.length,bw=Math.max(4,Math.floor(w/n)-2);
+  var maxc=0;for(var j=0;j<n;j++){if(bars[j].count>maxc)maxc=bars[j].count;}
+  if(maxc<=0)maxc=1;
   for(var i=0;i<n;i++){
-    var route=rows[i].route||"student";
-    var color="#7fbf3f";if(route==="mixed")color="#d9a020";else if(route==="teacher")color="#cf4f3a";
+    var c=bars[i].count||0;
     var x=i*(w/n)+1;
-    // Bar height encodes student vs teacher tokens ratio if present;
-    // otherwise full height. Caps at h-6 so the baseline reads as a row.
-    var st=Number(rows[i].student_tokens||0),te=Number(rows[i].teacher_tokens||0),tot=st+te;
-    var ratio=tot>0?Math.max(0.15,st/tot):1;
-    var bh=Math.max(8,Math.floor((h-6)*ratio));
+    var bh=Math.max(2,Math.floor((h-6)*(c/maxc)));
     var rect=document.createElementNS("http://www.w3.org/2000/svg","rect");
     rect.setAttribute("x",x.toFixed(1));rect.setAttribute("y",(h-bh-3).toString());
     rect.setAttribute("width",bw.toString());rect.setAttribute("height",bh.toString());
-    rect.setAttribute("fill",color);rect.setAttribute("rx","1");
+    rect.setAttribute("fill","#7fbf3f");rect.setAttribute("rx","1");
     var title=document.createElementNS("http://www.w3.org/2000/svg","title");
-    title.textContent=route+" - "+(rows[i].reason||"")+" - "+(rows[i].ts||"");
+    title.textContent="hour "+(bars[i].hour||"")+": "+c+" enqueued";
     rect.appendChild(title);
     svg.appendChild(rect);
   }
@@ -201,39 +218,48 @@ function paintTable(recent){
   for(var i=0;i<rows.length;i++){
     var r=rows[i];
     var tr=document.createElement("tr");
-    tr.innerHTML="<td>"+window.kesc(fmtTs(r.ts))+"</td>"
+    tr.innerHTML="<td>"+window.kesc(fmtTs(r.ts||r.created_at||r.enqueued_at))+"</td>"
       +"<td>"+window.kesc(r.namespace||"default")+"</td>"
-      +"<td>"+routePill(r.route)+"</td>"
-      +"<td>"+window.kesc(r.reason||"")+"</td>"
-      +"<td>"+(r.threshold_used==null?"-":window.kesc(String(r.threshold_used)))+"</td>";
+      +"<td>"+window.kesc(shortId(r.trace_id||r.id))+"</td>"
+      +"<td>"+prioPill(r.priority)+"</td>"
+      +"<td>"+window.kesc(r.source_decision||r.source||r.reason||"-")+"</td>";
     tbody.appendChild(tr);
   }
 }
 
-function paintSummary(s){
-  var total=(s&&s.summary&&s.summary.total)||0;
-  var br=(s&&s.summary&&s.summary.by_route)||{student:0,teacher:0,mixed:0};
-  document.getElementById("m-total").textContent=String(total);
-  document.getElementById("m-local-pct").textContent=pct((br.student||0)+(br.mixed||0),total);
-  document.getElementById("m-teacher-pct").textContent=pct(br.teacher||0,total);
-  document.getElementById("m-mixed-pct").textContent=pct(br.mixed||0,total);
-  document.getElementById("m-saved").textContent=fmtUsd((s&&s.summary&&s.summary.est_cost_saved_usd)||0);
-  var last=s&&s.summary&&s.summary.last_decision_at;
-  document.getElementById("m-since").textContent=last?("last "+fmtTs(last)):"no decisions yet";
+function paintSummary(j){
+  var s=(j&&j.summary)||{};
+  document.getElementById("m-queued").textContent=String(s.queued||0);
+  document.getElementById("m-consumed").textContent=String(s.consumed_24h||0);
+  document.getElementById("m-dropped").textContent=String(s.dropped_24h||0);
+  var oldest=s.oldest_queued_at;
+  document.getElementById("m-oldest").textContent=oldest?fmtRel(oldest):"-";
+  document.getElementById("m-oldest-help").textContent=oldest?fmtTs(oldest):"none queued";
+  var cont=(j&&j.continuous)||{enabled:false,last_trigger_at:null};
+  var contEl=document.getElementById("m-continuous");
+  contEl.textContent=cont.enabled?"on":"off";
+  var help=document.getElementById("m-continuous-help");
+  if(cont.last_trigger_at){
+    help.textContent="last "+fmtRel(cont.last_trigger_at);
+  }else{
+    help.textContent="no triggers yet";
+  }
 }
 
 function load(){
   var ns=(document.getElementById("ns-input").value||"").trim();
-  var url="/v1/routing/summary";
+  var url="/v1/active-learning/summary";
   if(ns)url+="?namespace="+encodeURIComponent(ns);
   window.kfetch(url).then(function(j){
     paintSummary(j);
-    paintSparkline(j.recent);
+    var buckets=(j&&j.summary&&j.summary.enqueue_buckets_24h)||[];
+    paintSparkline(buckets);
     paintTable(j.recent);
   }).catch(function(e){
     // Render empty-state on 401/404/network errors so the page never blanks.
-    paintSummary({summary:{total:0,by_route:{student:0,teacher:0,mixed:0},est_cost_saved_usd:0}});
-    paintSparkline([]);paintTable([]);
+    paintSummary({summary:{queued:0,consumed_24h:0,dropped_24h:0,oldest_queued_at:null}});
+    paintSparkline([]);
+    paintTable([]);
   });
 }
 document.getElementById("ns-apply").addEventListener("click",load);

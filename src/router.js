@@ -13191,6 +13191,93 @@ res.json({
     }
   });
 
+  // ============== W710-4: active-learning queue summary ==============
+  // Reads the active-learning queue (W710-1/2 sibling agent's module) and
+  // returns queued / consumed / dropped counters + recent enqueues. The
+  // /account/active-learning dashboard polls this endpoint.
+  //
+  // Tenant fence: tenant_id is forced from req.tenant_record.id — never
+  // read from query string or body. namespace + since_ms are optional.
+  //
+  // Honest empty-state: if active-learning-queue.js isn't on disk yet
+  // (sibling agent still building, or this is a fresh deploy), return
+  // ok:true with module_missing:true so the dashboard can render a
+  // useful empty state instead of a 500.
+  r.get('/v1/active-learning/summary', async (req, res) => {
+    const trec = req && req.tenant_record;
+    if (!trec) {
+      return res.status(401).json({ error: 'auth_required', hint: 'send Authorization: Bearer <ks_* or kao_* key>' });
+    }
+    const namespace = (req.query && req.query.namespace) ? String(req.query.namespace) : null;
+    const sinceMsRaw = (req.query && req.query.since_ms) ? Number(req.query.since_ms) : null;
+    const sinceMs = (sinceMsRaw != null && Number.isFinite(sinceMsRaw)) ? Math.max(0, Math.trunc(sinceMsRaw)) : null;
+    const recentLimitRaw = (req.query && req.query.recent_limit) ? Number(req.query.recent_limit) : 10;
+    const recentLimit = Math.max(1, Math.min(100, Number.isFinite(recentLimitRaw) ? Math.trunc(recentLimitRaw) : 10));
+    let mod = null;
+    try { mod = await import('./active-learning-queue.js'); }
+    catch (_) { mod = null; }
+    if (!mod || typeof mod.summarize !== 'function') {
+      return res.json({
+        ok: true,
+        namespace,
+        since_ms: sinceMs,
+        module_missing: true,
+        summary: { queued: 0, consumed_24h: 0, dropped_24h: 0, oldest_queued_at: null },
+        recent: [],
+        continuous: { enabled: false, last_trigger_at: null, last_trigger_iter: null },
+      });
+    }
+    try {
+      const summary = mod.summarize(trec.id, namespace, sinceMs) || {};
+      let recent = [];
+      if (typeof mod.listQueued === 'function') {
+        try { recent = mod.listQueued(trec.id, namespace, recentLimit) || []; }
+        catch (_) { recent = []; }
+      }
+      // Continuous-trigger observability — last 24h of active_learning:trigger
+      // events from the lake (recorded by `kolm pipeline run --continuous`).
+      let lastTriggerAt = null;
+      let lastTriggerIter = null;
+      let triggers24h = 0;
+      try {
+        const es = await import('./event-store.js');
+        const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+        const events = (typeof es.listEvents === 'function')
+          ? (es.listEvents({ tenant_id: trec.id, namespace, workflow_id: 'active_learning:trigger', limit: 200 }) || [])
+          : [];
+        for (const ev of events) {
+          const t = new Date(ev.created_at || 0).getTime();
+          if (!Number.isFinite(t) || t < cutoff) continue;
+          triggers24h += 1;
+          if (!lastTriggerAt || t > new Date(lastTriggerAt).getTime()) {
+            lastTriggerAt = ev.created_at;
+            try {
+              const fb = typeof ev.feedback === 'string' ? JSON.parse(ev.feedback) : (ev.feedback || {});
+              lastTriggerIter = fb.iter != null ? fb.iter : null;
+            } catch (_) {}
+          }
+        }
+      } catch (_) {}
+      return res.json({
+        ok: true,
+        namespace,
+        since_ms: sinceMs,
+        summary,
+        recent,
+        continuous: {
+          enabled: lastTriggerAt != null,
+          last_trigger_at: lastTriggerAt,
+          last_trigger_iter: lastTriggerIter,
+          triggers_24h: triggers24h,
+          scaffold: true,
+          daemon_wave: 'W775',
+        },
+      });
+    } catch (e) {
+      return res.status(500).json({ error: 'active_learning_summary_error', message: String((e && e.message) || e) });
+    }
+  });
+
   // ============== W384: connectors ==============
   // Connectors - lists upstream provider connectors (openai, anthropic,
   // openrouter, etc.) with per-provider config status (key present, base URL,

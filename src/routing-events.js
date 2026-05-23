@@ -156,6 +156,25 @@ export async function recordRoutingDecision({
     // is the source of truth for the dashboard.
   }
 
+  // 3. W710-1 — auto-ingest non-'student' rows into the active-learning
+  //    queue so the next `kolm distill --resume-from-active-queue` run can
+  //    consume them. Lazy import to avoid a circular dependency at module
+  //    load time (active-learning-queue.js does NOT import routing-events,
+  //    but a future cross-import would deadlock the module graph). Wrapped
+  //    in its own try/catch — enqueue failure NEVER throws into the routing
+  //    decision path; the routing_decisions row above is the source of truth
+  //    and the queue can be backfilled from it.
+  if (route !== 'student') {
+    try {
+      const mod = await import('./active-learning-queue.js');
+      if (mod && typeof mod.enqueueFromRoutingDecision === 'function') {
+        mod.enqueueFromRoutingDecision(tenant_id, ns, row);
+      }
+    } catch (_) {
+      // Never propagate — active-learning is opportunistic.
+    }
+  }
+
   return row;
 }
 
