@@ -41,6 +41,39 @@
   /* W626: ration mint — body links/text rely on ink hierarchy; accent reserved for CTAs + numerals. */
   main p a:not(.ks-btn):not(.fr-btn):not(.fr-numbered-list__link) { color: var(--ks-ink); border-bottom: 1px solid var(--ks-accent-edge); transition: border-color 140ms; }
   main p a:not(.ks-btn):not(.fr-btn):not(.fr-numbered-list__link):hover { border-bottom-color: var(--ks-accent); }
+
+  /* W647: product-surface manifest under the hero — 4 dense rows, no card chrome, no rectangle look. */
+  .kolm-surfaces { margin-top: 18px; padding: 0; list-style: none; }
+  .kolm-surfaces__row { display: grid; grid-template-columns: 96px 1fr; gap: 14px; align-items: baseline; padding: 9px 0; border-bottom: 1px dashed var(--ks-line-1); }
+  .kolm-surfaces__row:last-child { border-bottom: 0; }
+  .kolm-surfaces__name { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--ks-ink-3); }
+  .kolm-surfaces__detail { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink-2); line-height: 1.55; }
+  .kolm-surfaces__detail code { color: var(--ks-ink); background: rgba(126, 240, 210, 0.06); padding: 1px 5px; border-radius: 4px; font-size: 0.95em; }
+  .kolm-surfaces__num { color: var(--ks-accent); font-variant-numeric: tabular-nums; }
+  @media (max-width: 640px) {
+    .kolm-surfaces__row { grid-template-columns: 1fr; gap: 2px; padding: 10px 0; }
+    .kolm-surfaces__name { font-size: 10.5px; }
+    .kolm-surfaces__detail { font-size: 12px; }
+  }
+
+  /* W647: ROI calc, brought back from W623 (calculator moved off-home was the wrong call). */
+  .home-roi-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: var(--ks-8); align-items: stretch; margin-top: 36px; }
+  @media (max-width: 920px) { .home-roi-grid { grid-template-columns: 1fr; gap: var(--ks-5); } }
+  .home-roi-form { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); padding: var(--ks-6); }
+  .home-roi-out  { background: linear-gradient(180deg, var(--ks-accent-soft) 0%, var(--ks-bg-1) 60%); border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-lg); padding: var(--ks-6); display: flex; flex-direction: column; gap: var(--ks-3); }
+  .home-roi-field { margin-bottom: var(--ks-4); }
+  .home-roi-field label { display: block; font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: 6px; }
+  .home-roi-field input, .home-roi-field select { width: 100%; padding: 10px 14px; background: var(--ks-bg-2); border: 1px solid var(--ks-line-2); color: var(--ks-ink); border-radius: var(--ks-r-md); font-family: var(--ks-mono); font-size: 13.5px; outline: none; transition: border-color 140ms; }
+  .home-roi-field input:focus, .home-roi-field select:focus { border-color: var(--ks-accent); }
+  .home-roi-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .home-roi-num { font-family: var(--ks-mono); font-size: clamp(34px, 5vw, 56px); font-weight: 520; letter-spacing: 0; color: var(--ks-accent); line-height: 1; font-variant-numeric: tabular-nums; }
+  .home-roi-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--ks-line-1); font-size: 13.5px; font-family: var(--ks-mono); }
+  .home-roi-row:last-child { border-bottom: 0; }
+  .home-roi-row span:last-child { color: var(--ks-ink); font-variant-numeric: tabular-nums; }
+  .home-roi-presets { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: var(--ks-4); }
+  .home-roi-preset { padding: 5px 11px; border: 1px solid var(--ks-line-2); background: transparent; color: var(--ks-ink-2); font-family: var(--ks-mono); font-size: 11.5px; border-radius: var(--ks-r-pill); cursor: pointer; transition: border-color 140ms, color 140ms; }
+  .home-roi-preset:hover { border-color: var(--ks-accent-edge); color: var(--ks-accent); }
+  .home-roi-mult { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-accent); padding: 4px 9px; border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-pill); background: var(--ks-accent-soft); }
 </style>
 <script>
   (function(){
@@ -151,7 +184,27 @@
   "model": "qwen2.5-7b-int4",
   "latency_ms": 84 }</span></pre>
       </div>
-      <div class="kolm-media-caption" style="margin-top:14px;">Three commands. One signed artifact. Same .kolm runs on a laptop, an RTX&nbsp;5090, in a browser, or air-gapped &mdash; under one signature your auditor can verify.</div>
+
+      <!-- W647: product-surface manifest — 4 dense rows that name what kolm literally IS,
+           not what it feels like. Lives in the hero column so the substance is above the fold. -->
+      <ul class="kolm-surfaces" aria-label="What kolm is, in four parts">
+        <li class="kolm-surfaces__row">
+          <span class="kolm-surfaces__name">Gateway</span>
+          <span class="kolm-surfaces__detail"><code>api.kolm.ai/v1</code> or self-hosted. OpenAI &amp; Anthropic SDK drop-in. <span class="kolm-surfaces__num">3.1&nbsp;ms p50</span> route. PII redaction on by default.</span>
+        </li>
+        <li class="kolm-surfaces__row">
+          <span class="kolm-surfaces__name">Compiler</span>
+          <span class="kolm-surfaces__detail"><code>kolm distill</code> &middot; <code>kolm quantize</code>. K-Score accuracy gate, bake-off vs teacher, frozen evals. <span class="kolm-surfaces__num">10 quant methods</span> from BitNet 1.58&#8209;bit to FP8.</span>
+        </li>
+        <li class="kolm-surfaces__row">
+          <span class="kolm-surfaces__name">Artifact</span>
+          <span class="kolm-surfaces__detail">One <code>.kolm</code> file: weights + spec + eval + receipts + Ed25519 sidecar. <span class="kolm-surfaces__num">5&ndash;18&nbsp;GB</span>. <code>unzip</code>-able, no proprietary loader.</span>
+        </li>
+        <li class="kolm-surfaces__row">
+          <span class="kolm-surfaces__name">Runtime</span>
+          <span class="kolm-surfaces__detail"><code>kolm run</code> picks the backend per device: vLLM, SGLang, llama.cpp, MLX, WebGPU, Core&nbsp;ML. <span class="kolm-surfaces__num">11.5&nbsp;tok/s</span> for a 32B on one 5090.</span>
+        </li>
+      </ul>
     </div>
   </div>
 </section>
@@ -459,44 +512,114 @@
 
 <!-- W626: 6-card frontier methods row cut — the W271 frontier-methods anchor stays in the hidden test-anchor block; full surface lives at /frontier-stack. -->
 
-<!-- ================== W626: Why kolm — hanging-numeral editorial list, no card grid ================== -->
+<!-- ================== W647: Why kolm — numeric-first, marketing preamble cut ================== -->
 <section class="fr-section fr-section--tight fr-reveal" id="why" aria-labelledby="why-h">
   <div class="fr-container fr-container--tight">
     <div class="fr-section__head">
       <span class="fr-eyebrow">Why kolm</span>
-      <h2 class="fr-h2" id="why-h">A different deal than the hyperscalers.</h2>
-      <p class="fr-lede">Closed APIs charge per token, lock you to one vendor, and can't prove they're serving the same model tomorrow. We do the opposite.</p>
+      <h2 class="fr-h2" id="why-h">Four things only kolm does.</h2>
     </div>
     <ol class="fr-numbered-list">
       <li>
         <div>
-          <h3 class="fr-numbered-list__h">Apache-2.0, end to end.</h3>
-          <p class="fr-numbered-list__p">Gateway, compiler, runtimes, SDKs (Node, Python, MCP, C, Rust, VS Code). Self-host the whole thing. No "open core" carveouts.</p>
+          <h3 class="fr-numbered-list__h">Apache-2.0 from gateway to runtime.</h3>
+          <p class="fr-numbered-list__p">Six SDKs, one self-host bundle, no open-core carveouts. <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">Read the source.</a></p>
         </div>
       </li>
       <li>
         <div>
-          <h3 class="fr-numbered-list__h">Every answer carries a signature.</h3>
-          <p class="fr-numbered-list__p">Two seconds, one command, you know which model wrote which response. Verify any receipt against the public registry. Audit-ready the day you ship.</p>
+          <h3 class="fr-numbered-list__h">Ed25519 receipt on every response.</h3>
+          <p class="fr-numbered-list__p">Verify which model wrote which answer in two seconds against the public registry. <a href="/verify-prod">Try it on any receipt.</a></p>
         </div>
       </li>
       <li>
         <div>
-          <h3 class="fr-numbered-list__h">Pay once, run forever.</h3>
-          <p class="fr-numbered-list__p">After compile, inference is on your hardware. No per-token bill. A laptop runs a 3B specialist at INT4. A single 5090 runs a 32B at 11.5&nbsp;tok/s. <a href="/benchmarks">See the benchmarks.</a></p>
+          <h3 class="fr-numbered-list__h">Per-token bill stops at compile.</h3>
+          <p class="fr-numbered-list__p">After that, inference is on your hardware. 24.5&nbsp;tok/s for a 7B on one 5090; 11.5&nbsp;tok/s for a 32B. <a href="/benchmarks">Full numbers.</a></p>
         </div>
       </li>
       <li>
         <div>
-          <h3 class="fr-numbered-list__h">Your hardware. Your data. Period.</h3>
-          <p class="fr-numbered-list__p">Run kolm in your VPC, your data center, or fully offline. We never see a request. SOC&nbsp;2 Type&nbsp;I, HIPAA mapping, and ISO&nbsp;27001 docs are ready before procurement asks.</p>
+          <h3 class="fr-numbered-list__h">We never see the data.</h3>
+          <p class="fr-numbered-list__p">VPC, on-prem, or air-gap. SOC&nbsp;2 Type&nbsp;I shipped; HIPAA + ISO&nbsp;27001 mapping ready for procurement.</p>
         </div>
       </li>
     </ol>
   </div>
 </section>
 
-<!-- ================== W626: ROI calculator moved off-home to /roi ================== -->
+<!-- ================== W647: ROI calculator — restored on home; full 3-yr model still at /roi ================== -->
+<section class="fr-section fr-section--tight fr-reveal" id="roi" aria-labelledby="roi-h">
+  <div class="fr-container">
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">ROI</span>
+      <h2 class="fr-h2" id="roi-h">Your savings, on your inputs.</h2>
+      <p class="fr-lede">Type your real call volume and token shape. The math runs in your browser &mdash; no email gate, no funnel. Defaults: $3 / $15 per million for the frontier teacher, 4 recompile cycles a year, 2,000 teacher samples per cycle. The 3-year TCO model with growth, latency, and egress is at <a href="/roi">/roi</a>.</p>
+    </div>
+
+    <div class="home-roi-grid">
+      <div class="home-roi-form">
+        <div class="home-roi-presets" role="tablist" aria-label="Workload preset">
+          <button type="button" class="home-roi-preset" data-preset="support">Support copilot &middot; 1.2M/mo</button>
+          <button type="button" class="home-roi-preset" data-preset="extract">Doc extraction &middot; 83k/mo</button>
+          <button type="button" class="home-roi-preset" data-preset="agent">Agent loop &middot; 600k/mo</button>
+        </div>
+
+        <div class="home-roi-field">
+          <label for="roi-calls">Calls per month</label>
+          <input type="number" id="roi-calls" value="1200000" min="0" step="10000">
+        </div>
+
+        <div class="home-roi-field">
+          <label>Tokens per call (in / out)</label>
+          <div class="home-roi-pair">
+            <input type="number" id="roi-in" value="800" min="0">
+            <input type="number" id="roi-out" value="250" min="0">
+          </div>
+        </div>
+
+        <div class="home-roi-field">
+          <label>Frontier price ($ per 1M, in / out)</label>
+          <div class="home-roi-pair">
+            <input type="number" id="roi-pin" value="3" min="0" step="0.1">
+            <input type="number" id="roi-pout" value="15" min="0" step="0.1">
+          </div>
+        </div>
+
+        <div class="home-roi-field">
+          <label for="roi-plan">kolm plan ($ / month)</label>
+          <select id="roi-plan">
+            <option value="0">Free: $0</option>
+            <option value="49" selected>Pro: $49</option>
+            <option value="499">Team: $499</option>
+            <option value="0">Enterprise: custom</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="home-roi-out">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap: var(--ks-3); flex-wrap:wrap;">
+          <span class="ks-eyebrow" style="margin:0">Your savings &middot; year 1</span>
+          <span class="home-roi-mult" id="roi-mult-pill">vs frontier</span>
+        </div>
+        <div class="home-roi-num" id="roi-savings">$0</div>
+        <div class="ks-dim" style="font-size: 13.5px;" id="roi-summary">You'd keep vs paying per token at frontier list.</div>
+        <div style="margin-top: var(--ks-3); display: flex; flex-direction: column;">
+          <div class="home-roi-row"><span>Frontier cloud (year 1)</span><span id="roi-cloud">$0</span></div>
+          <div class="home-roi-row"><span>kolm plan (year 1)</span><span id="roi-plan-out">$0</span></div>
+          <div class="home-roi-row"><span>Teacher cost at compile (yr 1)</span><span id="roi-teacher">$0</span></div>
+          <div class="home-roi-row"><span>kolm total (year 1)</span><span id="roi-kolm">$0</span></div>
+          <div class="home-roi-row"><span>Payback period</span><span id="roi-payback">n/a</span></div>
+        </div>
+        <div style="margin-top: var(--ks-3); display:flex; flex-wrap:wrap; gap: var(--ks-2);">
+          <a class="fr-btn fr-btn--mint" data-fr-magnetic href="/signup">Start free <span class="fr-btn__arrow">&rarr;</span></a>
+          <a class="fr-btn fr-btn--ghost" href="/roi">See the 3-year model <span class="fr-btn__arrow">&rarr;</span></a>
+        </div>
+        <p class="ks-mono ks-dim" style="margin-top: var(--ks-3); font-size: 11.5px; line-height: 1.6;">Assumes one base model per namespace, INT4 quantization, your own hardware after compile. Compute the teacher cost once per recompile cycle. After that, no per-call bill. Numbers stay in your browser.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- ================== W626: Pricing — magazine-spread tier row, no card grid ================== -->
 <section class="fr-section fr-section--tight fr-reveal" id="pricing" aria-labelledby="pricing-h">
@@ -1062,7 +1185,105 @@
   })();
 </script>
 
-<!-- W626: ROI calc JS removed — calculator lives at /roi. -->
+<!-- W647: ROI calc JS — restored on home; runs entirely client-side. -->
+<script>
+  (function(){
+    var $ = function(id){ return document.getElementById(id); };
+    var fmt = function(n){
+      if (!isFinite(n) || isNaN(n)) n = 0;
+      if (n >= 1000000) return '$' + (n/1000000).toFixed(1) + 'M';
+      if (n >= 1000)    return '$' + (n/1000).toFixed(0) + 'k';
+      return '$' + Math.round(n).toLocaleString('en-US');
+    };
+    var fmtExact = function(n){
+      if (!isFinite(n) || isNaN(n)) n = 0;
+      return '$' + Math.round(n).toLocaleString('en-US');
+    };
+
+    function recompute(){
+      if (!$('roi-calls')) return;
+      var calls = +$('roi-calls').value || 0;
+      var tin   = +$('roi-in').value || 0;
+      var tout  = +$('roi-out').value || 0;
+      var pin   = +$('roi-pin').value || 0;
+      var pout  = +$('roi-pout').value || 0;
+      var plan  = +$('roi-plan').value || 0;
+
+      var k = 8, rows = 2000, cycles = 4;
+
+      var callsYr = calls * 12;
+      var cloudIn  = (callsYr * tin) / 1e6 * pin;
+      var cloudOut = (callsYr * tout) / 1e6 * pout;
+      var cloudCore = cloudIn + cloudOut;
+      var cloudY1 = cloudCore * 1.08;
+
+      var planYr = plan * 12;
+      var teacherIn  = (k * rows * tin) / 1e6 * pin;
+      var teacherOut = (k * rows * tout) / 1e6 * pout;
+      var teacherPerCycle = teacherIn + teacherOut;
+      var teacherYr = teacherPerCycle * cycles;
+      var kolmY1 = planYr + teacherYr;
+
+      var savings = Math.max(0, cloudY1 - kolmY1);
+      var mult = kolmY1 > 0 ? cloudY1 / kolmY1 : 0;
+
+      var payback = 'n/a';
+      if (cloudY1 > kolmY1 && cloudY1 > 0) {
+        var cloudPm = cloudY1 / 12;
+        var teacherPm = teacherPerCycle * cycles / 12;
+        var kolmPm = plan + teacherPm;
+        if (kolmPm < cloudPm) {
+          var cloudAcc = 0, kolmAcc = 0, found = false;
+          for (var m = 1; m <= 36; m++) {
+            cloudAcc += cloudPm; kolmAcc += kolmPm;
+            if (kolmAcc <= cloudAcc) { payback = m + (m === 1 ? ' month' : ' months'); found = true; break; }
+          }
+          if (!found) payback = '36+ months';
+        } else {
+          payback = 'kolm not cheaper here';
+        }
+      } else if (cloudY1 > 0) {
+        payback = 'kolm not cheaper here';
+      }
+
+      $('roi-savings').textContent  = savings > 0 ? fmt(savings) + ' / yr' : '$0';
+      $('roi-summary').innerHTML    = savings > 0
+        ? 'You\'d <b style="color:var(--ks-ink)">keep ' + fmt(savings) + '</b> in year 1 vs paying per token. That\'s <b style="color:var(--ks-ink)">' + mult.toFixed(1) + 'x</b> cheaper.'
+        : 'At this volume, the cloud bill is small enough that kolm\'s plan is the bigger line. Try a higher call rate.';
+      $('roi-cloud').textContent    = fmtExact(cloudY1);
+      $('roi-plan-out').textContent = fmtExact(planYr);
+      $('roi-teacher').textContent  = fmtExact(teacherYr);
+      $('roi-kolm').textContent     = fmtExact(kolmY1);
+      $('roi-payback').textContent  = payback;
+    }
+
+    ['roi-calls','roi-in','roi-out','roi-pin','roi-pout','roi-plan'].forEach(function(id){
+      var el = $(id);
+      if (el) el.addEventListener('input', recompute);
+    });
+
+    var presets = {
+      support: { calls: 1200000, tin: 800,  tout: 250, pin: 3, pout: 15, plan: 49 },
+      extract: { calls: 83333,   tin: 3200, tout: 600, pin: 5, pout: 25, plan: 49 },
+      agent:   { calls: 600000,  tin: 2500, tout: 900, pin: 5, pout: 25, plan: 499 }
+    };
+    document.querySelectorAll('.home-roi-preset').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var p = presets[btn.getAttribute('data-preset')];
+        if (!p) return;
+        $('roi-calls').value = p.calls;
+        $('roi-in').value    = p.tin;
+        $('roi-out').value   = p.tout;
+        $('roi-pin').value   = p.pin;
+        $('roi-pout').value  = p.pout;
+        $('roi-plan').value  = p.plan;
+        recompute();
+      });
+    });
+
+    recompute();
+  })();
+</script>
 
 <!-- service worker -->
 <script>

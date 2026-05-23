@@ -1,5 +1,5 @@
 // Recipe service worker: keeps the registry available offline.
-const CACHE = 'kolm-v7-2026-05-23-wave646-homepage-rebuild-hero-terminal-mobile-anatomy';
+const CACHE = 'kolm-v7-2026-05-23-wave647-hero-surfaces-why-tighten-roi-restore';
 const PRECACHE = [
  '/device',
  '/design-tokens.css',
