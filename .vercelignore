@@ -1,9 +1,8 @@
-# Prevent Vercel from auto-detecting server.js as a fallback function.
-# server.js is the Railway/Express entry, not the Vercel entry.
-# api/r2.js and api/cf-config.js (declared in vercel.json functions block)
-# import from ../src/*, so src/ must stay uploaded.
-server.js
-
+# server.js MUST stay uploaded — Vercel framework auto-detect searches for
+# server.{js,cjs,mjs,ts,cts,mts} and fails the build if none is found.
+# Auto-bundling of server.js as a fallback function is prevented via
+# `"framework": null` in vercel.json (only api/* are functions).
+#
 # Backend-only configs not needed by Vercel functions
 Dockerfile
 railway.toml
