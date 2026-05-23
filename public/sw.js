@@ -1,5 +1,5 @@
 // Recipe service worker: keeps the registry available offline.
-const CACHE = 'kolm-v24-2026-05-24-wave691-pricing-amber-scrub-nav-unify';
+const CACHE = 'kolm-v25-2026-05-24-wave692-security-bundle-soc2-hipaa-baa';
 const PRECACHE = [
  '/device',
  '/design-tokens.css',
