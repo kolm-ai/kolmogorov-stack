@@ -293,6 +293,47 @@
     return fn ? fn() : '';
   }
 
+  // ---- BADGES — reusable visual stamps (W658). ----
+  // K-score badge: medallion with the "K" mark, a score number, and a "verified by kolm.ai"
+  // microtype on the bottom arc. currentColor for outer ring; mint accent on the K + score
+  // so it sits on any background. opts.score (string, e.g. "0.91"), opts.size (px).
+  function buildBadgeKScore(opts) {
+    opts = opts || {};
+    var score = (opts.score != null ? String(opts.score) : '0.91');
+    var size = opts.size || 120;
+    var label = 'K-Score ' + score + ' — verified by kolm.ai';
+    return '<svg class="kolm-badge kolm-badge--kscore" width="' + size + '" height="' + size + '" viewBox="0 0 120 120" role="img" aria-label="' + label + '">' +
+      '<defs>' +
+        '<path id="kbadge-arc" d="M 14,60 A 46,46 0 0 0 106,60"/>' +
+      '</defs>' +
+      // outer ring (faint)
+      '<circle cx="60" cy="60" r="58" fill="none" stroke="currentColor" stroke-opacity=".18" stroke-width="1"/>' +
+      // inner ring (slightly stronger)
+      '<circle cx="60" cy="60" r="52" fill="none" stroke="currentColor" stroke-opacity=".28" stroke-width="1"/>' +
+      // top arc label: "K-SCORE"
+      '<text x="60" y="26" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="8.5" letter-spacing="0.18em" fill="currentColor" fill-opacity=".55">K-SCORE</text>' +
+      // big "K" mark in mint accent
+      '<text x="60" y="62" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="34" font-weight="700" fill="var(--ks-accent, #a3e7c7)">K</text>' +
+      // divider
+      '<line x1="34" y1="72" x2="86" y2="72" stroke="currentColor" stroke-opacity=".25" stroke-width="1"/>' +
+      // score number
+      '<text x="60" y="90" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" font-weight="540" fill="currentColor">' + score + '</text>' +
+      // bottom-arc microtype
+      '<text font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="7" letter-spacing="0.20em" fill="currentColor" fill-opacity=".55">' +
+        '<textPath href="#kbadge-arc" startOffset="50%" text-anchor="middle">VERIFIED BY KOLM.AI</textPath>' +
+      '</text>' +
+      '</svg>';
+  }
+
+  var BADGES = {
+    'kscore': buildBadgeKScore
+  };
+
+  function buildBadge(name, opts) {
+    var fn = BADGES[name];
+    return fn ? fn(opts) : '';
+  }
+
   // ---- Auto-render on DOM ready ----
   function render() {
     var iconHosts = document.querySelectorAll('[data-kolm-icon]:not([data-kolm-rendered])');
@@ -311,11 +352,21 @@
       host2.innerHTML = buildIllustration(iname);
       host2.setAttribute('data-kolm-rendered', '1');
     }
+    var badgeHosts = document.querySelectorAll('[data-kolm-badge]:not([data-kolm-rendered])');
+    for (var k = 0; k < badgeHosts.length; k++) {
+      var host3 = badgeHosts[k];
+      var bname = host3.getAttribute('data-kolm-badge');
+      var bsize = host3.getAttribute('data-kolm-size');
+      var bscore = host3.getAttribute('data-score');
+      host3.innerHTML = buildBadge(bname, { size: bsize ? parseInt(bsize, 10) : undefined, score: bscore });
+      host3.setAttribute('data-kolm-rendered', '1');
+    }
   }
 
   // expose
   window.kolmIcon = buildIcon;
   window.kolmIllustration = buildIllustration;
+  window.kolmBadge = buildBadge;
   window.kolmRenderSvg = render;
 
   if (document.readyState === 'loading') {

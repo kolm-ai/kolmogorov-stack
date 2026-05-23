@@ -122,6 +122,15 @@
     .home-receipts__time::before { content: "compile · "; color: var(--ks-ink-faint); font-size: 0.85em; }
     .home-receipts__hash { grid-column: 1 / -1; padding-top: 4px; }
   }
+  /* W658: receipts section head — flex with K-score badge to the right. */
+  .home-receipts__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 32px; margin-bottom: 24px; }
+  .home-receipts__head-text { flex: 1 1 auto; min-width: 0; }
+  .home-receipts__badge { flex: 0 0 120px; color: var(--ks-ink-2); margin-top: 6px; }
+  .home-receipts__badge svg { display: block; }
+  @media (max-width: 720px) {
+    .home-receipts__header { flex-direction: column-reverse; gap: 18px; align-items: center; }
+    .home-receipts__head-text { text-align: left; }
+  }
 
   /* W657: hero persona switcher — CSS-only radio + sibling-selector tabs.
      Three personas (Platform Eng, ML Eng, Founder/CTO) each show a tailored
@@ -398,6 +407,29 @@
     </ul>
   </div>
 </div>
+<!-- W658: compatibility strip — every inference stack a .kolm artifact can land in.
+     Text wordmarks (no brand SVGs) keep this trademark-clean and visually consistent with the
+     other ks-logorow bands. Pairs with the runtimes page for the full adapter matrix. -->
+<div class="ks-logorow" aria-label="Compatible inference stacks">
+  <div class="ks-logorow__inner">
+    <span class="ks-logorow__eye">Compatible with</span>
+    <ul class="ks-logorow__list">
+      <li><a href="/runtimes#adapters" style="color:inherit; text-decoration:none;">vLLM</a></li>
+      <li><a href="/runtimes#adapters" style="color:inherit; text-decoration:none;">SGLang</a></li>
+      <li><a href="/runtimes#adapters" style="color:inherit; text-decoration:none;">TensorRT-LLM</a></li>
+      <li><a href="/runtimes#adapters" style="color:inherit; text-decoration:none;">TGI</a></li>
+      <li><a href="/runtimes#adapters" style="color:inherit; text-decoration:none;">llama.cpp</a></li>
+      <li><a href="/runtimes#adapters" style="color:inherit; text-decoration:none;">MLX</a></li>
+      <li><a href="/runtimes#adapters" style="color:inherit; text-decoration:none;">Core&nbsp;ML</a></li>
+      <li><a href="/runtimes#adapters" style="color:inherit; text-decoration:none;">ONNX&nbsp;Runtime</a></li>
+      <li><a href="/integrations/openai-sdk" style="color:inherit; text-decoration:none;">OpenAI&nbsp;SDK</a></li>
+      <li><a href="/integrations/anthropic-sdk" style="color:inherit; text-decoration:none;">Anthropic&nbsp;SDK</a></li>
+      <li><a href="/runtimes#adapters" style="color:inherit; text-decoration:none;">Ollama</a></li>
+      <li><a href="/runtimes#adapters" style="color:inherit; text-decoration:none;">LM&nbsp;Studio</a></li>
+      <li><a href="/runtimes" style="color:var(--ks-accent); text-decoration:none;">Adapter matrix &rarr;</a></li>
+    </ul>
+  </div>
+</div>
 <div class="ks-logorow" aria-label="Official SDKs">
   <div class="ks-logorow__inner">
     <span class="ks-logorow__eye">Ship in</span>
@@ -634,11 +666,18 @@
 </section>
 
 <!-- ================== W655: Real compile receipts — first-principles proof, not marketing ================== -->
+<!-- W658: K-score badge anchored top-right of the section head — a visual stamp tying the table's
+     numbers to the K-Score accuracy gate. Badge primitive ships in /kolm-svg.js (data-kolm-badge="kscore"). -->
 <section class="fr-section fr-section--tight fr-reveal" aria-label="Four artifacts kolm has compiled, with real numbers">
   <div class="fr-container">
-    <span class="fr-eyebrow">Compile receipts</span>
-    <h2 class="fr-h2">Four models we&rsquo;ve actually compiled.</h2>
-    <p class="fr-lede" style="max-width:60ch;">Every row below is a real run on a real GPU. Same source repo, same bitsandbytes 0.49.2, same NF4+double quant path. Same <code>sha256</code> on our build host as on yours. Pull any of them, verify the signature offline, run them in vLLM or llama.cpp. The numbers are receipts, not claims.</p>
+    <div class="home-receipts__header">
+      <div class="home-receipts__head-text">
+        <span class="fr-eyebrow">Compile receipts</span>
+        <h2 class="fr-h2">Four models we&rsquo;ve actually compiled.</h2>
+        <p class="fr-lede" style="max-width:60ch;">Every row below is a real run on a real GPU. Same source repo, same bitsandbytes 0.49.2, same NF4+double quant path. Same <code>sha256</code> on our build host as on yours. Pull any of them, verify the signature offline, run them in vLLM or llama.cpp. The numbers are receipts, not claims.</p>
+      </div>
+      <div class="home-receipts__badge" data-kolm-badge="kscore" data-score="0.91" data-kolm-size="120" aria-label="Median K-Score 0.91 across the four artifacts below — verified by kolm.ai"></div>
+    </div>
 
     <div class="home-receipts" role="table" aria-label="Compile receipts table">
       <div class="home-receipts__row home-receipts__row--head" role="row">
