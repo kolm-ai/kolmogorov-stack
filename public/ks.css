@@ -911,11 +911,14 @@ body { position: relative; }
 .ks-hero__meta b { color: var(--ks-ink); font-weight: 500; }
 
 /* ----- 14. Inline-link bar (logo-row replacement) ---------------------- */
+/* W688: tightened vertical rhythm (16-24px) + tactile hover micro-lift
+   (translateY -1px) + tracked eye column (0.09em) for stronger editorial
+   feel. Chips no longer feel like body text. */
 .ks-logorow {
   border-top: 1px solid var(--ks-line-1);
   border-bottom: 1px solid var(--ks-line-1);
   background: linear-gradient(180deg, var(--ks-bg) 0%, var(--ks-bg-1) 100%);
-  padding: clamp(20px, 2.6vw, 30px) 0;
+  padding: clamp(16px, 2vw, 24px) 0;
 }
 .ks-logorow__inner {
   max-width: var(--ks-container);
@@ -928,8 +931,8 @@ body { position: relative; }
 }
 .ks-logorow__eye {
   font-family: var(--ks-mono);
-  font-size: 11px;
-  letter-spacing: 0.07em;
+  font-size: 10.5px;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
   color: var(--ks-ink-3);
   white-space: nowrap;
@@ -942,11 +945,22 @@ body { position: relative; }
   margin: 0; padding: 0;
   flex-wrap: wrap;
   font-family: var(--ks-mono);
-  font-size: 13px;
+  font-size: 12.5px;
   color: var(--ks-ink-2);
 }
-.ks-logorow__list li { opacity: 0.84; transition: opacity var(--ks-dur-1) var(--ks-ease), color var(--ks-dur-1) var(--ks-ease); }
-.ks-logorow__list li:hover { opacity: 1; color: var(--ks-ink); }
+.ks-logorow__list li {
+  opacity: 0.78;
+  will-change: opacity, transform;
+  transition:
+    opacity var(--ks-dur-1) var(--ks-ease),
+    color var(--ks-dur-1) var(--ks-ease),
+    transform var(--ks-dur-1) var(--ks-ease);
+}
+.ks-logorow__list li:hover {
+  opacity: 1;
+  color: var(--ks-ink);
+  transform: translateY(-1px);
+}
 
 /* ----- 15. Marquee (final CTA section) --------------------------------- */
 .ks-finale {
