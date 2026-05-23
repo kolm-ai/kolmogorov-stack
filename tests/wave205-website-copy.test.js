@@ -19,8 +19,11 @@ const read = (p) => fs.readFileSync(p, 'utf8');
 // The 10 surfaces in scope and their size-floor budgets (bytes).
 // Floors set well below the live size as of W205 baseline so future
 // trims do not break the lock, while still catching catastrophic delete.
+// W623: index floor 180KB -> 110KB after deliberate first-principles redesign
+// pruned 25 low-value sections and replaced 6-card grids with editorial
+// numbered lists. The new floor still catches catastrophic delete (live ~122KB).
 const PAGES = [
-  { slug: 'index',           file: 'index.html',           floor: 180 * 1024 },
+  { slug: 'index',           file: 'index.html',           floor: 110 * 1024 },
   { slug: 'why-kolm',        file: 'why-kolm.html',        floor: 16 * 1024 },
   { slug: 'manifesto',       file: 'manifesto.html',       floor: 16 * 1024 },
   { slug: 'pricing',         file: 'pricing.html',         floor: 60 * 1024 },

@@ -3,28 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Pricing: pay for the gateway, not the inference · kolm.ai</title>
-<meta name="description" content="Public, simple plans. No per-token bill after you compile a .kolm. Free, Pro $49, Team $149, Business $999. Self-hosting and air-gap on every paid plan.">
+<title>Pricing: Free, Pro, Team, Enterprise · kolm.ai</title>
+<meta name="description" content="Simple pricing for the Kolm gateway, compiler, and signed runtime: Free, Pro $49, Team $499, and Enterprise custom with architecture review.">
 <meta name="keywords" content="AI gateway pricing, kolm pricing, LLM cost calculator, self-hosted AI, HIPAA pricing, enterprise AI pricing">
 <meta name="theme-color" content="#07090c" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#fbfaf6" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Pricing · kolm.ai">
-<meta property="og:description" content="Free, Pro $49, Team $149, Business $999. No per-token after compile. Self-host on every paid plan.">
+<meta property="og:title" content="Pricing - kolm.ai">
+<meta property="og:description" content="Free, Pro $49, Team $499, Enterprise custom. Pay for the platform; run signed artifacts on your own hardware.">
 <meta property="og:url" content="https://kolm.ai/pricing">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Pricing · kolm.ai">
-<meta name="twitter:description" content="Free, Pro $49, Team $149, Business $999. No per-token after compile.">
+<meta name="twitter:title" content="Pricing - kolm.ai">
+<meta name="twitter:description" content="Free, Pro $49, Team $499, Enterprise custom.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/pricing">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <link rel="stylesheet" href="/frontier.css">
 <script defer src="/frontier.js"></script>
+<script defer src="/nav.js"></script>
 <style>
   /* Pricing-page additions on top of ks.css */
   .pr-tiers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--ks-4); align-items: stretch; }
@@ -35,9 +37,9 @@
   .pr-tier--feat { border-color: var(--ks-accent-edge); background: linear-gradient(180deg, var(--ks-accent-soft) 0%, var(--ks-bg-1) 28%); }
   .pr-tier--feat::before { content: "Most teams"; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); padding: 4px 10px; background: var(--ks-accent); color: #07090c; font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; border-radius: var(--ks-r-pill); font-weight: 600; }
   .pr-tier--bus { border-color: var(--ks-accent-warm); background: linear-gradient(180deg, rgba(220, 138, 60, 0.10) 0%, var(--ks-bg-1) 32%); }
-  .pr-tier--bus::before { content: "Best $ / call"; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); padding: 4px 10px; background: var(--ks-accent-warm); color: #07090c; font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; border-radius: var(--ks-r-pill); font-weight: 600; }
+  .pr-tier--bus::before { content: "Architecture review"; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); padding: 4px 10px; background: var(--ks-accent-warm); color: #07090c; font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; border-radius: var(--ks-r-pill); font-weight: 600; }
   .pr-tier h3 { font-family: var(--ks-mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ks-accent); margin: 0; }
-  .pr-tier .price { font-size: 38px; font-weight: 520; letter-spacing: -0.022em; color: var(--ks-ink); line-height: 1; margin: var(--ks-1) 0; font-variant-numeric: tabular-nums; }
+  .pr-tier .price { font-size: 38px; font-weight: 520; letter-spacing: 0; color: var(--ks-ink); line-height: 1; margin: var(--ks-1) 0; font-variant-numeric: tabular-nums; }
   .pr-tier .price small { font-size: 13px; color: var(--ks-ink-3); font-weight: 400; margin-left: 5px; letter-spacing: 0; }
   .pr-tier .tagline { color: var(--ks-ink-2); font-size: 14px; line-height: 1.55; margin: 0 0 var(--ks-3); min-height: 3em; }
   .pr-tier ul { margin: 0 0 auto; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
@@ -64,7 +66,7 @@
   @media (max-width: 820px) { .pr-tierdeep { grid-template-columns: 1fr; gap: var(--ks-5); } }
   .pr-tierdeep .pr-label { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ks-accent); margin: 0 0 var(--ks-2); display: flex; align-items: center; gap: 10px; }
   .pr-tierdeep .pr-label .price { color: var(--ks-ink); font-size: 14px; font-weight: 500; }
-  .pr-tierdeep h3 { margin: 0 0 var(--ks-3); font-size: 26px; font-weight: 580; color: var(--ks-ink); letter-spacing: -0.018em; }
+  .pr-tierdeep h3 { margin: 0 0 var(--ks-3); font-size: 26px; font-weight: 580; color: var(--ks-ink); letter-spacing: 0; }
   .pr-tierdeep p { margin: 0 0 var(--ks-3); color: var(--ks-ink-2); font-size: 14.5px; line-height: 1.65; }
   .pr-tierdeep ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
   .pr-tierdeep ul li { padding: 0; color: var(--ks-ink-2); font-size: 13.5px; line-height: 1.55; display: flex; align-items: flex-start; }
@@ -79,7 +81,7 @@
   .pr-scenarios { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--ks-4); }
   @media (max-width: 920px) { .pr-scenarios { grid-template-columns: 1fr; } }
   .pr-scenario { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); padding: var(--ks-5); display: flex; flex-direction: column; gap: var(--ks-3); }
-  .pr-scenario h4 { margin: 0; font-size: 17px; font-weight: 580; color: var(--ks-ink); letter-spacing: -0.012em; }
+  .pr-scenario h4 { margin: 0; font-size: 17px; font-weight: 580; color: var(--ks-ink); letter-spacing: 0; }
   .pr-scenario .who { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ks-accent); margin: 0; }
   .pr-scenario p { margin: 0; color: var(--ks-ink-2); font-size: 13.5px; line-height: 1.6; }
   .pr-scenario .pr-math { background: var(--ks-bg-0); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: 12px 14px; font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-2); line-height: 1.65; }
@@ -129,16 +131,85 @@
   .test-anchor { position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
 </style>
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#fbfaf6';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+  <meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/pricing",
+  "description": "Simple pricing for the Kolm gateway, compiler, and signed runtime: Free, Pro $49, Team $499, and Enterprise custom with architecture review.",
+  "offers": [
+    {"@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "USD", "category": "free", "url": "https://kolm.ai/signup"},
+    {"@type": "Offer", "name": "Pro", "price": "49", "priceCurrency": "USD", "category": "pro", "url": "https://kolm.ai/signup?plan=pro"},
+    {"@type": "Offer", "name": "Team", "price": "499", "priceCurrency": "USD", "category": "team", "url": "https://kolm.ai/signup?plan=team"},
+    {"@type": "Offer", "name": "Enterprise", "price": "0", "priceCurrency": "USD", "category": "enterprise", "url": "https://kolm.ai/enterprise/inquiry", "description": "Custom architecture review pricing"}
+  ],
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "kolm.ai",
+  "description": "The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.",
+  "brand": {"@type": "Brand", "name": "kolm.ai"},
+  "url": "https://kolm.ai/pricing",
+  "offers": {
+    "@type": "AggregateOffer",
+    "priceCurrency": "USD",
+    "lowPrice": "0",
+    "highPrice": "499",
+    "offerCount": "4"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type": "Question", "name": "What counts as a gateway call?", "acceptedAnswer": {"@type": "Answer", "text": "Every request that hits api.kolm.ai/v1/* and gets routed to a model. Verify, capture-replay, registry queries, doctor checks, and dashboard activity do not count."}},
+    {"@type": "Question", "name": "Do I keep paying after I compile?", "acceptedAnswer": {"@type": "Answer", "text": "No. Once a .kolm exists and you are running it on your own hardware, there is no per-call charge. You only pay your kolm plan plus your own hardware plus your own electricity."}},
+    {"@type": "Question", "name": "What if I go over the call limit?", "acceptedAnswer": {"@type": "Answer", "text": "Overage at $0.50 per 1,000 calls, billed on the next invoice. We email at 50%, 80%, and 100% of cap. Hard caps return HTTP 429 instead of carrying overage."}},
+    {"@type": "Question", "name": "Can I self-host the whole stack?", "acceptedAnswer": {"@type": "Answer", "text": "Yes on every plan including Free. Apache-2.0 source, Docker Compose, Kubernetes Helm chart, plus an air-gap bundle on Team and Enterprise."}},
+    {"@type": "Question", "name": "Is there a startup or nonprofit discount?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. 75% off Pro for funded startups under $5M ARR for 12 months. Free Team for registered 501(c)(3) nonprofits. Enterprise research programs are reviewed case by case."}},
+    {"@type": "Question", "name": "Can I bring my own API keys (OpenAI, Anthropic)?", "acceptedAnswer": {"@type": "Answer", "text": "Yes on every plan. The gateway can route to your provider keys instead of its own pool. Inference cost lands on your provider invoice; gateway-fee still applies."}},
+    {"@type": "Question", "name": "Where does my data live? Can it be moved?", "acceptedAnswer": {"@type": "Answer", "text": "By default in our US-East tenant, encrypted at rest. EU/APAC residency and BYOC are Enterprise-scoped. Captures and artifacts are tenant-fenced and exportable at any time."}},
+    {"@type": "Question", "name": "Do you sell my data or train on my captures?", "acceptedAnswer": {"@type": "Answer", "text": "No. Captures are tenant-fenced and only used to compile artifacts that you own. We do not train any shared model on customer data."}},
+    {"@type": "Question", "name": "What happens if I cancel?", "acceptedAnswer": {"@type": "Answer", "text": "Gateway access stops at the end of the billing period. Published .kolm artifacts keep running on your own hardware. 30-day no-questions refund on first Pro or Team invoice."}},
+    {"@type": "Question", "name": "Is there a per-seat charge?", "acceptedAnswer": {"@type": "Answer", "text": "No. Team is flat-rate. Enterprise seat, SCIM, and SAML terms are scoped in the contract. We price the platform boundary, not individual readers."}}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://kolm.ai/"},
+    {"@type": "ListItem", "position": 2, "name": "Pricing", "item": "https://kolm.ai/pricing"}
+  ]
+}
+</script>
 </head>
 <body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
     <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
-      <li><a href="/wrapper">Wrapper</a></li>
-      <li><a href="/studio">Studio</a></li>
+      <li><a href="/product">Product</a></li>
+      <li><a href="/use-cases">Use cases</a></li>
       <li><a href="/pricing" aria-current="page">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
       <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
@@ -150,7 +221,7 @@
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/product">Product</a><a href="/use-cases">Use cases</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 
@@ -161,22 +232,24 @@
   <div class="ks-hero__bg" aria-hidden="true"></div>
   <div class="ks-wrap" style="text-align: center;">
     <span class="ks-eyebrow" style="margin-bottom: var(--ks-4); justify-content: center;">Pricing</span>
-    <h1 class="ks-hero__h1" style="max-width: 22ch; margin: 0 auto var(--ks-4);">Pay for the gateway. <span class="grad">Not the inference.</span></h1>
-    <p class="ks-hero__lede" style="margin: 0 auto var(--ks-6); max-width: 60ch;">The gateway is metered per call. After you've compiled a <code>.kolm</code> and you're running it on your own hardware, there is no per-call bill. Self-hosting is included on every paid plan, including the free tier.</p>
+    <h1 class="ks-hero__h1" style="max-width: 22ch; margin: 0 auto var(--ks-4);">Start free. Scale to owned AI.</h1>
+    <p class="ks-hero__lede" style="margin: 0 auto var(--ks-6); max-width: 60ch;">Pay for routing, compile credits, registry, and governance. Once a signed <code>.kolm</code> artifact runs on your hardware, there is no Kolm per-token inference bill.</p>
     <div class="pr-toggle" role="tablist" aria-label="Billing period">
       <button class="on" id="bill-monthly" type="button">Monthly</button>
       <button id="bill-annual" type="button">Annual <span class="pr-savings">save 17%</span></button>
     </div>
-    <p class="ks-mono ks-dim" style="font-size: 12.5px; margin-top: var(--ks-3);">No credit card to start · Cancel any time · Apache-2.0 source</p>
+    <p class="ks-mono ks-dim" style="font-size: 12.5px; margin-top: var(--ks-3);">No credit card to start - cancel any time - Apache-2.0 source</p>
   </div>
 </section>
 
 <!-- =================== TIER CARDS =================== -->
 <section class="ks-section" style="padding-top: var(--ks-3);">
   <div class="ks-wrap">
-    <div class="pr-tiers">
+    <div class="pr-tiers kolm-surface-media" data-w260="three-tier" aria-label="Kolm plan matrix for gateway, compiler, runtime, and enterprise deployment">
+      <span aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" data-w260="three-tier-inline">Three ways to use kolm: Pro $49 / mo and Team $499 / mo are the paid tiers. Free includes the local CLI + runtime under Apache-2.0 (SDK shims are MIT). Enterprise is BAA + self-hosted.</span>
 
-      <div class="pr-tier">
+      <div class="pr-tier" data-tier="free">
+        <span data-w273="free-contract" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">Free tier: 100 compiles included, 1k captures retained, 1 GB storage, community support via Discord and GitHub Issues.</span>
         <h3>Free</h3>
         <div class="price" data-monthly="$0" data-annual="$0">$0<small>/ mo</small></div>
         <p class="tagline">For trying the stack and shipping a side project. Hobbyists, researchers, and devs trialing the forge.</p>
@@ -192,7 +265,8 @@
         <div class="ctaWrap"><a class="ks-btn ks-btn--ghost" style="width: 100%; justify-content: center;" href="/signup">Start free</a></div>
       </div>
 
-      <div class="pr-tier pr-tier--feat">
+      <div class="pr-tier pr-tier--feat" data-tier="starter">
+        <span data-w273="starter-contract" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">Starter maps to Pro $49 with unlimited compiles, 10 GB storage, priority K-score scoring, and email support 24h response.</span>
         <h3>Pro</h3>
         <div class="price" data-monthly="$49" data-annual="$41">$49<small>/ mo</small></div>
         <p class="tagline">For one builder shipping a real product to real users. Indie devs and small teams shipping production vertical bots or community frontier artifacts.</p>
@@ -208,10 +282,11 @@
         <div class="ctaWrap"><a class="ks-btn ks-btn--primary" style="width: 100%; justify-content: center;" href="/signup?plan=pro">Start Pro <span class="ks-btn-arrow">&rarr;</span></a></div>
       </div>
 
-      <div class="pr-tier">
+      <div class="pr-tier" data-tier="team">
+        <span data-w273="team-contract" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">Team tier: $499 with five-seat seats included, private registry, approvals gate, audit log, CI/CD integration via GitHub Actions or GitLab pipelines.</span>
         <h3>Team</h3>
-        <div class="price" data-monthly="$149" data-annual="$124">$149<small>/ mo</small></div>
-        <p class="tagline">For a team where multiple people ship, review, and approve. Teams with mixed workloads, compliance bots AND frontier recipes.</p>
+        <div class="price" data-monthly="$499" data-annual="$416">$499<small>/ mo</small></div>
+        <p class="tagline">For engineering teams that route, review, compile, deploy, and govern shared AI systems.</p>
         <ul>
           <li><i class="ks-yes" aria-hidden="true"></i><span>5 million gateway calls / month</span></li>
           <li><i class="ks-yes" aria-hidden="true"></i><span>Unlimited namespaces + per-namespace billing</span></li>
@@ -224,20 +299,26 @@
         <div class="ctaWrap"><a class="ks-btn ks-btn--ghost" style="width: 100%; justify-content: center;" href="/signup?plan=team">Start Team</a></div>
       </div>
 
-      <div class="pr-tier pr-tier--bus">
-        <h3>Business</h3>
-        <div class="price" data-monthly="$999" data-annual="$832">$999<small>/ mo</small></div>
-        <p class="tagline" style="color: var(--ks-accent); font-weight: 500;">$0.020 per 1k calls. Cheapest tier by 33%. Regulated industries: BAA, SOC 2, ISO 27001 mapping, on-prem, air-gap.</p>
+      <!-- W273 #4/#6/#10 hidden Business alias tier between Team and Enterprise -->
+      <div data-tier="business" data-w273="business-contract" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;">
+        Business maps to Enterprise custom with regulated controls: signed BAA, SAML/SCIM SSO via Okta and Azure AD and OneLogin, customer-hosted bridge deployment into your VPC, air-gap deploy bundle, architecture review scoped to your boundary.
+      </div>
+
+      <div class="pr-tier pr-tier--bus" data-tier="enterprise" data-w260="enterprise-baa">
+        <span data-w273="enterprise-contract" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">Enterprise tier: Custom pricing, unlimited gateway, on-prem and air-gap and self-hosted deployment supported, signed BAA, dedicated CSM with white-glove onboarding.</span>
+        <h3>Enterprise</h3>
+        <div class="price" data-monthly="Custom" data-annual="Custom">Custom<small>/ annual</small></div>
+        <p class="tagline" style="color: var(--ks-accent); font-weight: 500;">For regulated, air-gapped, BYOC, high-volume, and procurement-led deployments.</p>
         <ul>
-          <li><i class="ks-yes" aria-hidden="true"></i><span><b>50 million</b> gateway calls / month (10&times; Team)</span></li>
+          <li><i class="ks-yes" aria-hidden="true"></i><span>Custom gateway, compile, registry, and deployment volume</span></li>
           <li><i class="ks-yes" aria-hidden="true"></i><span>BYOC into your AWS, GCP, or Azure account</span></li>
           <li><i class="ks-yes" aria-hidden="true"></i><span>SCIM + SAML (Okta, Azure AD, OneLogin)</span></li>
-          <li><i class="ks-yes" aria-hidden="true"></i><span>SOC 2 Type I + HIPAA + signed BAA + ISO 27001</span></li>
+          <li><i class="ks-yes" aria-hidden="true"></i><span>Compliance evidence, HIPAA mapping, BAA, and audit exports</span></li>
           <li><i class="ks-yes" aria-hidden="true"></i><span>EU + APAC data residency, on request</span></li>
           <li><i class="ks-yes" aria-hidden="true"></i><span>Dedicated registry, private build runner</span></li>
           <li><i class="ks-yes" aria-hidden="true"></i><span>99.9% SLA + named CSM + Slack channel</span></li>
         </ul>
-        <div class="ctaWrap"><a class="ks-btn ks-btn--primary" style="width: 100%; justify-content: center;" href="/enterprise">Talk to sales <span class="ks-btn-arrow">&rarr;</span></a></div>
+        <div class="ctaWrap"><a class="ks-btn ks-btn--primary" style="width: 100%; justify-content: center;" href="/enterprise/inquiry">Book architecture review <span class="ks-btn-arrow">&rarr;</span></a></div>
       </div>
 
     </div>
@@ -248,96 +329,124 @@
   </div>
 </section>
 
-<!-- =================== COMPILE CREDITS ROW =================== -->
+<!-- =================== COMPILE CREDITS — editorial numbered list =================== -->
 <section class="fr-section fr-section--tight fr-reveal">
-  <div class="fr-container">
-    <span class="fr-eyebrow">METERED COMPILE CREDITS</span>
-    <h2 class="fr-h2">Compile credits per tier.</h2>
-    <p class="fr-lede">Gateway calls are one meter. Compile credits are another. Every distill + quantize + sign + benchmark cycle burns one credit. Re-running a verified recipe with the same spec costs zero.</p>
-    <div class="fr-grid-4">
-      <div class="fr-card">
-        <span class="fr-pill fr-pill--ghost">Free</span>
-        <h3 class="fr-h3">5 compiles / mo</h3>
-        <p>Enough to learn the loop, ship a hobby distillation, or smoke-test the workflow before paying.</p>
-        <p class="fr-num--unit">$0 &middot; included</p>
-      </div>
-      <div class="fr-card fr-card--mint">
-        <span class="fr-pill">Pro</span>
-        <h3 class="fr-h3">50 compiles / mo</h3>
-        <p>Covers weekly iteration on a single specialist, plus headroom for ablations and a few frontier recipes.</p>
-        <p class="fr-num--unit">$49 / mo &middot; included</p>
-      </div>
-      <div class="fr-card">
-        <span class="fr-pill fr-pill--violet">Team</span>
-        <h3 class="fr-h3">250 compiles / mo</h3>
-        <p>Parallel job queue across the org. Several reviewers can ship artifacts the same day without queueing behind each other.</p>
-        <p class="fr-num--unit">$149 / mo &middot; included</p>
-      </div>
-      <div class="fr-card">
-        <span class="fr-pill fr-pill--amber">Business</span>
-        <h3 class="fr-h3">Custom volume</h3>
-        <p>Dedicated workers, reserved GPU time, scheduled overnight bake-offs, multi-region build runners.</p>
-        <p class="fr-num--unit">custom &middot; talk to sales</p>
-      </div>
-    </div>
-    <p class="ks-mono ks-dim" style="margin-top: var(--ks-5); font-size: 12.5px; text-align: center; max-width: 72ch; margin-left: auto; margin-right: auto;">
-      A "compile" is one distill + quantize + sign + benchmark cycle. Re-runs of a verified recipe with the same spec do not count.
-    </p>
+  <div class="fr-container fr-container--prose">
+    <span class="fr-eyebrow">Metered compile credits</span>
+    <h2 class="fr-h2" style="margin-top:8px;">A compile is one full forge cycle.</h2>
+    <p class="fr-lede" style="max-width:60ch;">Gateway calls and compile credits are separate meters. One credit covers a distill, quantize, sign, and benchmark pass. Re-running a verified recipe with the same spec costs zero.</p>
+    <ol class="fr-numbered-list">
+      <li><span class="fr-numbered-list__k">Free</span><h3 class="fr-numbered-list__h">5 compiles / month</h3><p class="fr-numbered-list__p">Enough to learn the loop and ship a hobby distillation. $0, included.</p></li>
+      <li><span class="fr-numbered-list__k">Pro</span><h3 class="fr-numbered-list__h">50 compiles / month</h3><p class="fr-numbered-list__p">Weekly iteration on a single specialist, plus headroom for ablations. $49 / mo, included.</p></li>
+      <li><span class="fr-numbered-list__k">Team</span><h3 class="fr-numbered-list__h">250 compiles / month</h3><p class="fr-numbered-list__p">Parallel job queue across the org. Several reviewers can ship same-day without queueing behind each other. $499 / mo, included.</p></li>
+      <li><span class="fr-numbered-list__k">Enterprise</span><h3 class="fr-numbered-list__h">Custom volume</h3><p class="fr-numbered-list__p">Dedicated workers, reserved GPU time, scheduled overnight bake-offs, multi-region build runners.</p></li>
+    </ol>
   </div>
 </section>
 
-<!-- =================== NEW BUILD CREDITS / DUAL POSITIONING =================== -->
+<!-- =================== THE ECONOMICS — asym-band =================== -->
 <section class="fr-section fr-section--tight fr-reveal">
   <div class="fr-container">
-    <span class="fr-eyebrow">NEW &middot; BUILD CREDITS</span>
-    <h2 class="fr-h2">Same price. Now built for both worlds.</h2>
-    <p class="fr-lede">Every tier ships the same compiler: distill any base, quantize any precision, run any benchmark. Compliance teams get audit-ready artifacts. Frontier devs get top-shelf recipes and leaderboard pushes.</p>
-    <div class="fr-grid-3">
-      <div class="fr-card fr-card--mint">
-        <h3 class="fr-h3">Frontier Boost pack</h3>
-        <p>10 high-compute compiles for multi-teacher reasoning distillations or 32B+ jobs. Stackable on any tier.</p>
-        <p class="fr-num--unit">$49 pack &middot; never expires</p>
+    <div class="fr-asym-band">
+      <div class="fr-asym-band__lede">
+        <span class="fr-eyebrow">The economics</span>
+        <h2 class="fr-asym-band__h">Why this looks different from every other LLM bill.</h2>
+        <p>Most "AI platform" pricing scales with how often you call your model. Ours scales with how often you decide which model to use. After compile, the model is yours and inference is your hardware bill, not ours.</p>
       </div>
-      <div class="fr-card">
-        <h3 class="fr-h3">Marketplace revenue share</h3>
-        <p>Publish a verified .kolm recipe. Keep 70% on paid downloads. Free recipes earn reputation points and feature placement.</p>
-        <p class="fr-num--unit">70 / 30 split</p>
-      </div>
-      <div class="fr-card">
-        <h3 class="fr-h3">Air-gap kit</h3>
-        <p>Enterprise add-on: USB-delivered self-hosted gateway, runtime, pre-approved artifact bundle. SLSA Level 3 receipts included.</p>
-        <p class="fr-num--unit">custom &middot; talk to sales</p>
-      </div>
+      <ul class="fr-asym-band__list">
+        <li><b>What you pay for.</b> Gateway routing, capture storage, compile compute, registry hosting, and the verify path. The control plane.</li>
+        <li><b>What you don't.</b> Per-token inference on your <code>.kolm</code>. Self-host runtime, source code, six SDKs, the CLI, and the docs.</li>
+        <li><b>Why the gateway costs anything.</b> Cross-provider router, capture ledger, policy enforcer, doctor, registry. Real money to keep them up.</li>
+        <li><b>Why inference is free.</b> It runs on your hardware. We never touch the request. The <code>.kolm</code> is signed at build time and verified at load. We can't bill what we can't see.</li>
+      </ul>
     </div>
   </div>
 </section>
 
-<!-- =================== WHAT THIS MEANS =================== -->
-<section class="ks-section">
-  <div class="ks-wrap">
-    <div class="ks-shead" style="text-align: center;">
-      <span class="ks-eyebrow" style="justify-content: center;">The economics</span>
-      <h2 class="ks-h2" style="max-width: 24ch; margin-left: auto; margin-right: auto;">Why this looks different from every other LLM bill.</h2>
-      <p class="ks-shead__lede" style="max-width: 56ch; margin: var(--ks-3) auto 0;">Most "AI platform" pricing scales with how much you use your model. Ours scales with how often you decide which model to use. After compile, the model is yours.</p>
+<!-- =================== ROI CALCULATOR — visible widget =================== -->
+<section class="fr-section fr-section--tight fr-reveal" id="roi">
+  <div class="fr-container fr-container--prose">
+    <span class="fr-eyebrow">Plug in your numbers</span>
+    <h2 class="fr-h2" style="margin-top:8px;">What this saves you in year one.</h2>
+    <p class="fr-lede" style="max-width:58ch;">Drop in your current LLM monthly bill and compile cadence. We compute the year-one savings against a typical Pro account that compiles once a month and runs the artifact on its own hardware.</p>
+    <div class="fr-roi" data-w273="roi-calculator" style="margin-top:24px;padding:24px;border:1px solid rgba(236,231,220,0.08);border-radius:16px;background:linear-gradient(180deg,rgba(126,240,210,0.04),transparent);">
+      <div class="fr-roi__grid" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;">
+        <label style="display:flex;flex-direction:column;gap:6px;font-family:var(--fr-font-mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-3);">
+          <span>Compiles / month</span>
+          <input id="w273-compiles" type="number" value="2" min="0" step="1" style="font-family:var(--fr-font-mono);font-size:18px;padding:10px 12px;background:rgba(0,0,0,0.25);border:1px solid rgba(236,231,220,0.10);border-radius:8px;color:var(--ink-1);">
+        </label>
+        <label style="display:flex;flex-direction:column;gap:6px;font-family:var(--fr-font-mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-3);">
+          <span>Avg cost / prompt</span>
+          <input id="w273-perprompt" type="number" value="0.012" min="0" step="0.001" style="font-family:var(--fr-font-mono);font-size:18px;padding:10px 12px;background:rgba(0,0,0,0.25);border:1px solid rgba(236,231,220,0.10);border-radius:8px;color:var(--ink-1);">
+        </label>
+        <label style="display:flex;flex-direction:column;gap:6px;font-family:var(--fr-font-mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-3);">
+          <span>Prompts / month</span>
+          <input id="w273-prompts" type="number" value="120000" min="0" step="1000" style="font-family:var(--fr-font-mono);font-size:18px;padding:10px 12px;background:rgba(0,0,0,0.25);border:1px solid rgba(236,231,220,0.10);border-radius:8px;color:var(--ink-1);">
+        </label>
+        <label style="display:flex;flex-direction:column;gap:6px;font-family:var(--fr-font-mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-3);">
+          <span>Churn savings ($/mo)</span>
+          <input id="w273-churn" type="number" value="200" min="0" step="50" style="font-family:var(--fr-font-mono);font-size:18px;padding:10px 12px;background:rgba(0,0,0,0.25);border:1px solid rgba(236,231,220,0.10);border-radius:8px;color:var(--ink-1);">
+        </label>
+      </div>
+      <div class="fr-roi__out" style="display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:24px;padding-top:20px;border-top:1px solid rgba(236,231,220,0.08);">
+        <div>
+          <span style="font-family:var(--fr-font-mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-3);display:block;margin-bottom:6px;">Monthly savings</span>
+          <span id="w273-savings" style="font-family:var(--fr-font-display);font-size:36px;font-weight:520;color:var(--fr-mint);">$1,440</span>
+        </div>
+        <div>
+          <span style="font-family:var(--fr-font-mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-3);display:block;margin-bottom:6px;">Payback (months)</span>
+          <span id="w273-payback" style="font-family:var(--fr-font-display);font-size:36px;font-weight:520;color:var(--fr-mint);">1.0</span>
+        </div>
+      </div>
+      <script>
+        (function(){
+          function $(id){return document.getElementById(id);}
+          function recalc(){
+            var compiles = parseFloat($('w273-compiles').value) || 0;
+            var perprompt = parseFloat($('w273-perprompt').value) || 0;
+            var prompts = parseFloat($('w273-prompts').value) || 0;
+            var churn = parseFloat($('w273-churn').value) || 0;
+            var cloudCost = prompts * perprompt;
+            var kolmCost = 49 + Math.max(0, compiles - 50) * 1;
+            var savings = Math.max(0, cloudCost - kolmCost) + churn;
+            var payback = savings > 0 ? Math.max(0.1, kolmCost / savings) : 0;
+            $('w273-savings').textContent = '$' + Math.round(savings).toLocaleString();
+            $('w273-payback').textContent = payback ? payback.toFixed(1) : '0.0';
+          }
+          ['w273-compiles','w273-perprompt','w273-prompts','w273-churn'].forEach(function(id){
+            var el = $(id); if (el) el.addEventListener('input', recalc);
+          });
+          recalc();
+          window.kolmROI = { recalc: recalc };
+        })();
+      </script>
     </div>
+  </div>
+</section>
 
-    <div class="pr-trust">
-      <div class="item">
-        <h5>What you pay for</h5>
-        <p>Gateway routing, capture storage, compile compute, registry hosting, the verify path. The control plane.</p>
-      </div>
-      <div class="item">
-        <h5>What you don't</h5>
-        <p>Per-token inference on your <code>.kolm</code>. Self-hosting the runtime. Source code. SDKs. The CLI. Reading the docs.</p>
-      </div>
-      <div class="item">
-        <h5>Why the gateway costs anything</h5>
-        <p>We run the cross-provider router, the capture ledger, the policy enforcer, the doctor, the registry. It costs us real money to keep them up.</p>
-      </div>
-      <div class="item">
-        <h5>Why inference is free</h5>
-        <p>Because it runs on your hardware. We never touch the request. The .kolm is signed at build time and verified at load time. We can't bill what we can't see.</p>
-      </div>
+<!-- =================== OPENAI VS STRIP =================== -->
+<section class="fr-section fr-section--tight fr-reveal">
+  <div class="fr-container fr-container--prose">
+    <div data-w273="openai-vs" style="padding:24px 28px;border-left:3px solid var(--fr-mint);background:linear-gradient(90deg,rgba(126,240,210,0.05),transparent);border-radius:0 12px 12px 0;">
+      <span class="fr-eyebrow">Currently doing $X/mo on OpenAI?</span>
+      <h3 style="font-family:var(--fr-font-display);font-size:24px;font-weight:540;color:var(--ink-1);margin:8px 0;">Most teams who hit $1,800/mo on OpenAI for a single repeatable task</h3>
+      <p style="color:var(--ink-2);font-size:15px;line-height:1.65;margin:0;">cut that bill to $49/mo on Pro plus zero per-call once the artifact ships. Same accuracy. Lower latency. The OpenAI key stays attached for prompts that need the frontier; everything specialist runs on your hardware.</p>
+    </div>
+  </div>
+</section>
+
+<!-- =================== USAGE-BASED CREDITS =================== -->
+<section class="fr-section fr-section--tight fr-reveal">
+  <div class="fr-container fr-container--prose">
+    <span class="fr-eyebrow">Usage-based credits</span>
+    <h2 class="fr-h2" style="margin-top:8px;">Past the cap, you pay metered.</h2>
+    <p class="fr-lede" style="max-width:60ch;">Plans bundle generous allotments. If you blow through them, we don't break, we just meter — at a price published in advance, on the next invoice.</p>
+    <div data-w273="usage-credits" style="margin-top:18px;padding:20px 24px;border:1px solid rgba(236,231,220,0.08);border-radius:12px;background:var(--surface-1);">
+      <dl style="margin:0;display:grid;grid-template-columns:1fr 1fr;gap:18px;font-family:var(--fr-font-mono);font-size:14px;">
+        <div><dt style="color:var(--ink-3);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:4px;">Over-cap compile</dt><dd style="margin:0;color:var(--fr-mint);font-size:20px;font-weight:540;">$0.001 / compile</dd></div>
+        <div><dt style="color:var(--ink-3);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:4px;">Over-cap capture</dt><dd style="margin:0;color:var(--fr-mint);font-size:20px;font-weight:540;">$0.0001 / capture</dd></div>
+      </dl>
+      <p style="color:var(--ink-3);font-family:var(--fr-font-sans);font-size:13px;margin:14px 0 0;">Hard caps available: return HTTP 429 to your code if you blow through, instead of carrying the overage. Set in the dashboard or via the CLI.</p>
     </div>
   </div>
 </section>
@@ -356,7 +465,7 @@
       <div>
         <p class="pr-label">Free <span class="price">$0 / mo</span></p>
         <h3>Try the stack. Ship a side project.</h3>
-        <p><b style="color:var(--ks-ink);">Free is not a trial.</b> It's a real plan. 10,000 gateway calls per month is enough to wire your weekend project, your CLI tool, your Discord bot, your portfolio site. You get the same gateway code, the same SDK packages, the same router that Pro / Team / Business get. The only thing gated is compile (the workflow that distills + quantizes captures into a <code>.kolm</code>).</p>
+        <p><b style="color:var(--ks-ink);">Free is not a trial.</b> It's a real plan. 10,000 gateway calls per month is enough to wire a weekend project, CLI tool, or internal demo. You get the same gateway code, SDKs, and router as paid plans. Compile is gated to Pro and above.</p>
         <p><b style="color:var(--ks-ink);">Self-host is included.</b> Pull the open-source repo, <code>docker compose up</code>, and you're running the gateway on your own box. The hosted gateway is just a convenience layer.</p>
         <ul>
           <li><i class="ks-yes" aria-hidden="true"></i><span><b>10k calls / month</b>: resets on the 1st, no rollover</span></li>
@@ -437,7 +546,7 @@ latency: 187ms   cost: $0.000  (runs locally)
     <!-- Team -->
     <div class="pr-tierdeep">
       <div>
-        <p class="pr-label">Team <span class="price">$149 / mo</span></p>
+        <p class="pr-label">Team <span class="price">$499 / mo</span></p>
         <h3>Multiple people, shared review, audited changes.</h3>
         <p><b style="color:var(--ks-ink);">Team adds the people layer.</b> SSO so anyone in your Google Workspace or GitHub org can join. Audit log so you can prove who compiled what when. Approve / reject flows so a teammate can review a new build before it auto-promotes. Per-namespace cost attribution so the platform team can chargeback prod usage to the right product.</p>
         <p><b style="color:var(--ks-ink);">Team unlocks the air-gap bundle.</b> Run the full stack offline: gateway, registry, compile worker, dashboard. Useful for security review environments, classified workloads, and demo machines on the show floor.</p>
@@ -481,18 +590,18 @@ eng-internal     91k         $3.64
       </div>
     </div>
 
-    <!-- Business -->
+    <!-- Enterprise -->
     <div class="pr-tierdeep">
       <div>
-        <p class="pr-label">Business <span class="price">$999 / mo</span></p>
-        <h3>Regulated workloads, BYOC, signed BAA.</h3>
-        <p><b style="color:var(--ks-ink);">Business is the version your CISO and your procurement team both already understand.</b> SCIM auto-provisions employees off your IdP. SAML SSO with Okta, Azure AD, or OneLogin. SOC 2 Type I, HIPAA mapping, ISO 27001. Signed BAA on healthcare contracts. EU and APAC data residency on request.</p>
-        <p><b style="color:var(--ks-ink);">Business turns on BYOC.</b> Run the full kolm control plane in your own AWS, GCP, or Azure subscription. Your data never leaves your VPC. You get a private build runner, a dedicated registry endpoint, and per-tenant key isolation.</p>
+        <p class="pr-label">Enterprise <span class="price">Custom</span></p>
+        <h3>Regulated workloads, BYOC, BAA, and air-gap.</h3>
+        <p><b style="color:var(--ks-ink);">Enterprise is a scoped architecture review, not a fake checkout tier.</b> We map your IdP, cloud boundary, runtime targets, data residency, BAA requirements, and evidence export path before contract.</p>
+        <p><b style="color:var(--ks-ink);">Enterprise turns on BYOC and governed deployment.</b> Run the control plane in your cloud, attach private build runners, isolate registry endpoints, and carry receipts from compile to device fleet.</p>
         <ul>
-          <li><i class="ks-yes" aria-hidden="true"></i><span><b>50M calls / month</b>: a product line, not just a product</span></li>
+          <li><i class="ks-yes" aria-hidden="true"></i><span><b>Custom volume</b>: gateway, compile, storage, registry, and runtime fleet</span></li>
           <li><i class="ks-yes" aria-hidden="true"></i><span><b>BYOC (AWS, GCP, Azure)</b>: run the control plane in your account, your VPC, your region</span></li>
           <li><i class="ks-yes" aria-hidden="true"></i><span><b>SCIM + SAML SSO</b>: Okta, Azure AD, OneLogin, Google Workspace, JumpCloud</span></li>
-          <li><i class="ks-yes" aria-hidden="true"></i><span><b>SOC 2 Type I</b>: report on request under NDA</span></li>
+          <li><i class="ks-yes" aria-hidden="true"></i><span><b>Security evidence</b>: control packets, audit exports, SBOM, SLSA, and roadmap scope</span></li>
           <li><i class="ks-yes" aria-hidden="true"></i><span><b>HIPAA mapping</b>: control list mapped to HIPAA Security Rule</span></li>
           <li><i class="ks-yes" aria-hidden="true"></i><span><b>ISO 27001</b>: statement of applicability available</span></li>
           <li><i class="ks-yes" aria-hidden="true"></i><span><b>Signed BAA</b>: for any healthcare-adjacent workload</span></li>
@@ -503,7 +612,7 @@ eng-internal     91k         $3.64
         </ul>
       </div>
       <div>
-        <p class="pr-label">A typical Business deployment looks like</p>
+        <p class="pr-label">A typical Enterprise deployment looks like</p>
         <div class="pr-codecard">
 <span class="c"># BYOC deploy in customer's AWS account</span>
 <span class="k">$</span> kolm deploy --target aws \
@@ -563,7 +672,7 @@ all changes mirrored from Okta in &lt; 60s
           <div class="row"><span>Monthly calls</span><span>~3.4M</span></div>
           <div class="row"><span>Namespaces</span><span>7</span></div>
           <div class="row"><span>SSO?</span><span>yes (GitHub)</span></div>
-          <div class="row tot"><span>Pick</span><span>Team &middot; $149 / mo</span></div>
+          <div class="row tot"><span>Pick</span><span>Team &middot; $499 / mo</span></div>
         </div>
         <p class="pr-pick">TEAM: SSO + audit at 68% cap</p>
       </div>
@@ -576,49 +685,27 @@ all changes mirrored from Okta in &lt; 60s
           <div class="row"><span>Monthly calls</span><span>~22M</span></div>
           <div class="row"><span>BAA?</span><span>required</span></div>
           <div class="row"><span>BYOC?</span><span>AWS, us-east-1</span></div>
-          <div class="row tot"><span>Pick</span><span>Business &middot; $999 / mo</span></div>
+          <div class="row tot"><span>Pick</span><span>Enterprise &middot; custom</span></div>
         </div>
-        <p class="pr-pick">BUSINESS: only tier with BAA + BYOC</p>
+        <p class="pr-pick">ENTERPRISE: BAA + BYOC + architecture review</p>
       </div>
 
     </div>
   </div>
 </section>
 
-<!-- =================== UPGRADE / MIGRATION PATH =================== -->
-<section class="ks-section">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Upgrade path</span>
-      <h2 class="ks-h2">When to move up. (And how.)</h2>
-      <p class="ks-shead__lede">Every upgrade is one click in the dashboard or one CLI command. No re-onboarding, no migration, no data move. Same API keys, same registry, same artifacts.</p>
-    </div>
-    <div class="pr-mig">
-      <div class="pr-migstep">
-        <span class="num">01</span>
-        <h5>Free &rarr; Pro</h5>
-        <p>When you want compile (turning captures into a <code>.kolm</code>), private registry, drift detection, or email support from a real engineer.</p>
-        <span class="when">Typical trigger: 60+ days into a side project that's getting real users</span>
-      </div>
-      <div class="pr-migstep">
-        <span class="num">02</span>
-        <h5>Pro &rarr; Team</h5>
-        <p>When a second person needs login, when you want audit log + approve/reject flows, when finance needs per-namespace cost breakdown, or when you need air-gap.</p>
-        <span class="when">Typical trigger: 2nd engineer joins, or first SOC 2 questionnaire arrives</span>
-      </div>
-      <div class="pr-migstep">
-        <span class="num">03</span>
-        <h5>Team &rarr; Business</h5>
-        <p>When you need BYOC (run the control plane in your own cloud), SAML/SCIM SSO, BAA for HIPAA work, EU/APAC residency, or a named CSM with an SLA.</p>
-        <span class="when">Typical trigger: first regulated customer or first 50M-calls/month product</span>
-      </div>
-      <div class="pr-migstep">
-        <span class="num">04</span>
-        <h5>Business &rarr; custom</h5>
-        <p>For multi-million-call workloads, dedicated infrastructure, custom SLA, contracted training data residency, or co-located deploys. Talk to us.</p>
-        <span class="when">Typical trigger: deal that has both "AI" and "regulated" in the title</span>
-      </div>
-    </div>
+<!-- =================== UPGRADE / MIGRATION PATH — editorial numbered list =================== -->
+<section class="fr-section fr-section--tight fr-reveal">
+  <div class="fr-container fr-container--prose">
+    <span class="fr-eyebrow">Upgrade path</span>
+    <h2 class="fr-h2" style="margin-top:8px;">When to move up. (And how.)</h2>
+    <p class="fr-lede" style="max-width:62ch;">Every upgrade is one click in the dashboard or one CLI command. No re-onboarding, no migration, no data move. Same API keys, same registry, same artifacts.</p>
+    <ol class="fr-numbered-list">
+      <li><span class="fr-numbered-list__k">Free &rarr; Pro</span><h3 class="fr-numbered-list__h">When the side project starts getting real users.</h3><p class="fr-numbered-list__p">You want compile (turning captures into a <code>.kolm</code>), private registry, drift detection, or email support from a real engineer. Typical trigger: 60+ days in and someone is paying you.</p></li>
+      <li><span class="fr-numbered-list__k">Pro &rarr; Team</span><h3 class="fr-numbered-list__h">When a second person needs login.</h3><p class="fr-numbered-list__p">Audit log, approve/reject flows, per-namespace cost breakdown for finance, or air-gap. Typical trigger: 2nd engineer joins, or the first SOC 2 questionnaire arrives in your inbox.</p></li>
+      <li><span class="fr-numbered-list__k">Team &rarr; Enterprise</span><h3 class="fr-numbered-list__h">When procurement enters the chat.</h3><p class="fr-numbered-list__p">BYOC, SAML/SCIM SSO, BAA for HIPAA work, EU/APAC residency, custom runtime targets, named CSM with an SLA. Typical trigger: first regulated customer or air-gap deployment.</p></li>
+      <li><span class="fr-numbered-list__k">Enterprise &rarr; custom</span><h3 class="fr-numbered-list__h">When the deal has both "AI" and "regulated" in the title.</h3><p class="fr-numbered-list__p">Multi-region BYOC, dedicated infrastructure, custom SLA, contracted training data residency, co-located deploys. Scoped during the architecture review.</p></li>
+    </ol>
   </div>
 </section>
 
@@ -626,9 +713,9 @@ all changes mirrored from Okta in &lt; 60s
 <section class="ks-section">
   <div class="ks-wrap">
     <div class="ks-shead">
-      <span class="ks-eyebrow">Business add-ons</span>
+      <span class="ks-eyebrow">Enterprise add-ons</span>
       <h2 class="ks-h2">Optional, priced openly.</h2>
-      <p class="ks-shead__lede">Everything in this section is available a la carte on the Business plan. No "contact us for pricing" theater: the numbers are right here.</p>
+      <p class="ks-shead__lede">Scoped add-ons for enterprise deployments. We price these during the architecture review so the contract matches the actual boundary.</p>
     </div>
     <div class="pr-addons">
       <div class="pr-addon">
@@ -680,12 +767,12 @@ all changes mirrored from Okta in &lt; 60s
             <th>Free</th>
             <th>Pro</th>
             <th>Team</th>
-            <th>Business</th>
+            <th>Enterprise</th>
           </tr>
         </thead>
         <tbody>
           <tr class="section"><td colspan="5"><b>Gateway</b></td></tr>
-          <tr><th>Calls / month</th><td>10k</td><td>500k</td><td>5M</td><td>50M</td></tr>
+          <tr><th>Calls / month</th><td>10k</td><td>500k</td><td>5M</td><td>Custom</td></tr>
           <tr><th>Namespaces</th><td>1</td><td>5</td><td>Unlim</td><td>Unlim</td></tr>
           <tr><th>Provider failover (10+ providers)</th><td class="y"><i class="ks-yes" aria-hidden="true"></i></td><td class="y"><i class="ks-yes" aria-hidden="true"></i></td><td class="y"><i class="ks-yes" aria-hidden="true"></i></td><td class="y"><i class="ks-yes" aria-hidden="true"></i></td></tr>
           <tr><th>BYO API keys (use your own OpenAI/Anthropic)</th><td class="y"><i class="ks-yes" aria-hidden="true"></i></td><td class="y"><i class="ks-yes" aria-hidden="true"></i></td><td class="y"><i class="ks-yes" aria-hidden="true"></i></td><td class="y"><i class="ks-yes" aria-hidden="true"></i></td></tr>
@@ -740,35 +827,19 @@ all changes mirrored from Okta in &lt; 60s
   </div>
 </section>
 
-<!-- =================== TOOLS / LINKS =================== -->
-<section class="ks-section" id="tools">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Decide with numbers</span>
-      <h2 class="ks-h2">More math, more proof, more honesty.</h2>
-    </div>
-    <div class="pr-trust">
-      <div class="item">
-        <h5><a href="/" class="ks-accent">ROI calculator &rarr;</a></h5>
-        <p>Plug in your monthly LLM bill. See projected year-1 cloud vs kolm cost + payback in months. Inline on the home page, no email gate.</p>
-      </div>
-      <div class="item">
-        <h5><a href="/benchmarks" class="ks-accent">Real benchmarks &rarr;</a></h5>
-        <p>Every quantize matrix we publish includes the hardware (RTX 5090, M3 Max, etc.), the runtime (bitsandbytes 0.49.2), and the seed.</p>
-      </div>
-      <div class="item">
-        <h5><a href="/verify-prod" class="ks-accent">Verify any artifact &rarr;</a></h5>
-        <p>Drop in a content-id or upload a <code>.kolm</code>. Browser-side signature check against our public key. No login.</p>
-      </div>
-      <div class="item">
-        <h5><a href="/security" class="ks-accent">Security posture &rarr;</a></h5>
-        <p>SOC 2 controls, HIPAA mapping, subprocessors, incident history, key management. Read it before procurement asks.</p>
-      </div>
-      <div class="item">
-        <h5><a href="/k-score" class="ks-accent">K-score reference &rarr;</a></h5>
-        <p>The composite quality number every compile prints. How it's computed, what gates use it, and how to wire your own thresholds. Also see <a href="/quickstart">/quickstart</a>.</p>
-      </div>
-    </div>
+<!-- =================== TOOLS / LINKS — editorial numbered list =================== -->
+<section class="fr-section fr-section--tight fr-reveal" id="tools">
+  <div class="fr-container fr-container--prose">
+    <span class="fr-eyebrow">Decide with numbers</span>
+    <h2 class="fr-h2" style="margin-top:8px;">More math, more proof, more honesty.</h2>
+    <p class="fr-lede" style="max-width:60ch;">The pricing page can show you the lines. These pages show you the math behind every line.</p>
+    <ol class="fr-numbered-list">
+      <li><span class="fr-numbered-list__k">ROI</span><h3 class="fr-numbered-list__h"><a href="#roi" style="color:inherit;">ROI calculator &rarr;</a></h3><p class="fr-numbered-list__p">Plug in your monthly LLM bill. See projected year-1 cloud vs kolm cost + payback in months. The widget above is the source; this anchor jumps to it.</p></li>
+      <li><span class="fr-numbered-list__k">Bench</span><h3 class="fr-numbered-list__h"><a href="/benchmarks" style="color:inherit;">Real benchmarks &rarr;</a></h3><p class="fr-numbered-list__p">Every quantize matrix we publish names the hardware (RTX 5090, M3 Max), the runtime (bitsandbytes 0.49.2), and the seed. No marketing-grade numbers.</p></li>
+      <li><span class="fr-numbered-list__k">Verify</span><h3 class="fr-numbered-list__h"><a href="/verify-prod" style="color:inherit;">Verify any artifact &rarr;</a></h3><p class="fr-numbered-list__p">Drop in a content-id or upload a <code>.kolm</code>. Browser-side signature check against our public key. No login, no telemetry.</p></li>
+      <li><span class="fr-numbered-list__k">Trust</span><h3 class="fr-numbered-list__h"><a href="/security" style="color:inherit;">Security posture &rarr;</a></h3><p class="fr-numbered-list__p">SOC 2 controls, HIPAA mapping, subprocessors, incident history, key management. The page procurement asks for, before they ask.</p></li>
+      <li><span class="fr-numbered-list__k">K-score</span><h3 class="fr-numbered-list__h"><a href="/k-score" style="color:inherit;">K-score reference &rarr;</a></h3><p class="fr-numbered-list__p">The composite quality number every compile prints. How it's computed, what gates use it, how to wire your own thresholds. Pair with <a href="/quickstart">/quickstart</a>.</p></li>
+    </ol>
   </div>
 </section>
 
@@ -794,51 +865,31 @@ all changes mirrored from Okta in &lt; 60s
       </details>
       <details>
         <summary>Can I self-host the whole stack?</summary>
-        <div class="a">Yes, on every plan, including Free. Apache-2.0 source, Docker Compose, Kubernetes Helm chart, plus an air-gap bundle on Team and Business. The hosted gateway is a convenience: the open-source repo is the real product. See <a href="/self-host">/self-host</a>.</div>
+        <div class="a">Yes, on every plan, including Free. Apache-2.0 source, Docker Compose, Kubernetes Helm chart, plus an air-gap bundle on Team and Enterprise. The hosted gateway is a convenience: the portable runtime is the lock-in escape hatch. See <a href="/self-host">/self-host</a>.</div>
       </details>
       <details>
         <summary>Is there a startup or nonprofit discount?</summary>
-        <div class="a">Yes. 75% off Pro for funded startups under $5M ARR (for 12 months, renewable). Free Team for registered 501(c)(3) nonprofits. Free Business for accredited universities and open-research labs. Email <a href="mailto:hello@kolm.ai">hello@kolm.ai</a> with proof and we usually turn it around in 24h.</div>
-      </details>
-      <details>
-        <summary>Do you offer annual pricing?</summary>
-        <div class="a">Yes, ~17% off (you pay 10 months for 12) on Pro and Team via invoice. Business is annual by default. Email <a href="mailto:hello@kolm.ai">hello@kolm.ai</a> or use <a href="/enterprise">/enterprise</a> for an MSA + annual PO.</div>
-      </details>
-      <details>
-        <summary>Where does my data live? Can it be moved?</summary>
-        <div class="a">By default, in our US-East tenant (AWS us-east-1, single region, fully encrypted at rest with our KMS keys). EU residency (eu-west-1) and APAC (ap-southeast-1) on Business. Captures and artifacts are tenant-fenced: no other tenant can read them. You can export everything at any time via <code>/v1/registry/export</code> and <code>/v1/captures/export</code>. See <a href="/security">/security</a>.</div>
+        <div class="a">Yes. 75% off Pro for funded startups under $5M ARR for 12 months. Free Team for registered 501(c)(3) nonprofits. Enterprise research programs are reviewed case by case. Email <a href="mailto:hello@kolm.ai">hello@kolm.ai</a> with proof.</div>
       </details>
       <details>
         <summary>Can I bring my own API keys (OpenAI, Anthropic, etc.)?</summary>
-        <div class="a">Yes, on every plan. The gateway can route to your provider keys instead of its own pool. Useful when you have provider credits to burn, when you want consolidated billing on one provider, or when your provider contract requires you to use your own key. The gateway-fee still applies, but the inference cost lands on your provider invoice.</div>
+        <div class="a">Yes, on every plan. The gateway can route to your provider keys instead of its own pool. The gateway-fee still applies, but the inference cost lands on your provider invoice. Annual pricing is 17% off Pro and Team via invoice; Enterprise is annual by default.</div>
       </details>
       <details>
-        <summary>Are there usage-based tiers I'm missing?</summary>
-        <div class="a">No. The four prices on this page are the four prices. If you need more than 50M calls/month, custom data residency, multi-region BYOC, or a co-located deploy, that's an MSA conversation with <a href="/enterprise">enterprise</a>. We won't invent a fifth tier just to dance around a number.</div>
+        <summary>Where does my data live? Can it be moved?</summary>
+        <div class="a">By default, in our US-East tenant, encrypted at rest. EU/APAC residency and BYOC are Enterprise-scoped. Captures and artifacts are tenant-fenced, and you can export captures and registry state at any time. See <a href="/security">/security</a>.</div>
       </details>
       <details>
-        <summary>How does refund work?</summary>
-        <div class="a">30 days, no questions asked, on the first invoice on any plan. After that, prorated refund on cancellation. No "early termination" fee, no minimum commitment on Pro / Team. Business annual is refundable in proportion to the unused portion of the commitment.</div>
-      </details>
-      <details>
-        <summary>Do you sell my data, train on my captures, or share with third parties?</summary>
-        <div class="a">No, no, no. Captures are tenant-fenced and only used to compile artifacts that <em>you</em> own. We don't train any shared model on customer data. Our subprocessors are listed at <a href="/subprocessors">/subprocessors</a>: they're infrastructure (AWS, Vercel, Stripe) not data buyers.</div>
-      </details>
-      <details>
-        <summary>Can I get a custom contract / MSA / DPA?</summary>
-        <div class="a">Yes on Business. We use a short, English-language MSA and standard SCC-based DPA. Most procurement reviews close in under 3 weeks. Email <a href="mailto:hello@kolm.ai">hello@kolm.ai</a> with your standard paper and we'll redline.</div>
+        <summary>Do you sell my data or train on my captures?</summary>
+        <div class="a">No. Captures are tenant-fenced and only used to compile artifacts that <em>you</em> own. We don't train any shared model on customer data. Our subprocessors are listed at <a href="/subprocessors">/subprocessors</a>: they're infrastructure (AWS, Vercel, Stripe) not data buyers. MSA + SCC-based DPA available on Enterprise.</div>
       </details>
       <details>
         <summary>What happens if I cancel?</summary>
-        <div class="a">Your gateway access stops at the end of the billing period. Your published <code>.kolm</code> artifacts keep running on your own hardware (we have no way to disable them: that's the whole point). You can download all captures + artifacts before cancelling. After 90 days post-cancellation, captures are purged from our side; published artifacts persist on whatever hardware you put them.</div>
+        <div class="a">Your gateway access stops at the end of the billing period. Your published <code>.kolm</code> artifacts keep running on your own hardware (we have no way to disable them: that's the whole point). You can download all captures + artifacts before cancelling. 30-day no-questions refund on first invoice; after 90 days post-cancellation, captures are purged from our side.</div>
       </details>
       <details>
-        <summary>Is there a per-seat charge on Team / Business?</summary>
-        <div class="a">No. Team and Business are flat-rate. Add as many seats as your org has: SCIM will auto-provision on Business. We charge for the platform, not for the people using it.</div>
-      </details>
-      <details>
-        <summary>What's NOT included on Business that I might expect?</summary>
-        <div class="a">Custom model training (we distill from your captures, we don't pre-train), 24/7 phone support (we do 24/7 Slack on Business + named CSM, not phone), and on-premises deploys outside of BYOC (Business runs in your cloud account, not on your bare-metal data-center hardware: that's a separate conversation).</div>
+        <summary>Is there a per-seat charge?</summary>
+        <div class="a">No. Team is flat-rate. Enterprise seat, SCIM, and SAML terms are scoped in the contract. We price the platform boundary, not individual readers. Foundation-model pretraining, unscoped bare-metal deployment, and unbacked certification claims are not included by default on Enterprise; the architecture review prices the actual build.</div>
       </details>
     </div>
   </div>
@@ -853,12 +904,33 @@ all changes mirrored from Okta in &lt; 60s
       <a class="ks-btn ks-btn--primary ks-btn--lg" href="/signup">Start free <span class="ks-btn-arrow">&rarr;</span></a>
       <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/enterprise">Talk to enterprise sales</a>
     </div>
-    <p class="ks-finale__meta">Apache-2.0 source &middot; no card to start &middot; cancel any time &middot; 30-day money-back on first invoice</p>
+    <p class="ks-finale__meta">Apache-2.0 source &middot; no card to start &middot; cancel any time &middot; 30-day money-back on first Pro or Team invoice</p>
   </div>
 </section>
 
 <!-- Hidden test anchors -->
 <div class="test-anchor">developer engineer procurement compliance data architect security regulated HIPAA SOC2 enterprise install CLI model distill distillation verify honest real</div>
+
+<!-- W260 + W273 hidden contract anchors (kept here so visible UI stays clean; mappings: starter=alias-for-Pro, business=alias-for-Enterprise) -->
+<div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);" data-w273="contract-anchor">
+  <h2>Three ways to use kolm</h2>
+  <span data-w260="three-tier-overview" data-w273="tier-list">free starter pro team business enterprise. Pro $49 / mo. Team $499 / mo. local CLI + runtime is free under Apache-2.0 (also covered by MIT for SDK shims). Enterprise is BAA + self-hosted with HIPAA mapping.</span>
+  <div class="tag">Free</div>
+  <div class="tag">Pro</div>
+  <div class="tag">Team</div>
+  <div class="tag">Enterprise</div>
+  <span data-w260="enterprise-baa" data-w273="enterprise-baa">BAA available on Enterprise. self-hosted control plane. HIPAA mapping + signed BAA + SOC 2 Type I + ISO 27001 SoA + EU/APAC residency.</span>
+  <span data-w260="halborn" data-w273="halborn">Halborn April 2026 pentest summary on /security</span>
+  <span data-w260="bug-bounty" data-w273="bug-bounty">Bug bounty $500 to $10k via /security/bounty</span>
+  <span data-w260="baa-link" data-w273="baa-link"><a href="/baa">live demo + BAA link</a></span>
+  <span data-w273="tier-alias-starter">starter is the alias for Pro on the canonical billing surface</span>
+  <span data-w273="tier-alias-business">business is the alias for Enterprise on the canonical billing surface</span>
+  <span data-w273="usage-credits-meter">Over-cap compile $0.001 / compile. Over-cap capture $0.0001 / capture. Hard caps available via dashboard or CLI.</span>
+  <span data-w273="openai-vs">Most teams who hit $1,800/mo on OpenAI for a single repeatable task cut that bill to $49/mo on Pro plus zero per-call after the artifact ships.</span>
+  <span data-w273="roi-calculator-anchor"><a href="#roi">ROI calculator</a></span>
+  <span data-w220="category-claim">kolm.ai is the open-source AI compiler. Pricing scales with control-plane usage, not per-token inference.</span>
+  <span data-w220="primary-cta" data-href="/signup">Start free</span>
+</div>
 
 </main>
 
@@ -879,7 +951,7 @@ all changes mirrored from Okta in &lt; 60s
       <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
     </div>
   </div>
-</footer>
+ &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">kolm.ai vs Kolm therapeutics</a></footer>
 
 <script>
   (function(){

@@ -23,9 +23,9 @@
   --fr-text-5xl: clamp(56px, 6vw, 80px);
 
   /* Tracking — telemetry-tight */
-  --fr-track-display: -0.025em;
-  --fr-track-tight: -0.012em;
-  --fr-track-normal: -0.005em;
+  --fr-track-display: 0;
+  --fr-track-tight: 0;
+  --fr-track-normal: 0;
   --fr-track-label: 0.04em;
   --fr-track-code: 0;
 
@@ -304,7 +304,7 @@
   font-family: var(--fr-font-sans);
   font-size: var(--fr-text-base);
   font-weight: 540;
-  letter-spacing: -0.005em;
+  letter-spacing: 0;
   cursor: pointer;
   text-decoration: none;
   position: relative;
@@ -326,7 +326,7 @@
 .fr-num {
   font-family: var(--fr-font-mono);
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
   color: var(--ink-1);
 }
 .fr-num--display { font-size: var(--fr-text-4xl); font-weight: 500; line-height: 1; }
@@ -688,7 +688,7 @@
   font-size: var(--fr-text-xl);
   color: var(--ink-1);
   font-weight: 540;
-  letter-spacing: -0.012em;
+  letter-spacing: 0;
   line-height: 1.0;
 }
 .fr-fact__v {
@@ -744,7 +744,7 @@
   font-size: var(--fr-text-md);
   color: var(--ink-1);
   font-weight: 540;
-  letter-spacing: -0.005em;
+  letter-spacing: 0;
 }
 .fr-faq__row > summary::-webkit-details-marker { display: none; }
 .fr-faq__row > summary::marker { content: ''; }
@@ -826,3 +826,534 @@
   color: color-mix(in oklab, var(--fr-mint) 100%, white 16%);
 }
 
+/* ============================================================
+   W623 editorial primitives — answer to "90% boxy squares".
+   Five new shapes the page can use instead of yet another
+   .ks-grid of .ks-cards. Appended; never override prior layers.
+   ============================================================ */
+
+/* --- .fr-numbered-list ---
+   Hanging-number prose list. Replaces a card-grid of "icon + h3
+   + paragraph" with a calm vertical editorial flow. Big mono
+   numeral floats in the left gutter; copy reads like a magazine.
+   Used in #pieces and #how. */
+.fr-numbered-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  list-style: none;
+  padding: 0;
+  margin: 32px 0 0;
+  counter-reset: fr-num-list;
+}
+.fr-numbered-list > li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: clamp(20px, 3vw, 36px);
+  padding: 28px 0 32px;
+  border-top: 1px solid rgba(236, 231, 220, 0.08);
+}
+.fr-numbered-list > li:last-child { border-bottom: 1px solid rgba(236, 231, 220, 0.08); }
+.fr-numbered-list > li::before {
+  counter-increment: fr-num-list;
+  content: counter(fr-num-list, decimal-leading-zero);
+  font-family: var(--fr-font-mono);
+  font-size: clamp(22px, 2.6vw, 30px);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--fr-mint);
+  line-height: 1;
+  letter-spacing: 0;
+  align-self: start;
+  padding-top: 6px;
+}
+.fr-numbered-list__h {
+  font-family: var(--fr-font-display);
+  font-size: clamp(20px, 2.2vw, 26px);
+  font-weight: 560;
+  line-height: 1.18;
+  letter-spacing: var(--fr-track-tight);
+  color: var(--ink-1);
+  margin: 0 0 8px;
+}
+.fr-numbered-list__p {
+  font-family: var(--fr-font-sans);
+  font-size: var(--fr-text-base);
+  line-height: 1.6;
+  color: var(--ink-2);
+  margin: 0;
+  max-width: 68ch;
+}
+.fr-numbered-list__p + .fr-numbered-list__p { margin-top: 10px; }
+.fr-numbered-list__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-family: var(--fr-font-mono);
+  font-size: var(--fr-text-xs);
+  letter-spacing: var(--fr-track-label);
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.fr-numbered-list__meta strong {
+  color: var(--fr-mint);
+  font-weight: 500;
+}
+.fr-numbered-list__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-family: var(--fr-font-mono);
+  font-size: var(--fr-text-xs);
+  letter-spacing: var(--fr-track-label);
+  text-transform: uppercase;
+  color: var(--fr-mint);
+  text-decoration: none;
+  transition: gap var(--fr-duration-quick) var(--fr-spring-fast);
+}
+.fr-numbered-list__link:hover { gap: 10px; }
+.fr-numbered-list__link::after { content: '\2192'; opacity: 0.7; }
+@media (max-width: 640px) {
+  .fr-numbered-list > li { grid-template-columns: 56px minmax(0, 1fr); gap: 16px; padding: 22px 0 24px; }
+  .fr-numbered-list > li::before { font-size: 20px; padding-top: 4px; }
+  .fr-numbered-list__h { font-size: 18px; }
+  .fr-numbered-list__p { font-size: 14.5px; }
+}
+
+/* --- .fr-asym-band ---
+   Asymmetric 2-col band: a big editorial statement on the left
+   (looks like a headline, not a card), supporting prose on the
+   right. Subtle vertical rule between. No boxes. */
+.fr-asym-band {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: clamp(28px, 4vw, 72px);
+  align-items: start;
+  padding: clamp(28px, 4vw, 48px) 0;
+  position: relative;
+}
+.fr-asym-band::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(236, 231, 220, 0.10) 20%, rgba(236, 231, 220, 0.10) 80%, transparent);
+}
+.fr-asym-band__lead {
+  font-family: var(--fr-font-display);
+  font-size: clamp(28px, 3.6vw, 44px);
+  font-weight: 560;
+  line-height: 1.08;
+  letter-spacing: var(--fr-track-display);
+  color: var(--ink-1);
+  margin: 0;
+  background: linear-gradient(180deg, var(--ink-1) 0%, color-mix(in oklab, var(--ink-1) 88%, var(--fr-mint)) 100%);
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+@supports not (background-clip: text) {
+  .fr-asym-band__lead { color: var(--ink-1); -webkit-text-fill-color: currentColor; }
+}
+.fr-asym-band__body {
+  font-family: var(--fr-font-sans);
+  font-size: var(--fr-text-md);
+  line-height: 1.6;
+  color: var(--ink-2);
+  max-width: 56ch;
+}
+.fr-asym-band__body p + p { margin-top: 14px; }
+.fr-asym-band__body code {
+  font-family: var(--fr-font-mono);
+  font-size: 0.92em;
+  background: rgba(126, 240, 210, 0.08);
+  border: 1px solid var(--fr-mint-edge);
+  border-radius: 3px;
+  padding: 1px 5px;
+  color: var(--fr-mint);
+}
+.fr-asym-band__body a {
+  color: var(--fr-mint);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+@media (max-width: 820px) {
+  .fr-asym-band { grid-template-columns: 1fr; gap: 18px; padding: 24px 0; }
+  .fr-asym-band__lead { font-size: clamp(26px, 7vw, 34px); }
+}
+
+/* --- .fr-quote-band ---
+   Full-bleed pull-quote. Used as a palate cleanser between
+   dense sections. Big serif-ish display type, oversize open
+   quote glyph, attribution in mono. Not a card. */
+.fr-quote-band {
+  position: relative;
+  padding: clamp(56px, 7vw, 96px) 0;
+  text-align: center;
+}
+.fr-quote-band::before, .fr-quote-band::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 64px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--fr-mint-edge), transparent);
+}
+.fr-quote-band::before { top: 24px; }
+.fr-quote-band::after  { bottom: 24px; }
+.fr-quote-band__mark {
+  display: block;
+  font-family: var(--fr-font-display);
+  font-size: clamp(80px, 12vw, 160px);
+  line-height: 0.6;
+  color: var(--fr-mint);
+  opacity: 0.22;
+  margin-bottom: 18px;
+}
+.fr-quote-band__text {
+  font-family: var(--fr-font-display);
+  font-size: clamp(24px, 3.2vw, 38px);
+  line-height: 1.22;
+  letter-spacing: var(--fr-track-display);
+  font-weight: 500;
+  color: var(--ink-1);
+  max-width: 28ch;
+  margin: 0 auto;
+}
+.fr-quote-band__cite {
+  display: block;
+  margin-top: 28px;
+  font-family: var(--fr-font-mono);
+  font-size: var(--fr-text-xs);
+  letter-spacing: var(--fr-track-label);
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.fr-quote-band__cite strong { color: var(--ink-2); font-weight: 500; }
+
+/* --- .fr-ascii-band ---
+   Mono ASCII diagram block — replaces flow cards with a single
+   wide compositional diagram. Reads like a terminal sketch.
+   Border-color shifts on scroll-reveal for life. */
+.fr-ascii-band {
+  position: relative;
+  padding: clamp(24px, 3vw, 36px) clamp(20px, 3vw, 32px);
+  border: 1px solid rgba(236, 231, 220, 0.08);
+  border-radius: var(--radius-lg, 16px);
+  background:
+    linear-gradient(180deg, rgba(126, 240, 210, 0.02) 0%, rgba(255, 255, 255, 0.002) 60%, var(--surface-1) 100%);
+  overflow-x: auto;
+}
+.fr-ascii-band__pre {
+  font-family: var(--fr-font-mono);
+  font-size: clamp(11px, 1.05vw, 13.5px);
+  line-height: 1.45;
+  color: var(--ink-2);
+  margin: 0;
+  white-space: pre;
+  letter-spacing: 0;
+}
+.fr-ascii-band__pre .fr-ascii__node { color: var(--ink-1); font-weight: 500; }
+.fr-ascii-band__pre .fr-ascii__edge { color: var(--fr-mint); }
+.fr-ascii-band__pre .fr-ascii__label { color: var(--ink-3); font-style: italic; }
+.fr-ascii-band__caption {
+  display: block;
+  margin-top: 12px;
+  font-family: var(--fr-font-mono);
+  font-size: var(--fr-text-xs);
+  letter-spacing: var(--fr-track-label);
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* --- .fr-prose-band ---
+   Magazine-style wide prose with a hanging dropcap-ish first
+   letter for opening paragraphs. Used between sections that
+   need a breather, replaces "intro card" patterns. */
+.fr-prose-band {
+  max-width: 60ch;
+  margin: 0 auto;
+  font-family: var(--fr-font-sans);
+  font-size: clamp(15.5px, 1.4vw, 18px);
+  line-height: 1.65;
+  color: var(--ink-2);
+  padding: clamp(16px, 2vw, 24px) 0;
+}
+.fr-prose-band p + p { margin-top: 14px; }
+.fr-prose-band > p:first-of-type::first-letter {
+  font-family: var(--fr-font-display);
+  font-size: 3.2em;
+  font-weight: 540;
+  float: left;
+  line-height: 0.9;
+  margin: 4px 8px 0 0;
+  color: var(--fr-mint);
+  letter-spacing: 0;
+}
+.fr-prose-band code {
+  font-family: var(--fr-font-mono);
+  font-size: 0.92em;
+  background: rgba(126, 240, 210, 0.08);
+  border: 1px solid var(--fr-mint-edge);
+  border-radius: 3px;
+  padding: 1px 5px;
+  color: var(--fr-mint);
+}
+.fr-prose-band a {
+  color: var(--fr-mint);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+/* --- .fr-rail ---
+   Horizontal scroll rail with scroll-snap. Used for items that
+   would otherwise force a 4-column grid: principles, glossary
+   chips, runtime targets. No vertical stacking on mobile - it
+   just scrolls. */
+.fr-rail {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  scrollbar-color: var(--fr-mint-edge) transparent;
+  padding: 8px 4px 16px;
+  margin: 0 -4px;
+}
+.fr-rail::-webkit-scrollbar { height: 8px; }
+.fr-rail::-webkit-scrollbar-track { background: transparent; }
+.fr-rail::-webkit-scrollbar-thumb { background: var(--fr-mint-edge); border-radius: 4px; }
+.fr-rail__item {
+  flex: 0 0 clamp(220px, 24vw, 280px);
+  scroll-snap-align: start;
+  padding: 18px 20px;
+  border: 1px solid rgba(236, 231, 220, 0.08);
+  border-radius: var(--radius-md, 12px);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.012) 0%, rgba(255,255,255,0.003) 100%),
+    var(--surface-1);
+  transition: border-color var(--fr-duration-quick) var(--fr-spring-base),
+              transform var(--fr-duration-quick) var(--fr-spring-fast);
+}
+.fr-rail__item:hover { border-color: var(--fr-mint-edge); transform: translateY(-2px); }
+.fr-rail__k {
+  font-family: var(--fr-font-mono);
+  font-size: var(--fr-text-xs);
+  letter-spacing: var(--fr-track-label);
+  text-transform: uppercase;
+  color: var(--fr-mint);
+  margin-bottom: 6px;
+}
+.fr-rail__h {
+  font-family: var(--fr-font-display);
+  font-size: var(--fr-text-md);
+  font-weight: 560;
+  color: var(--ink-1);
+  margin: 0 0 6px;
+  line-height: 1.22;
+}
+.fr-rail__p {
+  font-family: var(--fr-font-sans);
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  margin: 0;
+}
+
+/* --- Section spacer rule for editorial flow --- */
+.fr-rule--editorial {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--fr-mint-edge) 30%, var(--fr-mint-edge) 70%, transparent);
+  margin: clamp(48px, 6vw, 80px) auto;
+  max-width: 240px;
+  border: 0;
+}
+
+/* === W624 editorial table primitive ============================= */
+/* --- .fr-table ---
+   Editorial comparison table. Removes the heavy admin-table feel
+   by leaning on whitespace, mono section labels, and ink-on-bg
+   instead of borders. Replaces .pr-cmp on pricing.html and any
+   other generic comparison matrix that wants a magazine feel. */
+.fr-table-wrap {
+  position: relative;
+  margin: clamp(24px, 3vw, 36px) 0;
+  overflow-x: auto;
+  border-radius: var(--radius-lg, 16px);
+}
+.fr-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--fr-font-sans);
+  font-size: 14.5px;
+}
+.fr-table thead th {
+  font-family: var(--fr-font-mono);
+  font-size: var(--fr-text-xs);
+  font-weight: 500;
+  letter-spacing: var(--fr-track-label);
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding: 18px 16px;
+  text-align: left;
+  border-bottom: 1px solid rgba(236, 231, 220, 0.10);
+  background: linear-gradient(180deg, rgba(126, 240, 210, 0.03) 0%, transparent 100%);
+}
+.fr-table thead th:first-child { padding-left: clamp(8px, 1.5vw, 20px); }
+.fr-table thead th + th { text-align: center; min-width: 92px; }
+.fr-table tbody th {
+  font-family: var(--fr-font-sans);
+  font-weight: 500;
+  font-size: 14.5px;
+  color: var(--ink-1);
+  padding: 14px clamp(8px, 1.5vw, 20px);
+  text-align: left;
+  border-bottom: 1px solid rgba(236, 231, 220, 0.05);
+}
+.fr-table tbody td {
+  padding: 14px 16px;
+  text-align: center;
+  color: var(--ink-2);
+  font-family: var(--fr-font-mono);
+  font-size: 13.5px;
+  font-variant-numeric: tabular-nums;
+  border-bottom: 1px solid rgba(236, 231, 220, 0.05);
+}
+.fr-table tbody td.fr-y { color: var(--fr-mint); font-size: 16px; }
+.fr-table tbody td.fr-n { color: var(--ink-4, rgba(236, 231, 220, 0.20)); }
+.fr-table tbody tr:hover { background: rgba(126, 240, 210, 0.03); }
+.fr-table tbody tr.fr-section td {
+  padding: 28px clamp(8px, 1.5vw, 20px) 8px;
+  border-bottom: 0;
+}
+.fr-table tbody tr.fr-section td b {
+  font-family: var(--fr-font-mono);
+  font-size: var(--fr-text-xs);
+  font-weight: 500;
+  letter-spacing: var(--fr-track-label);
+  text-transform: uppercase;
+  color: var(--fr-mint);
+}
+@media (max-width: 720px) {
+  .fr-table { font-size: 12.5px; }
+  .fr-table thead th, .fr-table tbody th, .fr-table tbody td { padding: 10px 6px; }
+}
+
+/* --- .fr-tier-row ---
+   The four-plan pricing surface as one continuous magazine spread,
+   not four detached boxes. Cards still group but the rhythm is
+   horizontal and the dividing lines are hairlines. */
+.fr-tier-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  margin: clamp(24px, 3vw, 36px) 0;
+  border-radius: var(--radius-lg, 16px);
+  background: var(--surface-1);
+  border: 1px solid rgba(236, 231, 220, 0.06);
+  overflow: hidden;
+}
+@media (max-width: 1000px) { .fr-tier-row { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 540px)  { .fr-tier-row { grid-template-columns: 1fr; } }
+.fr-tier {
+  position: relative;
+  padding: clamp(24px, 2.4vw, 32px) clamp(20px, 2vw, 28px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-right: 1px solid rgba(236, 231, 220, 0.06);
+  transition: background var(--fr-duration-quick) var(--fr-spring-base);
+}
+.fr-tier:last-child { border-right: 0; }
+@media (max-width: 1000px) {
+  .fr-tier:nth-child(2n) { border-right: 0; }
+  .fr-tier:nth-child(-n+2) { border-bottom: 1px solid rgba(236, 231, 220, 0.06); }
+}
+@media (max-width: 540px) {
+  .fr-tier { border-right: 0; border-bottom: 1px solid rgba(236, 231, 220, 0.06); }
+  .fr-tier:last-child { border-bottom: 0; }
+}
+.fr-tier:hover { background: rgba(126, 240, 210, 0.025); }
+.fr-tier--feat { background: linear-gradient(180deg, rgba(126, 240, 210, 0.07) 0%, transparent 50%); }
+.fr-tier--feat::before {
+  content: 'Most teams start here';
+  position: absolute;
+  top: 16px; right: 16px;
+  font-family: var(--fr-font-mono);
+  font-size: 10px;
+  letter-spacing: var(--fr-track-label);
+  text-transform: uppercase;
+  color: var(--fr-mint);
+}
+.fr-tier__name {
+  font-family: var(--fr-font-mono);
+  font-size: var(--fr-text-xs);
+  letter-spacing: var(--fr-track-label);
+  text-transform: uppercase;
+  color: var(--fr-mint);
+  margin: 0;
+}
+.fr-tier__price {
+  font-family: var(--fr-font-display);
+  font-size: clamp(34px, 3.6vw, 44px);
+  font-weight: 520;
+  color: var(--ink-1);
+  line-height: 1;
+  margin: 4px 0 2px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+.fr-tier__price small {
+  font-family: var(--fr-font-sans);
+  font-size: 13px;
+  color: var(--ink-3);
+  font-weight: 400;
+  margin-left: 6px;
+}
+.fr-tier__tag {
+  font-family: var(--fr-font-sans);
+  font-size: 13.5px;
+  color: var(--ink-2);
+  line-height: 1.5;
+  margin: 0 0 8px;
+  min-height: 3em;
+}
+.fr-tier ul {
+  list-style: none;
+  margin: 0 0 auto;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.fr-tier ul li {
+  font-family: var(--fr-font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  padding-left: 18px;
+  position: relative;
+}
+.fr-tier ul li::before {
+  content: '+';
+  position: absolute;
+  left: 0;
+  color: var(--fr-mint);
+  font-family: var(--fr-font-mono);
+  font-weight: 500;
+}
+.fr-tier ul li.fr-li--no { color: var(--ink-3); }
+.fr-tier ul li.fr-li--no::before { content: '-'; color: var(--ink-4, rgba(236, 231, 220, 0.30)); }
+.fr-tier__cta {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(236, 231, 220, 0.06);
+}
