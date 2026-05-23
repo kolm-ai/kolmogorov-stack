@@ -146,22 +146,23 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
  <div class="f"><b>seed corpus</b><span>60 rows (48/12)</span></div>
 </div>
 
-<h2>Install</h2>
-<pre>$ kolm marketplace install qwen-distill-classifier
+<h2>Install &amp; verify</h2>
+<p class="muted">No download button. Every <code>.kolm</code> arrives through the verifiable-trust CLI &mdash; sha256, ed25519 receipt chain, and K-score are all checked before it lands on disk.</p>
+<pre>$ kolm pull qwen-distill-classifier
 fetching qwen-distill-classifier &middot; verifying sha256 &middot; ok
-saved to ~/.kolm/artifacts/qwen-distill-classifier.kolm</pre>
+saved to ~/.kolm/artifacts/qwen-distill-classifier.kolm
 
-<a class="cta" href="/v1/marketplace/qwen-distill-classifier/download">Download .kolm</a>
-<a class="cta-alt" href="/build-your-own?template=qwen-distill-classifier">Compile your own variant in 60 seconds</a>
-
-<h2>Verify the signed receipt chain</h2>
-<pre>$ kolm verify ~/.kolm/artifacts/qwen-distill-classifier.kolm
+$ kolm verify ~/.kolm/artifacts/qwen-distill-classifier.kolm
 sha256 ok
 ed25519 ok
 receipt chain ok
 K-score 0.9797 (matches manifest)
 eval_provenance real_eval
-production_ready true</pre>
+production_ready true
+
+$ kolm run qwen-distill-classifier &lt; utterance.txt</pre>
+
+<a class="cta-alt" href="/build-your-own?template=qwen-distill-classifier">Compile your own variant &rarr;</a>
 
 <h2>How it works</h2>
 <p>This is the first <code>distilled_model</code>-class artifact in the seed catalog. The recipe carries a TF-IDF-style keyword model that mirrors the behavior a student model distilled from the base would learn for this routing task. The artifact bundles its own <code>model.gguf</code> weights blob inside the .kolm zip (8 KB deterministic byte stream produced by the build script&apos;s sha256 chain), so the validator at <code>recipe-class.js:247</code> sees a real <code>manifest.hashes.model_weights</code> entry rather than a pointer doc. The evaluation block is grounded by <code>prepareSeedSplit()</code> against 60 real customer-support utterances, yielding 48 train / 12 holdout rows with <code>eval_provenance: real_eval</code> and <code>eval_source: tenant_captured</code>. The recipe response includes a <code>source</code> field so each row&apos;s expected output is unique, defeating the train/holdout leakage detector at <code>productionReady.js</code>.</p>
@@ -231,7 +232,6 @@ production_ready true</pre>
 <p class="muted"><a href="/marketplace">All marketplace artifacts</a> &middot; <a href="/v1/marketplace/catalog.json">catalog manifest</a> &middot; <a href="/build-your-own?template=qwen-distill-classifier">compile your own variant</a></p>
 
 </main>
-<footer>kolm.ai &middot; the AI compiler &middot; <a href="/marketplace">marketplace</a> &middot; <a href="/what-is-an-ai-compiler">what is an AI compiler?</a></footer>
 <footer class="ks-footer">
   <div class="ks-wrap">
     <div class="ks-footer__grid">

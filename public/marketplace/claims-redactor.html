@@ -146,20 +146,21 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
  <div class="f"><b>seed corpus</b><span>60 rows</span></div>
 </div>
 
-<h2>Install</h2>
-<pre>$ kolm marketplace install claims-redactor
+<h2>Install &amp; verify</h2>
+<p class="muted">No download button. Every <code>.kolm</code> arrives through the verifiable-trust CLI &mdash; sha256, ed25519 receipt chain, and K-score are all checked before it lands on disk.</p>
+<pre>$ kolm pull claims-redactor
 fetching claims-redactor &middot; verifying sha256 &middot; ok
-saved to ~/.kolm/artifacts/claims-redactor.kolm</pre>
+saved to ~/.kolm/artifacts/claims-redactor.kolm
 
-<a class="cta" href="/v1/marketplace/claims-redactor/download">Download .kolm</a>
-<a class="cta-alt" href="/build-your-own?template=claims-redactor">Compile your own variant in 60 seconds</a>
-
-<h2>Verify the signed receipt chain</h2>
-<pre>$ kolm verify ~/.kolm/artifacts/claims-redactor.kolm
+$ kolm verify ~/.kolm/artifacts/claims-redactor.kolm
 sha256 ok
 ed25519 ok
 receipt chain ok
-K-score 0.9850 (matches manifest)</pre>
+K-score 0.9850 (matches manifest)
+
+$ kolm run claims-redactor &lt; claim.txt</pre>
+
+<a class="cta-alt" href="/build-your-own?template=claims-redactor">Compile your own variant &rarr;</a>
 
 <h2>How it works</h2>
 <p>A rule-class recipe authored as a sandbox-safe mirror of <code>src/phi-redactor.js</code> (single-source-of-truth pattern, W295/W258-ML-4). The artifact is a single .kolm zip containing the recipe source, an ed25519 receipt chain, and an evaluation block measured against a held-out slice of 60 synthetic-but-realistic claims notes. The recipe is deterministic: the same note always returns the same redacted output with the same token-to-original map. Tokens preserve structure so a downstream teacher API never sees the raw PHI, and <code>reinject()</code> on the teacher response restores fidelity.</p>
@@ -211,7 +212,6 @@ K-score 0.9850 (matches manifest)</pre>
 <p class="muted"><a href="/marketplace">All marketplace artifacts</a> &middot; <a href="/v1/marketplace/catalog.json">catalog manifest</a> &middot; <a href="/build-your-own?template=claims-redactor">compile your own variant</a></p>
 
 </main>
-<footer>kolm.ai &middot; the AI compiler &middot; <a href="/marketplace">marketplace</a> &middot; <a href="/what-is-an-ai-compiler">what is an AI compiler?</a></footer>
 <footer class="ks-footer">
   <div class="ks-wrap">
     <div class="ks-footer__grid">

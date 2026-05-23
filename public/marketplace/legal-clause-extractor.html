@@ -144,20 +144,21 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
  <div class="f"><b>runtime</b><span>sandboxed JS</span></div>
 </div>
 
-<h2>Install</h2>
-<pre>$ kolm marketplace install legal-clause-extractor
+<h2>Install &amp; verify</h2>
+<p class="muted">No download button. Every <code>.kolm</code> arrives through the verifiable-trust CLI &mdash; sha256, ed25519 receipt chain, and K-score are all checked before it lands on disk.</p>
+<pre>$ kolm pull legal-clause-extractor
 fetching legal-clause-extractor &middot; verifying sha256 &middot; ok
-saved to ~/.kolm/artifacts/legal-clause-extractor.kolm</pre>
+saved to ~/.kolm/artifacts/legal-clause-extractor.kolm
 
-<a class="cta" href="/v1/marketplace/legal-clause-extractor/download">Download .kolm</a>
-<a class="cta-alt" href="/build-your-own?template=legal-clause-extractor">Compile your own variant in 60 seconds</a>
-
-<h2>Verify the signed receipt chain</h2>
-<pre>$ kolm verify ~/.kolm/artifacts/legal-clause-extractor.kolm
+$ kolm verify ~/.kolm/artifacts/legal-clause-extractor.kolm
 sha256 ok
 ed25519 ok
 receipt chain ok
-K-score 0.9516 (matches manifest)</pre>
+K-score 0.9516 (matches manifest)
+
+$ kolm run legal-clause-extractor &lt; msa.txt</pre>
+
+<a class="cta-alt" href="/build-your-own?template=legal-clause-extractor">Compile your own variant &rarr;</a>
 
 <h2>How it works</h2>
 <p>A rule-class extractor for the most-common metadata fields a contracts team wants to lift out of an MSA or NDA. The recipe handles US, UK, and EU governing-law clauses, multi-party agreements (up to 4 parties), and the usual term-length grammars (months, years, perpetual). Designed to be the cheap pre-filter before a human reviewer reads the document end to end.</p>
@@ -189,7 +190,6 @@ K-score 0.9516 (matches manifest)</pre>
 <p class="muted"><a href="/marketplace">All marketplace artifacts</a> &middot; <a href="/v1/marketplace/catalog.json">catalog manifest</a> &middot; <a href="/build-your-own?template=legal-clause-extractor">compile your own variant</a></p>
 
 </main>
-<footer>kolm.ai &middot; the AI compiler &middot; <a href="/marketplace">marketplace</a> &middot; <a href="/what-is-an-ai-compiler">what is an AI compiler?</a></footer>
 <footer class="ks-footer">
   <div class="ks-wrap">
     <div class="ks-footer__grid">

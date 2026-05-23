@@ -50,8 +50,8 @@
   --ks-sans: "Geist", "Inter", system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --ks-mono: "Geist Mono", "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
   --ks-serif: "Tiempos Headline", "Iowan Old Style", "Georgia", "Times New Roman", Times, serif;
-  --ks-display-tight: -0.034em;
-  --ks-tight: -0.015em;
+  --ks-display-tight: 0;
+  --ks-tight: 0;
   --ks-loose: 0.02em;
 
   /* Spacing scale (8pt grid) */
@@ -146,6 +146,44 @@ html, body { margin: 0; padding: 0; max-width: 100vw; overflow-x: hidden; }
 }
 .ks pre, .ks code { max-width: 100%; }
 .ks pre { white-space: pre; }
+
+/* ============================================================
+   W628 global atmosphere — ambient warm/cool radial bloom +
+   subtle grain texture overlay. Fixed to viewport, beneath all
+   content, off on prefers-reduced-motion-safe? no, the layer is
+   static so it stays for everyone. Adds material depth so the
+   page no longer feels like a flat-black slab.
+   ============================================================ */
+body { position: relative; }
+.ks::before,
+.ks::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.ks::before {
+  background:
+    radial-gradient(ellipse 1100px 800px at 8% -10%, rgba(255, 178, 102, 0.045), transparent 55%),
+    radial-gradient(ellipse 900px 720px at 100% 105%, rgba(126, 240, 210, 0.035), transparent 50%),
+    radial-gradient(ellipse 1400px 900px at 50% 50%, rgba(120, 100, 180, 0.018), transparent 60%);
+}
+.ks::after {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0'/></filter><rect width='220' height='220' filter='url(%23n)' opacity='0.42'/></svg>");
+  opacity: 0.025;
+  mix-blend-mode: overlay;
+}
+.ks > *, .ks .ks-nav, .ks .ks-footer, .ks main { position: relative; z-index: 1; }
+:root[data-theme='light'] .ks::before {
+  background:
+    radial-gradient(ellipse 1100px 800px at 8% -10%, rgba(204, 130, 60, 0.05), transparent 55%),
+    radial-gradient(ellipse 900px 720px at 100% 105%, rgba(20, 130, 90, 0.04), transparent 50%);
+}
+:root[data-theme='light'] .ks::after { opacity: 0.018; mix-blend-mode: multiply; }
+@media (prefers-reduced-data: reduce) {
+  .ks::after { display: none; }
+}
 @media (max-width: 600px) {
   .ks pre { white-space: pre-wrap; word-break: break-word; }
 }
@@ -209,7 +247,7 @@ html, body { margin: 0; padding: 0; max-width: 100vw; overflow-x: hidden; }
 .ks-h2 {
   font-size: clamp(28px, 4vw, 52px);
   line-height: 1.05;
-  letter-spacing: -0.025em;
+  letter-spacing: 0;
   margin: 0;
   font-weight: 520;
   color: var(--ks-ink);
@@ -218,7 +256,7 @@ html, body { margin: 0; padding: 0; max-width: 100vw; overflow-x: hidden; }
 .ks-h3 {
   font-size: clamp(20px, 1.6vw, 24px);
   line-height: 1.2;
-  letter-spacing: -0.012em;
+  letter-spacing: 0;
   margin: 0;
   font-weight: 580;
   color: var(--ks-ink);
@@ -279,7 +317,7 @@ html, body { margin: 0; padding: 0; max-width: 100vw; overflow-x: hidden; }
   font-family: var(--ks-sans);
   font-size: 14.5px;
   font-weight: 580;
-  letter-spacing: -0.005em;
+  letter-spacing: 0;
   border: 1px solid transparent;
   transition: background var(--ks-dur-1) var(--ks-ease),
               border-color var(--ks-dur-1) var(--ks-ease),
@@ -379,7 +417,7 @@ html, body { margin: 0; padding: 0; max-width: 100vw; overflow-x: hidden; }
   color: var(--ks-ink-3);
   margin: 0 0 var(--ks-3);
 }
-.ks-card__h { font-size: 18px; font-weight: 580; color: var(--ks-ink); margin: 0 0 var(--ks-3); letter-spacing: -0.01em; }
+.ks-card__h { font-size: 18px; font-weight: 580; color: var(--ks-ink); margin: 0 0 var(--ks-3); letter-spacing: 0; }
 .ks-card__p { font-size: 14.5px; line-height: 1.55; color: var(--ks-ink-2); margin: 0; }
 
 /* ----- 8. Code blocks --------------------------------------------------- */
@@ -439,7 +477,7 @@ html, body { margin: 0; padding: 0; max-width: 100vw; overflow-x: hidden; }
 .ks-stat__val {
   font-size: clamp(24px, 2.6vw, 36px);
   font-weight: 520;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   color: var(--ks-ink);
   line-height: 1.05;
   font-variant-numeric: tabular-nums;
@@ -519,6 +557,52 @@ html, body { margin: 0; padding: 0; max-width: 100vw; overflow-x: hidden; }
   align-items: center;
   gap: var(--ks-6);
 }
+/* W630: alias classes — 30 pages (api, baa, benchmarks, capture, changelog,
+   community, compare, compile, distill, faq, forge, hipaa-mapping,
+   integrations, k-score, manifesto, models, privacy, recipes, registry,
+   roadmap, runtimes, sdks, security, self-host, soc2, subprocessors, terms,
+   verify-prod, why-kolm, 404) use .ks-nav__row / __links / __cta class
+   names that had no rules — nav collapsed to a centered vertical stack.
+   These aliases make the canonical horizontal nav layout work for both
+   class-name variants without touching any HTML. */
+.ks-nav__row {
+  display: flex;
+  align-items: center;
+  gap: var(--ks-6);
+  width: 100%;
+}
+.ks-nav__links {
+  display: flex;
+  align-items: center;
+  gap: var(--ks-2);
+  list-style: none;
+  margin: 0 0 0 var(--ks-6);
+  padding: 0;
+}
+.ks-nav__links a {
+  display: inline-flex;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: var(--ks-ink-2);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+  transition: background var(--ks-dur-1) var(--ks-ease), color var(--ks-dur-1) var(--ks-ease);
+}
+.ks-nav__links a:hover, .ks-nav__links a[aria-current="page"] {
+  color: var(--ks-ink);
+  background: var(--ks-bg-2);
+}
+.ks-nav__cta {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ks-2);
+}
+@media (max-width: 900px) {
+  .ks-nav__links { display: none; }
+  .ks-nav__cta .ks-btn--ghost { display: none; }
+}
 .ks-nav__brand {
   display: inline-flex;
   align-items: center;
@@ -526,7 +610,7 @@ html, body { margin: 0; padding: 0; max-width: 100vw; overflow-x: hidden; }
   font-family: var(--ks-mono);
   font-size: 15px;
   font-weight: 600;
-  letter-spacing: -0.015em;
+  letter-spacing: 0;
   color: var(--ks-ink);
 }
 .ks-nav__brand b { color: var(--ks-accent); font-weight: 600; }
@@ -540,7 +624,7 @@ html, body { margin: 0; padding: 0; max-width: 100vw; overflow-x: hidden; }
   font-family: var(--ks-mono);
   font-size: 13px;
   font-weight: 700;
-  letter-spacing: -0.05em;
+  letter-spacing: 0;
 }
 .ks-nav__list {
   display: flex;
@@ -557,7 +641,7 @@ html, body { margin: 0; padding: 0; max-width: 100vw; overflow-x: hidden; }
   color: var(--ks-ink-2);
   font-size: 14px;
   font-weight: 500;
-  letter-spacing: -0.005em;
+  letter-spacing: 0;
   transition: background var(--ks-dur-1) var(--ks-ease), color var(--ks-dur-1) var(--ks-ease);
 }
 .ks-nav__list a:hover, .ks-nav__list a[aria-current="page"] {
@@ -750,7 +834,7 @@ html, body { margin: 0; padding: 0; max-width: 100vw; overflow-x: hidden; }
 .ks-hero__h1 {
   font-size: clamp(40px, 6.5vw, 88px);
   line-height: 0.98;
-  letter-spacing: -0.034em;
+  letter-spacing: 0;
   margin: 0 0 var(--ks-5);
   font-weight: 520;
   color: var(--ks-ink);
@@ -768,7 +852,7 @@ html, body { margin: 0; padding: 0; max-width: 100vw; overflow-x: hidden; }
   font-family: var(--ks-serif);
   font-style: italic;
   font-weight: 420;
-  letter-spacing: -0.018em;
+  letter-spacing: 0;
   color: var(--ks-ink);
 }
 /* Inline-anywhere editorial emphasis. */
@@ -776,7 +860,7 @@ html, body { margin: 0; padding: 0; max-width: 100vw; overflow-x: hidden; }
   font-family: var(--ks-serif);
   font-style: italic;
   font-weight: 420;
-  letter-spacing: -0.012em;
+  letter-spacing: 0;
   color: var(--ks-ink);
 }
 .ks-hero__lede {
@@ -870,7 +954,7 @@ html, body { margin: 0; padding: 0; max-width: 100vw; overflow-x: hidden; }
 .ks-finale__h2 {
   font-size: clamp(34px, 5vw, 64px);
   line-height: 1.0;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   margin: 0 0 var(--ks-5);
   font-weight: 520;
   color: var(--ks-ink);
@@ -995,7 +1079,7 @@ html, body { margin: 0; padding: 0; max-width: 100vw; overflow-x: hidden; }
     --ks-pad-x: 16px;
   }
   .ks .ks-hero { padding: 56px 0 40px; }
-  .ks .ks-hero h1 { font-size: clamp(28px, 7.8vw, 40px); line-height: 1.06; letter-spacing: -0.02em; }
+  .ks .ks-hero h1 { font-size: clamp(28px, 7.8vw, 40px); line-height: 1.06; letter-spacing: 0; }
   .ks .ks-section { padding: 48px 0; }
   .ks .ks-section h2 { font-size: clamp(22px, 5.6vw, 28px); line-height: 1.12; }
   .ks .ks-section .lede,
@@ -1041,3 +1125,254 @@ html, body { margin: 0; padding: 0; max-width: 100vw; overflow-x: hidden; }
   :root { --ks-section-y: 72px; }
 }
 
+/* ============================================================================
+   W665 — First-principles aesthetic upgrade (2026-05-23)
+   - Brand mark goes monochrome (logo black + white only)
+   - Wordmark "ai" no longer wears the mint accent
+   - Typography pushed for a more editorial, bigger-air feel
+   - Cards layered with multi-stop depth (inner highlight + outer shadow)
+   - Hero gets a wider, slower atmospheric bloom
+   - Buttons get tactile press with finer border stroke
+   - Optional `.ks-kinetic` headline class — variable-weight glide on scroll
+   This layer ALWAYS LOADS LAST so it wins over every prior rule via cascade
+   order. No !important needed.
+   ============================================================================ */
+
+/* -- 1. Monochrome brand mark ------------------------------------------- */
+/* Strip the mint gradient. Mark becomes a tactile ink chip on dark canvas;
+   inverts cleanly in light mode. Logo === black + white only. */
+.ks-nav__mark {
+  background: var(--ks-ink) !important;
+  color: var(--ks-bg) !important;
+  border-radius: 6px;
+  font-family: var(--ks-mono);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    0 1px 0 rgba(0,0,0,0.5);
+}
+[data-theme="light"] .ks-nav__mark {
+  background: #0c111a !important;
+  color: #fbfaf6 !important;
+}
+/* Wordmark: drop the mint accent on the .ai — keep the whole wordmark in ink. */
+.ks-nav__brand b,
+.ks-foot__brand b,
+.ks-footer .ks-nav__brand b {
+  color: var(--ks-ink) !important;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+
+/* -- 2. Typography push — editorial weight + air ------------------------ */
+.ks-h1 {
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 0.96;
+  font-feature-settings: "ss01","ss03","calt","kern","case";
+}
+.ks-h2 {
+  font-weight: 500;
+  letter-spacing: -0.018em;
+}
+.ks-hero__h1 {
+  font-weight: 500;
+  letter-spacing: -0.028em;
+  line-height: 0.94;
+}
+.ks-hero__h1 em,
+.ks-hero__h1 .ks-em,
+.ks-hero__h1 .grad {
+  letter-spacing: -0.02em;
+}
+.ks-finale__h2 {
+  font-weight: 500;
+  letter-spacing: -0.022em;
+  line-height: 0.96;
+}
+
+/* -- 3. Card depth — proper glass + inner light shelf ------------------- */
+.ks-card {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--ks-bg-1) 90%, transparent) 0%,
+    color-mix(in srgb, var(--ks-bg-2) 96%, transparent) 100%);
+  border: 1px solid var(--ks-line-2);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    0 1px 2px rgba(0,0,0,0.25),
+    0 16px 40px -24px rgba(0,0,0,0.45);
+  backdrop-filter: saturate(120%);
+  -webkit-backdrop-filter: saturate(120%);
+}
+.ks-card--linked:hover {
+  border-color: rgba(255,250,240,0.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    0 2px 4px rgba(0,0,0,0.32),
+    0 22px 56px -28px rgba(0,0,0,0.55);
+  transform: translateY(-2px);
+}
+[data-theme="light"] .ks-card {
+  background: #ffffff;
+  border-color: rgba(10,16,22,0.10);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    0 1px 2px rgba(10,16,22,0.04),
+    0 12px 32px -16px rgba(10,16,22,0.10);
+}
+
+/* -- 4. Buttons — tactile press, sharper edge --------------------------- */
+.ks-btn {
+  border-radius: 8px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  transition:
+    background var(--ks-dur-1) var(--ks-ease),
+    border-color var(--ks-dur-1) var(--ks-ease),
+    transform var(--ks-dur-2) cubic-bezier(0.16,1,0.3,1),
+    box-shadow var(--ks-dur-2) var(--ks-ease),
+    color var(--ks-dur-1) var(--ks-ease);
+}
+.ks-btn--primary {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.28),
+    0 1px 2px rgba(0,0,0,0.18),
+    0 8px 24px -10px var(--ks-accent-glow);
+}
+.ks-btn--primary:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.34),
+    0 2px 6px rgba(0,0,0,0.22),
+    0 14px 36px -10px var(--ks-accent-glow);
+}
+.ks-btn--ghost {
+  background: color-mix(in srgb, var(--ks-bg-1) 80%, transparent);
+  border-color: var(--ks-line-3);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+.ks-btn--ghost:hover {
+  background: var(--ks-bg-2);
+  border-color: var(--ks-ink-4);
+  transform: translateY(-1px);
+}
+
+/* -- 5. Hero — wider, slower atmosphere --------------------------------- */
+.ks-hero__bg {
+  background-image:
+    radial-gradient(820px circle at 78% 10%, var(--ks-accent-glow) 0%, transparent 64%),
+    radial-gradient(680px circle at 14% 88%, var(--ks-accent-warm-soft) 0%, transparent 66%),
+    radial-gradient(1100px ellipse at 50% 110%, var(--ks-accent-cool-soft) 0%, transparent 72%);
+  mask-image: radial-gradient(ellipse at center top, black 0%, transparent 90%);
+  -webkit-mask-image: radial-gradient(ellipse at center top, black 0%, transparent 90%);
+  animation: ks-hero-drift 24s ease-in-out infinite alternate;
+}
+@keyframes ks-hero-drift {
+  0%   { transform: translate3d(0, 0, 0); opacity: 0.92; }
+  100% { transform: translate3d(-1.2%, 0.6%, 0); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ks-hero__bg { animation: none; }
+}
+
+/* -- 6. Pills — tighter ring, mono caps --------------------------------- */
+.ks-pill {
+  padding: 5px 11px;
+  border-radius: 999px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: color-mix(in srgb, var(--ks-bg-2) 80%, transparent);
+  border-color: var(--ks-line-2);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+/* -- 7. Tables — denser, sharper numerics ------------------------------- */
+.ks-table thead th {
+  background: linear-gradient(180deg, rgba(0,0,0,0.32), rgba(0,0,0,0.10));
+  letter-spacing: 0.08em;
+}
+.ks-table tbody tr { transition: background var(--ks-dur-1) var(--ks-ease); }
+.ks-table tbody tr:hover { background: rgba(255,250,240,0.025); }
+
+/* -- 8. Nav — refined edge, deeper saturation --------------------------- */
+.ks-nav-wrap {
+  background: color-mix(in srgb, var(--ks-bg) 84%, transparent);
+  backdrop-filter: saturate(160%) blur(18px);
+  -webkit-backdrop-filter: saturate(160%) blur(18px);
+  border-bottom: 1px solid var(--ks-line-2);
+}
+.ks-nav__links a,
+.ks-nav__list a {
+  font-weight: 500;
+  letter-spacing: -0.003em;
+  border-radius: 7px;
+}
+
+/* -- 9. Optional `.ks-kinetic` — variable-weight glide on focus/hover --- */
+.ks-kinetic {
+  font-variation-settings: "wght" 500;
+  transition: font-variation-settings 540ms cubic-bezier(0.16,1,0.3,1),
+              letter-spacing 540ms cubic-bezier(0.16,1,0.3,1);
+}
+.ks-kinetic:hover,
+.ks-kinetic:focus-within {
+  font-variation-settings: "wght" 700;
+  letter-spacing: -0.032em;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ks-kinetic { transition: none; }
+}
+
+/* -- 10. Sectional intro reveal — CSS-only fade-up ---------------------- */
+/* Pages opt-in via `<section class="ks-section ks-reveal">`. Stays static
+   under reduced-motion. */
+.ks-reveal {
+  animation: ks-reveal 720ms cubic-bezier(0.16,1,0.3,1) both;
+  animation-timeline: view();
+  animation-range: entry 5% cover 30%;
+}
+@keyframes ks-reveal {
+  from { opacity: 0; transform: translate3d(0, 18px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ks-reveal { animation: none; opacity: 1; transform: none; }
+}
+
+/* -- 11. Selection — monochrome ink-on-paper, no mint flash -------------- */
+.ks ::selection {
+  background: var(--ks-ink);
+  color: var(--ks-bg);
+}
+
+/* -- 12. Footer brand mark + wordmark — same monochrome treatment ------- */
+.ks-footer .ks-nav__brand,
+.ks-foot .ks-nav__brand {
+  font-weight: 600;
+}
+.ks-footer .ks-nav__mark,
+.ks-foot .ks-nav__mark {
+  background: var(--ks-ink) !important;
+  color: var(--ks-bg) !important;
+}
+
+/* -- 13. Code prose — sharper backing, no mint glow --------------------- */
+.ks pre {
+  background: linear-gradient(180deg, var(--ks-bg-2), var(--ks-bg-1));
+  border: 1px solid var(--ks-line-2);
+  border-radius: 10px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+}
+
+/* -- 14. Section heading air — give air on desktop ---------------------- */
+@media (min-width: 981px) {
+  .ks-shead { margin-bottom: var(--ks-12); }
+  .ks-hero__h1 { max-width: 16ch; }
+}

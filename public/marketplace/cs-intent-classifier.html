@@ -144,20 +144,21 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
  <div class="f"><b>runtime</b><span>sandboxed JS</span></div>
 </div>
 
-<h2>Install</h2>
-<pre>$ kolm marketplace install cs-intent-classifier
+<h2>Install &amp; verify</h2>
+<p class="muted">No download button. Every <code>.kolm</code> arrives through the verifiable-trust CLI &mdash; sha256, ed25519 receipt chain, and K-score are all checked before it lands on disk.</p>
+<pre>$ kolm pull cs-intent-classifier
 fetching cs-intent-classifier &middot; verifying sha256 &middot; ok
-saved to ~/.kolm/artifacts/cs-intent-classifier.kolm</pre>
+saved to ~/.kolm/artifacts/cs-intent-classifier.kolm
 
-<a class="cta" href="/v1/marketplace/cs-intent-classifier/download">Download .kolm</a>
-<a class="cta-alt" href="/build-your-own?template=cs-intent-classifier">Compile your own variant in 60 seconds</a>
-
-<h2>Verify the signed receipt chain</h2>
-<pre>$ kolm verify ~/.kolm/artifacts/cs-intent-classifier.kolm
+$ kolm verify ~/.kolm/artifacts/cs-intent-classifier.kolm
 sha256 ok
 ed25519 ok
 receipt chain ok
-K-score 0.9700 (matches manifest)</pre>
+K-score 0.9700 (matches manifest)
+
+$ kolm run cs-intent-classifier &lt; ticket.txt</pre>
+
+<a class="cta-alt" href="/build-your-own?template=cs-intent-classifier">Compile your own variant &rarr;</a>
 
 <h2>How it works</h2>
 <p>A rule-class intent classifier built as the kolm answer to the Predibase / LoRAX customer-support fine-tuning demo. The original demo trained a 7B parameter LoRA adapter on 1000 labeled support tickets. This artifact ships the same 10-intent contract as a 5.7 KB compiled recipe, runs in microseconds, and costs $0 per call. Bench report is shipped alongside the artifact.</p>
@@ -189,7 +190,6 @@ K-score 0.9700 (matches manifest)</pre>
 <p class="muted"><a href="/marketplace">All marketplace artifacts</a> &middot; <a href="/v1/marketplace/catalog.json">catalog manifest</a> &middot; <a href="/build-your-own?template=cs-intent-classifier">compile your own variant</a></p>
 
 </main>
-<footer>kolm.ai &middot; the AI compiler &middot; <a href="/marketplace">marketplace</a> &middot; <a href="/what-is-an-ai-compiler">what is an AI compiler?</a></footer>
 <footer class="ks-footer">
   <div class="ks-wrap">
     <div class="ks-footer__grid">

@@ -144,20 +144,21 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
  <div class="f"><b>runtime</b><span>sandboxed JS</span></div>
 </div>
 
-<h2>Install</h2>
-<pre>$ kolm marketplace install multilingual-greeter
+<h2>Install &amp; verify</h2>
+<p class="muted">No download button. Every <code>.kolm</code> arrives through the verifiable-trust CLI &mdash; sha256, ed25519 receipt chain, and K-score are all checked before it lands on disk.</p>
+<pre>$ kolm pull multilingual-greeter
 fetching multilingual-greeter &middot; verifying sha256 &middot; ok
-saved to ~/.kolm/artifacts/multilingual-greeter.kolm</pre>
+saved to ~/.kolm/artifacts/multilingual-greeter.kolm
 
-<a class="cta" href="/v1/marketplace/multilingual-greeter/download">Download .kolm</a>
-<a class="cta-alt" href="/build-your-own?template=multilingual-greeter">Compile your own variant in 60 seconds</a>
-
-<h2>Verify the signed receipt chain</h2>
-<pre>$ kolm verify ~/.kolm/artifacts/multilingual-greeter.kolm
+$ kolm verify ~/.kolm/artifacts/multilingual-greeter.kolm
 sha256 ok
 ed25519 ok
 receipt chain ok
-K-score 0.9878 (matches manifest)</pre>
+K-score 0.9878 (matches manifest)
+
+$ kolm run multilingual-greeter &lt; greeting.txt</pre>
+
+<a class="cta-alt" href="/build-your-own?template=multilingual-greeter">Compile your own variant &rarr;</a>
 
 <h2>How it works</h2>
 <p>A rule-class language detector built for short greetings (hello, bonjour, hola, ciao, etc) where statistical n-gram detectors over-fit on noise. The recipe is a 4 KB lookup table over the most common greeting tokens per language; runtime is microseconds and the binary footprint fits comfortably on a $5 microcontroller.</p>
@@ -189,7 +190,6 @@ K-score 0.9878 (matches manifest)</pre>
 <p class="muted"><a href="/marketplace">All marketplace artifacts</a> &middot; <a href="/v1/marketplace/catalog.json">catalog manifest</a> &middot; <a href="/build-your-own?template=multilingual-greeter">compile your own variant</a></p>
 
 </main>
-<footer>kolm.ai &middot; the AI compiler &middot; <a href="/marketplace">marketplace</a> &middot; <a href="/what-is-an-ai-compiler">what is an AI compiler?</a></footer>
 <footer class="ks-footer">
   <div class="ks-wrap">
     <div class="ks-footer__grid">
