@@ -108,6 +108,117 @@ except Exception:
 
 IMPORTANCE_VERSION = "w711-v1"
 
+# W712 — progressive distillation + capability gating.
+#
+# Three-pass curriculum. Pass-1 trains on ALL captures (format/tone/structure);
+# pass-2 narrows to rows with reasoning_trace or token_count > 200 (multi-step
+# proxy); pass-3 trains on a caller-provided failure slice (passed via the
+# JSONL itself — the CLI side filters before invocation). At each pass the
+# K-Score axis gate is evaluated AFTER training to decide whether to advance.
+#
+# Honesty contracts:
+#   * --pass=N filters the training JSONL in-process. The filter NEVER throws;
+#     a row missing both reasoning_trace and a usable token count is silently
+#     dropped from pass-2 (the CLI's own progress envelope warns about the
+#     dropped count via captures_remaining).
+#   * --gate=<axis> is a label only — the trainer doesn't compute the gate
+#     itself (that's the JS CLI's job after reading run-meta.json). We stamp
+#     the requested gate label into run-meta.progressive.json so an operator
+#     reading the artifact later can see which curriculum stage produced it.
+#   * Without --pass, behavior is UNCHANGED (preserves W711 + base contract).
+
+PROGRESSIVE_VERSION = "w712-v1"
+
+PROGRESSIVE_GATES = {
+    1: {"axis": "F", "threshold": 0.65, "label": "format"},
+    2: {"axis": "R", "threshold": 0.60, "label": "reasoning"},
+    3: {"axis": "E", "threshold": 0.55, "label": "edge"},
+}
+
+PROGRESSIVE_MULTI_STEP_TOKEN_FLOOR = 200
+
+
+def _progressive_token_count(row: dict) -> int:
+    """Best-effort token estimator for a training row (no torch needed).
+
+    Whitespace-split underestimates BPE counts by ~1.3x, but we only need
+    a ratio against MULTI_STEP_TOKEN_FLOOR, so the underestimate is fine."""
+    tc = row.get("token_count")
+    if isinstance(tc, (int, float)):
+        return int(tc)
+    tk = row.get("tokens")
+    if isinstance(tk, (int, float)):
+        return int(tk)
+    resp = row.get("response", "")
+    if not isinstance(resp, str) or not resp:
+        return 0
+    return sum(1 for t in resp.split() if t)
+
+
+def _progressive_filter_rows(rows: list[dict], pass_num: int) -> list[dict]:
+    """Apply the --pass filter to the loaded JSONL rows.
+
+    Pass 1: pass-through (uniform).
+    Pass 2: keep rows where reasoning_trace is non-null OR token_count > 200.
+    Pass 3: pass-through (the CLI already filtered to pass-2 failures before
+            handing us the JSONL — see cmdDistillProgressive in cli/kolm.js).
+    """
+    if not isinstance(rows, list) or pass_num not in (1, 2, 3):
+        return rows or []
+    if pass_num == 1:
+        return rows
+    if pass_num == 2:
+        out: list[dict] = []
+        for r in rows:
+            if not isinstance(r, dict):
+                continue
+            if r.get("reasoning_trace") is not None:
+                out.append(r)
+                continue
+            if _progressive_token_count(r) > PROGRESSIVE_MULTI_STEP_TOKEN_FLOOR:
+                out.append(r)
+        return out
+    # pass_num == 3 — passthrough.
+    return rows
+
+
+def _write_progressive_run_meta(
+    out_dir: str,
+    pass_num: int,
+    gate_label: str | None,
+    n_before: int,
+    n_after: int,
+) -> Optional[str]:
+    """Write a sibling run-meta.progressive.json so the curriculum stage is
+    recoverable independent of the main HF Trainer state.
+
+    Mirrors the W711 _write_importance_run_meta pattern: best-effort write,
+    OSError is logged not raised."""
+    if not out_dir:
+        return None
+    gate_spec = PROGRESSIVE_GATES.get(pass_num)
+    meta = {
+        "progressive_version": PROGRESSIVE_VERSION,
+        "pass": pass_num,
+        "gate_axis": gate_spec["axis"] if gate_spec else None,
+        "gate_threshold": gate_spec["threshold"] if gate_spec else None,
+        "gate_label_requested": gate_label,
+        "captures_in": int(n_before),
+        "captures_after_filter": int(n_after),
+    }
+    try:
+        os.makedirs(out_dir, exist_ok=True)
+        p = os.path.join(out_dir, "run-meta.progressive.json")
+        with open(p, "w", encoding="utf-8") as f:
+            json.dump(meta, f, indent=2, sort_keys=True)
+        return p
+    except OSError as e:
+        print(
+            f"distill.py: could not write run-meta.progressive.json: {e}",
+            file=sys.stderr,
+        )
+        return None
+
 
 def _load_importance_weights_jsonl(path: str) -> dict[str, float]:
     """Load a weights JSONL into a {capture_id: importance} dict.
@@ -598,6 +709,8 @@ def distill_trainer(
     config: Optional[DistillConfig] = None,
     eval_jsonl: Optional[str] = None,
     importance_weights_path: Optional[str] = None,
+    progressive_pass: Optional[int] = None,
+    progressive_gate: Optional[str] = None,
 ) -> DistillSession:
     """Build a configured KD trainer ready for .train().
 
@@ -662,6 +775,19 @@ def distill_trainer(
     student.config.pad_token_id = tokenizer.pad_token_id
 
     rows = _load_jsonl(train_jsonl)
+    # W712: progressive-distillation pass filter. Applied BEFORE eval-split
+    # so the held-out slice reflects the same capability stage as the
+    # training data. When --pass is omitted, this is a no-op.
+    n_before_filter = len(rows)
+    if progressive_pass in (1, 2, 3):
+        rows = _progressive_filter_rows(rows, progressive_pass)
+        if not rows:
+            raise ValueError(
+                f"distill.py: --pass={progressive_pass} filter dropped all rows. "
+                f"For pass=2 ensure captures carry reasoning_trace or response > "
+                f"{PROGRESSIVE_MULTI_STEP_TOKEN_FLOOR} tokens. For pass=3 ensure "
+                f"the supplied failures slice is non-empty."
+            )
     eval_rows: list[dict] = []
     if eval_jsonl:
         eval_rows = _load_jsonl(eval_jsonl)
@@ -801,6 +927,18 @@ def distill_trainer(
     # even if training crashes; the feedback block is appended post-train.
     importance_meta_path = _write_importance_run_meta(out_dir, importance_meta)
 
+    # W712: stamp run-meta.progressive.json so the curriculum stage is
+    # recoverable independent of HF Trainer state and the K-Score axis-gate
+    # decision (made post-train by the CLI side) has a stable provenance file.
+    if progressive_pass in (1, 2, 3):
+        _write_progressive_run_meta(
+            out_dir=out_dir,
+            pass_num=progressive_pass,
+            gate_label=progressive_gate,
+            n_before=n_before_filter,
+            n_after=len(rows),
+        )
+
     session = DistillSession(
         teacher_model=teacher_model,
         student_model=student_model,
@@ -938,6 +1076,20 @@ def _build_argparser() -> argparse.ArgumentParser:
                    help="Path to a JSONL file of {'capture_id': str, 'importance': float in [0,1]} "
                         "produced by src/capture-importance.js. When set, training uses a "
                         "WeightedRandomSampler so high-importance captures are oversampled.")
+    # W712: progressive distillation curriculum knobs. --pass selects which
+    # capability stage (1=format, 2=reasoning, 3=edge); --gate is a label-only
+    # field that gets stamped into run-meta.progressive.json so the artifact
+    # carries provenance of the curriculum stage that produced it. Neither
+    # flag is required; without them the trainer behavior is UNCHANGED.
+    p.add_argument("--pass", dest="prog_pass", type=int, default=None,
+                   choices=[1, 2, 3],
+                   help="W712 progressive-distillation pass: 1=format, 2=reasoning, 3=edge. "
+                        "Filters the training JSONL in-process before the sampler runs. "
+                        "Omit for the default pass-through behavior.")
+    p.add_argument("--gate", dest="prog_gate", type=str, default=None,
+                   choices=["format", "reasoning", "edge"],
+                   help="W712 gate label (informational; stamped into run-meta.progressive.json). "
+                        "The K-Score axis gate itself is evaluated by the CLI side post-train.")
     return p
 
 
@@ -985,6 +1137,8 @@ def main(argv: Optional[list[str]] = None) -> int:
         eval_jsonl=args.eval_jsonl,
         config=cfg,
         importance_weights_path=args.importance_weights,
+        progressive_pass=args.prog_pass,
+        progressive_gate=args.prog_gate,
     )
     summary = session.train()
     receipt = receipt_block(session, summary)

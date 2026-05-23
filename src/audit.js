@@ -62,6 +62,11 @@ export const AUDIT_OPS = Object.freeze({
   FEDERATED_OPTIN: 'federated.optin',
   FEDERATED_OPTOUT: 'federated.optout',
   FEDERATED_SHARE: 'federated.share',
+  // W715 — cross-namespace transfer learning: emitted when a tenant
+  // shares its namespace fingerprint (hash-only, opt-in) so sibling new
+  // namespaces can pick a warm-start checkpoint. Payload records
+  // recipient namespaces but NEVER the raw bag contents.
+  FINGERPRINT_SHARE: 'fingerprint.share',
   // Admin / system
   ADMIN_ACTION: 'admin.action',
 });

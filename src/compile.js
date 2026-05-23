@@ -60,6 +60,94 @@ const VALID_PRESETS = new Set([
   'instant',        // TAID-inspired zero-shot
 ]);
 
+// W716-3 — Mixture-of-Experts recipe scaffold.
+//
+// Emits a kolm.yaml-style block from an arch spec produced by
+// src/student-arch-recommender.js#recommendArch. Gated behind
+// KOLM_ENABLE_MOE because the recipe ships before the full mixture
+// trainer does — production_ready:false is stamped on the output so
+// downstream code can refuse to ship until the trainer lands.
+//
+// Honest contract:
+//   - arch_spec without moe block       -> { ok:false, error:'arch_not_moe' }
+//   - KOLM_ENABLE_MOE not set            -> { ok:true, gated:true, ... }
+//   - otherwise                          -> full recipe block, gated:false
+export const MOE_RECIPE_VERSION = 'w716-v1';
+
+export function buildMoeRecipe(arch_spec) {
+  if (!arch_spec || typeof arch_spec !== 'object') {
+    return {
+      ok: false,
+      error: 'arch_spec_required',
+      version: MOE_RECIPE_VERSION,
+    };
+  }
+  const moe = arch_spec.moe;
+  if (!moe || typeof moe !== 'object') {
+    return {
+      ok: false,
+      error: 'arch_not_moe',
+      hint: 'recommender returned a dense arch (no .moe block); MoE recipe inapplicable.',
+      version: MOE_RECIPE_VERSION,
+    };
+  }
+  const numExperts = Number(moe.num_experts) || 8;
+  const topK = Number(moe.top_k) || 3;
+  const specialization = Array.isArray(moe.expert_specialization)
+    ? moe.expert_specialization.slice()
+    : ['tool_call', 'reasoning', 'general'];
+  const capacityFactor = Number(moe.capacity_factor) || 1.25;
+  const routing = String(moe.routing || 'switch-transformer-top-k');
+  const gated = process.env.KOLM_ENABLE_MOE
+    ? !/^(1|true|yes|on)$/i.test(String(process.env.KOLM_ENABLE_MOE))
+    : true;
+
+  // yaml-style block (string + structured both — caller picks the form
+  // they want to thread into the spec).
+  const yamlBlock =
+    'recipe:\n' +
+    '  kind: moe\n' +
+    '  version: ' + MOE_RECIPE_VERSION + '\n' +
+    '  routing: ' + routing + '\n' +
+    '  num_experts: ' + numExperts + '\n' +
+    '  top_k: ' + topK + '\n' +
+    '  capacity_factor: ' + capacityFactor + '\n' +
+    '  expert_specialization:\n' +
+    specialization.map((s) => '    - ' + s).join('\n') + '\n' +
+    '  base_dense_geometry:\n' +
+    '    family: ' + (arch_spec.family || 'unknown') + '\n' +
+    '    depth: ' + (Number(arch_spec.depth) || 0) + '\n' +
+    '    hidden_dim: ' + (Number(arch_spec.hidden_dim) || 0) + '\n' +
+    '    num_attention_heads: ' + (Number(arch_spec.num_attention_heads) || 0) + '\n' +
+    '  production_ready: false   # W716-3 — recipe scaffold; trainer pending\n';
+
+  return {
+    ok: true,
+    gated,
+    version: MOE_RECIPE_VERSION,
+    production_ready: false,
+    recipe: {
+      kind: 'moe',
+      version: MOE_RECIPE_VERSION,
+      routing,
+      num_experts: numExperts,
+      top_k: topK,
+      capacity_factor: capacityFactor,
+      expert_specialization: specialization,
+      base_dense_geometry: {
+        family: arch_spec.family || 'unknown',
+        depth: Number(arch_spec.depth) || 0,
+        hidden_dim: Number(arch_spec.hidden_dim) || 0,
+        num_attention_heads: Number(arch_spec.num_attention_heads) || 0,
+      },
+    },
+    yaml: yamlBlock,
+    hint: gated
+      ? 'MoE recipe scaffold emitted; set KOLM_ENABLE_MOE=1 + install the mixture trainer to actually train.'
+      : 'MoE recipe scaffold emitted; trainer integration is still W716-future.',
+  };
+}
+
 function clampRank(n) {
   const v = Number(n);
   if (!Number.isFinite(v)) return 16;

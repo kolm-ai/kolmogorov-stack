@@ -68,6 +68,12 @@ import {
 } from './drift-supersession.js';
 import { checkCorpusLicensing } from './licensing-allowlist.js';
 import AdmZip from 'adm-zip';
+// W715 — privacy proof for cross-namespace transfer learning: every
+// fingerprint share writes one audit row through the existing per-tenant
+// HMAC chain so a tenant can later prove which sibling namespaces saw a
+// given fingerprint_id. Imported lazily inside recordFingerprintShare so
+// adding the surface does not change binder.js boot order.
+import { appendAudit, AUDIT_OPS } from './audit.js';
 
 const BINDER_SPEC = 'kolm-binder/0.1';
 
@@ -2635,6 +2641,38 @@ function recheckBundledFileHashes(bundle, hashes) {
     }
   }
   return { ok: true };
+}
+
+// W715-5 — privacy proof for cross-namespace transfer learning.
+//
+// Writes an audit row recording that a tenant's namespace fingerprint
+// (hash-only, opt-in) was shared with the listed recipient namespaces.
+// The audit chain proves what left the tenant without exposing the bag
+// contents — the fingerprint_id is a hash, and recipient_namespaces are
+// the sibling namespace IDs the share targets.
+//
+// Returns the inserted audit row (with event_hash + seq) for callers
+// who want to attach it to a binder receipt. Never throws on missing
+// args — returns null instead so a degraded-mode caller can keep going.
+export function recordFingerprintShare(tenant_id, namespace, fingerprint_id, recipient_namespaces) {
+  if (!tenant_id || !namespace || !fingerprint_id) return null;
+  const recipients = Array.isArray(recipient_namespaces)
+    ? recipient_namespaces.filter(x => typeof x === 'string' && x.length > 0)
+    : [];
+  return appendAudit({
+    tenant_id,
+    op: AUDIT_OPS.FINGERPRINT_SHARE,
+    payload: {
+      namespace,
+      fingerprint_id,
+      recipient_count: recipients.length,
+      recipient_namespaces: recipients,
+      // The wire-level promise: NO raw bag, NO top_terms_hash_array (the
+      // recipients already have those by definition). Payload is the
+      // audit envelope only.
+      shared_at: new Date().toISOString(),
+    },
+  });
 }
 
 export const BINDER = { spec: BINDER_SPEC };

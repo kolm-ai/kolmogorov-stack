@@ -299,3 +299,85 @@ def receipt_block(
             "arXiv:2007.14390",  # Flower
         ],
     }
+
+
+# W715-2 — warm-start hook.
+#
+# load_warm_start_from_fingerprint(fp_path) returns either:
+#   * a path-to-checkpoint string if the fingerprint has a
+#     warm_start_checkpoint_path field, OR
+#   * None if missing — caller logs and proceeds with a cold start
+#     (W715 standing directive #1: missing warm-start must NEVER fail
+#     training; cold start is the honest fallback).
+#
+# This module does NOT add new training logic; the trainer entrypoint
+# loads the returned checkpoint into `global_state` before the first
+# federated_round() call. See apps/trainer/distill.py + the W715 CLI
+# `kolm namespace warm-start-suggest` for how fingerprints are produced.
+def load_warm_start_from_fingerprint(fp_path: str) -> Optional[str]:
+    """Return a warm-start checkpoint path from a W715 fingerprint file.
+
+    Returns None when:
+      * the file does not exist (no fingerprint yet)
+      * the fingerprint version is not w715-vN (refuse to guess across versions)
+      * warm_start_checkpoint_path is null/empty (cold start)
+
+    Never raises — caller treats None as "cold start, proceed normally."
+    """
+
+    if not fp_path:
+        return None
+    p = Path(fp_path)
+    if not p.exists():
+        return None
+    try:
+        fp = json.loads(p.read_text())
+    except Exception:
+        return None
+    version = str(fp.get("version", ""))
+    if not version.startswith("w715-v"):
+        return None
+    ck = fp.get("warm_start_checkpoint_path")
+    if not ck:
+        return None
+    return str(ck)
+
+
+def _w715_cli():
+    """Tiny argparse entrypoint that exposes --warm-start-from-fingerprint.
+
+    Production trainers wire this flag into their own argparse; this CLI
+    is here so `python -m apps.trainer.federated --warm-start-from-fingerprint
+    <path>` exits cleanly and prints the resolved checkpoint (or the cold-
+    start log line). The W715 verification step uses it.
+    """
+
+    import argparse
+
+    parser = argparse.ArgumentParser(description="federated trainer (W715 warm-start probe)")
+    parser.add_argument(
+        "--warm-start-from-fingerprint",
+        dest="warm_start_fp",
+        default=None,
+        help=(
+            "Path to a W715 namespace fingerprint JSON file. If the fingerprint "
+            "has a warm_start_checkpoint_path, the trainer initializes "
+            "global_state from that checkpoint. Missing or null path = cold start."
+        ),
+    )
+    args = parser.parse_args()
+    if not args.warm_start_fp:
+        print("[W715] no warm-start fingerprint provided, cold start")
+        return 0
+    ck = load_warm_start_from_fingerprint(args.warm_start_fp)
+    if ck is None:
+        print("[W715] no warm-start checkpoint available, cold start")
+        return 0
+    print(f"[W715] warm-start checkpoint resolved: {ck}")
+    return 0
+
+
+if __name__ == "__main__":
+    import sys
+
+    sys.exit(_w715_cli())

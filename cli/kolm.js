@@ -13735,9 +13735,20 @@ async function cmdDistill(args) {
   // trainer consumes via --importance-weights. Hoisted before --detach so
   // the W711 dispatch handles its own envelope (trainer-not-invoked etc).
   if (args.includes('--importance-weighted')) return cmdDistillImportanceWeighted(args);
+  // W712-CLI: --progressive runs a 3-pass curriculum (format -> reasoning ->
+  // edge) with K-Score axis gates between each pass. Hoisted before --detach
+  // so cmdDistillProgressive handles its own envelope (gate-fail / honest
+  // trainer-missing fallback).
+  if (args.includes('--progressive')) return cmdDistillProgressive(args);
   // W714-4: --contrastive generates negative variants + invokes the
   // contrastive trainer; honest envelope on missing python/trainer.
   if (args.includes('--contrastive')) return cmdDistillContrastive(args);
+  // W716-4: --auto-arch runs TAAS (task-adaptive architecture search):
+  // analyze capture distribution, recommend a student arch, print a
+  // report. With --apply, write the spec to ~/.kolm/auto-arch/<ns>-<ts>.json
+  // so a follow-up `kolm distill --config <path>` consumes it. Honest
+  // envelope on no captures (exit 3) — never fabricates training.
+  if (args.includes('--auto-arch')) return cmdDistillAutoArch(args);
   // W480 - on-policy + preference orchestration subverbs. Local-only by default
   // (trainer is a tenant plug-in); --remote routes through /v1/distill/*.
   if (args[0] === 'onpolicy') return cmdDistillOnPolicy(args.slice(1));
@@ -14625,6 +14636,442 @@ async function cmdDistillImportanceWeighted(args) {
     console.log('  trainer exit: ' + r.status);
   }
   process.exit(r.status || 0);
+}
+
+// W712-CLI — `kolm distill --progressive [--namespace ns] [--max-pass 1|2|3]
+//   [--limit N] [--json]`
+//
+// Three-pass curriculum:
+//   Pass 1 (format)    : train on ALL captures, gate K-Score axis F >= 0.65
+//   Pass 2 (reasoning) : filter to multi-step captures, gate axis R >= 0.60
+//   Pass 3 (edge)      : filter to pass-2 failures, gate axis E >= 0.55
+//
+// Between each pass we spawn `python -m apps.trainer.distill --pass=N --gate=<label>`
+// against a JSONL produced from the namespace's captures, then evaluate the
+// gate via src/progressive-distill.js evaluateGate(). On gate fail we emit
+// a structured `need_more: {class, count}` envelope and exit 3 (per the
+// W712 spec). On honest trainer-missing failure we emit
+// `trainer_not_invoked:true` and exit 0 — same fallback shape as W711.
+async function cmdDistillProgressive(args) {
+  const wantJson = args.includes('--json');
+  const namespace = pickFlag(args, '--namespace') || pickFlag(args, '-n') || 'default';
+  const limitFlag = pickFlag(args, '--limit');
+  const limit = Number.isFinite(Number(limitFlag)) && Number(limitFlag) > 0
+    ? Math.trunc(Number(limitFlag)) : 1000;
+  const maxPassFlag = pickFlag(args, '--max-pass');
+  const maxPass = Number.isFinite(Number(maxPassFlag)) && [1, 2, 3].includes(Number(maxPassFlag))
+    ? Number(maxPassFlag) : 3;
+
+  // Lazy-load the progressive-distill module so a missing import surfaces
+  // as a clean error rather than a top-level crash.
+  let progMod;
+  try {
+    progMod = await import('../src/progressive-distill.js');
+  } catch (e) {
+    const env = {
+      ok: false,
+      error: 'progressive_module_missing',
+      detail: e && e.message ? e.message : String(e),
+      hint: 'src/progressive-distill.js must be importable',
+    };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else console.error('error: ' + env.error + ': ' + env.detail);
+    process.exit(typeof EXIT !== 'undefined' && EXIT.EXECUTION ? EXIT.EXECUTION : 1);
+  }
+
+  // 1. Pull captures from the event-store (namespace-scoped). Tolerant: if
+  //    the store is empty we still emit an honest envelope rather than crash.
+  let captures = [];
+  try {
+    const es = await import('../src/event-store.js');
+    if (typeof es.listEvents === 'function') {
+      const query = { limit };
+      if (namespace && namespace !== 'all') query.namespace = namespace;
+      captures = await es.listEvents(query) || [];
+    }
+  } catch (_) {
+    captures = [];
+  }
+  captures = captures.filter(ev => {
+    if (!ev || typeof ev !== 'object') return false;
+    if (typeof ev.kind === 'string' && ev.kind.startsWith('capture')) return true;
+    if (ev.request && ev.response) return true;
+    if (typeof ev.prompt === 'string' && typeof ev.response === 'string') return true;
+    return false;
+  });
+
+  // 2. Persist a per-namespace JSONL the Python trainer can consume. We
+  //    write the FULL capture set; the trainer's --pass filter narrows in
+  //    process (so pass-1/2/3 share the same file and we don't churn disk).
+  const home = process.env.KOLM_HOME
+    || path.join(process.env.HOME || process.env.USERPROFILE || '.', '.kolm');
+  const outDir = path.join(home, 'progressive');
+  try { fs.mkdirSync(outDir, { recursive: true }); } catch (_) {}
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const jsonlPath = path.join(outDir, `captures-${namespace}-${stamp}.jsonl`);
+  try {
+    const lines = captures.map(ev => {
+      // Normalize to {prompt, response, reasoning_trace?} so the trainer
+      // matches the documented input shape regardless of capture origin.
+      const prompt = ev.prompt || (ev.request && (ev.request.prompt || ev.request.input)) || '';
+      const response = ev.response
+        || (ev.response_text)
+        || (typeof ev.output === 'string' ? ev.output : '')
+        || '';
+      const row = { prompt: String(prompt), response: String(response) };
+      if (ev.reasoning_trace != null) row.reasoning_trace = ev.reasoning_trace;
+      if (ev.id || ev.event_id || ev.capture_id) {
+        row.capture_id = String(ev.capture_id || ev.event_id || ev.id);
+      }
+      return JSON.stringify(row);
+    });
+    fs.writeFileSync(jsonlPath, lines.join('\n') + (lines.length > 0 ? '\n' : ''), 'utf8');
+  } catch (e) {
+    const env = {
+      ok: false,
+      error: 'jsonl_write_failed',
+      detail: e && e.message ? e.message : String(e),
+      hint: 'check that ' + outDir + ' is writable',
+    };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else console.error('error: ' + env.error + ': ' + env.detail);
+    process.exit(typeof EXIT !== 'undefined' && EXIT.EXECUTION ? EXIT.EXECUTION : 1);
+  }
+
+  // 3. Resolve the trainer entry point. Same fallback hierarchy as W711:
+  //    KOLM_TRAINER_BIN -> python -m apps.trainer.distill -> honest envelope.
+  const trainerBin = process.env.KOLM_TRAINER_BIN || null;
+  const pythonBin = process.env.PYTHON || process.env.KOLM_PYTHON || 'python';
+  let trainerInvocable = false;
+  if (trainerBin) {
+    try { trainerInvocable = fs.existsSync(trainerBin); } catch (_) { trainerInvocable = false; }
+  }
+  if (!trainerInvocable && !process.env.KOLM_DISABLE_TRAINER_PROBE) {
+    try {
+      const probe = spawnSync(pythonBin, ['-c', 'import apps.trainer.distill'], {
+        encoding: 'utf8', timeout: 10_000, shell: process.platform === 'win32',
+      });
+      trainerInvocable = probe.status === 0;
+    } catch (_) {
+      trainerInvocable = false;
+    }
+  }
+  if (!trainerInvocable) {
+    const env = {
+      ok: true,
+      progressive_version: progMod.PROGRESSIVE_VERSION,
+      trainer_not_invoked: true,
+      trainer_unreachable: true,
+      captures_jsonl_written: jsonlPath,
+      captures_total: captures.length,
+      namespace,
+      hint: 'pip install -e apps/trainer or set KOLM_TRAINER_BIN to the trainer binary path '
+        + '(python -m apps.trainer.distill --help to verify)',
+    };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else {
+      console.log(`Wrote ${captures.length} captures to JSONL.`);
+      console.log('  out: ' + jsonlPath);
+      console.log('  trainer: not invoked (' + env.hint + ')');
+    }
+    process.exit(0);
+  }
+
+  // 4. Loop passes 1 -> maxPass. After each pass parse the trainer's
+  //    run-meta.json for K-Score axes, evaluate the gate, exit 3 on fail.
+  const results = [];
+  let prevFailures = null;  // pass-3 input slice.
+  for (let pass = 1; pass <= maxPass; pass++) {
+    const gateLabel = progMod.PASS_GATES[pass].label;
+    const passOutDir = path.join(outDir, `pass-${pass}-${stamp}`);
+    try { fs.mkdirSync(passOutDir, { recursive: true }); } catch (_) {}
+
+    let passJsonl = jsonlPath;
+    if (pass === 3 && Array.isArray(prevFailures) && prevFailures.length > 0) {
+      const failPath = path.join(passOutDir, 'failures.jsonl');
+      try {
+        const lines = prevFailures.map(r => JSON.stringify(r));
+        fs.writeFileSync(failPath, lines.join('\n') + '\n', 'utf8');
+        passJsonl = failPath;
+      } catch (_) { /* honest fall-through to original JSONL */ }
+    }
+
+    const trainerArgs = [
+      '-m', 'apps.trainer.distill',
+      '--pass=' + pass,
+      '--gate=' + gateLabel,
+      '--train-jsonl', passJsonl,
+      '--out-dir', passOutDir,
+    ];
+    const r = spawnSync(pythonBin, trainerArgs, {
+      encoding: 'utf8', timeout: 600_000, shell: process.platform === 'win32',
+    });
+
+    // 5. Read the K-Score axes. Probe two run-meta candidates then fall
+    //    back to stdout receipt parsing.
+    let axes = null;
+    const candidates = [
+      path.join(passOutDir, 'run-meta.json'),
+      path.join(passOutDir, 'run-meta.progressive.json'),
+    ];
+    for (const candidatePath of candidates) {
+      try {
+        if (fs.existsSync(candidatePath)) {
+          const j = JSON.parse(fs.readFileSync(candidatePath, 'utf8'));
+          if (j && j.kscore_axes && typeof j.kscore_axes === 'object') {
+            axes = j.kscore_axes; break;
+          }
+          if (j && j.axes && typeof j.axes === 'object') {
+            axes = j.axes; break;
+          }
+        }
+      } catch (_) { /* try next */ }
+    }
+    if (axes == null && r.stdout) {
+      try {
+        const firstBrace = r.stdout.indexOf('{');
+        const lastBrace = r.stdout.lastIndexOf('}');
+        if (firstBrace >= 0 && lastBrace > firstBrace) {
+          const j = JSON.parse(r.stdout.slice(firstBrace, lastBrace + 1));
+          if (j && j.kscore_axes) axes = j.kscore_axes;
+          else if (j && j.axes) axes = j.axes;
+        }
+      } catch (_) { /* fall through */ }
+    }
+
+    const gateResult = progMod.evaluateGate(pass, axes || {});
+    const envelope = progMod.buildGateEnvelope(gateResult, {
+      captures_remaining: captures.length,
+    });
+    envelope.trainer_exit = r.status;
+    envelope.namespace = namespace;
+    envelope.pass_out_dir = passOutDir;
+    results.push(envelope);
+
+    if (!envelope.ok) {
+      envelope.results = results;
+      if (wantJson) console.log(JSON.stringify(envelope, null, 2));
+      else {
+        console.log(`Pass ${pass} (${gateLabel}) failed gate.`);
+        console.log('  axis: ' + envelope.axis);
+        console.log('  score: ' + envelope.gate_score + ' / threshold: ' + envelope.threshold);
+        if (envelope.need_more) {
+          console.log('  need_more: ' + envelope.need_more.count + ' more ' + envelope.need_more.class + ' captures');
+        }
+        if (envelope.hint) console.log('  hint: ' + envelope.hint);
+      }
+      process.exit(3);
+    }
+  }
+
+  // 6. Graduated — all passes cleared.
+  const final = results[results.length - 1];
+  if (wantJson) {
+    console.log(JSON.stringify({
+      ok: true,
+      progressive_version: progMod.PROGRESSIVE_VERSION,
+      passes_completed: results.length,
+      graduated: final && final.advanced_to_pass == null,
+      results,
+      namespace,
+    }, null, 2));
+  } else {
+    console.log(`Progressive distillation completed ${results.length}/${maxPass} passes.`);
+    for (const r of results) {
+      console.log(`  pass ${r.pass} (${r.label}): ${r.gate_score} >= ${r.threshold}`);
+    }
+    if (final && final.advanced_to_pass == null) console.log('  graduated.');
+  }
+  process.exit(0);
+}
+
+// W716-4 — `kolm distill --auto-arch [--namespace ns] [--limit N]
+//                                     [--apply] [--json]`
+//
+// Task-Adaptive Architecture Search (TAAS): analyze the capture
+// distribution for a namespace, recommend a student arch (rule-based
+// v1, see src/student-arch-recommender.js), print a markdown report
+// (or JSON with --json). With --apply, persist the spec to
+// ~/.kolm/auto-arch/<ns>-<ts>.json so a follow-up `kolm distill --config
+// <path>` consumes it.
+//
+// Honest envelopes only:
+//   - No captures           -> exit 3 { ok:false, error:'no_captures' }
+//   - Capture store error   -> exit 4 with diagnostic envelope
+//   - Otherwise             -> exit 0 with report + spec path (if --apply)
+async function cmdDistillAutoArch(args) {
+  const wantJson = args.includes('--json');
+  const apply = args.includes('--apply');
+  const namespace = pickFlag(args, '--namespace') || pickFlag(args, '-n') || 'default';
+  const limitFlag = pickFlag(args, '--limit');
+  const limit = Number.isFinite(Number(limitFlag)) && Number(limitFlag) > 0
+    ? Math.trunc(Number(limitFlag)) : 10000;
+  // Tenant fence: prefer the api-key tenant when available; fall back to
+  // 'local' for offline mode (capture-store uses 'local' for the legacy
+  // sync store when no driver is configured).
+  const cfg = loadConfig();
+  const tenant = cfg.tenant_id || cfg.tenant || 'local';
+
+  // 1. Pull captures. Try both event-store and capture-store.
+  let captures = [];
+  let captureSource = 'none';
+  try {
+    const cs = await import('../src/capture-store.js');
+    if (typeof cs.listCaptures === 'function') {
+      const rows = await cs.listCaptures(tenant, namespace, limit);
+      if (Array.isArray(rows) && rows.length > 0) {
+        captures = rows;
+        captureSource = 'capture-store';
+      }
+    }
+  } catch (_) { /* fall through to event-store */ }
+  if (captures.length === 0) {
+    try {
+      const es = await import('../src/event-store.js');
+      if (typeof es.listEvents === 'function') {
+        const rows = await es.listEvents({ tenant_id: tenant, namespace, limit });
+        if (Array.isArray(rows) && rows.length > 0) {
+          captures = rows;
+          captureSource = 'event-store';
+        }
+      }
+    } catch (_) { /* honest empty below */ }
+  }
+
+  if (captures.length === 0) {
+    const env = {
+      ok: false,
+      error: 'no_captures',
+      namespace,
+      tenant,
+      hint: `kolm capture start --namespace ${namespace} (or run any inference through the daemon to populate captures)`,
+      version: 'w716-v1',
+    };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else {
+      console.error(`no captures for namespace=${namespace} tenant=${tenant}`);
+      console.error('  hint: ' + env.hint);
+    }
+    process.exit(3);
+  }
+
+  // 2. Compute capture-distribution stats.
+  const { computeCaptureStats, CAPTURE_STATS_VERSION } = await import('../src/capture-stats.js');
+  const { recommendArch, RECOMMENDER_VERSION } = await import('../src/student-arch-recommender.js');
+  const stats = computeCaptureStats(captures);
+
+  // 3. Recommend.
+  const rec = recommendArch(stats);
+
+  // 4. Optional MoE recipe build (only if recommended arch carries .moe).
+  let moeRecipe = null;
+  if (rec.recommended && rec.recommended.moe) {
+    try {
+      const { buildMoeRecipe } = await import('../src/compile.js');
+      moeRecipe = buildMoeRecipe(rec.recommended);
+    } catch (e) {
+      moeRecipe = { ok: false, error: 'moe_recipe_build_failed', message: String(e.message || e) };
+    }
+  }
+
+  // 5. Persist spec on --apply.
+  let appliedPath = null;
+  if (apply) {
+    try {
+      const dir = path.join(KOLM_DIR, 'auto-arch');
+      fs.mkdirSync(dir, { recursive: true });
+      const ts = new Date().toISOString().replace(/[:.]/g, '-');
+      const safeNs = String(namespace).replace(/[^a-zA-Z0-9_-]+/g, '_');
+      appliedPath = path.join(dir, `${safeNs}-${ts}.json`);
+      const spec = {
+        ok: true,
+        version: 'w716-v1',
+        capture_stats_version: CAPTURE_STATS_VERSION,
+        recommender_version: RECOMMENDER_VERSION,
+        namespace,
+        tenant,
+        capture_source: captureSource,
+        stats,
+        recommendation: rec,
+        moe_recipe: moeRecipe,
+        applied_at: new Date().toISOString(),
+      };
+      fs.writeFileSync(appliedPath, JSON.stringify(spec, null, 2));
+    } catch (e) {
+      const env = {
+        ok: false,
+        error: 'apply_write_failed',
+        message: String(e.message || e),
+        version: 'w716-v1',
+      };
+      if (wantJson) console.log(JSON.stringify(env, null, 2));
+      else console.error(`apply write failed: ${env.message}`);
+      process.exit(4);
+    }
+  }
+
+  // 6. Emit envelope.
+  const envelope = {
+    ok: true,
+    version: 'w716-v1',
+    capture_stats_version: CAPTURE_STATS_VERSION,
+    recommender_version: RECOMMENDER_VERSION,
+    namespace,
+    tenant,
+    capture_source: captureSource,
+    stats,
+    recommendation: rec,
+    moe_recipe: moeRecipe,
+    applied_to: appliedPath,
+  };
+
+  if (wantJson) {
+    console.log(JSON.stringify(envelope, null, 2));
+    process.exit(0);
+  }
+
+  // Markdown-style human report.
+  const r = rec.recommended;
+  console.log(`# TAAS report — namespace=${namespace}`);
+  console.log('');
+  console.log(`Captures analyzed: ${stats.n} (source: ${captureSource})`);
+  console.log('');
+  console.log('## Capture-distribution stats');
+  console.log(`  output_length p50/p95/mean : ${stats.output_length.p50} / ${stats.output_length.p95} / ${stats.output_length.mean}`);
+  console.log(`  vocab_entropy_bits         : ${stats.vocab_entropy_bits}`);
+  console.log(`  reasoning_chain_depth_avg  : ${stats.reasoning_chain_depth_avg}`);
+  console.log(`  tool_use_rate              : ${stats.tool_use_rate}`);
+  console.log(`  task_complexity_proxy      : ${stats.task_complexity_proxy}`);
+  console.log('');
+  console.log('## Recommended student arch');
+  console.log(`  family   : ${r.family}`);
+  console.log(`  size     : ${r.size_label}`);
+  console.log(`  depth    : ${r.depth}`);
+  console.log(`  width    : ${r.width}`);
+  console.log(`  hidden   : ${r.hidden_dim}`);
+  console.log(`  heads    : ${r.num_attention_heads}`);
+  console.log(`  quant    : ${r.quant}`);
+  if (r.moe) {
+    console.log(`  moe      : ${r.moe.num_experts} experts, top-${r.moe.top_k}, specialization=${r.moe.expert_specialization.join('/')}`);
+  }
+  console.log('');
+  console.log(`Reasoning: ${rec.reasoning}`);
+  console.log('');
+  console.log(`Fallback: ${rec.fallback.size_label} (${rec.fallback.family})`);
+  if (moeRecipe && moeRecipe.ok) {
+    console.log('');
+    console.log('## MoE recipe (scaffold; production_ready:false)');
+    console.log(moeRecipe.yaml);
+  }
+  if (appliedPath) {
+    console.log('');
+    console.log(`Applied: ${appliedPath}`);
+    console.log(`  next: kolm distill --config ${appliedPath}`);
+  } else {
+    console.log('');
+    console.log('Add --apply to persist this spec and proceed with distill.');
+  }
+  process.exit(0);
 }
 
 // W714-4 — `kolm distill --contrastive [--negative-teacher <vendor:model>]
@@ -20203,6 +20650,8 @@ const COMPLETION_VERBS = [
   // the script/API/product graph surfaces.
   'packages', 'package',
   'evidence',
+  // W715 — cross-namespace transfer learning verbs.
+  'namespace', 'ns', 'federated',
 ];
 const COMPLETION_SUBS = {
   auditor: ['keygen', 'sign', 'verify'],
@@ -20227,6 +20676,8 @@ const COMPLETION_SUBS = {
   benchmark: ['evidence'],
   packages: ['release-readiness', 'release', 'readiness'],
   package: ['release-readiness', 'release', 'readiness'],
+  namespace: ['fingerprint', 'warm-start-suggest', 'verticals'],
+  ns: ['fingerprint', 'warm-start-suggest', 'verticals'],
   evidence: ['format-governance', 'runtime-adoption', 'compliance-certification', 'package-release', 'benchmark', 'quality'],
   models:  ['list', 'info', 'recommend', 'pin', 'devices', 'frontier', 'tiers', 'backends', 'benchmarks', 'verify-benchmarks', 'show', 'add', 'verify', 'pull', 'cache', 'prefetch', 'manifest'],
   gpu:     ['detect', 'doctor', 'setup', 'stress'],
@@ -25051,6 +25502,116 @@ async function cmdFederated(args) {
   throw _badArgs(`unknown federated subcommand: ${sub}`);
 }
 
+// ---------- namespace (W715) ----------
+// `kolm namespace fingerprint` computes the privacy-safe fingerprint for a
+// tenant's captures so a new sibling namespace can pick a warm-start.
+// `kolm namespace warm-start-suggest` ranks sibling namespaces by Jaccard
+// similarity over the hashed bigram set. Both are local-only by default —
+// no network. Add --remote to talk to /v1/namespaces/* (router routes are
+// optional; see src/router.js).
+async function cmdNamespace(args) {
+  const sub = args && args[0];
+  const rest = (args || []).slice(1);
+  const jsonOut = rest.includes('--json');
+  const fp = await import('../src/namespace-fingerprint.js');
+  const eventStore = await import('../src/event-store.js');
+  if (!sub || sub === '--help' || sub === '-h' || sub === 'help') {
+    console.log('kolm namespace - privacy-safe namespace fingerprint + warm-start (W715)\n\n' +
+      'USAGE\n' +
+      '  kolm namespace fingerprint [--namespace=<ns>] [--limit=N] [--json]\n' +
+      '  kolm namespace warm-start-suggest [--namespace=<ns>] [--k=5] [--json]\n' +
+      '  kolm namespace verticals [--json]\n\n' +
+      'Honest scope: fingerprint = sha256(bigram-bag) + top-K sha256(bigram) +\n' +
+      'vertical guess. NO raw capture text is ever included. Sharing requires\n' +
+      'explicit opt-in via /account/namespaces/new (default OFF).');
+    return;
+  }
+  function flag(name) {
+    const direct = rest.find(a => a === '--' + name);
+    if (direct) return true;
+    const eq = rest.find(a => a.startsWith('--' + name + '='));
+    return eq ? eq.split('=').slice(1).join('=') : null;
+  }
+  const tenant_id = process.env.KOLM_TENANT_ID || process.env.KOLM_TENANT || 'local';
+
+  if (sub === 'verticals') {
+    const out = {
+      verticals: Object.keys(fp.VERTICAL_STUBS),
+      note: 'scaffold for W751-W755 vertical warm-start libraries',
+    };
+    if (jsonOut) return _printJson(out);
+    console.log('verticals (scaffold for W751-W755):');
+    for (const v of out.verticals) console.log('  ' + v);
+    return;
+  }
+
+  if (sub === 'fingerprint') {
+    const namespace = flag('namespace') || flag('ns') || null;
+    const limit = flag('limit') ? Number(flag('limit')) : 1000;
+    const events = await eventStore.listEvents({
+      tenant_id,
+      namespace: namespace || undefined,
+      limit,
+      order: 'desc',
+    });
+    const captures = (events || []).map(ev => ({
+      text: ev.output || ev.response || ev.completion || ev.prompt || ev.input || '',
+      prompt: ev.prompt,
+      output: ev.output,
+    }));
+    const result = fp.computeFingerprint({ captures, namespace });
+    if (jsonOut) return _printJson(result);
+    console.log(`fingerprint  ns=${namespace || '(all)'}  v=${result.version}`);
+    console.log(`  n_captures=${result.n_captures}  n_tokens=${result.n_tokens}  unique_terms=${result.n_unique_terms}`);
+    console.log(`  vertical_guess=${result.vertical_guess}`);
+    console.log(`  fingerprint_id=${result.fingerprint_id}`);
+    console.log(`  token_bag_hash=${result.token_bag_hash.slice(0, 16)}...`);
+    console.log(`  top_terms_hash_array.length=${result.top_terms_hash_array.length}`);
+    return;
+  }
+
+  if (sub === 'warm-start-suggest' || sub === 'suggest') {
+    const namespace = flag('namespace') || flag('ns') || null;
+    const k = flag('k') ? Number(flag('k')) : 5;
+    const limit = flag('limit') ? Number(flag('limit')) : 1000;
+    // Build target fingerprint.
+    const targetEvents = await eventStore.listEvents({
+      tenant_id,
+      namespace: namespace || undefined,
+      limit,
+      order: 'desc',
+    });
+    const targetCaptures = (targetEvents || []).map(ev => ({
+      text: ev.output || ev.response || ev.completion || ev.prompt || ev.input || '',
+    }));
+    const target_fp = fp.computeFingerprint({ captures: targetCaptures, namespace });
+    // Discover candidate sibling namespaces in the SAME tenant (a real
+    // deploy would also pull opted-in peer fingerprints; for the local
+    // CLI we stick to within-tenant siblings).
+    const allEvents = await eventStore.listEvents({ tenant_id, limit: 5000, order: 'desc' });
+    const byNs = new Map();
+    for (const ev of (allEvents || [])) {
+      const ns = ev.namespace;
+      if (!ns || ns === namespace) continue;
+      if (!byNs.has(ns)) byNs.set(ns, []);
+      byNs.get(ns).push({ text: ev.output || ev.response || ev.completion || ev.prompt || ev.input || '' });
+    }
+    const candidates = [];
+    for (const [ns, caps] of byNs.entries()) candidates.push(fp.computeFingerprint({ captures: caps, namespace: ns }));
+    const ranked = fp.findNearestNamespaces(target_fp, candidates, k);
+    const out = { target: target_fp, k, candidates_total: candidates.length, suggestions: ranked };
+    if (jsonOut) return _printJson(out);
+    console.log(`warm-start-suggest  ns=${namespace || '(all)'}  candidates=${candidates.length}`);
+    if (!ranked.length) { console.log('  no sibling namespaces found'); return; }
+    for (const r of ranked) {
+      console.log(`  ${r.namespace}  similarity=${r.similarity.toFixed(4)}  vertical=${r.vertical_guess}`);
+    }
+    return;
+  }
+
+  throw _badArgs(`unknown namespace subcommand: ${sub}`);
+}
+
 function _badArgs(msg) { const e = new Error(msg); e.exitCode = EXIT.BAD_ARGS; return e; }
 
 // ---------- update ----------
@@ -27362,6 +27923,10 @@ async function main() {
       case 'cc':       await withErrorContext('cc',       () => cmdCc(rest)); break;
       case 'fl':       await withErrorContext('fl',       () => cmdFl(rest)); break;
       case 'federated': await withErrorContext('federated', () => cmdFederated(rest)); break;
+      // W715 — cross-namespace transfer learning: compute a privacy-safe
+      // namespace fingerprint + discover warm-start siblings.
+      case 'namespace':
+      case 'ns':       await withErrorContext('namespace', () => cmdNamespace(rest)); break;
       case 'anonymize':await withErrorContext('anonymize',() => cmdAnonymize(rest)); break;
       case 'redact':   await withErrorContext('redact',   () => cmdRedact(rest)); break;
       // W454 — multimodal redaction worker (OCR / pdf-parse / whisper).
