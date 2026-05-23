@@ -1,0 +1,25 @@
+{
+  "name": "@kolm/tsac-worker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "W721 — Task-Specific Attention Compiler (TSAC) kernel-selector stub. Reads a per-(layer,head) sparsity profile and emits a kernel-name selection table for serve-time dispatch. Heavy ML kernel deps (CUDA/Metal/CPU kernels) are a FUTURE WAVE; this worker ships the contract that real kernel dispatchers will plug into. Root kolm install pulls ZERO TSAC deps.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "tsac.mjs",
+  "bin": {
+    "kolm-tsac-worker": "tsac.mjs"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "doctor": "node tsac.mjs --doctor"
+  },
+  "dependencies": {},
+  "optionalDependencies": {},
+  "external": {
+    "python": {
+      "note": "Default kernel selector is workers/tsac/scripts/tsac.py (stdlib only — argparse + json). Override with $TSAC_KERNEL_CMD when integrating a real GPU kernel selector. The runtime kernel dispatch (CUDA/Metal/CPU sparse-attention kernels) is a future wave."
+    }
+  }
+}

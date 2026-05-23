@@ -13719,9 +13719,245 @@ async function cmdDistillStrategy(args) {
   if (requireReady && !plan.ok) process.exit(EXIT.EXECUTION);
 }
 
+// W720 — `kolm distill improve [--detect | --orchestrate | --decide]`
+//
+// Three-mode dispatcher over the self-improvement loop primitive. Local-only
+// orchestration (no /v1/* fetch); all three modes read + write under
+// ~/.kolm/{events,distill-runs,registry}. Honest envelope on any error path
+// with a non-zero exit so scripts can branch deterministically.
+//
+//   --detect:      print candidates table OR {ok:true,candidates:[]} JSON
+//   --orchestrate: kick off a re-distill round (returns immediately with run_id)
+//   --decide:      compareAndDecide({base, candidate}) -> promote/hold/rollback
+//
+// Common flags: --json (machine-readable envelope), --namespace, --tenant.
+async function cmdDistillImprove(args) {
+  const wantJson = args.includes('--json');
+  const namespace = pickFlag(args, '--namespace') || pickFlag(args, '-n') || 'default';
+  const tenant = pickFlag(args, '--tenant') || pickFlag(args, '--tenant-id') || 'local';
+
+  const emit = (env) => {
+    console.log(JSON.stringify(env, null, 2));
+  };
+
+  // -------------------------------------------------------------------------
+  // --detect: scan event-store for underperforming captures.
+  // -------------------------------------------------------------------------
+  if (args.includes('--detect')) {
+    const windowFlag = pickFlag(args, '--window-days');
+    const windowDays = Number.isFinite(Number(windowFlag)) && Number(windowFlag) > 0
+      ? Number(windowFlag) : 7;
+    const minDeltaFlag = pickFlag(args, '--min-kscore-delta');
+    const minKscoreDelta = Number.isFinite(Number(minDeltaFlag)) ? Number(minDeltaFlag) : 0.05;
+    const minFailFlag = pickFlag(args, '--min-failure-rate');
+    const minFailureRate = Number.isFinite(Number(minFailFlag)) ? Number(minFailFlag) : 0.10;
+    let detectMod;
+    try {
+      detectMod = await import('../src/self-improvement.js');
+    } catch (e) {
+      const env = {
+        ok: false,
+        error: 'self_improvement_module_missing',
+        detail: e && e.message ? e.message : String(e),
+        hint: 'src/self-improvement.js must be importable',
+      };
+      emit(env);
+      process.exit(EXIT.EXECUTION);
+    }
+    const result = await detectMod.detectUnderperformingCaptures({
+      tenant_id: tenant,
+      namespace: namespace === 'all' ? null : namespace,
+      window_days: windowDays,
+      min_kscore_delta: minKscoreDelta,
+      min_failure_rate: minFailureRate,
+    });
+    if (!result.ok) {
+      emit(result);
+      process.exit(EXIT.MISSING_PREREQ);
+    }
+    if (wantJson) {
+      emit(result);
+      return;
+    }
+    // Human-readable table (non-JSON path).
+    console.log(`detected ${result.candidates.length} candidate captures (window=${windowDays}d, namespace=${namespace}, tenant=${tenant})`);
+    if (result.candidates.length === 0) {
+      console.log('  (no candidates above failure-rate threshold)');
+      return;
+    }
+    for (const c of result.candidates.slice(0, 50)) {
+      const kstr = c.observed_kscore == null ? '?    ' : c.observed_kscore.toFixed(3);
+      const artStr = c.current_artifact_id || '(no_artifact)';
+      console.log(`  ${String(c.capture_id).padEnd(36)} kscore=${kstr} fail=${(c.failure_rate * 100).toFixed(1)}% n=${c.route_events_count} art=${artStr}`);
+    }
+    if (result.candidates.length > 50) {
+      console.log(`  ... ${result.candidates.length - 50} more (use --json to dump all)`);
+    }
+    return;
+  }
+
+  // -------------------------------------------------------------------------
+  // --orchestrate: kick off a re-distill round (non-blocking).
+  // -------------------------------------------------------------------------
+  if (args.includes('--orchestrate')) {
+    const minDeltaFlag = pickFlag(args, '--min-kscore-delta');
+    const minKscoreDelta = Number.isFinite(Number(minDeltaFlag)) ? Number(minDeltaFlag) : 0.05;
+    const minFailFlag = pickFlag(args, '--min-failure-rate');
+    const minFailureRate = Number.isFinite(Number(minFailFlag)) ? Number(minFailFlag) : 0.10;
+    const windowFlag = pickFlag(args, '--window-days');
+    const windowDays = Number.isFinite(Number(windowFlag)) && Number(windowFlag) > 0
+      ? Number(windowFlag) : 7;
+    const useCouncilFlag = args.includes('--use-council');
+    const skipSpawn = args.includes('--dry-run') || args.includes('--no-spawn');
+    let detectMod;
+    let orchMod;
+    try {
+      detectMod = await import('../src/self-improvement.js');
+      orchMod = await import('../src/improvement-orchestrator.js');
+    } catch (e) {
+      const env = {
+        ok: false,
+        error: 'self_improvement_module_missing',
+        detail: e && e.message ? e.message : String(e),
+        hint: 'src/self-improvement.js and src/improvement-orchestrator.js must be importable',
+      };
+      emit(env);
+      process.exit(EXIT.EXECUTION);
+    }
+    const detected = await detectMod.detectUnderperformingCaptures({
+      tenant_id: tenant,
+      namespace: namespace === 'all' ? null : namespace,
+      window_days: windowDays,
+      min_kscore_delta: minKscoreDelta,
+      min_failure_rate: minFailureRate,
+    });
+    if (!detected.ok) {
+      emit(detected);
+      process.exit(EXIT.MISSING_PREREQ);
+    }
+    if (detected.candidates.length === 0) {
+      const env = {
+        ok: false,
+        error: 'no_candidates',
+        hint: 'detection ran but yielded zero candidates above the failure-rate threshold',
+        threshold: detected.threshold,
+        window_days: windowDays,
+        namespace,
+      };
+      emit(env);
+      process.exit(EXIT.MISSING_PREREQ);
+    }
+    const orch = await orchMod.orchestrateImprovement({
+      tenant_id: tenant,
+      namespace: namespace === 'all' ? null : namespace,
+      candidates: detected.candidates,
+      opts: {
+        use_curriculum: true,
+        use_council: useCouncilFlag,
+        skip_spawn: skipSpawn,
+      },
+    });
+    if (!orch.ok) {
+      emit(orch);
+      process.exit(EXIT.EXECUTION);
+    }
+    if (wantJson) {
+      emit(orch);
+      return;
+    }
+    console.log(`orchestrated re-distill: run_id=${orch.run_id}`);
+    console.log(`  base_artifact:      ${orch.base_artifact_id || '(none)'}`);
+    console.log(`  candidate_artifact: ${orch.candidate_artifact_id}`);
+    console.log(`  candidate_count:    ${orch.plan.candidate_count}`);
+    console.log(`  curriculum:         ${orch.plan.curriculum_enabled ? 'on' : 'off'}`);
+    console.log(`  teacher_council:    ${orch.plan.teacher_council ? 'on' : 'off'}`);
+    console.log(`  round:              ${orch.plan.round}`);
+    console.log(`  poll_url:           ${orch.poll_url}`);
+    return;
+  }
+
+  // -------------------------------------------------------------------------
+  // --decide: compareAndDecide(base, candidate).
+  // -------------------------------------------------------------------------
+  if (args.includes('--decide')) {
+    const base = pickFlag(args, '--base');
+    const candidate = pickFlag(args, '--candidate');
+    const minDeltaFlag = pickFlag(args, '--min-kscore-delta');
+    const minDelta = Number.isFinite(Number(minDeltaFlag)) ? Number(minDeltaFlag) : 0.02;
+    const maxRegFlag = pickFlag(args, '--max-regression-classes');
+    const maxReg = Number.isFinite(Number(maxRegFlag)) ? Number(maxRegFlag) : 0;
+    const autoPromote = args.includes('--auto-promote');
+    if (!base || !candidate) {
+      const env = {
+        ok: false,
+        error: 'missing_artifact_id',
+        hint: 'pass both --base <artifact_id> and --candidate <artifact_id>',
+      };
+      emit(env);
+      process.exit(EXIT.BAD_ARGS);
+    }
+    let orchMod;
+    try {
+      orchMod = await import('../src/improvement-orchestrator.js');
+    } catch (e) {
+      const env = {
+        ok: false,
+        error: 'self_improvement_module_missing',
+        detail: e && e.message ? e.message : String(e),
+        hint: 'src/improvement-orchestrator.js must be importable',
+      };
+      emit(env);
+      process.exit(EXIT.EXECUTION);
+    }
+    const result = await orchMod.compareAndDecide({
+      tenant_id: tenant,
+      base_artifact_id: base,
+      candidate_artifact_id: candidate,
+      gate: {
+        min_kscore_delta: minDelta,
+        max_regression_classes: maxReg,
+        auto_promote: autoPromote,
+      },
+    });
+    if (!result.ok) {
+      emit(result);
+      process.exit(EXIT.MISSING_PREREQ);
+    }
+    if (wantJson) {
+      emit(result);
+      return;
+    }
+    console.log(`decision: ${result.decision.toUpperCase()}`);
+    console.log(`  base_kscore:      ${result.base_kscore.toFixed(4)}`);
+    console.log(`  candidate_kscore: ${result.candidate_kscore.toFixed(4)}`);
+    console.log(`  delta:            ${result.delta >= 0 ? '+' : ''}${result.delta.toFixed(4)}`);
+    if (result.regressions.length > 0) {
+      console.log(`  regressions:      ${result.regressions.join(', ')}`);
+    }
+    if (result.promoted_path) {
+      console.log(`  promoted:         ${result.promoted_path}`);
+    }
+    return;
+  }
+
+  // No mode flag — print usage envelope and exit 1.
+  const env = {
+    ok: false,
+    error: 'no_mode_flag',
+    hint: 'pass one of --detect, --orchestrate, or --decide',
+  };
+  emit(env);
+  process.exit(EXIT.BAD_ARGS);
+}
+
 async function cmdDistill(args) {
   if (maybeHelp('distill', args)) return;
   if (args[0] === 'strategy') return cmdDistillStrategy(args.slice(1));
+  // W720 — `kolm distill improve --detect|--orchestrate|--decide` runs the
+  // self-improvement loop primitive. Dispatched BEFORE the other subverbs so
+  // `kolm distill improve --orchestrate --namespace X` is not hijacked by a
+  // later --namespace consumer. Local-only by default (no /v1/* fetch).
+  if (args[0] === 'improve') return cmdDistillImprove(args.slice(1));
   // W455 - `kolm distill runs [<id>]` lists or shows local distill runs.
   // Dispatched BEFORE --from-captures so `kolm distill runs --from-captures`
   // is not hijacked (W455 #8 lock).
@@ -13766,6 +14002,20 @@ async function cmdDistill(args) {
   // path validates + ships the profile through to the bakeoff /
   // quantize worker. Honest envelope on missing telemetry (exit 3).
   if (args.includes('--mixed-precision')) return cmdDistillMixedPrecision(args);
+  // W721-CLI: `kolm distill sparse-attention {compile,validate,summarize}`
+  // drives TSAC (Task-Specific Attention Compiler). compile walks task
+  // captures + emits a per-(layer,head) sparsity profile; validate
+  // schema-checks an existing profile; summarize reports dense/sparse/
+  // pruned head counts. Local-only (no /v1/* fetch). Honest envelope on
+  // any failure — non-zero exit.
+  if (args[0] === 'sparse-attention') return cmdDistillSparseAttention(args.slice(1));
+  // W722-CLI: `kolm distill itkv {build,classify,estimate}` drives ITKV
+  // (Importance-Tiered KV Cache). build emits a profile JSON, classify
+  // scores tokens through classifyToken, estimate reports GPU-resident
+  // memory savings. Local-only (no /v1/* fetch). Verb intentionally
+  // named "itkv" (not "kv") to avoid collision risk with future kv
+  // subverbs. Honest envelope on any failure - non-zero exit.
+  if (args[0] === 'itkv') return cmdDistillKvOptim(args.slice(1));
   // W480 - on-policy + preference orchestration subverbs. Local-only by default
   // (trainer is a tenant plug-in); --remote routes through /v1/distill/*.
   if (args[0] === 'onpolicy') return cmdDistillOnPolicy(args.slice(1));
@@ -15586,6 +15836,587 @@ async function cmdDistillMixedPrecision(args) {
     profile,
     summary,
   });
+}
+
+// W721-CLI — `kolm distill sparse-attention {compile,validate,summarize}`
+// drives the Task-Specific Attention Compiler (TSAC).
+//
+//   compile   — read captures (JSONL or JSON) with attention_traces[] +
+//               write a per-(layer,head) sparsity profile JSON. Honest
+//               envelope on insufficient captures / no telemetry.
+//   validate  — schema-check an existing profile via validateProfile.
+//   summarize — report dense/sparse/pruned counts + avg page_topk.
+//
+// All subverbs support --json (always-on for compile because the profile
+// IS JSON). Honest envelope on every failure path; non-zero exit on error.
+async function cmdDistillSparseAttention(args) {
+  const sub = args[0];
+  const rest = args.slice(1);
+  const wantJson = rest.includes('--json') || sub === 'compile';
+
+  const emit = (obj) => {
+    process.stdout.write(JSON.stringify(obj, null, 2) + '\n');
+    return obj;
+  };
+
+  if (!sub || sub === '--help' || sub === '-h') {
+    if (wantJson) {
+      emit({
+        ok: false,
+        error: 'subverb_required',
+        usage: 'kolm distill sparse-attention {compile|validate|summarize} [...]',
+        subverbs: ['compile', 'validate', 'summarize'],
+      });
+    } else {
+      console.log('usage: kolm distill sparse-attention {compile|validate|summarize} [...]');
+      console.log('  compile   --task X --captures-from <path> --out <profile.json> [--num-layers N --num-heads N]');
+      console.log('  validate  --profile <path>');
+      console.log('  summarize --profile <path>');
+    }
+    process.exit(sub ? EXIT.OK : EXIT.BAD_ARGS);
+  }
+
+  const {
+    TSAC_VERSION,
+    validateProfile,
+    summarizeProfile,
+    buildDefaultProfile,
+  } = await import('../src/tsac-profile.js');
+  const { compileTsacProfile } = await import('../src/tsac-compiler.js');
+
+  // -------------------------------------------------------------------------
+  // compile
+  // -------------------------------------------------------------------------
+  if (sub === 'compile') {
+    const task = pickFlag(rest, '--task');
+    const capturesFrom = pickFlag(rest, '--captures-from');
+    const out = pickFlag(rest, '--out') || pickFlag(rest, '-o');
+    const numLayersFlag = pickFlag(rest, '--num-layers');
+    const numHeadsFlag = pickFlag(rest, '--num-heads');
+    if (!task) {
+      emit({
+        ok: false,
+        error: 'missing_task',
+        tsac_version: TSAC_VERSION,
+        hint: 'pass --task <name> identifying the task this profile is for',
+      });
+      process.exit(EXIT.BAD_ARGS);
+    }
+    if (!capturesFrom) {
+      emit({
+        ok: false,
+        error: 'missing_captures_source',
+        tsac_version: TSAC_VERSION,
+        hint: 'pass --captures-from <path-to-jsonl-or-json> with attention_traces[]',
+      });
+      process.exit(EXIT.BAD_ARGS);
+    }
+    if (!fs.existsSync(capturesFrom)) {
+      emit({
+        ok: false,
+        error: 'captures_not_found',
+        path: capturesFrom,
+        tsac_version: TSAC_VERSION,
+      });
+      process.exit(EXIT.NOT_FOUND);
+    }
+    let raw;
+    try {
+      raw = fs.readFileSync(capturesFrom, 'utf8');
+    } catch (e) {
+      emit({
+        ok: false,
+        error: 'captures_read_failed',
+        path: capturesFrom,
+        detail: String(e && e.message || e),
+        tsac_version: TSAC_VERSION,
+      });
+      process.exit(EXIT.EXECUTION);
+    }
+    // Accept either JSONL (one row per line) OR a JSON array.
+    let captures;
+    const trimmed = raw.trim();
+    try {
+      if (trimmed.startsWith('[')) {
+        captures = JSON.parse(trimmed);
+      } else {
+        captures = trimmed.split(/\r?\n/).filter(Boolean).map((line, idx) => {
+          try { return JSON.parse(line); }
+          catch (e) { throw new Error(`line ${idx + 1}: ${e.message}`); }
+        });
+      }
+    } catch (e) {
+      emit({
+        ok: false,
+        error: 'captures_parse_failed',
+        path: capturesFrom,
+        detail: String(e && e.message || e),
+        tsac_version: TSAC_VERSION,
+      });
+      process.exit(EXIT.BAD_ARGS);
+    }
+    if (!Array.isArray(captures)) {
+      emit({
+        ok: false,
+        error: 'captures_not_array',
+        tsac_version: TSAC_VERSION,
+      });
+      process.exit(EXIT.BAD_ARGS);
+    }
+
+    const opts = {};
+    const nl = Number(numLayersFlag);
+    const nh = Number(numHeadsFlag);
+    if (Number.isInteger(nl) && nl > 0) opts.num_layers = nl;
+    if (Number.isInteger(nh) && nh > 0) opts.num_heads = nh;
+
+    const result = compileTsacProfile({ task_name: task, captures, opts });
+    if (!result.ok) {
+      emit({ ...result, tsac_version: TSAC_VERSION });
+      process.exit(EXIT.MISSING_PREREQ);
+    }
+    if (out) {
+      try {
+        fs.mkdirSync(path.dirname(path.resolve(process.cwd(), out)) || '.', { recursive: true });
+        fs.writeFileSync(out, JSON.stringify(result.profile, null, 2));
+      } catch (e) {
+        emit({
+          ok: false,
+          error: 'output_write_failed',
+          path: out,
+          detail: String(e && e.message || e),
+          tsac_version: TSAC_VERSION,
+        });
+        process.exit(EXIT.EXECUTION);
+      }
+    }
+    emit({
+      ok: true,
+      tsac_version: TSAC_VERSION,
+      task,
+      output: out || null,
+      summary: summarizeProfile(result.profile),
+      telemetry: result.telemetry,
+      warnings: result.warnings,
+    });
+    return;
+  }
+
+  // -------------------------------------------------------------------------
+  // validate
+  // -------------------------------------------------------------------------
+  if (sub === 'validate') {
+    const profilePath = pickFlag(rest, '--profile');
+    if (!profilePath) {
+      emit({
+        ok: false,
+        error: 'missing_profile',
+        tsac_version: TSAC_VERSION,
+        hint: 'pass --profile <path-to-tsac-profile.json>',
+      });
+      process.exit(EXIT.BAD_ARGS);
+    }
+    if (!fs.existsSync(profilePath)) {
+      emit({
+        ok: false,
+        error: 'profile_not_found',
+        path: profilePath,
+        tsac_version: TSAC_VERSION,
+      });
+      process.exit(EXIT.NOT_FOUND);
+    }
+    let profile;
+    try {
+      profile = JSON.parse(fs.readFileSync(profilePath, 'utf8'));
+    } catch (e) {
+      emit({
+        ok: false,
+        error: 'profile_parse_failed',
+        path: profilePath,
+        detail: String(e && e.message || e),
+        tsac_version: TSAC_VERSION,
+      });
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const v = validateProfile(profile);
+    if (!v.ok) {
+      emit({
+        ok: false,
+        error: 'profile_invalid',
+        path: profilePath,
+        tsac_version: TSAC_VERSION,
+        validation_errors: v.errors.slice(0, 50),
+      });
+      process.exit(EXIT.BAD_ARGS);
+    }
+    emit({
+      ok: true,
+      tsac_version: TSAC_VERSION,
+      path: profilePath,
+      validated: true,
+    });
+    return;
+  }
+
+  // -------------------------------------------------------------------------
+  // summarize
+  // -------------------------------------------------------------------------
+  if (sub === 'summarize') {
+    const profilePath = pickFlag(rest, '--profile');
+    if (!profilePath) {
+      emit({
+        ok: false,
+        error: 'missing_profile',
+        tsac_version: TSAC_VERSION,
+        hint: 'pass --profile <path-to-tsac-profile.json>',
+      });
+      process.exit(EXIT.BAD_ARGS);
+    }
+    if (!fs.existsSync(profilePath)) {
+      emit({
+        ok: false,
+        error: 'profile_not_found',
+        path: profilePath,
+        tsac_version: TSAC_VERSION,
+      });
+      process.exit(EXIT.NOT_FOUND);
+    }
+    let profile;
+    try {
+      profile = JSON.parse(fs.readFileSync(profilePath, 'utf8'));
+    } catch (e) {
+      emit({
+        ok: false,
+        error: 'profile_parse_failed',
+        path: profilePath,
+        detail: String(e && e.message || e),
+        tsac_version: TSAC_VERSION,
+      });
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const v = validateProfile(profile);
+    if (!v.ok) {
+      emit({
+        ok: false,
+        error: 'profile_invalid',
+        path: profilePath,
+        tsac_version: TSAC_VERSION,
+        validation_errors: v.errors.slice(0, 20),
+      });
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const summary = summarizeProfile(profile);
+    emit({
+      ok: true,
+      tsac_version: TSAC_VERSION,
+      path: profilePath,
+      summary,
+    });
+    return;
+  }
+
+  emit({
+    ok: false,
+    error: 'unknown_subverb',
+    subverb: sub,
+    tsac_version: TSAC_VERSION,
+    hint: 'use one of: compile, validate, summarize',
+  });
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// W722-CLI — `kolm distill itkv {build,classify,estimate}` drives ITKV
+// (Importance-Tiered KV Cache).
+//
+//   build     — build a profile JSON for a given artifact id. Optional
+//               --sink-anchor / --recent-window flags override the defaults
+//               (4 / 512). Writes to --out <path> or stdout. --json is
+//               always-on for this verb because the profile IS JSON.
+//
+//   classify  — score a JSONL of token rows through classifyToken. Reads
+//               --tokens <jsonl> + optional --profile <path>; prints one
+//               line per token with {position, class, precision_tier}.
+//
+//   estimate  — call estimateMemoryReduction on a profile + distribution
+//               and print the GPU-resident savings breakdown. Distribution
+//               is parsed from --distribution "sink:10,policy:50,..."
+//
+// Verb is intentionally "itkv" not "kv" to leave room for future kv-*
+// subverbs without shadowing. Honest envelope on every failure path
+// (invalid_precision_tier, class_distribution_mismatch, missing files);
+// always non-zero exit on error.
+async function cmdDistillKvOptim(args) {
+  const sub = args[0];
+  const rest = args.slice(1);
+  const wantJson = rest.includes('--json');
+  const emit = (env) => {
+    console.log(JSON.stringify(env, null, 2));
+    return env;
+  };
+
+  const {
+    ITKV_VERSION,
+    TOKEN_CLASSES,
+    PRECISION_TIERS,
+    classifyToken,
+    precisionTierFor,
+    buildItkvProfile,
+    estimateMemoryReduction,
+  } = await import('../src/itkv-profile.js');
+
+  if (!sub || sub === '--help' || sub === '-h') {
+    emit({
+      ok: false,
+      error: 'usage',
+      version: ITKV_VERSION,
+      hint: 'kolm distill itkv {build|classify|estimate} ...',
+      verbs: {
+        build: 'kolm distill itkv build --artifact <id> [--sink-anchor 4] [--recent-window 512] [--out <path>]',
+        classify: 'kolm distill itkv classify --tokens <jsonl> [--profile <path>]',
+        estimate: 'kolm distill itkv estimate --profile <path> --total-tokens <N> --distribution <sink:10,policy:50,...>',
+      },
+      token_classes: TOKEN_CLASSES,
+      precision_tiers: PRECISION_TIERS,
+    });
+    process.exit(EXIT.BAD_ARGS);
+  }
+
+  // ----- build -----------------------------------------------------------
+  if (sub === 'build') {
+    const artifact_id = pickFlag(rest, '--artifact') || pickFlag(rest, '--artifact-id') || '';
+    const sinkFlag = pickFlag(rest, '--sink-anchor');
+    const recentFlag = pickFlag(rest, '--recent-window');
+    const out = pickFlag(rest, '--out');
+
+    const sink_anchor = sinkFlag != null && sinkFlag !== ''
+      ? Number.parseInt(sinkFlag, 10)
+      : undefined;
+    const recent_window_size = recentFlag != null && recentFlag !== ''
+      ? Number.parseInt(recentFlag, 10)
+      : undefined;
+
+    // Optional precision_override — pass as repeated --precision <class>=<tier>.
+    const precision_override = {};
+    for (let i = 0; i < rest.length; i += 1) {
+      if (rest[i] === '--precision' && rest[i + 1]) {
+        const [cls, tier] = rest[i + 1].split('=');
+        if (cls && tier) precision_override[cls] = tier;
+      }
+    }
+
+    const built = buildItkvProfile({
+      artifact_id,
+      sink_anchor,
+      recent_window_size,
+      precision_override,
+    });
+    if (!built.ok) {
+      emit({ ...built, version: ITKV_VERSION });
+      process.exit(EXIT.BAD_ARGS);
+    }
+
+    if (out) {
+      try {
+        fs.writeFileSync(out, JSON.stringify(built.profile, null, 2));
+      } catch (e) {
+        emit({
+          ok: false,
+          error: 'profile_write_failed',
+          detail: String(e.message || e),
+          path: out,
+          version: ITKV_VERSION,
+        });
+        process.exit(EXIT.RUNTIME);
+      }
+      emit({
+        ok: true,
+        version: ITKV_VERSION,
+        verb: 'build',
+        profile_path: out,
+        profile: built.profile,
+      });
+      return;
+    }
+
+    emit({ ok: true, version: ITKV_VERSION, verb: 'build', profile: built.profile });
+    return;
+  }
+
+  // ----- classify --------------------------------------------------------
+  if (sub === 'classify') {
+    const tokensPath = pickFlag(rest, '--tokens');
+    const profilePath = pickFlag(rest, '--profile');
+    if (!tokensPath) {
+      emit({
+        ok: false,
+        error: 'bad_args',
+        hint: '--tokens <jsonl> is required',
+        version: ITKV_VERSION,
+      });
+      process.exit(EXIT.BAD_ARGS);
+    }
+    if (!fs.existsSync(tokensPath)) {
+      emit({
+        ok: false,
+        error: 'tokens_file_not_found',
+        path: tokensPath,
+        version: ITKV_VERSION,
+      });
+      process.exit(EXIT.NOT_FOUND);
+    }
+    let precision_by_class = null;
+    if (profilePath) {
+      if (!fs.existsSync(profilePath)) {
+        emit({
+          ok: false,
+          error: 'profile_not_found',
+          path: profilePath,
+          version: ITKV_VERSION,
+        });
+        process.exit(EXIT.NOT_FOUND);
+      }
+      try {
+        const prof = JSON.parse(fs.readFileSync(profilePath, 'utf8'));
+        if (prof && typeof prof.precision_by_class === 'object') {
+          precision_by_class = prof.precision_by_class;
+        }
+      } catch (e) {
+        emit({
+          ok: false,
+          error: 'profile_parse_failed',
+          detail: String(e.message || e),
+          path: profilePath,
+          version: ITKV_VERSION,
+        });
+        process.exit(EXIT.BAD_ARGS);
+      }
+    }
+
+    const lines = fs.readFileSync(tokensPath, 'utf8').split('\n').filter(Boolean);
+    const out = [];
+    for (let i = 0; i < lines.length; i += 1) {
+      let tok;
+      try {
+        tok = JSON.parse(lines[i]);
+      } catch (e) {
+        emit({
+          ok: false,
+          error: 'malformed_token_line',
+          line: i + 1,
+          detail: String(e.message || e),
+          version: ITKV_VERSION,
+        });
+        process.exit(EXIT.BAD_ARGS);
+      }
+      const result = classifyToken(tok);
+      const tier = precisionTierFor(result, precision_by_class);
+      const cls = result && typeof result === 'object' ? result.class : result;
+      const pos = Number.isInteger(tok.position) ? tok.position : -1;
+      out.push({ position: pos, class: cls, precision_tier: tier });
+    }
+
+    if (wantJson) {
+      emit({
+        ok: true,
+        version: ITKV_VERSION,
+        verb: 'classify',
+        tokens_in: lines.length,
+        classifications: out,
+      });
+      return;
+    }
+    for (const r of out) {
+      console.log(`${r.position}\t${r.class}\t${r.precision_tier}`);
+    }
+    return;
+  }
+
+  // ----- estimate --------------------------------------------------------
+  if (sub === 'estimate') {
+    const profilePath = pickFlag(rest, '--profile');
+    const totalTokensRaw = pickFlag(rest, '--total-tokens');
+    const distributionRaw = pickFlag(rest, '--distribution');
+
+    if (!profilePath || !totalTokensRaw || !distributionRaw) {
+      emit({
+        ok: false,
+        error: 'bad_args',
+        hint: '--profile <path> --total-tokens N --distribution sink:10,policy:50,...',
+        version: ITKV_VERSION,
+      });
+      process.exit(EXIT.BAD_ARGS);
+    }
+    if (!fs.existsSync(profilePath)) {
+      emit({
+        ok: false,
+        error: 'profile_not_found',
+        path: profilePath,
+        version: ITKV_VERSION,
+      });
+      process.exit(EXIT.NOT_FOUND);
+    }
+    const total_tokens = Number.parseInt(totalTokensRaw, 10);
+    if (!Number.isInteger(total_tokens) || total_tokens <= 0) {
+      emit({
+        ok: false,
+        error: 'invalid_total_tokens',
+        hint: 'total_tokens must be a positive integer',
+        version: ITKV_VERSION,
+      });
+      process.exit(EXIT.BAD_ARGS);
+    }
+
+    let profile;
+    try {
+      profile = JSON.parse(fs.readFileSync(profilePath, 'utf8'));
+    } catch (e) {
+      emit({
+        ok: false,
+        error: 'profile_parse_failed',
+        detail: String(e.message || e),
+        path: profilePath,
+        version: ITKV_VERSION,
+      });
+      process.exit(EXIT.BAD_ARGS);
+    }
+
+    // Parse "sink:10,policy:50,boilerplate:200" into an object.
+    const class_distribution = {};
+    for (const pair of distributionRaw.split(',')) {
+      const [cls, n] = pair.split(':');
+      if (!cls || !n) continue;
+      const v = Number.parseInt(n, 10);
+      if (!Number.isFinite(v) || v < 0) continue;
+      class_distribution[cls.trim()] = v;
+    }
+
+    const r = estimateMemoryReduction(profile, { total_tokens, class_distribution });
+    if (!r.ok) {
+      emit({ ...r, version: ITKV_VERSION });
+      process.exit(EXIT.BAD_ARGS);
+    }
+    emit({
+      ok: true,
+      version: ITKV_VERSION,
+      verb: 'estimate',
+      total_tokens,
+      class_distribution,
+      bf16_bytes_baseline: r.bf16_bytes_baseline,
+      itkv_bytes_estimated: r.itkv_bytes_estimated,
+      reduction_pct: r.reduction_pct,
+      by_class_breakdown: r.by_class_breakdown,
+    });
+    return;
+  }
+
+  emit({
+    ok: false,
+    error: 'unknown_verb',
+    verb: sub,
+    hint: 'use one of: build | classify | estimate',
+    version: ITKV_VERSION,
+  });
+  process.exit(EXIT.BAD_ARGS);
 }
 
 async function cmdDistillContrastive(args) {

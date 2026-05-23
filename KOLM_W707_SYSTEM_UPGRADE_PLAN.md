@@ -891,4 +891,331 @@ Waves run **sequentially**. Within each wave, agents run **in parallel via singl
 
 ---
 
-*Plan prepared 2026-05-24 in response to user-shared 114-item external Claude review of kolm.ai. Atomic preservation of all source items per `feedback-w707-external-review-atomic-execution` memory.*
+## PART VI — EXTERNAL-REVIEW ADDITION 2026-05-24 (29 NEW WAVES, W807-W835)
+
+Source: second external-review queue dated 2026-05-24, delivered verbatim by user with directive "do not miss any that you were already focused on these are purely additions — update the master doc now to survive compression … and also have atomic levels of execution like this."
+
+**Priority override:** Tier 0 items (W807-W810) are "ship-blocking before launch." They JUMP the queue and execute IMMEDIATELY after the current W720-W722 batch lands, before W723 begins. Tier 1-4 retain numerical ordering W811-W835 and execute after W806 OR interleave based on dependency (e.g. W811 capture analytics is a natural follow-on to W720 self-improvement; flag at runtime).
+
+**Tier legend:** `[T0]` ship-blocking · `[T1]` first 30 days · `[T2]` first 90 days · `[T3]` first 6 months · `[T4]` year 1+
+
+---
+
+### W807 — [T0] CONFIDENCE-AWARE ADAPTIVE ROUTING
+
+Without this, every deployment is "trust the student blindly." With it, every fallback is a training signal feeding W720 self-improvement loop. Highest-impact T0 item.
+
+- **[W807-1]** Token-level entropy monitoring during student generation. New `src/confidence-router.js` exports `tokenEntropy(logits)`, `streamingEntropyWindow(window=8)`, threshold table `{aggressive:0.85, balanced:0.7, conservative:0.55}`. Agent: `confidence-1`.
+- **[W807-2]** Mid-response seamless splice: when entropy window exceeds threshold, request teacher to continue from current token state. New `src/teacher-splice.js` exports `spliceToTeacher({tokens_so_far, prompt, teacher_id, budget_ms})`. Honest envelope: teacher unreachable → finish-locally + stamp `fallback_failed:true` on response metadata. Agent: `confidence-2`.
+- **[W807-3]** Response metadata schema: `{local_tokens, teacher_tokens, local_ratio, splice_events:[{at_token, reason, latency_ms}], threshold_used}`. Add to response envelope across all runtime backends. Agent: `confidence-3`.
+- **[W807-4]** Dashboard `/account/confidence.html`: local-vs-teacher ratio over time, cost savings line, p50/p95/p99 splice latency, threshold-distribution histogram. Agent: `confidence-4`.
+- **[W807-5]** Fallback latency budget: configurable per-tenant `max_splice_delay_ms`; exceeded → degrade-to-local with warning event. Agent: `confidence-4`.
+- **[W807-6]** Wire-into-W720: every fallback span emits `{capture_candidate:true, weakness_signal:true}` event → W720 detectUnderperformingCaptures elevates these to top of re-distill queue. Agent: `confidence-5`.
+
+### W808 — [T0] CAPTURE POISONING DETECTION
+
+Before ANY production traffic flows, captures must be sanity-checked. Without this, malicious traffic poisons the next distillation.
+
+- **[W808-1]** Statistical anomaly detector: per-tenant per-namespace running mean/stddev on output_length, vocab_entropy, response_time, token_overlap_to_teacher_typical. Flag if any axis exceeds 3σ. New `src/capture-anomaly.js`. Agent: `poison-1`.
+- **[W808-2]** Capture staging/quarantine: new captures land in `staged_captures` table with `quarantine_until: now()+24h`. Promotion to `captures` table requires (a) no anomaly flag AND (b) no manual block. New table + migration in `src/store.js`. Agent: `poison-2`.
+- **[W808-3]** Cryptographic origin binding: capture rows store `teacher_response_signature` (sha256 of teacher response headers + first 256 bytes of body); reject if signature does not chain to a known teacher fingerprint. Add to `src/proxy.js`. Agent: `poison-3`.
+- **[W808-4]** Manual review queue UI `/account/captures/review.html` with allow/block/escalate actions. Per-row diff vs teacher baseline. Agent: `poison-4`.
+- **[W808-5]** Post-distillation regression gate: bakeoff vs prior artifact on shared eval set; auto-rollback if K-Score drops > 0.02 OR critical_fail_rate increases > 1pp. Wire into `src/distill-pipeline.js` final step. Agent: `poison-5`.
+- **[W808-6]** New CLI: `kolm captures review [--list-pending | --allow ID | --block ID --reason "..." | --auto-allow-since 24h]`. Agent: `poison-6`.
+
+### W809 — [T0] STRUCTURED OUTPUT VALIDATION
+
+The #1 production failure mode: teacher emits valid JSON, student emits broken JSON, downstream silently corrupts.
+
+- **[W809-1]** Schema specification in `.kolm` manifest: `output_schema:{kind:'json'|'xml'|'grammar'|'regex'|null, schema:<inline-or-ref>, strict:bool}`. Extend `src/artifact.js` buildPayload — conditionally bind `output_schema_hash` into artifact_hash chain (W460 pattern). Agent: `schema-1`.
+- **[W809-2]** Constrained decoding engine integration. Add `src/constrained-decode.js` wrapping `outlines` (Python) or `lm-format-enforcer` for JSON-Schema-guided sampling. Worker shell at `workers/constrained/`. Honest envelope: library not installed → exit 3 + `no_constrained_decoder` + install hint. Agent: `schema-2`.
+- **[W809-3]** Bakeoff parse-validation track: every structured output is parsed; emit `parse_failure_rate` ALONGSIDE K-Score (never substituted for). Extend `src/bakeoff.js` summary. Agent: `schema-3`.
+- **[W809-4]** Runtime auto-retry on parse failure: up to 3 retries with temperature decay (0.7 → 0.3 → 0.1); 4th attempt falls back to teacher via W807 splice. New retry harness in `src/runtime-wrap.js`. Agent: `schema-4`.
+- **[W809-5]** CLI: `kolm compile --output-schema <file.json>` writes schema into artifact; `kolm verify --validate-schema` runs schema check post-load. Agent: `schema-5`.
+
+### W810 — [T0] K-SCORE EXTERNAL CALIBRATION (move up from W745)
+
+If K-Score 0.91 doesn't mean what users perceive, credibility dies on day one.
+
+- **[W810-1]** Calibration pack data layer: new `src/kscore-calibration.js` reads `~/.kolm/calibration-pack-YYYY-MM.jsonl` (rows: `{pair_id, prompt, response_a, response_b, human_preference:'a'|'b'|'tie', task_category}`). Agent: `cal-1`.
+- **[W810-2]** Bradley-Terry fitter: pure-JS solver (gradient descent on logistic likelihood) to estimate latent skill from pairwise prefs; emits per-task-category and pooled curves. `src/bradley-terry.js`. Agent: `cal-2`.
+- **[W810-3]** Calibration mapping export: write `~/.kolm/kscore-calibration.json` `{by_category:{coding:{slope, intercept, ci95_low, ci95_high}, writing:{...}, analysis:{...}, support:{...}}, pooled:{...}, n_pairs, fitted_at}`. Agent: `cal-2`.
+- **[W810-4]** Surface calibration in K-Score response envelope: `{kscore:0.91, human_preference_rate:{point:0.89, ci95:[0.86,0.92]}, calibration_pack_id:'2026-Q2'}`. Extend `src/kscore.js`. Agent: `cal-3`.
+- **[W810-5]** Quarterly recalibration job: `scripts/recalibrate-kscore.cjs` ingests new pack, fits, writes mapping. Cron-friendly. Agent: `cal-4`.
+- **[W810-6]** Public methodology page `/k-score-calibration.html`: explains Bradley-Terry, links to anonymized pack hash, shows current curves. Honest contract: never publish mapping without n>=500 pairs in category (display "insufficient_data" instead). Agent: `cal-5`.
+
+---
+
+### W811 — [T1] CAPTURE ANALYTICS DASHBOARD
+
+Users must understand their data BEFORE distilling. Pairs with W716 TAAS recommender.
+
+- **[W811-1]** Topic clustering pipeline: `src/capture-cluster.js` — embed captures (existing `src/embed.js`), HDBSCAN or k-means via pure-JS implementation OR `workers/cluster/` Python shell with sklearn. Agent: `analytics-1`.
+- **[W811-2]** Per-cluster summary: volume, diversity (mean pairwise distance), avg/p95 length, language breakdown, temporal histogram. Agent: `analytics-2`.
+- **[W811-3]** Pre-distill K-Score prediction: ML estimate using W832 kolm-meta inputs (capture stats → predicted K-Score). Initial v0: rule-based score = `0.65 + 0.001 * min(n_captures, 500) + 0.05 * cluster_diversity_norm`. Agent: `analytics-3`.
+- **[W811-4]** Readiness score + recommendations: emit `{readiness:0..1, missing:[{cluster, current_n, recommended_n, projected_kscore_lift}]}`. Agent: `analytics-3`.
+- **[W811-5]** Dashboard `/account/captures/analytics.html`: cluster bubbles, readiness gauge, recommendation list, "Distill now" CTA. Agent: `analytics-4`.
+- **[W811-6]** Smart dedup: detect near-duplicates (cosine > 0.97 over embeddings), compress to weighted exemplar. Toggle via `--dedup-near` flag on `kolm captures stats`. Agent: `analytics-5`.
+
+### W812 — [T1] FAILURE-MODE VISUALIZATION
+
+After distillation, show WHERE the student fails.
+
+- **[W812-1]** Per-cluster K-Score breakdown in `src/bakeoff.js` summary (already groups; surface in API). Agent: `failmode-1`.
+- **[W812-2]** Worst-N examples surface: top-20 mismatches with teacher/student side-by-side, full diff. New route `/v1/bakeoff/:id/worst`. Agent: `failmode-2`.
+- **[W812-3]** Failure categorization rubric: format / factual / reasoning / tone / hallucination — heuristic classifier in `src/failure-categorize.js` (regex + length-delta + entity-overlap + numeric-mismatch). Agent: `failmode-3`.
+- **[W812-4]** Fix priority ranking: `priority = cluster_freq × kscore_delta × user_visibility_weight`; emit ranked list. Agent: `failmode-3`.
+- **[W812-5]** Capture-recommendation link: every failure category gets actionable text "Capture 50 more examples like THIS to fix" with a query template. Agent: `failmode-4`.
+- **[W812-6]** Dashboard `/account/artifacts/:id/failures.html`. Agent: `failmode-5`.
+
+### W813 — [T1] DRIFT DETECTION AND ALERTING
+
+Deployed students degrade as production traffic shifts.
+
+- **[W813-1]** Embedding-distribution comparator: `src/drift-detect.js` — KL divergence between live-query embedding histogram and capture-training embedding histogram (binned). Already partial in `src/drift-supersession.js` — extend. Agent: `drift-1`.
+- **[W813-2]** Configurable threshold + alert: default `kl_threshold:0.10`, `fallback_rate_lift:0.20`. Per-namespace override. Agent: `drift-1`.
+- **[W813-3]** Webhook + email alerts: reuse existing `src/notifications.js` (W215). New `drift_detected` event type. Agent: `drift-2`.
+- **[W813-4]** Suggested-action text with quantified shift: "your traffic shifted 23% more billing queries; re-distill recommended". Agent: `drift-3`.
+- **[W813-5]** Auto-trigger W720 self-improvement when drift detected (opt-in via `auto_remediate_drift:true` namespace setting). Agent: `drift-4`.
+
+### W814 — [T1] SPECULATIVE DECODING WITH STUDENT DRAFT
+
+Student as draft for teacher — inverse of W807 fallback.
+
+- **[W814-1]** Speculative wrapper: `src/speculative-teacher.js` — student generates N=8 candidate tokens; teacher verifies in one forward pass. Reuses EAGLE-3 infra already shipped (A3). Agent: `spec-1`.
+- **[W814-2]** Acceptance-rate benchmarker: per-artifact `kolm bench speculative --against TEACHER` reports acceptance rate + effective speedup. Agent: `spec-2`.
+- **[W814-3]** Runtime mode flag: `--speculative student` on `kolm serve` enables draft mode. Agent: `spec-3`.
+- **[W814-4]** Per-task acceptance log: store `{task_cluster, accept_rate, avg_accepted_run}` in event-store; surface in dashboard. Agent: `spec-4`.
+
+### W815 — [T1] ACTIVE LEARNING LOOP
+
+Automatically identify what to capture next.
+
+- **[W815-1]** Gap detector: `src/active-learning.js` — compare capture distribution (W811 clustering) to production-traffic distribution (W813 live histogram); rank gaps by `gap_size × prod_frequency × est_kscore_lift`. Agent: `active-1`.
+- **[W815-2]** Recommendation surface: top-K gaps as actionable items "Your top 3 capture priorities: ..." in dashboard + CLI `kolm captures next`. Agent: `active-2`.
+- **[W815-3]** Optional synthetic-capture generation: with user approval, teacher generates synthetic examples for gap clusters. Honest envelope: synthetic captures stamped `synthetic:true`; never silent. Agent: `active-3`.
+- **[W815-4]** Wire-into-W720 self-improvement: active-learning queue is the seed for next orchestrateImprovement call. Agent: `active-4`.
+
+### W816 — [T1] FAILURE-MODE → CAPTURE RECOMMENDATION FEEDBACK LOOP
+
+(Implicit T1 from queue summary — failure-mode + active-learning + W720 form the loop.)
+
+- **[W816-1]** Glue: failure rows from W812 → priority feed in W815. Agent: `loop-1`.
+- **[W816-2]** Lock-in test: end-to-end fixture proving the failure→capture→re-distill→improvement cycle produces a K-Score lift on a synthetic regression. Agent: `loop-1`.
+
+---
+
+### W817 — [T2] .KOLM FORMAT FORMAL SPECIFICATION
+
+Start the standard moat.
+
+- **[W817-1]** Version-numbered spec doc `docs/spec/kolm-format-v1.0.md` (this IS user-requested — add to allowed-MD list). Agent: `spec-1`.
+- **[W817-2]** kolmspec.org domain placeholder + redirect plan (no DNS purchase this wave — TODO note). Agent: `spec-2`.
+- **[W817-3]** Reference implementations: `sdk/c/kolm-format.h` schema reader, `sdk/python/kolm/format.py`, `sdk/rust/src/format.rs`. Agent: `spec-3`, `spec-4`, `spec-5` (parallel).
+- **[W817-4]** Test vectors: 5 known-good artifacts checked into `tests/fixtures/format-v1/*.kolm` with sha256 manifest. Agent: `spec-6`.
+- **[W817-5]** RFC-style change process doc `docs/spec/CHANGE_PROCESS.md`. Agent: `spec-7`.
+
+### W818 — [T2] .KOLM LOADERS FOR ECOSYSTEM TOOLS
+
+- **[W818-1]** llama.cpp loader PR: prepare `tools/llama-cpp-kolm-loader/` patch series. Agent: `eco-1`.
+- **[W818-2]** Ollama loader / plugin in `tools/ollama-kolm/`. Agent: `eco-2`.
+- **[W818-3]** Hugging Face Hub format-option PR draft. Agent: `eco-3`.
+- **[W818-4]** vLLM model loader in `tools/vllm-kolm/`. Agent: `eco-4`.
+- **[W818-5]** LM Studio import-wizard spec doc. Agent: `eco-5`.
+
+### W819 — [T2] VS CODE EXTENSION
+
+(Partial: `packages/vscode-kolm-rag/` exists. Upgrade to full passive-monitor + distill workflow.)
+
+- **[W819-1]** Passive monitor: hook Copilot/Cursor/Claude-Code suggestion-acceptance events. Agent: `vscode-1`.
+- **[W819-2]** Pattern detection: surface "boilerplate", "tests", "docstrings" repetition clusters. Agent: `vscode-2`.
+- **[W819-3]** Status bar: capture count + "ready to distill" CTA. Agent: `vscode-3`.
+- **[W819-4]** Post-distill routing: route matching completions to local student via in-process runtime. Agent: `vscode-4`.
+- **[W819-5]** Settings panel: threshold, teacher preference, namespace. Agent: `vscode-5`.
+
+### W820 — [T2] GITHUB ACTIONS INTEGRATION
+
+- **[W820-1]** `.github/workflows/kolm.yml` template + `kolm.yaml` schema. Agent: `gha-1`.
+- **[W820-2]** Action: `kolm/distill-action@v1` evaluates K-Score on push; gates merge. Agent: `gha-2`.
+- **[W820-3]** Auto re-distill when K-Score drops below gate. Agent: `gha-3`.
+- **[W820-4]** Publish .kolm to GitHub Releases as artifact. Agent: `gha-4`.
+- **[W820-5]** `kolm diff v1.2.kolm v1.3.kolm` quality-delta command. Agent: `gha-5`.
+
+### W821 — [T2] ARTIFACT COMPOSITION / PIPELINE ORCHESTRATION
+
+- **[W821-1]** `kolm.pipeline.yaml` schema + parser (`src/pipeline-orchestrator.js`). Agent: `pipe-1`.
+- **[W821-2]** Runtime router using classifier-artifact + specialists. Agent: `pipe-2`.
+- **[W821-3]** Pipeline-level K-Score (weighted by route frequency). Agent: `pipe-3`.
+- **[W821-4]** Flow-diagram visualization on `/account/pipelines/:id.html`. Agent: `pipe-4`.
+
+### W822 — [T2] A/B TESTING INFRASTRUCTURE
+
+- **[W822-1]** Traffic splitter: per-tenant config `{version_a:ART, version_b:ART, split:0.5}`. Agent: `abtest-1`.
+- **[W822-2]** Per-version metrics: K-Score, latency, fallback rate, user feedback aggregation. Agent: `abtest-2`.
+- **[W822-3]** Significance: chi-squared OR bootstrap (pure-JS in `src/significance.js`). Agent: `abtest-3`.
+- **[W822-4]** Auto-promote / auto-rollback based on significance + delta gates. Agent: `abtest-4`.
+- **[W822-5]** Wire-into-W720: A/B comparison data feeds self-improvement. Agent: `abtest-5`.
+
+### W823 — [T2] OPENTELEMETRY INTEGRATION (UPGRADE)
+
+(A18 partial — existing OTLP. Add new attrs + dashboard template.)
+
+- **[W823-1]** New span attrs: artifact_id, routing_decision, token_confidence_p50/p95, kscore_drift. Agent: `otel-1`.
+- **[W823-2]** Grafana dashboard template `tools/grafana/kolm-dashboard.json`. Agent: `otel-2`.
+- **[W823-3]** Alert templates for Datadog/Honeycomb/Grafana (K-Score drift, fallback spike, latency regression). Agent: `otel-3`.
+
+### W824 — [T2] KUBERNETES-NATIVE DEPLOYMENT
+
+- **[W824-1]** Helm chart `tools/helm/kolm/` with values.yaml. Agent: `k8s-1`.
+- **[W824-2]** /ready endpoint upgrade: 200 only when artifact loaded + warmed. Agent: `k8s-2`.
+- **[W824-3]** /metrics Prometheus exporter. Agent: `k8s-3`.
+- **[W824-4]** HPA spec keyed on inference-queue depth (custom metric). Agent: `k8s-4`.
+- **[W824-5]** Init container to pull .kolm from registry. Agent: `k8s-5`.
+- **[W824-6]** Rolling-update support for zero-downtime model swaps. Agent: `k8s-6`.
+
+---
+
+### W825 — [T3] ARTIFACT MARKETPLACE MVP
+
+(Existing pages at `public/marketplace/` are static. Upgrade to dynamic listings + downloads.)
+
+- **[W825-1]** Browse + filter UI: vertical, task type, K-Score, hardware, teacher. Agent: `mkt-1`.
+- **[W825-2]** Upload flow with metadata + signature verify. Agent: `mkt-2`.
+- **[W825-3]** Download + run one-click via SDK. Agent: `mkt-3`.
+- **[W825-4]** Transfer-learning fine-tune from marketplace artifact (wires W720 + W718). Agent: `mkt-4`.
+- **[W825-5]** Rating + review system with anti-gaming (req. account history). Agent: `mkt-5`.
+- **[W825-6]** Revenue share (70% publisher) on paid downloads. Agent: `mkt-6`.
+
+### W826 — [T3] MEMORY-AWARE RUNTIME SCHEDULING
+
+- **[W826-1]** Memory hierarchy detector: `src/runtime-placement.js` — probes GPU VRAM, system RAM, NVMe bandwidth. Agent: `mem-1`.
+- **[W826-2]** Placement decision tree: VRAM-fit → full-GPU; VRAM+RAM → hybrid auto-split; overflow → NVMe-mmap. Agent: `mem-1`.
+- **[W826-3]** Pre-load heuristic: analyze inference patterns → preload likely-next artifact. Agent: `mem-2`.
+- **[W826-4]** Performance estimate before load: "~25 tok/s on your hardware". Agent: `mem-3`.
+
+### W827 — [T3] CONTRASTIVE DISTILLATION (DPO-LITE)
+
+(Partial P2 — DPO/SimPO/ORPO/KTO exist. Add response-level negative-example loss.)
+
+- **[W827-1]** Negative-variant generator in `apps/trainer/contrastive.py` — weak model OR perturbation. Agent: `contrast-1`.
+- **[W827-2]** DPO loss wired into distill loop with `--contrastive` flag. Agent: `contrast-2`.
+- **[W827-3]** Benchmark suite: K-Score improvement contrastive vs SFT-only on shared eval. Agent: `contrast-3`.
+
+### W828 — [T3] REASONING TRACE DISTILLATION
+
+(Partial P1 — GRPO/PRM/TTC exist. Add dedicated teacher-CoT capture/replay.)
+
+- **[W828-1]** Reasoning-model detector + extended-thinking API capture in `src/proxy.js`. Agent: `reason-1`.
+- **[W828-2]** Trace format: `<think>...</think>` token structure in training rows. Agent: `reason-2`.
+- **[W828-3]** Trainer extension in `apps/trainer/distill.py` for trace-aware loss. Agent: `reason-3`.
+- **[W828-4]** Toggle: `--with-reasoning-traces` on `kolm distill`. Agent: `reason-4`.
+
+### W829 — [T3] MULTIMODAL CAPTURE PIPELINE (UPGRADE)
+
+(W454 transcript + W462 image + W464 audio redactors exist; integrate into capture lake.)
+
+- **[W829-1]** Capture-lake extension: store image/audio/tool-use/multi-turn alongside text in `src/captures.js`. Agent: `mm-1`.
+- **[W829-2]** .kolm format heterogeneous weights: text + vision-encoder + tool-use-head. Extend `src/artifact.js`. Agent: `mm-2`.
+- **[W829-3]** VLM distillation support: GPT-4V → smaller VLM. Agent: `mm-3`.
+- **[W829-4]** Multi-turn conversation history capture (not just single-turn). Agent: `mm-4`.
+
+### W830 — [T3] FEDERATED DISTILLATION (INTEGRATE)
+
+(A9 + W461 exist; integrate consortium management + verifiable DP claims.)
+
+- **[W830-1]** Consortium management UI `/account/federated/consortium.html`: opt-in, privacy budget, members. Agent: `fed-1`.
+- **[W830-2]** Membership-inference attack resistance verifier in `src/federated-mia.js`. Agent: `fed-2`.
+- **[W830-3]** End-to-end consortium walkthrough doc (this IS user-requested — `docs/federated/CONSORTIUM_GUIDE.md`). Agent: `fed-3`.
+
+### W831 — [T3] OFFLINE / AIR-GAPPED MODE (INTEGRATE)
+
+(A33 partial — local backends exist; integrate full offline-distill + sneakernet.)
+
+- **[W831-1]** Fully offline distillation: user-provided training data, no API captures. Agent: `airgap-1`.
+- **[W831-2]** Local-only teacher via Ollama/vLLM with mandatory air-gap verification. Agent: `airgap-2`.
+- **[W831-3]** Sneakernet deploy: USB transfer with Ed25519 signature verify. Agent: `airgap-3`.
+- **[W831-4]** Air-gapped bakeoff harness (no-network mode). Agent: `airgap-4`.
+- **[W831-5]** Deployment guide `docs/airgap/CLASSIFIED_DEPLOYMENT.md`. Agent: `airgap-5`.
+
+---
+
+### W832 — [T4] KOLM-META (THE META-DISTILLATION MODEL)
+
+The data moat made real.
+
+- **[W832-1]** Training-data spec: each distillation run emits `{capture_stats, chosen_arch, observed_kscore, compile_time, observed_failure_modes}` row to `~/.kolm/meta-training/*.jsonl`. Agent: `meta-1`.
+- **[W832-2]** Trainer for kolm-meta itself: small XGBoost-style regression/classification model in `src/kolm-meta-trainer.js` (pure-JS gradient boosting OR worker shell to Python). Agent: `meta-2`.
+- **[W832-3]** Weekly retrain cron. Agent: `meta-3`.
+- **[W832-4]** Replace W716 TAAS rule ladder with kolm-meta inference when n>=1000 training rows; fall back to rules otherwise (honest envelope `meta_insufficient_data`). Agent: `meta-4`.
+
+### W833 — [T4] CROSS-LINGUAL DISTILLATION
+
+- **[W833-1]** Language distribution detector. Agent: `lingual-1`.
+- **[W833-2]** Synthetic translation via teacher for underrepresented languages (stamped `synthetic_translation:true`). Agent: `lingual-2`.
+- **[W833-3]** Multilingual mixture training. Agent: `lingual-3`.
+- **[W833-4]** Per-language K-Score reporting in artifact manifest. Agent: `lingual-4`.
+
+### W834 — [T4] REGULATORY COMPLIANCE TOOLKIT
+
+- **[W834-1]** EU AI Act technical-docs auto-generator from artifact manifest. Agent: `reg-1`.
+- **[W834-2]** Risk classification per task category (high-risk/limited-risk/minimal-risk). Agent: `reg-2`.
+- **[W834-3]** Human-in-the-loop config: per-namespace `mandatory_human_review_threshold`. Agent: `reg-3`.
+- **[W834-4]** Data governance reports: capture sources, PII handling, consent tracking. Agent: `reg-4`.
+- **[W834-5]** Auto-generated model cards (HF standard). Agent: `reg-5`.
+- **[W834-6]** GRC export connectors: OneTrust, ServiceNow, IBM OpenPages. Agent: `reg-6`.
+
+### W835 — [T4] SAVINGS-BASED PRICING
+
+- **[W835-1]** Teacher API spend baseline tracker (pre-kolm baseline period). Agent: `pricing-1`.
+- **[W835-2]** Post-kolm spend tracker. Agent: `pricing-1`.
+- **[W835-3]** Savings calc + 10-15% fee surface in `/account/billing`. Agent: `pricing-2`.
+- **[W835-4]** Transparent dashboard "kolm saved you $X, fee is $Y". Agent: `pricing-3`.
+
+---
+
+## PART VI APPENDIX — DEPENDENCY GRAPH (CRITICAL EDGES)
+
+- **W807 → W720**: confidence-router fallback events feed self-improvement queue
+- **W808 → W720**: capture-poisoning quarantine gates self-improvement input
+- **W809 → W821**: structured-output validation enables pipeline orchestration safely
+- **W810 → W832**: external K-Score calibration is the ground truth kolm-meta predicts against
+- **W811 → W815**: capture analytics clusters feed active-learning gap detection
+- **W812 → W816 → W720**: failure visualization → capture recommendation → re-distill
+- **W813 → W815**: drift detection feeds active-learning priority
+- **W814 → W807**: speculative draft is the inverse mode of confidence routing
+- **W817 → W818**: format spec must land BEFORE ecosystem-tool loaders
+- **W819 → W820**: VS Code extension and GitHub Actions share `.kolm` artifact contract
+- **W821 → W822**: pipeline orchestration enables per-route A/B
+- **W825 → W830**: marketplace MVP needs federated trust primitives
+- **W826 → W814**: memory-aware placement informs speculative-decode budget
+- **W827 → W828 → W720**: contrastive + reasoning-trace distill feed quality back to self-improvement
+- **W829 → W825**: marketplace must surface multimodal artifact metadata
+- **W830 → W831**: consortium model overlaps with air-gapped sneakernet trust
+- **W832 (kolm-meta)**: depends on W720, W810, W811, W812, W813, W815 ALL emitting training rows
+
+## PART VI APPENDIX — REVISED EXECUTION ORDER (after W720-W722 ship)
+
+1. **W807, W808, W809, W810** (Tier 0 — parallel where file-scope allows) — ship-blocking, JUMP queue.
+2. Resume **W723-W754** with T1 items W811-W816 interleaved at natural dependency points.
+3. **W755-W806** alongside T2 items W817-W824 (T2 ecosystem work parallel-friendly).
+4. **W825-W831** Tier 3 (post-W806 ideally; can interleave if velocity allows).
+5. **W832-W835** Tier 4 (kolm-meta requires accumulated W720/W811/W812/W813/W815 training rows — defer until pipeline running).
+
+## PART VI APPENDIX — TOTAL QUEUE SUMMARY
+
+| Tier | Waves | Count | Timeline |
+|------|-------|-------|----------|
+| In flight (W707 originals) | W720-W722 | 3 | now |
+| Tier 0 (jumped) | W807-W810 | 4 | next |
+| W707-original tail | W723-W806 | 84 | after T0 |
+| Tier 1 | W811-W816 | 6 | interleave |
+| Tier 2 | W817-W824 | 8 | interleave |
+| Tier 3 | W825-W831 | 7 | post-W806 |
+| Tier 4 | W832-W835 | 4 | year-1+ |
+| **TOTAL REMAINING** | **W720-W835** | **116 waves** | |
+
+(29 new waves added to the 87 originally tracked W720-W806 = 116 total remaining.)
+
+---
+
+*Part VI appended 2026-05-24 in response to user-shared second external-review queue. Atomic-decomposition format mirrors PART II per directive "and also have atomic levels of execution like this." Tier-0 priority-override mandate honored.*

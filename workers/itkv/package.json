@@ -1,0 +1,25 @@
+{
+  "name": "@kolm/itkv-worker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "W722 - isolated kolm Importance-Tiered KV Cache (ITKV) tier selector worker. Thin Node shell that spawns a Python tier-classifier (verbatim port of src/itkv-profile.js classifyToken). NO heavy deps - root kolm install stays light. Runtime KV cache tier DISPATCH (vLLM PagedAttention / SGLang radix cache) is a future wave; this worker only ships the classifier so an external runtime can call it as a sidecar.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "itkv.mjs",
+  "bin": {
+    "kolm-itkv-worker": "itkv.mjs"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "doctor": "node itkv.mjs --doctor"
+  },
+  "dependencies": {},
+  "optionalDependencies": {},
+  "external": {
+    "python": {
+      "note": "Default tier selector is python3 workers/itkv/scripts/itkv.py. Uses ONLY the Python stdlib (argparse + json + sys); no heavy ML deps. Override via $ITKV_TIER_CMD (single command or JSON array form, e.g. ITKV_TIER_CMD='[\"node\",\"stub.js\"]')."
+    }
+  }
+}

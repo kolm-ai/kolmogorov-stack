@@ -299,7 +299,7 @@ function normalizeLicense(license) {
   };
 }
 
-export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, k_score, judge_id, eval_score, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile }) {
+export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, k_score, judge_id, eval_score, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile }) {
   const secret = requireSignSecret();
   // W252 — K-score ship gate is load-bearing. If a K-score is supplied AND
   // it says ships=false, the builder must refuse unless the caller explicitly
@@ -927,6 +927,29 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     // any post-build profile mutation breaks the receipt chain.
     mixed_precision_profile: Array.isArray(daq_profile) && daq_profile.length > 0
       ? daq_profile : null,
+    // W721 — Task-Specific Attention Compiler (TSAC) per-(layer,head)
+    // sparsity profile. When the build was driven by `kolm distill
+    // sparse-attention compile`, the resolved profile rides here so a
+    // verifier (or a serve-time kernel selector) can re-derive the same
+    // per-head kernel dispatch. Schema lives in src/tsac-profile.js;
+    // builder in src/tsac-compiler.js. Bound into artifact_hash below via
+    // sparsity_profile_hash with the W460 conditional-slot pattern so
+    // existing (no-TSAC) artifacts stay byte-identical.
+    sparsity_profile: sparsity_profile && typeof sparsity_profile === 'object'
+        && Object.keys(sparsity_profile).length > 0
+      ? sparsity_profile
+      : null,
+    // W722 — Importance-Tiered KV Cache (ITKV) per-artifact profile. When
+    // the build was driven by `kolm distill itkv build`, the resolved
+    // token-class + precision-tier profile rides here so a runtime KV
+    // scheduler (PagedAttention / radix cache) can apply the same per-class
+    // precision schedule. Schema lives in src/itkv-profile.js. Bound into
+    // artifact_hash below via kv_profile_hash with the W460 conditional-slot
+    // pattern so existing (no-ITKV) artifacts stay byte-identical.
+    kv_profile: kv_profile && typeof kv_profile === 'object'
+        && Object.keys(kv_profile).length > 0
+      ? kv_profile
+      : null,
     k_score: k_score || null,  // patched after zipping for the size_bytes axis
     ship_gate_overridden: allow_below_gate === true ? true : undefined,
     license: normalizeLicense(license),
@@ -1109,6 +1132,29 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   // ship a DAQ profile remain byte-stable.
   if (Array.isArray(daq_profile) && daq_profile.length > 0) {
     artifact_hash_input.mixed_precision_profile_hash = sha256(canonicalJson(daq_profile));
+  }
+  // W721 — bind the TSAC sparsity_profile into artifact_hash so any
+  // post-build tamper of the per-(layer,head) kernel selection (added
+  // entry, dropped one, swapped prefill_pattern, swapped decode_policy,
+  // tweaked page_topk/sink_keep/dense_fallback_threshold, etc.) breaks
+  // the receipt chain. Mirrors the W460 confidential_compute_hash slot:
+  // keyed ONLY when the field is non-null AND non-empty so existing
+  // artifacts (which never carried a sparsity_profile) remain
+  // byte-stable. CRITICAL — never unconditionally add to the hash chain;
+  // that would re-hash every legacy .kolm at the next verify pass.
+  if (sparsity_profile && typeof sparsity_profile === 'object'
+      && Object.keys(sparsity_profile).length > 0) {
+    artifact_hash_input.sparsity_profile_hash = sha256(canonicalJson(sparsity_profile));
+  }
+  // W722 — bind the ITKV kv_profile into artifact_hash so any post-build
+  // mutation of the per-token-class precision schedule breaks the receipt
+  // chain. Mirrors the W460 confidential_compute_hash + W721
+  // sparsity_profile_hash conditional-slot pattern: keyed only when a
+  // non-empty profile is present, so pre-W722 artifacts (which never
+  // carried a kv_profile) remain byte-identical when rebuilt.
+  if (kv_profile && typeof kv_profile === 'object'
+      && Object.keys(kv_profile).length > 0) {
+    artifact_hash_input.kv_profile_hash = sha256(canonicalJson(kv_profile));
   }
   if (hashes.extra_files) {
     artifact_hash_input.extra_files_hash = sha256(canonicalJson(hashes.extra_files));
@@ -1483,7 +1529,7 @@ export function packageArtifact({ job_id, payload, outPath }) {
 // with the size-aware K-score patched into the manifest. The double-zip is
 // cheap (≤10ms for 5KB artifacts) and keeps the K-score honest — the size
 // axis includes the K-score bytes themselves.
-export async function buildAndZip({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, outDir, outPath: outPathOverride, judge_id, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile }) {
+export async function buildAndZip({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, outDir, outPath: outPathOverride, judge_id, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile }) {
   requireSignSecret();
   // W457b (build-honors-out) — when an explicit outPath is supplied, write
   // the .kolm directly at the user-requested filename. Otherwise fall back
@@ -1518,7 +1564,7 @@ export async function buildAndZip({ job_id, task, base_model, recipes, lora_poin
     confidential_compute = await verifyAttestation(kind, attestation_report);
   }
 
-  const sharedBlocks = { capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile };
+  const sharedBlocks = { capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile };
 
   // W350 — temp-file cleanup registry. The two-pass build writes a probe zip
   // to measure its size before the K-score is embedded; on success the probe
