@@ -9,7 +9,7 @@
  overflow: hidden !important;
  min-height: auto !important;
  background:
-  linear-gradient(90deg, rgba(126, 240, 210, 0.08), transparent 34%, rgba(255, 206, 125, 0.06) 100%),
+  linear-gradient(90deg, rgba(126, 240, 210, 0.08), transparent 34%, rgba(126, 240, 210, 0.04) 100%),
   linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0) 28%) !important;
 }
 
@@ -103,7 +103,7 @@
  border: 1px solid rgba(255, 247, 232, 0.13) !important;
  border-radius: 10px !important;
  background:
-  linear-gradient(135deg, rgba(126, 240, 210, 0.09), rgba(255, 206, 125, 0.035)),
+  linear-gradient(135deg, rgba(126, 240, 210, 0.09), rgba(126, 240, 210, 0.025)),
   rgba(255, 255, 255, 0.035) !important;
  color: #f7f0df !important;
  text-decoration: none !important;
@@ -123,7 +123,7 @@
 .home-hero-left .kolm-hero-paths a:focus-visible {
  border-color: rgba(126, 240, 210, 0.42) !important;
  background:
-  linear-gradient(135deg, rgba(126, 240, 210, 0.14), rgba(255, 206, 125, 0.06)),
+  linear-gradient(135deg, rgba(126, 240, 210, 0.14), rgba(126, 240, 210, 0.04)),
   rgba(255, 255, 255, 0.05) !important;
  transform: translateY(-1px) !important;
 }
@@ -189,7 +189,7 @@
  border: 1px solid rgba(126,240,210,0.24) !important;
  border-radius: 12px !important;
  background:
-  linear-gradient(135deg, rgba(126,240,210,0.08), rgba(255,206,125,0.035)),
+  linear-gradient(135deg, rgba(126,240,210,0.08), rgba(126,240,210,0.025)),
   rgba(255,255,255,0.03) !important;
 }
 
@@ -463,7 +463,8 @@
 }
 
 .home-hero-left .khs-lanes span {
- color: #ffce7d !important;
+ /* W683: unified to brand mint (was golden #ffce7d). */
+ color: var(--ks-accent, #7ef0d2) !important;
  font-family: var(--kolm-mono, ui-monospace, monospace) !important;
  font-size: 10.5px !important;
  text-transform: uppercase !important;

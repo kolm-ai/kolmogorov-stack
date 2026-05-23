@@ -1129,8 +1129,10 @@ body > .site-nav {
  padding: 28px var(--kolm-page-pad) 34px;
  border-top: 1px solid var(--kolm-rule-1);
  border-bottom: 1px solid var(--kolm-rule-1);
+ /* W683: single-hue mint atmosphere. Golden second stop removed to stop
+    cross-page color bleed; per-route variants below are also unified. */
  background:
- linear-gradient(90deg, rgba(126,240,210,0.045), transparent 32%, rgba(255,206,125,0.035)),
+ linear-gradient(90deg, rgba(126,240,210,0.04), transparent 60%),
  rgba(8, 9, 12, 0.28);
 }
 
@@ -1314,17 +1316,20 @@ body > .site-nav {
  text-transform: none;
 }
 
+/* W683: per-route surface-media variants unified to brand mint.
+   Pre-W683 they were cyan / golden / pink which read as three different
+   sites. Single hue tightens the brand and stops cross-page bleeding. */
 .kolm-surface-media--training .ksm-step span,
-.kolm-surface-media--training .ksm-kicker { color: #8fc7ff !important; }
-.kolm-surface-media--training .ksm-stats span { background: rgba(143,199,255,0.05); }
+.kolm-surface-media--training .ksm-kicker { color: var(--ks-accent, #7ef0d2) !important; }
+.kolm-surface-media--training .ksm-stats span { background: rgba(126,240,210,0.045); }
 
 .kolm-surface-media--distill .ksm-step span,
-.kolm-surface-media--distill .ksm-kicker { color: #ffce7d !important; }
-.kolm-surface-media--distill .ksm-stats span { background: rgba(255,206,125,0.055); }
+.kolm-surface-media--distill .ksm-kicker { color: var(--ks-accent, #7ef0d2) !important; }
+.kolm-surface-media--distill .ksm-stats span { background: rgba(126,240,210,0.045); }
 
 .kolm-surface-media--enterprise .ksm-step span,
-.kolm-surface-media--enterprise .ksm-kicker { color: #f4a7c8 !important; }
-.kolm-surface-media--enterprise .ksm-stats span { background: rgba(244,167,200,0.052); }
+.kolm-surface-media--enterprise .ksm-kicker { color: var(--ks-accent, #7ef0d2) !important; }
+.kolm-surface-media--enterprise .ksm-stats span { background: rgba(126,240,210,0.045); }
 
 [data-theme="light"] .kolm-surface-media {
  background:
@@ -1804,8 +1809,9 @@ h6:not(#kolm-noop) {
 .kolm-product-spine a:hover,
 .kolm-product-spine a:focus-visible {
  border-color: rgba(126,240,210,0.38) !important;
+ /* W683: single mint gradient — golden second stop removed. */
  background:
-  linear-gradient(135deg, rgba(126,240,210,0.13), rgba(255,206,125,0.045)),
+  linear-gradient(135deg, rgba(126,240,210,0.13), rgba(126,240,210,0.04)),
   rgba(255,255,255,0.045) !important;
 }
 
@@ -1833,13 +1839,13 @@ h6:not(#kolm-noop) {
 /* Post-auth command center. Account pages should feel like the product
    operating console, not a generic settings area. */
 body.kolm-account-surface {
+ /* W683: single mint pin — second warm radial removed. */
  background:
   linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px),
   linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px),
   radial-gradient(circle at 16% 0%, rgba(126,240,210,0.09), transparent 30%),
-  radial-gradient(circle at 88% 12%, rgba(255,206,125,0.06), transparent 32%),
   #08090c !important;
- background-size: 116px 116px, 116px 116px, auto, auto, auto !important;
+ background-size: 116px 116px, 116px 116px, auto, auto !important;
 }
 
 .kolm-account-command {
@@ -4223,8 +4229,9 @@ html.kolm-sota-ui-v597 :where(.kolm-product-spine a[aria-current="page"],
 .kolm-product-spine a:hover,
 .kolm-product-spine a:focus-visible) {
  border-color: rgba(126,240,210,0.34) !important;
+ /* W683: single mint gradient — golden second stop removed. */
  background:
-  linear-gradient(135deg, rgba(126,240,210,0.13), rgba(255,206,125,0.04)),
+  linear-gradient(135deg, rgba(126,240,210,0.13), rgba(126,240,210,0.04)),
   rgba(255,255,255,0.045) !important;
  color: var(--kolm-ink-0, #faf2e1) !important;
  text-decoration: none !important;

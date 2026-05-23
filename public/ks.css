@@ -35,10 +35,16 @@
   --ks-ink-3:       rgba(245,241,232,0.54);
   --ks-ink-4:       rgba(245,241,232,0.36);
 
-  /* Accent — tri-hue functional palette (W613).
-     Mint = action / CTA / live state.  Used sparingly.
-     Warm = numeric data, prices, durations.  Adds editorial warmth.
-     Cool = code syntax, secondary category.  Visual variety, not decoration. */
+  /* Accent — W683: single-hue brand palette. Mint is the brand color and the
+     only chroma in the marketing surface. Warm is kept for editorial numerics
+     ONLY (prices, durations, K-Score deltas) — never for backgrounds, hover
+     states, or atmosphere. Lavender/cool was retired — it was a layered hue
+     that read as "rainbow" against the mint primary; the .ks-cool and
+     .ks-table .accent-cool utility classes are aliased back to mint so legacy
+     usage on older pages degrades cleanly instead of bleeding purple.
+       --ks-accent      : the primary action / CTA / live state token.
+       --ks-accent-2    : same-family lighter mint, used only for hover/active.
+       --ks-accent-warm : editorial numerics only (prices, durations, deltas). */
   --ks-accent:      #2bf5b3;
   --ks-accent-2:    #92ffd9;
   --ks-accent-soft: rgba(43,245,179,0.12);
@@ -46,8 +52,6 @@
   --ks-accent-glow: rgba(43,245,179,0.22);
   --ks-accent-warm: #ffb155;
   --ks-accent-warm-soft: rgba(255,177,85,0.14);
-  --ks-accent-cool: #a89bff;
-  --ks-accent-cool-soft: rgba(168,155,255,0.14);
 
   /* Status — used only in product / dashboards, not marketing */
   --ks-pos:         #6ee7a8;
@@ -306,7 +310,7 @@ body { position: relative; }
 .ks-mono   { font-family: var(--ks-mono); font-feature-settings: "tnum"; }
 .ks-accent { color: var(--ks-accent); }
 .ks-warm   { color: var(--ks-accent-warm); font-variant-numeric: tabular-nums; }
-.ks-cool   { color: var(--ks-accent-cool); }
+.ks-cool   { color: var(--ks-accent); } /* W683: aliased to mint — lavender retired site-wide */
 .ks-num    { font-variant-numeric: tabular-nums lining-nums; font-feature-settings: "tnum"; }
 .ks-em     { font-family: var(--ks-serif); font-style: italic; font-weight: 420; color: var(--ks-ink); }
 .ks-dim    { color: var(--ks-ink-3); }
@@ -531,7 +535,7 @@ body { position: relative; }
 /* W613: table accents are numeric — use warm-amber, not mint. */
 .ks-table .accent { color: var(--ks-accent-warm); font-weight: 580; font-variant-numeric: tabular-nums; }
 .ks-table .accent-mint { color: var(--ks-accent); font-weight: 580; }
-.ks-table .accent-cool { color: var(--ks-accent-cool); font-weight: 580; font-family: var(--ks-mono); }
+.ks-table .accent-cool { color: var(--ks-accent); font-weight: 580; font-family: var(--ks-mono); } /* W683: aliased to mint */
 @media (max-width: 880px) {
   .ks-table thead { display: none; }
   .ks-table tbody tr { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; padding: 16px; }
