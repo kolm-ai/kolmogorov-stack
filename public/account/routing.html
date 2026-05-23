@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f7f4ec";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Routing decisions - Account - kolm.ai</title>
+<meta name="description" content="Confidence-aware student / teacher routing for /v1/route/chat/completions. Per-decision route, reason, threshold, and an estimate of teacher calls saved.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://kolm.ai/account/routing">
+<meta property="og:title" content="Routing decisions &middot; Account &middot; kolm.ai">
+<meta property="og:description" content="Confidence-aware student / teacher routing for /v1/route/chat/completions. Per-decision route, reason, threshold, and an estimate of teacher calls saved.">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/account/routing">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Routing decisions - Account - kolm.ai","description":"Confidence-aware student / teacher routing for /v1/route/chat/completions.","url":"https://kolm.ai/account/routing","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"Routing decisions","item":"https://kolm.ai/account/routing"}]}}</script>
+<style>
+.acct-shell{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:flex-start;max-width:1280px;margin:0 auto;padding:24px}
+#account-sidebar{position:sticky;top:24px;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13px}
+#account-sidebar h2{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin:0 0 10px}
+#account-sidebar ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+#account-sidebar a{display:block;padding:6px 10px;border-radius:4px;color:var(--ink-mute);text-decoration:none;font-family:var(--mono);font-size:12.5px}
+#account-sidebar a:hover{background:var(--bg-elev);color:var(--ink)}
+#account-sidebar a[aria-current=page]{background:var(--bg-elev);color:var(--accent);border-left:2px solid var(--accent);padding-left:8px}
+.acct-content h1{margin:0 0 4px;font-size:28px;letter-spacing:0}
+.acct-content h2{font-size:16px;margin:22px 0 10px}
+.acct-content h3{font-size:14px;margin:16px 0 8px}
+.acct-content .lede{color:var(--ink-mute);font-size:14.5px;margin:0 0 8px;max-width:64ch}
+.acct-content .eyebrow{font-family:var(--mono);text-transform:uppercase;letter-spacing:0.08em;font-size:11px;color:var(--ink-faint);margin:0 0 6px}
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--ink,#faf2e1);color:var(--bg,#08090c);padding:8px 12px;font-family:var(--mono);font-size:12px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
+.skip-link:focus{left:0}
+.metric-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:16px 0 20px}
+.metric-card{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px}
+.metric-card .label{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin-bottom:6px}
+.metric-card .value{font-size:22px;font-weight:600;font-family:var(--mono);color:var(--ink)}
+.metric-card .delta{font-size:11.5px;color:var(--ink-mute);margin-top:4px}
+.kpanel{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:16px}
+.kpanel h2{margin:0 0 12px;font-size:15px}
+.kpanel .pdesc{color:var(--ink-mute);font-size:13px;margin:0 0 12px}
+.ktable{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
+.ktable th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);color:var(--ink-faint);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;font-size:10.5px}
+.ktable td{padding:8px 8px;border-bottom:1px solid var(--line-soft,rgba(255,255,255,0.04));color:var(--ink)}
+.ktable tr:hover td{background:var(--bg-elev)}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor}
+.pill.ok{color:var(--good)}.pill.warn{color:var(--warn)}.pill.bad{color:var(--bad)}.pill.mute{color:var(--ink-faint)}
+.pill.route-student{color:var(--good)}
+.pill.route-mixed{color:var(--warn)}
+.pill.route-teacher{color:var(--bad)}
+.empty{background:var(--bg-card);border:1px dashed var(--line);border-radius:8px;padding:18px;color:var(--ink-mute);font-size:13.5px;line-height:1.6}
+.empty code{background:var(--bg-elev);padding:2px 6px;border-radius:3px;font-size:12.5px;color:var(--accent)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center}
+.toolbar input[type=text],.toolbar select{background:var(--bg-elev);border:1px solid var(--line);color:var(--ink);padding:6px 10px;border-radius:4px;font-family:var(--mono);font-size:12px}
+.btn{display:inline-block;padding:6px 12px;border-radius:5px;border:1px solid var(--line-strong);background:transparent;color:var(--ink);font-family:var(--mono);font-size:12px;cursor:pointer;text-decoration:none}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.sparkbox{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:12px;margin-top:8px}
+.sparkbox svg{display:block;width:100%;height:60px}
+.sparkbox .legend{font-family:var(--mono);font-size:11px;color:var(--ink-mute);margin-top:8px;display:flex;gap:14px;flex-wrap:wrap}
+.sparkbox .legend .dot{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;vertical-align:middle}
+.note{background:var(--bg-card);border-left:3px solid var(--ink-faint);padding:10px 14px;margin-top:18px;color:var(--ink-mute);font-size:12.5px;line-height:1.6}
+@media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}.metric-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+<link rel="stylesheet" href="/ks.css">
+</head>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+    </div>
+  </nav>
+</div>
+
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<a href="#main" class="skip-link">Skip to content</a>
+
+<main id="main">
+<div class="acct-shell">
+<nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview">Overview</a></li><li><a href="/account/connectors">Connectors</a></li><li><a href="/account/captured">Captured calls</a></li><li><a href="/account/privacy-events">Privacy events</a></li><li><a href="/account/repeated-workflows">Repeated workflows</a></li><li><a href="/account/opportunities">Opportunities</a></li><li><a href="/account/labeling">Labeling queue</a></li><li><a href="/account/datasets">Datasets</a></li><li><a href="/account/simulations">Simulations</a></li><li><a href="/account/bakeoffs">Bakeoffs</a></li><li><a href="/account/builds">Artifact jobs</a></li><li><a href="/account/artifacts">Artifacts</a></li><li><a href="/account/devices">Devices</a></li><li><a href="/account/storage">Storage truth</a></li><li><a href="/account/billing">Billing</a></li><li><a href="/account/routing" aria-current="page">Routing decisions</a></li></ul></nav>
+<section class="acct-content">
+
+<p class="eyebrow">Confidence-aware student / teacher ratio (W709)</p>
+<h1>Routing decisions.</h1>
+<p class="lede">Every call to <code>/v1/route/chat/completions</code> picks a route based on the student's first-token entropy. A <strong>routing_decision</strong> row records which route ran, why, and the cost on both sides so you can see the local-vs-teacher ratio over time.</p>
+
+<div class="toolbar">
+  <label for="ns-input" style="color:var(--ink-faint);font-family:var(--mono);font-size:11px">Namespace</label>
+  <input id="ns-input" type="text" placeholder="default" value="" style="min-width:160px">
+  <button id="ns-apply" class="btn" type="button">Apply</button>
+  <a class="btn" href="/docs/api" rel="noopener">API reference</a>
+</div>
+
+<div class="metric-grid">
+  <div class="metric-card"><div class="label">Decisions</div><div class="value" id="m-total">-</div><div class="delta" id="m-since">since first decision</div></div>
+  <div class="metric-card"><div class="label">% local</div><div class="value" id="m-local-pct">-</div><div class="delta" id="m-local-help">student + mixed routes</div></div>
+  <div class="metric-card"><div class="label">% teacher</div><div class="value" id="m-teacher-pct">-</div><div class="delta">escalated to teacher</div></div>
+  <div class="metric-card"><div class="label">% mixed</div><div class="value" id="m-mixed-pct">-</div><div class="delta">student + teacher merged</div></div>
+  <div class="metric-card"><div class="label">Est. cost saved</div><div class="value" id="m-saved">-</div><div class="delta">teacher cost avoided</div></div>
+</div>
+
+<div class="kpanel">
+  <h2>Last 30 decisions</h2>
+  <p class="pdesc">Sparkline of the most recent 30 routing decisions, oldest on the left. Color encodes the route the router picked.</p>
+  <div class="sparkbox">
+    <svg id="spark" viewBox="0 0 600 60" preserveAspectRatio="none" aria-label="Last 30 routing decisions"></svg>
+    <div class="legend">
+      <span><span class="dot" style="background:var(--good,#7fbf3f)"></span>student</span>
+      <span><span class="dot" style="background:var(--warn,#d9a020)"></span>mixed</span>
+      <span><span class="dot" style="background:var(--bad,#cf4f3a)"></span>teacher</span>
+    </div>
+  </div>
+</div>
+
+<div class="kpanel">
+  <h2>10 most-recent decisions</h2>
+  <p class="pdesc">Newest first. <code>threshold</code> is the entropy threshold the router compared against; <code>reason</code> is the routing rule that fired.</p>
+  <table class="ktable">
+    <thead><tr><th>Timestamp</th><th>Namespace</th><th>Route</th><th>Reason</th><th>Threshold</th></tr></thead>
+    <tbody id="recent-rows"></tbody>
+  </table>
+  <div id="recent-empty" class="empty" hidden>
+    <strong>No routing decisions yet.</strong> Call <code>/v1/route/chat/completions</code> at least once and the row will appear here within a few seconds.
+  </div>
+</div>
+
+<div class="note">
+  <strong>Honesty note.</strong> Decisions logged here include the <em>cost-of-student</em> (compute) and <em>cost-of-teacher</em> (API). Cost savings shown are estimates; settle against your invoice.
+</div>
+
+</section>
+</div>
+</main>
+
+<script>
+(function(){
+  var key=null; try{key=localStorage.getItem("kolm-key")||localStorage.getItem("ks_api_key")||localStorage.getItem("kolm_api_key")||localStorage.getItem("KOLM_API_KEY");}catch(_){}
+  window.KOLM_AUTH=key?{"Authorization":"Bearer "+key,"Accept":"application/json"}:{"Accept":"application/json"};
+  window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
+  window.kesc=function(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});};
+  if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
+})();
+
+function pct(n,total){if(!total||total<=0)return "0%";return Math.round((n/total)*100)+"%";}
+function fmtUsd(v){if(v==null)return "$0.00";return "$"+Number(v).toFixed(4);}
+function fmtTs(t){if(!t)return "-";var d=new Date(t);if(isNaN(d.getTime()))return String(t);return d.toISOString().replace("T"," ").slice(0,19)+"Z";}
+function routePill(r){var cls=r==="teacher"?"route-teacher":(r==="mixed"?"route-mixed":"route-student");return "<span class=\"pill "+cls+"\">"+window.kesc(r||"student")+"</span>";}
+
+function paintSparkline(recent){
+  var svg=document.getElementById("spark");
+  if(!svg)return;
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
+  // Recent comes back newest-first; flip for left=oldest.
+  var rows=(recent||[]).slice().reverse().slice(-30);
+  if(rows.length===0){
+    var t=document.createElementNS("http://www.w3.org/2000/svg","text");
+    t.setAttribute("x","8");t.setAttribute("y","34");
+    t.setAttribute("fill","#888");t.setAttribute("font-family","monospace");t.setAttribute("font-size","12");
+    t.textContent="no decisions yet";svg.appendChild(t);return;
+  }
+  var w=600,h=60,n=rows.length,bw=Math.max(4,Math.floor(w/n)-2);
+  for(var i=0;i<n;i++){
+    var route=rows[i].route||"student";
+    var color="#7fbf3f";if(route==="mixed")color="#d9a020";else if(route==="teacher")color="#cf4f3a";
+    var x=i*(w/n)+1;
+    // Bar height encodes student vs teacher tokens ratio if present;
+    // otherwise full height. Caps at h-6 so the baseline reads as a row.
+    var st=Number(rows[i].student_tokens||0),te=Number(rows[i].teacher_tokens||0),tot=st+te;
+    var ratio=tot>0?Math.max(0.15,st/tot):1;
+    var bh=Math.max(8,Math.floor((h-6)*ratio));
+    var rect=document.createElementNS("http://www.w3.org/2000/svg","rect");
+    rect.setAttribute("x",x.toFixed(1));rect.setAttribute("y",(h-bh-3).toString());
+    rect.setAttribute("width",bw.toString());rect.setAttribute("height",bh.toString());
+    rect.setAttribute("fill",color);rect.setAttribute("rx","1");
+    var title=document.createElementNS("http://www.w3.org/2000/svg","title");
+    title.textContent=route+" - "+(rows[i].reason||"")+" - "+(rows[i].ts||"");
+    rect.appendChild(title);
+    svg.appendChild(rect);
+  }
+}
+
+function paintTable(recent){
+  var tbody=document.getElementById("recent-rows");
+  var empty=document.getElementById("recent-empty");
+  tbody.innerHTML="";
+  var rows=(recent||[]).slice(0,10);
+  if(rows.length===0){empty.hidden=false;return;}
+  empty.hidden=true;
+  for(var i=0;i<rows.length;i++){
+    var r=rows[i];
+    var tr=document.createElement("tr");
+    tr.innerHTML="<td>"+window.kesc(fmtTs(r.ts))+"</td>"
+      +"<td>"+window.kesc(r.namespace||"default")+"</td>"
+      +"<td>"+routePill(r.route)+"</td>"
+      +"<td>"+window.kesc(r.reason||"")+"</td>"
+      +"<td>"+(r.threshold_used==null?"-":window.kesc(String(r.threshold_used)))+"</td>";
+    tbody.appendChild(tr);
+  }
+}
+
+function paintSummary(s){
+  var total=(s&&s.summary&&s.summary.total)||0;
+  var br=(s&&s.summary&&s.summary.by_route)||{student:0,teacher:0,mixed:0};
+  document.getElementById("m-total").textContent=String(total);
+  document.getElementById("m-local-pct").textContent=pct((br.student||0)+(br.mixed||0),total);
+  document.getElementById("m-teacher-pct").textContent=pct(br.teacher||0,total);
+  document.getElementById("m-mixed-pct").textContent=pct(br.mixed||0,total);
+  document.getElementById("m-saved").textContent=fmtUsd((s&&s.summary&&s.summary.est_cost_saved_usd)||0);
+  var last=s&&s.summary&&s.summary.last_decision_at;
+  document.getElementById("m-since").textContent=last?("last "+fmtTs(last)):"no decisions yet";
+}
+
+function load(){
+  var ns=(document.getElementById("ns-input").value||"").trim();
+  var url="/v1/routing/summary";
+  if(ns)url+="?namespace="+encodeURIComponent(ns);
+  window.kfetch(url).then(function(j){
+    paintSummary(j);
+    paintSparkline(j.recent);
+    paintTable(j.recent);
+  }).catch(function(e){
+    // Render empty-state on 401/404/network errors so the page never blanks.
+    paintSummary({summary:{total:0,by_route:{student:0,teacher:0,mixed:0},est_cost_saved_usd:0}});
+    paintSparkline([]);paintTable([]);
+  });
+}
+document.getElementById("ns-apply").addEventListener("click",load);
+document.getElementById("ns-input").addEventListener("keydown",function(e){if(e.key==="Enter")load();});
+load();
+</script>
+
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/integrations">Integrations</a></li><li><a href="/docs/api">API reference</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

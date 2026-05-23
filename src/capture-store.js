@@ -29,6 +29,7 @@
 import * as store from './store.js';
 import { appendEvent } from './event-store.js';
 import { hashContent, normalizeVendor } from './event-schema.js';
+import { attachCopyrightFlag } from './capture-copyright-filter.js';
 
 const ON_VERCEL = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
 
@@ -210,6 +211,12 @@ export async function insertCapture(row) {
   if (!row || typeof row !== 'object') {
     throw new Error('insertCapture: row must be an object');
   }
+  // W708-4 — defensive copyright-risk flag before persistence. Pure
+  // observability: stamps copyright_flagged + copyright_reasons[] on the
+  // row so downstream (distill-time / dataset workbench / label queue) can
+  // filter. Failure NEVER blocks the capture write — the caller already got
+  // its upstream answer; losing the flag is better than losing the row.
+  try { attachCopyrightFlag(row); } catch (_) { /* never block insert */ }
   const driver = await loadDriver();
   if (driver) {
     await driver.insert('observations', row);

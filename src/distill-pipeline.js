@@ -50,6 +50,72 @@ const DEFAULT_WORKER = path.join(ROOT, 'workers', 'distill', 'distill.mjs');
 
 export const MODES = ['kd_softmax', 'kd_top_k', 'rejection_sampling'];
 
+// W708-2 — Teacher-source policy enum. Every known teacher slug is classified
+// as either 'open-weights' (the weights are downloadable + the license permits
+// distillation) or 'proprietary' (closed weights served only via vendor API,
+// distillation may violate the vendor's TOS). The classification is stamped
+// onto every distill manifest + run-meta.json so a downstream auditor can
+// answer "did this artifact's teacher carry TOS risk?" without rebuilding the
+// run.
+//
+// Classification rules — keep this table short and explicit; the fallback
+// (unknown slug → 'proprietary') is safe-deny so an unrecognised slug never
+// silently qualifies as open-weights. Operators who run a fork should add the
+// slug here OR prefix it with `local:` / `hf:` so the prefix-fallback catches.
+export const TEACHER_SOURCE_CLASSIFICATION = Object.freeze({
+  // Proprietary — closed weights, vendor API only.
+  'claude': 'proprietary',
+  'gpt': 'proprietary',
+  'gemini': 'proprietary',
+  // Open-weights — downloadable weights, distillation permitted by license.
+  'qwen': 'open-weights',
+  'qwen2.5': 'open-weights',
+  'qwen3': 'open-weights',
+  'llama': 'open-weights',
+  'mistral': 'open-weights',
+  'mixtral': 'open-weights',
+  'deepseek': 'open-weights', // distill-r1 + qwen-distill variants are MIT-licensed
+});
+
+// W708-2 — classifyTeacher(slug): returns 'open-weights' | 'proprietary' | 'unknown'.
+// Order of resolution:
+//   1. provider prefix `local:` or `hf:` → 'open-weights' (operator opted into
+//      self-hosted weights — by definition they hold the weights themselves)
+//   2. provider prefix `anthropic:` / `openai:` / `google:` → 'proprietary'
+//      (vendor-routed slugs that the prefix-stripped model name would also
+//      flag, but the prefix is the more reliable signal)
+//   3. base-name prefix lookup against TEACHER_SOURCE_CLASSIFICATION using the
+//      longest matching key (so `qwen2.5-7b-instruct` resolves under 'qwen2.5'
+//      not 'qwen').
+//   4. Falls through to 'unknown' for slugs the table does not recognise; the
+//      _pickTeachers() filter treats 'unknown' as NOT open-weights (safe-deny).
+export function classifyTeacher(teacherSlug) {
+  if (teacherSlug == null) return 'unknown';
+  const raw = String(teacherSlug).trim().toLowerCase();
+  if (!raw) return 'unknown';
+  // 1. Self-hosted prefixes.
+  if (raw.startsWith('local:') || raw.startsWith('hf:')) return 'open-weights';
+  // 2. Known vendor prefixes that imply proprietary regardless of model name.
+  if (raw.startsWith('anthropic:') || raw.startsWith('openai:') || raw.startsWith('google:')) {
+    return 'proprietary';
+  }
+  // Strip any other provider prefix (`vendor:model-x`) before base-name lookup.
+  const base = raw.includes(':') ? raw.split(':').slice(1).join(':') : raw;
+  // 3. Longest-prefix match against the classification table.
+  const keys = Object.keys(TEACHER_SOURCE_CLASSIFICATION).sort((a, b) => b.length - a.length);
+  for (const key of keys) {
+    // Match either exact key or key followed by a non-alphanumeric separator,
+    // so 'qwen' matches 'qwen-3b' but NOT 'qwenfoo'.
+    if (base === key) return TEACHER_SOURCE_CLASSIFICATION[key];
+    if (base.startsWith(key + '-') || base.startsWith(key + '_') || base.startsWith(key + '.')) {
+      return TEACHER_SOURCE_CLASSIFICATION[key];
+    }
+  }
+  // 4. Safe-deny fallback. Anything we do not recognise is treated as unknown;
+  // _pickTeachers() filter rejects 'unknown' when KOLM_TEACHER_SOURCE=open-weights.
+  return 'unknown';
+}
+
 // Registry of student backbones by recommended training path. Mirrors the
 // authoritative table in src/training-planner.js (BACKBONE_BY_PATH). The
 // duplicate keeps this module standalone (no circular deps when planner
@@ -269,6 +335,23 @@ export function _pickTeachers() {
   }
   if (process.env.ANTHROPIC_API_KEY) add('anthropic:claude-opus-4-7');
   if (process.env.OPENAI_API_KEY) add('openai:gpt-4o-mini');
+  // W708-2 — open-weights policy filter. When the operator sets
+  // KOLM_TEACHER_SOURCE=open-weights, we strip every teacher whose
+  // classifyTeacher() result is NOT 'open-weights'. If the filtered list is
+  // empty we throw a clear, actionable error rather than silently falling back
+  // to a proprietary teacher (the whole point of the policy enum is to make
+  // TOS leakage a structural impossibility, not a soft warning).
+  const policy = process.env.KOLM_TEACHER_SOURCE;
+  if (policy === 'open-weights') {
+    const filtered = out.filter((t) => classifyTeacher(t) === 'open-weights');
+    if (filtered.length === 0) {
+      const err = new Error('no_open_weight_teacher_configured');
+      err.code = 'no_open_weight_teacher_configured';
+      err.hint = 'KOLM_TEACHER_SOURCE=open-weights is set but no open-weight teacher is configured. Set KOLM_DISTILL_TEACHER to one of: qwen2.5-7b, qwen2.5-3b, llama-3-8b, mistral-7b, mixtral-8x7b, deepseek-r1-distill-qwen-7b, or use a local:/hf: prefix (e.g. local:/path/to/weights, hf:Qwen/Qwen2.5-7B-Instruct).';
+      throw err;
+    }
+    return filtered;
+  }
   return out;
 }
 
@@ -427,6 +510,15 @@ export async function* distill({
   // + base + ts so the list view tells the user what they were training.
   // W459 — record the planned teacher attempt list so the run is auditable
   // even before any worker has reported back which teacher won.
+  // W708-2 — teacher-source policy stamps. teacher_source is the chosen
+  // teacher's classification (open-weights | proprietary | unknown); when no
+  // teacher is wired (stub mode) it is null so downstream readers can
+  // distinguish "no teacher" from "teacher classification unknown".
+  // policy_enforced records whether KOLM_TEACHER_SOURCE=open-weights was set
+  // at the time of the run — useful for after-the-fact auditing.
+  const _firstTeacher = attemptList[0] || null;
+  const teacher_source = _firstTeacher ? classifyTeacher(_firstTeacher) : null;
+  const policy_enforced = process.env.KOLM_TEACHER_SOURCE === 'open-weights';
   try {
     fs.writeFileSync(path.join(runDir, 'run-meta.json'), JSON.stringify({
       job_id: jobId,
@@ -438,6 +530,8 @@ export async function* distill({
       worker_mode: workerMode,
       teacher: attemptList[0] || null,
       teacher_planned: attemptList,
+      teacher_source,
+      policy_enforced,
       resume_from: resume_from || null,
       created_at: new Date().toISOString(),
     }, null, 2));
@@ -579,6 +673,22 @@ export async function* distill({
   // W455 — close progress.jsonl after the attempt loop finishes (success or
   // exhaustion). All synthetic events from every attempt have been appended.
   if (progressFd !== null) { try { fs.closeSync(progressFd); } catch (_) {} }
+  // W708-2 — stamp the WINNING teacher's source classification onto the worker
+  // manifest so the .kolm artifact carries the policy enum end-to-end. The
+  // manifest may already exist on disk (worker wrote it); we re-write it with
+  // the added fields so a verifier reading the .kolm receipt chain sees
+  // teacher_source + policy_enforced inline. Best-effort — a stamp failure
+  // must not invalidate an otherwise successful distill run.
+  const _winningTeacher = teacher_used || (attemptList[0] || null);
+  const teacher_source_final = _winningTeacher ? classifyTeacher(_winningTeacher) : null;
+  if (workerManifest && typeof workerManifest === 'object') {
+    workerManifest.teacher_source = teacher_source_final;
+    workerManifest.policy_enforced = policy_enforced;
+    try {
+      const manifestPath = path.join(outDir, 'manifest.json');
+      fs.writeFileSync(manifestPath, JSON.stringify(workerManifest, null, 2));
+    } catch (_) {}
+  }
   // The artifact_path is the worker's out dir (the .kolm itself is built by
   // src/compile-pipeline.js in the bundle phase — distill yields the path to
   // the training pairs / student weights, not a sealed .kolm).
@@ -596,6 +706,11 @@ export async function* distill({
     // (W459+) both see the right value.
     teacher: teacher_used,
     teacher_used,
+    // W708-2 — stamp open-weights vs proprietary classification on the done
+    // envelope so callers reading the iterator output (without re-reading the
+    // worker manifest from disk) see the policy verdict inline.
+    teacher_source: teacher_source_final,
+    policy_enforced,
     teacher_attempts,
     teacher_attempted_count: teacher_attempts.length,
     pair_count: pairs.length,
@@ -718,4 +833,4 @@ function _safeTail(p, bytes) {
   } catch (_) { return ''; }
 }
 
-export default { distill, prepareDistillCorpus, selectStudentBackbone, MODES, _resolveDistillTenant, listDistillRuns, readDistillRun };
+export default { distill, prepareDistillCorpus, selectStudentBackbone, MODES, _resolveDistillTenant, listDistillRuns, readDistillRun, classifyTeacher, TEACHER_SOURCE_CLASSIFICATION };

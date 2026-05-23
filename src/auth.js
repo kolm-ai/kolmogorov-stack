@@ -13,6 +13,24 @@ const buckets = new Map();
 const DEFAULT_RATE = parseInt(process.env.RATE_LIMIT_PER_SEC || '20'); // req/s sustained
 const DEFAULT_BURST = parseInt(process.env.RATE_LIMIT_BURST || '60');
 
+// W708-5 — Export-control geo-fence. ISO 3166-1 alpha-2 country codes
+// corresponding to US OFAC comprehensive-sanctions jurisdictions
+// (Cuba, Iran, North Korea, Syria, Russia, Belarus). This is a baseline list
+// and admins MUST adjust per their own legal counsel — sanctions programs
+// change, and your obligations depend on the products/services you ship.
+export const EXPORT_CONTROL_DENYLIST = ['CU', 'IR', 'KP', 'SY', 'RU', 'BY'];
+
+// True if the given ISO 3166-1 alpha-2 country code is on the export-control
+// denylist. Comparison is case-insensitive; null/undefined/empty returns false
+// (an unknown country never blocks — see signup handler for the "stamp
+// geo_check:unknown" branch).
+export function isGeoFenced(countryCode) {
+  if (!countryCode) return false;
+  const code = String(countryCode).trim().toUpperCase();
+  if (code.length !== 2) return false;
+  return EXPORT_CONTROL_DENYLIST.includes(code);
+}
+
 function mintApiKey(kind = 'user') {
   const prefix = kind === 'anon' ? 'kao_' : 'ks_';
   return prefix + crypto.randomBytes(16).toString('hex');
@@ -85,7 +103,7 @@ export function migrateAllPlainKeysOnce() {
 }
 migrateAllPlainKeysOnce();
 
-export function provisionTenant(name, { quota = 10000, plan = 'free', kind = 'user', expires_at = null, email = null } = {}) {
+export function provisionTenant(name, { quota = 10000, plan = 'free', kind = 'user', expires_at = null, email = null, country_code = null, geo_check = null } = {}) {
   const existing = all('tenants').find(t => t.name === name);
   if (existing) return existing;
   const key = mintApiKey(kind);
@@ -101,6 +119,12 @@ export function provisionTenant(name, { quota = 10000, plan = 'free', kind = 'us
     used: 0,
     rate_per_sec: DEFAULT_RATE,
     burst: DEFAULT_BURST,
+    // W708-5 — export-control attribution. country_code is the ISO 3166-1
+    // alpha-2 code provided at signup (header or body), null if unknown.
+    // geo_check is one of: 'allowed' | 'unknown' | 'denied' (denied tenants
+    // never reach provisionTenant — they're rejected upstream with HTTP 451).
+    country_code: country_code || null,
+    geo_check: geo_check || (country_code ? 'allowed' : 'unknown'),
     created_at: new Date().toISOString(),
   };
   insert('tenants', t);

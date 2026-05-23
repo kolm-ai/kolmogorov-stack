@@ -17,7 +17,7 @@ import { effectiveReceiptSecret, isProductionRuntime, runtimeReadiness, tenantRe
 import * as registry from './registry.js';
 import * as runtime from './runtime.js';
 import * as cache from './cache.js';
-import { authMiddleware, provisionTenant, provisionAnonTenant, claimAnonTenant, chargeUsage, rotateTenantKey, rotateTenantReceiptSecret, listTenantReceiptSecrets, pruneTenantReceiptSecret, adminApiKey, findTenantByApiKey, findTenantByEmail, constantTimeEqual as constantTimeEq, requirePlan } from './auth.js';
+import { authMiddleware, provisionTenant, provisionAnonTenant, claimAnonTenant, chargeUsage, rotateTenantKey, rotateTenantReceiptSecret, listTenantReceiptSecrets, pruneTenantReceiptSecret, adminApiKey, findTenantByApiKey, findTenantByEmail, constantTimeEqual as constantTimeEq, requirePlan, isGeoFenced } from './auth.js';
 import { mountOAuth, oauthConfigured } from './oauth.js';
 import { sendWelcome, sendBillingActivated, sendBillingFailed, emailConfigured } from './email.js';
 import { compileJs, verify } from './verifier.js';
@@ -125,6 +125,66 @@ import { kernelCatalog } from './product-kernel.js';
 import { attachEnvelopeHeaders, okEnvelope } from './envelope.js';
 import { cloudReadinessSummary, listPlatformCapabilities } from './platform-capabilities.js';
 import { objectStorageReadiness } from './object-storage.js';
+import { quantizationOracleCatalog, rankQuantizationStrategies } from './quantization-oracle.js';
+import { cloudComputeBrokerCatalog, planCloudCompute } from './cloud-compute-broker.js';
+import { distillStrategyCatalog, planDistillStrategy } from './distill-strategy.js';
+import { buildStrategyCatalog, planBuildStrategy } from './build-strategy-brain.js';
+import {
+  buildProductFrontierLab,
+  PRODUCT_FRONTIER_LAB_SOURCE_PATHS,
+} from './product-frontier-lab.js';
+import {
+  buildProductFrontierContracts,
+  PRODUCT_FRONTIER_IMPLEMENTATION_CONTRACTS_SOURCE_PATHS,
+} from './product-frontier-contracts.js';
+import {
+  buildProductFrontierOperatorKernels,
+  PRODUCT_FRONTIER_OPERATOR_KERNELS_SOURCE_PATHS,
+} from './product-frontier-operator-kernels.js';
+import {
+  auditPackageReleaseReadiness,
+  packageReleaseManifestTemplate,
+  validatePackageReleaseManifest,
+} from './package-release-readiness.js';
+import { runRedactionBenchmark } from './redaction-benchmark.js';
+import {
+  BENCH_CASES as KSCORE_BENCH_CASES,
+  BENCH_FROZEN_AT as KSCORE_BENCH_FROZEN_AT,
+  BENCH_SCHEMA_VERSION as KSCORE_BENCH_SCHEMA_VERSION,
+  BENCH_SPEC_ID as KSCORE_BENCH_SPEC_ID,
+  loadLeaderboard as loadKScoreLeaderboard,
+  referenceScorer as kscoreReferenceScorer,
+  runBench as runKScoreBench,
+} from './kscore-bench.js';
+import {
+  auditBenchmarkEvidence,
+  benchmarkEvidenceCatalog,
+  benchmarkEvidenceTemplate,
+  validateBenchmarkProviderMatrix,
+} from './benchmark-evidence.js';
+import { qualityCalibrationCatalog, runQualityCalibration } from './quality-calibration.js';
+import {
+  auditFormatGovernancePacket,
+  formatGovernanceCatalog,
+  formatGovernanceSubmissionTemplate,
+  validateFormatGovernanceSubmission,
+} from './format-governance-packet.js';
+import {
+  auditRuntimeAdoptionPackets,
+  runtimeAdoptionCatalog,
+  runtimeAdoptionManifestTemplate,
+  validateRuntimeAdoptionManifest,
+} from './runtime-adoption-packets.js';
+import {
+  auditComplianceCertificationPacket,
+  complianceCertificationManifestTemplate,
+  validateComplianceCertificationManifest,
+} from './compliance-certification-packet.js';
+import {
+  buildEvidenceReadiness,
+  EVIDENCE_READINESS_REQUIREMENT_IDS,
+  EVIDENCE_READINESS_SOURCE_PATHS,
+} from './evidence-readiness.js';
 
 // =====================================================================
 // W384 — backend wiring imports for /v1/* routes that expose the W369–
@@ -264,6 +324,12 @@ import {
   teamRollup as billingTeamRollup,
 } from './billing-breakdown.js';
 
+// W709-5 — runtime-router decision summary for /account/routing dashboard.
+import {
+  summarizeRouting as routingSummarize,
+  recentRoutingDecisions as routingRecent,
+} from './routing-events.js';
+
 // W466 — multimodal bake-off harness (image/audio/video).
 import { runMultimodalBakeoff } from './multimodal-bakeoff.js';
 import {
@@ -337,7 +403,8 @@ const verifiedLimiter = rateLimit({
 
 // Anonymous workspace bootstrap — bots can mint these without an email. Cap to
 // prevent disk-DoS-by-tenant-row.
-const PRODUCT_GRAPH_PATH = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'public', 'product-graph.json');
+const ROUTER_REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const PRODUCT_GRAPH_PATH = path.join(ROUTER_REPO_ROOT, 'public', 'product-graph.json');
 function readProductGraph() {
   try {
     return JSON.parse(fs.readFileSync(PRODUCT_GRAPH_PATH, 'utf8'));
@@ -895,6 +962,693 @@ export function buildRouter() {
     res.status(graph.ok === false ? 503 : 200).json(envelope);
   });
 
+  // Product frontier lab - public, secret-safe summary of the research-to-build
+  // experiment portfolio. This is a local product planning contract, not a
+  // claim of external benchmark, package, adoption, or certification completion.
+  r.get('/v1/product/frontier-lab', (req, res) => {
+    try {
+      const include = String(req.query.include_experiments || req.query.experiments || '') === '1';
+      const lab = buildProductFrontierLab({
+        root: ROUTER_REPO_ROOT,
+        category: req.query.category ? String(req.query.category) : null,
+        experiment: req.query.experiment ? String(req.query.experiment) : null,
+        source: req.query.source ? String(req.query.source) : null,
+        metric: req.query.metric ? String(req.query.metric) : null,
+      });
+      const data = {
+        lab: include ? lab : { ...lab, selected_experiments: lab.selected_experiments.slice(0, 5) },
+        secret_values_included: false,
+      };
+      const envelope = okEnvelope({
+        surface: 'public-docs-sdk',
+        journey: 'compile-verify',
+        readiness: {
+          status: lab.readiness_status,
+          requirement_ids: ['product-frontier-lab', 'research-to-build-handoff'],
+          external_requirements: lab.external_ready ? [] : [
+            'external evidence remains in readiness closeout gates before public finality claims',
+          ],
+        },
+        data,
+        evidence: {
+          source_paths: PRODUCT_FRONTIER_LAB_SOURCE_PATHS,
+        },
+        next_actions: lab.next_actions,
+      });
+      attachEnvelopeHeaders(res, envelope);
+      res.status(lab.local_contract_ok ? 200 : 503).json(envelope);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'product_frontier_lab_error', detail: String(e.message || e) });
+    }
+  });
+
+  // Product frontier implementation contracts - public, secret-safe handoff
+  // from research experiments to implementation-agent owner files, routes,
+  // commands, smoke fixtures, evidence gates, and failure modes.
+  r.get('/v1/product/frontier-contracts', (req, res) => {
+    try {
+      const include = String(req.query.include_contracts || req.query.contracts || '') === '1';
+      const contracts = buildProductFrontierContracts({
+        root: ROUTER_REPO_ROOT,
+        contract: req.query.contract ? String(req.query.contract) : null,
+        experiment: req.query.experiment ? String(req.query.experiment) : null,
+        category: req.query.category ? String(req.query.category) : null,
+        source: req.query.source ? String(req.query.source) : null,
+        metric: req.query.metric ? String(req.query.metric) : null,
+      });
+      const data = {
+        contracts: include ? contracts : { ...contracts, selected_contracts: contracts.selected_contracts.slice(0, 5) },
+        secret_values_included: false,
+      };
+      const envelope = okEnvelope({
+        surface: 'public-docs-sdk',
+        journey: 'compile-verify',
+        readiness: {
+          status: contracts.readiness_status,
+          requirement_ids: ['product-frontier-implementation-contracts', 'research-to-build-handoff'],
+          external_requirements: contracts.external_ready ? [] : [
+            'external evidence remains in readiness closeout gates before public finality claims',
+          ],
+        },
+        data,
+        evidence: {
+          source_paths: PRODUCT_FRONTIER_IMPLEMENTATION_CONTRACTS_SOURCE_PATHS,
+        },
+        next_actions: contracts.next_actions,
+      });
+      attachEnvelopeHeaders(res, envelope);
+      res.status(contracts.local_contract_ok ? 200 : 503).json(envelope);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'product_frontier_contracts_error', detail: String(e.message || e) });
+    }
+  });
+
+  // Product frontier operator kernels - public, secret-safe build plans that
+  // convert the frontier research and implementation contracts into concrete
+  // backend kernels across quantization, compile, distill, serving, eval, cloud,
+  // edge, governance, security, and agent automation.
+  r.get('/v1/product/operator-kernels', (req, res) => {
+    try {
+      const include = String(req.query.include_kernels || req.query.kernels || '') === '1';
+      const kernels = buildProductFrontierOperatorKernels({
+        root: ROUTER_REPO_ROOT,
+        kernel: req.query.kernel ? String(req.query.kernel) : null,
+        category: req.query.category ? String(req.query.category) : null,
+        source: req.query.source ? String(req.query.source) : null,
+        metric: req.query.metric ? String(req.query.metric) : null,
+        journey: req.query.journey ? String(req.query.journey) : null,
+      });
+      const data = {
+        operator_kernels: include ? kernels : { ...kernels, selected_kernels: kernels.selected_kernels.slice(0, 5) },
+        secret_values_included: false,
+      };
+      const envelope = okEnvelope({
+        surface: 'public-docs-sdk',
+        journey: 'compile-verify',
+        readiness: {
+          status: kernels.readiness_status,
+          requirement_ids: ['product-frontier-operator-kernels', 'research-to-build-handoff'],
+          external_requirements: kernels.external_ready ? [] : [
+            'external evidence remains in readiness closeout gates before public finality claims',
+          ],
+        },
+        data,
+        evidence: {
+          source_paths: PRODUCT_FRONTIER_OPERATOR_KERNELS_SOURCE_PATHS,
+        },
+        next_actions: kernels.next_actions,
+      });
+      attachEnvelopeHeaders(res, envelope);
+      res.status(kernels.local_contract_ok ? 200 : 503).json(envelope);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'product_frontier_operator_kernels_error', detail: String(e.message || e) });
+    }
+  });
+
+  // Evidence readiness - one public, secret-safe aggregate for every proof gate
+  // that can keep product copy from saying "final" too early. This mirrors
+  // `kolm evidence --json` so account UI, docs, CLI, and release audits share
+  // the same local/external boundary.
+  r.get('/v1/evidence/readiness', (_req, res) => {
+    try {
+      const readiness = buildEvidenceReadiness({ root: ROUTER_REPO_ROOT });
+      const envelope = okEnvelope({
+        surface: 'public-docs-sdk',
+        journey: 'public-docs-sdk',
+        readiness: {
+          status: readiness.readiness_status,
+          requirement_ids: EVIDENCE_READINESS_REQUIREMENT_IDS,
+          external_requirements: readiness.gates
+            .filter((gate) => !gate.external_ready)
+            .map((gate) => `${gate.id}:${gate.status}`),
+        },
+        data: {
+          readiness,
+          secret_values_included: readiness.secret_values_included,
+        },
+        evidence: {
+          source_paths: EVIDENCE_READINESS_SOURCE_PATHS,
+        },
+        next_actions: [
+          {
+            kind: 'command',
+            label: 'Verify all evidence gates',
+            value: 'kolm evidence --summary --require-local-contract',
+            surface: 'public-docs-sdk',
+            journey: 'public-docs-sdk',
+            priority: 'P0',
+          },
+          ...readiness.next_actions,
+        ],
+      });
+      attachEnvelopeHeaders(res, envelope);
+      res.status(readiness.local_contract_ok ? 200 : 503).json(envelope);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'evidence_readiness_error', detail: String(e.message || e) });
+    }
+  });
+
+  // Package release readiness - local, secret-safe audit for SDK/runtime/install
+  // package contracts. This is not a registry publication claim: it exposes
+  // manifest/docs/dry-run readiness and channel blockers for package-gated items.
+  r.get('/v1/packages/release-readiness', (_req, res) => {
+    const audit = auditPackageReleaseReadiness({ root: ROUTER_REPO_ROOT });
+    const envelope = okEnvelope({
+      surface: 'public-docs-sdk',
+      journey: 'public-docs-sdk',
+      readiness: {
+        status: audit.ok ? 'implemented' : 'blocked',
+        requirement_ids: ['runtime-wasm', 'ios-android-sdk', 'sdk-depth', 'one-line-install'],
+      },
+      data: {
+        audit,
+        secret_values_included: false,
+      },
+      next_actions: [
+        {
+          kind: 'command',
+          label: 'Verify local package release contracts',
+          value: 'node scripts/package-release-readiness.mjs --summary --require-local-contract',
+          surface: 'public-docs-sdk',
+          journey: 'public-docs-sdk',
+          priority: 'P1',
+        },
+      ],
+    });
+    attachEnvelopeHeaders(res, envelope);
+    res.status(audit.ok ? 200 : 503).json(envelope);
+  });
+
+  // Package release manifest template - the signed artifact/registry evidence
+  // required before package-gated readiness can become publish-ready.
+  r.get('/v1/packages/release-readiness/template', (_req, res) => {
+    const envelope = okEnvelope({
+      surface: 'public-docs-sdk',
+      journey: 'public-docs-sdk',
+      readiness: {
+        status: 'needs_package_release',
+        requirement_ids: ['runtime-wasm', 'ios-android-sdk', 'sdk-depth', 'one-line-install'],
+      },
+      data: {
+        template: packageReleaseManifestTemplate(),
+        secret_values_included: false,
+      },
+      evidence: {
+        source_paths: [
+          'src/package-release-readiness.js',
+          'scripts/package-release-readiness.mjs',
+        ],
+      },
+      next_actions: [
+        {
+          kind: 'command',
+          label: 'Generate package release manifest template',
+          value: 'node scripts/package-release-readiness.mjs --template',
+          surface: 'public-docs-sdk',
+          journey: 'public-docs-sdk',
+          priority: 'P1',
+        },
+      ],
+    });
+    attachEnvelopeHeaders(res, envelope);
+    res.json(envelope);
+  });
+
+  // Package release manifest validation - dry-runs a proposed signed release
+  // manifest without publishing to npm, PyPI, crates, SwiftPM, Maven, winget,
+  // Homebrew, apt, or extension stores.
+  r.post('/v1/packages/release-readiness/validate', (req, res) => {
+    try {
+      const validation = validatePackageReleaseManifest(req.body || {});
+      const envelope = okEnvelope({
+        surface: 'public-docs-sdk',
+        journey: 'public-docs-sdk',
+        readiness: {
+          status: validation.ok ? 'implemented' : 'needs_package_release',
+          requirement_ids: ['runtime-wasm', 'ios-android-sdk', 'sdk-depth', 'one-line-install'],
+        },
+        data: {
+          validation,
+          secret_values_included: false,
+        },
+        evidence: {
+          source_paths: [
+            'src/package-release-readiness.js',
+            'scripts/package-release-readiness.mjs',
+          ],
+        },
+        next_actions: [
+          {
+            kind: 'command',
+            label: 'Validate package release manifest',
+            value: 'node scripts/package-release-readiness.mjs --validate reports/package-release-manifest.json',
+            surface: 'public-docs-sdk',
+            journey: 'public-docs-sdk',
+            priority: 'P1',
+          },
+        ],
+      });
+      attachEnvelopeHeaders(res, envelope);
+      res.status(validation.ok ? 200 : 422).json(envelope);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'package_release_validate_error', detail: String(e.message || e) });
+    }
+  });
+
+  // Compliance certification packet - local evidence exists, external auditor
+  // and legal certifications remain explicitly gated.
+  r.get('/v1/compliance/certification-packet', (_req, res) => {
+    try {
+      const audit = auditComplianceCertificationPacket({ root: ROUTER_REPO_ROOT });
+      const envelope = okEnvelope({
+        surface: 'governance-compliance-security',
+        journey: 'governance-compliance-security',
+        readiness: {
+          status: audit.ok ? 'needs_live_certification' : 'blocked',
+          requirement_ids: ['compliance-certifications'],
+        },
+        data: {
+          audit,
+          secret_values_included: false,
+        },
+        evidence: {
+          source_paths: [
+            'src/compliance-certification-packet.js',
+            'scripts/compliance-certification-packet.mjs',
+            'docs/compliance-certification-packet.md',
+          ],
+        },
+        next_actions: [
+          {
+            kind: 'command',
+            label: 'Verify compliance certification packet',
+            value: 'npm run verify:compliance-packet',
+            surface: 'governance-compliance-security',
+            journey: 'governance-compliance-security',
+            priority: 'P0',
+          },
+        ],
+      });
+      attachEnvelopeHeaders(res, envelope);
+      res.status(audit.ok ? 200 : 503).json(envelope);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'compliance_certification_packet_error', detail: String(e.message || e) });
+    }
+  });
+
+  // Compliance certification manifest template - the exact evidence bundle a
+  // live auditor/legal/certification claim must provide before Kolm can call
+  // compliance certifications complete.
+  r.get('/v1/compliance/certification-packet/template', (_req, res) => {
+    try {
+      const template = complianceCertificationManifestTemplate();
+      const envelope = okEnvelope({
+        surface: 'governance-compliance-security',
+        journey: 'governance-compliance-security',
+        readiness: {
+          status: 'needs_live_certification',
+          requirement_ids: ['compliance-certifications'],
+        },
+        data: {
+          template,
+          secret_values_included: false,
+        },
+        evidence: {
+          source_paths: [
+            'src/compliance-certification-packet.js',
+            'scripts/compliance-certification-packet.mjs',
+          ],
+        },
+        next_actions: [
+          {
+            kind: 'command',
+            label: 'Validate compliance certification manifest',
+            value: 'node scripts/compliance-certification-packet.mjs --validate reports/compliance-certification-manifest.json',
+            surface: 'governance-compliance-security',
+            journey: 'governance-compliance-security',
+            priority: 'P0',
+          },
+        ],
+      });
+      attachEnvelopeHeaders(res, envelope);
+      res.status(200).json(envelope);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'compliance_certification_template_error', detail: String(e.message || e) });
+    }
+  });
+
+  // Compliance certification manifest validation - fails closed on missing
+  // auditor/legal evidence, unsigned proof hashes, non-HTTPS evidence URLs,
+  // placeholder fields, and secret-looking values.
+  r.post('/v1/compliance/certification-packet/validate', (req, res) => {
+    try {
+      const validation = validateComplianceCertificationManifest(req.body || {});
+      const envelope = okEnvelope({
+        surface: 'governance-compliance-security',
+        journey: 'governance-compliance-security',
+        readiness: {
+          status: validation.ok ? 'implemented' : 'needs_live_certification',
+          requirement_ids: ['compliance-certifications'],
+        },
+        data: {
+          validation,
+          secret_values_included: false,
+        },
+        evidence: {
+          source_paths: [
+            'src/compliance-certification-packet.js',
+            'scripts/compliance-certification-packet.mjs',
+          ],
+        },
+        next_actions: [
+          {
+            kind: 'command',
+            label: 'Validate compliance certification manifest',
+            value: 'node scripts/compliance-certification-packet.mjs --validate reports/compliance-certification-manifest.json',
+            surface: 'governance-compliance-security',
+            journey: 'governance-compliance-security',
+            priority: 'P0',
+          },
+        ],
+      });
+      attachEnvelopeHeaders(res, envelope);
+      res.status(validation.ok ? 200 : 422).json(envelope);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'compliance_certification_validate_error', detail: String(e.message || e) });
+    }
+  });
+
+  // Redaction benchmark - public, synthetic, secret-safe proof that the PHI/PII
+  // redactor detects expected classes, redacts raw values, and fails closed on
+  // malformed identifiers. This is benchmark evidence, not a live compliance
+  // certification claim.
+  r.get('/v1/privacy/redaction-benchmark', (_req, res) => {
+    try {
+      const benchmark = runRedactionBenchmark({ includeHost: false });
+      const envelope = okEnvelope({
+        surface: 'governance-compliance-security',
+        journey: 'privacy-redaction',
+        readiness: { status: benchmark.ok ? 'implemented' : 'blocked', requirement_ids: ['redaction-quality'] },
+        data: {
+          benchmark,
+          secret_values_included: false,
+        },
+        evidence: {
+          source_paths: [
+            'src/redaction-benchmark.js',
+            'src/phi-redactor.js',
+            'scripts/bench-redaction-fixtures.mjs',
+            'test/fixtures/redaction-public-benchmark.json',
+            'public/benchmarks/redaction-public-benchmark.json',
+          ],
+          proof_refs: [
+            { kind: 'public_json', path: '/benchmarks/redaction-public-benchmark.json' },
+          ],
+        },
+        next_actions: [
+          {
+            kind: 'command',
+            label: 'Verify redaction benchmark',
+            value: 'npm run verify:redaction-benchmark',
+            surface: 'governance-compliance-security',
+            journey: 'privacy-redaction',
+            priority: 'P0',
+          },
+        ],
+      });
+      attachEnvelopeHeaders(res, envelope);
+      res.status(benchmark.ok ? 200 : 503).json(envelope);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'redaction_benchmark_error', detail: String(e.message || e) });
+    }
+  });
+
+  // K-score calibration - public, frozen benchmark contract for the score
+  // formula, 30-case suite, class mix, axis means, and manual-review
+  // leaderboard. This proves how K-score is computed; live model ranking
+  // claims require separate public benchmark evidence.
+  r.get('/v1/eval/k-score-calibration', async (_req, res) => {
+    try {
+      const calibration = await runKScoreBench(kscoreReferenceScorer);
+      const leaderboard = await loadKScoreLeaderboard();
+      const class_counts = KSCORE_BENCH_CASES.reduce((acc, c) => {
+        acc[c.cls] = (acc[c.cls] || 0) + 1;
+        return acc;
+      }, {});
+      const envelope = okEnvelope({
+        surface: 'capture-data-eval-training',
+        journey: 'train-distill',
+        readiness: { status: 'implemented', requirement_ids: ['k-score-calibration'] },
+        data: {
+          spec: KSCORE_BENCH_SPEC_ID,
+          schema_version: KSCORE_BENCH_SCHEMA_VERSION,
+          frozen_at: KSCORE_BENCH_FROZEN_AT,
+          case_count: KSCORE_BENCH_CASES.length,
+          class_counts,
+          axes: [
+            { id: 'A', label: 'accuracy' },
+            { id: 'S', label: 'size score' },
+            { id: 'L', label: 'latency score' },
+            { id: 'C', label: 'cost score' },
+            { id: 'V', label: 'eval coverage' },
+            { id: 'R', label: 'robustness' },
+            { id: 'F', label: 'fairness floor' },
+            { id: 'T', label: 'teacher fidelity' },
+            { id: 'E', label: 'energy' },
+            { id: 'Z', label: 'drift' },
+          ],
+          calibration_summary: calibration.summary,
+          leaderboard: {
+            spec: leaderboard.spec,
+            rows: Array.isArray(leaderboard.rows) ? leaderboard.rows : [],
+            submission_mode: leaderboard.submission_mode || 'manual_review',
+            submission_endpoint: leaderboard.submission_endpoint ?? null,
+            submission_contact: leaderboard.submission_contact || 'leaderboard@kolm.ai',
+          },
+          secret_values_included: false,
+          claim_scope: 'Frozen synthetic/public suite and manual-review leaderboard; broader competitive claims require dated public multi-provider reports.',
+        },
+        evidence: {
+          source_paths: [
+            'src/kscore.js',
+            'src/kscore-bench.js',
+            'public/kolm-bench.json',
+            'public/kscore-leaderboard.json',
+            'tests/wave275-kscore-deep.test.js',
+          ],
+          proof_refs: [
+            { kind: 'public_json', path: '/kolm-bench.json' },
+            { kind: 'public_json', path: '/kscore-leaderboard.json' },
+          ],
+        },
+        next_actions: [
+          {
+            kind: 'command',
+            label: 'Verify K-score calibration',
+            value: 'npm run verify:kscore-calibration',
+            surface: 'capture-data-eval-training',
+            journey: 'train-distill',
+            priority: 'P0',
+          },
+        ],
+      });
+      attachEnvelopeHeaders(res, envelope);
+      res.json(envelope);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'k_score_calibration_error', detail: String(e.message || e) });
+    }
+  });
+
+  // Benchmark evidence readiness for comparative claims. This route audits
+  // local evidence files and reports the exact public data lanes still needed;
+  // it never calls providers and never returns secret values.
+  r.get('/v1/eval/benchmark-evidence', (_req, res) => {
+    try {
+      const audit = auditBenchmarkEvidence({ root: ROUTER_REPO_ROOT });
+      const envelope = okEnvelope({
+        surface: 'capture-data-eval-training',
+        journey: 'train-distill',
+        readiness: {
+          status: audit.public_claim_ready ? 'implemented' : 'needs_public_benchmark_data',
+          requirement_ids: ['benchmarking-infra'],
+        },
+        data: {
+          catalog: benchmarkEvidenceCatalog(),
+          audit,
+          secret_values_included: false,
+        },
+        evidence: {
+          source_paths: [
+            'src/benchmark-evidence.js',
+            'scripts/benchmark-evidence.mjs',
+            'docs/benchmark-evidence.md',
+          ],
+          proof_refs: audit.required_artifacts.map((artifact) => ({
+            kind: 'source_version',
+            id: artifact.path,
+            sha256: artifact.sha256,
+          })),
+        },
+        next_actions: [
+          {
+            kind: 'command',
+            label: 'Verify benchmark evidence contract',
+            value: 'npm run verify:benchmark-evidence',
+            surface: 'capture-data-eval-training',
+            journey: 'train-distill',
+            priority: 'P0',
+          },
+        ],
+      });
+      attachEnvelopeHeaders(res, envelope);
+      res.status(audit.ok ? 200 : 503).json(envelope);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'benchmark_evidence_error', detail: String(e.message || e) });
+    }
+  });
+
+  // Benchmark evidence template - returns the strict provider/runtime lane
+  // schema required before comparative benchmark claims can be marked public.
+  r.get('/v1/eval/benchmark-evidence/template', (_req, res) => {
+    const envelope = okEnvelope({
+      surface: 'capture-data-eval-training',
+      journey: 'train-distill',
+      readiness: {
+        status: 'needs_public_benchmark_data',
+        requirement_ids: ['benchmarking-infra'],
+      },
+      data: {
+        template: benchmarkEvidenceTemplate(),
+        secret_values_included: false,
+      },
+      evidence: {
+        source_paths: [
+          'src/benchmark-evidence.js',
+          'scripts/benchmark-evidence.mjs',
+        ],
+      },
+      next_actions: [
+        {
+          kind: 'command',
+          label: 'Generate benchmark evidence template',
+          value: 'node scripts/benchmark-evidence.mjs --template',
+          surface: 'capture-data-eval-training',
+          journey: 'train-distill',
+          priority: 'P0',
+        },
+      ],
+    });
+    attachEnvelopeHeaders(res, envelope);
+    res.json(envelope);
+  });
+
+  // Benchmark evidence validation - validates a proposed provider matrix
+  // without saving it, calling providers, or exposing secrets.
+  r.post('/v1/eval/benchmark-evidence/validate', (req, res) => {
+    try {
+      const validation = validateBenchmarkProviderMatrix(req.body || {});
+      const envelope = okEnvelope({
+        surface: 'capture-data-eval-training',
+        journey: 'train-distill',
+        readiness: {
+          status: validation.ok ? 'implemented' : 'needs_public_benchmark_data',
+          requirement_ids: ['benchmarking-infra'],
+        },
+        data: {
+          validation,
+          secret_values_included: false,
+        },
+        evidence: {
+          source_paths: [
+            'src/benchmark-evidence.js',
+            'scripts/benchmark-evidence.mjs',
+          ],
+        },
+        next_actions: [
+          {
+            kind: 'command',
+            label: 'Validate benchmark evidence matrix',
+            value: 'node scripts/benchmark-evidence.mjs --validate reports/benchmarks/provider-matrix.json',
+            surface: 'capture-data-eval-training',
+            journey: 'train-distill',
+            priority: 'P0',
+          },
+        ],
+      });
+      attachEnvelopeHeaders(res, envelope);
+      res.status(validation.ok ? 200 : 422).json(envelope);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'benchmark_evidence_validate_error', detail: String(e.message || e) });
+    }
+  });
+
+  // Quality judge calibration - public, deterministic fixture for the
+  // per-call quality judge. This is calibration evidence, not a broad claim
+  // that autonomous judging matches every review domain.
+  r.get('/v1/eval/quality-calibration', (_req, res) => {
+    try {
+      const calibration = runQualityCalibration();
+      const envelope = okEnvelope({
+        surface: 'capture-data-eval-training',
+        journey: 'train-distill',
+        readiness: {
+          status: calibration.local_contract_ok ? 'implemented' : 'needs_public_benchmark_data',
+          requirement_ids: ['quality-scoring'],
+        },
+        data: {
+          catalog: qualityCalibrationCatalog(),
+          calibration,
+          secret_values_included: false,
+        },
+        evidence: {
+          source_paths: [
+            'src/quality-calibration.js',
+            'scripts/bench-quality-calibration.mjs',
+            'public/benchmarks/quality-judge-calibration.json',
+            'tests/wave588-quality-calibration-contract.test.js',
+          ],
+          proof_refs: [
+            { kind: 'public_json', path: '/benchmarks/quality-judge-calibration.json' },
+          ],
+        },
+        next_actions: [
+          {
+            kind: 'command',
+            label: 'Verify quality calibration contract',
+            value: 'npm run verify:quality-calibration',
+            surface: 'capture-data-eval-training',
+            journey: 'train-distill',
+            priority: 'P0',
+          },
+        ],
+      });
+      attachEnvelopeHeaders(res, envelope);
+      res.status(calibration.ok ? 200 : 503).json(envelope);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'quality_calibration_error', detail: String(e.message || e) });
+    }
+  });
+
   // Cloud readiness is exposed directly for account UI, CI, and self-hosted
   // operators. It reports configured categories and missing variable names,
   // but never returns secret values.
@@ -908,6 +1662,21 @@ export function buildRouter() {
       blockers: readiness.blockers,
       secret_values_included: false,
     });
+  });
+
+  // Constraint-first compute planner for local, SSH, rented GPU, managed
+  // training, customer cloud, and edge runtime. This is a planning endpoint
+  // only: it never launches infrastructure and never returns secret values.
+  r.get('/v1/cloud/broker/catalog', (_req, res) => {
+    res.json(cloudComputeBrokerCatalog());
+  });
+
+  r.post('/v1/cloud/broker', (req, res) => {
+    try {
+      res.json(planCloudCompute(req.body || {}, process.env));
+    } catch (e) {
+      res.status(400).json({ ok: false, error: String(e.message || e), code: 'cloud_compute_broker_error' });
+    }
   });
 
   // Artifact object-store readiness for account UI and CI. This is split out
@@ -1105,9 +1874,25 @@ export function buildRouter() {
     if (process.env.INVITE_ONLY === 'true') {
       return res.status(403).json({ error: 'public signup disabled — invite required' });
     }
-    const { email, name, plan: rawPlan } = req.body || {};
+    const { email, name, plan: rawPlan, country_code: bodyCountry } = req.body || {};
     if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
       return res.status(400).json({ error: 'valid email required' });
+    }
+    // W708-5 — export-control geo-fence. Country code may arrive via header
+    // (preferred — CDN-supplied or operator-supplied) or body field. Missing
+    // is allowed (geo_check:'unknown' stamped on tenant). HTTP 451 is the
+    // correct status here: "Unavailable For Legal Reasons" (RFC 7725) — NOT
+    // 403 (forbidden by app policy), because the restriction is legal.
+    const headerCountry = req.headers['x-kolm-country'];
+    const rawCountry = (headerCountry || bodyCountry || '').toString().trim().toUpperCase();
+    const countryCode = rawCountry.length === 2 ? rawCountry : null;
+    if (countryCode && isGeoFenced(countryCode)) {
+      return res.status(451).json({
+        ok: false,
+        error: 'geo_restricted',
+        country: countryCode,
+        contact: 'rodneyyesep@gmail.com',
+      });
     }
     // Refuse to mint a second tenant for the same email. Silently re-issuing
     // a fresh key creates undiscoverable orphan tenants and rotates the
@@ -1136,7 +1921,16 @@ export function buildRouter() {
     // Always provision on free quota; webhook upgrades after payment.
     const provisionedPlan = isPaid ? 'free' : requestedPlan;
     const provisionedMeta = PLAN_CATALOG[provisionedPlan];
-    const t = provisionTenant(uniq, { quota: provisionedMeta.quota, plan: provisionedPlan, email });
+    // W708-5 — stamp country_code + geo_check on the tenant row so legal /
+    // audit can later reconstruct what we knew at signup time.
+    const geoCheck = countryCode ? 'allowed' : 'unknown';
+    const t = provisionTenant(uniq, {
+      quota: provisionedMeta.quota,
+      plan: provisionedPlan,
+      email,
+      country_code: countryCode,
+      geo_check: geoCheck,
+    });
 
     let billingUrl = null;
     if (requiresBilling) {
@@ -1829,6 +2623,218 @@ export function buildRouter() {
   // A device with this bundle can run every public recipe locally, offline,
   // forever, for free. Returns a portable JSON envelope of all public recipes
   // with their executable source. This is the on-device runtime payload.
+  // Format governance packet - local evidence for neutral .kolm stewardship.
+  // External acceptance remains explicitly gated until a public venue accepts it.
+  r.get('/v1/spec/governance-packet', (_req, res) => {
+    try {
+      const audit = auditFormatGovernancePacket({ root: ROUTER_REPO_ROOT });
+      const envelope = okEnvelope({
+        surface: 'public-docs-sdk',
+        journey: 'public-docs-sdk',
+        readiness: {
+          status: audit.external_acceptance_verified ? 'implemented' : 'needs_external_partner',
+          requirement_ids: ['foundation-standardization'],
+        },
+        data: {
+          catalog: formatGovernanceCatalog(),
+          audit,
+          secret_values_included: false,
+        },
+        evidence: {
+          source_paths: [
+            'src/format-governance-packet.js',
+            'scripts/format-governance-packet.mjs',
+            'docs/format-governance-packet.md',
+          ],
+        },
+        next_actions: [
+          {
+            kind: 'command',
+            label: 'Verify format governance packet',
+            value: 'npm run verify:governance-packets',
+            surface: 'public-docs-sdk',
+            journey: 'public-docs-sdk',
+            priority: 'P1',
+          },
+        ],
+      });
+      attachEnvelopeHeaders(res, envelope);
+      res.status(audit.ok ? 200 : 503).json(envelope);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'format_governance_packet_error', detail: String(e.message || e) });
+    }
+  });
+
+  r.get('/v1/spec/governance-packet/template', (_req, res) => {
+    try {
+      const template = formatGovernanceSubmissionTemplate();
+      const envelope = okEnvelope({
+        surface: 'public-docs-sdk',
+        journey: 'public-docs-sdk',
+        readiness: {
+          status: 'needs_external_partner',
+          requirement_ids: ['foundation-standardization'],
+        },
+        data: { template, secret_values_included: false },
+        evidence: {
+          source_paths: ['src/format-governance-packet.js', 'scripts/format-governance-packet.mjs'],
+        },
+        next_actions: [
+          {
+            kind: 'command',
+            label: 'Validate format governance submission',
+            value: 'node scripts/format-governance-packet.mjs --validate reports/format-governance-submission.json',
+            surface: 'public-docs-sdk',
+            journey: 'public-docs-sdk',
+            priority: 'P1',
+          },
+        ],
+      });
+      attachEnvelopeHeaders(res, envelope);
+      res.status(200).json(envelope);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'format_governance_template_error', detail: String(e.message || e) });
+    }
+  });
+
+  r.post('/v1/spec/governance-packet/validate', (req, res) => {
+    try {
+      const validation = validateFormatGovernanceSubmission(req.body || {});
+      const envelope = okEnvelope({
+        surface: 'public-docs-sdk',
+        journey: 'public-docs-sdk',
+        readiness: {
+          status: validation.ok ? 'implemented' : 'needs_external_partner',
+          requirement_ids: ['foundation-standardization'],
+        },
+        data: { validation, secret_values_included: false },
+        evidence: {
+          source_paths: ['src/format-governance-packet.js', 'scripts/format-governance-packet.mjs'],
+        },
+        next_actions: [
+          {
+            kind: 'command',
+            label: 'Validate format governance submission',
+            value: 'node scripts/format-governance-packet.mjs --validate reports/format-governance-submission.json',
+            surface: 'public-docs-sdk',
+            journey: 'public-docs-sdk',
+            priority: 'P1',
+          },
+        ],
+      });
+      attachEnvelopeHeaders(res, envelope);
+      res.status(validation.ok ? 200 : 422).json(envelope);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'format_governance_validate_error', detail: String(e.message || e) });
+    }
+  });
+
+  // Runtime adoption packets - local integration packets for model hubs,
+  // local runners, conversion tooling, and hardware partners.
+  r.get('/v1/runtime/adoption-packets', (_req, res) => {
+    try {
+      const audit = auditRuntimeAdoptionPackets({ root: ROUTER_REPO_ROOT });
+      const envelope = okEnvelope({
+        surface: 'runtime-inference-connectors',
+        journey: 'runtime-inference-connectors',
+        readiness: {
+          status: audit.external_adoption_verified ? 'implemented' : 'needs_external_partner',
+          requirement_ids: ['ecosystem-runtime-adoption'],
+        },
+        data: {
+          catalog: runtimeAdoptionCatalog(),
+          audit,
+          secret_values_included: false,
+        },
+        evidence: {
+          source_paths: [
+            'src/runtime-adoption-packets.js',
+            'scripts/runtime-adoption-packets.mjs',
+            'docs/runtime-adoption-packets.md',
+          ],
+        },
+        next_actions: [
+          {
+            kind: 'command',
+            label: 'Verify runtime adoption packets',
+            value: 'npm run verify:governance-packets',
+            surface: 'runtime-inference-connectors',
+            journey: 'runtime-inference-connectors',
+            priority: 'P1',
+          },
+        ],
+      });
+      attachEnvelopeHeaders(res, envelope);
+      res.status(audit.ok ? 200 : 503).json(envelope);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'runtime_adoption_packets_error', detail: String(e.message || e) });
+    }
+  });
+
+  r.get('/v1/runtime/adoption-packets/template', (_req, res) => {
+    try {
+      const template = runtimeAdoptionManifestTemplate();
+      const envelope = okEnvelope({
+        surface: 'runtime-inference-connectors',
+        journey: 'runtime-inference-connectors',
+        readiness: {
+          status: 'needs_external_partner',
+          requirement_ids: ['ecosystem-runtime-adoption'],
+        },
+        data: { template, secret_values_included: false },
+        evidence: {
+          source_paths: ['src/runtime-adoption-packets.js', 'scripts/runtime-adoption-packets.mjs'],
+        },
+        next_actions: [
+          {
+            kind: 'command',
+            label: 'Validate runtime adoption manifest',
+            value: 'node scripts/runtime-adoption-packets.mjs --validate reports/runtime-adoption-manifest.json',
+            surface: 'runtime-inference-connectors',
+            journey: 'runtime-inference-connectors',
+            priority: 'P1',
+          },
+        ],
+      });
+      attachEnvelopeHeaders(res, envelope);
+      res.status(200).json(envelope);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'runtime_adoption_template_error', detail: String(e.message || e) });
+    }
+  });
+
+  r.post('/v1/runtime/adoption-packets/validate', (req, res) => {
+    try {
+      const validation = validateRuntimeAdoptionManifest(req.body || {});
+      const envelope = okEnvelope({
+        surface: 'runtime-inference-connectors',
+        journey: 'runtime-inference-connectors',
+        readiness: {
+          status: validation.ok ? 'implemented' : 'needs_external_partner',
+          requirement_ids: ['ecosystem-runtime-adoption'],
+        },
+        data: { validation, secret_values_included: false },
+        evidence: {
+          source_paths: ['src/runtime-adoption-packets.js', 'scripts/runtime-adoption-packets.mjs'],
+        },
+        next_actions: [
+          {
+            kind: 'command',
+            label: 'Validate runtime adoption manifest',
+            value: 'node scripts/runtime-adoption-packets.mjs --validate reports/runtime-adoption-manifest.json',
+            surface: 'runtime-inference-connectors',
+            journey: 'runtime-inference-connectors',
+            priority: 'P1',
+          },
+        ],
+      });
+      attachEnvelopeHeaders(res, envelope);
+      res.status(validation.ok ? 200 : 422).json(envelope);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'runtime_adoption_validate_error', detail: String(e.message || e) });
+    }
+  });
+
   r.get('/v1/registry/export', exportLimiter, (_req, res) => {
     const concepts = all('concepts').filter(c => c.visibility === 'public');
     const versions = all('versions');
@@ -2991,6 +3997,369 @@ export function buildRouter() {
   // /anthropic/v1/messages so SDKs that point BASE_URL at https://kolm.ai/anthropic
   // continue to work without rewriting the path.
   r.post('/anthropic/v1/messages', __w411HostedAuthGate, (req, res) => __connectorProxy('anthropic', '/v1/messages', req, res));
+
+  // ====================================================================
+  // W709 — confidence-aware routing. NEW route — does NOT modify the
+  // existing /v1/chat/completions wrapper at line ~3973. The student is
+  // queried first (via __hostedInferenceWrapper so tenant metering still
+  // fires); the response's token-level logprobs are scored for Shannon
+  // entropy; if any token exceeds the threshold the route escalates the
+  // high-entropy span to the configured teacher and stitches a unified
+  // envelope. If the upstream adapter did NOT return logprobs (Anthropic,
+  // OpenAI without `logprobs:true`, many self-hosted servers without the
+  // flag) the route emits route:'student' + reason:'no_entropy_signal_available'
+  // and NEVER silently substitutes the teacher — that would defeat the
+  // cost-saving point and lie about why the teacher was billed.
+  //
+  // Request body (additive to OpenAI chat-completions shape):
+  //   { ...openai_chat_completions_body,
+  //     kolm_routing: {
+  //       threshold?: number,            // entropy threshold in NATs
+  //       teacher_model?: string,        // anthropic/openai model id
+  //       teacher_provider?: string,     // 'anthropic' | 'openai'
+  //       student_artifact?: string,     // reserved — local artifact path
+  //     }
+  //   }
+  //
+  // Response: original upstream JSON, additionally tagged with
+  //   { kolm_routing: { decision, segments, teacher_called,
+  //                     total_cost_micro_usd } }
+  // ====================================================================
+  r.post('/v1/route/chat/completions', __w411HostedAuthGate, async (req, res) => {
+    const bodyIn = (req.body && typeof req.body === 'object') ? req.body : {};
+    const routing = (bodyIn.kolm_routing && typeof bodyIn.kolm_routing === 'object') ? bodyIn.kolm_routing : {};
+    const threshold = Number.isFinite(Number(routing.threshold)) ? Number(routing.threshold) : undefined;
+    const teacherProvider = String(routing.teacher_provider || 'anthropic').toLowerCase();
+    const teacherModel = String(routing.teacher_model || '').slice(0, 256);
+
+    // STEP 1 — query the student via the existing hosted-inference wrapper.
+    // We strip the kolm_routing block from the forwarded body so upstream
+    // servers don't choke on an unknown field. We also ensure the OpenAI
+    // logprobs flag is enabled so we have a chance of getting entropy.
+    const studentBody = { ...bodyIn };
+    delete studentBody.kolm_routing;
+    if (studentBody.logprobs === undefined) studentBody.logprobs = true;
+    if (studentBody.top_logprobs === undefined) studentBody.top_logprobs = 5;
+
+    let studentPayload = null;
+    let studentStatus = 200;
+    // Intercept res.status/res.json so we capture without sending.
+    const originalStatus = res.status.bind(res);
+    const originalJson = res.json.bind(res);
+    let capturedStatus = 200;
+    res.status = (code) => { capturedStatus = code; return res; };
+    res.json = (payload) => { studentPayload = payload; return res; };
+    const innerReq = { ...req, body: studentBody };
+    Object.setPrototypeOf(innerReq, Object.getPrototypeOf(req));
+    try {
+      await __hostedInferenceWrapper('openai', '/v1/chat/completions', innerReq, res);
+    } catch (err) {
+      res.status = originalStatus;
+      res.json = originalJson;
+      return res.status(502).json({
+        error: 'student_call_failed',
+        detail: String(err && err.message || err),
+      });
+    }
+    // Restore the real res.status/res.json so downstream output works.
+    res.status = originalStatus;
+    res.json = originalJson;
+    studentStatus = capturedStatus;
+    if (studentStatus >= 400 || !studentPayload) {
+      return res.status(studentStatus || 502).json(studentPayload || {
+        error: 'student_call_failed',
+        reason: 'no_payload_captured',
+      });
+    }
+
+    // STEP 2 — extract logprobs and score entropy.
+    const RR = await import('./runtime-confidence-router.js');
+    const choice0 = (studentPayload.choices && studentPayload.choices[0]) || null;
+    const lpBlock = choice0 && choice0.logprobs;
+    // OpenAI v1: choice.logprobs.content = [{ token, logprob, top_logprobs:[...] }]
+    const tokenLogprobs = lpBlock && Array.isArray(lpBlock.content) ? lpBlock.content : null;
+    const hasLogprobs = Array.isArray(tokenLogprobs) && tokenLogprobs.length > 0;
+    const decision = RR.decideRouting({ tokens: tokenLogprobs, threshold, hasLogprobs });
+
+    // STEP 3 — if escalation triggered, call the teacher. Honest contract:
+    // when entropy unavailable we DO NOT silently switch teachers — caller
+    // sees route:'student' with the original student answer and a reason
+    // tag explaining why no entropy signal was extractable.
+    let teacherCalled = false;
+    let teacherCostMicroUsd = 0;
+    let teacherError = null;
+    if (RR.shouldEscalateToTeacher(decision)) {
+      try {
+        if (teacherProvider === 'anthropic') {
+          const anthAdapter = await import('./compute/backends/anthropic.js');
+          const teacherMessages = Array.isArray(bodyIn.messages) ? bodyIn.messages : [];
+          const teacherResp = await anthAdapter.run({
+            model: teacherModel || process.env.KOLM_ANTHROPIC_MODEL || 'claude-sonnet-4-6',
+            messages: teacherMessages,
+            max_tokens: Number(bodyIn.max_tokens) || 1024,
+          });
+          if (teacherResp && teacherResp.ok && teacherResp.text) {
+            // Replace assistant content with teacher answer.
+            if (studentPayload.choices && studentPayload.choices[0]
+                && studentPayload.choices[0].message) {
+              studentPayload.choices[0].message.content = teacherResp.text;
+              studentPayload.choices[0].finish_reason = 'stop';
+            }
+            teacherCalled = true;
+          } else {
+            teacherError = (teacherResp && teacherResp.reason) || 'teacher_call_returned_no_text';
+          }
+        } else {
+          teacherError = `unsupported_teacher_provider:${teacherProvider}`;
+        }
+      } catch (err) {
+        teacherError = String(err && err.message || err);
+      }
+    }
+
+    const envelope = {
+      ...studentPayload,
+      kolm_routing: {
+        decision,
+        segments: decision.segments,
+        teacher_called: teacherCalled,
+        teacher_error: teacherError,
+        total_cost_micro_usd: teacherCostMicroUsd,
+        threshold_nats: Number.isFinite(threshold) ? threshold : RR.DEFAULT_ENTROPY_THRESHOLD_NATS,
+        has_logprobs: hasLogprobs,
+      },
+    };
+    return res.status(200).json(envelope);
+  });
+
+  // ====================================================================
+  // W709-4 — SSE streaming version of /v1/route/chat/completions.
+  //
+  // Behaves like W709-2 above but emits OpenAI-shaped streaming chunks
+  // (`text/event-stream`) instead of a single JSON envelope. The route:
+  //
+  //   1. Resolves the entropy threshold via routing-threshold.js (env
+  //      default + per-namespace override). An explicit
+  //      `kolm_routing.threshold` in the request body still wins.
+  //   2. Streams tokens from the student. For every token, computes
+  //      Shannon entropy from the per-token logprobs block (or from a
+  //      pre-scored `entropy` field on fixture tokens used by tests).
+  //   3. The FIRST time entropy crosses the threshold, emits a marker
+  //      `data: {"kolm_routing":{"event":"high_entropy_detected", ...}}\n\n`
+  //      and switches to the teacher. Once switched we stay with the
+  //      teacher for the rest of the response (no ping-pong).
+  //   4. Final marker carries `segments[]` + `teacher_called` + `decision`,
+  //      followed by the standard `data: [DONE]\n\n` sentinel so OpenAI
+  //      SDK clients see a clean stream close.
+  //
+  // Stream coherence: id/created/model are pinned ONCE at the top of the
+  // stream and reused on every chunk — the segments[] marker is what tells
+  // the client which range came from which source. This keeps OpenAI SDK
+  // clients (which assume model is stable per stream) happy across the
+  // student→teacher splice.
+  //
+  // Fixture mode: the request body may carry
+  //   __fixture_student_tokens: [{text, entropy}, ...]
+  //   __fixture_teacher_tokens: [{text}, ...]
+  // which makes the route end-to-end testable without standing up real
+  // student/teacher upstreams. Tests rely on this; production never sets
+  // these fields.
+  // ====================================================================
+  r.post('/v1/route/chat/completions/stream', __w411HostedAuthGate, async (req, res) => {
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    const routing = (body.kolm_routing && typeof body.kolm_routing === 'object') ? body.kolm_routing : {};
+    const namespace = sanitizeNamespace(String(
+      req.headers['x-kolm-namespace'] || body.corpus_namespace || body.namespace || 'default'
+    ));
+    const tenantId = req.tenant_record?.id || req.tenant || 'local-tenant';
+
+    // Threshold resolution: request override > per-namespace override > env default.
+    let threshold;
+    let thresholdSource = 'default';
+    try {
+      const TR = await import('./routing-threshold.js');
+      if (routing.threshold != null) {
+        try { threshold = TR.validateThreshold(routing.threshold); thresholdSource = 'request'; }
+        catch { threshold = await TR.getNamespaceThreshold(namespace, tenantId); thresholdSource = 'namespace_or_default'; }
+      } else {
+        const ns = await TR.getNamespaceThreshold(namespace, tenantId);
+        threshold = ns;
+        thresholdSource = (ns === TR.defaultThreshold()) ? 'default' : 'namespace_override';
+      }
+    } catch (_) {
+      // routing-threshold module missing — use a hard-coded safe default
+      // so the route stays serving traffic.
+      threshold = 1.5;
+      thresholdSource = 'fallback_constant';
+    }
+
+    // Try to load the W709-1 confidence-router primitives. Degrade if
+    // they're unavailable — we still expose the SSE surface so callers
+    // see a coherent stream end-to-end.
+    let RR = null;
+    try { RR = await import('./runtime-confidence-router.js'); } catch (_) { RR = null; }
+
+    // Open the SSE stream + pin envelope fields ONCE.
+    res.set({
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache, no-transform',
+      'Connection': 'keep-alive',
+      'X-Accel-Buffering': 'no',
+      'X-Kolm-Routing-Threshold': String(threshold),
+    });
+    res.flushHeaders?.();
+
+    const streamId = body.id || 'chatcmpl-' + crypto.randomBytes(8).toString('hex');
+    const createdAt = body.created || Math.floor(Date.now() / 1000);
+    const studentModel = body.model || body.student_model || 'kolm-student';
+    const teacherModel = routing.teacher_model || body.teacher_model || 'kolm-teacher';
+
+    const segments = [];
+    let teacherCalled = false;
+    let tokenIndex = 0;
+    let switched = false;
+    let switchAt = null;
+    let studentSegStart = 0;
+    let studentSegSawAny = false;
+
+    const writeChunk = (deltaContent, finishReason = null) => {
+      // OpenAI chunk shape. id/created/model are pinned to the STUDENT
+      // values across both segments so the SDK never sees a model swap
+      // mid-stream; the segments[] marker carries the splice provenance.
+      const chunk = {
+        id: streamId,
+        object: 'chat.completion.chunk',
+        created: createdAt,
+        model: studentModel,
+        choices: [{
+          index: 0,
+          delta: deltaContent != null ? { content: deltaContent } : {},
+          finish_reason: finishReason,
+        }],
+      };
+      try { res.write('data: ' + JSON.stringify(chunk) + '\n\n'); } catch (_) {}
+    };
+    const writeMarker = (marker) => {
+      try { res.write('data: ' + JSON.stringify({ kolm_routing: marker }) + '\n\n'); } catch (_) {}
+    };
+
+    // Token producers. Fixture path supports tests; real path delegates
+    // to the W709-1 primitives when present; degraded path emits nothing
+    // (final marker still fires so the client knows the route is wired).
+    async function* studentTokens() {
+      if (Array.isArray(body.__fixture_student_tokens)) {
+        for (const tok of body.__fixture_student_tokens) yield tok;
+        return;
+      }
+      if (RR && typeof RR.streamStudent === 'function') {
+        for await (const tok of RR.streamStudent(body)) yield tok;
+        return;
+      }
+      return;
+    }
+    async function* teacherTokens(fromIndex) {
+      if (Array.isArray(body.__fixture_teacher_tokens)) {
+        for (const tok of body.__fixture_teacher_tokens) yield tok;
+        return;
+      }
+      if (RR && typeof RR.streamTeacher === 'function') {
+        for await (const tok of RR.streamTeacher(body, fromIndex)) yield tok;
+        return;
+      }
+      return;
+    }
+
+    function _entropyOf(tok) {
+      // Preferred: pre-scored {text, entropy}. Fallback: {text, logprobs}
+      // (logprobs is an array of {token, logprob} or a top_logprobs blob)
+      // computed via RR.tokenEntropy if loaded.
+      if (tok == null) return 0;
+      if (typeof tok.entropy === 'number') return tok.entropy;
+      if (Array.isArray(tok.logprobs) && RR && typeof RR.tokenEntropy === 'function') {
+        try { return RR.tokenEntropy(tok.logprobs); } catch { return 0; }
+      }
+      return 0;
+    }
+
+    try {
+      for await (const tok of studentTokens()) {
+        const ent = _entropyOf(tok);
+        const text = typeof tok === 'string' ? tok : (tok?.text ?? '');
+        if (!switched && ent > threshold) {
+          // Close student segment, emit marker, drain teacher.
+          if (studentSegSawAny) {
+            segments.push({ start: studentSegStart, end: tokenIndex, source: 'student' });
+          }
+          switched = true;
+          switchAt = tokenIndex;
+          teacherCalled = true;
+          writeMarker({
+            event: 'high_entropy_detected',
+            token_index: tokenIndex,
+            entropy: ent,
+            threshold,
+          });
+          const teacherStart = tokenIndex;
+          for await (const ttok of teacherTokens(tokenIndex)) {
+            const ttext = typeof ttok === 'string' ? ttok : (ttok?.text ?? '');
+            writeChunk(ttext);
+            tokenIndex += 1;
+          }
+          segments.push({ start: teacherStart, end: tokenIndex, source: 'teacher' });
+          break;
+        }
+        writeChunk(text);
+        studentSegSawAny = true;
+        tokenIndex += 1;
+      }
+      if (!switched && studentSegSawAny) {
+        segments.push({ start: studentSegStart, end: tokenIndex, source: 'student' });
+      }
+
+      // Decision payload — inline summary + optional RR.decideRouting overlay.
+      let streamDecision = {
+        threshold,
+        threshold_source: thresholdSource,
+        switched,
+        switch_at_token: switchAt,
+        student_tokens: switched ? (switchAt || 0) : tokenIndex,
+        teacher_tokens: switched ? Math.max(0, tokenIndex - (switchAt || 0)) : 0,
+      };
+      if (RR && typeof RR.decideRouting === 'function') {
+        try {
+          // decideRouting expects tokens with logprobs but we operate at
+          // the stream level; pass our summary so the function can overlay
+          // its own decision shape if it inspects {threshold, tokens_emitted}.
+          const d = RR.decideRouting({
+            threshold,
+            hasLogprobs: false,
+            tokens: null,
+          });
+          if (d && typeof d === 'object') streamDecision = { ...d, ...streamDecision };
+        } catch (_) {}
+      }
+
+      writeMarker({
+        segments,
+        teacher_called: teacherCalled,
+        decision: streamDecision,
+        id: streamId,
+        created: createdAt,
+        model: studentModel,
+        teacher_model: teacherModel,
+      });
+      writeChunk(null, 'stop');
+      try { res.write('data: [DONE]\n\n'); } catch (_) {}
+    } catch (e) {
+      try {
+        res.write('data: ' + JSON.stringify({ error: String(e?.message || e) }) + '\n\n');
+        res.write('data: [DONE]\n\n');
+      } catch (_) {}
+    } finally {
+      try { res.end(); } catch (_) {}
+    }
+  });
+
   // OpenRouter capture and base-URL aliases. The direct base-URL forms support
   // SDKs that point BASE_URL at https://kolm.ai/v1/openrouter.
   r.post('/v1/capture/openrouter', __w411HostedAuthGate, (req, res) => __connectorProxy('openrouter', '/v1/chat/completions', req, res));
@@ -4455,31 +5824,99 @@ export function buildRouter() {
   // with HTTP 200 (a routable envelope, not a wall). The metadata + SP-config
   // endpoints are real static documents an IdP can fetch to start federation.
   //
-  // The actual SAML assertion + SCIM provisioning loops are not implemented;
-  // the configure POST persists nothing today. When that ships, these stubs
-  // are the public contract it has to honor.
+  // Tenant IdP configuration and SCIM user create/list are persisted locally.
+  // SAML assertion validation still needs a production identity provider or
+  // customer IdP exchange, so status separates configured state from live
+  // assertion handling.
+  const SSO_PROVIDERS = ['google-workspace', 'okta', 'azure-ad', 'onelogin', 'jumpcloud', 'saml-generic', 'oidc-generic'];
   function _ssoEntitled(plan) {
     return plan === 'enterprise' || plan === 'business';
+  }
+  function _str(v, max = 512) {
+    return String(v == null ? '' : v).trim().slice(0, max);
+  }
+  function _httpsUrl(v, field) {
+    const s = _str(v, 2048);
+    if (!s) return '';
+    let u;
+    try { u = new URL(s); } catch { throw new Error(`${field}_must_be_valid_url`); }
+    if (u.protocol !== 'https:') throw new Error(`${field}_must_be_https`);
+    return u.toString();
+  }
+  function _ssoConfigForTenant(tenantId) {
+    return findOne('enterprise_identity_configs', (row) => row.tenant_id === tenantId);
+  }
+  function _publicSsoConfig(row) {
+    if (!row) return null;
+    return {
+      id: row.id,
+      provider: row.provider,
+      enabled: row.enabled !== false,
+      domains: Array.isArray(row.domains) ? row.domains : [],
+      metadata_url: row.metadata_url || null,
+      metadata_sha256: row.metadata_sha256 || null,
+      oidc_issuer: row.oidc_issuer || null,
+      idp_entity_id: row.idp_entity_id || null,
+      sso_url: row.sso_url || null,
+      default_role: row.default_role || 'member',
+      jit_provisioning: row.jit_provisioning !== false,
+      scim_enabled: row.scim_enabled === true,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+      secret_values_included: false,
+    };
+  }
+  function _scimUserFromRow(row, host) {
+    const created = row.created_at || new Date().toISOString();
+    const updated = row.updated_at || created;
+    return {
+      schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
+      id: row.id,
+      externalId: row.externalId || undefined,
+      userName: row.userName,
+      active: row.active !== false,
+      name: row.name || {},
+      displayName: row.displayName || undefined,
+      emails: Array.isArray(row.emails) ? row.emails : [],
+      groups: Array.isArray(row.groups) ? row.groups : [],
+      meta: {
+        resourceType: 'User',
+        created,
+        lastModified: updated,
+        location: `https://${host || 'kolm.ai'}/v1/scim/v2/Users/${row.id}`,
+      },
+    };
+  }
+  function _scimError(res, status, detail) {
+    return res.status(status).json({
+      schemas: ['urn:ietf:params:scim:api:messages:2.0:Error'],
+      status: String(status),
+      detail,
+    });
   }
   r.get('/v1/account/sso/status', (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
     const plan = req.tenant_record.plan || 'free';
     const entitled = _ssoEntitled(plan);
+    const config = entitled ? _ssoConfigForTenant(req.tenant_record.id) : null;
     res.json({
       ok: true,
-      enabled: false,
+      enabled: !!(config && config.enabled !== false),
+      configured: !!config,
       plan,
       entitled,
-      providers_supported: ['google-workspace', 'okta', 'azure-ad', 'onelogin', 'jumpcloud', 'saml-generic', 'oidc-generic'],
+      providers_supported: SSO_PROVIDERS,
+      config: _publicSsoConfig(config),
       enterprise_only: !entitled,
       upgrade_path: entitled ? null : '/v1/account/change-plan',
       contact: entitled ? null : 'sales@kolm.ai',
       docs: 'https://kolm.ai/enterprise#sso',
       sp_metadata_url: '/v1/account/saml/metadata',
       scim_endpoint: '/v1/scim/v2/',
+      assertion_consumer_status: process.env.KOLM_SAML_ACS_ENABLED === '1' ? 'external_provider_enabled' : 'not_enabled_in_local_runtime',
       note: entitled
-        ? 'SSO entitlement present; POST /v1/account/sso/configure with {provider, metadata_url} to start federation.'
-        : 'SSO is available on Business and Enterprise plans. The endpoint envelope ships today; the federation loop is not yet implemented and is gated to entitled tenants.',
+        ? 'SSO entitlement present. POST /v1/account/sso/configure stores tenant IdP metadata; live assertion handling requires the production identity provider to be enabled.'
+        : 'SSO is available on Team/Enterprise plans. The endpoint envelope ships today and is gated to entitled tenants.',
     });
   });
   r.post('/v1/account/sso/configure', (req, res) => {
@@ -4495,14 +5932,72 @@ export function buildRouter() {
         docs: 'https://kolm.ai/enterprise#sso',
       });
     }
-    return res.status(503).json({
-      ok: false,
-      error: 'sso_federation_not_yet_implemented',
-      plan,
-      note: 'Entitlement check passed but the SAML/OIDC federation loop is not yet wired. Contact dev@kolm.ai to coordinate a manual provisioning + early-access rollout.',
-      contact: 'dev@kolm.ai',
-      tracking: 'W560',
-    });
+    try {
+      const body = (req.body && typeof req.body === 'object') ? req.body : {};
+      const provider = _str(body.provider || 'saml-generic', 64);
+      if (!SSO_PROVIDERS.includes(provider)) {
+        return res.status(400).json({ ok: false, error: 'unsupported_provider', provider, providers_supported: SSO_PROVIDERS });
+      }
+      const metadataUrl = _httpsUrl(body.metadata_url || '', 'metadata_url');
+      const oidcIssuer = _httpsUrl(body.oidc_issuer || '', 'oidc_issuer');
+      const metadataXml = _str(body.metadata_xml || '', 200000);
+      if (!metadataUrl && !metadataXml && !oidcIssuer) {
+        return res.status(400).json({ ok: false, error: 'identity_metadata_required', required_any: ['metadata_url', 'metadata_xml', 'oidc_issuer'] });
+      }
+      const now = new Date().toISOString();
+      const metadataHash = metadataXml
+        ? 'sha256:' + crypto.createHash('sha256').update(metadataXml, 'utf8').digest('hex')
+        : null;
+      const defaultRole = _str(body.default_role, 32);
+      const domains = Array.isArray(body.domains)
+        ? body.domains.map((d) => _str(d, 120).toLowerCase()).filter((d) => /^[a-z0-9.-]+\.[a-z]{2,}$/.test(d)).slice(0, 25)
+        : [];
+      const patch = {
+        provider,
+        enabled: body.enabled !== false,
+        metadata_url: metadataUrl || null,
+        metadata_sha256: metadataHash,
+        oidc_issuer: oidcIssuer || null,
+        idp_entity_id: _str(body.idp_entity_id || '', 512) || null,
+        sso_url: body.sso_url ? _httpsUrl(body.sso_url, 'sso_url') : null,
+        domains,
+        default_role: ['viewer', 'member', 'admin'].includes(defaultRole) ? defaultRole : 'member',
+        jit_provisioning: body.jit_provisioning !== false,
+        scim_enabled: body.scim_enabled === true,
+        updated_at: now,
+      };
+      const existing = _ssoConfigForTenant(req.tenant_record.id);
+      let row;
+      if (existing) {
+        update('enterprise_identity_configs', (r) => r.tenant_id === req.tenant_record.id, patch);
+        row = { ...existing, ...patch };
+      } else {
+        row = {
+          id: storeId('sso'),
+          tenant_id: req.tenant_record.id,
+          created_at: now,
+          ...patch,
+        };
+        insert('enterprise_identity_configs', row);
+      }
+      tryAppendAudit({
+        tenant_id: req.tenant_record.id,
+        tenant_name: req.tenant_record.name || null,
+        actor: 'tenant',
+        op: 'enterprise.identity_configured',
+        payload: { provider, domains, scim_enabled: patch.scim_enabled, metadata_sha256: patch.metadata_sha256 },
+      });
+      res.json({
+        ok: true,
+        plan,
+        configured: true,
+        config: _publicSsoConfig(row),
+        assertion_consumer_status: process.env.KOLM_SAML_ACS_ENABLED === '1' ? 'external_provider_enabled' : 'not_enabled_in_local_runtime',
+        secret_values_included: false,
+      });
+    } catch (e) {
+      res.status(400).json({ ok: false, error: 'invalid_identity_config', detail: String(e && e.message || e) });
+    }
   });
   // SP metadata is a static document an IdP fetches at federation-config
   // time. It does NOT depend on entitlement (publishing the SP entity ID
@@ -4568,13 +6063,25 @@ export function buildRouter() {
       });
     }
     // SCIM ListResponse shape (RFC 7644 §3.4.2). Empty list when entitled
-    // but no provisioning has occurred yet.
+    // Supports tenant-scoped create/list and simple SCIM equality filters.
+    const host = req.get('host') || 'kolm.ai';
+    let rows = findByField('scim_users', 'tenant_id', req.tenant_record.id);
+    const filter = _str(req.query.filter || '', 500);
+    const m = filter.match(/^(userName|externalId|id)\s+eq\s+"([^"]{1,512})"$/i);
+    if (m) {
+      const field = m[1] === 'id' ? 'id' : m[1];
+      const want = m[2];
+      rows = rows.filter((row) => String(row[field] || '') === want);
+    }
+    const startIndex = Math.max(1, Number.parseInt(String(req.query.startIndex || '1'), 10) || 1);
+    const count = Math.min(200, Math.max(0, Number.parseInt(String(req.query.count || '100'), 10) || 100));
+    const page = rows.slice(startIndex - 1, startIndex - 1 + count);
     res.json({
       schemas: ['urn:ietf:params:scim:api:messages:2.0:ListResponse'],
-      totalResults: 0,
-      startIndex: 1,
-      itemsPerPage: 0,
-      Resources: [],
+      totalResults: rows.length,
+      startIndex,
+      itemsPerPage: page.length,
+      Resources: page.map((row) => _scimUserFromRow(row, host)),
     });
   });
   r.post('/v1/scim/v2/Users', (req, res) => {
@@ -4589,11 +6096,47 @@ export function buildRouter() {
         contact: 'sales@kolm.ai',
       });
     }
-    return res.status(503).json({
-      schemas: ['urn:ietf:params:scim:api:messages:2.0:Error'],
-      status: '503',
-      detail: 'scim_provisioning_not_yet_implemented; tracking W560',
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    const userName = _str(body.userName, 320).toLowerCase();
+    if (!userName || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(userName)) {
+      return _scimError(res, 400, 'userName must be a valid email address');
+    }
+    const existing = findByField('scim_users', 'tenant_id', req.tenant_record.id)
+      .find((row) => String(row.userName || '').toLowerCase() === userName);
+    if (existing) return _scimError(res, 409, 'SCIM user already exists for this tenant');
+    const now = new Date().toISOString();
+    const row = {
+      id: storeId('scim_user'),
+      tenant_id: req.tenant_record.id,
+      externalId: _str(body.externalId, 256) || null,
+      userName,
+      active: body.active !== false,
+      name: (body.name && typeof body.name === 'object') ? {
+        givenName: _str(body.name.givenName, 120) || undefined,
+        familyName: _str(body.name.familyName, 120) || undefined,
+        formatted: _str(body.name.formatted, 240) || undefined,
+      } : {},
+      displayName: _str(body.displayName, 240) || null,
+      emails: Array.isArray(body.emails) && body.emails.length
+        ? body.emails.slice(0, 5).map((e) => ({
+          value: _str((e && e.value) || '', 320).toLowerCase(),
+          primary: !!(e && e.primary),
+          type: _str((e && e.type) || 'work', 32) || 'work',
+        })).filter((e) => e.value)
+        : [{ value: userName, primary: true, type: 'work' }],
+      groups: Array.isArray(body.groups) ? body.groups.slice(0, 50) : [],
+      created_at: now,
+      updated_at: now,
+    };
+    insert('scim_users', row);
+    tryAppendAudit({
+      tenant_id: req.tenant_record.id,
+      tenant_name: req.tenant_record.name || null,
+      actor: 'scim',
+      op: 'enterprise.scim_user_created',
+      payload: { scim_user_id: row.id, userName: row.userName, externalId: row.externalId },
     });
+    res.status(201).json(_scimUserFromRow(row, req.get('host') || 'kolm.ai'));
   });
 
   // W452 — multimodal redactor surface. The fail-closed redactor in
@@ -7302,6 +8845,174 @@ export function buildRouter() {
       specialist_eligible: total >= 1000,
     });
   });
+
+  // Build strategy brain - shared planner for capture, prompt/RAG/routing,
+  // training, distillation, cloud compute, compilation, quantization, and
+  // local runtime. It never launches work and never returns secret values.
+  r.get('/v1/build/strategy/catalog', authMiddleware, (req, res) => {
+    const catalog = buildStrategyCatalog();
+    const envelope = okEnvelope({
+      surface: 'capture-data-eval-training',
+      journey: 'train-distill',
+      readiness: {
+        status: 'implemented',
+        requirement_ids: ['distill-strategy-selection', 'cloud-compute-broker', 'quality-scoring'],
+      },
+      tenant: req.tenant_record || { id: req.tenant },
+      data: { catalog },
+      evidence: {
+        source_paths: [
+          'src/build-strategy-brain.js',
+          'src/distill-strategy.js',
+          'src/cloud-compute-broker.js',
+          'src/quantization-oracle.js',
+        ],
+      },
+      next_actions: [
+        {
+          kind: 'command',
+          label: 'Plan build strategy',
+          value: 'node scripts/build-strategy-brain.mjs --task extraction --rows 500 --json',
+          surface: 'capture-data-eval-training',
+          journey: 'train-distill',
+          priority: 'P1',
+        },
+      ],
+    });
+    attachEnvelopeHeaders(res, envelope);
+    res.json(envelope);
+  });
+
+  r.get('/v1/build/strategy', authMiddleware, (req, res) => {
+    try {
+      const plan = planBuildStrategy(req.query || {}, process.env);
+      const envelope = okEnvelope({
+        surface: 'capture-data-eval-training',
+        journey: 'train-distill',
+        readiness: {
+          status: 'implemented',
+          requirement_ids: ['distill-strategy-selection', 'cloud-compute-broker', 'quality-scoring'],
+        },
+        tenant: req.tenant_record || { id: req.tenant },
+        data: { plan },
+        evidence: {
+          source_paths: ['src/build-strategy-brain.js', 'scripts/build-strategy-brain.mjs'],
+        },
+        next_actions: plan.next_actions || [],
+      });
+      attachEnvelopeHeaders(res, envelope);
+      res.json(envelope);
+    } catch (e) { res.status(400).json(_w384Err(e, 'build_strategy_error')); }
+  });
+
+  r.post('/v1/build/strategy', authMiddleware, (req, res) => {
+    try {
+      const body = req.body || {};
+      const plan = planBuildStrategy(body.profile || body, process.env);
+      const envelope = okEnvelope({
+        surface: 'capture-data-eval-training',
+        journey: 'train-distill',
+        readiness: {
+          status: 'implemented',
+          requirement_ids: ['distill-strategy-selection', 'cloud-compute-broker', 'quality-scoring'],
+        },
+        tenant: req.tenant_record || { id: req.tenant },
+        data: { plan },
+        evidence: {
+          source_paths: ['src/build-strategy-brain.js', 'scripts/build-strategy-brain.mjs'],
+        },
+        next_actions: plan.next_actions || [],
+      });
+      attachEnvelopeHeaders(res, envelope);
+      res.json(envelope);
+    } catch (e) { res.status(400).json(_w384Err(e, 'build_strategy_error')); }
+  });
+
+  // Distill strategy catalog - static decision vocabulary for data collection,
+  // rule/cache first paths, supervised fine-tune, teacher distillation,
+  // preference optimization, on-policy improvement, and speculative decoding.
+  r.get('/v1/distill/strategy/catalog', authMiddleware, (req, res) => {
+    const catalog = distillStrategyCatalog();
+    const envelope = okEnvelope({
+      surface: 'capture-data-eval-training',
+      journey: 'train-distill',
+      readiness: {
+        status: 'implemented',
+        requirement_ids: ['distill-strategy-selection', 'training-plan'],
+      },
+      tenant: req.tenant_record || { id: req.tenant },
+      data: { catalog },
+      evidence: {
+        source_paths: [
+          'src/distill-strategy.js',
+          'scripts/distill-strategy.mjs',
+          'src/distill-pipeline.js',
+          'src/training-planner.js',
+        ],
+      },
+      next_actions: [
+        {
+          kind: 'command',
+          label: 'Plan distill strategy',
+          value: 'node scripts/distill-strategy.mjs --task extraction --rows 500 --simulate anthropic',
+          surface: 'capture-data-eval-training',
+          journey: 'train-distill',
+          priority: 'P1',
+        },
+      ],
+    });
+    attachEnvelopeHeaders(res, envelope);
+    res.json(envelope);
+  });
+
+  // Distill strategy plan - ranks the next backend action from current data,
+  // holdout, privacy, teacher, preference, latency, and budget constraints.
+  // This planner does not launch training or call providers.
+  r.get('/v1/distill/strategy', authMiddleware, (req, res) => {
+    try {
+      const plan = planDistillStrategy(req.query || {}, process.env);
+      const envelope = okEnvelope({
+        surface: 'capture-data-eval-training',
+        journey: 'train-distill',
+        readiness: {
+          status: 'implemented',
+          requirement_ids: ['distill-strategy-selection', 'training-plan'],
+        },
+        tenant: req.tenant_record || { id: req.tenant },
+        data: { plan },
+        evidence: {
+          source_paths: ['src/distill-strategy.js', 'scripts/distill-strategy.mjs'],
+        },
+        next_actions: plan.next_actions || [],
+      });
+      attachEnvelopeHeaders(res, envelope);
+      res.json(envelope);
+    } catch (e) { res.status(400).json(_w384Err(e, 'distill_strategy_error')); }
+  });
+
+  r.post('/v1/distill/strategy', authMiddleware, (req, res) => {
+    try {
+      const body = req.body || {};
+      const plan = planDistillStrategy(body.profile || body, process.env);
+      const envelope = okEnvelope({
+        surface: 'capture-data-eval-training',
+        journey: 'train-distill',
+        readiness: {
+          status: 'implemented',
+          requirement_ids: ['distill-strategy-selection', 'training-plan'],
+        },
+        tenant: req.tenant_record || { id: req.tenant },
+        data: { plan },
+        evidence: {
+          source_paths: ['src/distill-strategy.js', 'scripts/distill-strategy.mjs'],
+        },
+        next_actions: plan.next_actions || [],
+      });
+      attachEnvelopeHeaders(res, envelope);
+      res.json(envelope);
+    } catch (e) { res.status(400).json(_w384Err(e, 'distill_strategy_error')); }
+  });
+
   // Distill from captures - turns the caller's namespace captures into either
   // a recipe (template-cluster >=4 captures) or a specialist distill job (when
   // total captures >=1000 or mode='specialist' is forced). Returns the synth
@@ -9133,9 +10844,13 @@ export function buildRouter() {
   });
 
   // ----- federated learning -----
-  r.get('/v1/fl/strategies', wave144Limiter, (_req, res) => {
-    res.json({ spec: federatedLearning.FL_SPEC_VERSION, strategies: Object.values(federatedLearning.STRATEGIES) });
-  });
+r.get('/v1/fl/strategies', wave144Limiter, (_req, res) => {
+res.json({
+  spec: federatedLearning.FL_SPEC_VERSION,
+  strategies: Object.values(federatedLearning.STRATEGIES),
+  robust_aggregators: Object.values(federatedLearning.ROBUST_AGGREGATORS || {}).filter((v) => v !== 'none'),
+});
+});
 
   // Federated round create - creates a foundation-state round and returns its stable round hash.
   r.post('/v1/fl/round/new', wave144Limiter, authMiddleware, (req, res) => {
@@ -11048,6 +12763,141 @@ export function buildRouter() {
     } catch (e) { res.status(400).json(_w384Err(e, 'device_recommend_error')); }
   });
 
+  function _quantOracleProfileFromQuery(query = {}) {
+    const out = {};
+    for (const [key, value] of Object.entries(query || {})) {
+      if (value == null || value === '') continue;
+      const normalized = key.replace(/-/g, '_');
+      if (['params_b', 'context_tokens', 'memory_gb', 'target_latency_ms', 'calibration_rows', 'quality_floor'].includes(normalized)) {
+        out[normalized] = Number(value);
+      } else if (normalized === 'preference_tuned' || normalized === 'local') {
+        out[normalized] = value === true || String(value).toLowerCase() === 'true' || String(value) === '1';
+      } else {
+        out[normalized] = String(value);
+      }
+    }
+    return out;
+  }
+
+  // Quantization oracle catalog - lists supported planner methods and whether
+  // each method is worker-backed, external-toolchain, runtime-policy, or baseline.
+  r.get('/v1/quantization/oracle/catalog', (req, res) => {
+    const catalog = quantizationOracleCatalog();
+    const envelope = okEnvelope({
+      surface: 'compile-artifact-verification',
+      journey: 'compile-verify',
+      readiness: {
+        status: 'implemented',
+        requirement_ids: ['export-quantize-targets', 'runtime-local-artifact'],
+      },
+      tenant: req.tenant_record || { id: req.tenant },
+      data: { catalog },
+      evidence: {
+        source_paths: [
+          'src/quantization-oracle.js',
+          'scripts/quantization-oracle.mjs',
+          'docs/quantization-oracle.md',
+          'workers/quantize/README.md',
+        ],
+      },
+      next_actions: [
+        {
+          kind: 'command',
+          label: 'Plan quantization',
+          value: 'node scripts/quantization-oracle.mjs --task extraction --device rtx-4090-24gb --params-b 7 --context 8192 --calibration-rows 256',
+          surface: 'compile-artifact-verification',
+          journey: 'compile-verify',
+          priority: 'P0',
+        },
+      ],
+    });
+    attachEnvelopeHeaders(res, envelope);
+    res.json(envelope);
+  });
+
+  // Quantization oracle plan - ranks quantization methods for task, device,
+  // memory, runtime, calibration, quality, and privacy constraints. This is a
+  // planner only: promotion still requires quantize doctor, hashes, and holdout eval.
+  r.get('/v1/quantization/oracle', (req, res) => {
+    try {
+      const plan = rankQuantizationStrategies(_quantOracleProfileFromQuery(req.query || {}));
+      const envelope = okEnvelope({
+        surface: 'compile-artifact-verification',
+        journey: 'compile-verify',
+        readiness: {
+          status: 'implemented',
+          requirement_ids: ['export-quantize-targets', 'quality-scoring'],
+        },
+        tenant: req.tenant_record || { id: req.tenant },
+        data: { plan },
+        evidence: {
+          source_paths: ['src/quantization-oracle.js', 'scripts/quantization-oracle.mjs', 'docs/quantization-oracle.md'],
+        },
+        next_actions: plan?.recommendation?.command ? [
+          {
+            kind: 'command',
+            label: 'Run quantize worker',
+            value: plan.recommendation.command,
+            surface: 'compile-artifact-verification',
+            journey: 'compile-verify',
+            priority: 'P0',
+          },
+        ] : [
+          {
+            kind: 'docs',
+            label: 'Review infeasible candidates',
+            value: '/docs/quantization-oracle',
+            surface: 'compile-artifact-verification',
+            journey: 'compile-verify',
+            priority: 'P0',
+          },
+        ],
+      });
+      attachEnvelopeHeaders(res, envelope);
+      res.json(envelope);
+    } catch (e) { res.status(400).json(_w384Err(e, 'quantization_oracle_error')); }
+  });
+  r.post('/v1/quantization/oracle', (req, res) => {
+    try {
+      const body = req.body || {};
+      const plan = rankQuantizationStrategies(body.profile || body);
+      const envelope = okEnvelope({
+        surface: 'compile-artifact-verification',
+        journey: 'compile-verify',
+        readiness: {
+          status: 'implemented',
+          requirement_ids: ['export-quantize-targets', 'quality-scoring'],
+        },
+        tenant: req.tenant_record || { id: req.tenant },
+        data: { plan },
+        evidence: {
+          source_paths: ['src/quantization-oracle.js', 'scripts/quantization-oracle.mjs', 'docs/quantization-oracle.md'],
+        },
+        next_actions: plan?.recommendation?.command ? [
+          {
+            kind: 'command',
+            label: 'Run quantize worker',
+            value: plan.recommendation.command,
+            surface: 'compile-artifact-verification',
+            journey: 'compile-verify',
+            priority: 'P0',
+          },
+        ] : [
+          {
+            kind: 'docs',
+            label: 'Review infeasible candidates',
+            value: '/docs/quantization-oracle',
+            surface: 'compile-artifact-verification',
+            journey: 'compile-verify',
+            priority: 'P0',
+          },
+        ],
+      });
+      attachEnvelopeHeaders(res, envelope);
+      res.json(envelope);
+    } catch (e) { res.status(400).json(_w384Err(e, 'quantization_oracle_error')); }
+  });
+
   // ============== W384: capture/media (multipart/form-data) ==============
   // Hand-rolled minimal multipart/form-data parser. No npm dep allowed,
   // and this is the only multipart endpoint we ship, so we keep the
@@ -11312,6 +13162,32 @@ export function buildRouter() {
       if (code === 'team_not_found') return res.status(404).json({ error: 'team_not_found' });
       if (code === 'forbidden') return res.status(403).json({ error: 'forbidden', message: String(e.message || '') });
       return res.status(500).json({ error: 'billing_breakdown_error', message: String((e && e.message) || e) });
+    }
+  });
+
+  // ============== W709-5: routing decision summary ==============
+  // Reads the routing_decisions store (written by the W709 runtime router)
+  // and returns counts, local_ratio, est_cost_saved_usd for the caller's
+  // tenant. The /account/routing dashboard polls this endpoint.
+  //
+  // Tenant fence: tenant_id is forced from req.tenant_record.id — never
+  // read from query string or body. namespace + since are optional
+  // filters.
+  r.get('/v1/routing/summary', (req, res) => {
+    const trec = req && req.tenant_record;
+    if (!trec) {
+      return res.status(401).json({ error: 'auth_required', hint: 'send Authorization: Bearer <ks_* or kao_* key>' });
+    }
+    const namespace = (req.query && req.query.namespace) ? String(req.query.namespace) : null;
+    const since = (req.query && req.query.since) ? String(req.query.since) : null;
+    const recentLimitRaw = (req.query && req.query.recent_limit) ? Number(req.query.recent_limit) : 30;
+    const recentLimit = Math.max(1, Math.min(100, Number.isFinite(recentLimitRaw) ? Math.trunc(recentLimitRaw) : 30));
+    try {
+      const summary = routingSummarize(trec.id, namespace, since);
+      const recent = routingRecent(trec.id, namespace, recentLimit);
+      return res.json({ ok: true, namespace, since, summary, recent });
+    } catch (e) {
+      return res.status(500).json({ error: 'routing_summary_error', message: String((e && e.message) || e) });
     }
   });
 

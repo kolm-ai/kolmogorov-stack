@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Liability and high-risk vertical disclaimers · kolm.ai</title>
+<meta name="description" content="How kolm handles high-risk verticals (medical, legal, financial). Runtime disclaimer envelope injected by spec-compile. User is responsible for downstream output. Bug-bounty contact.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<link rel="canonical" href="https://kolm.ai/legal/liability">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+ :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--good:#7ef0d2;--warn:#f5c97a;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif}
+ [data-theme=light]{--bg:#f7f4ec;--bg-elev:#ffffff;--bg-card:#fafaf6;--line:rgba(0,0,0,0.08);--line-strong:rgba(0,0,0,0.14);--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--accent:#1f2429;--good:#059669;--warn:#b45309;}
+ *{box-sizing:border-box}html,body{margin:0;padding:0}
+ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+ a{color:inherit;text-decoration:none}
+ .wrap-tight{max-width:760px;margin:0 auto;padding:0 32px}
+ @media(max-width:720px){.wrap-tight{padding:0 20px}}
+ section{padding:64px 0;border-bottom:1px solid var(--line)}
+ section.hero{padding:84px 0 60px}
+ h1{font-size:46px;line-height:1.06;letter-spacing:-0.02em;margin:0 0 18px;font-weight:600}
+ h2{font-size:28px;line-height:1.18;letter-spacing:-0.012em;margin:0 0 14px;font-weight:600}
+ h3{font-size:16px;line-height:1.35;margin:0 0 6px;font-weight:600}
+ p{color:var(--ink-mute);max-width:620px}
+ .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:0.08em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:14px}
+ .eyebrow .num{color:var(--accent)}
+ .pill{display:inline-flex;align-items:center;gap:8px;padding:4px 10px;border:1px solid var(--line-strong);border-radius:99px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;color:var(--ink-mute);background:var(--bg-elev)}
+ .pill .dot{width:6px;height:6px;border-radius:50%;background:var(--warn)}
+ .lede{font-size:19px;line-height:1.5;color:var(--ink-mute);max-width:620px;margin:22px 0 28px}
+ code,pre{font-family:var(--mono);font-size:13px}
+ pre{background:var(--bg-elev);border:1px solid var(--line-strong);padding:18px 16px;overflow-x:auto;color:var(--ink);white-space:pre}
+ table.bom{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12.5px;border:1px solid var(--line);background:var(--bg-elev);margin:20px 0}
+ table.bom thead th{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line-strong);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint)}
+ table.bom tbody td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+ table.bom tbody tr:last-child td{border-bottom:none}
+ .callout{background:var(--bg-elev);border:1px solid var(--line-strong);padding:18px 20px;margin:24px 0;font-size:14px;color:var(--ink-mute)}
+ .callout b{color:var(--ink)}
+ .disc{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin-top:32px}
+</style>
+<link rel="stylesheet" href="/ks.css">
+</head>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    </div>
+  </nav>
+</div>
+<main id="main">
+
+<section class="hero">
+ <div class="wrap-tight">
+ <span class="pill"><span class="dot"></span>High-risk verticals &middot; runtime envelope &middot; signed receipts</span>
+ <h1 style="margin-top:24px">Liability and high-risk verticals.</h1>
+ <p class="lede">Medical, legal, and financial outputs carry consequences beyond software. Kolm injects a runtime disclaimer envelope when an artifact's manifest declares a high-risk vertical, signs every run with Ed25519, and keeps the burden of professional judgment with the operator. Here is what kolm does, and what it does not.</p>
+ </div>
+</section>
+
+<section>
+ <div class="wrap-tight">
+ <div class="eyebrow"><span class="num">01</span><span>The runtime disclaimer envelope</span></div>
+ <p>When you set <code>vertical</code> on your spec to one of <code>medical</code>, <code>legal</code>, or <code>financial</code>, <code>spec-compile</code> writes a <code>disclaimer_injection</code> field into the manifest. The runtime reads that field and wraps every generated output with the exact disclaimer text, verbatim. The user cannot suppress it from the wrapping; they can only suppress it by recompiling without the vertical declared.</p>
+ <pre># Spec snippet for a medical-vertical artifact
+{
+  "job_id": "job_soap_redactor",
+  "task": "Redact PHI from clinical SOAP notes",
+  "vertical": "medical",
+  "recipes": [ ... ]
+}
+
+# Resulting manifest contains:
+"vertical": "medical",
+"disclaimer_injection": "This output was generated by a distilled AI model. It is not a substitute for professional medical advice. Verify with a qualified professional before acting."</pre>
+ </div>
+</section>
+
+<section>
+ <div class="wrap-tight">
+ <div class="eyebrow"><span class="num">02</span><span>What kolm provides</span></div>
+ <table class="bom">
+ <thead><tr><th>Capability</th><th>What you get</th></tr></thead>
+ <tbody>
+ <tr><td>Deterministic compile path</td><td>The same spec, the same teacher, the same corpus yields the same artifact hash. Audits can re-derive your build.</td></tr>
+ <tr><td>Signed receipts (Ed25519)</td><td>Every run produces a receipt signed by the local keypair. The receipt proves which artifact ran on which input at which time on which device.</td></tr>
+ <tr><td>Manifest vertical stamp</td><td><code>manifest.vertical</code> is hash-bound. The runtime cannot strip it without invalidating <code>kolm verify</code>.</td></tr>
+ <tr><td>Disclaimer envelope</td><td>Injected automatically when <code>manifest.vertical</code> is in the high-risk set. The text is canonical; downstream consumers can parse it programmatically.</td></tr>
+ <tr><td>Open compile + open runtime</td><td>The compile bridge and the runtime are both source-available. Your counsel can review the exact code path that produced the output.</td></tr>
+ </tbody>
+ </table>
+ </div>
+</section>
+
+<section>
+ <div class="wrap-tight">
+ <div class="eyebrow"><span class="num">03</span><span>What kolm does not do</span></div>
+ <p>Kolm is not a medical device. Kolm is not law-firm counsel. Kolm is not a registered investment adviser. The disclaimer envelope is a hygiene measure, not a guarantee. The operator who deploys the artifact is the responsible party for any downstream decision the artifact's output informs.</p>
+ <p style="margin-top:12px">Kolm does not warrant that the disclaimer text satisfies any specific regulatory regime (HIPAA, GDPR, SEC Rule 206(4)-7, state bar rules, FDA SaMD framework, or others). The text is a reasonable default. Your counsel may require additional language; you can extend the envelope in your runtime wrapper.</p>
+ </div>
+</section>
+
+<section>
+ <div class="wrap-tight">
+ <div class="eyebrow"><span class="num">04</span><span>The audit story</span></div>
+ <p>When something goes wrong in production, the question is "what model produced this output, when, on what input." Kolm answers all three from a single receipt. The receipt carries the artifact hash, the vertical stamp, the disclaimer text that was injected, the input hash, the output hash, the device fingerprint, and the timestamp. The keypair signature ties the row to the device.</p>
+ <pre>$ kolm verify ./run-receipt-2026-05-23T14-22-08.json
+artifact_hash : a91d4f0c...
+vertical      : medical
+disclaimer    : (verbatim injected text)
+input_hash    : 7c3e...
+output_hash   : 9b18...
+device        : kolm-rtx5090-prod-01
+timestamp     : 2026-05-23T14:22:08Z
+signature     : ed25519:valid
+ok            : true</pre>
+ </div>
+</section>
+
+<section>
+ <div class="wrap-tight">
+ <div class="eyebrow"><span class="num">05</span><span>Bug bounty and responsible disclosure</span></div>
+ <p>If you find a security issue, a verifier escape, a signature-forgery path, or a way to strip the disclaimer envelope without invalidating <code>kolm verify</code>, please report it directly to <a href="mailto:rodneyyesep@gmail.com" style="color:var(--good)">rodneyyesep@gmail.com</a>. We acknowledge reports within 72 hours and aim to ship a fix in the next release wave.</p>
+ <p style="margin-top:12px">Please do not file public issues for security reports. We credit reporters in <a href="/hall-of-fame" style="color:var(--good)">/hall-of-fame</a> after fixes ship, unless you ask to remain anonymous.</p>
+ <p class="disc">Not legal advice. Not medical advice. Not financial advice. For specifics, consult a qualified professional. <a href="/legal" style="color:var(--good)">Back to /legal</a>.</p>
+ </div>
+</section>
+
+</main>
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/integrations">Integrations</a></li><li><a href="/docs/api">API reference</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

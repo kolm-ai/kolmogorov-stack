@@ -68,8 +68,30 @@
   @media (max-width: 980px) { .qs-layout { grid-template-columns: 1fr; } .qs-toc { position: static; max-height: none; } }
   .test-anchor { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/quickstart",
+  "description": "Install the kolm CLI, route a single API call through the gateway, distill a specialist from your approved captures, quantize to INT4, and run the signed .kolm artifact locally. Ten minutes for a developer with an LLM key.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
 </head>
 <body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <a href="#main" class="ks-skip">Skip to content</a>
 
@@ -105,6 +127,26 @@
 </div>
 
 <main id="main">
+
+<!-- W708-3: open-weights deep-link banner. Hidden by default; shown only when
+     the URL carries ?teacher=open-weights so existing quickstart traffic is
+     unaffected. Single-line, monochrome, no graphic — points the visitor at
+     the Qwen example further down the page. -->
+<div id="w708-open-weights-banner" hidden style="background: var(--ks-bg-1); border-bottom: 1px solid var(--ks-line-2); padding: 10px 0; font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink-2); text-align: center; letter-spacing: 0.01em;">
+  Open-weights teachers only - zero TOS risk.
+  <a href="#step-5" style="color: var(--ks-accent); text-decoration: none; border-bottom: 1px dotted var(--ks-accent-edge); margin-left: 8px;">Show me a Qwen quickstart &rarr;</a>
+</div>
+<script>
+  (function () {
+    try {
+      var params = new URLSearchParams(window.location.search);
+      if (params.get('teacher') === 'open-weights') {
+        var el = document.getElementById('w708-open-weights-banner');
+        if (el) el.hidden = false;
+      }
+    } catch (_) { /* no-op — banner stays hidden */ }
+  })();
+</script>
 
 <section class="ks-hero" style="padding: clamp(48px, 6vw, 88px) 0 clamp(36px, 4vw, 56px);">
   <div class="ks-hero__bg" aria-hidden="true"></div>
@@ -185,13 +227,13 @@
           <pre class="ks-code qs-pane" data-pane="install-npm" data-active="true"><span class="pmpt">$</span> npm i -g @kolm/cli
 <span class="pmpt">$</span> kolm --version
   <span class="ok">kolm 1.0.0  node 20.11.0</span></pre>
-          <pre class="ks-code qs-pane" data-pane="install-pip"><span class="pmpt">$</span> pip install kolm
+          <pre class="ks-code qs-pane" data-pane="install-pip"><span class="pmpt">$</span> pip install kolm  # package release pending
 <span class="pmpt">$</span> kolm --version
   <span class="ok">kolm 1.0.0  python 3.11.6</span></pre>
-          <pre class="ks-code qs-pane" data-pane="install-brew"><span class="pmpt">$</span> brew install kolm/tap/kolm
+          <pre class="ks-code qs-pane" data-pane="install-brew"><span class="pmpt">$</span> brew install kolm/tap/kolm  # package release pending
 <span class="pmpt">$</span> kolm --version
   <span class="ok">kolm 1.0.0</span></pre>
-          <pre class="ks-code qs-pane" data-pane="install-curl"><span class="pmpt">$</span> curl -fsSL https://kolm.ai/install.sh | sh
+          <pre class="ks-code qs-pane" data-pane="install-curl"><span class="pmpt">$</span> curl -fsSL https://kolm.ai/install.sh | sh  # package release pending
 <span class="pmpt">$</span> kolm --version
   <span class="ok">kolm 1.0.0</span></pre>
           <p style="margin-top: var(--ks-3);">Run <code>kolm doctor</code> to verify your environment. It prints a green checklist and writes a JSON receipt to <code>~/.kolm/doctor.json</code>.</p>
@@ -353,43 +395,28 @@ console.log(r.content[0].text);</pre>
           <span class="fr-eyebrow">FRONTIER RECIPES</span>
           <h2 class="fr-h2">Or build a frontier recipe in one line.</h2>
           <p class="fr-lede">Same compiler. Different starting point. These commands produce verified, signed, K-scored .kolm artifacts ready for the leaderboard.</p>
-          <div class="fr-grid-2">
-            <div class="fr-card fr-card--feature">
-              <div>
-                <span class="fr-pill fr-pill--violet">REASONING</span>
-                <span class="fr-pill fr-pill--amber">MULTI-TEACHER</span>
-              </div>
-              <h3 class="fr-h3">Frontier reasoning, 8B</h3>
-              <p>Opus-4.7 teacher distilled into a Qwen2.5-7B student with NF4 quantization and reasoning-trace supervision.</p>
-              <pre class="fr-cli"><span class="fr-cli__prompt">$</span> kolm build reasoning <span class="fr-cli__flag">--teacher=claude-opus-4-7</span> <span class="fr-cli__flag">--student=qwen2-5-7b</span> <span class="fr-cli__flag">--bit=4.0</span> <span class="fr-cli__flag">--mode=reasoning</span></pre>
-            </div>
-            <div class="fr-card fr-card--feature">
-              <div>
-                <span class="fr-pill fr-pill--violet">CODING</span>
-                <span class="fr-pill fr-pill--amber">MTP</span>
-              </div>
-              <h3 class="fr-h3">Frontier coding, 13B + MTP</h3>
-              <p>Multi-token prediction head bolted onto a 14B coder student. Aider bench drives the bake-off grader.</p>
-              <pre class="fr-cli"><span class="fr-cli__prompt">$</span> kolm build coding <span class="fr-cli__flag">--student=qwen2-5-14b</span> <span class="fr-cli__flag">--bit=4.0</span> <span class="fr-cli__flag">--mode=mpt</span> <span class="fr-cli__flag">--bench=aider</span></pre>
-            </div>
-            <div class="fr-card fr-card--mint">
-              <div>
-                <span class="fr-pill fr-pill--ghost">LOW-BIT</span>
-                <span class="fr-pill fr-pill--amber">BITNET</span>
-              </div>
-              <h3 class="fr-h3">Low-bit generalist, 1.58-bit</h3>
-              <p>BitNet ternary weights, drift-bounded against a BF16 reference. Runs on CPU with under 2 GB resident.</p>
-              <pre class="fr-cli"><span class="fr-cli__prompt">$</span> kolm build low-bit-generalist <span class="fr-cli__flag">--bit=1.58</span> <span class="fr-cli__flag">--quant=bitnet</span></pre>
-            </div>
-            <div class="fr-card fr-card--feature">
-              <div>
-                <span class="fr-pill fr-pill--violet">MULTI-TEACHER</span>
-              </div>
-              <h3 class="fr-h3">Multi-teacher fused, 14B</h3>
-              <p>Claude, GPT, and DeepSeek each generate the same prompts. The fuser keeps the answer that the K-score grader ranks highest.</p>
-              <pre class="fr-cli"><span class="fr-cli__prompt">$</span> kolm build multi-teacher-fused <span class="fr-cli__flag">--teachers=claude,gpt,deepseek</span></pre>
-            </div>
-          </div>
+          <ul class="fr-spec-list qs-recipe-list">
+            <li class="fr-spec-list__row">
+              <div class="fr-spec-list__head"><h3>Frontier reasoning, 8B</h3><span class="fr-spec-list__delta">REASONING &middot; multi-teacher &middot; NF4</span></div>
+              <p class="fr-spec-list__p">Opus-4.7 teacher distilled into a Qwen2.5-7B student with NF4 quantization and reasoning-trace supervision.</p>
+              <pre class="fr-cli" style="margin-top:10px"><span class="fr-cli__prompt">$</span> kolm build reasoning <span class="fr-cli__flag">--teacher=claude-opus-4-7</span> <span class="fr-cli__flag">--student=qwen2-5-7b</span> <span class="fr-cli__flag">--bit=4.0</span> <span class="fr-cli__flag">--mode=reasoning</span></pre>
+            </li>
+            <li class="fr-spec-list__row">
+              <div class="fr-spec-list__head"><h3>Frontier coding, 13B + MTP</h3><span class="fr-spec-list__delta">CODING &middot; multi-token prediction &middot; aider bench</span></div>
+              <p class="fr-spec-list__p">Multi-token prediction head bolted onto a 14B coder student. Aider bench drives the bake-off grader.</p>
+              <pre class="fr-cli" style="margin-top:10px"><span class="fr-cli__prompt">$</span> kolm build coding <span class="fr-cli__flag">--student=qwen2-5-14b</span> <span class="fr-cli__flag">--bit=4.0</span> <span class="fr-cli__flag">--mode=mpt</span> <span class="fr-cli__flag">--bench=aider</span></pre>
+            </li>
+            <li class="fr-spec-list__row">
+              <div class="fr-spec-list__head"><h3>Low-bit generalist, 1.58-bit</h3><span class="fr-spec-list__delta">BITNET &middot; CPU &middot; &lt;2 GB resident</span></div>
+              <p class="fr-spec-list__p">BitNet ternary weights, drift-bounded against a BF16 reference. Runs on CPU with under 2 GB resident.</p>
+              <pre class="fr-cli" style="margin-top:10px"><span class="fr-cli__prompt">$</span> kolm build low-bit-generalist <span class="fr-cli__flag">--bit=1.58</span> <span class="fr-cli__flag">--quant=bitnet</span></pre>
+            </li>
+            <li class="fr-spec-list__row">
+              <div class="fr-spec-list__head"><h3>Multi-teacher fused, 14B</h3><span class="fr-spec-list__delta">CLAUDE &middot; GPT &middot; DEEPSEEK</span></div>
+              <p class="fr-spec-list__p">Claude, GPT, and DeepSeek each generate the same prompts. The fuser keeps the answer that the K-score grader ranks highest.</p>
+              <pre class="fr-cli" style="margin-top:10px"><span class="fr-cli__prompt">$</span> kolm build multi-teacher-fused <span class="fr-cli__flag">--teachers=claude,gpt,deepseek</span></pre>
+            </li>
+          </ul>
           <p style="margin-top:24px"><a class="fr-btn fr-btn--ghost" href="/recipes">All recipes</a> <a class="fr-btn fr-btn--mint" data-fr-magnetic href="/forge">Open the forge</a></p>
         </div>
       </section>
@@ -432,7 +459,7 @@ console.log(r.content[0].text);</pre>
           <details><summary>OOM during quantize on a 7B model</summary><div class="a">You need 16 GB free RAM for a 7B INT4 quantize. Free memory, or pass <code>--quantize int8</code> (needs 24 GB), or pass <code>--remote-quantize</code> to run the heavy step in our hosted workers.</div></details>
           <details><summary>Distill says <code>no approved captures</code></summary><div class="a">Captures are <em>pending</em> until you mark them approved. Run <code>kolm capture review --namespace support</code> for a TUI; press <kbd>a</kbd> to approve, <kbd>r</kbd> to reject. You can also auto-approve a fraction with <code>--auto-approve 0.20</code>.</div></details>
           <details><summary>Bake-off score is below threshold</summary><div class="a">Try a bigger student (<code>--student qwen2.5-14b</code>), a richer teacher (<code>--teacher claude-opus</code>), more captures (<code>--min-captures 5000</code>), or a stricter grader. The bake-off report shows the worst 50 examples; read those first.</div></details>
-          <details><summary>Run is slow on Apple Silicon</summary><div class="a">The CLI uses Metal via llama.cpp on M-series chips. Make sure <code>kolm doctor</code> reports <code>metal: ok</code>. If not, reinstall with <code>brew install kolm/tap/kolm</code> (the npm build does not bundle Metal kernels).</div></details>
+          <details><summary>Run is slow on Apple Silicon</summary><div class="a">The CLI uses Metal via llama.cpp on M-series chips. Make sure <code>kolm doctor</code> reports <code>metal: ok</code>. If not, package release pending: reinstall with <code>brew install kolm/tap/kolm</code> when the channel lands (the npm build does not bundle Metal kernels).</div></details>
           <details><summary>Verify says <code>signature mismatch</code></summary><div class="a">Someone modified the artifact (or your filesystem is doing transparent compression on a non-block-aligned write). Re-download or re-compile. Never run an artifact that fails verification.</div></details>
           <details><summary>WebPush threshold notification never arrives</summary><div class="a">Push subscriptions are per-browser. Re-enable notifications at <code>/account/notifications</code>. The threshold also fires a webhook if you have <code>kolm webhooks set --on capture.threshold</code>.</div></details>
           <details><summary>I want to start over</summary><div class="a">Run <code>kolm reset --confirm</code>. Removes <code>~/.kolm</code>, revokes the local key, clears the keychain entry. Your captures on the server are preserved; pass <code>--also-server</code> to nuke them too.</div></details>
