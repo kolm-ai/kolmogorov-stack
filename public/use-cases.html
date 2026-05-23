@@ -121,38 +121,44 @@
  a.btn-primary { background: var(--ink); color: var(--bg); border-radius: 6px; padding: 11px 18px; font-size: 14px; font-weight: 500; }
  a.btn-link { color: var(--ink); padding: 11px 14px; font-size: 14px; font-weight: 500; }
 
- section.verticals { padding: 48px 0 64px; border-top: 1px solid var(--line); }
- section.verticals h2 { margin: 0 0 8px; font-size: clamp(24px, 2.6vw, 32px); font-weight: 500; letter-spacing: -0.01em; }
- section.verticals p.sec-lede { margin: 0 0 28px; color: var(--ink-mute); font-size: 15px; max-width: 64ch; }
- .vert-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
- @media (max-width: 1080px) { .vert-grid { grid-template-columns: repeat(2, 1fr); } }
- @media (max-width: 640px) { .vert-grid { grid-template-columns: 1fr; } }
- .vert { background: var(--bg-elev); border: 1px solid var(--line); border-radius: 12px; padding: 22px; display: flex; flex-direction: column; gap: 12px; transition: border-color 120ms ease, transform 120ms ease; }
- .vert:hover { border-color: var(--line-strong); transform: translateY(-1px); }
- .vert .icon { width: 36px; height: 36px; border-radius: 8px; background: var(--accent-soft); display: inline-flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 15px; color: var(--accent); font-weight: 500; letter-spacing: -0.02em; }
- .vert h3 { margin: 0; font-size: 18px; font-weight: 500; line-height: 1.3; color: var(--ink); }
- .vert .pain { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-mute); }
- .vert .solution { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink); }
- .vert .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
- .vert .chip { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.03em; color: var(--good); background: rgba(126,240,210,0.07); border: 1px solid rgba(126,240,210,0.18); border-radius: 6px; padding: 3px 8px; }
- .vert .cta { margin-top: auto; display: flex; gap: 12px; padding-top: 12px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 12px; color: var(--accent); }
- .vert .cta a { color: var(--accent); }
- .vert .cta a:hover { text-decoration: underline; }
- .vert .badge-new { font-family: var(--mono); font-size: 10px; color: var(--ink-faint); letter-spacing: 0.06em; text-transform: uppercase; }
+ section.verticals { padding: 56px 0 72px; border-top: 1px solid var(--line); }
+ section.verticals h2 { margin: 0 0 10px; font-size: clamp(26px, 2.8vw, 34px); font-weight: 500; letter-spacing: -0.012em; }
+ section.verticals p.sec-lede { margin: 0 0 8px; color: var(--ink-mute); font-size: 16px; max-width: 64ch; line-height: 1.6; }
 
- section.workflows { padding: 48px 0 80px; border-top: 1px solid var(--line); }
- section.workflows h2 { margin: 0 0 8px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 500; }
- section.workflows p.sec-lede { margin: 0 0 22px; color: var(--ink-mute); font-size: 15px; max-width: 64ch; }
- .case-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
- @media (max-width: 980px) { .case-grid { grid-template-columns: repeat(2, 1fr); } }
- @media (max-width: 640px) { .case-grid { grid-template-columns: 1fr; } }
- .case { background: var(--bg-elev); border: 1px solid var(--line); border-radius: 10px; padding: 22px; display: flex; flex-direction: column; gap: 10px; }
- .case .case-num { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faint); }
- .case h3 { margin: 0; font-size: 16px; font-weight: 500; line-height: 1.3; color: var(--ink); }
- .case p { margin: 0; font-size: 13px; line-height: 1.55; color: var(--ink-mute); }
- .case .art { font-family: var(--mono); font-size: 11.5px; color: var(--good); }
- .case .row { margin-top: auto; display: flex; gap: 12px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); padding-top: 10px; border-top: 1px solid var(--line); }
- .case .row a { color: var(--accent); }
+ /* W649: verticals magazine spread — 2-col grid, no card chrome, typography-only hierarchy. */
+ .verts-spread { display: grid; grid-template-columns: 1fr 1fr; column-gap: 64px; row-gap: 48px; margin-top: 44px; }
+ .vert-row { padding: 0; }
+ .vert-row__head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 14px; }
+ .vert-row__tag { font-family: var(--mono); font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--good); }
+ .vert-row__h { font-family: var(--sans); font-size: clamp(22px, 2.2vw, 28px); font-weight: 520; letter-spacing: -0.012em; color: var(--ink); margin: 0; line-height: 1.2; }
+ .vert-row__p { font-size: 15px; line-height: 1.65; color: var(--ink-mute); margin: 0 0 10px 0; }
+ .vert-row__solution { font-size: 15px; line-height: 1.65; color: var(--ink); margin: 0 0 14px 0; }
+ .vert-row__chips { display: flex; flex-wrap: wrap; gap: 8px 14px; margin: 6px 0 16px 0; font-family: var(--mono); font-size: 11.5px; color: var(--good); }
+ .vert-row__chips span { white-space: nowrap; }
+ .vert-row__chips span::before { content: "·"; margin-right: 10px; color: var(--ink-faint); }
+ .vert-row__chips span:first-child::before { display: none; }
+ .vert-row__cta { font-family: var(--mono); font-size: 12.5px; color: var(--good); border-bottom: 1px solid rgba(126,240,210,0.35); padding-bottom: 1px; }
+ .vert-row__cta:hover { border-bottom-color: var(--good); }
+ .vert-row__badge { font-family: var(--mono); font-size: 10px; color: var(--ink-faint); letter-spacing: 0.08em; text-transform: uppercase; margin-left: 8px; }
+ @media (max-width: 760px) { .verts-spread { grid-template-columns: 1fr; column-gap: 0; row-gap: 36px; margin-top: 32px; } }
+
+ section.workflows { padding: 56px 0 88px; border-top: 1px solid var(--line); }
+ section.workflows h2 { margin: 0 0 10px; font-size: clamp(24px, 2.6vw, 32px); font-weight: 500; letter-spacing: -0.012em; }
+ section.workflows p.sec-lede { margin: 0 0 8px; color: var(--ink-mute); font-size: 16px; max-width: 64ch; line-height: 1.6; }
+
+ /* W649: cases editorial list — horizontal rows with no card box; numerated by typography, not cards. */
+ .cases-list { list-style: none; margin: 36px 0 0 0; padding: 0; border-top: 1px solid var(--line); }
+ .cases-list__row { display: grid; grid-template-columns: 168px 1fr 240px; gap: 32px; align-items: start; padding: 22px 0; border-bottom: 1px solid var(--line); }
+ .cases-list__num { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); padding-top: 4px; }
+ .cases-list__body { display: flex; flex-direction: column; gap: 6px; }
+ .cases-list__h { font-family: var(--sans); font-size: 18px; font-weight: 520; color: var(--ink); margin: 0; letter-spacing: -0.01em; }
+ .cases-list__p { font-size: 14px; line-height: 1.6; color: var(--ink-mute); margin: 0; max-width: 64ch; }
+ .cases-list__art { font-family: var(--mono); font-size: 12px; color: var(--good); margin-top: 4px; }
+ .cases-list__refs { font-family: var(--mono); font-size: 12px; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; text-align: right; padding-top: 4px; }
+ .cases-list__refs a { color: var(--accent); border-bottom: 1px solid rgba(250,242,225,0.25); padding-bottom: 1px; }
+ .cases-list__refs a:hover { border-bottom-color: var(--accent); }
+ @media (max-width: 920px) { .cases-list__row { grid-template-columns: 130px 1fr; } .cases-list__refs { grid-column: 1 / 3; flex-direction: row; align-items: flex-start; text-align: left; gap: 18px; margin-top: 8px; } }
+ @media (max-width: 640px) { .cases-list__row { grid-template-columns: 1fr; gap: 6px; padding: 18px 0; } .cases-list__refs { grid-column: 1; } }
 
  section.faq { padding: 48px 0 80px; border-top: 1px solid var(--line); }
  section.faq h2 { margin: 0 0 18px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 500; }
@@ -170,6 +176,7 @@
 <link rel="stylesheet" href="/ks.css">
 </head>
 <body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
@@ -225,131 +232,75 @@
  <div class="wrap">
  <h2>Eight verticals. One signed artifact per buyer.</h2>
  <p class="sec-lede">The compilation flow is the same in every column. The regulator, the residency rule, and the seed schema differ. Click into a vertical to see the artifact, the K-score, and the recipe.</p>
- <div class="vert-grid" data-w400b="vert-grid">
+ <div class="verts-spread vert-grid" data-w400b="vert-grid">
 
- <article class="vert" data-vertical="healthcare">
- <span class="icon" aria-hidden="true">H</span>
- <h3>Healthcare.</h3>
- <p class="pain">PHI in claim notes, discharge summaries, and intake forms. HIPAA exposure on every cloud LLM call.</p>
- <p class="solution">Compile a typed redactor that strips 21 PHI classes against your gold set, then ship the signed file to the laptop. No prompt leaves the firm boundary.</p>
- <div class="chips">
- <span class="chip">21 PHI classes</span>
- <span class="chip">K=0.985</span>
- <span class="chip">60 seeds</span>
+ <div class="vert-row vert" data-vertical="healthcare">
+ <div class="vert-row__head"><span class="vert-row__tag">01 &middot; HIPAA</span><h3 class="vert-row__h">Healthcare</h3></div>
+ <p class="vert-row__p pain">PHI sits in claim notes, discharge summaries, and intake forms. Every cloud LLM call is an exposure event.</p>
+ <p class="vert-row__solution solution">A typed redactor strips 21 PHI classes against your gold set. The signed file ships to the laptop. No prompt ever leaves the firm boundary.</p>
+ <div class="vert-row__chips chips"><span class="chip">21 PHI classes</span><span class="chip">K=0.985</span><span class="chip">60 seeds</span></div>
+ <a class="vert-row__cta" href="/healthcare">Open Healthcare &rarr;</a>
  </div>
- <div class="cta">
- <a href="/healthcare">Open Healthcare &rarr;</a>
- </div>
- </article>
 
- <article class="vert" data-vertical="legal">
- <span class="icon" aria-hidden="true">L</span>
- <h3>Legal.</h3>
- <p class="pain">Firm bans cloud LLMs on client matter. Every prompt is potentially discoverable. Redline turnaround stalls.</p>
- <p class="solution">Compile the firm's playbook into a clause extractor and redline engine. Per-matter artifacts, privilege intact, audit defensible.</p>
- <div class="chips">
- <span class="chip">K=0.84</span>
- <span class="chip">80-200 redlines</span>
- <span class="chip">indemnity / IP / MFN</span>
+ <div class="vert-row vert" data-vertical="legal">
+ <div class="vert-row__head"><span class="vert-row__tag">02 &middot; privilege</span><h3 class="vert-row__h">Legal</h3></div>
+ <p class="vert-row__p pain">Cloud LLMs are banned on client matter. Every prompt is discoverable. Redline turnaround stalls.</p>
+ <p class="vert-row__solution solution">Compile the firm's playbook into a clause extractor and redline engine. Per-matter artifacts. Privilege intact. Audit defensible.</p>
+ <div class="vert-row__chips chips"><span class="chip">K=0.84</span><span class="chip">80-200 redlines</span><span class="chip">indemnity / IP / MFN</span></div>
+ <a class="vert-row__cta" href="/legal">Open Legal &rarr;</a>
  </div>
- <div class="cta">
- <a href="/legal">Open Legal &rarr;</a>
- </div>
- </article>
 
- <article class="vert" data-vertical="finance">
- <span class="icon" aria-hidden="true">F</span>
- <h3>Finance.</h3>
- <p class="pain">SR 11-7, FINRA, OCC, FCA, BaFin. Every cross-border prompt is a residency event. Every vendor swap is a re-review at the model risk committee.</p>
- <p class="solution">Compile MNPI redaction, disclosure review, and trade-decision support into signed artifacts. K-score and lineage drop into your model risk inventory.</p>
- <div class="chips">
- <span class="chip">SR 11-7</span>
- <span class="chip">MNPI redaction</span>
- <span class="chip">sub-80 ms</span>
+ <div class="vert-row vert" data-vertical="finance">
+ <div class="vert-row__head"><span class="vert-row__tag">03 &middot; SR 11-7</span><h3 class="vert-row__h">Finance</h3></div>
+ <p class="vert-row__p pain">SR 11-7, FINRA, OCC, FCA, BaFin. Every cross-border prompt is a residency event. Every vendor swap is a re-review at the model risk committee.</p>
+ <p class="vert-row__solution solution">MNPI redaction, disclosure review, and trade-decision support compile into signed artifacts. K-score and lineage drop into your model risk inventory.</p>
+ <div class="vert-row__chips chips"><span class="chip">SR 11-7</span><span class="chip">MNPI redaction</span><span class="chip">sub-80 ms</span></div>
+ <a class="vert-row__cta" href="/finance">Open Finance &rarr;</a>
  </div>
- <div class="cta">
- <a href="/finance">Open Finance &rarr;</a>
- </div>
- </article>
 
- <article class="vert" data-vertical="defense">
- <span class="icon" aria-hidden="true">D</span>
- <h3>Defense.</h3>
- <p class="pain">Cloud LLMs are not an option inside the SCIF. The diode is one-way. Your task is classified or ITAR-bounded.</p>
- <p class="solution">Run the compile server inside an IL5 or IL6 enclave. Byte-exact reproducibility on the air-gap side. The cloud round-trip does not exist in this build.</p>
- <div class="chips">
- <span class="chip">IL5 / IL6</span>
- <span class="chip">ITAR-bounded</span>
- <span class="chip">air-gap reproducible</span>
+ <div class="vert-row vert" data-vertical="defense">
+ <div class="vert-row__head"><span class="vert-row__tag">04 &middot; IL5/IL6</span><h3 class="vert-row__h">Defense</h3></div>
+ <p class="vert-row__p pain">Cloud LLMs are not an option inside the SCIF. The diode is one-way. Your task is classified or ITAR-bounded.</p>
+ <p class="vert-row__solution solution">Run the compile server inside an IL5 or IL6 enclave. Byte-exact reproducibility on the air-gap side. The cloud round-trip does not exist in this build.</p>
+ <div class="vert-row__chips chips"><span class="chip">IL5 / IL6</span><span class="chip">ITAR-bounded</span><span class="chip">air-gap reproducible</span></div>
+ <a class="vert-row__cta" href="/defense">Open Defense &rarr;</a>
  </div>
- <div class="cta">
- <a href="/defense">Open Defense &rarr;</a>
- </div>
- </article>
 
- <article class="vert" data-vertical="gov">
- <span class="icon" aria-hidden="true">G</span>
- <h3>Government.</h3>
- <span class="badge-new">New vertical</span>
- <p class="pain">FedRAMP High, StateRAMP, CJIS. Citizen records cannot leave the agency boundary. Cloud-vendor lock-in fails procurement review.</p>
- <p class="solution">Compile case-routing, FOIA redaction, and benefits-intake classifiers into signed artifacts that run inside the agency enclave. Reproducible across regions.</p>
- <div class="chips">
- <span class="chip">FedRAMP High</span>
- <span class="chip">CJIS-aware</span>
- <span class="chip">FOIA redact</span>
+ <div class="vert-row vert" data-vertical="gov">
+ <div class="vert-row__head"><span class="vert-row__tag">05 &middot; FedRAMP High</span><h3 class="vert-row__h">Government<span class="vert-row__badge">new</span></h3></div>
+ <p class="vert-row__p pain">FedRAMP High, StateRAMP, CJIS. Citizen records cannot leave the agency boundary. Cloud-vendor lock-in fails procurement review.</p>
+ <p class="vert-row__solution solution">Case-routing, FOIA redaction, and benefits-intake classifiers compile into signed artifacts that run inside the agency enclave. Reproducible across regions.</p>
+ <div class="vert-row__chips chips"><span class="chip">FedRAMP High</span><span class="chip">CJIS-aware</span><span class="chip">FOIA redact</span></div>
+ <a class="vert-row__cta" href="/gov">Open Government &rarr;</a>
+ <span class="badge-new" style="display:none">New vertical</span>
  </div>
- <div class="cta">
- <a href="/gov">Open Government &rarr;</a><!-- created by W400F -->
- </div>
- </article>
 
- <article class="vert" data-vertical="education">
- <span class="icon" aria-hidden="true">E</span>
- <h3>Education.</h3>
- <span class="badge-new">New vertical</span>
- <p class="pain">FERPA on student records. Districts and provosts cannot ship a hosted LLM. Tutors hallucinate on the syllabus.</p>
- <p class="solution">Compile a syllabus-grounded tutor and a FERPA redactor per institution. The artifact ships to the school laptop. No student record touches a third-party API.</p>
- <div class="chips">
- <span class="chip">FERPA-aware</span>
- <span class="chip">syllabus-grounded</span>
- <span class="chip">per-institution</span>
+ <div class="vert-row vert" data-vertical="education">
+ <div class="vert-row__head"><span class="vert-row__tag">06 &middot; FERPA</span><h3 class="vert-row__h">Education<span class="vert-row__badge">new</span></h3></div>
+ <p class="vert-row__p pain">FERPA on student records. Districts and provosts cannot ship a hosted LLM. Tutors hallucinate on the syllabus.</p>
+ <p class="vert-row__solution solution">A syllabus-grounded tutor and a FERPA redactor compile per institution. The artifact ships to the school laptop. No student record touches a third-party API.</p>
+ <div class="vert-row__chips chips"><span class="chip">FERPA-aware</span><span class="chip">syllabus-grounded</span><span class="chip">per-institution</span></div>
+ <a class="vert-row__cta" href="/education">Open Education &rarr;</a>
+ <span class="badge-new" style="display:none">New vertical</span>
  </div>
- <div class="cta">
- <a href="/education">Open Education &rarr;</a><!-- created by W400F -->
- </div>
- </article>
 
- <article class="vert" data-vertical="fintech">
- <span class="icon" aria-hidden="true">$</span>
- <h3>Fintech.</h3>
- <span class="badge-new">New vertical</span>
- <p class="pain">KYC, AML, transaction-categorization, dispute-letter triage. Hosted LLM calls land in the regulator's exam scope.</p>
- <p class="solution">Compile a categorizer, a KYC document reader, and a dispute classifier into signed artifacts. Latency is local, audit chain is Ed25519.</p>
- <div class="chips">
- <span class="chip">KYC / AML</span>
- <span class="chip">PCI-aware</span>
- <span class="chip">dispute triage</span>
+ <div class="vert-row vert" data-vertical="fintech">
+ <div class="vert-row__head"><span class="vert-row__tag">07 &middot; KYC / AML</span><h3 class="vert-row__h">Fintech<span class="vert-row__badge">new</span></h3></div>
+ <p class="vert-row__p pain">KYC, AML, transaction-categorization, dispute-letter triage. Hosted LLM calls land in the regulator's exam scope.</p>
+ <p class="vert-row__solution solution">A categorizer, a KYC document reader, and a dispute classifier compile into signed artifacts. Latency is local. The audit chain is Ed25519.</p>
+ <div class="vert-row__chips chips"><span class="chip">KYC / AML</span><span class="chip">PCI-aware</span><span class="chip">dispute triage</span></div>
+ <a class="vert-row__cta" href="/fintech">Open Fintech &rarr;</a>
+ <span class="badge-new" style="display:none">New vertical</span>
  </div>
- <div class="cta">
- <a href="/fintech">Open Fintech &rarr;</a><!-- created by W400F -->
- </div>
- </article>
 
- <article class="vert" data-vertical="saas">
- <span class="icon" aria-hidden="true">S</span>
- <h3>SaaS.</h3>
- <span class="badge-new">New vertical</span>
- <p class="pain">SOC 2 customers want a "no data leaves" mode. Your support, intake, and onboarding flows depend on a third-party LLM bill.</p>
- <p class="solution">Compile triage, summarization, and onboarding classifiers into a signed artifact your customer can self-host. Drop-in for the OpenAI call you were making.</p>
- <div class="chips">
- <span class="chip">SOC 2 ready</span>
- <span class="chip">self-host shim</span>
- <span class="chip">OpenAI drop-in</span>
+ <div class="vert-row vert" data-vertical="saas">
+ <div class="vert-row__head"><span class="vert-row__tag">08 &middot; SOC 2</span><h3 class="vert-row__h">SaaS<span class="vert-row__badge">new</span></h3></div>
+ <p class="vert-row__p pain">SOC 2 customers want a "no data leaves" mode. Your support, intake, and onboarding flows depend on a third-party LLM bill.</p>
+ <p class="vert-row__solution solution">Triage, summarization, and onboarding classifiers compile into a signed artifact your customer can self-host. Drop-in for the OpenAI call you were making.</p>
+ <div class="vert-row__chips chips"><span class="chip">SOC 2 ready</span><span class="chip">self-host shim</span><span class="chip">OpenAI drop-in</span></div>
+ <a class="vert-row__cta" href="/saas">Open SaaS &rarr;</a>
+ <span class="badge-new" style="display:none">New vertical</span>
  </div>
- <div class="cta">
- <a href="/saas">Open SaaS &rarr;</a><!-- created by W400F -->
- </div>
- </article>
 
  </div>
  </div>
@@ -359,71 +310,89 @@
  <div class="wrap">
  <h2>Or browse by task, not by vertical.</h2>
  <p class="sec-lede">Nine reference workflows. Each one is a signed <code style="font-family:var(--mono)">.kolm</code> file plus a recipe. Fork, recompile against your captures, ship.</p>
- <div class="case-grid" data-w373="usecases-grid">
- <article class="case" data-usecase="healthcare-claim-redactor" data-w373="uc-healthcare">
- <span class="case-num">01 &middot; healthcare</span>
- <h3>Healthcare claim redactor.</h3>
- <p>Strip PHI from inbound claim documents before they hit your data lake. 21 typed detectors, stable VAR_ placeholders, tamper-evident receipt per redaction.</p>
- <span class="art">claims-redactor.kolm &middot; K=0.985 &middot; 60 seeds</span>
- <div class="row"><a href="/healthcare">Vertical &rarr;</a><a href="/cookbook/phi-redactor">Recipe &rarr;</a></div>
- </article>
- <article class="case" data-usecase="legal-contract-clause" data-w373="uc-legal">
- <span class="case-num">02 &middot; legal</span>
- <h3>Legal contract clause extractor.</h3>
- <p>Extract typed clauses (indemnity, IP assignment, MFN, term and termination) from PDFs and DOCX. Returns spans with offsets and the contract version hash.</p>
- <span class="art">legal-clause-extract.kolm &middot; K=0.84 &middot; 58 MB</span>
- <div class="row"><a href="/legal">Vertical &rarr;</a><a href="/cookbook/legal-clause-extract">Recipe &rarr;</a></div>
- </article>
- <article class="case" data-usecase="support-triage" data-w373="uc-support">
- <span class="case-num">03 &middot; support</span>
- <h3>Support ticket triage.</h3>
- <p>Classify inbound tickets by urgency, product area, and required skill. Routes to the right queue before a human sees it. Drop-in for the hosted call.</p>
- <span class="art">ticket-triage.kolm &middot; 91% on hold-out tickets</span>
- <div class="row"><a href="/captures">Captures &rarr;</a><a href="/cookbook/intake-triage">Recipe &rarr;</a></div>
- </article>
- <article class="case" data-usecase="code-review-classifier" data-w373="uc-code">
- <span class="case-num">04 &middot; developer tools</span>
- <h3>Code-review classifier.</h3>
- <p>Tag diffs by risk and area (auth, billing, infra, UI) so reviewers focus on the dangerous chunks first. Runs locally so source never leaves CI.</p>
- <span class="art">review-classifier.kolm &middot; 89% on sampled diffs</span>
- <div class="row"><a href="/docs">Docs &rarr;</a><a href="/cookbook/pr-review">Recipe &rarr;</a></div>
- </article>
- <article class="case" data-usecase="internal-qa-rag" data-w373="uc-rag">
- <span class="case-num">05 &middot; knowledge</span>
- <h3>Internal Q&amp;A bot (RAG).</h3>
- <p>Index your wiki, retrieve before you reply, cite source paragraphs. The retriever and reranker ship in the artifact; no hosted vector DB.</p>
- <span class="art">rag-qa.kolm &middot; 87% answer accuracy</span>
- <div class="row"><a href="/docs">Docs &rarr;</a><a href="/cookbook/recipe-from-observations">Recipe &rarr;</a></div>
- </article>
- <article class="case" data-usecase="pdf-table-extractor" data-w373="uc-pdf">
- <span class="case-num">06 &middot; documents</span>
- <h3>PDF table extractor.</h3>
- <p>Pull structured tables out of scanned PDFs into typed JSON. Pairs an OCR pass with a layout-aware schema model. Confidence per cell.</p>
- <span class="art">pdf-tables.kolm &middot; 92% cell accuracy</span>
- <div class="row"><a href="/docs">Docs &rarr;</a><a href="/cookbook/finance-disclosure-redact">Recipe &rarr;</a></div>
- </article>
- <article class="case" data-usecase="voice-transcript-summarizer" data-w373="uc-voice">
- <span class="case-num">07 &middot; voice</span>
- <h3>Voice transcript summarizer.</h3>
- <p>Summarize meeting transcripts into action items, decisions, and follow-ups. Names normalized, action items linked to owners by username.</p>
- <span class="art">meeting-notes.kolm &middot; 88% action-item recall</span>
- <div class="row"><a href="/docs">Docs &rarr;</a><a href="/cookbook/daily-recap">Recipe &rarr;</a></div>
- </article>
- <article class="case" data-usecase="browser-workflow-tester" data-w373="uc-browser">
- <span class="case-num">08 &middot; agents</span>
- <h3>Browser workflow tester.</h3>
- <p>Drive a headless browser through your app, score each step, and emit a signed receipt of what happened. Replay byte-identically for regressions.</p>
- <span class="art">browser-flow.kolm &middot; 86% on replayed flows</span>
- <div class="row"><a href="/docs">Docs &rarr;</a><a href="/cookbook/runbook-step">Recipe &rarr;</a></div>
- </article>
- <article class="case" data-usecase="privacy-red-team" data-w373="uc-redteam">
- <span class="case-num">09 &middot; security</span>
- <h3>Privacy red-team.</h3>
- <p>Probe your prompts and outputs for PII leakage, prompt-injection susceptibility, and jailbreak surface. Accuracy gate blocks regressions in CI.</p>
- <span class="art">redteam-probe.kolm &middot; 93% on the probe set</span>
- <div class="row"><a href="/security">Security &rarr;</a><a href="/cookbook/drug-name-redact">Recipe &rarr;</a></div>
- </article>
+ <ul class="cases-list case-grid" data-w373="usecases-grid">
+ <li class="cases-list__row case" data-usecase="healthcare-claim-redactor" data-w373="uc-healthcare">
+ <div class="cases-list__num case-num">01 &middot; healthcare</div>
+ <div class="cases-list__body">
+ <h3 class="cases-list__h">Healthcare claim redactor</h3>
+ <p class="cases-list__p">Strip PHI from inbound claim documents before they hit your data lake. 21 typed detectors, stable VAR_ placeholders, tamper-evident receipt per redaction.</p>
+ <div class="cases-list__art art">claims-redactor.kolm &middot; K=0.985 &middot; 60 seeds</div>
  </div>
+ <div class="cases-list__refs row"><a href="/healthcare">Vertical &rarr;</a><a href="/cookbook/phi-redactor">Recipe &rarr;</a></div>
+ </li>
+ <li class="cases-list__row case" data-usecase="legal-contract-clause" data-w373="uc-legal">
+ <div class="cases-list__num case-num">02 &middot; legal</div>
+ <div class="cases-list__body">
+ <h3 class="cases-list__h">Legal contract clause extractor</h3>
+ <p class="cases-list__p">Extract typed clauses (indemnity, IP assignment, MFN, term and termination) from PDFs and DOCX. Returns spans with offsets and the contract version hash.</p>
+ <div class="cases-list__art art">legal-clause-extract.kolm &middot; K=0.84 &middot; 58 MB</div>
+ </div>
+ <div class="cases-list__refs row"><a href="/legal">Vertical &rarr;</a><a href="/cookbook/legal-clause-extract">Recipe &rarr;</a></div>
+ </li>
+ <li class="cases-list__row case" data-usecase="support-triage" data-w373="uc-support">
+ <div class="cases-list__num case-num">03 &middot; support</div>
+ <div class="cases-list__body">
+ <h3 class="cases-list__h">Support ticket triage</h3>
+ <p class="cases-list__p">Classify inbound tickets by urgency, product area, and required skill. Routes to the right queue before a human sees it. Drop-in for the hosted call.</p>
+ <div class="cases-list__art art">ticket-triage.kolm &middot; 91% on hold-out tickets</div>
+ </div>
+ <div class="cases-list__refs row"><a href="/captures">Captures &rarr;</a><a href="/cookbook/intake-triage">Recipe &rarr;</a></div>
+ </li>
+ <li class="cases-list__row case" data-usecase="code-review-classifier" data-w373="uc-code">
+ <div class="cases-list__num case-num">04 &middot; developer tools</div>
+ <div class="cases-list__body">
+ <h3 class="cases-list__h">Code-review classifier</h3>
+ <p class="cases-list__p">Tag diffs by risk and area (auth, billing, infra, UI) so reviewers focus on the dangerous chunks first. Runs locally so source never leaves CI.</p>
+ <div class="cases-list__art art">review-classifier.kolm &middot; 89% on sampled diffs</div>
+ </div>
+ <div class="cases-list__refs row"><a href="/docs">Docs &rarr;</a><a href="/cookbook/pr-review">Recipe &rarr;</a></div>
+ </li>
+ <li class="cases-list__row case" data-usecase="internal-qa-rag" data-w373="uc-rag">
+ <div class="cases-list__num case-num">05 &middot; knowledge</div>
+ <div class="cases-list__body">
+ <h3 class="cases-list__h">Internal Q&amp;A bot (RAG)</h3>
+ <p class="cases-list__p">Index your wiki, retrieve before you reply, cite source paragraphs. The retriever and reranker ship in the artifact &mdash; no hosted vector DB.</p>
+ <div class="cases-list__art art">rag-qa.kolm &middot; 87% answer accuracy</div>
+ </div>
+ <div class="cases-list__refs row"><a href="/docs">Docs &rarr;</a><a href="/cookbook/recipe-from-observations">Recipe &rarr;</a></div>
+ </li>
+ <li class="cases-list__row case" data-usecase="pdf-table-extractor" data-w373="uc-pdf">
+ <div class="cases-list__num case-num">06 &middot; documents</div>
+ <div class="cases-list__body">
+ <h3 class="cases-list__h">PDF table extractor</h3>
+ <p class="cases-list__p">Pull structured tables out of scanned PDFs into typed JSON. Pairs an OCR pass with a layout-aware schema model. Confidence per cell.</p>
+ <div class="cases-list__art art">pdf-tables.kolm &middot; 92% cell accuracy</div>
+ </div>
+ <div class="cases-list__refs row"><a href="/docs">Docs &rarr;</a><a href="/cookbook/finance-disclosure-redact">Recipe &rarr;</a></div>
+ </li>
+ <li class="cases-list__row case" data-usecase="voice-transcript-summarizer" data-w373="uc-voice">
+ <div class="cases-list__num case-num">07 &middot; voice</div>
+ <div class="cases-list__body">
+ <h3 class="cases-list__h">Voice transcript summarizer</h3>
+ <p class="cases-list__p">Summarize meeting transcripts into action items, decisions, and follow-ups. Names normalized, action items linked to owners by username.</p>
+ <div class="cases-list__art art">meeting-notes.kolm &middot; 88% action-item recall</div>
+ </div>
+ <div class="cases-list__refs row"><a href="/docs">Docs &rarr;</a><a href="/cookbook/daily-recap">Recipe &rarr;</a></div>
+ </li>
+ <li class="cases-list__row case" data-usecase="browser-workflow-tester" data-w373="uc-browser">
+ <div class="cases-list__num case-num">08 &middot; agents</div>
+ <div class="cases-list__body">
+ <h3 class="cases-list__h">Browser workflow tester</h3>
+ <p class="cases-list__p">Drive a headless browser through your app, score each step, and emit a signed receipt of what happened. Replay byte-identically for regressions.</p>
+ <div class="cases-list__art art">browser-flow.kolm &middot; 86% on replayed flows</div>
+ </div>
+ <div class="cases-list__refs row"><a href="/docs">Docs &rarr;</a><a href="/cookbook/runbook-step">Recipe &rarr;</a></div>
+ </li>
+ <li class="cases-list__row case" data-usecase="privacy-red-team" data-w373="uc-redteam">
+ <div class="cases-list__num case-num">09 &middot; security</div>
+ <div class="cases-list__body">
+ <h3 class="cases-list__h">Privacy red-team</h3>
+ <p class="cases-list__p">Probe your prompts and outputs for PII leakage, prompt-injection susceptibility, and jailbreak surface. Accuracy gate blocks regressions in CI.</p>
+ <div class="cases-list__art art">redteam-probe.kolm &middot; 93% on the probe set</div>
+ </div>
+ <div class="cases-list__refs row"><a href="/security">Security &rarr;</a><a href="/cookbook/drug-name-redact">Recipe &rarr;</a></div>
+ </li>
+ </ul>
  </div>
 </section>
 
