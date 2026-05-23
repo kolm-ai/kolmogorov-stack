@@ -1,5 +1,5 @@
 // Recipe service worker: keeps the registry available offline.
-const CACHE = 'kolm-v10-2026-05-23-wave658-compat-strip-kscore-badge';
+const CACHE = 'kolm-v11-2026-05-23-wave659-artifact-anatomy-split';
 const PRECACHE = [
  '/device',
  '/design-tokens.css',

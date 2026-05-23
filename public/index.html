@@ -131,6 +131,16 @@
     .home-receipts__header { flex-direction: column-reverse; gap: 18px; align-items: center; }
     .home-receipts__head-text { text-align: left; }
   }
+  /* W659: .kolm anatomy 2-column split — illustration left, annotated file tree right.
+     Same illustration that renders on /hub via data-kolm-illustration="artifact-anatomy". */
+  .kolm-anatomy-split { display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr); gap: 40px; align-items: start; margin-top: 32px; }
+  .kolm-anatomy-split__illu { display: flex; justify-content: center; }
+  .kolm-anatomy-split__illu svg { width: 100%; max-width: 320px; height: auto; display: block; }
+  .kolm-anatomy-split__tree { min-width: 0; }
+  @media (max-width: 900px) {
+    .kolm-anatomy-split { grid-template-columns: 1fr; gap: 24px; }
+    .kolm-anatomy-split__illu svg { max-width: 280px; }
+  }
 
   /* W657: hero persona switcher — CSS-only radio + sibling-selector tabs.
      Three personas (Platform Eng, ML Eng, Founder/CTO) each show a tailored
@@ -625,43 +635,52 @@
   </div>
 </section>
 
-<!-- ================== W646: .kolm anatomy — semantic rows that wrap on mobile ================== -->
+<!-- ================== W646 / W659: .kolm anatomy — 2-column visual explainer ================== -->
+<!-- W659: split into illustration (left) + annotated file tree (right). Magnifying-glass overlay
+     on the SVG signals "you can see inside". @media collapses to single column on mobile. -->
 <section class="fr-section fr-reveal" aria-label="Inside a kolm artifact">
   <div class="fr-container">
     <span class="fr-eyebrow">What's in the file</span>
     <h2 class="fr-h2">One <code class="fr-code" style="font-size:0.72em; vertical-align:0.1em; background:rgba(126,240,210,0.08); border-color:var(--fr-mint-edge); color:var(--fr-mint);">.kolm</code>. No proprietary loader.</h2>
     <p class="fr-lede"><code>unzip</code> it on any machine; the structure is self-describing.</p>
-    <ul class="kolm-anatomy" aria-label="Files inside a .kolm artifact" style="list-style:none; margin:32px 0 0 0; padding:0; border:1px solid rgba(236,231,220,0.08); border-radius:14px; background:linear-gradient(180deg, rgba(126,240,210,0.02) 0%, transparent 60%);">
-      <li style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:14px 18px; border-bottom:1px solid rgba(236,231,220,0.06); flex-wrap:wrap;">
-        <code style="font-family:var(--fr-font-mono); font-size:14px; color:var(--fr-mint); font-weight:600;">support.kolm</code>
-        <span style="font-family:var(--fr-font-sans); font-size:13px; color:var(--ink-3); font-style:italic;">5.2 GB &middot; one file &middot; signed</span>
-      </li>
-      <li style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:14px 18px 14px 36px; border-bottom:1px solid rgba(236,231,220,0.06); flex-wrap:wrap;">
-        <code style="font-family:var(--fr-font-mono); font-size:13px; color:var(--ink-1);">+&minus; spec.toml</code>
-        <span style="font-family:var(--fr-font-sans); font-size:13px; color:var(--ink-3); font-style:italic;">teacher, student, seed, quant method</span>
-      </li>
-      <li style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:14px 18px 14px 36px; border-bottom:1px solid rgba(236,231,220,0.06); flex-wrap:wrap;">
-        <code style="font-family:var(--fr-font-mono); font-size:13px; color:var(--ink-1);">+&minus; weights/</code>
-        <span style="font-family:var(--fr-font-sans); font-size:13px; color:var(--ink-3); font-style:italic;">quantized tensors, runtime-neutral</span>
-      </li>
-      <li style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:14px 18px 14px 36px; border-bottom:1px solid rgba(236,231,220,0.06); flex-wrap:wrap;">
-        <code style="font-family:var(--fr-font-mono); font-size:13px; color:var(--ink-1);">+&minus; eval.frozen.jsonl</code>
-        <span style="font-family:var(--fr-font-sans); font-size:13px; color:var(--ink-3); font-style:italic;">the rows that gated this build</span>
-      </li>
-      <li style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:14px 18px 14px 36px; border-bottom:1px solid rgba(236,231,220,0.06); flex-wrap:wrap;">
-        <code style="font-family:var(--fr-font-mono); font-size:13px; color:var(--ink-1);">+&minus; bakeoff/</code>
-        <span style="font-family:var(--fr-font-sans); font-size:13px; color:var(--ink-3); font-style:italic;">K-Score vs the teacher, per row</span>
-      </li>
-      <li style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:14px 18px 14px 36px; border-bottom:1px solid rgba(236,231,220,0.06); flex-wrap:wrap;">
-        <code style="font-family:var(--fr-font-mono); font-size:13px; color:var(--ink-1);">+&minus; receipts/</code>
-        <span style="font-family:var(--fr-font-sans); font-size:13px; color:var(--ink-3); font-style:italic;">every capture that fed the distill</span>
-      </li>
-      <li style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:14px 18px 14px 36px; flex-wrap:wrap;">
-        <code style="font-family:var(--fr-font-mono); font-size:13px; color:var(--ink-1);">+&minus; sidecar.ed25519</code>
-        <span style="font-family:var(--fr-font-sans); font-size:13px; color:var(--ink-3); font-style:italic;">64-byte signature over the SHA-256</span>
-      </li>
-    </ul>
-    <p style="margin-top:16px; font-family:var(--fr-font-mono); font-size:var(--fr-text-xs); letter-spacing:var(--fr-track-label); text-transform:uppercase; color:var(--ink-3);">Verifies offline. Smaller than a movie file. <a href="/verify-prod" style="color:var(--fr-mint); text-transform:none; letter-spacing:0;">Try it on any artifact &rarr;</a></p>
+    <div class="kolm-anatomy-split">
+      <div class="kolm-anatomy-split__illu" aria-hidden="true">
+        <div data-kolm-illustration="artifact-anatomy" style="color:var(--fr-mint); --brand-primary:var(--fr-mint);"></div>
+      </div>
+      <div class="kolm-anatomy-split__tree">
+        <ul class="kolm-anatomy" aria-label="Files inside a .kolm artifact" style="list-style:none; margin:0; padding:0; border:1px solid rgba(236,231,220,0.08); border-radius:14px; background:linear-gradient(180deg, rgba(126,240,210,0.02) 0%, transparent 60%);">
+          <li style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:14px 18px; border-bottom:1px solid rgba(236,231,220,0.06); flex-wrap:wrap;">
+            <code style="font-family:var(--fr-font-mono); font-size:14px; color:var(--fr-mint); font-weight:600;">support.kolm</code>
+            <span style="font-family:var(--fr-font-sans); font-size:13px; color:var(--ink-3); font-style:italic;">5.2 GB &middot; one file &middot; signed</span>
+          </li>
+          <li style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:14px 18px 14px 36px; border-bottom:1px solid rgba(236,231,220,0.06); flex-wrap:wrap;">
+            <code style="font-family:var(--fr-font-mono); font-size:13px; color:var(--ink-1);">+&minus; spec.toml</code>
+            <span style="font-family:var(--fr-font-sans); font-size:13px; color:var(--ink-3); font-style:italic;">teacher, student, seed, quant method</span>
+          </li>
+          <li style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:14px 18px 14px 36px; border-bottom:1px solid rgba(236,231,220,0.06); flex-wrap:wrap;">
+            <code style="font-family:var(--fr-font-mono); font-size:13px; color:var(--ink-1);">+&minus; weights/</code>
+            <span style="font-family:var(--fr-font-sans); font-size:13px; color:var(--ink-3); font-style:italic;">quantized tensors, runtime-neutral</span>
+          </li>
+          <li style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:14px 18px 14px 36px; border-bottom:1px solid rgba(236,231,220,0.06); flex-wrap:wrap;">
+            <code style="font-family:var(--fr-font-mono); font-size:13px; color:var(--ink-1);">+&minus; eval.frozen.jsonl</code>
+            <span style="font-family:var(--fr-font-sans); font-size:13px; color:var(--ink-3); font-style:italic;">the rows that gated this build</span>
+          </li>
+          <li style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:14px 18px 14px 36px; border-bottom:1px solid rgba(236,231,220,0.06); flex-wrap:wrap;">
+            <code style="font-family:var(--fr-font-mono); font-size:13px; color:var(--ink-1);">+&minus; bakeoff/</code>
+            <span style="font-family:var(--fr-font-sans); font-size:13px; color:var(--ink-3); font-style:italic;">K-Score vs the teacher, per row</span>
+          </li>
+          <li style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:14px 18px 14px 36px; border-bottom:1px solid rgba(236,231,220,0.06); flex-wrap:wrap;">
+            <code style="font-family:var(--fr-font-mono); font-size:13px; color:var(--ink-1);">+&minus; receipts/</code>
+            <span style="font-family:var(--fr-font-sans); font-size:13px; color:var(--ink-3); font-style:italic;">every capture that fed the distill</span>
+          </li>
+          <li style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:14px 18px 14px 36px; flex-wrap:wrap;">
+            <code style="font-family:var(--fr-font-mono); font-size:13px; color:var(--ink-1);">+&minus; sidecar.ed25519</code>
+            <span style="font-family:var(--fr-font-sans); font-size:13px; color:var(--ink-3); font-style:italic;">64-byte signature over the SHA-256</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <p style="margin-top:16px; font-family:var(--fr-font-mono); font-size:var(--fr-text-xs); letter-spacing:var(--fr-track-label); text-transform:uppercase; color:var(--ink-3);">Verifies offline. Smaller than a movie file. <a href="/verify-prod" style="color:var(--fr-mint); text-transform:none; letter-spacing:0;">Try it on any artifact &rarr;</a> &nbsp;<span style="color:var(--ink-faint);">&middot;</span>&nbsp; <a href="/spec/kolm-format-v1" style="color:var(--fr-mint); text-transform:none; letter-spacing:0;">See the format spec &rarr;</a></p>
   </div>
 </section>
 

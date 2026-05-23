@@ -168,29 +168,49 @@
   }
 
   function illArtifactAnatomy() {
-    // .kolm internals — cutaway layers
-    return '<svg class="kolm-ill kolm-ill--anatomy" viewBox="0 0 360 280" role="img" aria-label="The .kolm artifact contains weights, signature, K-score, and a receipt chain">' +
-      '<rect x="30" y="30" width="300" height="220" rx="14" fill="var(--brand-primary)" fill-opacity=".05" stroke="var(--brand-primary)" stroke-opacity=".55" stroke-width="1.5"/>' +
-      '<text x="180" y="58" text-anchor="middle" font-family="ui-monospace, monospace" font-size="14" font-weight="700" fill="var(--brand-primary)">deepseek-r1-32b.kolm</text>' +
-      // layer rows
+    // .kolm internals — cutaway layers + magnifying-glass overlay.
+    // W659: 6 rows match the homepage file tree (spec.toml, weights/, eval.frozen.jsonl,
+    // bakeoff/, receipts/, sidecar.ed25519). Filename header is generic (support.kolm)
+    // so the same illustration drops into any page that shows a .kolm artifact.
+    return '<svg class="kolm-ill kolm-ill--anatomy" viewBox="0 0 360 360" role="img" aria-label="The .kolm artifact is a zip containing spec, weights, frozen eval, bakeoff, receipts, and an Ed25519 signature">' +
+      // outer "file" envelope
+      '<rect x="30" y="30" width="300" height="300" rx="14" fill="var(--brand-primary)" fill-opacity=".05" stroke="var(--brand-primary)" stroke-opacity=".55" stroke-width="1.5"/>' +
+      '<text x="180" y="58" text-anchor="middle" font-family="ui-monospace, monospace" font-size="14" font-weight="700" fill="var(--brand-primary)">support.kolm</text>' +
+      // 6 layer rows
       '<g font-family="ui-monospace, monospace" font-size="10" fill="currentColor">' +
-        '<rect x="50" y="80"  width="260" height="28" rx="6" fill="currentColor" fill-opacity=".06"/>' +
-        '<text x="62" y="98" fill-opacity=".85">weights.int4</text><text x="296" y="98" text-anchor="end" fill-opacity=".55">17.9 GB</text>' +
-        '<rect x="50" y="116" width="260" height="28" rx="6" fill="currentColor" fill-opacity=".06"/>' +
-        '<text x="62" y="134" fill-opacity=".85">manifest.json</text><text x="296" y="134" text-anchor="end" fill-opacity=".55">1.4 KB</text>' +
-        '<rect x="50" y="152" width="260" height="28" rx="6" fill="currentColor" fill-opacity=".06"/>' +
-        '<text x="62" y="170" fill-opacity=".85">signature.ed25519</text><text x="296" y="170" text-anchor="end" fill-opacity=".55">64 B</text>' +
-        '<rect x="50" y="188" width="260" height="28" rx="6" fill="currentColor" fill-opacity=".06"/>' +
-        '<text x="62" y="206" fill-opacity=".85">receipt.json</text><text x="296" y="206" text-anchor="end" fill-opacity=".55">4 KB</text>' +
+        '<rect x="50" y="78"  width="260" height="34" rx="6" fill="currentColor" fill-opacity=".06"/>' +
+        '<text x="62" y="93" fill-opacity=".85">spec.toml</text><text x="296" y="93" text-anchor="end" fill-opacity=".55">1.4 KB</text>' +
+        '<text x="62" y="106" fill-opacity=".45" font-size="9">teacher · student · seed · quant</text>' +
+        '<rect x="50" y="118" width="260" height="34" rx="6" fill="currentColor" fill-opacity=".06"/>' +
+        '<text x="62" y="133" fill-opacity=".85">weights/</text><text x="296" y="133" text-anchor="end" fill-opacity=".55">5.2 GB</text>' +
+        '<text x="62" y="146" fill-opacity=".45" font-size="9">quantized tensors, runtime-neutral</text>' +
+        '<rect x="50" y="158" width="260" height="34" rx="6" fill="currentColor" fill-opacity=".06"/>' +
+        '<text x="62" y="173" fill-opacity=".85">eval.frozen.jsonl</text><text x="296" y="173" text-anchor="end" fill-opacity=".55">88 KB</text>' +
+        '<text x="62" y="186" fill-opacity=".45" font-size="9">rows that gated this build</text>' +
+        '<rect x="50" y="198" width="260" height="34" rx="6" fill="currentColor" fill-opacity=".06"/>' +
+        '<text x="62" y="213" fill-opacity=".85">bakeoff/</text><text x="296" y="213" text-anchor="end" fill-opacity=".55">126 KB</text>' +
+        '<text x="62" y="226" fill-opacity=".45" font-size="9">K-Score vs the teacher, per row</text>' +
+        '<rect x="50" y="238" width="260" height="34" rx="6" fill="currentColor" fill-opacity=".06"/>' +
+        '<text x="62" y="253" fill-opacity=".85">receipts/</text><text x="296" y="253" text-anchor="end" fill-opacity=".55">2.1 MB</text>' +
+        '<text x="62" y="266" fill-opacity=".45" font-size="9">every capture that fed the distill</text>' +
+        '<rect x="50" y="278" width="260" height="34" rx="6" fill="currentColor" fill-opacity=".06"/>' +
+        '<text x="62" y="293" fill-opacity=".85">sidecar.ed25519</text><text x="296" y="293" text-anchor="end" fill-opacity=".55">64 B</text>' +
+        '<text x="62" y="306" fill-opacity=".45" font-size="9">signature over the SHA-256</text>' +
       '</g>' +
       // K-score badge top-right
       '<g transform="translate(258,18)">' +
         '<rect width="78" height="32" rx="16" fill="var(--brand-primary)" fill-opacity=".18" stroke="var(--brand-primary)" stroke-opacity=".7"/>' +
         '<text x="14" y="20" font-family="ui-monospace, monospace" font-size="10" fill="currentColor" fill-opacity=".7">K</text>' +
-        '<text x="42" y="22" font-family="ui-monospace, monospace" font-size="14" font-weight="700" fill="var(--brand-primary)">88.2</text>' +
+        '<text x="42" y="22" font-family="ui-monospace, monospace" font-size="14" font-weight="700" fill="var(--brand-primary)">0.91</text>' +
       '</g>' +
-      // pulsing scan line
-      '<rect class="kolm-ill-scan" x="48" y="78" width="264" height="2" fill="var(--brand-primary)" fill-opacity=".5"/>' +
+      // pulsing scan line over the top row
+      '<rect class="kolm-ill-scan" x="48" y="76" width="264" height="2" fill="var(--brand-primary)" fill-opacity=".5"/>' +
+      // magnifying-glass overlay (bottom-right) — signals "you can see inside"
+      '<g class="kolm-ill-loupe" transform="translate(258,228)" stroke="var(--brand-primary)" stroke-width="1.6" fill="none">' +
+        '<circle cx="32" cy="32" r="28" stroke-opacity=".7" fill="currentColor" fill-opacity=".02"/>' +
+        '<line x1="52" y1="52" x2="68" y2="68" stroke-opacity=".7"/>' +
+        '<circle cx="26" cy="28" r="4" stroke-opacity=".4"/>' +
+      '</g>' +
     '</svg>';
   }
 
