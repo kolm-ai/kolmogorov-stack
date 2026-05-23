@@ -719,6 +719,48 @@ return profile('platform', 'Product map', 'Gateway, compiler, runtime, proof.', 
  // W689: footer trust ribbon. Injected once above the existing site footer
  // on every page. Four chips: license / signing / billing / contact.
  // Idempotent. Skips if the page already has a hand-placed .ks-trust-ribbon.
+ // W691: Primary-nav unifier. Many pages still carry the legacy verb-rail
+ // (Gateway/Capture/Distill/Compile/Runtime/K-score/Pricing). Replace with the
+ // canonical 5-item marketing nav so brand reads as one product across every
+ // page on the next service-worker refresh. CTAs are left alone — pages keep
+ // their intent-aware right-side (Quickstart vs Get started vs Talk to sales).
+ (function unifyPrimaryNav() {
+  var canonical = [
+   { href: '/product', label: 'Product' },
+   { href: '/use-cases', label: 'Use cases' },
+   { href: '/pricing', label: 'Pricing' },
+   { href: '/docs', label: 'Docs' },
+   { href: 'https://github.com/sneaky-hippo/kolmogorov-stack', label: 'GitHub', rel: 'noopener' },
+  ];
+  function render(target, tag) {
+   target.innerHTML = '';
+   canonical.forEach(function (item) {
+    var node = document.createElement(tag === 'li' ? 'li' : 'a');
+    if (tag === 'li') {
+     var a = document.createElement('a');
+     a.href = item.href; a.textContent = item.label;
+     if (item.rel) a.setAttribute('rel', item.rel);
+     node.appendChild(a);
+    } else {
+     node.href = item.href; node.textContent = item.label;
+     if (item.rel) node.setAttribute('rel', item.rel);
+    }
+    target.appendChild(node);
+   });
+   target.setAttribute('data-w691-unified', '1');
+  }
+  // Replace the legacy verb-rail (security/compare/k-score/integrations style):
+  // nav.ks-nav__links with [Gateway, Capture, Distill, Compile, Runtime,
+  // K-score, Pricing] — 7 deep verbs that read as a confusing tour of the
+  // compiler internals to a first-time visitor. The marketing variants
+  // (ul.ks-nav__list) already read coherently and are left alone, so pages
+  // that legitimately surface Wrapper/Studio/Enterprise keep their structure.
+  document.querySelectorAll('nav.ks-nav__links').forEach(function (n) {
+   if (n.getAttribute('data-w691-unified') === '1') return;
+   render(n, 'a');
+  });
+ })();
+
  (function injectTrustRibbon() {
   if (document.querySelector('.ks-trust-ribbon')) return;
   var foot = document.querySelector('footer.ks-footer, footer.ks-foot, footer.site-footer, footer.kolm-foot, footer.site, footer');
