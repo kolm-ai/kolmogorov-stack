@@ -355,6 +355,66 @@ export function _pickTeachers() {
   return out;
 }
 
+// W718 — Teacher Council per-task selector. Wraps _pickTeachers() with the
+// Teacher Council weighting formula from src/teacher-council.js, returning a
+// teacher list re-ranked per capture so the highest-weight teacher leads.
+//
+// Activation:
+//   - opts.use_council === true (explicit per-call opt-in)
+//   - OR process.env.KOLM_TEACHER_COUNCIL === '1'
+// Otherwise this returns _pickTeachers() unchanged (W459 fallback order
+// preserved). Callers that ignore the council can keep using _pickTeachers
+// directly; the council path is strictly additive.
+//
+// Honesty contract:
+//   - When no reliability table is supplied AND no path exists on disk, the
+//     council degenerates to per-capture cost/risk weighting only (every
+//     teacher gets a 0.5 reliability prior). This is documented behavior:
+//     we never fabricate reliability numbers.
+//   - opts.explicit_teachers (CSV passed via --teachers) takes priority over
+//     env-derived teachers, but the council filter still runs against it.
+export async function _pickTeachersForCapture(capture, opts = {}) {
+  const useCouncil = opts.use_council === true || process.env.KOLM_TEACHER_COUNCIL === '1';
+  const baseList = (Array.isArray(opts.explicit_teachers) && opts.explicit_teachers.length > 0)
+    ? opts.explicit_teachers.slice()
+    : _pickTeachers();
+  if (!useCouncil || baseList.length === 0) return { teachers: baseList, council: null };
+  // Lazy-import to avoid a hard dep at module-load (the council files are
+  // additive; older deploys without them must still run distill).
+  let council = null;
+  let weightsMod = null;
+  try {
+    council = await import('./teacher-council.js');
+    weightsMod = await import('./teacher-weights.js');
+  } catch (_) {
+    return { teachers: baseList, council: { ok: false, error: 'council_unavailable' } };
+  }
+  let reliability = null;
+  try {
+    const persistPath = opts.reliability_path || weightsMod.defaultPersistPath();
+    reliability = weightsMod.TeacherReliabilityTable.load(persistPath);
+  } catch (_) {
+    reliability = new weightsMod.TeacherReliabilityTable();
+  }
+  const selection = council.selectTeacherForCapture(baseList, capture || {}, reliability, opts);
+  // Re-rank baseList so the winning teacher is first; remaining teachers
+  // preserve their weight-descending order from the council formula.
+  const ranked = selection.weights.map((w) => w.teacher);
+  // Fill any unranked teachers (shouldn't happen, but defensive) to keep
+  // baseList's tail intact.
+  for (const t of baseList) if (!ranked.includes(t)) ranked.push(t);
+  return {
+    teachers: ranked,
+    council: {
+      ok: true,
+      version: council.TEACHER_COUNCIL_VERSION,
+      winner: selection.teacher,
+      explanation: selection.explanation,
+      weights: selection.weights,
+    },
+  };
+}
+
 // Resolve the mode policy: 'full' only when KOLM_DISTILL_FULL=1 + a teacher
 // is wired. Otherwise 'collect' when teacher is wired, 'stub' when none.
 function _resolveWorkerMode() {
@@ -519,6 +579,26 @@ export async function* distill({
   const _firstTeacher = attemptList[0] || null;
   const teacher_source = _firstTeacher ? classifyTeacher(_firstTeacher) : null;
   const policy_enforced = process.env.KOLM_TEACHER_SOURCE === 'open-weights';
+  // W718 — stamp Teacher Council choice when the council was invoked. We
+  // detect activation either by env (KOLM_TEACHER_COUNCIL=1) or by a non-null
+  // selection result passed via opts. Stamping is best-effort: a stamp failure
+  // never blocks the distill run.
+  let teacher_council_choice = null;
+  let teacher_council_weights = null;
+  if (process.env.KOLM_TEACHER_COUNCIL === '1' && attemptList.length > 0) {
+    try {
+      const { selectTeacherForCapture } = await import('./teacher-council.js');
+      const { TeacherReliabilityTable, defaultPersistPath } = await import('./teacher-weights.js');
+      const reliability = TeacherReliabilityTable.load(defaultPersistPath());
+      // Use the first pair (representative capture) for the council choice; the
+      // per-capture stamping happens in the Python trainer when full logit
+      // blending kicks in.
+      const sampleCapture = pairs[0] || { namespace: teacher_namespace };
+      const selection = selectTeacherForCapture(attemptList, sampleCapture, reliability);
+      teacher_council_choice = selection.teacher;
+      teacher_council_weights = selection.weights;
+    } catch (_) {}
+  }
   try {
     fs.writeFileSync(path.join(runDir, 'run-meta.json'), JSON.stringify({
       job_id: jobId,
@@ -532,6 +612,8 @@ export async function* distill({
       teacher_planned: attemptList,
       teacher_source,
       policy_enforced,
+      teacher_council_choice,
+      teacher_council_weights,
       resume_from: resume_from || null,
       created_at: new Date().toISOString(),
     }, null, 2));

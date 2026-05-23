@@ -82,7 +82,7 @@ from typing import Any, Iterable, Optional
 try:
     import torch
     import torch.nn.functional as F
-    from torch.utils.data import Dataset, WeightedRandomSampler
+    from torch.utils.data import Dataset, WeightedRandomSampler, SequentialSampler
     _HAS_TORCH = True
 except Exception:
     _HAS_TORCH = False
@@ -128,6 +128,92 @@ IMPORTANCE_VERSION = "w711-v1"
 #   * Without --pass, behavior is UNCHANGED (preserves W711 + base contract).
 
 PROGRESSIVE_VERSION = "w712-v1"
+
+# W717 — curriculum distillation.
+#
+# When --curriculum is passed, sort training rows by ascending complexity_proxy
+# (computed JS-side by src/curriculum-sort.js and stamped on each JSONL row).
+# Rows missing complexity_proxy get a neutral 0.5 so the sort stays well-defined
+# without dropping data. The trainer then swaps its sampler for a
+# SequentialSampler — a WeightedRandomSampler or shuffle would defeat the
+# curriculum ordering.
+#
+# Order of operations:
+#   1. --pass filter (W712) narrows the corpus to the capability stage.
+#   2. --curriculum reorders WITHIN the stage (this wave).
+#   3. SequentialSampler walks the ordered rows in order.
+#
+# When --curriculum AND --importance-weights are both set, --curriculum WINS:
+# importance weighting is incompatible with deterministic curriculum order.
+# The trainer logs the conflict to run-meta.curriculum.json and skips the
+# weighted sampler (never silently fakes both).
+#
+# Honesty contract: --curriculum without complexity_proxy on any row falls
+# back to length-based ordering (response char count) so the trainer still
+# produces a deterministic order rather than ValueError-ing the run.
+
+CURRICULUM_VERSION = "w717-v1"
+
+
+def _curriculum_sort_rows(rows: list[dict]) -> tuple[list[dict], dict]:
+    """Sort training rows by ascending complexity_proxy.
+
+    Returns (sorted_rows, meta) where meta captures the sort provenance for
+    run-meta.curriculum.json. Pure: does not mutate the input list."""
+    if not isinstance(rows, list) or not rows:
+        return rows or [], {
+            "curriculum_version": CURRICULUM_VERSION,
+            "rows_in": 0,
+            "rows_with_proxy": 0,
+            "fallback": None,
+        }
+    n_with_proxy = 0
+    decorated: list[tuple[float, int, dict]] = []
+    for i, r in enumerate(rows):
+        cp = r.get("complexity_proxy") if isinstance(r, dict) else None
+        if isinstance(cp, (int, float)) and 0.0 <= float(cp) <= 1.0:
+            decorated.append((float(cp), i, r))
+            n_with_proxy += 1
+        else:
+            # Fallback: length-based proxy. response_chars / 4096 clamped.
+            resp = r.get("response", "") if isinstance(r, dict) else ""
+            chars = len(resp) if isinstance(resp, str) else 0
+            length_norm = min(1.0, chars / 4096.0)
+            decorated.append((length_norm, i, r))
+    # Stable sort: tuple compares by score then by original index.
+    decorated.sort(key=lambda t: (t[0], t[1]))
+    sorted_rows = [t[2] for t in decorated]
+    meta = {
+        "curriculum_version": CURRICULUM_VERSION,
+        "rows_in": len(rows),
+        "rows_with_proxy": n_with_proxy,
+        "fallback": (
+            None if n_with_proxy == len(rows)
+            else f"{len(rows) - n_with_proxy} rows used length-based fallback"
+        ),
+    }
+    return sorted_rows, meta
+
+
+def _write_curriculum_run_meta(out_dir: str, meta: dict) -> Optional[str]:
+    """Write a sibling run-meta.curriculum.json so the curriculum stamp is
+    recoverable independent of HF Trainer state. Best-effort write, mirrors
+    the W711/W712 pattern."""
+    if not out_dir:
+        return None
+    try:
+        os.makedirs(out_dir, exist_ok=True)
+        p = os.path.join(out_dir, "run-meta.curriculum.json")
+        with open(p, "w", encoding="utf-8") as f:
+            json.dump(meta, f, indent=2, sort_keys=True)
+        return p
+    except OSError as e:
+        print(
+            f"distill.py: could not write run-meta.curriculum.json: {e}",
+            file=sys.stderr,
+        )
+        return None
+
 
 PROGRESSIVE_GATES = {
     1: {"axis": "F", "threshold": 0.65, "label": "format"},
@@ -711,6 +797,7 @@ def distill_trainer(
     importance_weights_path: Optional[str] = None,
     progressive_pass: Optional[int] = None,
     progressive_gate: Optional[str] = None,
+    curriculum: bool = False,
 ) -> DistillSession:
     """Build a configured KD trainer ready for .train().
 
@@ -809,6 +896,21 @@ def distill_trainer(
         if not r.get("response"):
             r["response"] = _teacher_sample(teacher, tokenizer, r["prompt"], max_new=256)
 
+    # W717: curriculum sort applies AFTER pass-filter (W712) and the
+    # eval-split shuffle but BEFORE the sampler is chosen, since the trainer
+    # walks `rows` in order via SequentialSampler when --curriculum is set.
+    curriculum_meta: dict[str, Any] = {
+        "curriculum_version": CURRICULUM_VERSION,
+        "curriculum_used": False,
+    }
+    if curriculum:
+        rows, sort_meta = _curriculum_sort_rows(rows)
+        curriculum_meta = {
+            **curriculum_meta,
+            "curriculum_used": True,
+            **sort_meta,
+        }
+
     train_ds = _PromptResponseDataset(rows, tokenizer, cfg.max_length)
     eval_ds = _PromptResponseDataset(eval_rows, tokenizer, cfg.max_length) if eval_rows else None
 
@@ -898,7 +1000,33 @@ def distill_trainer(
         else:
             importance_meta["importance_weights_used"] = True
 
-    if weighted_sampler is not None:
+    # W717: --curriculum WINS over --importance-weights. Curriculum order is a
+    # deterministic sweep simple->complex; a WeightedRandomSampler would
+    # shuffle that into random order and defeat the point. When both flags are
+    # set, log the conflict and drop the weighted sampler.
+    if curriculum and weighted_sampler is not None:
+        weighted_sampler = None
+        importance_meta["importance_weights_used"] = False
+        importance_meta["importance_weights_skipped_reason"] = "curriculum_active"
+        curriculum_meta["importance_weights_skipped"] = True
+
+    if curriculum:
+        _curriculum_sampler = SequentialSampler(train_ds)
+
+        class _DistillTrainerCurriculum(_DistillTrainer):
+            def _get_train_sampler(self, *_args, **_kwargs):
+                # SequentialSampler walks indices in order — matches the
+                # curriculum sort we did pre-dataset.
+                return _curriculum_sampler
+
+        trainer = _DistillTrainerCurriculum(
+            model=student,
+            args=args,
+            train_dataset=train_ds,
+            eval_dataset=eval_ds,
+            data_collator=collator,
+        )
+    elif weighted_sampler is not None:
         _captured_sampler = weighted_sampler
 
         class _DistillTrainerWeighted(_DistillTrainer):
@@ -938,6 +1066,12 @@ def distill_trainer(
             n_before=n_before_filter,
             n_after=len(rows),
         )
+
+    # W717: stamp run-meta.curriculum.json so the curriculum-sort provenance
+    # is recoverable. Always write (even when --curriculum was OFF) so an
+    # auditor reading the artifact can confirm the trainer ran with the
+    # curriculum knob in the OFF position rather than inferring from absence.
+    _write_curriculum_run_meta(out_dir, curriculum_meta)
 
     session = DistillSession(
         teacher_model=teacher_model,
@@ -1090,6 +1224,16 @@ def _build_argparser() -> argparse.ArgumentParser:
                    choices=["format", "reasoning", "edge"],
                    help="W712 gate label (informational; stamped into run-meta.progressive.json). "
                         "The K-Score axis gate itself is evaluated by the CLI side post-train.")
+    # W717: curriculum-distillation flag. When set, sort training rows by
+    # ascending complexity_proxy (computed JS-side by src/curriculum-sort.js
+    # and stamped on each JSONL row), then walk them with SequentialSampler.
+    # Wins over --importance-weights when both are set (logged in
+    # run-meta.curriculum.json).
+    p.add_argument("--curriculum", dest="curriculum", action="store_true",
+                   default=False,
+                   help="W717 curriculum-distillation: sort rows by ascending "
+                        "complexity_proxy and walk them with SequentialSampler. "
+                        "Wins over --importance-weights when both are set.")
     return p
 
 
@@ -1139,6 +1283,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         importance_weights_path=args.importance_weights,
         progressive_pass=args.prog_pass,
         progressive_gate=args.prog_gate,
+        curriculum=args.curriculum,
     )
     summary = session.train()
     receipt = receipt_block(session, summary)

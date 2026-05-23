@@ -145,12 +145,20 @@ if (!report.ready_by_method?.[method] || !pyScriptExists) {
 // script's output beyond exit code; the script writes its own quantized
 // weights to --out.
 console.log(`[${WORKER_NAME}] invoking python quantizer (method=${method})`);
-const res = spawnSync('python3', [
+// W719 — pass --mixed-precision profile path through to the python worker
+// when set. Resolved relative to the calling CWD so a user can pass a
+// relative profile path on the CLI.
+const passthrough = [
   pyScript,
   `--method=${method}`,
   `--in=${inDir}`,
   `--out=${outDir}`,
-], { stdio: 'inherit' });
+];
+if (args['mixed-precision']) {
+  const mp = path.resolve(process.cwd(), args['mixed-precision']);
+  passthrough.push(`--mixed-precision=${mp}`);
+}
+const res = spawnSync('python3', passthrough, { stdio: 'inherit' });
 process.exit(res.status ?? 1);
 
 // ---------------------------------------------------------------------------

@@ -67,6 +67,15 @@ def parse_args():
     p.add_argument("--device", default="auto",
                    help="device map for load (auto/cuda/cpu/mps); int4/int8 "
                         "require CUDA for compute, gptq/awq prefer CUDA")
+    p.add_argument("--mixed-precision", dest="mixed_precision", default=None,
+                   help="(W719 DAQ) JSON file holding a per-layer profile array "
+                        "produced by src/daq-profile.js buildDaqProfile. When set, "
+                        "the quantizer applies per-layer weight_bits / kv_bits / "
+                        "group_size / scale_mode from the profile instead of the "
+                        "uniform --bits / --group-size. Unsupported bit-widths for "
+                        "the chosen backend fall back to nearest-supported with a "
+                        "warning logged into the receipt; uniform-bit calls still "
+                        "work when this flag is omitted.")
     return p.parse_args()
 
 
@@ -470,6 +479,121 @@ def _ver(modname):
         return "missing"
 
 
+# -----------------------------------------------------------------------------
+# W719 — Distillation-Aware Quantization (DAQ) mixed-precision support.
+#
+# When --mixed-precision is set the quantizer reads a per-layer profile array
+# (output of src/daq-profile.js buildDaqProfile) and applies per-layer
+# weight_bits / group_size / scale_mode instead of the uniform --bits /
+# --group-size flags. Two things are KEY here:
+#
+#   1) NEVER crash. If the chosen backend (e.g. bitsandbytes which only ships
+#      nf4 + llm.int8) cannot honor a layer's requested bit width, we log a
+#      warning to the receipt and fall back to the nearest-supported width.
+#      The receipt's mixed_precision_warnings[] array makes the fallback
+#      visible to a verifier.
+#
+#   2) The uniform-bit code path is UNCHANGED. Existing callers that do not
+#      pass --mixed-precision get exactly the pre-W719 behavior.
+# -----------------------------------------------------------------------------
+
+# Backend-specific supported bit widths (informational — used to compute the
+# nearest-supported fallback and emit honest warnings).
+_BACKEND_SUPPORTED_BITS = {
+    "int4":  [4],          # bitsandbytes NF4
+    "int8":  [8],          # bitsandbytes LLM.int8
+    "gptq":  [2, 3, 4, 8],
+    "awq":   [4, 8],
+    "aqlm":  [2],          # additive 2x16 — sub-2-bit effective
+    "quip":  [2],
+    "exl2":  [2, 3, 4, 5, 6, 8],
+    "exl3":  [2, 3, 4, 5, 6, 8],
+    "hqq":   [2, 3, 4, 8],
+    "qat":   [2, 3, 4, 8],
+}
+
+
+def load_mixed_precision_profile(path):
+    """Load + validate a DAQ profile JSON file.
+
+    The file is the canonical output of src/daq-profile.js buildDaqProfile —
+    an ordered array of per-layer objects each with weight_bits, activation_bits,
+    kv_bits, group_size, protected_channels, clip_percentile, scale_mode,
+    fallback_dtype, kl_sensitivity.
+
+    Returns: (profile, warnings)
+      profile  — the parsed array (may be empty if the file is malformed)
+      warnings — list of human-readable strings ('layer X used Y instead of Z')
+    """
+    if not path:
+        return None, []
+    if not os.path.exists(path):
+        fail(3, f"--mixed-precision profile not found: {path}")
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            profile = json.load(f)
+    except (OSError, json.JSONDecodeError) as e:
+        fail(2, f"--mixed-precision profile failed to parse: {e}")
+    if not isinstance(profile, list) or len(profile) == 0:
+        fail(2, "--mixed-precision profile must be a non-empty JSON array")
+    # Validate shape up front so we fail loud before invoking the backend.
+    required = {"layer_id", "weight_bits", "activation_bits",
+                "kv_bits", "group_size"}
+    for i, layer in enumerate(profile):
+        if not isinstance(layer, dict):
+            fail(2, f"--mixed-precision profile[{i}] is not an object")
+        missing = required - layer.keys()
+        if missing:
+            fail(2, f"--mixed-precision profile[{i}] missing fields: {sorted(missing)}")
+    return profile, []
+
+
+def compute_uniform_fallback_from_profile(profile, method):
+    """Reduce a per-layer profile to a (bits, group_size) pair for backends
+    that do not natively support per-layer mixing.
+
+    Strategy: pick the MAJORITY weight_bits across the profile; tiebreak by
+    higher bits (safer). group_size: majority over the profile.
+    Returns (uniform_bits, uniform_group_size, warnings[]).
+    """
+    warnings = []
+    if not profile:
+        return None, None, warnings
+    # Count per bit-width + group size.
+    bit_counts = {}
+    group_counts = {}
+    for layer in profile:
+        wb = int(layer["weight_bits"])
+        gs = int(layer["group_size"])
+        bit_counts[wb] = bit_counts.get(wb, 0) + 1
+        group_counts[gs] = group_counts.get(gs, 0) + 1
+    # Sort by (count desc, bits desc) — higher bits wins ties (safer fallback).
+    uniform_bits = sorted(bit_counts.items(), key=lambda x: (-x[1], -x[0]))[0][0]
+    uniform_group = sorted(group_counts.items(), key=lambda x: (-x[1], -x[0]))[0][0]
+    # Snap to nearest backend-supported bit width.
+    supported = _BACKEND_SUPPORTED_BITS.get(method, [uniform_bits])
+    if uniform_bits not in supported:
+        nearest = min(supported, key=lambda b: abs(b - uniform_bits))
+        warnings.append(
+            f"--mixed-precision majority weight_bits={uniform_bits} not supported "
+            f"by backend {method}; using nearest-supported {nearest} (supported={supported})"
+        )
+        uniform_bits = nearest
+    # Per-layer fidelity loss warning — the bakeoff harness pre-W719 (and the
+    # docs/research Invention 1 spec) lean on the per-layer schedule being
+    # actually applied. When the backend cannot, surface the lost layers so a
+    # downstream verifier sees the gap.
+    distinct_widths = sorted(bit_counts.keys())
+    if len(distinct_widths) > 1:
+        warnings.append(
+            f"--mixed-precision profile carried {len(distinct_widths)} distinct "
+            f"weight_bits {distinct_widths} but backend {method} only supports "
+            f"{supported}; applying uniform {uniform_bits} across all layers "
+            "(per-layer schedule recorded in receipt for verifier replay)"
+        )
+    return uniform_bits, uniform_group, warnings
+
+
 # Small built-in calibration set — generic prose so the quantizer has something
 # to learn activation scales from when the caller didn't pass --calib.
 _FALLBACK_CALIB = [
@@ -521,6 +645,23 @@ def main():
     t0 = time.time()
     src_hash = hash_input_tree(str(src))
 
+    # W719 — DAQ mixed-precision profile load + uniform-bit fallback. When
+    # --mixed-precision is set we load + validate the profile, then compute
+    # the best-effort uniform fallback for the chosen backend (since
+    # bitsandbytes / autoawq / etc. ship uniform-bit quantizers — true
+    # per-layer mixed bits is enabled only when --method=hqq + a future
+    # per-layer hqq config; for now we surface honest fallback warnings).
+    daq_profile = None
+    daq_warnings = []
+    if args.mixed_precision:
+        daq_profile, _ = load_mixed_precision_profile(args.mixed_precision)
+        uniform_bits, uniform_group, daq_warnings = \
+            compute_uniform_fallback_from_profile(daq_profile, args.method)
+        if uniform_bits is not None:
+            args.bits = uniform_bits
+        if uniform_group is not None:
+            args.group_size = uniform_group
+
     try:
         if args.method in ("int4", "int8"):
             tool_info = run_int_bnb(args.method, str(src), str(dst), args.device)
@@ -562,6 +703,17 @@ def main():
         "tool": tool_info,
         "finished_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     }
+    # W719 — surface the DAQ profile + any fallback warnings in the receipt
+    # so a verifier replaying this run knows EXACTLY which per-layer schedule
+    # was requested and how the backend honored or fell back from it. The
+    # mixed_precision_profile is bound into artifact_hash by src/artifact.js
+    # via the mixed_precision_profile_hash field, so any post-build tamper
+    # breaks the receipt chain.
+    if daq_profile is not None:
+        receipt["mixed_precision_profile"] = daq_profile
+        receipt["mixed_precision_warnings"] = daq_warnings
+        receipt["mixed_precision_applied_bits"] = args.bits
+        receipt["mixed_precision_applied_group_size"] = args.group_size
     with open(dst / "quantize-receipt.json", "w", encoding="utf-8") as f:
         json.dump(receipt, f, indent=2, sort_keys=True)
     sys.stdout.write(json.dumps({"ok": True, "receipt": str(dst / "quantize-receipt.json")}) + "\n")

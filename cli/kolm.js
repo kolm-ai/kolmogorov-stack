@@ -12584,6 +12584,9 @@ async function cmdQuantizeLocalWorker(args) {
   const inDir = pick('--in');
   const outDir = pick('--out');
   const wantJson = args.includes('--json');
+  // W719 — mixed-precision profile path passes straight through to the
+  // python worker (workers/quantize/scripts/quantize.py reads + validates).
+  const mixedPrecision = pick('--mixed-precision');
 
   const passthru = [];
   if (doctor) {
@@ -12592,6 +12595,7 @@ async function cmdQuantizeLocalWorker(args) {
     passthru.push(`--method=${method}`);
     if (inDir) passthru.push(`--in=${inDir}`);
     if (outDir) passthru.push(`--out=${outDir}`);
+    if (mixedPrecision) passthru.push(`--mixed-precision=${mixedPrecision}`);
   }
   if (wantJson) passthru.push('--json');
 
@@ -13740,6 +13744,13 @@ async function cmdDistill(args) {
   // so cmdDistillProgressive handles its own envelope (gate-fail / honest
   // trainer-missing fallback).
   if (args.includes('--progressive')) return cmdDistillProgressive(args);
+  // W717: --curriculum sorts captures simple->complex via the curriculum-sort
+  // perplexity proxy, writes the sorted JSONL, and spawns the trainer with
+  // --curriculum so SequentialSampler walks rows in order. Honest envelope on
+  // missing python (trainer_not_invoked:true, exit 0). Sibling to --progressive
+  // (curriculum within a stage vs across stages) and --importance-weighted
+  // (deterministic order vs weighted random).
+  if (args.includes('--curriculum')) return cmdDistillCurriculum(args);
   // W714-4: --contrastive generates negative variants + invokes the
   // contrastive trainer; honest envelope on missing python/trainer.
   if (args.includes('--contrastive')) return cmdDistillContrastive(args);
@@ -13749,11 +13760,25 @@ async function cmdDistill(args) {
   // so a follow-up `kolm distill --config <path>` consumes it. Honest
   // envelope on no captures (exit 3) — never fabricates training.
   if (args.includes('--auto-arch')) return cmdDistillAutoArch(args);
+  // W719-CLI: --mixed-precision auto|<profile.json> drives DAQ
+  // (Distillation-Aware Quantization). Auto mode reads namespace
+  // run-meta telemetry to synthesize a per-layer profile; explicit
+  // path validates + ships the profile through to the bakeoff /
+  // quantize worker. Honest envelope on missing telemetry (exit 3).
+  if (args.includes('--mixed-precision')) return cmdDistillMixedPrecision(args);
   // W480 - on-policy + preference orchestration subverbs. Local-only by default
   // (trainer is a tenant plug-in); --remote routes through /v1/distill/*.
   if (args[0] === 'onpolicy') return cmdDistillOnPolicy(args.slice(1));
   if (args[0] === 'preference' || args[0] === 'dpo' || args[0] === 'simpo') {
     return cmdDistillPreference(args.slice(1), args[0]);
+  }
+  // W718 — Teacher Council. `--teachers a,b,c --weights auto|equal|domain`
+  // routes through the council formula to RANK teachers per-capture before
+  // the worker spawn. Local-only orchestration: prints the council verdict
+  // + an honest envelope on no captures (exit 3). When --weights is absent
+  // we DO NOT trigger council mode — falls through to the existing dispatch.
+  if (args.includes('--teachers') && args.includes('--weights')) {
+    return cmdDistillTeacherCouncil(args);
   }
   // W233 --detach short-circuit: fork a background session and return the id.
   if (args.includes('--detach') && !process.env.KOLM_DETACHED) {
@@ -13833,6 +13858,146 @@ async function cmdDistill(args) {
   if (j.pair_count !== undefined) console.log('  pairs:     ' + j.pair_count);
   if (j.status_url || j.poll_url) console.log('  status:    ' + (j.status_url || j.poll_url));
   if (j.bridge_source) console.log('  source:    ' + j.bridge_source);
+}
+
+// W718 — kolm distill --teachers a,b,c --weights auto|equal|domain
+//
+// Local-only orchestration of the Teacher Council per-task selector. Reads
+// captures from the namespace (tenant-fenced via prepareDistillCorpus), then:
+//   --weights auto    -> compute Teacher Council weights via the W718 formula
+//   --weights equal   -> uniform weight (1/N each) across the teacher list
+//   --weights domain  -> rank by domain_reliability alone (for ablation)
+//
+// Honest envelope on no captures: prints
+//   {ok:false, error:'no_captures', namespace, ...} and exits 3.
+// Honest envelope on missing teacher slug list: exits 1.
+async function cmdDistillTeacherCouncil(args) {
+  const wantJson = args.includes('--json');
+  const teachersFlag = pickFlag(args, '--teachers') || '';
+  const weightsFlag = (pickFlag(args, '--weights') || 'auto').toLowerCase();
+  const ns = pickFlag(args, '--namespace') || pickFlag(args, '-n') || 'default';
+  const tenant = pickFlag(args, '--tenant') || pickFlag(args, '--tenant-id') || 'local';
+  const teachers = teachersFlag.split(',').map((s) => s.trim()).filter(Boolean);
+  if (teachers.length === 0) {
+    const env = { ok: false, error: 'no_teachers', message: '--teachers requires a comma-separated list of teacher slugs (e.g. claude-opus-4-7,gpt-4o)' };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else {
+      console.error('error: --teachers requires a comma-separated teacher slug list');
+      console.error('       e.g. --teachers claude-opus-4-7,gpt-4o,gemini-2-pro');
+    }
+    process.exit(EXIT.BAD_ARGS);
+  }
+  if (!['auto', 'equal', 'domain'].includes(weightsFlag)) {
+    const env = { ok: false, error: 'bad_weights_mode', message: `--weights must be one of: auto, equal, domain (got '${weightsFlag}')` };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else console.error(`error: --weights must be one of: auto, equal, domain (got '${weightsFlag}')`);
+    process.exit(EXIT.BAD_ARGS);
+  }
+  // Load captures via the W411 tenant-fenced corpus reader. We pull a small
+  // sample (no full distill — that's the existing /v1/specialists/auto-distill
+  // path); the council dispatch is for surfacing the per-capture verdict.
+  let pairs = [];
+  let stats = null;
+  try {
+    const pipeline = await import('../src/distill-pipeline.js');
+    const prep = await pipeline.prepareDistillCorpus({ namespace: ns, split: 'train', tenant_id: tenant, limit: 50 });
+    pairs = prep.pairs || [];
+    stats = prep.stats || null;
+  } catch (e) {
+    const env = { ok: false, error: 'corpus_read_failed', namespace: ns, tenant_id: tenant, message: String(e && e.message || e) };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else console.error(`error: ${env.message}`);
+    process.exit(EXIT.EXECUTION);
+  }
+  if (pairs.length === 0) {
+    const env = {
+      ok: false,
+      error: 'no_captures',
+      namespace: ns,
+      tenant_id: tenant,
+      teachers,
+      weights_mode: weightsFlag,
+      message: `no captures in namespace '${ns}' for tenant '${tenant}'. Run \`kolm capture log\` or \`kolm intent ask\` first.`,
+      stats,
+    };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else {
+      console.error('error: no captures available for teacher-council ranking.');
+      console.error(`       namespace: ${ns}, tenant: ${tenant}`);
+      console.error('       capture data first: kolm capture log');
+    }
+    process.exit(EXIT.MISSING_PREREQ);
+  }
+  let council = null;
+  let weightsMod = null;
+  try {
+    council = await import('../src/teacher-council.js');
+    weightsMod = await import('../src/teacher-weights.js');
+  } catch (e) {
+    const env = { ok: false, error: 'council_unavailable', message: String(e && e.message || e) };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else console.error(`error: ${env.message}`);
+    process.exit(EXIT.EXECUTION);
+  }
+  // Per-capture verdicts.
+  const reliability = weightsMod.TeacherReliabilityTable.load(weightsMod.defaultPersistPath());
+  const verdicts = [];
+  for (const p of pairs.slice(0, 20)) {
+    let selection;
+    if (weightsFlag === 'equal') {
+      const w = 1 / teachers.length;
+      selection = {
+        teacher: teachers[0],
+        weight: w,
+        explanation: `equal-weights mode: each teacher gets ${w.toFixed(3)}`,
+        weights: teachers.map((t) => ({ teacher: t, weight: w, contributions: {} })),
+      };
+    } else if (weightsFlag === 'domain') {
+      const ranked = council.computeTeacherWeights(teachers, p, reliability, {
+        gamma: { domain: 2.0, task: 0, verifier: 0, human: 0, cost: 0, risk: 0 },
+      });
+      selection = {
+        teacher: ranked[0] ? ranked[0].teacher : null,
+        weight: ranked[0] ? ranked[0].weight : 0,
+        explanation: 'domain-only mode: rank by domain_reliability',
+        weights: ranked,
+      };
+    } else {
+      selection = council.selectTeacherForCapture(teachers, p, reliability);
+    }
+    verdicts.push({
+      event_id: p.event_id,
+      domain: p.namespace || ns,
+      winner: selection.teacher,
+      winner_weight: selection.weight,
+      weights: selection.weights.map((w) => ({ teacher: w.teacher, weight: w.weight })),
+      explanation: selection.explanation,
+    });
+  }
+  const envelope = {
+    ok: true,
+    council_version: council.TEACHER_COUNCIL_VERSION,
+    weights_mode: weightsFlag,
+    teachers,
+    namespace: ns,
+    tenant_id: tenant,
+    captures_ranked: verdicts.length,
+    verdicts,
+  };
+  if (wantJson) {
+    console.log(JSON.stringify(envelope, null, 2));
+  } else {
+    console.log(`teacher council ${council.TEACHER_COUNCIL_VERSION} — mode: ${weightsFlag}`);
+    console.log(`  teachers:   ${teachers.join(', ')}`);
+    console.log(`  namespace:  ${ns}`);
+    console.log(`  tenant:     ${tenant}`);
+    console.log(`  ranked:     ${verdicts.length} captures`);
+    console.log('');
+    for (const v of verdicts.slice(0, 5)) {
+      console.log(`  - ${v.event_id || '(no id)'} -> ${v.winner} (${v.winner_weight.toFixed(3)})`);
+    }
+    if (verdicts.length > 5) console.log(`  ... and ${verdicts.length - 5} more (see --json for full output).`);
+  }
 }
 
 // W455 — kolm distill runs [<id>] [--json] [--limit N] [--namespace NS]
@@ -14885,6 +15050,188 @@ async function cmdDistillProgressive(args) {
   process.exit(0);
 }
 
+// W717-CLI — `kolm distill --curriculum [--namespace ns] [--mode ascending|descending]
+//                                       [--limit N] [--out-jsonl PATH] [--json]`
+//
+// Curriculum-distillation order: rank captures simple->complex (or reverse)
+// via src/curriculum-sort.js complexityProxy (length + Shannon perplexity),
+// write the sorted JSONL with a complexity_proxy field per row, spawn the
+// trainer with --curriculum so SequentialSampler walks the rows in order.
+//
+// Honest envelopes only:
+//   - Trainer missing      -> exit 0 { ok:true, trainer_not_invoked:true, ... }
+//   - JSONL write failed   -> exit EXIT.EXECUTION { ok:false, error:'jsonl_write_failed' }
+//   - Otherwise            -> exit 0 with trainer_exit + sorted-row count
+async function cmdDistillCurriculum(args) {
+  const wantJson = args.includes('--json');
+  const namespace = pickFlag(args, '--namespace') || pickFlag(args, '-n') || 'default';
+  const modeFlag = pickFlag(args, '--mode');
+  const mode = (modeFlag === 'descending' || modeFlag === 'desc') ? 'descending' : 'ascending';
+  const limitFlag = pickFlag(args, '--limit');
+  const limit = Number.isFinite(Number(limitFlag)) && Number(limitFlag) > 0
+    ? Math.trunc(Number(limitFlag)) : 1000;
+  const outJsonlFlag = pickFlag(args, '--out-jsonl');
+
+  // Tenant fence: prefer the api-key tenant when available; fall back to
+  // 'local' for offline (mirrors cmdDistillAutoArch).
+  const cfg = loadConfig();
+  const tenant = cfg.tenant_id || cfg.tenant || 'local';
+
+  // 1. Pull captures, namespace-scoped, tenant-fenced.
+  let captures = [];
+  try {
+    const es = await import('../src/event-store.js');
+    if (typeof es.listEvents === 'function') {
+      const query = { limit, tenant_id: tenant };
+      if (namespace && namespace !== 'all') query.namespace = namespace;
+      captures = await es.listEvents(query) || [];
+    }
+  } catch (_) {
+    captures = [];
+  }
+  captures = captures.filter(ev => {
+    if (!ev || typeof ev !== 'object') return false;
+    if (typeof ev.kind === 'string' && ev.kind.startsWith('capture')) return true;
+    if (ev.request && ev.response) return true;
+    if (typeof ev.prompt === 'string' && typeof ev.response === 'string') return true;
+    return false;
+  });
+
+  // 2. Lazy-load curriculum-sort; compute proxies + sorted JSONL rows.
+  let curriculumMod;
+  try {
+    curriculumMod = await import('../src/curriculum-sort.js');
+  } catch (e) {
+    const env = {
+      ok: false,
+      error: 'curriculum_module_missing',
+      detail: e && e.message ? e.message : String(e),
+      hint: 'src/curriculum-sort.js must be importable',
+    };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else console.error('error: ' + env.error + ': ' + env.detail);
+    process.exit(typeof EXIT !== 'undefined' && EXIT.EXECUTION ? EXIT.EXECUTION : 1);
+  }
+
+  // Normalize captures into {prompt, response, capture_id?, reasoning_trace?}
+  // so the JSONL drops in directly.
+  const normalized = captures.map(ev => {
+    const prompt = ev.prompt
+      || (ev.request && (ev.request.prompt || ev.request.input))
+      || '';
+    const response = ev.response
+      || ev.response_text
+      || (typeof ev.output === 'string' ? ev.output : '')
+      || '';
+    const row = { prompt: String(prompt), response: String(response) };
+    if (ev.reasoning_trace != null) row.reasoning_trace = ev.reasoning_trace;
+    if (ev.capture_id || ev.event_id || ev.id) {
+      row.capture_id = String(ev.capture_id || ev.event_id || ev.id);
+    }
+    return row;
+  });
+
+  const rows = curriculumMod.buildCurriculumJsonlRows(normalized, mode);
+
+  // 3. Persist sorted JSONL.
+  const home = process.env.KOLM_HOME
+    || path.join(process.env.HOME || process.env.USERPROFILE || '.', '.kolm');
+  const outDir = path.join(home, 'curriculum');
+  try { fs.mkdirSync(outDir, { recursive: true }); } catch (_) {}
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const safeNs = String(namespace).replace(/[^a-zA-Z0-9_-]+/g, '_');
+  const defaultPath = path.join(outDir, `captures-${safeNs}-${stamp}.jsonl`);
+  const jsonlPath = outJsonlFlag ? path.resolve(outJsonlFlag) : defaultPath;
+  try {
+    const lines = rows.map(r => JSON.stringify(r));
+    fs.writeFileSync(jsonlPath, lines.join('\n') + (lines.length > 0 ? '\n' : ''), 'utf8');
+  } catch (e) {
+    const env = {
+      ok: false,
+      error: 'jsonl_write_failed',
+      detail: e && e.message ? e.message : String(e),
+      hint: 'check that ' + outDir + ' is writable',
+    };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else console.error('error: ' + env.error + ': ' + env.detail);
+    process.exit(typeof EXIT !== 'undefined' && EXIT.EXECUTION ? EXIT.EXECUTION : 1);
+  }
+
+  // 4. Resolve trainer. Same fallback hierarchy as W711/W712.
+  const trainerBin = process.env.KOLM_TRAINER_BIN || null;
+  const pythonBin = process.env.PYTHON || process.env.KOLM_PYTHON || 'python';
+  let trainerInvocable = false;
+  if (trainerBin) {
+    try { trainerInvocable = fs.existsSync(trainerBin); } catch (_) { trainerInvocable = false; }
+  }
+  if (!trainerInvocable && !process.env.KOLM_DISABLE_TRAINER_PROBE) {
+    try {
+      const probe = spawnSync(pythonBin, ['-c', 'import apps.trainer.distill'], {
+        encoding: 'utf8', timeout: 10_000, shell: process.platform === 'win32',
+      });
+      trainerInvocable = probe.status === 0;
+    } catch (_) {
+      trainerInvocable = false;
+    }
+  }
+  if (!trainerInvocable) {
+    const env = {
+      ok: true,
+      curriculum_version: curriculumMod.CURRICULUM_VERSION,
+      trainer_not_invoked: true,
+      trainer_unreachable: true,
+      captures_jsonl_written: jsonlPath,
+      sorted_rows: rows.length,
+      mode,
+      namespace,
+      tenant,
+      hint: 'pip install -e apps/trainer or set KOLM_TRAINER_BIN to the trainer binary path '
+        + '(python -m apps.trainer.distill --help to verify --curriculum is supported)',
+    };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else {
+      console.log(`Wrote ${rows.length} curriculum-sorted rows.`);
+      console.log('  out: ' + jsonlPath);
+      console.log('  mode: ' + mode);
+      console.log('  trainer: not invoked (' + env.hint + ')');
+    }
+    process.exit(0);
+  }
+
+  // 5. Trainer invocable — spawn with --curriculum.
+  const trainerOutDir = path.join(outDir, `run-${safeNs}-${stamp}`);
+  try { fs.mkdirSync(trainerOutDir, { recursive: true }); } catch (_) {}
+  const trainerArgs = trainerBin
+    ? ['--curriculum', '--train-jsonl', jsonlPath, '--out-dir', trainerOutDir]
+    : ['-m', 'apps.trainer.distill', '--curriculum',
+       '--train-jsonl', jsonlPath, '--out-dir', trainerOutDir];
+  const trainerCmd = trainerBin || pythonBin;
+  const r = spawnSync(trainerCmd, trainerArgs, {
+    encoding: 'utf8', timeout: 600_000, shell: process.platform === 'win32',
+  });
+  const env = {
+    ok: r.status === 0,
+    curriculum_version: curriculumMod.CURRICULUM_VERSION,
+    trainer_not_invoked: false,
+    captures_jsonl_written: jsonlPath,
+    sorted_rows: rows.length,
+    mode,
+    namespace,
+    tenant,
+    trainer_exit: r.status,
+    trainer_stdout_tail: (r.stdout || '').slice(-2000),
+    trainer_stderr_tail: (r.stderr || '').slice(-2000),
+  };
+  if (wantJson) console.log(JSON.stringify(env, null, 2));
+  else {
+    console.log(`Wrote ${rows.length} curriculum-sorted rows.`);
+    console.log('  out: ' + jsonlPath);
+    console.log('  mode: ' + mode);
+    console.log('  trainer exit: ' + r.status);
+  }
+  process.exit(r.status || 0);
+}
+
 // W716-4 — `kolm distill --auto-arch [--namespace ns] [--limit N]
 //                                     [--apply] [--json]`
 //
@@ -15094,6 +15441,153 @@ async function cmdDistillAutoArch(args) {
 //
 // Never silently no-op: every failure mode emits a structured envelope with
 // `ok` + `error` + `hint`.
+
+// W719-CLI — `kolm distill --mixed-precision auto|<profile.json>` drives DAQ
+// (Distillation-Aware Quantization). Two modes:
+//
+//   auto             — synthesize a per-layer profile from the namespace's
+//                      run-meta.json layer telemetry (if present). On
+//                      missing telemetry exits 3 with an honest envelope.
+//
+//   <profile.json>   — explicit profile path. Loaded + schema-validated by
+//                      src/daq-profile.js validateProfile; on failure we
+//                      surface the validation errors and exit 2.
+//
+// Output: a structured JSON envelope describing the profile + the bit-budget
+// summary. The actual `quantize` step is decoupled — the operator runs
+// `kolm quantize --local-worker --mixed-precision <profile.json>` next.
+async function cmdDistillMixedPrecision(args) {
+  const wantJson = args.includes('--json');
+  const namespace = pickFlag(args, '--namespace') || pickFlag(args, '-n') || 'default';
+  const mode = pickFlag(args, '--mixed-precision') || 'auto';
+  const {
+    buildDaqProfile, summarizeBitBudget, validateProfile, DAQ_VERSION,
+  } = await import('../src/daq-profile.js');
+
+  const emit = (env) => {
+    if (wantJson) {
+      console.log(JSON.stringify(env, null, 2));
+    } else {
+      console.log(JSON.stringify(env, null, 2));
+    }
+    return env;
+  };
+
+  // Explicit profile path branch — load + validate + summarize.
+  if (mode !== 'auto') {
+    if (!fs.existsSync(mode)) {
+      emit({
+        ok: false,
+        error: 'profile_not_found',
+        path: mode,
+        daq_version: DAQ_VERSION,
+        hint: 'pass --mixed-precision auto OR a path to a DAQ profile JSON file',
+      });
+      process.exit(EXIT.NOT_FOUND);
+    }
+    let profile;
+    try {
+      profile = JSON.parse(fs.readFileSync(mode, 'utf8'));
+    } catch (e) {
+      emit({
+        ok: false,
+        error: 'profile_parse_failed',
+        path: mode,
+        detail: String(e.message || e),
+        daq_version: DAQ_VERSION,
+      });
+      process.exit(EXIT.BAD_ARGS);
+    }
+    if (!Array.isArray(profile)) {
+      emit({
+        ok: false,
+        error: 'profile_not_array',
+        path: mode,
+        daq_version: DAQ_VERSION,
+        hint: 'a DAQ profile is a JSON array of per-layer objects',
+      });
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const allErrors = [];
+    for (let i = 0; i < profile.length; i += 1) {
+      const v = validateProfile(profile[i]);
+      if (!v.ok) allErrors.push({ index: i, layer_id: profile[i] && profile[i].layer_id, errors: v.errors });
+    }
+    if (allErrors.length > 0) {
+      emit({
+        ok: false,
+        error: 'profile_invalid',
+        daq_version: DAQ_VERSION,
+        validation_errors: allErrors.slice(0, 20),
+      });
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const summary = summarizeBitBudget(profile);
+    emit({
+      ok: true,
+      daq_version: DAQ_VERSION,
+      mode: 'explicit',
+      namespace,
+      profile_path: mode,
+      summary,
+      next: `kolm quantize --local-worker --mixed-precision ${mode} --in <hf_model_dir> --out <quantized_dir>`,
+    });
+    return;
+  }
+
+  // Auto mode — try to read layer telemetry from the namespace's most recent
+  // distill run-meta.json. The shape we look for is run-meta.layer_telemetry[]
+  // (forward-compat key — populated by future per-layer KL collectors).
+  const dataDir = process.env.KOLM_DATA_DIR
+    || process.env.KOLM_HOME
+    || path.join(os.homedir(), '.kolm');
+  const distillRoot = path.join(dataDir, 'distill-runs');
+  let telemetry = null;
+  if (fs.existsSync(distillRoot)) {
+    try {
+      const runs = fs.readdirSync(distillRoot)
+        .map((f) => ({ name: f, full: path.join(distillRoot, f) }))
+        .filter((e) => { try { return fs.statSync(e.full).isDirectory(); } catch { return false; } })
+        .sort((a, b) => fs.statSync(b.full).mtimeMs - fs.statSync(a.full).mtimeMs);
+      for (const r of runs) {
+        const metaPath = path.join(r.full, 'run-meta.json');
+        if (!fs.existsSync(metaPath)) continue;
+        let meta;
+        try { meta = JSON.parse(fs.readFileSync(metaPath, 'utf8')); } catch { continue; }
+        if (meta.namespace && meta.namespace !== namespace) continue;
+        if (Array.isArray(meta.layer_telemetry) && meta.layer_telemetry.length > 0) {
+          telemetry = meta.layer_telemetry;
+          break;
+        }
+      }
+    } catch { /* fall through to honest envelope */ }
+  }
+  if (!telemetry) {
+    emit({
+      ok: false,
+      error: 'no_telemetry',
+      namespace,
+      daq_version: DAQ_VERSION,
+      hint: 'no run-meta.json with layer_telemetry[] under '
+        + distillRoot
+        + ' for namespace=' + namespace
+        + '. Run a distill pass first OR pass --mixed-precision <profile.json> explicitly.',
+    });
+    process.exit(3);
+  }
+  const profile = buildDaqProfile(telemetry, {});
+  const summary = summarizeBitBudget(profile);
+  emit({
+    ok: true,
+    daq_version: DAQ_VERSION,
+    mode: 'auto',
+    namespace,
+    source_telemetry_layers: telemetry.length,
+    profile,
+    summary,
+  });
+}
+
 async function cmdDistillContrastive(args) {
   const wantJson = args.includes('--json');
   const namespace = pickFlag(args, '--namespace') || pickFlag(args, '-n') || 'default';
