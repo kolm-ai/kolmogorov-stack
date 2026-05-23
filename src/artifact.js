@@ -51,6 +51,7 @@ import { computeKScore as computeKScoreFromKscoreModule } from './kscore.js';
 import { verifyAttestation, manifestBlock as ccManifestBlock, STATES as CC_STATES } from './confidential-compute.js';
 import { loadSignerKeyFromEnv as loadEd25519SignerFromEnv, loadOrCreateDefaultSigner as loadEd25519DefaultSigner, buildSignatureBlock as buildEd25519Block } from './ed25519.js';
 import { buildSigstoreBundle, isDisabled as isSigstoreDisabled, attestArtifactWithRekor, rekorUrl as sigstoreRekorUrl } from './sigstore.js';
+import { canonicalizeOutputSchemaSpec, validateOutputSchemaSpec, OUTPUT_SCHEMA_VERSION } from './output-schema.js';
 
 const ARTIFACT_SPEC = 'kolm-1';
 const PACK_MAGIC = 'KOLMPACK\x01';
@@ -299,7 +300,7 @@ function normalizeLicense(license) {
   };
 }
 
-export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, k_score, judge_id, eval_score, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile }) {
+export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, k_score, judge_id, eval_score, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, output_schema }) {
   const secret = requireSignSecret();
   // W252 — K-score ship gate is load-bearing. If a K-score is supplied AND
   // it says ships=false, the builder must refuse unless the caller explicitly
@@ -351,6 +352,20 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   let moe_block = null;
   if (moeInput) {
     moe_block = validateMoeBlock(moeInput);
+  }
+  // W809 — output_schema spec. Validate up front so a bad spec is caught at
+  // build time (not first runtime invocation). Absence / null / {} all collapse
+  // to canon === null via canonicalizeOutputSchemaSpec, and the chain slot
+  // below is keyed only when canon != null — pre-W809 artifacts remain
+  // byte-identical when rebuilt. Validation throws on a bad spec, mirroring
+  // the export/moe pattern above.
+  let _output_schema_canon = null;
+  if (output_schema != null) {
+    const _osv = validateOutputSchemaSpec(output_schema);
+    if (!_osv.ok) {
+      throw new Error('invalid output_schema: ' + _osv.errors.join(','));
+    }
+    _output_schema_canon = canonicalizeOutputSchemaSpec(output_schema);
   }
   // Wave 148 — pretokenize block. Same shape as moe: bridge builds + validates;
   // we re-validate so a hand-rolled block still gets schema-checked. Drift in
@@ -950,6 +965,15 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
         && Object.keys(kv_profile).length > 0
       ? kv_profile
       : null,
+    // W809 — output_schema spec (canonicalized). Surface the spec a runtime
+    // wrapper or constrained decoder uses to enforce structured output. Schema
+    // lives in src/output-schema.js (canonicalizer + validator + parser).
+    // Bound into artifact_hash below via output_schema_hash with the W460
+    // conditional-slot pattern: absence / null / {} all canonicalize to null
+    // and skip the slot, so pre-W809 artifacts stay byte-identical when
+    // rebuilt. Schema version stamp lets verifiers detect spec migrations.
+    output_schema: _output_schema_canon,
+    output_schema_spec_version: _output_schema_canon ? OUTPUT_SCHEMA_VERSION : undefined,
     k_score: k_score || null,  // patched after zipping for the size_bytes axis
     ship_gate_overridden: allow_below_gate === true ? true : undefined,
     license: normalizeLicense(license),
@@ -1155,6 +1179,16 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   if (kv_profile && typeof kv_profile === 'object'
       && Object.keys(kv_profile).length > 0) {
     artifact_hash_input.kv_profile_hash = sha256(canonicalJson(kv_profile));
+  }
+  // W809 — bind the structured-output schema spec into artifact_hash so any
+  // post-build swap of the canonical output_schema breaks the receipt chain.
+  // Mirrors the W460 confidential_compute_hash + W721 sparsity_profile_hash +
+  // W722 kv_profile_hash conditional-slot pattern: keyed only when canonical
+  // spec is non-null (absent / null / {} all collapse to null in
+  // canonicalizeOutputSchemaSpec), so pre-W809 artifacts remain byte-identical
+  // when rebuilt.
+  if (_output_schema_canon !== null) {
+    artifact_hash_input.output_schema_hash = sha256(canonicalJson(_output_schema_canon));
   }
   if (hashes.extra_files) {
     artifact_hash_input.extra_files_hash = sha256(canonicalJson(hashes.extra_files));

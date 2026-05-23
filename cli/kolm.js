@@ -6392,6 +6392,43 @@ async function readStdin() {
   });
 }
 
+// W809-5 — `kolm compile --output-schema <file.json>` helper. Reads + parses
+// the JSON file the user passed, hands it to validateOutputSchemaSpec, and
+// either returns the canonical spec for the cmdCompile pipeline OR prints a
+// stable error envelope + exits. Kept as a standalone helper so the
+// orchestrator can wire output_schema into spec-compile.js without touching
+// the cmdCompile flag-parsing block in unrelated waves.
+async function cmdCompileOutputSchema(filePath) {
+  if (!filePath || typeof filePath !== 'string') {
+    console.error('error: --output-schema needs a path to a JSON file');
+    process.exit(EXIT.BAD_ARGS);
+  }
+  if (!fs.existsSync(filePath)) {
+    console.error(`error: --output-schema ${filePath}: not found`);
+    process.exit(EXIT.NOT_FOUND);
+  }
+  let raw;
+  try { raw = fs.readFileSync(filePath, 'utf8'); }
+  catch (e) {
+    console.error(`error: --output-schema ${filePath}: ${e.message}`);
+    process.exit(EXIT.NOT_FOUND);
+  }
+  let spec;
+  try { spec = JSON.parse(raw); }
+  catch (e) {
+    console.error(`error: --output-schema ${filePath}: not valid JSON (${e.message})`);
+    process.exit(EXIT.BAD_ARGS);
+  }
+  const mod = await import(new URL('../src/output-schema.js', import.meta.url).href);
+  const v = mod.validateOutputSchemaSpec(spec);
+  if (!v.ok) {
+    console.error(`error: --output-schema ${filePath}: invalid spec`);
+    for (const code of v.errors) console.error(`  - ${code}`);
+    process.exit(EXIT.BAD_ARGS);
+  }
+  return mod.canonicalizeOutputSchemaSpec(spec);
+}
+
 async function cmdCompile(args) {
   if (maybeHelp('compile', args)) return;
   firstRunBannerIfNeeded();
@@ -7066,6 +7103,19 @@ async function cmdCompile(args) {
     if (attestationKindFlag && !['pccs', 'snp-report', 'nitro-attestation', 'nras'].includes(attestationKindFlag)) {
       console.error(`error: --attestation-kind ${attestationKindFlag}: must be one of pccs, snp-report, nitro-attestation, nras`);
       process.exit(EXIT.BAD_ARGS);
+    }
+    // W809-5 — `--output-schema <file.json>` writes a validated W809 spec
+    // into the spec.output_schema slot so the orchestrator can bind it into
+    // artifact_hash via the W460 byte-stability pattern. Loud failure on
+    // invalid spec; no schema = byte-identical to a pre-W809 compile.
+    const outputSchemaFlag = pickFlag(args, '--output-schema');
+    let outputSchemaSpec = null;
+    if (outputSchemaFlag) {
+      outputSchemaSpec = await cmdCompileOutputSchema(outputSchemaFlag);
+      // Thread the canonical spec onto the parsed spec object so downstream
+      // compileSpec sees it without us having to widen compileSpec's surface
+      // in this wave. The orchestrator wires this into spec-compile.js.
+      spec.output_schema = outputSchemaSpec;
     }
     // W470 P1-5 — map the CLI --target surface (native-c/native-rust + bare
     // c/rust aliases + wasm) to the bare target string spec-compile.js
@@ -8545,6 +8595,41 @@ async function cmdDiff(args) {
   });
 }
 
+// W809-5 — `kolm verify --validate-schema` helper. Loads the output_schema
+// spec from the .kolm manifest and runs validateOutputSchemaSpec against it
+// + an optional --sample <path> output for a parse round-trip. Returns
+// {ok, kind, errors, sample_parse|null}. The orchestrator wires the manifest
+// read into cmdVerify's main path; this helper is the pure validator the
+// orchestrator (and tests) can call on any manifest object directly.
+async function _w809VerifyOutputSchema(manifest, sampleText) {
+  const mod = await import(new URL('../src/output-schema.js', import.meta.url).href);
+  const spec = (manifest && manifest.output_schema) || null;
+  if (spec == null) {
+    return {
+      ok: true,
+      kind: null,
+      present: false,
+      errors: [],
+      sample_parse: null,
+      version: mod.OUTPUT_SCHEMA_VERSION,
+    };
+  }
+  const v = mod.validateOutputSchemaSpec(spec);
+  let sampleParse = null;
+  if (v.ok && typeof sampleText === 'string') {
+    const r = mod.parseOutputAgainstSpec(sampleText, spec);
+    sampleParse = { ok: !!r.ok, error: r.error || null };
+  }
+  return {
+    ok: v.ok,
+    kind: (spec && spec.kind) || null,
+    present: true,
+    errors: v.errors || [],
+    sample_parse: sampleParse,
+    version: mod.OUTPUT_SCHEMA_VERSION,
+  };
+}
+
 async function cmdVerify(args) {
   if (maybeHelp('verify', args)) return;
   const positional = args.filter(a => !a.startsWith('--'));
@@ -8614,11 +8699,35 @@ async function cmdVerify(args) {
   // which attestation kind was embedded + what state the verifier landed on.
   // Independent of binder mode: works for both --json and plaintext output.
   const showAttestation = args.includes('--attestation');
+  // W809-5 — `--validate-schema` runs validateOutputSchemaSpec against the
+  // manifest's output_schema block + (optional) `--sample <text|@file>` for
+  // a parse round-trip. Surfaces the result alongside the verify verdict.
+  const validateSchemaFlag = args.includes('--validate-schema');
+  let sampleSchemaText = null;
+  const sampleIdx = args.indexOf('--sample');
+  if (sampleIdx >= 0 && args[sampleIdx + 1] && !args[sampleIdx + 1].startsWith('--')) {
+    const raw = args[sampleIdx + 1];
+    if (raw.startsWith('@')) {
+      const p = raw.slice(1);
+      try { sampleSchemaText = fs.readFileSync(p, 'utf8'); }
+      catch (e) {
+        console.error(`error: --sample @${p}: ${e.message}`);
+        process.exit(EXIT.NOT_FOUND);
+      }
+    } else {
+      sampleSchemaText = raw;
+    }
+  }
 
   // No --binder: print the verification summary as JSON or plaintext.
   const result = await buildBinder(ap);
   void repoRoot;
   const ccBlock = result.manifest?.confidential_compute || null;
+  // W809-5 — run the spec validator only when --validate-schema is set. The
+  // helper handles the absent-spec path internally.
+  const schemaCheck = validateSchemaFlag
+    ? await _w809VerifyOutputSchema(result.manifest, sampleSchemaText)
+    : null;
   // W339 — single source-of-truth gate. The binder still runs its full set
   // of checks (signature, receipt chain, exports, holdouts, attestations);
   // productionReady() collapses the four "is this safe to ship" gates the
@@ -8630,7 +8739,13 @@ async function cmdVerify(args) {
   let prodVerdict;
   try { prodVerdict = await productionReady(ap, { kGate: kGate() }); }
   catch (e) { prodVerdict = { ok: false, gates: {}, reasons: [`probe failed: ${e.message}`] }; }
-  const combinedFail = result.verdict === 'fail' || !prodVerdict.ok;
+  // W809-5 — when --validate-schema is set, a present-but-invalid spec OR
+  // a present-but-failed sample parse should fail the verify verdict so CI
+  // catches a broken structured-output contract.
+  const schemaFail = !!(schemaCheck && schemaCheck.present
+    && (!schemaCheck.ok
+        || (schemaCheck.sample_parse && !schemaCheck.sample_parse.ok)));
+  const combinedFail = result.verdict === 'fail' || !prodVerdict.ok || schemaFail;
   if (jsonFlag) {
     console.log(JSON.stringify({
       ok: !combinedFail,
@@ -8642,6 +8757,7 @@ async function cmdVerify(args) {
       gate_reasons: prodVerdict.reasons,
       gates: prodVerdict.gates,
       confidential_compute: showAttestation ? ccBlock : undefined,
+      output_schema_check: schemaCheck || undefined,
     }, null, 2));
   } else {
     console.log(`verdict: ${combinedFail ? 'fail' : result.verdict}`);
@@ -8677,6 +8793,20 @@ async function cmdVerify(args) {
     } else if (showAttestation) {
       console.log('');
       console.log('confidential_compute: (none — artifact has no embedded attestation)');
+    }
+    // W809-5 — output_schema validation pretty-print.
+    if (schemaCheck) {
+      console.log('');
+      console.log('output_schema:');
+      console.log(`  present:  ${schemaCheck.present}`);
+      console.log(`  kind:     ${schemaCheck.kind || '(none)'}`);
+      console.log(`  spec_ok:  ${schemaCheck.ok}`);
+      if ((schemaCheck.errors || []).length) {
+        for (const code of schemaCheck.errors) console.log(`    - ${code}`);
+      }
+      if (schemaCheck.sample_parse) {
+        console.log(`  sample:   ${schemaCheck.sample_parse.ok ? 'pass' : 'fail (' + (schemaCheck.sample_parse.error || 'unknown') + ')'}`);
+      }
     }
     console.log('');
     console.log('hint: add --binder out.html to emit a printable compliance report');
@@ -10517,6 +10647,139 @@ async function cmdRuntime(args) {
   console.error('try: kolm runtime targets|info|doctor|build-from-source');
   console.error('     kolm runtime start|status|policy|install|decisions|stats   (W372 policy ladder)');
   const err = new Error('unknown runtime subcommand'); err.exitCode = EXIT.BAD_ARGS; throw err;
+}
+
+// W807 — kolm route doctor: reports the active confidence threshold and
+// the most-recent splice ratio so operators can confirm the router is
+// configured the way they expect WITHOUT having to load the dashboard.
+//
+// Two modes:
+//   `kolm route doctor`         — human-readable summary; exit 0
+//   `kolm route doctor --json`  — honest envelope JSON
+//
+// Exit codes:
+//   0  — ok: threshold resolved + recent summary fetched
+//   1  — bad args (unknown subcommand or sub missing)
+//   3  — missing prereq (confidence-router or routing-events module missing)
+//   4  — execution error (summary read threw)
+async function cmdRoute(args) {
+  if (maybeHelp('route', args)) return;
+  const sub = args[0];
+  const rest = args.slice(1);
+  if (sub !== 'doctor') {
+    console.error('unknown route subcommand: ' + (sub || ''));
+    console.error('try: kolm route doctor [--profile <name>] [--namespace <ns>] [--tenant <id>] [--json]');
+    process.exit(EXIT.BAD_ARGS);
+  }
+  return cmdRouteDoctor(rest);
+}
+
+async function cmdRouteDoctor(args) {
+  if (maybeHelp('route doctor', args)) return;
+  const wantJson = args.includes('--json');
+  const namespace = pickFlag(args, '--namespace') || pickFlag(args, '-n') || null;
+  const tenant = pickFlag(args, '--tenant') || pickFlag(args, '--tenant-id') || process.env.KOLM_TENANT_ID || 'local-tenant';
+  const profileFlag = pickFlag(args, '--profile') || 'balanced';
+
+  let crMod;
+  try { crMod = await import('../src/confidence-router.js'); }
+  catch (e) {
+    const env = {
+      ok: false,
+      error: 'confidence_router_module_missing',
+      detail: e && e.message ? e.message : String(e),
+      hint: 'src/confidence-router.js must be importable',
+      version: 'w807-v1',
+    };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else console.error('error: ' + env.error + ' - ' + env.detail);
+    process.exit(EXIT.MISSING_PREREQ);
+  }
+
+  const resolved = crMod.resolveThreshold(profileFlag);
+  let reMod;
+  try { reMod = await import('../src/routing-events.js'); }
+  catch (e) {
+    const env = {
+      ok: false,
+      error: 'routing_events_module_missing',
+      detail: e && e.message ? e.message : String(e),
+      hint: 'src/routing-events.js must be importable',
+      version: 'w807-v1',
+    };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else console.error('error: ' + env.error + ' - ' + env.detail);
+    process.exit(EXIT.MISSING_PREREQ);
+  }
+
+  let summary;
+  try {
+    summary = reMod.summarizeRouting(tenant, namespace, null) || {
+      total: 0, by_route: { student: 0, teacher: 0, mixed: 0 },
+      local_ratio: 0, teacher_calls_saved: 0, est_cost_saved_usd: 0,
+      last_decision_at: null,
+    };
+  } catch (e) {
+    const env = {
+      ok: false,
+      error: 'summary_read_failed',
+      detail: e && e.message ? e.message : String(e),
+      hint: 'src/routing-events.js summarizeRouting threw — check the store backend',
+      version: 'w807-v1',
+    };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else console.error('error: ' + env.error + ' - ' + env.detail);
+    process.exit(EXIT.EXECUTION);
+  }
+
+  const total = summary.total || 0;
+  const br = summary.by_route || { student: 0, teacher: 0, mixed: 0 };
+  const localCount = (br.student || 0) + (br.mixed || 0);
+  const spliceCount = (br.mixed || 0) + (br.teacher || 0);
+  const localRatio = total > 0 ? localCount / total : 0;
+  const spliceRatio = total > 0 ? spliceCount / total : 0;
+
+  const env = {
+    ok: true,
+    threshold: {
+      profile: resolved.profile,
+      value: resolved.value,
+      unknown_input: resolved.unknown || null,
+      table: crMod.THRESHOLD_TABLE,
+    },
+    summary: {
+      total,
+      by_route: br,
+      local_ratio: Math.round(localRatio * 1e4) / 1e4,
+      splice_ratio: Math.round(spliceRatio * 1e4) / 1e4,
+      est_cost_saved_usd: summary.est_cost_saved_usd || 0,
+      last_decision_at: summary.last_decision_at || null,
+    },
+    tenant_id: tenant,
+    namespace,
+    version: crMod.VERSION || 'w807-v1',
+  };
+
+  if (wantJson) { console.log(JSON.stringify(env, null, 2)); return; }
+  console.log('confidence router doctor');
+  console.log('  version:           ' + env.version);
+  console.log('  profile:           ' + (env.threshold.profile || '(raw)')
+    + (env.threshold.unknown_input ? ' (unknown input \"' + env.threshold.unknown_input + '\" → fell back)' : ''));
+  console.log('  threshold (nats):  ' + env.threshold.value);
+  console.log('  threshold table:   '
+    + 'aggressive=' + crMod.THRESHOLD_TABLE.aggressive
+    + ' balanced=' + crMod.THRESHOLD_TABLE.balanced
+    + ' conservative=' + crMod.THRESHOLD_TABLE.conservative);
+  console.log('');
+  console.log('recent routing summary (tenant=' + tenant + ', namespace=' + (namespace || '(all)') + ')');
+  console.log('  total decisions:   ' + total);
+  console.log('  by_route:          student=' + (br.student || 0)
+    + ' mixed=' + (br.mixed || 0)
+    + ' teacher=' + (br.teacher || 0));
+  console.log('  local_ratio:       ' + (env.summary.local_ratio * 100).toFixed(2) + '%');
+  console.log('  splice_ratio:      ' + (env.summary.splice_ratio * 100).toFixed(2) + '%');
+  console.log('  est_cost_saved:    $' + (env.summary.est_cost_saved_usd || 0).toFixed(4));
+  console.log('  last_decision_at:  ' + (env.summary.last_decision_at || '(none)'));
 }
 
 async function cmdJobs(args) {
@@ -14930,6 +15193,207 @@ async function cmdCaptureImportance(args) {
     for (const r of top) console.log(`  ${r.capture_id}  score=${r.score.toFixed(4)}`);
     console.log(`Bottom-${bottom.length}:`);
     for (const r of bottom) console.log(`  ${r.capture_id}  score=${r.score.toFixed(4)}`);
+  }
+}
+
+// =============================================================================
+// W808-6 — `kolm captures review` dispatcher.
+//
+// Sub-modes (mutually exclusive — first one wins):
+//   --list-pending          (default if no other flag) — print staged rows
+//   --allow <id>            — promote staged row <id> into observations
+//   --block <id> --reason   — refuse staged row <id> forever
+//   --auto-allow-since <dur>— sweep + promote every row whose timer has elapsed
+//
+// Common flags:
+//   --tenant <tenant_id>    — required when not logged in (resolved via
+//                             /v1/whoami when --tenant absent + key present)
+//   --namespace <ns>        — filter (list-pending only)
+//   --json                  — JSON-only output for scripting
+//   --limit N               — list-pending cap (default 100)
+//
+// Honest envelopes everywhere — never silent no-op. Exit codes:
+//   0  ok
+//   1  bad-args
+//   3  missing-prereq (no tenant, no key, module import failure)
+//   5  not-found (staged_capture_id does not exist)
+// =============================================================================
+async function cmdCapturesReview(args) {
+  const wantJson = args.includes('--json');
+  const emit = (env) => console.log(JSON.stringify(env, null, 2));
+  // Parse modes — first match wins.
+  const listPending = args.includes('--list-pending');
+  const allowIdRaw = pickFlag(args, '--allow');
+  const blockIdRaw = pickFlag(args, '--block');
+  const autoAllowRaw = pickFlag(args, '--auto-allow-since');
+  const tenantFlag = pickFlag(args, '--tenant') || pickFlag(args, '--tenant-id') || null;
+  const namespace = pickFlag(args, '--namespace') || pickFlag(args, '-n') || null;
+  const reason = pickFlag(args, '--reason') || null;
+  const reviewer = pickFlag(args, '--reviewer') || 'cli';
+  const limitFlag = pickFlag(args, '--limit');
+  const limit = Number.isFinite(Number(limitFlag)) && Number(limitFlag) > 0
+    ? Math.trunc(Number(limitFlag)) : 100;
+
+  // Resolve tenant. Explicit flag > env > 'local' fallback (for `KOLM_ENV=test`
+  // and CI runs that have no live login).
+  const tenant_id = tenantFlag
+    || process.env.KOLM_TENANT_ID
+    || (process.env.KOLM_ENV === 'test' ? 'local' : null);
+  if (!tenant_id) {
+    const env = {
+      ok: false,
+      error: 'tenant_resolve_failed',
+      hint: 'pass --tenant <id> or set KOLM_TENANT_ID; run `kolm whoami` to find your tenant id',
+      version: 'w808-v1',
+    };
+    if (wantJson) emit(env); else console.error('error: ' + env.error + '\n  hint: ' + env.hint);
+    process.exit(EXIT.MISSING_PREREQ);
+  }
+
+  let storeMod;
+  let captureStoreMod;
+  try {
+    storeMod = await import('../src/store.js');
+    captureStoreMod = await import('../src/capture-store.js');
+  } catch (e) {
+    const env = {
+      ok: false,
+      error: 'store_module_missing',
+      detail: e && e.message || String(e),
+      hint: 'src/store.js + src/capture-store.js must be importable',
+      version: 'w808-v1',
+    };
+    if (wantJson) emit(env); else console.error('error: ' + env.error);
+    process.exit(EXIT.MISSING_PREREQ);
+  }
+
+  // ---------------------------------------------------------------------------
+  // --allow <id>
+  // ---------------------------------------------------------------------------
+  if (allowIdRaw !== null && allowIdRaw !== '') {
+    const row = storeMod.getStagedCapture(allowIdRaw, { tenant_id });
+    if (!row) {
+      const env = { ok: false, error: 'not_found', staged_capture_id: allowIdRaw, hint: 'no staged capture with that id for this tenant', version: 'w808-v1' };
+      if (wantJson) emit(env); else console.error('not found: ' + allowIdRaw);
+      process.exit(EXIT.NOT_FOUND);
+    }
+    const promoted = storeMod.promoteStagedCapture(allowIdRaw, {
+      tenant_id,
+      reviewer,
+      force: true, // explicit --allow overrides anomaly + timer gates
+      insertObservation: (r) => storeMod.insert('observations', r),
+    });
+    if (!promoted) {
+      const env = { ok: false, error: 'promote_failed', staged_capture_id: allowIdRaw, hint: 'row may be blocked; pass --reason via --block to keep audit trail', version: 'w808-v1' };
+      if (wantJson) emit(env); else console.error('promote failed: ' + allowIdRaw);
+      process.exit(EXIT.EXECUTION);
+    }
+    const env = { ok: true, action: 'allow', staged_capture_id: allowIdRaw, reviewer, version: 'w808-v1' };
+    if (wantJson) emit(env); else console.log('allowed: ' + allowIdRaw + ' (reviewer=' + reviewer + ')');
+    return;
+  }
+
+  // ---------------------------------------------------------------------------
+  // --block <id> --reason "..."
+  // ---------------------------------------------------------------------------
+  if (blockIdRaw !== null && blockIdRaw !== '') {
+    if (!reason) {
+      const env = { ok: false, error: 'reason_required', hint: 'pass --reason "<text>" — blocks are audit-trail rows; reason is mandatory', version: 'w808-v1' };
+      if (wantJson) emit(env); else console.error('--block requires --reason "<text>"');
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const row = storeMod.getStagedCapture(blockIdRaw, { tenant_id });
+    if (!row) {
+      const env = { ok: false, error: 'not_found', staged_capture_id: blockIdRaw, hint: 'no staged capture with that id for this tenant', version: 'w808-v1' };
+      if (wantJson) emit(env); else console.error('not found: ' + blockIdRaw);
+      process.exit(EXIT.NOT_FOUND);
+    }
+    const n = storeMod.blockStagedCapture(blockIdRaw, { tenant_id, reason, reviewer });
+    if (n === 0) {
+      const env = { ok: false, error: 'block_failed', staged_capture_id: blockIdRaw, version: 'w808-v1' };
+      if (wantJson) emit(env); else console.error('block failed: ' + blockIdRaw);
+      process.exit(EXIT.EXECUTION);
+    }
+    const env = { ok: true, action: 'block', staged_capture_id: blockIdRaw, reason, reviewer, version: 'w808-v1' };
+    if (wantJson) emit(env); else console.log('blocked: ' + blockIdRaw + ' (reason=' + JSON.stringify(reason) + ', reviewer=' + reviewer + ')');
+    return;
+  }
+
+  // ---------------------------------------------------------------------------
+  // --auto-allow-since <dur> (e.g. "24h", "1h", "7d")
+  // ---------------------------------------------------------------------------
+  if (autoAllowRaw !== null && autoAllowRaw !== '') {
+    // Parse a tiny duration grammar: <number><h|d|m|s>. Anything else → 24h
+    // default + warn.
+    const m = /^(\d+)\s*([hdms])?$/i.exec(String(autoAllowRaw).trim());
+    let sinceMs = 24 * 60 * 60 * 1000;
+    if (m) {
+      const n = Number(m[1]);
+      const unit = (m[2] || 'h').toLowerCase();
+      const mult = unit === 'd' ? 86400000 : unit === 'h' ? 3600000 : unit === 'm' ? 60000 : 1000;
+      sinceMs = n * mult;
+    }
+    const result = storeMod.autoAllowSinceQuarantine({
+      tenant_id,
+      since_ms: sinceMs,
+      insertObservation: (r) => storeMod.insert('observations', r),
+    });
+    const env = {
+      ok: true,
+      action: 'auto-allow-since',
+      since_ms: sinceMs,
+      ...result,
+      version: 'w808-v1',
+    };
+    if (wantJson) emit(env);
+    else {
+      console.log(`auto-allow sweep: promoted=${result.promoted} skipped=${result.skipped} blocked=${result.blocked} anomalous=${result.anomalous} (window=${sinceMs}ms)`);
+    }
+    return;
+  }
+
+  // ---------------------------------------------------------------------------
+  // --list-pending (default)
+  // ---------------------------------------------------------------------------
+  // No explicit flag AND no positional — default to list-pending.
+  const _ = listPending; // intentionally referenced to silence linters
+  const staged = storeMod.listStagedCaptures({ tenant_id, namespace, limit });
+  const env = {
+    ok: true,
+    action: 'list-pending',
+    tenant_id,
+    namespace: namespace || null,
+    count: staged.length,
+    staged: staged.map(r => ({
+      staged_capture_id: r.staged_capture_id,
+      staged_at: r.staged_at,
+      quarantine_until: r.quarantine_until,
+      quarantine_state: r.quarantine_state,
+      namespace: r.namespace || r.corpus_namespace || 'default',
+      anomaly_flagged: !!r.anomaly_flagged,
+      anomaly_reasons: r.anomaly_reasons || [],
+      anomaly_flagged_axes: r.anomaly_flagged_axes || [],
+      prompt_excerpt: typeof r.prompt === 'string' ? r.prompt.slice(0, 200) : null,
+      response_excerpt: typeof r.response === 'string' ? r.response.slice(0, 200) : null,
+      teacher_response_signature: r.teacher_response_signature || null,
+      teacher_fingerprint_known: r.teacher_fingerprint_known === true,
+      manual_block_reason: r.manual_block_reason || null,
+    })),
+    version: 'w808-v1',
+  };
+  if (wantJson) emit(env);
+  else {
+    console.log(`pending captures: ${staged.length} (tenant=${tenant_id}, namespace=${namespace || 'all'})`);
+    if (staged.length === 0) {
+      console.log('  (none — staged_captures table is empty for this tenant)');
+      return;
+    }
+    for (const r of staged.slice(0, 50)) {
+      const flag = r.anomaly_flagged ? '[ANOM]' : '[clean]';
+      const reasons = (r.anomaly_reasons || []).slice(0, 1).join('; ');
+      console.log(`  ${String(r.staged_capture_id).padEnd(28)} ${flag} ${r.quarantine_state || 'pending'}  ${reasons}`);
+    }
+    if (staged.length > 50) console.log(`  ... ${staged.length - 50} more (use --json to dump all)`);
   }
 }
 
@@ -29070,6 +29534,8 @@ async function _dispatchVerb(verb, args) {
     nl: cmdNl, tokenize: cmdTokenize, extract: cmdExtract, doc: cmdDoc,
     config: cmdConfig, hmac: cmdHmac, keygen: cmdKeygen, pubkey: cmdPubkey,
     keys: cmdKeys, auditor: cmdAuditor, quantize: cmdQuantize, runtime: cmdRuntime,
+    // W807 — kolm route doctor: confidence-router threshold + recent splice summary.
+    route: cmdRoute,
     jobs: cmdJobs, watch: cmdWatch, resume: cmdResume, rescue: cmdRescue,
     sessions: cmdSessions, checkpoint: cmdCheckpoint, 'import-chat': cmdImportChat,
     import: cmdImportChat, merge: cmdMerge, agent: cmdAgent, 'init-agent': cmdInitAgent,
@@ -29154,6 +29620,17 @@ async function main() {
       // `kolm sdk --help` no longer falls through to root help.
       case 'sdk':      await withErrorContext('sdk',      () => cmdSdk(rest)); break;
       case 'capture':  await withErrorContext('capture',  () => cmdCapture(rest)); break;
+      // W808-6 — `kolm captures review` (plural noun) — manual review queue
+      // dispatcher. Separate verb from singular `capture` to avoid colliding
+      // with the existing `capture image|status|importance` sub-tree.
+      case 'captures':
+        if (rest[0] === 'review') {
+          await withErrorContext('captures review', () => cmdCapturesReview(rest.slice(1)));
+        } else {
+          console.error('usage: kolm captures review [--list-pending | --allow ID | --block ID --reason "..." | --auto-allow-since 24h]');
+          process.exit(EXIT.BAD_ARGS);
+        }
+        break;
       case 'labels':   await withErrorContext('labels',   () => cmdLabels(rest)); break;
       case 'distill':  await withErrorContext('distill',  () => cmdDistill(rest)); break;
       case 'spec-decode': await withErrorContext('spec-decode', () => cmdSpecDecode(rest)); break;
@@ -29177,6 +29654,10 @@ async function main() {
       case 'settings': await withErrorContext('settings', () => cmdSettings(rest)); break;
       case 'quantize': await withErrorContext('quantize', () => cmdQuantize(rest)); break;
       case 'runtime':  await withErrorContext('runtime',  () => cmdRuntime(rest)); break;
+      // W807 — `kolm route doctor` reports the active confidence threshold
+      // + the most-recent splice ratio so operators can confirm the router
+      // is configured the way they expect without loading the dashboard.
+      case 'route':    await withErrorContext('route',    () => cmdRoute(rest)); break;
       case 'jobs':     await withErrorContext('jobs',     () => cmdJobs(rest)); break;
       // W369 data plane (lake / optimize / dataset / label).
       case 'lake':     await withErrorContext('lake',     () => cmdLake(rest)); break;

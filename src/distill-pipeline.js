@@ -775,6 +775,28 @@ export async function* distill({
   // src/compile-pipeline.js in the bundle phase — distill yields the path to
   // the training pairs / student weights, not a sealed .kolm).
   const studentPath = path.join(outDir, 'student');
+  // W808-5 — Post-distillation regression gate. Final pipeline step. Compares
+  // the just-finished run against the prior artifact (if one exists for the
+  // same namespace) and produces a verdict block on the done envelope. The
+  // gate is non-fatal: it ANNOUNCES a regression but the caller decides
+  // whether to roll back (the compile-pipeline + ship-pipeline read the
+  // regression_gate.verdict to make the rollback decision).
+  //
+  // Wired here at the END of distill() — does NOT touch the W459 teacher-
+  // attempt logic, the W711 importance weighting, the W713 curriculum hook,
+  // or the W714 holdout-exclusion chokepoint. Safe to remove the W808 block
+  // by deleting these four lines + the function definition below.
+  let _w808_gate = null;
+  try {
+    _w808_gate = _w808RegressionGate({
+      run_dir: outDir,
+      namespace: teacher_namespace || namespace || null,
+      tenant_id,
+      manifest: workerManifest,
+    });
+  } catch (e) {
+    _w808_gate = { ok: false, error: 'w808_gate_threw', detail: String(e && e.message || e), version: 'w808-v1' };
+  }
   yield {
     done: true,
     artifact_path: outDir,
@@ -806,6 +828,8 @@ export async function* distill({
     exit: exitInfo,
     manifest: workerManifest,
     duration_ms: Date.now() - start,
+    // W808-5 — regression-gate verdict block (see _w808RegressionGate below).
+    w808_regression_gate: _w808_gate,
   };
 }
 
@@ -915,4 +939,149 @@ function _safeTail(p, bytes) {
   } catch (_) { return ''; }
 }
 
-export default { distill, prepareDistillCorpus, selectStudentBackbone, MODES, _resolveDistillTenant, listDistillRuns, readDistillRun, classifyTeacher, TEACHER_SOURCE_CLASSIFICATION };
+// =============================================================================
+// W808-5 — Post-distillation regression gate.
+//
+// After the worker exits + the run-meta is finalized, compare the just-shipped
+// run's K-Score + critical_fail_rate against the prior run in the SAME
+// (tenant_id, namespace). If the candidate degrades by more than the
+// thresholds below, the verdict is 'rollback'; the caller (compile-pipeline /
+// ship-pipeline) reads w808_regression_gate.verdict and decides whether to
+// halt the ship.
+//
+// Thresholds (per master plan W808-5):
+//   - K-Score drop > 0.02  → rollback
+//   - critical_fail_rate increase > 0.01 (1pp) → rollback
+//   - Otherwise → 'promote'
+//
+// Honest envelope: if no prior run exists for this namespace, returns
+// { ok:true, verdict:'first_run', ... } — the first ship of a namespace is
+// always allowed (no baseline to regress against). If the candidate's
+// K-Score is missing, returns { ok:false, error:'no_candidate_kscore' } and
+// the caller treats that as 'needs_human'.
+//
+// Intentionally DOES NOT touch the W459/W711/W713/W714 hooks above — this
+// is a pure read-only verdict computation off the run-meta + prior run.
+// Wired into distill() above by the four-line _w808_gate block before the
+// final yield.
+// =============================================================================
+
+export const W808_REGRESSION_GATE_VERSION = 'w808-v1';
+export const W808_KSCORE_DROP_THRESHOLD = 0.02;
+export const W808_CRITICAL_FAIL_RATE_INCREASE_THRESHOLD = 0.01;
+
+export function _w808RegressionGate({ run_dir, namespace, tenant_id = 'local', manifest = null } = {}) {
+  const candidate_kscore = _w808ExtractKscoreFromRunDir(run_dir, manifest);
+  const candidate_cfr = _w808ExtractCriticalFailRate(run_dir, manifest);
+  // Find the prior run in the same namespace + tenant — newest BEFORE the
+  // run we just finished.
+  const allRuns = listDistillRuns({ tenant_id, limit: 200, namespace });
+  // Drop the current run from the list (it appears as the newest entry).
+  const candidateId = path.basename(run_dir || '');
+  const prior = allRuns.filter(r => r.id !== candidateId)[0] || null;
+  if (candidate_kscore == null) {
+    return {
+      ok: false,
+      verdict: 'needs_human',
+      error: 'no_candidate_kscore',
+      candidate_kscore: null,
+      prior_kscore: prior ? prior.k_final : null,
+      hint: 'distill worker did not emit a k_score in progress.jsonl or manifest.json',
+      version: W808_REGRESSION_GATE_VERSION,
+    };
+  }
+  if (!prior) {
+    return {
+      ok: true,
+      verdict: 'first_run',
+      candidate_kscore,
+      candidate_critical_fail_rate: candidate_cfr,
+      prior_kscore: null,
+      prior_run_id: null,
+      hint: 'no prior artifact in this namespace — first run always allowed',
+      kscore_drop_threshold: W808_KSCORE_DROP_THRESHOLD,
+      critical_fail_rate_increase_threshold: W808_CRITICAL_FAIL_RATE_INCREASE_THRESHOLD,
+      version: W808_REGRESSION_GATE_VERSION,
+    };
+  }
+  const prior_kscore = Number.isFinite(prior.k_final) ? Number(prior.k_final) : null;
+  if (prior_kscore == null) {
+    return {
+      ok: true,
+      verdict: 'first_run', // no comparable prior — treat as first comparable run
+      candidate_kscore,
+      candidate_critical_fail_rate: candidate_cfr,
+      prior_kscore: null,
+      prior_run_id: prior.id,
+      hint: 'prior run has no k_final; treating as no comparable baseline',
+      kscore_drop_threshold: W808_KSCORE_DROP_THRESHOLD,
+      critical_fail_rate_increase_threshold: W808_CRITICAL_FAIL_RATE_INCREASE_THRESHOLD,
+      version: W808_REGRESSION_GATE_VERSION,
+    };
+  }
+  // Read prior critical_fail_rate (best-effort; defaults to 0 when absent).
+  const prior_full = readDistillRun(prior.id, { tenant_id });
+  const prior_cfr = prior_full && prior_full.manifest && Number.isFinite(prior_full.manifest.critical_fail_rate)
+    ? Number(prior_full.manifest.critical_fail_rate) : 0;
+  const kscore_drop = prior_kscore - candidate_kscore;
+  const cfr_increase = (Number.isFinite(candidate_cfr) ? candidate_cfr : 0) - prior_cfr;
+  let verdict = 'promote';
+  const reasons = [];
+  if (kscore_drop > W808_KSCORE_DROP_THRESHOLD) {
+    verdict = 'rollback';
+    reasons.push(`k_score dropped ${kscore_drop.toFixed(4)} (prior ${prior_kscore.toFixed(4)} → candidate ${candidate_kscore.toFixed(4)}); threshold ${W808_KSCORE_DROP_THRESHOLD}`);
+  }
+  if (cfr_increase > W808_CRITICAL_FAIL_RATE_INCREASE_THRESHOLD) {
+    verdict = 'rollback';
+    reasons.push(`critical_fail_rate increased ${cfr_increase.toFixed(4)} (prior ${prior_cfr.toFixed(4)} → candidate ${(candidate_cfr || 0).toFixed(4)}); threshold ${W808_CRITICAL_FAIL_RATE_INCREASE_THRESHOLD}`);
+  }
+  return {
+    ok: true,
+    verdict,
+    reasons,
+    candidate_kscore,
+    candidate_critical_fail_rate: candidate_cfr,
+    prior_kscore,
+    prior_critical_fail_rate: prior_cfr,
+    prior_run_id: prior.id,
+    kscore_drop,
+    critical_fail_rate_increase: cfr_increase,
+    kscore_drop_threshold: W808_KSCORE_DROP_THRESHOLD,
+    critical_fail_rate_increase_threshold: W808_CRITICAL_FAIL_RATE_INCREASE_THRESHOLD,
+    version: W808_REGRESSION_GATE_VERSION,
+  };
+}
+
+// Internal — best-effort K-Score extractor. Tries manifest.k_score_final
+// first, then the last row of progress.jsonl. Returns null when absent.
+function _w808ExtractKscoreFromRunDir(run_dir, manifest) {
+  if (manifest && Number.isFinite(Number(manifest.k_score_final))) return Number(manifest.k_score_final);
+  if (manifest && Number.isFinite(Number(manifest.k_score))) return Number(manifest.k_score);
+  if (!run_dir) return null;
+  try {
+    const progPath = path.join(run_dir, 'progress.jsonl');
+    if (!fs.existsSync(progPath)) return null;
+    const lines = fs.readFileSync(progPath, 'utf8').split('\n').filter(Boolean);
+    if (!lines.length) return null;
+    const last = JSON.parse(lines[lines.length - 1]);
+    if (Number.isFinite(Number(last.k_score))) return Number(last.k_score);
+  } catch (_) { /* fall through */ }
+  return null;
+}
+
+// Internal — best-effort critical_fail_rate extractor. Returns 0 when absent
+// (a missing CFR is treated as "no critical failures observed").
+function _w808ExtractCriticalFailRate(run_dir, manifest) {
+  if (manifest && Number.isFinite(Number(manifest.critical_fail_rate))) return Number(manifest.critical_fail_rate);
+  if (!run_dir) return 0;
+  try {
+    const cfrPath = path.join(run_dir, 'critical-fail-rate.json');
+    if (fs.existsSync(cfrPath)) {
+      const j = JSON.parse(fs.readFileSync(cfrPath, 'utf8'));
+      if (Number.isFinite(Number(j.critical_fail_rate))) return Number(j.critical_fail_rate);
+    }
+  } catch (_) {}
+  return 0;
+}
+
+export default { distill, prepareDistillCorpus, selectStudentBackbone, MODES, _resolveDistillTenant, listDistillRuns, readDistillRun, classifyTeacher, TEACHER_SOURCE_CLASSIFICATION, _w808RegressionGate, W808_KSCORE_DROP_THRESHOLD, W808_CRITICAL_FAIL_RATE_INCREASE_THRESHOLD, W808_REGRESSION_GATE_VERSION };

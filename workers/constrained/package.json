@@ -1,0 +1,25 @@
+{
+  "name": "@kolm/constrained-worker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "W809 - constrained decoding worker. Thin Node shell that spawns a Python decoder wrapping `outlines` or `lm-format-enforcer` for JSON-Schema-guided sampling. Heavy ML deps (outlines/lm-format-enforcer + torch + a base model) stay OUTSIDE Node; root kolm install pulls ZERO constrained-decoder deps. On a host without either library the worker emits an honest envelope (exit 3, no_constrained_decoder) + an install hint; it never silently falls back to unconstrained sampling.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "constrained.mjs",
+  "bin": {
+    "kolm-constrained-worker": "constrained.mjs"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "doctor": "node constrained.mjs --doctor"
+  },
+  "dependencies": {},
+  "optionalDependencies": {},
+  "external": {
+    "python": {
+      "note": "Default decoder is python3 workers/constrained/scripts/constrained.py which imports outlines OR lm-format-enforcer at runtime. Override the launcher via $CONSTRAINED_DECODE_CMD (single command OR JSON array, e.g. CONSTRAINED_DECODE_CMD='[\"node\",\"stub.js\"]'). When neither outlines nor lm-format-enforcer is importable the Python script exits 3 with {ok:false, error:'no_constrained_decoder', hint:'pip install outlines OR lm-format-enforcer'}."
+    }
+  }
+}

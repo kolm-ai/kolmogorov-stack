@@ -33,6 +33,10 @@ import os from 'node:os';
 
 import { callLLM, isConfigured, describeConfig } from './llm-call.js';
 import { runArtifact } from './artifact-runner.js';
+// W809-3 — parse_failure_rate track. parseOutputAgainstSpec returns
+// {ok,parsed,error} so the bakeoff summary can count parse failures alongside
+// pass_rate (never substituted for K-Score).
+import { parseOutputAgainstSpec as _w809ParseOutputAgainstSpec } from './output-schema.js';
 
 // Per-contestant cost estimates (USD per call). Conservative defaults; the
 // caller can pass opts.costTable to override. These are intentionally rough -
@@ -427,11 +431,15 @@ async function runContestant(name, rows, opts) {
   return runModelContestant(rows, name, opts);
 }
 
-function summarize(name, calls) {
+function summarize(name, calls, opts) {
   if (!calls.length) return {
     name, pass_rate: 0, avg_latency_ms: 0, avg_cost_usd: 0, calls: 0, score_per_dollar: 0,
     privacy_class: classifyPrivacy(name), deterministic: classifyDeterminism(name),
     quality: 0,
+    // W809-3 — parse_failure_rate is emitted ALONGSIDE pass_rate, never as
+    // a substitute. NaN here would poison downstream filters; pin to 0 for
+    // the empty-calls path so the column is always numeric.
+    parse_failure_rate: 0,
   };
   const pass = calls.filter((c) => c.pass).length;
   const passRate = pass / calls.length;
@@ -440,6 +448,30 @@ function summarize(name, calls) {
   // score_per_dollar: pass per dollar. Floor cost at $1e-6 so zero-cost
   // contestants don't blow up to Infinity.
   const score_per_dollar = passRate / Math.max(avgCostUsd, 1e-6);
+  // W809-3 — parse_failure_rate track. When the caller passes
+  // opts.schema_spec we parse every contestant's `got` string against the
+  // spec and report the fraction that failed. This is ALWAYS computed when
+  // a spec is present and is NEVER substituted for pass_rate — both ride
+  // out alongside K-Score so the UI can show "passed 0.92 / parse-fail 0.04".
+  // No spec → parse_failure_rate is null (column present, value honest).
+  let parseFailureRate = null;
+  if (opts && opts.schema_spec) {
+    try {
+      let fails = 0;
+      let attempted = 0;
+      for (const c of calls) {
+        if (c.got == null) continue;
+        attempted += 1;
+        const r = _w809ParseOutputAgainstSpec(c.got, opts.schema_spec);
+        if (!r.ok) fails += 1;
+      }
+      parseFailureRate = attempted === 0 ? 0 : fails / attempted;
+    } catch (_e) {
+      // Honest-by-default: if the parser throws, leave the field null
+      // rather than silently reporting 0 (which would lie).
+      parseFailureRate = null;
+    }
+  }
   return {
     name,
     pass_rate: passRate,
@@ -450,6 +482,8 @@ function summarize(name, calls) {
     privacy_class: classifyPrivacy(name),
     deterministic: classifyDeterminism(name),
     calls: calls.length,
+    // W809-3 — parse_failure_rate next to (never replacing) pass_rate.
+    parse_failure_rate: parseFailureRate,
   };
 }
 
@@ -490,7 +524,7 @@ export async function bakeoff(datasetId, { contestants, opts = {} } = {}) {
     } catch (e) {
       error = String(e.message || e);
     }
-    const summary = summarize(name, calls);
+    const summary = summarize(name, calls, opts);
     summary.error = error;
     summary.elapsed_ms = Date.now() - t0;
     results.push(summary);

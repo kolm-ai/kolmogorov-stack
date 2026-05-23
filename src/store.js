@@ -494,3 +494,195 @@ export function withTransaction(fn) {
 export function storeDriver() {
   return STORE_DRIVER;
 }
+
+// =============================================================================
+// W808-2 — staged_captures table (capture quarantine).
+//
+// New rows from the proxy capture path land HERE first (not in the canonical
+// `observations` table). Each row carries a `quarantine_until` deadline
+// (default now + 24h) plus optional `anomaly_flagged` + `manual_block_reason`
+// fields. promoteStagedCapture(id) lifts a row into `observations` once it
+// has cleared:
+//   (a) no anomaly flag (or operator override), AND
+//   (b) no manual block, AND
+//   (c) quarantine_until <= now (or operator override via auto_allow_since).
+//
+// This module DOES NOT touch the existing `observations` table schema. It
+// only adds parallel staging + a one-way promotion verb. If the staged
+// table is empty the proxy can fall back to direct-write into observations
+// (when KOLM_W808_STAGING=0) — that env-gate lives in src/proxy.js, not
+// here.
+//
+// All getters/setters are tenant-scoped via the canonical `tenant_id` field
+// (W411). The driver itself does not enforce the fence — callers must.
+// =============================================================================
+
+// W808-2 default quarantine window. Exported so the proxy + tests can
+// reference the same constant.
+export const W808_DEFAULT_QUARANTINE_MS = 24 * 60 * 60 * 1000; // 24h
+export const W808_STAGED_TABLE = 'staged_captures';
+
+// Insert a new staged capture row. Mints a synthetic id if absent.
+// Always stamps quarantine_until (now+24h by default). Returns the row.
+//
+// Callers MUST pass row.tenant_id — we error out otherwise to keep the
+// W411 fence loud (silent default-tenant rows poison the whole baseline).
+export function insertStagedCapture(row, opts = {}) {
+  if (!row || typeof row !== 'object') {
+    throw new Error('insertStagedCapture: row must be an object');
+  }
+  if (!row.tenant_id && !row.tenant) {
+    throw new Error('insertStagedCapture: row.tenant_id is required (W411 tenant fence)');
+  }
+  const quarantineMs = Number.isFinite(opts.quarantine_ms) && opts.quarantine_ms > 0
+    ? opts.quarantine_ms : W808_DEFAULT_QUARANTINE_MS;
+  const staged = {
+    ...row,
+    staged_capture_id: row.staged_capture_id || id('stg'),
+    staged_at: row.staged_at || new Date().toISOString(),
+    quarantine_until: row.quarantine_until || new Date(Date.now() + quarantineMs).toISOString(),
+    quarantine_state: row.quarantine_state || 'pending',
+    anomaly_flagged: row.anomaly_flagged === true,
+    anomaly_reasons: Array.isArray(row.anomaly_reasons) ? row.anomaly_reasons : [],
+    manual_block_reason: row.manual_block_reason || null,
+    manual_review_at: row.manual_review_at || null,
+    manual_review_by: row.manual_review_by || null,
+    w808_version: 'w808-v1',
+  };
+  insert(W808_STAGED_TABLE, staged);
+  return staged;
+}
+
+// List staged captures pending review. Filters: tenant_id (required),
+// namespace (optional), includeBlocked (default false), limit (default 500).
+// Returns newest-first by staged_at.
+export function listStagedCaptures({ tenant_id, namespace = null, includeBlocked = false, limit = 500 } = {}) {
+  if (!tenant_id) return [];
+  const rows = findByField(W808_STAGED_TABLE, 'tenant_id', tenant_id);
+  const out = [];
+  for (const r of rows) {
+    // Inner-loop tenant fence — never trust the index alone (W411).
+    if (String(r.tenant_id) !== String(tenant_id)) continue;
+    if (namespace && String(r.namespace || r.corpus_namespace || 'default') !== String(namespace)) continue;
+    if (!includeBlocked && r.quarantine_state === 'blocked') continue;
+    if (r.quarantine_state === 'promoted') continue; // already in observations
+    out.push(r);
+  }
+  out.sort((a, b) => String(b.staged_at || '').localeCompare(String(a.staged_at || '')));
+  return out.slice(0, Math.max(1, limit));
+}
+
+// Get one staged capture by staged_capture_id. Returns null if missing OR
+// if the caller's tenant_id does not match the row (W411).
+export function getStagedCapture(staged_capture_id, { tenant_id } = {}) {
+  if (!staged_capture_id) return null;
+  const rows = findByField(W808_STAGED_TABLE, 'staged_capture_id', staged_capture_id);
+  for (const r of rows) {
+    if (tenant_id && String(r.tenant_id) !== String(tenant_id)) continue;
+    return r;
+  }
+  return null;
+}
+
+// Mark a staged row as anomaly_flagged (called from the proxy after the
+// anomaly detector returns ok:true + anomaly_flagged:true). Returns the
+// number of rows patched (0 or 1).
+export function markStagedAnomaly(staged_capture_id, { tenant_id, reasons = [], flagged_axes = [] } = {}) {
+  if (!staged_capture_id) return 0;
+  return update(W808_STAGED_TABLE,
+    (r) => r.staged_capture_id === staged_capture_id
+      && (!tenant_id || String(r.tenant_id) === String(tenant_id)),
+    {
+      anomaly_flagged: true,
+      anomaly_reasons: Array.isArray(reasons) ? reasons : [],
+      anomaly_flagged_axes: Array.isArray(flagged_axes) ? flagged_axes : [],
+      anomaly_flagged_at: new Date().toISOString(),
+    });
+}
+
+// Manual block — operator chose to refuse this capture forever. Returns 0/1.
+export function blockStagedCapture(staged_capture_id, { tenant_id, reason, reviewer = null } = {}) {
+  if (!staged_capture_id) return 0;
+  if (!reason || typeof reason !== 'string') {
+    throw new Error('blockStagedCapture: reason is required (audit trail)');
+  }
+  return update(W808_STAGED_TABLE,
+    (r) => r.staged_capture_id === staged_capture_id
+      && (!tenant_id || String(r.tenant_id) === String(tenant_id)),
+    {
+      quarantine_state: 'blocked',
+      manual_block_reason: reason,
+      manual_review_at: new Date().toISOString(),
+      manual_review_by: reviewer || null,
+    });
+}
+
+// Manual allow — operator chose to override anomaly flag / quarantine timer
+// and promote NOW. Returns the promoted row (or null if not found / blocked).
+// The actual insert into `observations` is delegated to a callback so this
+// module stays decoupled from src/capture-store.js.
+export function promoteStagedCapture(staged_capture_id, { tenant_id, reviewer = null, force = false, insertObservation } = {}) {
+  if (!staged_capture_id) return null;
+  const row = getStagedCapture(staged_capture_id, { tenant_id });
+  if (!row) return null;
+  if (row.quarantine_state === 'blocked' && !force) return null;
+  if (row.quarantine_state === 'promoted') return row;
+  if (!force) {
+    // No-anomaly-flag AND no-block (W808-2 contract).
+    if (row.anomaly_flagged === true) return null;
+    if (row.manual_block_reason) return null;
+    // Quarantine deadline must have passed (operator can force).
+    const deadline = Date.parse(row.quarantine_until || '');
+    if (Number.isFinite(deadline) && Date.now() < deadline) return null;
+  }
+  // Promote — delegate the insert; mark staged row as promoted on success.
+  if (typeof insertObservation === 'function') {
+    try { insertObservation(row); } catch (e) {
+      // Re-throw with context so the caller's audit trail records the failure.
+      const err = new Error(`promoteStagedCapture: observation insert failed: ${e.message || e}`);
+      err.cause = e;
+      throw err;
+    }
+  }
+  update(W808_STAGED_TABLE,
+    (r) => r.staged_capture_id === staged_capture_id,
+    {
+      quarantine_state: 'promoted',
+      manual_review_at: new Date().toISOString(),
+      manual_review_by: reviewer || row.manual_review_by || null,
+    });
+  return { ...row, quarantine_state: 'promoted' };
+}
+
+// Auto-allow sweep — promote every staged row whose quarantine_until has
+// elapsed AND that carries no anomaly flag AND no block. Returns
+// { promoted, skipped, blocked, anomalous }.
+export function autoAllowSinceQuarantine({ tenant_id, since_ms = W808_DEFAULT_QUARANTINE_MS, insertObservation } = {}) {
+  if (!tenant_id) return { promoted: 0, skipped: 0, blocked: 0, anomalous: 0 };
+  const now = Date.now();
+  const cutoff = now - Math.max(0, since_ms);
+  const rows = listStagedCaptures({ tenant_id, includeBlocked: true, limit: 5000 });
+  let promoted = 0, skipped = 0, blocked = 0, anomalous = 0;
+  for (const r of rows) {
+    if (r.quarantine_state === 'blocked') { blocked += 1; continue; }
+    if (r.quarantine_state === 'promoted') continue;
+    if (r.anomaly_flagged === true) { anomalous += 1; continue; }
+    if (r.manual_block_reason) { blocked += 1; continue; }
+    const staged = Date.parse(r.staged_at || '');
+    if (!Number.isFinite(staged) || staged > cutoff) { skipped += 1; continue; }
+    const promoted_row = promoteStagedCapture(r.staged_capture_id, {
+      tenant_id,
+      reviewer: 'auto-allow',
+      force: true,                 // we've already validated the gates above
+      insertObservation,
+    });
+    if (promoted_row) promoted += 1;
+    else skipped += 1;
+  }
+  return { promoted, skipped, blocked, anomalous };
+}
+
+// Reset hook for tests — empties the staged_captures table.
+export function _resetStagedCapturesForTests() {
+  remove(W808_STAGED_TABLE, () => true);
+}

@@ -30,6 +30,16 @@
 // supplied axes.
 //
 // Both versions are normalized to [0..1] and gated at 0.85.
+//
+// W810 (external calibration): the K-Score envelope also surfaces a
+// `human_preference_rate` block when a fitted calibration mapping is
+// available at ~/.kolm/kscore-calibration.json. The mapping is built by
+// `src/kscore-calibration.js` from a Bradley-Terry fit (W810-1/2/3). The
+// surfacing here is ADDITIVE — it preserves every existing weight + axis
+// (A/S/L/C/V/R/T/F/E/Z + W714 k_contrastive_score). See the W810 anchor
+// section near the bottom of this file.
+
+import { loadMapping, applyCalibration, CALIBRATION_VERSION } from './kscore-calibration.js';
 
 const V1_WEIGHTS = { A: 0.40, S: 0.15, L: 0.15, C: 0.15, V: 0.15 };
 const V2_WEIGHTS = { A: 0.30, S: 0.10, L: 0.10, C: 0.10, V: 0.10, R: 0.05, T: 0.05, F: 0.10, E: 0.05, Z: 0.05 };
@@ -257,6 +267,7 @@ export function computeKScoreV2(input) {
 // not accept an unverifiable T axis) can pass `strict_teacher_fidelity: true`
 // to upgrade the warning to a throw.
 export function computeKScore(input) {
+  let out;
   if (input && input.recipe_class === 'distilled_model'
       && input.teacher_vendor
       && (input.teacher_holdout_accuracy == null)) {
@@ -264,25 +275,117 @@ export function computeKScore(input) {
       + String(input.teacher_vendor)
       + ' teacher_holdout_accuracy not provided (verifier check #T1, RS-1 §7.13).';
     if (input.lenient_teacher_fidelity === true) {
-      const out = computeKScoreV2(input);
+      out = computeKScoreV2(input);
       const warning = { code: 'T_axis_unverifiable', message: msg };
       out.warnings = Array.isArray(out.warnings) ? out.warnings.concat(warning) : [warning];
-      return out;
-    }
-    if (input.strict_teacher_fidelity === true) {
+    } else if (input.strict_teacher_fidelity === true) {
       throw new Error(
         'strict-teacher-fidelity: teacher_holdout_accuracy not provided for '
         + 'distilled_model with teacher_vendor=' + String(input.teacher_vendor)
         + '. Either supply teacher_holdout_accuracy or drop strict_teacher_fidelity.'
       );
-    }
-    if (input.holdout_accuracy != null) {
-      const out = computeKScoreV2(input);
+    } else if (input.holdout_accuracy != null) {
+      out = computeKScoreV2(input);
       const warning = { code: 'T_axis_unverifiable', message: msg };
       out.warnings = Array.isArray(out.warnings) ? out.warnings.concat(warning) : [warning];
-      return out;
+    } else {
+      throw new Error(msg);
     }
-    throw new Error(msg);
+  } else {
+    out = computeKScoreV2(input);
   }
-  return computeKScoreV2(input);
+  // W810: additive calibration surfacing. Never throws; never mutates
+  // existing weights/axes; only ADDS the human_preference_rate block.
+  return _attachW810Calibration(out, input);
 }
+
+// ===========================================================================
+// W810 ANCHOR — K-Score external calibration envelope surfacing.
+// ===========================================================================
+//
+// Adds a `human_preference_rate` block (and the calibration_pack_id +
+// calibration_version + calibration_status fields) to the K-Score envelope
+// when a fitted calibration mapping is available at
+// ~/.kolm/kscore-calibration.json (or $KOLM_DATA_DIR/kscore-calibration.json
+// when the test-seam env var is set).
+//
+// HONEST CONTRACT:
+//   - When no mapping file exists OR the file failed to load, every new
+//     field is null AND calibration_status:'no_calibration_mapping' so
+//     callers can distinguish "we never calibrated" from "we calibrated
+//     but the category has too few pairs".
+//   - When the per-category slot is below MIN_PAIRS_PER_CATEGORY (500),
+//     human_preference_rate is null AND calibration_status:'insufficient_data'.
+//     We DO NOT silently substitute the pooled estimate (that would lie about
+//     the per-category measurement basis).
+//   - When the category isn't in the calibration pack at all,
+//     calibration_status:'unknown_category'.
+//   - When everything checks out, human_preference_rate:{point, ci95:[lo,hi]}.
+//
+// Inputs the caller can pass through `input` to drive this:
+//   - calibration_category   (string, one of coding/writing/analysis/support)
+//   - calibration_mapping    (object override — used by tests to inject a
+//                             mapping without writing to disk; takes
+//                             precedence over the on-disk loadMapping())
+//   - calibration_disabled   (boolean — if true, surfacing is a no-op and the
+//                             envelope is returned unchanged. Useful for
+//                             callers who can prove they don't need it.)
+//
+// Existing fields preserved: A/S/L/C/V/R/T/F/E/Z + composite + ships + gate
+// + spec + weights + k_contrastive_score + warnings. No reweighting. No axis
+// removal. No mutation that changes the `ships` decision.
+
+function _attachW810Calibration(envelope, input) {
+  if (envelope == null) return envelope;
+  if (input && input.calibration_disabled === true) return envelope;
+
+  const category = (input && typeof input.calibration_category === 'string')
+    ? input.calibration_category
+    : null;
+  const mapping = (input && input.calibration_mapping != null)
+    ? input.calibration_mapping
+    : loadMapping();
+
+  // Defaults: every new field starts null. Callers that don't have a
+  // calibration mapping installed get an envelope where the calibration
+  // block is uniformly null — never a noisy default.
+  envelope.human_preference_rate = null;
+  envelope.calibration_pack_id = null;
+  envelope.calibration_version = CALIBRATION_VERSION;
+  envelope.calibration_category = category;
+  envelope.calibration_status = 'no_calibration_mapping';
+
+  if (mapping == null) return envelope;
+  envelope.calibration_pack_id = mapping.calibration_pack_id || null;
+
+  if (category == null) {
+    envelope.calibration_status = 'no_category_supplied';
+    return envelope;
+  }
+  const k = envelope.composite;
+  if (typeof k !== 'number' || !Number.isFinite(k)) {
+    envelope.calibration_status = 'no_composite_to_calibrate';
+    return envelope;
+  }
+  const cal = applyCalibration(mapping, category, k);
+  if (cal == null) {
+    envelope.calibration_status = 'no_calibration_mapping';
+    return envelope;
+  }
+  if (cal.status === 'ok') {
+    envelope.calibration_status = 'ok';
+    envelope.human_preference_rate = {
+      point: cal.point,
+      ci95: [cal.ci95_low, cal.ci95_high],
+      n_pairs: cal.n_pairs,
+    };
+    return envelope;
+  }
+  envelope.calibration_status = cal.status; // 'insufficient_data' or 'unknown_category'
+  envelope.calibration_n_pairs = cal.n_pairs;
+  return envelope;
+}
+
+// Exposed for tests + the methodology page renderer.
+export { CALIBRATION_VERSION };
+
