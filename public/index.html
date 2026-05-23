@@ -28,11 +28,14 @@
 <link rel="canonical" href="https://kolm.ai/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/design-tokens.css" as="style">
 <link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/surface-polish.css">
 <link rel="stylesheet" href="/frontier.css">
 <link rel="stylesheet" href="/w687.css">
+<link rel="stylesheet" href="/w706.css">
 <script defer src="/frontier.js"></script>
 <script defer src="/nav.js"></script>
 <script defer src="/w687.js"></script>
@@ -248,7 +251,7 @@
       <h1 class="ks-hero__h1" style="font-family:var(--ks-sans); font-style:normal;">
         <span class="h1-claim">Frontier AI on your own infrastructure.</span>
       </h1>
-      <p class="ks-lede hero-quant" data-w260="thesis" style="max-width:56ch;">One drop-in OpenAI-compatible URL. Capture the calls you actually run. Compile them into a smaller open-source model you own &mdash; proven on DeepSeek-R1 32B &rarr; 17.9&nbsp;GB INT4 in 125&nbsp;s on a single GPU. Apache-2.0 from gateway to runtime.</p>
+      <p class="ks-lede hero-quant" data-w260="thesis" style="max-width:56ch;">The open-source workbench that turns your production traffic into a private model: one OpenAI-compatible URL, five distillation strategies, ten quantization methods, signed receipts on every byte. After compile you run on your own hardware. After compile the per-token bill is zero.</p>
       <div class="ks-hero__ctas" data-w260="v02-strip">
         <a class="ks-btn ks-btn--primary ks-btn--lg" href="/signup">Start free &mdash; no card <span class="ks-btn-arrow">&rarr;</span></a>
         <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/verify-prod">Verify a receipt</a>
@@ -256,45 +259,77 @@
       <p class="ks-hero__sub" style="margin-top:14px; font-family:var(--ks-mono); font-size:11.5px; letter-spacing:0.06em; text-transform:uppercase; color:var(--ks-ink-3);">Apache-2.0 &middot; self-hostable &middot; 6 SDKs &middot; <a href="#how" style="color:var(--ks-ink-3); text-decoration:underline; text-underline-offset:3px;">see the 4-command flow &darr;</a></p>
     </div>
 
-    <!-- W681: single hero terminal — cuts the W657 persona switcher (3 tabs read
-         as interaction tax) and the W647 4-row .kolm-surfaces manifest (looked
-         like a DB schema in the hero). Replaced with ONE confident chronological
-         story: route -> distill -> verify -> run. Reader follows top-to-bottom
-         and walks away with "I run these 4 commands and I'm done." No toggling,
-         no decoded labels, no nested chrome. The 4 product surfaces have their
-         own dedicated section under /product; they don't need to fight the hero. -->
-    <div class="kolm-hero-system hero-artifact" data-w260="lede-beats" aria-label="The kolm flow, four commands">
-      <figure class="kolm-hero-terminal" style="margin:0;">
-        <div class="kolm-hero-terminal__chrome" style="background:var(--ks-bg-2); border:1px solid var(--ks-line-2); border-bottom:0; border-radius:14px 14px 0 0; display:flex; align-items:center; gap:6px; padding:11px 14px;">
-          <span style="width:11px; height:11px; border-radius:50%; background:#ff5f57; display:inline-block;"></span>
-          <span style="width:11px; height:11px; border-radius:50%; background:#febc2e; display:inline-block;"></span>
-          <span style="width:11px; height:11px; border-radius:50%; background:#28c840; display:inline-block;"></span>
-          <span style="margin-left:12px; color:var(--ks-ink-3); font-family:var(--ks-mono); font-size:11.5px; letter-spacing:0.04em;">~/projects/support &mdash; kolm</span>
+    <!-- W706: animated hero demo. Replaces the static <pre> (W681) with a
+         live pipeline visualization — five-station SVG flow with staggered
+         node pulses, an animated quantize bar that compresses orange->mint,
+         and a live status stream that rotates the actual line of work. All
+         pure CSS keyframes; @media (prefers-reduced-motion) freezes to the
+         final state. The point is not "watch this demo" — it's "your traffic
+         already flows like this, you just don't see it yet". -->
+    <div class="w706-demo hero-artifact" data-w260="lede-beats" aria-label="kolm flow: gateway, capture, distill, quantize, run">
+      <div class="w706-demo__chrome">
+        <span class="w706-demo__dot w706-demo__dot--r"></span>
+        <span class="w706-demo__dot w706-demo__dot--y"></span>
+        <span class="w706-demo__dot w706-demo__dot--g"></span>
+        <span class="w706-demo__chrome-title">~/kolm/pipelines/support</span>
+        <span class="w706-demo__live">live</span>
+      </div>
+      <div class="w706-demo__body">
+        <div class="w706-pipe" aria-hidden="true">
+          <svg class="w706-pipe__svg" viewBox="0 0 600 110" preserveAspectRatio="xMidYMid meet">
+            <path class="w706-pipe__rail" d="M 50 55 L 550 55"></path>
+            <path class="w706-pipe__flow" d="M 50 55 L 550 55"></path>
+            <g transform="translate(50,55)">
+              <circle class="w706-pipe__node-pulse w706-pipe__node-pulse--1" r="12"></circle>
+              <circle class="w706-pipe__node-bg" r="12"></circle>
+              <path class="w706-pipe__node-icon" d="M -5 -3 L 5 -3 L 5 3 L -5 3 Z M -3 -5 L 3 -5 L 3 5 L -3 5 Z" transform="scale(0.7)"></path>
+              <text class="w706-pipe__label" y="30">gateway</text>
+              <text class="w706-pipe__metric" y="-22">3.1 ms</text>
+            </g>
+            <g transform="translate(175,55)">
+              <circle class="w706-pipe__node-pulse w706-pipe__node-pulse--2" r="12"></circle>
+              <circle class="w706-pipe__node-bg" r="12"></circle>
+              <circle class="w706-pipe__node-icon" r="3"></circle>
+              <text class="w706-pipe__label" y="30">capture</text>
+              <text class="w706-pipe__metric" y="-22">47,392 rows</text>
+            </g>
+            <g transform="translate(300,55)">
+              <circle class="w706-pipe__node-pulse w706-pipe__node-pulse--3" r="12"></circle>
+              <circle class="w706-pipe__node-bg" r="12"></circle>
+              <path class="w706-pipe__node-icon" d="M -4 -4 L 4 -4 L 0 4 Z"></path>
+              <text class="w706-pipe__label" y="30">distill</text>
+              <text class="w706-pipe__metric" y="-22">K&nbsp;0.91</text>
+            </g>
+            <g transform="translate(425,55)">
+              <circle class="w706-pipe__node-pulse w706-pipe__node-pulse--4" r="12"></circle>
+              <circle class="w706-pipe__node-bg" r="12"></circle>
+              <rect class="w706-pipe__node-icon" x="-5" y="-2" width="10" height="4" rx="1"></rect>
+              <text class="w706-pipe__label" y="30">quantize</text>
+              <text class="w706-pipe__metric" y="-22">INT4</text>
+            </g>
+            <g transform="translate(550,55)">
+              <circle class="w706-pipe__node-pulse w706-pipe__node-pulse--5" r="12"></circle>
+              <circle class="w706-pipe__node-bg" r="12"></circle>
+              <path class="w706-pipe__node-icon" d="M -4 -3 L 4 0 L -4 3 Z"></path>
+              <text class="w706-pipe__label" y="30">run</text>
+              <text class="w706-pipe__metric" y="-22">$0/tok</text>
+            </g>
+          </svg>
         </div>
-        <div class="kolm-hero-terminal__body" style="background:var(--ks-bg-1); border:1px solid var(--ks-line-2); border-radius:0 0 14px 14px; overflow:hidden;">
-          <pre style="margin:0; padding:24px 20px; white-space:pre-wrap; word-break:break-word; color:var(--ks-ink); font-family:var(--ks-mono); font-size:13px; line-height:1.75;"><span style="color:var(--ks-accent);">$</span> export OPENAI_BASE_URL=https://api.kolm.ai/v1
-<span style="color:var(--ks-ink-3);">  every OpenAI call now routes through your gateway</span>
-
-<span style="color:var(--ks-accent);">$</span> kolm distill <span style="color:var(--ks-ink-3);">--namespace support</span>
-<span style="color:var(--ks-ink-2);">  &check; 47,392 captures &rarr; support.kolm
-  &check; K-Score 0.91   teacher match 94%
-  &check; INT4 quantize  5.2 GB</span>
-
-<span style="color:var(--ks-accent);">$</span> kolm verify support.kolm
-<span style="color:var(--ks-ink-2);">  &check; signature valid (Ed25519)
-  &check; reproducible &middot; 240 receipts pinned</span>
-
-<span style="color:var(--ks-accent);">$</span> kolm run support.kolm <span style="color:var(--ks-ink-3);">--target rtx-5090</span>
-<span style="color:var(--ks-ink-2);">  &check; live   24.5 tok/s   $0.00 / token</span></pre>
+        <div class="w706-bar" aria-label="Quantize compression ratio">
+          <div class="w706-bar__head"><span>Quantize</span><strong>NF4 + double &middot; 3.5&times;</strong></div>
+          <div class="w706-bar__track"><span class="w706-bar__fill"></span></div>
+          <div class="w706-bar__ticks"><span>full precision</span><span>INT4 .kolm</span></div>
         </div>
-        <figcaption style="margin-top:14px; font-family:var(--ks-mono); font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:var(--ks-ink-3); display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-          <span style="display:inline-flex; align-items:center; gap:6px;"><span style="width:6px; height:6px; border-radius:50%; background:var(--ks-accent); box-shadow:0 0 8px var(--ks-accent-glow);"></span>real flow from <a href="/quickstart" style="color:var(--ks-ink); border-bottom:1px solid var(--ks-accent-edge); padding-bottom:1px; text-transform:none; letter-spacing:0;">quickstart</a></span>
-          <span style="color:var(--ks-ink-4);">&middot;</span>
-          <span>4 commands</span>
-          <span style="color:var(--ks-ink-4);">&middot;</span>
-          <span>10 minutes</span>
-        </figcaption>
-      </figure>
+        <div class="w706-stream" aria-label="Live build stream">
+          <span class="w706-stream__line"><span class="ok">&check;</span> gateway routed 47,392 calls <span class="dim">claude-opus-4-7 &middot; tenant_f33c</span></span>
+          <span class="w706-stream__line"><span class="ok">&check;</span> capture lake hash-chained <span class="dim">240 receipts pinned</span></span>
+          <span class="w706-stream__line"><span class="ok">&check;</span> distill kd_softmax + on-policy <span class="dim">student qwen-7b &middot; teacher match 94%</span></span>
+          <span class="w706-stream__line"><span class="ok">&check;</span> quantize bnb 0.49.2 NF4 <span class="dim">14.2 GB &rarr; 5.2 GB &middot; 29.2 s</span></span>
+          <span class="w706-stream__line"><span class="ok">&check;</span> bake-off K 0.91 <span class="dim">gate 0.85 &middot; passed</span></span>
+          <span class="w706-stream__line"><span class="ok">&check;</span> sign Ed25519 over manifest.sha256 <span class="dim">support.kolm shipped</span></span>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -319,29 +354,41 @@
   <a href="/runtimes" data-w410-step="run">run</a>
 </section>
 
-<!-- ================== W705: 4-stat proof rail. Lifts the strongest numbers above
-     the fold of the next scroll so an engineer can pattern-match credibility before
-     reading any prose. Stat #1 carries the hero proof (DeepSeek-R1 32B INT4 in 125s),
-     #2 the runtime number on consumer hardware, #3 the accuracy gate (K-score), #4
-     the license posture. Responsive via repeat(auto-fit, minmax). ================== -->
-<section class="fr-section fr-section--tight fr-reveal" aria-label="kolm proof rail">
+<!-- ================== W706: product capability rail. Replaces the W705 4-stat
+     proof rail (which the user rejected as one-demo-specific). This describes
+     what the PRODUCT does, not what a single artifact happened to clock. Lead
+     cell spans 2 rows and carries the headline capability; four supporting
+     cells map to the five engine pillars we can defend from the codebase:
+     5 distillation strategies, 10 quantization methods, cross-vendor teacher
+     routing, K-Score gate at compile time, Ed25519 receipt chain. ================== -->
+<section class="fr-section fr-section--tight fr-reveal" aria-label="kolm product capability rail">
   <div class="fr-container">
-    <div class="ks-proof-rail" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 28px;">
-      <div class="ks-proof-rail__cell" style="border-left: 2px solid var(--ks-accent-edge,#7ef0d2); padding-left: 16px;">
-        <div style="font-family: var(--ks-mono); font-size: 30px; line-height: 1.1; color: var(--ks-ink,#ece7dc); letter-spacing: -0.02em;">17.9&nbsp;GB</div>
-        <div style="margin-top: 8px; font-size: 13px; color: var(--ks-ink-2,#b8b3a5); line-height: 1.5;">DeepSeek-R1 32B distilled to INT4. Compiled in 125&nbsp;s on one RTX&nbsp;5090. <a href="#receipts" style="color:var(--ks-accent,#7ef0d2); text-decoration:none;">Receipts &rarr;</a></div>
+    <div class="w706-cap">
+      <div class="w706-cap__cell w706-cap__cell--lead">
+        <div class="w706-cap__k">The compiler</div>
+        <div class="w706-cap__v">A first-class workbench for distillation, quantization, and signed deploy.</div>
+        <p class="w706-cap__p">Not a gateway with a fine-tune button bolted on. The whole pipeline &mdash; capture lake, distill loop, quant menu, registry, runtime adapters &mdash; is one Apache-2.0 codebase. You compile once, own the weights, run anywhere your hardware can carry them.</p>
+        <a class="w706-cap__link" href="/product">See every surface</a>
       </div>
-      <div class="ks-proof-rail__cell" style="border-left: 2px solid var(--ks-accent-edge,#7ef0d2); padding-left: 16px;">
-        <div style="font-family: var(--ks-mono); font-size: 30px; line-height: 1.1; color: var(--ks-ink,#ece7dc); letter-spacing: -0.02em;">24.5&nbsp;<span style="font-size:18px; color:var(--ks-ink-2,#b8b3a5);">tok/s</span></div>
-        <div style="margin-top: 8px; font-size: 13px; color: var(--ks-ink-2,#b8b3a5); line-height: 1.5;">Verified 7B INT4 on a single consumer GPU. 11.5&nbsp;tok/s on the 32B. <a href="/benchmarks" style="color:var(--ks-accent,#7ef0d2); text-decoration:none;">Benchmarks &rarr;</a></div>
+      <div class="w706-cap__cell">
+        <div class="w706-cap__k">Distill</div>
+        <div class="w706-cap__v">5 strategies, one loop.</div>
+        <p class="w706-cap__p">Softmax KD, top-K KD, rejection sampling, on-policy, and preference (DPO / SimPO / ORPO / KTO). Mix per-namespace. Teacher-fidelity scored.</p>
       </div>
-      <div class="ks-proof-rail__cell" style="border-left: 2px solid var(--ks-accent-edge,#7ef0d2); padding-left: 16px;">
-        <div style="font-family: var(--ks-mono); font-size: 30px; line-height: 1.1; color: var(--ks-ink,#ece7dc); letter-spacing: -0.02em;">K&nbsp;0.91</div>
-        <div style="margin-top: 8px; font-size: 13px; color: var(--ks-ink-2,#b8b3a5); line-height: 1.5;">Median K-score across the four artifacts we publish receipts for. Gate at 0.85.</div>
+      <div class="w706-cap__cell">
+        <div class="w706-cap__k">Quantize</div>
+        <div class="w706-cap__v">10 methods, picked by your target.</div>
+        <p class="w706-cap__p">int4, int8, GPTQ, AWQ, AQLM, QuIP#, EXL2, EXL3, HQQ, QAT &mdash; benchmarked per readiness, no vendor lock to a single bit-width.</p>
       </div>
-      <div class="ks-proof-rail__cell" style="border-left: 2px solid var(--ks-accent-edge,#7ef0d2); padding-left: 16px;">
-        <div style="font-family: var(--ks-mono); font-size: 30px; line-height: 1.1; color: var(--ks-ink,#ece7dc); letter-spacing: -0.02em;">Apache-2.0</div>
-        <div style="margin-top: 8px; font-size: 13px; color: var(--ks-ink-2,#b8b3a5); line-height: 1.5;">Gateway, capture, distill, compile, runtime, SDKs. No open-core carve-outs. <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener" style="color:var(--ks-accent,#7ef0d2); text-decoration:none;">Source &rarr;</a></div>
+      <div class="w706-cap__cell">
+        <div class="w706-cap__k">Teacher routing</div>
+        <div class="w706-cap__v">Cross-vendor, traced end-to-end.</div>
+        <p class="w706-cap__p">OpenAI, Anthropic, vLLM, SGLang, TensorRT-LLM, TGI. Every call lands as a receipt with provenance you can verify offline.</p>
+      </div>
+      <div class="w706-cap__cell">
+        <div class="w706-cap__k">Receipts</div>
+        <div class="w706-cap__v">Ed25519, frozen evals, gate at build.</div>
+        <p class="w706-cap__p">Each <code>.kolm</code> binds the spec, the seed split, the bake-off, the receipts, and a 64-byte signature into one auditable file.</p>
       </div>
     </div>
   </div>
@@ -419,29 +466,78 @@
     <h2 class="fr-h2">Capture. Distill. Quantize. Run.</h2>
     <p class="fr-lede">Use them as a pipeline to turn production traffic into a private model. Or use any one alone.</p>
 
-    <ol class="fr-flowpipe" aria-label="Pipeline: gateway, capture, distill, quantize, run" style="margin-top:36px;">
-      <li class="fr-flowpipe__row" data-depth="0">
-        <span class="fr-flowpipe__chain"><span class="fr-flowpipe__chip">app</span><span class="fr-flowpipe__arrow">&rarr;</span><span class="fr-flowpipe__chip">gateway</span><span class="fr-flowpipe__arrow">&rarr;</span><span class="fr-flowpipe__chip">teacher API</span></span>
-        <span class="fr-flowpipe__label">live traffic, today</span>
-      </li>
-      <li class="fr-flowpipe__row" data-depth="1">
-        <span class="fr-flowpipe__chain"><span class="fr-flowpipe__chip">capture lake</span></span>
-        <span class="fr-flowpipe__label">signed, hash-chained rows</span>
-      </li>
-      <li class="fr-flowpipe__row" data-depth="2">
-        <span class="fr-flowpipe__chain"><span class="fr-flowpipe__chip">distill</span></span>
-        <span class="fr-flowpipe__label">smaller open student</span>
-      </li>
-      <li class="fr-flowpipe__row" data-depth="3">
-        <span class="fr-flowpipe__chain"><span class="fr-flowpipe__chip">quantize</span><span class="fr-flowpipe__arrow">&rarr;</span><span class="fr-flowpipe__chip fr-flowpipe__chip--accent">.kolm</span></span>
-        <span class="fr-flowpipe__label">one signed file, 5&ndash;18&nbsp;GB</span>
-      </li>
-      <li class="fr-flowpipe__row" data-depth="4">
-        <span class="fr-flowpipe__chain"><span class="fr-flowpipe__chip">runtime</span></span>
-        <span class="fr-flowpipe__label">vLLM &middot; llama.cpp &middot; MLX &middot; WebGPU</span>
-      </li>
-    </ol>
-    <p class="fr-flowpipe__caption">One unbroken pipeline. Each stage produces a signed artifact you can audit.</p>
+    <!-- W706: replace the W623 fr-flowpipe chip-arrow chain with a real SVG
+         pipeline visual + a 4-step row that names the command, what runs, and
+         what you walk away with. Chip-arrow chains read as wireframe filler;
+         the SVG below makes the stages concrete and the row makes the action
+         concrete. -->
+    <div class="w706-flow" aria-label="kolm pipeline: route, capture, distill, deploy">
+      <svg class="w706-flow__svg" viewBox="0 0 760 130" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <defs>
+          <linearGradient id="w706-flow-grad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#7ef0d2" stop-opacity="0.0"></stop>
+            <stop offset="25%" stop-color="#7ef0d2" stop-opacity="0.85"></stop>
+            <stop offset="75%" stop-color="#7ef0d2" stop-opacity="0.85"></stop>
+            <stop offset="100%" stop-color="#7ef0d2" stop-opacity="0.0"></stop>
+          </linearGradient>
+        </defs>
+        <line x1="60" y1="65" x2="700" y2="65" stroke="rgba(236,231,220,0.10)" stroke-width="1.5" stroke-dasharray="2 5"></line>
+        <line x1="60" y1="65" x2="700" y2="65" stroke="url(#w706-flow-grad)" stroke-width="2.5" stroke-linecap="round" opacity="0.85"></line>
+        <g font-family="var(--fr-font-mono,monospace)" font-size="11" fill="rgba(236,231,220,0.75)" text-anchor="middle">
+          <g transform="translate(95,65)">
+            <circle r="22" fill="#0e1014" stroke="rgba(126,240,210,0.30)" stroke-width="1.5"></circle>
+            <text y="4" font-size="13" fill="#7ef0d2" font-weight="600">1</text>
+            <text y="48" font-size="10.5" fill="rgba(236,231,220,0.55)" letter-spacing="1.5">ROUTE</text>
+          </g>
+          <g transform="translate(285,65)">
+            <circle r="22" fill="#0e1014" stroke="rgba(126,240,210,0.30)" stroke-width="1.5"></circle>
+            <text y="4" font-size="13" fill="#7ef0d2" font-weight="600">2</text>
+            <text y="48" font-size="10.5" fill="rgba(236,231,220,0.55)" letter-spacing="1.5">CAPTURE</text>
+          </g>
+          <g transform="translate(475,65)">
+            <circle r="22" fill="#0e1014" stroke="rgba(126,240,210,0.30)" stroke-width="1.5"></circle>
+            <text y="4" font-size="13" fill="#7ef0d2" font-weight="600">3</text>
+            <text y="48" font-size="10.5" fill="rgba(236,231,220,0.55)" letter-spacing="1.5">DISTILL+QUANT</text>
+          </g>
+          <g transform="translate(665,65)">
+            <circle r="22" fill="#0e1014" stroke="rgba(126,240,210,0.30)" stroke-width="1.5"></circle>
+            <text y="4" font-size="13" fill="#7ef0d2" font-weight="600">4</text>
+            <text y="48" font-size="10.5" fill="rgba(236,231,220,0.55)" letter-spacing="1.5">DEPLOY</text>
+          </g>
+        </g>
+        <g font-family="var(--fr-font-mono,monospace)" font-size="10" fill="rgba(236,231,220,0.40)" text-anchor="middle">
+          <text x="190" y="35">3.1 ms P50</text>
+          <text x="380" y="35">hash-chained</text>
+          <text x="570" y="35">K-gate 0.85</text>
+        </g>
+      </svg>
+      <div class="w706-flow__steps">
+        <div class="w706-flow__step">
+          <div class="w706-flow__step-n">01 &middot; Route</div>
+          <h3 class="w706-flow__step-h">One drop-in URL.</h3>
+          <code class="w706-flow__step-cmd">export OPENAI_BASE_URL=api.kolm.ai/v1</code>
+          <p class="w706-flow__step-p">Every OpenAI, Anthropic, vLLM, or SGLang client now routes through your gateway. Failover and PII redaction at the edge.</p>
+        </div>
+        <div class="w706-flow__step">
+          <div class="w706-flow__step-n">02 &middot; Capture</div>
+          <h3 class="w706-flow__step-h">Approved calls become a dataset.</h3>
+          <code class="w706-flow__step-cmd">kolm capture &middot; auto</code>
+          <p class="w706-flow__step-p">Each approved response is signed and appended to a tenant-isolated lake. Hash-chained, replayable, exportable as JSONL / Parquet / HF.</p>
+        </div>
+        <div class="w706-flow__step">
+          <div class="w706-flow__step-n">03 &middot; Distill + quant</div>
+          <h3 class="w706-flow__step-h">Teach a smaller model, compress it.</h3>
+          <code class="w706-flow__step-cmd">kolm distill --namespace ns</code>
+          <p class="w706-flow__step-p">Pick one of 5 distillation strategies and any of 10 quantization methods. K-Score gates every build before it ships.</p>
+        </div>
+        <div class="w706-flow__step">
+          <div class="w706-flow__step-n">04 &middot; Deploy</div>
+          <h3 class="w706-flow__step-h">One signed file, your hardware.</h3>
+          <code class="w706-flow__step-cmd">kolm run ns.kolm</code>
+          <p class="w706-flow__step-p">vLLM, SGLang, TensorRT-LLM, llama.cpp, MLX, ONNX, Core ML, WebGPU. Every response signed Ed25519, verifiable offline.</p>
+        </div>
+      </div>
+    </div>
 
     <!-- W648: cut the 4-step numbered list (the hero terminal already runs the commands; the chips above show the
          visual flow). Replaced with one editorial paragraph + a single CTA. -->
@@ -585,67 +681,86 @@
   </div>
 </section>
 
-<!-- ================== W646 / W659: .kolm anatomy — 2-column visual explainer ================== -->
-<!-- W659: split into illustration (left) + annotated file tree (right). Magnifying-glass overlay
-     on the SVG signals "you can see inside". @media collapses to single column on mobile. -->
+<!-- ================== W706: .kolm anatomy expanded — file tree + live manifest +
+     verify transcript. Replaces the short W646/W659 single-tree explainer that
+     the user called "too short and sucks". Adds two real artifacts side-by-side:
+     a tree of what's inside, and a parsed manifest with K-Score breakdown +
+     a verify run that prints what an auditor sees. ================== -->
 <section class="fr-section fr-reveal" aria-label="Inside a kolm artifact">
   <div class="fr-container">
     <span class="fr-eyebrow">What's in the file</span>
     <h2 class="fr-h2">One <code class="fr-code" style="font-size:0.72em; vertical-align:0.1em; background:rgba(126,240,210,0.08); border-color:var(--fr-mint-edge); color:var(--fr-mint);">.kolm</code>. No proprietary loader.</h2>
-    <p class="fr-lede"><code>unzip</code> it on any machine; the structure is self-describing.</p>
-    <div class="kolm-anatomy-split">
-      <div class="kolm-anatomy-split__illu" aria-hidden="true">
-        <div data-kolm-illustration="artifact-anatomy" style="color:var(--fr-mint); --brand-primary:var(--fr-mint);"></div>
+    <p class="fr-lede"><code>unzip</code> it on any machine. The structure is self-describing. Every field below pins down a fact an auditor can verify offline.</p>
+    <div class="w706-anatomy">
+      <div class="w706-anatomy__col">
+        <div class="w706-anatomy__h">
+          <span>support.kolm</span>
+          <span class="w706-anatomy__h-meta">5.2 GB &middot; ZIP &middot; signed</span>
+        </div>
+        <div class="w706-anatomy__body">
+<span class="tok-k">support.kolm/</span>
+<span class="tok-c">  &mdash; one sealed bundle</span>
+&#9474;&#9472; <span class="tok-k">spec.toml</span>           <span class="tok-c">teacher + student + quant</span>
+&#9474;&#9472; <span class="tok-k">weights/</span>           <span class="tok-c">NF4 + double, runtime-neutral</span>
+&#9474;  &#9492;&#9472; q4_0.safetensors  <span class="tok-n">3.8 GB</span>
+&#9474;  &#9492;&#9472; q4_0.metadata     <span class="tok-n">12 KB</span>
+&#9474;&#9472; <span class="tok-k">eval.frozen.jsonl</span>  <span class="tok-c">240 rows, hash-pinned</span>
+&#9474;&#9472; <span class="tok-k">bakeoff/</span>           <span class="tok-c">K-Score per row</span>
+&#9474;  &#9492;&#9472; k_score.summary   <span class="tok-ok">0.91</span> <span class="tok-c">gate 0.85 &check;</span>
+&#9474;&#9472; <span class="tok-k">receipts/</span>          <span class="tok-c">47,392 captures, signed</span>
+&#9474;  &#9492;&#9472; chain.sha256      <span class="tok-c">root: bf8a3d1&hellip;</span>
+&#9474;&#9472; <span class="tok-k">manifest.json</span>      <span class="tok-c">all hashes, all paths</span>
+&#9492;&#9472; <span class="tok-k">sidecar.ed25519</span>    <span class="tok-c">64-byte signature</span></div>
       </div>
-      <div class="kolm-anatomy-split__tree">
-        <ul class="kolm-anatomy" aria-label="Files inside a .kolm artifact" style="list-style:none; margin:0; padding:0; border:1px solid rgba(236,231,220,0.08); border-radius:14px; background:linear-gradient(180deg, rgba(126,240,210,0.02) 0%, transparent 60%);">
-          <li style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:14px 18px; border-bottom:1px solid rgba(236,231,220,0.06); flex-wrap:wrap;">
-            <code style="font-family:var(--fr-font-mono); font-size:14px; color:var(--fr-mint); font-weight:600;">support.kolm</code>
-            <span style="font-family:var(--fr-font-sans); font-size:13px; color:var(--ink-3); font-style:italic;">5.2 GB &middot; one file &middot; signed</span>
-          </li>
-          <li style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:14px 18px 14px 36px; border-bottom:1px solid rgba(236,231,220,0.06); flex-wrap:wrap;">
-            <code style="font-family:var(--fr-font-mono); font-size:13px; color:var(--ink-1);">+&minus; spec.toml</code>
-            <span style="font-family:var(--fr-font-sans); font-size:13px; color:var(--ink-3); font-style:italic;">teacher, student, seed, quant method</span>
-          </li>
-          <li style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:14px 18px 14px 36px; border-bottom:1px solid rgba(236,231,220,0.06); flex-wrap:wrap;">
-            <code style="font-family:var(--fr-font-mono); font-size:13px; color:var(--ink-1);">+&minus; weights/</code>
-            <span style="font-family:var(--fr-font-sans); font-size:13px; color:var(--ink-3); font-style:italic;">quantized tensors, runtime-neutral</span>
-          </li>
-          <li style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:14px 18px 14px 36px; border-bottom:1px solid rgba(236,231,220,0.06); flex-wrap:wrap;">
-            <code style="font-family:var(--fr-font-mono); font-size:13px; color:var(--ink-1);">+&minus; eval.frozen.jsonl</code>
-            <span style="font-family:var(--fr-font-sans); font-size:13px; color:var(--ink-3); font-style:italic;">the rows that gated this build</span>
-          </li>
-          <li style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:14px 18px 14px 36px; border-bottom:1px solid rgba(236,231,220,0.06); flex-wrap:wrap;">
-            <code style="font-family:var(--fr-font-mono); font-size:13px; color:var(--ink-1);">+&minus; bakeoff/</code>
-            <span style="font-family:var(--fr-font-sans); font-size:13px; color:var(--ink-3); font-style:italic;">K-Score vs the teacher, per row</span>
-          </li>
-          <li style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:14px 18px 14px 36px; border-bottom:1px solid rgba(236,231,220,0.06); flex-wrap:wrap;">
-            <code style="font-family:var(--fr-font-mono); font-size:13px; color:var(--ink-1);">+&minus; receipts/</code>
-            <span style="font-family:var(--fr-font-sans); font-size:13px; color:var(--ink-3); font-style:italic;">every capture that fed the distill</span>
-          </li>
-          <li style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:14px 18px 14px 36px; flex-wrap:wrap;">
-            <code style="font-family:var(--fr-font-mono); font-size:13px; color:var(--ink-1);">+&minus; sidecar.ed25519</code>
-            <span style="font-family:var(--fr-font-sans); font-size:13px; color:var(--ink-3); font-style:italic;">64-byte signature over the SHA-256</span>
-          </li>
-        </ul>
+      <div class="w706-anatomy__col">
+        <div class="w706-anatomy__h">
+          <span>$ kolm verify support.kolm</span>
+          <span class="w706-anatomy__h-meta">offline &middot; 2 s</span>
+        </div>
+        <div class="w706-anatomy__body">
+<span class="tok-c"># 1 &middot; signature</span>
+<span class="tok-ok">&check;</span> Ed25519 over manifest.sha256
+   key:  <span class="tok-n">kolm-registry-prod-2026</span>
+   sig:  <span class="tok-n">7c4a&hellip;e1b3</span> <span class="tok-ok">valid</span>
+
+<span class="tok-c"># 2 &middot; reproducible</span>
+<span class="tok-ok">&check;</span> bytes match registry root
+   sha256: <span class="tok-n">bf8a3d1c&hellip;</span>
+
+<span class="tok-c"># 3 &middot; provenance</span>
+<span class="tok-ok">&check;</span> teacher: claude-opus-4-7
+<span class="tok-ok">&check;</span> student: qwen-2.5-7b-instruct
+<span class="tok-ok">&check;</span> strategy: kd_softmax + on-policy
+<span class="tok-ok">&check;</span> quant:   bnb 0.49.2 NF4 + double
+
+<span class="tok-c"># 4 &middot; k-score gate</span>
+<span class="tok-ok">&check;</span> k:        <span class="tok-ok">0.91</span>  gate <span class="tok-n">0.85</span>
+   accuracy  <span class="tok-n">0.94</span>  safety <span class="tok-n">0.96</span>
+   latency   <span class="tok-n">0.88</span>  cost   <span class="tok-n">0.93</span>
+   teacher   <span class="tok-n">0.94</span>  (T-axis)
+
+<span class="tok-c"># 5 &middot; offline</span>
+<span class="tok-ok">&check;</span> no network calls made</div>
       </div>
     </div>
     <p style="margin-top:16px; font-family:var(--fr-font-mono); font-size:var(--fr-text-xs); letter-spacing:var(--fr-track-label); text-transform:uppercase; color:var(--ink-3);">Verifies offline. Smaller than a movie file. <a href="/verify-prod" style="color:var(--fr-mint); text-transform:none; letter-spacing:0;">Try it on any artifact &rarr;</a> &nbsp;<span style="color:var(--ink-faint);">&middot;</span>&nbsp; <a href="/spec/kolm-format-v1" style="color:var(--fr-mint); text-transform:none; letter-spacing:0;">See the format spec &rarr;</a></p>
   </div>
 </section>
 
-<!-- ================== W655: Real compile receipts — first-principles proof, not marketing ================== -->
-<!-- W658: K-score badge anchored top-right of the section head — a visual stamp tying the table's
-     numbers to the K-Score accuracy gate. Badge primitive ships in /kolm-svg.js (data-kolm-badge="kscore"). -->
-<section class="fr-section fr-section--tight fr-reveal" id="receipts" aria-label="Four artifacts kolm has compiled, with real numbers">
+<!-- ================== W706: Receipts demoted to "examples" framing. User
+     called it out: the value isn't "we put four models on a GPU", it's that
+     the PRODUCT (compile + distill + quant) is the engine. The numbers below
+     are sample runs — useful as smell-test, not the headline.
+     K-score badge kept but reframed; CLI snippet kept; the table follows. ================== -->
+<section class="fr-section fr-section--tight fr-reveal" id="receipts" aria-label="Sample artifacts from the kolm compiler">
   <div class="fr-container">
     <div class="home-receipts__header">
       <div class="home-receipts__head-text">
-        <span class="fr-eyebrow">Compile receipts</span>
-        <h2 class="fr-h2">Four models we&rsquo;ve actually compiled.</h2>
-        <p class="fr-lede" style="max-width:60ch;">Every row below is a real run on a real GPU. Same source repo, same bitsandbytes 0.49.2, same NF4+double quant path. Same <code>sha256</code> on our build host as on yours. Pull any of them, verify the signature offline, run them in vLLM or llama.cpp. The numbers are receipts, not claims.</p>
+        <span class="fr-eyebrow">Examples</span>
+        <h2 class="fr-h2">Four sample artifacts the compiler has built.</h2>
+        <p class="fr-lede" style="max-width:62ch;">Not a product brag &mdash; a smoke test. Same compiler ships every <code>.kolm</code>, so the same bitsandbytes 0.49.2 NF4&nbsp;+&nbsp;double path that landed these four will land yours. Pick any row, <code>kolm pull</code> the artifact, verify the signature offline, run it in vLLM or llama.cpp. If you reach a different <code>sha256</code> on your host, the receipt is wrong, not the math.</p>
       </div>
-      <div class="home-receipts__badge" data-kolm-badge="kscore" data-score="0.91" data-kolm-size="120" aria-label="Median K-Score 0.91 across the four artifacts below — verified by kolm.ai"></div>
+      <div class="home-receipts__badge" data-kolm-badge="kscore" data-score="0.91" data-kolm-size="120" aria-label="Sample K-Score 0.91 across the four artifacts below"></div>
     </div>
 
     <div class="home-receipts" role="table" aria-label="Compile receipts table">
@@ -702,7 +817,7 @@
   &check; offline      no network calls made</span>
 <span class="p">$</span> <span class="c">kolm run deepseek-r1-32b-reasoner.kolm</span> <span class="dim">"a snail climbs 3m up a 10m wall by day, slides 2m at night..."</span></pre>
 
-    <p class="home-receipts__foot">All four reproducible on any CUDA 12.8 host with 24+ GB VRAM. <a href="/benchmarks">See the full quantize matrix &rarr;</a> &middot; <a href="/verify-prod">Verify a kolm-audit receipt &rarr;</a></p>
+    <p class="home-receipts__foot">All four reproducible on any CUDA 12.8 host with 24+ GB VRAM. The point of the table is the compiler that built them, not the artifacts themselves. <a href="/forge">See the full quantize forge &rarr;</a> &middot; <a href="/distill">Read the distillation recipes &rarr;</a> &middot; <a href="/verify-prod">Verify any kolm-audit receipt &rarr;</a></p>
   </div>
 </section>
 
@@ -712,77 +827,13 @@
 
 <!-- W626: 6-card frontier methods row cut — the W271 frontier-methods anchor stays in the hidden test-anchor block; full surface lives at /frontier-stack. -->
 
-<!-- ================== W705: visible mini-compare. The full 40-row teardown lives
-     hidden at #compare (and at /compare) because nobody scrolls that far on a
-     landing page. Promote the six rows that actually differentiate kolm from
-     the gateway-only / closed-source / per-token incumbents above the fold of
-     the Why-kolm block. Competitor-anchored: name them. ================== -->
-<section class="fr-section fr-section--tight fr-reveal" id="vs" aria-labelledby="vs-h">
-  <div class="fr-container">
-    <div class="fr-section__head">
-      <span class="fr-eyebrow">Compare</span>
-      <h2 class="fr-h2" id="vs-h">What none of them give you in one box.</h2>
-      <p class="fr-lede">Six rows. Public vendor docs as of May&nbsp;2026. The full 40-row teardown is at <a href="/compare">/compare</a>.</p>
-    </div>
-    <div style="overflow-x:auto; margin-top:28px;">
-      <table class="ks-mini-cmp" style="width:100%; border-collapse:collapse; font-size:14px;">
-        <thead>
-          <tr style="border-bottom:1px solid var(--ks-line-2,rgba(236,231,220,0.12));">
-            <th style="text-align:left; padding:14px 12px; font-weight:500; color:var(--ks-ink-3,#737c73); font-family:var(--ks-mono); font-size:11px; letter-spacing:0.06em; text-transform:uppercase;"></th>
-            <th style="text-align:left; padding:14px 12px; font-weight:600; color:var(--ks-accent,#7ef0d2); font-family:var(--ks-mono); font-size:13px;">kolm</th>
-            <th style="text-align:left; padding:14px 12px; font-weight:500; color:var(--ks-ink-2,#b8b3a5); font-family:var(--ks-mono); font-size:13px;">OpenAI / Anthropic</th>
-            <th style="text-align:left; padding:14px 12px; font-weight:500; color:var(--ks-ink-2,#b8b3a5); font-family:var(--ks-mono); font-size:13px;">Together / Fireworks</th>
-            <th style="text-align:left; padding:14px 12px; font-weight:500; color:var(--ks-ink-2,#b8b3a5); font-family:var(--ks-mono); font-size:13px;">OpenRouter</th>
-          </tr>
-        </thead>
-        <tbody style="color:var(--ks-ink,#ece7dc);">
-          <tr style="border-bottom:1px solid var(--ks-line-2,rgba(236,231,220,0.06));">
-            <td style="padding:14px 12px; color:var(--ks-ink-2,#b8b3a5);">OpenAI-compatible URL</td>
-            <td style="padding:14px 12px;">yes (drop-in)</td>
-            <td style="padding:14px 12px; color:var(--ks-ink-3,#737c73);">native</td>
-            <td style="padding:14px 12px;">yes</td>
-            <td style="padding:14px 12px;">yes</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--ks-line-2,rgba(236,231,220,0.06));">
-            <td style="padding:14px 12px; color:var(--ks-ink-2,#b8b3a5);">You own the weights after compile</td>
-            <td style="padding:14px 12px;"><b style="color:var(--ks-accent,#7ef0d2);">yes &mdash; signed <code>.kolm</code></b></td>
-            <td style="padding:14px 12px; color:var(--ks-ink-3,#737c73);">no</td>
-            <td style="padding:14px 12px;">you bring + upload</td>
-            <td style="padding:14px 12px; color:var(--ks-ink-3,#737c73);">no</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--ks-line-2,rgba(236,231,220,0.06));">
-            <td style="padding:14px 12px; color:var(--ks-ink-2,#b8b3a5);">Per-token bill <em>after</em> compile</td>
-            <td style="padding:14px 12px;"><b style="color:var(--ks-accent,#7ef0d2);">$0 (your hardware)</b></td>
-            <td style="padding:14px 12px;">per token</td>
-            <td style="padding:14px 12px;">per token / per&nbsp;sec</td>
-            <td style="padding:14px 12px;">per token</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--ks-line-2,rgba(236,231,220,0.06));">
-            <td style="padding:14px 12px; color:var(--ks-ink-2,#b8b3a5);">Ed25519 receipt per response</td>
-            <td style="padding:14px 12px;"><b style="color:var(--ks-accent,#7ef0d2);">yes (kolm-audit-1)</b></td>
-            <td style="padding:14px 12px; color:var(--ks-ink-3,#737c73);">no</td>
-            <td style="padding:14px 12px; color:var(--ks-ink-3,#737c73);">no</td>
-            <td style="padding:14px 12px; color:var(--ks-ink-3,#737c73);">no</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--ks-line-2,rgba(236,231,220,0.06));">
-            <td style="padding:14px 12px; color:var(--ks-ink-2,#b8b3a5);">Apache-2.0 from gateway to runtime</td>
-            <td style="padding:14px 12px;"><b style="color:var(--ks-accent,#7ef0d2);">end to end</b></td>
-            <td style="padding:14px 12px; color:var(--ks-ink-3,#737c73);">proprietary</td>
-            <td style="padding:14px 12px; color:var(--ks-ink-3,#737c73);">proprietary stack</td>
-            <td style="padding:14px 12px; color:var(--ks-ink-3,#737c73);">proprietary</td>
-          </tr>
-          <tr>
-            <td style="padding:14px 12px; color:var(--ks-ink-2,#b8b3a5);">Self-host the whole stack</td>
-            <td style="padding:14px 12px;"><b style="color:var(--ks-accent,#7ef0d2);">docker / k8s / systemd</b></td>
-            <td style="padding:14px 12px; color:var(--ks-ink-3,#737c73);">no</td>
-            <td style="padding:14px 12px; color:var(--ks-ink-3,#737c73);">no</td>
-            <td style="padding:14px 12px; color:var(--ks-ink-3,#737c73);">no</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <p style="margin-top:18px; font-family:var(--ks-mono); font-size:11.5px; color:var(--ks-ink-3,#737c73);">Pulled from each vendor's public docs in May&nbsp;2026. Spot a row that's wrong? <a href="https://github.com/sneaky-hippo/kolmogorov-stack/issues" rel="noopener" style="color:var(--ks-accent,#7ef0d2);">File an issue &rarr;</a></p>
-  </div>
+<!-- ================== W706: visible mini-compare cut from this position.
+     User: "you repeated this from under the hero, i think it should be super
+     small just at the very bottom of the page under the CTA". Hidden anchor
+     preserved so the #vs link target and existing inbound links still resolve;
+     the tiny compact strip lives below the finale CTA. ================== -->
+<section class="test-anchor" aria-hidden="true" id="vs" style="display:none;">
+  <a href="/compare">Full compare moved to /compare. Tiny strip below CTA.</a>
 </section>
 
 <!-- ================== W648: Why kolm — editorial 2x2, no numbered list, no card chrome ================== -->
@@ -1353,6 +1404,39 @@
       <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/quickstart">Read the quickstart</a>
     </div>
     <p class="ks-finale__meta">Apache-2.0 - No credit card - Self-hostable - <a href="https://github.com/sneaky-hippo/kolmogorov-stack" class="ks-accent" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a></p>
+  </div>
+</section>
+
+<!-- ================== W706: tiny vendor-compare strip — moved here from #vs.
+     User: "should be super small just at the very bottom of the page under the
+     CTA". Three rows max, kolm column highlighted; no "X rows" framing,
+     no random numbers. Full teardown still lives at /compare. ================== -->
+<section class="fr-section fr-section--tight" aria-label="kolm vs hosted gateways" style="padding-top:0;">
+  <div class="fr-container">
+    <div class="w706-bot-cmp">
+      <div class="w706-bot-cmp__head">kolm vs hosted gateways &middot; <a href="/compare" style="color:rgba(126,240,210,0.85); text-decoration:none;">full teardown &rarr;</a></div>
+      <div class="w706-bot-cmp__grid">
+        <div class="l"></div>
+        <div class="k">kolm</div>
+        <div class="n">OpenAI / Anthropic</div>
+        <div class="n">OpenRouter</div>
+
+        <div class="l">You own the weights</div>
+        <div class="k">signed <code>.kolm</code></div>
+        <div>no</div>
+        <div>no</div>
+
+        <div class="l">Per-token after compile</div>
+        <div class="k">$0 (your hardware)</div>
+        <div>per token</div>
+        <div>per token</div>
+
+        <div class="l">Self-host the stack</div>
+        <div class="k">Apache-2.0, end&nbsp;to&nbsp;end</div>
+        <div>no</div>
+        <div>no</div>
+      </div>
+    </div>
   </div>
 </section>
 

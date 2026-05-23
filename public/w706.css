@@ -1,0 +1,656 @@
+/* w706.css — homepage v706 rebuild.
+   Goals (per user 2026-05-24 reject of W705):
+   - Lead with PRODUCT, not one DeepSeek demo
+   - Kill the W705 4-stat proof rail; replace with capability rail
+   - Replace static <pre> hero terminal with an animated SOTA demo
+   - Demote receipts to "examples"; up-weight product story
+   - Move mini-compare to a tiny strip below the finale CTA
+   - Fix the random-white-blur inconsistency by retuning aurora opacities
+   - Break the uniform repeat(auto-fit) grid pattern with asymmetric layouts
+   Loads AFTER w687.css; never overrides /design-tokens.css or /frontier.css
+   primitives — only adds .w706-* classes the homepage opts into. */
+
+/* === W706 hero demo — animated frontier-compile visualization ============ */
+.w706-demo {
+  position: relative;
+  background: linear-gradient(180deg, #0c0f15 0%, #06080c 100%);
+  border: 1px solid rgba(236, 231, 220, 0.10);
+  border-radius: 16px;
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow:
+    0 0 0 1px rgba(126, 240, 210, 0.06),
+    0 24px 60px -20px rgba(0, 0, 0, 0.60),
+    0 0 80px -20px rgba(126, 240, 210, 0.10);
+}
+.w706-demo::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 80% at 0% 0%, rgba(126, 240, 210, 0.05) 0%, transparent 50%),
+    radial-gradient(100% 60% at 100% 100%, rgba(176, 124, 245, 0.04) 0%, transparent 50%),
+    linear-gradient(rgba(255, 255, 255, 0.014) 1px, transparent 1px);
+  background-size: auto, auto, 100% 3px;
+  z-index: 0;
+}
+.w706-demo__chrome {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 14px;
+  background: rgba(8, 10, 12, 0.55);
+  border-bottom: 1px solid rgba(236, 231, 220, 0.08);
+  position: relative;
+  z-index: 2;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.w706-demo__dot { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; }
+.w706-demo__dot--r { background: #ff5f57; }
+.w706-demo__dot--y { background: #febc2e; }
+.w706-demo__dot--g { background: #28c840; }
+.w706-demo__chrome-title {
+  margin-left: 14px;
+  font-family: var(--fr-font-mono, 'JetBrains Mono', monospace);
+  font-size: 11px;
+  color: rgba(236, 231, 220, 0.55);
+  letter-spacing: 0.04em;
+}
+.w706-demo__live {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--fr-font-mono);
+  font-size: 10.5px;
+  color: rgba(126, 240, 210, 0.85);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.w706-demo__live::before {
+  content: '';
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #7ef0d2;
+  box-shadow: 0 0 8px rgba(126, 240, 210, 0.6);
+  animation: w706-pulse 1.6s ease-in-out infinite;
+}
+@keyframes w706-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(0.85); }
+  50%      { opacity: 1;   transform: scale(1.15); }
+}
+.w706-demo__body {
+  position: relative;
+  padding: 28px 26px 26px;
+  z-index: 1;
+  min-height: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* Pipeline diagram — 5 stations, particle flows through */
+.w706-pipe {
+  position: relative;
+  height: 110px;
+}
+.w706-pipe__svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+.w706-pipe__rail {
+  fill: none;
+  stroke: rgba(236, 231, 220, 0.12);
+  stroke-width: 1.5;
+  stroke-dasharray: 2 4;
+}
+.w706-pipe__flow {
+  fill: none;
+  stroke: #7ef0d2;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 80 1000;
+  stroke-dashoffset: 0;
+  filter: drop-shadow(0 0 4px rgba(126, 240, 210, 0.6));
+  animation: w706-flow 6s linear infinite;
+}
+@keyframes w706-flow {
+  0%   { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -1080; }
+}
+.w706-pipe__node {
+  /* sized via <circle r=…> in SVG; styling here */
+}
+.w706-pipe__node-bg { fill: #0e1014; stroke: rgba(236, 231, 220, 0.18); stroke-width: 1; }
+.w706-pipe__node-icon { fill: rgba(236, 231, 220, 0.85); }
+.w706-pipe__node-pulse {
+  fill: none;
+  stroke: #7ef0d2;
+  stroke-width: 1.5;
+  opacity: 0;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+.w706-pipe__node-pulse--1 { animation: w706-node-ping 6s linear infinite; animation-delay: 0s; }
+.w706-pipe__node-pulse--2 { animation: w706-node-ping 6s linear infinite; animation-delay: 1.2s; }
+.w706-pipe__node-pulse--3 { animation: w706-node-ping 6s linear infinite; animation-delay: 2.4s; }
+.w706-pipe__node-pulse--4 { animation: w706-node-ping 6s linear infinite; animation-delay: 3.6s; }
+.w706-pipe__node-pulse--5 { animation: w706-node-ping 6s linear infinite; animation-delay: 4.8s; }
+@keyframes w706-node-ping {
+  0%   { opacity: 0; r: 12; }
+  4%   { opacity: 0.9; r: 12; }
+  18%  { opacity: 0; r: 26; }
+  100% { opacity: 0; r: 26; }
+}
+.w706-pipe__label {
+  font-family: var(--fr-font-mono);
+  font-size: 10.5px;
+  fill: rgba(236, 231, 220, 0.62);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-anchor: middle;
+}
+.w706-pipe__metric {
+  font-family: var(--fr-font-mono);
+  font-size: 11px;
+  fill: #7ef0d2;
+  letter-spacing: 0;
+  text-anchor: middle;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Quantize visual — bar that compresses */
+.w706-bar {
+  position: relative;
+  border: 1px solid rgba(236, 231, 220, 0.10);
+  border-radius: 10px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.012);
+}
+.w706-bar__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: var(--fr-font-mono);
+  font-size: 11px;
+  color: rgba(236, 231, 220, 0.55);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.w706-bar__head strong {
+  color: #7ef0d2;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.w706-bar__track {
+  height: 14px;
+  background: rgba(236, 231, 220, 0.06);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+.w706-bar__fill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,
+    rgba(255, 177, 85, 0.85) 0%,
+    rgba(255, 177, 85, 0.85) 100%);
+  border-radius: 4px;
+  transform-origin: left;
+  animation: w706-shrink 6s ease-in-out infinite;
+}
+@keyframes w706-shrink {
+  0%   { transform: scaleX(1);    background: linear-gradient(90deg, rgba(255,177,85,0.85), rgba(255,177,85,0.85)); }
+  20%  { transform: scaleX(1);    background: linear-gradient(90deg, rgba(255,177,85,0.85), rgba(255,177,85,0.85)); }
+  55%  { transform: scaleX(0.29); background: linear-gradient(90deg, rgba(126,240,210,0.85), rgba(126,240,210,0.85)); }
+  85%  { transform: scaleX(0.29); background: linear-gradient(90deg, rgba(126,240,210,0.85), rgba(126,240,210,0.85)); }
+  100% { transform: scaleX(1);    background: linear-gradient(90deg, rgba(255,177,85,0.85), rgba(255,177,85,0.85)); }
+}
+.w706-bar__ticks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-family: var(--fr-font-mono);
+  font-size: 10.5px;
+  color: rgba(236, 231, 220, 0.40);
+  letter-spacing: 0;
+}
+
+/* Live status stream — short lines that rotate */
+.w706-stream {
+  position: relative;
+  font-family: var(--fr-font-mono);
+  font-size: 12px;
+  color: rgba(236, 231, 220, 0.85);
+  background: rgba(236, 231, 220, 0.03);
+  border: 1px solid rgba(236, 231, 220, 0.08);
+  border-radius: 10px;
+  padding: 12px 16px;
+  min-height: 56px;
+  overflow: hidden;
+}
+.w706-stream__line {
+  display: block;
+  opacity: 0;
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.w706-stream__line .ok { color: #7ef0d2; }
+.w706-stream__line .dim { color: rgba(236, 231, 220, 0.45); }
+.w706-stream__line:nth-child(1) { animation: w706-stream 18s linear infinite; animation-delay: 0s; }
+.w706-stream__line:nth-child(2) { animation: w706-stream 18s linear infinite; animation-delay: 3s; }
+.w706-stream__line:nth-child(3) { animation: w706-stream 18s linear infinite; animation-delay: 6s; }
+.w706-stream__line:nth-child(4) { animation: w706-stream 18s linear infinite; animation-delay: 9s; }
+.w706-stream__line:nth-child(5) { animation: w706-stream 18s linear infinite; animation-delay: 12s; }
+.w706-stream__line:nth-child(6) { animation: w706-stream 18s linear infinite; animation-delay: 15s; }
+@keyframes w706-stream {
+  0%   { opacity: 0; transform: translateY(8px); }
+  4%   { opacity: 1; transform: translateY(0); }
+  14%  { opacity: 1; transform: translateY(0); }
+  18%  { opacity: 0; transform: translateY(-6px); }
+  100% { opacity: 0; transform: translateY(-6px); }
+}
+
+/* prefers-reduced-motion: freeze animation, show static final state */
+@media (prefers-reduced-motion: reduce) {
+  .w706-demo__live::before,
+  .w706-pipe__flow,
+  .w706-pipe__node-pulse--1,
+  .w706-pipe__node-pulse--2,
+  .w706-pipe__node-pulse--3,
+  .w706-pipe__node-pulse--4,
+  .w706-pipe__node-pulse--5,
+  .w706-bar__fill,
+  .w706-stream__line {
+    animation: none !important;
+  }
+  .w706-bar__fill { transform: scaleX(0.29); background: linear-gradient(90deg, rgba(126,240,210,0.85), rgba(126,240,210,0.85)); }
+  .w706-stream__line { opacity: 0; position: static; }
+  .w706-stream__line:first-child { opacity: 1; }
+}
+
+/* === W706 capability rail — replaces W705 4-stat proof rail =============== */
+/* Asymmetric, editorial — not a uniform stat grid */
+.w706-cap {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  background: rgba(236, 231, 220, 0.08);
+  border: 1px solid rgba(236, 231, 220, 0.08);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.w706-cap__cell {
+  background: linear-gradient(180deg, rgba(126, 240, 210, 0.025) 0%, rgba(255, 255, 255, 0.002) 60%, var(--surface-1, #0e1014) 100%);
+  padding: 22px 22px;
+  position: relative;
+  transition: background 200ms ease;
+}
+.w706-cap__cell:hover {
+  background: linear-gradient(180deg, rgba(126, 240, 210, 0.06) 0%, rgba(126, 240, 210, 0.01) 60%, var(--surface-1, #0e1014) 100%);
+}
+.w706-cap__cell--lead { grid-row: span 2; grid-column: 1; }
+.w706-cap__k {
+  font-family: var(--fr-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--fr-mint, #7ef0d2);
+  margin-bottom: 8px;
+}
+.w706-cap__v {
+  font-family: var(--fr-font-display, 'Inter', sans-serif);
+  font-size: 22px;
+  color: var(--ink-1, #faf2e1);
+  line-height: 1.18;
+  font-weight: 540;
+  margin-bottom: 6px;
+  letter-spacing: -0.005em;
+}
+.w706-cap__cell--lead .w706-cap__v {
+  font-size: 30px;
+  line-height: 1.10;
+  letter-spacing: -0.012em;
+}
+.w706-cap__p {
+  font-family: var(--fr-font-sans, sans-serif);
+  font-size: 13.5px;
+  color: var(--ink-2, #b5bdb1);
+  line-height: 1.55;
+  margin: 0;
+  max-width: 38ch;
+}
+.w706-cap__cell--lead .w706-cap__p { font-size: 14.5px; max-width: 46ch; }
+.w706-cap__vs {
+  margin-top: 10px;
+  font-family: var(--fr-font-mono);
+  font-size: 11.5px;
+  color: rgba(236, 231, 220, 0.45);
+  letter-spacing: 0;
+}
+.w706-cap__vs strong {
+  color: rgba(236, 231, 220, 0.85);
+  font-weight: 500;
+}
+.w706-cap__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  font-family: var(--fr-font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fr-mint, #7ef0d2);
+  text-decoration: none;
+  transition: gap 200ms ease;
+}
+.w706-cap__link:hover { gap: 10px; }
+.w706-cap__link::after { content: '\2192'; opacity: 0.7; }
+@media (max-width: 820px) {
+  .w706-cap { grid-template-columns: 1fr; }
+  .w706-cap__cell--lead { grid-row: auto; }
+  .w706-cap__cell--lead .w706-cap__v { font-size: 24px; }
+}
+
+/* === W706 flow — pipeline visual replaces fr-flowpipe chip-chain ========== */
+.w706-flow {
+  margin: 36px 0 0;
+  border: 1px solid rgba(236, 231, 220, 0.08);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(126, 240, 210, 0.018) 0%, rgba(255, 255, 255, 0.002) 50%, var(--surface-1, #0e1014) 100%);
+  overflow: hidden;
+}
+.w706-flow__svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  padding: 28px 24px 12px;
+}
+.w706-flow__steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  border-top: 1px solid rgba(236, 231, 220, 0.06);
+}
+.w706-flow__step {
+  padding: 18px 22px;
+  border-right: 1px solid rgba(236, 231, 220, 0.06);
+}
+.w706-flow__step:last-child { border-right: 0; }
+.w706-flow__step-n {
+  font-family: var(--fr-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fr-mint, #7ef0d2);
+  margin-bottom: 6px;
+}
+.w706-flow__step-h {
+  font-family: var(--fr-font-display);
+  font-size: 16px;
+  color: var(--ink-1, #faf2e1);
+  font-weight: 560;
+  margin: 0 0 6px;
+  line-height: 1.25;
+}
+.w706-flow__step-cmd {
+  font-family: var(--fr-font-mono);
+  font-size: 12px;
+  color: rgba(236, 231, 220, 0.65);
+  background: rgba(126, 240, 210, 0.04);
+  border: 1px solid rgba(126, 240, 210, 0.14);
+  border-radius: 4px;
+  padding: 4px 8px;
+  margin-bottom: 8px;
+  display: inline-block;
+  letter-spacing: 0;
+}
+.w706-flow__step-p {
+  font-family: var(--fr-font-sans);
+  font-size: 13px;
+  color: var(--ink-2, #b5bdb1);
+  line-height: 1.5;
+  margin: 0;
+}
+@media (max-width: 720px) {
+  .w706-flow__steps { grid-template-columns: 1fr; }
+  .w706-flow__step { border-right: 0; border-bottom: 1px solid rgba(236, 231, 220, 0.06); }
+  .w706-flow__step:last-child { border-bottom: 0; }
+}
+
+/* === W706 anatomy expansion — file tree + manifest + receipt verify ====== */
+.w706-anatomy {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 24px;
+  margin-top: 28px;
+}
+@media (max-width: 980px) {
+  .w706-anatomy { grid-template-columns: 1fr; }
+}
+.w706-anatomy__col {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.012) 0%, rgba(255, 255, 255, 0.003) 100%), var(--surface-1, #0e1014);
+  border: 1px solid rgba(236, 231, 220, 0.08);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.w706-anatomy__h {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: rgba(126, 240, 210, 0.025);
+  border-bottom: 1px solid rgba(126, 240, 210, 0.12);
+  font-family: var(--fr-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fr-mint, #7ef0d2);
+}
+.w706-anatomy__h-meta {
+  font-family: var(--fr-font-mono);
+  font-size: 10.5px;
+  color: rgba(236, 231, 220, 0.50);
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+.w706-anatomy__body {
+  padding: 18px 20px;
+  font-family: var(--fr-font-mono);
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--ink-1, #faf2e1);
+  overflow-x: auto;
+}
+.w706-anatomy__body .tok-k { color: var(--fr-mint, #7ef0d2); }
+.w706-anatomy__body .tok-s { color: #ffb155; }
+.w706-anatomy__body .tok-n { color: #b07cf5; }
+.w706-anatomy__body .tok-c { color: rgba(236, 231, 220, 0.40); font-style: italic; }
+.w706-anatomy__body .tok-ok { color: #7ef0d2; font-weight: 500; }
+.w706-anatomy__body .tok-warn { color: #ffb155; }
+
+/* === W706 bottom mini-compare — compact 2-row strip below finale CTA ===== */
+.w706-bot-cmp {
+  margin-top: 40px;
+  padding: 24px 0 0;
+  border-top: 1px solid rgba(236, 231, 220, 0.08);
+}
+.w706-bot-cmp__head {
+  font-family: var(--fr-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(236, 231, 220, 0.50);
+  margin-bottom: 14px;
+  text-align: center;
+}
+.w706-bot-cmp__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  align-items: stretch;
+  max-width: 880px;
+  margin: 0 auto;
+}
+.w706-bot-cmp__row {
+  display: contents;
+}
+.w706-bot-cmp__row > div {
+  font-family: var(--fr-font-mono);
+  font-size: 12px;
+  padding: 12px 14px;
+  background: rgba(236, 231, 220, 0.02);
+  border: 1px solid rgba(236, 231, 220, 0.06);
+  border-radius: 8px;
+  color: rgba(236, 231, 220, 0.75);
+  letter-spacing: 0;
+}
+.w706-bot-cmp__row > div.k {
+  background: rgba(126, 240, 210, 0.06);
+  border-color: rgba(126, 240, 210, 0.18);
+  color: var(--fr-mint, #7ef0d2);
+}
+.w706-bot-cmp__row > div.n { color: rgba(236, 231, 220, 0.35); }
+.w706-bot-cmp__row > div.l { background: transparent; border: 0; color: rgba(236, 231, 220, 0.85); padding-left: 0; }
+@media (max-width: 720px) {
+  .w706-bot-cmp__grid { grid-template-columns: 1fr; gap: 6px; }
+  .w706-bot-cmp__row > div.l { padding-top: 8px; font-weight: 500; }
+}
+
+/* === W706 aurora retune — kills the "random white blurring" complaint ==== */
+/* The .fr-section::before aurora was set at opacity:0.9 with light-mint
+   blooms in inconsistent positions; on the homepage that read as random
+   white smudges. Retune to a quieter, deterministic top-only aurora. */
+body:has(.w706-demo) .fr-section::before {
+  opacity: 0.4;
+  background:
+    radial-gradient(1200px 200px at 50% 0%, rgba(126, 240, 210, 0.03) 0%, transparent 80%);
+}
+body:has(.w706-demo) .fr-section--aurora-amber::before {
+  opacity: 0.4;
+  background:
+    radial-gradient(1200px 200px at 50% 0%, rgba(255, 177, 85, 0.035) 0%, transparent 80%);
+}
+/* Tone .fr-card backdrop-filter on the homepage — frosted glass on dark
+   sections reads as inconsistent halos when stacked. Keep the edge ring
+   + ambient inner glow on hover, but skip the saturating blur. */
+body:has(.w706-demo) .fr-card {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* === W706 product spotlight — replaces "ks-proof-rail" up-top ============ */
+.w706-product {
+  margin-top: 38px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 36px;
+  align-items: start;
+}
+@media (max-width: 980px) { .w706-product { grid-template-columns: 1fr; gap: 24px; } }
+.w706-product__lead {
+  font-family: var(--fr-font-display);
+  font-size: clamp(22px, 2.4vw, 30px);
+  line-height: 1.18;
+  font-weight: 540;
+  color: var(--ink-1, #faf2e1);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+.w706-product__lead em {
+  font-style: normal;
+  color: var(--fr-mint, #7ef0d2);
+}
+.w706-product__body {
+  font-family: var(--fr-font-sans);
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink-2, #b5bdb1);
+  max-width: 56ch;
+}
+.w706-product__body p + p { margin-top: 12px; }
+
+/* === W706 aesthetic uplevel — kills "uniform grid / children's hackathon" ==
+   The complaint is real: 4-up grids with equal cells and flat surfaces read
+   as a wireframe. These rules break the symmetry on the highest-trafficked
+   sections (Why kolm, Pricing, FAQ) without touching the underlying card or
+   tier components on other pages. */
+
+/* Why-kolm 2x2: stagger the right column 18px down for editorial offset. */
+body:has(.w706-demo) #why .why-grid > .why-cell:nth-child(2),
+body:has(.w706-demo) #why .why-grid > .why-cell:nth-child(4) {
+  transform: translateY(18px);
+}
+@media (max-width: 760px) {
+  body:has(.w706-demo) #why .why-grid > .why-cell:nth-child(2),
+  body:has(.w706-demo) #why .why-grid > .why-cell:nth-child(4) {
+    transform: none;
+  }
+}
+
+/* Pricing tier — feature tier gets a quiet inner-glow + ring. The others get
+   a more deliberate edge so the row reads as one designed object, not a
+   1fr 1fr 1fr 1fr boilerplate. */
+body:has(.w706-demo) .fr-tier { transition: border-color 220ms ease, transform 220ms ease, box-shadow 220ms ease; }
+body:has(.w706-demo) .fr-tier:hover {
+  transform: translateY(-2px);
+  border-color: rgba(126, 240, 210, 0.30);
+}
+body:has(.w706-demo) .fr-tier--feat {
+  box-shadow:
+    0 0 0 1px rgba(126, 240, 210, 0.18),
+    0 24px 60px -28px rgba(126, 240, 210, 0.30),
+    inset 0 1px 0 0 rgba(126, 240, 210, 0.10);
+}
+
+/* FAQ rows — quiet but distinct hover state so the page feels alive. */
+body:has(.w706-demo) .fr-faq__row { transition: background 200ms ease; }
+body:has(.w706-demo) .fr-faq__row:hover { background: rgba(126, 240, 210, 0.025); }
+
+/* Subtle grain overlay on the page — single fixed element, GPU-cheap.
+   Breaks the flat-color feel that reads as "wireframe". Stops at 60% alpha. */
+body:has(.w706-demo)::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.018;
+  mix-blend-mode: overlay;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.6) 0.5px, transparent 0);
+  background-size: 3px 3px;
+}
+
+/* Receipts table band — give it an asymmetric left rail so it reads as
+   a featured artifact, not a generic data table. */
+body:has(.w706-demo) #receipts .home-receipts {
+  position: relative;
+}
+body:has(.w706-demo) #receipts .home-receipts::before {
+  content: '';
+  position: absolute;
+  left: -16px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: linear-gradient(180deg,
+    rgba(126, 240, 210, 0) 0%,
+    rgba(126, 240, 210, 0.4) 20%,
+    rgba(126, 240, 210, 0.4) 80%,
+    rgba(126, 240, 210, 0) 100%);
+  border-radius: 2px;
+}
+@media (max-width: 760px) {
+  body:has(.w706-demo) #receipts .home-receipts::before { display: none; }
+}
