@@ -1,5 +1,5 @@
 // Recipe service worker: keeps the registry available offline.
-const CACHE = 'kolm-v35-2026-05-24-wave703-recipes-cookbook-bridge';
+const CACHE = 'kolm-v36-2026-05-24-wave704-docs-api-back-link';
 const PRECACHE = [
  '/device',
  '/design-tokens.css',

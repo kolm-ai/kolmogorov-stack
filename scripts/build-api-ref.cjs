@@ -666,6 +666,8 @@ ${navBlock}
 <h1>API reference</h1>
 <p class="lede">The kolm.ai REST surface. ${totalCount} wired routes across ${groupKeys.length} groups, auto-extracted from route source files and re-rendered on every wave. Every endpoint is JSON in, JSON out, bearer-auth on protected routes, and rate-limited per tenant.</p>
 
+<p data-w704="api-landing-bridge" style="margin:-8px 0 14px;font-size:14px;color:var(--ink-faint,#737c73)">Looking for a high-level surface map, curl-friendly examples, and the auth-flow walkthrough? Start at <a href="/api">/api</a>. This page is the exhaustive endpoint catalog.</p>
+
 <p class="totals"><strong>${totalCount} wired routes</strong> &middot; <span class="route-live">${liveCount} reference-ready</span> &middot; <span class="route-stub">${previewCount} source-indexed</span> &middot; ${groupKeys.length} groups &middot; generated ${TODAY} &middot; source <code>src/router.js</code></p>
 
 <div class="partition-toolbar"><label><input type="checkbox" id="hide-preview" onclick="document.body.setAttribute('data-api-filter', this.checked ? 'live' : 'all')"> Show reference-ready routes only</label></div>
