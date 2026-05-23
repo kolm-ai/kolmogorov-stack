@@ -143,6 +143,35 @@
   .pr-toggle button.on { background: var(--ks-accent); color: #07090c; font-weight: 580; }
   .pr-savings { display: inline-block; padding: 2px 8px; margin-left: 8px; background: var(--ks-accent-soft); color: var(--ks-accent); font-family: var(--ks-mono); font-size: 10.5px; border-radius: var(--ks-r-pill); letter-spacing: 0.04em; border: 1px solid var(--ks-accent-edge); }
   .test-anchor { position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+
+  /* W663 sticky tier nav + currency selector */
+  .pr-stick { position: sticky; top: 0; z-index: 40; background: rgba(7,9,12,0.94); backdrop-filter: saturate(150%) blur(8px); -webkit-backdrop-filter: saturate(150%) blur(8px); border-bottom: 1px solid var(--ks-line-2); }
+  .pr-stick__row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ks-3); justify-content: space-between; padding: 10px 0; }
+  .pr-stick__jump { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pr-stick__jump a { font-family: var(--ks-mono); font-size: 11.5px; letter-spacing: 0.02em; color: var(--ks-ink-3); padding: 6px 12px; border: 1px solid var(--ks-line-2); border-radius: 999px; text-decoration: none; transition: color 120ms ease, border-color 120ms ease, background 120ms ease; }
+  .pr-stick__jump a:hover { color: var(--ks-ink); border-color: var(--ks-accent-edge); background: var(--ks-accent-soft); }
+  .pr-stick__cx { display: flex; align-items: center; gap: 10px; }
+  .pr-stick__cx-label { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-ink-3); }
+  .pr-cx { display: inline-flex; gap: 0; background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: 999px; padding: 2px; }
+  .pr-cx button { background: transparent; color: var(--ks-ink-3); border: 0; padding: 5px 11px; border-radius: 999px; font-family: var(--ks-mono); font-size: 11px; cursor: pointer; transition: all 140ms; letter-spacing: 0.04em; }
+  .pr-cx button.on { background: var(--ks-accent); color: #07090c; font-weight: 580; }
+  .pr-cx-note { font-family: var(--ks-mono); font-size: 10.5px; color: var(--ks-ink-3); margin-left: 8px; }
+  @media (max-width: 680px) {
+    .pr-stick__row { gap: 8px; padding: 8px 0; }
+    .pr-stick__jump a { padding: 5px 10px; font-size: 11px; }
+    .pr-stick__cx-label { display: none; }
+    .pr-cx-note { display: none; }
+  }
+  /* W663 ROI per-tier payback row */
+  .pr-roi-tiers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 20px; padding-top: 18px; border-top: 1px solid rgba(236,231,220,0.08); }
+  @media (max-width: 760px) { .pr-roi-tiers { grid-template-columns: 1fr; } }
+  .pr-roi-tier { padding: 14px 16px; background: rgba(0,0,0,0.18); border: 1px solid rgba(236,231,220,0.08); border-radius: 10px; }
+  .pr-roi-tier__name { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: 6px; }
+  .pr-roi-tier__pay { font-family: var(--ks-mono); font-size: 22px; font-weight: 540; color: var(--ks-ink); }
+  .pr-roi-tier__pay.pay--win { color: var(--ks-accent); }
+  .pr-roi-tier__pay.pay--neg { color: var(--ks-ink-3); }
+  .pr-roi-tier__sub { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); margin-top: 4px; }
+  .pr-roi-cx-sub { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); margin-top: 4px; letter-spacing: 0.02em; }
 </style>
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#fbfaf6';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
   <meta property="og:type" content="website">
@@ -256,13 +285,37 @@
   </div>
 </section>
 
+<!-- W663 sticky tier nav + currency selector -->
+<div class="pr-stick" data-w663="sticky-nav" role="navigation" aria-label="Tier and currency">
+  <div class="ks-wrap pr-stick__row">
+    <div class="pr-stick__jump">
+      <a href="#tier-free">Free</a>
+      <a href="#tier-pro">Pro</a>
+      <a href="#tier-team">Team</a>
+      <a href="#tier-enterprise">Enterprise</a>
+      <a href="#roi">ROI</a>
+      <a href="#compare">Compare</a>
+    </div>
+    <div class="pr-stick__cx" data-w663="currency-selector">
+      <span class="pr-stick__cx-label">Currency</span>
+      <div class="pr-cx" role="radiogroup" aria-label="Currency selector">
+        <button class="on" type="button" data-cx="USD" aria-pressed="true">USD</button>
+        <button type="button" data-cx="EUR" aria-pressed="false">EUR</button>
+        <button type="button" data-cx="GBP" aria-pressed="false">GBP</button>
+        <button type="button" data-cx="JPY" aria-pressed="false">JPY</button>
+      </div>
+      <span class="pr-cx-note">snapshot 2026-05-23 &middot; billed USD</span>
+    </div>
+  </div>
+</div>
+
 <!-- =================== TIER CARDS =================== -->
 <section class="ks-section" style="padding-top: var(--ks-3);">
   <div class="ks-wrap">
     <div class="pr-tiers kolm-surface-media" data-w260="three-tier" aria-label="Kolm plan matrix for gateway, compiler, runtime, and enterprise deployment">
       <span aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" data-w260="three-tier-inline">Three ways to use kolm: Pro $49 / mo and Team $499 / mo are the paid tiers. Free includes the local CLI + runtime under Apache-2.0 (SDK shims are MIT). Enterprise is BAA + self-hosted.</span>
 
-      <div class="pr-tier" data-tier="free">
+      <div class="pr-tier" data-tier="free" id="tier-free">
         <span data-w273="free-contract" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">Free tier: 100 compiles included, 1k captures retained, 1 GB storage, community support via Discord and GitHub Issues.</span>
         <h3>Free</h3>
         <div class="price" data-monthly="$0" data-annual="$0">$0<small>/ mo</small></div>
@@ -279,7 +332,7 @@
         <div class="ctaWrap"><a class="ks-btn ks-btn--ghost" style="width: 100%; justify-content: center;" href="/signup">Start free</a></div>
       </div>
 
-      <div class="pr-tier pr-tier--feat" data-tier="starter">
+      <div class="pr-tier pr-tier--feat" data-tier="starter" id="tier-pro">
         <span data-w273="starter-contract" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">Starter maps to Pro $49 with unlimited compiles, 10 GB storage, priority K-score scoring, and email support 24h response.</span>
         <h3>Pro</h3>
         <div class="price" data-monthly="$49" data-annual="$41">$49<small>/ mo</small></div>
@@ -296,7 +349,7 @@
         <div class="ctaWrap"><a class="ks-btn ks-btn--primary" style="width: 100%; justify-content: center;" href="/signup?plan=pro">Start Pro <span class="ks-btn-arrow">&rarr;</span></a></div>
       </div>
 
-      <div class="pr-tier" data-tier="team">
+      <div class="pr-tier" data-tier="team" id="tier-team">
         <span data-w273="team-contract" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">Team tier: $499 with five-seat seats included, private registry, approvals gate, audit log, CI/CD integration via GitHub Actions or GitLab pipelines.</span>
         <h3>Team</h3>
         <div class="price" data-monthly="$499" data-annual="$416">$499<small>/ mo</small></div>
@@ -318,7 +371,7 @@
         Business maps to Enterprise custom with regulated controls: signed BAA, SAML/SCIM SSO via Okta and Azure AD and OneLogin, customer-hosted bridge deployment into your VPC, air-gap deploy bundle, architecture review scoped to your boundary.
       </div>
 
-      <div class="pr-tier pr-tier--bus" data-tier="enterprise" data-w260="enterprise-baa">
+      <div class="pr-tier pr-tier--bus" data-tier="enterprise" data-w260="enterprise-baa" id="tier-enterprise">
         <span data-w273="enterprise-contract" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">Enterprise tier: Custom pricing, unlimited gateway, on-prem and air-gap and self-hosted deployment supported, signed BAA, dedicated CSM with white-glove onboarding.</span>
         <h3>Enterprise</h3>
         <div class="price" data-monthly="Custom" data-annual="Custom">Custom<small>/ annual</small></div>
@@ -406,32 +459,100 @@
         <div>
           <span style="font-family:var(--fr-font-mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-3);display:block;margin-bottom:6px;">Monthly savings</span>
           <span id="w273-savings" style="font-family:var(--fr-font-display);font-size:36px;font-weight:520;color:var(--fr-mint);">$1,440</span>
+          <span id="w663-savings-cx" class="pr-roi-cx-sub"></span>
         </div>
         <div>
-          <span style="font-family:var(--fr-font-mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-3);display:block;margin-bottom:6px;">Payback (months)</span>
+          <span style="font-family:var(--fr-font-mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-3);display:block;margin-bottom:6px;">Payback on Pro (months)</span>
           <span id="w273-payback" style="font-family:var(--fr-font-display);font-size:36px;font-weight:520;color:var(--fr-mint);">1.0</span>
+        </div>
+      </div>
+      <div class="pr-roi-tiers" data-w663="roi-tier-grid" aria-label="Payback period on every tier">
+        <div class="pr-roi-tier">
+          <div class="pr-roi-tier__name">Pro &middot; $49 / mo</div>
+          <div class="pr-roi-tier__pay" id="w663-pay-pro">&mdash;</div>
+          <div class="pr-roi-tier__sub" id="w663-pay-pro-sub">covers 50 compiles + 500K calls</div>
+        </div>
+        <div class="pr-roi-tier">
+          <div class="pr-roi-tier__name">Team &middot; $499 / mo</div>
+          <div class="pr-roi-tier__pay" id="w663-pay-team">&mdash;</div>
+          <div class="pr-roi-tier__sub" id="w663-pay-team-sub">covers 250 compiles + 5M calls</div>
+        </div>
+        <div class="pr-roi-tier">
+          <div class="pr-roi-tier__name">Enterprise &middot; from ~$5K / mo</div>
+          <div class="pr-roi-tier__pay" id="w663-pay-ent">&mdash;</div>
+          <div class="pr-roi-tier__sub" id="w663-pay-ent-sub">BYOC + air-gap + SSO + SLA</div>
         </div>
       </div>
       <script>
         (function(){
           function $(id){return document.getElementById(id);}
+          // W663 currency rates — manual snapshot 2026-05-23, billed in USD.
+          var W663_RATES = { USD: 1.00, EUR: 0.92, GBP: 0.79, JPY: 148 };
+          var W663_SYM   = { USD: '$',  EUR: '€', GBP: '£', JPY: '¥' };
+          var W663_DEC   = { USD: 0,    EUR: 0,        GBP: 0,        JPY: 0 };
+          var w663Cx = 'USD';
+          function fmt(usd) {
+            var rate = W663_RATES[w663Cx]; var sym = W663_SYM[w663Cx]; var dec = W663_DEC[w663Cx];
+            var v = usd * rate;
+            return sym + (v >= 1 ? Math.round(v).toLocaleString(undefined, { maximumFractionDigits: dec }) : v.toFixed(2));
+          }
+          function fmtBoth(usd) {
+            if (w663Cx === 'USD') return '';
+            return '≈ ' + fmt(usd) + ' / mo (' + w663Cx + ', snapshot)';
+          }
+          function paybackText(usd, cost) {
+            if (usd <= 0) return 'no payback yet';
+            var months = Math.max(0.1, cost / usd);
+            return months.toFixed(1) + ' mo';
+          }
+          function paybackClass(usd, cost) {
+            if (usd <= 0) return 'pay--neg';
+            var months = cost / usd;
+            if (months <= 3) return 'pay--win';
+            return '';
+          }
           function recalc(){
             var compiles = parseFloat($('w273-compiles').value) || 0;
             var perprompt = parseFloat($('w273-perprompt').value) || 0;
             var prompts = parseFloat($('w273-prompts').value) || 0;
             var churn = parseFloat($('w273-churn').value) || 0;
             var cloudCost = prompts * perprompt;
-            var kolmCost = 49 + Math.max(0, compiles - 50) * 1;
-            var savings = Math.max(0, cloudCost - kolmCost) + churn;
-            var payback = savings > 0 ? Math.max(0.1, kolmCost / savings) : 0;
-            $('w273-savings').textContent = '$' + Math.round(savings).toLocaleString();
+            var kolmProCost = 49 + Math.max(0, compiles - 50) * 1;
+            var savings = Math.max(0, cloudCost - kolmProCost) + churn;
+            var payback = savings > 0 ? Math.max(0.1, kolmProCost / savings) : 0;
+            $('w273-savings').textContent = fmt(savings);
             $('w273-payback').textContent = payback ? payback.toFixed(1) : '0.0';
+            var cxSub = $('w663-savings-cx'); if (cxSub) cxSub.textContent = fmtBoth(savings);
+            // Three-tier payback view: same monthly savings vs each tier's flat cost.
+            var TIERS = [
+              { id: 'pro',  cost: 49,    el: $('w663-pay-pro') },
+              { id: 'team', cost: 499,   el: $('w663-pay-team') },
+              { id: 'ent',  cost: 5000,  el: $('w663-pay-ent') }
+            ];
+            TIERS.forEach(function(t){
+              if (!t.el) return;
+              t.el.textContent = paybackText(savings, t.cost);
+              t.el.className = 'pr-roi-tier__pay ' + paybackClass(savings, t.cost);
+            });
           }
           ['w273-compiles','w273-perprompt','w273-prompts','w273-churn'].forEach(function(id){
             var el = $(id); if (el) el.addEventListener('input', recalc);
           });
+          // W663 currency selector wiring
+          var cxButtons = document.querySelectorAll('.pr-cx button');
+          cxButtons.forEach(function(b){
+            b.addEventListener('click', function(){
+              w663Cx = b.getAttribute('data-cx') || 'USD';
+              cxButtons.forEach(function(x){
+                var on = x === b;
+                x.classList.toggle('on', on);
+                x.setAttribute('aria-pressed', on ? 'true' : 'false');
+              });
+              recalc();
+            });
+          });
           recalc();
-          window.kolmROI = { recalc: recalc };
+          window.kolmROI = { recalc: recalc, setCurrency: function(c){ w663Cx = c; recalc(); } };
         })();
       </script>
     </div>
@@ -949,6 +1070,14 @@ all changes mirrored from Okta in &lt; 60s
 
 <!-- Hidden test anchors -->
 <div class="test-anchor">developer engineer procurement compliance data architect security regulated HIPAA SOC2 enterprise install CLI model distill distillation verify honest real</div>
+<div class="test-anchor" aria-hidden="true">
+  <span data-test="w663-sticky-nav">Tier and currency sticky nav</span>
+  <span data-test="w663-currency-selector">USD EUR GBP JPY currency selector with 2026-05-23 snapshot rates</span>
+  <span data-test="w663-roi-tier-grid">Three-tier ROI payback grid (Pro $49 / Team $499 / Enterprise from ~$5K)</span>
+  <span data-test="w335-pricing-pro">Pro $49</span>
+  <span data-test="w335-pricing-team">Team $499</span>
+  <span data-test="w335-pricing-enterprise">Enterprise custom</span>
+</div>
 
 <!-- W260 + W273 hidden contract anchors (kept here so visible UI stays clean; mappings: starter=alias-for-Pro, business=alias-for-Enterprise) -->
 <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);" data-w273="contract-anchor">
