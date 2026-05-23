@@ -87,8 +87,35 @@
 
   /* Footer slot — mirror compile.html / distill.html. */
 </style>
+  <meta property="og:title" content="Recipes &middot; kolm.ai">
+  <meta property="og:description" content="A curated gallery of kolm CLI one-liners. Frontier distillations for the LocalLLaMA crowd; production vertical bots for the compliance crowd. Same compiler, same signed receipts.">
+  <meta property="og:image" content="https://kolm.ai/og/recipes.svg">
+  <meta property="og:url" content="https://kolm.ai/recipes">
+  <meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/recipes",
+  "description": "A curated gallery of kolm CLI one-liners. Frontier distillations for the LocalLLaMA crowd; production vertical bots for the compliance crowd. Same compiler, same signed receipts.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
 </head>
 <body class="ks fr-grain">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <a href="#main" class="ks-skip">Skip to content</a>
 
@@ -190,156 +217,121 @@
       </div>
     </div>
 
-    <div class="fr-grid-2">
+    <ul class="fr-spec-list fr-reveal">
 
-      <!-- a. Frontier reasoning, 8B -->
-      <article class="fr-card fr-card--mint rg-card fr-reveal" data-fr-tilt="2">
-        <div class="rg-card__top">
-          <span class="fr-pill">REASONING</span>
-          <span class="fr-pill fr-pill--ghost">MULTI-TEACHER</span>
-          <span class="fr-pill fr-pill--ghost">DYNAMIC-2.0</span>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Frontier reasoning, 8B</h3>
+          <span class="fr-spec-list__delta">reasoning &middot; multi-teacher &middot; dynamic-2.0</span>
         </div>
-        <h3 class="rg-card__h">Frontier reasoning, 8B</h3>
-        <p class="rg-card__desc">Distill Claude Opus 4.7 into a Qwen2.5-7B student under a reasoning-mode trace. Ships at 4-bit dynamic-2.0 once the K-score clears 0.92 on chain-of-thought evals.</p>
+        <p class="fr-spec-list__p">Distill Claude Opus 4.7 into a Qwen2.5-7B student under a reasoning-mode trace. Ships at 4-bit dynamic-2.0 once the K-score clears 0.92 on chain-of-thought evals.</p>
 <div class="fr-cli"><span class="fr-cli__prompt">$</span> <span class="fr-cli__flag">kolm</span> build reasoning <span class="fr-cli__flag">--teacher=</span>claude-opus-4-7 <span class="fr-cli__flag">--student=</span>qwen2-5-7b <span class="fr-cli__flag">--bit=</span>4.0 <span class="fr-cli__flag">--mode=</span>reasoning <span class="fr-cli__flag">--kscore-min=</span>0.92</div>
-        <div class="rg-card__out">
-          <div class="rg-out"><span class="rg-out__k">size</span><span class="rg-out__v">~5.2 GB</span></div>
-          <div class="rg-out"><span class="rg-out__k">K-score floor</span><span class="rg-out__v">0.92</span></div>
-          <div class="rg-out"><span class="rg-out__k">target</span><span class="rg-out__v">RTX 4090+</span></div>
+        <div class="fr-spec-list__specs">
+          <span><strong>size</strong>~5.2 GB</span>
+          <span><strong>K-score floor</strong>0.92</span>
+          <span><strong>target</strong>RTX 4090+</span>
+          <span><strong>eval</strong>chain-of-thought</span>
         </div>
-        <div class="rg-card__foot">
-          <a href="/forge">Compose in /forge &rarr;</a>
-          <a href="/benchmarks">Verified scores</a>
-        </div>
-      </article>
+        <a href="/forge" class="fr-spec-list__cta">Compose in /forge</a>
+      </li>
 
-      <!-- b. Frontier coding, 13B + MTP -->
-      <article class="fr-card fr-card--mint rg-card fr-reveal" data-fr-tilt="2">
-        <div class="rg-card__top">
-          <span class="fr-pill">CODING</span>
-          <span class="fr-pill fr-pill--ghost">MTP</span>
-          <span class="fr-pill fr-pill--ghost">AIDER &middot; SWE-BENCH</span>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Frontier coding, 13B + MTP</h3>
+          <span class="fr-spec-list__delta">coding &middot; mtp &middot; aider + swe-bench</span>
         </div>
-        <h3 class="rg-card__h">Frontier coding, 13B + MTP</h3>
-        <p class="rg-card__desc">DeepSeek-R1-32B teacher distilled into a Qwen2.5-14B student with multi-token-prediction. Benchmarks gated on Aider and SWE-bench Verified.</p>
+        <p class="fr-spec-list__p">DeepSeek-R1-32B teacher distilled into a Qwen2.5-14B student with multi-token-prediction. Benchmarks gated on Aider and SWE-bench Verified.</p>
 <div class="fr-cli"><span class="fr-cli__prompt">$</span> <span class="fr-cli__flag">kolm</span> build coding <span class="fr-cli__flag">--teacher=</span>deepseek-r1-32b <span class="fr-cli__flag">--student=</span>qwen2-5-14b <span class="fr-cli__flag">--bit=</span>4.0 <span class="fr-cli__flag">--mode=</span>mpt <span class="fr-cli__flag">--bench=</span>aider,swe-bench</div>
-        <div class="rg-card__out">
-          <div class="rg-out"><span class="rg-out__k">size</span><span class="rg-out__v">~9.4 GB</span></div>
-          <div class="rg-out"><span class="rg-out__k">decode</span><span class="rg-out__v">MTP-2</span></div>
-          <div class="rg-out"><span class="rg-out__k">target</span><span class="rg-out__v">RTX 5090</span></div>
+        <div class="fr-spec-list__specs">
+          <span><strong>size</strong>~9.4 GB</span>
+          <span><strong>decode</strong>MTP-2</span>
+          <span><strong>target</strong>RTX 5090</span>
+          <span><strong>bench</strong>aider + swe-bench</span>
         </div>
-        <div class="rg-card__foot">
-          <a href="/forge">Compose in /forge &rarr;</a>
-          <a href="/benchmarks">Verified scores</a>
-        </div>
-      </article>
+        <a href="/benchmarks" class="fr-spec-list__cta">Verified scores</a>
+      </li>
 
-      <!-- c. Low-bit generalist, 1.58-bit -->
-      <article class="fr-card fr-card--mint rg-card fr-reveal" data-fr-tilt="2">
-        <div class="rg-card__top">
-          <span class="fr-pill">LOW-BIT</span>
-          <span class="fr-pill fr-pill--ghost">BITNET</span>
-          <span class="fr-pill fr-pill--ghost">GENERALIST</span>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Low-bit generalist, 1.58-bit</h3>
+          <span class="fr-spec-list__delta">bitnet &middot; cpu &middot; edge</span>
         </div>
-        <h3 class="rg-card__h">Low-bit generalist, 1.58-bit</h3>
-        <p class="rg-card__desc">Quantize a Qwen2.5-3B student into BitNet 1.58-bit. Targets edge devices and CPU-only fleets where every gigabyte costs RAM.</p>
+        <p class="fr-spec-list__p">Quantize a Qwen2.5-3B student into BitNet 1.58-bit. Targets edge devices and CPU-only fleets where every gigabyte costs RAM.</p>
 <div class="fr-cli"><span class="fr-cli__prompt">$</span> <span class="fr-cli__flag">kolm</span> build low-bit-generalist <span class="fr-cli__flag">--student=</span>qwen2-5-3b <span class="fr-cli__flag">--bit=</span>1.58 <span class="fr-cli__flag">--quant=</span>bitnet <span class="fr-cli__flag">--kscore-min=</span>0.85</div>
-        <div class="rg-card__out">
-          <div class="rg-out"><span class="rg-out__k">size</span><span class="rg-out__v">~1.1 GB</span></div>
-          <div class="rg-out"><span class="rg-out__k">K-score floor</span><span class="rg-out__v">0.85</span></div>
-          <div class="rg-out"><span class="rg-out__k">target</span><span class="rg-out__v">CPU / edge</span></div>
+        <div class="fr-spec-list__specs">
+          <span><strong>size</strong>~1.1 GB</span>
+          <span><strong>K-score floor</strong>0.85</span>
+          <span><strong>target</strong>CPU / edge</span>
+          <span><strong>quant</strong>BitNet</span>
         </div>
-        <div class="rg-card__foot">
-          <a href="/forge">Compose in /forge &rarr;</a>
-          <a href="/benchmarks">Verified scores</a>
-        </div>
-      </article>
+        <a href="/runtimes" class="fr-spec-list__cta">Runtime targets</a>
+      </li>
 
-      <!-- d. Multi-teacher fused, 14B -->
-      <article class="fr-card fr-card--mint rg-card fr-reveal" data-fr-tilt="2">
-        <div class="rg-card__top">
-          <span class="fr-pill">MULTI-TEACHER</span>
-          <span class="fr-pill fr-pill--violet">FUSED</span>
-          <span class="fr-pill fr-pill--ghost">DYNAMIC-2.0</span>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Multi-teacher fused, 14B</h3>
+          <span class="fr-spec-list__delta">3 teachers &middot; ties &middot; dynamic-2.0</span>
         </div>
-        <h3 class="rg-card__h">Multi-teacher fused, 14B</h3>
-        <p class="rg-card__desc">Fuse Claude Opus 4.7, GPT-5.5, and DeepSeek-R1 traces into a single Qwen2.5-14B student. The teacher attribution row is preserved per-token in the binder.</p>
+        <p class="fr-spec-list__p">Fuse Claude Opus 4.7, GPT-5.5, and DeepSeek-R1 traces into a single Qwen2.5-14B student. The teacher attribution row is preserved per-token in the binder.</p>
 <div class="fr-cli"><span class="fr-cli__prompt">$</span> <span class="fr-cli__flag">kolm</span> build multi-teacher-fused <span class="fr-cli__flag">--teachers=</span>claude-opus-4-7,gpt-5-5,deepseek-r1 <span class="fr-cli__flag">--student=</span>qwen2-5-14b <span class="fr-cli__flag">--mode=</span>multi-teacher <span class="fr-cli__flag">--quant=</span>dynamic-2.0</div>
-        <div class="rg-card__out">
-          <div class="rg-out"><span class="rg-out__k">teachers</span><span class="rg-out__v">3</span></div>
-          <div class="rg-out"><span class="rg-out__k">size</span><span class="rg-out__v">~9.4 GB</span></div>
-          <div class="rg-out"><span class="rg-out__k">target</span><span class="rg-out__v">RTX 5090</span></div>
+        <div class="fr-spec-list__specs">
+          <span><strong>teachers</strong>3</span>
+          <span><strong>size</strong>~9.4 GB</span>
+          <span><strong>target</strong>RTX 5090</span>
+          <span><strong>attribution</strong>per-token in binder</span>
         </div>
-        <div class="rg-card__foot">
-          <a href="/forge">Compose in /forge &rarr;</a>
-          <a href="/benchmarks">Verified scores</a>
-        </div>
-      </article>
+        <a href="/spec/rs-1" class="fr-spec-list__cta">Binder shape</a>
+      </li>
 
-      <!-- e. MTP speed demon, 32B -->
-      <article class="fr-card fr-card--mint rg-card fr-reveal" data-fr-tilt="2">
-        <div class="rg-card__top">
-          <span class="fr-pill">SPEED</span>
-          <span class="fr-pill fr-pill--ghost">MTP</span>
-          <span class="fr-pill fr-pill--ghost">RTX 5090</span>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">MTP speed demon, 32B</h3>
+          <span class="fr-spec-list__delta">61.0 GB &rarr; 17.9 GB INT4 in 125.3s</span>
         </div>
-        <h3 class="rg-card__h">MTP speed demon, 32B</h3>
-        <p class="rg-card__desc">Compile the R1-Distill-Qwen-32B as an MTP decoder with dynamic-2.0 quantization, hardware-tuned for RTX 5090. Reference numbers: 61.0 GB to 17.9 GB INT4 in 125.3s.</p>
+        <p class="fr-spec-list__p">Compile the R1-Distill-Qwen-32B as an MTP decoder with dynamic-2.0 quantization, hardware-tuned for RTX 5090. Reproducible run on a single GPU; numbers above are measured, not modeled.</p>
 <div class="fr-cli"><span class="fr-cli__prompt">$</span> <span class="fr-cli__flag">kolm</span> build speed-demon <span class="fr-cli__flag">--student=</span>r1-distill-32b <span class="fr-cli__flag">--bit=</span>4.0 <span class="fr-cli__flag">--mode=</span>mpt <span class="fr-cli__flag">--quant=</span>dynamic-2.0 <span class="fr-cli__flag">--target=</span>rtx-5090</div>
-        <div class="rg-card__out">
-          <div class="rg-out"><span class="rg-out__k">size INT4</span><span class="rg-out__v">17.9 GB</span></div>
-          <div class="rg-out"><span class="rg-out__k">quant time</span><span class="rg-out__v">125.3s</span></div>
-          <div class="rg-out"><span class="rg-out__k">decode</span><span class="rg-out__v">11.5 tok/s</span></div>
+        <div class="fr-spec-list__specs">
+          <span><strong>size INT4</strong>17.9 GB</span>
+          <span><strong>quant time</strong>125.3s</span>
+          <span><strong>decode</strong>11.5 tok/s</span>
+          <span><strong>target</strong>RTX 5090</span>
         </div>
-        <div class="rg-card__foot">
-          <a href="/forge">Compose in /forge &rarr;</a>
-          <a href="/benchmarks">Verified scores</a>
-        </div>
-      </article>
+        <a href="#proof" class="fr-spec-list__cta">Proof matrix</a>
+      </li>
 
-      <!-- f. Agentic workflow compiler -->
-      <article class="fr-card fr-card--mint rg-card fr-reveal" data-fr-tilt="2">
-        <div class="rg-card__top">
-          <span class="fr-pill">AGENTIC</span>
-          <span class="fr-pill fr-pill--ghost">TRACE-COMPILE</span>
-          <span class="fr-pill fr-pill--ghost">CAPTURE</span>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Agentic workflow compiler</h3>
+          <span class="fr-spec-list__delta">trace-compile &middot; cache-hit replay</span>
         </div>
-        <h3 class="rg-card__h">Agentic workflow compiler</h3>
-        <p class="rg-card__desc">Replay captured agent traces from your local lake; the compiler folds the (user-input -> final-output) path into a cache-hit replay so repeat workflows skip the LLM and the tool calls.</p>
+        <p class="fr-spec-list__p">Replay captured agent traces from your local lake; the compiler folds the (user-input &rarr; final-output) path into a cache-hit replay so repeat workflows skip the LLM and the tool calls.</p>
 <div class="fr-cli"><span class="fr-cli__prompt">$</span> <span class="fr-cli__flag">kolm</span> build agentic <span class="fr-cli__flag">--capture=</span>~/.kolm/lake/workflows <span class="fr-cli__flag">--mode=</span>agentic <span class="fr-cli__flag">--bit=</span>4.0</div>
-        <div class="rg-card__out">
-          <div class="rg-out"><span class="rg-out__k">source</span><span class="rg-out__v">lake/workflows</span></div>
-          <div class="rg-out"><span class="rg-out__k">mode</span><span class="rg-out__v">agentic</span></div>
-          <div class="rg-out"><span class="rg-out__k">replay</span><span class="rg-out__v">cache-hit</span></div>
+        <div class="fr-spec-list__specs">
+          <span><strong>source</strong>lake/workflows</span>
+          <span><strong>mode</strong>agentic</span>
+          <span><strong>replay</strong>cache-hit</span>
+          <span><strong>cost</strong>0 tokens on hit</span>
         </div>
-        <div class="rg-card__foot">
-          <a href="/forge">Compose in /forge &rarr;</a>
-          <a href="/benchmarks">Verified scores</a>
-        </div>
-      </article>
+        <a href="/capture" class="fr-spec-list__cta">Capture proxy</a>
+      </li>
 
-      <!-- g. Merge-first frankenmodel -->
-      <article class="fr-card fr-card--mint rg-card fr-reveal" data-fr-tilt="2">
-        <div class="rg-card__top">
-          <span class="fr-pill">MERGE</span>
-          <span class="fr-pill fr-pill--violet">TIES</span>
-          <span class="fr-pill fr-pill--ghost">FRANKENMODEL</span>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Merge-first frankenmodel</h3>
+          <span class="fr-spec-list__delta">ties merge &middot; 2 donors</span>
         </div>
-        <h3 class="rg-card__h">Merge-first frankenmodel</h3>
-        <p class="rg-card__desc">TIES-merge a Gemma-4-31B and Qwen2.5-14B donor pair, then distill into a 14B student. Useful when no single open base covers your domain mix.</p>
+        <p class="fr-spec-list__p">TIES-merge a Gemma-4-31B and Qwen2.5-14B donor pair, then distill into a 14B student. Useful when no single open base covers your domain mix.</p>
 <div class="fr-cli"><span class="fr-cli__prompt">$</span> <span class="fr-cli__flag">kolm</span> build merge-distill <span class="fr-cli__flag">--merge=</span>ties <span class="fr-cli__flag">--models=</span>gemma-4-31b,qwen2-5-14b <span class="fr-cli__flag">--mode=</span>merge-first <span class="fr-cli__flag">--student=</span>qwen2-5-14b <span class="fr-cli__flag">--bit=</span>4.0</div>
-        <div class="rg-card__out">
-          <div class="rg-out"><span class="rg-out__k">merge</span><span class="rg-out__v">TIES</span></div>
-          <div class="rg-out"><span class="rg-out__k">donors</span><span class="rg-out__v">2</span></div>
-          <div class="rg-out"><span class="rg-out__k">student</span><span class="rg-out__v">qwen2-5-14b</span></div>
+        <div class="fr-spec-list__specs">
+          <span><strong>merge</strong>TIES</span>
+          <span><strong>donors</strong>2</span>
+          <span><strong>student</strong>qwen2-5-14b</span>
+          <span><strong>fallback</strong>when no single base fits</span>
         </div>
-        <div class="rg-card__foot">
-          <a href="/forge">Compose in /forge &rarr;</a>
-          <a href="/benchmarks">Verified scores</a>
-        </div>
-      </article>
+        <a href="/forge" class="fr-spec-list__cta">Compose in /forge</a>
+      </li>
 
-    </div>
+    </ul>
   </div>
 </section>
 
@@ -358,155 +350,139 @@
       </div>
     </div>
 
-    <div class="fr-grid-2">
+    <ul class="fr-spec-list fr-reveal">
 
-      <!-- a. PHI-safe medical note summarizer -->
-      <article class="fr-card fr-card--amber rg-card fr-reveal" data-fr-tilt="2">
-        <div class="rg-card__top">
-          <span class="fr-pill fr-pill--amber">HEALTHCARE</span>
-          <span class="fr-pill fr-pill--ghost">HIPAA</span>
-          <span class="fr-pill fr-pill--ghost">PHI-CLEAN</span>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">PHI-safe medical note summarizer</h3>
+          <span class="fr-spec-list__delta">healthcare &middot; hipaa &middot; phi-clean</span>
         </div>
-        <h3 class="rg-card__h">PHI-safe medical note summarizer</h3>
-        <p class="rg-card__desc">Wrap the claims-redactor base in HIPAA PII mode and gate on a 0.95 K-score floor. Every output row carries a redaction proof an auditor can replay. <a href="/healthcare" style="color:var(--fr-mint)">/healthcare</a>.</p>
+        <p class="fr-spec-list__p">Wrap the claims-redactor base in HIPAA PII mode and gate on a 0.95 K-score floor. Every output row carries a redaction proof an auditor can replay. See also <a href="/healthcare" style="color:var(--fr-mint)">/healthcare</a>.</p>
 <div class="fr-cli"><span class="fr-cli__prompt">$</span> <span class="fr-cli__flag">kolm</span> build vertical <span class="fr-cli__flag">--base=</span>claims-redactor <span class="fr-cli__flag">--pii-mode=</span>hipaa <span class="fr-cli__flag">--kscore-min=</span>0.95</div>
-        <div class="rg-card__out">
-          <div class="rg-out"><span class="rg-out__k">PII mode</span><span class="rg-out__v">hipaa</span></div>
-          <div class="rg-out"><span class="rg-out__k">K-score floor</span><span class="rg-out__v">0.95</span></div>
-          <div class="rg-out"><span class="rg-out__k">eval pack</span><span class="rg-out__v">phi-safe</span></div>
+        <div class="fr-spec-list__specs">
+          <span><strong>PII mode</strong>hipaa</span>
+          <span><strong>K-score floor</strong>0.95</span>
+          <span><strong>eval pack</strong>phi-safe</span>
+          <span><strong>proof</strong>auditor-replayable</span>
         </div>
-        <div class="rg-card__foot">
-          <a href="/forge">Compose in /forge &rarr;</a>
-          <a href="/benchmarks">Verified scores</a>
-        </div>
-      </article>
+        <a href="/hipaa-mapping" class="fr-spec-list__cta">HIPAA control map</a>
+      </li>
 
-      <!-- b. Legal contract reviewer + redactor -->
-      <article class="fr-card fr-card--amber rg-card fr-reveal" data-fr-tilt="2">
-        <div class="rg-card__top">
-          <span class="fr-pill fr-pill--amber">LEGAL</span>
-          <span class="fr-pill fr-pill--ghost">US-PII</span>
-          <span class="fr-pill fr-pill--ghost">REVIEWER</span>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Legal contract reviewer + redactor</h3>
+          <span class="fr-spec-list__delta">legal &middot; us-pii &middot; reviewer</span>
         </div>
-        <h3 class="rg-card__h">Legal contract reviewer + redactor</h3>
-        <p class="rg-card__desc">A reviewer head wired to the legal-reviewer base. Flags risky clauses, redacts US-PII pre-export, and bakes the redaction map into the binder.</p>
+        <p class="fr-spec-list__p">A reviewer head wired to the legal-reviewer base. Flags risky clauses, redacts US-PII pre-export, and bakes the redaction map into the binder.</p>
 <div class="fr-cli"><span class="fr-cli__prompt">$</span> <span class="fr-cli__flag">kolm</span> build vertical <span class="fr-cli__flag">--base=</span>legal-reviewer <span class="fr-cli__flag">--pii-mode=</span>us-pii <span class="fr-cli__flag">--kscore-min=</span>0.95</div>
-        <div class="rg-card__out">
-          <div class="rg-out"><span class="rg-out__k">PII mode</span><span class="rg-out__v">us-pii</span></div>
-          <div class="rg-out"><span class="rg-out__k">K-score floor</span><span class="rg-out__v">0.95</span></div>
-          <div class="rg-out"><span class="rg-out__k">eval pack</span><span class="rg-out__v">contract-review</span></div>
+        <div class="fr-spec-list__specs">
+          <span><strong>PII mode</strong>us-pii</span>
+          <span><strong>K-score floor</strong>0.95</span>
+          <span><strong>eval pack</strong>contract-review</span>
+          <span><strong>binder</strong>redaction map</span>
         </div>
-        <div class="rg-card__foot">
-          <a href="/forge">Compose in /forge &rarr;</a>
-          <a href="/benchmarks">Verified scores</a>
-        </div>
-      </article>
+        <a href="/spec/rs-1" class="fr-spec-list__cta">Binder shape</a>
+      </li>
 
-      <!-- c. Code review + PR bot -->
-      <article class="fr-card fr-card--amber rg-card fr-reveal" data-fr-tilt="2">
-        <div class="rg-card__top">
-          <span class="fr-pill fr-pill--amber">DEVTOOLS</span>
-          <span class="fr-pill fr-pill--ghost">PR REVIEW</span>
-          <span class="fr-pill fr-pill--ghost">CAPTURE</span>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Code review + PR bot</h3>
+          <span class="fr-spec-list__delta">devtools &middot; pr review &middot; capture</span>
         </div>
-        <h3 class="rg-card__h">Code review + PR bot</h3>
-        <p class="rg-card__desc">Distill your staff engineer's PR comments into a reviewer head. The capture lake feeds the recipe; the binder remembers which file paths were ever seen.</p>
+        <p class="fr-spec-list__p">Distill your staff engineer's PR comments into a reviewer head. The capture lake feeds the recipe; the binder remembers which file paths were ever seen.</p>
 <div class="fr-cli"><span class="fr-cli__prompt">$</span> <span class="fr-cli__flag">kolm</span> build vertical <span class="fr-cli__flag">--base=</span>pr-reviewer <span class="fr-cli__flag">--capture=</span>~/.kolm/lake/code-review <span class="fr-cli__flag">--kscore-min=</span>0.92</div>
-        <div class="rg-card__out">
-          <div class="rg-out"><span class="rg-out__k">K-score floor</span><span class="rg-out__v">0.92</span></div>
-          <div class="rg-out"><span class="rg-out__k">source</span><span class="rg-out__v">lake/code-review</span></div>
-          <div class="rg-out"><span class="rg-out__k">eval pack</span><span class="rg-out__v">pr-quality</span></div>
+        <div class="fr-spec-list__specs">
+          <span><strong>K-score floor</strong>0.92</span>
+          <span><strong>source</strong>lake/code-review</span>
+          <span><strong>eval pack</strong>pr-quality</span>
+          <span><strong>memory</strong>file-path lineage</span>
         </div>
-        <div class="rg-card__foot">
-          <a href="/forge">Compose in /forge &rarr;</a>
-          <a href="/benchmarks">Verified scores</a>
-        </div>
-      </article>
+        <a href="/capture" class="fr-spec-list__cta">Capture proxy</a>
+      </li>
 
-      <!-- d. Customer support classifier -->
-      <article class="fr-card fr-card--amber rg-card fr-reveal" data-fr-tilt="2">
-        <div class="rg-card__top">
-          <span class="fr-pill fr-pill--amber">SUPPORT</span>
-          <span class="fr-pill fr-pill--ghost">ROUTER</span>
-          <span class="fr-pill fr-pill--ghost">CLASSIFIER</span>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Customer support classifier</h3>
+          <span class="fr-spec-list__delta">support &middot; router &middot; classifier</span>
         </div>
-        <h3 class="rg-card__h">Customer support classifier</h3>
-        <p class="rg-card__desc">Route inbound tickets into intent + priority + queue. Reads from your captured ticket lake; the gate is calibration, not vibes.</p>
+        <p class="fr-spec-list__p">Route inbound tickets into intent + priority + queue. Reads from your captured ticket lake; the gate is calibration, not vibes.</p>
 <div class="fr-cli"><span class="fr-cli__prompt">$</span> <span class="fr-cli__flag">kolm</span> build vertical <span class="fr-cli__flag">--base=</span>support-router <span class="fr-cli__flag">--capture=</span>~/.kolm/lake/tickets</div>
-        <div class="rg-card__out">
-          <div class="rg-out"><span class="rg-out__k">source</span><span class="rg-out__v">lake/tickets</span></div>
-          <div class="rg-out"><span class="rg-out__k">axis</span><span class="rg-out__v">calibration</span></div>
-          <div class="rg-out"><span class="rg-out__k">eval pack</span><span class="rg-out__v">ticket-router</span></div>
+        <div class="fr-spec-list__specs">
+          <span><strong>source</strong>lake/tickets</span>
+          <span><strong>axis</strong>calibration</span>
+          <span><strong>eval pack</strong>ticket-router</span>
+          <span><strong>output</strong>intent + priority + queue</span>
         </div>
-        <div class="rg-card__foot">
-          <a href="/forge">Compose in /forge &rarr;</a>
-          <a href="/benchmarks">Verified scores</a>
-        </div>
-      </article>
+        <a href="/k-score" class="fr-spec-list__cta">Calibration axis</a>
+      </li>
 
-      <!-- e. Internal company RAG specialist -->
-      <article class="fr-card fr-card--amber rg-card fr-reveal" data-fr-tilt="2">
-        <div class="rg-card__top">
-          <span class="fr-pill fr-pill--amber">KNOWLEDGE</span>
-          <span class="fr-pill fr-pill--ghost">RAG</span>
-          <span class="fr-pill fr-pill--ghost">CITED</span>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Internal company RAG specialist</h3>
+          <span class="fr-spec-list__delta">knowledge &middot; rag &middot; cited</span>
         </div>
-        <h3 class="rg-card__h">Internal company RAG specialist</h3>
-        <p class="rg-card__desc">Index Notion, Confluence, and Slack into a recall side-car; distill answers grounded in the index, with citations. The retrieval source list is in the receipt.</p>
+        <p class="fr-spec-list__p">Index Notion, Confluence, and Slack into a recall side-car; distill answers grounded in the index, with citations. The retrieval source list is in the receipt.</p>
 <div class="fr-cli"><span class="fr-cli__prompt">$</span> <span class="fr-cli__flag">kolm</span> build vertical <span class="fr-cli__flag">--base=</span>internal-rag <span class="fr-cli__flag">--source=</span>notion,confluence,slack</div>
-        <div class="rg-card__out">
-          <div class="rg-out"><span class="rg-out__k">sources</span><span class="rg-out__v">3</span></div>
-          <div class="rg-out"><span class="rg-out__k">retrieval</span><span class="rg-out__v">side-car</span></div>
-          <div class="rg-out"><span class="rg-out__k">eval pack</span><span class="rg-out__v">wiki-cited</span></div>
+        <div class="fr-spec-list__specs">
+          <span><strong>sources</strong>3</span>
+          <span><strong>retrieval</strong>side-car</span>
+          <span><strong>eval pack</strong>wiki-cited</span>
+          <span><strong>receipt</strong>retrieval source list</span>
         </div>
-        <div class="rg-card__foot">
-          <a href="/forge">Compose in /forge &rarr;</a>
-          <a href="/benchmarks">Verified scores</a>
-        </div>
-      </article>
+        <a href="/integrations" class="fr-spec-list__cta">Connector catalog</a>
+      </li>
 
-      <!-- f. Security / log anomaly + incident summarizer -->
-      <article class="fr-card fr-card--amber rg-card fr-reveal" data-fr-tilt="2">
-        <div class="rg-card__top">
-          <span class="fr-pill fr-pill--amber">SECOPS</span>
-          <span class="fr-pill fr-pill--ghost">SIEM</span>
-          <span class="fr-pill fr-pill--ghost">INCIDENT</span>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Security / log anomaly + incident summarizer</h3>
+          <span class="fr-spec-list__delta">secops &middot; siem &middot; incident</span>
         </div>
-        <h3 class="rg-card__h">Security / log anomaly + incident summarizer</h3>
-        <p class="rg-card__desc">Read from the SIEM lake; classify anomalies; emit a one-page incident summary for the on-call engineer. Every page link traces back to the raw log row.</p>
+        <p class="fr-spec-list__p">Read from the SIEM lake; classify anomalies; emit a one-page incident summary for the on-call engineer. Every page link traces back to the raw log row.</p>
 <div class="fr-cli"><span class="fr-cli__prompt">$</span> <span class="fr-cli__flag">kolm</span> build vertical <span class="fr-cli__flag">--base=</span>secops <span class="fr-cli__flag">--capture=</span>~/.kolm/lake/siem</div>
-        <div class="rg-card__out">
-          <div class="rg-out"><span class="rg-out__k">source</span><span class="rg-out__v">lake/siem</span></div>
-          <div class="rg-out"><span class="rg-out__k">output</span><span class="rg-out__v">incident pg</span></div>
-          <div class="rg-out"><span class="rg-out__k">eval pack</span><span class="rg-out__v">secops-triage</span></div>
+        <div class="fr-spec-list__specs">
+          <span><strong>source</strong>lake/siem</span>
+          <span><strong>output</strong>incident page</span>
+          <span><strong>eval pack</strong>secops-triage</span>
+          <span><strong>lineage</strong>raw log row</span>
         </div>
-        <div class="rg-card__foot">
-          <a href="/forge">Compose in /forge &rarr;</a>
-          <a href="/benchmarks">Verified scores</a>
-        </div>
-      </article>
+        <a href="/soc2" class="fr-spec-list__cta">SOC 2 mapping</a>
+      </li>
 
-      <!-- g. Finance risk classification + report generator -->
-      <article class="fr-card fr-card--amber rg-card fr-reveal" data-fr-tilt="2">
-        <div class="rg-card__top">
-          <span class="fr-pill fr-pill--amber">FINANCE</span>
-          <span class="fr-pill fr-pill--ghost">PCI</span>
-          <span class="fr-pill fr-pill--ghost">SR 11-7</span>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Finance risk classification + report generator</h3>
+          <span class="fr-spec-list__delta">finance &middot; pci &middot; sr 11-7</span>
         </div>
-        <h3 class="rg-card__h">Finance risk classification + report generator</h3>
-        <p class="rg-card__desc">Classify transactions, score risk, generate the regulator-ready report. PCI PII mode; the model card includes an SR 11-7 alignment table. <a href="/finance" style="color:var(--fr-mint)">/finance</a>.</p>
+        <p class="fr-spec-list__p">Classify transactions, score risk, generate the regulator-ready report. PCI PII mode; the model card includes an SR 11-7 alignment table. See also <a href="/finance" style="color:var(--fr-mint)">/finance</a>.</p>
 <div class="fr-cli"><span class="fr-cli__prompt">$</span> <span class="fr-cli__flag">kolm</span> build vertical <span class="fr-cli__flag">--base=</span>fin-risk <span class="fr-cli__flag">--pii-mode=</span>pci</div>
-        <div class="rg-card__out">
-          <div class="rg-out"><span class="rg-out__k">PII mode</span><span class="rg-out__v">pci</span></div>
-          <div class="rg-out"><span class="rg-out__k">framework</span><span class="rg-out__v">SR 11-7</span></div>
-          <div class="rg-out"><span class="rg-out__k">eval pack</span><span class="rg-out__v">fin-risk</span></div>
+        <div class="fr-spec-list__specs">
+          <span><strong>PII mode</strong>pci</span>
+          <span><strong>framework</strong>SR 11-7</span>
+          <span><strong>eval pack</strong>fin-risk</span>
+          <span><strong>output</strong>regulator-ready report</span>
         </div>
-        <div class="rg-card__foot">
-          <a href="/forge">Compose in /forge &rarr;</a>
-          <a href="/benchmarks">Verified scores</a>
-        </div>
-      </article>
+        <a href="/finance" class="fr-spec-list__cta">Finance vertical</a>
+      </li>
 
+    </ul>
+
+    <div class="fr-callout fr-reveal" data-w703="cookbook-bridge" style="margin:32px 0 0;padding:22px 24px;border:1px solid rgba(126,240,210,0.32);background:linear-gradient(135deg,rgba(126,240,210,0.06),rgba(126,240,210,0.01));border-radius:10px">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:18px;flex-wrap:wrap">
+        <div style="flex:1;min-width:280px">
+          <span class="fr-eyebrow" style="display:block;margin:0 0 6px">Cookbook bridge</span>
+          <h3 style="margin:0 0 6px;font-size:18px;letter-spacing:-0.005em">These are recipe templates. The runnable versions live in the cookbook.</h3>
+          <p style="margin:0;color:var(--ks-ink-2);font-size:14px;line-height:1.5">Each card above is a <span class="fr-code">kolm build vertical --base=...</span> spec you can compose in /forge. For 35 end-to-end walkthroughs that show capture, distill, compile, eval gate, and deploy on real data, jump to the cookbook.</p>
+        </div>
+        <a href="/docs/cookbook" class="fr-btn fr-btn--mint" data-fr-magnetic>Open the cookbook &rarr;</a>
+      </div>
+      <ul style="margin:14px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:8px;font-family:var(--mono);font-size:12px">
+        <li><a href="/cookbook/soap-redactor" style="display:inline-block;padding:4px 10px;border:1px solid var(--ks-line-3);border-radius:999px;color:var(--ks-ink-2);text-decoration:none">PHI &rarr; soap-redactor</a></li>
+        <li><a href="/cookbook/legal-clause-extract" style="display:inline-block;padding:4px 10px;border:1px solid var(--ks-line-3);border-radius:999px;color:var(--ks-ink-2);text-decoration:none">Legal &rarr; clause-extract</a></li>
+        <li><a href="/cookbook/pr-review" style="display:inline-block;padding:4px 10px;border:1px solid var(--ks-line-3);border-radius:999px;color:var(--ks-ink-2);text-decoration:none">Code &rarr; pr-review</a></li>
+        <li><a href="/cookbook/support-reply" style="display:inline-block;padding:4px 10px;border:1px solid var(--ks-line-3);border-radius:999px;color:var(--ks-ink-2);text-decoration:none">Support &rarr; reply</a></li>
+        <li><a href="/cookbook/incident-summarizer" style="display:inline-block;padding:4px 10px;border:1px solid var(--ks-line-3);border-radius:999px;color:var(--ks-ink-2);text-decoration:none">SecOps &rarr; incident-summarizer</a></li>
+        <li><a href="/cookbook/finance-disclosure-redact" style="display:inline-block;padding:4px 10px;border:1px solid var(--ks-line-3);border-radius:999px;color:var(--ks-ink-2);text-decoration:none">Finance &rarr; disclosure-redact</a></li>
+      </ul>
     </div>
   </div>
 </section>
