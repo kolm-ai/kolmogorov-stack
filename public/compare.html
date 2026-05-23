@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>kolm vs LoRAX, Predibase, OpenPipe, DIY, hyperscaler &middot; kolm.ai</title>
-<meta name="description" content="Ten axes that separate a kolm-compiled signed artifact from every adjacent build-or-serve stack. Side by side, every claim cited by the shipping wave that delivered it.">
+<meta name="description" content="Fourteen axes that separate a kolm-compiled signed artifact from every adjacent build-or-serve stack. Side by side, every claim cited by the shipping wave that delivered it, plus 17 deeper 1:1 teardowns.">
 <meta name="theme-color" content="#07090c">
 <meta property="og:title" content="kolm vs LoRAX, Predibase, OpenPipe, DIY, hyperscaler &middot; kolm.ai">
-<meta property="og:description" content="Ten axes that separate a kolm-compiled signed artifact from every adjacent build-or-serve stack.">
+<meta property="og:description" content="Fourteen axes that separate a kolm-compiled signed artifact from every adjacent build-or-serve stack.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/compare">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -39,10 +39,40 @@
   .cmp-card .when { padding: 10px 14px; background: #0c0e12; border: 1px dashed var(--ks-line-2); border-radius: var(--ks-r-md); font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-2); line-height: 1.5; }
   .cmp-card .when b { color: var(--ks-accent); font-weight: 600; }
   .ks-legend { display: flex; gap: var(--ks-4); flex-wrap: wrap; font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-3); padding: var(--ks-3); }
+  .vs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--ks-3); }
+  .vs-cluster { margin-bottom: var(--ks-6); }
+  .vs-cluster__title { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-ink-3); margin: 0 0 var(--ks-3); padding-bottom: var(--ks-2); border-bottom: 1px solid var(--ks-line-2); }
+  .vs-link { display: flex; flex-direction: column; gap: 6px; padding: var(--ks-4); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); text-decoration: none; transition: border-color 120ms ease, transform 120ms ease; }
+  .vs-link:hover { border-color: var(--ks-accent-edge); transform: translateY(-1px); text-decoration: none; }
+  .vs-link__tag { font-family: var(--ks-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-accent); }
+  .vs-link__title { font-size: 15px; font-weight: 580; color: var(--ks-ink); }
+  .vs-link__hint { font-size: 12.5px; color: var(--ks-ink-2); line-height: 1.5; }
   .test-anchor { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/compare",
+  "description": "Fourteen axes that separate a kolm-compiled signed artifact from every adjacent build-or-serve stack. Side by side, every claim cited by the shipping wave that delivered it.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
 </head>
 <body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <a href="#main" class="ks-skip">Skip to content</a>
 
@@ -85,7 +115,7 @@
 <section class="ks-section ks-section--hero">
   <div class="ks-wrap">
     <span class="ks-eyebrow">For developers, engineers, and architects weighing the build-or-serve trade-off</span>
-    <h1 class="ks-h1" style="margin-top: var(--ks-3);">kolm vs the adjacent stacks: ten axes, no marketing.</h1>
+    <h1 class="ks-h1" style="margin-top: var(--ks-3);">kolm vs the adjacent stacks: fourteen axes, no marketing.</h1>
     <p class="ks-lede">Honest column-by-column. We give competitors credit where they earn it and we name the axes where we are not the right fit. Pick the row that matters most to your team and read across.</p>
     <div style="display: flex; gap: var(--ks-3); flex-wrap: wrap; margin-top: var(--ks-5);">
       <a href="/quickstart" class="ks-btn ks-btn--primary ks-btn--lg">Try kolm in 10 min <span class="ks-btn-arrow">&rarr;</span></a>
@@ -99,8 +129,8 @@
   <div class="ks-wrap">
     <div class="ks-shead">
       <span class="ks-eyebrow">The matrix</span>
-      <h2 class="ks-h2">Ten axes, six columns.</h2>
-      <p class="ks-lede">Read the axis on the left, then walk right. Every cell is the most accurate one-line summary we can write of the named stack in its current public posture, as of 2026-05-22.</p>
+      <h2 class="ks-h2">Fourteen axes, six columns.</h2>
+      <p class="ks-lede">Read the axis on the left, then walk right. Every cell is the most accurate one-line summary we can write of the named stack in its current public posture, as of 2026-05-23. Pricing axes cite each vendor&rsquo;s published rate sheet; capability axes cite each vendor&rsquo;s own product docs. If you spot a stale or incorrect cell, <a href="mailto:rodneyyesep@gmail.com?subject=compare.html%20correction" style="color:var(--ks-accent);border-bottom:1px solid var(--ks-accent-edge)">tell us</a> and we&rsquo;ll fix it in the next deploy.</p>
     </div>
 
     <div class="ks-legend">
@@ -212,6 +242,42 @@
             <td><span class="ico ico-p"></span>Per-deploy + per-token pricing.</td>
             <td><span class="ico ico-p"></span>Cheapest software, expensive labor.</td>
             <td><span class="ico ico-n"></span>Per-token + dedicated capacity premiums.</td>
+          </tr>
+          <tr>
+            <td class="ax">INT4 quantize verified on real hardware</td>
+            <td class="k"><b>Yes</b><span class="ico ico-y"></span>NF4 + double quantize via bitsandbytes; matrix from 0.5B to 32B verified on RTX 5090.</td>
+            <td><span class="ico ico-p"></span>vLLM serves int4; quantize step is your own conversion.</td>
+            <td><span class="ico ico-p"></span>Quantize selectable per fine-tune; runtime hosted.</td>
+            <td><span class="ico ico-p"></span>Inference precision vendor-managed.</td>
+            <td><span class="ico ico-p"></span>You assemble bitsandbytes + AutoGPTQ + AWQ yourself.</td>
+            <td><span class="ico ico-p"></span>Vendor chooses runtime precision; opaque to buyer.</td>
+          </tr>
+          <tr>
+            <td class="ax">Gateway capture in front of any provider</td>
+            <td class="k"><b>Yes</b><span class="ico ico-y"></span>OpenAI/Anthropic/vLLM/TGI drop-in; tenant-fenced redacted captures land in your VPC.</td>
+            <td><span class="ico ico-n"></span>Inference layer; capture is out of scope.</td>
+            <td><span class="ico ico-p"></span>Captures inside the Predibase platform only.</td>
+            <td><span class="ico ico-y"></span>Workflow-capture in front of OpenAI is the on-ramp.</td>
+            <td><span class="ico ico-n"></span>Wire LiteLLM / OpenLLMetry / Helicone yourself.</td>
+            <td><span class="ico ico-n"></span>Vendor logs only; not a capture-for-training surface.</td>
+          </tr>
+          <tr>
+            <td class="ax">Open published artifact format spec</td>
+            <td class="k"><b>Yes</b><span class="ico ico-y"></span>.kolm format v1 spec under Apache-2.0; reference implementation + verifier published.</td>
+            <td><span class="ico ico-p"></span>Open source ecosystem formats (GGUF, safetensors); no signed-receipt envelope.</td>
+            <td><span class="ico ico-n"></span>Vendor-internal artifact representation.</td>
+            <td><span class="ico ico-n"></span>Vendor-internal artifact representation.</td>
+            <td><span class="ico ico-y"></span>You define your own; no published spec to align around.</td>
+            <td><span class="ico ico-n"></span>Vendor-proprietary, no public spec.</td>
+          </tr>
+          <tr>
+            <td class="ax">Published cost per 1M tokens, INT4 7B student</td>
+            <td class="k"><b>~$0.08</b><span class="ico ico-y"></span>Amortized RTX A6000 power + a monthly re-distill, no per-token markup.</td>
+            <td><span class="ico ico-y"></span>Your hardware, no software markup.</td>
+            <td><span class="ico ico-p"></span>Per-deploy + per-token; see vendor rate sheet.</td>
+            <td><span class="ico ico-p"></span>Per-call pricing; see vendor rate sheet.</td>
+            <td><span class="ico ico-y"></span>Your hardware, your labor; no software markup.</td>
+            <td><span class="ico ico-n"></span>Per-token + dedicated-capacity uplift on top.</td>
           </tr>
         </tbody>
       </table>
@@ -339,6 +405,125 @@
 
 <section class="ks-section">
   <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Deeper 1:1 comparisons</span>
+      <h2 class="ks-h2">Want the full teardown of any single stack?</h2>
+      <p class="ks-lede">Seventeen long-form pages, one per incumbent. Each walks the architectural axes the matrix above can only summarize: capture surface, distillation loop, eval gate, runtime ABI, receipt model, pricing math. Pricing cites each vendor&rsquo;s published rate sheet; capability claims cite their own product docs.</p>
+    </div>
+
+    <div class="vs-cluster">
+      <h3 class="vs-cluster__title">Frontier providers &amp; hyperscalers</h3>
+      <div class="vs-grid">
+        <a href="/how-vs-anthropic" class="vs-link">
+          <span class="vs-link__tag">Build-or-buy</span>
+          <span class="vs-link__title">vs Anthropic</span>
+          <span class="vs-link__hint">Distill Claude into a signed specialist that runs in your VPC.</span>
+        </a>
+        <a href="/how-vs-openai-fine-tune" class="vs-link">
+          <span class="vs-link__tag">Build-or-buy</span>
+          <span class="vs-link__title">vs OpenAI fine-tune</span>
+          <span class="vs-link__hint">Engineering teardown of the OpenAI hosted fine-tune path.</span>
+        </a>
+        <a href="/how-vs-hyperscaler" class="vs-link">
+          <span class="vs-link__tag">Build-or-buy</span>
+          <span class="vs-link__title">vs hyperscaler</span>
+          <span class="vs-link__hint">Bedrock/Vertex/Azure fine-tune compared on receipts and exit.</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="vs-cluster">
+      <h3 class="vs-cluster__title">Fine-tune SaaS &amp; LoRA platforms</h3>
+      <div class="vs-grid">
+        <a href="/how-vs-predibase" class="vs-link">
+          <span class="vs-link__tag">Architecture</span>
+          <span class="vs-link__title">vs Predibase (engineering)</span>
+          <span class="vs-link__hint">How the compile loop differs from a managed fine-tune cloud.</span>
+        </a>
+        <a href="/vs-predibase" class="vs-link">
+          <span class="vs-link__tag">Category</span>
+          <span class="vs-link__title">vs Predibase (category)</span>
+          <span class="vs-link__hint">When to keep Predibase, when to migrate to a compiler.</span>
+        </a>
+        <a href="/how-vs-openpipe" class="vs-link">
+          <span class="vs-link__tag">Architecture</span>
+          <span class="vs-link__title">vs OpenPipe (engineering)</span>
+          <span class="vs-link__hint">Capture &rarr; LoRA compared with capture &rarr; signed artifact.</span>
+        </a>
+        <a href="/vs-openpipe" class="vs-link">
+          <span class="vs-link__tag">Category</span>
+          <span class="vs-link__title">vs OpenPipe (category)</span>
+          <span class="vs-link__hint">Hosted runtime vs portable .kolm in your runtime of choice.</span>
+        </a>
+        <a href="/how-vs-lorax" class="vs-link">
+          <span class="vs-link__tag">Architecture</span>
+          <span class="vs-link__title">vs LoRAX</span>
+          <span class="vs-link__hint">Multi-adapter serving compared with single-artifact compile.</span>
+        </a>
+        <a href="/vs-openai-fine-tune" class="vs-link">
+          <span class="vs-link__tag">Category</span>
+          <span class="vs-link__title">vs OpenAI fine-tune (category)</span>
+          <span class="vs-link__hint">When the hosted fine-tune wins, when the compiler wins.</span>
+        </a>
+        <a href="/vs-fine-tune" class="vs-link">
+          <span class="vs-link__tag">Approach</span>
+          <span class="vs-link__title">vs fine-tune (generic)</span>
+          <span class="vs-link__hint">Why &ldquo;just fine-tune&rdquo; understates the production loop.</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="vs-cluster">
+      <h3 class="vs-cluster__title">Runtime &amp; serving stacks</h3>
+      <div class="vs-grid">
+        <a href="/vs-ollama" class="vs-link">
+          <span class="vs-link__tag">Runtime</span>
+          <span class="vs-link__title">vs Ollama</span>
+          <span class="vs-link__hint">Local model runner vs end-to-end compile + sign + serve.</span>
+        </a>
+        <a href="/vs-together" class="vs-link">
+          <span class="vs-link__tag">Inference cloud</span>
+          <span class="vs-link__title">vs Together AI</span>
+          <span class="vs-link__hint">Hosted inference vs build-once, deploy-anywhere artifacts.</span>
+        </a>
+        <a href="/how-vs-diy" class="vs-link">
+          <span class="vs-link__tag">Build-it-yourself</span>
+          <span class="vs-link__title">vs DIY (Axolotl/Triton)</span>
+          <span class="vs-link__hint">When a platform team should adopt a higher-level compiler.</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="vs-cluster">
+      <h3 class="vs-cluster__title">Adjacent categories: retrieval, memory, observability</h3>
+      <div class="vs-grid">
+        <a href="/vs-rag" class="vs-link">
+          <span class="vs-link__tag">Approach</span>
+          <span class="vs-link__title">vs RAG</span>
+          <span class="vs-link__hint">When to retrieve, when to distill the retrieval into a model.</span>
+        </a>
+        <a href="/vs-mem0" class="vs-link">
+          <span class="vs-link__tag">Memory</span>
+          <span class="vs-link__title">vs Mem0</span>
+          <span class="vs-link__hint">Agent memory store vs compiled trace-replay specialist.</span>
+        </a>
+        <a href="/vs-langsmith" class="vs-link">
+          <span class="vs-link__tag">Observability</span>
+          <span class="vs-link__title">vs LangSmith</span>
+          <span class="vs-link__hint">LLM tracing vs capture-with-receipt that feeds the build loop.</span>
+        </a>
+        <a href="/vs-hindsight" class="vs-link">
+          <span class="vs-link__tag">Eval</span>
+          <span class="vs-link__title">vs Hindsight</span>
+          <span class="vs-link__hint">Post-hoc eval surface vs K-score gate wired to CI.</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ks-section">
+  <div class="ks-wrap">
     <div style="background: linear-gradient(180deg, var(--ks-accent-soft) 0%, transparent 100%); border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-lg); padding: var(--ks-10); text-align: center;">
       <span class="ks-eyebrow">Side-by-side</span>
       <h2 class="ks-h2" style="font-size: clamp(28px, 4vw, 40px); margin: var(--ks-3) auto; max-width: 28ch;">Run the same eval pack on your incumbent and on kolm. Compare K-scores.</h2>
@@ -358,6 +543,8 @@
   <span data-test="w271-frontier">Frontier methods</span>
   <span data-test="w335-claim">Open-source AI compiler</span>
   <span data-test="w373-receipts">Ed25519 receipts</span>
+  <span data-test="w661-matrix-expansion">14 axes</span>
+  <span data-test="w661-deeper-comparisons">17 deeper 1:1 pages</span>
 </div>
 
 </main>
