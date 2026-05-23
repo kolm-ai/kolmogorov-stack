@@ -449,12 +449,19 @@ Each item has the form: `[W<wave>-<seq>] <verbatim-or-condensed-quote> → statu
 - **[W743-2]** `kolm migrate from-lmstudio` reads LM Studio cache. Agent: `migrate-1`.
 - **[W743-3]** Doc: `/docs/migrate.html`. Agent: `migrate-2`.
 
-### W744 — SMART CAPTURE FILTER + INGEST DEDUP
+### W744 — SMART CAPTURE FILTER + INGEST DEDUP [KILLED 2026-05-24 — overlaps W808+W811+W815]
 
-- **[W744-1]** "Automatically identify high-information-density captures vs low-value" → ❌ ingest-time filter. Agent: `cap-filter-1`.
-- **[W744-2]** "If 500 of 10k are near-identical, compress into weighted exemplars" → ❌ MinHash dedup. Agent: `cap-filter-1`.
-- **[W744-3]** "Filter at capture time, not after". Agent: `cap-filter-2`.
-- **[W744-4]** Stats surfaced in /account/captures dashboard. Agent: `cap-filter-2`.
+**Status: KILLED per user mandate 2026-05-24.** Reason: W808 (capture poisoning detection,
+SHIPPED 2c6346a) already covers ingest-time filtering via the 3σ Welford anomaly detector +
+staged_captures quarantine queue. W811 (capture analytics dashboard) covers the /account/captures
+stats surface. W815 (active learning loop) covers the "identify high-information-density captures"
+selection logic. Three downstream waves already do the job — keeping W744 is duplicate engineering.
+Items below preserved for traceability but NOT scheduled.
+
+- ~~**[W744-1]** "Automatically identify high-information-density captures vs low-value"~~ → covered by W815-1.
+- ~~**[W744-2]** "If 500 of 10k are near-identical, compress into weighted exemplars"~~ → MinHash dedup folded into W808-staged_captures pipeline post-quarantine.
+- ~~**[W744-3]** "Filter at capture time, not after"~~ → covered by W808-3 captureWithSignature pre-persistence gate.
+- ~~**[W744-4]** Stats surfaced in /account/captures dashboard~~ → covered by W811-1.
 
 ### W745 — FAILURE-MODE VIZ DASHBOARD
 
@@ -489,12 +496,19 @@ Each item has the form: `[W<wave>-<seq>] <verbatim-or-condensed-quote> → statu
 - **[W749-3]** "Automated rare-case detection in capture analysis". Agent: `synth-2`.
 - **[W749-4]** "Coverage report" + "importance upweighting of rare captures". Agent: `synth-2`.
 
-### W750 — COPYRIGHT FILTER + CAPTURE QUARANTINE
+### W750 — COPYRIGHT FILTER + CAPTURE QUARANTINE [MERGED INTO W808 2026-05-24]
 
-- **[W750-1]** "Copyright filter on captures" → covered by W708-4; quarantine extension here. Agent: `quar-1`.
-- **[W750-2]** "Capture quarantine: new captures held in staging area, validated before distillation pool" → ❌ `event-store` quarantine flag. Agent: `quar-1`.
-- **[W750-3]** "User-configurable capture approval (manual review)" → ❌ `/account/captures/review.html`. Agent: `quar-2`.
-- **[W750-4]** Defense-in-depth: tenant-fenced quarantine queue. Agent: `quar-2`.
+**Status: MERGED into W808 per user mandate 2026-05-24.** The capture-quarantine half
+shipped 2c6346a (W808: staged_captures table, /account/captures/review.html review inbox,
+cmdCapturesReview --release/--quarantine, tenant-fenced quarantine queue). Remaining
+copyright-filter slice promotes to a single W808-followup item below — heuristics-based
+copyright detector hooks into the same staged_captures pipeline as a post-quarantine
+classifier (not a separate wave).
+
+- ~~**[W750-1]** Copyright filter on captures~~ → **[W808-followup-1]** add HEURISTIC copyright detector (regex pack for common copyrighted-content fingerprints: Disney character names, song lyric n-grams from Top-100, code with explicit copyright headers) hooked into staged_captures post-quarantine classifier. Agent: `cap-followup-1`.
+- ~~**[W750-2]** Capture quarantine~~ → SHIPPED via W808 staged_captures table.
+- ~~**[W750-3]** Manual review~~ → SHIPPED via W808 /account/captures/review.html + cmdCapturesReview.
+- ~~**[W750-4]** Tenant-fenced quarantine queue~~ → SHIPPED via W808 tenant-fence on staged_captures reads.
 
 ### W751–W755 — VERTICAL FOUNDATION STUDENTS (5 verticals × 4 items each)
 
@@ -633,20 +647,38 @@ For each vertical V ∈ {legal, medical, code, finance, support}:
 - **[W774-3]** Doc: `/docs/multilingual.html`. Agent: `xlang-2`.
 - **[W774-4]** Bakeoff multi-lang pairs. Agent: `xlang-1`.
 
-### W775 — CONTINUOUS BACKGROUND DISTILL (THE KILLER FEATURE)
+### W775 — CONTINUOUS BACKGROUND DISTILL (THE KILLER FEATURE) [PRIORITY-JUMPED 2026-05-24]
+
+**Priority jump per user mandate 2026-05-24:** "This is the killer feature that turns kolm
+from a tool into invisible infrastructure. It depends on W720 (self-improvement ✅ shipped
+6872812), W807 (confidence routing ✅ shipped 2c6346a), W813 (drift detection), W815 (active
+learning). Once those four land, W775 should jump queue — don't let it sit behind carbon
+footprint tracking and currency localization."
+
+**New execution position: AFTER W813 + W815 land** (likely the next parallel-batch slot).
+Removes from the W707-original tail at position ~52/84 and slots ahead of W786 (carbon
+footprint), W796 (currency localization), etc.
 
 - **[W775-1]** "Install kolm, point at API, forget about it. It captures every call." — daemon scaffold. Agent: `cont-1`.
-- **[W775-2]** "Continuously evaluates whether it has enough data to distill" — readiness scorer. Agent: `cont-1`.
-- **[W775-3]** "When critical mass, automatically distills/quantizes/deploys local model". Agent: `cont-2`.
-- **[W775-4]** "Silently routes matching queries to local, only novel/uncertain to teacher" — uses W709. Agent: `cont-2`.
-- **[W775-5]** "API bill drops gradually + automatically without manual intervention" — savings telemetry. Agent: `cont-3`.
+- **[W775-2]** "Continuously evaluates whether it has enough data to distill" — readiness scorer (uses W815 active-learning signal). Agent: `cont-1`.
+- **[W775-3]** "When critical mass, automatically distills/quantizes/deploys local model" — uses W720 orchestrateImprovement + W813 drift gate. Agent: `cont-2`.
+- **[W775-4]** "Silently routes matching queries to local, only novel/uncertain to teacher" — uses W807 streaming router + W709 first-token entropy. Agent: `cont-2`.
+- **[W775-5]** "API bill drops gradually + automatically without manual intervention" — savings telemetry surface. Agent: `cont-3`.
 - **[W775-6]** `/kolm-auto-pilot.html` landing + opt-in. Agent: `cont-4`.
+- **[W775-7]** Daemon process lifecycle: `kolm autopilot {start,stop,status,disable}` CLI + system-tray / login-item hook for darwin/win32/linux. Agent: `cont-5`.
 
-### W776 — SYNTHETIC CAPTURE SELF-IMPROVEMENT
+### W776 — SYNTHETIC CAPTURE SELF-IMPROVEMENT [KILLED 2026-05-24 — subset of W720+W815]
 
-- **[W776-1]** Synthetic-gen on persistent failure modes (W745 dep). Agent: `synself-1`.
-- **[W776-2]** Loop into next distillation cycle (W720 dep). Agent: `synself-1`.
-- **[W776-3]** Telemetry: synthetic-vs-real capture ratio. Agent: `synself-2`.
+**Status: KILLED per user mandate 2026-05-24.** Reason: W720 (distill self-improvement loop,
+SHIPPED 6872812) already implements detectUnderperformingCaptures + orchestrateImprovement +
+the regenerate-and-compare cycle. W815 (active learning loop) covers persistent-failure-mode
+selection. The "synthetic capture" piece (synthetic-gen on failure modes) is a thin wrapper
+over the existing W720 pipeline + W745 failure-mode dashboard — not worth a dedicated wave.
+Items below preserved for traceability but NOT scheduled.
+
+- ~~**[W776-1]** Synthetic-gen on persistent failure modes~~ → covered by W720-orchestrateImprovement + W745 input.
+- ~~**[W776-2]** Loop into next distillation cycle~~ → covered by W720 self-improvement loop directly.
+- ~~**[W776-3]** Telemetry: synthetic-vs-real capture ratio~~ → covered by W811-1 capture analytics dashboard.
 
 ### W777 — A/B TESTING INFRA
 
@@ -1093,22 +1125,34 @@ Start the standard moat.
 - **[W826-3]** Pre-load heuristic: analyze inference patterns → preload likely-next artifact. Agent: `mem-2`.
 - **[W826-4]** Performance estimate before load: "~25 tok/s on your hardware". Agent: `mem-3`.
 
-### W827 — [T3] CONTRASTIVE DISTILLATION (DPO-LITE)
+### W827 — [T3] CONTRASTIVE DISTILLATION v2: TOKEN-LEVEL DPO [RENAMED 2026-05-24]
 
-(Partial P2 — DPO/SimPO/ORPO/KTO exist. Add response-level negative-example loss.)
+**Renamed per user mandate 2026-05-24.** W714 already shipped response-level contrastive
+distillation (negative-variant generator + response-level DPO loss + `--contrastive` flag).
+W827 is the v2 UPGRADE that adds the token-level extension W714 doesn't have: per-token
+positive/negative logit attribution for fine-grained reward shaping (vs the response-level
+whole-output reward in W714). Scope is reduced to ONLY the token-level extension —
+infrastructure already exists in W714.
 
-- **[W827-1]** Negative-variant generator in `apps/trainer/contrastive.py` — weak model OR perturbation. Agent: `contrast-1`.
-- **[W827-2]** DPO loss wired into distill loop with `--contrastive` flag. Agent: `contrast-2`.
-- **[W827-3]** Benchmark suite: K-Score improvement contrastive vs SFT-only on shared eval. Agent: `contrast-3`.
+- ~~**[W827-1]** Negative-variant generator~~ → SHIPPED in W714-1.
+- ~~**[W827-2]** Response-level DPO loss~~ → SHIPPED in W714-2.
+- **[W827-3]** TOKEN-LEVEL DPO extension: per-token positive-vs-negative logit attribution in `apps/trainer/contrastive_distill.py` (extends, does not replace, W714-2). Agent: `contrast-tlv-1`.
+- **[W827-4]** New flag `--contrastive-token-level` (additive to existing `--contrastive`). Agent: `contrast-tlv-1`.
+- **[W827-5]** Benchmark: token-level vs response-level K-Score delta on shared eval (must show > 1% improvement to ship — honest gate). Agent: `contrast-tlv-2`.
 
-### W828 — [T3] REASONING TRACE DISTILLATION
+### W828 — [T3] REASONING TRACE DISTILLATION v2: AUTO-DETECT + TRACE-AWARE LOSS [RENAMED 2026-05-24]
 
-(Partial P1 — GRPO/PRM/TTC exist. Add dedicated teacher-CoT capture/replay.)
+**Renamed per user mandate 2026-05-24.** W713 already shipped reasoning-trace distillation
+(Anthropic thinking blocks + o1 reasoning_tokens capture + `<think>...</think>` training rows +
+`--no-cot` off-switch). W828 is the v2 UPGRADE that adds the auto-detection and trainer-side
+trace-aware loss W713 doesn't have. Scope reduced to ONLY the new pieces — infrastructure
+already exists in W713.
 
-- **[W828-1]** Reasoning-model detector + extended-thinking API capture in `src/proxy.js`. Agent: `reason-1`.
-- **[W828-2]** Trace format: `<think>...</think>` token structure in training rows. Agent: `reason-2`.
-- **[W828-3]** Trainer extension in `apps/trainer/distill.py` for trace-aware loss. Agent: `reason-3`.
-- **[W828-4]** Toggle: `--with-reasoning-traces` on `kolm distill`. Agent: `reason-4`.
+- ~~**[W828-1]** Reasoning-model detector + extended-thinking API capture~~ → PARTIALLY SHIPPED in W713-1 (manual config). W828 adds: AUTO-DETECT — sniff response shape to identify reasoning model without explicit per-call config. Agent: `reason-v2-1`.
+- ~~**[W828-2]** Trace format `<think>...</think>`~~ → SHIPPED in W713-2 + W713-3.
+- **[W828-3]** TRACE-AWARE LOSS extension in `apps/trainer/distill.py` — weighted loss term over the trace tokens separate from the answer tokens (forces student to actually learn reasoning structure, not just final answer). Agent: `reason-v2-2`.
+- **[W828-4]** New flag `--reasoning-trace-loss-weight 0.0..1.0` (additive to existing `--with-reasoning-traces`). Agent: `reason-v2-2`.
+- **[W828-5]** Benchmark: trace-aware vs answer-only K-Score delta on reasoning-heavy eval (MMLU-Pro / GSM8K / MATH) — must show > 2% improvement to ship. Agent: `reason-v2-3`.
 
 ### W829 — [T3] MULTIMODAL CAPTURE PIPELINE (UPGRADE)
 
@@ -1201,21 +1245,379 @@ The data moat made real.
 4. **W825-W831** Tier 3 (post-W806 ideally; can interleave if velocity allows).
 5. **W832-W835** Tier 4 (kolm-meta requires accumulated W720/W811/W812/W813/W815 training rows — defer until pipeline running).
 
-## PART VI APPENDIX — TOTAL QUEUE SUMMARY
+## PART VI APPENDIX — TOTAL QUEUE SUMMARY (updated 2026-05-24 with dup cleanup + WF/WC waves)
 
 | Tier | Waves | Count | Timeline |
 |------|-------|-------|----------|
-| In flight (W707 originals) | W720-W722 | 3 | now |
-| Tier 0 (jumped) | W807-W810 | 4 | next |
-| W707-original tail | W723-W806 | 84 | after T0 |
+| SHIPPED 2026-05-24 (W707-originals) | W720-W722 | 3 | done |
+| SHIPPED 2026-05-24 (Tier 0) | W807-W810 | 4 | done |
+| W707-original tail (minus dups) | W723-W806 (less W744, W750, W776) | 81 | after T0 |
 | Tier 1 | W811-W816 | 6 | interleave |
 | Tier 2 | W817-W824 | 8 | interleave |
 | Tier 3 | W825-W831 | 7 | post-W806 |
 | Tier 4 | W832-W835 | 4 | year-1+ |
-| **TOTAL REMAINING** | **W720-W835** | **116 waves** | |
+| W775 priority-jumped | W775 | 1 (already counted in tail) | after W813+W815 |
+| Frontend (Part VII) | WF01-WF29 | 29 | parallel with code waves |
+| Cleanup (Part VIII) | WC01-WC15 | 15 | inter-wave hygiene |
+| **TOTAL REMAINING** | **W723-W835 + WF01-WF29 + WC01-WC15** | **~144 waves** | |
 
-(29 new waves added to the 87 originally tracked W720-W806 = 116 total remaining.)
+(Dup cleanup 2026-05-24: killed W744 + W750 (merged into W808) + W776 = −3 from W707-tail.
+W807/W808/W809/W810 + W720/W721/W722 = 7 shipped. Net remaining: 116 + 29 + 15 − 7 = 153
+items before dup-killing, ~144 after.)
 
 ---
 
-*Part VI appended 2026-05-24 in response to user-shared second external-review queue. Atomic-decomposition format mirrors PART II per directive "and also have atomic levels of execution like this." Tier-0 priority-override mandate honored.*
+# PART VII — FRONTEND WAVES (WF01-WF29)
+
+**Source:** User-shared 2026-05-24: "From 'good startup site' to 'state-of-the-art neo lab'" +
+"Navigation Standards, Missing Items, K-Score Correction, Codebase Cleanup."
+**Reference quality bar:** Linear / Vercel / Anthropic / Stripe / Resend / Raycast.
+**Brand lock (binding):** Eyebrow "Open-source AI workbench"; H1 "Frontier AI on your own infrastructure."
+
+## WF01 — DESIGN SYSTEM v1 (the foundation)
+
+- **[WF01-1]** Token scale: spacing (4/8/12/16/24/32/48/64/96), type (12/14/16/18/24/32/48/64/96), radius (4/8/12/16/24), shadow (sm/md/lg/xl/2xl), motion (75/150/250/350/500ms ease curves). Agent: `wf01-tok`.
+- **[WF01-2]** Color tokens: brand-primary, brand-secondary, surface (4 levels), text (4 levels), border (3 levels), state (success/warning/error/info × 3 levels each). Linear/Stripe-quality. Agent: `wf01-tok`.
+- **[WF01-3]** Component primitives: Button (5 variants × 3 sizes), Input, Select, Card, Badge, Toast, Modal, Drawer, Tooltip, Tabs, Accordion, Avatar. All a11y-complete. Agent: `wf01-comp`.
+- **[WF01-4]** Storybook-equivalent: `/design-system.html` showcase page enumerating every token + component with copy-paste-ready snippets. Agent: `wf01-doc`.
+- **[WF01-5]** Token-driven CSS rewrite of `design-tokens.css` consuming the new tokens (no raw hex values). Agent: `wf01-impl`.
+
+## WF02 — HERO REDESIGN (homepage h1 area)
+
+- **[WF02-1]** Lock eyebrow "Open-source AI workbench" + H1 "Frontier AI on your own infrastructure." (NEVER edit without explicit user authorization). Agent: `wf02-copy`.
+- **[WF02-2]** Lede 22-28 words max, max-width 48ch, "one breath" reading test. Agent: `wf02-copy`.
+- **[WF02-3]** ONE atmospheric pin (mint radial gradient at 78-82% top-right). NEVER add a second bloom — premium B2B sites ship at most one (W604 lesson). Agent: `wf02-vis`.
+- **[WF02-4]** Hero terminal: chronological 4-command flow (export OPENAI_BASE_URL → kolm distill → kolm verify → kolm run). NO persona switcher. Agent: `wf02-term`.
+- **[WF02-5]** Two CTAs only: primary "Start distilling" (verb-driven), secondary "See a .kolm". Agent: `wf02-cta`.
+
+## WF03 — NAV POLISH
+
+- **[WF03-1]** Sticky top nav with backdrop-blur(20px) + 0.85 surface opacity. Linear/Vercel-quality. Agent: `wf03-1`.
+- **[WF03-2]** Logo + 5 nav items max: Product, Pricing, Docs, Blog, Sign in. Agent: `wf03-1`.
+- **[WF03-3]** Mega-menu under Product: 3-column grid (Build / Deploy / Use cases) — see Part VII NAV STANDARDS below. Agent: `wf03-2`.
+- **[WF03-4]** Mobile nav: hamburger → full-screen drawer with stacked sections. NEVER reuse desktop dropdown logic. Agent: `wf03-2`.
+- **[WF03-5]** Active-route highlight: 2px under-line + brand color on current section's nav item. Agent: `wf03-1`.
+
+## WF04 — SCROLL ANIMATIONS (subtle, Vercel-quality)
+
+- **[WF04-1]** IntersectionObserver-based fade-in-up on every major section (translateY: 16px → 0, opacity 0 → 1, 350ms ease-out). Agent: `wf04-1`.
+- **[WF04-2]** Respect prefers-reduced-motion: disable ALL scroll animations when set. Agent: `wf04-1`.
+- **[WF04-3]** Cursor-reactive ambient orb on hero (W604 pattern preserved). Gate on pointer:fine. Agent: `wf04-2`.
+- **[WF04-4]** Magnetic CTAs (cursor pull effect 6px). Gate on pointer:fine + reduced-motion. Agent: `wf04-2`.
+
+## WF05 — PIPELINE EXPLAINER (interactive)
+
+- **[WF05-1]** 4-step horizontal pipeline diagram: Capture → Distill → Compile → Deploy. Click each step expands an inline panel with code + receipt artifact. Agent: `wf05-1`.
+- **[WF05-2]** Keyboard nav: ← → switches steps. Active step has 2px underline + brand color. Agent: `wf05-1`.
+- **[WF05-3]** Mobile: stacked vertical with same expand-on-tap behavior. Agent: `wf05-2`.
+- **[WF05-4]** Each step shows real CLI output (not mock) — pulled at build time from a captured transcript. Agent: `wf05-2`.
+
+## WF06 — DARK MODE
+
+- **[WF06-1]** Add `[data-theme="dark"]` + `[data-theme="light"]` token overrides on `:root` (default dark — Linear/Vercel/Anthropic pattern). Agent: `wf06-1`.
+- **[WF06-2]** Persistent toggle in nav: sun/moon icon, writes to localStorage + respects prefers-color-scheme on first visit. Agent: `wf06-1`.
+- **[WF06-3]** Audit EVERY component for dark-mode parity — desaturated/lighter tonal variants, not inverted. WCAG AA contrast verified on both. Agent: `wf06-2`.
+- **[WF06-4]** No FOUC: inline theme-detection script in `<head>` before any CSS load. Agent: `wf06-1`.
+
+## WF07 — ROI CALCULATOR (homepage proof band)
+
+- **[WF07-1]** Slider inputs: monthly API spend ($1k-$1M), # distill targets (1-100), avg captures/day (100-1M). Agent: `wf07-1`.
+- **[WF07-2]** Live output: estimated monthly savings (pre-kolm spend × (1 − routing efficiency × 0.8)), payback period, $/distilled-artifact. Agent: `wf07-1`.
+- **[WF07-3]** "Show me the math" expand: full assumption breakdown + a link to W835 savings-based pricing dashboard. Agent: `wf07-2`.
+- **[WF07-4]** Default values match a realistic enterprise scenario (Stripe-quality default selection). Agent: `wf07-2`.
+
+## WF08 — SOCIAL PROOF BAR
+
+- **[WF08-1]** Honest-by-default: "X distilled artifacts shipped" pulled from real registry count + "Y% K-Score median" pulled from real calibration pack (W810). Agent: `wf08-1`.
+- **[WF08-2]** NO fake logos. NO "trusted by" without real authorization. Agent: `wf08-1`.
+- **[WF08-3]** If pre-launch: omit social proof band entirely — never fake it (Linear/Vercel approach pre-Series-A). Agent: `wf08-1`.
+
+## WF09 — (RESERVED for future use — was K-Score Explorer, removed per user mandate 2026-05-24)
+
+**Status: REMOVED.** Per user mandate: K-Score is a per-namespace quality gate, not a
+public product-wide leaderboard. Homepage copy correction is in PART VII K-SCORE CORRECTION
+section below.
+
+## WF10 — BLOG / CHANGELOG SHELL
+
+- **[WF10-1]** `/blog/` index with grid of posts (title, dek, author, date, read-time). Agent: `wf10-1`.
+- **[WF10-2]** Per-post template: max-width 65ch reading column, drop cap, prev/next nav, anchored TOC on right. Agent: `wf10-1`.
+- **[WF10-3]** RSS feed at `/blog/rss.xml` (auto-generated). Agent: `wf10-2`.
+- **[WF10-4]** First three posts: (a) "Why we open-sourced the .kolm format" (b) "Distilling DeepSeek-R1 32B to INT4 in 125s" (c) "K-Score: a quality gate, not a leaderboard." Agent: `wf10-2`.
+
+## WF11 — CHANGELOG
+
+- **[WF11-1]** `/changelog.html` already exists — overhaul to Stripe-quality format: month-grouped, version-pinned, "what's new / improved / fixed" tabs per release. Agent: `wf11-1`.
+- **[WF11-2]** Build script harvests git log for entries tagged `release:` and auto-generates entries. Agent: `wf11-1`.
+- **[WF11-3]** RSS feed at `/changelog.rss` for developers who want push notifications. Agent: `wf11-2`.
+- **[WF11-4]** Highlight badge on nav "Changelog" item when there's a release in the last 7 days. Agent: `wf11-2`.
+
+## WF12 — DOCS UPGRADE
+
+- **[WF12-1]** Three-pane layout (Vercel/Stripe docs quality): nav left, content center max-65ch, anchor TOC right. Agent: `wf12-1`.
+- **[WF12-2]** Search bar (Cmd/Ctrl+K) with fuzzy matching across docs + CLI ref + API ref. Agent: `wf12-2`.
+- **[WF12-3]** Code blocks: language pill + copy button + line numbers toggle + theme-matched syntax. Agent: `wf12-1`.
+- **[WF12-4]** Per-doc "Was this helpful? 👍 / 👎 + feedback box" → posts to `/v1/docs/feedback` (already exists). Agent: `wf12-3`.
+- **[WF12-5]** Mobile: docs nav becomes top dropdown, TOC moves to expandable panel. Agent: `wf12-1`.
+
+## WF13 — INTERACTIVE DEMO
+
+- **[WF13-1]** `/demo` interactive sandbox: pre-loaded captures, click "Distill" → real artifact build (using ephemeral tenant), shows K-Score, lets user inspect manifest.json. Agent: `wf13-1`.
+- **[WF13-2]** Rate-limited (5 distills / IP / day) — honest envelope when exhausted. Agent: `wf13-2`.
+- **[WF13-3]** "Try with your own captures" CTA at bottom routes to signup. Agent: `wf13-1`.
+
+## WF14 — PERFORMANCE
+
+- **[WF14-1]** Lighthouse Performance score ≥ 95 on every public page. Agent: `wf14-1`.
+- **[WF14-2]** LCP < 1.2s on homepage (mobile 4G simulated). Agent: `wf14-1`.
+- **[WF14-3]** CLS < 0.05 site-wide. Agent: `wf14-1`.
+- **[WF14-4]** All images WebP/AVIF with width+height declared (no layout shift). Agent: `wf14-2`.
+- **[WF14-5]** Critical CSS inlined; non-critical async-loaded. Agent: `wf14-2`.
+- **[WF14-6]** Lazy-load any below-the-fold image/iframe. Agent: `wf14-2`.
+
+## WF15 — MOBILE
+
+- **[WF15-1]** Mobile-first audit of every public page: no horizontal scroll, all touch targets ≥ 44×44 with 8px spacing. Agent: `wf15-1`.
+- **[WF15-2]** Test on iPhone SE (smallest live device width 375px) + iPhone 16 Pro Max + Galaxy S24 Ultra widths. Agent: `wf15-1`.
+- **[WF15-3]** Safe-area-inset support for notch/Dynamic-Island devices. Agent: `wf15-2`.
+- **[WF15-4]** Bottom-nav on mobile-app-style routes (/account/*): 5 items max, icon+label. Agent: `wf15-2`.
+
+## WF16 — SEO
+
+- **[WF16-1]** Per-page `<title>` and meta description handcrafted (no template-fill). Agent: `wf16-1`.
+- **[WF16-2]** OG image generator: pulls page title + brand mark + sub-line into 1200×630 image at build. Agent: `wf16-2`.
+- **[WF16-3]** Twitter card metadata. Agent: `wf16-2`.
+- **[WF16-4]** Structured data: Organization, Product (per pricing tier), FAQPage on FAQs. Agent: `wf16-1`.
+- **[WF16-5]** `sitemap.xml` auto-generated at build. Agent: `wf16-3`.
+- **[WF16-6]** `robots.txt` allows all + points to sitemap. Agent: `wf16-3`.
+
+## WF17 — ACCESSIBILITY
+
+- **[WF17-1]** WCAG 2.2 AA compliance audit across every public page. Agent: `wf17-1`.
+- **[WF17-2]** Skip-to-content link on every page. Agent: `wf17-2`.
+- **[WF17-3]** Heading hierarchy lint (no h1→h3 skip). Agent: `wf17-2`.
+- **[WF17-4]** Focus rings 2-3px brand color, never removed. Agent: `wf17-1`.
+- **[WF17-5]** Aria-labels on every icon-only button. Agent: `wf17-2`.
+- **[WF17-6]** Color contrast 4.5:1 minimum (verified with tool, both light + dark). Agent: `wf17-1`.
+
+## WF18 — FOOTER
+
+- **[WF18-1]** 4-column footer: Product / Resources / Company / Legal. Linear/Stripe pattern. Agent: `wf18-1`.
+- **[WF18-2]** Sub-row: copyright, license (Apache 2.0), social links (GitHub primary), status page link. Agent: `wf18-1`.
+- **[WF18-3]** Sitemap link in footer. Agent: `wf18-1`.
+
+## WF19 — ERROR PAGES
+
+- **[WF19-1]** `/404.html` custom: brand-consistent, search box, "back to home" + popular links. Agent: `wf19-1`.
+- **[WF19-2]** `/500.html` custom: incident-aware ("we're on it"), status page link. Agent: `wf19-1`.
+- **[WF19-3]** `/403.html` custom: "you need to sign in" CTA. Agent: `wf19-1`.
+
+## WF20 — LAUNCH POLISH
+
+- **[WF20-1]** Cross-browser test: Safari 17+, Chrome 120+, Firefox 121+, Edge 120+. Agent: `wf20-1`.
+- **[WF20-2]** Print stylesheet for docs (readable when printed). Agent: `wf20-2`.
+- **[WF20-3]** Favicon set: 16/32/48/180/512px, theme-color meta, apple-touch-icon. Agent: `wf20-2`.
+- **[WF20-4]** Open Graph image preview test on Twitter/LinkedIn/Slack/Discord. Agent: `wf20-1`.
+- **[WF20-5]** Final screenshot pass: every public page on 1440×900 desktop + 390×844 mobile, archived in `docs/screenshots/launch-2026-05-24/`. Agent: `wf20-3`.
+
+---
+
+## PART VII NAV STANDARDS (binding cross-cutting spec)
+
+**Nav architecture (5-item lock):** Logo · Product · Pricing · Docs · Blog · Sign in
+
+**Mega-menu under Product (3-column):**
+- **Build** — Distill / Compile / Quantize / Verify
+- **Deploy** — Hosted / On-prem / Air-gapped / Edge
+- **Use cases** — Customer support / Code / Legal / Medical / Finance
+
+**Mobile nav:** hamburger → full-screen drawer; sections stacked; back-arrow on every sub-page; never re-use desktop mega-menu logic.
+
+**Docs sidebar:** 3-level nesting max; current section auto-expanded; persistent scroll position across navigations.
+
+**Scroll behavior:** sticky top nav with backdrop-blur(20px); scroll-shadow on TOC when content scrolls past it.
+
+**Breadcrumbs:** mandatory on `/docs/**` and `/account/**`; format: Home > Section > Page.
+
+**Command palette (Cmd/Ctrl+K):** global; fuzzy search across docs + CLI ref + nav routes; recent-pages section.
+
+---
+
+## PART VII SUPPLEMENT (WF21-WF29)
+
+### WF21 — STATUS PAGE
+- **[WF21-1]** `/status.html` — uptime + per-surface status (API / docs / dashboard / kolm.ai static). Agent: `wf21-1`.
+- **[WF21-2]** Incident log section with last 90 days of incidents (auto from `/v1/incidents/log`). Agent: `wf21-1`.
+- **[WF21-3]** RSS subscribe + email subscribe (proxies to existing notification system). Agent: `wf21-2`.
+
+### WF22 — SECURITY UPGRADE
+- **[WF22-1]** `/security.html` upgrade: threat model summary, SBOM link, Trust Center link, security@kolm.ai contact. Agent: `wf22-1`.
+- **[WF22-2]** Responsible-disclosure policy + bug bounty (if budget) detail page. Agent: `wf22-1`.
+- **[WF22-3]** Crystal-clear SOC 2 / ISO 27001 status section (honest envelope on incomplete certs). Agent: `wf22-2`.
+
+### WF23 — COMPARE POLISH
+- **[WF23-1]** `/compare/` index: kolm vs Fireworks / Together AI / Modal / Replicate / Lamini / OpenPipe / Predibase. Agent: `wf23-1`.
+- **[WF23-2]** Per-competitor compare table: pricing, model classes supported, on-prem support, .kolm format support, open-source license. Agent: `wf23-1`.
+- **[WF23-3]** Honest gaps: where competitor wins on a dimension, say so. Linear/Stripe credibility. Agent: `wf23-2`.
+
+### WF24 — INTEGRATIONS GRID
+- **[WF24-1]** `/integrations.html` overhaul: card grid of every SDK + adapter + connector + framework. Agent: `wf24-1`.
+- **[WF24-2]** Filter chips: SDK / adapter / IDE / CI/CD / workflow tool. Agent: `wf24-1`.
+- **[WF24-3]** Per-card: logo, name, description, install cmd, "Open docs" CTA. Agent: `wf24-2`.
+- **[WF24-4]** "Coming Q3 2026" pill for honest-not-yet-shipped items (e.g. Zapier / Make.com). Agent: `wf24-2`.
+
+### WF25 — COOKIE CONSENT
+- **[WF25-1]** Bottom-right banner first-visit; "Accept all" + "Essential only" + "Customize". Agent: `wf25-1`.
+- **[WF25-2]** Granular categories: essential, analytics, functional. NEVER pre-checked analytics (GDPR). Agent: `wf25-1`.
+- **[WF25-3]** Persistent cookie-preferences page at `/cookies.html`. Agent: `wf25-2`.
+
+### WF26 — ANNOUNCEMENT BAR
+- **[WF26-1]** Top-of-page strip for time-sensitive launches/sales/event/release-week. Dismissible (localStorage). Agent: `wf26-1`.
+- **[WF26-2]** Honest: only show when there's a real announcement — never always-on filler. Agent: `wf26-1`.
+
+### WF27 — WAITLIST (if pre-launch tier)
+- **[WF27-1]** `/waitlist.html` — single-field email + "what would you build with kolm?" textarea. Agent: `wf27-1`.
+- **[WF27-2]** Honest confirmation email (no fake "you're #4283 in line"). Agent: `wf27-2`.
+
+### WF28 — LEGAL PAGES
+- **[WF28-1]** `/terms.html` — reviewed by counsel before publish. Agent: `wf28-1`.
+- **[WF28-2]** `/privacy.html` — GDPR + CCPA + LGPD compliant. Agent: `wf28-1`.
+- **[WF28-3]** `/dpa.html` Data Processing Addendum (enterprise customers will ask). Agent: `wf28-2`.
+- **[WF28-4]** `/acceptable-use.html` — what kolm can NOT be used for. Agent: `wf28-2`.
+
+### WF29 — KEYBOARD SHORTCUTS PAGE
+- **[WF29-1]** `/shortcuts.html` — global shortcuts (Cmd/Ctrl+K command palette, ? help overlay, g+h home, g+d docs, etc.). Agent: `wf29-1`.
+- **[WF29-2]** Per-route shortcuts table in docs sidebar (Vercel pattern). Agent: `wf29-1`.
+
+---
+
+## PART VII K-SCORE CORRECTION (binding 2026-05-24)
+
+**Removed:** Public K-Score Explorer (WF09 originally). Reason: K-Score is a per-namespace
+quality gate, NOT a public product-wide leaderboard. A public explorer would mislead users
+into comparing scores across non-comparable artifacts/namespaces.
+
+**Homepage copy (binding wording):**
+> "Quality gate every .kolm must pass before shipping. 0.85 minimum, 0.91 median
+> across our reference artifacts. Your namespace gets its own K-Score after distillation."
+
+**Where it surfaces:**
+- Per-namespace dashboard `/account/k-score/<namespace>` (private, signed-in only).
+- Per-artifact verify page `/verify/<cid>` shows K-Score + Bradley-Terry CI (W810).
+- Homepage proof band uses the binding-wording above + a static 0.91 median reference number.
+- Never as a public sortable leaderboard.
+
+---
+
+# PART VIII — CODEBASE CLEANUP WAVES (WC01-WC15)
+
+**Source:** User-shared 2026-05-24 supplement Part IV. Inter-wave hygiene; runs in parallel
+with feature waves where file-scope allows. Cleanup is NOT a one-shot — items run continuously.
+
+### WC01 — DEPENDENCY AUDIT
+- **[WC01-1]** `npm audit` + `pip-audit` + `cargo audit` clean (no high/critical CVEs). Agent: `wc01-1`.
+- **[WC01-2]** Pin every top-level dep to exact version in `package.json` (no `^` / `~` for prod). Agent: `wc01-2`.
+- **[WC01-3]** Lockfile committed + verified deterministic across hosts. Agent: `wc01-2`.
+- **[WC01-4]** Identify unused deps (`depcheck`) — remove or document. Agent: `wc01-3`.
+
+### WC02 — DEAD CODE ELIMINATION
+- **[WC02-1]** Run `eslint --report-unused-disable-directives` site-wide + clean. Agent: `wc02-1`.
+- **[WC02-2]** Run `ts-prune` equivalent on JS — flag every exported function with zero importers. Agent: `wc02-1`.
+- **[WC02-3]** Delete (don't archive) genuinely dead code. Backwards-compat shims with no caller are still dead. Agent: `wc02-2`.
+- **[WC02-4]** Audit `cli/kolm.js` for orphan sub-commands (declared but never wired to a TUI route or docs). Agent: `wc02-2`.
+
+### WC03 — DUPLICATE CLEANUP
+- **[WC03-1]** AST-level duplicate detection (`jscpd` or similar) — flag every >50-line clone. Agent: `wc03-1`.
+- **[WC03-2]** Merge or extract — never leave a flagged clone "for now." Agent: `wc03-2`.
+- **[WC03-3]** Per-pass report in `docs/cleanup/wc03-dups-<date>.md`. Agent: `wc03-2`.
+
+### WC04 — TEST COVERAGE
+- **[WC04-1]** Per-file coverage report: every `src/` file ≥ 80% line coverage OR documented exception. Agent: `wc04-1`.
+- **[WC04-2]** Lock-in family pattern relaxed to regex+threshold (W604 anti-brittleness rule). Agent: `wc04-2`.
+- **[WC04-3]** Flaky test elimination: any test that fails > 1% under 100 runs gets quarantined + fixed. Agent: `wc04-2`.
+
+### WC05 — ERROR HANDLING AUDIT
+- **[WC05-1]** Every `throw` has a stable snake_case error code in the message. Agent: `wc05-1`.
+- **[WC05-2]** Honest-envelope pattern: every failable handler returns `{ok:false, error, hint, version}` + non-zero exit on CLI. Agent: `wc05-1`.
+- **[WC05-3]** Never silent fallthrough — every error path is observable. Agent: `wc05-2`.
+
+### WC06 — LOGGING
+- **[WC06-1]** Single structured logger: `{ts, level, namespace, msg, extras}`. Agent: `wc06-1`.
+- **[WC06-2]** Never log secrets, never log raw user input on auth paths. Agent: `wc06-1`.
+- **[WC06-3]** Per-route correlation ID propagated through all logs of that request. Agent: `wc06-2`.
+
+### WC07 — CONFIG
+- **[WC07-1]** Single source of truth for every config var: `src/env.js`. Agent: `wc07-1`.
+- **[WC07-2]** Every env var documented in `docs/env.md` + emitted into doctor output. Agent: `wc07-1`.
+- **[WC07-3]** No `process.env.X` outside of `src/env.js`. Agent: `wc07-2`.
+
+### WC08 — API VERSIONING
+- **[WC08-1]** Every route prefixed `/v1/`. No unversioned API routes. Agent: `wc08-1`.
+- **[WC08-2]** Deprecation policy documented: 6-month notice + dual-mount + Sunset header. Agent: `wc08-1`.
+- **[WC08-3]** OpenAPI spec auto-generated and committed at every release. Agent: `wc08-2`.
+
+### WC09 — CODE STYLE
+- **[WC09-1]** Single formatter: Prettier (or biome) — committed config, runs on pre-commit. Agent: `wc09-1`.
+- **[WC09-2]** Single linter: ESLint (or biome) — committed config, blocks PR. Agent: `wc09-1`.
+- **[WC09-3]** No bypassed lint rules without `// eslint-disable` + comment explaining why. Agent: `wc09-2`.
+
+### WC10 — CODE DOCS
+- **[WC10-1]** Every public function in `src/` has a 1-3-line header explaining WHY it exists (not WHAT it does). Agent: `wc10-1`.
+- **[WC10-2]** Module-level JSDoc on every `src/*.js` describing the module's purpose. Agent: `wc10-1`.
+- **[WC10-3]** Honest contract callouts: every "honesty marker" (no_X_available envelope, 501 install_hint, etc.) documented in the module header. Agent: `wc10-2`.
+
+### WC11 — CI/CD
+- **[WC11-1]** GitHub Actions workflow: lint + test + audit-static-refs + audit-href on every PR. Agent: `wc11-1`.
+- **[WC11-2]** Release gate: `scripts/release-verify.cjs` all 7 gates green required for tagged release. Agent: `wc11-1`.
+- **[WC11-3]** Auto-deploy: push to main → Vercel deploys + sw.js cache busts. Agent: `wc11-2`.
+- **[WC11-4]** SDK CI workflow (W470 already shipped `.github/workflows/sdk-c-rust.yml`) extended to Python + Node + Kotlin + RN. Agent: `wc11-2`.
+
+### WC12 — MONOREPO HYGIENE
+- **[WC12-1]** Single root `package.json` + workspaces. Agent: `wc12-1`.
+- **[WC12-2]** Shared tsconfig / jest config / eslint config at root. Agent: `wc12-1`.
+- **[WC12-3]** Per-workspace README explaining purpose + how to run/test locally. Agent: `wc12-2`.
+
+### WC13 — DATABASE MIGRATIONS
+- **[WC13-1]** Numbered, ordered migration files in `src/migrations/`. Agent: `wc13-1`.
+- **[WC13-2]** Every migration has up + down (reversible). Agent: `wc13-1`.
+- **[WC13-3]** Test: replay all migrations on empty DB → schema matches expected. Agent: `wc13-2`.
+- **[WC13-4]** No NOT-NULL-on-large-table without backfill plan (concurrent-write safety). Agent: `wc13-2`.
+
+### WC14 — SECURITY HARDENING
+- **[WC14-1]** Helmet / CSP / HSTS / X-Frame-Options on every HTTP response. Agent: `wc14-1`.
+- **[WC14-2]** Rate-limiting on every authn route + signup route. Agent: `wc14-1`.
+- **[WC14-3]** SQL injection audit: every query uses prepared statements (no string concat). Agent: `wc14-2`.
+- **[WC14-4]** XSS audit: every templated HTML output uses safe escaping. Agent: `wc14-2`.
+- **[WC14-5]** Auth audit: every protected route runs through the same auth middleware (no per-route bypasses). Agent: `wc14-3`.
+- **[WC14-6]** Secrets management: never in repo, never in logs, rotation playbook documented. Agent: `wc14-3`.
+
+### WC15 — PERFORMANCE PROFILING
+- **[WC15-1]** Per-route P50/P95/P99 latency tracked + alerted on regression. Agent: `wc15-1`.
+- **[WC15-2]** Memory profile on long-running daemon: no leaks over 24h soak test. Agent: `wc15-2`.
+- **[WC15-3]** Database query audit: every N+1 query identified + batched. Agent: `wc15-1`.
+- **[WC15-4]** Bundle size budget: no JS bundle > 200KB gzip without explicit user approval. Agent: `wc15-2`.
+
+---
+
+## PART VIII GRAND TOTAL (updated 2026-05-24)
+
+| Source | Waves | Count |
+|--------|-------|-------|
+| W707-original tail (post-dup-kill) | W723-W806 | 81 |
+| Tier 1 (W811-W816) | W811-W816 | 6 |
+| Tier 2 (W817-W824) | W817-W824 | 8 |
+| Tier 3 (W825-W831) | W825-W831 | 7 |
+| Tier 4 (W832-W835) | W832-W835 | 4 |
+| Frontend (WF01-WF29, minus WF09) | WF01-WF29 | 28 |
+| Cleanup (WC01-WC15) | WC01-WC15 | 15 |
+| **GRAND TOTAL REMAINING** | | **149 waves** |
+
+SHIPPED 2026-05-24: W720+W721+W722 (3) + W807+W808+W809+W810 (4) = 7 waves.
+
+---
+
+*Part VII (Frontend) + Part VIII (Cleanup) appended 2026-05-24 per user mandate
+"ensure all instructions and waves are added to the master doc before context
+compression kicks in." Atomic-decomposition format mirrors PART II + PART VI.
+Dup cleanup (W744 killed, W750 merged into W808, W776 killed) + W775 priority-jump
++ W827/W828 renamed to v2 = applied same session.*
