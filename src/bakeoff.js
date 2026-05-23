@@ -37,6 +37,11 @@ import { runArtifact } from './artifact-runner.js';
 // {ok,parsed,error} so the bakeoff summary can count parse failures alongside
 // pass_rate (never substituted for K-Score).
 import { parseOutputAgainstSpec as _w809ParseOutputAgainstSpec } from './output-schema.js';
+// W734-5 — context-faithfulness axis. computeContextFaithfulness returns a
+// 0..1 score (or null when retrieved_context is absent — honest absence, NOT
+// 0) for how much of a contestant's response is grounded in the retrieved
+// chunks. Per-call score is averaged across rows in summarize().
+import { computeContextFaithfulness as _w734ComputeContextFaithfulness } from './rag-capture.js';
 
 // Per-contestant cost estimates (USD per call). Conservative defaults; the
 // caller can pass opts.costTable to override. These are intentionally rough -
@@ -440,6 +445,9 @@ function summarize(name, calls, opts) {
     // a substitute. NaN here would poison downstream filters; pin to 0 for
     // the empty-calls path so the column is always numeric.
     parse_failure_rate: 0,
+    // W734-5 — context_faithfulness is null on the empty-calls path so the
+    // column is honestly absent (we have NO data to score), not falsely 0.
+    context_faithfulness: null,
   };
   const pass = calls.filter((c) => c.pass).length;
   const passRate = pass / calls.length;
@@ -472,6 +480,33 @@ function summarize(name, calls, opts) {
       parseFailureRate = null;
     }
   }
+  // W734-5 — context_faithfulness axis. For every call that carries a
+  // retrieved_context array (passed through on the row / call shape),
+  // compute the TF-presence score. Average across rows; honest null when
+  // NO call carried retrieved_context (RAG-free bakeoff). This is NEVER
+  // 0 for the absent case — the bakeoff UI / verdict logic relies on
+  // null to mean "axis not applicable to this dataset".
+  let contextFaithfulness = null;
+  try {
+    let cfSum = 0;
+    let cfCount = 0;
+    for (const c of calls) {
+      const retrieved = (c && Array.isArray(c.retrieved_context)) ? c.retrieved_context
+        : (c && c.row && Array.isArray(c.row.retrieved_context)) ? c.row.retrieved_context
+        : null;
+      if (!retrieved || retrieved.length === 0) continue;
+      const responseText = (typeof c.got === 'string') ? c.got
+        : (typeof c.response === 'string') ? c.response : '';
+      const score = _w734ComputeContextFaithfulness(responseText, retrieved);
+      if (score == null) continue;
+      cfSum += score;
+      cfCount += 1;
+    }
+    contextFaithfulness = cfCount === 0 ? null : (cfSum / cfCount);
+  } catch (_e) {
+    // Honest absence on heuristic failure — never 0 (would lie).
+    contextFaithfulness = null;
+  }
   return {
     name,
     pass_rate: passRate,
@@ -484,6 +519,9 @@ function summarize(name, calls, opts) {
     calls: calls.length,
     // W809-3 — parse_failure_rate next to (never replacing) pass_rate.
     parse_failure_rate: parseFailureRate,
+    // W734-5 — context_faithfulness axis. 0..1 OR null (honest absence
+    // when no call carried retrieved_context).
+    context_faithfulness: contextFaithfulness,
   };
 }
 

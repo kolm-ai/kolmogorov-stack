@@ -284,6 +284,84 @@ class Kolm:
             raise KolmError(500, r.stderr.strip() or "cli verify failed")
         return json.loads(r.stdout)
 
+    # ----- W734: RAG-aware capture -----
+
+    def capture_with_context(
+        self,
+        prompt: str,
+        retrieved: list,
+        response: str,
+        namespace: str = "default",
+    ) -> dict:
+        """W734-3 helper: log a capture row WITH the retrieved chunks the
+        upstream LLM was shown.
+
+        ``retrieved`` is a list of ``{source, text, score?}`` dicts — one per
+        chunk that landed in the LLM's context window. Each item must have a
+        ``source`` (URL/document id) and ``text`` (the chunk content); ``score``
+        is optional (the retriever's similarity score, when available).
+
+        The list is JSON-encoded then base64-encoded and sent on the
+        ``kolm-retrieved-context`` request header so structured chunks
+        survive HTTP escaping. The server (W734-1) parses the header and
+        persists the chunks on the capture row alongside prompt + response,
+        letting the W734-2 training-data formatter prefix them as
+        ``<RETRIEVED>`` blocks at distill time.
+
+        Returns the server's JSON envelope (or raises ``KolmError`` on
+        non-2xx). The server returns 400 with
+        ``error: 'invalid_retrieved_context_header'`` if the encoded
+        payload is malformed, so misconfigured callers fail loud.
+
+        Example::
+
+            client.capture_with_context(
+                prompt="When did kolm.ai launch?",
+                retrieved=[
+                    {"source": "kolm.ai/changelog", "text": "Launched 2026-05", "score": 0.92},
+                ],
+                response="kolm.ai launched in May 2026.",
+                namespace="customer-support",
+            )
+        """
+        if not isinstance(prompt, str) or not prompt:
+            raise KolmError(400, "capture_with_context: prompt (non-empty str) required")
+        if not isinstance(response, str):
+            raise KolmError(400, "capture_with_context: response (str) required")
+        if not isinstance(retrieved, list):
+            raise KolmError(400, "capture_with_context: retrieved must be a list of {source, text, score?} dicts")
+        for i, item in enumerate(retrieved):
+            if not isinstance(item, dict) or "source" not in item or "text" not in item:
+                raise KolmError(400, f"capture_with_context: retrieved[{i}] must have 'source' and 'text' fields")
+
+        import base64
+        payload_json = json.dumps(retrieved, separators=(",", ":"))
+        header_val = base64.b64encode(payload_json.encode("utf-8")).decode("ascii")
+
+        api_key = self._require_api_key("POST /v1/capture/log")
+        url = self.base + "/v1/capture/log"
+        body = {
+            "namespace": namespace,
+            "items": [{"input": prompt, "output": response}],
+            "provider": "manual",
+        }
+        data = json.dumps(body).encode("utf-8")
+        req = urllib.request.Request(url, data=data, method="POST")
+        req.add_header("Authorization", f"Bearer {api_key}")
+        req.add_header("Content-Type", "application/json")
+        # W734-3 header — base64 JSON array of {source, text, score?}.
+        req.add_header("kolm-retrieved-context", header_val)
+        try:
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                payload = resp.read().decode("utf-8")
+                return json.loads(payload) if payload else {}
+        except urllib.error.HTTPError as e:
+            try:
+                err = json.loads(e.read().decode("utf-8"))
+            except Exception:
+                err = {"error": str(e)}
+            raise KolmError(e.code, err) from None
+
     # ----- CLI presence -----
 
     def _cli_or_none(self) -> Optional[str]:

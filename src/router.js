@@ -57,6 +57,12 @@ import * as traceCompile from './trace-compile.js';
 // rejections surface as HTTP 429 + Retry-After via the loadQueueMiddleware
 // defined below. Kill-switched by KOLM_LOAD_QUEUE_DISABLED=1.
 import { enqueue as __loadQueueEnqueue, getQueueStats as __loadQueueGetStats } from './load-queue.js';
+// W734 — RAG-aware distillation. parseRetrievedContextHeader() reads the
+// kolm-retrieved-context request header (base64 JSON array of
+// {source,text,score?}) and folds the retrieved chunks onto the capture row
+// so the distill loop has the same context the upstream LLM saw. Pure parser
+// — persistence stays in recordCapture / insertCapture.
+import { parseRetrievedContextHeader as __ragParseRetrievedContextHeader } from './rag-capture.js';
 import * as deviceCaps from './device-capabilities.js';
 import * as confidentialCompute from './confidential-compute.js';
 import * as federatedLearning from './federated-learning.js';
@@ -4211,6 +4217,22 @@ export function buildRouter() {
   //                     total_cost_micro_usd } }
   // ====================================================================
   r.post('/v1/route/chat/completions', __w411HostedAuthGate, async (req, res) => {
+    // W733 — start a parent inference span around the W709 routing handler.
+    // The wrapper is HONEST: when no OTel tracer is registered (the default
+    // for self-hosted boxes without an OTLP collector) the import + call
+    // chain is a no-op. We never block the request path on tracing.
+    let __w733Otel = null;
+    let __w733ParentSpan = null;
+    const __w733T0 = Date.now();
+    try {
+      __w733Otel = await import('./otel.js');
+      if (__w733Otel && typeof __w733Otel.startSpan === 'function') {
+        __w733ParentSpan = __w733Otel.startSpan('kolm.inference', {
+          'http.route': '/v1/route/chat/completions',
+          'http.method': 'POST',
+        });
+      }
+    } catch (_e) { /* honest no-op — OTel never breaks the request path */ }
     const bodyIn = (req.body && typeof req.body === 'object') ? req.body : {};
     const routing = (bodyIn.kolm_routing && typeof bodyIn.kolm_routing === 'object') ? bodyIn.kolm_routing : {};
     const threshold = Number.isFinite(Number(routing.threshold)) ? Number(routing.threshold) : undefined;
@@ -4314,6 +4336,34 @@ export function buildRouter() {
         has_logprobs: hasLogprobs,
       },
     };
+    // W733 — flush routing attributes onto the parent span + emit the four
+    // inference sub-spans (queue → load → prefill → decode). Timings here
+    // are approximate: we have one wall-clock delta from the parent start
+    // (Date.now() - __w733T0) and no decomposition signal yet, so we
+    // attribute the whole delta to the decode phase and zero the others.
+    // This still gives the buyer a real timeline + real K-Score attribute
+    // surface; later waves can refine the per-phase timings when the
+    // hosted-inference wrapper instruments them.
+    try {
+      if (__w733Otel && __w733ParentSpan) {
+        __w733Otel.setRoutingAttributes(__w733ParentSpan, {
+          decision: decision && decision.route ? decision.route : (teacherCalled ? 'teacher' : 'student'),
+          entropy_nats: Number.isFinite(threshold) ? threshold : RR.DEFAULT_ENTROPY_THRESHOLD_NATS,
+          confidence: (decision && Number.isFinite(decision.max_entropy_nats)) ? decision.max_entropy_nats : undefined,
+          namespace: String(req.headers['x-kolm-namespace'] || bodyIn.corpus_namespace || bodyIn.namespace || 'default'),
+          tenant_id: req.tenant_record && req.tenant_record.id,
+        });
+        __w733Otel.createInferenceSpans(__w733ParentSpan, {
+          queue_ms: 0,
+          load_ms: 0,
+          prefill_ms: 0,
+          decode_ms: Math.max(0, Date.now() - __w733T0),
+        });
+        if (typeof __w733Otel.endSpan === 'function') {
+          __w733Otel.endSpan(__w733ParentSpan, { status: 'ok' });
+        }
+      }
+    } catch (_e) { /* honest no-op — OTel never breaks the response */ }
     return res.status(200).json(envelope);
   });
 
@@ -4724,6 +4774,67 @@ export function buildRouter() {
       },
       readiness: runtimeReadiness(),
       tenant: { admin: true },
+    });
+  });
+
+  // W732 — POST /v1/yaml/validate lints a kolm.yaml document over the API
+  // so CI providers that don't bundle Node can still gate on schema errors
+  // before invoking the rest of the distill loop. Auth-gated on
+  // req.tenant_record so anonymous scanners can't burn CPU on this endpoint.
+  //
+  // Accepts either:
+  //   * Content-Type: application/json   body { yaml: '<text>' }
+  //   * Content-Type: text/yaml          raw body string
+  //
+  // Returns:
+  //   * 200 + { ok:true,  parsed, validation } on schema-clean input
+  //   * 200 + { ok:false, parsed, validation } on schema errors (parse
+  //     succeeded but the document violates the W732 schema — caller still
+  //     gets the parsed tree so it can highlight the bad rows)
+  //   * 400 + { ok:false, error:'yaml_parse_failed', detail, line } on a
+  //     parser error (couldn't even read the document)
+  r.post('/v1/yaml/validate', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    let yamlText = '';
+    const ct = String(req.get('content-type') || '');
+    if (ct.includes('text/yaml') || ct.includes('text/x-yaml') || ct.includes('application/yaml')) {
+      yamlText = typeof req.body === 'string' ? req.body : String(req.body || '');
+    } else if (req.body && typeof req.body === 'object' && typeof req.body.yaml === 'string') {
+      yamlText = req.body.yaml;
+    } else {
+      return res.status(400).json({
+        ok: false,
+        error: 'missing_yaml_body',
+        hint: 'POST { "yaml": "<text>" } as application/json, or raw text as text/yaml',
+      });
+    }
+    let mod;
+    try {
+      mod = await import('./kolm-yaml.js');
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'kolm_yaml_module_unavailable',
+        detail: String((e && e.message) || e),
+      });
+    }
+    let parsed;
+    try {
+      parsed = mod.parseKolmYaml(yamlText);
+    } catch (e) {
+      return res.status(400).json({
+        ok: false,
+        error: e && e.code ? e.code : 'yaml_parse_failed',
+        detail: String((e && e.message) || e),
+        line: (e && typeof e.line === 'number') ? e.line : null,
+      });
+    }
+    const validation = mod.validateKolmYaml(parsed);
+    return res.status(200).json({
+      ok: validation.ok,
+      version: mod.KOLM_YAML_VERSION,
+      parsed,
+      validation,
     });
   });
 
@@ -9677,7 +9788,7 @@ export function buildRouter() {
   // to the SSE fan-out (W258-BE-2) so /v1/capture/stream pushes immediately
   // and the dashboard stops doing a 2 s poll-and-scan, and (b) check
   // threshold crossings (W258-BE-3) and fire alerts atomically.
-  async function recordCapture({ tenant, tenant_id, provider, model, namespace, prompt, response, latency_us, status, cost_usd, tokens_in, tokens_out, files, tool_calls, error: errorMsg, reasoning_trace }) {
+  async function recordCapture({ tenant, tenant_id, provider, model, namespace, prompt, response, latency_us, status, cost_usd, tokens_in, tokens_out, files, tool_calls, error: errorMsg, reasoning_trace, retrieved_context }) {
     if (!prompt || response === undefined || response === null) return null;
     const hash = promptHash(prompt + '|' + (model || ''));
     const ns = namespace || 'default';
@@ -9720,6 +9831,14 @@ export function buildRouter() {
       // confusable with "empty trace recorded"). Sibling to response — we
       // NEVER mutate response with the thinking text.
       reasoning_trace: reasoning_trace != null ? reasoning_trace : null,
+      // W734-1 — retrieved_context is the RAG chunks the upstream LLM was
+      // shown alongside the prompt. Honest null when absent so the
+      // training-data formatter can distinguish "no RAG" from "RAG with
+      // empty result-set". Persisted on the capture row so the distill
+      // loop has the same context the teacher saw.
+      retrieved_context: (Array.isArray(retrieved_context) && retrieved_context.length > 0)
+        ? retrieved_context
+        : null,
     };
     // insertCapture throws on disk-full / ephemeral-/tmp / driver failure.
     // We do NOT catch here — propagation is the whole point of the fix.
@@ -9799,6 +9918,27 @@ export function buildRouter() {
     const body = req.body || {};
     const { namespace = 'default', items, provider = 'manual', model = '' } = body;
     const cleanNs = sanitizeNamespace(namespace);
+    // W734-1 — parse kolm-retrieved-context header BEFORE the zero-retention
+    // short-circuit so malformed headers fail loud regardless of retention
+    // mode. Honest empty array on absence (no-op for non-RAG calls).
+    const __ragHeader = __ragParseRetrievedContextHeader(req);
+    if (!__ragHeader.ok) {
+      return res.status(400).json({
+        ok: false,
+        error: 'invalid_retrieved_context_header',
+        hint: __ragHeader.hint || 'must be base64 JSON array of {source, text, score?}',
+      });
+    }
+    // Privacy: never log raw text. Only count + source URLs.
+    if (__ragHeader.retrieved.length > 0) {
+      try {
+        const sources = __ragHeader.retrieved.map((r) => r.source).slice(0, 10);
+        res.set('x-kolm-retrieved-count', String(__ragHeader.retrieved.length));
+        // Source list survives only on the response header for debug;
+        // never written to audit log. Tenant fence is enforced by recordCapture.
+        if (sources.length) res.set('x-kolm-retrieved-sources', sources.join(','));
+      } catch (_) { /* header set failures must not break the capture path */ }
+    }
     if (__isZeroRetentionRequest(req, body)) {
       __setZeroRetentionHeaders(res, cleanNs);
       return res.status(202).json({
@@ -9835,6 +9975,12 @@ export function buildRouter() {
           response: output,
           latency_us: typeof it === 'object' ? (Number(it.latency_us) || 0) : 0,
           status: 200,
+          // W734-1 — surface the parsed retrieved_context onto each
+          // capture row. The same chunks flow onto every item in this
+          // batch (the convention is one RAG turn per request). Defense-
+          // in-depth tenant fence: recordCapture sets tenant_id on the
+          // obs before insertCapture writes it.
+          retrieved_context: __ragHeader.retrieved.length > 0 ? __ragHeader.retrieved : undefined,
         });
         if (obs) {
           ids.push(obs.id);

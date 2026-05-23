@@ -1,0 +1,117 @@
+# W732 — Git-Integrated kolm.yaml + GitHub Actions distill loop.
+#
+# TEMPLATE: Configure KOLM_API_KEY secret before enabling.
+#
+# Setup
+# -----
+# 1. Add a repo-root `kolm.yaml` (run `kolm yaml init` locally to scaffold).
+# 2. In the GitHub repo: Settings → Secrets and variables → Actions → New
+#    repository secret named `KOLM_API_KEY` (a `ks_*` tenant key from
+#    https://kolm.ai/account/keys).
+# 3. Optional: set `KOLM_BASE_URL` repo variable if you self-host.
+# 4. Uncomment the `on:` block below to actually wire push triggers. While
+#    commented out this workflow only runs via manual `workflow_dispatch`,
+#    so committing this template does NOT consume any CI minutes.
+#
+# What it does
+# ------------
+# On every push to main: parse kolm.yaml, replay the most recent captures
+# through the active artifact, score them against the quality gates pinned in
+# `kolm.yaml`, and re-distill any namespace that fell below the gate. The
+# resulting .kolm artifact is published as a GitHub Release asset so
+# downstream consumers can pin to an exact compiled version.
+#
+# Why opt-in by default
+# ---------------------
+# A push trigger that exits non-zero on a missing secret would mark every
+# unrelated commit as failed in the GitHub UI. We mirror the W211/W405 fix
+# pattern: render the workflow file unchanged in forks (so users can read
+# the template) but gate the actual job on KOLM_API_KEY being non-empty.
+
+name: kolm-distill
+
+# Uncomment to enable push trigger. workflow_dispatch is the safe default.
+# on:
+#   push:
+#     branches: [main]
+on:
+  workflow_dispatch:
+    inputs:
+      force_distill:
+        description: 'Re-distill every namespace even if K-Score passes'
+        required: false
+        default: 'false'
+
+jobs:
+  kolm-distill:
+    runs-on: ubuntu-latest
+    # W211 pattern: skip the job entirely if the secret isn't configured, so
+    # a fork without the KOLM_API_KEY secret does not show a red X on every
+    # push. Operators who want this job MUST set the secret explicitly.
+    if: ${{ secrets.KOLM_API_KEY != '' }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: setup node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: install kolm CLI
+        # Pin against the same SHA the PR was opened from so the CI run
+        # stays reproducible across re-runs. Replace `latest` once you ship
+        # a versioned tag.
+        run: npm install -g kolm-stack@latest || npm install -g .
+
+      - name: validate kolm.yaml
+        env:
+          KOLM_API_KEY: ${{ secrets.KOLM_API_KEY }}
+          KOLM_BASE_URL: ${{ vars.KOLM_BASE_URL || 'https://kolm.ai' }}
+        # Hard-fail on schema errors before we spend any minutes on the
+        # actual distill loop. `npx kolm yaml validate` returns ok:false +
+        # an `errors[]` array of jq-style paths the operator can repair.
+        run: npx kolm yaml validate --file kolm.yaml --json
+
+      - name: verify K-Score against quality_gates
+        id: verify
+        env:
+          KOLM_API_KEY: ${{ secrets.KOLM_API_KEY }}
+          KOLM_BASE_URL: ${{ vars.KOLM_BASE_URL || 'https://kolm.ai' }}
+        # The `--yaml` flag tells `kolm verify` to load thresholds from the
+        # `quality_gates:` block in kolm.yaml instead of the per-artifact
+        # spec.json default. Exit code 0 = all gates pass; non-zero = at
+        # least one namespace fell below min_kscore (proceed to distill).
+        continue-on-error: true
+        run: npx kolm verify --yaml
+
+      - name: re-distill on gate failure
+        if: ${{ steps.verify.outcome != 'success' || github.event.inputs.force_distill == 'true' }}
+        env:
+          KOLM_API_KEY: ${{ secrets.KOLM_API_KEY }}
+          KOLM_BASE_URL: ${{ vars.KOLM_BASE_URL || 'https://kolm.ai' }}
+        # `--from-yaml` reads the namespace + teacher pairs out of kolm.yaml
+        # and writes one .kolm per namespace into ./dist/. This call is the
+        # one that actually consumes tenant quota; everything above is free.
+        run: npx kolm distill --from-yaml --out ./dist
+
+      - name: publish .kolm artifacts to GitHub Releases
+        if: ${{ steps.verify.outcome != 'success' || github.event.inputs.force_distill == 'true' }}
+        # Tag-per-commit so consumers can pin to an exact SHA. The release
+        # body is auto-generated; .kolm files in ./dist/ become release
+        # assets the W721 hosted bundle registry can fetch.
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: kolm-distill-${{ github.sha }}
+          name: 'kolm distill ${{ github.sha }}'
+          body: |
+            Auto-distilled by .github/workflows/kolm-distill.yml on push to main.
+
+            Sources: kolm.yaml @ ${{ github.sha }}
+            Trigger: K-Score regression vs. quality_gates.min_kscore
+          files: dist/*.kolm
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

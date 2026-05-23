@@ -30774,6 +30774,675 @@ async function cmdW730Metrics(args) {
   process.exit(EXIT.BAD_ARGS);
 }
 
+// W731 — VS Code extension installer + status dispatcher.
+//
+// Distinct-named (cmdW731VscodeInstall) per the W724/W726/W727/W728/W729/W730
+// precedent so parallel W732/W733/W734 agents don't collide on this symbol.
+//
+// Subcommands:
+//   `kolm vscode install` — print install instructions and a copy-paste
+//                            command. If the `code` binary is on PATH we
+//                            offer to invoke `code --install-extension` from
+//                            a freshly packaged .vsix; if not, we fall back
+//                            to the manual copy-to-extensions instructions.
+//   `kolm vscode status`  — JSON envelope reporting whether the extension is
+//                            present under ~/.vscode/extensions or via `code
+//                            --list-extensions`.
+//
+// Honest fallbacks:
+//   * `code` binary missing → `{ok:false, error:'vscode_not_installed',
+//     hint:'install VS Code and re-run'}` on stdout + EXIT.MISSING_PREREQ.
+//   * sdk/vscode/ missing → `{ok:false, error:'extension_source_missing'}`.
+//   * Unknown subcommand → usage line + EXIT.BAD_ARGS.
+async function cmdW731VscodeInstall(args) {
+  const sub = (args && args[0]) || '';
+  const fsMod = await import('node:fs');
+  const pathMod = await import('node:path');
+  const os = await import('node:os');
+  const childProcess = await import('node:child_process');
+
+  // Repo-relative path to the VS Code extension source.
+  const here = pathMod.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'));
+  const sdkVscodeDir = pathMod.join(here, '..', 'sdk', 'vscode');
+
+  function findCodeBinary() {
+    // Honest probe — try `code --version`. If it exits non-zero or throws
+    // ENOENT, we say the binary is missing.
+    try {
+      const ext = process.platform === 'win32' ? '.cmd' : '';
+      const r = childProcess.spawnSync(`code${ext}`, ['--version'], {
+        encoding: 'utf-8',
+        shell: process.platform === 'win32',
+        timeout: 5000,
+      });
+      if (r && r.status === 0) return `code${ext}`;
+    } catch { /* fall through */ }
+    return null;
+  }
+
+  function extensionsDir() {
+    return pathMod.join(os.homedir(), '.vscode', 'extensions', 'kolm.kolm-vscode-0.3.0');
+  }
+
+  if (sub === 'install') {
+    if (!fsMod.existsSync(sdkVscodeDir)) {
+      const env = {
+        ok: false,
+        error: 'extension_source_missing',
+        detail: `sdk/vscode/ not found at ${sdkVscodeDir}`,
+        hint: 'reinstall the kolm CLI from the kolmogorov-stack repo',
+        version: 'w731-v1',
+      };
+      console.log(JSON.stringify(env, null, 2));
+      process.exit(EXIT.MISSING_PREREQ);
+      return;
+    }
+    const codeBin = findCodeBinary();
+    if (!codeBin) {
+      const env = {
+        ok: false,
+        error: 'vscode_not_installed',
+        hint: 'install VS Code and re-run',
+        detail: 'could not find the `code` binary on PATH; install VS Code from https://code.visualstudio.com/ and ensure the shell command is enabled',
+        manual: {
+          extensions_dir: extensionsDir(),
+          copy_from: sdkVscodeDir,
+        },
+        version: 'w731-v1',
+      };
+      console.log(JSON.stringify(env, null, 2));
+      process.exit(EXIT.MISSING_PREREQ);
+      return;
+    }
+    // Honest path: emit the exact two commands we recommend and an envelope
+    // so scripted callers don't need to scrape stdout text. We do NOT spawn
+    // the install ourselves — invoking a global package manager from inside
+    // a CLI is a footgun for CI and remote shells.
+    const env = {
+      ok: true,
+      version: 'w731-v1',
+      code_binary: codeBin,
+      source_dir: sdkVscodeDir,
+      manual_install: [
+        `cd ${sdkVscodeDir}`,
+        'npx -y @vscode/vsce package -o kolm-vscode.vsix',
+        `${codeBin} --install-extension kolm-vscode.vsix`,
+      ],
+      copy_install: {
+        extensions_dir: extensionsDir(),
+        copy_from: sdkVscodeDir,
+        note: 'Alternative: copy sdk/vscode/ to the extensions_dir above and restart VS Code',
+      },
+    };
+    console.log(JSON.stringify(env, null, 2));
+    return;
+  }
+
+  if (sub === 'status') {
+    const codeBin = findCodeBinary();
+    let installedViaCli = null;
+    if (codeBin) {
+      try {
+        const r = childProcess.spawnSync(codeBin, ['--list-extensions'], {
+          encoding: 'utf-8',
+          shell: process.platform === 'win32',
+          timeout: 5000,
+        });
+        if (r && r.status === 0 && typeof r.stdout === 'string') {
+          installedViaCli = r.stdout.split(/\r?\n/).some((line) =>
+            line.trim().toLowerCase() === 'kolm.kolm-vscode'
+          );
+        }
+      } catch { /* leave null */ }
+    }
+    const extDir = extensionsDir();
+    const presentOnDisk = (() => {
+      try { return fsMod.existsSync(pathMod.join(extDir, 'package.json')); }
+      catch { return false; }
+    })();
+    const env = {
+      ok: true,
+      version: 'w731-v1',
+      code_binary_present: !!codeBin,
+      extension_installed_via_cli: installedViaCli,
+      extension_present_on_disk: presentOnDisk,
+      extensions_dir: extDir,
+      source_dir: sdkVscodeDir,
+      source_dir_present: fsMod.existsSync(sdkVscodeDir),
+    };
+    console.log(JSON.stringify(env, null, 2));
+    return;
+  }
+
+  console.error('usage: kolm vscode <install|status>');
+  console.error('  install — print install instructions for the kolm VS Code extension');
+  console.error('  status  — JSON envelope describing detected install state');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// =============================================================================
+// W732 — Git-integrated kolm.yaml + GHA dispatcher.
+//
+// Distinct-named (cmdW732YamlSync) per the W724/W726/W727/W728/W729/W730/W731
+// precedent so parallel wave agents (W733/W734/...) cannot collide on the
+// same symbol.
+//
+// Subcommands:
+//   `kolm yaml validate [--file <path>]`  — parse + schema-check kolm.yaml.
+//                                            Defaults to the nearest kolm.yaml
+//                                            walking up from cwd (git-style).
+//   `kolm yaml init`                       — write a starter kolm.yaml to cwd.
+//                                            No-op (exit 0 + already_exists
+//                                            envelope) if a kolm.yaml is
+//                                            already there.
+//   `kolm diff <a.kolm> <b.kolm>`          — compute artifact diff. W732 ships
+//                                            an honest `w739_not_shipped`
+//                                            envelope; W739 overrides the
+//                                            diffArtifacts function in
+//                                            src/kolm-diff.js without touching
+//                                            this dispatcher.
+//
+// Honest fallbacks:
+//   * src/kolm-yaml.js missing → JSON envelope on stdout + exit MISSING_PREREQ.
+//   * No kolm.yaml found       → `kolm_yaml_not_found` + hint to run `init`.
+//   * `init` on an existing    → `already_exists` envelope (idempotent), exit 0.
+//   * Unknown subcommand       → usage line on stderr + exit BAD_ARGS (1).
+// =============================================================================
+async function cmdW732YamlSync(args) {
+  const sub = (args && args[0]) || '';
+  if (sub === 'validate') {
+    let mod;
+    try {
+      mod = await import('../src/kolm-yaml.js');
+    } catch (e) {
+      const envelope = {
+        ok: false,
+        error: 'kolm_yaml_module_missing',
+        detail: (e && e.message) || String(e),
+        hint: 'src/kolm-yaml.js must be importable; reinstall the kolm CLI',
+        version: 'w732-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.MISSING_PREREQ);
+      return;
+    }
+    // --file <path> wins over the walk-up search; we never silently override
+    // an explicit user choice. When --file isn't passed we walk up from cwd
+    // (the same algorithm git uses to find .gitignore).
+    let filePath = null;
+    for (let i = 1; i < args.length; i++) {
+      if (args[i] === '--file' && i + 1 < args.length) {
+        filePath = path.resolve(args[i + 1]);
+        i++;
+      } else if (args[i].startsWith('--file=')) {
+        filePath = path.resolve(args[i].slice('--file='.length));
+      }
+    }
+    if (!filePath) filePath = mod.findKolmYamlInRepo(process.cwd());
+    if (!filePath) {
+      const envelope = {
+        ok: false,
+        error: 'kolm_yaml_not_found',
+        hint: 'run `kolm yaml init` first to scaffold a kolm.yaml at the repo root',
+        version: mod.KOLM_YAML_VERSION,
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.NOT_FOUND);
+      return;
+    }
+    let yamlText;
+    try {
+      yamlText = fs.readFileSync(filePath, 'utf8');
+    } catch (e) {
+      const envelope = {
+        ok: false,
+        error: 'kolm_yaml_read_failed',
+        path: filePath,
+        detail: (e && e.message) || String(e),
+        version: mod.KOLM_YAML_VERSION,
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.EXECUTION);
+      return;
+    }
+    let parsed;
+    try {
+      parsed = mod.parseKolmYaml(yamlText);
+    } catch (e) {
+      const envelope = {
+        ok: false,
+        error: e && e.code ? e.code : 'yaml_parse_failed',
+        path: filePath,
+        detail: (e && e.message) || String(e),
+        line: (e && typeof e.line === 'number') ? e.line : null,
+        version: mod.KOLM_YAML_VERSION,
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.GATE_FAIL);
+      return;
+    }
+    const validation = mod.validateKolmYaml(parsed);
+    const out = {
+      ok: validation.ok,
+      version: mod.KOLM_YAML_VERSION,
+      path: filePath,
+      parsed,
+      validation,
+    };
+    console.log(JSON.stringify(out, null, 2));
+    if (!validation.ok) process.exit(EXIT.GATE_FAIL);
+    return;
+  }
+  if (sub === 'init') {
+    let mod;
+    try {
+      mod = await import('../src/kolm-yaml.js');
+    } catch (e) {
+      const envelope = {
+        ok: false,
+        error: 'kolm_yaml_module_missing',
+        detail: (e && e.message) || String(e),
+        hint: 'src/kolm-yaml.js must be importable; reinstall the kolm CLI',
+        version: 'w732-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.MISSING_PREREQ);
+      return;
+    }
+    const dest = path.join(process.cwd(), 'kolm.yaml');
+    if (fs.existsSync(dest)) {
+      // Idempotent: re-running `init` after the file exists is a no-op +
+      // honest envelope. Exit 0 so CI loops can call this safely.
+      console.log(JSON.stringify({
+        ok: true,
+        already_exists: true,
+        path: dest,
+        version: mod.KOLM_YAML_VERSION,
+      }, null, 2));
+      return;
+    }
+    try {
+      fs.writeFileSync(dest, mod.starterKolmYaml(), 'utf8');
+    } catch (e) {
+      const envelope = {
+        ok: false,
+        error: 'kolm_yaml_write_failed',
+        path: dest,
+        detail: (e && e.message) || String(e),
+        version: mod.KOLM_YAML_VERSION,
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.EXECUTION);
+      return;
+    }
+    console.log(JSON.stringify({
+      ok: true,
+      created: true,
+      path: dest,
+      version: mod.KOLM_YAML_VERSION,
+    }, null, 2));
+    return;
+  }
+  // `kolm yaml` with no subcommand → usage line.
+  console.error('usage: kolm yaml <validate|init> [--file kolm.yaml]');
+  console.error('  validate — parse + schema-check the nearest kolm.yaml (walks up like git)');
+  console.error('  init     — write a starter kolm.yaml to the current directory');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// W732-4 — `kolm diff <a.kolm> <b.kolm>`. Honest pass-through to
+// src/kolm-diff.js which W732 ships as a `w739_not_shipped` stub. W739 will
+// replace the diffArtifacts export without touching this dispatcher.
+async function cmdW732Diff(args) {
+  const aPath = args && args[0];
+  const bPath = args && args[1];
+  if (!aPath || !bPath) {
+    console.error('usage: kolm diff <a.kolm> <b.kolm>');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+  let mod;
+  try {
+    mod = await import('../src/kolm-diff.js');
+  } catch (e) {
+    const envelope = {
+      ok: false,
+      error: 'kolm_diff_module_missing',
+      detail: (e && e.message) || String(e),
+      hint: 'src/kolm-diff.js must be importable; reinstall the kolm CLI',
+      version: 'w732-v1',
+    };
+    console.log(JSON.stringify(envelope, null, 2));
+    process.exit(EXIT.MISSING_PREREQ);
+    return;
+  }
+  const result = mod.diffArtifacts(aPath, bPath);
+  console.log(JSON.stringify(result, null, 2));
+  // honest stub returns ok:false → exit non-zero so CI doesn't gate on
+  // a placeholder. W739 swaps in real behavior and the exit code follows.
+  if (!result || result.ok === false) process.exit(EXIT.MISSING_PREREQ);
+}
+
+// =============================================================================
+// W733 — OpenTelemetry semantic-conventions CLI dispatcher.
+//
+// Distinct-named (cmdW733OtelStatus) per the W724/W726/W727/W728/W729/W730
+// precedent so parallel wave agents (W731/W732/W734) cannot collide on the
+// same symbol.
+//
+// Subcommands:
+//   `kolm otel status`     — prints OTEL_W733_VERSION + whether
+//                            @opentelemetry/api is detected at runtime +
+//                            whether a tracer is registered.
+//   `kolm otel attributes` — emits KOLM_OTEL_ATTRS as JSON (codegen-friendly).
+//
+// Honest fallbacks:
+//   * src/otel.js missing → JSON envelope on stdout + exit MISSING_PREREQ (3).
+//     Mirrors the W730 import-failure pattern.
+//   * Unknown subcommand → usage line on stderr + exit BAD_ARGS (64).
+// =============================================================================
+async function cmdW733OtelStatus(args) {
+  const sub = (args && args[0]) || '';
+  if (sub === 'status') {
+    let mod;
+    try {
+      mod = await import('../src/otel.js');
+    } catch (e) {
+      const envelope = {
+        ok: false,
+        error: 'otel_module_missing',
+        detail: (e && e.message) || String(e),
+        hint: 'src/otel.js must be importable; reinstall the kolm CLI',
+        version: 'w733-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.MISSING_PREREQ);
+      return;
+    }
+    // Probe @opentelemetry/api so the "detected" flag reflects runtime
+    // reality, not just a stale cached value from earlier in the session.
+    try { if (typeof mod._probeOtelApi === 'function') await mod._probeOtelApi(); } catch (_e) { /* honest no-op */ }
+    const status = (typeof mod.getW733Status === 'function')
+      ? mod.getW733Status()
+      : { ok: true, version: 'w733-v1', otel_api_detected: false, tracer_registered: false, native_enabled: false };
+    console.log(JSON.stringify(status, null, 2));
+    return;
+  }
+  if (sub === 'attributes' || sub === 'attrs') {
+    let mod;
+    try {
+      mod = await import('../src/otel.js');
+    } catch (e) {
+      const envelope = {
+        ok: false,
+        error: 'otel_module_missing',
+        detail: (e && e.message) || String(e),
+        hint: 'src/otel.js must be importable; reinstall the kolm CLI',
+        version: 'w733-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.MISSING_PREREQ);
+      return;
+    }
+    const out = {
+      ok: true,
+      version: mod.OTEL_W733_VERSION || 'w733-v1',
+      attributes: (typeof mod.listW733Attrs === 'function') ? mod.listW733Attrs() : {},
+      span_names: (typeof mod.listW733SpanNames === 'function') ? mod.listW733SpanNames() : {},
+    };
+    console.log(JSON.stringify(out, null, 2));
+    return;
+  }
+  console.error('usage: kolm otel <status|attributes>');
+  console.error('  status      — print W733 OTel status (version + tracer detection)');
+  console.error('  attributes  — emit kolm.* attribute namespace + span names as JSON');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// W734 — RAG-aware capture CLI dispatcher.
+//
+// Distinct-named (cmdW734RagCapture) per the W724/W726/W727/W728/W729/W730/
+// W731/W732/W733 precedent so the parallel W734-sibling agents cannot collide
+// on this symbol.
+//
+// Subcommands:
+//   `kolm rag capture --prompt <text> --context <file> --response <text>`
+//                       — POST /v1/capture/log with the retrieved chunks read
+//                         from a JSON file (array of {source, text, score?}).
+//                         Uses KOLM_BASE_URL + KOLM_API_KEY env vars when set;
+//                         falls back to https://kolm.ai + ~/.kolm/config.json.
+//   `kolm rag status`   — JSON envelope reporting RAG_CAPTURE_VERSION + the
+//                         on-disk retrieved-context capture count when the
+//                         local KOLM_DATA_DIR is readable. Honest "no_local
+//                         _store" envelope when the data dir is absent.
+//
+// Honest fallbacks:
+//   * src/rag-capture.js missing            → EXIT.MISSING_PREREQ + envelope
+//   * --context file missing                → EXIT.NOT_FOUND  +
+//                                              error:'context_file_not_found'
+//   * --context not a JSON array of items   → EXIT.BAD_ARGS  +
+//                                              error:'context_file_invalid'
+//   * Unknown subcommand                    → EXIT.BAD_ARGS  + usage line
+//
+// Privacy: NEVER prints the raw retrieved text on stdout. Status envelopes
+// report only the per-item source URL + chunk count.
+async function cmdW734RagCapture(args) {
+  const sub = (args && args[0]) || '';
+  const fsMod = await import('node:fs');
+  const pathMod = await import('node:path');
+
+  // ---- subcommand: status ----
+  if (sub === 'status') {
+    let mod;
+    try {
+      mod = await import('../src/rag-capture.js');
+    } catch (e) {
+      const envelope = {
+        ok: false,
+        error: 'rag_capture_module_missing',
+        detail: (e && e.message) || String(e),
+        hint: 'src/rag-capture.js must be importable; reinstall the kolm CLI',
+        version: 'w734-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.MISSING_PREREQ);
+      return;
+    }
+    // Best-effort local RAG-capture count from KOLM_DATA_DIR. We never crawl
+    // anything outside ~/.kolm — honest "no_local_store" envelope when the
+    // data dir is absent or unreadable.
+    let localCount = null;
+    let localSampleSources = [];
+    try {
+      const dataDir = process.env.KOLM_DATA_DIR
+        || (process.env.HOME && pathMod.join(process.env.HOME, '.kolm'))
+        || (process.env.USERPROFILE && pathMod.join(process.env.USERPROFILE, '.kolm'))
+        || null;
+      if (dataDir && fsMod.existsSync(dataDir)) {
+        const obsPath = pathMod.join(dataDir, 'observations.jsonl');
+        if (fsMod.existsSync(obsPath)) {
+          const lines = fsMod.readFileSync(obsPath, 'utf8').split('\n').filter(Boolean);
+          let n = 0;
+          for (const line of lines) {
+            try {
+              const row = JSON.parse(line);
+              if (row && Array.isArray(row.retrieved_context) && row.retrieved_context.length > 0) {
+                n += 1;
+                if (localSampleSources.length < 5 && row.retrieved_context[0] && typeof row.retrieved_context[0].source === 'string') {
+                  // Privacy: surface SOURCE URL only, never raw text.
+                  localSampleSources.push(row.retrieved_context[0].source);
+                }
+              }
+            } catch (_e) { /* skip malformed rows */ }
+          }
+          localCount = n;
+        } else {
+          localCount = 0;
+        }
+      }
+    } catch (_e) { /* best-effort — leave localCount null */ }
+
+    const out = {
+      ok: true,
+      version: mod.RAG_CAPTURE_VERSION,
+      local_rag_capture_count: localCount,
+      local_sample_sources: localSampleSources,
+      hint: localCount == null
+        ? 'no local KOLM_DATA_DIR observations.jsonl readable; remote-only mode'
+        : `${localCount} local capture rows carry retrieved_context`,
+    };
+    console.log(JSON.stringify(out, null, 2));
+    return;
+  }
+
+  // ---- subcommand: capture ----
+  if (sub === 'capture') {
+    // Parse the flags inline so we don't pull in the heavier flag parser
+    // (keeping this dispatcher self-contained for the parallel-wave merge).
+    const rest = args.slice(1);
+    const flags = {};
+    for (let i = 0; i < rest.length; i++) {
+      const a = rest[i];
+      if (a === '--prompt')       flags.prompt    = rest[++i];
+      else if (a === '--context') flags.context   = rest[++i];
+      else if (a === '--response')flags.response  = rest[++i];
+      else if (a === '--namespace') flags.namespace = rest[++i];
+      else if (typeof a === 'string' && a.startsWith('--prompt='))    flags.prompt    = a.slice(9);
+      else if (typeof a === 'string' && a.startsWith('--context='))   flags.context   = a.slice(10);
+      else if (typeof a === 'string' && a.startsWith('--response='))  flags.response  = a.slice(11);
+      else if (typeof a === 'string' && a.startsWith('--namespace=')) flags.namespace = a.slice(12);
+    }
+    if (typeof flags.prompt !== 'string' || !flags.prompt
+        || typeof flags.context !== 'string' || !flags.context
+        || typeof flags.response !== 'string') {
+      console.error('usage: kolm rag capture --prompt <text> --context <file> --response <text> [--namespace <ns>]');
+      console.error('  <file> is a JSON array of {source, text, score?} items.');
+      process.exit(EXIT.BAD_ARGS);
+      return;
+    }
+    const ctxPath = pathMod.resolve(flags.context);
+    if (!fsMod.existsSync(ctxPath)) {
+      const envelope = {
+        ok: false,
+        error: 'context_file_not_found',
+        hint: `no such file: ${ctxPath}`,
+        version: 'w734-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.NOT_FOUND);
+      return;
+    }
+    let retrieved;
+    try {
+      const raw = fsMod.readFileSync(ctxPath, 'utf8');
+      retrieved = JSON.parse(raw);
+    } catch (e) {
+      const envelope = {
+        ok: false,
+        error: 'context_file_invalid',
+        detail: (e && e.message) || String(e),
+        hint: 'context file must contain a JSON array of {source, text, score?}',
+        version: 'w734-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.BAD_ARGS);
+      return;
+    }
+    if (!Array.isArray(retrieved)) {
+      const envelope = {
+        ok: false,
+        error: 'context_file_invalid',
+        hint: 'context file root must be a JSON array (got ' + typeof retrieved + ')',
+        version: 'w734-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.BAD_ARGS);
+      return;
+    }
+    for (let i = 0; i < retrieved.length; i++) {
+      const it = retrieved[i];
+      if (!it || typeof it !== 'object' || typeof it.source !== 'string' || typeof it.text !== 'string') {
+        const envelope = {
+          ok: false,
+          error: 'context_file_invalid',
+          hint: `item #${i} must have 'source' and 'text' string fields`,
+          version: 'w734-v1',
+        };
+        console.log(JSON.stringify(envelope, null, 2));
+        process.exit(EXIT.BAD_ARGS);
+        return;
+      }
+    }
+    // Base64-encode the array onto the kolm-retrieved-context header and
+    // POST /v1/capture/log. We use fetch from globalThis so the CLI works on
+    // Node 18+ without pulling in a dependency.
+    const payloadJson = JSON.stringify(retrieved);
+    const headerVal = Buffer.from(payloadJson, 'utf8').toString('base64');
+    const base = (process.env.KOLM_BASE_URL || process.env.KOLM_BASE || 'https://kolm.ai').replace(/\/$/, '');
+    const apiKey = process.env.KOLM_API_KEY || process.env.KOLM_KEY || '';
+    if (!apiKey) {
+      const envelope = {
+        ok: false,
+        error: 'missing_api_key',
+        hint: 'set KOLM_API_KEY (or KOLM_KEY) and re-run; or run `kolm login`',
+        version: 'w734-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.MISSING_PREREQ);
+      return;
+    }
+    let res;
+    try {
+      res = await fetch(base + '/v1/capture/log', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'authorization': `Bearer ${apiKey}`,
+          'kolm-retrieved-context': headerVal,
+        },
+        body: JSON.stringify({
+          namespace: flags.namespace || 'default',
+          items: [{ input: flags.prompt, output: flags.response }],
+          provider: 'manual',
+        }),
+      });
+    } catch (e) {
+      const envelope = {
+        ok: false,
+        error: 'capture_request_failed',
+        detail: (e && e.message) || String(e),
+        hint: 'check KOLM_BASE_URL + network connectivity',
+        version: 'w734-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.EXECUTION);
+      return;
+    }
+    const text = await res.text().catch(() => '');
+    let body = null;
+    try { body = text ? JSON.parse(text) : null; } catch (_) { body = text; }
+    // Privacy: log COUNT + per-item SOURCE only, never raw retrieved text.
+    const out = {
+      ok: res.ok,
+      status: res.status,
+      namespace: flags.namespace || 'default',
+      retrieved_count: retrieved.length,
+      retrieved_sources: retrieved.slice(0, 10).map((r) => r.source),
+      server: body,
+      version: 'w734-v1',
+    };
+    console.log(JSON.stringify(out, null, 2));
+    if (!res.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ---- unknown subcommand ----
+  console.error('usage: kolm rag <capture|status>');
+  console.error('  capture  — POST a RAG capture with prompt + context-file + response');
+  console.error('  status   — emit RAG_CAPTURE_VERSION + local-store retrieved_context count');
+  process.exit(EXIT.BAD_ARGS);
+}
+
 async function main() {
   ensureLocalReceiptSecretInEnv();
   const [, , cmd, ...rest] = process.argv;
@@ -30797,6 +31466,17 @@ async function main() {
         }
         break;
       }
+      // W731 — `kolm vscode install|status` routes to the VS Code extension
+      // installer dispatcher.
+      case 'vscode': await withErrorContext('vscode', () => cmdW731VscodeInstall(rest)); break;
+      // W733 — `kolm otel status|attributes` routes to the OpenTelemetry
+      // semantic-conventions dispatcher (distinct symbol cmdW733OtelStatus
+      // so parallel W731/W732/W734 wave agents don't collide on this case).
+      case 'otel': await withErrorContext('otel', () => cmdW733OtelStatus(rest)); break;
+      // W734 — `kolm rag capture|status` routes to the RAG-aware capture
+      // dispatcher (distinct symbol cmdW734RagCapture so parallel W731/W732/
+      // W733 wave agents don't collide on this case).
+      case 'rag': await withErrorContext('rag', () => cmdW734RagCapture(rest)); break;
       // W456 — `kolm changelog` (public wave history; no auth).
       case 'changelog': await withErrorContext('changelog', () => cmdChangelog(rest)); break;
       // W409i — `kolm billing` (usage|plan|tiers|invoices).
@@ -30896,6 +31576,15 @@ async function main() {
       case 'extract':  await withErrorContext('extract',  () => cmdExtract(rest)); break;
       case 'doc':      await withErrorContext('doc',      () => cmdDoc(rest)); break;
       case 'config':   await withErrorContext('config',   () => cmdConfig(rest)); break;
+      // W732 — `kolm yaml validate|init` (kolm.yaml schema). Distinct
+      // dispatcher (cmdW732YamlSync) so parallel W731/W733/W734 agents do not
+      // merge-conflict on the symbol. Honest envelopes on missing file +
+      // parse error + already-exists.
+      case 'yaml':     await withErrorContext('yaml',     () => cmdW732YamlSync(rest)); break;
+      // W732-4 — `kolm diff <a.kolm> <b.kolm>`. Honest `w739_not_shipped`
+      // envelope until W739 ships; the dispatcher slot stays stable so the
+      // W739 wave swaps src/kolm-diff.js without touching this file.
+      case 'diff':     await withErrorContext('diff',     () => cmdW732Diff(rest)); break;
       case 'hmac':     await withErrorContext('hmac',     () => cmdHmac(rest)); break;
       case 'keygen':   await withErrorContext('keygen',   () => cmdKeygen(rest)); break;
       case 'pubkey':   await withErrorContext('pubkey',   () => cmdPubkey(rest)); break;

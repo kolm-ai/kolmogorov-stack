@@ -58,6 +58,10 @@ function cfg() {
     baseUrl: (c.get('baseUrl') || DEFAULT_BASE).replace(/\/$/, ''),
     suggest: c.get('suggestReplacements'),
     showRest: c.get('showRestEquivalent'),
+    namespace: c.get('namespace') || 'vscode-codegen',
+    costPerCall: c.get('costPerCall'),
+    captureEnabled: c.get('captureWatcher.enabled') !== false,
+    throttleMs: c.get('captureWatcher.throttleMs') || 5000,
   };
 }
 
@@ -359,6 +363,45 @@ async function cmdOpenConsole() {
 }
 
 // ---------------------------------------------------------------------------
+// W731 — capture watcher + pattern detector + distill + cost savings + router.
+// Loaded lazily so existing tests (which import this file under Node) don't
+// blow up on missing vscode globals. Each sub-module takes its dependencies
+// via params (see sdk/vscode/src/*.js).
+// ---------------------------------------------------------------------------
+function _loadW731() {
+  try {
+    return {
+      watcher: require('./src/capture-watcher'),
+      pattern: require('./src/pattern-detector'),
+      distill: require('./src/distill-command'),
+      cost:    require('./src/cost-savings'),
+      router:  require('./src/router-switch'),
+    };
+  } catch (e) {
+    // Honest: if the modules are missing the activate path becomes a no-op
+    // rather than throwing into the extension host.
+    return null;
+  }
+}
+
+async function cmdDistillCodingAssistant() {
+  const w731 = _loadW731();
+  if (!w731) return;
+  const deps = { cfg, request: (m, u, o) => request(m, u, o), vscode, logChannel: chan() };
+  await w731.distill.runDistill(deps);
+}
+
+async function cmdViewCaptures() {
+  const { baseUrl } = cfg();
+  vscode.env.openExternal(vscode.Uri.parse(baseUrl + '/account/captures'));
+}
+
+async function cmdViewCostSavings() {
+  const { baseUrl } = cfg();
+  vscode.env.openExternal(vscode.Uri.parse(baseUrl + '/account/billing'));
+}
+
+// ---------------------------------------------------------------------------
 // activate / deactivate
 // ---------------------------------------------------------------------------
 function activate(context) {
@@ -374,7 +417,58 @@ function activate(context) {
     vscode.commands.registerCommand('kolm.search',         cmdSearch),
     vscode.commands.registerCommand('kolm.replaceLLMCall', cmdReplaceLLMCall),
     vscode.commands.registerCommand('kolm.openConsole',    cmdOpenConsole),
+    vscode.commands.registerCommand('kolm.distillCodingAssistant', cmdDistillCodingAssistant),
+    vscode.commands.registerCommand('kolm.viewCaptures',         cmdViewCaptures),
+    vscode.commands.registerCommand('kolm.viewCostSavings',      cmdViewCostSavings),
   );
+
+  // W731 — capture watcher + pattern detector + cost-savings + router badge.
+  // Wired only if the modules import cleanly; otherwise we no-op.
+  const w731 = _loadW731();
+  if (!w731) return;
+
+  const c = cfg();
+  if (c.captureEnabled !== false) {
+    const detector = w731.pattern.createDetector({
+      emit: (event) => {
+        try {
+          vscode.window.showInformationMessage(
+            `kolm: detected ${event.matches} repetitive completions - distill?`,
+            'Distill now'
+          ).then((pick) => {
+            if (pick === 'Distill now') vscode.commands.executeCommand('kolm.distillCodingAssistant');
+          });
+        } catch {}
+      },
+    });
+    const watcher = w731.watcher.activate({
+      vscode,
+      cfg,
+      request: (m, u, o) => request(m, u, o),
+      logChannel: chan(),
+      patternDetector: detector,
+    });
+    context.subscriptions.push(watcher);
+  }
+
+  const distillBar = w731.distill.createStatusBar(vscode);
+  if (distillBar && typeof distillBar.show === 'function') {
+    distillBar.show();
+    context.subscriptions.push(distillBar);
+  }
+
+  const costBar = w731.cost.activate({
+    vscode,
+    cfg,
+    request: (m, u, o) => request(m, u, o),
+    logChannel: chan(),
+  });
+  context.subscriptions.push(costBar);
+
+  const routerBadge = w731.router.createBadgeItem(vscode);
+  if (routerBadge && typeof routerBadge.show === 'function') {
+    context.subscriptions.push(routerBadge);
+  }
 }
 
 function deactivate() {

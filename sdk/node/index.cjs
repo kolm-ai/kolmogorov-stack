@@ -101,6 +101,45 @@ class RecipeClient {
   health()                     { return this._req("GET", "/health"); }
   bootstrapAnonymous(meta)     { return this._req("POST", "/v1/anon/bootstrap", { user_agent: (meta && meta.user_agent) || `@kolm/kolm-sdk/${SDK_VERSION}`, hostname: (meta && meta.hostname) || null }); }
   claimAnonymous(anon_token, email, name) { return this._req("POST", "/v1/anon/claim", { anon_token, email, name }); }
+
+  // W734 — captureWithContext: log a capture row WITH the retrieved chunks
+  // the upstream LLM was shown. Header is base64 JSON array of
+  // {source, text, score?}. Mirrors the .mjs + Python SDK contract.
+  async captureWithContext(opts) {
+    const { prompt, retrieved, response, namespace } = (opts || {});
+    const ns = namespace == null ? "default" : namespace;
+    if (typeof prompt !== "string" || !prompt) {
+      throw new RecipeError("captureWithContext: prompt (non-empty string) required", 400, null);
+    }
+    if (typeof response !== "string") {
+      throw new RecipeError("captureWithContext: response (string) required", 400, null);
+    }
+    if (!Array.isArray(retrieved)) {
+      throw new RecipeError("captureWithContext: retrieved must be an array of {source, text, score?}", 400, null);
+    }
+    for (let i = 0; i < retrieved.length; i++) {
+      const it = retrieved[i];
+      if (!it || typeof it !== "object" || typeof it.source !== "string" || typeof it.text !== "string") {
+        throw new RecipeError("captureWithContext: retrieved[" + i + "] must have 'source' and 'text' string fields", 400, null);
+      }
+    }
+    const payloadJson = JSON.stringify(retrieved);
+    let headerVal;
+    if (typeof Buffer !== "undefined" && typeof Buffer.from === "function") {
+      headerVal = Buffer.from(payloadJson, "utf8").toString("base64");
+    } else if (typeof btoa === "function") {
+      headerVal = btoa(payloadJson);
+    } else {
+      throw new RecipeError("captureWithContext: no base64 encoder available", 500, null);
+    }
+    return this._req("POST", "/v1/capture/log", {
+      namespace: ns,
+      items: [{ input: prompt, output: response }],
+      provider: "manual",
+    }, {
+      headers: { "kolm-retrieved-context": headerVal },
+    });
+  }
 }
 
 let _defaultClient = null;

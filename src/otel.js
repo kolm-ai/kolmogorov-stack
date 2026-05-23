@@ -335,6 +335,235 @@ function routePattern(req) {
     || '';
 }
 
+// =============================================================================
+// W733 — OpenTelemetry Semantic Conventions
+//
+// Atomic additions (W707 plan W733-1/-2/-3):
+//   * KOLM_OTEL_ATTRS    — the kolm.* attribute namespace (token confidence,
+//                          routing decision, K-Score, K-Score 24h drift,
+//                          artifact CID, tenant id_hash, namespace).
+//   * KOLM_OTEL_SPAN_NAMES — sub-span structure for the inference timeline
+//                          (queue → load → prefill → decode).
+//   * createInferenceSpans(parent, timings) — emits 4 child spans with
+//                          relative start-time offsets so they render as a
+//                          stacked timeline in any OTel UI.
+//   * setRoutingAttributes(span, w709Block) — pure attacher; safely no-ops
+//                          when span or @opentelemetry/api are absent.
+//
+// Privacy contract (W733 #6): tenant_id NEVER appears as a raw attribute.
+// We expose ONLY a sha256-derived 12-char hex prefix as kolm.tenant.id_hash
+// so traces stay linkable across spans for the same tenant without leaking
+// the identifier into the buyer's tracing backend.
+//
+// Optional dep: @opentelemetry/api is OPTIONAL. We never list it in
+// package.json. At runtime we try-import it lazily; if absent we fall
+// through to the existing STATE.enabled-driven kolm-native exporter above
+// and remain honest no-ops if neither path is wired. The "honest no-op"
+// promise is critical — we never throw on a missing tracer because that
+// would put OTel in the request hot-path on uninstrumented hosts.
+// =============================================================================
+
+const OTEL_W733_VERSION = 'w733-v1';
+
+const KOLM_OTEL_ATTRS = Object.freeze({
+  // W709 token-level confidence (mean Shannon entropy per span, or per-token
+  // gauge if the caller emits sub-spans per token). Unit: nats.
+  TOKEN_CONFIDENCE: 'kolm.token.confidence',
+  // W709 routing decision: 'student' | 'teacher' | 'mixed'.
+  ROUTING_DECISION: 'kolm.routing.decision',
+  // W709 routing-threshold entropy. Unit: nats. The threshold that fired,
+  // not the per-token entropy — that lives on per-token sub-spans.
+  ROUTING_ENTROPY_NATS: 'kolm.routing.entropy_nats',
+  // W733 K-Score at the time the inference ran.
+  KSCORE_VALUE: 'kolm.kscore.value',
+  // W733 K-Score 24h drift (current minus 24h-ago baseline).
+  KSCORE_DRIFT_24H: 'kolm.kscore.drift_24h',
+  // W144 artifact content-id (immutable).
+  ARTIFACT_CID: 'kolm.artifact.cid',
+  // W733 tenant id_hash — sha256 prefix, NEVER raw tenant_id (see privacy
+  // contract above). 12 hex chars = 48 bits = collision-safe for the use
+  // case (linking spans across a single tenant inside one tenant's trace
+  // budget).
+  TENANT_ID_HASH: 'kolm.tenant.id_hash',
+  // W245 namespace (already public — appears in routes, capture rows,
+  // metrics). Safe to emit raw.
+  NAMESPACE: 'kolm.namespace',
+});
+
+const KOLM_OTEL_SPAN_NAMES = Object.freeze({
+  // W729 load queue → time-in-queue before the request was picked up.
+  QUEUE: 'kolm.inference.queue',
+  // W729 model load → 0 ms if the artifact was already paged into VRAM.
+  LOAD: 'kolm.inference.load',
+  // Prefill compute (prompt → KV cache).
+  PREFILL: 'kolm.inference.prefill',
+  // Decode loop (KV cache → output tokens).
+  DECODE: 'kolm.inference.decode',
+});
+
+// Lazy @opentelemetry/api detection. Caches the module if present so we
+// only pay the try-import cost once per process. We DO NOT add the dep —
+// only honor it if the host installed it for their own instrumentation.
+let _otelApi = null;
+let _otelApiDetected = false;
+let _otelApiProbed = false;
+
+async function _probeOtelApi() {
+  if (_otelApiProbed) return _otelApiDetected;
+  _otelApiProbed = true;
+  try {
+    _otelApi = await import('@opentelemetry/api');
+    _otelApiDetected = !!_otelApi;
+  } catch (_e) {
+    _otelApi = null;
+    _otelApiDetected = false;
+  }
+  return _otelApiDetected;
+}
+
+function _isOtelApiDetectedSync() {
+  return _otelApiDetected;
+}
+
+function _getRegisteredTracer() {
+  if (globalThis.__OTEL_TRACER__) return globalThis.__OTEL_TRACER__;
+  if (_otelApi && _otelApi.trace && typeof _otelApi.trace.getTracer === 'function') {
+    try { return _otelApi.trace.getTracer('kolm', OTEL_W733_VERSION); } catch (_e) { return null; }
+  }
+  return null;
+}
+
+function _hashTenant(rawTenantId) {
+  if (!rawTenantId) return null;
+  return crypto.createHash('sha256').update(String(rawTenantId)).digest('hex').slice(0, 12);
+}
+
+// Pure helper — attaches W709 routing block attributes to a span. Safe to
+// call with span=null (no-op); safe to call with a kolm-native span object
+// from startSpan() above OR an @opentelemetry/api Span (both honor
+// setAttribute(key, value) and our native path appends to span.attributes).
+function setRoutingAttributes(span, block) {
+  if (!span || !block || typeof block !== 'object') return false;
+  const out = {};
+  if (typeof block.decision === 'string') out[KOLM_OTEL_ATTRS.ROUTING_DECISION] = block.decision;
+  else if (block.decision && typeof block.decision === 'object' && typeof block.decision.route === 'string') {
+    out[KOLM_OTEL_ATTRS.ROUTING_DECISION] = block.decision.route;
+  }
+  if (Number.isFinite(Number(block.entropy_nats))) out[KOLM_OTEL_ATTRS.ROUTING_ENTROPY_NATS] = Number(block.entropy_nats);
+  if (Number.isFinite(Number(block.confidence))) out[KOLM_OTEL_ATTRS.TOKEN_CONFIDENCE] = Number(block.confidence);
+  if (Number.isFinite(Number(block.kscore))) out[KOLM_OTEL_ATTRS.KSCORE_VALUE] = Number(block.kscore);
+  if (Number.isFinite(Number(block.kscore_drift_24h))) out[KOLM_OTEL_ATTRS.KSCORE_DRIFT_24H] = Number(block.kscore_drift_24h);
+  if (typeof block.artifact_cid === 'string') out[KOLM_OTEL_ATTRS.ARTIFACT_CID] = block.artifact_cid;
+  if (typeof block.namespace === 'string') out[KOLM_OTEL_ATTRS.NAMESPACE] = block.namespace;
+  if (block.tenant_id) {
+    // Privacy — only the sha256 prefix ever crosses the OTel boundary.
+    const hashed = _hashTenant(block.tenant_id);
+    if (hashed) out[KOLM_OTEL_ATTRS.TENANT_ID_HASH] = hashed;
+  }
+  // Native kolm-otel span shape from startSpan() — attributes is a kv array.
+  if (Array.isArray(span.attributes)) {
+    for (const k of Object.keys(out)) span.attributes.push(kv(k, out[k]));
+    return true;
+  }
+  // @opentelemetry/api Span shape — setAttribute(key, value).
+  if (typeof span.setAttribute === 'function') {
+    for (const k of Object.keys(out)) {
+      try { span.setAttribute(k, out[k]); } catch (_e) { /* ignore one bad attr */ }
+    }
+    return true;
+  }
+  return false;
+}
+
+// Emits 4 inference sub-spans (queue → load → prefill → decode) with
+// monotonically-advancing start times so the buyer's OTel UI renders them
+// as a stacked timeline below the parent kolm.inference span. Tolerates
+// (a) missing parent, (b) missing tracer, (c) missing @opentelemetry/api
+// — all of which collapse to an honest no-op + return false. Never throws.
+function createInferenceSpans(parentSpan, timings) {
+  timings = timings || {};
+  const queueMs = Number(timings.queue_ms) || 0;
+  const loadMs = Number(timings.load_ms) || 0;
+  const prefillMs = Number(timings.prefill_ms) || 0;
+  const decodeMs = Number(timings.decode_ms) || 0;
+  // No tracer + no native otel state? Honest no-op.
+  const tracer = _getRegisteredTracer();
+  if (!tracer && !STATE.enabled) {
+    if (process.env.KOLM_OTEL_DEBUG) {
+      // eslint-disable-next-line no-console
+      console.warn('[kolm.otel] createInferenceSpans no-op: no tracer registered, KOLM_OTEL=0');
+    }
+    return false;
+  }
+  const baseT = Date.now();
+  // Native-path emission: directly enqueue 4 child spans into STATE.spanQueue
+  // through endSpan() so they ride the existing OTLP flush loop. We compute
+  // start/end deltas in ns from the offset budget so the timeline renders
+  // queue → load → prefill → decode in order without overlap.
+  const parentTraceId = (parentSpan && parentSpan.traceId) || null;
+  const parentSpanId = (parentSpan && parentSpan.spanId) || null;
+  let offsetMs = 0;
+  const segments = [
+    { name: KOLM_OTEL_SPAN_NAMES.QUEUE, ms: queueMs },
+    { name: KOLM_OTEL_SPAN_NAMES.LOAD, ms: loadMs },
+    { name: KOLM_OTEL_SPAN_NAMES.PREFILL, ms: prefillMs },
+    { name: KOLM_OTEL_SPAN_NAMES.DECODE, ms: decodeMs },
+  ];
+  const emitted = [];
+  for (const seg of segments) {
+    const startMs = baseT + offsetMs;
+    const endMs = startMs + Math.max(0, seg.ms);
+    const child = {
+      traceId: parentTraceId || makeId(16),
+      spanId: makeId(8),
+      parentSpanId: parentSpanId || undefined,
+      name: seg.name,
+      startTimeUnixNano: String(BigInt(startMs) * 1000000n),
+      endTimeUnixNano: String(BigInt(endMs) * 1000000n),
+      attributes: [kv('kolm.inference.phase_ms', seg.ms)],
+      status: { code: 1 },
+      events: [],
+    };
+    if (STATE.enabled) {
+      STATE.spanQueue.push(child);
+    }
+    emitted.push(child);
+    offsetMs += Math.max(0, seg.ms);
+  }
+  if (STATE.enabled) trimQueue();
+  // If @opentelemetry/api tracer is also registered, mirror via tracer
+  // hook — but tolerate any tracer impl that doesn't honor our minimal
+  // contract by catching+continuing.
+  if (tracer && typeof tracer.startSpan === 'function') {
+    try {
+      for (const seg of segments) {
+        const s = tracer.startSpan(seg.name);
+        if (s && typeof s.setAttribute === 'function') s.setAttribute('kolm.inference.phase_ms', seg.ms);
+        if (s && typeof s.end === 'function') s.end();
+      }
+    } catch (_e) { /* honest no-op on tracer error */ }
+  }
+  return emitted;
+}
+
+function getW733Status() {
+  return {
+    ok: true,
+    version: OTEL_W733_VERSION,
+    otel_api_detected: _isOtelApiDetectedSync(),
+    tracer_registered: !!_getRegisteredTracer(),
+    native_enabled: STATE.enabled,
+  };
+}
+
+function listW733Attrs() {
+  return Object.assign({}, KOLM_OTEL_ATTRS);
+}
+
+function listW733SpanNames() {
+  return Object.assign({}, KOLM_OTEL_SPAN_NAMES);
+}
+
 export {
   init,
   startSpan,
@@ -345,4 +574,14 @@ export {
   shutdown,
   isEnabled,
   expressMiddleware,
+  // W733 — semantic conventions surface.
+  OTEL_W733_VERSION,
+  KOLM_OTEL_ATTRS,
+  KOLM_OTEL_SPAN_NAMES,
+  createInferenceSpans,
+  setRoutingAttributes,
+  getW733Status,
+  listW733Attrs,
+  listW733SpanNames,
+  _probeOtelApi,
 };

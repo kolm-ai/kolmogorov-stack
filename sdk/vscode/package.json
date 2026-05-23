@@ -2,7 +2,7 @@
   "name": "kolm-vscode",
   "displayName": "Kolm: signed AI artifacts",
   "description": "Compile, inspect, verify, and run .kolm artifacts without leaving your editor. Detects LLM calls and offers to swap them for a signed, deterministic kolm artifact.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "publisher": "kolm",
   "license": "Apache-2.0",
   "homepage": "https://kolm.ai",
@@ -30,6 +30,7 @@
     ".kolm"
   ],
   "activationEvents": [
+    "onStartupFinished",
     "onLanguage:javascript",
     "onLanguage:typescript",
     "onLanguage:python",
@@ -39,7 +40,10 @@
     "onCommand:kolm.compile",
     "onCommand:kolm.search",
     "onCommand:kolm.openConsole",
-    "onCommand:kolm.replaceLLMCall"
+    "onCommand:kolm.replaceLLMCall",
+    "onCommand:kolm.distillCodingAssistant",
+    "onCommand:kolm.viewCaptures",
+    "onCommand:kolm.viewCostSavings"
   ],
   "main": "./extension.js",
   "contributes": {
@@ -50,7 +54,10 @@
       { "command": "kolm.compile",         "title": "Kolm: Compile a new artifact from a spec" },
       { "command": "kolm.search",          "title": "Kolm: Search the public registry" },
       { "command": "kolm.replaceLLMCall",  "title": "Kolm: Replace this LLM call with a kolm artifact" },
-      { "command": "kolm.openConsole",     "title": "Kolm: Open the dashboard" }
+      { "command": "kolm.openConsole",     "title": "Kolm: Open the dashboard" },
+      { "command": "kolm.distillCodingAssistant", "title": "Kolm: Distill my coding assistant" },
+      { "command": "kolm.viewCaptures",    "title": "Kolm: View recent captures" },
+      { "command": "kolm.viewCostSavings", "title": "Kolm: View today's cost savings" }
     ],
     "menus": {
       "editor/context": [
@@ -84,6 +91,26 @@
           "type": "boolean",
           "default": true,
           "description": "After running a command, log the equivalent REST call so the editor doubles as an API tutorial."
+        },
+        "kolm.namespace": {
+          "type": "string",
+          "default": "vscode-codegen",
+          "description": "Namespace used by the W731 capture watcher when POSTing to /v1/capture/log."
+        },
+        "kolm.costPerCall": {
+          "type": "number",
+          "default": 0.003,
+          "description": "Estimated teacher cost per call in USD (default $0.003 ~ Claude Sonnet 1k tokens). Drives the W731 cost-savings status bar."
+        },
+        "kolm.captureWatcher.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "W731-1: watch document changes for Copilot/Claude Code completions and POST to /v1/capture/log."
+        },
+        "kolm.captureWatcher.throttleMs": {
+          "type": "number",
+          "default": 5000,
+          "description": "Minimum interval between captures per file (W731-1)."
         }
       }
     }

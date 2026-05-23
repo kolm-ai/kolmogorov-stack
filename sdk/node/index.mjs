@@ -126,6 +126,63 @@ export class RecipeClient {
   claimAnonymous(anon_token, email, name) {
     return this._req("POST", "/v1/anon/claim", { anon_token, email, name });
   }
+
+  // ---------- W734: RAG-aware capture ----------
+  // captureWithContext({prompt, retrieved, response, namespace}) logs a
+  // capture row WITH the retrieved chunks the upstream LLM was shown.
+  //
+  // `retrieved` is an array of `{source, text, score?}` items — one per
+  // chunk that landed in the LLM's context window. Each item must have a
+  // `source` (URL/document id) and `text` (the chunk content); `score` is
+  // optional (the retriever's similarity score).
+  //
+  // The array is JSON-stringified and base64-encoded onto the
+  // `kolm-retrieved-context` request header so structured chunks survive
+  // HTTP escaping. The server (W734-1) parses the header and persists the
+  // chunks on the capture row alongside prompt + response — the W734-2
+  // training-data formatter prefixes them as `<RETRIEVED>` blocks at
+  // distill time. Mirrors the Python SDK's capture_with_context.
+  //
+  // Returns the server JSON envelope. On a malformed header the server
+  // returns 400 with `error:'invalid_retrieved_context_header'` so the
+  // caller can fail loud.
+  async captureWithContext({ prompt, retrieved, response, namespace = "default" } = {}) {
+    if (typeof prompt !== "string" || !prompt) {
+      throw new RecipeError("captureWithContext: prompt (non-empty string) required", 400, null);
+    }
+    if (typeof response !== "string") {
+      throw new RecipeError("captureWithContext: response (string) required", 400, null);
+    }
+    if (!Array.isArray(retrieved)) {
+      throw new RecipeError("captureWithContext: retrieved must be an array of {source, text, score?}", 400, null);
+    }
+    for (let i = 0; i < retrieved.length; i++) {
+      const it = retrieved[i];
+      if (!it || typeof it !== "object" || typeof it.source !== "string" || typeof it.text !== "string") {
+        throw new RecipeError(`captureWithContext: retrieved[${i}] must have 'source' and 'text' string fields`, 400, null);
+      }
+    }
+    const payloadJson = JSON.stringify(retrieved);
+    // Node 18+ + modern browsers both have Buffer (Node) or btoa (browser).
+    let headerVal;
+    if (typeof Buffer !== "undefined" && typeof Buffer.from === "function") {
+      headerVal = Buffer.from(payloadJson, "utf8").toString("base64");
+    } else if (typeof btoa === "function") {
+      // btoa is byte-safe for ASCII; for non-ASCII we'd need encodeURIComponent
+      // round-trip. JSON.stringify already escapes non-ASCII as \uXXXX so the
+      // payload string is ASCII-safe here.
+      headerVal = btoa(payloadJson);
+    } else {
+      throw new RecipeError("captureWithContext: no base64 encoder available (need Buffer or btoa)", 500, null);
+    }
+    return this._req("POST", "/v1/capture/log", {
+      namespace,
+      items: [{ input: prompt, output: response }],
+      provider: "manual",
+    }, {
+      headers: { "kolm-retrieved-context": headerVal },
+    });
+  }
 }
 
 export class KolmClient extends RecipeClient {}
