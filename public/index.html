@@ -56,6 +56,22 @@
     .kolm-surfaces__detail { font-size: 12px; }
   }
 
+  /* W648: editorial "why" — 2x2 magazine spread, no numbered list, no card chrome. */
+  .why-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 56px; row-gap: 40px; margin-top: 44px; }
+  .why-cell { padding: 0; }
+  .why-cell__h { font-family: var(--ks-sans); font-size: clamp(20px, 2.4vw, 26px); font-weight: 520; letter-spacing: -0.012em; line-height: 1.22; color: var(--ks-ink); margin: 0 0 12px 0; }
+  .why-cell__p { font-family: var(--ks-sans); font-size: 15.5px; line-height: 1.7; color: var(--ks-ink-2); margin: 0; }
+  .why-cell__p a { color: var(--ks-ink); border-bottom: 1px solid var(--ks-accent-edge); transition: border-color 140ms; }
+  .why-cell__p a:hover { border-bottom-color: var(--ks-accent); }
+  @media (max-width: 760px) { .why-grid { grid-template-columns: 1fr; column-gap: 0; row-gap: 30px; margin-top: 32px; } }
+
+  /* W648: narrative prose blocks between sections — editorial, not bulleted. */
+  .home-prose { max-width: 62ch; font-family: var(--ks-sans); font-size: 17px; line-height: 1.72; color: var(--ks-ink-2); margin: 28px 0 0 0; }
+  .home-prose code { background: rgba(126, 240, 210, 0.08); color: var(--ks-ink); padding: 1px 6px; border-radius: 4px; font-family: var(--ks-mono); font-size: 0.92em; }
+  .home-prose strong { color: var(--ks-ink); font-weight: 540; }
+  .home-prose a { color: var(--ks-ink); border-bottom: 1px solid var(--ks-accent-edge); transition: border-color 140ms; }
+  .home-prose a:hover { border-bottom-color: var(--ks-accent); }
+
   /* W647: ROI calc, brought back from W623 (calculator moved off-home was the wrong call). */
   .home-roi-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: var(--ks-8); align-items: stretch; margin-top: 36px; }
   @media (max-width: 920px) { .home-roi-grid { grid-template-columns: 1fr; gap: var(--ks-5); } }
@@ -156,7 +172,6 @@
         <a class="ks-btn ks-btn--primary ks-btn--lg" href="/quickstart">Start free <span class="ks-btn-arrow">&rarr;</span></a>
         <a class="ks-btn ks-btn--ghost ks-btn--lg" href="#how">See how it works</a>
       </div>
-      <p class="ks-mono ks-dim" style="margin-top:18px; font-size:12.5px; max-width:52ch;">Apache-2.0 &middot; npm i kolm &middot; pip install kolm &middot; SDKs for Node, Python, MCP, VS Code, C, Rust</p>
     </div>
 
     <!-- W646: hero terminal — the SVG above 1.46:1 portrait was breaking on mobile
@@ -300,36 +315,12 @@
     </ol>
     <p class="fr-flowpipe__caption">One unbroken pipeline. Each stage produces a signed artifact you can audit.</p>
 
-    <ol class="fr-numbered-list">
-      <li>
-        <div>
-          <h3 class="fr-numbered-list__h">Capture. One env var; your app keeps working.</h3>
-          <p class="fr-numbered-list__p">Point your OpenAI client at <code class="fr-code">api.kolm.ai/v1</code>. Every approved response is hashed, signed, and logged inside your tenant. Nothing leaves the gateway without a receipt.</p>
-          <pre class="fr-cli" style="margin-top:14px;"><span class="fr-cli__prompt">$</span> export OPENAI_BASE_URL=https://api.kolm.ai/v1</pre>
-        </div>
-      </li>
-      <li>
-        <div>
-          <h3 class="fr-numbered-list__h">Distill. Teach a smaller open model from your captures.</h3>
-          <p class="fr-numbered-list__p">Any OpenAI-compatible endpoint is a valid teacher. The compiler bake-off-scores the student against the teacher on your held-out rows before it ships.</p>
-          <pre class="fr-cli" style="margin-top:14px;"><span class="fr-cli__prompt">$</span> kolm distill <span class="fr-cli__flag">--namespace=support --teacher=claude-sonnet-4-6 --student=qwen2.5-7b</span></pre>
-        </div>
-      </li>
-      <li>
-        <div>
-          <h3 class="fr-numbered-list__h">Quantize. Shrink 4x at INT4 with an accuracy gate.</h3>
-          <p class="fr-numbered-list__p">The compile step refuses to ship if K&#8209;Score drops past your threshold. One default method covers 95% of teams; nine more are one flag away.</p>
-          <pre class="fr-cli" style="margin-top:14px;"><span class="fr-cli__prompt">$</span> kolm quantize ./adapter <span class="fr-cli__flag">--out adapter-int4</span></pre>
-        </div>
-      </li>
-      <li>
-        <div>
-          <h3 class="fr-numbered-list__h">Run. One file, every backend, on your hardware.</h3>
-          <p class="fr-numbered-list__p">Runtime picks the backend per device &mdash; vLLM, llama.cpp, MLX, WebGPU. Every response carries a verifiable Ed25519 receipt that links back to a registry row.</p>
-          <pre class="fr-cli" style="margin-top:14px;"><span class="fr-cli__prompt">$</span> kolm run support.kolm <span class="fr-cli__flag">'{"text":"..."}'</span></pre>
-        </div>
-      </li>
-    </ol>
+    <!-- W648: cut the 4-step numbered list (the hero terminal already runs the commands; the chips above show the
+         visual flow). Replaced with one editorial paragraph + a single CTA. -->
+    <p class="home-prose">
+      Point your OpenAI client at <code>api.kolm.ai/v1</code> and ship as you always do; every approved response is hashed, signed, and logged inside your tenant. When the namespace has enough rows, <code>kolm distill</code> teaches a smaller open student from your captures and bake-off-scores it against the teacher before it ships. <code>kolm quantize</code> shrinks the result 4&times; at INT4 with a K&#8209;Score gate. <code>kolm run</code> picks the backend for whatever you're targeting &mdash; vLLM, llama.cpp, MLX, WebGPU &mdash; and signs every response with a key your auditor can verify offline.
+    </p>
+    <p style="margin-top:24px;"><a class="fr-btn fr-btn--ghost" href="/quickstart">Try it in 10 minutes <span class="fr-btn__arrow">&rarr;</span></a></p>
   </div>
 </section>
 
@@ -512,39 +503,32 @@
 
 <!-- W626: 6-card frontier methods row cut — the W271 frontier-methods anchor stays in the hidden test-anchor block; full surface lives at /frontier-stack. -->
 
-<!-- ================== W647: Why kolm — numeric-first, marketing preamble cut ================== -->
+<!-- ================== W648: Why kolm — editorial 2x2, no numbered list, no card chrome ================== -->
 <section class="fr-section fr-section--tight fr-reveal" id="why" aria-labelledby="why-h">
   <div class="fr-container fr-container--tight">
     <div class="fr-section__head">
       <span class="fr-eyebrow">Why kolm</span>
-      <h2 class="fr-h2" id="why-h">Four things only kolm does.</h2>
+      <h2 class="fr-h2" id="why-h">The opposite of a closed API.</h2>
+      <p class="fr-lede">Open from gateway to runtime. Signed in transit and at rest. Paid for once at compile. Never visible to us.</p>
     </div>
-    <ol class="fr-numbered-list">
-      <li>
-        <div>
-          <h3 class="fr-numbered-list__h">Apache-2.0 from gateway to runtime.</h3>
-          <p class="fr-numbered-list__p">Six SDKs, one self-host bundle, no open-core carveouts. <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">Read the source.</a></p>
-        </div>
-      </li>
-      <li>
-        <div>
-          <h3 class="fr-numbered-list__h">Ed25519 receipt on every response.</h3>
-          <p class="fr-numbered-list__p">Verify which model wrote which answer in two seconds against the public registry. <a href="/verify-prod">Try it on any receipt.</a></p>
-        </div>
-      </li>
-      <li>
-        <div>
-          <h3 class="fr-numbered-list__h">Per-token bill stops at compile.</h3>
-          <p class="fr-numbered-list__p">After that, inference is on your hardware. 24.5&nbsp;tok/s for a 7B on one 5090; 11.5&nbsp;tok/s for a 32B. <a href="/benchmarks">Full numbers.</a></p>
-        </div>
-      </li>
-      <li>
-        <div>
-          <h3 class="fr-numbered-list__h">We never see the data.</h3>
-          <p class="fr-numbered-list__p">VPC, on-prem, or air-gap. SOC&nbsp;2 Type&nbsp;I shipped; HIPAA + ISO&nbsp;27001 mapping ready for procurement.</p>
-        </div>
-      </li>
-    </ol>
+    <div class="why-grid">
+      <div class="why-cell">
+        <h3 class="why-cell__h">Apache-2.0, end to end.</h3>
+        <p class="why-cell__p">Six SDKs, one self-host bundle, no open-core carveouts. The whole stack runs without us. <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">Read the source &rarr;</a></p>
+      </div>
+      <div class="why-cell">
+        <h3 class="why-cell__h">Ed25519 on every response.</h3>
+        <p class="why-cell__p">Verify which model wrote which answer in two seconds against the public registry. Audit-ready the day you ship. <a href="/verify-prod">Try it on any receipt &rarr;</a></p>
+      </div>
+      <div class="why-cell">
+        <h3 class="why-cell__h">The per-token bill stops at compile.</h3>
+        <p class="why-cell__p">After that, your hardware runs the model. 24.5&nbsp;tok/s for a 7B on one 5090; 11.5 for a 32B. <a href="/benchmarks">See the benchmarks &rarr;</a></p>
+      </div>
+      <div class="why-cell">
+        <h3 class="why-cell__h">Your data, untouched.</h3>
+        <p class="why-cell__p">VPC, on-prem, or air-gap. SOC&nbsp;2 Type&nbsp;I shipped; HIPAA + ISO&nbsp;27001 mapping ready before procurement asks.</p>
+      </div>
+    </div>
   </div>
 </section>
 
