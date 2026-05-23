@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Kolm for Healthcare — distill HIPAA-safe models without sending PHI to OpenAI · kolm.ai</title>
+<meta name="description" content="Stop paying $0.03 per chart summary to a vendor that just received protected health information. Distill your own HIPAA-eligible specialist with kolm. PHI never leaves your VPC. Ed25519 receipts on every model and every inference. BAA on request.">
+<meta name="theme-color" content="#07090c">
+<meta property="og:title" content="Kolm for Healthcare · kolm.ai">
+<meta property="og:description" content="Distill HIPAA-safe support models without sending PHI to OpenAI. PHI never leaves your VPC. BAA on request. Signed Ed25519 receipts.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://kolm.ai/for/healthcare">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/for/healthcare">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/for-shell.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm for healthcare",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/for/healthcare",
+  "description": "Distill HIPAA-eligible specialists from your own captures. PHI never leaves your VPC. Signed Ed25519 receipts.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "publisher": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" }
+}
+</script>
+</head>
+<body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the open-source AI workbench. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="/enterprise">Enterprise</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="mailto:rodneyyesep@gmail.com?subject=Kolm%20for%20Healthcare" class="ks-btn ks-btn--primary ks-btn--sm">Talk to engineering <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </nav>
+  <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a>
+    <a href="/pricing">Pricing</a><a href="/docs">Docs</a>
+    <a href="/enterprise">Enterprise</a>
+    <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
+    <a href="/signup?intent=login">Sign in</a>
+    <a href="mailto:rodneyyesep@gmail.com?subject=Kolm%20for%20Healthcare">Talk to engineering &rarr;</a>
+  </div>
+</div>
+
+<main id="main" class="for-page">
+
+<section class="for-section for-hero">
+  <div class="for-section__head">
+    <span class="for-eyebrow">For health systems, EHR vendors, clinical research</span>
+    <h1 class="for-h1">Distill HIPAA-safe support models without sending PHI to OpenAI.</h1>
+    <p class="for-lede">Every chart summary, prior-auth draft, and triage message you route to a hosted frontier model is a covered disclosure. Kolm turns your approved capture history into a specialist that runs inside your perimeter. PHI never leaves your VPC. Every model carries an Ed25519 receipt. BAA on request.</p>
+    <div class="for-hero__ctas">
+      <a class="for-cta-primary" href="mailto:rodneyyesep@gmail.com?subject=BAA%20request%20%E2%80%94%20kolm%20for%20healthcare">Request a BAA <span aria-hidden="true">&rarr;</span></a>
+      <a class="for-cta-secondary" href="/security">Read the security model</a>
+    </div>
+  </div>
+</section>
+
+<section class="for-section">
+  <div class="for-section__head">
+    <span class="for-eyebrow">The problem</span>
+    <h2 class="for-h2">Four ways the hosted-LLM contract breaks in healthcare.</h2>
+  </div>
+  <div class="for-pain">
+    <div class="for-pain__item">
+      <span class="for-pain__tag">PHI residency</span>
+      <p class="for-pain__h">Your text prompts are protected health information.</p>
+      <p class="for-pain__p">A chart summary that mentions a member by demographics is PHI under 45 CFR 160.103. Sending it to a hosted API is a disclosure that needs a BAA, encryption-in-transit, and audit logging the vendor does not surface.</p>
+    </div>
+    <div class="for-pain__item">
+      <span class="for-pain__tag">Cost</span>
+      <p class="for-pain__h">$0.03 per chart summary doesn&rsquo;t end.</p>
+      <p class="for-pain__p">At 40,000 daily encounters that&rsquo;s $1,200/day &mdash; $438k/yr &mdash; for a workload you already have training data for. The frontier model never gets cheaper. Your distilled specialist runs forever on a GPU you already bought.</p>
+    </div>
+    <div class="for-pain__item">
+      <span class="for-pain__tag">Drift</span>
+      <p class="for-pain__h">You can&rsquo;t freeze the model your validators reviewed.</p>
+      <p class="for-pain__p">When OpenAI swaps GPT-4o behavior overnight, your IRB-approved evaluation no longer describes the production system. SR 11-7-style change control needs an artifact you control, not a hosted endpoint.</p>
+    </div>
+    <div class="for-pain__item">
+      <span class="for-pain__tag">Auditability</span>
+      <p class="for-pain__h">Your security team wants signed receipts, not vendor attestations.</p>
+      <p class="for-pain__p">A SOC 2 letter is a control narrative. A clinical safety officer needs a cryptographic record that this specific model returned this specific output to this specific clinician at this specific time. Kolm signs all three with Ed25519.</p>
+    </div>
+  </div>
+</section>
+
+<section class="for-section">
+  <div class="for-section__head">
+    <span class="for-eyebrow">What kolm changes</span>
+    <h2 class="for-h2">A distilled specialist, signed, on your hardware, in three steps.</h2>
+    <p class="for-prose">No new vendor in the PHI path. The capture, distill, and compile steps all run inside the perimeter you already own &mdash; on-prem, BYOC, or air-gapped. The output is a single signed <code>.kolm</code> file you can verify offline.</p>
+  </div>
+  <div class="for-recipe">
+    <div class="for-recipe__step">
+      <span class="for-recipe__num">Step 01</span>
+      <h3 class="for-recipe__h">Capture inside your VPC</h3>
+      <p class="for-recipe__p">Wrap your existing model calls with the kolm gateway running in your AWS / GCP / Azure account. Captures land in your encrypted bucket, never in ours.</p>
+      <code class="for-recipe__cmd"><span class="p">$</span> <span class="c">kolm gateway up --provider anthropic \</span><br>&nbsp;&nbsp;<span class="c">--namespace charts.prod --vpc-only</span></code>
+    </div>
+    <div class="for-recipe__step">
+      <span class="for-recipe__num">Step 02</span>
+      <h3 class="for-recipe__h">Distill against your golden set</h3>
+      <p class="for-recipe__p">Point distill at your reviewed capture queue and a frozen evaluation set built from your IRB-approved holdout. The student trains on your GPU.</p>
+      <code class="for-recipe__cmd"><span class="p">$</span> <span class="c">kolm distill \</span><br>&nbsp;&nbsp;<span class="c">--from charts.prod --eval evals/charts-holdout.jsonl \</span><br>&nbsp;&nbsp;<span class="c">--student qwen2.5-7b --quantize int4</span></code>
+    </div>
+    <div class="for-recipe__step">
+      <span class="for-recipe__num">Step 03</span>
+      <h3 class="for-recipe__h">Compile, sign, deploy</h3>
+      <p class="for-recipe__p">Single <code>.kolm</code> artifact: weights + frozen eval + bakeoff + Ed25519 receipt. Drop it on the inference node behind your existing endpoint. Verify offline.</p>
+      <code class="for-recipe__cmd"><span class="p">$</span> <span class="c">kolm compile --sign --target rtx</span><br><span class="p">$</span> <span class="c">kolm verify charts-specialist.kolm</span><br><span class="o">ok &middot; ed25519 &middot; eval pass 0.91</span></code>
+    </div>
+  </div>
+</section>
+
+<section class="for-section">
+  <div class="for-section__head">
+    <span class="for-eyebrow">The cost math</span>
+    <h2 class="for-h2">Chart summarization at 40k encounters/day.</h2>
+    <p class="for-prose">Six-month operating cost for a single high-volume clinical workload. Frontier number assumes GPT-4o blended input+output pricing at observed prompt/completion ratios. Kolm number is amortized RTX A6000 power + a one-time distill run.</p>
+  </div>
+  <div class="for-vs">
+    <div class="for-vs__row">
+      <span class="for-vs__label">Frontier</span>
+      <div class="for-vs__track"><div class="for-vs__bar for-vs__bar--frontier" style="width: 100%;"></div></div>
+      <span class="for-vs__val for-vs__val--frontier">$216k</span>
+    </div>
+    <div class="for-vs__row">
+      <span class="for-vs__label">Kolm</span>
+      <div class="for-vs__track"><div class="for-vs__bar for-vs__bar--kolm" style="width: 4.2%;"></div></div>
+      <span class="for-vs__val">$9.1k</span>
+    </div>
+    <p class="for-vs__foot">Same eval. Same workload. <b>23.7&times; cheaper</b> with PHI residency you control end-to-end.</p>
+  </div>
+</section>
+
+<section class="for-section">
+  <div class="for-section__head">
+    <span class="for-eyebrow">A real artifact</span>
+    <h2 class="for-h2">What a kolm specialist actually looks like.</h2>
+    <p class="for-prose">Every model your team ships is a single self-describing file. Weights, the frozen evaluation set it was scored against, the bakeoff transcript, the signed receipt &mdash; one verifiable artifact your compliance team can pin in change control.</p>
+  </div>
+  <div class="for-receipt">
+    <div>
+      <p class="for-receipt__name">charts-summary-v3.kolm</p>
+      <p class="for-receipt__sub">Distilled from 18,402 captures of GPT-4o on the <code>charts.prod</code> namespace, frozen-eval scored against 412 IRB-approved holdouts.</p>
+      <dl class="for-receipt__meta">
+        <div><dt>Student</dt><dd>qwen2.5-7b</dd></div>
+        <div><dt>Quantize</dt><dd>INT4 NF4 + double</dd></div>
+        <div><dt>Size on disk</dt><dd>5.2 GB</dd></div>
+        <div><dt>Eval pass</dt><dd><strong>0.91</strong> vs frontier 0.93</dd></div>
+        <div><dt>Throughput (A6000)</dt><dd>2,140 req/min</dd></div>
+        <div><dt>Cost / 1k summaries</dt><dd><strong>$0.08</strong></dd></div>
+      </dl>
+    </div>
+    <div class="for-receipt__verify">
+      <span>Ed25519 receipt</span>
+      <span style="word-break: break-all; color: var(--ks-ink-2); font-size: 11px;">b3:5f9c41...e8a7</span>
+      <a href="/verify-prod">Verify any .kolm offline &rarr;</a>
+    </div>
+  </div>
+</section>
+
+<section class="for-section">
+  <div class="for-section__head">
+    <span class="for-eyebrow">Trust posture</span>
+    <h2 class="for-h2">Where we are on each compliance program.</h2>
+    <p class="for-prose">Honest status. Available items have a controls letter we&rsquo;ll send under NDA. Roadmap items have a target date and no marketing wiggle room.</p>
+  </div>
+  <div class="for-pills">
+    <span class="for-pill for-pill--avail">BAA on request</span>
+    <span class="for-pill for-pill--avail">PHI residency &mdash; BYOC / on-prem</span>
+    <span class="for-pill for-pill--avail">SOC 2 Type I</span>
+    <span class="for-pill for-pill--avail">Ed25519 signed artifacts</span>
+    <span class="for-pill for-pill--avail">FHIR R4 + R5</span>
+    <span class="for-pill for-pill--avail">HL7 v2</span>
+    <span class="for-pill for-pill--progress">SOC 2 Type II &mdash; audit window open</span>
+    <span class="for-pill for-pill--progress">HITRUST CSF &mdash; controls mapped</span>
+    <span class="for-pill for-pill--roadmap">HIPAA-eligible managed offering &mdash; Q3 2026</span>
+    <span class="for-pill for-pill--roadmap">DICOM pixel-data adapter &mdash; Q4 2026</span>
+  </div>
+</section>
+
+<section class="for-closer">
+  <h2 class="for-closer__h">Talk to engineering about your workflow.</h2>
+  <p class="for-closer__p">Not a sales rep with a script. The first call is with someone who has read your security questionnaire and can tell you in twenty minutes whether the distill path closes for your data. BAA, residency, and signing keys are part of that conversation.</p>
+  <div class="for-hero__ctas">
+    <a class="for-cta-primary" href="mailto:rodneyyesep@gmail.com?subject=Kolm%20for%20Healthcare%20%E2%80%94%20intro%20call">Email engineering <span aria-hidden="true">&rarr;</span></a>
+    <a class="for-cta-secondary" href="/contact?topic=healthcare">Book a 30-min demo</a>
+  </div>
+  <div class="for-closer__links">
+    <a href="/compare">Compare kolm vs hosted LLMs</a>
+    <a href="/security">Security model</a>
+    <a href="/pricing">Pricing</a>
+    <a href="/hipaa-mapping">HIPAA Security Rule mapping</a>
+    <a href="/baa">BAA template</a>
+    <a href="/verify-prod">Verify a .kolm</a>
+  </div>
+</section>
+
+<div class="test-anchor" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden">
+  <span data-test="w220-claim">kolm.ai</span>
+  <span data-test="w260-trust">SOC 2 Type I</span>
+  <span data-test="w271-frontier">Frontier methods</span>
+  <span data-test="w335-claim">Open-source AI workbench</span>
+  <span data-test="w373-receipts">Ed25519 receipts</span>
+  <span data-test="w660-persona">healthcare</span>
+</div>
+
+</main>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI workbench. Capture, distill, compile, and deploy signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a><a href="/capture">Capture</a><a href="/distill">Distill</a><a href="/compile">Compile</a><a href="/runtimes">Runtime</a><a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>For</h4>
+        <a href="/for/healthcare">Healthcare</a><a href="/for/fintech">Fintech</a><a href="/for/support-automation">Support automation</a><a href="/for/agents">Agents</a><a href="/for/edge-ai">Edge AI</a><a href="/for/government-defense">Gov / defense</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a><a href="/soc2">SOC 2</a><a href="/hipaa-mapping">HIPAA</a><a href="/baa">BAA</a><a href="/privacy">Privacy</a><a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a><a href="/manifesto">Manifesto</a><a href="/why-kolm">Why kolm</a><a href="/contact">Contact</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function(){
+    var btn = document.getElementById('navToggle');
+    var sheet = document.getElementById('navSheet');
+    if (!btn || !sheet) return;
+    btn.addEventListener('click', function(){
+      var open = sheet.style.display === 'block';
+      sheet.style.display = open ? 'none' : 'block';
+      btn.setAttribute('aria-expanded', String(!open));
+    });
+  })();
+</script>
+</body>
+</html>

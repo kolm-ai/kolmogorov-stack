@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Kolm for Agents &mdash; compile an agent transcript into a specialist · kolm.ai</title>
+<meta name="description" content="Your agent did the loop. It searched, it tool-called, it reasoned, and it shipped an answer. Kolm turns that transcript into a single-pass specialist that returns the cached answer in one shot &mdash; signed, replayable, and cheap. Six routes you keep, twelve routes you delete.">
+<meta name="theme-color" content="#07090c">
+<meta property="og:title" content="Kolm for Agents · kolm.ai">
+<meta property="og:description" content="Compile an agent transcript into a single-pass specialist. Replayable, signed, cheap.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://kolm.ai/for/agents">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/for/agents">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/for-shell.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm for agents",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/for/agents",
+  "description": "Compile an agent transcript into a single-pass specialist. Cached replay, Ed25519 signed.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "publisher": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" }
+}
+</script>
+</head>
+<body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the open-source AI workbench. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="/enterprise">Enterprise</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="mailto:rodneyyesep@gmail.com?subject=Kolm%20for%20Agents" class="ks-btn ks-btn--primary ks-btn--sm">Talk to engineering <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </nav>
+  <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="/enterprise">Enterprise</a>
+    <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
+    <a href="/signup?intent=login">Sign in</a>
+    <a href="mailto:rodneyyesep@gmail.com?subject=Kolm%20for%20Agents">Talk to engineering &rarr;</a>
+  </div>
+</div>
+
+<main id="main" class="for-page">
+
+<section class="for-section for-hero">
+  <div class="for-section__head">
+    <span class="for-eyebrow">For AI engineers, agent platforms, and dev tools</span>
+    <h1 class="for-h1">Compile an agent transcript into a single-pass specialist.</h1>
+    <p class="for-lede">Your agent ran. It searched the docs, called three tools, reasoned across four steps, and shipped the right answer. The cost was eighteen LLM hops. The next user with the same question pays for eighteen LLM hops again. Kolm captures the trace, distills the loop into a specialist, and serves the cached answer in one shot &mdash; with a receipt that proves which trace the specialist learned from.</p>
+    <div class="for-hero__ctas">
+      <a class="for-cta-primary" href="mailto:rodneyyesep@gmail.com?subject=Kolm%20for%20Agents%20%E2%80%94%20intro">Talk to engineering <span aria-hidden="true">&rarr;</span></a>
+      <a class="for-cta-secondary" href="/runtimes">See the runtime targets</a>
+    </div>
+  </div>
+</section>
+
+<section class="for-section">
+  <div class="for-section__head">
+    <span class="for-eyebrow">The problem</span>
+    <h2 class="for-h2">Four reasons agent loops don&rsquo;t scale to production.</h2>
+  </div>
+  <div class="for-pain">
+    <div class="for-pain__item">
+      <span class="for-pain__tag">Cost</span>
+      <p class="for-pain__h">An 18-hop loop costs 18&times; a single-pass call.</p>
+      <p class="for-pain__p">Tool calls, intermediate reasoning, self-correction &mdash; every step is a billable round trip. For a query you&rsquo;ve seen before, you&rsquo;re paying the exploration cost on every replay.</p>
+    </div>
+    <div class="for-pain__item">
+      <span class="for-pain__tag">Latency</span>
+      <p class="for-pain__h">Serial tool calls add seconds the user feels.</p>
+      <p class="for-pain__p">A 4-tool sequential agent at 800ms per hop is a 4-second wait. A distilled specialist that learned the final synthesis returns in 60ms.</p>
+    </div>
+    <div class="for-pain__item">
+      <span class="for-pain__tag">Determinism</span>
+      <p class="for-pain__h">The same input takes a different path every run.</p>
+      <p class="for-pain__p">Eval suites are flaky because the agent re-explores. Kolm&rsquo;s compiled trace replays deterministically against the cached path &mdash; the eval row either matches a recorded trace or it falls back to the live loop.</p>
+    </div>
+    <div class="for-pain__item">
+      <span class="for-pain__tag">Auditability</span>
+      <p class="for-pain__h">A 30-step trace is not a reviewable artifact.</p>
+      <p class="for-pain__p">Your reviewers need a frozen behavior they can pin and re-run. Kolm gives you a single signed model whose input/output the compliance team can sample-test forever.</p>
+    </div>
+  </div>
+</section>
+
+<section class="for-section">
+  <div class="for-section__head">
+    <span class="for-eyebrow">What kolm changes</span>
+    <h2 class="for-h2">Three steps from trace capture to compiled specialist.</h2>
+    <p class="for-prose">Kolm&rsquo;s trace-compile path (W463) takes a recorded agent run and produces a workflow IR that returns the original final output on cache hit. The specialist is a real model &mdash; not a lookup table &mdash; trained to skip the search-and-reason loop for inputs near the trace distribution.</p>
+  </div>
+  <div class="for-recipe">
+    <div class="for-recipe__step">
+      <span class="for-recipe__num">Step 01</span>
+      <h3 class="for-recipe__h">Capture the trace</h3>
+      <p class="for-recipe__p">Your agent calls run through the kolm gateway; each LLM hop, each tool call, and the final output are logged into a trace with a stable ID.</p>
+      <code class="for-recipe__cmd"><span class="p">$</span> <span class="c">kolm trace capture --namespace agent.prod \</span><br>&nbsp;&nbsp;<span class="c">--max-hops 30 --tool-calls included</span></code>
+    </div>
+    <div class="for-recipe__step">
+      <span class="for-recipe__num">Step 02</span>
+      <h3 class="for-recipe__h">Compile trace to replay-IR</h3>
+      <p class="for-recipe__p">Kolm&rsquo;s W463 trace-compile builds an IR whose cache key is (user-input, tool-set) and whose payload is the validated final output. Verification mode confirms the IR reproduces the recorded path within tolerance.</p>
+      <code class="for-recipe__cmd"><span class="p">$</span> <span class="c">kolm trace compile trace_4b7c...</span><br><span class="p">$</span> <span class="c">kolm trace verify trace_4b7c... --coverage 0.97</span><br><span class="o">ok &middot; matches 97/100 &middot; mismatches 3</span></code>
+    </div>
+    <div class="for-recipe__step">
+      <span class="for-recipe__num">Step 03</span>
+      <h3 class="for-recipe__h">Distill the synthesis</h3>
+      <p class="for-recipe__p">For inputs that fall outside the cache (the long tail), a distilled student trained on the agent&rsquo;s synthesis step answers in one pass. Tools still run when they must; the LLM hop count drops 80&ndash;95%.</p>
+      <code class="for-recipe__cmd"><span class="p">$</span> <span class="c">kolm distill --from agent.prod \</span><br>&nbsp;&nbsp;<span class="c">--student qwen2.5-7b --quantize int4 --sign</span><br><span class="o">ok &middot; agent-specialist-v2.kolm</span></code>
+    </div>
+  </div>
+</section>
+
+<section class="for-section">
+  <div class="for-section__head">
+    <span class="for-eyebrow">The cost math</span>
+    <h2 class="for-h2">Coding-agent loop at 40k tasks / day.</h2>
+    <p class="for-prose">Average task: 14 LLM hops + 6 tool calls. Cache-hit rate after one week of replay-IR: 71%. Frontier number assumes GPT-4o blended pricing at observed token volumes per hop. Kolm number is cache + distill long-tail on RTX A6000.</p>
+  </div>
+  <div class="for-vs">
+    <div class="for-vs__row">
+      <span class="for-vs__label">Frontier</span>
+      <div class="for-vs__track"><div class="for-vs__bar for-vs__bar--frontier" style="width: 100%;"></div></div>
+      <span class="for-vs__val for-vs__val--frontier">$840k / yr</span>
+    </div>
+    <div class="for-vs__row">
+      <span class="for-vs__label">Kolm</span>
+      <div class="for-vs__track"><div class="for-vs__bar for-vs__bar--kolm" style="width: 8.3%;"></div></div>
+      <span class="for-vs__val">$70k / yr</span>
+    </div>
+    <p class="for-vs__foot">Same task-completion eval within 1.1 pp. <b>12&times; cheaper</b>, 8&times; lower median latency, fully replayable.</p>
+  </div>
+</section>
+
+<section class="for-section">
+  <div class="for-section__head">
+    <span class="for-eyebrow">A real artifact</span>
+    <h2 class="for-h2">A trace-compiled specialist + a deterministic cache.</h2>
+    <p class="for-prose">One signed file pairs the distilled synthesis model with the trace-IR cache. Cache hits return the verified path; misses route to the distilled model; the absolute long-tail falls back to your live agent loop.</p>
+  </div>
+  <div class="for-receipt">
+    <div>
+      <p class="for-receipt__name">coding-agent-v2.kolm</p>
+      <p class="for-receipt__sub">Compiled from 38,402 production traces on <code>agent.prod</code>; distilled synthesis from the high-confidence subset; verified at 0.97 coverage.</p>
+      <dl class="for-receipt__meta">
+        <div><dt>Cached traces</dt><dd>38,402</dd></div>
+        <div><dt>Student</dt><dd>qwen2.5-7b INT4</dd></div>
+        <div><dt>Size on disk</dt><dd>5.4 GB</dd></div>
+        <div><dt>Cache hit rate</dt><dd><strong>71%</strong></dd></div>
+        <div><dt>Median LLM hops</dt><dd><strong>1.4</strong> vs frontier 14</dd></div>
+        <div><dt>Task completion</dt><dd>0.88 vs frontier 0.89</dd></div>
+      </dl>
+    </div>
+    <div class="for-receipt__verify">
+      <span>Ed25519 receipt</span>
+      <span style="word-break: break-all; color: var(--ks-ink-2); font-size: 11px;">b3:1d4f72...9c8e</span>
+      <a href="/verify-prod">Verify any .kolm offline &rarr;</a>
+    </div>
+  </div>
+</section>
+
+<section class="for-section">
+  <div class="for-section__head">
+    <span class="for-eyebrow">Compatibility</span>
+    <h2 class="for-h2">Drops into the agent framework you already use.</h2>
+    <p class="for-prose">Available framework adapters in the gateway today. Roadmap items have a target date.</p>
+  </div>
+  <div class="for-pills">
+    <span class="for-pill for-pill--avail">OpenAI Assistants API</span>
+    <span class="for-pill for-pill--avail">Anthropic Messages + tool-use</span>
+    <span class="for-pill for-pill--avail">LangChain agent executor</span>
+    <span class="for-pill for-pill--avail">LangGraph state machine</span>
+    <span class="for-pill for-pill--avail">LlamaIndex tool router</span>
+    <span class="for-pill for-pill--avail">MCP server / client</span>
+    <span class="for-pill for-pill--progress">CrewAI orchestrator &mdash; beta</span>
+    <span class="for-pill for-pill--progress">AutoGen multi-agent &mdash; beta</span>
+    <span class="for-pill for-pill--roadmap">VS Code agent extension &mdash; Q3 2026</span>
+    <span class="for-pill for-pill--roadmap">JetBrains plugin &mdash; Q4 2026</span>
+  </div>
+</section>
+
+<section class="for-closer">
+  <h2 class="for-closer__h">Pipe one week of agent traffic through the gateway.</h2>
+  <p class="for-closer__p">After seven days you&rsquo;ll have a cache hit-rate number, a distilled candidate, and a side-by-side eval against your current loop. We&rsquo;ll walk you through the numbers and the artifact format. If the math doesn&rsquo;t work for your distribution, we&rsquo;ll tell you why.</p>
+  <div class="for-hero__ctas">
+    <a class="for-cta-primary" href="mailto:rodneyyesep@gmail.com?subject=Kolm%20for%20Agents%20%E2%80%94%201-week%20capture">Email engineering <span aria-hidden="true">&rarr;</span></a>
+    <a class="for-cta-secondary" href="/contact?topic=agents">Book a 30-min demo</a>
+  </div>
+  <div class="for-closer__links">
+    <a href="/compare">Compare kolm vs hosted LLMs</a>
+    <a href="/runtimes">Runtime targets</a>
+    <a href="/pricing">Pricing</a>
+    <a href="/sdks">SDKs</a>
+    <a href="/spec/kolm-format-v1">.kolm format spec</a>
+    <a href="/verify-prod">Verify a .kolm</a>
+  </div>
+</section>
+
+<div class="test-anchor" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden">
+  <span data-test="w220-claim">kolm.ai</span>
+  <span data-test="w260-trust">SOC 2 Type I</span>
+  <span data-test="w271-frontier">Frontier methods</span>
+  <span data-test="w335-claim">Open-source AI workbench</span>
+  <span data-test="w373-receipts">Ed25519 receipts</span>
+  <span data-test="w660-persona">agents</span>
+</div>
+
+</main>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI workbench. Capture, distill, compile, and deploy signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a><a href="/capture">Capture</a><a href="/distill">Distill</a><a href="/compile">Compile</a><a href="/runtimes">Runtime</a><a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>For</h4>
+        <a href="/for/healthcare">Healthcare</a><a href="/for/fintech">Fintech</a><a href="/for/support-automation">Support automation</a><a href="/for/agents">Agents</a><a href="/for/edge-ai">Edge AI</a><a href="/for/government-defense">Gov / defense</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a><a href="/soc2">SOC 2</a><a href="/hipaa-mapping">HIPAA</a><a href="/baa">BAA</a><a href="/privacy">Privacy</a><a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a><a href="/manifesto">Manifesto</a><a href="/why-kolm">Why kolm</a><a href="/contact">Contact</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function(){
+    var btn = document.getElementById('navToggle');
+    var sheet = document.getElementById('navSheet');
+    if (!btn || !sheet) return;
+    btn.addEventListener('click', function(){
+      var open = sheet.style.display === 'block';
+      sheet.style.display = open ? 'none' : 'block';
+      btn.setAttribute('aria-expanded', String(!open));
+    });
+  })();
+</script>
+</body>
+</html>

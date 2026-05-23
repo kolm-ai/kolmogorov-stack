@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Kolm for Government &amp; Defense &mdash; air-gapped, FedRAMP / IL5 / IL6 roadmap · kolm.ai</title>
+<meta name="description" content="Mission-critical AI cannot phone home. Kolm runs entirely inside the enclave, signs every artifact with Ed25519, and ships in Apache-2.0 source you can audit line by line. FedRAMP Moderate in process, IL5 mapping, IL6 air-gap pattern documented.">
+<meta name="theme-color" content="#07090c">
+<meta property="og:title" content="Kolm for Government &amp; Defense · kolm.ai">
+<meta property="og:description" content="Air-gapped AI infrastructure with Ed25519 signed receipts. FedRAMP Moderate in process, IL5 mapping, IL6 air-gap pattern.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://kolm.ai/for/government-defense">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/for/government-defense">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/for-shell.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm for government and defense",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/for/government-defense",
+  "description": "Air-gapped AI infrastructure with Ed25519 signed receipts. FedRAMP / IL5 / IL6 roadmap.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "publisher": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" }
+}
+</script>
+</head>
+<body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the open-source AI workbench. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="/enterprise">Enterprise</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="mailto:rodneyyesep@gmail.com?subject=Kolm%20for%20Gov%20Defense" class="ks-btn ks-btn--primary ks-btn--sm">Talk to engineering <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </nav>
+  <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="/enterprise">Enterprise</a>
+    <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
+    <a href="/signup?intent=login">Sign in</a>
+    <a href="mailto:rodneyyesep@gmail.com?subject=Kolm%20for%20Gov%20Defense">Talk to engineering &rarr;</a>
+  </div>
+</div>
+
+<main id="main" class="for-page">
+
+<section class="for-section for-hero">
+  <div class="for-section__head">
+    <span class="for-eyebrow">For federal agencies, DoD integrators, intelligence community</span>
+    <h1 class="for-h1">Air-gapped AI. Apache-2.0 source. Ed25519 receipts.</h1>
+    <p class="for-lede">Mission-critical AI cannot phone home, cannot rely on a hosted endpoint, and cannot ship binary blobs your A&amp;A reviewer can&rsquo;t inspect. Kolm runs entirely inside the enclave, signs every artifact with the keys you control, and ships in Apache-2.0 source you can audit line by line. FedRAMP Moderate is in process, IL5 mapping is published, and the IL6 air-gap pattern is documented.</p>
+    <div class="for-hero__ctas">
+      <a class="for-cta-primary" href="mailto:rodneyyesep@gmail.com?subject=Kolm%20for%20Gov%2FDefense%20%E2%80%94%20intro">Talk to engineering <span aria-hidden="true">&rarr;</span></a>
+      <a class="for-cta-secondary" href="/security">Read the security model</a>
+    </div>
+  </div>
+</section>
+
+<section class="for-section">
+  <div class="for-section__head">
+    <span class="for-eyebrow">The problem</span>
+    <h2 class="for-h2">Four reasons hosted AI does not authorize.</h2>
+  </div>
+  <div class="for-pain">
+    <div class="for-pain__item">
+      <span class="for-pain__tag">Boundary</span>
+      <p class="for-pain__h">Your network has one boundary. A hosted LLM crosses it on every call.</p>
+      <p class="for-pain__p">RMF, DISA STIGs, and IL5/IL6 boundary controls all assume data does not exit the enclave. A hosted LLM call is, by definition, an outbound disclosure. Kolm&rsquo;s entire data plane runs inside the boundary you already authorized.</p>
+    </div>
+    <div class="for-pain__item">
+      <span class="for-pain__tag">Inspectability</span>
+      <p class="for-pain__h">Your A&amp;A reviewer cannot inspect closed weights.</p>
+      <p class="for-pain__p">Authorization requires source-of-truth review. Kolm is Apache-2.0 from the gateway through the runtime; your reviewer can pin a commit and rebuild from source in CI you control.</p>
+    </div>
+    <div class="for-pain__item">
+      <span class="for-pain__tag">Chain of custody</span>
+      <p class="for-pain__h">A hosted model has no signed provenance you control.</p>
+      <p class="for-pain__p">When a mission output is challenged, you must show which exact weights produced it. Kolm signs every artifact with Ed25519 keys you generate; the verifier runs offline, on the same box, with no network call.</p>
+    </div>
+    <div class="for-pain__item">
+      <span class="for-pain__tag">Supply chain</span>
+      <p class="for-pain__h">A model update from the vendor is a supply-chain event.</p>
+      <p class="for-pain__p">You need SBOM, reproducible builds, and SLSA-grade provenance for every component. Kolm publishes an SBOM per release; the build is reproducible from the source tag.</p>
+    </div>
+  </div>
+</section>
+
+<section class="for-section">
+  <div class="for-section__head">
+    <span class="for-eyebrow">What kolm changes</span>
+    <h2 class="for-h2">Three steps from cleared corpus to signed mission specialist.</h2>
+    <p class="for-prose">The same three-step recipe as commercial, but with every step running inside the boundary, against keys you control, with the source open for your A&amp;A reviewer to walk line by line.</p>
+  </div>
+  <div class="for-recipe">
+    <div class="for-recipe__step">
+      <span class="for-recipe__num">Step 01</span>
+      <h3 class="for-recipe__h">Capture inside the enclave</h3>
+      <p class="for-recipe__p">Kolm gateway runs on the cleared side. Captures land in your storage system; no metering call, no telemetry, no outbound traffic from the data plane.</p>
+      <code class="for-recipe__cmd"><span class="p">$</span> <span class="c">kolm gateway up --air-gap \</span><br>&nbsp;&nbsp;<span class="c">--namespace mission.corpus --metering off</span></code>
+    </div>
+    <div class="for-recipe__step">
+      <span class="for-recipe__num">Step 02</span>
+      <h3 class="for-recipe__h">Distill against the cleared eval</h3>
+      <p class="for-recipe__p">Your evaluator builds the frozen evaluation set; distill runs on the cleared GPU. The teacher is whatever cleared model your authorization permits (open-weights or your own).</p>
+      <code class="for-recipe__cmd"><span class="p">$</span> <span class="c">kolm distill --offline \</span><br>&nbsp;&nbsp;<span class="c">--teacher /opt/models/cleared-70b \</span><br>&nbsp;&nbsp;<span class="c">--student qwen2.5-7b --quantize int4</span></code>
+    </div>
+    <div class="for-recipe__step">
+      <span class="for-recipe__num">Step 03</span>
+      <h3 class="for-recipe__h">Sign with your keys, verify on every load</h3>
+      <p class="for-recipe__p">The signing key never leaves your HSM. The runtime refuses to load any artifact whose signature doesn&rsquo;t verify against the allowlist. The verifier is a single statically-linked binary that runs offline.</p>
+      <code class="for-recipe__cmd"><span class="p">$</span> <span class="c">kolm compile --sign-with hsm://mission-sk</span><br><span class="p">$</span> <span class="c">kolm verify --offline mission-spec.kolm</span><br><span class="o">ok &middot; ed25519 &middot; key-id mission-sk-v3</span></code>
+    </div>
+  </div>
+</section>
+
+<section class="for-section">
+  <div class="for-section__head">
+    <span class="for-eyebrow">Where things stand</span>
+    <h2 class="for-h2">Authorization posture, with honest dates.</h2>
+    <p class="for-prose">Available items have a controls letter ready under NDA. In-process items have a target date for the next milestone. No marketing wiggle room.</p>
+  </div>
+  <div class="for-vs">
+    <div class="for-vs__row">
+      <span class="for-vs__label">SOC 2 Type I</span>
+      <div class="for-vs__track"><div class="for-vs__bar for-vs__bar--kolm" style="width: 100%;"></div></div>
+      <span class="for-vs__val">Available</span>
+    </div>
+    <div class="for-vs__row">
+      <span class="for-vs__label">SOC 2 Type II</span>
+      <div class="for-vs__track"><div class="for-vs__bar for-vs__bar--kolm" style="width: 62%;"></div></div>
+      <span class="for-vs__val">Window open</span>
+    </div>
+    <div class="for-vs__row">
+      <span class="for-vs__label">FedRAMP Mod</span>
+      <div class="for-vs__track"><div class="for-vs__bar for-vs__bar--kolm" style="width: 38%;"></div></div>
+      <span class="for-vs__val">In process</span>
+    </div>
+    <div class="for-vs__row">
+      <span class="for-vs__label">IL5 / IL6</span>
+      <div class="for-vs__track"><div class="for-vs__bar for-vs__bar--kolm" style="width: 18%;"></div></div>
+      <span class="for-vs__val">Pattern docs</span>
+    </div>
+    <p class="for-vs__foot">Source-line audit, SBOM, reproducible builds, and signed receipts are <b>available today</b> &mdash; A&amp;A formal authorization is the longer cycle.</p>
+  </div>
+</section>
+
+<section class="for-section">
+  <div class="for-section__head">
+    <span class="for-eyebrow">A real artifact</span>
+    <h2 class="for-h2">A signed mission specialist, loadable offline.</h2>
+    <p class="for-prose">One self-describing file: weights, frozen eval, bakeoff, Ed25519 receipt signed with your enclave keys. The verifier is a single statically-linked binary you cross-compile from source.</p>
+  </div>
+  <div class="for-receipt">
+    <div>
+      <p class="for-receipt__name">mission-translate-v5.kolm</p>
+      <p class="for-receipt__sub">Distilled from a cleared 70B teacher on the <code>mission.corpus</code> namespace; signed by enclave HSM key <code>mission-sk-v3</code>.</p>
+      <dl class="for-receipt__meta">
+        <div><dt>Student</dt><dd>qwen2.5-7b</dd></div>
+        <div><dt>Quantize</dt><dd>INT4 NF4 + double</dd></div>
+        <div><dt>Size on disk</dt><dd>5.2 GB</dd></div>
+        <div><dt>BLEU vs teacher</dt><dd><strong>0.91</strong> of teacher</dd></div>
+        <div><dt>Verifier binary</dt><dd>2.3 MB static</dd></div>
+        <div><dt>Signing key</dt><dd>HSM-resident, never exported</dd></div>
+      </dl>
+    </div>
+    <div class="for-receipt__verify">
+      <span>Ed25519 receipt (your key)</span>
+      <span style="word-break: break-all; color: var(--ks-ink-2); font-size: 11px;">b3:2c7d49...e3b1</span>
+      <a href="/verify-prod">See verifier source &rarr;</a>
+    </div>
+  </div>
+</section>
+
+<section class="for-section">
+  <div class="for-section__head">
+    <span class="for-eyebrow">Authorization mapping</span>
+    <h2 class="for-h2">What ships with every release.</h2>
+    <p class="for-prose">Available items are downloadable today. Roadmap items have a target date.</p>
+  </div>
+  <div class="for-pills">
+    <span class="for-pill for-pill--avail">Apache-2.0 source, full stack</span>
+    <span class="for-pill for-pill--avail">SBOM per release (SPDX)</span>
+    <span class="for-pill for-pill--avail">Reproducible build from source tag</span>
+    <span class="for-pill for-pill--avail">Ed25519 receipts &middot; your keys</span>
+    <span class="for-pill for-pill--avail">Air-gap install bundle</span>
+    <span class="for-pill for-pill--avail">SOC 2 Type I</span>
+    <span class="for-pill for-pill--avail">NIST 800-171 mapping</span>
+    <span class="for-pill for-pill--progress">FedRAMP Moderate &mdash; in process</span>
+    <span class="for-pill for-pill--progress">SOC 2 Type II &mdash; audit window open</span>
+    <span class="for-pill for-pill--roadmap">IL5 reciprocity package &mdash; Q4 2026</span>
+    <span class="for-pill for-pill--roadmap">IL6 reference architecture &mdash; 2027</span>
+    <span class="for-pill for-pill--roadmap">CMMC L3 attestation &mdash; 2027</span>
+  </div>
+</section>
+
+<section class="for-closer">
+  <h2 class="for-closer__h">Bring your authorization boundary to the first call.</h2>
+  <p class="for-closer__p">We&rsquo;ll walk your A&amp;A reviewer through the source layout, the build chain, the signing path, and the offline verifier. You&rsquo;ll leave with the exact NIST 800-53 control numbers each kolm primitive answers to. We are an open-source project; integrator-led deployments are how this scales inside government.</p>
+  <div class="for-hero__ctas">
+    <a class="for-cta-primary" href="mailto:rodneyyesep@gmail.com?subject=Kolm%20for%20Gov%2FDefense%20%E2%80%94%20A%26A%20walkthrough">Email engineering <span aria-hidden="true">&rarr;</span></a>
+    <a class="for-cta-secondary" href="/contact?topic=government-defense">Book a 30-min demo</a>
+  </div>
+  <div class="for-closer__links">
+    <a href="/security">Security model</a>
+    <a href="/compare">Compare kolm vs hosted LLMs</a>
+    <a href="/pricing">Pricing</a>
+    <a href="/spec/kolm-format-v1">.kolm format spec</a>
+    <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">Source on GitHub</a>
+    <a href="/verify-prod">Verify a .kolm</a>
+  </div>
+</section>
+
+<div class="test-anchor" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden">
+  <span data-test="w220-claim">kolm.ai</span>
+  <span data-test="w260-trust">SOC 2 Type I</span>
+  <span data-test="w271-frontier">Frontier methods</span>
+  <span data-test="w335-claim">Open-source AI workbench</span>
+  <span data-test="w373-receipts">Ed25519 receipts</span>
+  <span data-test="w660-persona">government-defense</span>
+</div>
+
+</main>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI workbench. Capture, distill, compile, and deploy signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a><a href="/capture">Capture</a><a href="/distill">Distill</a><a href="/compile">Compile</a><a href="/runtimes">Runtime</a><a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>For</h4>
+        <a href="/for/healthcare">Healthcare</a><a href="/for/fintech">Fintech</a><a href="/for/support-automation">Support automation</a><a href="/for/agents">Agents</a><a href="/for/edge-ai">Edge AI</a><a href="/for/government-defense">Gov / defense</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a><a href="/soc2">SOC 2</a><a href="/hipaa-mapping">HIPAA</a><a href="/baa">BAA</a><a href="/privacy">Privacy</a><a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a><a href="/manifesto">Manifesto</a><a href="/why-kolm">Why kolm</a><a href="/contact">Contact</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function(){
+    var btn = document.getElementById('navToggle');
+    var sheet = document.getElementById('navSheet');
+    if (!btn || !sheet) return;
+    btn.addEventListener('click', function(){
+      var open = sheet.style.display === 'block';
+      sheet.style.display = open ? 'none' : 'block';
+      btn.setAttribute('aria-expanded', String(!open));
+    });
+  })();
+</script>
+</body>
+</html>
