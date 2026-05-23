@@ -122,6 +122,35 @@
     .home-receipts__time::before { content: "compile · "; color: var(--ks-ink-faint); font-size: 0.85em; }
     .home-receipts__hash { grid-column: 1 / -1; padding-top: 4px; }
   }
+
+  /* W657: hero persona switcher — CSS-only radio + sibling-selector tabs.
+     Three personas (Platform Eng, ML Eng, Founder/CTO) each show a tailored
+     4-command flow. No JS state. Radios are visually hidden but keyboard-focusable. */
+  .hp-switcher { position: relative; width: 100%; max-width: 560px; margin: 0 auto; }
+  .hp-radio { position: absolute; left: -10000px; width: 1px; height: 1px; opacity: 0; }
+  .hp-tabs { display: flex; gap: 0; margin: 0 0 -1px 0; border-bottom: 1px solid var(--ks-line-2); position: relative; z-index: 1; }
+  .hp-tab { padding: 8px 14px; cursor: pointer; font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ks-ink-3); border-bottom: 2px solid transparent; transition: color 140ms, border-color 140ms; user-select: none; }
+  .hp-tab:hover { color: var(--ks-ink-2); }
+  .hp-panel { display: none; }
+  #hp-platform:checked ~ .hp-tabs .hp-tab[for="hp-platform"],
+  #hp-ml:checked       ~ .hp-tabs .hp-tab[for="hp-ml"],
+  #hp-founder:checked  ~ .hp-tabs .hp-tab[for="hp-founder"] {
+    color: var(--ks-accent); border-bottom-color: var(--ks-accent);
+  }
+  #hp-platform:checked ~ .hp-panels .hp-panel--platform,
+  #hp-ml:checked       ~ .hp-panels .hp-panel--ml,
+  #hp-founder:checked  ~ .hp-panels .hp-panel--founder {
+    display: block;
+  }
+  .hp-radio:focus-visible ~ .hp-tabs .hp-tab { outline: none; }
+  #hp-platform:focus-visible ~ .hp-tabs .hp-tab[for="hp-platform"],
+  #hp-ml:focus-visible       ~ .hp-tabs .hp-tab[for="hp-ml"],
+  #hp-founder:focus-visible  ~ .hp-tabs .hp-tab[for="hp-founder"] {
+    box-shadow: inset 0 0 0 2px var(--ks-accent-edge);
+  }
+  @media (max-width: 480px) {
+    .hp-tab { padding: 7px 10px; font-size: 10.5px; }
+  }
 </style>
 <script>
   (function(){
@@ -206,30 +235,87 @@
       </div>
     </div>
 
-    <!-- W646: hero terminal — the SVG above 1.46:1 portrait was breaking on mobile
-         and showing the same numbers our pricing/quant section already shows. Replaced
-         with a developer-style terminal that demonstrates the actual SDK in 8 lines:
-         install -> quantize -> run with receipt. Mobile-safe (mono, narrow, no overflow). -->
-    <div class="kolm-hero-system hero-artifact" data-w260="lede-beats" aria-label="Compile and run a kolm artifact in three commands">
-      <div class="hero-terminal" style="width:100%; max-width:560px; margin:0 auto; background:var(--ks-bg-1); border:1px solid var(--ks-line-2); border-radius:14px; overflow:hidden; font-family:var(--ks-mono); font-size:13px; line-height:1.65;">
-        <div style="display:flex; align-items:center; gap:6px; padding:10px 14px; background:var(--ks-bg-2); border-bottom:1px solid var(--ks-line-2);">
-          <span style="width:10px; height:10px; border-radius:50%; background:#ff5f57; display:inline-block;"></span>
-          <span style="width:10px; height:10px; border-radius:50%; background:#febc2e; display:inline-block;"></span>
-          <span style="width:10px; height:10px; border-radius:50%; background:#28c840; display:inline-block;"></span>
-          <span style="margin-left:10px; color:var(--ks-ink-3); font-size:11.5px; letter-spacing:0.05em;">support &mdash; kolm</span>
+    <!-- W657: hero persona switcher — three CSS-only tabs (Platform Eng / ML Eng / Founder).
+         Each panel shows a tailored 4-command flow. Radios visually hidden, labels are tabs.
+         No JS. Preserves W646 hero-terminal aesthetic inside each panel. -->
+    <div class="kolm-hero-system hero-artifact" data-w260="lede-beats" aria-label="Choose your role to see the matching flow">
+      <div class="hp-switcher">
+        <input type="radio" name="hp" id="hp-platform" class="hp-radio" checked>
+        <input type="radio" name="hp" id="hp-ml" class="hp-radio">
+        <input type="radio" name="hp" id="hp-founder" class="hp-radio">
+        <div class="hp-tabs" role="tablist">
+          <label for="hp-platform" class="hp-tab" role="tab">Platform Eng</label>
+          <label for="hp-ml" class="hp-tab" role="tab">ML Eng</label>
+          <label for="hp-founder" class="hp-tab" role="tab">Founder / CTO</label>
         </div>
-        <pre style="margin:0; padding:18px 16px; white-space:pre-wrap; word-break:break-word; color:var(--ks-ink);"><span style="color:var(--ks-accent);">$</span> npm i kolm
-<span style="color:var(--ks-accent);">$</span> kolm distill <span style="color:var(--ks-ink-3);">--teacher gpt-4o --student qwen2.5-7b</span>
-<span style="color:var(--ks-ink-2);">  &check; 12,847 approved captures
-  &check; K-Score 0.87 &rarr; 0.91
-  &check; bake-off vs teacher: passed
-  &check; support.kolm  5.2 GB  signed</span>
+        <div class="hp-panels">
 
-<span style="color:var(--ks-accent);">$</span> kolm run support.kolm <span style="color:var(--ks-ink-3);">"where is my order?"</span>
-<span style="color:var(--ks-ink-2);">{ "answer": "&hellip;",
-  "receipt": "kolm-audit-1:7af3&hellip;",
-  "model": "qwen2.5-7b-int4",
-  "latency_ms": 84 }</span></pre>
+          <!-- Persona A: Platform Eng — drop in for OpenAI, capture all traffic, then distill. -->
+          <div class="hp-panel hp-panel--platform" role="tabpanel" aria-labelledby="hp-platform">
+            <div class="hero-terminal" style="background:var(--ks-bg-1); border:1px solid var(--ks-line-2); border-top:0; border-radius:0 0 14px 14px; overflow:hidden; font-family:var(--ks-mono); font-size:13px; line-height:1.65;">
+              <div style="display:flex; align-items:center; gap:6px; padding:10px 14px; background:var(--ks-bg-2); border-bottom:1px solid var(--ks-line-2);">
+                <span style="width:10px; height:10px; border-radius:50%; background:#ff5f57; display:inline-block;"></span>
+                <span style="width:10px; height:10px; border-radius:50%; background:#febc2e; display:inline-block;"></span>
+                <span style="width:10px; height:10px; border-radius:50%; background:#28c840; display:inline-block;"></span>
+                <span style="margin-left:10px; color:var(--ks-ink-3); font-size:11.5px; letter-spacing:0.05em;">gateway &mdash; kolm</span>
+              </div>
+              <pre style="margin:0; padding:18px 16px; white-space:pre-wrap; word-break:break-word; color:var(--ks-ink);"><span style="color:var(--ks-accent);">$</span> export OPENAI_BASE_URL=https://api.kolm.ai/v1
+<span style="color:var(--ks-ink-3);">  # every OpenAI call now routes through kolm gateway</span>
+<span style="color:var(--ks-accent);">$</span> kolm captures stats
+<span style="color:var(--ks-ink-2);">  &check; 47,392 calls captured in 24h
+  &check; 3.1 ms p50 overhead
+  &check; $1,847 saved (31% cache hit)
+  &check; 142 PII redactions enforced</span>
+
+<span style="color:var(--ks-accent);">$</span> kolm distill from-captures <span style="color:var(--ks-ink-3);">--namespace support</span>
+<span style="color:var(--ks-ink-2);">  &check; support.kolm  5.2 GB  K-Score 0.91  signed</span></pre>
+            </div>
+          </div>
+
+          <!-- Persona B: ML Eng — write a spec, compile a specialist, verify the artifact. -->
+          <div class="hp-panel hp-panel--ml" role="tabpanel" aria-labelledby="hp-ml">
+            <div class="hero-terminal" style="background:var(--ks-bg-1); border:1px solid var(--ks-line-2); border-top:0; border-radius:0 0 14px 14px; overflow:hidden; font-family:var(--ks-mono); font-size:13px; line-height:1.65;">
+              <div style="display:flex; align-items:center; gap:6px; padding:10px 14px; background:var(--ks-bg-2); border-bottom:1px solid var(--ks-line-2);">
+                <span style="width:10px; height:10px; border-radius:50%; background:#ff5f57; display:inline-block;"></span>
+                <span style="width:10px; height:10px; border-radius:50%; background:#febc2e; display:inline-block;"></span>
+                <span style="width:10px; height:10px; border-radius:50%; background:#28c840; display:inline-block;"></span>
+                <span style="margin-left:10px; color:var(--ks-ink-3); font-size:11.5px; letter-spacing:0.05em;">compile &mdash; kolm</span>
+              </div>
+              <pre style="margin:0; padding:18px 16px; white-space:pre-wrap; word-break:break-word; color:var(--ks-ink);"><span style="color:var(--ks-accent);">$</span> kolm compile <span style="color:var(--ks-ink-3);">--spec support-bot.yaml</span>
+<span style="color:var(--ks-ink-3);">  # teacher=gpt-4o  student=qwen2.5-7b  quantize=int4</span>
+<span style="color:var(--ks-ink-2);">  &check; 12,847 approved captures loaded
+  &check; distill 27m  K-Score 0.87&rarr;0.91
+  &check; bake-off vs teacher: 94% match
+  &check; quantize INT4  5.2 GB</span>
+
+<span style="color:var(--ks-accent);">$</span> kolm verify support-bot.kolm
+<span style="color:var(--ks-ink-2);">  &check; signature valid (Ed25519)
+  &check; reproducible &middot; receipts present</span></pre>
+            </div>
+          </div>
+
+          <!-- Persona C: Founder/CTO — show me the bill, then own it. -->
+          <div class="hp-panel hp-panel--founder" role="tabpanel" aria-labelledby="hp-founder">
+            <div class="hero-terminal" style="background:var(--ks-bg-1); border:1px solid var(--ks-line-2); border-top:0; border-radius:0 0 14px 14px; overflow:hidden; font-family:var(--ks-mono); font-size:13px; line-height:1.65;">
+              <div style="display:flex; align-items:center; gap:6px; padding:10px 14px; background:var(--ks-bg-2); border-bottom:1px solid var(--ks-line-2);">
+                <span style="width:10px; height:10px; border-radius:50%; background:#ff5f57; display:inline-block;"></span>
+                <span style="width:10px; height:10px; border-radius:50%; background:#febc2e; display:inline-block;"></span>
+                <span style="width:10px; height:10px; border-radius:50%; background:#28c840; display:inline-block;"></span>
+                <span style="margin-left:10px; color:var(--ks-ink-3); font-size:11.5px; letter-spacing:0.05em;">cost &mdash; kolm</span>
+              </div>
+              <pre style="margin:0; padding:18px 16px; white-space:pre-wrap; word-break:break-word; color:var(--ks-ink);"><span style="color:var(--ks-accent);">$</span> kolm cost report <span style="color:var(--ks-ink-3);">--period 30d</span>
+<span style="color:var(--ks-ink-2);">  Frontier API spend:        $84,712
+  After kolm route+distill:   $3,294
+  Net savings:               $81,418 (96%)</span>
+
+<span style="color:var(--ks-accent);">$</span> kolm pull qwen2.5-7b-support
+<span style="color:var(--ks-ink-2);">  &check; pulled  5.2 GB  K-Score 0.91</span>
+<span style="color:var(--ks-accent);">$</span> kolm deploy <span style="color:var(--ks-ink-3);">--target rtx-5090</span>
+<span style="color:var(--ks-ink-2);">  &check; live  24.5 tok/s  $0.00 per token</span></pre>
+            </div>
+          </div>
+
+        </div>
       </div>
 
       <!-- W647: product-surface manifest — 4 dense rows that name what kolm literally IS,
@@ -294,6 +380,24 @@
     </ul>
   </div>
 </section>
+<!-- W657: device-target strip — name every place a .kolm artifact actually lands.
+     Text chips (no logos) keep the bar honest and lightweight; the link goes to /runtimes. -->
+<div class="ks-logorow" aria-label="Deployment targets">
+  <div class="ks-logorow__inner">
+    <span class="ks-logorow__eye">Deploys to</span>
+    <ul class="ks-logorow__list">
+      <li><a href="/runtimes#reach" style="color:inherit; text-decoration:none;">Mac M-series</a></li>
+      <li><a href="/runtimes#reach" style="color:inherit; text-decoration:none;">Linux x86</a></li>
+      <li><a href="/runtimes#reach" style="color:inherit; text-decoration:none;">NVIDIA RTX</a></li>
+      <li><a href="/runtimes#reach" style="color:inherit; text-decoration:none;">NVIDIA H100</a></li>
+      <li><a href="/runtimes#reach" style="color:inherit; text-decoration:none;">WebGPU</a></li>
+      <li><a href="/runtimes#reach" style="color:inherit; text-decoration:none;">iOS Core&nbsp;ML</a></li>
+      <li><a href="/runtimes#reach" style="color:inherit; text-decoration:none;">Android NNAPI</a></li>
+      <li><a href="/runtimes#reach" style="color:inherit; text-decoration:none;">Raspberry Pi</a></li>
+      <li><a href="/runtimes" style="color:var(--ks-accent); text-decoration:none;">All runtimes &rarr;</a></li>
+    </ul>
+  </div>
+</div>
 <div class="ks-logorow" aria-label="Official SDKs">
   <div class="ks-logorow__inner">
     <span class="ks-logorow__eye">Ship in</span>
