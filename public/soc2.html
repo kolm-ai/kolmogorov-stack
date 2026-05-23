@@ -11,6 +11,8 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/frontier.css">
 <style>
   .sec-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
   .sec-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
@@ -73,8 +75,35 @@
   .timeline .ev .label { font-size: 15px; font-weight: 540; color: var(--ks-ink); margin-bottom: 4px; }
   .timeline .ev .body { font-size: 13.5px; color: var(--ks-ink-2); line-height: 1.6; }
 </style>
+  <meta property="og:title" content="SOC 2 &middot; kolm.ai">
+  <meta property="og:description" content="Type I report available under NDA. Type II in observation through Q4 2026. Trust services criteria covered, what">
+  <meta property="og:image" content="https://kolm.ai/og/soc2.svg">
+  <meta property="og:url" content="https://kolm.ai/soc2">
+  <meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/soc2",
+  "description": "Type I report available under NDA. Type II in observation through Q4 2026. Trust services criteria covered, what",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
 </head>
 <body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <a href="#main" class="ks-skip">Skip to content</a>
 
@@ -103,7 +132,7 @@
 
 <section class="sec-hero">
   <div class="ks-wrap">
-    <div class="eyebrow">SOC 2</div>
+    <div class="eyebrow"><a href="/security#soc2" style="color:var(--ks-ink-3); text-decoration:none">&larr; Security</a> &middot; SOC 2 evidence</div>
     <h1>Type I available. <b>Type II in observation.</b></h1>
     <p class="lede">A compliance reviewer can pull the Type I report under NDA today. The Type II observation window is underway and the letter is expected in Q4 2026. We do not claim certifications we do not hold; what is signed is signed, what is in progress is labeled, what is not on the roadmap is named.</p>
     <div class="cta-row">
@@ -138,38 +167,50 @@
   <div class="ks-wrap">
     <h2>Trust services criteria covered</h2>
     <p class="sub">We scope to the three criteria a regulated buyer actually needs from a compiler vendor. Processing Integrity and Privacy criteria are mapped but not in scope for Type I or the current Type II window; we will name the gap rather than imply coverage.</p>
-    <div class="grid-3">
-      <div class="sec-card">
-        <div class="row"><span class="tag">CC-series</span><span class="st live">In scope</span></div>
-        <h3>Security</h3>
-        <p>Common Criteria controls covering access management, change management, network protection, vulnerability management, and incident response for the hosted control plane and the open-source CLI release pipeline.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">A-series</span><span class="st live">In scope</span></div>
-        <h3>Availability</h3>
-        <p>Capacity, backup, and recovery controls for the hosted registry, signing service, and verify endpoint. Customer-side compile workloads run on customer hardware and inherit the customer's availability posture.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">C-series</span><span class="st live">In scope</span></div>
-        <h3>Confidentiality</h3>
-        <p>Controls covering data classification, retention, secure disposal, and key custody. Captures are tenant-scoped by namespace and the default deployment keeps them on customer hardware.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">PI-series</span><span class="st no">Not in scope</span></div>
-        <h3>Processing Integrity</h3>
-        <p>Not in scope for the current window. Verifiable processing integrity is delivered through the artifact receipt chain (Ed25519 signature, content-addressed CID, K-score axes) rather than as a SOC 2 criterion.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">P-series</span><span class="st no">Not in scope</span></div>
-        <h3>Privacy</h3>
-        <p>Not in scope for the current window. Privacy posture is documented separately in the DPA and the privacy statement; honest scope means we will not imply criterion coverage we do not have.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">non-criterion</span><span class="st live">Verifiable</span></div>
-        <h3>Receipt chain</h3>
-        <p>Every artifact ships with a signed receipt naming the teacher, base model, eval pack, and K-score verdict. An auditor can verify the chain offline without contacting kolm.ai; the same chain is referenced in the SOC 2 system description.</p>
-      </div>
-    </div>
+    <ul class="fr-spec-list">
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Security</h3>
+          <span class="fr-spec-list__delta">CC-series &middot; in scope</span>
+        </div>
+        <p class="fr-spec-list__p">Common Criteria controls covering access management, change management, network protection, vulnerability management, and incident response for the hosted control plane and the open-source CLI release pipeline.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Availability</h3>
+          <span class="fr-spec-list__delta">A-series &middot; in scope</span>
+        </div>
+        <p class="fr-spec-list__p">Capacity, backup, and recovery controls for the hosted registry, signing service, and verify endpoint. Customer-side compile workloads run on customer hardware and inherit the customer's availability posture.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Confidentiality</h3>
+          <span class="fr-spec-list__delta">C-series &middot; in scope</span>
+        </div>
+        <p class="fr-spec-list__p">Controls covering data classification, retention, secure disposal, and key custody. Captures are tenant-scoped by namespace and the default deployment keeps them on customer hardware.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Processing Integrity</h3>
+          <span class="fr-spec-list__delta" style="color:#d6a65a">PI-series &middot; not in scope</span>
+        </div>
+        <p class="fr-spec-list__p">Not in scope for the current window. Verifiable processing integrity is delivered through the artifact receipt chain (Ed25519 signature, content-addressed CID, K-score axes) rather than as a SOC 2 criterion.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Privacy</h3>
+          <span class="fr-spec-list__delta" style="color:#d6a65a">P-series &middot; not in scope</span>
+        </div>
+        <p class="fr-spec-list__p">Not in scope for the current window. Privacy posture is documented separately in the DPA and the privacy statement; honest scope means we will not imply criterion coverage we do not have.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Receipt chain</h3>
+          <span class="fr-spec-list__delta">non-criterion &middot; verifiable offline</span>
+        </div>
+        <p class="fr-spec-list__p">Every artifact ships with a signed receipt naming the teacher, base model, eval pack, and K-score verdict. An auditor can verify the chain offline without contacting kolm.ai; the same chain is referenced in the SOC 2 system description.</p>
+      </li>
+    </ul>
   </div>
 </section>
 
@@ -177,28 +218,36 @@
   <div class="ks-wrap">
     <h2>What is in the report</h2>
     <p class="sub">A SOC 2 reviewer expects four things; here is what the report carries and what we will say about each section before you ask.</p>
-    <div class="grid-2">
-      <div class="sec-card">
-        <div class="row"><span class="tag">section-i</span></div>
-        <h3>Independent auditor's letter</h3>
-        <p>The CPA firm's opinion on the design (Type I) or design plus operating effectiveness (Type II) of the controls. Cited by name on the letter; firm name and engagement partner appear there rather than on this page.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">section-ii</span></div>
-        <h3>Management's assertion</h3>
-        <p>Our management's written statement that the system description fairly presents what we operate and that the controls are suitably designed for the criteria in scope.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">section-iii</span></div>
-        <h3>System description and boundary diagram</h3>
-        <p>The hosted control plane (signup, registry, signing service, verify endpoint), the open-source CLI release pipeline, and the supporting infrastructure. A boundary diagram shows what runs on our side versus on customer hardware in the default deployment.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">section-iv</span></div>
-        <h3>Control descriptions and test results</h3>
-        <p>Each control mapped to a trust services criterion, with the auditor's test procedure and the result. Any exceptions are listed verbatim; a real SOC 2 report shows the exceptions rather than hiding them.</p>
-      </div>
-    </div>
+    <ul class="fr-spec-list">
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Independent auditor's letter</h3>
+          <span class="fr-spec-list__delta">section i</span>
+        </div>
+        <p class="fr-spec-list__p">The CPA firm's opinion on the design (Type I) or design plus operating effectiveness (Type II) of the controls. Cited by name on the letter; firm name and engagement partner appear there rather than on this page.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Management's assertion</h3>
+          <span class="fr-spec-list__delta">section ii</span>
+        </div>
+        <p class="fr-spec-list__p">Our management's written statement that the system description fairly presents what we operate and that the controls are suitably designed for the criteria in scope.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">System description and boundary diagram</h3>
+          <span class="fr-spec-list__delta">section iii</span>
+        </div>
+        <p class="fr-spec-list__p">The hosted control plane (signup, registry, signing service, verify endpoint), the open-source CLI release pipeline, and the supporting infrastructure. A boundary diagram shows what runs on our side versus on customer hardware in the default deployment.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Control descriptions and test results</h3>
+          <span class="fr-spec-list__delta">section iv</span>
+        </div>
+        <p class="fr-spec-list__p">Each control mapped to a trust services criterion, with the auditor's test procedure and the result. Any exceptions are listed verbatim; a real SOC 2 report shows the exceptions rather than hiding them.</p>
+      </li>
+    </ul>
   </div>
 </section>
 
@@ -246,23 +295,29 @@
   <div class="ks-wrap">
     <h2>Vendor risk questionnaires</h2>
     <p class="sub">We accept your standard questionnaire. Most enterprise procurement teams send us SIG Core, SIG Lite, CAIQ, or a custom workbook; the turnaround for a populated response is five business days.</p>
-    <div class="grid-3">
-      <div class="sec-card">
-        <div class="row"><span class="tag">SIG</span><span class="st live">5 days</span></div>
-        <h3>Shared Assessments SIG</h3>
-        <p>SIG Core and SIG Lite are pre-populated against our SOC 2 system description and refreshed quarterly. We return your workbook with the source-of-truth column filled and citations to the SOC 2 controls.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">CAIQ</span><span class="st live">5 days</span></div>
-        <h3>Cloud Security Alliance CAIQ</h3>
-        <p>CAIQ v4 populated and signed. We map each answer to the SOC 2 control number and to the relevant section of <a href="/security">/security</a> so a reviewer can trace the assertion back to a control.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">custom</span><span class="st live">5 days</span></div>
-        <h3>Your custom workbook</h3>
-        <p>Hospital systems, payors, federal pilots, and large enterprises send custom questionnaires. We populate them; if a question requires a SOC 2 trust services criterion outside our current scope, we will say so rather than fabricate coverage.</p>
-      </div>
-    </div>
+    <ul class="fr-spec-list">
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Shared Assessments SIG</h3>
+          <span class="fr-spec-list__delta">SIG core + lite &middot; 5 days</span>
+        </div>
+        <p class="fr-spec-list__p">SIG Core and SIG Lite are pre-populated against our SOC 2 system description and refreshed quarterly. We return your workbook with the source-of-truth column filled and citations to the SOC 2 controls.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Cloud Security Alliance CAIQ</h3>
+          <span class="fr-spec-list__delta">CAIQ v4 &middot; 5 days</span>
+        </div>
+        <p class="fr-spec-list__p">CAIQ v4 populated and signed. We map each answer to the SOC 2 control number and to the relevant section of <a href="/security" style="color:var(--fr-mint)">/security</a> so a reviewer can trace the assertion back to a control.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Your custom workbook</h3>
+          <span class="fr-spec-list__delta">custom &middot; 5 days</span>
+        </div>
+        <p class="fr-spec-list__p">Hospital systems, payors, federal pilots, and large enterprises send custom questionnaires. We populate them; if a question requires a SOC 2 trust services criterion outside our current scope, we will say so rather than fabricate coverage.</p>
+      </li>
+    </ul>
   </div>
 </section>
 

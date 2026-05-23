@@ -11,6 +11,7 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/frontier.css">
 <style>
   .sec-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
   .sec-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
@@ -70,8 +71,35 @@
   .download-band .text p { margin: 0; font-size: 13.5px; color: var(--ks-ink-2); line-height: 1.55; max-width: 64ch; }
   .download-band .actions { display: flex; flex-wrap: wrap; gap: var(--ks-3); }
 </style>
+  <meta property="og:title" content="HIPAA Security Rule mapping &middot; kolm.ai">
+  <meta property="og:description" content="Per-control mapping for 45 CFR 164.308 (administrative), 164.310 (physical), 164.312 (technical), 164.314 (organizational), and 164.316 (policies & procedures). Honest about what is kolm-side, joint, or customer responsibility.">
+  <meta property="og:image" content="https://kolm.ai/og/hipaa-mapping.svg">
+  <meta property="og:url" content="https://kolm.ai/hipaa-mapping">
+  <meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/hipaa-mapping",
+  "description": "Per-control mapping for 45 CFR 164.308 (administrative), 164.310 (physical), 164.312 (technical), 164.314 (organizational), and 164.316 (policies & procedures). Honest about what is kolm-side, joint, or customer responsibility.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
 </head>
 <body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <a href="#main" class="ks-skip">Skip to content</a>
 
@@ -100,7 +128,7 @@
 
 <section class="sec-hero">
   <div class="ks-wrap">
-    <div class="eyebrow">HIPAA Security Rule</div>
+    <div class="eyebrow"><a href="/security#hipaa" style="color:var(--ks-ink-3); text-decoration:none">&larr; Security</a> &middot; HIPAA Security Rule mapping</div>
     <h1>Per-control mapping for <b>164.308 / .310 / .312 / .314 / .316</b></h1>
     <p class="lede">The kolm side of the HIPAA Security Rule, control by control. Administrative safeguards, physical safeguards, technical safeguards, organizational requirements, and policies &amp; procedures. Honest about where the control is the customer's responsibility (most physical safeguards), where it is joint, and where kolm carries it on the customer's behalf. A compliance reviewer can read this alongside our SOC 2 report and the BAA Schedule 1.</p>
     <div class="cta-row">
@@ -116,23 +144,29 @@
   <div class="ks-wrap">
     <h2>How to read this page</h2>
     <p class="sub">Each row names the regulatory citation, the standard or implementation specification, who carries it, and how kolm helps in the default deployment. We use three responsibility tags so a reviewer can scan a section without misreading the boundary.</p>
-    <div class="grid-3">
-      <div class="sec-card">
-        <div class="row"><span class="tag">responsibility</span><span class="st live">kolm-side</span></div>
-        <h3>kolm carries it</h3>
-        <p>Implemented inside the hosted control plane or the CLI itself. Evidence lives in our SOC 2 report and is referenced in the BAA Schedule 1.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">responsibility</span><span class="st wip">joint</span></div>
-        <h3>Joint with the customer</h3>
-        <p>kolm provides primitives (signed receipts, retention controls, audit-log emit). The customer configures, operates, and reviews. Both sides leave evidence.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">responsibility</span><span class="st no">customer</span></div>
-        <h3>Customer responsibility</h3>
-        <p>Outside the kolm boundary. Most physical safeguards, the customer's identity provider, OS-level disk encryption, facility access. We will not pretend we cover what we do not.</p>
-      </div>
-    </div>
+    <ul class="fr-spec-list">
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">kolm carries it</h3>
+          <span class="fr-spec-list__delta">responsibility &middot; kolm-side</span>
+        </div>
+        <p class="fr-spec-list__p">Implemented inside the hosted control plane or the CLI itself. Evidence lives in our SOC 2 report and is referenced in the BAA Schedule 1.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Joint with the customer</h3>
+          <span class="fr-spec-list__delta" style="color:#d6a65a">responsibility &middot; joint</span>
+        </div>
+        <p class="fr-spec-list__p">kolm provides primitives (signed receipts, retention controls, audit-log emit). The customer configures, operates, and reviews. Both sides leave evidence.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Customer responsibility</h3>
+          <span class="fr-spec-list__delta" style="color:#d77">responsibility &middot; customer</span>
+        </div>
+        <p class="fr-spec-list__p">Outside the kolm boundary. Most physical safeguards, the customer's identity provider, OS-level disk encryption, facility access. We will not pretend we cover what we do not.</p>
+      </li>
+    </ul>
     <div class="legend">
       <div class="item"><span class="side kolm">kolm</span>&nbsp;kolm carries the control on the customer's behalf</div>
       <div class="item"><span class="side joint">joint</span>&nbsp;shared; kolm provides primitives, customer operates</div>
@@ -632,26 +666,24 @@
   <div class="ks-wrap">
     <h2>Download or reference this mapping</h2>
     <p class="sub">A populated questionnaire or this page itself is enough for most procurement reviewers. We do not gate the mapping behind a sales call; a security engineer can read it before talking to anyone in revenue.</p>
-    <div class="download-band">
-      <div class="text">
-        <h3>PDF version</h3>
-        <p>The kolm BAA Schedule 1 carries the same per-control mapping in PDF form. Requested with the BAA itself; we will send the schedule under the same mutual NDA. If your procurement team needs a static snapshot of this page, the BAA route is the verified path.</p>
-      </div>
-      <div class="actions">
-        <a href="/baa" class="ks-btn ks-btn--primary">Request the BAA <span class="ks-btn-arrow">&rarr;</span></a>
-        <a href="/security" class="ks-btn ks-btn--ghost">Security overview</a>
-      </div>
-    </div>
-    <div class="download-band" style="margin-top:var(--ks-3)">
-      <div class="text">
-        <h3>Vendor risk questionnaires</h3>
-        <p>SIG, CAIQ, and custom workbooks populated against this mapping and the SOC 2 system description. Five-business-day turnaround. Citations to the control numbers above appear inline in the workbook.</p>
-      </div>
-      <div class="actions">
-        <a href="/soc2" class="ks-btn ks-btn--ghost">SOC 2 details</a>
-        <a href="/contact" class="ks-btn ks-btn--ghost">Send a workbook</a>
-      </div>
-    </div>
+    <ul class="fr-spec-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>PDF version</h3>
+          <span class="fr-spec-list__delta">PDF &middot; mutual NDA</span>
+        </div>
+        <p class="fr-spec-list__p">The kolm BAA Schedule 1 carries the same per-control mapping in PDF form. Requested with the BAA itself; we will send the schedule under the same mutual NDA. If your procurement team needs a static snapshot of this page, the BAA route is the verified path.</p>
+        <a class="fr-spec-list__cta" href="/baa">Request the BAA <span aria-hidden="true">&rarr;</span></a>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>Vendor risk questionnaires</h3>
+          <span class="fr-spec-list__delta">SIG / CAIQ &middot; 5 days</span>
+        </div>
+        <p class="fr-spec-list__p">SIG, CAIQ, and custom workbooks populated against this mapping and the SOC 2 system description. Five-business-day turnaround. Citations to the control numbers above appear inline in the workbook.</p>
+        <a class="fr-spec-list__cta" href="/contact">Send a workbook <span aria-hidden="true">&rarr;</span></a>
+      </li>
+    </ul>
   </div>
 </section>
 
@@ -659,20 +691,32 @@
   <div class="ks-wrap">
     <h2>Reach the trust team</h2>
     <p class="sub">For BAA execution, control-level questions, populated questionnaires, or a deployment review with a security engineer who has shipped to HIPAA workloads.</p>
-    <div class="grid-3">
-      <div class="sec-card">
-        <h3>Trust contact</h3>
-        <p>Email <code>trust@kolm.ai</code> or use the <a href="/contact">contact form</a>. Acknowledged within one business day; populated reports and questionnaires in five.</p>
-      </div>
-      <div class="sec-card">
-        <h3>Healthcare deployment review</h3>
-        <p>For hospital systems, payors, and life-sciences customers, a solutions engineer walks your privacy and security teams through the boundary. <a href="/healthcare">Healthcare overview</a> &middot; <a href="/enterprise">Book a review</a>.</p>
-      </div>
-      <div class="sec-card">
-        <h3>Verify a .kolm artifact</h3>
-        <p>The receipt chain is verifiable offline. A reviewer can verify any artifact against its eval pack and K-score at <a href="/verify-prod">/verify-prod</a> without trusting us.</p>
-      </div>
-    </div>
+    <ul class="fr-spec-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>Trust contact</h3>
+          <span class="fr-spec-list__delta">trust@kolm.ai &middot; 1 day ack</span>
+        </div>
+        <p class="fr-spec-list__p">Email <code>trust@kolm.ai</code> or use the <a href="/contact">contact form</a>. Acknowledged within one business day; populated reports and questionnaires in five.</p>
+        <a class="fr-spec-list__cta" href="/contact">Open contact form <span aria-hidden="true">&rarr;</span></a>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>Healthcare deployment review</h3>
+          <span class="fr-spec-list__delta">solutions engineer &middot; live</span>
+        </div>
+        <p class="fr-spec-list__p">For hospital systems, payors, and life-sciences customers, a solutions engineer walks your privacy and security teams through the boundary.</p>
+        <a class="fr-spec-list__cta" href="/healthcare">Healthcare overview <span aria-hidden="true">&rarr;</span></a>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>Verify a .kolm artifact</h3>
+          <span class="fr-spec-list__delta">offline &middot; no auth required</span>
+        </div>
+        <p class="fr-spec-list__p">The receipt chain is verifiable offline. A reviewer can verify any artifact against its eval pack and K-score without trusting us.</p>
+        <a class="fr-spec-list__cta" href="/verify-prod">Open /verify-prod <span aria-hidden="true">&rarr;</span></a>
+      </li>
+    </ul>
     <div style="margin-top:var(--ks-6); display:flex; flex-wrap:wrap; gap:var(--ks-3)">
       <a href="/quickstart" class="ks-btn ks-btn--primary">Install the CLI <span class="ks-btn-arrow">&rarr;</span></a>
       <a href="/self-host" class="ks-btn ks-btn--ghost">Self-host the stack</a>

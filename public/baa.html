@@ -11,6 +11,8 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/frontier.css">
 <style>
   .sec-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
   .sec-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
@@ -51,15 +53,18 @@
   .pact dd a { color: var(--ks-accent); }
   @media (max-width: 900px) { .pact dl { grid-template-columns: 1fr; gap: var(--ks-1) var(--ks-3); } .pact dt { padding-top: 0; } .pact dd { margin-bottom: var(--ks-3); } }
 
-  .does-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--ks-5); margin-top: var(--ks-4); }
-  @media (max-width: 900px) { .does-grid { grid-template-columns: 1fr; } }
-  .does, .doesnt { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); }
-  .does h3, .doesnt h3 { margin: 0 0 var(--ks-2); font-size: 16px; font-weight: 540; letter-spacing: -0.005em; }
-  .does h3 { color: var(--ks-accent); }
-  .doesnt h3 { color: #d6a65a; }
-  .does ul, .doesnt ul { margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.7; color: var(--ks-ink-2); }
+  /* W637: editorial two-section split — no card chrome, hairline rule, mint/amber heads with mono eyebrow */
+  .does-stack { margin-top: var(--ks-4); display: flex; flex-direction: column; gap: var(--ks-6); }
+  .does, .doesnt { padding: 0; background: transparent; border: 0; }
+  .does h3, .doesnt h3 { margin: 0 0 var(--ks-3); font-size: 18px; font-weight: 560; letter-spacing: -0.005em; display: flex; align-items: baseline; gap: 14px; }
+  .does h3::before { content: 'IN SCOPE'; font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.08em; color: var(--ks-accent); font-weight: 500; }
+  .doesnt h3::before { content: 'OUT OF SCOPE'; font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.08em; color: #d6a65a; font-weight: 500; }
+  .does h3 { color: var(--ks-ink); }
+  .doesnt h3 { color: var(--ks-ink); }
+  .does ul, .doesnt ul { margin: 0; padding-left: 18px; font-size: 14.5px; line-height: 1.7; color: var(--ks-ink-2); max-width: 78ch; }
   .does ul li + li, .doesnt ul li + li { margin-top: var(--ks-2); }
   .does ul li b, .doesnt ul li b { color: var(--ks-ink); font-weight: 540; }
+  .does-divider { border: 0; height: 1px; background: var(--ks-line-1); margin: 0; }
 
   .terms-tbl { width: 100%; border-collapse: collapse; margin-top: var(--ks-4); font-size: 14px; }
   .terms-tbl th, .terms-tbl td { padding: var(--ks-3) var(--ks-4); text-align: left; border-bottom: 1px solid var(--ks-line-1); color: var(--ks-ink-2); vertical-align: top; line-height: 1.6; }
@@ -75,8 +80,35 @@
   .req-flow ol li code { font-family: var(--ks-mono); font-size: 12.5px; background: #050607; border: 1px solid var(--ks-line-2); border-radius: 4px; padding: 1px 6px; color: var(--ks-ink); }
   .req-flow ol li a { color: var(--ks-accent); }
 </style>
+  <meta property="og:title" content="BAA &middot; kolm.ai">
+  <meta property="og:description" content="Business Associate Agreement for HIPAA coverage. Who needs it, what kolm does and does not do under the BAA, the standard terms, and how to execute. Honest scope: kolm is a business associate when handling PHI on customer behalf.">
+  <meta property="og:image" content="https://kolm.ai/og/baa.svg">
+  <meta property="og:url" content="https://kolm.ai/baa">
+  <meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/baa",
+  "description": "Business Associate Agreement for HIPAA coverage. Who needs it, what kolm does and does not do under the BAA, the standard terms, and how to execute. Honest scope: kolm is a business associate when handling PHI on customer behalf.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
 </head>
 <body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <a href="#main" class="ks-skip">Skip to content</a>
 
@@ -105,7 +137,7 @@
 
 <section class="sec-hero">
   <div class="ks-wrap">
-    <div class="eyebrow">HIPAA</div>
+    <div class="eyebrow"><a href="/security#baa" style="color:var(--ks-ink-3); text-decoration:none">&larr; Security</a> &middot; BAA terms</div>
     <h1>Business Associate Agreement, <b>signed.</b></h1>
     <p class="lede">If you are a covered entity, or a business associate passing protected health information through kolm, we sign the BAA. The compiler runs inside your VPC by default; the receipt chain is verifiable offline; the BAA names what we touch and what we will not. Honest scope: we are a business associate when handling PHI on customer behalf, not a covered entity ourselves.</p>
     <div class="cta-row">
@@ -121,28 +153,36 @@
   <div class="ks-wrap">
     <h2>Who needs the BAA</h2>
     <p class="sub">If protected health information (PHI) touches the kolm CLI, the hosted control plane, or the optional hosted teacher path, you need a BAA in place before production traffic flows. A few common paths so a compliance reviewer can locate themselves.</p>
-    <div class="grid-2">
-      <div class="sec-card">
-        <div class="row"><span class="tag">covered-entity</span><span class="st live">BAA required</span></div>
-        <h3>Provider, payor, or clearinghouse</h3>
-        <p>Hospital systems, health plans, dental and behavioral practices, claims clearinghouses. Any time you put PHI into the compiler (captures, prompts, training pairs), the BAA must be executed first.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">business-associate</span><span class="st live">BAA required</span></div>
-        <h3>Downstream business associate</h3>
-        <p>A SaaS vendor, ML platform, or contract research organization that receives PHI from a covered entity and routes any of it through kolm. The customer signs a BAA with kolm; kolm becomes a subcontractor business associate.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">research</span><span class="st live">BAA available</span></div>
-        <h3>Clinical research with PHI</h3>
-        <p>IRB-approved studies that compile models against de-identified or limited-data-set inputs. The BAA covers the kolm side; the IRB and the data-use agreement cover the upstream side.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">no-PHI</span><span class="st no">No BAA needed</span></div>
-        <h3>Healthcare workloads without PHI</h3>
-        <p>If your captures are de-identified to the HIPAA Safe Harbor standard, or you are compiling on synthetic data only, the BAA is optional. We will still sign one on request so a procurement reviewer has the paperwork on file.</p>
-      </div>
-    </div>
+    <ul class="fr-spec-list">
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Provider, payor, or clearinghouse</h3>
+          <span class="fr-spec-list__delta">covered entity &middot; BAA required</span>
+        </div>
+        <p class="fr-spec-list__p">Hospital systems, health plans, dental and behavioral practices, claims clearinghouses. Any time you put PHI into the compiler (captures, prompts, training pairs), the BAA must be executed first.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Downstream business associate</h3>
+          <span class="fr-spec-list__delta">business associate &middot; BAA required</span>
+        </div>
+        <p class="fr-spec-list__p">A SaaS vendor, ML platform, or contract research organization that receives PHI from a covered entity and routes any of it through kolm. The customer signs a BAA with kolm; kolm becomes a subcontractor business associate.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Clinical research with PHI</h3>
+          <span class="fr-spec-list__delta">research &middot; BAA available</span>
+        </div>
+        <p class="fr-spec-list__p">IRB-approved studies that compile models against de-identified or limited-data-set inputs. The BAA covers the kolm side; the IRB and the data-use agreement cover the upstream side.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Healthcare workloads without PHI</h3>
+          <span class="fr-spec-list__delta" style="color:#d6a65a">no PHI &middot; BAA optional</span>
+        </div>
+        <p class="fr-spec-list__p">If your captures are de-identified to the HIPAA Safe Harbor standard, or you are compiling on synthetic data only, the BAA is optional. We will still sign one on request so a procurement reviewer has the paperwork on file.</p>
+      </li>
+    </ul>
   </div>
 </section>
 
@@ -176,7 +216,7 @@
   <div class="ks-wrap">
     <h2>What kolm does and does not do under the BAA</h2>
     <p class="sub">A direct list. The honest version of "shared responsibility" rather than the vague version.</p>
-    <div class="does-grid">
+    <div class="does-stack">
       <div class="does">
         <h3>What kolm does</h3>
         <ul>
@@ -188,6 +228,7 @@
           <li><b>Operate a trust mailbox.</b> <code>trust@kolm.ai</code> for BAA requests, breach reports, and audit support questions. Acknowledged within one business day.</li>
         </ul>
       </div>
+      <hr class="does-divider">
       <div class="doesnt">
         <h3>What kolm does not do</h3>
         <ul>
