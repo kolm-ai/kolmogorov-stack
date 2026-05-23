@@ -140,6 +140,15 @@
  .vert-row__cta { font-family: var(--mono); font-size: 12.5px; color: var(--good); border-bottom: 1px solid rgba(126,240,210,0.35); padding-bottom: 1px; }
  .vert-row__cta:hover { border-bottom-color: var(--good); }
  .vert-row__badge { font-family: var(--mono); font-size: 10px; color: var(--ink-faint); letter-spacing: 0.08em; text-transform: uppercase; margin-left: 8px; }
+ /* W652: prove-it receipt line under chips — artifact filename + size + sha + verify link */
+ .vert-row__receipt { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); margin: 0 0 14px 0; padding: 8px 0 8px 12px; border-left: 1px solid rgba(126,240,210,0.25); display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; line-height: 1.5; }
+ .vert-row__receipt code { font-family: var(--mono); color: var(--ink); background: transparent; padding: 0; font-size: 11.5px; }
+ .vert-row__receipt .meta { color: var(--ink-faint); }
+ .vert-row__receipt .meta::before { content: "·"; margin-right: 6px; color: var(--ink-faint); }
+ .vert-row__receipt a { color: var(--good); border-bottom: 1px solid rgba(126,240,210,0.3); padding-bottom: 1px; margin-left: auto; }
+ .vert-row__receipt a:hover { border-bottom-color: var(--good); }
+ .vert-row__receipt.is-recipe { border-left-color: rgba(181,189,177,0.20); }
+ .vert-row__receipt.is-recipe code { color: var(--ink-mute); }
  @media (max-width: 760px) { .verts-spread { grid-template-columns: 1fr; column-gap: 0; row-gap: 36px; margin-top: 32px; } }
 
  section.workflows { padding: 56px 0 88px; border-top: 1px solid var(--line); }
@@ -174,6 +183,8 @@
  footer.site .row { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
 </style>
 <link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/kolm-svg.css">
+<script defer src="/kolm-svg.js"></script>
 </head>
 <body class="ks">
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
@@ -239,6 +250,7 @@
  <p class="vert-row__p pain">PHI sits in claim notes, discharge summaries, and intake forms. Every cloud LLM call is an exposure event.</p>
  <p class="vert-row__solution solution">A typed redactor strips 21 PHI classes against your gold set. The signed file ships to the laptop. No prompt ever leaves the firm boundary.</p>
  <div class="vert-row__chips chips"><span class="chip">21 PHI classes</span><span class="chip">K=0.985</span><span class="chip">60 seeds</span></div>
+ <div class="vert-row__receipt"><code>claims-redactor.kolm</code><span class="meta">5.2 GB &middot; INT4 &middot; sha256 27c44b&hellip;</span><a href="/verify-prod">verify &rarr;</a></div>
  <a class="vert-row__cta" href="/healthcare">Open Healthcare &rarr;</a>
  </div>
 
@@ -247,6 +259,7 @@
  <p class="vert-row__p pain">Cloud LLMs are banned on client matter. Every prompt is discoverable. Redline turnaround stalls.</p>
  <p class="vert-row__solution solution">Compile the firm's playbook into a clause extractor and redline engine. Per-matter artifacts. Privilege intact. Audit defensible.</p>
  <div class="vert-row__chips chips"><span class="chip">K=0.84</span><span class="chip">80-200 redlines</span><span class="chip">indemnity / IP / MFN</span></div>
+ <div class="vert-row__receipt"><code>legal-clause-extract.kolm</code><span class="meta">3.8 GB &middot; INT4 &middot; sha256 9a18e3&hellip;</span><a href="/verify-prod">verify &rarr;</a></div>
  <a class="vert-row__cta" href="/legal">Open Legal &rarr;</a>
  </div>
 
@@ -255,6 +268,7 @@
  <p class="vert-row__p pain">SR 11-7, FINRA, OCC, FCA, BaFin. Every cross-border prompt is a residency event. Every vendor swap is a re-review at the model risk committee.</p>
  <p class="vert-row__solution solution">MNPI redaction, disclosure review, and trade-decision support compile into signed artifacts. K-score and lineage drop into your model risk inventory.</p>
  <div class="vert-row__chips chips"><span class="chip">SR 11-7</span><span class="chip">MNPI redaction</span><span class="chip">sub-80 ms</span></div>
+ <div class="vert-row__receipt"><code>finance-disclosure-redact.kolm</code><span class="meta">2.1 GB &middot; INT4 &middot; sha256 b1f072&hellip;</span><a href="/verify-prod">verify &rarr;</a></div>
  <a class="vert-row__cta" href="/finance">Open Finance &rarr;</a>
  </div>
 
@@ -263,6 +277,7 @@
  <p class="vert-row__p pain">Cloud LLMs are not an option inside the SCIF. The diode is one-way. Your task is classified or ITAR-bounded.</p>
  <p class="vert-row__solution solution">Run the compile server inside an IL5 or IL6 enclave. Byte-exact reproducibility on the air-gap side. The cloud round-trip does not exist in this build.</p>
  <div class="vert-row__chips chips"><span class="chip">IL5 / IL6</span><span class="chip">ITAR-bounded</span><span class="chip">air-gap reproducible</span></div>
+ <div class="vert-row__receipt"><code>kolm-compile-server</code><span class="meta">self-hosted &middot; byte-exact reproducible &middot; SCIF-deployable</span><a href="/airgap">deploy &rarr;</a></div>
  <a class="vert-row__cta" href="/defense">Open Defense &rarr;</a>
  </div>
 
@@ -271,6 +286,7 @@
  <p class="vert-row__p pain">FedRAMP High, StateRAMP, CJIS. Citizen records cannot leave the agency boundary. Cloud-vendor lock-in fails procurement review.</p>
  <p class="vert-row__solution solution">Case-routing, FOIA redaction, and benefits-intake classifiers compile into signed artifacts that run inside the agency enclave. Reproducible across regions.</p>
  <div class="vert-row__chips chips"><span class="chip">FedRAMP High</span><span class="chip">CJIS-aware</span><span class="chip">FOIA redact</span></div>
+ <div class="vert-row__receipt is-recipe"><code>gov-foia-redact.template</code><span class="meta">seed schema &middot; FedRAMP-aligned spec &middot; your captures</span><a href="/quickstart">start &rarr;</a></div>
  <a class="vert-row__cta" href="/gov">Open Government &rarr;</a>
  <span class="badge-new" style="display:none">New vertical</span>
  </div>
@@ -280,6 +296,7 @@
  <p class="vert-row__p pain">FERPA on student records. Districts and provosts cannot ship a hosted LLM. Tutors hallucinate on the syllabus.</p>
  <p class="vert-row__solution solution">A syllabus-grounded tutor and a FERPA redactor compile per institution. The artifact ships to the school laptop. No student record touches a third-party API.</p>
  <div class="vert-row__chips chips"><span class="chip">FERPA-aware</span><span class="chip">syllabus-grounded</span><span class="chip">per-institution</span></div>
+ <div class="vert-row__receipt is-recipe"><code>edu-tutor-syllabus.template</code><span class="meta">seed schema &middot; FERPA-aligned spec &middot; per-institution compile</span><a href="/quickstart">start &rarr;</a></div>
  <a class="vert-row__cta" href="/education">Open Education &rarr;</a>
  <span class="badge-new" style="display:none">New vertical</span>
  </div>
@@ -289,6 +306,7 @@
  <p class="vert-row__p pain">KYC, AML, transaction-categorization, dispute-letter triage. Hosted LLM calls land in the regulator's exam scope.</p>
  <p class="vert-row__solution solution">A categorizer, a KYC document reader, and a dispute classifier compile into signed artifacts. Latency is local. The audit chain is Ed25519.</p>
  <div class="vert-row__chips chips"><span class="chip">KYC / AML</span><span class="chip">PCI-aware</span><span class="chip">dispute triage</span></div>
+ <div class="vert-row__receipt is-recipe"><code>fintech-kyc-triage.template</code><span class="meta">seed schema &middot; PCI-aligned spec &middot; Ed25519 audit chain</span><a href="/quickstart">start &rarr;</a></div>
  <a class="vert-row__cta" href="/fintech">Open Fintech &rarr;</a>
  <span class="badge-new" style="display:none">New vertical</span>
  </div>
@@ -298,6 +316,7 @@
  <p class="vert-row__p pain">SOC 2 customers want a "no data leaves" mode. Your support, intake, and onboarding flows depend on a third-party LLM bill.</p>
  <p class="vert-row__solution solution">Triage, summarization, and onboarding classifiers compile into a signed artifact your customer can self-host. Drop-in for the OpenAI call you were making.</p>
  <div class="vert-row__chips chips"><span class="chip">SOC 2 ready</span><span class="chip">self-host shim</span><span class="chip">OpenAI drop-in</span></div>
+ <div class="vert-row__receipt is-recipe"><code>saas-triage-shim.template</code><span class="meta">seed schema &middot; OpenAI-compatible base URL &middot; customer self-hosts</span><a href="/quickstart">start &rarr;</a></div>
  <a class="vert-row__cta" href="/saas">Open SaaS &rarr;</a>
  <span class="badge-new" style="display:none">New vertical</span>
  </div>

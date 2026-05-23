@@ -16,7 +16,9 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/surface-polish.css">
+<link rel="stylesheet" href="/kolm-svg.css">
 <script defer src="/nav.js"></script>
+<script defer src="/kolm-svg.js"></script>
 <style>
   /* ---------- hero with pipeline panel ---------- */
   .p-hero { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--ks-12); align-items: center; }
@@ -91,7 +93,10 @@
   .p-card { background: transparent; border: 0; border-bottom: 1px solid rgba(236,231,220,0.08); border-radius: 0; padding: var(--ks-5) 0; display: grid; grid-template-columns: 110px 1fr; column-gap: var(--ks-4); row-gap: 6px; align-items: baseline; transition: none; }
   @media (max-width: 560px) { .p-card { grid-template-columns: 1fr; row-gap: 4px; padding: var(--ks-4) 0; } }
   .p-card:hover { border-color: rgba(236,231,220,0.08); background: transparent; }
-  .p-card__label { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-accent); padding-top: 4px; }
+  .p-card__label { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-accent); padding-top: 4px; display: inline-flex; align-items: center; gap: 8px; }
+  /* W654: inline icon glyph inside p-card__label — kolm-svg.js renders 24x24, we size it down */
+  .p-card__label .kolm-icon { width: 16px; height: 16px; color: var(--ks-accent); opacity: 0.85; flex-shrink: 0; }
+  .p-card__label .kolm-icon svg { width: 100%; height: 100%; display: block; }
   .p-card h3 { grid-column: 2; font-size: 17px; margin: 0; font-weight: 540; letter-spacing: -0.008em; color: var(--ks-ink); line-height: 1.3; }
   @media (max-width: 560px) { .p-card h3 { grid-column: 1; } }
   .p-card p { grid-column: 2; margin: 0; font-size: 14px; color: var(--ks-ink-2); line-height: 1.55; max-width: 46ch; }
@@ -514,49 +519,49 @@
     </div>
     <div class="p-work__grid">
       <article class="p-card">
-        <span class="p-card__label">Drop-in</span>
+        <span class="p-card__label"><span data-kolm-icon="gateway" data-size="14" aria-hidden="true"></span>Drop-in</span>
         <h3>OpenAI-compatible gateway.</h3>
         <p>One base URL for OpenAI-compatible model routing, privacy controls, receipts, and capture.</p>
         <a href="/quickstart">See the quickstart &rarr;</a>
       </article>
       <article class="p-card">
-        <span class="p-card__label">Safety</span>
+        <span class="p-card__label"><span data-kolm-icon="shield" data-size="14" aria-hidden="true"></span>Safety</span>
         <h3>Redact before upstream.</h3>
         <p>PII (text, image, audio) is scrubbed at the edge. Receipts attest what was removed.</p>
         <a href="/capture">Redaction policies &rarr;</a>
       </article>
       <article class="p-card">
-        <span class="p-card__label">Observability</span>
+        <span class="p-card__label"><span data-kolm-icon="chart" data-size="14" aria-hidden="true"></span>Observability</span>
         <h3>Telemetry you own.</h3>
         <p>Per-namespace cost, latency, K-score, drift. No external SaaS sucking your traces.</p>
         <a href="/account/billing">Cost dashboard &rarr;</a>
       </article>
       <article class="p-card">
-        <span class="p-card__label">Dataset</span>
+        <span class="p-card__label"><span data-kolm-icon="table" data-size="14" aria-hidden="true"></span>Dataset</span>
         <h3>Reviewed training data.</h3>
         <p>Approve, reject, tag from CLI / TUI / web. Export the clean rows for distill.</p>
         <a href="/captures">Open your captures &rarr;</a>
       </article>
       <article class="p-card">
-        <span class="p-card__label">Distill</span>
+        <span class="p-card__label"><span data-kolm-icon="distill" data-size="14" aria-hidden="true"></span>Distill</span>
         <h3>Promote the repeat work.</h3>
         <p>If 90% of your calls look the same, distill them into a smaller, signed model.</p>
         <a href="/distill">Distill pipeline &rarr;</a>
       </article>
       <article class="p-card">
-        <span class="p-card__label">Run anywhere</span>
+        <span class="p-card__label"><span data-kolm-icon="deploy" data-size="14" aria-hidden="true"></span>Run anywhere</span>
         <h3>Cloud, browser, phone, air-gap.</h3>
         <p>Same .kolm runs on vLLM, llama.cpp, MLX, WebGPU, iOS, Android, embedded.</p>
         <a href="/runtimes">Runtime matrix &rarr;</a>
       </article>
       <article class="p-card">
-        <span class="p-card__label">Drift</span>
+        <span class="p-card__label"><span data-kolm-icon="alert" data-size="14" aria-hidden="true"></span>Drift</span>
         <h3>Watch K-score post-ship.</h3>
         <p>Compare prod responses to the frozen seed split. Page on drift verdict.</p>
         <a href="/k-score">K-score &amp; drift &rarr;</a>
       </article>
       <article class="p-card">
-        <span class="p-card__label">Proof</span>
+        <span class="p-card__label"><span data-kolm-icon="check" data-size="14" aria-hidden="true"></span>Proof</span>
         <h3>Verify any response.</h3>
         <p>Ed25519 receipt per call. Anyone with the receipt ID can verify against the registry.</p>
         <a href="/verify-prod">Verify a .kolm &rarr;</a>

@@ -90,6 +90,18 @@
   .pr-scenario .pr-math .row { display: flex; justify-content: space-between; padding: 3px 0; }
   .pr-scenario .pr-math .row.tot { border-top: 1px dashed var(--ks-line-1); margin-top: 6px; padding-top: 8px; color: var(--ks-accent); font-weight: 580; }
   .pr-scenario .pr-pick { font-family: var(--ks-mono); font-size: 11.5px; color: var(--ks-accent); letter-spacing: 0.04em; text-align: left; padding: 0; background: transparent; border: 0; border-radius: 0; }
+  /* W653: inline kolm-vs-frontier cost-comparison bars — visual proof under each scenario */
+  .pr-vs { margin-top: 2px; padding: 12px 0 4px; border-top: 1px dashed rgba(236,231,220,0.08); display: flex; flex-direction: column; gap: 6px; }
+  .pr-vs__row { display: grid; grid-template-columns: 88px 1fr 92px; align-items: center; gap: 10px; font-family: var(--ks-mono); font-size: 11px; line-height: 1.2; }
+  .pr-vs__label { color: var(--ks-ink-3); letter-spacing: 0.04em; text-transform: uppercase; }
+  .pr-vs__track { position: relative; height: 6px; background: rgba(236,231,220,0.05); border-radius: 3px; overflow: hidden; }
+  .pr-vs__bar { position: absolute; top: 0; left: 0; height: 100%; border-radius: 3px; }
+  .pr-vs__bar--frontier { background: linear-gradient(90deg, rgba(255,150,120,0.55), rgba(255,150,120,0.85)); }
+  .pr-vs__bar--kolm { background: linear-gradient(90deg, var(--ks-accent), rgba(126,240,210,0.7)); }
+  .pr-vs__val { color: var(--ks-ink); text-align: right; font-variant-numeric: tabular-nums; }
+  .pr-vs__val--frontier { color: var(--ks-ink-2); text-decoration: line-through; text-decoration-color: rgba(255,150,120,0.6); text-decoration-thickness: 1px; }
+  .pr-vs__foot { font-family: var(--ks-mono); font-size: 10.5px; color: var(--ks-ink-3); letter-spacing: 0.04em; padding-top: 4px; }
+  .pr-vs__foot b { color: var(--ks-accent); font-weight: 540; }
   /* W650: Add-ons — editorial spec-list rows, no card chrome */
   .pr-addons { display: grid; grid-template-columns: 1fr; gap: 0; border-top: 1px solid rgba(236,231,220,0.08); }
   .pr-addon { background: transparent; border: 0; border-bottom: 1px solid rgba(236,231,220,0.08); border-radius: 0; padding: var(--ks-5) 0; display: grid; grid-template-columns: 1fr 2fr; gap: var(--ks-3) var(--ks-6); align-items: start; }
@@ -663,6 +675,11 @@ all changes mirrored from Okta in &lt; 60s
           <div class="row"><span>Air-gap?</span><span>no</span></div>
           <div class="row tot"><span>Pick</span><span>Pro &middot; $49 / mo</span></div>
         </div>
+        <div class="pr-vs" aria-label="Monthly cost: frontier API vs kolm">
+          <div class="pr-vs__row"><span class="pr-vs__label">Frontier API</span><span class="pr-vs__track"><span class="pr-vs__bar pr-vs__bar--frontier" style="width:100%"></span></span><span class="pr-vs__val pr-vs__val--frontier">$900</span></div>
+          <div class="pr-vs__row"><span class="pr-vs__label">kolm Pro</span><span class="pr-vs__track"><span class="pr-vs__bar pr-vs__bar--kolm" style="width:5.4%"></span></span><span class="pr-vs__val">$49</span></div>
+          <div class="pr-vs__foot"><b>94% lower bill</b> &middot; same model quality &middot; signed artifact</div>
+        </div>
         <p class="pr-pick">PRO: under the 500k cap by 13x</p>
       </div>
 
@@ -676,6 +693,11 @@ all changes mirrored from Okta in &lt; 60s
           <div class="row"><span>SSO?</span><span>yes (GitHub)</span></div>
           <div class="row tot"><span>Pick</span><span>Team &middot; $499 / mo</span></div>
         </div>
+        <div class="pr-vs" aria-label="Monthly cost: frontier API vs kolm">
+          <div class="pr-vs__row"><span class="pr-vs__label">Frontier API</span><span class="pr-vs__track"><span class="pr-vs__bar pr-vs__bar--frontier" style="width:100%"></span></span><span class="pr-vs__val pr-vs__val--frontier">$85k</span></div>
+          <div class="pr-vs__row"><span class="pr-vs__label">kolm Team</span><span class="pr-vs__track"><span class="pr-vs__bar pr-vs__bar--kolm" style="width:0.6%"></span></span><span class="pr-vs__val">$499</span></div>
+          <div class="pr-vs__foot"><b>170x cheaper</b> &middot; SSO + audit log &middot; per-namespace chargeback</div>
+        </div>
         <p class="pr-pick">TEAM: SSO + audit at 68% cap</p>
       </div>
 
@@ -688,6 +710,11 @@ all changes mirrored from Okta in &lt; 60s
           <div class="row"><span>BAA?</span><span>required</span></div>
           <div class="row"><span>BYOC?</span><span>AWS, us-east-1</span></div>
           <div class="row tot"><span>Pick</span><span>Enterprise &middot; custom</span></div>
+        </div>
+        <div class="pr-vs" aria-label="Monthly cost: frontier API vs kolm">
+          <div class="pr-vs__row"><span class="pr-vs__label">Frontier API</span><span class="pr-vs__track"><span class="pr-vs__bar pr-vs__bar--frontier" style="width:100%"></span></span><span class="pr-vs__val pr-vs__val--frontier">$550k</span></div>
+          <div class="pr-vs__row"><span class="pr-vs__label">kolm BYOC</span><span class="pr-vs__track"><span class="pr-vs__bar pr-vs__bar--kolm" style="width:0.9%"></span></span><span class="pr-vs__val">~$5k</span></div>
+          <div class="pr-vs__foot"><b>110x cheaper</b> &middot; runs in your AWS &middot; BAA + SOC 2 + named CSM</div>
         </div>
         <p class="pr-pick">ENTERPRISE: BAA + BYOC + architecture review</p>
       </div>
