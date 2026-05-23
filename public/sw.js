@@ -1,5 +1,5 @@
 // Recipe service worker: keeps the registry available offline.
-const CACHE = 'kolm-v20-2026-05-24-wave686-kscore-badge-polish';
+const CACHE = 'kolm-v21-2026-05-24-wave687-hero-motion-primitive';
 const PRECACHE = [
  '/device',
  '/design-tokens.css',
@@ -10,12 +10,12 @@ const PRECACHE = [
  '/kolm-svg.css',
  '/w598.css',
  '/w600-layout.css',
- '/w605.css',
+ '/w687.css',
  '/docs-shell.css',
  '/frontier.css',
  '/nav.js',
  '/kolm-svg.js',
- '/w605.js',
+ '/w687.js',
  '/sdk.js',
  '/docs-shell.js',
  '/frontier.js',
