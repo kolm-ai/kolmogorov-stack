@@ -1,0 +1,36 @@
+# Prevent Vercel from auto-detecting server.js as a fallback function.
+# server.js is the Railway/Express entry, not the Vercel entry.
+# api/r2.js and api/cf-config.js (declared in vercel.json functions block)
+# import from ../src/*, so src/ must stay uploaded.
+server.js
+
+# Backend-only configs not needed by Vercel functions
+Dockerfile
+railway.toml
+ecosystem.config.cjs
+
+# Heavy dirs that don't need to ship to Vercel runtime
+tests/
+bench/
+workers/
+apps/
+packages/
+_audit/
+audit-shots/
+archive/
+backups/
+data/
+build/
+bin/
+
+# Plans, audits, internal docs (not for serverless bundle)
+KOLM_*.md
+FINAL_*.md
+INTERNAL_*.md
+STRATEGY.md
+DEMO.md
+AGENT_GUIDE.md
+CONTRIBUTING.md
+
+# Scratch
+all_hrefs.txt
