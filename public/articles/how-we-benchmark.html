@@ -7,8 +7,8 @@
 <title>How we benchmark · kolm.ai</title>
 <meta name="description" content="The methodology behind every percentage on this site. n=150 SWE-bench Lite, seed=42, swebench 4.1.0 evaluator. What the harness measures, what it does not,...">
 <meta name="keywords" content="SWE-bench Lite, kolm benchmark, reproducer, swebench 4.1.0, methodology, Opus-4.7, agentic coding, retrieval-augmented coding, REM injection">
-<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta name="author" content="Kolm">
@@ -211,7 +211,7 @@
  </div>
 
  <h2 id="one-number">One number, named plainly.</h2>
- <p>Five different numbers framed five different ways is how a marketing page is built. One number with the seed, the model, and the evaluator written next to it is how a benchmark is built. We chose the second, <em>before</em> the number, not after. The methodology, the seed, the harness, and the evaluator pin are all written down. When we have a signed run, the cells below fill in. Until then they stay empty on purpose.</p>
+ <p>A different number framed a different way for every audience is how a marketing page is built. One number with the seed, the model, and the evaluator written next to it is how a benchmark is built. We chose the second, <em>before</em> the number, not after. The methodology, the seed, the harness, and the evaluator pin are all written down. When we have a signed run, the cells below fill in. Until then they stay empty on purpose.</p>
 
  <div class="num-card">
  <div class="cell">
@@ -275,7 +275,7 @@ kolm <span class="kw">bench</span> --reproduce <span class="arg">swebench-lite-n
  </div>
 
  <h2 id="not-claim">What we do not claim.</h2>
- <p>Three benchmarks you will not see cited on this site, and why.</p>
+ <p>Benchmarks you will not see cited on this site, and why.</p>
  <ul>
  <li><b>LongMemEval.</b> Memory-on-memory. The benchmark scores how well a memory backend retrieves seeded facts; using it to grade a system whose job is to retrieve seeded facts is tautological. We retired the headline 94.6% number in April when it stopped meaning anything to a buyer.</li>
  <li><b>MMLU.</b> Contaminated. The dataset has been in pretraining corpora since 2023; lifts on MMLU now measure how recently a model was trained more than how well it reasons. Coding benchmarks like SWE-bench are harder to contaminate because the test bodies change with each PR.</li>

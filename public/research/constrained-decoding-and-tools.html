@@ -6,8 +6,8 @@
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Constrained decoding and tool calling · JSON that · kolm.ai</title>
 <meta name="description" content="Outlines plus lm-format-enforcer plus a post-hoc retry shim. JSON-schema, regex, EBNF, and choice modes. Tool calling rendered for Qwen, Llama, Hermes, with...">
-<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="Constrained decoding and tool calling · JSON that · kolm.ai">
@@ -163,7 +163,7 @@
 
  <p>A logits processor is a function that runs between the model and the sampler. It receives the next-token logits and can zero out any tokens that would violate a constraint. If the constraint is "the output must satisfy this JSON schema," the processor maintains a partial-parse state machine over the generated tokens and masks any next-token that does not extend a valid prefix of the schema's grammar.</p>
 
- <p>Two production libraries implement this:</p>
+ <p>The production libraries that implement this:</p>
 
  <ul>
  <li><strong>Outlines</strong> (Willard &amp; Louf, 2023). Compiles a regex or JSON schema into a finite-state machine over the tokenizer's vocabulary; at decode time, the FSM tracks which states are reachable. Fast, handles JSON schema, regex, and EBNF CFG.</li>
@@ -172,7 +172,7 @@
 
  <p>Both ship as logits-processor-compatible objects that drop into vLLM, transformers, and llama.cpp. kolm prefers Outlines when present, falls back to lm-format-enforcer, and finally to a post-hoc parse-and-retry shim when neither is installed.</p>
 
- <h2>The three modes</h2>
+ <h2>The decoding modes</h2>
 
  <h3>JSON schema mode</h3>
  <p>For structured outputs where the schema is known in advance: classifier labels, extracted entities, function arguments. The schema goes in, a logits processor comes out:</p>

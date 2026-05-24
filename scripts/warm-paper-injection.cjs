@@ -75,10 +75,28 @@ function transform(html) {
     return `${pre} style="${cleaned}"`;
   });
 
-  /* 3. Rewrite meta theme-color when it pins a dark hex, replacing with a paired pair. */
+  /* 3. Rewrite meta theme-color so all variants land on the Warm Paper pair.
+   *    Three cases handled:
+   *      - Single tag, any color: replace with paired Warm Paper pair.
+   *      - Already paired (light): normalize hex to #faf9f7.
+   *      - Already paired (dark):  normalize hex to #121211.
+   *    Idempotent — re-running on a Warm Paper page is a no-op.
+   */
   out = out.replace(/<meta\s+name=["']theme-color["'][^>]*>/gi, (tag) => {
-    /* Already a media-paired tag? Leave it. */
-    if (/media=/i.test(tag)) return tag;
+    if (/media=/i.test(tag)) {
+      /* Paired tag — just normalize the hex. */
+      if (/prefers-color-scheme:\s*light/i.test(tag)) {
+        const normalized = tag.replace(/content=(["'])#[0-9a-f]{3,8}\1/i, 'content="#faf9f7"');
+        if (normalized !== tag) changed = true;
+        return normalized;
+      }
+      if (/prefers-color-scheme:\s*dark/i.test(tag)) {
+        const normalized = tag.replace(/content=(["'])#[0-9a-f]{3,8}\1/i, 'content="#121211"');
+        if (normalized !== tag) changed = true;
+        return normalized;
+      }
+      return tag;
+    }
     /* Replace single tag with light+dark pair. */
     changed = true;
     return (

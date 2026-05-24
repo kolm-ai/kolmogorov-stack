@@ -7,8 +7,8 @@
 <title>Our marketing runs on 4 distilled models · kolm.ai</title>
 <meta name="description" content="How kolm uses four internal Specialists for repeatable marketing workflows, with K-scores, compile costs, rollback notes, and frontier escalation boundaries.">
 <meta name="keywords" content="dogfood AI, marketing AI cost, distilled model marketing stack, kolm specialists, .kolm production">
-<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta name="author" content="Kolm">
@@ -196,10 +196,10 @@
 <section class="hero">
  <div class="wrap">
  <span class="pill"><span class="dot"></span>Dogfood &middot; 2026-05-09 &middot; 10 min read</span>
- <h1>Our marketing runs on <span class="tone">four distilled models.</span></h1>
- <p class="lede">The site you&rsquo;re reading this on uses AI for nine features. <b>Four are powered by .kolm Specialists on dedicated runtime capacity.</b> One stays on the frontier where it belongs. Four are static or rule-based. This is the breakdown: which Specialists, why we picked them, what they cost, and where we kept the frontier.</p>
+ <h1>Our marketing runs on <span class="tone">distilled models.</span></h1>
+ <p class="lede">This site uses AI for a handful of features. <b>The bulk run as .kolm Specialists on dedicated runtime capacity.</b> A small set stays on the frontier where it belongs. The rest are static or rule-based. The breakdown: which Specialists, why we picked them, what they cost, and where we kept the frontier.</p>
  <div class="meta"><span><b>By</b>&nbsp;Kolm</span><span><b>Tag</b>&nbsp;dogfood &middot; cost &middot; production</span></div>
- <div style="margin:18px 0 0;padding:16px 18px;border:1px solid rgba(245,158,11,0.32);border-left:3px solid #f59e0b;border-radius:8px;background:rgba(245,158,11,0.06);font-size:14px;line-height:1.55;color:var(--ink-mute);max-width:780px"><b style="color:var(--ink)">v0.2 provenance.</b> The four Specialists in this case study are recipe-class artifacts: deterministic compiled code, an Ed25519-signed manifest + receipt, an optional <code>kolm-moe-1</code> composition block routing across N expert recipes, an optional bundled <code>kolm-tokenizer-1</code> byte-level BPE, a <code>KOLMIDX</code> deterministic lookup container, plus the K-score gate. Trained LoRA distillation with INT4/GGUF/ONNX weight bundling on a small base runs through the runtime bridge. The cost and latency numbers below describe a recipe-class deployment; LoRA or quantized-weight references describe the runtime-bridge path.</div>
+ <div style="margin:18px 0 0;padding:16px 18px;border:1px solid rgba(245,158,11,0.32);border-left:3px solid #f59e0b;border-radius:8px;background:rgba(245,158,11,0.06);font-size:14px;line-height:1.55;color:var(--ink-mute);max-width:780px"><b style="color:var(--ink)">v0.2 provenance.</b> The Specialists in this case study are recipe-class artifacts: deterministic compiled code, an Ed25519-signed manifest + receipt, an optional <code>kolm-moe-1</code> composition block routing across N expert recipes, an optional bundled <code>kolm-tokenizer-1</code> byte-level BPE, a <code>KOLMIDX</code> deterministic lookup container, plus the K-score gate. Trained LoRA distillation with INT4/GGUF/ONNX weight bundling on a small base runs through the runtime bridge. The cost and latency numbers below describe a recipe-class deployment; LoRA or quantized-weight references describe the runtime-bridge path.</div>
  </div>
 </section>
 
@@ -209,8 +209,8 @@
  <div class="toc">
  <h5>Contents</h5>
  <ol>
- <li><a href="#features">The nine features that need a model</a></li>
- <li><a href="#stack">The four Specialists</a></li>
+ <li><a href="#features">The features that need a model</a></li>
+ <li><a href="#stack">The Specialists</a></li>
  <li><a href="#kept">Where we kept the frontier</a></li>
  <li><a href="#bill">The actual monthly bill</a></li>
  <li><a href="#fail">The features we tried to compile and rolled back</a></li>
@@ -219,7 +219,7 @@
  </ol>
  </div>
 
- <h2 id="features">The nine features that need a model.</h2>
+ <h2 id="features">The features that need a model.</h2>
  <p>Audit of every place AI touches the kolm marketing pipeline. Two-week review, one engineer, no tools you don&rsquo;t already have access to.</p>
 
  <ul>
@@ -234,9 +234,9 @@
  <li><b>9. Long-form drafting.</b> The cornerstone essays you&rsquo;re reading.</li>
  </ul>
 
- <p>Of those, <b>five are 80%+ deterministic in shape.</b> They take an input that fits a recognizable mold and produce an output that fits a recognizable mold. Those are the candidates for a Specialist. The other four are open-domain reasoning that we keep on the frontier.</p>
+ <p>Most of those are <b>80%+ deterministic in shape.</b> They take an input that fits a recognizable mold and produce an output that fits a recognizable mold. Those are the candidates for a Specialist. The rest are open-domain reasoning that we keep on the frontier.</p>
 
- <h2 id="stack">The four Specialists.</h2>
+ <h2 id="stack">The Specialists.</h2>
  <p>What we actually compiled, what each is doing, and what we paid for it.</p>
 
  <div class="stack-tbl-wrap">
@@ -253,9 +253,9 @@
  </table>
  </div>
 
- <p><b>One-time compile total: $1,020.</b> Marginal cost of all four is tied to fixed runtime capacity, not token volume. If outbound volume grows 10x, the serving cost stays fixed until capacity is saturated.</p>
+ <p><b>One-time compile total: $1,020.</b> Marginal cost across the set is tied to fixed runtime capacity, not token volume. If outbound volume grows 10x, the serving cost stays fixed until capacity is saturated.</p>
 
- <p>For comparison, when we ran all four on Sonnet at our current volume in February, the bill was $1,860/mo. <b>The four artifacts paid back their compile cost in 17 days.</b></p>
+ <p>For comparison, when we ran this set on Sonnet at our current volume in February, the bill was $1,860/mo. <b>The artifacts paid back their compile cost in 17 days.</b></p>
 
  <h2 id="kept">Where we kept the frontier.</h2>
  <p>We did not compile features 1, 7, 8, or 9. Each for a specific reason.</p>
@@ -282,7 +282,7 @@
 sonnet calls (all 9 features) <span class="kw">$1,860 / mo</span>
 total <span class="arg">$1,860 / mo</span></pre>
 
- <p>May 2026, four Specialists shipped:</p>
+ <p>May 2026, Specialists shipped:</p>
  <pre><span class="com"># after</span>
 sonnet/opus calls (features 1, 7, 8, 9) <span class="kw">$ 240 / mo</span>
 H100-sliver lease (one box, four .kolm) <span class="kw">$ 99 / mo</span>
@@ -294,7 +294,7 @@ total <span class="arg">$ 339 / mo</span></pre>
  <p>The numbers above are not impressive in absolute dollars; we&rsquo;re a small company, our volumes are small. <b>The numbers matter because they&rsquo;re shaped the same way at every scale.</b> A Series A AI-native SaaS doing 4M calls a month gets the same shape, multiplied by 100x. The point is the slope.</p>
 
  <h2 id="fail">The features we tried to compile and rolled back.</h2>
- <p>Two failures worth naming.</p>
+ <p>Failures worth naming.</p>
 
  <h3>The "rephrase to brand voice" Specialist.</h3>
  <p>We tried to compile a "make this sound like kolm marketing voice" Specialist. The verifier was a BLEU-based reference output check. The K-score gated at 78. <b>The outputs were technically correct and stylistically wrong.</b> Brand voice turns out to be open-domain in a way the verifier couldn&rsquo;t capture. We pulled it back to the frontier for now.</p>
@@ -305,7 +305,7 @@ total <span class="arg">$ 339 / mo</span></pre>
  <p>Both failures are verifiable examples of where compiling does not pay back. <b>Distillation transfers behavior; it does not transfer taste.</b> Anywhere taste is the metric, the frontier wins for now.</p>
 
  <h2 id="auto">The build pipeline.</h2>
- <p>For the four Specialists that did ship, the pipeline looks like this:</p>
+ <p>For the Specialists that did ship, the pipeline looks like this:</p>
  <pre><span class="com"># nightly job, runs at 04:00 UTC</span>
 <span class="kw">$</span> kolm compile <span class="arg">"draft a 60-word TLDR for the article body provided"</span> \
  --examples ./marketing/examples/tldr-2026-05.jsonl \
@@ -328,7 +328,7 @@ total <span class="arg">$ 339 / mo</span></pre>
 <span class="arg"> - /span> rolled out behind 5% traffic
 <span class="arg"> - /span> hold for 24h, auto-promote on no K-score regression</pre>
 
- <p>The whole pipeline is six commands. <b>One CI job, ten minutes a night.</b> Specialists that fail the gate stay at the prior version; Specialists that pass roll out behind a 5% canary. We have not had a regression incident since switching.</p>
+ <p>The whole pipeline is a handful of commands. <b>One CI job, ten minutes a night.</b> Specialists that fail the gate stay at the prior version; Specialists that pass roll out behind a 5% canary. We have not had a regression incident since switching.</p>
 
  <h2 id="why">Why this is the most useful blog post we could write.</h2>
  <p>Most engineering posts are arguments. This one is a checklist. If you read it as a checklist of "what your AI-native SaaS could be doing instead of paying Sonnet rates for ticket-tagging," it has done its job.</p>
@@ -337,12 +337,12 @@ total <span class="arg">$ 339 / mo</span></pre>
  <ul>
  <li><b>Audit:</b> list every AI feature in your product. Tag each as deterministic-shape or open-domain. Tag each by call volume.</li>
  <li><b>Pick:</b> the highest-volume, most-deterministic feature is your first compile. Skip taste-driven features.</li>
- <li><b>Compile:</b> 50-200 example pairs, one verifier, one base model, one CI run. <code>kolm compile</code> handles the seven stages.</li>
+ <li><b>Compile:</b> 50-200 example pairs, one verifier, one base model, one CI run. <code>kolm compile</code> handles the pipeline stages.</li>
  <li><b>Canary:</b> route 5% of traffic to the Specialist; watch the K-score and the customer-facing metric. Hold 24h. Promote.</li>
  <li><b>Repeat:</b> the next-highest-volume feature.</li>
  </ul>
 
- <p>Three months in, your AI-feature line item is a fraction of what it was, your gross margin curve has bent, and your auditor has a receipt for every customer-facing call. <b>That&rsquo;s the dogfood. That&rsquo;s how the building gets used.</b></p>
+ <p>A quarter in, your AI-feature line item is a fraction of what it was, your gross margin curve has bent, and your auditor has a receipt for every customer-facing call. <b>That&rsquo;s the dogfood. That&rsquo;s how the building gets used.</b></p>
 
  <div class="signpost">
  <a href="/articles/why-we-built-kolm">

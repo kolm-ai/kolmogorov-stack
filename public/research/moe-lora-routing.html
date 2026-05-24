@@ -6,8 +6,8 @@
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Mixture of LoRA experts learned routing across signed · kolm.ai</title>
 <meta name="description" content="Train one router that picks among N domain-specific LoRA adapters on the same base. Switch-Transformer top-1 and Mixtral-style top-k, with router z-loss and...">
-<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="Mixture of LoRA experts learned routing across signed · kolm.ai">
@@ -188,9 +188,10 @@
 
  <p>The top-k aggregation is a weighted sum of expert outputs, weights from the router's softmax. The Mixtral 8x7B model runs k=2 of 8 experts per token; we apply the same idea at per-sequence granularity. Higher k buys quality at linear inference cost. Lower k is cheaper and easier to attribute (the receipt records exactly which expert ran).</p>
 
- <h2>The two auxiliary losses</h2>
+ <h2>The auxiliary losses</h2>
 
- <p>Cross-entropy on the supervised routing label is necessary but not sufficient. Two extra terms keep training stable:</p>
+ <p>Cross-entropy on the supervised routing label is necessary but not sufficient. The extra terms that keep training stable:</p>
+
 
  <ul>
  <li><strong>Router z-loss</strong> (Lepikhin 2020). Penalizes large logit magnitudes via <code>(logsumexp(logits))<sup>2</sup></code>. Without it the softmax saturates: one expert hits probability ~1, gradients flow only to that expert, and the router stops learning. Weight 1e-3 is the published default.</li>

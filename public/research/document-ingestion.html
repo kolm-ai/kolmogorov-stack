@@ -6,8 +6,8 @@
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Document ingestion From PDF, email, and HTML to · kolm.ai</title>
 <meta name="description" content="A multi-format ingest pipeline that turns PDFs, emails, mailboxes, HTML pages, and CSV exports into chunked, redacted, mode-tagged training pairs. The RAG...">
-<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="Document ingestion From PDF, email, and HTML to · kolm.ai">
@@ -185,7 +185,7 @@
 
  <p>The structured-regex layer catches roughly 95% of PII; the residual 5% (free-text names, addresses inside narrative paragraphs) needs an entity recognizer or a human-in-the-loop pass. kolm reports the regex-hit count per document and flags documents with hit-density above a threshold for the buyer's review. The redactor is conservative: a false positive (redacting a non-PII token) costs only some training signal; a false negative (leaking real PII into the training set) is the bug the pipeline must not have.</p>
 
- <h2>Three task modes</h2>
+ <h2>Task modes</h2>
 
  <table class="table">
  <thead><tr><th>Mode</th><th>Prompt shape</th><th>Response shape</th><th>When to use</th></tr></thead>
@@ -200,7 +200,7 @@
 
  <h2>Per-format readers</h2>
 
- <p>Each format has its own reader that returns plain text; everything downstream is format-agnostic. The four hot-path readers:</p>
+ <p>Each format has its own reader that returns plain text; everything downstream is format-agnostic. The hot-path readers:</p>
 
  <ul>
  <li><strong>PDF.</strong> PyMuPDF first (fast, layout-preserving), with a pdfplumber fallback for PDFs that PyMuPDF returns empty text from (scanned PDFs with broken text layers). OCR fallback (Tesseract) is wired but off by default; the buyer opts in because the throughput drop is large.</li>
@@ -209,11 +209,11 @@
  <li><strong>CSV.</strong> Each row becomes a paragraph constructed from the header-to-value mapping. The buyer specifies which columns are prompt and which are response (or the reader infers it from the column-name patterns &quot;input&quot;/&quot;output&quot;, &quot;question&quot;/&quot;answer&quot;, &quot;prompt&quot;/&quot;completion&quot;).</li>
  </ul>
 
- <p>Three more formats are wired but rare: DOCX via python-docx, TXT via direct read, JSONL via line-by-line parse with explicit schema validation.</p>
+ <p>Additional formats are wired but rare: DOCX via python-docx, TXT via direct read, JSONL via line-by-line parse with explicit schema validation.</p>
 
  <h2>Deduplication</h2>
 
- <p>Two passes. The first is exact-hash deduplication: chunks with identical SHA-256 are collapsed to one. The second is near-duplicate detection via MinHash + locality-sensitive hashing with a Jaccard threshold of 0.85 on shingled 5-grams. Both passes run before mode-tagging because a duplicate chunk in qa mode produces a duplicate prompt-answer pair and inflates the training set with no new signal.</p>
+ <p>The pipeline runs two passes. The first is exact-hash deduplication: chunks with identical SHA-256 are collapsed to one. The second is near-duplicate detection via MinHash + locality-sensitive hashing with a Jaccard threshold of 0.85 on shingled 5-grams. Both passes run before mode-tagging because a duplicate chunk in qa mode produces a duplicate prompt-answer pair and inflates the training set with no new signal.</p>
 
  <p>The dedup statistics ship in the receipt: <code>n_documents, n_chunks_pre_dedup, n_chunks_post_dedup, dedup_ratio</code>. A high dedup ratio is a flag (the buyer may have ingested the same set of templates twice); a low one is normal.</p>
 

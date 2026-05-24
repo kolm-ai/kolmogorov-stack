@@ -7,8 +7,8 @@
 <title>Speculative Decoding With Deterministic Drafts · kolm.ai</title>
 <meta name="description" content="Draft models are the standard for speculative decoding. A deterministic recipe pack is faster, smaller, and free at runtime. Here is how to cut your local...">
 <meta name="keywords" content="speculative decoding, deterministic drafts, recipe-driven decoding, free LLM inference, speculative decoding without draft model, RSD, recipe speculative decoding, llama.cpp speculative">
-<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta name="author" content="Kolm">
@@ -302,7 +302,7 @@
  </table>
  </div>
 
- <p>Three things to read out of this table.</p>
+ <p>What to read out of this table.</p>
  <p><b>RSD wins big on structured tasks.</b> JSON extraction goes from 38 tok/s cold to 158 tok/s with a recipe pack --4.2x wall-time speedup at zero accuracy cost. The pack covers 83% of the tokens for free.</p>
  <p><b>RSD does not help on free prose.</b> A summary task is mostly novel tokens; the recipe pack hit rate is 22%, the speedup is small. <b>That's correct behavior.</b> The recipe pack should not be helping on free prose - it has nothing to predict that a model wouldn't have to figure out anyway.</p>
  <p><b>The 1.5B draft beats RSD on free prose.</b> If your workload is dominated by open-domain text, a draft model is the better choice. We support both; the compiler picks the right one for the task.</p>
