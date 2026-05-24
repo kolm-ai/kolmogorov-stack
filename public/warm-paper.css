@@ -464,11 +464,15 @@ code:not(pre code) {
    8. NAV - paper-toned chrome, no contrast strip
    ============================================================ */
 
+/* W845: .ks-nav stripped from this rule. The translucent bar is painted by
+   .ks-nav-wrap in ks.css; layering a second translucent background here
+   produced the double-bar look the user flagged on /. The other classes
+   below are for legacy/embedded pages that mount the nav directly. */
 .kolm-nav,
 .kolm-product-spine,
 header.kolm-nav,
 nav.kolm-nav,
-.site-nav, .ks-nav {
+.site-nav {
   background: rgba(247, 244, 236, 0.88);
   backdrop-filter: saturate(110%) blur(14px);
   -webkit-backdrop-filter: saturate(110%) blur(14px);
@@ -480,10 +484,20 @@ nav.kolm-nav,
 [data-theme="dark"] .kolm-product-spine,
 [data-theme="dark"] header.kolm-nav,
 [data-theme="dark"] nav.kolm-nav,
-[data-theme="dark"] .site-nav,
-[data-theme="dark"] .ks-nav {
+[data-theme="dark"] .site-nav {
   background: rgba(11, 11, 13, 0.86);
   border-bottom: 1px solid var(--line-1);
+}
+
+/* W845: .ks-nav itself stays TRANSPARENT — the .ks-nav-wrap parent is the
+   translucent layer. Without this nuke a previous .ks-nav rule from
+   surface-polish.css could still re-introduce a second band. */
+.ks-nav,
+[data-theme="dark"] .ks-nav,
+[data-theme="light"] .ks-nav {
+  background: transparent !important;
+  border-bottom: 0 !important;
+  box-shadow: none !important;
 }
 
 .kolm-logo, .ks-logo, .brand-mark {
@@ -855,20 +869,20 @@ html:not([data-theme])   { color-scheme: light; }
    features on so Inter's display-cuts kick in. Still monochrome ink. */
 .fr-h1--hero, h1.fr-h1--hero, .display-hero {
   font-family: var(--ks-font-sans);
-  font-weight: 800;
-  font-size: clamp(54px, 8.2vw, 116px);
+  font-weight: 280;
+  font-size: clamp(54px, 8.4vw, 124px);
   line-height: 0.96;
-  letter-spacing: -0.048em;
+  letter-spacing: -0.045em;
   color: var(--ink-1);
   text-wrap: balance;
   margin: 0 0 var(--ks-space-24, 24px) 0;
-  font-feature-settings: "ss01", "ss02", "cv11", "cv05", "kern";
+  font-feature-settings: "ss01", "ss02", "cv11", "cv05", "kern", "tnum";
   font-optical-sizing: auto;
 }
 
 .fr-h1--hero em, .fr-h1--hero i {
   font-style: normal;
-  font-weight: 700;
+  font-weight: 420;
   color: var(--ink-1);
   position: relative;
   display: inline-block;
@@ -949,13 +963,14 @@ main > section:first-of-type .fr-h1--hero {
   opacity: 0.85;
 }
 
-/* Display numeral - sans tabular, the same Inter face at scale */
+/* Display numeral - sans tabular, the same Inter face at scale. W846 pull
+   to thin/contemporary weight per direct user feedback. */
 .display-num {
   font-family: var(--ks-font-sans);
-  font-weight: 700;
-  font-size: clamp(40px, 5vw, 72px);
+  font-weight: 320;
+  font-size: clamp(40px, 5vw, 76px);
   line-height: 0.98;
-  letter-spacing: -0.038em;
+  letter-spacing: -0.042em;
   color: var(--ink-1);
   font-variant-numeric: tabular-nums lining-nums;
 }
@@ -1617,8 +1632,9 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
 }
 .kolm-arch-band__h {
   font-family: var(--ks-font-sans);
-  font-weight: 600;
-  font-size: clamp(28px, 3.4vw, 48px);
+  font-weight: 340;
+  letter-spacing: -0.032em;
+  font-size: clamp(28px, 3.6vw, 50px);
   line-height: 1.06;
   letter-spacing: -0.028em;
   color: var(--ink-1);
@@ -1685,12 +1701,13 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
 }
 .ks-cli-chat__copy h2 {
   font-family: var(--ks-font-sans);
-  font-weight: 600;
-  font-size: clamp(28px, 3.4vw, 48px);
-  line-height: 1.05;
-  letter-spacing: -0.028em;
+  font-weight: 340;
+  font-size: clamp(28px, 3.6vw, 50px);
+  line-height: 1.04;
+  letter-spacing: -0.032em;
   color: var(--ink-1);
   margin: 0 0 16px;
+  font-feature-settings: "ss01", "kern", "tnum";
   text-wrap: balance;
 }
 .ks-cli-chat__copy .eye {
@@ -1739,8 +1756,14 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   margin-top: 28px;
 }
 
+/* W845: chat box background MUST be an explicit dark hex (not var(--ink-1)).
+   --ink-1 is a SEMANTIC INK TOKEN — #111 in light theme, but #e8e3d6 (cream)
+   in dark theme. Using it as a SURFACE color flipped the terminal to white
+   in dark mode (user: "this completely bleeds"). The chat box is a terminal;
+   it stays dark in both themes. */
 .ks-cli-chat__box {
-  background: var(--ink-1);
+  background: #14110d;
+  border: 1px solid #2a241b;
   border-radius: var(--ks-radius-lg, 12px);
   overflow: hidden;
   box-shadow: 0 24px 64px -28px rgba(17, 17, 17, 0.22);
@@ -1847,9 +1870,16 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   margin: 8px 22px 16px;
 }
 
+/* W845: explicit overrides for both themes — defense-in-depth.
+   The chat box IS a terminal so it stays dark in light AND dark mode.
+   Earlier this block was empty; combined with the buggy var(--ink-1) above
+   it produced a cream box in dark mode. */
 [data-theme="light"] .ks-cli-chat__box,
-:root:not([data-theme="dark"]) .ks-cli-chat__box {
-  /* keep terminal dark even in light mode — it IS a terminal */
+:root:not([data-theme="dark"]) .ks-cli-chat__box,
+[data-theme="dark"] .ks-cli-chat__box {
+  background: #14110d;
+  color: #f5efe2;
+  border-color: #2a241b;
 }
 
 /* example chips inside the chat — render once on first paint, removed on first send */
@@ -1979,12 +2009,13 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
 }
 .kac-chat-copy h2 {
   font-family: var(--ks-font-sans);
-  font-weight: 600;
-  font-size: clamp(24px, 2.8vw, 36px);
-  line-height: 1.06;
-  letter-spacing: -0.024em;
+  font-weight: 360;
+  font-size: clamp(26px, 3vw, 40px);
+  line-height: 1.04;
+  letter-spacing: -0.032em;
   color: var(--ink-1);
   margin: 0 0 14px;
+  font-feature-settings: "ss01", "kern", "tnum";
 }
 .kac-chat-copy p {
   font-family: var(--ks-font-sans);
@@ -2043,12 +2074,13 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
 }
 .kolm-deep__title {
   font-family: var(--ks-font-sans);
-  font-weight: 700;
-  font-size: clamp(20px, 2.1vw, 24px);
-  line-height: 1.18;
-  letter-spacing: -0.018em;
+  font-weight: 440;
+  font-size: clamp(20px, 2.1vw, 26px);
+  line-height: 1.16;
+  letter-spacing: -0.025em;
   color: var(--ink-1);
   margin: 0;
+  font-feature-settings: "ss01", "kern";
 }
 .kolm-deep__body {
   font-family: var(--ks-font-sans);
@@ -2151,4 +2183,344 @@ html[data-theme="dark"] .kolm-deep__cmd {
   border-left-color: rgba(168, 215, 188, 0.75);
   color: rgba(245, 239, 226, 0.94);
 }
+
+/* =========================================================================
+   W845 / Section 27  -  fix-the-site round 2
+   Hero typography lift, in-nav theme toggle, hero backdrop, hero card
+   collapse to single-column, vertical rhythm reset.
+   ========================================================================= */
+
+/* W846: hero H1 — THINNER, contemporary, clean. User direct feedback:
+   "make the hero font thinner and more contemporary ... not thicker btw
+   ... i need it to be super clean ... everythings gotta be buttoned up".
+   Pulled from weight 820 (display black, felt SaaS-heavy) to 280
+   (Inter Display Thin) with tighter tracking and same dramatic size.
+   This is the Linear / Vercel / Stripe Press editorial vibe: thin and
+   big, not thick and shouty. */
+.fr-h1--hero, h1.fr-h1--hero, .display-hero,
+.ks-hero__h1, .ks-hero h1.fr-h1--hero {
+  font-weight: 280;
+  font-size: clamp(54px, 8.4vw, 124px);
+  line-height: 0.96;
+  letter-spacing: -0.045em;
+  max-width: 18ch;
+  text-wrap: balance;
+  font-feature-settings: "ss01", "ss02", "cv11", "cv05", "kern", "tnum";
+  font-optical-sizing: auto;
+  color: var(--ink-1, #111111);
+}
+.fr-h1--hero .h1-claim { font-weight: inherit; }
+
+/* W846: hero backdrop — pulled back. The W845 dot field + double bloom felt
+   noisy; user wanted "super clean ... buttoned up". Now a single very faint
+   warm wash, no dot grid. The thin hero H1 carries the page; the bg stays
+   out of the way. */
+.ks-hero {
+  background:
+    radial-gradient(900px 480px at 78% -10%, rgba(194, 65, 12, 0.05) 0%, transparent 64%);
+  position: relative;
+}
+.ks-hero::before { content: none; }
+[data-theme="dark"] .ks-hero {
+  background:
+    radial-gradient(900px 480px at 78% -10%, rgba(194, 65, 12, 0.10) 0%, transparent 64%);
+}
+
+/* W845: hero now single-column. The right-column mini-card was a wedge the
+   user called weak ("doesnt add much and doesnt take up the weight it
+   should"). The arch-band below the hero already answers "what is kolm".
+   Collapse column 2 visually but keep the DOM node for lock-ins. */
+.ks-hero__wrap {
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 0 !important;
+  max-width: min(var(--ks-container), 1080px);
+}
+.ks-hero__card {
+  display: none !important;
+}
+
+/* W845: tighten hero CTAs row + sub-line so the H1 breathes properly. */
+.ks-hero__ctas { margin-top: 32px; gap: 14px; }
+.ks-hero .ks-lede { margin-top: 22px; }
+.ks-hero__sub { margin-top: 22px !important; }
+
+/* W845: in-nav theme toggle (pre-baked into homepage + docs HTML, so it
+   does not depend on nav.js mounting). Icons swap based on data-theme on
+   <html>. Sun shown in dark mode = "switch to light"; moon shown in light
+   mode = "switch to dark". */
+.ks-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px; height: 38px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--ink-2, #44423d);
+  transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+.ks-theme-toggle:hover {
+  background: rgba(33, 28, 21, 0.05);
+  color: var(--ink-1, #111111);
+  border-color: rgba(33, 28, 21, 0.08);
+}
+[data-theme="dark"] .ks-theme-toggle:hover {
+  background: rgba(245, 239, 226, 0.06);
+  color: var(--ink-1, #e8e3d6);
+  border-color: rgba(245, 239, 226, 0.10);
+}
+.ks-theme-toggle svg { display: block; pointer-events: none; }
+.ks-theme-toggle .theme-icon--sun  { display: none; }
+.ks-theme-toggle .theme-icon--moon { display: block; }
+[data-theme="dark"] .ks-theme-toggle .theme-icon--sun  { display: block; }
+[data-theme="dark"] .ks-theme-toggle .theme-icon--moon { display: none; }
+
+/* W845: deep-dive cards — kill the var(--paper-1) reference (undefined token
+   was falling back to #faf9f7 in light mode, but defense-in-depth here). */
+.kolm-deep__card {
+  background: #fbfaf6;
+  border-color: #e8e2d3;
+}
+.kolm-deep__cmd {
+  background: #f4efe1;
+  border-color: #ece6d6;
+}
+
+/* W845: vertical rhythm reset — section spacing collapsed where the W706+
+   editorial stack stretched it out. Sections sit on a 96px/64px/48px
+   cadence; the eyebrow + h2 pair tightens so eyebrows feel like a label,
+   not a sentence. */
+section.fr-section { padding-top: clamp(48px, 6vw, 96px); padding-bottom: clamp(48px, 6vw, 96px); }
+section.fr-section + section.fr-section { padding-top: 0; }
+.fr-section .fr-container { padding-left: clamp(20px, 4vw, 40px); padding-right: clamp(20px, 4vw, 40px); }
+.fr-eyebrow {
+  display: inline-block;
+  margin-bottom: 14px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-1, #c2410c);
+  font-family: var(--ks-font-mono, ui-monospace, monospace);
+}
+.fr-h2 {
+  margin: 0 0 18px 0;
+  font-size: clamp(30px, 4vw, 52px);
+  line-height: 1.05;
+  letter-spacing: -0.032em;
+  font-weight: 360;
+  color: var(--ink-1);
+  font-feature-settings: "ss01", "kern", "tnum";
+}
+.fr-lede { max-width: 64ch; margin: 0 0 28px 0; }
+
+/* =========================================================================
+   W846 — Round-3 visual + content fixes
+   Goals: hero earns the fold, eyebrow+H2 echo dies site-wide, H2s carry
+   editorial weight, proof bar lives ABOVE the next-scroll fold so a 5-second
+   visitor sees concrete numbers.
+   ========================================================================= */
+
+/* W846: hero proof rail. Four stat cells under the CTA row so the value
+   prop has a number-grounded second-beat before the user scrolls. Each
+   cell carries a single big stat + a one-line caption. Lives inside
+   .ks-hero__wrap > div (column 1). */
+.ks-hero__proof {
+  list-style: none;
+  padding: 0;
+  margin: 36px 0 0 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px;
+  max-width: 720px;
+  border-top: 1px solid var(--rule-1, #e5e0d4);
+  padding-top: 22px;
+}
+@media (max-width: 720px) {
+  .ks-hero__proof {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+}
+.ks-hero__proof li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.ks-hero__proof b {
+  font-family: var(--ks-font-sans);
+  font-weight: 420;
+  font-size: clamp(22px, 2.4vw, 30px);
+  letter-spacing: -0.028em;
+  color: var(--ink-1, #111111);
+  line-height: 1.0;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "ss01", "tnum", "kern";
+}
+.ks-hero__proof span {
+  font-family: var(--ks-font-sans);
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink-3, #6b6b66);
+  letter-spacing: 0;
+}
+[data-theme="dark"] .ks-hero__proof { border-top-color: rgba(245,239,226,0.10); }
+[data-theme="dark"] .ks-hero__proof b { color: var(--ink-1, #e8e3d6); }
+[data-theme="dark"] .ks-hero__proof span { color: var(--ink-3, #9e978b); }
+
+/* W846: sub-line under proof rail. Smaller, monospace, with a clear github
+   link. The previous version used JS-undefined --ks-mono / --ks-ink-3
+   tokens that fell back unreliably. */
+.ks-hero__sub {
+  margin: 22px 0 0 0;
+  font-family: var(--ks-font-mono, ui-monospace, "JetBrains Mono", monospace);
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3, #6b6b66);
+}
+.ks-hero__sub a {
+  color: var(--ink-2, #44423d);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+[data-theme="dark"] .ks-hero__sub { color: var(--ink-3, #9e978b); }
+[data-theme="dark"] .ks-hero__sub a { color: var(--ink-1, #e8e3d6); }
+
+/* W846: H2 weight harmonize across .fr-h2 / .ks-h2 — both thin & contemporary
+   to match the hero. Linear / Vercel / Stripe Press editorial weight.
+   Reverted from earlier 720 bump per direct user feedback ("super clean"). */
+.ks-h2 {
+  font-weight: 360 !important;
+  letter-spacing: -0.032em !important;
+  font-feature-settings: "ss01", "kern", "tnum";
+}
+.ks-h1 {
+  font-weight: 300 !important;
+  letter-spacing: -0.038em !important;
+  font-feature-settings: "ss01", "kern", "tnum";
+}
+h3.fr-h3, .fr-h3, h3.ks-h3, .ks-h3 {
+  font-weight: 480;
+  letter-spacing: -0.022em;
+  font-feature-settings: "ss01", "kern";
+}
+
+/* W846: eyebrow + H2 echo killer. Where an eyebrow sits directly above
+   a heading that restates the same theme, the eyebrow becomes a quiet
+   mono caps label, never a sentence. This is a visual rule; copy is
+   handled per-page. */
+.fr-eyebrow,
+.ks-eyebrow {
+  font-weight: 580;
+  opacity: 0.78;
+}
+
+/* W846: section heading group — when eyebrow + h2 sit together, drop the
+   top gap so they read as one unit. Also tighten the lede max-width so
+   long sentences don't blow horizontal rhythm. */
+.ks-shead { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+.ks-shead .ks-eyebrow + .ks-h2 { margin-top: 0; }
+.ks-shead .ks-lede { margin-top: 6px; max-width: 64ch; }
+
+/* W846: deep-dive cards — buttoned up. Hairline border, no decorative ::before
+   stripe (W846a removed). Hover only shifts border + lifts by 1px. */
+.kolm-deep__card {
+  position: relative;
+  background: #fbfaf6;
+  border: 1px solid #eae4d5;
+  border-radius: 8px;
+  box-shadow: none;
+  transition: border-color .18s ease, transform .18s ease;
+}
+.kolm-deep__card:hover {
+  border-color: #d4cdba;
+  transform: translateY(-1px);
+  box-shadow: none;
+}
+[data-theme="dark"] .kolm-deep__card { background: #14110d; border-color: rgba(245,239,226,0.10); }
+[data-theme="dark"] .kolm-deep__card:hover { border-color: rgba(245,239,226,0.20); }
+[data-theme="dark"] .kolm-deep__card .kolm-deep__cmd { background: #1a1612; border-color: rgba(245,239,226,0.10); color: #e8e3d6; }
+[data-theme="dark"] .kolm-deep__card .kolm-deep__title { color: #e8e3d6; }
+[data-theme="dark"] .kolm-deep__card .kolm-deep__body { color: #cbc4b5; }
+[data-theme="dark"] .kolm-deep__card .kolm-deep__head { border-bottom-color: rgba(245,239,226,0.08); }
+
+/* W846: receipt JSON inline strip — give devs a real artifact preview
+   above the next scroll fold, not just a file-list visual. */
+.kolm-receipt-strip {
+  margin: 26px 0 0 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: 22px;
+  align-items: stretch;
+}
+@media (max-width: 880px) {
+  .kolm-receipt-strip { grid-template-columns: 1fr; }
+}
+.kolm-receipt-strip pre {
+  margin: 0;
+  padding: 18px 22px;
+  background: #14110d;
+  color: #e8e3d6;
+  border: 1px solid #2a241b;
+  border-radius: 8px;
+  font-family: var(--ks-font-mono, ui-monospace, "JetBrains Mono", monospace);
+  font-size: 12.5px;
+  line-height: 1.55;
+  overflow: auto;
+}
+.kolm-receipt-strip .kolm-receipt-strip__copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 4px 0;
+}
+.kolm-receipt-strip h4 {
+  margin: 0 0 8px 0;
+  font-family: var(--ks-font-sans);
+  font-weight: 500;
+  font-size: 18px;
+  letter-spacing: -0.018em;
+  color: var(--ink-1, #111111);
+}
+.kolm-receipt-strip p {
+  margin: 0;
+  font-family: var(--ks-font-sans);
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink-2, #44423d);
+}
+.kolm-receipt-strip .receipt-line-ok { color: #7fcb9d; }
+.kolm-receipt-strip .receipt-line-key { color: #b8a5e8; }
+.kolm-receipt-strip .receipt-line-str { color: #f2c97d; }
+.kolm-receipt-strip .receipt-line-comment { color: #6b6b66; font-style: italic; }
+[data-theme="dark"] .kolm-receipt-strip h4 { color: #e8e3d6; }
+[data-theme="dark"] .kolm-receipt-strip p { color: #cbc4b5; }
+
+/* W846: signpost banner — pinned reassurance band that sits between hero
+   and arch-band. One line. "Open source. Self-host or use kolm.ai cloud.
+   No vendor lock-in." Honest scope. */
+.ks-signpost {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 18px 32px;
+  padding: 14px 24px;
+  margin: 0 auto;
+  max-width: var(--ks-container, 1200px);
+  border-top: 1px solid var(--rule-1, #e5e0d4);
+  border-bottom: 1px solid var(--rule-1, #e5e0d4);
+  font-family: var(--ks-font-mono, ui-monospace, monospace);
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3, #6b6b66);
+}
+.ks-signpost b { color: var(--ink-1, #111111); font-weight: 600; }
+.ks-signpost .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent-1, #c2410c); display: inline-block; }
+[data-theme="dark"] .ks-signpost { border-color: rgba(245,239,226,0.10); color: var(--ink-3, #9e978b); }
+[data-theme="dark"] .ks-signpost b { color: var(--ink-1, #e8e3d6); }
 

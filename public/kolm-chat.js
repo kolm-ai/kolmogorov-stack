@@ -16,14 +16,19 @@
   if (window.__kolmChatBooted) return;
   window.__kolmChatBooted = true;
 
+  // W845: user feedback on W844 chips — "verify the receipt on this artifact"
+  // and "show me my opportunities" were dropped. Both leaned on internal
+  // jargon (CIDs, opportunity-detection) that a first-time visitor can't
+  // act on. Replaced with concrete user-pain prompts where the next CLI is
+  // obviously valuable.
   var EXAMPLES = [
-    'how do I capture my OpenAI calls?',
-    'what is a kolm artifact?',
-    'distill a 7B model from my anthropic traffic',
-    'quantize qwen-7b to INT4',
-    'verify the receipt on this artifact',
-    'show me my opportunities',
-    'what is the cheapest way to run this on edge?'
+    'how do I cut my OpenAI bill in half?',
+    'capture my anthropic traffic',
+    'distill a 7B model from my support transcripts',
+    'fit deepseek-r1-32b on a single 5090',
+    'what runs on a Mac laptop?',
+    'how do I prove to compliance the model didn’t change?',
+    'how do I self-host this air-gapped?'
   ];
 
   function el(tag, attrs, kids) {

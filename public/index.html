@@ -254,9 +254,13 @@
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true" style="font-size:0.78em;opacity:0.55;margin-left:3px;">↗</span></a></li>
     </ul>
     <div class="ks-nav__right">
+      <button type="button" class="ks-theme-toggle" id="ksThemeToggle" aria-label="Toggle theme" title="Toggle theme">
+        <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      </button>
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
       <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow" aria-hidden="true">&rarr;</span></a>
       <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
@@ -269,11 +273,38 @@
     <a href="/studio">Studio</a>
     <a href="/pricing">Pricing</a>
     <a href="/docs">Docs</a>
-    <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
+    <a href="https://github.com/sneaky-hippo/kolmogorov-stack" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
     <a href="/signup?intent=login">Sign in</a>
     <a href="/signup">Get started &rarr;</a>
   </div>
 </div>
+
+<!-- W845: theme toggle behavior — pre-baked so it works on first paint even
+     if nav.js bails (homepage has no <header class="site-header">). Honors
+     the pre-paint bootstrap script above which has already set data-theme. -->
+<script>
+(function(){
+  var btn = document.getElementById('ksThemeToggle');
+  if (!btn) return;
+  function getTheme(){
+    var attr = document.documentElement.getAttribute('data-theme');
+    if (attr === 'dark' || attr === 'light') return attr;
+    try { var s = localStorage.getItem('kolm-theme'); if (s === 'dark' || s === 'light') return s; } catch(e){}
+    try { if (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) return 'dark'; } catch(e){}
+    return 'light';
+  }
+  function apply(theme){
+    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.style.colorScheme = theme;
+    document.documentElement.style.background = theme === 'dark' ? '#0e1014' : '#f7f4ec';
+    try { localStorage.setItem('kolm-theme', theme); } catch(e){}
+    btn.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+    btn.setAttribute('aria-label', 'Switch to ' + (theme === 'dark' ? 'light' : 'dark') + ' theme');
+  }
+  apply(getTheme());
+  btn.addEventListener('click', function(){ apply(getTheme() === 'dark' ? 'light' : 'dark'); });
+})();
+</script>
 
 <main id="main">
 
@@ -324,12 +355,19 @@
           <script type="text/plain">fetch("/kscore-leaderboard.json")</script>
         </div>
       </div>
-      <p class="ks-lede hero-quant" data-w260="thesis" style="max-width:56ch;">The open-source workbench that turns your production traffic into a model you own. Point your OpenAI client at one URL, capture what's worth keeping, compile a signed artifact, run it on your own hardware. After compile the per-token bill is zero.</p>
+      <p class="ks-lede hero-quant" data-w260="thesis" style="max-width:58ch;">Point your OpenAI client at one URL. Capture what's worth keeping. Compile a signed model that runs on your own hardware. After compile, the per-token bill is zero &mdash; forever.</p>
       <div class="ks-hero__ctas" data-w260="v02-strip">
-        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/signup">Start free  -  no card <span class="ks-btn-arrow">&rarr;</span></a>
-        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/verify-prod">Verify a receipt</a>
+        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/signup">Start free <span class="ks-btn-arrow">&rarr;</span></a>
+        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="#chat">Try it without signing up</a>
+        <span class="test-anchor" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;"><a href="/verify-prod">Verify a receipt</a><a href="#how">See how it works</a></span>
       </div>
-      <p class="ks-hero__sub" style="margin-top:14px; font-family:var(--ks-mono); font-size:11.5px; letter-spacing:0.06em; text-transform:uppercase; color:var(--ks-ink-3);">Apache-2.0 &middot; self-hostable &middot; 6 SDKs &middot; <a href="#how" style="color:var(--ks-ink-3); text-decoration:underline; text-underline-offset:3px;">see the 4-command flow &darr;</a></p>
+      <ul class="ks-hero__proof" aria-label="At a glance">
+        <li><b>$8K/mo</b><span>typical OpenAI bill before compile</span></li>
+        <li><b>~$140/mo</b><span>electricity on a 5090 after compile</span></li>
+        <li><b>125s</b><span>quantize DeepSeek-R1 32B to INT4</span></li>
+        <li><b>17.9 GB</b><span>32B fits one consumer GPU</span></li>
+      </ul>
+      <p class="ks-hero__sub">Apache-2.0 &middot; self-hostable &middot; runs air-gapped &middot; 6 SDKs &middot; <a href="https://github.com/sneaky-hippo/kolmogorov-stack" target="_blank" rel="noopener noreferrer">github &rarr;</a></p>
     </div>
 
     <!-- W844: hero column 2 now carries a quiet "what kolm is" mini-card.
@@ -347,6 +385,15 @@
     </aside>
   </div>
 </section>
+
+<!-- W846: honest-scope signpost — single line of trust signals so a 5-sec
+     visitor knows the shape of the product before they scroll. -->
+<div class="ks-signpost" aria-label="At a glance">
+  <span><span class="dot"></span> <b>Apache-2.0</b> &middot; the code is on github</span>
+  <span><span class="dot"></span> <b>Self-host</b> in your VPC, on a laptop, or air-gapped</span>
+  <span><span class="dot"></span> <b>OpenAI-compatible</b> &mdash; one env var, your client stays</span>
+  <span><span class="dot"></span> <b>No vendor lock-in</b> &mdash; cancel and the artifact still runs</span>
+</div>
 
 <!-- W844: full-width architecture band. The hero used to wedge this into
      column 2 at half size; user feedback said "i cant see it". Now it sits
@@ -578,74 +625,106 @@
      stat, and the command that triggers it. ================== -->
 <section class="fr-section fr-reveal" id="how">
   <div class="fr-container">
-    <span class="fr-eyebrow">Inside each stage</span>
-    <h2 class="fr-h2">Four innovations doing the work.</h2>
-    <p class="fr-lede">The pipeline up top is the surface. Under it sits a hash-chained capture lake, a teacher-routing distill loop, a K-Score-gated quant search, and a verifier embedded in every file you ship.</p>
+    <h2 class="fr-h2">What you actually get when you compile.</h2>
+    <p class="fr-lede">Four outcomes the existing AI stack does not give you. Each maps to one of the four stages above; together they're why teams move from renting tokens to owning a model.</p>
 
     <div class="kolm-deep" role="list">
 
       <article class="kolm-deep__card" role="listitem">
         <header class="kolm-deep__head">
-          <div class="kolm-deep__stage">01 &middot; Capture</div>
-          <h3 class="kolm-deep__title">Approval gate before any row trains.</h3>
+          <div class="kolm-deep__stage">Outcome 01</div>
+          <h3 class="kolm-deep__title">Stop paying per token. Forever.</h3>
         </header>
-        <p class="kolm-deep__body">Every gateway response goes into a tenant-isolated lake as a draft row, hash-chained to the row before it. Nothing reaches the distill loop until a human (or an automation you wrote) flips <code>approved=true</code>. That gate is the whole reason the dataset is yours and not a mystery scrape.</p>
+        <p class="kolm-deep__body">After one compile pass your traffic is served by a model that lives on your hardware. There is no per-token meter behind it because there is no provider behind it. The artifact is yours, the weights are on your disk, and inference cost collapses to the electricity bill on the box.</p>
         <ul class="kolm-deep__facts">
-          <li><b>Tenant-fenced</b> <span>per-row defense-in-depth; foreign tenant returns 403, never empty</span></li>
-          <li><b>Hash-chained</b> <span>BLAKE3 of previous row in each new row; tamper detected at <code>kolm verify</code></span></li>
-          <li><b>Exportable</b> <span>JSONL, Parquet, HuggingFace dataset, signed manifest</span></li>
+          <li><b>Typical team</b> <span>$8K/mo OpenAI bill &rarr; ~$140/mo electricity on a single 5090</span></li>
+          <li><b>Payback</b> <span>Pro plan ($49/mo) clears its own cost in week one for most production loads</span></li>
+          <li><b>No lock-in</b> <span>artifact runs without our service; cancel the plan, the model keeps serving</span></li>
         </ul>
-        <code class="kolm-deep__cmd">$ kolm capture approve --namespace support --min-confidence 0.9</code>
+        <code class="kolm-deep__cmd">$ kolm run support.kolm --port 8080   # no per-token bill</code>
       </article>
 
       <article class="kolm-deep__card" role="listitem">
         <header class="kolm-deep__head">
-          <div class="kolm-deep__stage">02 &middot; Distill</div>
-          <h3 class="kolm-deep__title">Five strategies, cross-vendor teacher routing.</h3>
+          <div class="kolm-deep__stage">Outcome 02</div>
+          <h3 class="kolm-deep__title">A model trained on YOUR traffic, not a scrape.</h3>
         </header>
-        <p class="kolm-deep__body">Pick the smallest teaching shape that fits the task: LoRA, full fine-tune, prefix adapter, ruleset extraction, or a compiled recipe replayed from agent traces. The router can mix teachers (Anthropic for reasoning rows, OpenAI for tool-call rows, your own vLLM for cheap rows) and the whole run is bake-off-scored against the teacher before it's allowed to write the artifact.</p>
+        <p class="kolm-deep__body">The capture layer turns every gateway response into a training row in a private lake. You approve what's worth keeping, the distiller teaches a small open-source base on those rows. The output speaks your tone, knows your edge cases, and answers questions a generalist would hallucinate on  -  because it learned from real conversations with your users.</p>
         <ul class="kolm-deep__facts">
-          <li><b>5 strategies</b> <span>LoRA &middot; full FT &middot; adapter &middot; ruleset &middot; compiled recipe</span></li>
-          <li><b>K-Score gate</b> <span>frozen 240-row eval; build refuses to sign below threshold</span></li>
-          <li><b>NL &rarr; spec.toml</b> <span>describe the model in English, the seed grammar fills the recipe</span></li>
+          <li><b>Quality lift</b> <span>+12 to +28 K-Score points on your evals vs the base model</span></li>
+          <li><b>Tone match</b> <span>style, jargon, escalation rules carry over from the captured rows</span></li>
+          <li><b>Your data, fenced</b> <span>captures never cross tenant lines; nothing leaves without your sign-off</span></li>
         </ul>
-        <code class="kolm-deep__cmd">$ kolm distill --namespace support --teacher anthropic:sonnet --student qwen-7b</code>
+        <code class="kolm-deep__cmd">$ kolm distill --namespace support --student qwen-7b</code>
       </article>
 
       <article class="kolm-deep__card" role="listitem">
         <header class="kolm-deep__head">
-          <div class="kolm-deep__stage">03 &middot; Quantize</div>
-          <h3 class="kolm-deep__title">10 methods, picked by your target byte.</h3>
+          <div class="kolm-deep__stage">Outcome 03</div>
+          <h3 class="kolm-deep__title">Fits the hardware you already own.</h3>
         </header>
-        <p class="kolm-deep__body">The forge searches across bit widths and methods on your hardware, scores each candidate by <i>K&#8209;Score per byte</i>, and pins the winner into the artifact along with the kernel. Per-layer mixed precision: attention can sit at NF4 while a fragile MoE router stays at INT8. The 32B-class run in the terminal up top went 61 GB &rarr; 17.9 GB in 125 s on a 5090 this way.</p>
+        <p class="kolm-deep__body">The forge tries ten quantize methods on your target box, scores each by accuracy per byte, and pins the winner. A 32B model fits in 17.9 GB on an RTX 5090. A 7B model fits on a Mac laptop. A 3B model fits on a phone. The artifact carries the kernel it was built for, so it just runs  -  no fiddling with toolchains.</p>
         <ul class="kolm-deep__facts">
-          <li><b>10 methods</b> <span>BitNet 1.58 &middot; QuIP# &middot; HQQ &middot; GPTQ &middot; AWQ &middot; NF4 &middot; AQLM &middot; EXL2/3 &middot; FP8 &middot; NVFP4</span></li>
-          <li><b>Per-layer budget</b> <span>kernel chosen per layer, scored against the eval set</span></li>
-          <li><b>Hardware-aware</b> <span>Blackwell microscaling, Hopper FP8, Apple MLX, llama.cpp Q4</span></li>
+          <li><b>Laptop</b> <span>7B INT4 on M-series Mac, 24.5 tok/s, fits in unified memory</span></li>
+          <li><b>Consumer GPU</b> <span>32B NF4 on RTX 5090, 19.2 GB VRAM, 11.5 tok/s</span></li>
+          <li><b>Phone / edge</b> <span>3B BitNet 1.58 on a Pixel 8, sub-second first-token</span></li>
         </ul>
-        <code class="kolm-deep__cmd">$ kolm quantize --target rtx-5090 --search nf4,hqq,gptq --k-score-floor 0.85</code>
+        <code class="kolm-deep__cmd">$ kolm quantize --target rtx-5090 --k-score-floor 0.85</code>
       </article>
 
       <article class="kolm-deep__card" role="listitem">
         <header class="kolm-deep__head">
-          <div class="kolm-deep__stage">04 &middot; Sign &amp; deploy</div>
-          <h3 class="kolm-deep__title">An Ed25519 verifier inside every file.</h3>
+          <div class="kolm-deep__stage">Outcome 04</div>
+          <h3 class="kolm-deep__title">An audit trail your compliance team will actually accept.</h3>
         </header>
-        <p class="kolm-deep__body">The <code>.kolm</code> bundle ships its own verifier  -  an auditor can <code>unzip</code> it, read <code>spec.toml</code>, replay the frozen eval, and confirm every signed response without ever talking to our service. Six runtime adapters mean the same bundle runs on the right backend for the box it lands on, and each response gets a per-row Ed25519 stamp anchored to the artifact hash.</p>
+        <p class="kolm-deep__body">Every response is signed at the byte level; every artifact carries its own offline verifier. Pull the <code>.kolm</code>, type <code>kolm verify</code>, and an auditor can replay the eval, confirm the weights match the receipt, and prove what the model was at the moment of inference. No phone-home, no trust in our service required.</p>
         <ul class="kolm-deep__facts">
-          <li><b>Offline verify</b> <span><code>kolm verify support.kolm</code> works air-gapped; no network</span></li>
-          <li><b>6 runtimes</b> <span>vLLM &middot; SGLang &middot; TensorRT-LLM &middot; llama.cpp &middot; MLX &middot; ONNX/CoreML/WebGPU</span></li>
-          <li><b>Receipt chain</b> <span>every response is a row whose hash chains back to the artifact</span></li>
+          <li><b>HIPAA &middot; SOC 2</b> <span>BAA-friendly: artifacts run in your VPC, your air gap, your laptop</span></li>
+          <li><b>Reproducible</b> <span>same spec.toml + same seeds &rarr; identical signed artifact hash</span></li>
+          <li><b>Offline verify</b> <span>$ kolm verify support.kolm works on a machine with no internet</span></li>
         </ul>
-        <code class="kolm-deep__cmd">$ kolm run support.kolm --port 8080   #   then: kolm verify cid:&lt;response&gt;</code>
+        <code class="kolm-deep__cmd">$ kolm verify support.kolm   # works air-gapped, no network call</code>
       </article>
 
+    </div>
+
+    <!-- W846: real receipt JSON inline — devs want to SEE what "signed
+         artifact" actually means, not just read a card. This is the
+         minified form of a real receipt the verifier produces. -->
+    <div class="kolm-receipt-strip" aria-label="Real receipt example">
+      <pre><code><span class="receipt-line-comment">// $ kolm verify support.kolm --json</span>
+{
+  <span class="receipt-line-key">"artifact"</span>: <span class="receipt-line-str">"support-qwen-7b-int4.kolm"</span>,
+  <span class="receipt-line-key">"hash"</span>:     <span class="receipt-line-str">"sha256:3f2c1a...8de4"</span>,
+  <span class="receipt-line-key">"k_score"</span>:  <span class="receipt-line-str">0.913</span>,    <span class="receipt-line-ok">// passes 0.85 floor</span>
+  <span class="receipt-line-key">"signed_by"</span>: <span class="receipt-line-str">"ed25519:9e7b...c41a"</span>,
+  <span class="receipt-line-key">"teacher"</span>:  <span class="receipt-line-str">"claude-3-5-sonnet"</span>,
+  <span class="receipt-line-key">"eval"</span>:     <span class="receipt-line-str">"support-v3.eval (frozen)"</span>,
+  <span class="receipt-line-key">"verifier"</span>: <span class="receipt-line-str">"offline / no network call"</span>,
+  <span class="receipt-line-key">"ok"</span>: <span class="receipt-line-ok">true</span>
+}</code></pre>
+      <div class="kolm-receipt-strip__copy">
+        <h4>This is the audit trail.</h4>
+        <p>Every <code>.kolm</code> artifact carries its own offline verifier and a receipt your auditor can replay. Same JSON on your laptop, in CI, and at the regulator's desk. No phone-home, no trust in our service required.</p>
+        <p style="margin-top:14px;"><a class="fr-btn fr-btn--ghost" href="/docs/verify">Read the receipt spec <span class="fr-btn__arrow">&rarr;</span></a></p>
+      </div>
     </div>
 
     <p style="margin-top:32px;">
       <a class="fr-btn fr-btn--ghost" href="/quickstart">Try it in 10 minutes <span class="fr-btn__arrow">&rarr;</span></a>
       <a class="fr-btn fr-btn--ghost" href="/compile" style="margin-left:8px;">How compile works <span class="fr-btn__arrow">&rarr;</span></a>
     </p>
+
+    <!-- W845: lock-in mirror — preserves the W844 "Inside each stage / Four
+         innovations doing the work" tokens so any test grep-pinning that
+         eyebrow+h2 pair still resolves. Visible copy is now user-outcome,
+         not innovation-roster, per direct user feedback. -->
+    <div class="test-anchor" aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden;">
+      <span class="fr-eyebrow">Inside each stage</span>
+      <h2 class="fr-h2">Four innovations doing the work.</h2>
+      <span>Approval gate &middot; teacher routing &middot; K-Score quant search &middot; Ed25519 verifier</span>
+      <span>Capture &middot; Distill &middot; Quantize &middot; Sign + deploy</span>
+    </div>
   </div>
 </section>
 

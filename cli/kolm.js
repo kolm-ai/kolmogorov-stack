@@ -415,18 +415,16 @@ COMMANDS
   fix <art.kolm> [--apply]         surface failing eval cases + suggest seed fixes (--json)
   lake <sub>                       data-plane analytics (stats|tail|inspect|export|purge|sync)  [storage: ~/.kolm/events/]
   optimize <sub>                   ranked opportunities (list|explain|accept|ignore|promote)
-  opportunities                    alias for 'optimize list' (--top N --namespace n --json)              [W409m]
+  opportunities                    alias for 'optimize list' (--top N --namespace n --json)
   dataset <sub>                    labeled training corpora (candidates|approve|reject|create|split|inspect|export|list)
   label <sub>                      reviewer queue (next|approve|fix|reject|stats)
-  demo <sub>                       close-the-loop seed corpus (list|seed-log-triage|reset)                  [W396]
-  privacy <sub>                    privacy membrane (scan|test|smoke|policy|report)                        [W384]
-  sync <sub>                       cloud-sync state (status|enable|disable|push|pull) + legacy git mirror [W384]
-  team <sub>                       workspace control (members|invite|role|approve|reject|namespace + cloud) [W384]
-  pipeline <sub>                   end-to-end compile (tokenize|distill|compile|full)                     [W384]
-  install <agent-id|harness>       dev-agent install (codex|aider|gemini-cli|...|all) + MCP harnesses     [W384]
-  wrap <agent-cmd> [args...]       spawn with kolm env injected (legacy: wrap <config> --out <spec.json>) [W384]
-  shell-init [--shell ...]         emit shell-export snippet (sh|bash|zsh|fish|pwsh|powershell|cmd|auto)   [W384]
-  agents <sub>                     dev-agent telemetry (stats|sessions|recommend|failing)                 [W384]
+  demo <sub>                       close-the-loop seed corpus (list|seed-log-triage|reset)
+  privacy <sub>                    privacy membrane (scan|test|smoke|policy|report)
+  sync <sub>                       cloud-sync state (status|enable|disable|push|pull) + legacy git mirror
+  pipeline <sub>                   end-to-end compile (tokenize|distill|compile|full)
+  wrap <agent-cmd> [args...]       spawn with kolm env injected (legacy: wrap <config> --out <spec.json>)
+  shell-init [--shell ...]         emit shell-export snippet (sh|bash|zsh|fish|pwsh|powershell|cmd|auto)
+  agents <sub>                     dev-agent telemetry (stats|sessions|recommend|failing)
 
 ENVIRONMENT
   KOLM_BASE             cloud endpoint (default: https://kolm.ai)
@@ -36960,7 +36958,8 @@ async function main() {
       case 'doctor':   await withErrorContext('doctor',   () => cmdDoctor(rest)); break;
       case 'loop':     await withErrorContext('loop',     () => cmdLoop(rest)); break;
       case 'logs':     await withErrorContext('logs',     () => cmdLogs(rest)); break;
-      case 'ask':      await withErrorContext('ask',      () => cmdAsk(rest)); break;
+      case 'ask':
+      case 'intent':   await withErrorContext('ask',      () => cmdAsk(rest)); break;
       case 'chat':     await withErrorContext('chat',     () => cmdChat(rest)); break;
       case 'chat-tui': await withErrorContext('chat-tui', () => cmdChatTui(rest)); break;
       case 'completion': await withErrorContext('completion', () => cmdCompletion(rest)); break;
@@ -37209,8 +37208,8 @@ async function main() {
           const guess = suggestVerb(cmd, COMPLETION_VERBS);
           console.error('unknown command:', cmd);
           if (guess) console.error('did you mean: kolm ' + guess + ' ?');
-          console.error('try: kolm ask "' + [cmd, ...rest].join(' ') + '"   (natural-language fallback)');
-          usage();
+          console.error('try:   kolm ask "' + [cmd, ...rest].join(' ') + '"   (natural-language fallback)');
+          console.error('or:    kolm --help                                  (full verb list)');
           process.exit(EXIT.BAD_ARGS);
         }
     }

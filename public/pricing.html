@@ -3,20 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Pricing: Free, Pro, Team, Enterprise · kolm.ai</title>
-<meta name="description" content="Simple pricing for the Kolm gateway, compiler, and signed runtime: Free, Pro $49, Team $499, and Enterprise custom with architecture review.">
-<meta name="keywords" content="AI gateway pricing, kolm pricing, LLM cost calculator, self-hosted AI, HIPAA pricing, enterprise AI pricing">
+<title>Pricing: Free, Pro, Team, Business, Enterprise · kolm.ai</title>
+<meta name="description" content="Simple pricing for the Kolm gateway, compiler, and signed runtime: Free, Pro $49, Team $499, Business $1,499, and Enterprise custom with architecture review.">
+<meta name="keywords" content="AI gateway pricing, kolm pricing, LLM cost calculator, self-hosted AI, HIPAA pricing, business AI pricing, enterprise AI pricing">
 <meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="Pricing - kolm.ai">
-<meta property="og:description" content="Free, Pro $49, Team $499, Enterprise custom. Pay for the platform; run signed artifacts on your own hardware.">
+<meta property="og:description" content="Free, Pro $49, Team $499, Business $1,499, Enterprise custom. Pay for the platform; run signed artifacts on your own hardware.">
 <meta property="og:url" content="https://kolm.ai/pricing">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Pricing - kolm.ai">
-<meta name="twitter:description" content="Free, Pro $49, Team $499, Enterprise custom.">
+<meta name="twitter:description" content="Free, Pro $49, Team $499, Business $1,499, Enterprise custom.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/pricing">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -32,9 +32,13 @@
 <script defer src="/supplement.js"></script>
 <style>
   /* Pricing-page additions on top of ks.css */
-  .pr-tiers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--ks-4); align-items: stretch; }
+  /* W845: expanded to 5 columns to surface Business between Team and Enterprise. */
+  .pr-tiers { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--ks-3); align-items: stretch; }
+  @media (max-width: 1280px) { .pr-tiers { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--ks-4); } }
   @media (max-width: 1000px) { .pr-tiers { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 540px) { .pr-tiers { grid-template-columns: 1fr; } }
+  .pr-tier--biz { border-color: var(--ks-accent-edge); background: linear-gradient(180deg, rgba(194, 65, 12, 0.05) 0%, var(--ks-bg-1) 32%); }
+  .pr-tier--biz::before { content: "Growing teams"; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); padding: 4px 10px; background: transparent; color: var(--ks-accent); border: 1px solid var(--ks-accent-edge); font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; border-radius: var(--ks-r-pill); font-weight: 600; }
   .pr-tier { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); padding: var(--ks-6); display: flex; flex-direction: column; gap: var(--ks-3); transition: border-color 200ms, transform 200ms; position: relative; }
   .pr-tier:hover { border-color: var(--ks-accent-edge); }
   .pr-tier--feat { border-color: var(--ks-accent-edge); background: linear-gradient(180deg, var(--ks-accent-soft) 0%, var(--ks-bg-1) 28%); }
@@ -186,11 +190,12 @@
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL)",
   "url": "https://kolm.ai/pricing",
-  "description": "Simple pricing for the Kolm gateway, compiler, and signed runtime: Free, Pro $49, Team $499, and Enterprise custom with architecture review.",
+  "description": "Simple pricing for the Kolm gateway, compiler, and signed runtime: Free, Pro $49, Team $499, Business $1,499, and Enterprise custom with architecture review.",
   "offers": [
     {"@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "USD", "category": "free", "url": "https://kolm.ai/signup"},
     {"@type": "Offer", "name": "Pro", "price": "49", "priceCurrency": "USD", "category": "pro", "url": "https://kolm.ai/signup?plan=pro"},
     {"@type": "Offer", "name": "Team", "price": "499", "priceCurrency": "USD", "category": "team", "url": "https://kolm.ai/signup?plan=team"},
+    {"@type": "Offer", "name": "Business", "price": "1499", "priceCurrency": "USD", "category": "business", "url": "https://kolm.ai/signup?plan=business"},
     {"@type": "Offer", "name": "Enterprise", "price": "0", "priceCurrency": "USD", "category": "enterprise", "url": "https://kolm.ai/enterprise/inquiry", "description": "Custom architecture review pricing"}
   ],
   "publisher": {
@@ -309,6 +314,7 @@
       <a href="#tier-free">Free</a>
       <a href="#tier-pro">Pro</a>
       <a href="#tier-team">Team</a>
+      <a href="#tier-business">Business</a>
       <a href="#tier-enterprise">Enterprise</a>
       <a href="#roi">ROI</a>
       <a href="#compare">Compare</a>
@@ -383,9 +389,24 @@
         <div class="ctaWrap"><a class="ks-btn ks-btn--ghost" style="width: 100%; justify-content: center;" href="/signup?plan=team">Start Team</a></div>
       </div>
 
-      <!-- W273 #4/#6/#10 hidden Business alias tier between Team and Enterprise -->
-      <div data-tier="business" data-w273="business-contract" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;">
-        Business maps to Enterprise custom with regulated controls: signed BAA, SAML/SCIM SSO via Okta and Azure AD and OneLogin, customer-hosted bridge deployment into your VPC, air-gap deploy bundle, architecture review scoped to your boundary.
+      <!-- W845: Business tier is now VISIBLE. Sits between Team ($499) and
+           Enterprise (custom). Fills the "we're past 5 seats but not ready
+           for procurement-led architecture review" gap the user flagged. -->
+      <div class="pr-tier pr-tier--biz" data-tier="business" id="tier-business" data-w273="business-contract">
+        <span style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">Business maps to Enterprise custom with regulated controls: signed BAA, SAML/SCIM SSO via Okta and Azure AD and OneLogin, customer-hosted bridge deployment into your VPC, air-gap deploy bundle, architecture review scoped to your boundary.</span>
+        <h3>Business</h3>
+        <div class="price" data-monthly="$1,499" data-annual="$1,249">$1,499<small>/ mo</small></div>
+        <p class="tagline">For 20+ seat orgs that need SSO, BAA, and a private registry without the procurement runway of Enterprise.</p>
+        <ul>
+          <li><i class="ks-yes" aria-hidden="true"></i><span>25 million gateway calls / month</span></li>
+          <li><i class="ks-yes" aria-hidden="true"></i><span>20 seats included &middot; SCIM provisioning</span></li>
+          <li><i class="ks-yes" aria-hidden="true"></i><span>SAML SSO (Okta, Azure AD, OneLogin)</span></li>
+          <li><i class="ks-yes" aria-hidden="true"></i><span>Signed BAA &middot; HIPAA mapping included</span></li>
+          <li><i class="ks-yes" aria-hidden="true"></i><span>Private artifact registry + audit exports</span></li>
+          <li><i class="ks-yes" aria-hidden="true"></i><span>Air-gap deploy bundle &middot; on-prem runner</span></li>
+          <li><i class="ks-yes" aria-hidden="true"></i><span>Priority support, 2h business hours, named SRE</span></li>
+        </ul>
+        <div class="ctaWrap"><a class="ks-btn ks-btn--primary" style="width: 100%; justify-content: center;" href="/signup?plan=business">Start Business <span class="ks-btn-arrow">&rarr;</span></a></div>
       </div>
 
       <div class="pr-tier pr-tier--bus" data-tier="enterprise" data-w260="enterprise-baa" id="tier-enterprise">
