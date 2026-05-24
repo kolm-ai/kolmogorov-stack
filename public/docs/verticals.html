@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Verticals &middot; 5 foundation students for legal, medical, code, finance, support &middot; kolm.ai</title>
+<meta name="description" content="Five vertical foundation students: kolm-legal-7b, kolm-medical-7b, kolm-code-7b, kolm-finance-7b, kolm-support-7b. Pending W751-W755 compilation. Open-source AI workbench.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Verticals &middot; 5 foundation students &middot; kolm.ai">
+<meta property="og:description" content="Five vertical foundation students for legal, medical, code, finance, support — sortable target K-Score table.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/docs/verticals">
+<link rel="canonical" href="https://kolm.ai/docs/verticals">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/design-tokens.css">
+<style>
+:root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--accent-soft:rgba(16,185,129,0.10);--pending:#d97706;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10);--pending:#b45309}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.skip-link{position:absolute;left:-9999px}
+.skip-link:focus{position:static;background:var(--accent);color:#fff;padding:8px 14px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.brand-eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 36px}
+h2{font-size:24px;font-weight:500;letter-spacing:-0.018em;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:28px 0 8px;max-width:780px}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
+li{margin:4px 0}
+.vtable{border-collapse:collapse;width:100%;max-width:1040px;margin:14px 0 28px;font-size:13.5px}
+.vtable th,.vtable td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+.vtable th{color:var(--ink);font-weight:500;cursor:pointer;font-family:var(--mono);font-size:11.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);user-select:none}
+.vtable th:hover{color:var(--accent)}
+.vtable th.sort-asc::after{content:" ↑";color:var(--accent)}
+.vtable th.sort-desc::after{content:" ↓";color:var(--accent)}
+.vtable td code{font-size:12.5px}
+.vtable .num{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--ink)}
+.vtable a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line)}
+.vtable a:hover{border-color:var(--accent)}
+.related{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+@media(max-width:820px){.related{grid-template-columns:1fr}}
+.related a{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:4px}
+.related a:hover{border-color:var(--accent-soft)}
+.related b{font-size:14px;color:var(--ink);font-weight:500}
+.related span{font-size:12.5px;color:var(--ink-mute);line-height:1.5}
+.status-pill{display:inline-flex;align-items:center;gap:6px;color:var(--pending);font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor;padding:1px 7px;border-radius:999px}
+.status-pill::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill-good{color:#10b981;font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor;padding:1px 7px;border-radius:999px}
+footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
+footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+</style>
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/docs-shell.css">
+<script defer src="/docs-shell.js"></script>
+</head>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/marketplace">Marketplace</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / verticals</div>
+<p class="brand-eyebrow">Open-source AI workbench</p>
+<h1>Frontier AI on your own infrastructure.</h1>
+
+<p class="lede">Five vertical foundation students &mdash; one per industry &mdash; each distilled to a 7B parameter base your team can run on a single GPU. <code>kolm-legal-7b</code>, <code>kolm-medical-7b</code>, <code>kolm-code-7b</code>, <code>kolm-finance-7b</code>, <code>kolm-support-7b</code>. Items <strong>3 + 4</strong> per vertical (marketplace listing + landing page) are live now. Items <strong>1 + 2</strong> (vertical fingerprint + pre-train) are blocked on W757 (fingerprinting) and W715 (cross-namespace transfer math) &mdash; the marketplace stubs register with <code>pending_distill:true</code> and <code>kscore:null</code> so we never paint a fake K-Score on an uncompiled student.</p>
+
+<div style="margin:0 0 22px">
+  <span class="pill-good">w751-v1</span>
+  <span class="status-pill" style="margin-left:8px">items 1+2 pending W757 + W715</span>
+</div>
+
+<h2 id="catalog">The 5 vertical foundation students</h2>
+<p>Click a header to sort. Click the slug to open the per-vertical landing page.</p>
+
+<table class="vtable" id="vtable">
+  <thead>
+    <tr>
+      <th data-sort="id">Vertical</th>
+      <th data-sort="slug">Model slug</th>
+      <th data-sort="target_kscore">Target K-Score</th>
+      <th data-sort="tasks">Common tasks (first 3)</th>
+      <th data-sort="status">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr data-id="legal" data-target="0.92" data-status="pending_distill">
+      <td><a href="/verticals/legal">Legal</a></td>
+      <td><code>kolm-legal-7b</code></td>
+      <td class="num">0.92</td>
+      <td>contract_summary, citation_extraction, case_law_search</td>
+      <td><span class="status-pill">pending_distill</span></td>
+    </tr>
+    <tr data-id="medical" data-target="0.90" data-status="pending_distill">
+      <td><a href="/verticals/medical">Medical</a></td>
+      <td><code>kolm-medical-7b</code></td>
+      <td class="num">0.90</td>
+      <td>patient_summary, icd10_coding, soap_note</td>
+      <td><span class="status-pill">pending_distill</span></td>
+    </tr>
+    <tr data-id="code" data-target="0.88" data-status="pending_distill">
+      <td><a href="/verticals/code">Code</a></td>
+      <td><code>kolm-code-7b</code></td>
+      <td class="num">0.88</td>
+      <td>code_review, generation, refactor</td>
+      <td><span class="status-pill">pending_distill</span></td>
+    </tr>
+    <tr data-id="finance" data-target="0.93" data-status="pending_distill">
+      <td><a href="/verticals/finance">Finance</a></td>
+      <td><code>kolm-finance-7b</code></td>
+      <td class="num">0.93</td>
+      <td>risk_analysis, compliance_check, filing_parse</td>
+      <td><span class="status-pill">pending_distill</span></td>
+    </tr>
+    <tr data-id="support" data-target="0.91" data-status="pending_distill">
+      <td><a href="/verticals/support">Support</a></td>
+      <td><code>kolm-support-7b</code></td>
+      <td class="num">0.91</td>
+      <td>response_drafting, sentiment_routing, ticket_summary</td>
+      <td><span class="status-pill">pending_distill</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="how-it-works">How a foundation student becomes a team student</h2>
+<p>The foundation students are pre-trained on the merged W751 fingerprint of public + opt-in capture corpora for each vertical. When your team runs <code>kolm pull kolm-&lt;vertical&gt;-7b</code> and then distills against your own captured workload (via the W144 capture pipeline + W715 cross-namespace transfer), you get a team student that inherits the vertical's base competence and specialises on your specific terminology, conventions, and workflow.</p>
+
+<p>The transfer math is W715 &mdash; cross-namespace transfer learning lets the team distill amortize across the foundation's pre-train, so you typically need <strong>10-100x fewer captures</strong> than distilling from scratch to hit the same K-Score on your team's eval set.</p>
+
+<h2 id="honesty">Why we ship items 3+4 before items 1+2</h2>
+<p>Items 1+2 (per-vertical fingerprint pipeline + per-vertical foundation pre-train) require W757 (which ships the fingerprint primitive shared by all 5 verticals) and W715 (which ships the cross-namespace transfer math the foundation needs to be useful). Both are queued in the W707-W806 plan. Items 3+4 (marketplace stub listing + landing pages) are independently shippable and let teams:</p>
+<ul>
+  <li>see which verticals are coming and reserve interest via the marketplace stub</li>
+  <li>start capturing per-vertical corpora <em>now</em> through the kolm wrapper so the eventual distill has the corpus it needs on day one</li>
+  <li>get the case-study skeleton in place so first-mover teams have a publishing template ready</li>
+</ul>
+
+<p>We register the marketplace stubs with <code>pending_distill:true</code>, <code>not_kolm_compiled:true</code>, and <code>kscore:null</code>. The W737 marketplace surface treats <code>kscore:null</code> as "not yet measured" (it never returns a fake number). The status pill on every landing page reads <em>pending compilation</em>. When W757 + W715 land and the real distill runs, the marketplace listing flips atomically &mdash; the same slug, a real sha256 content hash, a real K-Score eval, and the case-study slot pre-wired.</p>
+
+<h2 id="api">API + CLI surface</h2>
+<table class="vtable">
+  <thead><tr><th>Surface</th><th>Invocation</th></tr></thead>
+  <tbody>
+    <tr><td>API (list all)</td><td><code>GET /v1/verticals</code> (public)</td></tr>
+    <tr><td>API (detail)</td><td><code>GET /v1/verticals/:id</code> (public)</td></tr>
+    <tr><td>API (register stubs)</td><td><code>POST /v1/verticals/register-stubs</code> (auth, owner-only)</td></tr>
+    <tr><td>API (fingerprint)</td><td><code>GET /v1/verticals/:id/fingerprint</code> (auth, returns w757_not_shipped)</td></tr>
+    <tr><td>CLI (list)</td><td><code>kolm vertical list</code></td></tr>
+    <tr><td>CLI (show)</td><td><code>kolm vertical show &lt;id&gt;</code></td></tr>
+    <tr><td>CLI (register stubs)</td><td><code>kolm vertical register-stubs</code></td></tr>
+    <tr><td>CLI (fingerprint)</td><td><code>kolm vertical fingerprint &lt;id&gt;</code></td></tr>
+  </tbody>
+</table>
+
+<h2 id="related">Related</h2>
+<div class="related">
+  <a href="/marketplace"><b>Marketplace &rarr;</b><span>Browse all signed .kolm artifacts. Each foundation student lands here when compiled.</span></a>
+  <a href="/docs/distill"><b>Distill &rarr;</b><span>How team-specific students are distilled from the vertical foundations.</span></a>
+  <a href="/docs/k-score-methodology"><b>K-Score methodology &rarr;</b><span>How the target K-Scores are measured and why we never fake them.</span></a>
+</div>
+
+</div></main>
+
+<footer><div class="wrap">
+ kolm.ai &middot; the AI workbench &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
+</div></footer>
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Frontier AI on your own infrastructure.</p>
+      </div>
+      <div>
+        <h4>Verticals</h4>
+        <ul><li><a href="/verticals/legal">Legal</a></li><li><a href="/verticals/medical">Medical</a></li><li><a href="/verticals/code">Code</a></li><li><a href="/verticals/finance">Finance</a></li><li><a href="/verticals/support">Support</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/marketplace">Marketplace</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Sortable table for the 5-vertical catalog. Click a header to sort by that
+// column; click again to flip asc/desc. Numeric columns parse as Number;
+// everything else as lowercased string.
+(function(){
+  var tbl = document.getElementById('vtable');
+  if (!tbl) return;
+  var headers = tbl.querySelectorAll('th[data-sort]');
+  var tbody = tbl.querySelector('tbody');
+  function sortBy(key, asc) {
+    var rows = Array.from(tbody.querySelectorAll('tr'));
+    rows.sort(function(a, b) {
+      var av, bv;
+      if (key === 'target_kscore') {
+        av = parseFloat(a.dataset.target || '0');
+        bv = parseFloat(b.dataset.target || '0');
+      } else if (key === 'id' || key === 'status') {
+        av = (a.dataset[key === 'id' ? 'id' : 'status'] || '').toLowerCase();
+        bv = (b.dataset[key === 'id' ? 'id' : 'status'] || '').toLowerCase();
+      } else {
+        var idx = Array.from(headers).findIndex(function(h){ return h.dataset.sort === key; });
+        av = (a.children[idx] && a.children[idx].innerText || '').trim().toLowerCase();
+        bv = (b.children[idx] && b.children[idx].innerText || '').trim().toLowerCase();
+      }
+      if (av < bv) return asc ? -1 : 1;
+      if (av > bv) return asc ? 1 : -1;
+      return 0;
+    });
+    rows.forEach(function(r){ tbody.appendChild(r); });
+  }
+  headers.forEach(function(h) {
+    h.addEventListener('click', function() {
+      var key = h.dataset.sort;
+      var asc = !h.classList.contains('sort-asc');
+      headers.forEach(function(x){ x.classList.remove('sort-asc','sort-desc'); });
+      h.classList.add(asc ? 'sort-asc' : 'sort-desc');
+      sortBy(key, asc);
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

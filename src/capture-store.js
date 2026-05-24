@@ -30,6 +30,7 @@ import * as store from './store.js';
 import { appendEvent } from './event-store.js';
 import { hashContent, normalizeVendor } from './event-schema.js';
 import { attachCopyrightFlag } from './capture-copyright-filter.js';
+import { classifyForQuarantine as classifyCopyrightForQuarantine } from './copyright-detector.js';
 
 const ON_VERCEL = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
 
@@ -217,6 +218,38 @@ export async function insertCapture(row) {
   // filter. Failure NEVER blocks the capture write — the caller already got
   // its upstream answer; losing the flag is better than losing the row.
   try { attachCopyrightFlag(row); } catch (_) { /* never block insert */ }
+  // W750-followup — Heuristic copyright detector (regex pack for Disney
+  // names, song-title n-grams, code copyright headers). This runs AFTER
+  // the W708 paywall-shape detector and serves as the W808 staged_captures
+  // post-quarantine classifier: when it fires, we stamp a structured
+  // flag_reason on the row so the staged-captures UI can surface
+  // `copyright_heuristic:<categories>` next to the existing 3σ anomaly
+  // flag. The W808 staged_captures table consumes this via
+  // staged_captures.flag_reason (it carries through insertStagedCapture
+  // because we mutate the row in place before the staged copy is taken).
+  //
+  // GATING: KOLM_W750_COPYRIGHT_DETECTOR=off skips this entirely so the
+  // W808 happy-path remains byte-stable when an operator wants to disable
+  // the heuristic without redeploying.
+  if (process.env.KOLM_W750_COPYRIGHT_DETECTOR !== 'off') {
+    try {
+      const v = classifyCopyrightForQuarantine(row);
+      if (v && v.should_quarantine && v.reason) {
+        const prior = typeof row.flag_reason === 'string' && row.flag_reason
+          ? row.flag_reason + ';' : '';
+        row.flag_reason = prior + v.reason;
+        row.copyright_heuristic_flagged = true;
+        row.copyright_heuristic_risk = v.risk_score;
+        if (Array.isArray(v.hits)) {
+          row.copyright_heuristic_hits = v.hits.map(h => ({
+            kind: h.kind,
+            matched: h.matched,
+            side: h.side || null,
+          }));
+        }
+      }
+    } catch (_) { /* never block insert */ }
+  }
   const driver = await loadDriver();
   if (driver) {
     await driver.insert('observations', row);

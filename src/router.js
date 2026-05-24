@@ -5711,6 +5711,179 @@ export function buildRouter() {
     });
   });
 
+  // ---------- W748 — Seasonal capture tagging + variants + auto-select ----------
+  // GET /v1/seasonal/:namespace — distribution + active events + recommendation.
+  // POST /v1/seasonal/variant   — body { namespace, variant } -> registers a
+  //                              seasonal-variant namespace (e.g.
+  //                              "support/seasonal-black-friday") in the
+  //                              event-store as seasonal_variant_registration.
+  //
+  // Honest envelopes:
+  //   - auth missing                          → 401 auth_required
+  //   - bad params                            → 400 missing_field
+  //   - no matching variant for today's event/season → recommended:null +
+  //                                            human-readable reason string
+  //                                            (NEVER guess at the calendar).
+  //   - hemisphere bias echoed in payload     → callers can detect the N-bias.
+  r.get('/v1/seasonal/:namespace', async (req, res) => {
+    if (!req.tenant_record) {
+      return res.status(401).json({ ok: false, error: 'auth_required' });
+    }
+    let scMod;
+    try {
+      scMod = await import('./seasonal-capture.js');
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'seasonal_module_unavailable',
+        detail: String((e && e.message) || e),
+      });
+    }
+    const ns = String((req.params && req.params.namespace) || 'default').slice(0, 80);
+    const rows = await _w746ListCaptures(req.tenant_record.id, ns);
+    const distribution = scMod.seasonalDistribution(rows);
+    const now = new Date();
+    const active_events = scMod.eventsActiveOn(now);
+    const season = scMod.seasonFromDate(now);
+    // Build variant -> count map from registered seasonal_variant_registration
+    // rows (event-store). The canonical event schema does not carry a
+    // free-form `kind` column, so we encode the registration kind as
+    // model='seasonal_variant_registration' and stash the payload in `feedback`
+    // (JSON-encoded, matches the capture-analytics gap-signal pattern).
+    //
+    // Also count captures landed under each variant namespace
+    // ("ns/seasonal-<key>") so recommendVariant has real signal.
+    const variants = {};
+    try {
+      const regs = await eventList({
+        tenant: req.tenant_record.id,
+        namespace: ns,
+        model: 'seasonal_variant_registration',
+        limit: 1000,
+      });
+      const seen = new Set();
+      for (const ev of regs || []) {
+        let data = {};
+        try {
+          const fb = (ev && typeof ev.feedback === 'string') ? ev.feedback : '';
+          const json = fb.replace(/^seasonal_variant_registration:/, '');
+          data = json ? JSON.parse(json) : {};
+        } catch (_) {}
+        if (data && data.namespace === ns && typeof data.variant === 'string') {
+          if (seen.has(data.variant)) continue;
+          seen.add(data.variant);
+          const variantNs = `${ns}/seasonal-${data.variant}`;
+          let count = 0;
+          try {
+            count = (await _w746ListCaptures(req.tenant_record.id, variantNs)).length;
+          } catch (_) {}
+          // Even with zero captures, the registration alone enables the
+          // recommendation surface. variants[data.variant] = count (0 means
+          // registered-but-empty; recommendVariant honours this honestly).
+          variants[data.variant] = Math.max(count, 0);
+        }
+      }
+    } catch (_) {
+      // Best-effort. Missing event-store rows are not a hard error.
+    }
+    // recommendVariant requires variants[key] > 0 to recommend, so when a
+    // variant exists with 0 captures we still expose it via `registered_variants`
+    // in the envelope so the dashboard can offer to backfill.
+    const recommendation = scMod.recommendVariant(now, ns, variants);
+    return res.status(200).json({
+      ok: true,
+      namespace: ns,
+      total_captures: rows.length,
+      hemisphere: 'north',
+      season,
+      active_events,
+      distribution,
+      registered_variants: Object.keys(variants).sort(),
+      recommendation,
+      version: scMod.SEASONAL_VERSION,
+      generated_at: now.toISOString(),
+    });
+  });
+
+  r.post('/v1/seasonal/variant', async (req, res) => {
+    if (!req.tenant_record) {
+      return res.status(401).json({ ok: false, error: 'auth_required' });
+    }
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    const ns = typeof body.namespace === 'string' ? body.namespace.slice(0, 80) : '';
+    const variant = typeof body.variant === 'string' ? body.variant.trim().slice(0, 64) : '';
+    if (!ns) {
+      return res.status(400).json({ ok: false, error: 'missing_field', field: 'namespace' });
+    }
+    if (!variant) {
+      return res.status(400).json({ ok: false, error: 'missing_field', field: 'variant' });
+    }
+    let scMod;
+    try {
+      scMod = await import('./seasonal-capture.js');
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'seasonal_module_unavailable',
+        detail: String((e && e.message) || e),
+      });
+    }
+    // Variant must be a known season OR a known event key. We do NOT accept
+    // free-form labels — preventing typos that silently never match the
+    // recommendation engine.
+    const valid_season = scMod.SEASONS.indexOf(variant) >= 0;
+    const valid_event = Object.prototype.hasOwnProperty.call(scMod.SEASONAL_EVENTS, variant);
+    if (!valid_season && !valid_event) {
+      return res.status(400).json({
+        ok: false,
+        error: 'unknown_variant',
+        detail: `variant must be one of seasons:[${scMod.SEASONS.join(',')}] or events:[${Object.keys(scMod.SEASONAL_EVENTS).join(',')}]`,
+      });
+    }
+    const variant_namespace = `${ns}/seasonal-${variant}`;
+    // Idempotent registration: re-POST returns the same payload, no duplicate
+    // events (the GET-side de-dupes by `variant` via the Set). Writes stay
+    // append-only + audit-friendly.
+    //
+    // Schema mapping: model='seasonal_variant_registration' is the event-kind
+    // discriminator (matches the W411 gap-signal/active-learning pattern);
+    // payload rides in `feedback` (capped at 4096 chars). Both `namespace`
+    // and `tenant_id` map directly to canonical event columns so listEvents
+    // can filter at the storage layer.
+    const payload = {
+      namespace: ns,
+      variant,
+      variant_namespace,
+      kind: valid_event ? 'event' : 'season',
+      registered_at: new Date().toISOString(),
+    };
+    try {
+      await eventAppend({
+        tenant_id: req.tenant_record.id,
+        namespace: ns,
+        provider: 'kolm-internal',
+        model: 'seasonal_variant_registration',
+        status: 'ok',
+        request_hash: `seasonal-variant-${variant}`,
+        feedback: ('seasonal_variant_registration:' + JSON.stringify(payload)).slice(0, 4096),
+      });
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'event_store_write_failed',
+        detail: String((e && e.message) || e),
+      });
+    }
+    return res.status(201).json({
+      ok: true,
+      namespace: ns,
+      variant,
+      variant_namespace,
+      kind: valid_event ? 'event' : 'season',
+      version: scMod.SEASONAL_VERSION,
+    });
+  });
+
   // ---------- W745 — Failure-modes report (CID-keyed) ----------
   // POST /v1/failure-modes      → body {artifact_cid}, returns the failure-mode
   //                               envelope (clusters + top regressions +
@@ -10803,6 +10976,19 @@ export function buildRouter() {
         // Best-effort. Missing module must NEVER block the capture path.
       }
     }
+    // W748-1 — Seasonal capture tagging. Mutates obs in-place to add
+    // season + seasonal_events BEFORE insertCapture so the canonical bridge
+    // sees them. Gated on KOLM_W748_SEASONAL_TAGGING env flag (default: on)
+    // so an op can roll back to byte-stable old behavior without redeploy.
+    // Idempotent — a row with non-empty `season` is left alone.
+    if (process.env.KOLM_W748_SEASONAL_TAGGING !== 'off') {
+      try {
+        const sc = await import('./seasonal-capture.js');
+        sc.tagCaptureWithSeason(obs);
+      } catch (_) {
+        // Best-effort. Missing module must NEVER block the capture path.
+      }
+    }
     // insertCapture throws on disk-full / ephemeral-/tmp / driver failure.
     // We do NOT catch here — propagation is the whole point of the fix.
     // W409a — insertCapture also bridges to the canonical event-store via
@@ -13729,6 +13915,546 @@ res.json({
       });
     } catch (e) {
       res.status(500).json({ ok: false, error: 'drift_alert_webhook_register_error', detail: e && e.message });
+    }
+  });
+
+  // ============== W750-followup: heuristic copyright detector ==============
+  // POST /v1/copyright/scan        {text} or {capture_id}
+  // GET  /v1/copyright/queue/:namespace
+  //
+  // W750 (copyright filter + capture quarantine) was MERGED into W808 in the
+  // dup-cleanup. The quarantine half shipped under W808; only the
+  // copyright-classifier slice remains — a regex pack for common
+  // copyrighted-content fingerprints (Disney character names, Top-100 song
+  // n-grams, code copyright headers / SPDX lines) that hooks into the W808
+  // staged_captures pipeline as a post-quarantine classifier.
+  //
+  // The /v1/copyright/scan route lets a caller pre-flight any text or look
+  // up the verdict for a persisted capture by id. /v1/copyright/queue/:ns
+  // lists rows in the staged_captures table that were flagged by the
+  // heuristic (flag_reason starts with `copyright_heuristic:`).
+  //
+  // Honest contract: this is HEURISTIC, not legal advice. The route stamps
+  // version:'w750-followup-vN.M' on every envelope so consumers can
+  // version-pin via regex (/^w750-followup-/).
+  r.post('/v1/copyright/scan', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
+    try {
+      const detector = await import('./copyright-detector.js');
+      const body = req.body || {};
+      // Path 1 — caller passes literal text.
+      if (typeof body.text === 'string') {
+        const scan = detector.scanText(body.text);
+        return res.json({ ok: true, ...scan });
+      }
+      // Path 2 — caller passes a capture_id; we fetch from the staged or
+      // canonical observations store and scan.
+      if (typeof body.capture_id === 'string' && body.capture_id) {
+        const tenant_id = req.tenant_record.id;
+        const storeMod = await import('./store.js');
+        // Try staged_captures first (W808-2).
+        let row = null;
+        try {
+          row = storeMod.getStagedCapture(body.capture_id, { tenant_id });
+        } catch (_) { row = null; }
+        if (!row) {
+          // Fall back to observations (canonical post-promotion store).
+          try {
+            const rows = storeMod.findByField('observations', 'id', body.capture_id);
+            for (const r of (rows || [])) {
+              if (r && (String(r.tenant_id) === String(tenant_id) || String(r.tenant) === String(tenant_id))) {
+                row = r;
+                break;
+              }
+            }
+          } catch (_) { row = null; }
+        }
+        if (!row) {
+          return res.status(404).json({
+            ok: false,
+            error: 'capture_not_found',
+            capture_id: body.capture_id,
+            version: detector.COPYRIGHT_VERSION,
+          });
+        }
+        const scan = detector.scanCapture(row);
+        return res.json({ ok: true, ...scan });
+      }
+      return res.status(400).json({
+        ok: false,
+        error: 'missing_text_or_capture_id',
+        hint: 'POST /v1/copyright/scan body must be {text:"..."} or {capture_id:"..."}',
+        version: detector.COPYRIGHT_VERSION,
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'copyright_scan_error', detail: e && e.message });
+    }
+  });
+
+  r.get('/v1/copyright/queue/:namespace', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
+    try {
+      const detector = await import('./copyright-detector.js');
+      const storeMod = await import('./store.js');
+      const tenant_id = req.tenant_record.id;
+      const namespace = String(req.params.namespace || 'default').slice(0, 128);
+      const limit = Math.max(1, Math.min(500, Math.trunc(Number(req.query.limit) || 100)));
+      let staged = [];
+      try {
+        staged = storeMod.listStagedCaptures({
+          tenant_id,
+          namespace,
+          includeBlocked: true,
+          limit: 1000,
+        }) || [];
+      } catch (_) { staged = []; }
+      // Filter to rows whose flag_reason carries the copyright_heuristic tag,
+      // OR rows that bear the copyright_heuristic_flagged sidecar (rows
+      // inserted via the capture-store path get both, but rows inserted
+      // directly into staged_captures may only carry one of the two).
+      const flagged = [];
+      for (const r of staged) {
+        if (!r) continue;
+        const hasReason = typeof r.flag_reason === 'string' && r.flag_reason.indexOf('copyright_heuristic:') >= 0;
+        const hasSidecar = r.copyright_heuristic_flagged === true;
+        if (!hasReason && !hasSidecar) continue;
+        flagged.push({
+          staged_capture_id: r.staged_capture_id || null,
+          capture_id: r.capture_id || r.id || r.event_id || null,
+          namespace: r.namespace || r.corpus_namespace || 'default',
+          staged_at: r.staged_at || null,
+          quarantine_state: r.quarantine_state || 'pending',
+          flag_reason: r.flag_reason || null,
+          copyright_heuristic_risk: r.copyright_heuristic_risk != null
+            ? Number(r.copyright_heuristic_risk) : null,
+          copyright_heuristic_hits: Array.isArray(r.copyright_heuristic_hits)
+            ? r.copyright_heuristic_hits.slice(0, 16) : [],
+        });
+        if (flagged.length >= limit) break;
+      }
+      return res.json({
+        ok: true,
+        namespace,
+        total: flagged.length,
+        captures: flagged,
+        version: detector.COPYRIGHT_VERSION,
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'copyright_queue_error', detail: e && e.message });
+    }
+  });
+
+  // ============== W749: synthetic capture augmentation ==============
+  // GET  /v1/synthetic/gaps/:namespace      → gap analysis + suggested counts
+  // GET  /v1/synthetic/coverage/:namespace  → coverage report + Gini + rare buckets
+  // POST /v1/synthetic/generate             → batched teacher generation
+  //                                            (200 + ok:false + estimated_cost
+  //                                             when body.confirm !== true)
+  // POST /v1/synthetic/commit               → persists a generated batch to
+  //                                            event-store with kolm_synthetic:true
+  //
+  // Honesty contract:
+  //   * Every persisted row carries kolm_synthetic:true + parent_seed_cids.
+  //   * No teacher key wired here yet — generation requires the caller to
+  //     supply ANTHROPIC_API_KEY or KOLM_TEACHER_API_KEY in env. Missing key →
+  //     503 teacher_not_wired envelope.
+  //   * Spend protection: POST /v1/synthetic/generate refuses to actually call
+  //     the teacher unless body.confirm === true. Without confirm we return
+  //     200 + {ok:false, error:'synthetic_costs_money', estimated_cost_usd}.
+  r.get('/v1/synthetic/gaps/:namespace', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
+    try {
+      const synth = await import('./synthetic-augment.js');
+      const es = await import('./event-store.js');
+      const namespace = String(req.params.namespace || 'default').slice(0, 128);
+      const tenant_id = req.tenant_record.id;
+      let rows = [];
+      try {
+        rows = await es.listEvents({
+          tenant_id,
+          namespace,
+          limit: 5000,
+          order: 'desc',
+        });
+      } catch (_) { rows = []; }
+      rows = (rows || []).filter((r) => r && r.tenant_id === tenant_id);
+      // Project capture-event rows into the lean shape detectGaps expects.
+      const captures = rows.map((r) => ({
+        cid: r.event_id || r.cid,
+        namespace: r.namespace,
+        input: r.prompt_redacted || r.prompt || r.input || '',
+        output: r.response_redacted || r.response || r.output || '',
+        category: r.category,
+        media_kind: r.media_kind,
+        turn_count: r.turn_count,
+        tool_calls: r.tool_calls,
+      }));
+      let targetCats = null;
+      if (typeof req.query.target_categories === 'string' && req.query.target_categories.length) {
+        targetCats = String(req.query.target_categories).split(',').map((s) => s.trim()).filter(Boolean);
+      }
+      const minPer = Number.isFinite(Number(req.query.min_per_category))
+        ? Math.max(1, Math.trunc(Number(req.query.min_per_category)))
+        : undefined;
+      const gaps = synth.detectGaps(captures, {
+        target_categories: targetCats,
+        min_per_category: minPer,
+      });
+      return res.json({
+        ok: true,
+        namespace,
+        total_captures: captures.length,
+        gaps,
+        version: synth.SYNTHETIC_VERSION,
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'synthetic_gaps_error', detail: e && e.message });
+    }
+  });
+
+  r.get('/v1/synthetic/coverage/:namespace', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
+    try {
+      const synth = await import('./synthetic-augment.js');
+      const es = await import('./event-store.js');
+      const namespace = String(req.params.namespace || 'default').slice(0, 128);
+      const tenant_id = req.tenant_record.id;
+      let rows = [];
+      try {
+        rows = await es.listEvents({
+          tenant_id,
+          namespace,
+          limit: 5000,
+          order: 'desc',
+        });
+      } catch (_) { rows = []; }
+      rows = (rows || []).filter((r) => r && r.tenant_id === tenant_id);
+      const captures = rows.map((r) => ({
+        cid: r.event_id || r.cid,
+        namespace: r.namespace,
+        input: r.prompt_redacted || r.prompt || r.input || '',
+        output: r.response_redacted || r.response || r.output || '',
+        category: r.category,
+        media_kind: r.media_kind,
+        turn_count: r.turn_count,
+        tool_calls: r.tool_calls,
+      }));
+      const strategy = req.query.bucket_strategy === 'keyword' ? 'keyword' : 'category';
+      const report = synth.generateCoverageReport(captures, { bucket_strategy: strategy });
+      return res.json({
+        ok: true,
+        namespace,
+        ...report,
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'synthetic_coverage_error', detail: e && e.message });
+    }
+  });
+
+  // Module-scoped staging for synthetic batches between generate + commit.
+  // Map<tenant_id|namespace|generation_id, batch>. In-memory only — survives a
+  // single process lifetime, which is intentional: the caller is expected to
+  // generate + commit in the same session. A restart drops un-committed
+  // batches by design (no orphan synthetic rows leak).
+  if (!r._w749Staging) r._w749Staging = new Map();
+
+  r.post('/v1/synthetic/generate', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
+    try {
+      const synth = await import('./synthetic-augment.js');
+      const es = await import('./event-store.js');
+      const body = req.body || {};
+      const namespace = String(body.namespace || 'default').slice(0, 128);
+      const category = typeof body.category === 'string' ? body.category.trim() : '';
+      const target_count = Math.max(1, Math.min(1000, Math.trunc(Number(body.target_count) || 50)));
+      const confirm = body.confirm === true;
+      if (!category) {
+        return res.status(400).json({
+          ok: false,
+          error: 'category_required',
+          hint: 'pass {category} naming the bucket you want generated',
+          version: synth.SYNTHETIC_VERSION,
+        });
+      }
+
+      const estimated_cost_usd = Number((target_count * synth.DEFAULTS.COST_PER_ROW_USD).toFixed(4));
+
+      // SPEND PROTECTION: without confirm:true, refuse to actually generate.
+      if (!confirm) {
+        return res.status(200).json({
+          ok: false,
+          error: 'synthetic_costs_money',
+          hint: 'synthetic generation calls the teacher and incurs cost; re-send with {confirm:true} to proceed',
+          namespace,
+          category,
+          target_count,
+          estimated_cost_usd,
+          cost_per_row_usd: synth.DEFAULTS.COST_PER_ROW_USD,
+          version: synth.SYNTHETIC_VERSION,
+        });
+      }
+
+      // Pull seed captures from the namespace to anchor generation style.
+      let seedRows = [];
+      try {
+        seedRows = await es.listEvents({
+          tenant_id: req.tenant_record.id,
+          namespace,
+          limit: 10,
+          order: 'desc',
+        });
+      } catch (_) { seedRows = []; }
+      seedRows = (seedRows || []).filter((r) => r && r.tenant_id === req.tenant_record.id);
+      const seed_captures = seedRows.map((r) => ({
+        cid: r.event_id || r.cid,
+        input: r.prompt_redacted || r.prompt || r.input || '',
+        output: r.response_redacted || r.response || r.output || '',
+      }));
+
+      // Resolve teacher_caller. Two sources, in order:
+      //   1) req.app.locals._w749_teacher_caller — injected by tests
+      //   2) hosted teacher — currently honest-stub; returns 503
+      let teacher_caller = null;
+      try { teacher_caller = req.app && req.app.locals && req.app.locals._w749_teacher_caller; } catch (_) {}
+      if (typeof teacher_caller !== 'function') {
+        return res.status(503).json({
+          ok: false,
+          error: 'teacher_not_wired',
+          hint: 'no hosted teacher configured for this deploy; pass req.app.locals._w749_teacher_caller in tests',
+          namespace,
+          category,
+          target_count,
+          estimated_cost_usd,
+          version: synth.SYNTHETIC_VERSION,
+        });
+      }
+
+      const batch = await synth.requestSyntheticBatch({
+        category,
+        target_count,
+        seed_captures,
+        teacher_caller,
+      });
+      if (!batch.ok) {
+        return res.status(200).json({
+          ...batch,
+          namespace,
+          category,
+          target_count,
+        });
+      }
+      // Stage the batch so the commit route can pick it up by generation_id.
+      // We key on the FIRST generation_id of the batch — same as the response
+      // returns to the caller.
+      const stage_id = batch.generated[0] && batch.generated[0].generation_id;
+      if (stage_id) {
+        r._w749Staging.set(req.tenant_record.id + '|' + namespace + '|' + stage_id, {
+          batch,
+          tenant_id: req.tenant_record.id,
+          namespace,
+          staged_at: Date.now(),
+        });
+      }
+      return res.status(200).json({
+        ok: true,
+        namespace,
+        category,
+        generation_id: stage_id,
+        generated: batch.generated,
+        actual_count: batch.actual_count,
+        cost_usd_est: batch.cost_usd_est,
+        version: synth.SYNTHETIC_VERSION,
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'synthetic_generate_error', detail: e && e.message });
+    }
+  });
+
+  r.post('/v1/synthetic/commit', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
+    try {
+      const synth = await import('./synthetic-augment.js');
+      const es = await import('./event-store.js');
+      const body = req.body || {};
+      const namespace = String(body.namespace || 'default').slice(0, 128);
+      const generation_id = String(body.generation_id || '');
+      if (!generation_id) {
+        return res.status(400).json({
+          ok: false,
+          error: 'generation_id_required',
+          hint: 'pass {generation_id} returned by POST /v1/synthetic/generate',
+          version: synth.SYNTHETIC_VERSION,
+        });
+      }
+      const stage_key = req.tenant_record.id + '|' + namespace + '|' + generation_id;
+      const staged = r._w749Staging.get(stage_key);
+      if (!staged) {
+        return res.status(404).json({
+          ok: false,
+          error: 'generation_not_found',
+          hint: 'no staged generation for this tenant+namespace+id; generate first or the process restarted',
+          generation_id,
+          namespace,
+          version: synth.SYNTHETIC_VERSION,
+        });
+      }
+      const rows = synth.mergeSyntheticIntoCaptureRows(staged.batch, namespace);
+      const persisted = [];
+      const errors = [];
+      for (const row of rows) {
+        try {
+          // Canonical synthetic marker is source_type:'synthetic' — that's the
+          // load-bearing column the lake / dataset workbench / distill pipeline
+          // already key on (see event-schema.js SOURCE_TYPES). W749-specific
+          // metadata (kolm_synthetic flag + parent_seed_cids + source_category
+          // + generation_id) is packed into `feedback` as a JSON blob so it
+          // survives canonicalize() — which strips any keys not in EVENT_FIELDS.
+          const w749Meta = {
+            kolm_synthetic: true,
+            parent_seed_cids: row.parent_seed_cids || [],
+            source_category: row.source_category || null,
+            generation_id: row.generation_id || null,
+            generator_version: synth.SYNTHETIC_VERSION,
+          };
+          const ev = await es.appendEvent({
+            tenant_id: req.tenant_record.id,
+            namespace: row.namespace,
+            provider: 'kolm',                        // canonical vendor enum
+            model: 'kolm-synthetic-w749',
+            source_type: 'synthetic',                // load-bearing canonical flag
+            prompt_redacted: row.input,
+            response_redacted: row.output,
+            feedback: 'w749_synthetic:' + JSON.stringify(w749Meta),
+          });
+          persisted.push(ev.event_id);
+        } catch (e) {
+          errors.push({ error: (e && e.message) || String(e) });
+        }
+      }
+      // One-shot stage clear — committed batches MUST NOT double-write.
+      r._w749Staging.delete(stage_key);
+      return res.json({
+        ok: true,
+        namespace,
+        generation_id,
+        persisted_count: persisted.length,
+        persisted_event_ids: persisted,
+        errors,
+        version: synth.SYNTHETIC_VERSION,
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'synthetic_commit_error', detail: e && e.message });
+    }
+  });
+
+  // ============== W751-W755: vertical foundation students ==============
+  // GET  /v1/verticals                          PUBLIC  list all 5 verticals
+  // GET  /v1/verticals/:id                      PUBLIC  vertical detail
+  // POST /v1/verticals/register-stubs           AUTH    owner-only; bulk-register
+  //                                                     marketplace stubs (idempotent)
+  // GET  /v1/verticals/:id/fingerprint          AUTH    W757-blocked honest envelope
+  //
+  // The listing routes are public because they are marketing/discovery (same
+  // policy as /v1/marketplace + /v1/changelog). Registration + the
+  // fingerprint stub are auth-gated; registration is owner-only because it
+  // mints a marketplace-listing row (writes the event-store) on behalf of
+  // the `kolm.ai-foundation` publisher_id and that should only ever happen
+  // from a human workspace, not a CI api_only key.
+  //
+  // The fingerprint surface is intentionally non-404 — the route exists, it
+  // returns an honest "w757_not_shipped" envelope so callers can branch on
+  // the error code instead of probing for the URL.
+  r.get('/v1/verticals', async (_req, res) => {
+    try {
+      const verticals = await import('./verticals.js');
+      res.json({
+        ok: true,
+        version: verticals.VERTICALS_VERSION,
+        total: verticals.VERTICALS.length,
+        verticals: verticals.listVerticals(),
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'verticals_list_error', detail: e && e.message });
+    }
+  });
+
+  r.get('/v1/verticals/:id', async (req, res) => {
+    try {
+      const verticals = await import('./verticals.js');
+      const v = verticals.getVertical(req.params.id);
+      if (!v) {
+        return res.status(404).json({
+          ok: false,
+          error: 'unknown_vertical',
+          id: String(req.params.id || ''),
+          known: verticals.VERTICALS.map((row) => row.id),
+          version: verticals.VERTICALS_VERSION,
+        });
+      }
+      res.json({
+        ok: true,
+        version: verticals.VERTICALS_VERSION,
+        vertical: v,
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'vertical_show_error', detail: e && e.message });
+    }
+  });
+
+  // GET /v1/verticals/:id/fingerprint — declared BEFORE the :id route would
+  // otherwise shadow this on /v1/verticals/<id>/<fingerprint>. Express orders
+  // by registration, so this stays after /v1/verticals/:id but matches a
+  // strictly longer path; both are fine, the test pins both.
+  r.get('/v1/verticals/:id/fingerprint', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const verticals = await import('./verticals.js');
+      const v = verticals.getVertical(req.params.id);
+      if (!v) {
+        return res.status(404).json({
+          ok: false,
+          error: 'unknown_vertical',
+          id: String(req.params.id || ''),
+          known: verticals.VERTICALS.map((row) => row.id),
+          version: verticals.VERTICALS_VERSION,
+        });
+      }
+      // HTTP 200 because the call succeeded; the FEATURE is what's not
+      // shipped. Envelope error code is the machine-readable signal.
+      res.json(verticals.verticalFingerprintStub(req.params.id));
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'vertical_fingerprint_error', detail: e && e.message });
+    }
+  });
+
+  r.post('/v1/verticals/register-stubs', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const isOwner = !!(
+      req.is_admin
+      || req.local_daemon
+      || (req.tenant_record && req.tenant_record.kind === 'human')
+      || (req.tenant_record && req.tenant_record.kind === 'local_daemon')
+    );
+    if (!isOwner) {
+      return res.status(403).json({
+        ok: false,
+        error: 'forbidden',
+        hint: 'register-stubs is owner-only; viewer/member roles cannot publish marketplace listings',
+      });
+    }
+    try {
+      const verticals = await import('./verticals.js');
+      // The publisher_id defaults to 'kolm.ai-foundation' so all 5 stubs are
+      // attributed to the foundation namespace. A future signed-publisher
+      // workflow can override via the body — keep that surface explicit so
+      // it doesn't accidentally default to the caller's tenant id.
+      const publisher = (req.body && typeof req.body.publisher === 'string' && req.body.publisher.trim())
+        ? String(req.body.publisher).trim()
+        : 'kolm.ai-foundation';
+      const result = await verticals.registerAllVerticalStubs(publisher);
+      res.json(result);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'vertical_register_error', detail: e && e.message });
     }
   });
 

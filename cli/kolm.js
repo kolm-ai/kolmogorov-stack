@@ -33940,6 +33940,754 @@ async function cmdW747DriftAlert(args) {
   process.exit(EXIT.BAD_ARGS);
 }
 
+// =============================================================================
+// W750-followup — `kolm copyright-scan <text|capture|queue>` dispatcher.
+//
+// Distinct-named (cmdW750Copyright) per the W724/.../W747 precedent so
+// parallel wave agents on W749/W751/W808-followups cannot collide on this
+// symbol. The name preserves W750 as the original wave for traceability;
+// the rest of W750 was merged into W808 (staged_captures + manual review)
+// in the 2026-05-24 dup-cleanup.
+//
+// Subcommands:
+//   text "<text>"                — scan literal text (no auth, no network)
+//   capture <capture_id>         — POST /v1/copyright/scan {capture_id}
+//   queue <namespace>            — GET  /v1/copyright/queue/:namespace
+//
+// Honest exit codes:
+//   0 — clean (no hits)
+//   3 — hits found (informational; the operator should review the rows)
+//   2 — error (auth missing, bad args, network failure)
+//
+// The hits-found path uses exit 3 (informational, not failure) because the
+// heuristic is intentionally noisy and downstream automation should treat
+// "hits exist" as "human review needed" not as "build failed". The exit-2
+// channel is reserved for real errors so CI can keep them separate.
+// =============================================================================
+async function cmdW750Copyright(args) {
+  const sub = (args && args[0]) || '';
+
+  function _envApiKey() {
+    return process.env.KOLM_API_KEY || '';
+  }
+  function _envBase() {
+    return (process.env.KOLM_BASE_URL || 'https://kolm.ai').replace(/\/$/, '');
+  }
+  function _print(envelope) {
+    console.log(JSON.stringify(envelope, null, 2));
+  }
+  function _fail(envelope, code = 2) {
+    _print(envelope);
+    process.exit(code);
+  }
+
+  if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
+    console.error('usage: kolm copyright-scan <text|capture|queue> [args]');
+    console.error('  text "<text>"              — scan literal text (local, no auth)');
+    console.error('  capture <capture_id>       — POST /v1/copyright/scan {capture_id}');
+    console.error('  queue <namespace>          — GET  /v1/copyright/queue/:namespace');
+    console.error('exit codes: 0 clean, 3 hits-found, 2 error');
+    process.exit(2);
+    return;
+  }
+
+  // ──────────────────────── subcommand: text ─────────────────────────────────
+  // Local-only path; no network, no auth. Scans the text directly via the
+  // detector module so a CI agent can pre-flight content before captures
+  // ever leave the developer machine.
+  if (sub === 'text') {
+    const text = (args && args.slice(1).join(' ')) || '';
+    if (!text) {
+      _fail({
+        ok: false,
+        error: 'missing_text',
+        hint: 'usage: kolm copyright-scan text "<text>"',
+        version: 'w750-followup-v1',
+      });
+      return;
+    }
+    let detector;
+    try {
+      const url = await import('node:url');
+      const pathMod = await import('node:path');
+      const here = url.fileURLToPath(import.meta.url);
+      const detectorPath = pathMod.join(pathMod.dirname(here), '..', 'src', 'copyright-detector.js');
+      detector = await import(url.pathToFileURL(detectorPath).href);
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'detector_load_error',
+        detail: String(e && e.message || e),
+        version: 'w750-followup-v1',
+      });
+      return;
+    }
+    const scan = detector.scanText(text);
+    _print({ ok: true, ...scan });
+    // Honest exit code: 3 if hits found (informational), 0 otherwise.
+    if (Array.isArray(scan.hits) && scan.hits.length > 0) process.exit(3);
+    return;
+  }
+
+  // ──────────────────────── subcommand: capture ──────────────────────────────
+  if (sub === 'capture') {
+    const capture_id = (args && args[1]) || '';
+    if (!capture_id) {
+      _fail({
+        ok: false,
+        error: 'missing_capture_id',
+        hint: 'usage: kolm copyright-scan capture <capture_id>',
+        version: 'w750-followup-v1',
+      });
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({
+        ok: false,
+        error: 'auth_required',
+        hint: 'set KOLM_API_KEY (kolm signup / kolm login)',
+        version: 'w750-followup-v1',
+      });
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/copyright/scan', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({ capture_id }),
+      });
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'network_error',
+        detail: String(e && e.message || e),
+        version: 'w750-followup-v1',
+      });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(2);
+    if (body && Array.isArray(body.hits) && body.hits.length > 0) process.exit(3);
+    return;
+  }
+
+  // ──────────────────────── subcommand: queue ────────────────────────────────
+  if (sub === 'queue') {
+    const namespace = (args && args[1]) || '';
+    if (!namespace) {
+      _fail({
+        ok: false,
+        error: 'missing_namespace',
+        hint: 'usage: kolm copyright-scan queue <namespace>',
+        version: 'w750-followup-v1',
+      });
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({
+        ok: false,
+        error: 'auth_required',
+        hint: 'set KOLM_API_KEY (kolm signup / kolm login)',
+        version: 'w750-followup-v1',
+      });
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/copyright/queue/' + encodeURIComponent(namespace), {
+        method: 'GET',
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'network_error',
+        detail: String(e && e.message || e),
+        version: 'w750-followup-v1',
+      });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(2);
+    if (body && Number(body.total) > 0) process.exit(3);
+    return;
+  }
+
+  // Unknown subcommand.
+  console.error('usage: kolm copyright-scan <text|capture|queue> [args]');
+  console.error('  text "<text>"              — scan literal text (local, no auth)');
+  console.error('  capture <capture_id>       — POST /v1/copyright/scan {capture_id}');
+  console.error('  queue <namespace>          — GET  /v1/copyright/queue/:namespace');
+  console.error('exit codes: 0 clean, 3 hits-found, 2 error');
+  process.exit(2);
+}
+
+// =============================================================================
+// W748 — `kolm seasonal <show|create-variant|recommend>` dispatcher.
+//
+// Distinct-named (cmdW748Seasonal) per the W746/W747 precedent so parallel
+// wave agents on W749/W750 cannot collide on this symbol.
+//
+// Subcommands:
+//   show <namespace>                              — distribution + active events
+//                                                   + recommendation envelope
+//   create-variant <namespace> <variant>          — register a seasonal-variant
+//                                                   namespace (variant must be
+//                                                   a known season or event key)
+//   recommend <namespace>                         — print just the recommendation
+//                                                   block (drives downstream
+//                                                   automation that just wants
+//                                                   the answer + reason)
+//
+// Every subcommand prints the JSON envelope on stdout for CI parsing. Auth
+// fails loudly with {ok:false,error:'auth_required'} rather than silently
+// exiting 0 (matches every other auth'd CLI verb).
+// =============================================================================
+async function cmdW748Seasonal(args) {
+  const sub = (args && args[0]) || '';
+
+  function _envApiKey() {
+    return process.env.KOLM_API_KEY || '';
+  }
+  function _envBase() {
+    return (process.env.KOLM_BASE_URL || 'https://kolm.ai').replace(/\/$/, '');
+  }
+  function _print(envelope) {
+    console.log(JSON.stringify(envelope, null, 2));
+  }
+  function _fail(envelope, code = EXIT.EXECUTION) {
+    _print(envelope);
+    process.exit(code);
+  }
+  function _flag(rest, name) {
+    const i = rest.indexOf('--' + name);
+    if (i < 0) return undefined;
+    return rest[i + 1];
+  }
+
+  if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
+    console.error('usage: kolm seasonal <show|create-variant|recommend> [args]');
+    console.error('  show <namespace>                       — distribution + events + recommendation');
+    console.error('  create-variant <namespace> <variant>   — register seasonal-variant namespace');
+    console.error('  recommend <namespace>                  — print just the recommendation');
+    process.exit(sub === '' ? EXIT.BAD_ARGS : 0);
+  }
+
+  // ──────────────────────── subcommand: show ─────────────────────────────────
+  if (sub === 'show') {
+    const namespace = (args && args[1]) || '';
+    if (!namespace) {
+      _fail({ ok: false, error: 'missing_args', hint: 'usage: kolm seasonal show <namespace>', version: 'w748-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w748-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/seasonal/' + encodeURIComponent(namespace), {
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w748-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: create-variant ───────────────────────
+  if (sub === 'create-variant') {
+    const namespace = (args && args[1]) || '';
+    const variant = (args && args[2]) || '';
+    if (!namespace || !variant) {
+      _fail({ ok: false, error: 'missing_args', hint: 'usage: kolm seasonal create-variant <namespace> <variant>', version: 'w748-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w748-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/seasonal/variant', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({ namespace, variant }),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w748-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: recommend ────────────────────────────
+  if (sub === 'recommend') {
+    const namespace = (args && args[1]) || '';
+    if (!namespace) {
+      _fail({ ok: false, error: 'missing_args', hint: 'usage: kolm seasonal recommend <namespace>', version: 'w748-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w748-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/seasonal/' + encodeURIComponent(namespace), {
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w748-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    // Distil to just the recommendation block + context, so automation can pipe
+    // through `jq .recommended` without parsing the full distribution.
+    const out = {
+      ok: !!body.ok,
+      namespace: body.namespace || namespace,
+      season: body.season || null,
+      active_events: Array.isArray(body.active_events) ? body.active_events : [],
+      recommendation: body.recommendation || { recommended: null, reason: 'no_recommendation_returned' },
+      version: body.version || 'w748-v1',
+    };
+    _print(out);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // Unknown subcommand.
+  console.error('usage: kolm seasonal <show|create-variant|recommend> [args]');
+  console.error('  show <namespace>                       — distribution + events + recommendation');
+  console.error('  create-variant <namespace> <variant>   — register seasonal-variant namespace');
+  console.error('  recommend <namespace>                  — print just the recommendation');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// =============================================================================
+// W749 — `kolm synthetic <gaps|coverage|generate|commit>` dispatcher.
+//
+// Distinct-named (cmdW749Synthetic) per the W724/.../W748 precedent so parallel
+// wave agents on W747/W748/W750 cannot collide on this symbol.
+//
+// Subcommands:
+//   gaps     <namespace>                       — gap table (per-category)
+//   coverage <namespace> [--json]              — coverage + Gini + rare buckets
+//   generate <namespace> --category <c> --count N [--confirm]
+//                                              — preview WITHOUT --confirm
+//                                                (prints synthetic_costs_money
+//                                                envelope to stdout + ⚠ to stderr);
+//                                                actual call requires --confirm.
+//   commit   <namespace> <generation_id>       — persist staged batch to event-store
+//
+// Spend protection lives in stderr so a yellow ⚠ warning prints even when
+// stdout is being JSON-piped. The route is the canonical gate; this is the UX
+// surface that makes the gate hard to miss.
+// =============================================================================
+async function cmdW749Synthetic(args) {
+  const sub = (args && args[0]) || '';
+
+  function _envApiKey() {
+    return process.env.KOLM_API_KEY || '';
+  }
+  function _envBase() {
+    return (process.env.KOLM_BASE_URL || 'https://kolm.ai').replace(/\/$/, '');
+  }
+  function _flag(rest, name) {
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--' + name && i + 1 < rest.length) return rest[i + 1];
+      if (typeof rest[i] === 'string' && rest[i].startsWith('--' + name + '=')) {
+        return rest[i].slice(name.length + 3);
+      }
+    }
+    return null;
+  }
+  function _hasFlag(rest, name) {
+    return (rest || []).some((a) => a === '--' + name);
+  }
+  function _print(envelope) {
+    console.log(JSON.stringify(envelope, null, 2));
+  }
+  function _fail(envelope, code = EXIT.EXECUTION) {
+    _print(envelope);
+    process.exit(code);
+  }
+  // Yellow ⚠ warning to stderr. Wrapped in a try so non-color terminals don't
+  // crash on the ANSI sequence.
+  function _warnStderr(msg) {
+    try {
+      const yellow = '\x1b[33m';
+      const reset = '\x1b[0m';
+      console.error(yellow + '⚠ ' + msg + reset);
+    } catch (_) {
+      console.error('⚠ ' + msg);
+    }
+  }
+
+  if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
+    console.error('usage: kolm synthetic <gaps|coverage|generate|commit> [args]');
+    console.error('  gaps     <namespace>                                       — per-category gap table');
+    console.error('  coverage <namespace> [--json] [--strategy keyword]         — Gini + rare buckets');
+    console.error('  generate <namespace> --category <c> --count N [--confirm]  — preview without --confirm');
+    console.error('  commit   <namespace> <generation_id>                       — persist staged batch');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+
+  // ──────────────────────── subcommand: gaps ─────────────────────────────────
+  if (sub === 'gaps') {
+    const namespace = (args && args[1]) || '';
+    if (!namespace) {
+      _fail({ ok: false, error: 'missing_namespace', hint: 'usage: kolm synthetic gaps <namespace>', version: 'w749-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w749-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/synthetic/gaps/' + encodeURIComponent(namespace), {
+        method: 'GET',
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w749-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: coverage ─────────────────────────────
+  if (sub === 'coverage') {
+    const namespace = (args && args[1]) || '';
+    if (!namespace) {
+      _fail({ ok: false, error: 'missing_namespace', hint: 'usage: kolm synthetic coverage <namespace> [--json]', version: 'w749-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const rest = args.slice(2);
+    const wantJson = _hasFlag(rest, 'json');
+    const strategy = _flag(rest, 'strategy') || 'category';
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w749-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/synthetic/coverage/' + encodeURIComponent(namespace)
+        + '?bucket_strategy=' + encodeURIComponent(strategy), {
+        method: 'GET',
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w749-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    // Pretty-print rare buckets in stderr when not --json and the envelope is healthy.
+    if (!wantJson && body && body.ok && Array.isArray(body.rare_buckets)) {
+      console.log('');
+      console.log('Gini coefficient: ' + Number(body.gini_coefficient || 0).toFixed(4)
+        + '   (0=uniform · 1=concentrated)');
+      console.log('Total captures:   ' + (body.total || 0));
+      console.log('');
+      console.log('Top rare buckets (most under-served first):');
+      const top = body.rare_buckets.slice(0, 10);
+      for (const b of top) {
+        const pct = (Number(b.pct || 0) * 100).toFixed(2) + '%';
+        const rarity = Number(b.rarity_score || 0).toFixed(3);
+        console.log('  ' + String(b.name || '?').padEnd(28) + ' n=' + String(b.count).padStart(5)
+          + '   pct=' + pct.padStart(7) + '   rarity=' + rarity);
+      }
+    }
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: generate ─────────────────────────────
+  if (sub === 'generate') {
+    const namespace = (args && args[1]) || '';
+    if (!namespace) {
+      _fail({ ok: false, error: 'missing_namespace', hint: 'usage: kolm synthetic generate <namespace> --category <c> --count N [--confirm]', version: 'w749-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const rest = args.slice(2);
+    const category = _flag(rest, 'category') || '';
+    const countRaw = _flag(rest, 'count');
+    const target_count = Math.max(1, Math.min(1000, Math.trunc(Number(countRaw) || 50)));
+    const confirm = _hasFlag(rest, 'confirm');
+    if (!category) {
+      _fail({ ok: false, error: 'category_required', hint: 'pass --category <c> naming the bucket to fill', version: 'w749-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    if (!confirm) {
+      // Warn loudly that no spend is happening, then preview the envelope.
+      _warnStderr('preview only: --confirm omitted; teacher not called, no cost incurred.');
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w749-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/synthetic/generate', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({ namespace, category, target_count, confirm }),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w749-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (body && body.error === 'synthetic_costs_money') {
+      _warnStderr('estimated cost: $' + Number(body.estimated_cost_usd || 0).toFixed(4)
+        + ' for ' + target_count + ' rows. Re-run with --confirm to proceed.');
+    }
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: commit ───────────────────────────────
+  if (sub === 'commit') {
+    const namespace = (args && args[1]) || '';
+    const generation_id = (args && args[2]) || '';
+    if (!namespace || !generation_id) {
+      _fail({ ok: false, error: 'missing_args', hint: 'usage: kolm synthetic commit <namespace> <generation_id>', version: 'w749-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w749-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/synthetic/commit', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({ namespace, generation_id }),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w749-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // Unknown subcommand.
+  console.error('usage: kolm synthetic <gaps|coverage|generate|commit> [args]');
+  console.error('  gaps     <namespace>                                       — per-category gap table');
+  console.error('  coverage <namespace> [--json] [--strategy keyword]         — Gini + rare buckets');
+  console.error('  generate <namespace> --category <c> --count N [--confirm]  — preview without --confirm');
+  console.error('  commit   <namespace> <generation_id>                       — persist staged batch');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// =============================================================================
+// W751-W755 — `kolm vertical <list|show|register-stubs|fingerprint>` dispatcher.
+//
+// Distinct-named (cmdW751Verticals) per the W724/.../W747 precedent so parallel
+// wave agents on W750/W752/W753 cannot collide on this symbol.
+//
+// Subcommands:
+//   list                              — table of all 5 verticals
+//   show <id>                         — detail card for one vertical
+//   register-stubs                    — POST /v1/verticals/register-stubs (owner-only)
+//   fingerprint <id>                  — honest W757-blocked envelope
+//
+// Every subcommand returns a JSON envelope on stdout so CI loops can parse it
+// without screen-scraping. The honest fallback for missing kolm token mirrors
+// every other auth'd CLI verb — we print {ok:false,error:'auth_required'}
+// rather than silently exiting 0. `list` + `show` are public surfaces so they
+// run without an API key.
+// =============================================================================
+async function cmdW751Verticals(args) {
+  const sub = (args && args[0]) || '';
+
+  function _envApiKey() {
+    return process.env.KOLM_API_KEY || '';
+  }
+  function _envBase() {
+    return (process.env.KOLM_BASE_URL || 'https://kolm.ai').replace(/\/$/, '');
+  }
+  function _print(envelope) {
+    console.log(JSON.stringify(envelope, null, 2));
+  }
+  function _fail(envelope, code = EXIT.EXECUTION) {
+    _print(envelope);
+    process.exit(code);
+  }
+
+  if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
+    console.error('usage: kolm vertical <list|show|register-stubs|fingerprint> [args]');
+    console.error('  list                       — table of all 5 verticals');
+    console.error('  show <id>                  — detail card for one vertical');
+    console.error('  register-stubs             — bulk-register marketplace stubs (owner-only)');
+    console.error('  fingerprint <id>           — honest W757-blocked envelope');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+
+  // ──────────────────────── subcommand: list ─────────────────────────────────
+  if (sub === 'list') {
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/verticals', { method: 'GET' });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w751-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    // Pretty-print a human-readable table in addition to the JSON envelope
+    // so a developer at a terminal gets useful output without piping to jq.
+    if (body && body.ok && Array.isArray(body.verticals)) {
+      console.log('');
+      console.log('id        name      target_kscore  model_slug             status');
+      console.log('--------  --------  -------------  ---------------------  ----------------');
+      for (const v of body.verticals) {
+        const id = String(v.id || '').padEnd(8);
+        const name = String(v.name || '').padEnd(8);
+        const tk = String((v.target_kscore != null ? v.target_kscore.toFixed(2) : '—')).padStart(13);
+        const slug = String(v.model_slug || '').padEnd(21);
+        const status = String(v.marketplace_status || '');
+        console.log(`${id}  ${name}  ${tk}  ${slug}  ${status}`);
+      }
+    }
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: show ─────────────────────────────────
+  if (sub === 'show') {
+    const id = (args && args[1]) || '';
+    if (!id) {
+      _fail({ ok: false, error: 'missing_id', hint: 'usage: kolm vertical show <id>', version: 'w751-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/verticals/' + encodeURIComponent(id), { method: 'GET' });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w751-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (body && body.ok && body.vertical) {
+      const v = body.vertical;
+      console.log('');
+      console.log(`${v.name} (${v.id})`);
+      console.log('  tagline:        ' + (v.tagline || ''));
+      console.log('  target K-Score: ' + (v.target_kscore != null ? v.target_kscore.toFixed(2) : '—'));
+      console.log('  model slug:     ' + (v.model_slug || ''));
+      console.log('  status:         ' + (v.marketplace_status || ''));
+      console.log('  common tasks:   ' + (Array.isArray(v.common_tasks) ? v.common_tasks.join(', ') : ''));
+    }
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: register-stubs ───────────────────────
+  if (sub === 'register-stubs') {
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w751-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/verticals/register-stubs', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({}),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w751-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: fingerprint ──────────────────────────
+  if (sub === 'fingerprint') {
+    const id = (args && args[1]) || '';
+    if (!id) {
+      _fail({ ok: false, error: 'missing_id', hint: 'usage: kolm vertical fingerprint <id>', version: 'w751-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w751-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/verticals/' + encodeURIComponent(id) + '/fingerprint', {
+        method: 'GET',
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w751-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    // The W757-blocked envelope returns {ok:false,error:'w757_not_shipped'}
+    // with HTTP 200 because the call succeeded; the feature is what's blocked.
+    // Print a human-readable hint so users see the path forward.
+    if (body && body.error === 'w757_not_shipped') {
+      console.log('');
+      console.log(`Vertical fingerprint for "${id}" is blocked by W757 (vertical fingerprint pipeline).`);
+      console.log('Until W757 ships:');
+      console.log('  - capture per-namespace via /v1/capture/log');
+      console.log('  - distill through /v1/distill');
+      console.log('  - watch /docs/verticals for the live status pill');
+    }
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // Unknown subcommand.
+  console.error('usage: kolm vertical <list|show|register-stubs|fingerprint> [args]');
+  console.error('  list                       — table of all 5 verticals');
+  console.error('  show <id>                  — detail card for one vertical');
+  console.error('  register-stubs             — bulk-register marketplace stubs (owner-only)');
+  console.error('  fingerprint <id>           — honest W757-blocked envelope');
+  process.exit(EXIT.BAD_ARGS);
+}
+
 async function main() {
   ensureLocalReceiptSecretInEnv();
   const [, , cmd, ...rest] = process.argv;
@@ -34347,6 +35095,26 @@ async function main() {
       // distribution-shift live alerter. Distinct-named (cmdW747DriftAlert)
       // so parallel W745/W746/W748 wave agents cannot collide on this case.
       case 'drift-alert': await withErrorContext('drift-alert', () => cmdW747DriftAlert(rest)); break;
+      // W750-followup — `kolm copyright-scan <text|capture|queue>` routes
+      // the heuristic copyright detector. Distinct-named (cmdW750Copyright)
+      // — the original W750 wave was merged into W808; the remaining
+      // copyright-classifier slice ships under this dispatcher.
+      case 'copyright-scan': await withErrorContext('copyright-scan', () => cmdW750Copyright(rest)); break;
+      // W748 — `kolm seasonal <show|create-variant|recommend>` routes the
+      // seasonal capture tagging + variant management dispatcher. Distinct-named
+      // (cmdW748Seasonal) so parallel W749/W750 wave agents cannot collide on
+      // this case.
+      case 'seasonal': await withErrorContext('seasonal', () => cmdW748Seasonal(rest)); break;
+      // W749 — `kolm synthetic <gaps|coverage|generate|commit>` routes the
+      // synthetic capture augmentation dispatcher. Distinct-named
+      // (cmdW749Synthetic) so parallel W747/W748/W750 wave agents cannot
+      // collide on this case.
+      case 'synthetic': await withErrorContext('synthetic', () => cmdW749Synthetic(rest)); break;
+      // W751-W755 — `kolm vertical <list|show|register-stubs|fingerprint>`
+      // routes the 5-vertical foundation-student dispatcher. Distinct-named
+      // (cmdW751Verticals) so parallel W750/W752/W753 wave agents cannot
+      // collide on this case.
+      case 'vertical': await withErrorContext('vertical', () => cmdW751Verticals(rest)); break;
       case 'agents':     await withErrorContext('agents',     () => cmdAgents(rest)); break;
       case 'shell-init': await withErrorContext('shell-init', () => cmdShellInit(rest)); break;
       case '--version':

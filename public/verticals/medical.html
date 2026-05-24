@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Frontier AI for clinicians &middot; kolm-medical-7b foundation student &middot; kolm.ai</title>
+<meta name="description" content="kolm-medical-7b: foundation student for patient summaries, ICD-10 coding, SOAP notes, clinical decision support. Pending W751-W755 compilation. Open-source AI workbench.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Frontier AI for clinicians &middot; kolm-medical-7b &middot; kolm.ai">
+<meta property="og:description" content="Patient summaries, ICD-10 coding, SOAP notes, triage, medication checks. Foundation student pending W751-W755 compilation.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/verticals/medical">
+<link rel="canonical" href="https://kolm.ai/verticals/medical">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/design-tokens.css">
+<style>
+:root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--accent-soft:rgba(16,185,129,0.10);--pending:#d97706;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10);--pending:#b45309}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.skip-link{position:absolute;left:-9999px}
+.skip-link:focus{position:static;background:var(--accent);color:#fff;padding:8px 14px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.brand-eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 36px}
+h2{font-size:24px;font-weight:500;letter-spacing:-0.018em;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:28px 0 8px;max-width:780px}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
+li{margin:4px 0}
+table{border-collapse:collapse;width:100%;max-width:920px;margin:14px 0;font-size:13.5px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink);font-weight:500}
+.related{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+@media(max-width:820px){.related{grid-template-columns:1fr}}
+.related a{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:4px}
+.related a:hover{border-color:var(--accent-soft)}
+.related b{font-size:14px;color:var(--ink);font-weight:500}
+.related span{font-size:12.5px;color:var(--ink-mute);line-height:1.5}
+.tasks-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 18px;max-width:780px;margin:14px 0 22px}
+@media(max-width:680px){.tasks-grid{grid-template-columns:1fr}}
+.tasks-grid li{list-style:none;font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);border:1px solid var(--line);padding:8px 12px;border-radius:8px}
+.case-skel{border:1px dashed var(--line);border-radius:12px;padding:24px 24px;margin:16px 0;background:var(--bg-elev);max-width:780px}
+.case-skel h3{margin:0 0 8px;color:var(--ink)}
+.case-skel .placeholder{color:var(--ink-faint);font-style:italic;font-size:14px}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin:16px 0 28px}
+.cta{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:10px;font-family:var(--mono);font-size:13px;text-decoration:none;font-weight:500;transition:all 140ms}
+.cta--primary{background:var(--accent);color:#fff;border:1px solid var(--accent)}
+.cta--primary:hover{filter:brightness(1.05)}
+.cta--ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.cta--ghost:hover{border-color:var(--accent-soft)}
+footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
+footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.status-pill{display:inline-flex;align-items:center;gap:6px;color:var(--pending);font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor;padding:3px 9px;border-radius:999px;margin-right:8px}
+.status-pill::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor}
+.pill-good{color:#10b981;font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor;padding:1px 7px;border-radius:999px}
+.spec-row{display:grid;grid-template-columns:160px 1fr;gap:8px 18px;font-family:var(--mono);font-size:13.5px;max-width:780px;margin:10px 0 24px}
+.spec-row dt{color:var(--ink-faint);font-size:11.5px;text-transform:uppercase;letter-spacing:0.08em;padding-top:2px}
+.spec-row dd{margin:0;color:var(--ink)}
+</style>
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/docs-shell.css">
+<script defer src="/docs-shell.js"></script>
+</head>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/marketplace">Marketplace</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs/verticals">verticals</a> / medical</div>
+<p class="brand-eyebrow">Open-source AI workbench</p>
+<h1>Frontier AI for clinicians.</h1>
+
+<div style="margin:0 0 22px">
+  <span class="status-pill">pending compilation</span>
+  <span class="pill-good">w751-v1</span>
+</div>
+
+<p class="lede">Patient summaries, ICD-10 coding, SOAP notes, triage, medication interaction checks &mdash; distilled from frontier teachers into a 7B student your hospital runs on-prem behind a HIPAA-compliant firewall. <code>kolm-medical-7b</code> is the foundation student for the medical vertical; compilation is pending W757 (vertical fingerprinting) and W715 (cross-namespace transfer math).</p>
+
+<div class="cta-row">
+  <a href="/marketplace/kolm-medical-7b" class="cta cta--primary">Try the foundation student &rarr;</a>
+  <a href="/docs/verticals" class="cta cta--ghost">All 5 verticals</a>
+  <a href="/marketplace" class="cta cta--ghost">Marketplace</a>
+</div>
+
+<h2 id="spec">Foundation student spec</h2>
+<dl class="spec-row">
+  <dt>model slug</dt><dd><code>kolm-medical-7b</code></dd>
+  <dt>vertical</dt><dd>medical</dd>
+  <dt>target K-Score</dt><dd>0.90 <span class="status-pill" style="vertical-align:middle">target only</span></dd>
+  <dt>hardware target</dt><dd>rtx-4090 / 24 GB VRAM (INT4)</dd>
+  <dt>publisher</dt><dd>kolm.ai-foundation</dd>
+  <dt>status</dt><dd><strong>pending_distill</strong> &middot; blocked by W757 + W715</dd>
+</dl>
+
+<h2 id="tasks">Common tasks</h2>
+<p>The first task in this list doubles as the W737 marketplace facet task_type for the foundation listing. Subsequent tasks are the next-most-common workloads the eventual distilled student will be benchmarked against.</p>
+<ul class="tasks-grid">
+  <li>patient_summary</li>
+  <li>icd10_coding</li>
+  <li>soap_note</li>
+  <li>triage</li>
+  <li>medication_check</li>
+</ul>
+
+<h2 id="case-study">Case study skeleton</h2>
+<div class="case-skel">
+  <h3>Case study: &lt;Publish your team's W751-W757 results here&gt;</h3>
+  <p class="placeholder">When your hospital or clinic distills <code>kolm-medical-7b</code> on your own captured workload (discharge summaries, encounter notes, prior-auth requests, etc.), publish the K-Score delta + per-task accuracy + clinician-grade comparison here. PHI never leaves the firewall &mdash; only the K-Score numbers and the case summary.</p>
+  <p class="placeholder">Suggested structure: encounter count + captured volume &middot; teacher mix (with PHI redaction in the loop) &middot; per-task accuracy table (ICD-10 top-1, SOAP completeness, etc.) &middot; clinician-grade vs. resident baseline &middot; cost per encounter &middot; on-prem latency.</p>
+</div>
+
+<h2 id="how-it-ships">How this ships</h2>
+<p>Items <strong>3 + 4</strong> (marketplace listing + this landing page) are live now. Items <strong>1 + 2</strong> (vertical capture-lake fingerprint + per-vertical foundation pre-train) are blocked on W757 (fingerprinting pipeline) and W715 (cross-namespace transfer math). The marketplace stub registers with <code>pending_distill:true</code> and <code>kscore:null</code> &mdash; we never paint a fake K-Score on an uncompiled student. Clinical safety bar requires real eval against a held-out clinician-graded test set; <code>kscore:null</code> stays null until that eval runs.</p>
+
+<p>The pipeline once W757 + W715 land:</p>
+<ol>
+  <li>Fingerprint your hospital's capture lake by vertical (W757) &mdash; per-namespace token-bigram sketch, scoped to <code>vertical:'medical'</code>, with PHI redacted before fingerprinting.</li>
+  <li>Pre-train a 7B base student against the merged W751-fingerprint of medical corpora (W715 cross-namespace transfer for similar-clinic lift).</li>
+  <li>Compile to <code>kolm-medical-7b.kolm</code> with sha256-pinned bytes, signed receipt, real K-Score eval against the per-hospital holdout (clinician-graded).</li>
+  <li>Publish to <a href="/marketplace">marketplace</a> &mdash; replaces the <code>pending_</code> stub atomically.</li>
+</ol>
+
+<h2 id="api">API + CLI surface</h2>
+<table>
+  <thead><tr><th>Surface</th><th>Invocation</th></tr></thead>
+  <tbody>
+    <tr><td>API (list)</td><td><code>GET /v1/verticals</code></td></tr>
+    <tr><td>API (detail)</td><td><code>GET /v1/verticals/medical</code></td></tr>
+    <tr><td>API (fingerprint, blocked)</td><td><code>GET /v1/verticals/medical/fingerprint</code> &rarr; <code>w757_not_shipped</code> envelope</td></tr>
+    <tr><td>CLI (list)</td><td><code>kolm vertical list</code></td></tr>
+    <tr><td>CLI (show)</td><td><code>kolm vertical show medical</code></td></tr>
+    <tr><td>CLI (fingerprint)</td><td><code>kolm vertical fingerprint medical</code></td></tr>
+  </tbody>
+</table>
+
+<h2 id="next">Next steps</h2>
+<p>While <code>kolm-medical-7b</code> compiles: route your current frontier-API calls through the <a href="/capture">kolm wrapper</a>, redact PHI via the on-prem <a href="/marketplace/phi-redactor">PHI redactor</a>, and accumulate the corpus that will eventually feed the medical foundation pre-train. The marketplace listing at <a href="/marketplace/kolm-medical-7b">/marketplace/kolm-medical-7b</a> stays live so you can watch the status pill flip from <em>pending_distill</em> to <em>verified</em> when W757 + W715 ship.</p>
+
+<div class="related">
+  <a href="/verticals/legal"><b>Legal &rarr;</b><span>kolm-legal-7b: contract review, discovery, citation research.</span></a>
+  <a href="/verticals/code"><b>Code &rarr;</b><span>kolm-code-7b: review, generation, refactor with team conventions.</span></a>
+  <a href="/verticals/support"><b>Support &rarr;</b><span>kolm-support-7b: routing, response generation, escalation.</span></a>
+</div>
+
+</div></main>
+
+<footer><div class="wrap">
+ kolm.ai &middot; the AI workbench &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
+</div></footer>
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Frontier AI on your own infrastructure.</p>
+      </div>
+      <div>
+        <h4>Verticals</h4>
+        <ul><li><a href="/verticals/legal">Legal</a></li><li><a href="/verticals/medical">Medical</a></li><li><a href="/verticals/code">Code</a></li><li><a href="/verticals/finance">Finance</a></li><li><a href="/verticals/support">Support</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/marketplace">Marketplace</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

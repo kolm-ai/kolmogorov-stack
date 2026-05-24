@@ -401,6 +401,11 @@ const PUBLIC_API = (p) =>
   p === '/v1/marketplace/search' ||
   /^\/v1\/marketplace\/reviews\/[A-Za-z0-9._:-]{1,128}$/.test(p) ||
   /^\/v1\/marketplace\/[A-Za-z0-9._-]+(?:\/download)?$/.test(p) ||
+  // W751-W755 — vertical foundation-student catalog. Listing + per-id detail
+  // are public (marketing/discovery; mirrors /v1/marketplace policy). The
+  // register-stubs POST and the per-id fingerprint GET stay auth-gated above.
+  p === '/v1/verticals' ||
+  /^\/v1\/verticals\/[A-Za-z0-9_-]+$/.test(p) ||
   // W436 — public artifact verification. /v1/verify/:cid surfaces the
   // recompute-cid-from-manifest-hashes verdict so an auditor can verify
   // provenance without an account; /v1/artifact/verify-manifest is the

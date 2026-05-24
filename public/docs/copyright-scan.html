@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Copyright scan &middot; heuristic copyright detector &middot; kolm.ai</title>
+<meta name="description" content="Heuristic copyright detector for captured prompts/responses. Disney character names, Top-100 song-title n-grams, code copyright headers, SPDX lines. Local-only scan, not legal advice. W808 staged_captures post-quarantine classifier. Open-source AI workbench.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Copyright scan &middot; heuristic copyright detector &middot; kolm.ai">
+<meta property="og:description" content="Local-only heuristic copyright detector for captures. Disney names, song-title n-grams, code copyright headers. W808 staged_captures hook. Open-source AI workbench.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/docs/copyright-scan">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Copyright scan &middot; heuristic copyright detector &middot; kolm.ai">
+<meta name="twitter:description" content="Local-only heuristic copyright detector for captures. Disney names, song-title n-grams, code copyright headers.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/docs/copyright-scan">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Copyright scan: heuristic copyright detector","description":"Local-only heuristic copyright detector for captures. Disney character names, Top-100 song-title n-grams, code copyright headers, SPDX lines. W808 staged_captures post-quarantine classifier.","url":"https://kolm.ai/docs/copyright-scan","datePublished":"2026-05-24","dateModified":"2026-05-24","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<link rel="stylesheet" href="/design-tokens.css">
+<style>
+:root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--accent-soft:rgba(16,185,129,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.skip-link{position:absolute;left:-9999px}
+.skip-link:focus{position:static;background:var(--accent);color:#fff;padding:8px 14px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+header.site{padding:18px 0;border-bottom:1px solid var(--line)}
+header.site .wrap{display:flex;justify-content:space-between;align-items:center}
+header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px;flex-wrap:wrap}
+header.site nav a{color:inherit;text-decoration:none}
+header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.brand-eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 36px}
+h2{font-size:24px;font-weight:500;letter-spacing:-0.018em;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:28px 0 8px;max-width:780px}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px}
+pre code{background:none;border:none;padding:0;color:inherit;font:inherit}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
+li{margin:4px 0}
+table{border-collapse:collapse;width:100%;max-width:920px;margin:14px 0;font-size:13.5px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink);font-weight:500}
+td code{font-size:12px}
+.related{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+@media(max-width:820px){.related{grid-template-columns:1fr}}
+.related a{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:4px}
+.related a:hover{border-color:var(--accent-soft)}
+.related b{font-size:14px;color:var(--ink);font-weight:500}
+.related span{font-size:12.5px;color:var(--ink-mute);line-height:1.5}
+.metric-card{border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:14px 0;background:var(--bg-elev)}
+.metric-card h3{margin:0 0 6px}
+.metric-card .meta{font-family:var(--mono);font-size:11.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
+footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.pill-good{color:#10b981;font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor;padding:1px 7px;border-radius:999px}
+.pill-warn{color:#d97706;font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor;padding:1px 7px;border-radius:999px}
+.pill-bad{color:#dc2626;font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor;padding:1px 7px;border-radius:999px}
+.disclaimer{border:1px solid #d97706;border-radius:10px;background:rgba(217,119,6,0.06);padding:18px 22px;margin:18px 0;color:var(--ink)}
+.disclaimer strong{color:#d97706;font-weight:600}
+.chip{display:inline-block;font-family:var(--mono);font-size:11.5px;color:var(--ink);background:var(--bg-elev);border:1px solid var(--line);padding:2px 8px;margin:2px 4px 2px 0;border-radius:999px}
+</style>
+
+<link rel="stylesheet" href="/ks.css">
+<!-- ds-shell W619 -->
+<link rel="stylesheet" href="/docs-shell.css">
+<script defer src="/docs-shell.js"></script>
+
+</head>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    </div>
+  </nav>
+  <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+  </div>
+</div>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / copyright-scan</div>
+<p class="brand-eyebrow">Open-source AI workbench</p>
+<h1>Frontier AI on your own infrastructure.</h1>
+<p class="lede">Copyright scan is a <strong>heuristic</strong> copyright detector for captured prompts and responses. It runs a small pattern pack &mdash; well-known Disney character names, Top-100 song-title n-grams, code copyright headers, and SPDX license lines &mdash; and stamps a structured <code>copyright_heuristic:&lt;categories&gt;</code> reason on any staged capture that crosses the risk threshold. Same envelope is returned by <code>POST /v1/copyright/scan</code>, <code>GET /v1/copyright/queue/:namespace</code>, and the <code>kolm copyright-scan</code> CLI path. Version stamp: <code>w750-followup-v1</code>.</p>
+
+<div class="disclaimer">
+  <p style="margin:0 0 8px"><strong>Not legal advice.</strong> The heuristic flags content that <em>looks like</em> it may contain copyrighted material. A hit is a signal for human review, not a confirmed violation. The pattern packs are public knowledge (character names, song titles), not the protected works themselves. We do not bundle lyrics, prose, or licensed code. Use the result as one input to your own clearance process.</p>
+  <p style="margin:0"><strong>Local-only.</strong> Scans are 100% in-process. No text is sent to any external service, no third-party content classifier, no telemetry. The pattern packs ship as frozen arrays in <code>src/copyright-detector.js</code> &mdash; nothing leaves your machine.</p>
+</div>
+
+<h2 id="why">Why a heuristic instead of an ML classifier</h2>
+<p>A full content classifier (BERT-style copyright detector, fingerprint database lookup, dataset-membership inference) is a real product on its own and lives in a worker package, not the proxy hot path. The heuristic here is the lightweight in-process scanner that runs on every capture without adding network or model load. It catches the cases that <em>scream</em> "this might be copyrighted" &mdash; a model output that begins with <code>Copyright (c) 2024 Microsoft Corporation</code>, a chat transcript that references <em>Mickey Mouse</em>, a code snippet that carries <code>SPDX-License-Identifier: GPL-3.0-only</code>. These are decision-quality signals that justify human review; they are not the end of the analysis.</p>
+
+<p>The complementary scanner is <a href="/docs/quickstart">W708-4 capture-copyright-filter</a> in <code>src/capture-copyright-filter.js</code>: paywall boilerplate (<em>Subscribe to read more</em>, <em>All rights reserved</em>), <code>[Verse 1]</code>-style lyrics-site scrapes, and high-comma-density prose. W708-4 targets <strong>ingester content shape</strong>; the W750-followup detector here targets <strong>fingerprint-shaped content</strong>. Both run before the row reaches the canonical observations table, and a row can be flagged by either, both, or neither.</p>
+
+<h2 id="patterns">Pattern catalogs</h2>
+
+<h3>Disney character names (DISNEY_NAMES)</h3>
+<p>~30 well-known names matched case-insensitively as literal substrings:</p>
+<p style="max-width:920px">
+  <span class="chip">mickey mouse</span><span class="chip">minnie mouse</span><span class="chip">donald duck</span><span class="chip">daisy duck</span><span class="chip">goofy</span><span class="chip">pluto</span><span class="chip">elsa</span><span class="chip">anna</span><span class="chip">olaf</span><span class="chip">sven</span><span class="chip">simba</span><span class="chip">mufasa</span><span class="chip">timon</span><span class="chip">pumbaa</span><span class="chip">ariel</span><span class="chip">sebastian</span><span class="chip">flounder</span><span class="chip">aladdin</span><span class="chip">jasmine</span><span class="chip">genie</span><span class="chip">snow white</span><span class="chip">cinderella</span><span class="chip">aurora</span><span class="chip">belle</span><span class="chip">beast</span><span class="chip">tiana</span><span class="chip">rapunzel</span><span class="chip">flynn rider</span><span class="chip">merida</span><span class="chip">moana</span><span class="chip">maui</span>
+</p>
+<p>Disney character names are public knowledge but their appearance in a captured model input or output may signal user-generated derivative content. A hit is informational on its own; a hit combined with a song-title hit OR a code-copyright hit gets the row above the default <code>0.5</code> risk threshold and into the quarantine queue.</p>
+
+<h3>Lyric fingerprints (LYRIC_FINGERPRINTS)</h3>
+<p>~30 recognizable Top-100 song titles and short n-grams. The <strong>list</strong> is heuristic content &mdash; we ship the titles, not the lyrics themselves:</p>
+<table>
+  <thead><tr><th>Era / genre</th><th>Examples</th></tr></thead>
+  <tbody>
+    <tr><td>Classic rock / pop</td><td><code>hey jude</code>, <code>let it be</code>, <code>imagine all the people</code>, <code>bohemian rhapsody</code>, <code>sweet caroline</code>, <code>born to run</code>, <code>livin on a prayer</code>, <code>dont stop believin</code></td></tr>
+    <tr><td>Pop / R&amp;B canon</td><td><code>i will always love you</code>, <code>thriller michael jackson</code>, <code>billie jean</code>, <code>beat it</code>, <code>baby one more time</code></td></tr>
+    <tr><td>2010s pop</td><td><code>rolling in the deep</code>, <code>someone like you</code>, <code>shape of you</code>, <code>blank space</code>, <code>shake it off</code>, <code>old town road</code></td></tr>
+    <tr><td>2020s pop</td><td><code>flowers miley</code>, <code>as it was harry</code>, <code>watermelon sugar</code>, <code>levitating dua</code>, <code>dynamite bts</code>, <code>butter bts</code></td></tr>
+    <tr><td>Grunge / alt</td><td><code>smells like teen spirit</code>, <code>toxic britney</code></td></tr>
+    <tr><td>Other recent</td><td><code>despacito luis</code>, <code>closer chainsmokers</code>, <code>sorry justin bieber</code></td></tr>
+  </tbody>
+</table>
+<p>The pattern is <strong>title or short title-n-gram</strong>, not lyric reproduction. The presence of <em>"Hey Jude"</em> in a capture is the signal &mdash; we don't need (and don't include) the rest of the song.</p>
+
+<h3>Code copyright headers (CODE_COPYRIGHT_REGEX)</h3>
+<p>Matches <code>Copyright (c) 2023 Acme</code>, <code>Copyright (C) 2023-2025 Foo</code>, <code>copyright © 2024 Bar</code>, <code>Copyright &amp;copy; 2025 Baz</code>. Requires a 4-digit year followed by at least one letter so we don't flag bare <em>"copyright 2024"</em> boilerplate that appears in a sentence about a model's training cutoff.</p>
+
+<pre><code>// Matches: "Copyright (c) 2023 Acme Corp"
+//          "Copyright (C) 2023-2025 Foo"
+//          "copyright © 2024 Bar"
+//          "Copyright &amp;copy; 2025 Baz"
+const CODE_COPYRIGHT_REGEX = /\bcopyright\s*(?:\([cC]\)|©|&amp;copy;)?\s*\d{4}(?:-\d{4})?\s*[a-zA-Z]/;
+</code></pre>
+
+<h3>SPDX license identifier (SPDX_REGEX)</h3>
+<p>Matches the canonical <code>SPDX-License-Identifier: &lt;name&gt;</code> comment line. Code that carries an SPDX identifier almost always has a real license attached that the model may not be allowed to reproduce verbatim:</p>
+
+<pre><code>const SPDX_REGEX = /SPDX-License-Identifier:\s*[A-Za-z0-9.+-]+/;</code></pre>
+
+<h2 id="scoring">Risk score</h2>
+<p>Each hit contributes <code>0.25</code> to the risk score, capped at <code>1.0</code>. Four hits saturate the score; one hit gives <code>0.25</code>, two give <code>0.5</code>, three give <code>0.75</code>. The default quarantine threshold is <code>0.5</code> &mdash; <strong>two hits</strong> are required before the staged row gets a <code>copyright_heuristic:</code> reason. Tune via <code>opts.threshold</code> in code or via the <code>POST</code> body in the API.</p>
+
+<table>
+  <thead><tr><th>Outcome</th><th>Risk score</th><th>Hits</th><th>UI signal</th></tr></thead>
+  <tbody>
+    <tr><td>Clean</td><td><code>0.00</code></td><td>0</td><td><span class="pill-good">clean</span></td></tr>
+    <tr><td>One hit (informational)</td><td><code>0.25</code></td><td>1</td><td><span class="pill-warn">informational</span></td></tr>
+    <tr><td>Two hits (default flag)</td><td><code>0.50</code></td><td>2</td><td><span class="pill-warn">review</span></td></tr>
+    <tr><td>Three+ hits (high signal)</td><td><code>0.75+</code></td><td>3+</td><td><span class="pill-bad">quarantine</span></td></tr>
+  </tbody>
+</table>
+
+<h2 id="w808">W808 staged_captures integration</h2>
+<p>W750 (copyright filter + capture quarantine) was MERGED into W808 in the 2026-05-24 dup-cleanup. The capture-quarantine half shipped under W808: the <code>staged_captures</code> table, <a href="/account/captures/review">/account/captures/review.html</a> manual-review inbox, and <code>cmdCapturesReview --release/--quarantine</code>. This W750-followup is the remaining slice &mdash; the copyright-classifier &mdash; promoted to a single follow-up item that hooks into the same pipeline as a <strong>post-quarantine classifier</strong>.</p>
+
+<p>The wiring lives in <code>src/capture-store.js insertCapture</code>, immediately after the existing W708-4 <code>attachCopyrightFlag</code> call. When <code>classifyForQuarantine</code> returns <code>should_quarantine:true</code>, the insert path:</p>
+<ol>
+  <li>Appends <code>copyright_heuristic:&lt;categories&gt;</code> to <code>row.flag_reason</code> (semicolon-joined if a prior reason existed)</li>
+  <li>Stamps <code>row.copyright_heuristic_flagged = true</code></li>
+  <li>Stamps <code>row.copyright_heuristic_risk = &lt;risk_score&gt;</code></li>
+  <li>Stamps <code>row.copyright_heuristic_hits</code> with the matched kinds + values</li>
+</ol>
+
+<p>The W808 <code>staged_captures</code> table picks up all four fields when the staged copy is taken (because we mutate the row in place before <code>insertStagedCapture</code> reads it). The manual-review UI surfaces them next to the existing <code>anomaly_flagged</code> + 3&sigma; metrics so an operator can release, block, or accept the row with both signals visible.</p>
+
+<p><strong>Gating.</strong> The detector is enabled by default. Set <code>KOLM_W750_COPYRIGHT_DETECTOR=off</code> to skip it entirely &mdash; the W808 happy-path becomes byte-stable, no <code>flag_reason</code> mutations, no sidecar fields. Useful when an operator wants the heuristic disabled without redeploying.</p>
+
+<h2 id="envelope">Envelope shape</h2>
+<p>Same envelope is returned by <code>POST /v1/copyright/scan</code> and the <code>kolm copyright-scan text</code> CLI path. Field stability is part of the contract.</p>
+
+<pre><code>{
+  "ok": true,
+  "hits": [
+    { "kind": "disney_character", "matched": "mickey mouse", "index": 12, "side": "input" },
+    { "kind": "spdx",             "matched": "SPDX-License-Identifier: MIT", "index": 0, "side": "output" }
+  ],
+  "risk_score": 0.5,
+  "scanned_chars": 1024,
+  "version": "w750-followup-v1"
+}
+</code></pre>
+
+<p>The <code>GET /v1/copyright/queue/:namespace</code> envelope returns the captures that carry a <code>copyright_heuristic:</code> tag in their <code>staged_captures.flag_reason</code>, newest first:</p>
+
+<pre><code>{
+  "ok": true,
+  "namespace": "support",
+  "total": 3,
+  "captures": [
+    {
+      "staged_capture_id": "stg_abc123",
+      "capture_id": "obs_xyz789",
+      "namespace": "support",
+      "staged_at": "2026-05-24T18:42:11.503Z",
+      "quarantine_state": "pending",
+      "flag_reason": "copyright_heuristic:disney_character,spdx",
+      "copyright_heuristic_risk": 0.5,
+      "copyright_heuristic_hits": [
+        { "kind": "disney_character", "matched": "mickey mouse", "side": "input" },
+        { "kind": "spdx",             "matched": "SPDX-License-Identifier: MIT", "side": "output" }
+      ]
+    }
+  ],
+  "version": "w750-followup-v1"
+}
+</code></pre>
+
+<h2 id="api">API + CLI surface</h2>
+
+<table>
+  <thead><tr><th>Surface</th><th>Invocation</th></tr></thead>
+  <tbody>
+    <tr><td>CLI (literal text)</td><td><code>kolm copyright-scan text "&lt;text&gt;"</code></td></tr>
+    <tr><td>CLI (persisted capture)</td><td><code>kolm copyright-scan capture &lt;capture_id&gt;</code></td></tr>
+    <tr><td>CLI (queue listing)</td><td><code>kolm copyright-scan queue &lt;namespace&gt;</code></td></tr>
+    <tr><td>API (text or capture_id)</td><td><code>POST /v1/copyright/scan</code> body <code>{text}</code> or <code>{capture_id}</code></td></tr>
+    <tr><td>API (queue)</td><td><code>GET /v1/copyright/queue/:namespace</code></td></tr>
+    <tr><td>Manual review inbox</td><td><a href="/account/captures/review">/account/captures/review</a></td></tr>
+  </tbody>
+</table>
+
+<p>CLI exit codes are honest: <code>0</code> when the scan finds no hits, <code>3</code> when hits are found (informational &mdash; the operator should review), <code>2</code> on real errors (auth missing, bad arguments, network failure). The hits-found path is intentionally <strong>not</strong> exit-1 so CI can keep "review needed" separate from "build failed".</p>
+
+<h2 id="quickstart">Quickstart</h2>
+
+<pre><code># Local scan with no auth (text is never sent off your machine)
+kolm copyright-scan text "Copyright (c) 2024 Acme. SPDX-License-Identifier: MIT"
+# → {"ok":true,"hits":[{"kind":"code_copyright",...},{"kind":"spdx",...}],
+#    "risk_score":0.5, ...}
+# exits 3 (hits found, informational)
+
+# Look up the verdict for a staged capture
+kolm copyright-scan capture stg_abc123
+
+# List the copyright-flagged staged captures for a namespace
+kolm copyright-scan queue support
+</code></pre>
+
+<p>Pair this with <a href="/docs/drift-alert">drift-alert</a> for production-vs-training distribution drift, and with the W708-4 paywall-shape detector that runs in the same insert path. See <a href="/docs/quickstart">quickstart</a> for the broader capture pipeline.</p>
+
+<div class="related">
+  <a href="/account/captures/review"><b>Manual review inbox &rarr;</b><span>Release, block, or accept staged captures &mdash; copyright + anomaly signals side by side.</span></a>
+  <a href="/docs/drift-alert"><b>Drift alert &rarr;</b><span>Production-vs-training distribution drift on the same capture stream.</span></a>
+  <a href="/docs/quickstart"><b>Quickstart &rarr;</b><span>Capture, distill, compile, deploy &mdash; the whole pipeline in one page.</span></a>
+</div>
+
+</div></main>
+
+<footer><div class="wrap">
+ kolm.ai &middot; the AI workbench &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
+</div></footer>
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Frontier AI on your own infrastructure.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/integrations">Integrations</a></li><li><a href="/docs/api">API reference</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
