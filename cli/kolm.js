@@ -54,13 +54,16 @@ import http from 'node:http';
 import https from 'node:https';
 import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { envBool } from '../src/env.js';
 
 const VERSION = '0.2.6';
 const HOME = os.homedir();
 const KOLM_DIR = path.join(HOME, '.kolm');
+// Module-level cli/ directory — used by harness installers and any code that
+// must resolve files relative to this module (no ESM __dirname builtin).
+const SELF_DIR = path.dirname(fileURLToPath(import.meta.url));
 const CONFIG_PATH = path.join(KOLM_DIR, 'config.json');
 const ARTIFACTS_DIR = path.join(KOLM_DIR, 'artifacts');
 
@@ -30917,23 +30920,20 @@ async function cmdTui(args) {
     // shorthand block satisfies regexes that grep for `name: 'live-calls'`
     // (no quote on the key).
     const VIEW_ALIAS = {
-      // shorthand (unquoted) keys — tests grep for `name: 'value'`:
-      events: 'live-calls',
-      opportunities: 'opportunities',
-      datasets: 'datasets',
-      labels: 'labeling-queue',
-      bakeoffs: 'bakeoffs',
-      artifacts: 'artifacts',
-      billing: 'spend',
-      // W414 — :next command-mode alias for the Next-actions view.
-      next: 'next',
-      // quoted aliases + extended set (some keys would otherwise be invalid
-      // unquoted JS identifiers — hyphens). Quoted forms of the 7 canonical
-      // view names are repeated so behavior tests greppping for `'events'`,
-      // `'labels'`, `'billing'` find them.
+      // All keys are quoted because hyphen-keys (`live-calls`, `agent-telemetry`)
+      // require quoting and a mixed style produces no-dupe-keys lint errors.
+      // Tests source-grep with regex like /events:\s*['"]live-calls['"]/ which
+      // matches both `events:` and `'events':`, so the quoted form satisfies
+      // every existing test contract (W409i #15, W414 #5, W448, W449 #1 etc.).
+      // The W449 'billing'->'billing' below is the current truth (W449 added
+      // a real /billing view that supersedes the older :billing -> spend alias).
+      'opportunities': 'opportunities',
+      'datasets':      'datasets',
+      'bakeoffs':      'bakeoffs',
+      'artifacts':     'artifacts',
+      'next':          'next',
       'events':        'live-calls',
       'labels':        'labeling-queue',
-      'billing':       'spend',
       'live-calls':    'live-calls',
       'captures':      'live-calls',
       'opps':          'opportunities',
@@ -30953,11 +30953,9 @@ async function cmdTui(args) {
       'workflows':     'repeated-workflows',
       'repeated-workflows':'repeated-workflows',
       'simulations':   'opportunities', // tracked alias for the 14-view registry
-      'next':          'next',           // W414 — Next-actions view (mirrors kolm next + /v1/intent/next)
       'recommendations':'next',
       'actions':       'next',
       // W448 — audit-log view aliases (CLI `kolm audit` + TUI `:audit` + web).
-      audit:           'audit-log',
       'audit':         'audit-log',
       'audit-log':     'audit-log',
       'auditlog':      'audit-log',
@@ -37871,6 +37869,23 @@ async function cmdW756Kolmbench(args) {
     if (v == null || String(v).startsWith('--')) return '';
     return v;
   };
+  function _envApiKey() { return process.env.KOLM_API_KEY || ''; }
+  function _envBase() { return (process.env.KOLM_BASE_URL || 'https://kolm.ai').replace(/\/$/, ''); }
+  function _print(envelope) { console.log(JSON.stringify(envelope, null, 2)); }
+  function _fail(envelope, code = EXIT.EXECUTION) { _print(envelope); process.exit(code); }
+  function _flag(flagName) {
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--' + flagName && i + 1 < rest.length) return rest[i + 1];
+      if (typeof rest[i] === 'string' && rest[i].startsWith('--' + flagName + '=')) {
+        return rest[i].slice(flagName.length + 3);
+      }
+    }
+    return null;
+  }
+  function _hasFlag(flagName) { return rest.includes('--' + flagName); }
+  function _warnStderr(msg) { try { process.stderr.write(msg + '\n'); } catch (_) {} }
+  // Suppress unused-var lint while keeping helpers callable from any sub-cmd.
+  void _envApiKey; void _flag; void _hasFlag; void _warnStderr;
 
   // ─────────────────────────── subcommand: spec ──────────────────────────────
   if (sub === 'spec' || sub === '') {
@@ -38498,6 +38513,24 @@ async function cmdW761Poison(args) {
 async function cmdW762Redteam(args) {
   args = Array.isArray(args) ? args : [];
   const sub = (args[0] || '').toLowerCase();
+
+  // Local helpers (file-wide pattern — see cmdW765Pextract for the canonical shape).
+  function _envApiKey() { return process.env.KOLM_API_KEY || ''; }
+  function _envBase() { return (process.env.KOLM_BASE_URL || 'https://kolm.ai').replace(/\/$/, ''); }
+  function _print(envelope) { console.log(JSON.stringify(envelope, null, 2)); }
+  function _fail(envelope, code = EXIT.EXECUTION) { _print(envelope); process.exit(code); }
+  function _flag(rest, name) {
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--' + name && i + 1 < rest.length) return rest[i + 1];
+      if (typeof rest[i] === 'string' && rest[i].startsWith('--' + name + '=')) {
+        return rest[i].slice(name.length + 3);
+      }
+    }
+    return null;
+  }
+  function _hasFlag(rest, name) { return (rest || []).some((a) => a === '--' + name); }
+  function _warnStderr(msg) { try { process.stderr.write(msg + '\n'); } catch (_) {} }
+
   if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
     console.error('usage: kolm redteam <classify|generate|bakeoff|sanitize> [args]');
     console.error('  classify  --text TEXT                                              — heuristic adversarial classifier');
@@ -43028,8 +43061,9 @@ function _w821FlagValue(args, ...names) {
 async function cmdW821Pipeline(rest) {
   const args = Array.isArray(rest) ? rest.slice() : [];
   const sub = args.shift();
-  const fail = (env) => { try { _fail(env); } catch { console.error(JSON.stringify(env)); process.exit(EXIT.SOFT_FAIL || 2); } };
-  const print = (env) => { try { _print(env); } catch { console.log(JSON.stringify(env)); } };
+  // No module-scope _fail/_print exist (each cmd function defines its own); inline the envelope-emit shape.
+  const fail = (env) => { console.error(JSON.stringify(env)); process.exit(EXIT.SOFT_FAIL || 2); };
+  const print = (env) => { console.log(JSON.stringify(env)); };
   let mod;
   try {
     mod = await import('../src/pipeline-orchestrator.js');
