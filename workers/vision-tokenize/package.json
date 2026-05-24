@@ -1,0 +1,28 @@
+{
+  "name": "@kolm/vision-tokenize-worker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Isolated kolm vision tokenizer worker. Tokenizes raw image bytes into CLIP / SigLIP patch-embedding token arrays for the W771 VLM distill trainer. Heavy ML deps (transformers + torch + Pillow) live OUTSIDE this Node worker, in an opt-in Python process. Root kolm install stays light. When the Python toolchain or the requested CLIPProcessor model is not on disk the worker emits an honest no_detector_installed envelope -- it NEVER silently invents patch token counts.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "tokenize.mjs",
+  "bin": {
+    "kolm-vision-tokenize-worker": "tokenize.mjs"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "doctor": "node tokenize.mjs --doctor"
+  },
+  "dependencies": {},
+  "optionalDependencies": {},
+  "external": {
+    "processors": {
+      "default_model": "openai/clip-vit-large-patch14",
+      "default_patch_token_count": 256,
+      "default_image_size": 224,
+      "note": "Default processor is CLIPProcessor('openai/clip-vit-large-patch14'): 224x224 input, 14x14 patch grid -> 256 patch tokens (plus a CLS token at index 0 -> 257 sequence positions, hidden_size 1024). Without `transformers` + `torch` + `Pillow` installed Python-side (or a tokenizer wired via $KOLM_VISION_TOKENIZE_CMD), the worker returns {ok:false, error:'no_detector_installed', install_hint, patch_token_count:null}. Install path: pip install transformers torch Pillow; OR set $KOLM_VISION_TOKENIZE_CMD to a binary that accepts --path <file> --model <name> --json and emits the W771b envelope on stdout."
+    }
+  }
+}

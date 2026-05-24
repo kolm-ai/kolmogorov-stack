@@ -18442,5 +18442,258 @@ res.json({
     }
   });
 
+  // =====================================================================
+  // W772b — Audio tokenizer worker (Whisper mel/BPE).
+  //
+  // Wraps workers/audio-tokenize/tokenize.mjs via src/audio-tokenize.js so
+  // the trainer + audit harness can ask the API for real mel-spectrogram
+  // patch hashes + BPE token ids from a captured audio clip without each
+  // call site reaching into the worker directly.
+  //
+  //   POST /v1/audio/tokenize
+  //     Auth-gated, tenant-scoped. Body:
+  //       { path?, uri?, audio_base64?, model?, max_bytes?,
+  //         with_mel?, with_text_tokens? }
+  //     Returns the W772b envelope ({ok, kind:'audio', tokenizer, model,
+  //     duration_ms, mel_frame_count, mel_feature_dim, mel_sha256,
+  //     text_token_count, text_token_sample, text_sha256, audio_sha256,
+  //     install_hint?, version}). 200 on ok:true; 400 on no_audio_source
+  //     / bad_args; 200 on no_detector_installed (honest empty envelope,
+  //     never silent passthrough); 500 only on worker spawn failure.
+  //
+  //   GET  /v1/audio/tokenize/doctor
+  //     Auth-gated. Returns the worker doctor envelope - reports python3
+  //     presence + transformers/torch/librosa/soundfile availability +
+  //     which tokenizer command is wired.
+  // =====================================================================
+  r.post('/v1/audio/tokenize', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./audio-tokenize.js');
+      const body = (req.body && typeof req.body === 'object') ? req.body : {};
+      const hasSource = !!(body.path || body.uri || body.audio_base64);
+      if (!hasSource) {
+        return res.status(400).json({
+          ok: false,
+          error: 'no_audio_source',
+          hint: 'POST body must carry one of {path, uri, audio_base64}',
+          version: mod.AUDIO_TOKENIZE_VERSION,
+        });
+      }
+      const envelope = await mod.tokenizeAudio({
+        path: typeof body.path === 'string' ? body.path : null,
+        uri: typeof body.uri === 'string' ? body.uri : null,
+        audio_base64: typeof body.audio_base64 === 'string' ? body.audio_base64 : null,
+        model: typeof body.model === 'string' ? body.model : undefined,
+        max_bytes: Number.isFinite(Number(body.max_bytes)) ? Number(body.max_bytes) : undefined,
+        with_mel: body.with_mel !== false,
+        with_text_tokens: body.with_text_tokens !== false,
+      });
+      // 200 on honest no_detector_installed envelope. The operator gets
+      // an install_hint - this is the contract from the W462/W464 worker
+      // pattern (never silent passthrough).
+      return res.status(200).json(envelope);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'audio_tokenize_error',
+        detail: String(e && e.message || e),
+        version: 'w772b-v1',
+      });
+    }
+  });
+
+  r.get('/v1/audio/tokenize/doctor', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./audio-tokenize.js');
+      const envelope = await mod.getAudioTokenizeDoctor();
+      return res.status(200).json(envelope);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'audio_tokenize_doctor_error',
+        detail: String(e && e.message || e),
+        version: 'w772b-v1',
+      });
+    }
+  });
+
+  // =====================================================================
+  // W771b — VLM tokenizer worker (CLIP/SigLIP patches).
+  //
+  // Wraps workers/vision-tokenize/tokenize.mjs via src/vision-tokenize.js so
+  // the W771 VLM distill trainer + audit harness can ask the API for real
+  // CLIP / SigLIP patch token counts (+ patches_sha256) from a captured
+  // image without each call site reaching into the worker directly. Mirrors
+  // the W462 / W464 / W772b worker-shim pattern exactly: heavy ML deps
+  // (transformers + torch + Pillow) live in an opt-in Python process,
+  // root install stays light, honest no_detector_installed envelope when
+  // the toolchain is missing.
+  //
+  //   POST /v1/vlm/tokenize
+  //     Auth-gated, tenant-scoped. Body:
+  //       { path?, uri?, url?, image_base64?, model?, max_bytes? }
+  //     Returns the W771b envelope ({ok, kind:'vision', tokenizer, model,
+  //     patch_token_count, patch_token_dim, cls_token_present,
+  //     image_sha256, patches_sha256, install_hint?, version}).
+  //     400 on no_image_source / bad_args.
+  //     200 on no_detector_installed (honest empty envelope -- never
+  //     silent passthrough; the operator gets an install_hint).
+  //     500 only on worker spawn failure.
+  //
+  //   GET /v1/vlm/tokenize/doctor
+  //     Auth-gated. Returns the worker doctor envelope -- reports python3
+  //     presence + transformers/torch/Pillow availability + which
+  //     tokenizer command is wired.
+  // =====================================================================
+  r.post('/v1/vlm/tokenize', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./vision-tokenize.js');
+      const body = (req.body && typeof req.body === 'object') ? req.body : {};
+      const hasSource = !!(body.path || body.uri || body.url || body.image_base64);
+      if (!hasSource) {
+        return res.status(400).json({
+          ok: false,
+          error: 'no_image_source',
+          hint: 'POST body must carry one of {path, uri, url, image_base64}',
+          version: mod.VISION_TOKENIZE_VERSION,
+        });
+      }
+      const envelope = await mod.tokenizeImage({
+        path: typeof body.path === 'string' ? body.path : null,
+        uri: typeof body.uri === 'string' ? body.uri : null,
+        url: typeof body.url === 'string' ? body.url : null,
+        image_base64: typeof body.image_base64 === 'string' ? body.image_base64 : null,
+        model: typeof body.model === 'string' ? body.model : undefined,
+        max_bytes: Number.isFinite(Number(body.max_bytes)) ? Number(body.max_bytes) : undefined,
+      });
+      // 200 on honest no_detector_installed envelope. The operator gets
+      // an install_hint -- this is the contract from the W462/W464/W772b
+      // worker pattern (never silent passthrough).
+      return res.status(200).json(envelope);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'vision_tokenize_error',
+        detail: String(e && e.message || e),
+        version: 'w771b-v1',
+      });
+    }
+  });
+
+  r.get('/v1/vlm/tokenize/doctor', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./vision-tokenize.js');
+      const envelope = await mod.getVisionTokenizeDoctor();
+      return res.status(200).json(envelope);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'vision_tokenize_doctor_error',
+        detail: String(e && e.message || e),
+        version: 'w771b-v1',
+      });
+    }
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // W773b — Video tokenizer worker (frame-patch tokens)
+  //
+  // Wraps workers/video-tokenize/tokenize.mjs via src/video-tokenize.js so
+  // the W773 trainer + audit harness can ask the API for real LLaVA-NeXT-
+  // Video / Video-ViT / InternVL2 patch tokens from a captured video clip
+  // without each call site reaching into the worker directly. Mirrors the
+  // W462 / W464 / W771b / W772b worker-shim pattern: heavy ML deps
+  // (transformers + torch + decord/av + Pillow + vision-model weights)
+  // live in an opt-in Python process, root install stays light, honest
+  // no_detector_installed envelope when the toolchain is missing.
+  //
+  //   POST /v1/video/tokenize
+  //     Auth-gated, tenant-scoped. Body:
+  //       { path?, uri?, video_base64?, model?, sampling_strategy?,
+  //         num_frames?, max_bytes? }
+  //     Returns the W773b envelope ({ok, kind:'video', tokenizer, model,
+  //     duration_ms, fps, sampled_frame_count, patch_tokens_per_frame,
+  //     total_patch_tokens, patch_token_dim, sampling_strategy,
+  //     video_sha256, frames_sha256, install_hint?, version, tenant_id}).
+  //     400 on invalid_sampling_strategy or no_video_source.
+  //     200 on no_detector_installed (honest empty envelope, never silent
+  //     passthrough).
+  //     500 only on worker spawn failure.
+  //
+  //   GET /v1/video/tokenize/doctor
+  //     Auth-gated. Returns the worker doctor envelope -- reports python3
+  //     presence + transformers/torch/decord/av/PIL availability + which
+  //     tokenizer command is wired.
+  // ═══════════════════════════════════════════════════════════════════════
+  r.post('/v1/video/tokenize', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./video-tokenize.js');
+      const body = (req.body && typeof req.body === 'object') ? req.body : {};
+      // Cheap shape validation up-front (avoids unnecessary worker spawn).
+      if (body.sampling_strategy != null &&
+          !mod.SAMPLING_STRATEGIES.includes(body.sampling_strategy)) {
+        return res.status(400).json({
+          ok: false,
+          error: 'invalid_sampling_strategy',
+          hint: 'sampling_strategy must be one of ' + JSON.stringify(Array.from(mod.SAMPLING_STRATEGIES)),
+          supported: Array.from(mod.SAMPLING_STRATEGIES),
+          version: mod.VIDEO_TOKENIZE_VERSION,
+        });
+      }
+      const hasSource = !!(body.path || body.uri || body.video_base64);
+      if (!hasSource) {
+        return res.status(400).json({
+          ok: false,
+          error: 'no_video_source',
+          hint: 'POST body must carry one of {path, uri, video_base64}',
+          version: mod.VIDEO_TOKENIZE_VERSION,
+        });
+      }
+      const envelope = await mod.tokenizeVideo({
+        path: typeof body.path === 'string' ? body.path : undefined,
+        uri: typeof body.uri === 'string' ? body.uri : undefined,
+        video_base64: typeof body.video_base64 === 'string' ? body.video_base64 : undefined,
+        model: typeof body.model === 'string' ? body.model : undefined,
+        sampling_strategy: typeof body.sampling_strategy === 'string' ? body.sampling_strategy : undefined,
+        num_frames: Number.isFinite(Number(body.num_frames)) ? Number(body.num_frames) : undefined,
+        max_bytes: Number.isFinite(Number(body.max_bytes)) ? Number(body.max_bytes) : undefined,
+      });
+      // W411 defense-in-depth — stamp tenant_id on the response so audits
+      // can verify the fence held.
+      envelope.tenant_id = req.tenant_record.id;
+      // 200 on honest no_detector_installed envelope. Operator gets the
+      // install_hint -- never silent passthrough.
+      return res.status(200).json(envelope);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'video_tokenize_error',
+        detail: String(e && e.message || e),
+        version: 'w773b-v1',
+      });
+    }
+  });
+
+  r.get('/v1/video/tokenize/doctor', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./video-tokenize.js');
+      const envelope = await mod.getVideoTokenizeDoctor();
+      return res.status(200).json(envelope);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'video_tokenize_doctor_error',
+        detail: String(e && e.message || e),
+        version: 'w773b-v1',
+      });
+    }
+  });
+
   return r;
 }

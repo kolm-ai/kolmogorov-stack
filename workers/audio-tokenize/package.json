@@ -1,0 +1,27 @@
+{
+  "name": "@kolm/audio-tokenize-worker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Isolated kolm WhisperProcessor audio tokenizer. Spawns an external Python tokenizer (default: KOLM_AUDIO_TOKENIZE_CMD env override OR kolm-audio-tokenize on PATH OR python3 ~/.kolm/scripts/audio-tokenize.py) to extract Whisper-style mel-spectrogram features (80-dim x ~1500 frames for 30s of audio at 50ms hops) and BPE text tokens from a transcribed audio file. Heavy Python deps (transformers, torch, librosa, soundfile, whisper-large-v3 model weights) live OUTSIDE this Node package - root kolm install stays light. When the external tokenizer is missing the worker emits an honest install_hint envelope with mel_frame_count=null + text_token_count=null; it NEVER fabricates a mel/BPE shape it could not compute.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "tokenize.mjs",
+  "bin": {
+    "kolm-audio-tokenize-worker": "tokenize.mjs"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "doctor": "node tokenize.mjs --doctor"
+  },
+  "dependencies": {},
+  "optionalDependencies": {},
+  "external": {
+    "processors": {
+      "default_model": "openai/whisper-large-v3",
+      "note": "Production audio tokenization requires an external command that loads a Whisper processor + model. Default search order: $KOLM_AUDIO_TOKENIZE_CMD env override (single binary or JSON array of [cmd, ...args]), then `kolm-audio-tokenize` on PATH, then `~/.kolm/scripts/audio-tokenize.py` invoked via python3. The command MUST accept --path <audio> [--model NAME] [--with-mel] [--with-text-tokens] [--max-bytes N] and emit one JSON line on stdout with the W772b envelope shape ({ok, kind:'audio', tokenizer, model, duration_ms, mel_frame_count, mel_feature_dim, mel_sha256, text_token_count, text_token_sample, text_sha256, audio_sha256}). Without it the worker returns {ok:false, error:'no_detector_installed', install_hint, mel_frame_count:null, text_token_count:null} so the caller knows what's missing. The default Whisper processor (openai/whisper-large-v3) expects 30s mono 16kHz PCM and emits 1500 mel frames at 80 feature dims; the BPE text-side tokenizer is the standard Whisper multilingual vocab."
+    },
+    "python_requirements": "transformers>=4.40, torch>=2.0 (CPU or CUDA), librosa>=0.10, soundfile>=0.12. Optional: openai-whisper for an end-to-end transcription fallback when WhisperProcessor.batch_decode is not available."
+  }
+}

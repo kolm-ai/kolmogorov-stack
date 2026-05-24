@@ -38547,8 +38547,8 @@ async function cmdW769Residency(args) {
 // (W772 audio / W773 video / W774 xlang) can land their edits without
 // merge-conflicting on the COMPLETION_VERBS literal array.
 COMPLETION_VERBS.push('vlm', 'vision');
-COMPLETION_SUBS.vlm    = ['detect', 'bakeoff', 'captures'];
-COMPLETION_SUBS.vision = ['detect', 'bakeoff', 'captures'];
+COMPLETION_SUBS.vlm    = ['detect', 'bakeoff', 'captures', 'tokenize', 'tokenize-doctor'];
+COMPLETION_SUBS.vision = ['detect', 'bakeoff', 'captures', 'tokenize', 'tokenize-doctor'];
 
 // =============================================================================
 // W771 — Vision-language capture + bake-off dispatcher.
@@ -38742,8 +38742,104 @@ async function cmdW771Vlm(args) {
     return;
   }
 
-  console.error('usage: kolm vlm <detect|bakeoff|captures> [args]');
+  // ──────────────────────── subcommand: tokenize (W771b) ────────────────────
+  // W771b -- spawn the workers/vision-tokenize worker (CLIP / SigLIP patches).
+  // Lazy-imports src/vision-tokenize.js. Always prints the W771b envelope.
+  if (sub === 'tokenize') {
+    const rest = args.slice(1);
+    await _w771bTokenize(rest);
+    return;
+  }
+
+  // ──────────────────────── subcommand: tokenize-doctor (W771b) ─────────────
+  // W771b -- report whether the vision-tokenize worker has its toolchain
+  // wired (python3 + transformers + torch + Pillow OR $KOLM_VISION_TOKENIZE_CMD).
+  if (sub === 'tokenize-doctor') {
+    const rest = args.slice(1);
+    await _w771bTokenizeDoctor(rest);
+    return;
+  }
+
+  console.error('usage: kolm vlm <detect|bakeoff|captures|tokenize|tokenize-doctor> [args]');
   process.exit(EXIT.BAD_ARGS);
+}
+
+// W771b -- vlm tokenize helper. Lazy-imports src/vision-tokenize.js. Scoped
+// inside the W771 family (never a new top-level dispatcher) so parallel
+// W772 audio / W773 video / W774 xlang wave agents do not collide.
+async function _w771bTokenize(rest) {
+  const _flag = (arr, name) => {
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i] === '--' + name && i + 1 < arr.length) return arr[i + 1];
+      if (typeof arr[i] === 'string' && arr[i].startsWith('--' + name + '=')) {
+        return arr[i].slice(name.length + 3);
+      }
+    }
+    return null;
+  };
+  const positional = rest.find((a) => !a.startsWith('--'));
+  const model = _flag(rest, 'model');
+  const maxBytes = _flag(rest, 'max-bytes');
+
+  const opts = {};
+  if (model)    opts.model = model;
+  if (maxBytes) opts.max_bytes = Number(maxBytes);
+  if (positional) {
+    if (/^https?:\/\//i.test(positional))      opts.url  = positional;
+    else if (/^file:/.test(positional))        opts.uri  = positional;
+    else                                       opts.path = positional;
+  } else {
+    const pPath = _flag(rest, 'path');
+    const pUri  = _flag(rest, 'uri');
+    const pUrl  = _flag(rest, 'url');
+    if (pPath) opts.path = pPath;
+    if (pUri)  opts.uri  = pUri;
+    if (pUrl)  opts.url  = pUrl;
+  }
+
+  let env;
+  try {
+    const mod = await import('../src/vision-tokenize.js');
+    env = await mod.tokenizeImage(opts);
+  } catch (e) {
+    env = {
+      ok: false,
+      kind: 'vision',
+      error: 'tokenize_failed',
+      detail: String(e && e.message || e),
+      version: 'w771b-v1',
+      tokenizer: null,
+      model: model || 'openai/clip-vit-large-patch14',
+      patch_token_count: null,
+      patch_token_dim: null,
+      cls_token_present: null,
+      image_sha256: null,
+      patches_sha256: null,
+    };
+  }
+  console.log(JSON.stringify(env, null, 2));
+  if (!env.ok) process.exit(EXIT.EXECUTION);
+}
+
+// W771b -- vlm tokenize-doctor helper. Lazy-imports src/vision-tokenize.js.
+// Always exits 0 -- the envelope tells the operator what's missing.
+async function _w771bTokenizeDoctor(_rest) {
+  let env;
+  try {
+    const mod = await import('../src/vision-tokenize.js');
+    env = await mod.getVisionTokenizeDoctor();
+  } catch (e) {
+    env = {
+      ok: false,
+      spec: 'kolm-vision-tokenize-worker-doctor',
+      version: 'w771b-v1',
+      error: 'doctor_failed',
+      detail: String(e && e.message || e),
+      ready: false,
+      tokenizer: { ok: false, name: null, source: null, install_hint: 'install python3 + transformers + torch + Pillow, OR set $KOLM_VISION_TOKENIZE_CMD' },
+    };
+  }
+  console.log(JSON.stringify(env, null, 2));
 }
 
 // W772 — COMPLETION entries appended post-literal so a parallel agent on the
@@ -38751,7 +38847,7 @@ async function cmdW771Vlm(args) {
 // conflict on the literal array. `audio` is the only top-level verb the W772
 // wave ships.
 COMPLETION_VERBS.push('audio');
-COMPLETION_SUBS.audio = ['detect', 'bakeoff', 'captures'];
+COMPLETION_SUBS.audio = ['detect', 'bakeoff', 'captures', 'tokenize', 'tokenize-doctor'];
 
 // =============================================================================
 // W772 — Audio capture + audio bake-off dispatcher (transcript + intent).
@@ -38820,10 +38916,12 @@ async function cmdW772Audio(args) {
   }
 
   if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
-    console.error('usage: kolm audio <detect|bakeoff|captures> [args]');
+    console.error('usage: kolm audio <detect|bakeoff|captures|tokenize|tokenize-doctor> [args]');
     console.error('  detect                                    # reads chat-message JSON from stdin');
     console.error('  bakeoff <artifact_path> [--namespace ns] [--max N] --confirm');
     console.error('  captures [--namespace ns] [--limit N]');
+    console.error('  tokenize <path|uri> [--model NAME] [--with-mel] [--with-text-tokens] [--json]   # W772b');
+    console.error('  tokenize-doctor [--json]                                                          # W772b');
     process.exit(EXIT.BAD_ARGS);
     return;
   }
@@ -38944,8 +39042,110 @@ async function cmdW772Audio(args) {
     return;
   }
 
-  console.error('usage: kolm audio <detect|bakeoff|captures> [args]');
+  // ──────────────────────── subcommand: tokenize (W772b) ────────────────────
+  if (sub === 'tokenize') {
+    return _w772bTokenize(args.slice(1));
+  }
+
+  // ──────────────────────── subcommand: tokenize-doctor (W772b) ─────────────
+  if (sub === 'tokenize-doctor') {
+    return _w772bTokenizeDoctor(args.slice(1));
+  }
+
+  console.error('usage: kolm audio <detect|bakeoff|captures|tokenize|tokenize-doctor> [args]');
   process.exit(EXIT.BAD_ARGS);
+}
+
+// =============================================================================
+// W772b — Audio tokenizer worker (Whisper mel/BPE) CLI helpers.
+//
+// Scoped to the cmdW772Audio function family so parallel W771b vision and
+// W773b video wave agents do not collide on these symbols.
+// =============================================================================
+async function _w772bTokenize(rest) {
+  function _flag(r, name) {
+    for (let i = 0; i < r.length; i++) {
+      if (r[i] === '--' + name && i + 1 < r.length) return r[i + 1];
+      if (typeof r[i] === 'string' && r[i].startsWith('--' + name + '=')) {
+        return r[i].slice(name.length + 3);
+      }
+    }
+    return null;
+  }
+  function _hasFlag(r, name) {
+    return Array.isArray(r) && r.includes('--' + name);
+  }
+
+  // First positional that does not start with '--' is the audio path/uri.
+  let source = null;
+  for (const t of rest) {
+    if (typeof t === 'string' && !t.startsWith('--')) { source = t; break; }
+  }
+  source = source || _flag(rest, 'path') || _flag(rest, 'uri');
+
+  if (!source) {
+    console.log(JSON.stringify({
+      ok: false,
+      error: 'no_audio_source',
+      hint: 'usage: kolm audio tokenize <path|uri> [--model NAME] [--with-mel] [--with-text-tokens] [--json]',
+      version: 'w772b-v1',
+    }, null, 2));
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+
+  const looksLikeUri = /^file:[a-f0-9]{8,}\.[a-z0-9]+$/i.test(source);
+  const model = _flag(rest, 'model') || 'openai/whisper-large-v3';
+  const maxBytes = _flag(rest, 'max-bytes');
+  const withMel = _hasFlag(rest, 'with-mel') || !_hasFlag(rest, 'without-mel');
+  const withText = _hasFlag(rest, 'with-text-tokens') || !_hasFlag(rest, 'without-text-tokens');
+
+  let mod;
+  try {
+    mod = await import('../src/audio-tokenize.js');
+  } catch (e) {
+    console.log(JSON.stringify({
+      ok: false,
+      error: 'import_failed',
+      detail: String(e && e.message || e),
+      version: 'w772b-v1',
+    }, null, 2));
+    process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  const envelope = await mod.tokenizeAudio({
+    path: looksLikeUri ? null : source,
+    uri: looksLikeUri ? source : null,
+    model,
+    max_bytes: maxBytes ? Number(maxBytes) : undefined,
+    with_mel: withMel,
+    with_text_tokens: withText,
+  });
+  console.log(JSON.stringify(envelope, null, 2));
+  if (!envelope.ok) process.exit(EXIT.EXECUTION);
+}
+
+async function _w772bTokenizeDoctor(_rest) {
+  let mod;
+  try {
+    mod = await import('../src/audio-tokenize.js');
+  } catch (e) {
+    console.log(JSON.stringify({
+      ok: false,
+      error: 'import_failed',
+      detail: String(e && e.message || e),
+      version: 'w772b-v1',
+    }, null, 2));
+    process.exit(EXIT.EXECUTION);
+    return;
+  }
+  const envelope = await mod.getAudioTokenizeDoctor();
+  console.log(JSON.stringify(envelope, null, 2));
+  // Doctor exits 0 regardless (per spec). The envelope.ok flag reflects
+  // whether a tokenizer is wired — that is operator-visible, not a CLI
+  // failure mode.
+  process.exit(0);
 }
 
 // =============================================================================
@@ -39412,8 +39612,10 @@ async function cmdW813Drift(args) {
 
 // W773 — COMPLETION entries appended post-literal so the W773 edit lands
 // independently of W771/W772/W774 sibling waves. Mirror of the W772 pattern.
+// W773b extends with `tokenize` + `tokenize-doctor` so the workers/video-
+// tokenize/ Python-spawn worker is reachable from the CLI.
 COMPLETION_VERBS.push('video');
-COMPLETION_SUBS.video = ['detect', 'captures', 'bakeoff', 'sampling-spec'];
+COMPLETION_SUBS.video = ['detect', 'captures', 'bakeoff', 'sampling-spec', 'tokenize', 'tokenize-doctor'];
 
 async function cmdW773Video(args) {
   const rawArgs = Array.isArray(args) ? args : [];
@@ -39587,8 +39789,113 @@ async function cmdW773Video(args) {
     return;
   }
 
-  console.error('usage: kolm video <detect|captures|bakeoff|sampling-spec> [args]');
+  // ────────────────────────── subverb: tokenize (W773b) ─────────────────────
+  // Local — calls the workers/video-tokenize/ shim via src/video-tokenize.js
+  // which itself spawns the external Python tokenizer. Honest envelope when
+  // no tokenizer wired.
+  if (sub === 'tokenize') {
+    await _w773bTokenize(rest);
+    return;
+  }
+
+  // ─────────────────────── subverb: tokenize-doctor (W773b) ─────────────────
+  if (sub === 'tokenize-doctor') {
+    await _w773bTokenizeDoctor(rest);
+    return;
+  }
+
+  console.error('usage: kolm video <detect|captures|bakeoff|sampling-spec|tokenize|tokenize-doctor> [args]');
   process.exit(EXIT.BAD_ARGS);
+}
+
+// W773b — internal helpers scoped to the W773 family. Lazy-import so the
+// video-tokenize shim is only loaded when these subverbs run; the bakeoff /
+// captures / detect / sampling-spec paths are unchanged.
+async function _w773bTokenize(rest) {
+  function _pick(flag) {
+    const i = rest.indexOf(flag);
+    if (i >= 0 && i + 1 < rest.length) return rest[i + 1];
+    return null;
+  }
+  function _print(env) { console.log(JSON.stringify(env, null, 2)); }
+
+  // First positional is path-or-uri; flags follow.
+  const positional = rest.filter((a) => !a.startsWith('--'));
+  // Filter out values that follow known flags (so a value after --model is
+  // not picked up as a positional).
+  const knownFlags = ['--model', '--sampling-strategy', '--num-frames', '--max-bytes', '--uri', '--path'];
+  const positionalFiltered = [];
+  for (let i = 0; i < rest.length; i++) {
+    const a = rest[i];
+    if (a.startsWith('--')) {
+      if (knownFlags.includes(a)) i++;
+      continue;
+    }
+    positionalFiltered.push(a);
+  }
+  const pathOrUri = positionalFiltered[0] || _pick('--path') || _pick('--uri');
+  if (!pathOrUri) {
+    _print({ ok: false, error: 'bad_args', hint: 'kolm video tokenize <path|uri> [--model NAME] [--sampling-strategy STRAT] [--num-frames N] [--json]', version: 'w773b-v1' });
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+  const model = _pick('--model');
+  const samplingStrategy = _pick('--sampling-strategy');
+  const numFramesRaw = _pick('--num-frames');
+  const numFrames = numFramesRaw != null && /^\d+$/.test(String(numFramesRaw)) ? Number(numFramesRaw) : undefined;
+
+  let mod;
+  try {
+    const urlMod = await import('node:url');
+    const pathMod = await import('node:path');
+    const here = pathMod.dirname(urlMod.fileURLToPath(import.meta.url));
+    const shimUrl = urlMod.pathToFileURL(
+      pathMod.resolve(here, '..', 'src', 'video-tokenize.js'),
+    ).href;
+    mod = await import(shimUrl);
+  } catch (e) {
+    _print({ ok: false, error: 'video_tokenize_load_failed', detail: String(e && e.message || e), version: 'w773b-v1' });
+    process.exit(EXIT.EXECUTION);
+    return;
+  }
+  const opts = {};
+  // Treat pathOrUri as a path if it exists on disk, else as a media URI.
+  try {
+    const fsMod = await import('node:fs');
+    if (fsMod.existsSync(pathOrUri)) opts.path = pathOrUri;
+    else opts.uri = pathOrUri;
+  } catch (_) {
+    opts.uri = pathOrUri;
+  }
+  if (model) opts.model = model;
+  if (samplingStrategy) opts.sampling_strategy = samplingStrategy;
+  if (numFrames != null) opts.num_frames = numFrames;
+
+  const env = await mod.tokenizeVideo(opts);
+  _print(env);
+  if (!env.ok) process.exit(EXIT.EXECUTION);
+}
+
+async function _w773bTokenizeDoctor(_rest) {
+  function _print(env) { console.log(JSON.stringify(env, null, 2)); }
+  let mod;
+  try {
+    const urlMod = await import('node:url');
+    const pathMod = await import('node:path');
+    const here = pathMod.dirname(urlMod.fileURLToPath(import.meta.url));
+    const shimUrl = urlMod.pathToFileURL(
+      pathMod.resolve(here, '..', 'src', 'video-tokenize.js'),
+    ).href;
+    mod = await import(shimUrl);
+  } catch (e) {
+    _print({ ok: false, error: 'video_tokenize_load_failed', detail: String(e && e.message || e), version: 'w773b-v1' });
+    process.exit(EXIT.EXECUTION);
+    return;
+  }
+  const env = await mod.getVideoTokenizeDoctor();
+  _print(env);
+  // Doctor mode never errors out - even an unwired tokenizer is reportable
+  // truth. Exit 0 regardless so CI smokes do not break.
 }
 
 main();

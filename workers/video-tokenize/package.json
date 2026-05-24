@@ -1,0 +1,28 @@
+{
+  "name": "@kolm/video-tokenize-worker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Isolated kolm Video-ViT / LLaVA-NeXT-Video frame-patch tokenizer. Samples N frames from a video (per W773 frame-sampler strategy), runs each frame through a vision encoder (default model: llava-hf/LLaVA-NeXT-Video-7B-hf; alternatives: OpenGVLab/InternVL2-8B), and emits the patch-token grid for downstream LLM-side training. Heavy Python deps (transformers, torch, decord OR av, Pillow, vision-model weights) live OUTSIDE this Node package - root kolm install stays light. When the external tokenizer is missing the worker emits an honest install_hint envelope with sampled_frame_count=null + total_patch_tokens=null; it NEVER fabricates a frame/patch shape it could not compute.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "tokenize.mjs",
+  "bin": {
+    "kolm-video-tokenize-worker": "tokenize.mjs"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "doctor": "node tokenize.mjs --doctor"
+  },
+  "dependencies": {},
+  "optionalDependencies": {},
+  "external": {
+    "processors": {
+      "default_model": "llava-hf/LLaVA-NeXT-Video-7B-hf",
+      "note": "Production video tokenization requires an external command that loads a Video-ViT or LLaVA-NeXT-Video processor + model. Default search order: $KOLM_VIDEO_TOKENIZE_CMD env override (single binary or JSON array of [cmd, ...args]), then `kolm-video-tokenize` on PATH, then `~/.kolm/scripts/video-tokenize.py` invoked via python3. The command MUST accept --path <video> [--model NAME] [--sampling-strategy uniform|adaptive|keyframe|dense] [--num-frames N] [--max-bytes N] and emit one JSON line on stdout with the W773b envelope shape ({ok, kind:'video', tokenizer, model, duration_ms, fps, sampled_frame_count, patch_tokens_per_frame, total_patch_tokens, patch_token_dim, sampling_strategy, video_sha256, frames_sha256}). Without it the worker returns {ok:false, error:'no_detector_installed', install_hint, sampled_frame_count:null, total_patch_tokens:null} so the caller knows what's missing. The default LLaVA-NeXT-Video-7B-hf processor emits 144 patch tokens per frame at hidden dim 4096 (8 frames * 144 = 1152 patch tokens for an 8-frame sample); InternVL2-8B emits 256 patches per frame at 4096 dim. The Node-side num_frames hard cap (32) matches the W773 frame-sampler HARD_FRAME_CAP/32 budget so a single tokenize call never exceeds ~4600 patch tokens for LLaVA or ~8200 for InternVL2.",
+      "alternatives": ["OpenGVLab/InternVL2-8B", "OpenGVLab/InternVL2-Llama3-76B", "llava-hf/LLaVA-NeXT-Video-34B-hf"]
+    },
+    "python_requirements": "transformers>=4.40, torch>=2.0 (CPU or CUDA), decord>=0.6 OR av>=11.0 (video decode), Pillow>=10.0. Optional: opencv-python for adaptive frame sampling. The 'decord' route is faster (~2-5x for short clips) but requires ffmpeg shared libs on the host; the 'av' route is pure-Python with bundled ffmpeg via PyAV but slower for long clips."
+  }
+}
