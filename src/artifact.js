@@ -309,7 +309,7 @@ function normalizeLicense(license) {
   };
 }
 
-export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, k_score, judge_id, eval_score, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, output_schema, guardrails, parent_cid }) {
+export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, k_score, judge_id, eval_score, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, output_schema, guardrails, parent_cid, region }) {
   const secret = requireSignSecret();
   // W252 — K-score ship gate is load-bearing. If a K-score is supplied AND
   // it says ships=false, the builder must refuse unless the caller explicitly
@@ -423,6 +423,31 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
       );
     }
     _parent_cid_canon = parent_cid; // preserve verbatim form (bare hex or cidv1:sha256:<hex>)
+  }
+  // W769 — Data residency region pin. region is OPTIONAL. The W460
+  // byte-stability law applies VERBATIM: absent / null / '' all collapse
+  // to null (the conditional manifest spread + conditional hash slot
+  // below are skipped) so pre-W769 artifacts rebuilt without a region
+  // remain byte-identical to their original artifact_hash. Mirror of the
+  // W721 sparsity_profile / W722 kv_profile / W739 parent_cid conditional
+  // pattern.
+  //
+  // Validation: when non-null, region MUST be a non-empty string. We do
+  // NOT validate against the REGIONS taxonomy here because (a) the
+  // taxonomy is an evolving compliance contract and we don't want a
+  // taxonomy bump to invalidate every shipped .kolm, and (b) the
+  // residency UI and CLI gate on REGIONS at write time, so reaching
+  // buildPayload with an unknown region requires a deliberate caller
+  // bypass.
+  let _region_canon = null;
+  if (region !== null && region !== undefined && region !== '') {
+    if (typeof region !== 'string') {
+      throw new Error(
+        'invalid region: must be a string (REGIONS taxonomy id) or null; got ' +
+        JSON.stringify(region),
+      );
+    }
+    _region_canon = region;
   }
   // Wave 148 — pretokenize block. Same shape as moe: bridge builds + validates;
   // we re-validate so a hand-rolled block still gets schema-checked. Drift in
@@ -1084,6 +1109,18 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     // diffArtifacts in src/kolm-diff.js. Tested by W739 #9 byte-stability
     // lock-in.
     ...(_parent_cid_canon ? { parent_cid: _parent_cid_canon } : {}),
+    // W769 — Data residency region. The W460 byte-stability law: when region
+    // is absent the manifest MUST NOT carry the key at all (so manifest_hash
+    // + cid + artifact_hash stay byte-identical to pre-W769 artifacts).
+    // Conditional spread (...(value ? {key:value} : {})) mirrors the W739
+    // parent_cid pattern verbatim — absent / null / '' all collapse to the
+    // empty spread, and the matching artifact_hash_input slot below is
+    // skipped in lockstep. Schema lives in src/data-residency.js (REGIONS
+    // taxonomy + DEFAULT_REGION). Bound into artifact_hash below via
+    // region_hash with the W460 conditional-slot pattern so any post-build
+    // residency tamper (swap from EU_WEST → US_EAST after sign-time) breaks
+    // the receipt chain.
+    ...(_region_canon ? { region: _region_canon } : {}),
     k_score: k_score || null,  // patched after zipping for the size_bytes axis
     ship_gate_overridden: allow_below_gate === true ? true : undefined,
     license: normalizeLicense(license),
@@ -1326,6 +1363,19 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   // canonical key order in artifact_hash_input stays predictable.
   if (_parent_cid_canon) {
     artifact_hash_input.parent_cid = _parent_cid_canon;
+  }
+  // W769 — bind the residency region into artifact_hash so a tamperer
+  // cannot rewrite the residency claim on a signed artifact without
+  // invalidating the receipt chain. Mirrors the W460 confidential_compute_hash
+  // + W721 sparsity_profile_hash + W722 kv_profile_hash + W736 guardrails_hash
+  // + W739 parent_cid conditional-slot pattern: keyed ONLY when _region_canon
+  // is a non-empty string so pre-W769 artifacts (which never carried a
+  // region) rebuilt without one remain byte-identical to their original
+  // artifact_hash. CRITICAL: this slot's omission for absent/null/empty
+  // region inputs is the W460 byte-stability contract; never key it
+  // unconditionally.
+  if (_region_canon) {
+    artifact_hash_input.region_hash = sha256(Buffer.from(_region_canon));
   }
   if (hashes.extra_files) {
     artifact_hash_input.extra_files_hash = sha256(canonicalJson(hashes.extra_files));
@@ -1700,7 +1750,7 @@ export function packageArtifact({ job_id, payload, outPath }) {
 // with the size-aware K-score patched into the manifest. The double-zip is
 // cheap (≤10ms for 5KB artifacts) and keeps the K-score honest — the size
 // axis includes the K-score bytes themselves.
-export async function buildAndZip({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, outDir, outPath: outPathOverride, judge_id, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, guardrails, parent_cid }) {
+export async function buildAndZip({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, outDir, outPath: outPathOverride, judge_id, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, guardrails, parent_cid, region }) {
   requireSignSecret();
   // W457b (build-honors-out) — when an explicit outPath is supplied, write
   // the .kolm directly at the user-requested filename. Otherwise fall back
@@ -1735,7 +1785,7 @@ export async function buildAndZip({ job_id, task, base_model, recipes, lora_poin
     confidential_compute = await verifyAttestation(kind, attestation_report);
   }
 
-  const sharedBlocks = { capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, guardrails, parent_cid };
+  const sharedBlocks = { capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, guardrails, parent_cid, region };
 
   // W350 — temp-file cleanup registry. The two-pass build writes a probe zip
   // to measure its size before the K-score is embedded; on success the probe

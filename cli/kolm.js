@@ -23186,6 +23186,14 @@ COMPLETION_SUBS.px       = ['redact', 'detect', 'guard'];
 COMPLETION_VERBS.push('sbom');
 COMPLETION_SUBS.sbom = ['emit', 'repo', 'verify'];
 
+// W769 — Data residency + geo-fence. `kolm residency <regions|tag|get|
+// configure-namespace|enforce>` and the `region` alias. Distinct-named
+// dispatcher cmdW769Residency so parallel W766/W767/W768/W770 wave
+// agents cannot collide on this symbol.
+COMPLETION_VERBS.push('residency', 'region');
+COMPLETION_SUBS.residency = ['regions', 'tag', 'get', 'configure-namespace', 'enforce'];
+COMPLETION_SUBS.region    = ['regions', 'tag', 'get', 'configure-namespace', 'enforce'];
+
 function emitBashCompletion() {
     const verbs = COMPLETION_VERBS.join(' ');
     const subLines = Object.entries(COMPLETION_SUBS)
@@ -34930,7 +34938,23 @@ async function main() {
       // W448 — `kolm audit` is the read-only per-tenant audit-log mirror of
       // /account/audit-log.html. Distinct from `kolm auditor` (third-party
       // signing tool); kept as separate verbs to match muscle memory.
-      case 'audit':    await withErrorContext('audit',    () => cmdAudit(rest)); break;
+      case 'audit':
+        // W770 — `kolm audit export <format>` is the two-word form that
+        // routes through cmdW770AuditExport. All other audit subverbs
+        // (verify / list / default-print) continue to cmdAudit so the
+        // historic UX is preserved.
+        if (rest && rest[0] === 'export') {
+          await withErrorContext('audit-export', () => cmdW770AuditExport(rest.slice(1)));
+        } else {
+          await withErrorContext('audit',    () => cmdAudit(rest));
+        }
+        break;
+      // W770 — `kolm audit-export <formats|export|preview>` is the top-level
+      // mirror of the two-word form, distinct-named so parallel W766/W767/
+      // W768/W769 wave agents cannot collide on the dispatcher symbol. `ae`
+      // is the short alias dispatched from the same case arm.
+      case 'audit-export':
+      case 'ae':       await withErrorContext('audit-export', () => cmdW770AuditExport(rest)); break;
       // W450 — `kolm settings` is the per-tenant settings CLI mirror of
       // /account/settings.html + the TUI settings view (key F).
       case 'settings': await withErrorContext('settings', () => cmdSettings(rest)); break;
@@ -35224,6 +35248,34 @@ async function main() {
       // SPDX) emitter + verifier. Distinct-named (cmdW763Sbom) so parallel
       // W761/W762/W764/W765 wave agents cannot collide on this symbol.
       case 'sbom':     await withErrorContext('sbom',      () => cmdW763Sbom(rest)); break;
+      // W768 — `kolm model-card <generate|schema|governance-map>` routes the
+      // HF Model Card v0.3 auto-generator + governance-platform mapping
+      // dispatcher. Distinct-named (cmdW768ModelCard) so parallel W766/W767/
+      // W769/W770 wave agents cannot collide on this symbol. `mc` is the
+      // short alias dispatched from the same case arm.
+      case 'model-card':
+      case 'mc':       await withErrorContext('model-card', () => cmdW768ModelCard(rest)); break;
+      // W767 — `kolm cert <soc2-checklist|iso27001-controls|audit-retention-status|
+      // audit-retention-set|monitoring-snapshot>` routes the SOC 2 Type II +
+      // ISO 27001 certification dispatcher. Distinct-named (cmdW767Cert) so
+      // parallel W766/W768/W769/W770 wave agents cannot collide on this
+      // symbol.
+      case 'cert':     await withErrorContext('cert',      () => cmdW767Cert(rest)); break;
+      // W766 — `kolm ai-act <export-docs|risk-score|human-in-loop|governance-report>`
+      // routes the EU AI Act compliance toolkit dispatcher (Annex IV docs,
+      // Article 5/Annex III risk scoring, Article 14 human-in-loop config, and
+      // tenant-fenced governance reports). Distinct-named (cmdW766AiAct) so
+      // parallel W767/W768/W769/W770 wave agents cannot collide on this
+      // symbol. `aiact` is the no-hyphen alias dispatched from the same arm.
+      case 'ai-act':
+      case 'aiact':    await withErrorContext('ai-act',    () => cmdW766AiAct(rest)); break;
+      // W769 — `kolm residency <regions|tag|get|configure-namespace|enforce>`
+      // routes the data residency + geo-fence dispatcher. Distinct-named
+      // (cmdW769Residency) so parallel W766/W767/W768/W770 wave agents
+      // cannot collide on this symbol. `region` is a no-suffix alias
+      // dispatched from the same arm.
+      case 'residency':
+      case 'region':   await withErrorContext('residency', () => cmdW769Residency(rest)); break;
       case 'agents':     await withErrorContext('agents',     () => cmdAgents(rest)); break;
       case 'shell-init': await withErrorContext('shell-init', () => cmdShellInit(rest)); break;
       case '--version':
@@ -37302,5 +37354,1277 @@ async function cmdW764Mit(args) {
 COMPLETION_VERBS.push('forget', 'mit');
 COMPLETION_SUBS.forget = ['list'];
 COMPLETION_SUBS.mit    = ['run', 'scan-pii'];
+
+// W768 — COMPLETION entries for the `model-card` (alias `mc`) dispatcher.
+// Appended post-literal so a parallel agent landing W766/W767/W769/W770
+// completion edits cannot collide on the literal table.
+COMPLETION_VERBS.push('model-card', 'mc');
+COMPLETION_SUBS['model-card'] = ['generate', 'schema', 'governance-map'];
+COMPLETION_SUBS.mc            = ['generate', 'schema', 'governance-map'];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// W768 — Model Card auto-generation (HF v0.3 standard).
+//
+// `kolm model-card <generate|schema|governance-map>` (alias `kolm mc ...`)
+//
+// Three subverbs:
+//   generate <manifest_path> [--format json|markdown|huggingface]
+//                            [--include-environmental] [--out PATH]
+//                            — local pure-compute (no network, no API key).
+//
+//   schema                   — remote GET of MODEL_CARD_JSON_SCHEMA (auth-gated).
+//
+//   governance-map <platform> — remote GET of the GOVERNANCE_PLATFORM_MAPPINGS
+//                               entry for OneTrust / ServiceNow AI Governance /
+//                               IBM OpenPages (auth-gated).
+//
+// Distinct-named (cmdW768ModelCard) so parallel W766/W767/W769/W770 wave
+// agents cannot collide on this symbol.
+//
+// HONESTY CONTRACT: bubble the upstream envelope verbatim. `generate` exits
+// nonzero ONLY if the local build itself fails (manifest unreadable / unparseable
+// / unsupported_format). A successful build with `not_yet_disclosed` fields is
+// the EXPECTED happy path - it tells the auditor exactly which inputs the
+// manifest does not yet carry.
+// ─────────────────────────────────────────────────────────────────────────────
+async function cmdW768ModelCard(args) {
+  const sub = (args && args[0]) || '';
+
+  function _envApiKey() { return process.env.KOLM_API_KEY || ''; }
+  function _envBase() {
+    return (process.env.KOLM_BASE_URL || 'https://kolm.ai').replace(/\/$/, '');
+  }
+  function _flag(rest, name) {
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--' + name && i + 1 < rest.length) return rest[i + 1];
+      if (typeof rest[i] === 'string' && rest[i].startsWith('--' + name + '=')) {
+        return rest[i].slice(name.length + 3);
+      }
+    }
+    return null;
+  }
+  function _hasFlag(rest, name) {
+    return rest.includes('--' + name);
+  }
+  function _print(envelope) {
+    console.log(JSON.stringify(envelope, null, 2));
+  }
+  function _fail(envelope, code) {
+    _print(envelope);
+    process.exit(code != null ? code : EXIT.EXECUTION);
+  }
+
+  if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
+    console.error('usage: kolm model-card <generate|schema|governance-map> [args]');
+    console.error('        (alias: kolm mc ...)');
+    console.error('  generate <MANIFEST_PATH> [--format json|markdown|huggingface]');
+    console.error('                           [--include-environmental] [--out PATH]');
+    console.error('  schema                                       — fetch JSON schema');
+    console.error('  governance-map <PLATFORM>                    — onetrust|servicenow_ai_governance|ibm_openpages');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+
+  // ──────────────────────── subcommand: generate ────────────────────────────
+  if (sub === 'generate') {
+    const rest = args.slice(1);
+    // First positional (non-flag) arg is the manifest path; `--manifest PATH`
+    // also accepted for symmetry with the W763 cli pattern.
+    let manifestPath = _flag(rest, 'manifest');
+    if (!manifestPath) {
+      for (const a of rest) {
+        if (typeof a === 'string' && !a.startsWith('-')) { manifestPath = a; break; }
+      }
+    }
+    const format = _flag(rest, 'format') || 'json';
+    const includeEnv = _hasFlag(rest, 'include-environmental');
+    const output = _flag(rest, 'out') || _flag(rest, 'output');
+    if (!manifestPath) {
+      _fail({
+        ok: false,
+        error: 'manifest_required',
+        hint: 'pass a manifest path: kolm model-card generate <PATH>',
+        version: 'w768-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    let mod;
+    try {
+      mod = await import(new URL('../src/model-card-emit.js', import.meta.url).href);
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'model_card_module_load_failed',
+        detail: String(e && e.message || e),
+        version: 'w768-v1',
+      });
+      return;
+    }
+    const result = mod.buildModelCardFromManifestPath(manifestPath, {
+      format,
+      include_environmental: includeEnv,
+    });
+    if (output) {
+      try {
+        const fsMod = await import('node:fs');
+        fsMod.writeFileSync(output, JSON.stringify(result, null, 2) + '\n', 'utf8');
+        _print({
+          ok: result.ok,
+          version: result.version,
+          format: result.format,
+          output,
+        });
+      } catch (e) {
+        _fail({
+          ok: false,
+          error: 'output_write_failed',
+          detail: String(e && e.message || e),
+          version: 'w768-v1',
+        });
+        return;
+      }
+    } else {
+      _print(result);
+    }
+    if (!result.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: schema ──────────────────────────────
+  if (sub === 'schema') {
+    const key = _envApiKey();
+    if (!key) {
+      _fail({
+        ok: false,
+        error: 'auth_required',
+        hint: 'set KOLM_API_KEY (kolm signup / kolm login) — /v1/model-card/schema is auth-gated',
+        version: 'w768-v1',
+      }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/model-card/schema', {
+        method: 'GET',
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'network_error',
+        detail: String(e && e.message || e),
+        version: 'w768-v1',
+      });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: governance-map ──────────────────────
+  if (sub === 'governance-map' || sub === 'governance' || sub === 'gov-map') {
+    const rest = args.slice(1);
+    let platform = null;
+    for (const a of rest) {
+      if (typeof a === 'string' && !a.startsWith('-')) { platform = a; break; }
+    }
+    if (!platform) platform = _flag(rest, 'platform');
+    if (!platform) {
+      _fail({
+        ok: false,
+        error: 'platform_required',
+        hint: 'pass a platform name: onetrust | servicenow_ai_governance | ibm_openpages',
+        version: 'w768-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({
+        ok: false,
+        error: 'auth_required',
+        hint: 'set KOLM_API_KEY (kolm signup / kolm login) — /v1/model-card/governance-mappings is auth-gated',
+        version: 'w768-v1',
+      }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/model-card/governance-mappings?platform=' + encodeURIComponent(platform), {
+        method: 'GET',
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'network_error',
+        detail: String(e && e.message || e),
+        version: 'w768-v1',
+      });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  console.error('usage: kolm model-card <generate|schema|governance-map> [args]');
+  console.error('        (alias: kolm mc ...)');
+  console.error('  generate <MANIFEST_PATH> [--format json|markdown|huggingface]');
+  console.error('                           [--include-environmental] [--out PATH]');
+  console.error('  schema');
+  console.error('  governance-map <PLATFORM>                    — onetrust|servicenow_ai_governance|ibm_openpages');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// =============================================================================
+// W770 — Audit Export (CSV + SIEM-compatible CEF/LEEF/JSONL) dispatcher.
+//
+// Distinct-named (cmdW770AuditExport) so parallel W766/W767/W768/W769 wave
+// agents cannot collide on this symbol. Wired from main() via three case
+// arms: `case 'audit-export':`, `case 'ae':` (short alias), AND from
+// `case 'audit':` when the first sub-arg is the literal `export`. The
+// last form preserves the natural two-word UX:
+//
+//   kolm audit export csv --from 2026-01-01 --out audit.csv
+//   kolm audit-export export cef
+//   kolm ae preview leef
+//
+// Subcommands:
+//   formats                                    list supported formats + CSV cols
+//   export <format> [--from iso] [--to iso] [--max N] [--out path]
+//   preview <format> [--from iso] [--to iso]
+//
+// All three thinly wrap the auth-gated GET /v1/audit/export* routes so the
+// CLI honors the same auth + per-format Content-Type contracts as the API.
+// version stamp matches /^w770-/.
+// =============================================================================
+async function cmdW770AuditExport(args) {
+  const sub = (args && args[0]) || '';
+
+  function _envApiKey() {
+    return process.env.KOLM_API_KEY || process.env.KOLM_KEY || '';
+  }
+  function _envBase() {
+    return (process.env.KOLM_BASE_URL || process.env.KOLM_URL || 'https://kolm.ai').replace(/\/$/, '');
+  }
+  function _flag(rest, name) {
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--' + name && i + 1 < rest.length) return rest[i + 1];
+      if (typeof rest[i] === 'string' && rest[i].startsWith('--' + name + '=')) {
+        return rest[i].slice(name.length + 3);
+      }
+    }
+    return null;
+  }
+  function _print(envelope) {
+    console.log(JSON.stringify(envelope, null, 2));
+  }
+  function _fail(envelope, code = EXIT.EXECUTION) {
+    _print(envelope);
+    process.exit(code);
+  }
+  function _requireKey() {
+    const key = _envApiKey();
+    if (!key) {
+      _fail({
+        ok: false,
+        error: 'auth_required',
+        hint: 'set KOLM_API_KEY (kolm signup / kolm login)',
+        version: 'w770-v1',
+      }, EXIT.MISSING_PREREQ);
+    }
+    return key;
+  }
+
+  if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
+    console.error('usage: kolm audit-export <formats|export|preview> [args]');
+    console.error('         (alias: kolm ae ...   two-word: kolm audit export ...)');
+    console.error('  formats');
+    console.error('  export <csv|cef|leef|json> [--from iso] [--to iso] [--max N] [--out PATH]');
+    console.error('  preview <csv|cef|leef|json> [--from iso] [--to iso]');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+
+  // ──────────────────────── subcommand: formats ──────────────────────────────
+  if (sub === 'formats') {
+    const key = _requireKey();
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/audit/export/formats', {
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w770-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: export ───────────────────────────────
+  if (sub === 'export') {
+    const rest = args.slice(1);
+    const format = (rest[0] && !rest[0].startsWith('--')) ? rest[0] : (_flag(rest, 'format') || 'json');
+    const from = _flag(rest, 'from');
+    const to = _flag(rest, 'to');
+    const max = _flag(rest, 'max');
+    const out = _flag(rest, 'out');
+    const key = _requireKey();
+    const qs = new URLSearchParams();
+    qs.set('format', String(format));
+    if (from) qs.set('from', String(from));
+    if (to) qs.set('to', String(to));
+    if (max) qs.set('max_rows', String(max));
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/audit/export?' + qs.toString(), {
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w770-v1' });
+      return;
+    }
+    if (!resp.ok) {
+      // Bad-format / missing-tenant honest envelopes come back as JSON.
+      const body = await resp.json().catch(() => ({}));
+      _print(body);
+      process.exit(EXIT.EXECUTION);
+      return;
+    }
+    const text = await resp.text();
+    if (out) {
+      try {
+        const fs = await import('node:fs');
+        fs.writeFileSync(out, text, 'utf8');
+        console.error('# wrote ' + text.length + ' bytes to ' + out + ' (format=' + format + ')');
+      } catch (e) {
+        _fail({ ok: false, error: 'write_failed', detail: String(e && e.message || e), version: 'w770-v1' });
+        return;
+      }
+    } else {
+      process.stdout.write(text);
+    }
+    return;
+  }
+
+  // ──────────────────────── subcommand: preview ──────────────────────────────
+  if (sub === 'preview') {
+    const rest = args.slice(1);
+    const format = (rest[0] && !rest[0].startsWith('--')) ? rest[0] : (_flag(rest, 'format') || 'json');
+    const from = _flag(rest, 'from');
+    const to = _flag(rest, 'to');
+    const key = _requireKey();
+    const qs = new URLSearchParams();
+    qs.set('format', String(format));
+    if (from) qs.set('from', String(from));
+    if (to) qs.set('to', String(to));
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/audit/export/preview?' + qs.toString(), {
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w770-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  console.error('usage: kolm audit-export <formats|export|preview> [args]');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// W770 — COMPLETION entries appended post-literal so a parallel agent on the
+// same revision can land their COMPLETION edit independently without a merge
+// conflict on the literal array. `audit-export` is the top-level verb (with
+// `ae` as the short alias); `audit export <subverb>` is the two-word form
+// handled inside the dispatcher.
+COMPLETION_VERBS.push('audit-export', 'ae');
+COMPLETION_SUBS['audit-export'] = ['formats', 'export', 'preview'];
+COMPLETION_SUBS.ae = ['formats', 'export', 'preview'];
+
+// W766 — COMPLETION entries for the `ai-act` (alias `aiact`) dispatcher.
+// Appended post-literal so a parallel agent landing W767/W768/W769/W770
+// completion edits cannot collide on the literal table.
+COMPLETION_VERBS.push('ai-act', 'aiact');
+COMPLETION_SUBS['ai-act'] = ['export-docs', 'risk-score', 'human-in-loop', 'governance-report'];
+COMPLETION_SUBS.aiact    = ['export-docs', 'risk-score', 'human-in-loop', 'governance-report'];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// W766 — EU AI Act compliance toolkit.
+//
+// `kolm ai-act <export-docs|risk-score|human-in-loop|governance-report>`
+// (alias `kolm aiact ...`)
+//
+// Four subverbs:
+//   export-docs <MANIFEST_PATH> [--format json|markdown] [--out PATH]
+//                            — POST /v1/compliance/ai-act/export. Builds the
+//                              Annex IV technical-documentation envelope.
+//                              Auth-gated (KOLM_API_KEY).
+//
+//   risk-score  <MANIFEST_PATH>
+//                            — POST /v1/compliance/ai-act/risk-score. Returns
+//                              the risk_category (minimal/limited/high/
+//                              unacceptable) per Annex III + Article 5.
+//                              Auth-gated.
+//
+//   human-in-loop <NAMESPACE> <THRESHOLD_NATS>
+//                            — POST /v1/compliance/ai-act/human-in-loop.
+//                              Persists the per-namespace human-review
+//                              threshold (nats, [0, 10]). Sends confirm:true.
+//                              Auth-gated.
+//
+//   governance-report <NAMESPACE> [--from ISO] [--to ISO]
+//                            — GET /v1/compliance/ai-act/governance-report.
+//                              Returns the tenant-fenced aggregate (count_total,
+//                              count_high_risk, count_human_in_loop_triggered,
+//                              average_confidence_at_decision, by_namespace).
+//                              Auth-gated.
+//
+// Distinct-named (cmdW766AiAct) so parallel W767/W768/W769/W770 wave agents
+// cannot collide on this symbol.
+//
+// HONESTY CONTRACT: bubble the upstream envelope verbatim. The honest
+// happy-path response carries `not_yet_disclosed` for Annex IV fields the
+// manifest does not yet attest to — that's a feature, not an error. The CLI
+// only exits nonzero when the network call itself fails or auth is missing.
+//
+// Honest exit codes:
+//   0 — success (envelope printed; even ok:false envelopes from valid input
+//       like out-of-range threshold print at exit 0 so the CLI doesn't double-
+//       fail when the server already gave an honest 400 with details).
+//   1 — bad CLI args (missing subverb / missing positional)
+//   3 — auth missing (KOLM_API_KEY unset)
+//   4 — network failure / unexpected route error
+// ─────────────────────────────────────────────────────────────────────────────
+async function cmdW766AiAct(args) {
+  const sub = (args && args[0]) || '';
+
+  function _envApiKey() { return process.env.KOLM_API_KEY || ''; }
+  function _envBase()   { return (process.env.KOLM_BASE_URL || 'https://kolm.ai').replace(/\/$/, ''); }
+  function _flag(rest, name) {
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--' + name && i + 1 < rest.length) return rest[i + 1];
+      if (typeof rest[i] === 'string' && rest[i].startsWith('--' + name + '=')) {
+        return rest[i].slice(name.length + 3);
+      }
+    }
+    return null;
+  }
+  function _print(envelope) { console.log(JSON.stringify(envelope, null, 2)); }
+  function _fail(envelope, code) {
+    _print(envelope);
+    process.exit(code != null ? code : EXIT.EXECUTION);
+  }
+  function _requireKey() {
+    const key = _envApiKey();
+    if (!key) {
+      _fail({
+        ok: false,
+        error: 'auth_required',
+        hint: 'set KOLM_API_KEY (kolm signup / kolm login) — /v1/compliance/ai-act/* is auth-gated',
+        version: 'w766-v1',
+      }, EXIT.MISSING_PREREQ);
+    }
+    return key;
+  }
+  async function _readManifest(path) {
+    let fsMod;
+    try {
+      fsMod = await import('node:fs');
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'fs_unavailable',
+        detail: String(e && e.message || e),
+        version: 'w766-v1',
+      });
+      return null;
+    }
+    let raw;
+    try {
+      raw = fsMod.readFileSync(path, 'utf8');
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'manifest_read_failed',
+        detail: String(e && e.message || e),
+        hint: 'pass a path to a kolm artifact manifest.json',
+        version: 'w766-v1',
+      }, EXIT.BAD_ARGS);
+      return null;
+    }
+    try {
+      return JSON.parse(raw);
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'manifest_parse_failed',
+        detail: String(e && e.message || e),
+        hint: 'manifest must be valid JSON',
+        version: 'w766-v1',
+      }, EXIT.BAD_ARGS);
+      return null;
+    }
+  }
+
+  // ─── usage / help ───────────────────────────────────────────────────────
+  if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
+    console.error('usage: kolm ai-act <export-docs|risk-score|human-in-loop|governance-report> [args]');
+    console.error('        (alias: kolm aiact ...)');
+    console.error('  export-docs <MANIFEST_PATH> [--format json|markdown] [--out PATH]');
+    console.error('  risk-score <MANIFEST_PATH>');
+    console.error('  human-in-loop <NAMESPACE> <THRESHOLD_NATS>');
+    console.error('  governance-report <NAMESPACE> [--from ISO] [--to ISO]');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+
+  // ─── subcommand: export-docs ────────────────────────────────────────────
+  if (sub === 'export-docs') {
+    const rest = args.slice(1);
+    let manifestPath = _flag(rest, 'manifest');
+    if (!manifestPath) {
+      for (const a of rest) {
+        if (typeof a === 'string' && !a.startsWith('-')) { manifestPath = a; break; }
+      }
+    }
+    if (!manifestPath) {
+      _fail({
+        ok: false,
+        error: 'manifest_required',
+        hint: 'usage: kolm ai-act export-docs <MANIFEST_PATH> [--format json|markdown] [--out PATH]',
+        version: 'w766-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    const manifest = await _readManifest(manifestPath);
+    if (manifest == null) return;
+    const format = _flag(rest, 'format') === 'markdown' ? 'markdown' : 'json';
+    const output = _flag(rest, 'out') || _flag(rest, 'output');
+    const key = _requireKey();
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/compliance/ai-act/export', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({ manifest, format }),
+      });
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'network_error',
+        detail: String(e && e.message || e),
+        version: 'w766-v1',
+      });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    if (output) {
+      try {
+        const fsMod = await import('node:fs');
+        fsMod.writeFileSync(output, JSON.stringify(body, null, 2) + '\n', 'utf8');
+        _print({
+          ok: body && body.ok != null ? body.ok : true,
+          version: body && body.version ? body.version : 'w766-v1',
+          format,
+          output,
+        });
+      } catch (e) {
+        _fail({
+          ok: false,
+          error: 'output_write_failed',
+          detail: String(e && e.message || e),
+          version: 'w766-v1',
+        });
+        return;
+      }
+    } else {
+      _print(body);
+    }
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ─── subcommand: risk-score ─────────────────────────────────────────────
+  if (sub === 'risk-score') {
+    const rest = args.slice(1);
+    let manifestPath = _flag(rest, 'manifest');
+    if (!manifestPath) {
+      for (const a of rest) {
+        if (typeof a === 'string' && !a.startsWith('-')) { manifestPath = a; break; }
+      }
+    }
+    if (!manifestPath) {
+      _fail({
+        ok: false,
+        error: 'manifest_required',
+        hint: 'usage: kolm ai-act risk-score <MANIFEST_PATH>',
+        version: 'w766-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    const manifest = await _readManifest(manifestPath);
+    if (manifest == null) return;
+    const key = _requireKey();
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/compliance/ai-act/risk-score', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({ manifest }),
+      });
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'network_error',
+        detail: String(e && e.message || e),
+        version: 'w766-v1',
+      });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ─── subcommand: human-in-loop ──────────────────────────────────────────
+  if (sub === 'human-in-loop' || sub === 'hil') {
+    const rest = args.slice(1);
+    // Positional: <namespace> <threshold_nats>. Also accept --namespace + --threshold.
+    let namespace = _flag(rest, 'namespace');
+    let thresholdRaw = _flag(rest, 'threshold');
+    const positionals = rest.filter(a => typeof a === 'string' && !a.startsWith('-'));
+    if (!namespace && positionals[0]) namespace = positionals[0];
+    if (thresholdRaw == null && positionals[1] != null) thresholdRaw = positionals[1];
+    if (!namespace) {
+      _fail({
+        ok: false,
+        error: 'namespace_required',
+        hint: 'usage: kolm ai-act human-in-loop <NAMESPACE> <THRESHOLD_NATS>',
+        version: 'w766-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    if (thresholdRaw == null) {
+      _fail({
+        ok: false,
+        error: 'threshold_required',
+        hint: 'usage: kolm ai-act human-in-loop <NAMESPACE> <THRESHOLD_NATS>  (THRESHOLD ∈ [0, 10] nats)',
+        version: 'w766-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    const threshold = Number(thresholdRaw);
+    const key = _requireKey();
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/compliance/ai-act/human-in-loop', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({
+          namespace: String(namespace),
+          threshold_nats: threshold,
+          confirm: true,
+        }),
+      });
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'network_error',
+        detail: String(e && e.message || e),
+        version: 'w766-v1',
+      });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ─── subcommand: governance-report ──────────────────────────────────────
+  if (sub === 'governance-report' || sub === 'gov-report' || sub === 'gov') {
+    const rest = args.slice(1);
+    let namespace = _flag(rest, 'namespace');
+    if (!namespace) {
+      for (const a of rest) {
+        if (typeof a === 'string' && !a.startsWith('-')) { namespace = a; break; }
+      }
+    }
+    const from = _flag(rest, 'from') || _flag(rest, 'since');
+    const to = _flag(rest, 'to') || _flag(rest, 'until');
+    const key = _requireKey();
+    const qs = new URLSearchParams();
+    if (namespace) qs.set('namespace', String(namespace));
+    if (from) qs.set('from', String(from));
+    if (to) qs.set('to', String(to));
+    const url = _envBase() + '/v1/compliance/ai-act/governance-report'
+      + (qs.toString() ? '?' + qs.toString() : '');
+    let resp;
+    try {
+      resp = await fetch(url, {
+        method: 'GET',
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'network_error',
+        detail: String(e && e.message || e),
+        version: 'w766-v1',
+      });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  console.error('usage: kolm ai-act <export-docs|risk-score|human-in-loop|governance-report> [args]');
+  console.error('        (alias: kolm aiact ...)');
+  console.error('  export-docs <MANIFEST_PATH> [--format json|markdown] [--out PATH]');
+  console.error('  risk-score <MANIFEST_PATH>');
+  console.error('  human-in-loop <NAMESPACE> <THRESHOLD_NATS>');
+  console.error('  governance-report <NAMESPACE> [--from ISO] [--to ISO]');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// W767 — COMPLETION entries for the `cert` dispatcher. Appended post-literal
+// so a parallel agent on W766/W768/W769/W770 cannot collide with us on the
+// literal completion table.
+COMPLETION_VERBS.push('cert');
+COMPLETION_SUBS.cert = [
+  'soc2-checklist',
+  'iso27001-controls',
+  'audit-retention-status',
+  'audit-retention-set',
+  'monitoring-snapshot',
+];
+
+// =============================================================================
+// W767 — SOC 2 Type II + ISO 27001 certification dispatcher.
+//
+// Distinct-named (cmdW767Cert) so parallel W766/W768/W769/W770 wave agents
+// cannot collide on this symbol. Routed from main() under `case 'cert':` and
+// from the COMPLETION tables above.
+//
+// Subcommands:
+//   kolm cert soc2-checklist                       — GET soc2/checklist
+//   kolm cert iso27001-controls                    — GET iso27001/controls
+//   kolm cert audit-retention-status               — GET audit-retention/status
+//   kolm cert audit-retention-set <days> --confirm — write a tenant override
+//                                                    (honest not_yet_wired
+//                                                    until the setter route
+//                                                    ships)
+//   kolm cert monitoring-snapshot                  — GET continuous-monitoring
+//                                                    /snapshot
+//
+// All four read subcommands hit the hosted /v1/security/* routes so the CLI
+// honors the same auth contract as the API surface. The audit-retention-set
+// subcommand POSTs to /v1/security/audit-retention/set which does not yet
+// exist as a hosted route (W767-3 ships the read surface + module; the
+// explicit setter route is left for a follow-up). The dispatcher prints an
+// honest not_yet_wired envelope rather than silently passing.
+// =============================================================================
+async function cmdW767Cert(args) {
+  const sub = (args && args[0]) || '';
+
+  function _envApiKey() {
+    return process.env.KOLM_API_KEY || '';
+  }
+  function _envBase() {
+    return (process.env.KOLM_BASE_URL || 'https://kolm.ai').replace(/\/$/, '');
+  }
+  function _hasFlag(rest, name) {
+    return (rest || []).some((a) => a === '--' + name);
+  }
+  function _print(envelope) {
+    console.log(JSON.stringify(envelope, null, 2));
+  }
+  function _fail(envelope, code = EXIT.EXECUTION) {
+    _print(envelope);
+    process.exit(code);
+  }
+
+  if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
+    console.error('usage: kolm cert <soc2-checklist|iso27001-controls|audit-retention-status|audit-retention-set|monitoring-snapshot>');
+    console.error('  soc2-checklist                     — print the SOC 2 Type II readiness checklist');
+    console.error('  iso27001-controls                  — print the ISO 27001:2022 Annex A controls map');
+    console.error('  audit-retention-status             — print this tenant\'s audit-retention policy');
+    console.error('  audit-retention-set <days> --confirm  — request a tenant retention override (honest not_yet_wired)');
+    console.error('  monitoring-snapshot                — print the continuous-monitoring snapshot');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+
+  const key = _envApiKey();
+  if (!key) {
+    _fail({
+      ok: false,
+      error: 'auth_required',
+      hint: 'set KOLM_API_KEY (kolm signup / kolm login)',
+      version: 'w767-v1',
+    }, EXIT.MISSING_PREREQ);
+    return;
+  }
+
+  // ──────────── soc2-checklist | iso27001-controls | audit-retention-status |
+  // monitoring-snapshot — all four are read-only GETs to the hosted routes.
+  const readMap = {
+    'soc2-checklist':           '/v1/security/soc2/checklist',
+    'iso27001-controls':        '/v1/security/iso27001/controls',
+    'audit-retention-status':   '/v1/security/audit-retention/status',
+    'monitoring-snapshot':      '/v1/security/continuous-monitoring/snapshot',
+  };
+  if (readMap[sub]) {
+    let resp;
+    try {
+      resp = await fetch(_envBase() + readMap[sub], {
+        method: 'GET',
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'network_error',
+        detail: String(e && e.message || e),
+        version: 'w767-v1',
+      });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────── audit-retention-set <days> --confirm ───────────────────────
+  // No hosted setter route ships in W767-3 (read surface only); the CLI
+  // therefore gates on --confirm and prints an honest not_yet_wired envelope
+  // pointing the operator at the in-process API. Never silent-passes.
+  if (sub === 'audit-retention-set') {
+    const rest = args.slice(1);
+    const daysRaw = rest && rest[0];
+    const confirm = _hasFlag(rest, 'confirm');
+    if (daysRaw == null || /^--/.test(String(daysRaw))) {
+      _fail({
+        ok: false,
+        error: 'days_required',
+        hint: 'usage: kolm cert audit-retention-set <days> --confirm',
+        version: 'w767-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    if (!confirm) {
+      _fail({
+        ok: false,
+        error: 'confirm_required',
+        hint: 'pass --confirm to acknowledge changing the retention policy',
+        version: 'w767-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    const n = Number(daysRaw);
+    if (!Number.isFinite(n) || !Number.isInteger(n)) {
+      _fail({
+        ok: false,
+        error: 'days_invalid',
+        hint: 'days must be an integer',
+        version: 'w767-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    // Honest envelope — the hosted setter route is not yet wired (W767-3
+    // ships the read surface + module). Operators with a hosted account
+    // should call the in-process API via the SDK, OR shell into the
+    // daemon and call `setRetentionDays` directly.
+    _print({
+      ok: false,
+      error: 'not_yet_wired',
+      hint: 'POST /v1/security/audit-retention/set is not in this revision; call setRetentionDays(tenant_id, days) from src/audit-retention.js or set KOLM_AUDIT_RETENTION_DAYS=' + n + ' in the daemon env',
+      version: 'w767-v1',
+      requested_days: n,
+    });
+    process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // Unknown subverb.
+  _fail({
+    ok: false,
+    error: 'unknown_subcommand',
+    hint: 'usage: kolm cert <soc2-checklist|iso27001-controls|audit-retention-status|audit-retention-set|monitoring-snapshot>',
+    version: 'w767-v1',
+  }, EXIT.BAD_ARGS);
+}
+
+// =============================================================================
+// W769 — Data residency + geo-fence dispatcher.
+//
+// Distinct-named (cmdW769Residency) so parallel W766/W767/W768/W770 wave
+// agents cannot collide on this symbol. Routed from main() under
+// `case 'residency':` / `case 'region':`.
+//
+// Subcommands:
+//   kolm residency regions                                    — list region taxonomy
+//   kolm residency tag --capture-id CID --region R --confirm  — tag one capture
+//   kolm residency get --capture-id CID                       — read a capture tag
+//   kolm residency configure-namespace --namespace NS --region R --confirm
+//   kolm residency enforce --capture-id CID --target R        — check policy
+//
+// All thinly wrap the hosted /v1/residency/* routes so the CLI honors
+// the same auth + confirm contracts as the API surface. NEVER silent-
+// includes an untagged capture into a non-GLOBAL target (the
+// underlying filterCapturesByRegion is fail-closed).
+// =============================================================================
+async function cmdW769Residency(args) {
+  const sub = (args && args[0]) || '';
+
+  function _envApiKey() {
+    return process.env.KOLM_API_KEY || '';
+  }
+  function _envBase() {
+    return (process.env.KOLM_BASE_URL || 'https://kolm.ai').replace(/\/$/, '');
+  }
+  function _flag(rest, name) {
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--' + name && i + 1 < rest.length) return rest[i + 1];
+      if (typeof rest[i] === 'string' && rest[i].startsWith('--' + name + '=')) {
+        return rest[i].slice(name.length + 3);
+      }
+    }
+    return null;
+  }
+  function _hasFlag(rest, name) {
+    return (rest || []).some((a) => a === '--' + name);
+  }
+  function _print(envelope) {
+    console.log(JSON.stringify(envelope, null, 2));
+  }
+  function _fail(envelope, code) {
+    _print(envelope);
+    process.exit(code != null ? code : EXIT.EXECUTION);
+  }
+
+  if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
+    console.error('usage: kolm residency <regions|tag|get|configure-namespace|enforce> [args]');
+    console.error('  regions                                                                     — list region taxonomy');
+    console.error('  tag                  --capture-id CID --region R --confirm                  — tag one capture');
+    console.error('  get                  --capture-id CID                                       — read a capture tag');
+    console.error('  configure-namespace  --namespace NS --region R --confirm                    — set namespace default');
+    console.error('  enforce              --capture-id CID --target R                            — check residency policy');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+
+  // ────────────────────────── subcommand: regions ────────────────────────────
+  if (sub === 'regions') {
+    const key = _envApiKey();
+    if (!key) {
+      _fail({
+        ok: false,
+        error: 'auth_required',
+        hint: 'set KOLM_API_KEY (kolm signup / kolm login)',
+        version: 'w769-v1',
+      }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/residency/regions', {
+        method: 'GET',
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'network_error',
+        detail: String(e && e.message || e),
+        version: 'w769-v1',
+      });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────────── subcommand: tag ──────────────────────────────
+  if (sub === 'tag') {
+    const rest = args.slice(1);
+    const capture_id = _flag(rest, 'capture-id');
+    const region = _flag(rest, 'region');
+    const confirm = _hasFlag(rest, 'confirm');
+    if (!capture_id) {
+      _fail({
+        ok: false,
+        error: 'capture_id_required',
+        hint: 'pass --capture-id <id>',
+        version: 'w769-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    if (!region) {
+      _fail({
+        ok: false,
+        error: 'region_required',
+        hint: 'pass --region <REGION_CODE> (run `kolm residency regions` to list)',
+        version: 'w769-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    if (!confirm) {
+      _fail({
+        ok: false,
+        error: 'confirm_required',
+        hint: 'pass --confirm to acknowledge attaching a residency tag is auditable',
+        version: 'w769-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({
+        ok: false,
+        error: 'auth_required',
+        hint: 'set KOLM_API_KEY (kolm signup / kolm login)',
+        version: 'w769-v1',
+      }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/residency/tag-capture', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({ capture_id, region, confirm: true }),
+      });
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'network_error',
+        detail: String(e && e.message || e),
+        version: 'w769-v1',
+      });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────────── subcommand: get ──────────────────────────────
+  if (sub === 'get') {
+    const rest = args.slice(1);
+    const capture_id = _flag(rest, 'capture-id');
+    if (!capture_id) {
+      _fail({
+        ok: false,
+        error: 'capture_id_required',
+        hint: 'pass --capture-id <id>',
+        version: 'w769-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({
+        ok: false,
+        error: 'auth_required',
+        hint: 'set KOLM_API_KEY (kolm signup / kolm login)',
+        version: 'w769-v1',
+      }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/residency/capture-region/' + encodeURIComponent(capture_id), {
+        method: 'GET',
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'network_error',
+        detail: String(e && e.message || e),
+        version: 'w769-v1',
+      });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    // Untagged is an HONEST envelope (ok:false, error:'untagged'), not a
+    // transport-layer 4xx — preserve resp.ok pass-through.
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────── subcommand: configure-namespace ──────────────────────
+  if (sub === 'configure-namespace') {
+    const rest = args.slice(1);
+    const namespace = _flag(rest, 'namespace');
+    const region = _flag(rest, 'region');
+    const confirm = _hasFlag(rest, 'confirm');
+    if (!namespace) {
+      _fail({
+        ok: false,
+        error: 'namespace_required',
+        hint: 'pass --namespace <name>',
+        version: 'w769-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    if (!region) {
+      _fail({
+        ok: false,
+        error: 'region_required',
+        hint: 'pass --region <REGION_CODE>',
+        version: 'w769-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    if (!confirm) {
+      _fail({
+        ok: false,
+        error: 'confirm_required',
+        hint: 'pass --confirm to acknowledge changing the namespace default region',
+        version: 'w769-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({
+        ok: false,
+        error: 'auth_required',
+        hint: 'set KOLM_API_KEY (kolm signup / kolm login)',
+        version: 'w769-v1',
+      }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/residency/configure-namespace', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({ namespace, region, confirm: true }),
+      });
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'network_error',
+        detail: String(e && e.message || e),
+        version: 'w769-v1',
+      });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ────────────────────────── subcommand: enforce ────────────────────────────
+  if (sub === 'enforce') {
+    const rest = args.slice(1);
+    const capture_id = _flag(rest, 'capture-id');
+    const target = _flag(rest, 'target');
+    if (!capture_id) {
+      _fail({
+        ok: false,
+        error: 'capture_id_required',
+        hint: 'pass --capture-id <id>',
+        version: 'w769-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    if (!target) {
+      _fail({
+        ok: false,
+        error: 'target_required',
+        hint: 'pass --target <REGION_CODE> (the region attempting to access the capture)',
+        version: 'w769-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    // enforce is a pure compute combining /v1/residency/capture-region/:cid
+    // with the local enforceRegionPolicy helper. We fetch the tag and run
+    // the policy check client-side so the CLI can ALSO be used offline
+    // against a captured tag envelope (operators sometimes archive these).
+    const key = _envApiKey();
+    if (!key) {
+      _fail({
+        ok: false,
+        error: 'auth_required',
+        hint: 'set KOLM_API_KEY (kolm signup / kolm login)',
+        version: 'w769-v1',
+      }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/residency/capture-region/' + encodeURIComponent(capture_id), {
+        method: 'GET',
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'network_error',
+        detail: String(e && e.message || e),
+        version: 'w769-v1',
+      });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    let mod;
+    try {
+      mod = await import(new URL('../src/data-residency.js', import.meta.url).href);
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'residency_module_load_failed',
+        detail: String(e && e.message || e),
+        version: 'w769-v1',
+      });
+      return;
+    }
+    const capture_region = body && body.ok ? body.region : null;
+    const decision = mod.enforceRegionPolicy({
+      capture_region,
+      target_region: target,
+    });
+    _print({
+      ok: !!(decision && decision.ok),
+      capture_id,
+      capture_region,
+      target_region: target,
+      allowed: !!(decision && decision.allowed),
+      reason: decision && decision.reason,
+      tag_envelope: body,
+      version: 'w769-v1',
+    });
+    if (!decision || !decision.ok || !decision.allowed) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  console.error('usage: kolm residency <regions|tag|get|configure-namespace|enforce> [args]');
+  process.exit(EXIT.BAD_ARGS);
+}
 
 main();

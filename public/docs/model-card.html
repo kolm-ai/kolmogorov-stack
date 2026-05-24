@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Model card auto-generation &middot; kolm.ai</title>
+<meta name="description" content="Hugging Face Model Card v0.3 generated for every .kolm artifact. Intended use, limitations, training-data summary, eval results, ethical considerations, environmental impact. Embeddable in OneTrust, ServiceNow AI Governance, and IBM OpenPages. Open-source AI workbench.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Model card auto-generation &middot; kolm.ai">
+<meta property="og:description" content="Every .kolm artifact ships with an auto-generated Hugging Face Model Card v0.3. 10 sections, honest 'not_yet_disclosed' sentinels for missing fields, embeddable in OneTrust / ServiceNow AI Governance / IBM OpenPages.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/docs/model-card">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Model card auto-generation &middot; kolm.ai">
+<meta name="twitter:description" content="HF Model Card v0.3 for every .kolm artifact. Embeddable in OneTrust, ServiceNow, OpenPages.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/docs/model-card">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Model card auto-generation","description":"Hugging Face Model Card v0.3 for every .kolm artifact. Embeddable in OneTrust, ServiceNow AI Governance, IBM OpenPages.","url":"https://kolm.ai/docs/model-card","datePublished":"2026-05-24","dateModified":"2026-05-24","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<link rel="stylesheet" href="/design-tokens.css">
+<style>
+:root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--accent-soft:rgba(16,185,129,0.10);--warn:#d6a65a;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10);--warn:#a06b1a}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.skip-link{position:absolute;left:-9999px}
+.skip-link:focus{position:static;background:var(--accent);color:#fff;padding:8px 14px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+header.site{padding:18px 0;border-bottom:1px solid var(--line)}
+header.site .wrap{display:flex;justify-content:space-between;align-items:center}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.brand-eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 36px}
+h2{font-size:24px;font-weight:500;letter-spacing:-0.018em;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:28px 0 8px;max-width:780px}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px}
+pre code{background:none;border:none;padding:0;color:inherit;font:inherit}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
+li{margin:4px 0}
+table{border-collapse:collapse;width:100%;max-width:920px;margin:14px 0;font-size:13.5px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink);font-weight:500}
+td code{font-size:12px}
+.sect-table{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:14px 0 18px;max-width:920px}
+@media(max-width:720px){.sect-table{grid-template-columns:1fr}}
+.sect-card{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev)}
+.sect-card b{display:block;color:var(--accent);font-family:var(--mono);font-size:11.5px;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:8px}
+.sect-card p{font-size:13.5px;margin:0 0 6px;color:var(--ink-mute)}
+.sect-card code{font-size:11.5px}
+.warn{border:1px solid var(--warn);border-left:4px solid var(--warn);background:rgba(217,119,6,0.07);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
+.honesty{border:1px solid var(--accent);border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
+.related{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+@media(max-width:820px){.related{grid-template-columns:1fr}}
+.related a{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:4px}
+.related a:hover{border-color:var(--accent-soft)}
+.related b{font-size:14px;color:var(--ink);font-weight:500}
+.related span{font-size:12.5px;color:var(--ink-mute);line-height:1.5}
+footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
+footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+</style>
+
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/docs-shell.css">
+<script defer src="/docs-shell.js"></script>
+
+</head>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    </div>
+  </nav>
+  <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+  </div>
+</div>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / model-card</div>
+<p class="brand-eyebrow">Open-source AI workbench</p>
+<h1>Auto-generated model cards for every .kolm artifact.</h1>
+<p class="lede">Every <code>kolm compile</code> emits a fresh Hugging Face Model Card (v0.3) alongside the artifact. Ten sections covering intended use, limitations, training data summary, eval results, ethical considerations, and environmental impact &mdash; built from the same manifest that signs the receipt, so the card and the bytes can never drift. Fields that the manifest does not yet carry come through as the honest sentinel <code>not_yet_disclosed</code>: an auditor can grep for the exact gap. Stamped <code>w768-v1</code>. Built by <code>src/model-card-emit.js</code>, <code>src/model-card-schema.js</code>, and <code>apps/export/model_card.py</code>.</p>
+
+<h2 id="why">Why a model card for every artifact</h2>
+<p>A signed receipt proves a <code>.kolm</code> artifact's bytes match what was minted. A model card is what a procurement, legal, or compliance team needs <em>before</em> they will deploy those bytes inside a regulated workflow. The HF Model Card v0.3 schema is the de facto standard for that description; OneTrust, ServiceNow AI Governance, and IBM OpenPages all consume some variant of it. W768 generates the card on demand from the manifest, so it stays in lockstep with the artifact you just built &mdash; no out-of-band Word document to keep up to date.</p>
+
+<h2 id="sections">Ten sections (HF Model Card v0.3)</h2>
+<p>The card renders these ten sections in canonical order. Byte-stability matters: downstream tools diff sequential card emissions, and we never reorder without bumping the <code>w768-v1</code> stamp.</p>
+
+<div class="sect-table" data-w768="card-sections">
+  <div class="sect-card">
+    <b>1. Model details</b>
+    <p>Name, version, developer, model type, license, base model, framework, languages.</p>
+  </div>
+  <div class="sect-card">
+    <b>2. Intended use</b>
+    <p>Primary uses, primary users, out-of-scope uses. Honest about what the model is NOT for.</p>
+  </div>
+  <div class="sect-card">
+    <b>3. Factors</b>
+    <p>Relevant factors (demographic, domain, environmental) the model's performance varies across.</p>
+  </div>
+  <div class="sect-card">
+    <b>4. Metrics</b>
+    <p>Performance measures, decision thresholds, variation approaches, raw measured values.</p>
+  </div>
+  <div class="sect-card">
+    <b>5. Evaluation data</b>
+    <p>Datasets, motivation for selection, preprocessing applied before scoring.</p>
+  </div>
+  <div class="sect-card">
+    <b>6. Training data</b>
+    <p>Datasets, size, preprocessing, capture count (from kolm event-store when distilled from captures).</p>
+  </div>
+  <div class="sect-card">
+    <b>7. Quantitative analyses</b>
+    <p>Unitary results (per-factor) and intersectional results (factor combinations).</p>
+  </div>
+  <div class="sect-card">
+    <b>8. Ethical considerations</b>
+    <p>Sensitive data, human-life implications, mitigations applied, risks &amp; harms surfaced, intended use cases.</p>
+  </div>
+  <div class="sect-card">
+    <b>9. Caveats &amp; recommendations</b>
+    <p>Caveats the user should know, recommendations for safe deployment.</p>
+  </div>
+  <div class="sect-card">
+    <b>10. Environmental impact</b>
+    <p>Compute hours, GPU class, estimated CO<sub>2</sub>. Always stamped <code>static_grid_average_w768_v1</code> + <code>estimate_not_measured</code> &mdash; see the next section.</p>
+  </div>
+</div>
+
+<div class="honesty"><strong>Honest sentinel:</strong> any field the manifest does not yet carry comes through as the literal string <code>not_yet_disclosed</code>. We deliberately do NOT silently substitute an empty string or list &mdash; the auditor must be able to grep for <code>not_yet_disclosed</code> and see every gap in the card.</div>
+
+<h2 id="environmental" data-w768="environmental-methodology">Environmental impact estimation</h2>
+<p>The <code>environmental_impact</code> section is an <em>estimate</em>, not a measurement. We compute it as:</p>
+<pre><code>estimated_co2_kg = compute_hours * gpu_class_kw * grid_co2_kg_per_kwh
+                 = compute_hours * gpu_class_kw * 0.475
+
+# 0.475 kg CO2 / kWh is the IEA 2024 World Energy Outlook global grid average.
+# gpu_class_kw is the vendor TDP under sustained training load, single-card draw.</code></pre>
+<p>Every emission carries two stamps that prevent the estimate from being mistaken for a measurement:</p>
+<ul>
+  <li><code>methodology: "static_grid_average_w768_v1"</code> &mdash; surfaces the methodology version so a future revision can be diffed.</li>
+  <li><code>honest_caveat: "estimate_not_measured"</code> &mdash; the W411 honest envelope value, so downstream tooling and auditors can never confuse the static estimate with a measured datacenter bill.</li>
+</ul>
+<p>Known GPU classes today: <code>a100</code>, <code>h100</code>, <code>h200</code>, <code>b200</code>, <code>rtx-5090</code>, <code>rtx-4090</code>, <code>l40s</code>, <code>mi300x</code>, <code>tpu-v5p</code>. When the manifest's <code>gpu_class</code> is unknown to us, <code>estimated_co2_kg</code> is set to <code>not_yet_disclosed</code> with a <code>reason: "unknown_gpu_class"</code> field and the full list of known classes in <code>known_gpu_classes</code>. We never silently fall back to a different class.</p>
+
+<div class="warn"><strong>Honest scope:</strong> Measured datacenter billing is the gold standard for environmental impact. Until the artifact's compile loop ingests an actual energy meter reading, the value here is a static estimate. Treat it as a <em>floor</em> for compliance reporting and a <em>direction</em> for comparing across artifacts &mdash; not as an audited figure.</div>
+
+<h2 id="governance" data-w768="governance-mappings">Governance platform integration</h2>
+<p>The card schema is published as a JSON Schema draft-07 document at <code>/v1/model-card/schema</code> and re-emitted statically below. For the three named GRC suites we also ship a field-name mapping table so an integrator can move a generated card into the platform's expected shape without hand-rewiring.</p>
+
+<table data-w768="governance-platforms">
+  <thead>
+    <tr>
+      <th>kolm card field</th>
+      <th>OneTrust AI Governance</th>
+      <th>ServiceNow AI Governance</th>
+      <th>IBM OpenPages</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>model_details</code></td>
+      <td><code>aiInventory.modelMetadata</code></td>
+      <td><code>sn_aigov_inventory.model_metadata</code></td>
+      <td><code>OPModel.ModelOverview</code></td>
+    </tr>
+    <tr>
+      <td><code>intended_use</code></td>
+      <td><code>aiInventory.purposeOfProcessing</code></td>
+      <td><code>sn_aigov_inventory.intended_use</code></td>
+      <td><code>OPModel.IntendedUse</code></td>
+    </tr>
+    <tr>
+      <td><code>factors</code></td>
+      <td><code>aiInventory.modelFactors</code></td>
+      <td><code>sn_aigov_inventory.relevant_factors</code></td>
+      <td><code>OPModel.ModelFactors</code></td>
+    </tr>
+    <tr>
+      <td><code>metrics</code></td>
+      <td><code>aiInventory.modelPerformance</code></td>
+      <td><code>sn_aigov_inventory.performance_metrics</code></td>
+      <td><code>OPModel.PerformanceMetrics</code></td>
+    </tr>
+    <tr>
+      <td><code>evaluation_data</code></td>
+      <td><code>aiInventory.evaluationDatasets</code></td>
+      <td><code>sn_aigov_inventory.evaluation_data</code></td>
+      <td><code>OPModel.EvaluationData</code></td>
+    </tr>
+    <tr>
+      <td><code>training_data</code></td>
+      <td><code>aiInventory.trainingDatasets</code></td>
+      <td><code>sn_aigov_inventory.training_data</code></td>
+      <td><code>OPModel.TrainingData</code></td>
+    </tr>
+    <tr>
+      <td><code>quantitative_analyses</code></td>
+      <td><code>aiInventory.quantitativeAnalyses</code></td>
+      <td><code>sn_aigov_inventory.quantitative_analyses</code></td>
+      <td><code>OPModel.QuantitativeAnalyses</code></td>
+    </tr>
+    <tr>
+      <td><code>ethical_considerations</code></td>
+      <td><code>aiInventory.ethicalRiskAssessment</code></td>
+      <td><code>sn_aigov_risk.ethical_considerations</code></td>
+      <td><code>OPModel.EthicalConsiderations</code></td>
+    </tr>
+    <tr>
+      <td><code>caveats_and_recommendations</code></td>
+      <td><code>aiInventory.modelLimitations</code></td>
+      <td><code>sn_aigov_risk.model_limitations</code></td>
+      <td><code>OPModel.CaveatsAndRecommendations</code></td>
+    </tr>
+    <tr>
+      <td><code>environmental_impact</code></td>
+      <td><code>aiInventory.environmentalImpact</code></td>
+      <td><code>sn_aigov_inventory.environmental_impact</code></td>
+      <td><code>OPModel.EnvironmentalImpact</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Where a platform's top-level path is documented publicly, we use it verbatim. Where the platform exposes a customer-defined custom-field surface, we use a clearly-namespaced placeholder (for instance <code>custom.intendedUse</code>) so an integrator knows to wire it at deploy time. The mapping is exposed as frozen reference data via <code>/v1/model-card/governance-mappings?platform=&lt;name&gt;</code>.</p>
+
+<h2 id="cli" data-w768="cli-usage">CLI usage</h2>
+<p>Three paths: the local CLI for offline / CI use, the HTTP API for tenant-scoped builds, and a stdlib-only Python script for runners that don't have Node.</p>
+
+<h3>CLI (offline, pure-compute)</h3>
+<pre><code># Generate a JSON model card from a manifest:
+kolm mc generate ./my.kolm/manifest.json
+
+# Markdown body (HF-standard):
+kolm mc generate ./my.kolm/manifest.json --format markdown
+
+# Hugging Face Hub-ready (YAML frontmatter + markdown body):
+kolm mc generate ./my.kolm/manifest.json --format huggingface --out README.md
+
+# Include the environmental estimate:
+kolm mc generate ./my.kolm/manifest.json --include-environmental
+
+# Fetch the JSON schema (auth-gated):
+kolm mc schema
+
+# Fetch a governance platform mapping (auth-gated):
+kolm mc governance-map onetrust
+kolm mc governance-map servicenow_ai_governance
+kolm mc governance-map ibm_openpages</code></pre>
+
+<h3>HTTP API (authenticated)</h3>
+<pre><code>POST /v1/model-card/generate
+{ "manifest": { ...kolm manifest... },
+  "format":   "json",
+  "include_environmental": true }
+&rarr;
+{ "ok": true, "version": "w768-v1", "format": "json",
+  "generated_at": "2026-05-24T...Z",
+  "card": { "model_details": {...}, ..., "environmental_impact": {...} } }
+
+GET /v1/model-card/schema
+GET /v1/model-card/governance-mappings?platform=onetrust</code></pre>
+
+<h3>Python (stdlib-only)</h3>
+<pre><code>python3 apps/export/model_card.py \
+  --manifest ./my.kolm/manifest.json \
+  --format huggingface \
+  --include-environmental \
+  --out README.md</code></pre>
+
+<h2 id="api" data-w768="api-surface">API + CLI surface</h2>
+<table>
+  <thead><tr><th>Surface</th><th>Invocation</th></tr></thead>
+  <tbody>
+    <tr><td>CLI (generate)</td><td><code>kolm mc generate &lt;MANIFEST_PATH&gt; [--format json|markdown|huggingface] [--include-environmental] [--out PATH]</code></td></tr>
+    <tr><td>CLI (schema)</td><td><code>kolm mc schema</code></td></tr>
+    <tr><td>CLI (governance-map)</td><td><code>kolm mc governance-map &lt;onetrust|servicenow_ai_governance|ibm_openpages&gt;</code></td></tr>
+    <tr><td>API (generate)</td><td><code>POST /v1/model-card/generate</code> body <code>{manifest, format?, include_environmental?}</code></td></tr>
+    <tr><td>API (schema)</td><td><code>GET /v1/model-card/schema</code></td></tr>
+    <tr><td>API (governance)</td><td><code>GET /v1/model-card/governance-mappings?platform=&lt;name&gt;</code></td></tr>
+    <tr><td>Python (stdlib)</td><td><code>python3 apps/export/model_card.py --manifest PATH [--format ...] [--include-environmental] [--out PATH]</code></td></tr>
+  </tbody>
+</table>
+
+<h2 id="related">Related</h2>
+<div class="related">
+  <a href="/security/sbom"><b>SBOM &amp; supply chain</b><span>CycloneDX 1.5 + SPDX 2.3 for every artifact (W763).</span></a>
+  <a href="/compliance/eu-ai-act"><b>EU AI Act</b><span>Annex IV technical documentation generation (W766).</span></a>
+  <a href="/security"><b>Security overview</b><span>Receipts, signing, capture redaction, supply chain.</span></a>
+</div>
+
+</div></main>
+
+<footer><div class="wrap">
+<a href="/">kolm.ai</a> &middot; <a href="/security">security</a> &middot; <a href="/docs">docs</a> &middot; <span>w768-v1</span>
+</div></footer>
+
+</body>
+</html>

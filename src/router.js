@@ -17062,5 +17062,571 @@ res.json({
     }
   });
 
+  // ============== W766 — EU AI Act compliance toolkit ============
+  //
+  // Four routes:
+  //   POST /v1/compliance/ai-act/export             — auth; build Annex IV docs
+  //   POST /v1/compliance/ai-act/risk-score         — auth; classify a manifest
+  //   POST /v1/compliance/ai-act/human-in-loop      — auth + confirm; persist
+  //                                                   per-namespace threshold
+  //   GET  /v1/compliance/ai-act/governance-report  — auth; aggregate captures
+  //                                                   under tenant fence (W411
+  //                                                   defense-in-depth)
+  //
+  // Honesty contract:
+  //   * /export NEVER fabricates Annex IV fields — missing fields land as
+  //     'not_yet_disclosed' (per src/ai-act-export.js).
+  //   * /risk-score NEVER returns null risk_category — floor is 'minimal'.
+  //   * /human-in-loop validates threshold ∈ [0, 10] nats and requires
+  //     confirm:true (matches W709 + W411 spend-protection pattern).
+  //   * /governance-report runs the loop body with a per-row tenant re-check
+  //     so a future schema bug cannot leak across tenants.
+  //
+  // Distinct from sibling W767-cert / W768-modelcard / W769-residency /
+  // W770-audit-export routes — no path collision possible.
+  r.post('/v1/compliance/ai-act/export', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const body = req.body || {};
+      const mod = await import('./ai-act-export.js');
+      const format = body.format === 'markdown' ? 'markdown' : 'json';
+      const manifest = body.manifest;
+      // Defensive shape check — the JS module also validates but route-level
+      // 400 is friendlier than a 200 honest envelope for body-shape errors.
+      if (manifest == null || typeof manifest !== 'object' || Array.isArray(manifest)) {
+        return res.status(400).json({
+          ok: false,
+          error: 'manifest_required',
+          hint: 'pass {manifest: {...}} in body (kolm artifact manifest.json contents)',
+          version: 'w766-v1',
+        });
+      }
+      const env = mod.buildTechnicalDocumentation(manifest, { format });
+      return res.status(200).json(env);
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: 'ai_act_export_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  r.post('/v1/compliance/ai-act/risk-score', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const body = req.body || {};
+      const mod = await import('./ai-act-risk.js');
+      const manifest = body.manifest;
+      const env = mod.scoreArtifactRisk(manifest);
+      // Always 200 — the envelope carries ok:false honestly when input is bad,
+      // matching the W764 honest-envelope pattern.
+      return res.status(200).json(env);
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: 'ai_act_risk_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  r.post('/v1/compliance/ai-act/human-in-loop', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const body = req.body || {};
+    if (body.confirm !== true) {
+      return res.status(400).json({
+        ok: false,
+        error: 'confirm_required',
+        hint: 'send {"confirm": true} alongside {namespace, threshold_nats} — the threshold is durable and affects routing decisions for every subsequent request in this namespace.',
+        version: 'w766-v1',
+      });
+    }
+    try {
+      const mod = await import('./ai-act-export.js');
+      const tenant_id = req.tenant_record.id;
+      const result = await mod.humanInLoopConfig({
+        tenant_id,
+        namespace: typeof body.namespace === 'string' ? body.namespace : null,
+        threshold_nats: body.threshold_nats,
+      });
+      const status = result.ok ? 200 : 400;
+      return res.status(status).json(result);
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: 'ai_act_human_in_loop_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  r.get('/v1/compliance/ai-act/governance-report', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./ai-act-export.js');
+      const tenant_id = req.tenant_record.id;
+      const namespace = req.query && typeof req.query.namespace === 'string' ? req.query.namespace : null;
+      // Accept either ?from / ?to query params OR ?since / ?until (eventStore
+      // synonyms) so the shape is forgiving for ops users.
+      const from = (req.query && (req.query.from || req.query.since)) || null;
+      const to = (req.query && (req.query.to || req.query.until)) || null;
+      const time_range = (from || to) ? { from, to } : null;
+      const result = await mod.buildGovernanceReport({
+        tenant_id,
+        namespace,
+        time_range,
+      });
+      return res.status(200).json(result);
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: 'ai_act_governance_report_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // =====================================================================
+  // W768 - Model Card auto-generation (HF v0.3 standard).
+  //
+  //   POST /v1/model-card/generate              AUTH  build a card from a manifest
+  //   GET  /v1/model-card/schema                AUTH  emit MODEL_CARD_JSON_SCHEMA
+  //   GET  /v1/model-card/governance-mappings   AUTH  fetch the per-platform mapping
+  //
+  // All routes are tenant-fenced via req.tenant_record. The card itself is a
+  // pure function of the manifest the caller submits (no tenant data
+  // crosses boundaries); we still require auth because card generation is
+  // a billable compute. Schema + mappings are read-only reference data but
+  // are gated to keep the cost-discovery story consistent across the W76x
+  // sibling waves (W761..W765, W763, W766).
+  //
+  // Honest envelopes everywhere. Version stamp matches /^w768-/ - callers
+  // MUST regex-match (W604 anti-brittleness).
+  //
+  // Modules import lazily so cold daemons that never hit this surface
+  // don't pay for the schema/emitter trees.
+  // =====================================================================
+  r.post('/v1/model-card/generate', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const body = req.body || {};
+      const mod = await import('./model-card-emit.js');
+      let manifest = body.manifest;
+      // Accept manifest_id as a forward-compat slot - today we only support
+      // the inline `manifest` body. An honest envelope tells the caller the
+      // manifest_id resolver is wired in a follow-up wave.
+      if (!manifest && typeof body.manifest_id === 'string' && body.manifest_id) {
+        return res.status(400).json({
+          ok: false,
+          error: 'manifest_id_lookup_not_yet_wired',
+          hint: 'pass {"manifest": {...inline manifest...}} - manifest_id resolution is on the W768-followup roadmap.',
+          version: 'w768-v1',
+        });
+      }
+      if (!manifest || typeof manifest !== 'object') {
+        return res.status(400).json({
+          ok: false,
+          error: 'manifest_required',
+          hint: 'pass {"manifest": {...inline manifest...}, "format"?: "json"|"markdown"|"huggingface"}',
+          version: 'w768-v1',
+        });
+      }
+      const result = mod.buildModelCard(manifest, {
+        format: typeof body.format === 'string' ? body.format : undefined,
+        include_environmental: body.include_environmental === true,
+      });
+      return res.json(result);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'model_card_generate_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  r.get('/v1/model-card/schema', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./model-card-schema.js');
+      return res.json({
+        ok: true,
+        version: mod.MODEL_CARD_SCHEMA_VERSION,
+        schema: mod.MODEL_CARD_JSON_SCHEMA,
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'model_card_schema_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  r.get('/v1/model-card/governance-mappings', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./model-card-schema.js');
+      const platform = typeof req.query.platform === 'string' ? req.query.platform : null;
+      if (!platform) {
+        // No platform query - return the full lookup, honest envelope.
+        return res.json({
+          ok: true,
+          version: mod.MODEL_CARD_SCHEMA_VERSION,
+          supported_platforms: mod.SUPPORTED_GOVERNANCE_PLATFORMS,
+          mappings: mod.GOVERNANCE_PLATFORM_MAPPINGS,
+        });
+      }
+      if (!mod.SUPPORTED_GOVERNANCE_PLATFORMS.includes(platform)) {
+        return res.json({
+          ok: false,
+          error: 'unknown_platform',
+          hint: 'supported: ' + mod.SUPPORTED_GOVERNANCE_PLATFORMS.join(', '),
+          supported_platforms: mod.SUPPORTED_GOVERNANCE_PLATFORMS,
+          version: mod.MODEL_CARD_SCHEMA_VERSION,
+        });
+      }
+      return res.json({
+        ok: true,
+        platform,
+        version: mod.MODEL_CARD_SCHEMA_VERSION,
+        mapping: mod.GOVERNANCE_PLATFORM_MAPPINGS[platform],
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'model_card_governance_mappings_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // =====================================================================
+  // W770 - Audit Export (CSV + SIEM-compatible CEF/LEEF/JSONL).
+  //
+  //   GET /v1/audit/export?format=csv|cef|leef|json&from=<iso>&to=<iso>&max_rows=N
+  //     Streams the export body with the per-format Content-Type. Tenant-fenced
+  //     via req.tenant_record.id with W411 defense-in-depth (per-row filter).
+  //
+  //   GET /v1/audit/export/formats
+  //     Lists supported formats, CSV columns, mime-type table. No body weight.
+  //
+  //   GET /v1/audit/export/preview?format=...&from=...&to=...
+  //     Returns the first 10 rows + total_would_export so the UI can show a
+  //     preview without offering a backdoor full dump.
+  //
+  // All three routes auth-gate on req.tenant_record. Honest envelope on bad
+  // format / missing tenant - no silent passthrough.
+  // =====================================================================
+  r.get('/v1/audit/export', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./audit-export.js');
+      const tenant_id = req.tenant_record.id;
+      const format = typeof req.query.format === 'string' ? req.query.format : 'json';
+      const from = typeof req.query.from === 'string' ? req.query.from : null;
+      const to = typeof req.query.to === 'string' ? req.query.to : null;
+      const maxRowsRaw = req.query.max_rows;
+      const max_rows = (maxRowsRaw != null && Number.isFinite(Number(maxRowsRaw)))
+        ? Number(maxRowsRaw)
+        : 10000;
+      const result = mod.exportAuditEvents({ tenant_id, format, from, to, max_rows });
+      if (!result.ok) {
+        return res.status(400).json(result);
+      }
+      // Stream body with per-format Content-Type. Body is already encoded.
+      res.setHeader('Content-Type', result.mime_type);
+      res.setHeader('X-Kolm-Audit-Export-Version', result.version);
+      res.setHeader('X-Kolm-Audit-Export-Row-Count', String(result.row_count));
+      res.setHeader('X-Kolm-Audit-Export-Total-In-Range', String(result.total_in_range));
+      res.setHeader('X-Kolm-Audit-Export-Truncated', String(result.truncated));
+      return res.send(result.body);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'audit_export_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  r.get('/v1/audit/export/formats', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./audit-export.js');
+      return res.json(mod.listExportFormats());
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'audit_export_formats_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  r.get('/v1/audit/export/preview', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./audit-export.js');
+      const tenant_id = req.tenant_record.id;
+      const format = typeof req.query.format === 'string' ? req.query.format : 'json';
+      const from = typeof req.query.from === 'string' ? req.query.from : null;
+      const to = typeof req.query.to === 'string' ? req.query.to : null;
+      const result = mod.previewExport({ tenant_id, format, from, to });
+      if (!result.ok) return res.status(400).json(result);
+      return res.json(result);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'audit_export_preview_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // =====================================================================
+  // W767 — SOC 2 Type II + ISO 27001 certification surface.
+  //
+  // Four auth-gated read routes:
+  //
+  //   GET /v1/security/soc2/checklist
+  //       — static JSON checklist mirroring /security/soc2-type2.html
+  //   GET /v1/security/iso27001/controls
+  //       — ISO 27001:2022 Annex A controls -> kolm-component map
+  //   GET /v1/security/audit-retention/status
+  //       — tenant-fenced retention-policy snapshot
+  //   GET /v1/security/continuous-monitoring/snapshot
+  //       — tenant-fenced TSC -> signal map with green/yellow/red/unknown
+  //
+  // All four are tenant-fenced via req.tenant_record (W411). The two read-
+  // only static surfaces (checklist + controls) still require auth — they
+  // are tenant-scoped insofar as the consumer is an authenticated tenant
+  // operator. Returning ok:true with no auth would let a scraper inventory
+  // kolm's compliance posture without provenance.
+  //
+  // Honesty contract:
+  //   * snapshot returns 'unknown' status for any control whose signal
+  //     source is offline — NEVER fabricates a green pill.
+  //   * checklist marks shipped:false for items where the external auditor
+  //     (not kolm) supplies evidence (e.g. background-check policy).
+  //
+  // The retention + monitoring routes import lazily so the certification
+  // modules are not paid for on cold daemons that never call them.
+  // =====================================================================
+  r.get('/v1/security/soc2/checklist', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      // Static checklist — kept in-route so the public web page hand-mirrors
+      // a single in-source-tree source of truth. 18 line-items spanning the
+      // five Trust Services Criteria plus Continuous Monitoring. Items
+      // marked source:'external_auditor' are HONEST — kolm does not ship
+      // background-check evidence or facility security; the auditor's
+      // sample collects those from the customer org.
+      const checklist = Object.freeze([
+        Object.freeze({ id: 'TSC-S1',  criterion: 'Security',                 item: 'Logical access control (MFA, RBAC, key rotation)',           shipped: true,  source: 'kolm', evidence: 'src/auth.js + W258 key rotation + W409y RBAC' }),
+        Object.freeze({ id: 'TSC-S2',  criterion: 'Security',                 item: 'Audit logging with tamper-evident chain',                    shipped: true,  source: 'kolm', evidence: 'src/audit.js HMAC chain + verifyAuditChain' }),
+        Object.freeze({ id: 'TSC-S3',  criterion: 'Security',                 item: 'Vulnerability management (SBOM + dep audit)',                shipped: true,  source: 'kolm', evidence: 'W763 sbom-emit + /security/sbom' }),
+        Object.freeze({ id: 'TSC-S4',  criterion: 'Security',                 item: 'Prompt-extraction defense + red-team posture',               shipped: true,  source: 'kolm', evidence: 'W762 adversarial + W765 prompt-extraction' }),
+        Object.freeze({ id: 'TSC-S5',  criterion: 'Security',                 item: 'Background checks on personnel with prod access',            shipped: false, source: 'external_auditor', evidence: 'collected by auditor from customer HR' }),
+        Object.freeze({ id: 'TSC-A1',  criterion: 'Availability',             item: 'Uptime SLO + monitoring',                                    shipped: true,  source: 'kolm', evidence: 'W730 Prometheus/Grafana + /v1/health' }),
+        Object.freeze({ id: 'TSC-A2',  criterion: 'Availability',             item: 'Incident response runbook',                                  shipped: true,  source: 'kolm', evidence: '/security + AUDIT_OPS.ADMIN_ACTION' }),
+        Object.freeze({ id: 'TSC-A3',  criterion: 'Availability',             item: 'DR/backup retention >= 12 months',                           shipped: true,  source: 'kolm', evidence: 'W767-3 audit-retention 365d default' }),
+        Object.freeze({ id: 'TSC-PI1', criterion: 'Processing Integrity',     item: 'Artifact receipt verification',                              shipped: true,  source: 'kolm', evidence: 'src/binder.js HMAC chain + cid lock' }),
+        Object.freeze({ id: 'TSC-PI2', criterion: 'Processing Integrity',     item: 'Capture-anomaly quarantine before prod ingest',              shipped: true,  source: 'kolm', evidence: 'W808 staged-captures + W761 poisoning orchestrator' }),
+        Object.freeze({ id: 'TSC-PI3', criterion: 'Processing Integrity',     item: 'Numeric/eval honesty (kolmbench + numeric-accuracy)',        shipped: true,  source: 'kolm', evidence: 'W756 kolmbench + W759 numeric-accuracy' }),
+        Object.freeze({ id: 'TSC-C1',  criterion: 'Confidentiality',          item: 'PII scan + redaction prior to distillation',                 shipped: true,  source: 'kolm', evidence: 'W764 mit/scan-pii + W454 transcript-redact' }),
+        Object.freeze({ id: 'TSC-C2',  criterion: 'Confidentiality',          item: 'Tenant-fenced reads (W411 defense in depth)',                shipped: true,  source: 'kolm', evidence: 'tenant_id filter on every listEvents + re-filter inside helpers' }),
+        Object.freeze({ id: 'TSC-C3',  criterion: 'Confidentiality',          item: 'Confidential-compute attestation embed',                     shipped: true,  source: 'kolm', evidence: 'W460 attestation_kind manifest binding' }),
+        Object.freeze({ id: 'TSC-P1',  criterion: 'Privacy',                  item: 'Right-to-erasure (capture forget)',                          shipped: true,  source: 'kolm', evidence: 'W764-3 captures/forget + audit row' }),
+        Object.freeze({ id: 'TSC-P2',  criterion: 'Privacy',                  item: 'Data residency / region tagging',                            shipped: false, source: 'sibling_wave', evidence: 'W769 ships region tagging; not yet wired in this surface' }),
+        Object.freeze({ id: 'TSC-P3',  criterion: 'Privacy',                  item: 'Privacy policy + DPIA + DPA',                                shipped: false, source: 'external_auditor', evidence: 'customer legal + DPIA template at /privacy' }),
+        Object.freeze({ id: 'TSC-CC1', criterion: 'Continuous Monitoring',    item: 'TSC -> signal map with auditor read access',                 shipped: true,  source: 'kolm', evidence: 'W767-4 /v1/security/continuous-monitoring/snapshot' }),
+      ]);
+      const total = checklist.length;
+      const shipped_count = checklist.filter(x => x.shipped).length;
+      const external_count = total - shipped_count;
+      return res.status(200).json({
+        ok: true,
+        version: 'w767-v1',
+        type: 'soc2-type2-checklist',
+        criteria: ['Security', 'Availability', 'Processing Integrity', 'Confidentiality', 'Privacy', 'Continuous Monitoring'],
+        checklist,
+        total,
+        shipped_count,
+        external_count,
+        note: 'Items marked source:external_auditor are collected by the auditor from the customer org. kolm does not ship that evidence.',
+      });
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: 'soc2_checklist_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  r.get('/v1/security/iso27001/controls', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      // ISO 27001:2022 Annex A — four control families, 93 controls total.
+      // We map the controls kolm directly satisfies; controls left blank are
+      // not gaps so much as scope items the auditor verifies elsewhere
+      // (e.g. A.7 Physical security is a facilities concern, not a kolm
+      // module). REAL Annex A IDs — never invented.
+      const controls = Object.freeze([
+        Object.freeze({ id: 'A.5.1',  family: 'Organizational', name: 'Policies for information security',                kolm_component: 'INTERNAL_BACKEND_SPEC.md + /security landing' }),
+        Object.freeze({ id: 'A.5.7',  family: 'Organizational', name: 'Threat intelligence',                              kolm_component: 'W762 adversarial-prompts + W765 extraction-guard pattern catalog' }),
+        Object.freeze({ id: 'A.5.10', family: 'Organizational', name: 'Acceptable use of information',                    kolm_component: 'src/auth.js plan/quota enforcement + AUDIT_OPS' }),
+        Object.freeze({ id: 'A.5.12', family: 'Organizational', name: 'Classification of information',                    kolm_component: 'W764 PII scan + sensitive_data_detected event field' }),
+        Object.freeze({ id: 'A.5.15', family: 'Organizational', name: 'Access control',                                   kolm_component: 'src/auth.js RBAC + W258 key rotation' }),
+        Object.freeze({ id: 'A.5.17', family: 'Organizational', name: 'Authentication information',                       kolm_component: 'src/auth.js mintApiKey ks_* + bcrypt user passwords' }),
+        Object.freeze({ id: 'A.5.23', family: 'Organizational', name: 'Information security for use of cloud services',   kolm_component: 'src/byoc.js + W460 confidential-compute attestation' }),
+        Object.freeze({ id: 'A.5.30', family: 'Organizational', name: 'ICT readiness for business continuity',            kolm_component: 'W767-3 audit retention 12mo + W730 monitoring' }),
+        Object.freeze({ id: 'A.6.3',  family: 'People',         name: 'Information security awareness, education, training', kolm_component: 'AGENT_GUIDE.md + /docs/security + /security landing' }),
+        Object.freeze({ id: 'A.6.8',  family: 'People',         name: 'Information security event reporting',             kolm_component: 'src/audit.js appendAudit + AUDIT_OPS.ADMIN_ACTION' }),
+        Object.freeze({ id: 'A.7.4',  family: 'Physical',       name: 'Physical security monitoring',                     kolm_component: 'cloud-provider control (Vercel + Railway SOC 2 reports)' }),
+        Object.freeze({ id: 'A.8.1',  family: 'Technological',  name: 'User endpoint devices',                            kolm_component: 'src/devices.js + W604 device-capabilities' }),
+        Object.freeze({ id: 'A.8.2',  family: 'Technological',  name: 'Privileged access rights',                         kolm_component: 'src/auth.js owner/admin/member/viewer + W409y RBAC' }),
+        Object.freeze({ id: 'A.8.5',  family: 'Technological',  name: 'Secure authentication',                            kolm_component: 'src/auth.js bcrypt + ks_* + W258 key rotation' }),
+        Object.freeze({ id: 'A.8.7',  family: 'Technological',  name: 'Protection against malware',                       kolm_component: 'W761 model-poisoning + W808 capture-anomaly quarantine' }),
+        Object.freeze({ id: 'A.8.8',  family: 'Technological',  name: 'Management of technical vulnerabilities',          kolm_component: 'W763 SBOM (CycloneDX + SPDX) + dep audit gate' }),
+        Object.freeze({ id: 'A.8.9',  family: 'Technological',  name: 'Configuration management',                         kolm_component: 'src/diagnostic.js + src/env.js boot-time validation' }),
+        Object.freeze({ id: 'A.8.10', family: 'Technological',  name: 'Information deletion',                             kolm_component: 'W764-3 captures/forget + W767-3 audit retention enforcement' }),
+        Object.freeze({ id: 'A.8.11', family: 'Technological',  name: 'Data masking',                                     kolm_component: 'W454 transcript redact + W462/W464 multimodal redact + W765 prompt redactor' }),
+        Object.freeze({ id: 'A.8.12', family: 'Technological',  name: 'Data leakage prevention',                          kolm_component: 'W764 PII scan + W765 extraction guard + W750 copyright detector' }),
+        Object.freeze({ id: 'A.8.13', family: 'Technological',  name: 'Information backup',                               kolm_component: 'W767-3 12mo retention + event-store append-only chain' }),
+        Object.freeze({ id: 'A.8.15', family: 'Technological',  name: 'Logging',                                          kolm_component: 'src/audit.js HMAC chain + src/event-store.js append-only journal' }),
+        Object.freeze({ id: 'A.8.16', family: 'Technological',  name: 'Monitoring activities',                            kolm_component: 'W767-4 continuous-monitoring snapshot + W730 Prometheus' }),
+        Object.freeze({ id: 'A.8.23', family: 'Technological',  name: 'Web filtering',                                    kolm_component: 'src/router.js CSP headers + vercel.json security headers' }),
+        Object.freeze({ id: 'A.8.24', family: 'Technological',  name: 'Use of cryptography',                              kolm_component: 'src/binder.js HMAC receipts + src/ed25519.js artifact signing' }),
+        Object.freeze({ id: 'A.8.25', family: 'Technological',  name: 'Secure development life cycle',                    kolm_component: 'CONTRIBUTING.md + W470 release-verify gates' }),
+        Object.freeze({ id: 'A.8.26', family: 'Technological',  name: 'Application security requirements',                kolm_component: 'tests/wave* lock-in suite + tenant fence W411' }),
+        Object.freeze({ id: 'A.8.28', family: 'Technological',  name: 'Secure coding',                                    kolm_component: 'src/auth.js bcrypt + parameterized SQL + W411 tenant fence' }),
+        Object.freeze({ id: 'A.8.31', family: 'Technological',  name: 'Separation of development, test and production',   kolm_component: 'KOLM_ENV=test/dev/prod + DI seams + tests/wave* fixtures' }),
+        Object.freeze({ id: 'A.8.32', family: 'Technological',  name: 'Change management',                                kolm_component: 'src/changelog.js + AUDIT_OPS.VERSION_PUBLISHED + W767-4 deploy signal' }),
+      ]);
+      const families = ['Organizational', 'People', 'Physical', 'Technological'];
+      const byFamily = Object.create(null);
+      for (const f of families) byFamily[f] = controls.filter(c => c.family === f).length;
+      return res.status(200).json({
+        ok: true,
+        version: 'w767-v1',
+        type: 'iso27001-annex-a',
+        revision: 'ISO 27001:2022',
+        families,
+        family_counts: byFamily,
+        total: controls.length,
+        controls,
+      });
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: 'iso27001_controls_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  r.get('/v1/security/audit-retention/status', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const { getRetentionStatus } = await import('./audit-retention.js');
+      const env = await getRetentionStatus(req.tenant_record.id);
+      return res.status(200).json(env);
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: 'audit_retention_status_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  r.get('/v1/security/continuous-monitoring/snapshot', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const { snapshot } = await import('./continuous-monitoring.js');
+      // Tests / advanced callers can inject their own signalProviders via
+      // req.app.locals._w767_signal_providers. The route surface itself
+      // does NOT accept providers from the request body (would be a forge
+      // vector). The DI seam lives in app.locals for the same reason the
+      // W760 translator seam does.
+      let signalProviders = null;
+      try { signalProviders = req.app && req.app.locals && req.app.locals._w767_signal_providers; } catch (_) {}
+      const env = await snapshot(req.tenant_record.id, {
+        signalProviders: signalProviders || undefined,
+      });
+      return res.status(200).json(env);
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: 'continuous_monitoring_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // ============== W769 — Data Residency + Geo-Fence surface ==============
+  // POST /v1/residency/tag-capture           — tag a single capture (confirm:true)
+  // GET  /v1/residency/capture-region/:id    — read back a capture's tag
+  // POST /v1/residency/configure-namespace   — pin default region for a namespace
+  // GET  /v1/residency/regions               — read-only taxonomy
+  //
+  // ALL auth-gated (consistency w/ the rest of the /v1/* surface). Every
+  // read/write keys on req.tenant_record.id; defense-in-depth tenant fence
+  // lives inside src/data-residency.js (W411 law).
+  //
+  // Cross-ref: W708-5 (src/auth.js EXPORT_CONTROL_DENYLIST) blocks SIGN-UP
+  // by country code — that's the perimeter geo-fence. W769 tags WHERE
+  // DATA LIVES at capture time — that's the data-locality residency
+  // control. Both are required for a credible regulated-industry posture;
+  // they cover orthogonal threat models. The /compliance/data-residency
+  // landing surfaces the cross-reference explicitly.
+  r.post('/v1/residency/tag-capture', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const body = req.body || {};
+      if (body.confirm !== true) {
+        return res.status(400).json({
+          ok: false,
+          error: 'confirm_required',
+          hint: 'pass {confirm:true} to acknowledge the residency tag is durably persisted.',
+          version: 'w769-v1',
+        });
+      }
+      const mod = await import('./data-residency.js');
+      const env = await mod.tagCapture({
+        tenant_id: req.tenant_record.id,
+        capture_id: body.capture_id,
+        region: body.region,
+        confirm: true,
+      });
+      return res.status(env.ok ? 200 : 400).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'residency_tag_error',
+        detail: String(e && e.message || e),
+        version: 'w769-v1',
+      });
+    }
+  });
+
+  r.get('/v1/residency/capture-region/:capture_id', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./data-residency.js');
+      const env = await mod.getCaptureRegion({
+        tenant_id: req.tenant_record.id,
+        capture_id: req.params.capture_id,
+      });
+      // Untagged is an HONEST envelope, not an HTTP error — the route
+      // succeeded; the FEATURE state is "no tag yet". Status 200.
+      return res.status(200).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'residency_read_error',
+        detail: String(e && e.message || e),
+        version: 'w769-v1',
+      });
+    }
+  });
+
+  r.post('/v1/residency/configure-namespace', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const body = req.body || {};
+      if (body.confirm !== true) {
+        return res.status(400).json({
+          ok: false,
+          error: 'confirm_required',
+          hint: 'pass {confirm:true} to acknowledge the namespace default is durably persisted.',
+          version: 'w769-v1',
+        });
+      }
+      const mod = await import('./data-residency.js');
+      const env = await mod.configureNamespaceRegion({
+        tenant_id: req.tenant_record.id,
+        namespace: body.namespace,
+        region: body.region,
+        confirm: true,
+      });
+      return res.status(env.ok ? 200 : 400).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'residency_configure_error',
+        detail: String(e && e.message || e),
+        version: 'w769-v1',
+      });
+    }
+  });
+
+  r.get('/v1/residency/regions', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./data-residency.js');
+      return res.status(200).json({
+        ok: true,
+        regions: mod.REGIONS,
+        default_region: mod.DEFAULT_REGION,
+        version: mod.DATA_RESIDENCY_VERSION,
+      });
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'residency_regions_error',
+        detail: String(e && e.message || e),
+        version: 'w769-v1',
+      });
+    }
+  });
+
   return r;
 }
