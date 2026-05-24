@@ -5213,6 +5213,126 @@ export function buildRouter() {
     });
   });
 
+  // ---------- W743 — Migrate from Ollama / LM Studio ----------
+  // Bring an existing Ollama or LM Studio model library into kolm. Both
+  // routes wrap the per-blob result through src/import.js so the W740-2
+  // honesty lock (`not_kolm_compiled: true`) flows transitively — a
+  // migrated model NEVER earns a K-Score from migration alone.
+  //
+  // Endpoints:
+  //   POST /v1/migrate/discover  — body {source:'ollama'|'lmstudio', path?}:
+  //                                returns the discovery list (no parse).
+  //   POST /v1/migrate/wrap      — body {source, model_name, path?}:
+  //                                resolves model_name against the discovery
+  //                                list and runs the W740 wrap path; returns
+  //                                {ok, manifest, source_metadata, ...}.
+  //
+  // Both are auth-gated. Discovery is local-filesystem only — no network
+  // call leaves the box. The python3 GGUF parser is reused; missing python3
+  // surfaces a 503 envelope on the wrap path.
+  r.post('/v1/migrate/discover', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const body = req.body || {};
+    const source = body.source;
+    if (source !== 'ollama' && source !== 'lmstudio') {
+      return res.status(400).json({ ok: false, error: 'invalid_source', hint: 'source must be "ollama" or "lmstudio"' });
+    }
+    let migrateMod;
+    try { migrateMod = await import('./migrate.js'); }
+    catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'migrate_module_unavailable',
+        detail: String((e && e.message) || e),
+      });
+    }
+    const rootPath = typeof body.path === 'string' && body.path
+      ? body.path
+      : (source === 'ollama'
+          ? (migrateMod.OLLAMA_DEFAULT_PATHS || []).find((p) => {
+              try { return p && fs.existsSync(p); } catch { return false; }
+            })
+          : (migrateMod.LMSTUDIO_DEFAULT_PATHS || []).find((p) => {
+              try { return p && fs.existsSync(p); } catch { return false; }
+            }));
+    if (!rootPath) {
+      return res.status(200).json({
+        ok: false,
+        error: source === 'ollama' ? 'ollama_root_missing' : 'lmstudio_root_missing',
+        candidates: source === 'ollama' ? migrateMod.OLLAMA_DEFAULT_PATHS.slice() : migrateMod.LMSTUDIO_DEFAULT_PATHS.slice(),
+        hint: 'no default path exists on this host; pass {path:"..."} to override',
+        version: migrateMod.MIGRATE_VERSION,
+      });
+    }
+    const env = source === 'ollama'
+      ? migrateMod.discoverOllamaModels(rootPath)
+      : migrateMod.discoverLmStudioModels(rootPath);
+    return res.status(200).json(env);
+  });
+
+  r.post('/v1/migrate/wrap', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const body = req.body || {};
+    const source = body.source;
+    if (source !== 'ollama' && source !== 'lmstudio') {
+      return res.status(400).json({ ok: false, error: 'invalid_source', hint: 'source must be "ollama" or "lmstudio"' });
+    }
+    if (typeof body.model_name !== 'string' || !body.model_name) {
+      return res.status(400).json({ ok: false, error: 'missing_field', field: 'model_name' });
+    }
+    let migrateMod;
+    try { migrateMod = await import('./migrate.js'); }
+    catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'migrate_module_unavailable',
+        detail: String((e && e.message) || e),
+      });
+    }
+    const rootPath = typeof body.path === 'string' && body.path
+      ? body.path
+      : (source === 'ollama'
+          ? (migrateMod.OLLAMA_DEFAULT_PATHS || []).find((p) => {
+              try { return p && fs.existsSync(p); } catch { return false; }
+            })
+          : (migrateMod.LMSTUDIO_DEFAULT_PATHS || []).find((p) => {
+              try { return p && fs.existsSync(p); } catch { return false; }
+            }));
+    if (!rootPath) {
+      return res.status(200).json({
+        ok: false,
+        error: source === 'ollama' ? 'ollama_root_missing' : 'lmstudio_root_missing',
+        candidates: source === 'ollama' ? migrateMod.OLLAMA_DEFAULT_PATHS.slice() : migrateMod.LMSTUDIO_DEFAULT_PATHS.slice(),
+        hint: 'no default path exists on this host; pass {path:"..."} to override',
+        version: migrateMod.MIGRATE_VERSION,
+      });
+    }
+    const disco = source === 'ollama'
+      ? migrateMod.discoverOllamaModels(rootPath)
+      : migrateMod.discoverLmStudioModels(rootPath);
+    if (!disco || disco.ok === false) return res.status(200).json(disco);
+    const entry = (disco.models || []).find((m) => {
+      if (!m) return false;
+      if (source === 'ollama') return (m.source_name === body.model_name || m.name === body.model_name);
+      return (m.name === body.model_name || m.path === body.model_name);
+    });
+    if (!entry) {
+      return res.status(200).json({
+        ok: false,
+        error: 'model_not_found',
+        hint: `no ${source} model matched "${body.model_name}"; call /v1/migrate/discover first`,
+        version: migrateMod.MIGRATE_VERSION,
+      });
+    }
+    const wrapped = source === 'ollama'
+      ? await migrateMod.migrateOllamaModel(entry)
+      : await migrateMod.migrateLmStudioModel(entry);
+    if (wrapped && wrapped.ok === false && wrapped.error === 'python3_missing') {
+      return res.status(503).json(wrapped);
+    }
+    return res.status(200).json(wrapped);
+  });
+
   // ---------- W739 — Model lineage tracking + artifact diff ----------
   // POST /v1/artifact/lineage   → body {cid, max_depth?}, walks parent_cid chain
   // POST /v1/artifact/diff      → body {a_cid, b_cid}, compares two artifacts
@@ -5405,6 +5525,255 @@ export function buildRouter() {
   // GET twin — path param carries cid.
   r.get('/v1/diagnose/:cid', async (req, res) => {
     return _runDiagnose(req, res, req.params && req.params.cid);
+  });
+
+  // ---------- W746 — Capture staleness / TTL / teacher version ----------
+  // GET  /v1/staleness/:namespace         → freshness distribution + projected
+  //                                          eviction counts for 30d/90d TTL.
+  // POST /v1/staleness/apply-ttl          → DESTRUCTIVE; evicts rows older than
+  //                                          ttl_days from the namespace.
+  //                                          Owner-role only (or anon/admin in
+  //                                          local-daemon mode).
+  // GET  /v1/teacher-versions/:namespace  → groupByTeacherVersion counts.
+  //
+  // All three routes fence on req.tenant_record.id so cross-tenant staleness
+  // queries are structurally impossible. The eviction route is gated to
+  // owner-equivalent privilege (admin OR local_daemon OR is_admin), because
+  // any non-owner role with eviction rights would let a viewer torch a
+  // namespace they merely have read access to.
+  //
+  // Per W746-2: ttl_days = null means "no TTL configured" — never default
+  // a number. The CLI/dashboard makes the user explicitly pick a value.
+
+  // Helper: list ALL captures for a namespace through the canonical event-store.
+  // Returns the canonical event rows (already tenant-fenced) so the staleness
+  // module can compute weights/distributions without us re-implementing the
+  // tenant fence per route.
+  async function _w746ListCaptures(tenant_id, namespace) {
+    try {
+      const rows = await eventList({
+        tenant_id,
+        namespace,
+        limit: 0, // unlimited — staleness needs to count every row
+      });
+      // Defense-in-depth tenant fence (mirrors W454/W461/W465 pattern). The
+      // event-store already filters by tenant_id in the SQL WHERE clause; this
+      // second filter catches any future driver that returns rows from a wider
+      // scope by mistake.
+      return rows.filter((ev) => ev && ev.tenant_id === tenant_id);
+    } catch (_) {
+      return [];
+    }
+  }
+
+  // GET /v1/staleness/:namespace — freshness summary for the namespace.
+  r.get('/v1/staleness/:namespace', async (req, res) => {
+    if (!req.tenant_record) {
+      return res.status(401).json({ ok: false, error: 'auth_required' });
+    }
+    let stalenessMod;
+    try {
+      stalenessMod = await import('./capture-staleness.js');
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'staleness_module_unavailable',
+        detail: String((e && e.message) || e),
+      });
+    }
+    const ns = String((req.params && req.params.namespace) || 'default').slice(0, 80);
+    const rows = await _w746ListCaptures(req.tenant_record.id, ns);
+    // Project both common TTL choices so the dashboard can pre-fill the
+    // "if I applied 30d/90d what would I lose" preview without round-trips.
+    const freshness = stalenessMod.freshnessDistribution(rows, {});
+    const ev30 = stalenessMod.evictExpired(rows, { ttl_days: 30 });
+    const ev90 = stalenessMod.evictExpired(rows, { ttl_days: 90 });
+    return res.status(200).json({
+      ok: true,
+      namespace: ns,
+      total_captures: rows.length,
+      freshness,
+      evicted_if_ttl_30d: ev30.evicted.length,
+      evicted_if_ttl_90d: ev90.evicted.length,
+      version: stalenessMod.STALENESS_VERSION,
+      generated_at: new Date().toISOString(),
+    });
+  });
+
+  // POST /v1/staleness/apply-ttl — DESTRUCTIVE eviction.
+  // Body: {namespace, ttl_days}
+  // Role gate: req.is_admin OR req.local_daemon OR req.tenant_record.kind === 'human'
+  // (the tenant_record.kind sentinel — human tenants are workspace owners by
+  // construction in src/auth.js; anon/api_only/etc. are not). We do NOT reuse
+  // teams.requireRole here because the staleness scope is per-namespace inside
+  // a tenant, not per-team. Adding team scoping is a follow-up (W746+1).
+  r.post('/v1/staleness/apply-ttl', async (req, res) => {
+    if (!req.tenant_record) {
+      return res.status(401).json({ ok: false, error: 'auth_required' });
+    }
+    const isOwner = !!(
+      req.is_admin
+      || req.local_daemon
+      || (req.tenant_record && req.tenant_record.kind === 'human')
+      || (req.tenant_record && req.tenant_record.kind === 'local_daemon')
+    );
+    if (!isOwner) {
+      return res.status(403).json({
+        ok: false,
+        error: 'forbidden',
+        hint: 'apply-ttl is owner-only; viewer/member roles cannot evict capture rows',
+      });
+    }
+    let stalenessMod;
+    try {
+      stalenessMod = await import('./capture-staleness.js');
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'staleness_module_unavailable',
+        detail: String((e && e.message) || e),
+      });
+    }
+    const body = req.body || {};
+    const ns = String(body.namespace || '').slice(0, 80);
+    if (!ns) {
+      return res.status(400).json({ ok: false, error: 'missing_field', field: 'namespace' });
+    }
+    const ttl_days = body.ttl_days;
+    if (ttl_days != null && (typeof ttl_days !== 'number' || !Number.isFinite(ttl_days) || ttl_days < 0)) {
+      return res.status(400).json({
+        ok: false,
+        error: 'invalid_ttl_days',
+        hint: 'ttl_days must be null (no TTL) or a non-negative number',
+      });
+    }
+    const rows = await _w746ListCaptures(req.tenant_record.id, ns);
+    const result = stalenessMod.evictExpired(rows, { ttl_days });
+    // Execute the eviction by purging the older rows via the event-store.
+    // We use purgeEvents({before, namespace}) so the deletion is atomic on
+    // the SQLite backend. Same cutoff arithmetic as evictExpired.
+    let deleted = 0;
+    if (ttl_days != null && ttl_days >= 0 && result.evicted.length > 0) {
+      const cutoff = new Date(Date.now() - (ttl_days * 86400000)).toISOString();
+      try {
+        const purgeRes = await eventPurge({
+          before: cutoff,
+          namespace: ns,
+          dryRun: false,
+        });
+        deleted = (purgeRes && purgeRes.deleted) || 0;
+      } catch (_) {
+        // Purge failure is honest — we still report what WOULD have been
+        // evicted via the projection, but flag the actual delete as 0.
+      }
+    }
+    return res.status(200).json({
+      ok: true,
+      namespace: ns,
+      ttl_days: ttl_days == null ? null : ttl_days,
+      total_captures_before: rows.length,
+      evicted_projected: result.evicted.length,
+      kept_projected: result.kept.length,
+      deleted_actual: deleted,
+      version: stalenessMod.STALENESS_VERSION,
+    });
+  });
+
+  // GET /v1/teacher-versions/:namespace — count rows per teacher_version.
+  r.get('/v1/teacher-versions/:namespace', async (req, res) => {
+    if (!req.tenant_record) {
+      return res.status(401).json({ ok: false, error: 'auth_required' });
+    }
+    let tvMod;
+    try {
+      tvMod = await import('./teacher-version.js');
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'teacher_version_module_unavailable',
+        detail: String((e && e.message) || e),
+      });
+    }
+    const ns = String((req.params && req.params.namespace) || 'default').slice(0, 80);
+    const rows = await _w746ListCaptures(req.tenant_record.id, ns);
+    const by_version = tvMod.groupByTeacherVersion(rows);
+    // Sort versions by descending count for stable dashboard order.
+    const versions = Object.keys(by_version)
+      .sort((a, b) => (by_version[b] - by_version[a]) || a.localeCompare(b))
+      .map((v) => ({ teacher_version: v, count: by_version[v] }));
+    return res.status(200).json({
+      ok: true,
+      namespace: ns,
+      total_captures: rows.length,
+      versions,
+      version: tvMod.TEACHER_VERSION_TAG_VERSION,
+      generated_at: new Date().toISOString(),
+    });
+  });
+
+  // ---------- W745 — Failure-modes report (CID-keyed) ----------
+  // POST /v1/failure-modes      → body {artifact_cid}, returns the failure-mode
+  //                               envelope (clusters + top regressions +
+  //                               diagnostic_link bridge into W741).
+  // GET  /v1/failure-modes/:cid → read-only twin (same shape)
+  //
+  // Honest envelopes:
+  //   - missing artifact_cid       → 400 missing_field
+  //   - no_bakeoff_results_yet     → 200 + ok:false envelope with hint to
+  //                                  run `kolm bakeoff` (NOT 404 — HTTP
+  //                                  succeeded; the envelope is the answer)
+  //
+  // The clustering engine is dependency-injected via test-seam body fields
+  // _failure_modes_bakeoff_rows + _failure_modes_captures, matching the W741
+  // diagnose pattern so the integration tests can verify the auth + envelope
+  // surfaces without an on-disk bakeoff registry.
+  //
+  // W745 is the CID-keyed sibling of W812 (which clusters tenant-wide event
+  // streams). Both modules coexist on purpose — different question shapes.
+  async function _runFailureModesW745(req, res, artifact_cid) {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    if (!artifact_cid || typeof artifact_cid !== 'string') {
+      return res.status(400).json({ ok: false, error: 'missing_field', field: 'artifact_cid' });
+    }
+    let mod;
+    try {
+      mod = await import('./failure-modes-w745.js');
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'failure_modes_module_unavailable',
+        detail: String((e && e.message) || e),
+      });
+    }
+    const body = req.body || {};
+    const injectedRows = Array.isArray(body._failure_modes_bakeoff_rows) ? body._failure_modes_bakeoff_rows : null;
+    const injectedCaps = Array.isArray(body._failure_modes_captures) ? body._failure_modes_captures : null;
+    if (injectedRows) {
+      const out = mod.generateFailureModeReport(artifact_cid, injectedCaps || [], injectedRows);
+      return res.status(200).json(out);
+    }
+    // No persisted bakeoff registry yet → honest no_bakeoff_results_yet
+    // envelope (NOT 404). Bridges to W741 via diagnostic_link so the caller
+    // can pivot directly to the diagnostic UI.
+    return res.status(200).json({
+      ok: false,
+      error: 'no_bakeoff_results_yet',
+      failure_modes_version: mod.FAILURE_MODES_VERSION,
+      artifact_cid,
+      clustering: 'heuristic_keyword_v1',
+      hint: 'run `kolm bakeoff` first against this artifact_cid, then retry',
+      diagnostic_link: '/account/diagnose?cid=' + encodeURIComponent(artifact_cid),
+      generated_at: new Date().toISOString(),
+    });
+  }
+  // POST mirror — body carries artifact_cid.
+  r.post('/v1/failure-modes', async (req, res) => {
+    const body = req.body || {};
+    return _runFailureModesW745(req, res, body.artifact_cid);
+  });
+  // GET twin — path param carries cid.
+  r.get('/v1/failure-modes/:cid', async (req, res) => {
+    return _runFailureModesW745(req, res, req.params && req.params.cid);
   });
 
   // ---------- Compile (kolm) ----------
@@ -10420,6 +10789,20 @@ export function buildRouter() {
       // the teacher's shape" without conflating vendor differences.
       tool_parse_source: typeof tool_parse_source === 'string' ? tool_parse_source : 'none',
     };
+    // W746-4 — Teacher version tagging on every capture (extends event-store
+    // row). Mutates obs in-place to add teacher_version + teacher_provider
+    // BEFORE insertCapture so the canonical bridge sees them. Gated on the
+    // KOLM_W746_TEACHER_TAGGING env flag (default: on) so an op can flip back
+    // to byte-stable old behavior in a hotfix without a redeploy. Idempotent —
+    // a row that already carries teacher_version is left untouched.
+    if (process.env.KOLM_W746_TEACHER_TAGGING !== 'off') {
+      try {
+        const tv = await import('./teacher-version.js');
+        tv.tagCaptureWithTeacherVersion(obs);
+      } catch (_) {
+        // Best-effort. Missing module must NEVER block the capture path.
+      }
+    }
     // insertCapture throws on disk-full / ephemeral-/tmp / driver failure.
     // We do NOT catch here — propagation is the whole point of the fix.
     // W409a — insertCapture also bridges to the canonical event-store via
@@ -13126,6 +13509,227 @@ res.json({
       });
       res.json({ ok: true, report });
     } catch (e) { res.status(400).json(_w384Err(e, 'drift_report_error')); }
+  });
+
+  // ============== W747: distribution-shift live alerts ==============
+  // POST /v1/drift-alert/snapshot   {namespace, kind, samples_count}
+  // GET  /v1/drift-alert/:namespace
+  // POST /v1/drift-alert/webhooks   {namespace, webhook_url, jsd_threshold}
+  //
+  // W747 is a LIVE alerter (production vs training sketch) — distinct from
+  // the W434 /v1/drift/* routes (artifact-vs-artifact K-Score drift) and the
+  // W813 drift-detector (capture-window vs capture-window). The buyer story
+  // is "did the workload my student was trained on still look like the
+  // workload it's serving today?".
+  //
+  // W709 tie-in: when shouldAlert() fires the route calls
+  // driftAlertStore.registerDriftWarning() so the NEXT W709 routing
+  // decision can stamp `drift_warning:true`. Honest fallback: if the W709
+  // routing-events module is not loaded, the warning is still registered
+  // (it is in-memory) and the W709 hook simply never reads it.
+  r.post('/v1/drift-alert/snapshot', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
+    try {
+      const driftAlert = await import('./drift-alert.js');
+      const driftStore = await import('./drift-alert-store.js');
+      const es = await import('./event-store.js');
+      const body = req.body || {};
+      const namespace = String(body.namespace || 'default').slice(0, 128);
+      const kind = String(body.kind || '').toLowerCase();
+      if (driftStore.DRIFT_KINDS.indexOf(kind) < 0) {
+        return res.status(400).json({
+          ok: false,
+          error: 'invalid_kind',
+          allowed: driftStore.DRIFT_KINDS.slice(),
+          version: driftAlert.DRIFT_ALERT_VERSION,
+        });
+      }
+      const samplesCount = Math.max(1, Math.min(10000, Math.trunc(Number(body.samples_count) || 200)));
+      const tenant_id = req.tenant_record.id;
+
+      // Pull last N captures of this namespace from the event-store.
+      // We use the prompt_redacted + response_redacted text columns; missing
+      // values fall through tokenizeForDistribution() as empty arrays.
+      let rows = [];
+      try {
+        rows = await es.listEvents({
+          tenant_id,
+          namespace,
+          limit: samplesCount,
+          order: 'desc',
+        });
+      } catch (_) { rows = []; }
+      // Defense in depth — re-check tenant.
+      rows = (rows || []).filter((r) => r && r.tenant_id === tenant_id);
+      const samples = rows.map((r) => {
+        const parts = [];
+        for (const k of ['prompt_redacted', 'prompt', 'input', 'request_text']) {
+          if (r && typeof r[k] === 'string') { parts.push(r[k]); break; }
+        }
+        for (const k of ['response_redacted', 'response', 'output', 'response_text']) {
+          if (r && typeof r[k] === 'string') { parts.push(r[k]); break; }
+        }
+        return parts.join(' ');
+      });
+      const sketch = driftAlert.buildDistributionSketch(samples, { top_k: driftAlert.DEFAULTS.TOP_K });
+      const row = driftStore.recordSketchSnapshot({
+        tenant_id,
+        namespace,
+        kind,
+        sketch,
+      });
+      return res.json({
+        ok: true,
+        namespace,
+        kind,
+        samples_used: samples.length,
+        sketch_size: row.sketch_size,
+        sketch_total: row.sketch_total,
+        generated_at: row.generated_at,
+        version: driftAlert.DRIFT_ALERT_VERSION,
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'drift_alert_snapshot_error', detail: e && e.message });
+    }
+  });
+
+  r.get('/v1/drift-alert/:namespace', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
+    try {
+      const driftAlert = await import('./drift-alert.js');
+      const driftStore = await import('./drift-alert-store.js');
+      const namespace = String(req.params.namespace || 'default').slice(0, 128);
+      const tenant_id = req.tenant_record.id;
+      const snaps = driftStore.latestSnapshots(tenant_id, namespace);
+      if (!snaps.training || !snaps.production) {
+        return res.json({
+          ok: true,
+          namespace,
+          latest_training: snaps.training,
+          latest_production: snaps.production,
+          compare: null,
+          alert: false,
+          suggestions: [],
+          reason: !snaps.training && !snaps.production
+            ? 'no_snapshots_yet'
+            : (!snaps.training ? 'missing_training_snapshot' : 'missing_production_snapshot'),
+          hint: 'POST /v1/drift-alert/snapshot with kind:"training" and kind:"production" before /v1/drift-alert/:namespace can compare them.',
+          version: driftAlert.DRIFT_ALERT_VERSION,
+        });
+      }
+      const compare = driftAlert.compareSketches(snaps.training.sketch, snaps.production.sketch);
+      // Per-namespace webhook may carry its own JSD threshold.
+      const hooks = driftStore.listWebhooks(tenant_id, namespace);
+      // The lowest threshold wins (most conservative caller decides).
+      let threshold = driftAlert.DEFAULTS.JSD_THRESHOLD;
+      for (const h of hooks) {
+        if (Number.isFinite(Number(h.jsd_threshold))) {
+          threshold = Math.min(threshold, Number(h.jsd_threshold));
+        }
+      }
+      const alert = driftAlert.shouldAlert(compare, { jsd_threshold: threshold });
+      const suggestions = alert
+        ? driftAlert.generateShiftSuggestion(compare)
+        : [];
+
+      // W709 tie-in: pin the warning so the next routing decision sees it.
+      if (alert) {
+        try { driftStore.registerDriftWarning(tenant_id, namespace, { jsd: compare.jsd }); } catch (_) {}
+      }
+
+      // Best-effort webhook delivery (no retries, 5s timeout).
+      if (alert && hooks.length > 0) {
+        const payload = {
+          kolm_alert: 'distribution_shift',
+          namespace,
+          jsd: compare.jsd,
+          top_diverging: compare.top_diverging_tokens,
+          suggestions,
+          ts: new Date().toISOString(),
+        };
+        for (const h of hooks) {
+          // Fire-and-forget; do not block the response on webhook latency.
+          (async () => {
+            try {
+              const controller = new AbortController();
+              const timer = setTimeout(() => controller.abort(), 5000);
+              await fetch(h.webhook_url, {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify(payload),
+                signal: controller.signal,
+              }).catch(() => null);
+              clearTimeout(timer);
+            } catch (_) { /* no retries; the webhook caller decides resilience */ }
+          })();
+        }
+      }
+
+      return res.json({
+        ok: true,
+        namespace,
+        latest_training: {
+          generated_at: snaps.training.generated_at,
+          sketch_total: snaps.training.sketch_total,
+          sketch_size: snaps.training.sketch_size,
+        },
+        latest_production: {
+          generated_at: snaps.production.generated_at,
+          sketch_total: snaps.production.sketch_total,
+          sketch_size: snaps.production.sketch_size,
+        },
+        compare: {
+          kl: compare.kl,
+          jsd: compare.jsd,
+          top_diverging: compare.top_diverging_tokens,
+        },
+        threshold,
+        alert,
+        suggestions,
+        webhooks_registered: hooks.length,
+        version: driftAlert.DRIFT_ALERT_VERSION,
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'drift_alert_check_error', detail: e && e.message });
+    }
+  });
+
+  r.post('/v1/drift-alert/webhooks', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
+    try {
+      const driftAlert = await import('./drift-alert.js');
+      const driftStore = await import('./drift-alert-store.js');
+      const body = req.body || {};
+      const namespace = String(body.namespace || 'default').slice(0, 128);
+      const webhook_url = body.webhook_url;
+      const jsd_threshold = body.jsd_threshold;
+      if (typeof webhook_url !== 'string' || !/^https?:\/\//.test(webhook_url)) {
+        return res.status(400).json({
+          ok: false,
+          error: 'invalid_webhook_url',
+          hint: 'webhook_url must be an absolute http(s) URL',
+          version: driftAlert.DRIFT_ALERT_VERSION,
+        });
+      }
+      const row = driftStore.registerWebhook({
+        tenant_id: req.tenant_record.id,
+        namespace,
+        webhook_url,
+        jsd_threshold,
+      });
+      return res.json({
+        ok: true,
+        webhook: {
+          namespace: row.namespace,
+          webhook_url: row.webhook_url,
+          jsd_threshold: row.jsd_threshold,
+          updated_at: row.updated_at,
+        },
+        version: driftAlert.DRIFT_ALERT_VERSION,
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'drift_alert_webhook_register_error', detail: e && e.message });
+    }
   });
 
   // ============== W384: agent telemetry ==============

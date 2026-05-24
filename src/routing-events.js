@@ -97,6 +97,30 @@ export async function recordRoutingDecision({
     };
   }
 
+  // W747 tie-in: consume any pending drift-warning for this (tenant, ns) and
+  // stamp drift_warning:true on the row. The drift-alert-store is opt-in —
+  // if its consume helper is missing or throws, we silently skip (honest
+  // fallback per the W747 spec). When a warning IS pending, it's CLEARED by
+  // consumeDriftWarning so the next routing decision is back to clean unless
+  // /v1/drift-alert/:namespace re-fires another alert.
+  let driftWarning = false;
+  let driftWarningAt = null;
+  let driftWarningJsd = null;
+  try {
+    const dws = await import('./drift-alert-store.js');
+    if (dws && typeof dws.consumeDriftWarning === 'function') {
+      const w = dws.consumeDriftWarning(tenant_id, ns);
+      if (w) {
+        driftWarning = true;
+        driftWarningAt = w.at || null;
+        driftWarningJsd = Number.isFinite(Number(w.jsd)) ? Number(w.jsd) : null;
+      }
+    }
+  } catch (_) {
+    // Honest fallback — drift-alert-store missing or refactored. Do not
+    // crash the routing decision path; the warning is best-effort metadata.
+  }
+
   const row = {
     id: _id(),
     kind: 'routing_decision',
@@ -111,6 +135,9 @@ export async function recordRoutingDecision({
     teacher_cost_micro_usd: teacherCost,
     threshold_used: thresholdUsed,
     entropy_summary: entropySummary,
+    drift_warning: driftWarning,
+    drift_warning_at: driftWarningAt,
+    drift_warning_jsd: driftWarningJsd,
     ts,
   };
 

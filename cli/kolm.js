@@ -33137,6 +33137,809 @@ async function cmdW742Gateway(args) {
   process.exit(EXIT.BAD_ARGS);
 }
 
+// =============================================================================
+// W746 — `kolm staleness <show|apply-ttl|sampler-weights>` dispatcher.
+//
+// Distinct-named (cmdW746Staleness) per the W724/.../W742 precedent so
+// parallel wave agents on W744/W745/W747 cannot collide on this symbol.
+//
+// Subcommands:
+//   show <namespace>
+//     — fetch /v1/staleness/<ns> + /v1/teacher-versions/<ns> and print:
+//         * freshness distribution (timeline buckets)
+//         * teacher-version breakdown (sorted by count)
+//         * projected eviction counts at 30d/90d TTL
+//   apply-ttl <namespace> <days>
+//     — prompts confirmation (or honors --yes), then POSTs apply-ttl.
+//       DESTRUCTIVE: rows older than <days> are evicted from the namespace.
+//       Honest counts printed to stderr. Exits 2 (GATE_FAIL) on
+//       deleted_actual=0 when evicted_projected>0 (eviction quietly failed).
+//   sampler-weights <namespace> [--half-life N]
+//     — load captures locally via the staleness module + print recency_weight
+//       distribution stats (min/max/mean/median + per-decile counts).
+//
+// Every subcommand prints a JSON envelope on stdout so CI loops can parse
+// without screen-scraping. Honest errors loud.
+// =============================================================================
+async function cmdW746Staleness(args) {
+  const sub = (args && args[0]) || '';
+  const ns = (args && args[1]) || '';
+  const STALE_VER = 'w746-v1';
+
+  function _emit(envelope, exitCode) {
+    console.log(JSON.stringify(envelope, null, 2));
+    if (exitCode != null) process.exit(exitCode);
+  }
+
+  function _flag(rest, name) {
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--' + name && i + 1 < rest.length) return rest[i + 1];
+      if (typeof rest[i] === 'string' && rest[i].startsWith('--' + name + '=')) {
+        return rest[i].slice(name.length + 3);
+      }
+    }
+    return null;
+  }
+  function _hasFlag(rest, name) {
+    return Array.isArray(rest) && rest.some((a) => a === '--' + name);
+  }
+
+  function _resolveApi() {
+    const base = (process.env.KOLM_BASE_URL || process.env.KOLM_BASE || 'https://kolm.ai').replace(/\/$/, '');
+    const apiKey = process.env.KOLM_API_KEY || process.env.KOLM_KEY || '';
+    if (!apiKey) {
+      _emit({
+        ok: false,
+        error: 'missing_api_key',
+        hint: 'set KOLM_API_KEY (or KOLM_KEY) and re-run; or run `kolm login`',
+        version: STALE_VER,
+      }, EXIT.MISSING_PREREQ);
+      return null;
+    }
+    return { base, apiKey };
+  }
+
+  async function _getJson(url, apiKey) {
+    let res;
+    try {
+      res = await fetch(url, {
+        method: 'GET',
+        headers: { 'authorization': `Bearer ${apiKey}`, 'accept': 'application/json' },
+      });
+    } catch (e) {
+      return { ok: false, error: 'staleness_request_failed', detail: (e && e.message) || String(e), version: STALE_VER };
+    }
+    const text = await res.text().catch(() => '');
+    try { return text ? JSON.parse(text) : { ok: false, error: 'empty_response', http_status: res.status }; }
+    catch (_) { return { ok: false, error: 'invalid_json_response', _raw: text, http_status: res.status }; }
+  }
+
+  // ──────────────────────── subcommand: show ─────────────────────────────────
+  if (sub === 'show') {
+    if (!ns || ns.startsWith('-')) {
+      console.error('usage: kolm staleness show <namespace>');
+      console.error('  Prints freshness distribution + teacher-version breakdown.');
+      process.exit(EXIT.BAD_ARGS);
+      return;
+    }
+    const api = _resolveApi();
+    if (!api) return;
+    const stale = await _getJson(api.base + '/v1/staleness/' + encodeURIComponent(ns), api.apiKey);
+    const tv = await _getJson(api.base + '/v1/teacher-versions/' + encodeURIComponent(ns), api.apiKey);
+    const envelope = {
+      ok: !!(stale && stale.ok && tv && tv.ok),
+      namespace: ns,
+      staleness: stale,
+      teacher_versions: tv,
+      version: STALE_VER,
+    };
+    _emit(envelope, envelope.ok ? null : EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: apply-ttl ─────────────────────────────
+  if (sub === 'apply-ttl') {
+    const daysRaw = args && args[2];
+    if (!ns || ns.startsWith('-') || daysRaw == null) {
+      console.error('usage: kolm staleness apply-ttl <namespace> <days> [--yes]');
+      console.error('  DESTRUCTIVE: evicts capture rows older than <days> from <namespace>.');
+      process.exit(EXIT.BAD_ARGS);
+      return;
+    }
+    const days = Number(daysRaw);
+    if (!Number.isFinite(days) || days < 0) {
+      _emit({ ok: false, error: 'invalid_days', given: daysRaw, hint: 'days must be a non-negative number', version: STALE_VER }, EXIT.BAD_ARGS);
+      return;
+    }
+    const api = _resolveApi();
+    if (!api) return;
+    const rest = args.slice(3);
+    const skipPrompt = _hasFlag(rest, 'yes');
+    if (!skipPrompt) {
+      // Honest contract: we cannot prompt non-interactively. If stdin is not
+      // a TTY OR --yes is missing, we bail with a loud envelope rather than
+      // silently proceeding (W746 destructive-action policy).
+      if (!(process.stdin && process.stdin.isTTY)) {
+        _emit({
+          ok: false,
+          error: 'confirmation_required',
+          hint: 'this command is DESTRUCTIVE; re-run with --yes to confirm',
+          namespace: ns,
+          ttl_days: days,
+          version: STALE_VER,
+        }, EXIT.BAD_ARGS);
+        return;
+      }
+      // Best-effort interactive confirmation via readline. Falls back to
+      // a tight prompt loop. We deliberately do NOT add a hard-to-remove
+      // dependency for one prompt.
+      const readline = await import('node:readline');
+      const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+      const answer = await new Promise((resolve) => {
+        rl.question('About to evict captures older than ' + days + ' days from namespace "' + ns + '". Type the namespace to confirm: ', (a) => { rl.close(); resolve(String(a || '').trim()); });
+      });
+      if (answer !== ns) {
+        _emit({
+          ok: false,
+          error: 'confirmation_failed',
+          hint: 'typed value did not match the namespace; no rows evicted',
+          namespace: ns,
+          version: STALE_VER,
+        }, EXIT.BAD_ARGS);
+        return;
+      }
+    }
+    let res;
+    try {
+      res = await fetch(api.base + '/v1/staleness/apply-ttl', {
+        method: 'POST',
+        headers: {
+          'authorization': `Bearer ${api.apiKey}`,
+          'content-type': 'application/json',
+          'accept': 'application/json',
+        },
+        body: JSON.stringify({ namespace: ns, ttl_days: days }),
+      });
+    } catch (e) {
+      _emit({ ok: false, error: 'apply_ttl_request_failed', detail: (e && e.message) || String(e), version: STALE_VER }, EXIT.EXECUTION);
+      return;
+    }
+    const text = await res.text().catch(() => '');
+    let body;
+    try { body = text ? JSON.parse(text) : { ok: false, error: 'empty_response', http_status: res.status }; }
+    catch (_) { body = { ok: false, error: 'invalid_json_response', _raw: text, http_status: res.status }; }
+    // Honest counts to stderr so logs surface them prominently.
+    if (body && body.ok) {
+      console.error('[kolm staleness] namespace=' + ns + ' ttl_days=' + days
+        + ' evicted_projected=' + (body.evicted_projected || 0)
+        + ' deleted_actual=' + (body.deleted_actual || 0));
+    }
+    _emit(body, body && body.ok ? null : EXIT.GATE_FAIL);
+    return;
+  }
+
+  // ──────────────────────── subcommand: sampler-weights ───────────────────────
+  if (sub === 'sampler-weights') {
+    if (!ns || ns.startsWith('-')) {
+      console.error('usage: kolm staleness sampler-weights <namespace> [--half-life N]');
+      console.error('  Prints recency_weight distribution stats (min/max/mean + per-decile counts).');
+      process.exit(EXIT.BAD_ARGS);
+      return;
+    }
+    const rest = args.slice(2);
+    const hlRaw = _flag(rest, 'half-life');
+    const half_life_days = hlRaw && Number.isFinite(Number(hlRaw)) ? Number(hlRaw) : 30;
+    const api = _resolveApi();
+    if (!api) return;
+    // We fetch the freshness summary (it's cheap + already tenant-fenced server-side)
+    // and recompute weights locally for the distribution histogram. The server
+    // doesn't ship per-row weights to avoid leaking individual capture metadata
+    // beyond what's already on /v1/captures.
+    const stale = await _getJson(api.base + '/v1/staleness/' + encodeURIComponent(ns), api.apiKey);
+    if (!stale || !stale.ok) {
+      _emit({
+        ok: false,
+        error: 'staleness_unavailable',
+        detail: stale && stale.error,
+        namespace: ns,
+        version: STALE_VER,
+      }, EXIT.EXECUTION);
+      return;
+    }
+    let stalenessMod;
+    try {
+      stalenessMod = await import('../src/capture-staleness.js');
+    } catch (e) {
+      _emit({
+        ok: false,
+        error: 'staleness_module_missing',
+        detail: (e && e.message) || String(e),
+        version: STALE_VER,
+      }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    // Synthesize captured_at timestamps from the bucket midpoints so the local
+    // stats are representative — we don't need per-row exact timestamps to
+    // describe the SHAPE of the weight distribution. Honest about the approximation.
+    const now = Date.now();
+    const synth = [];
+    for (const bucket of (stale.freshness || [])) {
+      const ageDays = bucket.bucket_max_days != null
+        ? Math.max(0.5, bucket.bucket_max_days / 2)
+        : ((stale.freshness && stale.freshness.length > 1)
+            ? stale.freshness[stale.freshness.length - 2].bucket_max_days * 1.5
+            : 730);
+      for (let i = 0; i < (bucket.count || 0); i++) {
+        synth.push({ captured_at: new Date(now - ageDays * 86400000).toISOString() });
+      }
+    }
+    const weighted = stalenessMod.weightCapturesByRecency(synth, { half_life_days, now });
+    const weights = weighted.map((r) => r.recency_weight).sort((a, b) => a - b);
+    const sum = weights.reduce((a, b) => a + b, 0);
+    const decile_counts = new Array(10).fill(0);
+    for (const w of weights) {
+      const idx = Math.min(9, Math.floor(w * 10));
+      decile_counts[idx] += 1;
+    }
+    _emit({
+      ok: true,
+      namespace: ns,
+      half_life_days,
+      total: weights.length,
+      min_weight: weights.length ? weights[0] : null,
+      max_weight: weights.length ? weights[weights.length - 1] : null,
+      mean_weight: weights.length ? sum / weights.length : null,
+      median_weight: weights.length ? weights[Math.floor(weights.length / 2)] : null,
+      decile_counts,
+      approximation: 'weights computed from freshness bucket midpoints (server does not ship per-row timestamps)',
+      version: STALE_VER,
+    });
+    return;
+  }
+
+  // ──────────────────────── unknown subcommand ────────────────────────────────
+  console.error('usage: kolm staleness <show|apply-ttl|sampler-weights> <namespace> [args]');
+  console.error('  show <namespace>                           — freshness + teacher-version breakdown');
+  console.error('  apply-ttl <namespace> <days> [--yes]       — evict rows older than <days> (DESTRUCTIVE)');
+  console.error('  sampler-weights <namespace> [--half-life N] — recency_weight distribution stats');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// =============================================================================
+// W745 — `kolm failure-modes <artifact_cid> [--top N]` dispatcher.
+//
+// Distinct-named (cmdW745FailureModes) per the W724/.../W742 precedent so
+// parallel wave agents on W744/W746/W747 cannot collide on this symbol.
+//
+// W745 is the CID-keyed sibling of W812 (cmdFailureModes). W812 reads the
+// tenant-wide event store and clusters by topic+length+vendor; W745 takes a
+// single artifact_cid, asks the API for the failure-mode envelope, and
+// prints a top-regression table + per-cluster summary plus the W745-4
+// bridge link into /account/diagnose.
+//
+// Color-coded pills (ANSI when stdout is a TTY, plain otherwise) — matches
+// the W741 diagnose dispatcher contract:
+//   green  — k_score >= 0.95
+//   yellow — k_score >= 0.85
+//   red    — k_score <  0.85
+//
+// Exits 0 (informational); 2 (EXIT.GATE_FAIL) when the envelope reports
+// ok:false so CI can branch on a failure-mode report failure.
+// =============================================================================
+async function cmdW745FailureModes(args) {
+  const cid = args && args[0];
+  if (!cid || typeof cid !== 'string' || cid.startsWith('-')) {
+    console.error('usage: kolm failure-modes <artifact_cid> [--top N] [--json]');
+    console.error('  Prints a top-regression table + per-cluster K-Score summary.');
+    console.error('  See https://kolm.ai/docs/failure-modes for the envelope shape.');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+  // --top N caps the number of top-regression rows shown in the table.
+  let topN = 5;
+  for (let i = 1; i < args.length; i++) {
+    if (args[i] === '--top' && args[i + 1] != null) {
+      const v = Number(args[i + 1]);
+      if (Number.isFinite(v) && v > 0) topN = Math.trunc(v);
+    } else if (typeof args[i] === 'string' && args[i].startsWith('--top=')) {
+      const v = Number(args[i].slice('--top='.length));
+      if (Number.isFinite(v) && v > 0) topN = Math.trunc(v);
+    }
+  }
+  const base = (process.env.KOLM_BASE_URL || process.env.KOLM_BASE || 'https://kolm.ai').replace(/\/$/, '');
+  const apiKey = process.env.KOLM_API_KEY || process.env.KOLM_KEY || '';
+  if (!apiKey) {
+    const envelope = {
+      ok: false,
+      error: 'missing_api_key',
+      hint: 'set KOLM_API_KEY (or KOLM_KEY) and re-run; or run `kolm login`',
+      failure_modes_version: 'w745-v1',
+    };
+    console.log(JSON.stringify(envelope, null, 2));
+    process.exit(EXIT.MISSING_PREREQ);
+    return;
+  }
+  let res;
+  try {
+    res = await fetch(base + '/v1/failure-modes/' + encodeURIComponent(cid), {
+      method: 'GET',
+      headers: { 'authorization': `Bearer ${apiKey}`, 'accept': 'application/json' },
+    });
+  } catch (e) {
+    const envelope = {
+      ok: false,
+      error: 'failure_modes_request_failed',
+      detail: (e && e.message) || String(e),
+      failure_modes_version: 'w745-v1',
+    };
+    console.log(JSON.stringify(envelope, null, 2));
+    process.exit(EXIT.EXECUTION);
+    return;
+  }
+  const text = await res.text().catch(() => '');
+  let envelope = null;
+  try { envelope = text ? JSON.parse(text) : null; } catch (_) { envelope = { _raw: text }; }
+  if (!envelope || typeof envelope !== 'object') {
+    console.error('failure-modes: empty/invalid envelope (status ' + res.status + ')');
+    process.exit(EXIT.EXECUTION);
+    return;
+  }
+  // --json passthrough for CI scripts.
+  if (args.includes('--json')) {
+    console.log(JSON.stringify(envelope, null, 2));
+    if (envelope.ok === false) process.exit(EXIT.GATE_FAIL);
+    return;
+  }
+  _renderW745FailureModes(envelope, { topN });
+  if (envelope.ok === false) process.exit(EXIT.GATE_FAIL);
+}
+
+function _renderW745FailureModes(envelope, opts) {
+  const useColor = process.stdout && process.stdout.isTTY && !process.env.NO_COLOR;
+  const c = {
+    green:  (s) => useColor ? `\x1b[32m${s}\x1b[0m` : s,
+    yellow: (s) => useColor ? `\x1b[33m${s}\x1b[0m` : s,
+    red:    (s) => useColor ? `\x1b[31m${s}\x1b[0m` : s,
+    dim:    (s) => useColor ? `\x1b[2m${s}\x1b[0m` : s,
+    bold:   (s) => useColor ? `\x1b[1m${s}\x1b[0m` : s,
+  };
+  function pill(k) {
+    if (typeof k !== 'number') return c.dim('--');
+    if (k >= 0.95) return c.green('GOOD   ' + k.toFixed(3));
+    if (k >= 0.85) return c.yellow('OK     ' + k.toFixed(3));
+    return c.red('LOW    ' + k.toFixed(3));
+  }
+  console.log('');
+  console.log(c.bold('Failure modes ') + c.dim('(' + (envelope.failure_modes_version || 'w745-v1') + ')'));
+  console.log('  artifact_cid:    ' + (envelope.artifact_cid || '(none)'));
+  if (envelope.ok === false) {
+    console.log('  ' + c.red('status:          ok=false  error=' + envelope.error));
+    if (envelope.hint) console.log('  ' + c.dim('hint:            ' + envelope.hint));
+    if (envelope.diagnostic_link) {
+      console.log('  ' + c.dim('diagnostic:      ' + envelope.diagnostic_link));
+    }
+    console.log('');
+    return;
+  }
+  console.log('  overall k_score: ' + pill(envelope.overall_k_score));
+  console.log('  clustering:      ' + c.dim(envelope.clustering || 'heuristic_keyword_v1'));
+  console.log('  cluster_count:   ' + (envelope.cluster_count != null ? envelope.cluster_count : 0));
+  console.log('  generated_at:    ' + c.dim(envelope.generated_at || ''));
+  console.log('');
+  // Top regressions.
+  const topN = (opts && Number.isFinite(opts.topN)) ? opts.topN : 5;
+  const regs = Array.isArray(envelope.top_regressions) ? envelope.top_regressions.slice(0, topN) : [];
+  if (regs.length) {
+    console.log(c.bold('Top regressions') + c.dim(' (top ' + regs.length + ')'));
+    console.log('  ' + 'cluster_id'.padEnd(24) + 'n'.padStart(6) + '   ' + 'k_score'.padEnd(14) + 'delta'.padEnd(12) + 'keywords');
+    for (const r of regs) {
+      const id = String(r.cluster_id || '?').padEnd(24);
+      const n = String(r.n != null ? r.n : '-').padStart(6);
+      const k = pill(r.k_score).padEnd(14 + (useColor ? 9 : 0));
+      const delta = (typeof r.delta_vs_overall === 'number')
+        ? ((r.delta_vs_overall >= 0 ? '+' : '') + r.delta_vs_overall.toFixed(3)).padEnd(12)
+        : c.dim('-'.padEnd(12));
+      const kws = Array.isArray(r.top_keywords) ? r.top_keywords.slice(0, 3).join(', ') : '';
+      console.log('  ' + id + n + '   ' + k + delta + kws);
+    }
+    console.log('');
+  } else {
+    console.log(c.dim('No top regressions — no cluster falls below the overall k_score.'));
+    console.log('');
+  }
+  // Cluster summary.
+  const clusters = Array.isArray(envelope.clusters) ? envelope.clusters : [];
+  if (clusters.length) {
+    console.log(c.bold('Cluster summary'));
+    console.log('  ' + 'cluster_id'.padEnd(24) + 'n'.padStart(6) + '   ' + 'k_score'.padEnd(14) + 'keywords');
+    for (const cl of clusters) {
+      const id = String(cl.cluster_id || '?').padEnd(24);
+      const n = String(cl.n != null ? cl.n : '-').padStart(6);
+      const k = pill(cl.k_score).padEnd(14 + (useColor ? 9 : 0));
+      const kws = Array.isArray(cl.top_keywords) ? cl.top_keywords.slice(0, 3).join(', ') : '';
+      console.log('  ' + id + n + '   ' + k + kws);
+    }
+    console.log('');
+  }
+  if (envelope.diagnostic_link) {
+    console.log(c.dim('Next: pivot to W741 diagnostic at ' + envelope.diagnostic_link));
+    console.log('');
+  }
+}
+
+// =============================================================================
+// W743 — `kolm migrate from-ollama|from-lmstudio|doctor` dispatcher.
+//
+// Distinct-named (cmdW743Migrate) per the W724/.../W742 precedent so parallel
+// wave agents on W740/W741/W742/W744+ cannot collide on this symbol.
+//
+// Legacy `kolm migrate <spec.json> --out ...` (cmdMigrate above) is a SPEC
+// migrator and remains the fallthrough for any positional first arg that
+// isn't one of our three verbs. The `case 'migrate'` arm in main() keys on
+// the explicit W743 verb so spec-migrate users are unaffected.
+//
+// Subcommands:
+//   from-ollama    [--path <root>] [--dry-run] [--limit N] [--name <name:tag>]
+//                  — discovers Ollama-managed models under <root> (default
+//                    ~/.ollama/models). Without --name we print the
+//                    discovery list. With --name we run the W740 wrap on
+//                    the matching blob and print the manifest envelope.
+//   from-lmstudio  [--path <root>] [--dry-run] [--limit N] [--name <file>]
+//                  — same shape against an LM Studio cache root.
+//   doctor         — prints which default paths exist + how many models we
+//                    found in each.
+//
+// Honesty contract:
+//   * Missing root            -> NOT_FOUND     + {ok:false, error:'<source>_root_missing'}
+//   * Missing python3         -> MISSING_PREREQ + python3_missing
+//   * No matching --name      -> BAD_ARGS      + model_not_found
+//   * Migration NEVER earns a K-Score — the wrap inherits not_kolm_compiled
+//     from W740-2. The dispatcher prints a one-line hint after a successful
+//     wrap pointing at `kolm distill` so the user knows the next step.
+// =============================================================================
+async function cmdW743Migrate(args) {
+  const sub = (args && args[0]) || '';
+
+  async function _loadMod() {
+    try { return await import('../src/migrate.js'); }
+    catch (e) {
+      const envelope = {
+        ok: false,
+        error: 'migrate_module_missing',
+        detail: (e && e.message) || String(e),
+        hint: 'src/migrate.js must be importable; reinstall the kolm CLI',
+        version: 'w743-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.MISSING_PREREQ);
+      return null;
+    }
+  }
+
+  function _flag(rest, name) {
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--' + name && i + 1 < rest.length) return rest[i + 1];
+      if (typeof rest[i] === 'string' && rest[i].startsWith('--' + name + '=')) {
+        return rest[i].slice(name.length + 3);
+      }
+    }
+    return null;
+  }
+  function _hasFlag(rest, name) {
+    return rest.some((a) => a === '--' + name);
+  }
+
+  function _printDistillHint() {
+    // Wrap inherits not_kolm_compiled:true from W740-2 — surface the next
+    // step so the user knows migration alone never earns a K-Score.
+    console.error('hint: migrated models are not_kolm_compiled. run `kolm distill --base <gguf> --seeds <jsonl>` to earn a K-Score.');
+  }
+
+  // ──────────────────────── subcommand: doctor ───────────────────────────────
+  if (sub === 'doctor') {
+    const mod = await _loadMod();
+    if (!mod) return;
+    const out = mod.describeMigrationSources();
+    console.log(JSON.stringify(out, null, 2));
+    return;
+  }
+
+  // ──────────────────────── shared: from-<source> ───────────────────────────
+  function _isFromVerb(s) { return s === 'from-ollama' || s === 'from-lmstudio'; }
+
+  if (_isFromVerb(sub)) {
+    const mod = await _loadMod();
+    if (!mod) return;
+    const source = sub === 'from-ollama' ? 'ollama' : 'lmstudio';
+    const rest = args.slice(1);
+    const pathOverride = _flag(rest, 'path');
+    const dryRun = _hasFlag(rest, 'dry-run');
+    const limitRaw = _flag(rest, 'limit');
+    const limit = limitRaw && Number.isFinite(Number(limitRaw)) ? Math.max(1, Math.min(1000, Number(limitRaw) | 0)) : 25;
+    const namePick = _flag(rest, 'name');
+
+    // Determine root: explicit --path wins, else first existing default.
+    let root = pathOverride ? path.resolve(pathOverride) : null;
+    if (!root) {
+      const candidates = source === 'ollama' ? mod.OLLAMA_DEFAULT_PATHS : mod.LMSTUDIO_DEFAULT_PATHS;
+      for (const c of candidates) {
+        try { if (c && fs.existsSync(c)) { root = c; break; } } catch { /* skip */ }
+      }
+    }
+    if (!root || !fs.existsSync(root)) {
+      const envelope = {
+        ok: false,
+        error: source === 'ollama' ? 'ollama_root_missing' : 'lmstudio_root_missing',
+        candidates: (source === 'ollama' ? mod.OLLAMA_DEFAULT_PATHS : mod.LMSTUDIO_DEFAULT_PATHS).slice(),
+        hint: 'pass --path <root> to override; for ollama the default is ~/.ollama/models',
+        version: mod.MIGRATE_VERSION,
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.NOT_FOUND);
+      return;
+    }
+
+    // If --name was NOT given (or --dry-run), this is discovery only.
+    if (!namePick || dryRun) {
+      const env = mod.runMigrationDryRun({ source, path: root, limit });
+      console.log(JSON.stringify(env, null, 2));
+      if (env && env.ok === false) {
+        // Surface honest exit codes for the discovery-failure shapes.
+        if (env.error === 'ollama_root_missing' || env.error === 'lmstudio_root_missing') process.exit(EXIT.NOT_FOUND);
+        else if (env.error === 'invalid_source' || env.error === 'unknown_format') process.exit(EXIT.BAD_ARGS);
+        else process.exit(EXIT.GATE_FAIL);
+        return;
+      }
+      // Compact human-readable list under stderr so stdout stays JSON-only.
+      if (env && Array.isArray(env.sample)) {
+        for (const m of env.sample) {
+          if (source === 'ollama') {
+            console.error(`  ${m.source_name || m.name}  (${m.size_bytes || '?'} bytes)`);
+          } else {
+            console.error(`  ${m.name}  ${m.path}  (${m.size_bytes || '?'} bytes)`);
+          }
+        }
+      }
+      return;
+    }
+
+    // --name given without --dry-run: discover then wrap the chosen entry.
+    const disco = source === 'ollama'
+      ? mod.discoverOllamaModels(root)
+      : mod.discoverLmStudioModels(root);
+    if (!disco || disco.ok === false) {
+      console.log(JSON.stringify(disco, null, 2));
+      if (disco && (disco.error === 'ollama_root_missing' || disco.error === 'lmstudio_root_missing')) {
+        process.exit(EXIT.NOT_FOUND);
+      } else {
+        process.exit(EXIT.GATE_FAIL);
+      }
+      return;
+    }
+    const entry = (disco.models || []).find((m) => {
+      if (!m) return false;
+      if (source === 'ollama') return m.source_name === namePick || m.name === namePick;
+      return m.name === namePick || m.path === namePick;
+    });
+    if (!entry) {
+      const envelope = {
+        ok: false,
+        error: 'model_not_found',
+        source,
+        name: namePick,
+        hint: `no ${source} model matched "${namePick}"; run without --name to see the discovery list`,
+        version: mod.MIGRATE_VERSION,
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.BAD_ARGS);
+      return;
+    }
+    const wrapped = source === 'ollama'
+      ? await mod.migrateOllamaModel(entry)
+      : await mod.migrateLmStudioModel(entry);
+    console.log(JSON.stringify(wrapped, null, 2));
+    if (wrapped && wrapped.ok === false) {
+      if (wrapped.error === 'python3_missing') process.exit(EXIT.MISSING_PREREQ);
+      else if (wrapped.error === 'file_not_found') process.exit(EXIT.NOT_FOUND);
+      else if (wrapped.error === 'unknown_format') process.exit(EXIT.BAD_ARGS);
+      else process.exit(EXIT.GATE_FAIL);
+      return;
+    }
+    _printDistillHint();
+    return;
+  }
+
+  // ──────────────────────── unknown subcommand ───────────────────────────────
+  console.error('usage: kolm migrate <from-ollama|from-lmstudio|doctor> [args]');
+  console.error('  from-ollama   [--path <root>] [--dry-run] [--limit N] [--name <name:tag>]');
+  console.error('  from-lmstudio [--path <root>] [--dry-run] [--limit N] [--name <file>]');
+  console.error('  doctor                                            — show default paths + counts');
+  console.error('');
+  console.error('symmetric import: kolm import wrap <gguf|safetensors|onnx> [--out manifest.json]');
+  console.error('next step: kolm distill --base <gguf> --seeds <jsonl>  # earn a K-Score');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// =============================================================================
+// W747 — `kolm drift-alert <snapshot|check|webhooks>` dispatcher.
+//
+// Distinct-named (cmdW747DriftAlert) per the W724/.../W746 precedent so
+// parallel wave agents on W745/W746/W748 cannot collide on this symbol.
+//
+// Subcommands:
+//   snapshot <namespace> --kind training|production [--samples N]
+//                         — POST /v1/drift-alert/snapshot
+//   check <namespace>     — GET  /v1/drift-alert/:namespace + pretty-print
+//                            JSD pill + top diverging + suggestions
+//   webhooks <namespace> <url> [--threshold N]
+//                         — POST /v1/drift-alert/webhooks
+//
+// Every subcommand returns a JSON envelope on stdout so CI loops can parse it
+// without screen-scraping. The honest fallback for missing kolm token mirrors
+// every other auth'd CLI verb — we print {ok:false,error:'auth_required'}
+// rather than silently exiting 0.
+// =============================================================================
+async function cmdW747DriftAlert(args) {
+  const sub = (args && args[0]) || '';
+
+  function _envApiKey() {
+    return process.env.KOLM_API_KEY || '';
+  }
+  function _envBase() {
+    return (process.env.KOLM_BASE_URL || 'https://kolm.ai').replace(/\/$/, '');
+  }
+  function _flag(rest, name) {
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--' + name && i + 1 < rest.length) return rest[i + 1];
+      if (typeof rest[i] === 'string' && rest[i].startsWith('--' + name + '=')) {
+        return rest[i].slice(name.length + 3);
+      }
+    }
+    return null;
+  }
+  function _print(envelope) {
+    console.log(JSON.stringify(envelope, null, 2));
+  }
+  function _fail(envelope, code = EXIT.EXECUTION) {
+    _print(envelope);
+    process.exit(code);
+  }
+
+  if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
+    console.error('usage: kolm drift-alert <snapshot|check|webhooks> [args]');
+    console.error('  snapshot <namespace> --kind training|production [--samples N]');
+    console.error('  check <namespace>                              — JSD pill + suggestions');
+    console.error('  webhooks <namespace> <url> [--threshold 0.15]  — register webhook');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+
+  // ──────────────────────── subcommand: snapshot ─────────────────────────────
+  if (sub === 'snapshot') {
+    const namespace = (args && args[1]) || '';
+    if (!namespace) {
+      _fail({ ok: false, error: 'missing_namespace', hint: 'usage: kolm drift-alert snapshot <namespace> --kind training|production', version: 'w747-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const rest = args.slice(2);
+    const kind = _flag(rest, 'kind') || '';
+    const samples = Math.max(1, Math.trunc(Number(_flag(rest, 'samples') || 200)));
+    if (['training', 'production'].indexOf(kind) < 0) {
+      _fail({ ok: false, error: 'invalid_kind', allowed: ['training', 'production'], hint: 'pass --kind training or --kind production', version: 'w747-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w747-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/drift-alert/snapshot', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({ namespace, kind, samples_count: samples }),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w747-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: check ────────────────────────────────
+  if (sub === 'check') {
+    const namespace = (args && args[1]) || '';
+    if (!namespace) {
+      _fail({ ok: false, error: 'missing_namespace', hint: 'usage: kolm drift-alert check <namespace>', version: 'w747-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w747-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/drift-alert/' + encodeURIComponent(namespace), {
+        method: 'GET',
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w747-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    // Pretty-print the table + suggestions in addition to JSON so a human at
+    // a terminal gets a useful read of the envelope without piping to jq.
+    if (body && body.ok && body.compare) {
+      const jsd = Number(body.compare.jsd || 0);
+      const pill = jsd < 0.05 ? 'OK' : (jsd < 0.15 ? 'WARN' : 'ALERT');
+      console.log('');
+      console.log(`JSD: ${jsd.toFixed(4)}  [${pill}]   (alert=${body.alert ? 'true' : 'false'})`);
+      console.log('Top diverging tokens (train -> prod):');
+      const td = Array.isArray(body.compare.top_diverging) ? body.compare.top_diverging.slice(0, 10) : [];
+      for (const t of td) {
+        console.log(`  ${(Number(t.p_train) * 100).toFixed(2).padStart(6)}%  ->  ${(Number(t.p_prod) * 100).toFixed(2).padStart(6)}%   ${t.token}`);
+      }
+      if (Array.isArray(body.suggestions) && body.suggestions.length > 0) {
+        console.log('');
+        console.log('Suggestions:');
+        for (const s of body.suggestions) console.log('  - ' + s);
+      }
+    }
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: webhooks ─────────────────────────────
+  if (sub === 'webhooks') {
+    const namespace = (args && args[1]) || '';
+    const url = (args && args[2]) || '';
+    if (!namespace || !url) {
+      _fail({ ok: false, error: 'missing_args', hint: 'usage: kolm drift-alert webhooks <namespace> <url> [--threshold 0.15]', version: 'w747-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const rest = args.slice(3);
+    const threshold = Number(_flag(rest, 'threshold') || NaN);
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w747-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/drift-alert/webhooks', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({
+          namespace,
+          webhook_url: url,
+          jsd_threshold: Number.isFinite(threshold) ? threshold : undefined,
+        }),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w747-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // Unknown subcommand.
+  console.error('usage: kolm drift-alert <snapshot|check|webhooks> [args]');
+  console.error('  snapshot <namespace> --kind training|production [--samples N]');
+  console.error('  check <namespace>                              — JSD pill + suggestions');
+  console.error('  webhooks <namespace> <url> [--threshold 0.15]  — register webhook');
+  process.exit(EXIT.BAD_ARGS);
+}
+
 async function main() {
   ensureLocalReceiptSecretInEnv();
   const [, , cmd, ...rest] = process.argv;
@@ -33372,8 +34175,19 @@ async function main() {
       // W812 — `kolm failure-modes` mirrors /account/failure-modes.html:
       // cluster regression table + per-cluster inspector + optional emit
       // of weakness signals into W720 self-improvement.
+      //
+      // W745 — `kolm failure-modes <artifact_cid>` is a sibling lens: when
+      // the first positional arg is a CID (no leading dash) we dispatch to
+      // the CID-keyed cmdW745FailureModes report instead. Both modules
+      // coexist on purpose — W812 answers "where is THIS TENANT regressing
+      // right now?", W745 answers "where does THIS ARTIFACT diverge most
+      // from the bakeoff baseline?"
       case 'failure-modes':
-        await withErrorContext('failure-modes', () => cmdFailureModes(rest));
+        if (rest && rest[0] && typeof rest[0] === 'string' && !rest[0].startsWith('-')) {
+          await withErrorContext('failure-modes', () => cmdW745FailureModes(rest));
+        } else {
+          await withErrorContext('failure-modes', () => cmdFailureModes(rest));
+        }
         break;
       case 'jobs':     await withErrorContext('jobs',     () => cmdJobs(rest)); break;
       // W369 data plane (lake / optimize / dataset / label).
@@ -33419,7 +34233,20 @@ async function main() {
       case 'connect':     await withErrorContext('connect',     () => cmdConnect(rest)); break;
       case 'remote':      await withErrorContext('remote',      () => cmdRemote(rest)); break;
       case 'mesh':        await withErrorContext('mesh',        () => cmdMesh(rest)); break;
-      case 'migrate':     await withErrorContext('migrate',     () => cmdMigrate(rest)); break;
+      // W743 — `kolm migrate from-ollama|from-lmstudio|doctor` routes to the
+      // distinct W743 dispatcher (cmdW743Migrate) for Ollama / LM Studio model
+      // library import. Legacy `kolm migrate <spec.json> --out ...` for the
+      // spec-class migrator falls through to cmdMigrate. Branch keys on the
+      // explicit W743 verb so spec-migrate users keep their flow.
+      case 'migrate': {
+        const sub0Mig = (rest && rest[0]) || '';
+        if (sub0Mig === 'from-ollama' || sub0Mig === 'from-lmstudio' || sub0Mig === 'doctor') {
+          await withErrorContext('migrate', () => cmdW743Migrate(rest));
+        } else {
+          await withErrorContext('migrate', () => cmdMigrate(rest));
+        }
+        break;
+      }
       case 'wrap':        await withErrorContext('wrap',        () => cmdWrap(rest)); break;
       case 'tail':     await withErrorContext('tail',     () => cmdTail(rest)); break;
       case 'bridges':  await withErrorContext('bridges',  () => cmdBridges(rest)); break;
@@ -33512,6 +34339,14 @@ async function main() {
       // dispatcher. Distinct-named (cmdW742Gateway) so parallel W740/W741/W743
       // wave agents cannot collide on this case.
       case 'gateway':    await withErrorContext('gateway',    () => cmdW742Gateway(rest)); break;
+      // W746 — `kolm staleness <show|apply-ttl|sampler-weights>` routes the
+      // capture-staleness dispatcher. Distinct-named (cmdW746Staleness) so
+      // parallel W744/W745/W747 wave agents cannot collide on this case.
+      case 'staleness':  await withErrorContext('staleness',  () => cmdW746Staleness(rest)); break;
+      // W747 — `kolm drift-alert <snapshot|check|webhooks>` routes the
+      // distribution-shift live alerter. Distinct-named (cmdW747DriftAlert)
+      // so parallel W745/W746/W748 wave agents cannot collide on this case.
+      case 'drift-alert': await withErrorContext('drift-alert', () => cmdW747DriftAlert(rest)); break;
       case 'agents':     await withErrorContext('agents',     () => cmdAgents(rest)); break;
       case 'shell-init': await withErrorContext('shell-init', () => cmdShellInit(rest)); break;
       case '--version':

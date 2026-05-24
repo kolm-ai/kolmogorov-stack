@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f7f4ec";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Failure modes - Account - kolm.ai</title>
+<meta name="description" content="W812 failure-mode visualization: cluster captures by topic+shape, surface where the student diverges most from the teacher, and feed regression signals back into W720 self-improvement.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://kolm.ai/account/failure-modes">
+<meta property="og:title" content="Failure modes &middot; Account &middot; kolm.ai">
+<meta property="og:description" content="W812 failure-mode visualization: cluster captures by topic+shape, surface where the student diverges most from the teacher.">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/account/failure-modes">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Failure modes - Account - kolm.ai","description":"W812 failure-mode visualization dashboard.","url":"https://kolm.ai/account/failure-modes","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"Failure modes","item":"https://kolm.ai/account/failure-modes"}]}}</script>
+<style>
+.acct-shell{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:flex-start;max-width:1280px;margin:0 auto;padding:24px}
+#account-sidebar{position:sticky;top:24px;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13px}
+#account-sidebar h2{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin:0 0 10px}
+#account-sidebar ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+#account-sidebar a{display:block;padding:6px 10px;border-radius:4px;color:var(--ink-mute);text-decoration:none;font-family:var(--mono);font-size:12.5px}
+#account-sidebar a:hover{background:var(--bg-elev);color:var(--ink)}
+#account-sidebar a[aria-current=page]{background:var(--bg-elev);color:var(--accent);border-left:2px solid var(--accent);padding-left:8px}
+.acct-content h1{margin:0 0 4px;font-size:28px;letter-spacing:0}
+.acct-content h2{font-size:16px;margin:22px 0 10px}
+.acct-content h3{font-size:14px;margin:16px 0 8px}
+.acct-content .lede{color:var(--ink-mute);font-size:14.5px;margin:0 0 8px;max-width:64ch}
+.acct-content .eyebrow{font-family:var(--mono);text-transform:uppercase;letter-spacing:0.08em;font-size:11px;color:var(--ink-faint);margin:0 0 6px}
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--ink,#faf2e1);color:var(--bg,#08090c);padding:8px 12px;font-family:var(--mono);font-size:12px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
+.skip-link:focus{left:0}
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0 20px}
+.metric-card{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px}
+.metric-card .label{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin-bottom:6px}
+.metric-card .value{font-size:22px;font-weight:600;font-family:var(--mono);color:var(--ink)}
+.metric-card .delta{font-size:11.5px;color:var(--ink-mute);margin-top:4px}
+.kpanel{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:16px}
+.kpanel h2{margin:0 0 12px;font-size:15px}
+.kpanel .pdesc{color:var(--ink-mute);font-size:13px;margin:0 0 12px}
+.ktable{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
+.ktable th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);color:var(--ink-faint);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;font-size:10.5px;cursor:pointer;user-select:none}
+.ktable th[data-sort]:hover{color:var(--accent)}
+.ktable th[data-sort-active]::after{content:" \25BC";color:var(--accent)}
+.ktable th[data-sort-active="asc"]::after{content:" \25B2";color:var(--accent)}
+.ktable td{padding:8px 8px;border-bottom:1px solid var(--line-soft,rgba(255,255,255,0.04));color:var(--ink)}
+.ktable tr:hover td{background:var(--bg-elev);cursor:pointer}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor}
+.pill.ok{color:var(--good)}.pill.warn{color:var(--warn)}.pill.bad{color:var(--bad)}.pill.mute{color:var(--ink-faint)}
+.pill.delta-low{color:var(--good)}.pill.delta-mid{color:var(--warn)}.pill.delta-high{color:var(--bad)}
+.empty{background:var(--bg-card);border:1px dashed var(--line);border-radius:8px;padding:18px;color:var(--ink-mute);font-size:13.5px;line-height:1.6}
+.empty code{background:var(--bg-elev);padding:2px 6px;border-radius:3px;font-size:12.5px;color:var(--accent)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center}
+.toolbar input[type=text],.toolbar select{background:var(--bg-elev);border:1px solid var(--line);color:var(--ink);padding:6px 10px;border-radius:4px;font-family:var(--mono);font-size:12px}
+.btn{display:inline-block;padding:6px 12px;border-radius:5px;border:1px solid var(--line-strong);background:transparent;color:var(--ink);font-family:var(--mono);font-size:12px;cursor:pointer;text-decoration:none}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.note{background:var(--bg-card);border-left:3px solid var(--ink-faint);padding:10px 14px;margin-top:18px;color:var(--ink-mute);font-size:12.5px;line-height:1.6}
+.inspector{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:14px;margin-top:8px}
+.inspector h3{font-size:13px;margin:0 0 10px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-faint)}
+.sample{background:var(--bg-card);border:1px solid var(--line);border-radius:6px;padding:10px;margin-bottom:8px}
+.sample .prompt{font-family:var(--mono);font-size:12px;color:var(--ink-mute);margin-bottom:6px;white-space:pre-wrap;word-break:break-word}
+.sample .columns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.sample .col{background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:8px;font-family:var(--mono);font-size:11.5px;white-space:pre-wrap;word-break:break-word;color:var(--ink)}
+.sample .col h4{font-size:10.5px;margin:0 0 6px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.06em}
+.sample .col.student{border-color:rgba(217,160,32,0.4)}
+.sample .col.teacher{border-color:rgba(127,191,63,0.4)}
+@media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}.metric-grid{grid-template-columns:repeat(2,1fr)}.sample .columns{grid-template-columns:1fr}}
+</style>
+<link rel="stylesheet" href="/ks.css">
+</head>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+    </div>
+  </nav>
+</div>
+
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<a href="#main" class="skip-link">Skip to content</a>
+
+<main id="main">
+<div class="acct-shell">
+<nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview">Overview</a></li><li><a href="/account/connectors">Connectors</a></li><li><a href="/account/captured">Captured calls</a></li><li><a href="/account/privacy-events">Privacy events</a></li><li><a href="/account/repeated-workflows">Repeated workflows</a></li><li><a href="/account/opportunities">Opportunities</a></li><li><a href="/account/labeling">Labeling queue</a></li><li><a href="/account/datasets">Datasets</a></li><li><a href="/account/simulations">Simulations</a></li><li><a href="/account/bakeoffs">Bakeoffs</a></li><li><a href="/account/builds">Artifact jobs</a></li><li><a href="/account/artifacts">Artifacts</a></li><li><a href="/account/devices">Devices</a></li><li><a href="/account/storage">Storage truth</a></li><li><a href="/account/billing">Billing</a></li><li><a href="/account/routing">Routing decisions</a></li><li><a href="/account/confidence">Confidence routing</a></li><li><a href="/account/failure-modes" aria-current="page">Failure modes</a></li><li><a href="/account/active-learning">Active learning</a></li></ul></nav>
+<section class="acct-content">
+
+<p class="eyebrow">Open-source AI workbench &middot; Failure-mode visualization</p>
+<h1>Frontier AI on your own infrastructure.</h1>
+<p class="lede">Two complementary lenses on where the student diverges most from the teacher. W812 (below) buckets your tenant-wide capture stream by topic + length + vendor class. W745 (artifact-keyed panel) takes an <code>artifact_cid</code>, runs the bakeoff rows through a heuristic keyword cluster, and links every regression directly to <a href="/docs/diagnose">/docs/diagnose</a>. See <a href="/docs/failure-modes">/docs/failure-modes</a> for the W745 envelope spec.</p>
+
+<!-- W745 — Artifact-keyed cluster dashboard (bridges to W741 diagnostic) -->
+<div class="kpanel" id="w745-panel" style="border-color:rgba(16,185,129,0.25)">
+  <h2>Artifact-keyed clusters <span style="font-family:var(--mono);font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.08em;margin-left:8px">W745</span></h2>
+  <p class="pdesc">Paste an <code>artifact_cid</code> below. We call <code>/v1/failure-modes/&lt;cid&gt;</code> and render the top-regression panel plus the per-cluster K-Score table. Clustering is <code>heuristic_keyword_v1</code> &mdash; honest about the W757 fingerprinting placeholder. Each row links to the W741 diagnostic envelope at <code>/account/diagnose?cid=&lt;cid&gt;</code>.</p>
+  <div class="toolbar">
+    <input id="w745-cid" type="text" placeholder="artifact_cid (bafk...)" style="min-width:520px;flex:1">
+    <button id="w745-run" class="btn" type="button">Run</button>
+    <a class="btn" href="/account/diagnose">Diagnose &rarr;</a>
+    <a class="btn" href="/docs/failure-modes" rel="noopener">Docs</a>
+  </div>
+  <div id="w745-header" hidden style="margin-top:14px">
+    <div class="metric-grid">
+      <div class="metric-card"><div class="label">Overall K-Score</div><div class="value" id="w745-overall">-</div><div class="delta" id="w745-overall-status">-</div></div>
+      <div class="metric-card"><div class="label">Clusters</div><div class="value" id="w745-clcount">-</div><div class="delta">heuristic_keyword_v1</div></div>
+      <div class="metric-card"><div class="label">Top regressions</div><div class="value" id="w745-rcount">-</div><div class="delta">delta vs overall</div></div>
+      <div class="metric-card"><div class="label">Diagnostic link</div><div class="value" id="w745-diaglink" style="font-size:13px">-</div><div class="delta">W745-4 bridge</div></div>
+    </div>
+  </div>
+  <div id="w745-top-panel" hidden>
+    <h3 style="font-size:13px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin:14px 0 8px">Top regressions panel</h3>
+    <table class="ktable">
+      <thead><tr>
+        <th data-w745-sort="delta_vs_overall" data-sort-active>Delta</th>
+        <th data-w745-sort="k_score">K-Score</th>
+        <th data-w745-sort="n">n</th>
+        <th>Keywords</th>
+        <th>Cluster</th>
+        <th>Diagnostic</th>
+      </tr></thead>
+      <tbody id="w745-top-rows"></tbody>
+    </table>
+  </div>
+  <div id="w745-cluster-panel" hidden>
+    <h3 style="font-size:13px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin:14px 0 8px">All clusters</h3>
+    <table class="ktable" id="w745-cluster-table">
+      <thead><tr>
+        <th data-w745-sort-all="k_score">K-Score</th>
+        <th data-w745-sort-all="delta_vs_overall">Delta</th>
+        <th data-w745-sort-all="count">Count</th>
+        <th data-w745-sort-all="n">n</th>
+        <th>Keywords</th>
+        <th>Cluster</th>
+        <th>Diagnostic</th>
+      </tr></thead>
+      <tbody id="w745-cluster-rows"></tbody>
+    </table>
+  </div>
+  <div id="w745-empty" class="empty">
+    <strong>Paste an artifact_cid above</strong> to run the W745 report. If the artifact has no bakeoff yet, the envelope returns the honest <code>no_bakeoff_results_yet</code> response with a hint to run <code>kolm bakeoff</code> first.
+  </div>
+  <div id="w745-error" class="empty" hidden style="border-color:#dc2626;color:#dc2626"><strong>Request failed.</strong> <span id="w745-errmsg"></span></div>
+</div>
+
+<p class="eyebrow">Tenant-wide cluster failure visualization (W812)</p>
+<h2 style="font-size:20px;margin-top:18px">Tenant-wide stream.</h2>
+<p class="lede">W812 buckets your captures by topic + length + vendor class, then surfaces the clusters where the student (compiled artifact) diverges most from the teacher (upstream provider). The largest regressions feed the W720 self-improvement loop as weakness signals so the worst clusters re-distill first.</p>
+
+<div class="toolbar">
+  <label for="ns-input" style="color:var(--ink-faint);font-family:var(--mono);font-size:11px">Namespace</label>
+  <input id="ns-input" type="text" placeholder="all" value="" style="min-width:160px">
+  <label for="window-input" style="color:var(--ink-faint);font-family:var(--mono);font-size:11px;margin-left:10px">Window (days)</label>
+  <input id="window-input" type="text" value="30" style="min-width:60px">
+  <label for="topn-input" style="color:var(--ink-faint);font-family:var(--mono);font-size:11px;margin-left:10px">Top-N</label>
+  <input id="topn-input" type="text" value="20" style="min-width:60px">
+  <button id="apply-btn" class="btn" type="button">Apply</button>
+  <a class="btn" href="/account/active-learning" rel="noopener">Active learning</a>
+  <a class="btn" href="/account/bakeoffs" rel="noopener">Bakeoffs</a>
+  <a class="btn" href="/docs/api" rel="noopener">API reference</a>
+</div>
+
+<div class="metric-grid">
+  <div class="metric-card"><div class="label">Clusters scanned</div><div class="value" id="m-clusters">-</div><div class="delta" id="m-events">awaiting traffic</div></div>
+  <div class="metric-card"><div class="label">Regressions</div><div class="value" id="m-regressions">-</div><div class="delta">student trails teacher &ge; 0.05</div></div>
+  <div class="metric-card"><div class="label">Worst delta</div><div class="value" id="m-worst-delta">-</div><div class="delta" id="m-worst-cluster">no cluster</div></div>
+  <div class="metric-card"><div class="label">Signals emitted</div><div class="value" id="m-signals">0</div><div class="delta">into W720 self-improvement</div></div>
+</div>
+
+<div class="kpanel">
+  <h2>Top regressions (W812-2)</h2>
+  <p class="pdesc">Clusters ranked by <code>kscore_delta = teacher_mean - student_mean</code>. A delta of 0.10 means the student is scoring 10 K-Score points below the teacher on this cluster. Click a row to inspect 3 captures with student &amp; teacher outputs side-by-side.</p>
+  <table class="ktable" id="cluster-table">
+    <thead><tr>
+      <th data-sort="topic_seed">Topic</th>
+      <th data-sort="length_bucket">Length</th>
+      <th data-sort="sample_count">Samples</th>
+      <th data-sort="student_count">Student</th>
+      <th data-sort="teacher_count">Teacher</th>
+      <th data-sort="student_kscore_mean">Student K</th>
+      <th data-sort="teacher_kscore_mean">Teacher K</th>
+      <th data-sort="kscore_delta" data-sort-active>K Delta</th>
+      <th data-sort="last_seen">Last seen</th>
+    </tr></thead>
+    <tbody id="cluster-rows"></tbody>
+  </table>
+  <div id="cluster-empty" class="empty" hidden>
+    <strong>No captures to cluster yet.</strong> Route at least a handful of capture events through the wrapper or capture a few traces with <code>kolm capture</code> and re-run. The clustering is cheap (char-3-gram + length bucket + vendor class) and runs over the most recent 30 days by default.
+  </div>
+</div>
+
+<div class="kpanel" id="inspector-panel" hidden>
+  <h2>Sample inspector (W812-3)</h2>
+  <p class="pdesc">Three captures from <code id="inspector-cluster">-</code> with student and teacher outputs side-by-side. Long outputs are trimmed to 480 chars for the dashboard view; use <code>kolm failure-modes --inspect &lt;cluster_id&gt;</code> for the full payload.</p>
+  <div class="inspector" id="inspector-body">
+    <div class="empty">Click a row above to load samples.</div>
+  </div>
+</div>
+
+<div class="note">
+  <strong>Honesty note.</strong> Clusters are a CHEAP heuristic (char-3-gram + length bucket + vendor class) — not a learned embedding. If you need finer-grained topics, run <code>workers/failure-clustering/</code> (W812 isolation pattern). Each top-regression cluster emits a <em>weakness signal</em> into the W720 self-improvement loop with <code>capture_candidate:true</code> + <code>weakness_signal:true</code> stamped on the canonical event.
+</div>
+
+</section>
+</div>
+</main>
+
+<script>
+(function(){
+  var key=null; try{key=localStorage.getItem("kolm-key")||localStorage.getItem("ks_api_key")||localStorage.getItem("kolm_api_key")||localStorage.getItem("KOLM_API_KEY");}catch(_){}
+  window.KOLM_AUTH=key?{"Authorization":"Bearer "+key,"Accept":"application/json"}:{"Accept":"application/json"};
+  window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
+  window.kesc=function(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});};
+  if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
+})();
+
+var STATE={clusters:[],sort:"kscore_delta",dir:"desc",signals:0};
+
+function fmtKScore(v){if(v==null)return "-";return Number(v).toFixed(3);}
+function fmtDelta(v){if(v==null)return "-";var n=Number(v);return (n>=0?"+":"")+n.toFixed(3);}
+function fmtTs(t){if(!t)return "-";var d=new Date(t);if(isNaN(d.getTime()))return String(t);return d.toISOString().replace("T"," ").slice(0,19)+"Z";}
+function deltaPill(v){
+  if(v==null)return "<span class=\"pill mute\">unscored</span>";
+  var n=Number(v);
+  var cls="delta-low";
+  if(n>=0.10)cls="delta-high";
+  else if(n>=0.05)cls="delta-mid";
+  return "<span class=\"pill "+cls+"\">"+fmtDelta(v)+"</span>";
+}
+
+function sortClusters(){
+  var key=STATE.sort,dir=STATE.dir==="asc"?1:-1;
+  STATE.clusters.sort(function(a,b){
+    var av=a[key],bv=b[key];
+    if(av==null&&bv==null)return 0;
+    if(av==null)return 1;
+    if(bv==null)return -1;
+    if(typeof av==="number"&&typeof bv==="number")return (av-bv)*dir;
+    return String(av).localeCompare(String(bv))*dir;
+  });
+}
+
+function paintHeader(){
+  var ths=document.querySelectorAll("#cluster-table th[data-sort]");
+  ths.forEach(function(th){
+    th.removeAttribute("data-sort-active");
+    if(th.getAttribute("data-sort")===STATE.sort){
+      th.setAttribute("data-sort-active",STATE.dir);
+    }
+  });
+}
+
+function paintTable(){
+  var tbody=document.getElementById("cluster-rows");
+  var empty=document.getElementById("cluster-empty");
+  tbody.innerHTML="";
+  if(!STATE.clusters.length){empty.hidden=false;return;}
+  empty.hidden=true;
+  STATE.clusters.forEach(function(c){
+    var tr=document.createElement("tr");
+    tr.setAttribute("data-cluster",c.cluster_id);
+    tr.innerHTML="<td>"+window.kesc(c.topic_seed||"-")+"</td>"
+      +"<td>"+window.kesc(c.length_bucket||"-")+"</td>"
+      +"<td>"+String(c.sample_count||0)+"</td>"
+      +"<td>"+String(c.student_count||0)+"</td>"
+      +"<td>"+String(c.teacher_count||0)+"</td>"
+      +"<td>"+fmtKScore(c.student_kscore_mean)+"</td>"
+      +"<td>"+fmtKScore(c.teacher_kscore_mean)+"</td>"
+      +"<td>"+deltaPill(c.kscore_delta)+"</td>"
+      +"<td>"+window.kesc(fmtTs(c.last_seen))+"</td>";
+    tr.addEventListener("click",function(){loadInspector(c.cluster_id);});
+    tbody.appendChild(tr);
+  });
+}
+
+function paintMetrics(env){
+  var tot=(env&&env.totals)||{};
+  document.getElementById("m-clusters").textContent=String(tot.clusters_returned||0);
+  document.getElementById("m-events").textContent=(tot.events_scanned||0)+" events scanned";
+  var regs=STATE.clusters.filter(function(c){return c.kscore_delta!=null&&c.kscore_delta>=0.05;});
+  document.getElementById("m-regressions").textContent=String(regs.length);
+  if(regs.length>0){
+    var worst=regs[0];
+    document.getElementById("m-worst-delta").textContent=fmtDelta(worst.kscore_delta);
+    document.getElementById("m-worst-cluster").textContent=worst.topic_seed+"  / "+worst.length_bucket;
+  }else{
+    document.getElementById("m-worst-delta").textContent="-";
+    document.getElementById("m-worst-cluster").textContent="no regression";
+  }
+  document.getElementById("m-signals").textContent=String(STATE.signals||0);
+}
+
+function loadInspector(clusterId){
+  var panel=document.getElementById("inspector-panel");
+  panel.hidden=false;
+  document.getElementById("inspector-cluster").textContent=clusterId;
+  var body=document.getElementById("inspector-body");
+  body.innerHTML="<div class=\"empty\">Loading samples for "+window.kesc(clusterId)+"...</div>";
+  var ns=(document.getElementById("ns-input").value||"").trim();
+  var url="/v1/failure-modes/samples?cluster_id="+encodeURIComponent(clusterId);
+  if(ns)url+="&namespace="+encodeURIComponent(ns);
+  window.kfetch(url).then(function(j){
+    if(!j||!j.ok){
+      body.innerHTML="<div class=\"empty\"><strong>Inspector route not wired yet.</strong> Use <code>kolm failure-modes --inspect "+window.kesc(clusterId)+"</code> from the CLI to view samples.</div>";
+      return;
+    }
+    var samples=j.samples||[];
+    if(samples.length===0){
+      body.innerHTML="<div class=\"empty\">No paired samples for this cluster.</div>";
+      return;
+    }
+    body.innerHTML=samples.map(function(s){
+      return "<div class=\"sample\">"
+        +"<div class=\"prompt\"><strong>prompt:</strong> "+window.kesc(s.prompt||"-")+"</div>"
+        +"<div class=\"columns\">"
+        +"<div class=\"col student\"><h4>student "+(s.student_kscore!=null?("K="+s.student_kscore.toFixed(3)):"")+"</h4>"+window.kesc(s.student_response||"(no student response)")+"</div>"
+        +"<div class=\"col teacher\"><h4>teacher "+(s.teacher_kscore!=null?("K="+s.teacher_kscore.toFixed(3)):"")+"</h4>"+window.kesc(s.teacher_response||"(no teacher response)")+"</div>"
+        +"</div></div>";
+    }).join("");
+  }).catch(function(e){
+    body.innerHTML="<div class=\"empty\"><strong>Inspector route not wired yet.</strong> Use <code>kolm failure-modes --inspect "+window.kesc(clusterId)+"</code> from the CLI to view samples.</div>";
+  });
+}
+
+function load(){
+  var ns=(document.getElementById("ns-input").value||"").trim();
+  var win=(document.getElementById("window-input").value||"30").trim();
+  var top=(document.getElementById("topn-input").value||"20").trim();
+  var url="/v1/failure-modes/summary?window_days="+encodeURIComponent(win)+"&top="+encodeURIComponent(top);
+  if(ns)url+="&namespace="+encodeURIComponent(ns);
+  window.kfetch(url).then(function(j){
+    if(!j||!j.ok){
+      STATE.clusters=[];
+      paintMetrics({totals:{clusters_returned:0,events_scanned:0}});
+      paintTable();
+      document.getElementById("cluster-empty").hidden=false;
+      return;
+    }
+    STATE.clusters=(j.clusters||[]).slice();
+    STATE.signals=Number((j.signals_emitted_count)||0);
+    sortClusters();
+    paintHeader();
+    paintTable();
+    paintMetrics(j);
+  }).catch(function(e){
+    STATE.clusters=[];
+    paintMetrics({totals:{clusters_returned:0,events_scanned:0}});
+    paintTable();
+  });
+}
+
+document.querySelectorAll("#cluster-table th[data-sort]").forEach(function(th){
+  th.addEventListener("click",function(){
+    var key=th.getAttribute("data-sort");
+    if(STATE.sort===key){STATE.dir=STATE.dir==="desc"?"asc":"desc";}
+    else{STATE.sort=key;STATE.dir="desc";}
+    sortClusters();
+    paintHeader();
+    paintTable();
+  });
+});
+document.getElementById("apply-btn").addEventListener("click",load);
+document.getElementById("ns-input").addEventListener("keydown",function(e){if(e.key==="Enter")load();});
+document.getElementById("window-input").addEventListener("keydown",function(e){if(e.key==="Enter")load();});
+document.getElementById("topn-input").addEventListener("keydown",function(e){if(e.key==="Enter")load();});
+load();
+
+// =============================================================================
+// W745 — Artifact-keyed cluster dashboard. Bridges to W741 diagnostic via
+// /account/diagnose?cid=<artifact_cid>. Clustering is the heuristic_keyword_v1
+// placeholder (per_category, top_regressions, diagnostic_link envelope).
+// =============================================================================
+var W745={env:null,sortTop:"delta_vs_overall",dirTop:"desc",sortAll:"k_score",dirAll:"asc"};
+
+function w745Pill(k){
+  if(typeof k!=="number")return "pill mute";
+  if(k>=0.95)return "pill ok";
+  if(k>=0.85)return "pill warn";
+  return "pill bad";
+}
+
+function w745FmtK(k){return (typeof k==="number")?k.toFixed(3):"-";}
+function w745FmtDelta(d){if(typeof d!=="number")return "-";return (d>=0?"+":"")+d.toFixed(3);}
+
+function w745RenderHeader(env){
+  document.getElementById("w745-header").hidden=false;
+  document.getElementById("w745-empty").hidden=true;
+  document.getElementById("w745-error").hidden=true;
+  var ov=env.overall_k_score;
+  document.getElementById("w745-overall").innerHTML='<span class="'+w745Pill(ov)+'">'+w745FmtK(ov)+'</span>';
+  document.getElementById("w745-overall-status").textContent=(ov>=0.95?"production-ready":(ov>=0.85?"shippable":"below 0.85 gate"));
+  document.getElementById("w745-clcount").textContent=(env.cluster_count!=null?env.cluster_count:(Array.isArray(env.clusters)?env.clusters.length:0));
+  var regs=Array.isArray(env.top_regressions)?env.top_regressions:[];
+  document.getElementById("w745-rcount").textContent=regs.length;
+  var link=env.diagnostic_link||("/account/diagnose?cid="+encodeURIComponent(env.artifact_cid||""));
+  document.getElementById("w745-diaglink").innerHTML='<a class="btn" href="'+window.kesc(link)+'">/account/diagnose</a>';
+}
+
+function w745RenderTop(env){
+  var regs=Array.isArray(env.top_regressions)?env.top_regressions.slice():[];
+  if(!regs.length){document.getElementById("w745-top-panel").hidden=true;return;}
+  document.getElementById("w745-top-panel").hidden=false;
+  var key=W745.sortTop,dir=W745.dirTop==="asc"?1:-1;
+  regs.sort(function(a,b){
+    var av=a[key],bv=b[key];
+    if(av==null&&bv==null)return 0;
+    if(av==null)return 1;
+    if(bv==null)return -1;
+    if(typeof av==="number"&&typeof bv==="number")return (av-bv)*dir;
+    return String(av).localeCompare(String(bv))*dir;
+  });
+  var tbody=document.getElementById("w745-top-rows");
+  tbody.innerHTML=regs.map(function(r){
+    var link=env.diagnostic_link||("/account/diagnose?cid="+encodeURIComponent(env.artifact_cid||""));
+    var kws=Array.isArray(r.top_keywords)?r.top_keywords.slice(0,4).map(window.kesc).join(", "):"-";
+    return "<tr>"
+      +"<td><strong>"+w745FmtDelta(r.delta_vs_overall)+"</strong></td>"
+      +"<td><span class=\""+w745Pill(r.k_score)+"\">"+w745FmtK(r.k_score)+"</span></td>"
+      +"<td>"+(r.n!=null?r.n:"-")+"</td>"
+      +"<td>"+kws+"</td>"
+      +"<td><code>"+window.kesc(r.cluster_id||"-")+"</code></td>"
+      +"<td><a class=\"btn\" href=\""+window.kesc(link)+"\">View diagnostic &rarr;</a></td>"
+      +"</tr>";
+  }).join("");
+}
+
+function w745RenderClusters(env){
+  var cls=Array.isArray(env.clusters)?env.clusters.slice():[];
+  if(!cls.length){document.getElementById("w745-cluster-panel").hidden=true;return;}
+  document.getElementById("w745-cluster-panel").hidden=false;
+  var key=W745.sortAll,dir=W745.dirAll==="asc"?1:-1;
+  cls.sort(function(a,b){
+    var av=a[key],bv=b[key];
+    if(av==null&&bv==null)return 0;
+    if(av==null)return 1;
+    if(bv==null)return -1;
+    if(typeof av==="number"&&typeof bv==="number")return (av-bv)*dir;
+    return String(av).localeCompare(String(bv))*dir;
+  });
+  var tbody=document.getElementById("w745-cluster-rows");
+  tbody.innerHTML=cls.map(function(r){
+    var link=env.diagnostic_link||("/account/diagnose?cid="+encodeURIComponent(env.artifact_cid||""));
+    var kws=Array.isArray(r.top_keywords)?r.top_keywords.slice(0,4).map(window.kesc).join(", "):"-";
+    return "<tr>"
+      +"<td><span class=\""+w745Pill(r.k_score)+"\">"+w745FmtK(r.k_score)+"</span></td>"
+      +"<td>"+w745FmtDelta(r.delta_vs_overall)+"</td>"
+      +"<td>"+(r.count!=null?r.count:"-")+"</td>"
+      +"<td>"+(r.n!=null?r.n:"-")+"</td>"
+      +"<td>"+kws+"</td>"
+      +"<td><code>"+window.kesc(r.cluster_id||"-")+"</code></td>"
+      +"<td><a class=\"btn\" href=\""+window.kesc(link)+"\">Diagnose</a></td>"
+      +"</tr>";
+  }).join("");
+}
+
+function w745Render(env){
+  W745.env=env;
+  if(!env||env.ok===false){
+    document.getElementById("w745-header").hidden=true;
+    document.getElementById("w745-top-panel").hidden=true;
+    document.getElementById("w745-cluster-panel").hidden=true;
+    document.getElementById("w745-empty").hidden=true;
+    document.getElementById("w745-error").hidden=false;
+    var msg=(env&&(env.hint||env.error))||"Unknown error";
+    if(env&&env.diagnostic_link){
+      msg+=" — try the diagnostic UI: "+env.diagnostic_link;
+    }
+    document.getElementById("w745-errmsg").textContent=msg;
+    return;
+  }
+  w745RenderHeader(env);
+  w745RenderTop(env);
+  w745RenderClusters(env);
+}
+
+function w745Run(cid){
+  if(!cid)return;
+  document.getElementById("w745-empty").hidden=true;
+  document.getElementById("w745-error").hidden=true;
+  window.kfetch("/v1/failure-modes/"+encodeURIComponent(cid))
+    .then(w745Render)
+    .catch(function(e){
+      document.getElementById("w745-errmsg").textContent="Request failed: "+(e&&e.message||e);
+      document.getElementById("w745-error").hidden=false;
+    });
+}
+
+(function(){
+  var qs=new URLSearchParams(location.search);
+  var cid=qs.get("cid");
+  var input=document.getElementById("w745-cid");
+  if(cid){input.value=cid;w745Run(cid);}
+  document.getElementById("w745-run").addEventListener("click",function(){
+    var v=(input.value||"").trim();
+    if(v){
+      var u=new URL(location.href);
+      u.searchParams.set("cid",v);
+      history.replaceState(null,"",u.toString());
+      w745Run(v);
+    }
+  });
+  input.addEventListener("keydown",function(e){if(e.key==="Enter")document.getElementById("w745-run").click();});
+  document.querySelectorAll("[data-w745-sort]").forEach(function(th){
+    th.addEventListener("click",function(){
+      var k=th.getAttribute("data-w745-sort");
+      if(W745.sortTop===k){W745.dirTop=W745.dirTop==="desc"?"asc":"desc";}
+      else{W745.sortTop=k;W745.dirTop="desc";}
+      if(W745.env)w745RenderTop(W745.env);
+    });
+  });
+  document.querySelectorAll("[data-w745-sort-all]").forEach(function(th){
+    th.addEventListener("click",function(){
+      var k=th.getAttribute("data-w745-sort-all");
+      if(W745.sortAll===k){W745.dirAll=W745.dirAll==="desc"?"asc":"desc";}
+      else{W745.sortAll=k;W745.dirAll="asc";}
+      if(W745.env)w745RenderClusters(W745.env);
+    });
+  });
+})();
+</script>
+
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/integrations">Integrations</a></li><li><a href="/docs/api">API reference</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
