@@ -781,21 +781,16 @@ body {
  font-family: var(--kolm-mono) !important;
 }
 
+/* W847 — user explicitly flagged "ugly grid background is back, replace with
+   non-grid." The hero now carries the generated paper-blueprint background
+   (warm-paper.css → .ks-hero); body just keeps the warm cream wash. */
 html:not([data-theme="light"]) body {
- background:
- linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
- linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px),
- linear-gradient(180deg, #08090c 0%, #0b0d11 42%, #08090c 100%) !important;
- background-size: 112px 112px, 112px 112px, auto !important;
+ background: linear-gradient(180deg, #08090c 0%, #0b0d11 42%, #08090c 100%) !important;
  color: var(--kolm-ink-0) !important;
 }
 
 [data-theme="light"] body {
- background:
- linear-gradient(rgba(12,14,16,0.035) 1px, transparent 1px),
- linear-gradient(90deg, rgba(12,14,16,0.028) 1px, transparent 1px),
- #f7f3ea !important;
- background-size: 112px 112px, 112px 112px, auto !important;
+ background: #f7f3ea !important;
  color: #111315 !important;
 }
 

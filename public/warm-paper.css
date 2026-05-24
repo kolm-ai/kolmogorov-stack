@@ -134,7 +134,7 @@ small, .small {
   font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--ink-3);
+  color: #5a5a55;
 }
 
 .eyebrow::before, .kicker::before, .ks-eyebrow::before {
@@ -374,8 +374,8 @@ section[data-hero] {
 .kolm-btn-ghost, .ks-btn-ghost,
 .btn[data-variant="ghost"] {
   background: transparent;
-  color: var(--ink-2) !important;
-  border-color: transparent;
+  color: #111111 !important;
+  border-color: rgba(17,17,17,0.32);
 }
 
 .btn-ghost:hover, .button-ghost:hover,
@@ -452,7 +452,7 @@ code:not(pre code) {
 .code-block .tok-keyword, pre .tok-keyword { color: #c4c0b5; font-weight: 500; }
 .code-block .tok-string, pre .tok-string   { color: #a8b29c; }
 .code-block .tok-number, pre .tok-number   { color: #d4cdb6; }
-.code-block .tok-comment, pre .tok-comment { color: #6b685e; font-style: italic; }
+.code-block .tok-comment, pre .tok-comment { color: #6b685e; font-style: normal; }
 .code-block .tok-fn, pre .tok-fn           { color: #b8b1a0; }
 
 .terminal .prompt::before, .kolm-terminal .prompt::before {
@@ -1271,7 +1271,7 @@ main > section:first-of-type .fr-h1--hero {
 .kolm-arch__note {
   font-family: var(--ks-font-sans);
   font-size: 11px;
-  font-style: italic;
+  font-style: normal;
   letter-spacing: -0.005em;
   fill: var(--ink-3);
   text-anchor: middle;
@@ -1317,13 +1317,13 @@ hr, .section-rule {
   background: var(--line-3);
 }
 
-/* 24c. Blockquote - left rule, italic, ink-2 */
+/* 24c. Blockquote - left rule, no italic per brand mandate, ink-2 */
 blockquote {
   margin: 24px 0;
   padding: 4px 0 4px 20px;
   border-left: 2px solid var(--ink-1);
   font-family: var(--ks-font-sans);
-  font-style: italic;
+  font-style: normal;
   font-size: 17.5px;
   line-height: 1.55;
   color: var(--ink-2);
@@ -1598,7 +1598,7 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
 .ks-hero__card-foot {
   font-family: var(--ks-font-sans);
   font-size: 13px;
-  font-style: italic;
+  font-style: normal;
   color: var(--ink-3);
   margin: 0;
   padding-top: 14px;
@@ -1978,7 +1978,121 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
 }
 .ks-cli-chat__thinking {
   color: rgba(245, 239, 226, 0.45);
-  font-style: italic;
+  font-style: normal;
+}
+/* W847 — multi-step workflow recipe (returned when the user describes a goal
+   instead of a specific command). Renders as numbered steps with their own
+   $ command + a one-line why. */
+.ks-cli-chat__wf-summary {
+  font-size: 13px;
+  color: rgba(245, 239, 226, 0.88);
+  margin: 0 0 4px;
+  line-height: 1.55;
+}
+.ks-cli-chat__wf-steps {
+  list-style: none;
+  counter-reset: kolm-wf;
+  padding: 0;
+  margin: 4px 0 6px;
+  display: grid;
+  gap: 8px;
+}
+.ks-cli-chat__wf-step {
+  counter-increment: kolm-wf;
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px 10px 38px;
+  position: relative;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+}
+.ks-cli-chat__wf-step::before {
+  content: counter(kolm-wf);
+  position: absolute;
+  left: 12px;
+  top: 11px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(194, 65, 12, 0.85);
+  color: #faf6ec;
+  font-family: var(--ks-font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.ks-cli-chat__wf-step .ks-cli-chat__cmd {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  color: #f5efe2;
+}
+.ks-cli-chat__wf-why {
+  font-size: 11.5px;
+  color: rgba(245, 239, 226, 0.6);
+  line-height: 1.5;
+  font-family: var(--ks-font-sans);
+}
+
+/* W847 — "What is kolm" plain-English intro band. Sits between the hero
+   and the architecture diagram so a 10-sec visitor has a working mental
+   model before they hit the schematic. No card chrome, no list, just
+   editorial type. */
+.kolm-whatis {
+  padding: clamp(48px, 6vw, 96px) clamp(20px, 3vw, 36px) clamp(16px, 2vw, 24px);
+  background: transparent;
+}
+.kolm-whatis__inner {
+  max-width: 920px;
+  margin: 0 auto;
+}
+.kolm-whatis__eye {
+  font-family: var(--ks-font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #c2410c;
+  margin: 0 0 18px;
+  font-weight: 500;
+}
+.kolm-whatis__h {
+  font-family: var(--ks-font-sans);
+  font-weight: 360;
+  font-size: clamp(28px, 3.8vw, 48px);
+  letter-spacing: -0.024em;
+  line-height: 1.15;
+  color: var(--ink-1, #111111);
+  margin: 0 0 22px;
+}
+.kolm-whatis__p {
+  font-family: var(--ks-font-sans);
+  font-size: clamp(16.5px, 1.6vw, 19px);
+  line-height: 1.65;
+  color: var(--ink-1, #111111);
+  margin: 0 0 16px;
+  max-width: 70ch;
+}
+.kolm-whatis__p code {
+  font-family: var(--ks-font-mono);
+  font-size: 0.92em;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(194, 65, 12, 0.08);
+  color: #c2410c;
+  font-weight: 500;
+}
+.kolm-whatis__sub {
+  font-family: var(--ks-font-sans);
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: #5a5a55;
+  margin: 0;
+  max-width: 70ch;
 }
 
 /* W844 post-auth account chat band — mirrors the homepage chat layout */
@@ -2211,19 +2325,33 @@ html[data-theme="dark"] .kolm-deep__cmd {
 }
 .fr-h1--hero .h1-claim { font-weight: inherit; }
 
-/* W846: hero backdrop — pulled back. The W845 dot field + double bloom felt
-   noisy; user wanted "super clean ... buttoned up". Now a single very faint
-   warm wash, no dot grid. The thin hero H1 carries the page; the bg stays
-   out of the way. */
+/* W847: hero backdrop — replaced the W846 radial wash with an editorial
+   paper render (flux-pro/v1.1-ultra, see scripts/fal-hero-gen.cjs). Warm
+   cream #f7f4ec with a faint architectural schematic upper-right and calm
+   negative space center-left where the H1 sits. background-size: cover so
+   it never tiles; #f7f4ec fallback keeps the band warm if the asset 404s. */
 .ks-hero {
   background:
-    radial-gradient(900px 480px at 78% -10%, rgba(194, 65, 12, 0.05) 0%, transparent 64%);
+    url('/assets/hero-warm-paper-bg.png') center / cover no-repeat,
+    #f7f4ec;
   position: relative;
 }
 .ks-hero::before { content: none; }
+/* Kill any inherited dot-grid / scanline overlays inside the hero. The user
+   called these the "ugly grid background" — they live in frontier.css as
+   .fr-blueprint and .fr-scan helpers that sometimes get composed onto hero
+   children. Explicit override here so the new paper render stays clean. */
+.ks-hero.fr-blueprint,
+.ks-hero .fr-blueprint { background-image: none !important; }
+.ks-hero.fr-scan::after,
+.ks-hero .fr-scan::after { background-image: none !important; }
+/* Dark mode: same render but veiled so cream paper doesn't blow out
+   against dark UI. */
 [data-theme="dark"] .ks-hero {
   background:
-    radial-gradient(900px 480px at 78% -10%, rgba(194, 65, 12, 0.10) 0%, transparent 64%);
+    linear-gradient(rgba(15, 13, 10, 0.62), rgba(15, 13, 10, 0.62)),
+    url('/assets/hero-warm-paper-bg.png') center / cover no-repeat,
+    #0f0d0a;
 }
 
 /* W845: hero now single-column. The right-column mini-card was a wedge the
@@ -2495,7 +2623,7 @@ h3.fr-h3, .fr-h3, h3.ks-h3, .ks-h3 {
 .kolm-receipt-strip .receipt-line-ok { color: #7fcb9d; }
 .kolm-receipt-strip .receipt-line-key { color: #b8a5e8; }
 .kolm-receipt-strip .receipt-line-str { color: #f2c97d; }
-.kolm-receipt-strip .receipt-line-comment { color: #6b6b66; font-style: italic; }
+.kolm-receipt-strip .receipt-line-comment { color: #6b6b66; font-style: normal; }
 [data-theme="dark"] .kolm-receipt-strip h4 { color: #e8e3d6; }
 [data-theme="dark"] .kolm-receipt-strip p { color: #cbc4b5; }
 

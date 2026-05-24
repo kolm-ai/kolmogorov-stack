@@ -262,7 +262,7 @@ body { position: relative; }
   font-size: 12px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--ks-ink-3);
+  color: #5a5a55;
   display: inline-flex;
   align-items: center;
   gap: var(--ks-2);
@@ -342,7 +342,7 @@ body { position: relative; }
 .ks-warm   { color: var(--ks-accent-warm); font-variant-numeric: tabular-nums; }
 .ks-cool   { color: var(--ks-accent); } /* W683: aliased to mint — lavender retired site-wide */
 .ks-num    { font-variant-numeric: tabular-nums lining-nums; font-feature-settings: "tnum"; }
-.ks-em     { font-family: var(--ks-serif); font-style: italic; font-weight: 420; color: var(--ks-ink); }
+.ks-em     { font-family: var(--ks-sans); font-style: normal; font-weight: 500; color: var(--ks-ink); }
 .ks-dim    { color: var(--ks-ink-3); }
 /* Apply tabular-nums to every percentage/digit-bearing text by default in body */
 .ks { font-variant-numeric: lining-nums; }
@@ -893,17 +893,17 @@ body { position: relative; }
 .ks-hero__h1 .grad,
 .ks-hero__h1 .ks-em,
 .ks-hero__h1 em {
-  font-family: var(--ks-serif);
-  font-style: italic;
-  font-weight: 420;
+  font-family: var(--ks-sans);
+  font-style: normal;
+  font-weight: 500;
   letter-spacing: 0;
   color: var(--ks-ink);
 }
 /* Inline-anywhere editorial emphasis. */
 .ks .ks-em {
-  font-family: var(--ks-serif);
-  font-style: italic;
-  font-weight: 420;
+  font-family: var(--ks-sans);
+  font-style: normal;
+  font-weight: 500;
   letter-spacing: 0;
   color: var(--ks-ink);
 }

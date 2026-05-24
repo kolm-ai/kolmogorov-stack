@@ -143,13 +143,35 @@
 
     function renderResponse(data) {
       var wrap = el('div', { class: 'ks-cli-chat__resp' });
-      // command line
-      var pre = el('pre', { class: 'ks-cli-chat__cmd' });
-      pre.textContent = '$ ' + (data.command || ('kolm ' + (data.verb || 'next')));
-      wrap.appendChild(pre);
-      // why
-      if (data.why) {
-        wrap.appendChild(el('p', { class: 'ks-cli-chat__why', html: '<b>why:</b> ' + escapeHtml(data.why) + (data.confidence != null ? ' &middot; <span class="conf">confidence ' + (Math.round((data.confidence || 0) * 100)) + '%</span>' : '') }));
+      // W847 — if the server returned a workflow recipe (multi-step), render
+      // that INSTEAD of a single bare command. This is what makes "compile a
+      // model to blur porn" useful: 4 numbered steps the user can actually run.
+      if (data.workflow && data.workflow.steps && data.workflow.steps.length > 1) {
+        if (data.workflow.summary) {
+          wrap.appendChild(el('p', { class: 'ks-cli-chat__wf-summary', text: data.workflow.summary }));
+        }
+        var ol = el('ol', { class: 'ks-cli-chat__wf-steps' });
+        for (var s = 0; s < data.workflow.steps.length; s++) {
+          var step = data.workflow.steps[s];
+          var li = el('li', { class: 'ks-cli-chat__wf-step' });
+          var pre = el('pre', { class: 'ks-cli-chat__cmd' });
+          pre.textContent = '$ ' + step.cmd;
+          li.appendChild(pre);
+          if (step.why) li.appendChild(el('span', { class: 'ks-cli-chat__wf-why', text: step.why }));
+          ol.appendChild(li);
+        }
+        wrap.appendChild(ol);
+        if (data.workflow.namespace_hint) {
+          wrap.appendChild(el('p', { class: 'ks-cli-chat__why', html: '<b>tip:</b> replace <code>' + escapeHtml(data.workflow.namespace_hint) + '</code> with whatever namespace you want.' }));
+        }
+      } else {
+        // single-command path (status verbs, fully-specified asks)
+        var pre1 = el('pre', { class: 'ks-cli-chat__cmd' });
+        pre1.textContent = '$ ' + (data.command || ('kolm ' + (data.verb || 'next')));
+        wrap.appendChild(pre1);
+        if (data.why) {
+          wrap.appendChild(el('p', { class: 'ks-cli-chat__why', html: '<b>why:</b> ' + escapeHtml(data.why) + (data.confidence != null ? ' &middot; <span class="conf">confidence ' + (Math.round((data.confidence || 0) * 100)) + '%</span>' : '') }));
+        }
       }
       // alternatives
       if (data.alternatives && data.alternatives.length) {

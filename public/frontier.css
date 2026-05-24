@@ -89,20 +89,16 @@
   content: '';
   position: absolute;
   inset: 0;
-  background-image: linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px);
+  background-image: none;
   background-size: 100% 3px;
   pointer-events: none;
   z-index: 0;
 }
 
-/* === Blueprint grid (for hero-adjacent showcase panels) === */
+/* === Blueprint grid (W846 fix-the-site round 2: dot-grid killed per user) === */
 .fr-blueprint {
   position: relative;
-  background-image:
-    linear-gradient(rgba(17, 17, 17, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(17, 17, 17, 0.04) 1px, transparent 1px);
-  background-size: 32px 32px;
-  background-position: -1px -1px;
+  background-image: none;
 }
 
 /* === Section primitives === */
@@ -252,7 +248,7 @@
 }
 .fr-cli__prompt { color: var(--fr-mint); font-weight: 500; }
 .fr-cli__flag { color: var(--fr-amber); }
-.fr-cli__comment { color: var(--ink-3); font-style: italic; }
+.fr-cli__comment { color: var(--ink-3); font-style: normal; }
 .fr-cli__copy {
   position: absolute;
   top: 12px;
@@ -738,15 +734,20 @@
   cursor: pointer;
   user-select: none;
   display: grid;
-  grid-template-columns: 36px 1fr 28px;
+  /* W847 — looser column for the number (44px) so the question doesn't
+     visually crowd the leading "01" / "02" / "03" prefix. Vertical pad
+     up to 22px for proper breathing room (user feedback: "Q&A spacing
+     mess"). */
+  grid-template-columns: 44px 1fr 32px;
   align-items: center;
-  gap: 12px;
-  padding: 18px 22px;
+  gap: 16px;
+  padding: 22px 26px;
   font-family: var(--fr-font-sans);
   font-size: var(--fr-text-md);
   color: var(--ink-1);
   font-weight: 540;
   letter-spacing: 0;
+  line-height: 1.45;
 }
 .fr-faq__row > summary::-webkit-details-marker { display: none; }
 .fr-faq__row > summary::marker { content: ''; }
@@ -783,12 +784,15 @@
   color: var(--fr-mint);
 }
 .fr-faq__a {
-  padding: 0 22px 20px 70px;
+  /* W847 — answer indented to align with question column (60px = 44+16
+     from the summary grid), bottom pad bumped to match new summary
+     rhythm. */
+  padding: 4px 26px 24px 60px;
   font-family: var(--fr-font-sans);
   font-size: var(--fr-text-base);
-  line-height: 1.65;
+  line-height: 1.68;
   color: var(--ink-2);
-  max-width: 80ch;
+  max-width: 72ch;
 }
 .fr-faq__a a {
   color: var(--fr-mint);
@@ -806,8 +810,8 @@
   color: var(--fr-mint);
 }
 @media (max-width: 640px) {
-  .fr-faq__row > summary { grid-template-columns: 28px 1fr 24px; padding: 14px 16px; font-size: 14.5px; }
-  .fr-faq__a { padding: 0 16px 16px 50px; font-size: 14px; }
+  .fr-faq__row > summary { grid-template-columns: 32px 1fr 24px; padding: 18px 18px; font-size: 14.5px; gap: 12px; }
+  .fr-faq__a { padding: 4px 18px 20px 50px; font-size: 14px; }
 }
 
 /* --- Subtle stronger reveal animation on .fr-card descendants when
@@ -1130,7 +1134,7 @@
   font-family: var(--fr-font-sans);
   font-size: 13px;
   color: var(--ink-3);
-  font-style: italic;
+  font-style: normal;
   text-align: right;
   flex-shrink: 0;
 }
@@ -1177,7 +1181,7 @@
 }
 .fr-ascii-band__pre .fr-ascii__node { color: var(--ink-1); font-weight: 500; }
 .fr-ascii-band__pre .fr-ascii__edge { color: var(--fr-mint); }
-.fr-ascii-band__pre .fr-ascii__label { color: var(--ink-3); font-style: italic; }
+.fr-ascii-band__pre .fr-ascii__label { color: var(--ink-3); font-style: normal; }
 .fr-ascii-band__caption {
   display: block;
   margin-top: 12px;
@@ -1369,7 +1373,10 @@
    horizontal and the dividing lines are hairlines. */
 .fr-tier-row {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  /* W847 — was 3 columns hard-coded; the homepage strip is 4 tiers now
+     (Free, Pro, Team, Business). auto-fit + minmax lets the same rule
+     gracefully handle 3, 4, or 5 tier variants. */
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: 0;
   margin: clamp(24px, 3vw, 36px) 0;
   border-radius: var(--radius-lg, 16px);

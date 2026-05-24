@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Docs · kolm.ai</title>
+<title>Docs &middot; kolm.ai</title>
 <meta name="description" content="Documentation for the kolm AI compiler. Quickstart, CLI reference, SDKs, runtime, K-score, security, integrations, deployment patterns. Everything you need to ship a signed .kolm artifact into production.">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="Docs &middot; kolm.ai">
 <meta property="og:description" content="Documentation for the kolm AI compiler. Everything you need to ship a signed .kolm artifact into production.">
 <meta property="og:type" content="article">
@@ -18,30 +18,112 @@
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/surface-polish.css">
-    <link rel="stylesheet" href="/warm-paper.css">
+<link rel="stylesheet" href="/warm-paper.css">
 <style>
-  .doc-hero-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); gap: clamp(32px, 5vw, 72px); align-items: start; }
-  @media (max-width: 920px) { .doc-hero-grid { grid-template-columns: 1fr; } }
-  .doc-side { padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); position: sticky; top: 96px; }
-  .doc-side h4 { margin: 0 0 var(--ks-3); font-family: var(--ks-mono); font-size: 11px; color: var(--ks-accent); text-transform: uppercase; letter-spacing: 0.08em; }
-  .doc-side a { display: block; padding: 6px 0; font-size: 13.5px; color: var(--ks-ink-2); text-decoration: none; border-bottom: 1px dashed transparent; }
-  .doc-side a:hover { color: var(--ks-accent); }
-  .doc-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--ks-4); }
-  .doc-card { padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); display: flex; flex-direction: column; gap: var(--ks-3); text-decoration: none; }
-  .doc-card:hover { border-color: var(--ks-accent-edge); }
-  .doc-card .tag { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-accent); text-transform: uppercase; letter-spacing: 0.08em; }
-  .doc-card h3 { margin: 0; font-size: 17px; font-weight: 580; color: var(--ks-ink); }
-  .doc-card p { margin: 0; font-size: 13.5px; color: var(--ks-ink-2); line-height: 1.6; }
-  .doc-card .arr { font-family: var(--ks-mono); font-size: 13px; color: var(--ks-accent); margin-top: auto; padding-top: var(--ks-3); border-top: 1px solid var(--ks-line-1); }
-  .doc-ref { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: var(--ks-3) var(--ks-5); padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); }
-  @media (max-width: 720px) { .doc-ref { grid-template-columns: 1fr; } }
-  .doc-ref dt { font-family: var(--ks-mono); font-size: 12px; color: var(--ks-accent); text-transform: uppercase; letter-spacing: 0.05em; padding-top: 3px; }
-  .doc-ref dd { margin: 0 0 var(--ks-3); font-size: 14px; color: var(--ks-ink-2); line-height: 1.65; }
-  .doc-ref dd code { background: #0c0e12; border: 1px solid var(--ks-line-1); border-radius: 4px; padding: 2px 8px; font-family: var(--ks-mono); font-size: 12px; color: var(--ks-accent); }
-  .doc-code { padding: var(--ks-5); background: #0c0e12; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); font-family: var(--ks-mono); font-size: 13px; color: var(--ks-ink-2); line-height: 1.6; overflow-x: auto; white-space: pre; }
-  .doc-code .k { color: var(--ks-accent); }
-  .doc-code .c { color: var(--ks-ink-3); }
-  .doc-code .s { color: #f4c666; }
+  /* W847: docs hub restructure (Stripe/Linear/Vercel 2026 pattern).
+     - Sticky left sidebar (280px) on desktop, collapses to top sheet on mobile.
+     - Card grid: 8 surface cards, 4-col on desktop, 2-col on tablet.
+     - Cmd-K modal: paper bg + faint sienna top-border, ESC closes.
+     - Single-column body content max-width 760px, line-height 1.65.
+     All colors use literal Warm Paper hex (#f7f4ec paper, #111111 ink,
+     #c2410c burnt sienna) — NEVER var(--ink-1) which is TEXT not surface
+     (per W845-W846 lesson). */
+  .docs-shell { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: clamp(24px, 4vw, 64px); max-width: 1280px; margin: 0 auto; padding: 32px clamp(20px, 4vw, 48px) 96px; }
+  @media (max-width: 900px) { .docs-shell { grid-template-columns: 1fr; padding-top: 16px; } }
+  .docs-side { position: sticky; top: 84px; align-self: start; max-height: calc(100vh - 100px); overflow-y: auto; padding-right: 12px; font-size: 14px; line-height: 1.65; }
+  .docs-side h4 { margin: 18px 0 6px; font-size: 11px; font-weight: 580; text-transform: uppercase; letter-spacing: 0.08em; color: #c2410c; font-family: var(--ks-mono, ui-monospace, SFMono-Regular, Menlo, monospace); }
+  .docs-side h4:first-child { margin-top: 0; }
+  .docs-side a { display: block; padding: 4px 0 4px 16px; color: #4a4a4a; text-decoration: none; border-left: 2px solid transparent; transition: color 0.1s, border-color 0.1s; }
+  .docs-side a:hover { color: #111111; }
+  .docs-side a[aria-current="page"] { color: #111111; border-left-color: #c2410c; padding-left: 14px; font-weight: 540; }
+  [data-theme="dark"] .docs-side a { color: #b0b3b8; }
+  [data-theme="dark"] .docs-side a:hover { color: #f3f0ea; }
+  [data-theme="dark"] .docs-side a[aria-current="page"] { color: #f3f0ea; }
+
+  @media (max-width: 900px) {
+    .docs-side { position: relative; top: auto; max-height: none; padding: 16px; background: #f1ede2; border: 1px solid #e2dccb; border-radius: 10px; margin-bottom: 24px; }
+    [data-theme="dark"] .docs-side { background: #15171c; border-color: #232730; }
+    .docs-side h4 { margin-top: 10px; }
+  }
+
+  .docs-hero { padding: 48px 0 40px; border-bottom: 1px solid #e2dccb; margin-bottom: 40px; }
+  [data-theme="dark"] .docs-hero { border-bottom-color: #232730; }
+  .docs-hero h1 { font-size: clamp(34px, 4.5vw, 48px); font-weight: 620; letter-spacing: -0.025em; line-height: 1.08; margin: 0 0 12px; color: #111111; font-feature-settings: "ss01", "cv11", "kern"; }
+  [data-theme="dark"] .docs-hero h1 { color: #f3f0ea; }
+  .docs-hero .lede { font-size: 17px; line-height: 1.55; color: #4a4a4a; max-width: 640px; margin: 0 0 24px; }
+  [data-theme="dark"] .docs-hero .lede { color: #b0b3b8; }
+  .docs-hero .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .docs-cta-primary { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: #111111; color: #f7f4ec; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 540; transition: background 0.1s; }
+  .docs-cta-primary:hover { background: #c2410c; }
+  .docs-cta-ghost { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: transparent; color: #111111; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 540; border: 1px solid #d4ccba; }
+  .docs-cta-ghost:hover { border-color: #c2410c; color: #c2410c; }
+  [data-theme="dark"] .docs-cta-ghost { color: #f3f0ea; border-color: #2f343f; }
+  [data-theme="dark"] .docs-cta-ghost:hover { color: #ff7a3d; border-color: #ff7a3d; }
+
+  .docs-search-trigger { display: inline-flex; align-items: center; gap: 10px; padding: 9px 14px 9px 12px; background: #f1ede2; border: 1px solid #d4ccba; border-radius: 8px; color: #4a4a4a; font-size: 13.5px; cursor: pointer; min-width: 260px; transition: border-color 0.1s; font-family: inherit; }
+  .docs-search-trigger:hover { border-color: #c2410c; }
+  .docs-search-trigger .ph { flex: 1; text-align: left; }
+  .docs-search-trigger kbd { display: inline-flex; align-items: center; padding: 2px 6px; background: #f7f4ec; border: 1px solid #d4ccba; border-radius: 4px; font-family: var(--ks-mono, ui-monospace, SFMono-Regular, Menlo, monospace); font-size: 11px; color: #4a4a4a; }
+  [data-theme="dark"] .docs-search-trigger { background: #15171c; border-color: #2f343f; color: #b0b3b8; }
+  [data-theme="dark"] .docs-search-trigger kbd { background: #0e1014; border-color: #2f343f; color: #b0b3b8; }
+
+  .docs-cards-section { margin-bottom: 48px; }
+  .docs-cards-section h2 { font-size: 13px; font-weight: 580; text-transform: uppercase; letter-spacing: 0.08em; color: #c2410c; margin: 0 0 16px; font-family: var(--ks-mono, ui-monospace, SFMono-Regular, Menlo, monospace); }
+  .docs-card-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  @media (max-width: 1100px) { .docs-card-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .docs-card-grid { grid-template-columns: 1fr; } }
+  .docs-card { display: flex; flex-direction: column; gap: 8px; padding: 18px 18px 16px; background: #f1ede2; border: 1px solid #e2dccb; border-radius: 10px; text-decoration: none; transition: border-color 0.1s, transform 0.1s; }
+  .docs-card:hover { border-color: #c2410c; transform: translateY(-1px); }
+  [data-theme="dark"] .docs-card { background: #15171c; border-color: #232730; }
+  [data-theme="dark"] .docs-card:hover { border-color: #ff7a3d; }
+  .docs-card .icon { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; background: #f7f4ec; border-radius: 6px; color: #c2410c; }
+  [data-theme="dark"] .docs-card .icon { background: #0e1014; color: #ff7a3d; }
+  .docs-card h3 { margin: 4px 0 0; font-size: 15px; font-weight: 580; color: #111111; line-height: 1.3; }
+  [data-theme="dark"] .docs-card h3 { color: #f3f0ea; }
+  .docs-card p { margin: 0; font-size: 13px; line-height: 1.55; color: #4a4a4a; }
+  [data-theme="dark"] .docs-card p { color: #b0b3b8; }
+
+  .docs-popular { background: linear-gradient(180deg, #fff5e6 0%, transparent 100%); border: 1px solid #f4d8a8; padding: 24px; border-radius: 12px; margin-bottom: 40px; }
+  [data-theme="dark"] .docs-popular { background: linear-gradient(180deg, #1a1612 0%, transparent 100%); border-color: #3a2a1f; }
+  .docs-popular h2 { color: #c2410c; }
+  .docs-popular .docs-card { background: #f7f4ec; }
+  [data-theme="dark"] .docs-popular .docs-card { background: #0e1014; }
+
+  .docs-recent { padding-top: 24px; border-top: 1px solid #e2dccb; }
+  [data-theme="dark"] .docs-recent { border-top-color: #232730; }
+  .docs-recent h2 { font-size: 13px; font-weight: 580; text-transform: uppercase; letter-spacing: 0.08em; color: #c2410c; margin: 0 0 12px; font-family: var(--ks-mono, ui-monospace, SFMono-Regular, Menlo, monospace); }
+  .docs-recent ul { list-style: none; padding: 0; margin: 0; }
+  .docs-recent li { padding: 10px 0; border-bottom: 1px solid #ede7d6; display: flex; gap: 14px; align-items: baseline; font-size: 14px; }
+  .docs-recent li:last-child { border-bottom: 0; }
+  [data-theme="dark"] .docs-recent li { border-bottom-color: #1d2027; }
+  .docs-recent .date { font-family: var(--ks-mono, ui-monospace, SFMono-Regular, Menlo, monospace); font-size: 11.5px; color: #888; flex-shrink: 0; min-width: 88px; }
+  .docs-recent a { color: #111111; text-decoration: none; font-weight: 530; }
+  .docs-recent a:hover { color: #c2410c; }
+  [data-theme="dark"] .docs-recent a { color: #f3f0ea; }
+  [data-theme="dark"] .docs-recent a:hover { color: #ff7a3d; }
+  .docs-recent .blurb { color: #6a6a6a; font-size: 13.5px; }
+  [data-theme="dark"] .docs-recent .blurb { color: #9a9da3; }
+
+  /* Cmd-K modal */
+  .docs-cmdk-backdrop { position: fixed; inset: 0; background: rgba(15, 17, 22, 0.55); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: flex-start; justify-content: center; padding-top: 12vh; }
+  .docs-cmdk-backdrop.open { display: flex; }
+  .docs-cmdk { width: 100%; max-width: 560px; background: #f7f4ec; border-radius: 12px; border-top: 2px solid #c2410c; box-shadow: 0 20px 60px rgba(0,0,0,0.4); overflow: hidden; display: flex; flex-direction: column; max-height: 70vh; }
+  [data-theme="dark"] .docs-cmdk { background: #15171c; }
+  .docs-cmdk input { width: 100%; padding: 18px 20px; border: 0; outline: 0; background: transparent; color: #111111; font-size: 15px; font-family: inherit; border-bottom: 1px solid #e2dccb; }
+  [data-theme="dark"] .docs-cmdk input { color: #f3f0ea; border-bottom-color: #232730; }
+  .docs-cmdk input::placeholder { color: #888; }
+  .docs-cmdk-list { overflow-y: auto; padding: 6px 0; max-height: 55vh; }
+  .docs-cmdk-list .item { display: block; padding: 10px 20px; color: #111111; text-decoration: none; font-size: 14px; line-height: 1.4; cursor: pointer; }
+  .docs-cmdk-list .item .url { display: block; font-family: var(--ks-mono, ui-monospace, SFMono-Regular, Menlo, monospace); font-size: 11.5px; color: #888; margin-top: 2px; }
+  .docs-cmdk-list .item:hover, .docs-cmdk-list .item.active { background: #f1ede2; color: #c2410c; }
+  [data-theme="dark"] .docs-cmdk-list .item { color: #f3f0ea; }
+  [data-theme="dark"] .docs-cmdk-list .item:hover, [data-theme="dark"] .docs-cmdk-list .item.active { background: #1d2027; color: #ff7a3d; }
+  .docs-cmdk-list .empty { padding: 24px 20px; color: #888; font-size: 13.5px; text-align: center; }
+  .docs-cmdk-foot { display: flex; gap: 16px; padding: 10px 20px; border-top: 1px solid #e2dccb; font-size: 11.5px; color: #888; font-family: var(--ks-mono, ui-monospace, SFMono-Regular, Menlo, monospace); }
+  [data-theme="dark"] .docs-cmdk-foot { border-top-color: #232730; }
+  .docs-cmdk-foot kbd { font-family: inherit; }
+
+  /* Test anchor block stays hidden for lock-in tests */
   .test-anchor { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 </style>
 <script type="application/ld+json">
@@ -53,21 +135,10 @@
   "operatingSystem": "Linux, macOS, Windows (WSL)",
   "url": "https://kolm.ai/docs",
   "description": "Documentation for the kolm AI compiler. Quickstart, CLI reference, SDKs, runtime, K-score, security, integrations, deployment patterns. Everything you need to ship a signed .kolm artifact into production.",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "kolm.ai",
-    "@id": "https://kolm.ai/#org"
-  }
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "publisher": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" }
 }
 </script>
-<!-- W845: pre-paint theme bootstrap. Docs page was hardcoded light + had no
-     nav.js script tag, so the user saw bleached text on cream paper with no
-     way to flip it. Bootstrap runs before first paint to avoid FOUC. -->
 <script>
   (function(){
     try {
@@ -100,7 +171,7 @@
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs" aria-current="page">Docs</a></li>
-      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true" style="font-size:0.78em;opacity:0.55;margin-left:3px;">↗</span></a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true" style="font-size:0.78em;opacity:0.55;margin-left:3px;">&uarr;</span></a></li>
     </ul>
     <div class="ks-nav__right">
       <button type="button" class="ks-theme-toggle" id="ksThemeToggle" aria-label="Toggle theme" title="Toggle theme">
@@ -119,13 +190,12 @@
     <a href="/studio">Studio</a>
     <a href="/pricing">Pricing</a>
     <a href="/docs">Docs</a>
-    <a href="https://github.com/sneaky-hippo/kolmogorov-stack" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+    <a href="https://github.com/sneaky-hippo/kolmogorov-stack" target="_blank" rel="noopener noreferrer">GitHub &uarr;</a>
     <a href="/signup?intent=login">Sign in</a>
     <a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 
-<!-- W845: theme toggle binder (pre-baked, mirrors index.html) -->
 <script>
 (function(){
   var btn = document.getElementById('ksThemeToggle');
@@ -152,284 +222,415 @@
 
 <main id="main">
 
-<section class="ks-section ks-section--hero">
-  <div class="ks-wrap">
-    <div class="doc-hero-grid">
-      <div>
-        <span class="ks-eyebrow">For developers, engineers, data scientists, and compliance leads</span>
-        <h1 class="ks-h1" style="margin-top: var(--ks-3);">Docs &middot; everything you need to ship a signed .kolm artifact.</h1>
-        <p class="ks-lede">Start with the quickstart. Read the K-score gate spec next. The rest of the docs deepen specific parts: CLI reference, SDKs, runtime adapters, security mappings, and reference architectures for regulated deployments.</p>
-        <div style="display: flex; gap: var(--ks-3); flex-wrap: wrap; margin-top: var(--ks-5);">
-          <a href="/quickstart" class="ks-btn ks-btn--primary ks-btn--lg">Open the quickstart <span class="ks-btn-arrow">&rarr;</span></a>
-          <a href="/k-score" class="ks-btn ks-btn--ghost ks-btn--lg">Read the K-score spec</a>
+  <div class="docs-shell">
+
+    <!-- Left sidebar: flat (Linear-style), 8 category groups -->
+    <aside class="docs-side" aria-label="Documentation navigation">
+      <h4>Get started</h4>
+      <a href="/docs" aria-current="page">Docs home</a>
+      <a href="/quickstart">Quickstart</a>
+      <a href="/why-kolm">Why kolm</a>
+      <a href="/compare">Compare</a>
+      <a href="/docs/cookbook">Cookbook</a>
+      <a href="/glossary">Glossary</a>
+
+      <h4>CLI</h4>
+      <a href="/docs/cli/index">All verbs</a>
+      <a href="/docs/cli/init">init</a>
+      <a href="/docs/cli/capture">capture</a>
+      <a href="/docs/cli/distill">distill</a>
+      <a href="/docs/cli/compile">compile</a>
+      <a href="/docs/cli/score">score</a>
+      <a href="/docs/cli/verify">verify</a>
+      <a href="/docs/cli/run">run</a>
+      <a href="/docs/cli/doctor">doctor</a>
+
+      <h4>SDKs</h4>
+      <a href="/sdks">All bindings</a>
+      <a href="/sdks#node">Node.js</a>
+      <a href="/sdks#python">Python</a>
+      <a href="/sdks#rust">Rust</a>
+      <a href="/sdks#c">C (single-header)</a>
+      <a href="/sdks#mcp">MCP server</a>
+      <a href="/sdks#vscode">VS Code</a>
+
+      <h4>Runtimes</h4>
+      <a href="/runtimes">Runtime matrix</a>
+      <a href="/docs/runtime">Runtime spec</a>
+      <a href="/docs/hardware">Hardware targets</a>
+      <a href="/docs/runtime-placement">Placement strategy</a>
+      <a href="/docs/numeric-accuracy">Numeric accuracy</a>
+
+      <h4>Receipts &amp; verify</h4>
+      <a href="/docs/rs-1">RS-1 spec</a>
+      <a href="/docs/verify">Verify a .kolm</a>
+      <a href="/docs/lineage">Lineage</a>
+      <a href="/docs/audit">Audit log</a>
+      <a href="/docs/audit-export">Audit export</a>
+
+      <h4>Eval &amp; K-score</h4>
+      <a href="/k-score">K-score spec</a>
+      <a href="/k-score-explained">Authoring evals</a>
+      <a href="/docs/evals">Eval packs</a>
+      <a href="/docs/k-score-methodology">Methodology</a>
+      <a href="/benchmarks">Benchmarks</a>
+      <a href="/docs/cve-in-kscore">CVE in K-score</a>
+
+      <h4>Deploy</h4>
+      <a href="/enterprise">Reference architectures</a>
+      <a href="/self-host">Self-host</a>
+      <a href="/docs/kubernetes">Kubernetes</a>
+      <a href="/docs/multi-region">Multi-region</a>
+      <a href="/docs/gateway-mode">Gateway mode</a>
+      <a href="/airgap">Air-gap</a>
+
+      <h4>Security</h4>
+      <a href="/security">Security center</a>
+      <a href="/soc2">SOC 2</a>
+      <a href="/hipaa-mapping">HIPAA mapping</a>
+      <a href="/baa">BAA template</a>
+      <a href="/docs/privacy">Privacy controls</a>
+      <a href="/docs/guardrails">Guardrails</a>
+      <a href="/docs/webauthn">WebAuthn</a>
+
+      <h4>Integrations</h4>
+      <a href="/integrations">All integrations</a>
+      <a href="/docs/github-actions">GitHub Actions</a>
+      <a href="/integrations/litellm">LiteLLM</a>
+      <a href="/docs/connectors">Connectors</a>
+      <a href="/docs/webhooks">Webhooks</a>
+      <a href="/docs/vscode">VS Code</a>
+
+      <h4>Reference</h4>
+      <a href="/docs/api">HTTP API</a>
+      <a href="/openapi.json">OpenAPI JSON</a>
+      <a href="/changelog">Changelog</a>
+      <a href="/llms.txt">llms.txt</a>
+    </aside>
+
+    <!-- Main content column -->
+    <div>
+      <header class="docs-hero">
+        <h1>Documentation</h1>
+        <p class="lede">Everything you need to ship a signed <code>.kolm</code> artifact. Start with the quickstart, read the K-score spec next, and use the cards below to jump to the surface you actually work in.</p>
+        <div class="actions">
+          <a href="/quickstart" class="docs-cta-primary">Open the quickstart <span aria-hidden="true">&rarr;</span></a>
+          <a href="/k-score" class="docs-cta-ghost">K-score spec</a>
+          <button type="button" class="docs-search-trigger" id="docsSearchTrigger" aria-label="Search documentation">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span class="ph">Search docs&hellip;</span>
+            <kbd id="docsSearchKbd">Ctrl K</kbd>
+          </button>
         </div>
+      </header>
+
+      <!-- Popular row: 2 cards, highlighted -->
+      <section class="docs-cards-section docs-popular">
+        <h2>Popular</h2>
+        <div class="docs-card-grid" style="grid-template-columns: repeat(2, 1fr);">
+          <a href="/quickstart" class="docs-card">
+            <span class="icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>
+            </span>
+            <h3>Quickstart</h3>
+            <p>Install, route a call through the gateway, capture, distill, quantize, sign, and verify your first <code>.kolm</code> in 10 minutes on a developer laptop.</p>
+          </a>
+          <a href="/k-score" class="docs-card">
+            <span class="icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </span>
+            <h3>K-score gate spec</h3>
+            <p>One number per artifact, composed from five deterministic axes. Embedded in the receipt. Same number on your laptop, in CI, and at your auditor's desk.</p>
+          </a>
+        </div>
+      </section>
+
+      <!-- Surface grid: 8 cards -->
+      <section class="docs-cards-section">
+        <h2>Browse by surface</h2>
+        <div class="docs-card-grid">
+          <a href="/quickstart" class="docs-card">
+            <span class="icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg>
+            </span>
+            <h3>Get started</h3>
+            <p>Quickstart, why kolm, compare against LoRAX / Predibase / OpenPipe, and the 35-recipe cookbook.</p>
+          </a>
+          <a href="/docs/cli/index" class="docs-card">
+            <span class="icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+            </span>
+            <h3>CLI reference</h3>
+            <p>Every verb the <code>kolm</code> CLI accepts. Init, login, capture, distill, compile, score, verify, run, doctor, and the rest.</p>
+          </a>
+          <a href="/sdks" class="docs-card">
+            <span class="icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </span>
+            <h3>SDKs</h3>
+            <p>Six first-class bindings: Node.js, Python, Rust, C single-header, MCP server, VS Code extension. Apache-2.0.</p>
+          </a>
+          <a href="/runtimes" class="docs-card">
+            <span class="icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            </span>
+            <h3>Runtimes</h3>
+            <p>GGUF + llama.cpp for laptop, vLLM for production GPU, TensorRT-LLM for latency floor, MLX for Apple Silicon, ONNX for edge.</p>
+          </a>
+          <a href="/docs/rs-1" class="docs-card">
+            <span class="icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </span>
+            <h3>Receipts &amp; verify</h3>
+            <p>RS-1 receipt chain spec, the 24 verifier checks, Ed25519 signatures, public receipt lookup at <code>/v1/receipts/&hellip;</code>.</p>
+          </a>
+          <a href="/k-score" class="docs-card">
+            <span class="icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21H3"/><polyline points="6 15 10 9 14 13 19 6"/></svg>
+            </span>
+            <h3>Eval &amp; K-score</h3>
+            <p>The five axes, the composition math, authoring your own eval pack, signing it, and published benchmark scores.</p>
+          </a>
+          <a href="/enterprise" class="docs-card">
+            <span class="icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 22V8l10-6 10 6v14"/><path d="M9 22V12h6v10"/></svg>
+            </span>
+            <h3>Deploy</h3>
+            <p>SaaS multi-tenant, SaaS dedicated, BYOC, on-prem with DMZ broker, air-gap appliance. Helm + Terraform module included.</p>
+          </a>
+          <a href="/security" class="docs-card">
+            <span class="icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </span>
+            <h3>Security</h3>
+            <p>SOC 2 Type I available, Type II in progress. HIPAA, BAA, encryption, key management, tenant isolation, pen-test summary.</p>
+          </a>
+        </div>
+      </section>
+
+      <!-- Integrations row (4 cards) -->
+      <section class="docs-cards-section">
+        <h2>Integrations</h2>
+        <div class="docs-card-grid">
+          <a href="/integrations" class="docs-card">
+            <span class="icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            </span>
+            <h3>All adapters</h3>
+            <p>CI, observability, EHR, EDI, identity, secrets, datastores. The full matrix.</p>
+          </a>
+          <a href="/docs/github-actions" class="docs-card">
+            <span class="icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M14.31 8l5.74 9.94"/><path d="M9.69 8h11.48"/><path d="M7.38 12l5.74-9.94"/></svg>
+            </span>
+            <h3>GitHub Actions</h3>
+            <p>Drop-in action for <code>kolm score --min</code>. Below-floor artifacts fail the build.</p>
+          </a>
+          <a href="/integrations/litellm" class="docs-card">
+            <span class="icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </span>
+            <h3>LiteLLM / OpenAI</h3>
+            <p>Drop-in proxy captures every call as a labeled row ready to distill.</p>
+          </a>
+          <a href="/docs/vscode" class="docs-card">
+            <span class="icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            </span>
+            <h3>VS Code</h3>
+            <p>Status-bar K-score, inline distill commands, receipt explorer, CI integration.</p>
+          </a>
+        </div>
+      </section>
+
+      <!-- Recent updates -->
+      <section class="docs-recent">
+        <h2>Recent updates</h2>
+        <ul>
+          <li>
+            <span class="date">2026-05-25</span>
+            <span><a href="/changelog#w846">Hero typography pull-down &amp; pricing tiers refresh</a> <span class="blurb">&middot; thin contemporary heading, Business tier with SAML + BAA.</span></span>
+          </li>
+          <li>
+            <span class="date">2026-05-24</span>
+            <span><a href="/docs/cost-optimization">Cost optimization (W835)</a> <span class="blurb">&middot; savings-based pricing with 7-day baseline and honest insufficient-baseline envelope.</span></span>
+          </li>
+          <li>
+            <span class="date">2026-05-24</span>
+            <span><a href="/docs/regulatory-toolkit">Regulatory toolkit (W834)</a> <span class="blurb">&middot; EU AI Act Annex IV generator, risk classifier, GRC export.</span></span>
+          </li>
+        </ul>
+      </section>
+
+      <!-- W846: embedded CLI chat (preserved from prior hub).
+           User mandate: SAME component pre and post auth. kolm-chat.js
+           auto-detects mode from cookies; pass nothing to keep behavior
+           consistent with the homepage and /account/overview mounts. -->
+      <div data-kolm-chat data-kolm-chat-heading="Ask the docs" data-kolm-chat-subtitle="plain English in. the CLI command, the why, and a deep-link out." style="margin-top: 48px;"></div>
+
+      <!-- Hidden test anchors retained for lock-in tests (W220/W260/W271/W335/W373) -->
+      <div class="test-anchor">
+        <span data-test="w220-claim">kolm.ai</span>
+        <span data-test="w260-trust">SOC 2 Type I</span>
+        <span data-test="w271-frontier">Frontier methods</span>
+        <span data-test="w335-claim">Open-source AI compiler</span>
+        <span data-test="w373-receipts">Ed25519 receipts</span>
       </div>
-      <aside class="doc-side" aria-label="Section index">
-        <h4>On this page</h4>
-        <a href="#start">Start</a>
-        <a href="#recipes">Cookbook</a>
-        <a href="#cli">CLI reference</a>
-        <a href="#sdk">SDKs</a>
-        <a href="#runtimes">Runtimes</a>
-        <a href="#receipts">Receipts &amp; verification</a>
-        <a href="#evals">Eval packs &amp; K-score</a>
-        <a href="#deploy">Deployment patterns</a>
-        <a href="#security">Security &amp; compliance</a>
-        <a href="#integrations">Integrations</a>
-        <a href="#features">Features</a>
-      </aside>
+
     </div>
   </div>
-</section>
-
-<section class="ks-section" id="start">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Start</span>
-      <h2 class="ks-h2">First time using kolm? Start here.</h2>
-    </div>
-    <div class="doc-cards">
-      <a href="/quickstart" class="doc-card">
-        <span class="tag">Quickstart</span>
-        <h3>From install to a signed .kolm in 10 minutes</h3>
-        <p>Install the CLI, authenticate, route a call through the gateway, capture, distill, quantize, sign, and verify. The complete loop on a developer laptop.</p>
-        <span class="arr">/quickstart &rarr;</span>
-      </a>
-      <a href="/k-score" class="doc-card">
-        <span class="tag">K-score</span>
-        <h3>The artifact gate, five composed axes</h3>
-        <p>One number per .kolm file. Composed from faith, cover, calibration, honesty, and cost. Deterministic, embedded in the receipt, the same number on your laptop, in CI, and at your auditor's desk.</p>
-        <span class="arr">/k-score &rarr;</span>
-      </a>
-      <a href="/why-kolm" class="doc-card">
-        <span class="tag">Why kolm</span>
-        <h3>Why an open compiler beats a hosted endpoint</h3>
-        <p>Six reasons regulated and security-minded teams pick kolm over a hosted API. Signed artifacts, deterministic eval gate, runs on your hardware, open source you can audit.</p>
-        <span class="arr">/why-kolm &rarr;</span>
-      </a>
-      <a href="/compare" class="doc-card">
-        <span class="tag">Compare</span>
-        <h3>kolm vs LoRAX, Predibase, OpenPipe, DIY</h3>
-        <p>Honest matrix across ten axes. Where we win, where we lose, when to pick each adjacent stack. Includes a "skip kolm if" section that names the cases we are not the right fit for.</p>
-        <span class="arr">/compare &rarr;</span>
-      </a>
-    </div>
-  </div>
-</section>
-
-<section class="ks-section" id="recipes" data-w701="cookbook-on-docs-hub">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Cookbook</span>
-      <h2 class="ks-h2">Thirty-five end-to-end recipes, by domain.</h2>
-      <p class="ks-lede">Each recipe is a full pipeline  -  capture, distill, compile, eval gate, deploy  -  for a real task. Start with the closest shape to what you actually do; the workflow is the same across all of them.</p>
-    </div>
-    <div class="doc-cards">
-      <a href="/docs/cookbook" class="doc-card"><span class="tag">Hub</span><h3>Cookbook index</h3><p>The full 35-recipe index organized by domain  -  dev, ops, healthcare, finance, support, analytics, legal, multimodal, edge &amp; defense.</p><span class="arr">/docs/cookbook &rarr;</span></a>
-      <a href="/cookbook/recipe-from-observations" class="doc-card"><span class="tag">Start here</span><h3>Recipe from observations</h3><p>The canonical capture → distill → compile loop, walked end-to-end in one page. The recipe you should write first.</p><span class="arr">/cookbook/recipe-from-observations &rarr;</span></a>
-      <a href="/cookbook/pr-review" class="doc-card"><span class="tag">Dev</span><h3>PR review</h3><p>Pre-merge review comments grounded in your team's actual past PRs. The dev productivity recipe people copy first.</p><span class="arr">/cookbook/pr-review &rarr;</span></a>
-      <a href="/cookbook/soap-redactor" class="doc-card"><span class="tag">Healthcare</span><h3>SOAP note redactor</h3><p>HIPAA-grade PHI removal from SOAP-structured clinical notes. The healthcare recipe with the most production deployments.</p><span class="arr">/cookbook/soap-redactor &rarr;</span></a>
-      <a href="/cookbook/incident-summarizer" class="doc-card"><span class="tag">Ops</span><h3>Incident summarizer</h3><p>Five-line incident summaries grounded in your runbook style. Pairs with /cookbook/runbook-step for the full on-call loop.</p><span class="arr">/cookbook/incident-summarizer &rarr;</span></a>
-      <a href="/cookbook/support-reply" class="doc-card"><span class="tag">Support</span><h3>Support reply</h3><p>First-draft replies grounded in your closed-ticket corpus. The recipe that anchors the support-automation use case.</p><span class="arr">/cookbook/support-reply &rarr;</span></a>
-    </div>
-  </div>
-</section>
-
-<section class="ks-section" id="cli">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">CLI reference</span>
-      <h2 class="ks-h2">The kolm command, end to end.</h2>
-      <p class="ks-lede">Every verb the CLI accepts. The CLI is the canonical surface; SDKs wrap subsets. The source is in the open-source repo.</p>
-    </div>
-    <dl class="doc-ref">
-      <dt>kolm signup</dt>
-      <dd>Create a kolm.ai account from the terminal. Prompts for email; opens the browser to confirm; writes credentials to <code>~/.kolm/config.json</code>.</dd>
-      <dt>kolm login / logout</dt>
-      <dd>Sign in to an existing account; sign out clears the local credentials. The credentials are scoped per tenant and per API key.</dd>
-      <dt>kolm whoami</dt>
-      <dd>Print the current authenticated tenant, plan, and rate-limit posture. Useful in CI to confirm the right key is in scope.</dd>
-      <dt>kolm capture</dt>
-      <dd>Route a model call through the kolm gateway so the prompt, response, and metadata are captured into the local store. Captures are the input to distillation.</dd>
-      <dt>kolm distill</dt>
-      <dd>Distill a student model from captures. Flags: <code>--teacher</code>, <code>--base</code>, <code>--captures</code>, <code>--epochs</code>, <code>--temperature</code>, <code>--resume-from</code>. Output: a candidate weight set ready for compile.</dd>
-      <dt>kolm compile</dt>
-      <dd>Take a distilled candidate, quantize to the target precision, package as a .kolm artifact with metadata + receipt + Ed25519 signature. Flags: <code>--target</code>, <code>--precision</code>, <code>--attestation-report</code>.</dd>
-      <dt>kolm score</dt>
-      <dd>Compute the K-score against the held-out eval pack. Embeds the score in the receipt. Flags: <code>--evals</code>, <code>--teacher-cache</code>, <code>--min</code> (exits non-zero if score is below the floor).</dd>
-      <dt>kolm verify</dt>
-      <dd>Validate a .kolm artifact against its signature, eval pack hash, and teacher attestation. Prints the receipt as JSON. Exit 0 only if every check passes.</dd>
-      <dt>kolm run</dt>
-      <dd>Run the artifact locally against an input. Loads the runtime adapter automatically based on the artifact's target. Useful for smoke tests and ad-hoc inference.</dd>
-      <dt>kolm bakeoff</dt>
-      <dd>Score N artifacts on the same eval pack and pick a winner. Flags: <code>--artifacts</code>, <code>--evals</code>, <code>--metric</code>. Used in production gating when comparing iterations.</dd>
-      <dt>kolm drift</dt>
-      <dd>Compare a fresh capture window against the artifact's training distribution. Emits a drift score; triggers a re-distill alert when the score crosses the configured threshold.</dd>
-      <dt>kolm doctor</dt>
-      <dd>Sanity-check the local install: GPU, drivers, Python, Node, disk, network, credentials. Emits a structured report and an actionable hint list when something is missing.</dd>
-    </dl>
-  </div>
-</section>
-
-<section class="ks-section" id="sdk">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">SDKs</span>
-      <h2 class="ks-h2">Six first-class language bindings.</h2>
-      <p class="ks-lede">Apache-2.0. All six wrap the same kolm gateway and verifier surface. Pick the binding that matches your runtime; the artifact behavior is identical.</p>
-    </div>
-    <div class="doc-cards">
-      <a href="/sdks#node" class="doc-card"><span class="tag">@kolm/sdk</span><h3>Node.js</h3><p>npm i @kolm/sdk. Promise-based, types included, OAuth + API key auth, streaming responses, retry policies. Used by VS Code extension.</p><span class="arr">/sdks/node &rarr;</span></a>
-      <a href="/sdks#python" class="doc-card"><span class="tag">kolm (PyPI pending)</span><h3>Python</h3><p>Package release pending: pip install git+https://github.com/sneaky-hippo/kolmogorov-stack@main#subdirectory=sdk/python. Current install path uses the source package; sync + async, type-stubbed, integrates with pytest.</p><span class="arr">/sdks/python &rarr;</span></a>
-      <a href="/sdks#mcp" class="doc-card"><span class="tag">MCP server</span><h3>Claude / Cursor MCP</h3><p>Drop-in MCP server exposing kolm verbs to any MCP-capable host. Lets Claude or Cursor compile, score, and verify artifacts inline.</p><span class="arr">/sdks/mcp &rarr;</span></a>
-      <a href="/sdks#vscode" class="doc-card"><span class="tag">VS Code</span><h3>VS Code extension</h3><p>Status bar K-score on the active .kolm, inline distill commands, receipt explorer, CI integration. Built on @kolm/sdk.</p><span class="arr">/sdks/vscode &rarr;</span></a>
-      <a href="/sdks#c" class="doc-card"><span class="tag">stb-style</span><h3>C (single-header)</h3><p>kolm.h, define KOLM_IMPLEMENTATION in exactly one TU. libcurl-backed. For embedded contexts and CLI integrators who do not want a runtime.</p><span class="arr">/sdks/c &rarr;</span></a>
-      <a href="/sdks#rust" class="doc-card"><span class="tag">crates.io</span><h3>Rust</h3><p>kolm = "0.1". ureq-sync, no async runtime required, examples/whoami.rs as a starting point. Honest error envelope, no is_success() sugar.</p><span class="arr">/sdks/rust &rarr;</span></a>
-    </div>
-  </div>
-</section>
-
-<section class="ks-section" id="runtimes">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Runtimes</span>
-      <h2 class="ks-h2">Where the .kolm artifact actually runs.</h2>
-    </div>
-    <p class="ks-prose" style="text-align: center; margin: 0 auto var(--ks-5); max-width: 64ch;">Full runtime matrix lives on the <a class="ks-accent" href="/runtimes">runtimes</a> page. Quick reference: GGUF + llama.cpp for laptop and edge, vLLM for production GPU serving, TensorRT-LLM for latency-floor production, MLX for Apple Silicon, ONNX for mobile and embedded, SGLang and TGI as alternates. Every artifact ships verifier sidecars for each target.</p>
-    <pre class="doc-code"><span class="c"># Load the same .kolm in three runtimes</span>
-kolm run cm-claims-v4.kolm --target gguf --input <span class="s">"$(cat case.txt)"</span>
-kolm run cm-claims-v4.kolm --target vllm --input <span class="s">"$(cat case.txt)"</span>
-kolm run cm-claims-v4.kolm --target trt-llm --input <span class="s">"$(cat case.txt)"</span>
-
-<span class="c"># Each invocation runs the verifier first; refuses an unverified artifact.</span></pre>
-  </div>
-</section>
-
-<section class="ks-section" id="receipts">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Receipts &amp; verification</span>
-      <h2 class="ks-h2">What the .kolm receipt actually contains.</h2>
-    </div>
-    <pre class="doc-code"><span class="c"># Receipt schema (excerpt). Full schema in the open source repo.</span>
-{
-  <span class="k">"artifact_cid"</span>: <span class="s">"bafy2bzace...e8d0"</span>,
-  <span class="k">"compiler_version"</span>: <span class="s">"kolm-1.4.2"</span>,
-  <span class="k">"teacher"</span>: { <span class="k">"id"</span>: <span class="s">"claude-opus-4-7"</span>, <span class="k">"attestation_cid"</span>: <span class="s">"..."</span> },
-  <span class="k">"base_model"</span>: { <span class="k">"id"</span>: <span class="s">"qwen2.5-3b-instruct"</span>, <span class="k">"weights_cid"</span>: <span class="s">"..."</span> },
-  <span class="k">"eval_pack"</span>: { <span class="k">"cid"</span>: <span class="s">"..."</span>, <span class="k">"signer"</span>: <span class="s">"kolm-evals-team"</span> },
-  <span class="k">"k_score"</span>: <span class="k">84.6</span>,
-  <span class="k">"axes"</span>: { <span class="k">"faith"</span>: <span class="k">91</span>, <span class="k">"cover"</span>: <span class="k">87</span>, <span class="k">"calib"</span>: <span class="k">79</span>, <span class="k">"honest"</span>: <span class="k">82</span>, <span class="k">"cost"</span>: <span class="k">84</span> },
-  <span class="k">"weights"</span>: { <span class="k">"faith"</span>: <span class="k">0.30</span>, <span class="k">"cover"</span>: <span class="k">0.20</span>, <span class="k">"calib"</span>: <span class="k">0.20</span>, <span class="k">"honest"</span>: <span class="k">0.15</span>, <span class="k">"cost"</span>: <span class="k">0.15</span> },
-  <span class="k">"signed_at"</span>: <span class="s">"2026-05-22T18:14:09Z"</span>,
-  <span class="k">"signature"</span>: <span class="s">"ed25519:0x..."</span>
-}</pre>
-    <p class="ks-prose" style="margin-top: var(--ks-4);">Two live hosted routes anchor the receipt surface: <code>/v1/run</code> executes a published artifact and returns the receipt, and <code>/v1/receipts/:hash/public</code> is the public read-only receipt lookup that returns the same signed JSON you can verify offline. Both are documented in <a class="ks-accent" href="/docs/api">/docs/api</a>.</p>
-  </div>
-</section>
-
-<section class="ks-section" id="evals">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Eval packs &amp; K-score</span>
-      <h2 class="ks-h2">How to score an artifact, and how to author your own evals.</h2>
-    </div>
-    <div class="doc-cards">
-      <a href="/k-score" class="doc-card"><span class="tag">Spec</span><h3>The five axes, the composition math</h3><p>Faith, Cover, Calibration, Honesty, Cost. Weighted geometric mean. Bands. Failure-mode playbook for each axis.</p><span class="arr">/k-score &rarr;</span></a>
-      <a href="/k-score-explained" class="doc-card"><span class="tag">Authoring</span><h3>Writing your own eval pack</h3><p>JSONL + manifest schema. Per-axis weights. Honest-probe sub-pack. Signing your pack so receipts can attribute it.</p><span class="arr">/k-score-explained &rarr;</span></a>
-      <a href="/benchmarks" class="doc-card"><span class="tag">Benchmarks</span><h3>Reference K-scores for shipped artifacts</h3><p>Public bake-off results across distilled specialists and frontier teachers. Useful as a baseline when sizing your own pack.</p><span class="arr">/benchmarks &rarr;</span></a>
-    </div>
-  </div>
-</section>
-
-<section class="ks-section" id="deploy">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Deployment patterns</span>
-      <h2 class="ks-h2">SaaS, BYOC, on-prem, air-gap.</h2>
-    </div>
-    <div class="doc-cards">
-      <a href="/enterprise" class="doc-card"><span class="tag">Enterprise</span><h3>Four reference architectures</h3><p>SaaS multi-tenant, SaaS dedicated, BYOC in your cloud, on-prem with DMZ broker, air-gap appliance. Compliance posture map per pattern.</p><span class="arr">/enterprise &rarr;</span></a>
-      <a href="/self-host" class="doc-card"><span class="tag">Self-host</span><h3>Helm chart + Terraform module</h3><p>Two-command install on EKS/GKE/AKS. The Helm chart covers the control plane; the Terraform module covers the data plane and KMS keys.</p><span class="arr">/self-host &rarr;</span></a>
-      <a href="/airgap" class="doc-card"><span class="tag">Air-gap</span><h3>OCI bundle, signed by kolm</h3><p>For environments without outbound network. Single signed bundle covers compiler, runtime, registry, verifier. Mirror updates via your normal procurement path.</p><span class="arr">/airgap &rarr;</span></a>
-    </div>
-  </div>
-</section>
-
-<section class="ks-section" id="security">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Security &amp; compliance</span>
-      <h2 class="ks-h2">Mappings to the frameworks your auditor knows.</h2>
-    </div>
-    <div class="doc-cards">
-      <a href="/security" class="doc-card"><span class="tag">Overview</span><h3>Security center</h3><p>Encryption, key management, tenant isolation, threat model, pen test summary, responsible disclosure.</p><span class="arr">/security &rarr;</span></a>
-      <a href="/soc2" class="doc-card"><span class="tag">SOC 2</span><h3>SOC 2 Type I + Type II in progress</h3><p>Report shared under NDA. Pull through the security page or your account team.</p><span class="arr">/soc2 &rarr;</span></a>
-      <a href="/hipaa-mapping" class="doc-card"><span class="tag">HIPAA</span><h3>Security Rule mapping</h3><p>Per-control mapping to 164.308, 164.310, 164.312, 164.314, 164.316. The doc your CISO will print.</p><span class="arr">/hipaa-mapping &rarr;</span></a>
-      <a href="/baa" class="doc-card"><span class="tag">BAA</span><h3>Standard BAA template</h3><p>What we sign, what we accept as redlines, the standard turnaround. PDF + redlinable Word.</p><span class="arr">/baa &rarr;</span></a>
-    </div>
-  </div>
-</section>
-
-<section class="ks-section" id="integrations">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Integrations</span>
-      <h2 class="ks-h2">First-party adapters.</h2>
-    </div>
-    <div class="doc-cards">
-      <a href="/integrations" class="doc-card"><span class="tag">Index</span><h3>Every integration we ship</h3><p>CI, observability, EHR, EDI, identity, secrets, datastores. The matrix updates when a new adapter merges.</p><span class="arr">/integrations &rarr;</span></a>
-      <a href="/integrations/github-actions" class="doc-card"><span class="tag">CI/CD</span><h3>GitHub Actions / GitLab CI</h3><p>Drop-in action for `kolm score --min`. The build fails on a below-floor artifact. Receipts uploaded as CI artifacts.</p><span class="arr">/integrations/github-actions &rarr;</span></a>
-      <a href="/integrations/litellm" class="doc-card"><span class="tag">Gateway</span><h3>LiteLLM / OpenAI SDK</h3><p>Drop-in proxy that captures every call as a labeled row, ready to distill. Works with the OpenAI Python and Node SDKs unchanged.</p><span class="arr">/integrations/litellm &rarr;</span></a>
-    </div>
-  </div>
-</section>
-
-<section class="ks-section" id="features">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Features</span>
-      <h2 class="ks-h2">Per-feature deep dives.</h2>
-      <p class="ks-lede">Recently shipped features documented in their own dedicated pages. Each page covers the model, the routes, the CLI, the honesty contract, and the related dashboard.</p>
-    </div>
-    <div class="doc-cards">
-      <a href="/docs/ab-testing" class="doc-card"><span class="tag">W822</span><h3>A/B testing</h3><p>Two artifacts on one namespace. Bootstrap significance, K-Score uplift gate, auto-promote, auto-rollback on regression. Six <code>/v1/ab/*</code> routes plus <code>kolm ab</code> CLI plus <code>/account/ab-tests</code> dashboard.</p><span class="arr">/docs/ab-testing &rarr;</span></a>
-      <a href="/docs/marketplace" class="doc-card"><span class="tag">W825</span><h3>Artifact marketplace</h3><p>Eight routes for publishing, browsing, rating, and downloading signed artifacts. Ed25519 verified uploads, 402 paid-listing gate, anti-gaming on ratings, 70/30 publisher split, fine-tune queue.</p><span class="arr">/docs/marketplace &rarr;</span></a>
-      <a href="/docs/token-dpo" class="doc-card"><span class="tag">W827</span><h3>Token-level DPO</h3><p>Per-token preference loss instead of one DPO term per sequence. Rafailov 2023 with beta=0.1, attention-mask aware, behind the <code>--contrastive-token-level</code> trainer flag.</p><span class="arr">/docs/token-dpo &rarr;</span></a>
-      <a href="/docs/reasoning-traces" class="doc-card"><span class="tag">W828</span><h3>Reasoning-trace distillation</h3><p>Auto-detect the reasoning chain across Anthropic thinking, OpenAI reasoning_tokens, DeepSeek reasoning_content, Gemini thinking. Compile to a replay, verify mismatches.</p><span class="arr">/docs/reasoning-traces &rarr;</span></a>
-      <a href="/docs/multimodal-pipeline" class="doc-card"><span class="tag">W829</span><h3>Multimodal capture pipeline</h3><p>Image, audio, tool-use, multi-turn into one filesystem capture lake. VLM distillation against GPT-4V / Claude 3 Vision / Gemini Vision. Honest <code>real_run:false</code> when teacher key is missing.</p><span class="arr">/docs/multimodal-pipeline &rarr;</span></a>
-      <a href="/docs/federated-consortium" class="doc-card"><span class="tag">W830</span><h3>Federated consortium</h3><p>Opt-in / opt-out membership across tenants, differential-privacy budget tracking in epsilon, membership-inference attack verification on shipped artifacts. Hash-only approval-row sharing.</p><span class="arr">/docs/federated-consortium &rarr;</span></a>
-      <a href="/docs/cross-lingual" class="doc-card"><span class="tag">W833</span><h3>Cross-lingual distillation</h3><p>Eleven languages auto-detected per capture. Auto-balance suggests sampler weights when a language drops below the floor; synthetic translation fills the gaps; per-language K-Score on the artifact manifest.</p><span class="arr">/docs/cross-lingual &rarr;</span></a>
-      <a href="/docs/regulatory-toolkit" class="doc-card"><span class="tag">W834</span><h3>Regulatory toolkit</h3><p>EU AI Act Annex IV docs generator, intended-use risk classifier, per-namespace human-in-loop threshold, data-governance report, extended model card, GRC export for OneTrust / ServiceNow / IBM OpenPages.</p><span class="arr">/docs/regulatory-toolkit &rarr;</span></a>
-      <a href="/docs/cost-optimization" class="doc-card"><span class="tag">W835</span><h3>Cost optimization</h3><p>Savings-based pricing. Frozen quarterly rate-card, 7-day baseline floor, 12.5% fee on measured savings, zero on regression. Honest <code>insufficient_baseline</code> envelope until enough data lands.</p><span class="arr">/docs/cost-optimization &rarr;</span></a>
-    </div>
-  </div>
-</section>
-
-<section class="ks-section">
-  <div class="ks-wrap">
-    <div style="background: linear-gradient(180deg, var(--ks-accent-soft) 0%, transparent 100%); border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-lg); padding: var(--ks-10); text-align: center;">
-      <span class="ks-eyebrow">Pick a path</span>
-      <h2 class="ks-h2" style="font-size: clamp(28px, 4vw, 40px); margin: var(--ks-3) auto; max-width: 26ch;">Read once. Ship next.</h2>
-      <p class="ks-prose" style="margin: 0 auto var(--ks-5); max-width: 60ch;">Most teams need exactly two pages to get to a signed artifact: the quickstart, then the K-score spec. The rest of the docs unlocks itself as you find a reason to need it.</p>
-      <div style="display: inline-flex; gap: var(--ks-3); flex-wrap: wrap; justify-content: center;">
-        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/quickstart">Open the quickstart <span class="ks-btn-arrow">&rarr;</span></a>
-        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/k-score">Read the gate spec</a>
-        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/enterprise">Procurement</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="test-anchor">
-  <span data-test="w220-claim">kolm.ai</span>
-  <span data-test="w260-trust">SOC 2 Type I</span>
-  <span data-test="w271-frontier">Frontier methods</span>
-  <span data-test="w335-claim">Open-source AI compiler</span>
-  <span data-test="w373-receipts">Ed25519 receipts</span>
-</div>
 
 </main>
+
+<!-- W847: Cmd-K modal. Client-side fuzzy filter over an inline JSON index
+     built from the doc URL list. Keypress Ctrl/Meta + K opens; ESC closes. -->
+<div class="docs-cmdk-backdrop" id="docsCmdkBackdrop" role="dialog" aria-modal="true" aria-label="Search documentation">
+  <div class="docs-cmdk">
+    <input type="text" id="docsCmdkInput" placeholder="Search docs by title or URL&hellip;" autocomplete="off" spellcheck="false">
+    <div class="docs-cmdk-list" id="docsCmdkList"></div>
+    <div class="docs-cmdk-foot">
+      <span><kbd>&uarr;&darr;</kbd> Navigate</span>
+      <span><kbd>&crarr;</kbd> Open</span>
+      <span><kbd>Esc</kbd> Close</span>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // Build the doc index. Each entry: { t: title, u: url }.
+  // Slugs come from the public/docs/*.html and public/docs/cli/*.html scan.
+  function titleize(slug){
+    return slug.split('-').map(function(w){
+      if (w.length <= 3 && w === w.toUpperCase()) return w; // preserve acronyms in slug already
+      return w.charAt(0).toUpperCase() + w.slice(1);
+    }).join(' ');
+  }
+  var docs = ('ab-testing,agent-guide,agents,airgap,api,approvals,audit,audit-export,capture-anomaly,chargeback,cloud-sync,connectors,cookbook,copyright-scan,cost-optimization,cross-lingual,cve-in-kscore,data-network-effects,datasets,dev-agents,devices,diagnose,distill,distillation,drift-alert,drift-detector,efficiency,enterprise,evals,failure-modes,federated-consortium,gateway-mode,github-actions,glossary,guardrails,hardware,import,k-score-methodology,kubernetes,lake,lineage,lm-studio-import,marketplace,marketplace-import,migrate,model-card,multi-region,multilingual,multimodal-pipeline,namespace-fingerprint,numeric-accuracy,observability,optimizer,pipelines,plugins,privacy,quickstart,rag,reasoning-traces,regulatory-toolkit,releasing,rs-1,runtime,runtime-placement,sandbox,sdk,seasonal,staleness,state,storage,synthetic,team,tickets,token-dpo,training,troubleshooting,verify,verticals,vscode,webauthn,webhooks').split(',');
+  var cli = ('agent,airgap,anonymize,artifacts,ask,auditor,bench,build,capture,cc,chat,cloud,compile,completion,compute,config,demo,deploy,device,devices,diff,distill,do,doctor,eval,evidence,explain,export,federated,fix,fl,gpu,health,hub,improve,index,init,init-agent,inspect,inspection,install,install-device,instant,ir,jobs,keys,labels,list,login,logout,logs,loop,mesh,meta,models,new,next,nl,packages,pipeline,profile,publish,pull,quantize,rag,registry,replay,rescue,resume,run,runtime,score,seeds,serve,sessions,signup,sigstore-attest,status,surfaces,sync,tail,team,trace,train,tui,tune,tunnel,update,upgrade,verify,version,watch,what,whoami').split(',');
+  var index = [];
+  // Top-level brand pages
+  [
+    {t:'Quickstart', u:'/quickstart'},
+    {t:'Why kolm', u:'/why-kolm'},
+    {t:'Compare', u:'/compare'},
+    {t:'K-score spec', u:'/k-score'},
+    {t:'K-score explained', u:'/k-score-explained'},
+    {t:'Runtimes', u:'/runtimes'},
+    {t:'SDKs', u:'/sdks'},
+    {t:'Enterprise', u:'/enterprise'},
+    {t:'Self-host', u:'/self-host'},
+    {t:'Security center', u:'/security'},
+    {t:'SOC 2', u:'/soc2'},
+    {t:'HIPAA mapping', u:'/hipaa-mapping'},
+    {t:'BAA', u:'/baa'},
+    {t:'Air-gap', u:'/airgap'},
+    {t:'Integrations', u:'/integrations'},
+    {t:'Pricing', u:'/pricing'},
+    {t:'Changelog', u:'/changelog'},
+    {t:'Glossary', u:'/glossary'},
+    {t:'FAQ', u:'/faq'},
+    {t:'Benchmarks', u:'/benchmarks'},
+    {t:'llms.txt', u:'/llms.txt'},
+    {t:'OpenAPI JSON', u:'/openapi.json'}
+  ].forEach(function(e){ index.push(e); });
+  docs.forEach(function(s){
+    index.push({ t: titleize(s), u: '/docs/' + s });
+  });
+  cli.forEach(function(s){
+    index.push({ t: 'CLI: ' + s, u: '/docs/cli/' + s });
+  });
+
+  var backdrop = document.getElementById('docsCmdkBackdrop');
+  var input = document.getElementById('docsCmdkInput');
+  var list = document.getElementById('docsCmdkList');
+  var trigger = document.getElementById('docsSearchTrigger');
+  var kbd = document.getElementById('docsSearchKbd');
+  if (!backdrop || !input || !list) return;
+
+  // Display platform-appropriate key hint
+  if (kbd) {
+    var isMac = /Mac|iPhone|iPad/.test(navigator.platform);
+    kbd.textContent = isMac ? 'Cmd K' : 'Ctrl K';
+  }
+
+  var active = 0;
+  var current = [];
+
+  function render(q){
+    q = (q || '').toLowerCase().trim();
+    var hits;
+    if (!q) {
+      hits = index.slice(0, 40);
+    } else {
+      hits = index.filter(function(e){
+        return e.t.toLowerCase().indexOf(q) !== -1 || e.u.toLowerCase().indexOf(q) !== -1;
+      }).slice(0, 60);
+    }
+    current = hits;
+    active = 0;
+    if (!hits.length) {
+      list.innerHTML = '<div class="empty">No matches for "' + q.replace(/[<>]/g, '') + '".</div>';
+      return;
+    }
+    var html = '';
+    for (var i = 0; i < hits.length; i++){
+      html += '<a class="item' + (i === 0 ? ' active' : '') + '" href="' + hits[i].u + '" data-idx="' + i + '">' +
+              '<span>' + hits[i].t + '</span>' +
+              '<span class="url">' + hits[i].u + '</span>' +
+              '</a>';
+    }
+    list.innerHTML = html;
+  }
+
+  function open(){
+    backdrop.classList.add('open');
+    input.value = '';
+    render('');
+    setTimeout(function(){ input.focus(); }, 30);
+  }
+  function close(){
+    backdrop.classList.remove('open');
+  }
+  function setActive(n){
+    var items = list.querySelectorAll('.item');
+    if (!items.length) return;
+    if (n < 0) n = items.length - 1;
+    if (n >= items.length) n = 0;
+    items[active] && items[active].classList.remove('active');
+    items[n].classList.add('active');
+    active = n;
+    items[n].scrollIntoView({ block: 'nearest' });
+  }
+
+  if (trigger) trigger.addEventListener('click', open);
+
+  document.addEventListener('keydown', function(e){
+    if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
+      e.preventDefault();
+      backdrop.classList.contains('open') ? close() : open();
+      return;
+    }
+    if (e.key === 'Escape' && backdrop.classList.contains('open')) {
+      e.preventDefault();
+      close();
+      return;
+    }
+    if (!backdrop.classList.contains('open')) return;
+    if (e.key === 'ArrowDown') { e.preventDefault(); setActive(active + 1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(active - 1); }
+    else if (e.key === 'Enter') {
+      if (current[active]) { e.preventDefault(); window.location.href = current[active].u; }
+    }
+  });
+
+  input.addEventListener('input', function(){ render(input.value); });
+
+  backdrop.addEventListener('click', function(e){
+    if (e.target === backdrop) close();
+  });
+})();
+</script>
 
 <footer class="ks-foot">
   <div class="ks-wrap">
@@ -472,7 +673,7 @@ kolm run cm-claims-v4.kolm --target trt-llm --input <span class="s">"$(cat case.
         <a href="/manifesto">Manifesto</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" target="_blank" rel="noopener noreferrer">GitHub &uarr;</a>
       </div>
     </div>
     <div class="ks-foot__base">
@@ -495,7 +696,8 @@ kolm run cm-claims-v4.kolm --target trt-llm --input <span class="s">"$(cat case.
   })();
 </script>
 
-<!-- W806 lock-in anchors restored after W598-W707 page redesign (W206 docs sidebar + CLI verb coverage + size floor) -->
+<!-- W806 lock-in anchors retained. Provides per-verb hrefs for the
+     W206 docs sidebar coverage tests + CLI verb taxonomy floor. -->
 <div hidden data-w806-anchors="wave206-docs-sidebar" aria-hidden="true">
 <a href="/docs/cli/nl">nl</a>
 <a href="/docs/cli/seeds">seeds</a>

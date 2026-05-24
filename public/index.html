@@ -386,14 +386,34 @@
   </div>
 </section>
 
-<!-- W846: honest-scope signpost — single line of trust signals so a 5-sec
-     visitor knows the shape of the product before they scroll. -->
-<div class="ks-signpost" aria-label="At a glance">
-  <span><span class="dot"></span> <b>Apache-2.0</b> &middot; the code is on github</span>
-  <span><span class="dot"></span> <b>Self-host</b> in your VPC, on a laptop, or air-gapped</span>
-  <span><span class="dot"></span> <b>OpenAI-compatible</b> &mdash; one env var, your client stays</span>
-  <span><span class="dot"></span> <b>No vendor lock-in</b> &mdash; cancel and the artifact still runs</span>
-</div>
+<!-- W847: W846 signpost band removed — user feedback flagged it as
+     useless filler ("hero signpost band is useless — remove"). The four
+     claims are surfaced in the dedicated trust strip near the footer and
+     in the kolm-arch-band's monochrome labels. -->
+
+<!-- W847: "What is kolm" intro — user feedback: "need section under hero
+     showing what product IS." Three plain-English noun-phrase sentences,
+     no diagram, no card chrome. Sits between the hero and the kolm-arch
+     diagram so a 10-second visitor has a working mental model before they
+     hit the architectural detail. -->
+<section class="kolm-whatis" aria-label="What kolm is">
+  <div class="kolm-whatis__inner">
+    <p class="kolm-whatis__eye">In plain English</p>
+    <h2 class="kolm-whatis__h">kolm is an open-source compiler for AI.</h2>
+    <p class="kolm-whatis__p">
+      You point your existing LLM client at it; it captures the calls.
+      It distills those captures into a small specialist model trained on
+      your traffic. It quantizes that model to fit the hardware you
+      already own. It signs the result into one <code>.kolm</code> file
+      you can deploy anywhere &mdash; laptop, VPC, air-gap &mdash; and run
+      forever, with no per-token bill behind it.
+    </p>
+    <p class="kolm-whatis__sub">
+      Same compiler, same artifact format. Apache-2.0, self-hostable,
+      OpenAI-compatible, no vendor lock-in.
+    </p>
+  </div>
+</section>
 
 <!-- W844: full-width architecture band. The hero used to wedge this into
      column 2 at half size; user feedback said "i cant see it". Now it sits
@@ -625,65 +645,62 @@
      stat, and the command that triggers it. ================== -->
 <section class="fr-section fr-reveal" id="how">
   <div class="fr-container">
-    <h2 class="fr-h2">What you actually get when you compile.</h2>
-    <p class="fr-lede">Four outcomes the existing AI stack does not give you. Each maps to one of the four stages above; together they're why teams move from renting tokens to owning a model.</p>
+    <h2 class="fr-h2">What you get when you compile.</h2>
+    <p class="fr-lede">Four outcomes the rented-token stack does not give you.</p>
 
     <div class="kolm-deep" role="list">
 
       <article class="kolm-deep__card" role="listitem">
         <header class="kolm-deep__head">
-          <div class="kolm-deep__stage">Outcome 01</div>
-          <h3 class="kolm-deep__title">Stop paying per token. Forever.</h3>
+          <div class="kolm-deep__stage">01</div>
+          <h3 class="kolm-deep__title">No per-token bill. Ever.</h3>
         </header>
-        <p class="kolm-deep__body">After one compile pass your traffic is served by a model that lives on your hardware. There is no per-token meter behind it because there is no provider behind it. The artifact is yours, the weights are on your disk, and inference cost collapses to the electricity bill on the box.</p>
+        <p class="kolm-deep__body">The artifact runs on your hardware. Inference cost collapses to the electricity bill on the box.</p>
         <ul class="kolm-deep__facts">
-          <li><b>Typical team</b> <span>$8K/mo OpenAI bill &rarr; ~$140/mo electricity on a single 5090</span></li>
-          <li><b>Payback</b> <span>Pro plan ($49/mo) clears its own cost in week one for most production loads</span></li>
-          <li><b>No lock-in</b> <span>artifact runs without our service; cancel the plan, the model keeps serving</span></li>
+          <li><b>Typical team</b> <span>$8K/mo OpenAI &rarr; ~$140/mo electricity (1&times;5090)</span></li>
+          <li><b>Payback</b> <span>Pro ($49/mo) clears in week one for most loads</span></li>
         </ul>
-        <code class="kolm-deep__cmd">$ kolm run support.kolm --port 8080   # no per-token bill</code>
+        <code class="kolm-deep__cmd">$ kolm run support.kolm</code>
       </article>
 
       <article class="kolm-deep__card" role="listitem">
         <header class="kolm-deep__head">
-          <div class="kolm-deep__stage">Outcome 02</div>
-          <h3 class="kolm-deep__title">A model trained on YOUR traffic, not a scrape.</h3>
+          <div class="kolm-deep__stage">02</div>
+          <h3 class="kolm-deep__title">Trained on YOUR traffic, not a scrape.</h3>
         </header>
-        <p class="kolm-deep__body">The capture layer turns every gateway response into a training row in a private lake. You approve what's worth keeping, the distiller teaches a small open-source base on those rows. The output speaks your tone, knows your edge cases, and answers questions a generalist would hallucinate on  -  because it learned from real conversations with your users.</p>
+        <p class="kolm-deep__body">Distilled from real conversations on your namespace. Tone, jargon, edge cases all carry over.</p>
         <ul class="kolm-deep__facts">
-          <li><b>Quality lift</b> <span>+12 to +28 K-Score points on your evals vs the base model</span></li>
-          <li><b>Tone match</b> <span>style, jargon, escalation rules carry over from the captured rows</span></li>
-          <li><b>Your data, fenced</b> <span>captures never cross tenant lines; nothing leaves without your sign-off</span></li>
+          <li><b>Quality lift</b> <span>+12 to +28 K-Score points vs the base model</span></li>
+          <li><b>Tenant-fenced</b> <span>captures never cross tenant lines</span></li>
         </ul>
         <code class="kolm-deep__cmd">$ kolm distill --namespace support --student qwen-7b</code>
       </article>
 
       <article class="kolm-deep__card" role="listitem">
         <header class="kolm-deep__head">
-          <div class="kolm-deep__stage">Outcome 03</div>
-          <h3 class="kolm-deep__title">Fits the hardware you already own.</h3>
+          <div class="kolm-deep__stage">03</div>
+          <h3 class="kolm-deep__title">Fits the hardware you own.</h3>
         </header>
-        <p class="kolm-deep__body">The forge tries ten quantize methods on your target box, scores each by accuracy per byte, and pins the winner. A 32B model fits in 17.9 GB on an RTX 5090. A 7B model fits on a Mac laptop. A 3B model fits on a phone. The artifact carries the kernel it was built for, so it just runs  -  no fiddling with toolchains.</p>
+        <p class="kolm-deep__body">Ten quantize methods scored on your target box; winner pinned by accuracy-per-byte. From phone to 5090.</p>
         <ul class="kolm-deep__facts">
-          <li><b>Laptop</b> <span>7B INT4 on M-series Mac, 24.5 tok/s, fits in unified memory</span></li>
-          <li><b>Consumer GPU</b> <span>32B NF4 on RTX 5090, 19.2 GB VRAM, 11.5 tok/s</span></li>
-          <li><b>Phone / edge</b> <span>3B BitNet 1.58 on a Pixel 8, sub-second first-token</span></li>
+          <li><b>Mac laptop</b> <span>7B INT4, 24.5 tok/s</span></li>
+          <li><b>RTX 5090</b> <span>32B NF4, 19.2 GB VRAM, 11.5 tok/s</span></li>
+          <li><b>Pixel 8</b> <span>3B BitNet 1.58, sub-second first-token</span></li>
         </ul>
-        <code class="kolm-deep__cmd">$ kolm quantize --target rtx-5090 --k-score-floor 0.85</code>
+        <code class="kolm-deep__cmd">$ kolm quantize --target rtx-5090</code>
       </article>
 
       <article class="kolm-deep__card" role="listitem">
         <header class="kolm-deep__head">
-          <div class="kolm-deep__stage">Outcome 04</div>
-          <h3 class="kolm-deep__title">An audit trail your compliance team will actually accept.</h3>
+          <div class="kolm-deep__stage">04</div>
+          <h3 class="kolm-deep__title">An audit trail compliance accepts.</h3>
         </header>
-        <p class="kolm-deep__body">Every response is signed at the byte level; every artifact carries its own offline verifier. Pull the <code>.kolm</code>, type <code>kolm verify</code>, and an auditor can replay the eval, confirm the weights match the receipt, and prove what the model was at the moment of inference. No phone-home, no trust in our service required.</p>
+        <p class="kolm-deep__body">Every artifact ships its own offline verifier. <code>kolm verify</code> replays the eval and proves the weights, no phone-home.</p>
         <ul class="kolm-deep__facts">
-          <li><b>HIPAA &middot; SOC 2</b> <span>BAA-friendly: artifacts run in your VPC, your air gap, your laptop</span></li>
-          <li><b>Reproducible</b> <span>same spec.toml + same seeds &rarr; identical signed artifact hash</span></li>
-          <li><b>Offline verify</b> <span>$ kolm verify support.kolm works on a machine with no internet</span></li>
+          <li><b>HIPAA &middot; SOC 2</b> <span>BAA-friendly: VPC, air-gap, or laptop</span></li>
+          <li><b>Reproducible</b> <span>same spec + seeds &rarr; identical signed hash</span></li>
         </ul>
-        <code class="kolm-deep__cmd">$ kolm verify support.kolm   # works air-gapped, no network call</code>
+        <code class="kolm-deep__cmd">$ kolm verify support.kolm</code>
       </article>
 
     </div>
@@ -1059,7 +1076,7 @@
     </div>
 
     <details class="w837-receipts-fold">
-      <summary>Reference artifacts the same compiler has built &middot; smoke test, not a brag</summary>
+      <summary>Reference artifacts the same compiler has built</summary>
       <div class="home-receipts" role="table" aria-label="Compile receipts table">
         <div class="home-receipts__row home-receipts__row--head" role="row">
           <span role="columnheader">Artifact</span>
@@ -1273,8 +1290,20 @@
         </ul>
         <div class="fr-tier__cta"><a href="/signup?plan=team" class="fr-btn fr-btn--ghost">Start Team</a></div>
       </div>
+      <div class="fr-tier">
+        <p class="fr-tier__name">Business</p>
+        <p class="fr-tier__price">$1,499<small>/ mo</small></p>
+        <p class="fr-tier__tag">For a regulated org: SAML, BAA, dedicated SRE.</p>
+        <ul>
+          <li>25M gateway calls / mo</li>
+          <li>SAML SSO + SCIM</li>
+          <li>BAA + DPA on request</li>
+          <li>Air-gap + 20 seats</li>
+        </ul>
+        <div class="fr-tier__cta"><a href="/signup?plan=business" class="fr-btn fr-btn--ghost">Start Business</a></div>
+      </div>
     </div>
-    <p class="ks-mono ks-dim" style="margin-top: 16px; font-size: 12.5px;">Full pricing, overages, and self-host options at <a href="/pricing">/pricing</a>.</p>
+    <p class="ks-mono ks-dim" style="margin-top: 16px; font-size: 12.5px;">Full pricing, Enterprise, and self-host options at <a href="/pricing">/pricing</a>.</p>
   </div>
 </section>
 

@@ -17,9 +17,9 @@
 <link rel="stylesheet" href="/ks.css">
     <link rel="stylesheet" href="/warm-paper.css">
 <style>
-  .wrap-band { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--ks-10); align-items: start; padding: var(--ks-16) 0; border-top: 1px solid var(--ks-line-1); }
-  .wrap-band:first-child { border-top: 0; }
-  @media (max-width: 880px) { .wrap-band { grid-template-columns: 1fr; gap: var(--ks-6); padding: var(--ks-12) 0; } }
+  .wrap-band { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--ks-10); align-items: start; padding: clamp(56px, 7vw, 96px) 0; border-top: 1px solid var(--ks-line-1); }
+  .wrap-band:first-child { border-top: 0; padding-top: clamp(40px, 5vw, 64px); }
+  @media (max-width: 880px) { .wrap-band { grid-template-columns: 1fr; gap: var(--ks-6); padding: clamp(40px, 6vw, 64px) 0; } }
   .wrap-band .num { font-family: var(--ks-mono); font-size: 12px; color: var(--ks-accent); letter-spacing: 0.06em; text-transform: uppercase; margin: 0 0 var(--ks-3); }
   .wrap-band h3 { font-size: clamp(28px, 3vw, 40px); margin: 0 0 var(--ks-3); font-weight: 520; line-height: 1.05; letter-spacing: -0.022em; color: var(--ks-ink); text-wrap: balance; }
   .wrap-band p { margin: 0 0 var(--ks-5); color: var(--ks-ink-2); font-size: 16px; line-height: 1.65; max-width: 52ch; }
@@ -98,8 +98,8 @@
   <div class="ks-hero__wrap" style="grid-template-columns: 1fr;">
     <div style="max-width: 880px;">
       <span class="ks-eyebrow">For developers and platform teams</span>
-      <h1 class="ks-hero__h1" style="max-width: 22ch;">Drop-in <span class="grad">OpenAI-compatible</span> gateway, with capture and redaction built in.</h1>
-      <p class="ks-hero__lede">Change one environment variable. Your application keeps the OpenAI SDK, Anthropic SDK, LangChain, Vercel AI SDK, Cursor, Continue, Aider, whatever. Behind the URL, kolm routes to the right provider, redacts PII at the edge, retries on failure, fails over, and signs every approved response into a tenant-fenced capture log you own.</p>
+      <h1 class="ks-hero__h1" style="max-width: 22ch;">One gateway for <span class="grad">every LLM API</span>, with capture and redaction built in.</h1>
+      <p class="ks-hero__lede">Change one environment variable. Your application keeps whatever SDK it already uses &mdash; OpenAI, Anthropic, Google, LangChain, Vercel AI SDK, Cursor, Continue, Aider, vLLM, Ollama. Behind the URL, kolm routes to the right provider, redacts PII at the edge, retries on failure, fails over, and signs every approved response into a tenant-fenced capture log you own.</p>
       <div class="ks-hero__ctas">
         <a class="ks-btn ks-btn--primary ks-btn--lg" href="/signup">Start free</a>
         <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/quickstart">Read the quickstart</a>
@@ -137,11 +137,12 @@
       <div>
         <p class="num">01 &middot; Gateway</p>
         <h3>One URL. Every model API.</h3>
-        <p>Flip <code>OPENAI_BASE_URL</code>. Your app keeps the OpenAI SDK. Behind the scenes, kolm routes to OpenAI, Anthropic, vLLM, SGLang, TRT-LLM, TGI, Fireworks, Together, or your own kolm runtime. Set a per-namespace rate limit, retry budget, and failover order from the dashboard or the CLI.</p>
+        <p>Flip one base-URL env var (<code>OPENAI_BASE_URL</code>, <code>ANTHROPIC_BASE_URL</code>, or the equivalent for your client). Your app keeps the SDK it already uses. Behind the scenes, kolm routes across OpenAI, Anthropic, Google, Mistral, vLLM, SGLang, TRT-LLM, TGI, Fireworks, Together, Groq, Ollama, or your own kolm runtime. Set per-namespace rate limits, retry budgets, and failover order from the dashboard or the CLI.</p>
         <ul>
           <li>OpenAI Chat Completions, drop-in compatible</li>
           <li>Anthropic Messages, drop-in compatible</li>
-          <li>vLLM, SGLang, TRT-LLM, TGI, llama.cpp adapters</li>
+          <li>Google, Mistral, Groq, Together, Fireworks adapters</li>
+          <li>vLLM, SGLang, TRT-LLM, TGI, llama.cpp, Ollama runtimes</li>
           <li>Per-namespace rate limits, retries, failover order</li>
           <li>Stream and non-stream both supported</li>
         </ul>
@@ -329,7 +330,7 @@ console.log(body.suggested_model);  <span class="com">// &quot;qwen2.5-3b.kolm&q
   <div class="ks-wrap ks-wrap--narrow" style="text-align: center;">
     <span class="ks-eyebrow">Looking for the other side</span>
     <h2 class="ks-h2" style="text-wrap: balance;">If you train, distill, or quantize models, go to Studio.</h2>
-    <p class="ks-prose" style="margin: var(--ks-3) auto var(--ks-6); max-width: 60ch;">The wrapper is for application developers. Studio is the same product, for the ML team that distills a frontier teacher into a smaller student, quantizes it to INT4, and compiles a portable <code>.kolm</code> the wrapper can serve.</p>
+    <p class="ks-prose" style="margin: var(--ks-3) auto var(--ks-6); max-width: 64ch;">The wrapper is for application developers. Studio is the same product, for the ML team. It runs <b style="color:var(--ks-ink);">LoRA + QLoRA adapters</b> over a frozen frontier teacher, applies <b style="color:var(--ks-ink);">NF4 / GPTQ / AWQ quantization</b> to the student, bootstraps synthetic eval sets from captured traffic, and compiles a portable <code>.kolm</code> the wrapper can serve.</p>
     <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
       <a class="ks-btn ks-btn--primary ks-btn--lg" href="/studio">Open Studio &rarr;</a>
       <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/product">See both products</a>

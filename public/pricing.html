@@ -47,7 +47,7 @@
   .pr-tier--bus::before { content: "Architecture review"; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); padding: 4px 10px; background: transparent; color: var(--ks-accent); border: 1px solid var(--ks-accent); font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; border-radius: var(--ks-r-pill); font-weight: 600; }
   .pr-tier h3 { font-family: var(--ks-mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ks-accent); margin: 0; }
   .pr-tier .price { font-size: 38px; font-weight: 520; letter-spacing: 0; color: var(--ks-ink); line-height: 1; margin: var(--ks-1) 0; font-variant-numeric: tabular-nums; }
-  .pr-tier .price small { font-size: 13px; color: var(--ks-ink-3); font-weight: 400; margin-left: 5px; letter-spacing: 0; }
+  .pr-tier .price small { font-size: 13px; color: #5a5a55; font-weight: 400; margin-left: 5px; letter-spacing: 0; }
   .pr-tier .tagline { color: var(--ks-ink-2); font-size: 14px; line-height: 1.55; margin: 0 0 var(--ks-3); min-height: 3em; }
   .pr-tier ul { margin: 0 0 auto; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
   .pr-tier ul li { display: flex; align-items: flex-start; padding: 0; font-size: 13.5px; color: var(--ks-ink-2); line-height: 1.45; }
@@ -296,9 +296,9 @@
   <div class="ks-hero__bg" aria-hidden="true"></div>
   <div class="ks-wrap" style="text-align: center;">
     <span class="ks-eyebrow" style="margin-bottom: var(--ks-4); justify-content: center;">Pricing</span>
-    <h1 class="ks-hero__h1" style="max-width: 22ch; margin: 0 auto var(--ks-4);">Start free. Scale to owned AI.</h1>
-    <div class="w708-open-weights-badge" style="margin: 0 auto var(--ks-4); font-family: var(--ks-mono); font-size: 12px; letter-spacing: 0.02em; color: var(--ks-ink-3);"><a href="/quickstart?teacher=open-weights" style="color: var(--ks-ink-2); text-decoration: none; border-bottom: 1px dotted var(--ks-line-2); padding-bottom: 1px;">Open-weights teachers (Qwen, Llama, Mistral) - no API-vendor TOS risk &rarr;</a></div>
-    <p class="ks-hero__lede" style="margin: 0 auto var(--ks-6); max-width: 60ch;">Pay for routing, compile credits, registry, and governance. Once a signed <code>.kolm</code> artifact runs on your hardware, there is no Kolm per-token inference bill.</p>
+    <h1 class="ks-hero__h1" style="max-width: 18ch; margin: 0 auto var(--ks-4); color: var(--ks-ink);">Pay for compute, not tokens.</h1>
+    <p class="ks-hero__lede" style="margin: 0 auto var(--ks-5); max-width: 56ch;">Self-host free forever. Add seats, SSO, and BAA when you outgrow it.</p>
+    <div class="w708-open-weights-badge" style="margin: 0 auto var(--ks-4); font-family: var(--ks-mono); font-size: 12px; letter-spacing: 0.02em; color: var(--ks-ink-2);"><a href="/quickstart?teacher=open-weights" style="color: var(--ks-ink-2); text-decoration: none; border-bottom: 1px dotted var(--ks-line-2); padding-bottom: 1px;">Open-weights teachers (Qwen, Llama, Mistral) &mdash; no vendor TOS risk &rarr;</a></div>
     <div class="pr-toggle" role="tablist" aria-label="Billing period">
       <button class="on" id="bill-monthly" type="button">Monthly</button>
       <button id="bill-annual" type="button">Annual <span class="pr-savings">save 17%</span></button>
@@ -342,7 +342,7 @@
         <span data-w273="free-contract" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">Free tier: 100 compiles included, 1k captures retained, 1 GB storage, community support via Discord and GitHub Issues.</span>
         <h3>Free</h3>
         <div class="price" data-monthly="$0" data-annual="$0">$0<small>/ mo</small></div>
-        <p class="tagline">For trying the stack and shipping a side project. Hobbyists, researchers, and devs trialing the forge.</p>
+        <p class="tagline">Try the stack. Ship a side project. Self-host the whole thing.</p>
         <ul>
           <li data-w795="free-tier-50k"><i class="ks-yes" aria-hidden="true"></i><span>50,000 gateway calls / month</span></li>
           <li><i class="ks-yes" aria-hidden="true"></i><span>1 namespace, 1 tenant</span></li>
@@ -359,7 +359,7 @@
         <span data-w273="starter-contract" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">Starter maps to Pro $49 with unlimited compiles, 10 GB storage, priority K-score scoring, and email support 24h response.</span>
         <h3>Pro</h3>
         <div class="price" data-monthly="$49" data-annual="$41">$49<small>/ mo</small></div>
-        <p class="tagline">For one builder shipping a real product to real users. Indie devs and small teams shipping production vertical bots or community frontier artifacts.</p>
+        <p class="tagline">For one builder shipping a real product to real users.</p>
         <ul>
           <li><i class="ks-yes" aria-hidden="true"></i><span>500,000 gateway calls / month</span></li>
           <li><i class="ks-yes" aria-hidden="true"></i><span>5 namespaces, captures with rolling retention</span></li>
@@ -376,7 +376,7 @@
         <span data-w273="team-contract" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">Team tier: $499 with five-seat seats included, private registry, approvals gate, audit log, CI/CD integration via GitHub Actions or GitLab pipelines.</span>
         <h3>Team</h3>
         <div class="price" data-monthly="$499" data-annual="$416">$499<small>/ mo</small></div>
-        <p class="tagline">For engineering teams that route, review, compile, deploy, and govern shared AI systems.</p>
+        <p class="tagline">For engineering teams that route, review, compile, and govern shared AI.</p>
         <ul>
           <li><i class="ks-yes" aria-hidden="true"></i><span>5 million gateway calls / month</span></li>
           <li><i class="ks-yes" aria-hidden="true"></i><span>Unlimited namespaces + per-namespace billing</span></li>
@@ -396,7 +396,7 @@
         <span style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">Business maps to Enterprise custom with regulated controls: signed BAA, SAML/SCIM SSO via Okta and Azure AD and OneLogin, customer-hosted bridge deployment into your VPC, air-gap deploy bundle, architecture review scoped to your boundary.</span>
         <h3>Business</h3>
         <div class="price" data-monthly="$1,499" data-annual="$1,249">$1,499<small>/ mo</small></div>
-        <p class="tagline">For 20+ seat orgs that need SSO, BAA, and a private registry without the procurement runway of Enterprise.</p>
+        <p class="tagline">For 20+ seat orgs that need SSO and BAA without the Enterprise runway.</p>
         <ul>
           <li><i class="ks-yes" aria-hidden="true"></i><span>25 million gateway calls / month</span></li>
           <li><i class="ks-yes" aria-hidden="true"></i><span>20 seats included &middot; SCIM provisioning</span></li>
@@ -413,7 +413,7 @@
         <span data-w273="enterprise-contract" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">Enterprise tier: Custom pricing, unlimited gateway, on-prem and air-gap and self-hosted deployment supported, signed BAA, dedicated CSM with white-glove onboarding.</span>
         <h3>Enterprise</h3>
         <div class="price" data-monthly="Custom" data-annual="Custom">Custom<small>/ annual</small></div>
-        <p class="tagline" style="color: var(--ks-accent); font-weight: 500;">For regulated, air-gapped, BYOC, high-volume, and procurement-led deployments.</p>
+        <p class="tagline" style="color: var(--ks-accent); font-weight: 500;">For regulated, air-gapped, BYOC, procurement-led deployments.</p>
         <ul>
           <li><i class="ks-yes" aria-hidden="true"></i><span>Custom gateway, compile, registry, and deployment volume</span></li>
           <li><i class="ks-yes" aria-hidden="true"></i><span>BYOC into your AWS, GCP, or Azure account</span></li>

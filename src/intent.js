@@ -1331,10 +1331,185 @@ export function recommendNext(snapshot) {
   return recs.slice(0, 5);
 }
 
+// ---------------------------------------------------------------------------
+// W847 — expandToWorkflow. Bridges the gap between "classifier picked the
+// right verb" and "the user wanted a multi-step recipe, not a bare command."
+//
+// Problem the fix solves: when a free-tier visitor types a goal in plain
+// English ("compile a model to blur porn", "cut my OpenAI bill in half",
+// "fit deepseek 32B on a 5090"), classifyIntent correctly returns the
+// closing verb (compile, lake, quantize) — but with no args. The /v1/free/chat
+// surface rendered `$ kolm compile` and called it a day, which is useless: the
+// user can't run that. expandToWorkflow returns the actual recipe a human
+// would walk through, with each step's CLI + a one-line why.
+//
+// Heuristic: only expand when the classified verb is a "terminal" verb whose
+// real value comes from a preceding pipeline (compile, distill, run, bench,
+// verify, replay, bakeoff, dataset, quantize, export). Status-style verbs
+// (whoami, status, doctor, version, list, what, health, metrics) are already
+// one-shot and never expanded.
+//
+// Returns null when no workflow expansion applies — the caller should render
+// the bare command in that case.
+// ---------------------------------------------------------------------------
+
+const WORKFLOWS = {
+  compile: {
+    summary: 'Capture real traffic, distill a small model from it, then compile a verifiable .kolm.',
+    steps: [
+      { cmd: 'kolm capture --provider openai --as ks_proxy',           why: 'Stand up the capture proxy so production traffic lands in a namespace.' },
+      { cmd: 'kolm tail captures --namespace <name>',                  why: 'Watch the live (input,output) pairs accumulate until you have a few hundred.' },
+      { cmd: 'kolm distill --from-captures --namespace <name>',        why: 'Turn the captured pairs into a small specialist LoRA on a base model.' },
+      { cmd: 'kolm compile --spec <name>.spec.json',                   why: 'Bake the LoRA + recipes + evals into one signed, verifiable .kolm artifact.' },
+    ],
+  },
+  distill: {
+    summary: 'Distill captured traffic into a specialist LoRA you can run anywhere.',
+    steps: [
+      { cmd: 'kolm capture --provider openai --as ks_proxy',           why: 'Route production traffic through the proxy so pairs are recorded.' },
+      { cmd: 'kolm tail captures --namespace <name>',                  why: 'Confirm pairs are landing in the right namespace.' },
+      { cmd: 'kolm dataset create --namespace <name>',                 why: 'Curate a reviewable train/holdout split from the raw captures.' },
+      { cmd: 'kolm distill --from-captures --namespace <name>',        why: 'Train the specialist LoRA from the dataset.' },
+    ],
+  },
+  run: {
+    summary: 'List your local artifacts, then call the one you want against an input.',
+    steps: [
+      { cmd: 'kolm list',                                              why: 'See every .kolm artifact under ~/.kolm/artifacts/.' },
+      { cmd: 'kolm run <artifact>.kolm "<your input>"',                why: 'Execute the artifact against the input. Output is deterministic.' },
+    ],
+  },
+  bench: {
+    summary: 'Pick an artifact and measure latency + cost vs the original LLM.',
+    steps: [
+      { cmd: 'kolm list',                                              why: 'See which artifacts are available locally.' },
+      { cmd: 'kolm bench <artifact>.kolm --runs 100',                  why: 'Run reproducible latency + cost benchmark.' },
+    ],
+  },
+  verify: {
+    summary: 'Verify the signature, K-score, and emit a compliance binder.',
+    steps: [
+      { cmd: 'kolm list',                                              why: 'Find the artifact you want to verify.' },
+      { cmd: 'kolm verify <artifact>.kolm --binder report.html',       why: 'Check signature + K-score gate; the HTML binder is audit-ready.' },
+    ],
+  },
+  replay: {
+    summary: 'Replay captured pairs against a new artifact to detect regressions.',
+    steps: [
+      { cmd: 'kolm tail captures --namespace <name>',                  why: 'Confirm the namespace has captures to replay.' },
+      { cmd: 'kolm replay <namespace> <baseline_art> <candidate_art>', why: 'Diff candidate against baseline on real traffic. Catches drift before deploy.' },
+    ],
+  },
+  bakeoff: {
+    summary: 'Score candidate models head-to-head against a curated holdout.',
+    steps: [
+      { cmd: 'kolm dataset create --namespace <name>',                 why: 'Promote captures into a reviewable dataset with a holdout split.' },
+      { cmd: 'kolm bakeoff --dataset <ds_id>',                         why: 'Rank candidates by K-score + cost. Cheapest model that meets your bar wins.' },
+    ],
+  },
+  dataset: {
+    summary: 'Promote raw captures into a curated train+holdout dataset.',
+    steps: [
+      { cmd: 'kolm tail captures --namespace <name>',                  why: 'Spot-check the captures before promoting them.' },
+      { cmd: 'kolm dataset create --namespace <name>',                 why: 'Create the dataset and split.' },
+      { cmd: 'kolm dataset list',                                      why: 'Inspect the new dataset_id you can pass to distill/bakeoff.' },
+    ],
+  },
+  quantize: {
+    summary: 'Shrink a model to INT4 / INT8 so it fits on smaller hardware.',
+    steps: [
+      { cmd: 'kolm gpu detect',                                        why: 'Pick the right quantization for your GPU (NF4 needs CUDA + bitsandbytes).' },
+      { cmd: 'kolm quantize int4 --in <adapter_or_model>',             why: 'Run the isolated quantize worker. Outputs the quantized weights + a sidecar manifest.' },
+      { cmd: 'kolm run <quantized>.kolm "<input>"',                    why: 'Smoke-test it on a sample input before deploying.' },
+    ],
+  },
+  export: {
+    summary: 'Convert a .kolm into a runtime your stack already speaks (GGUF/MLX/ONNX/CoreML/TensorRT).',
+    steps: [
+      { cmd: 'kolm list',                                              why: 'Find the artifact to convert.' },
+      { cmd: 'kolm export <artifact>.kolm --to gguf',                  why: 'Emit the runtime-native weights + a portable runner manifest.' },
+    ],
+  },
+  capture: {
+    summary: 'Capture real LLM traffic into a namespace so you can distill/replay it later.',
+    steps: [
+      { cmd: 'kolm capture --provider openai --as ks_proxy',           why: 'Generate a per-namespace proxy key. Point your OPENAI_BASE_URL at it.' },
+      { cmd: 'kolm tail captures --namespace <name>',                  why: 'Watch live pairs land.' },
+      { cmd: 'kolm capture status',                                    why: 'Inspect per-namespace counts + cost rollup.' },
+    ],
+  },
+  lake: {
+    summary: 'Read the canonical telemetry lake: spend, top models/providers, error spikes.',
+    steps: [
+      { cmd: 'kolm lake stats',                                        why: 'One-shot rollup across every namespace.' },
+      { cmd: 'kolm lake tail --namespace <name>',                      why: 'Stream live calls for one namespace.' },
+      { cmd: 'kolm opportunities',                                     why: 'Surface duplicate calls, expensive prompts, and PII leaks.' },
+    ],
+  },
+  fix: {
+    summary: 'Surface failing eval cases and propose seed fixes you can apply in one shot.',
+    steps: [
+      { cmd: 'kolm eval <artifact>.kolm',                              why: 'Re-run the embedded evals to see exactly which cases fail.' },
+      { cmd: 'kolm fix <artifact>.kolm --apply',                       why: 'Apply auto-suggested seed/recipe patches and re-verify.' },
+    ],
+  },
+  serve: {
+    summary: 'Expose your local ~/.kolm/artifacts/ as MCP tools or an HTTP endpoint.',
+    steps: [
+      { cmd: 'kolm list',                                              why: 'Confirm the artifacts you want to serve are present.' },
+      { cmd: 'kolm serve --mcp --http --port 7787',                    why: 'Run the MCP server. Claude/Cursor can now call your artifacts as tools.' },
+      { cmd: 'kolm install claude-code --apply',                       why: 'Wire the running server into Claude Code config in one step.' },
+    ],
+  },
+};
+
+const VERB_NEEDS_ARGS = new Set([
+  'compile', 'distill', 'run', 'bench', 'verify', 'replay', 'bakeoff',
+  'dataset', 'quantize', 'export', 'capture', 'lake', 'fix', 'serve',
+]);
+
+export function expandToWorkflow(intent, originalQuestion) {
+  if (!intent || !intent.verb) return null;
+  const verb = intent.verb;
+  // If the classifier already extracted concrete args, the user knows what they
+  // want — no expansion needed.
+  if (intent.args && intent.args.length > 0) return null;
+  if (!VERB_NEEDS_ARGS.has(verb)) return null;
+  const wf = WORKFLOWS[verb];
+  if (!wf) return null;
+  // Pull a namespace hint from the question so the placeholder is meaningful.
+  // "blur porn" → "porn-filter", "openai bill" → "openai-bill", etc.
+  const q = String(originalQuestion || '').toLowerCase();
+  let hint = null;
+  // common goal phrasings
+  const goalMatch = q.match(/\b(?:to|for|that|which)\s+([a-z][a-z0-9 -]{2,40})/);
+  if (goalMatch) hint = goalMatch[1].trim().split(/\s+/).slice(0, 3).join('-');
+  if (!hint) {
+    const fromMatch = q.match(/\bfrom\s+(my\s+)?([a-z][a-z0-9 -]{2,30})/);
+    if (fromMatch) hint = fromMatch[2].trim().split(/\s+/).slice(0, 3).join('-');
+  }
+  if (!hint) {
+    // last-ditch: pluck the first noun-ish word after the verb
+    const verbMatch = q.match(new RegExp('\\b' + verb + '\\b\\s+([a-z][a-z0-9-]{2,30})'));
+    if (verbMatch) hint = verbMatch[1];
+  }
+  const safeHint = hint ? hint.replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').slice(0, 30) : null;
+  const steps = wf.steps.map(s => ({
+    cmd: safeHint ? s.cmd.replace(/<name>/g, safeHint).replace(/<artifact>/g, safeHint) : s.cmd,
+    why: s.why,
+  }));
+  return {
+    summary: wf.summary,
+    namespace_hint: safeHint,
+    steps,
+  };
+}
+
 export default {
   VERB_DESCRIPTIONS,
   listVerbs,
   classifyIntent,
   snapshotContext,
   recommendNext,
+  expandToWorkflow,
 };

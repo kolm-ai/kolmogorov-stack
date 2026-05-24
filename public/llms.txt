@@ -134,3 +134,135 @@ tests state that they are published.
 - General: https://kolm.ai/contact
 - Security disclosures: https://kolm.ai/.well-known/security.txt
 - Press: press@kolm.ai
+
+## Full doc index
+
+Per https://llmstxt.org spec. Every documented page on kolm.ai by surface,
+with a one-line description for downstream LLMs and crawlers.
+
+### Get started
+
+- [Quickstart](https://kolm.ai/quickstart): install, capture, distill, compile, sign, verify in ten minutes.
+- [Why kolm](https://kolm.ai/why-kolm): six reasons regulated and security-minded teams pick an open compiler.
+- [Compare](https://kolm.ai/compare): honest matrix against LoRAX, Predibase, OpenPipe, DIY across ten axes.
+- [Cookbook](https://kolm.ai/docs/cookbook): 35 end-to-end recipes by domain.
+- [Glossary](https://kolm.ai/glossary): the canonical definitions of kolm terms.
+
+### CLI reference (one page per verb)
+
+- [CLI index](https://kolm.ai/docs/cli/index): every verb the kolm CLI accepts.
+- [init](https://kolm.ai/docs/cli/init): scaffold a kolm project in the current directory.
+- [login](https://kolm.ai/docs/cli/login) / [logout](https://kolm.ai/docs/cli/logout) / [signup](https://kolm.ai/docs/cli/signup) / [whoami](https://kolm.ai/docs/cli/whoami): credential management.
+- [capture](https://kolm.ai/docs/cli/capture): route model calls through the gateway and record them locally.
+- [distill](https://kolm.ai/docs/cli/distill): train a student model from captures.
+- [compile](https://kolm.ai/docs/cli/compile): quantize and package a .kolm artifact.
+- [quantize](https://kolm.ai/docs/cli/quantize): emit an INT4 artifact from a BF16 base.
+- [score](https://kolm.ai/docs/cli/score): compute the K-score against an eval pack.
+- [verify](https://kolm.ai/docs/cli/verify): validate signature, eval pack hash, teacher attestation.
+- [run](https://kolm.ai/docs/cli/run): run a .kolm artifact locally against an input.
+- [serve](https://kolm.ai/docs/cli/serve): start the gateway in MCP or HTTP mode.
+- [bench](https://kolm.ai/docs/cli/bench): canonical benchmark runner.
+- [doctor](https://kolm.ai/docs/cli/doctor): sanity-check the local install.
+- [keys](https://kolm.ai/docs/cli/keys): manage Ed25519 signing keys.
+- [seeds](https://kolm.ai/docs/cli/seeds): manage the seed corpus.
+- [nl](https://kolm.ai/docs/cli/nl): natural-language recipe scaffolder.
+- [rag](https://kolm.ai/docs/cli/rag): knowledge-base index builder.
+- [inspect](https://kolm.ai/docs/cli/inspect): inspect a .kolm artifact and its receipts.
+- [install](https://kolm.ai/docs/cli/install): one-shot installers for Claude Code, Cursor, Continue, Cline, VS Code.
+- [tune](https://kolm.ai/docs/cli/tune): tune the distill recipe.
+- [improve](https://kolm.ai/docs/cli/improve): iterate on an existing artifact with new captures.
+- [trace](https://kolm.ai/docs/cli/trace): work with agent execution traces.
+- [tui](https://kolm.ai/docs/cli/tui): the post-auth terminal UI.
+
+### SDKs
+
+- [SDK reference](https://kolm.ai/docs/sdk): six bindings, all Apache-2.0, same gateway and verifier surface.
+- [Node.js (@kolm/sdk)](https://kolm.ai/sdks#node): promise-based, types included, OAuth and API key auth.
+- [Python](https://kolm.ai/sdks#python): sync and async, pytest integration, source install path.
+- [Rust](https://kolm.ai/sdks#rust): ureq-sync, no async runtime required.
+- [C single-header](https://kolm.ai/sdks#c): stb-style kolm.h, libcurl-backed, for embedded contexts.
+- [MCP server](https://kolm.ai/sdks#mcp): drop-in MCP server for Claude, Cursor, any MCP host.
+- [VS Code extension](https://kolm.ai/docs/vscode): K-score in the status bar, inline distill commands.
+
+### Runtimes
+
+- [Runtime matrix](https://kolm.ai/runtimes): GGUF, vLLM, TensorRT-LLM, MLX, ONNX, SGLang, TGI.
+- [Runtime spec](https://kolm.ai/docs/runtime): adapter contract and verifier sidecar shape.
+- [Runtime placement](https://kolm.ai/docs/runtime-placement): which runtime to pick for which target.
+- [Hardware targets](https://kolm.ai/docs/hardware): GPU, edge, mobile, Apple Silicon.
+- [Numeric accuracy](https://kolm.ai/docs/numeric-accuracy): FP32 vs FP16 vs BF16 vs INT8 vs INT4 vs FP8 tradeoffs.
+
+### Receipts and verify
+
+- [RS-1 spec](https://kolm.ai/docs/rs-1): receipt chain envelope, the 24 verifier checks.
+- [Verify a .kolm](https://kolm.ai/docs/verify): how to validate an artifact end-to-end.
+- [Lineage](https://kolm.ai/docs/lineage): how lineage rows compose into the receipt chain.
+- [Audit log](https://kolm.ai/docs/audit) / [audit export](https://kolm.ai/docs/audit-export): tenant-scoped audit trail.
+- [Model card](https://kolm.ai/docs/model-card): the per-artifact model card embedded in the receipt.
+
+### Eval and K-score
+
+- [K-score spec](https://kolm.ai/k-score): faith, cover, calibration, honesty, cost — composed.
+- [K-score explained](https://kolm.ai/k-score-explained): authoring your own eval pack.
+- [K-score methodology](https://kolm.ai/docs/k-score-methodology): the composition math in detail.
+- [Eval packs](https://kolm.ai/docs/evals): JSONL plus manifest schema.
+- [CVE in K-score](https://kolm.ai/docs/cve-in-kscore): how security advisories enter the gate.
+- [Benchmarks](https://kolm.ai/benchmarks): reference K-scores for shipped artifacts.
+
+### Deploy
+
+- [Enterprise architectures](https://kolm.ai/enterprise): SaaS, dedicated, BYOC, on-prem, air-gap.
+- [Self-host](https://kolm.ai/self-host): Helm chart and Terraform module.
+- [Kubernetes](https://kolm.ai/docs/kubernetes): production K8s deployment patterns.
+- [Multi-region](https://kolm.ai/docs/multi-region): cross-region failover and replication.
+- [Gateway mode](https://kolm.ai/docs/gateway-mode): production gateway sizing.
+- [Air-gap](https://kolm.ai/airgap): the OCI bundle for environments without outbound network.
+- [Releasing](https://kolm.ai/docs/releasing): the release pipeline.
+
+### Security and compliance
+
+- [Security center](https://kolm.ai/security): encryption, key management, threat model.
+- [SOC 2](https://kolm.ai/soc2): Type I available, Type II in progress.
+- [HIPAA mapping](https://kolm.ai/hipaa-mapping): control-by-control mapping for the Security Rule.
+- [BAA](https://kolm.ai/baa): standard template, redline policy.
+- [Privacy controls](https://kolm.ai/docs/privacy): tenant isolation, residency, retention.
+- [Guardrails](https://kolm.ai/docs/guardrails): policy engine for prompt and response filtering.
+- [WebAuthn](https://kolm.ai/docs/webauthn): hardware-key login.
+- [Sandbox](https://kolm.ai/docs/sandbox): the isolation envelope for untrusted code paths.
+
+### Integrations
+
+- [All integrations](https://kolm.ai/integrations): the matrix.
+- [GitHub Actions](https://kolm.ai/docs/github-actions): drop-in action for `kolm score --min`.
+- [Connectors](https://kolm.ai/docs/connectors): EHR, EDI, identity, secrets, datastores.
+- [Webhooks](https://kolm.ai/docs/webhooks): event-driven outbound surface.
+- [VS Code](https://kolm.ai/docs/vscode): IDE integration with status-bar K-score.
+- [LM Studio import](https://kolm.ai/docs/lm-studio-import): import a .kolm into LM Studio.
+- [Marketplace import](https://kolm.ai/docs/marketplace-import): pull a shared artifact from the marketplace.
+
+### Concepts and features
+
+- [Distill](https://kolm.ai/docs/distill) / [distillation](https://kolm.ai/docs/distillation): the distillation loop.
+- [Datasets](https://kolm.ai/docs/datasets) / [synthetic](https://kolm.ai/docs/synthetic) / [lake](https://kolm.ai/docs/lake): data plane.
+- [Optimizer](https://kolm.ai/docs/optimizer) / [pipelines](https://kolm.ai/docs/pipelines): the training control plane.
+- [Approvals](https://kolm.ai/docs/approvals) / [tickets](https://kolm.ai/docs/tickets) / [team](https://kolm.ai/docs/team): the review queue.
+- [Storage](https://kolm.ai/docs/storage) / [devices](https://kolm.ai/docs/devices) / [cloud-sync](https://kolm.ai/docs/cloud-sync): storage plane.
+- [Capture anomaly](https://kolm.ai/docs/capture-anomaly) / [drift alert](https://kolm.ai/docs/drift-alert) / [drift detector](https://kolm.ai/docs/drift-detector): drift surface.
+- [Chargeback](https://kolm.ai/docs/chargeback) / [efficiency](https://kolm.ai/docs/efficiency) / [observability](https://kolm.ai/docs/observability): cost surface.
+- [Multilingual](https://kolm.ai/docs/multilingual) / [cross-lingual](https://kolm.ai/docs/cross-lingual) / [multimodal pipeline](https://kolm.ai/docs/multimodal-pipeline): non-text surfaces.
+- [Failure modes](https://kolm.ai/docs/failure-modes) / [staleness](https://kolm.ai/docs/staleness) / [seasonal](https://kolm.ai/docs/seasonal): operational ledger.
+- [Verticals](https://kolm.ai/docs/verticals): packs for healthcare, finance, defense, government, education.
+- [Plugins](https://kolm.ai/docs/plugins) / [agents](https://kolm.ai/docs/agents) / [agent guide](https://kolm.ai/docs/agent-guide) / [dev agents](https://kolm.ai/docs/dev-agents): agent surface.
+- [Reasoning traces](https://kolm.ai/docs/reasoning-traces): distill from Anthropic thinking, OpenAI reasoning, DeepSeek reasoning_content.
+- [Token-level DPO](https://kolm.ai/docs/token-dpo): per-token preference loss.
+- [A/B testing](https://kolm.ai/docs/ab-testing): two artifacts on one namespace, auto-promote on uplift.
+- [Marketplace](https://kolm.ai/docs/marketplace): publish, browse, rate, download signed artifacts.
+- [Federated consortium](https://kolm.ai/docs/federated-consortium): opt-in cross-tenant learning with DP budget.
+- [Regulatory toolkit](https://kolm.ai/docs/regulatory-toolkit): EU AI Act Annex IV generator and GRC export.
+- [Cost optimization](https://kolm.ai/docs/cost-optimization): savings-based pricing with 7-day baseline.
+- [Namespace fingerprint](https://kolm.ai/docs/namespace-fingerprint): per-tenant namespace identity.
+- [Diagnose](https://kolm.ai/docs/diagnose) / [troubleshooting](https://kolm.ai/docs/troubleshooting) / [state](https://kolm.ai/docs/state): debug surface.
+- [Copyright scan](https://kolm.ai/docs/copyright-scan): training-data copyright pre-flight.
+- [Migrate](https://kolm.ai/docs/migrate): one-page guides from LoRAX, Predibase, OpenPipe, DIY, hyperscaler.
+- [Data network effects](https://kolm.ai/docs/data-network-effects): tenant-local network effects without data sharing.
+

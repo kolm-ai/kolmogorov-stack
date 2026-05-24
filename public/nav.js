@@ -193,29 +193,9 @@ var devRe = /^\/(docs|research|training|train|spec|api|sdk|articles|cookbook|arc
  }
  })();
 
- (function ensureSolutionsNav() {
- if (nav.querySelector('a[href="/use-cases"]')) return;
- var productTop = nav.querySelector('a[href="/product"]');
- if (!productTop) return;
- var productItem = productTop.closest('.nav-item');
- if (productItem) {
- var item = document.createElement('div');
- item.className = 'nav-item nav-item--solutions has-mega';
- item.innerHTML =
- '<a class="nav-top" href="/use-cases" aria-haspopup="true" aria-expanded="false"><span data-kolm-icon="layers" data-kolm-size="14" style="opacity:.75;margin-right:6px;vertical-align:-2px"></span>Solutions</a>' +
- '<div class="mega-menu" role="menu" aria-label="solutions menu">' +
- '<div class="mega-col"><p class="mega-h">Verticals</p><a href="/healthcare">Healthcare</a><a href="/finance">Finance</a><a href="/legal">Legal</a><a href="/defense">Defense</a></div>' +
- '<div class="mega-col"><p class="mega-h">Workflows</p><a href="/use-cases">Use cases</a><a href="/edge">Edge and mobile</a><a href="/devtools">Agents and devtools</a><a href="/case-studies">Case studies</a></div>' +
- '<div class="mega-col"><p class="mega-h">Evaluate</p><a href="/compare">Compare</a><a href="/migrate">Migrate</a><a href="/roi">ROI</a></div>' +
- '</div>';
- productItem.insertAdjacentElement('afterend', item);
- return;
- }
- var link = document.createElement('a');
- link.href = '/use-cases';
- link.textContent = 'Solutions';
- productTop.insertAdjacentElement('afterend', link);
- })();
+ /* W846 fix-the-site round 2: mega-menu dropdown killed per user mandate.
+    Nav already exposes the canonical links; dropdown was visual noise. */
+ (function ensureSolutionsNav() { return; })();
 
  var anchors = nav.querySelectorAll('a');
  for (var i = 0; i < anchors.length; i++) {

@@ -7221,6 +7221,10 @@ export function buildRouter() {
       const snap = await intent.snapshotContext(isAuth ? { tenant_id: req.tenant_record.id } : { tenant_id: null });
       const cls = await intent.classifyIntent(question, snap);
       const cmd = 'kolm ' + cls.verb + (cls.args && cls.args.length ? ' ' + cls.args.map(a => /\s/.test(String(a)) ? JSON.stringify(a) : a).join(' ') : '');
+      // W847 — when the classifier resolves a "terminal" verb but the user
+      // described a goal (no args extracted), return a multi-step recipe so
+      // the chat surface can render something they can actually run.
+      const workflow = intent.expandToWorkflow ? intent.expandToWorkflow(cls, question) : null;
       const remainingHeader = res.getHeader('RateLimit-Remaining');
       const remaining = (remainingHeader == null) ? null : Number(remainingHeader);
       res.json({
@@ -7235,6 +7239,7 @@ export function buildRouter() {
           : ('classifier source: ' + cls.source),
         confidence: cls.confidence,
         source: cls.source,
+        workflow,
         alternatives: (cls.alternatives || []).slice(0, 3).map(a => ({
           verb: a.verb,
           command: 'kolm ' + a.verb + (a.args && a.args.length ? ' ' + a.args.join(' ') : ''),
@@ -7262,6 +7267,9 @@ export function buildRouter() {
       const snap = await intent.snapshotContext({ tenant_id: req.tenant_record.id });
       const cls = await intent.classifyIntent(question, snap);
       const cmd = 'kolm ' + cls.verb + (cls.args && cls.args.length ? ' ' + cls.args.map(a => /\s/.test(String(a)) ? JSON.stringify(a) : a).join(' ') : '');
+      // W847 — same multi-step recipe expansion as /v1/free/chat so the
+      // post-auth console renders runnable workflows, not bare verbs.
+      const workflow = intent.expandToWorkflow ? intent.expandToWorkflow(cls, question) : null;
       const alts = (cls.alternatives || []).slice(0, 3).map(a => ({
         verb: a.verb,
         command: 'kolm ' + a.verb + (a.args && a.args.length ? ' ' + a.args.join(' ') : ''),
@@ -7278,6 +7286,7 @@ export function buildRouter() {
           : ('classifier source: ' + cls.source),
         confidence: cls.confidence,
         source: cls.source,
+        workflow,
         alternatives: alts,
         snapshot_summary: {
           artifacts: snap.counts.artifacts,
