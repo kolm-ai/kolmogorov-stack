@@ -440,7 +440,12 @@ const PUBLIC_API = (p) =>
   // surfaces (same policy as /v1/verticals + /v1/changelog). validate +
   // submit stay auth-gated above; submit additionally requires confirm:true.
   p === '/v1/kolmbench/spec' ||
-  p === '/v1/kolmbench/leaderboard';
+  p === '/v1/kolmbench/leaderboard' ||
+  // W844 — public chat for the homepage free-tier and the post-auth console.
+  // Same pipe; rate limiter inside the route enforces the 20/IP/day cap when
+  // no key is attached. With a valid key the soft-auth above promotes the
+  // call to the full snapshotContext path (same as /v1/intent/ask).
+  p === '/v1/free/chat';
 
 export function adminApiKey() {
   return process.env.ADMIN_KEY || null;

@@ -560,6 +560,25 @@ const publishLimiter = rateLimit({
   validate: { trustProxy: false },
 });
 
+// W844 — /v1/free/chat. Pre-auth free tier so visitors can tinker with the
+// kolm intent classifier before signing up. 20 messages/IP/day; when a real
+// API key is attached, the same handler upgrades to the full snapshot path.
+// Tight enough to deter scrapers, loose enough that a curious dev can build
+// confidence on the public homepage.
+const freeChatLimiter = rateLimit({
+  windowMs: 24 * 60 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    ok: false,
+    error: 'free_quota_exceeded',
+    message: 'Free tier caps at 20 messages/day. Sign up for unlimited.',
+    cta: { label: 'Create a free account', href: '/signup' },
+  },
+  validate: { trustProxy: false },
+});
+
 // Enterprise inquiry intake (KOLM-102). Public form on /enterprise/inquiry.
 // 5 hits per IP per hour is enough for a real buyer to make typos and retry,
 // but blocks form-spammer scripts. ipKey() coalesces /24 to survive Vercel
@@ -7182,6 +7201,53 @@ export function buildRouter() {
   // W729 — loadQueueMiddleware sheds load with HTTP 429 + Retry-After when
   // the queue is saturated. Tier-derived priority lets paid tenants jump
   // the queue ahead of free under contention.
+  // W844 — /v1/free/chat. Public OpenAI-style chat: pre-auth visitors get
+  // 20 messages/day to tinker with the intent classifier; if a tenant key is
+  // attached the route upgrades to the full /v1/intent/ask snapshot. This is
+  // the SAME pipe pre-auth and post-auth, so the homepage chat box and the
+  // /account console chat box share the contract. Anon callers cannot read
+  // tenant state — snapshotContext is called with tenant_id=null.
+  r.post('/v1/free/chat', freeChatLimiter, async (req, res) => {
+    const question = String((req.body && req.body.question) || '').trim();
+    if (!question) {
+      return res.status(400).json({ ok: false, error: 'missing_question', message: 'POST body must include a non-empty {question}.' });
+    }
+    if (question.length > 600) {
+      return res.status(413).json({ ok: false, error: 'question_too_long', message: 'Free tier caps each message at 600 characters.' });
+    }
+    try {
+      const intent = await import('./intent.js');
+      const isAuth = !!req.tenant_record;
+      const snap = await intent.snapshotContext(isAuth ? { tenant_id: req.tenant_record.id } : { tenant_id: null });
+      const cls = await intent.classifyIntent(question, snap);
+      const cmd = 'kolm ' + cls.verb + (cls.args && cls.args.length ? ' ' + cls.args.map(a => /\s/.test(String(a)) ? JSON.stringify(a) : a).join(' ') : '');
+      const remainingHeader = res.getHeader('RateLimit-Remaining');
+      const remaining = (remainingHeader == null) ? null : Number(remainingHeader);
+      res.json({
+        ok: true,
+        mode: isAuth ? 'auth' : 'free',
+        question,
+        verb: cls.verb,
+        command: cmd,
+        args: cls.args || [],
+        why: cls.matchedPhrase
+          ? ('matched phrase "' + cls.matchedPhrase + '"')
+          : ('classifier source: ' + cls.source),
+        confidence: cls.confidence,
+        source: cls.source,
+        alternatives: (cls.alternatives || []).slice(0, 3).map(a => ({
+          verb: a.verb,
+          command: 'kolm ' + a.verb + (a.args && a.args.length ? ' ' + a.args.join(' ') : ''),
+          confidence: a.confidence,
+        })),
+        remaining,
+        cta: isAuth ? null : (remaining !== null && remaining <= 3 ? { label: 'Sign up free for unlimited', href: '/signup' } : null),
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'classify_failed', message: String(e && e.message || e) });
+    }
+  });
+
   r.post('/v1/intent/ask', loadQueueMiddleware, async (req, res) => {
     _w788SlaTrack(req, res, 'intent_ask');
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });

@@ -1,4 +1,16 @@
 (function () {
+ // W844: ensure kolm-chat.js is loaded site-wide so the post-auth console
+ // and any page that adds a [data-kolm-chat] placeholder gets the live
+ // chat box. Cheap: idempotent script-tag injection.
+ (function ensureChatScript() {
+   try {
+     if (document.querySelector('script[src="/kolm-chat.js"], script[src*="/kolm-chat.js"]')) return;
+     var s = document.createElement('script');
+     s.src = '/kolm-chat.js';
+     s.defer = true;
+     (document.head || document.documentElement).appendChild(s);
+   } catch (e) {}
+ })();
  // Warm Paper theme bootstrap: pages now default to LIGHT (data-theme
  // attribute absent on <html>). Honor a previously-saved 'dark' choice
  // before first paint to avoid a flash. If no saved choice, fall back to
@@ -460,9 +472,10 @@ if (/start\s+free|get api key|get a key|sign up|new artifact/i.test(item.textCon
  // auth/app consoles uncluttered.
  (function injectProductSpine() {
  if (document.querySelector('.kolm-product-spine')) return;
+ if (path === '/' || path === '/index.html') return;
  if (/^\/(account|admin|signin|signup|password-reset|teams-accept)(\/|$)/.test(path)) return;
  var main = document.querySelector('main');
- if (!main || main.querySelector('.home-hero')) return;
+ if (!main || main.querySelector('.home-hero') || main.querySelector('.ks-hero')) return;
  if (main.closest('.app')) return;
  function spineActive(re) { return re.test(path) ? ' aria-current="page"' : ''; }
  var spine = document.createElement('nav');
@@ -648,6 +661,27 @@ function accountPageTagline() {
 '</div>';
  main.insertBefore(band, main.firstElementChild || main.firstChild);
  renderAccountSidebar();
+
+ // W844: post-auth console chat. Same component as the homepage free-tier
+ // chat; data-kolm-chat-mode="auth" hides the "20/day" framing and tells
+ // the chat to assume the soft-auth cookie will upgrade the response to a
+ // tenant-scoped snapshot. Mounts above the band so it's the first thing
+ // after the page header.
+ if (!document.querySelector('[data-kolm-chat]')) {
+   var chatBand = document.createElement('section');
+   chatBand.className = 'kolm-account-chat';
+   chatBand.setAttribute('aria-label', 'kolm console chat');
+   chatBand.innerHTML =
+     '<div class="kac-chat-shell">' +
+     '<div class="kac-chat-copy">' +
+     '<p class="kac-chat-eye">kolm console</p>' +
+     '<h2>Ask the console in plain English.</h2>' +
+     '<p>Same chat you tinkered with on the homepage &mdash; now wired to your tenant. Ask "what should I distill next?", "show artifacts I have not deployed", or "verify the receipt on cid:abc". The reply is the exact CLI command, ready to copy.</p>' +
+     '</div>' +
+     '<div data-kolm-chat data-kolm-chat-mode="auth"></div>' +
+     '</div>';
+   main.insertBefore(chatBand, band);
+ }
  })();
 
  // Generated product media. Each public surface gets a route-aware visual

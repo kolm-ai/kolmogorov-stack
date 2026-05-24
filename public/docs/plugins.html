@@ -45,7 +45,7 @@
   .kind-card .kind-id { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-accent); }
   .kind-card p { font-size: 14px; margin-top: 6px; }
 </style>
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 </head>
 <body class="ks">
 <a href="#main" class="ks-skip">Skip to content</a>

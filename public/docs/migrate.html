@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#e8e3d6}html{color-scheme:dark}</style>
 <title>Migrate &middot; from Ollama / LM Studio &middot; kolm.ai</title>
 <meta name="description" content="Bring your existing Ollama and LM Studio model libraries into kolm. Discovery is local-only; each model is wrapped through the W740 import path so the not_kolm_compiled honesty lock flows transitively.">

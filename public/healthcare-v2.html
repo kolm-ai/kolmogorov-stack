@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Healthcare AI on your own infrastructure (PHI-safe) · kolm.ai</title>
-<meta name="description" content="Capture clinical prompts in your VPC, compile a private model, deploy behind your BAA. PHI never leaves your tenant. Signed receipts on every inference.">
+<meta name="description" content="Capture clinical prompts in your VPC, compile a private model, deploy behind your BAA. PHI stays inside your tenant boundary your tenant. Signed receipts on every inference.">
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://kolm.ai/healthcare-v2">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -23,7 +23,7 @@
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL)",
   "url": "https://kolm.ai/healthcare-v2",
-  "description": "PHI-safe AI compilation for clinical teams. Capture clinical prompts, compile a private model, deploy inside your BAA boundary.",
+  "description": "PHI-safe AI compilation for clinical teams. Capture clinical prompts, compile a private model, deploy inside your BAA scope.",
   "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
   "publisher": {"@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org"}
 }
@@ -160,7 +160,7 @@
               <span class="c">--student qwen2.5-7b --quantize int4</span>
 <span class="o">ok &middot;</span> <span class="x">phi-safe-7b-int4.kolm (5.2 GB)</span>
 
-<span class="h"># verify offline before deploy into the BAA boundary</span>
+<span class="h"># verify offline before deploy into the BAA scope</span>
 <span class="p">$</span> <span class="c">kolm verify phi-safe-7b-int4.kolm</span>
 <span class="o">ok &middot;</span> <span class="x">ed25519 &middot; eval matches &middot; PHI=0</span>
         </div>
@@ -206,7 +206,7 @@
   </section>
 
   <section class="section">
-    <h2 class="v2-h2">Architecture: PHI never leaves your VPC.</h2>
+    <h2 class="v2-h2">Architecture: PHI stays inside your tenant boundary your VPC.</h2>
     <p class="sub">Capture, compile, and inference all run in your tenant. The only thing kolm ships you is software and a signature key.</p>
     <div class="arch-box">
 <pre>

@@ -849,17 +849,21 @@ html:not([data-theme])   { color-scheme: light; }
    no drop-cap, no chromatic seal. Pull-quote stays sans-italic.
    ============================================================ */
 
-/* Hero H1 modifier - kept as a class for legacy callers but
-   now caps at 88px and stays Inter. Substantial, not theatrical. */
+/* W844 hero H1: pull up to true editorial display weight. The old 88px / 700
+   was reading as "generic dashboard SaaS" — user said "garbage font". Now
+   caps at 116px, font-weight 800, tighter tracking, with stylistic-alt
+   features on so Inter's display-cuts kick in. Still monochrome ink. */
 .fr-h1--hero, h1.fr-h1--hero, .display-hero {
   font-family: var(--ks-font-sans);
-  font-weight: 700;
-  font-size: clamp(48px, 6.4vw, 88px);
-  line-height: 1.0;
-  letter-spacing: -0.040em;
+  font-weight: 800;
+  font-size: clamp(54px, 8.2vw, 116px);
+  line-height: 0.96;
+  letter-spacing: -0.048em;
   color: var(--ink-1);
   text-wrap: balance;
   margin: 0 0 var(--ks-space-24, 24px) 0;
+  font-feature-settings: "ss01", "ss02", "cv11", "cv05", "kern";
+  font-optical-sizing: auto;
 }
 
 .fr-h1--hero em, .fr-h1--hero i {
@@ -1520,3 +1524,631 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+/* ============================================================
+   25. W844 hero refit + full-width architecture band + CLI chat
+   - .ks-hero__card replaces the half-size diagram in hero col-2
+   - .kolm-arch-band hosts the full-width architecture diagram
+   - .kolm-arch--full enlarges the SVG to fill the band
+   - .ks-cli-chat is an OpenAI-style demo box for the free-tier brag
+   ============================================================ */
+
+/* hero column-2 mini-card - quiet, oriented to the eye, not a screenshot */
+.ks-hero__card {
+  align-self: start;
+  margin: 0;
+  padding: clamp(22px, 2.4vw, 32px);
+  background: var(--surface-1);
+  border: 1px solid var(--line-2);
+  border-radius: var(--ks-radius-lg);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset,
+              0 14px 40px -28px rgba(17, 17, 17, 0.10);
+}
+.ks-hero__card-eyebrow {
+  font-family: var(--ks-font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin: 0 0 16px;
+}
+.ks-hero__card-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+  display: grid;
+  gap: 12px;
+}
+.ks-hero__card-list li {
+  font-family: var(--ks-font-sans);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  padding-left: 14px;
+  border-left: 1px solid var(--line-2);
+}
+.ks-hero__card-list li b {
+  color: var(--ink-1);
+  font-weight: 600;
+}
+.ks-hero__card-list li code {
+  font-family: var(--ks-font-mono);
+  font-size: 0.86em;
+  color: var(--ink-1);
+  background: var(--surface-2);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+.ks-hero__card-foot {
+  font-family: var(--ks-font-sans);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--ink-3);
+  margin: 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--line-3);
+}
+
+/* full-width architecture band - sits directly under the hero */
+.kolm-arch-band {
+  padding: clamp(48px, 6vw, 88px) 0 clamp(40px, 5vw, 72px);
+  background: var(--surface-2);
+  border-block: 1px solid var(--line-3);
+}
+.kolm-arch-band__inner {
+  max-width: var(--ks-container, 1200px);
+  margin: 0 auto;
+  padding: 0 var(--ks-pad-x, 24px);
+}
+.kolm-arch-band__head {
+  margin: 0 0 clamp(32px, 4vw, 56px);
+  display: grid;
+  gap: 10px;
+  max-width: 64ch;
+}
+.kolm-arch-band__eye {
+  font-family: var(--ks-font-mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.kolm-arch-band__h {
+  font-family: var(--ks-font-sans);
+  font-weight: 600;
+  font-size: clamp(28px, 3.4vw, 48px);
+  line-height: 1.06;
+  letter-spacing: -0.028em;
+  color: var(--ink-1);
+  margin: 0;
+  text-wrap: balance;
+}
+.kolm-arch.kolm-arch--full {
+  padding: clamp(24px, 3vw, 40px);
+  margin: 0;
+  border: 1px solid var(--line-2);
+  border-radius: var(--ks-radius-lg);
+  background: var(--surface-1);
+}
+.kolm-arch.kolm-arch--full .kolm-arch__svg {
+  width: 100%;
+  height: auto;
+  min-height: 320px;
+}
+.kolm-arch.kolm-arch--full .kolm-arch__h {
+  font-size: 12px;
+  letter-spacing: 0.18em;
+}
+.kolm-arch.kolm-arch--full .kolm-arch__chipt,
+.kolm-arch.kolm-arch--full .kolm-arch__staget {
+  font-size: 14px;
+}
+.kolm-arch.kolm-arch--full .kolm-arch__stagen,
+.kolm-arch.kolm-arch--full .kolm-arch__artn {
+  font-size: 11px;
+}
+.kolm-arch.kolm-arch--full .kolm-arch__artt {
+  font-size: 22px;
+}
+.kolm-arch.kolm-arch--full .kolm-arch__note {
+  font-size: 12px;
+}
+
+@media (max-width: 720px) {
+  .kolm-arch.kolm-arch--full {
+    padding: 16px;
+  }
+  .kolm-arch.kolm-arch--full .kolm-arch__svg {
+    min-height: 420px;
+  }
+}
+
+/* ----- CLI chat demo (W844) ----- */
+.ks-cli-chat {
+  padding: clamp(48px, 6vw, 88px) 0;
+  background: var(--surface-1);
+  border-bottom: 1px solid var(--line-3);
+}
+.ks-cli-chat__inner {
+  max-width: var(--ks-container, 1200px);
+  margin: 0 auto;
+  padding: 0 var(--ks-pad-x, 24px);
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: clamp(36px, 4vw, 64px);
+  align-items: start;
+}
+@media (max-width: 880px) {
+  .ks-cli-chat__inner { grid-template-columns: 1fr; }
+}
+.ks-cli-chat__copy h2 {
+  font-family: var(--ks-font-sans);
+  font-weight: 600;
+  font-size: clamp(28px, 3.4vw, 48px);
+  line-height: 1.05;
+  letter-spacing: -0.028em;
+  color: var(--ink-1);
+  margin: 0 0 16px;
+  text-wrap: balance;
+}
+.ks-cli-chat__copy .eye {
+  font-family: var(--ks-font-mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  display: block;
+  margin: 0 0 14px;
+}
+.ks-cli-chat__copy p {
+  font-family: var(--ks-font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  max-width: 52ch;
+  margin: 0 0 16px;
+}
+.ks-cli-chat__copy ul {
+  list-style: none;
+  margin: 24px 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.ks-cli-chat__copy ul li {
+  font-family: var(--ks-font-mono);
+  font-size: 13px;
+  color: var(--ink-2);
+  padding-left: 18px;
+  position: relative;
+}
+.ks-cli-chat__copy ul li::before {
+  content: "›";
+  position: absolute;
+  left: 0;
+  color: var(--ink-3);
+  font-weight: 600;
+}
+.ks-cli-chat__copy .ctas {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 28px;
+}
+
+.ks-cli-chat__box {
+  background: var(--ink-1);
+  border-radius: var(--ks-radius-lg, 12px);
+  overflow: hidden;
+  box-shadow: 0 24px 64px -28px rgba(17, 17, 17, 0.22);
+  color: #f5efe2;
+  font-family: var(--ks-font-mono);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 420px;
+}
+.ks-cli-chat__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: rgba(245, 239, 226, 0.65);
+}
+.ks-cli-chat__head .dots { display: inline-flex; gap: 6px; margin-right: 10px; }
+.ks-cli-chat__head .dots span {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+}
+.ks-cli-chat__head .dots span:first-child { background: rgba(245, 239, 226, 0.35); }
+.ks-cli-chat__head b { color: rgba(245, 239, 226, 0.85); font-weight: 500; }
+.ks-cli-chat__head .head-tag {
+  margin-left: auto;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(245, 239, 226, 0.55);
+}
+.ks-cli-chat__log {
+  padding: 18px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+.ks-cli-chat__msg { display: grid; gap: 4px; }
+.ks-cli-chat__msg .who {
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(245, 239, 226, 0.5);
+}
+.ks-cli-chat__msg--user .who { color: rgba(168, 215, 188, 0.75); }
+.ks-cli-chat__msg .body {
+  color: rgba(245, 239, 226, 0.92);
+  white-space: pre-wrap;
+}
+.ks-cli-chat__msg--user .body { color: rgba(245, 239, 226, 1); font-weight: 500; }
+.ks-cli-chat__msg--kolm .body { color: rgba(245, 239, 226, 0.85); }
+.ks-cli-chat__msg--kolm .body code {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 0.92em;
+}
+.ks-cli-chat__form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  padding: 14px 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+.ks-cli-chat__form input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 8px;
+  padding: 12px 14px;
+  color: #f5efe2;
+  font-family: var(--ks-font-mono);
+  font-size: 13.5px;
+  outline: none;
+}
+.ks-cli-chat__form input:focus { border-color: rgba(245, 239, 226, 0.35); }
+.ks-cli-chat__form button {
+  background: #f5efe2;
+  color: #111;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 18px;
+  font-family: var(--ks-font-mono);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.ks-cli-chat__form button:hover { background: #ffffff; }
+.ks-cli-chat__form button:disabled { opacity: 0.4; cursor: not-allowed; }
+.ks-cli-chat__hint {
+  font-family: var(--ks-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: rgba(245, 239, 226, 0.45);
+  margin: 8px 22px 16px;
+}
+
+[data-theme="light"] .ks-cli-chat__box,
+:root:not([data-theme="dark"]) .ks-cli-chat__box {
+  /* keep terminal dark even in light mode — it IS a terminal */
+}
+
+/* example chips inside the chat — render once on first paint, removed on first send */
+.ks-cli-chat__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.ks-cli-chat__chip {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(245, 239, 226, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 999px;
+  padding: 6px 11px;
+  font-family: var(--ks-font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+.ks-cli-chat__chip:hover {
+  background: rgba(255, 255, 255, 0.10);
+  color: #f5efe2;
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+/* response block — command, why, alternatives, cta */
+.ks-cli-chat__resp {
+  display: grid;
+  gap: 10px;
+}
+.ks-cli-chat__cmd {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-family: var(--ks-font-mono);
+  font-size: 13.5px;
+  color: #f5efe2;
+  white-space: pre-wrap;
+  margin: 0;
+  overflow-x: auto;
+}
+.ks-cli-chat__why {
+  font-size: 12.5px;
+  color: rgba(245, 239, 226, 0.78);
+  margin: 0;
+  line-height: 1.5;
+}
+.ks-cli-chat__why b { color: #f5efe2; font-weight: 600; }
+.ks-cli-chat__why .conf { color: rgba(168, 215, 188, 0.78); font-family: var(--ks-font-mono); }
+.ks-cli-chat__alts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  font-size: 11.5px;
+}
+.ks-cli-chat__alts .alts-label {
+  font-family: var(--ks-font-mono);
+  color: rgba(245, 239, 226, 0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.ks-cli-chat__alts code {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  padding: 3px 6px;
+  font-family: var(--ks-font-mono);
+  font-size: 11.5px;
+  color: rgba(245, 239, 226, 0.85);
+}
+.ks-cli-chat__cta {
+  display: inline-flex;
+  align-self: start;
+  align-items: center;
+  background: #f5efe2;
+  color: #111;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-family: var(--ks-font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.ks-cli-chat__cta:hover { background: #ffffff; }
+.ks-cli-chat__resp--err .ks-cli-chat__cmd { display: none; }
+.ks-cli-chat__resp--err p {
+  font-size: 13px;
+  color: rgba(245, 239, 226, 0.78);
+  margin: 0;
+}
+.ks-cli-chat__thinking {
+  color: rgba(245, 239, 226, 0.45);
+  font-style: italic;
+}
+
+/* W844 post-auth account chat band — mirrors the homepage chat layout */
+.kolm-account-chat {
+  padding: clamp(36px, 4vw, 56px) clamp(20px, 3vw, 36px);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line-3);
+}
+.kac-chat-shell {
+  max-width: var(--ks-container, 1200px);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: clamp(28px, 3vw, 48px);
+  align-items: start;
+}
+@media (max-width: 880px) {
+  .kac-chat-shell { grid-template-columns: 1fr; }
+}
+.kac-chat-eye {
+  font-family: var(--ks-font-mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin: 0 0 12px;
+}
+.kac-chat-copy h2 {
+  font-family: var(--ks-font-sans);
+  font-weight: 600;
+  font-size: clamp(24px, 2.8vw, 36px);
+  line-height: 1.06;
+  letter-spacing: -0.024em;
+  color: var(--ink-1);
+  margin: 0 0 14px;
+}
+.kac-chat-copy p {
+  font-family: var(--ks-font-sans);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  margin: 0;
+  max-width: 56ch;
+}
+
+/* =========================================================================
+   W844 / Section 26  -  "Inside each stage" deep-dive cards
+   Four cards: Capture / Distill / Quantize / Sign+Deploy. Replaces the
+   W706 SVG pipeline + step row, which restated the arch-band above the
+   fold. These cards do not name the stage  -  they name the innovation.
+   ========================================================================= */
+.kolm-deep {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  margin-top: 40px;
+}
+@media (max-width: 880px) {
+  .kolm-deep { grid-template-columns: 1fr; gap: 18px; }
+}
+.kolm-deep__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 26px 28px 24px;
+  background: var(--paper-1, #faf9f7);
+  border: 1px solid var(--rule-1, #e5e0d4);
+  border-radius: 10px;
+  box-shadow: 0 1px 0 rgba(33, 28, 21, 0.02), 0 12px 28px -22px rgba(33, 28, 21, 0.18);
+  transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+.kolm-deep__card:hover {
+  border-color: var(--accent-1, #c2410c);
+  transform: translateY(-1px);
+  box-shadow: 0 1px 0 rgba(33, 28, 21, 0.03), 0 18px 34px -22px rgba(33, 28, 21, 0.24);
+}
+.kolm-deep__head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--rule-2, #e9e3d3);
+}
+.kolm-deep__stage {
+  font-family: var(--ks-font-mono, ui-monospace, "JetBrains Mono", monospace);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-1, #c2410c);
+}
+.kolm-deep__title {
+  font-family: var(--ks-font-sans);
+  font-weight: 700;
+  font-size: clamp(20px, 2.1vw, 24px);
+  line-height: 1.18;
+  letter-spacing: -0.018em;
+  color: var(--ink-1);
+  margin: 0;
+}
+.kolm-deep__body {
+  font-family: var(--ks-font-sans);
+  font-size: 14.5px;
+  line-height: 1.62;
+  color: var(--ink-2);
+  margin: 0;
+}
+.kolm-deep__body code {
+  font-family: var(--ks-font-mono, ui-monospace, "JetBrains Mono", monospace);
+  font-size: 12.5px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(194, 65, 12, 0.07);
+  color: var(--ink-1);
+}
+.kolm-deep__facts {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0;
+  display: grid;
+  gap: 8px;
+}
+.kolm-deep__facts li {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 12px;
+  font-family: var(--ks-font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  padding: 6px 0 0;
+  border-top: 1px dotted var(--rule-2, #ece6d6);
+}
+.kolm-deep__facts li:first-child { border-top: 0; padding-top: 0; }
+.kolm-deep__facts li b {
+  font-weight: 600;
+  color: var(--ink-1);
+  letter-spacing: -0.005em;
+}
+.kolm-deep__facts li code {
+  font-family: var(--ks-font-mono, ui-monospace, "JetBrains Mono", monospace);
+  font-size: 12px;
+  color: var(--ink-1);
+}
+.kolm-deep__cmd {
+  display: block;
+  margin-top: auto;
+  font-family: var(--ks-font-mono, ui-monospace, "JetBrains Mono", monospace);
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ink-1);
+  background: var(--paper-2, #f3eee0);
+  border: 1px solid var(--rule-2, #ece6d6);
+  border-left: 2px solid var(--accent-1, #c2410c);
+  border-radius: 6px;
+  padding: 10px 14px;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* Dark mode: keep the cards quiet and on-paper-stack
+   --------------------------------------------------- */
+:root[data-theme="dark"] .kolm-deep__card,
+html[data-theme="dark"] .kolm-deep__card {
+  background: rgba(245, 239, 226, 0.03);
+  border-color: rgba(245, 239, 226, 0.10);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25), 0 18px 34px -24px rgba(0, 0, 0, 0.45);
+}
+:root[data-theme="dark"] .kolm-deep__card:hover,
+html[data-theme="dark"] .kolm-deep__card:hover {
+  border-color: rgba(168, 215, 188, 0.45);
+}
+:root[data-theme="dark"] .kolm-deep__head,
+html[data-theme="dark"] .kolm-deep__head { border-bottom-color: rgba(245, 239, 226, 0.10); }
+:root[data-theme="dark"] .kolm-deep__stage,
+html[data-theme="dark"] .kolm-deep__stage { color: rgba(168, 215, 188, 0.9); }
+:root[data-theme="dark"] .kolm-deep__title,
+html[data-theme="dark"] .kolm-deep__title { color: rgba(245, 239, 226, 0.96); }
+:root[data-theme="dark"] .kolm-deep__body,
+html[data-theme="dark"] .kolm-deep__body { color: rgba(245, 239, 226, 0.78); }
+:root[data-theme="dark"] .kolm-deep__body code,
+html[data-theme="dark"] .kolm-deep__body code {
+  background: rgba(168, 215, 188, 0.10);
+  color: rgba(245, 239, 226, 0.94);
+}
+:root[data-theme="dark"] .kolm-deep__facts li,
+html[data-theme="dark"] .kolm-deep__facts li {
+  color: rgba(245, 239, 226, 0.74);
+  border-top-color: rgba(245, 239, 226, 0.08);
+}
+:root[data-theme="dark"] .kolm-deep__facts li b,
+html[data-theme="dark"] .kolm-deep__facts li b { color: rgba(245, 239, 226, 0.96); }
+:root[data-theme="dark"] .kolm-deep__facts li code,
+html[data-theme="dark"] .kolm-deep__facts li code { color: rgba(245, 239, 226, 0.92); }
+:root[data-theme="dark"] .kolm-deep__cmd,
+html[data-theme="dark"] .kolm-deep__cmd {
+  background: rgba(20, 18, 14, 0.55);
+  border-color: rgba(245, 239, 226, 0.12);
+  border-left-color: rgba(168, 215, 188, 0.75);
+  color: rgba(245, 239, 226, 0.94);
+}
+

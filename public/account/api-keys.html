@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#e8e3d6}html{color-scheme:dark}</style>
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 <title>API keys - Account - kolm.ai</title>
 <meta name="description" content="List, rotate, and revoke kolm.ai API keys. Real keys are never shown in full - only the prefix and last 4 characters. CLI mirror: kolm keys list / rotate /...">
 <meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
