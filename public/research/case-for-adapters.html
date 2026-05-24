@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -132,6 +132,7 @@
 
 
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <a href="#main" class="ks-skip">Skip to content</a>
@@ -204,7 +205,7 @@
  <p>The ratio is not the only number that matters. The download story matters too. A team that compiles five specialized models on top of the same base model ships five adapters totaling under a gigabyte, plus one base cached once. The merged-checkpoint equivalent ships five copies of the base plus the diffs, weighing in at 80+ GB. Bandwidth is a real cost; reproducible-fetch time is a real cost; the laptop's free disk is a real cost. The adapter format respects all three.</p>
 
  <h2 id="compose">Composability.</h2>
- <p>An adapter is additive over the base. Two adapters compiled from independent tasks can be stacked at inference time, applied serially or in a weighted blend, and detached cleanly. A merged checkpoint cannot.</p>
+ <p>An adapter is additive over the base. Adapters compiled from independent tasks can be stacked at inference time, applied serially or in a weighted blend, and detached cleanly. A merged checkpoint cannot.</p>
 
  <p>The composition is straightforward when the adapters target the same modules on the same base. The kolm runtime exposes this as an inference-time option:</p>
 
@@ -230,7 +231,7 @@
 
  <p>When a regulator asks "what model produced this output", the adapter-plus-base answer is two hashes and a pointer: the base model is a published string (<code>Qwen/Qwen2.5-7B-Instruct@v1.0.3</code>), the adapter is a 96 MB file with a known sha256, the runtime composed them deterministically. The audit chain is short and inspectable. A third party can re-pull the base from its public registry, re-load the adapter, run the eval pack, and reproduce the K-score within the deterministic-decoding tolerance.</p>
 
- <p>A merged checkpoint loses this. The base model is no longer separable from the adapter; the resulting weights are a function of (base, adapter, fold-precision, fold-implementation). Two different inference runtimes folding the same LoRA into the same base produce checkpoints whose weights differ in the 5th decimal place. The output token distributions are operationally identical, but the file hashes are not. The chain of custody, in cryptographic terms, has a join with no inverse.</p>
+ <p>A merged checkpoint loses this. The base model is no longer separable from the adapter; the resulting weights are a function of (base, adapter, fold-precision, fold-implementation). Different inference runtimes folding the same LoRA into the same base produce checkpoints whose weights differ in the 5th decimal place. The output token distributions are operationally identical, but the file hashes are not. The chain of custody, in cryptographic terms, has a join with no inverse.</p>
 
  <p>The receipt chain inside a <code>.kolm</code> records the base as a content-addressed pointer, the adapter as a sha256, and the K-score as the output of running the eval pack against (base + adapter). If you ship a merged copy, the receipt would have to record the merged weights as a single sha256, and the audit story collapses to "this is the model; we have lost the structure that produced it".</p>
 
@@ -258,7 +259,7 @@ alpha: scaling 16 or 32 in production
  <p>The compile loop picks defaults from a small table. Most artifacts ship at <code>r=8, alpha=16</code>; the trainer escalates to <code>r=16, alpha=32</code> when the K-score on the first attempt lands under 0.80 and there is room in the budget. The chosen values are written into the receipt chain at <code>training_stats.lora_r</code> and <code>training_stats.lora_alpha</code> so that a third party can reproduce the run exactly.</p>
 
  <h2 id="merge">When you do want a merged copy.</h2>
- <p>Three legitimate reasons to want a merged checkpoint instead of an adapter.</p>
+ <p>Legitimate reasons to want a merged checkpoint instead of an adapter.</p>
 
  <p><b>Sealed-runtime environments.</b> Some inference stacks (older vLLM builds, certain edge inference pipelines, in-process llama.cpp embeds) do not load adapters at all. They expect a single checkpoint file with merged weights. If your deployment target is one of these, the adapter format is a non-starter.</p>
 
@@ -286,7 +287,7 @@ merged.save_pretrained(<span class="arg">"./merged-checkpoint"</span>)</pre>
 
  <p><b>Toolchain dependency.</b> The PEFT library has to be present in the inference runtime. Every supported runtime kolm ships ({transformers, mlx-lm, llama.cpp via gguf-with-lora, vllm}) handles this; a custom inference stack might not. If you cannot guarantee PEFT support at the deployment site, the merged path is safer.</p>
 
- <p><b>Adapter stacking complexity.</b> Composability is a feature, not free. Two adapters can interact in ways that neither was trained for. The kolm runtime applies stacked adapters in a deterministic order (alphabetical by artifact ID, then by load-time), but the order matters for the output and is documented in the receipt. Teams that stack adapters should re-evaluate the stack the same way they evaluate a single artifact.</p>
+ <p><b>Adapter stacking complexity.</b> Composability is a feature, not free. Stacked adapters can interact in ways that neither was trained for. The kolm runtime applies them in a deterministic order (alphabetical by artifact ID, then by load-time), but the order matters for the output and is documented in the receipt. Teams that stack adapters should re-evaluate the stack the same way they evaluate a single artifact.</p>
 
  <p>The adapter format is a stance about what an AI artifact is: a small, named delta on top of a public, named base. The merged-checkpoint format treats the same task as a private monolithic blob. The former is a build artifact. The latter is a tarball.</p>
 

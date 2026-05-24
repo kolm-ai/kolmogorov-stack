@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -84,6 +84,7 @@
 }
 </script>
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <a href="#main" class="ks-skip">Skip to content</a>
@@ -200,7 +201,7 @@ const recipe = kolm.run(<span class="k">'recipe-from-observations.kolm'</span>, 
 fs.writeSync(<span class="k">'recipe-out/spec.json'</span>, recipe.spec_json);
 fs.writeSync(<span class="k">'recipe-out/pairs.jsonl'</span>, recipe.pairs_jsonl);
 exec(<span class="k">'kolm compile --recipe ./recipe-out --output ./email-classify.kolm'</span>);</pre>
- <p>Three steps: capture (proxy via <code>/v1/capture/openai</code> or <code>/v1/capture/anthropic</code>, or post rows directly to <code>/v1/capture/log</code>), distill (this recipe), compile (<code>kolm compile</code>). What goes in is your frontier-API spend; what comes out is a signed <code>.kolm</code> you can run offline forever.</p>
+ <p>Capture (proxy via <code>/v1/capture/openai</code> or <code>/v1/capture/anthropic</code>, or post rows directly to <code>/v1/capture/log</code>), distill (this recipe), compile (<code>kolm compile</code>). What goes in is frontier-API spend; what comes out is a signed <code>.kolm</code> you can run offline forever.</p>
  </div>
 
  <div class="group">

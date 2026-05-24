@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -78,6 +78,7 @@
 
 </style>
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <a href="#main" class="ks-skip">Skip to content</a>
@@ -309,10 +310,10 @@ function load(){
   window.kfetch("/v1/captures/analytics?namespace="+encodeURIComponent(ns)).then(function(j){
     render(j);
   }).catch(function(err){
-    // Honest empty-state: the W811 HTTP route may ship in a follow-up wave.
-    status.textContent="route not wired yet";status.className="pill warn";
+    // Honest empty-state: HTTP surface may be offline; fall through to CLI.
+    status.textContent="HTTP unavailable";status.className="pill warn";
     document.getElementById("empty-state").hidden=false;
-    document.getElementById("empty-state").innerHTML="<strong>The /v1/captures/analytics route is not wired yet.</strong> The W811 capture-analytics code is shipped; the HTTP route lands in a follow-up wave. In the meantime, use the CLI: <code>kolm captures analytics --namespace "+window.kesc(ns)+" --json</code>.";
+    document.getElementById("empty-state").innerHTML="<strong>The /v1/captures/analytics HTTP surface is unavailable from this browser.</strong> The W811 capture-analytics code is shipped; use the CLI to inspect locally: <code>kolm captures analytics --namespace "+window.kesc(ns)+" --json</code>.";
   });
 }
 

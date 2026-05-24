@@ -1,24 +1,24 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Adapter merging TIES, DARE, SLERP, linear | · kolm.ai</title>
-<meta name="description" content="Four pure-tensor ops over PEFT LoRA adapters. Linear is the floor; SLERP traces the unit sphere; DARE drops 50% with Bernoulli and rescales by 1/density;...">
+<meta name="description" content="Pure-tensor ops over PEFT LoRA adapters. Linear is the floor; SLERP traces the unit sphere; DARE drops 50% with Bernoulli and rescales by 1/density.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="Adapter merging TIES, DARE, SLERP, linear | · kolm.ai">
-<meta property="og:description" content="Four pure-tensor ops over PEFT LoRA adapters. Linear is the floor; SLERP traces the unit sphere; DARE drops 50% with Bernoulli and rescales by 1/density;...">
+<meta property="og:description" content="Pure-tensor ops over PEFT LoRA adapters. Linear is the floor; SLERP traces the unit sphere; DARE drops 50% with Bernoulli and rescales by 1/density.">
 <meta property="og:type" content="website">
 <meta property="article:published_time" content="2026-05-14">
 <meta property="article:author" content="Kolm">
 <meta property="article:section" content="methods">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Adapter merging TIES, DARE, SLERP, linear | · kolm.ai">
-<meta name="twitter:description" content="Four pure-tensor ops over PEFT LoRA adapters. Linear is the floor; SLERP traces the unit sphere; DARE drops 50% with Bernoulli and rescales by 1/density;...">
+<meta name="twitter:description" content="Pure-tensor ops over PEFT LoRA adapters. Linear is the floor; SLERP traces the unit sphere; DARE drops 50% with Bernoulli and rescales by 1/density.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/research/adapter-merging">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -32,7 +32,7 @@
  {
  "@type": "TechArticle",
  "headline": "Adapter merging: TIES, DARE, SLERP, linear",
- "description": "Four pure-tensor merge methods over PEFT LoRA adapters, with their gating conditions and trade-offs.",
+ "description": "Pure-tensor merge methods over PEFT LoRA adapters, with their gating conditions and trade-offs.",
  "url": "https://kolm.ai/research/adapter-merging",
  "author": {"@type": "Organization", "name": "Kolm"},
  "publisher": {"@type": "Organization", "name": "Kolm", "url": "https://kolm.ai"},
@@ -121,6 +121,7 @@
 
 
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <a href="#main" class="ks-skip">Skip to content</a>
@@ -148,8 +149,8 @@
 <main id="main">
  <div class="wrap">
  <div class="hero-eyebrow"><span class="he-dot"></span>research . methods . 12 min read</div>
- <h1>Four ways to merge an adapter.</h1>
- <p class="lede">A LoRA adapter is a stack of small tensors. Merging two adapters is a tensor operation. Choosing how those tensors combine is a design decision with four published answers, each with a different failure mode. Below: when each one is right.</p>
+ <h1>Ways to merge an adapter.</h1>
+ <p class="lede">A LoRA adapter is a stack of small tensors. Merging two adapters is a tensor operation. <b>Linear, SLERP, DARE, TIES</b>: each has a regime where it's right and a failure mode to avoid.</p>
 
  <div class="meta-line">
  <span>May 14, 2026</span>
@@ -163,14 +164,14 @@
 
  <p>A PEFT LoRA adapter is a dict mapping layer names to weight tensors of two shapes: <code>lora_A</code> (low-rank input projection) and <code>lora_B</code> (low-rank output projection). For two adapters to be mergeable they must share the base model and have the same target modules at the same shapes. The merge operates on the corresponding tensors; the merged result is a new adapter with the same shape signature.</p>
 
- <p>The four methods differ in how they reduce N input tensors to one. Below, <code>w_i</code> are the per-adapter weights (defaulting to <code>1/N</code>), and <code>t_i</code> are the tensors being combined at one layer.</p>
+ <p>The methods differ in how they reduce N input tensors to one. Below, <code>w_i</code> are the per-adapter weights (defaulting to <code>1/N</code>), and <code>t_i</code> are the tensors being combined at one layer.</p>
 
- <h2>The four ops</h2>
+ <h2>The ops</h2>
 
  <table class="table">
  <thead><tr><th>Method</th><th>Per-layer op</th><th>Best for</th></tr></thead>
  <tbody>
- <tr><td>Linear</td><td>weighted sum: <code>sum(w_i &middot; t_i)</code></td><td>Two adapters trained on disjoint subsets of one task</td></tr>
+ <tr><td>Linear</td><td>weighted sum: <code>sum(w_i &middot; t_i)</code></td><td>Adapters trained on disjoint subsets of one task</td></tr>
  <tr><td>SLERP</td><td>spherical interpolation along the unit sphere</td><td>Exactly two adapters; preserves norm</td></tr>
  <tr><td>DARE</td><td>Bernoulli mask + linear: drop with probability <code>1-density</code>, rescale survivors by <code>1/density</code></td><td>Combining adapters with redundant capacity</td></tr>
  <tr><td>TIES</td><td>trim by magnitude topk, sign-elect by weighted sum, merge only agreeing entries</td><td>Combining adapters trained on different tasks</td></tr>
@@ -283,7 +284,7 @@ merged.save_pretrained("./merged-adapter")</pre>
 
  <p><strong>Shape mismatches.</strong> Adapters trained on different bases (Qwen2.5-7B vs Llama-3.1-8B) cannot be merged because their tensor shapes differ. The trainer detects this from the PEFT config and fails loudly. There is no automatic projection step; the buyer must pick one base and retrain.</p>
 
- <p><strong>Rank mismatches.</strong> Two adapters with different LoRA rank (r=16 vs r=32) cannot be merged directly. The kolm implementation pads the smaller to the larger with zeros in the second half of the rank dimension; the result preserves the lower-rank adapter's behavior exactly and adds zero contribution from the missing rank slots. This is a deviation from mergekit, which refuses; the kolm path is more useful and the receipt records that padding occurred.</p>
+ <p><strong>Rank mismatches.</strong> Adapters with different LoRA rank (r=16 vs r=32) cannot be merged directly. The kolm implementation pads the smaller to the larger with zeros in the second half of the rank dimension; the result preserves the lower-rank adapter's behavior exactly and adds zero contribution from the missing rank slots. This is a deviation from mergekit, which refuses; the kolm path is more useful and the receipt records that padding occurred.</p>
 
  <p><strong>The merged adapter has no captures.</strong> Because merging is a tensor operation, there is no capture pack associated with the merged result. The K-score gate runs against a buyer-supplied eval pack instead. If the buyer does not have one, the trainer falls back to the union of the source adapters' eval packs (which is a fair test) and warns.</p>
 

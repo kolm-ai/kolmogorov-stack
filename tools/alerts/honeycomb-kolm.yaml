@@ -1,0 +1,107 @@
+# tools/alerts/honeycomb-kolm.yaml
+#
+# W823-3 — Honeycomb triggers for kolm.ai runtime.
+#
+# Honeycomb's trigger model is "calculation + threshold + frequency".
+# These match the W823-3 canonical thresholds shared with the Datadog
+# and Grafana templates:
+#
+#   - kscore_drift          > 0.05 over 1h
+#   - fallback_rate         > 0.15 over 15min
+#   - p95_latency_increase  > 25 percent vs 24h baseline
+#
+# Import:
+#   honeymarker triggers import --file tools/alerts/honeycomb-kolm.yaml
+#   OR via Terraform: hashicorp/honeycombio provider.
+
+version: 1
+dataset: kolm-runtime
+namespace: kolm
+triggers:
+
+  - name: "kolm.ai — K-Score drift > 0.05 (1h)"
+    description: >
+      K-Score has drifted more than 0.05 points away from the 24h baseline
+      over the last hour. Indicates either input-distribution shift or
+      silent local-model regression.
+    disabled: false
+    threshold:
+      op: ">"
+      value: 0.05
+    frequency: 900  # seconds — Honeycomb evaluates every 15min
+    query:
+      calculations:
+        - op: AVG
+          column: kolm.kscore.drift
+      filters:
+        - column: kolm.namespace
+          op: exists
+      breakdowns:
+        - kolm.namespace
+      time_range: 3600  # 1h
+    recipients:
+      - type: slack
+        target: "#kolm-oncall"
+      - type: pagerduty
+        target: "kolm-runtime"
+    tags:
+      - "wave:w823"
+      - "severity:warn"
+
+  - name: "kolm.ai — Fallback rate spike > 0.15 (15min)"
+    description: >
+      Local-model fallback-to-teacher rate has exceeded 15% over the last
+      15 minutes. Unit economics break above this threshold.
+    disabled: false
+    threshold:
+      op: ">"
+      value: 0.15
+    frequency: 300  # 5min
+    query:
+      calculations:
+        - op: RATE_AVG
+          column: kolm.routing.decision
+      filters:
+        - column: kolm.routing.decision
+          op: "="
+          value: "teacher"
+      breakdowns:
+        - kolm.namespace
+      time_range: 900  # 15min
+    recipients:
+      - type: slack
+        target: "#kolm-oncall"
+    tags:
+      - "wave:w823"
+      - "severity:warn"
+
+  - name: "kolm.ai — p95 latency regression > 25% vs 24h baseline"
+    description: >
+      Inference p95 latency has increased more than 25% relative to the
+      24h baseline. Check teacher backend latency, GPU contention,
+      queue depth.
+    disabled: false
+    threshold:
+      op: ">"
+      value: 1.25
+    frequency: 900  # 15min
+    query:
+      calculations:
+        - op: P95
+          column: duration_ms
+      filters:
+        - column: name
+          op: starts-with
+          value: "kolm.inference"
+      breakdowns:
+        - kolm.artifact.id
+      time_range: 900
+      compare_to: 86400  # 24h baseline ratio
+    recipients:
+      - type: slack
+        target: "#kolm-oncall"
+      - type: pagerduty
+        target: "kolm-runtime"
+    tags:
+      - "wave:w823"
+      - "severity:warn"

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -68,6 +68,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <link rel="stylesheet" href="/ks.css">
 <!-- ds-shell W619 -->
 <link rel="stylesheet" href="/docs-shell.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/docs-shell.js"></script>
 
 </head>
@@ -102,7 +103,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p class="lede">Most real applications are not one model. They are a routing layer (the classifier) plus a handful of specialists. kolm.ai lets you describe that shape declaratively in <code>kolm.pipeline.yaml</code> &mdash; one small specialist per label, an escalation lane for the long tail, and a runtime that prints the per-phase latency so you can see exactly where the time went.</p>
 
 <h2 id="why">Why compose artifacts</h2>
-<p>A single 70B generalist gets you to "it works on the demo" fast. It gets you to "billing questions cost us $0.04 each and the latency is 8 seconds" just as fast. The kolm composition argument is the same one your favourite operating system makes: <em>compose small, specialised, fast modules</em> instead of one giant binary. An intake classifier that decides which of {support, billing, escalation} the prompt belongs to is a 0.5B model that runs in &lt;100ms; a billing-specific specialist is a 3B INT4 model that ships in 1.9 GB; the escalation lane is a hosted teacher you only pay for on the long tail you actually need.</p>
+<p>A single 70B generalist gets you to "it works on the demo" fast. It gets you to "billing questions cost us $0.04 each and the latency is 8 seconds" just as fast. The kolm composition argument is the same one your favourite operating system makes: <em>compose small, specialised, fast modules</em> instead of one giant binary. An intake classifier that decides which of {support, billing, escalation} the prompt belongs to is a 0.5B model that runs in &lt;100ms; a billing-specific specialist is a 32B INT4 model that ships in 1.9 GB; the escalation lane is a hosted teacher you only pay for on the long tail you actually need.</p>
 
 <p>The win is not just cost. When billing logic changes you re-distill the billing artifact and bump its cid in the pipeline yaml. The classifier stays untouched, the support artifact stays untouched, and the W739 lineage chain shows the operator one line: <code>billing.kolm: bafkrei&hellip; -&gt; bafkrei&hellip;</code>. Each artifact is independently versioned, independently re-distilled, independently evaluated against its own holdout. There is no "one giant model passed the eval" lie; the per-route K-Score is the actual K-Score for the actual route.</p>
 

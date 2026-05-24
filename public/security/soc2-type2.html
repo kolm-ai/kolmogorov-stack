@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>SOC 2 Type II readiness &middot; kolm.ai</title>
-<meta name="description" content="SOC 2 Type II readiness checklist for the open-source AI workbench. Eighteen line-items across Security, Availability, Processing Integrity, Confidentiality, Privacy. 12-month audit retention default. Continuous monitoring dashboard for the auditor sample.">
+<meta name="description" content="SOC 2 Type II readiness checklist for the open-source AI workbench. Eighteen line-items across Security, Availability, Processing Integrity, Confidentiality, Privacy. 12-month audit retention default. Continuous">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="SOC 2 Type II readiness &middot; kolm.ai">
@@ -78,6 +78,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/docs-shell.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/docs-shell.js"></script>
 
 </head>
@@ -167,7 +168,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   <div class="row"><div class="id">TSC-C2</div><div class="crit">Confidentiality</div><div class="item">Tenant-fenced reads (W411 defense in depth)<small>tenant_id filter on every listEvents + re-filter inside helpers</small></div><div class="status ok">YES &middot; kolm</div></div>
   <div class="row"><div class="id">TSC-C3</div><div class="crit">Confidentiality</div><div class="item">Confidential-compute attestation embed<small>W460 attestation_kind manifest binding</small></div><div class="status ok">YES &middot; kolm</div></div>
   <div class="row"><div class="id">TSC-P1</div><div class="crit">Privacy</div><div class="item">Right-to-erasure (capture forget)<small>W764-3 captures/forget + audit row</small></div><div class="status ok">YES &middot; kolm</div></div>
-  <div class="row"><div class="id">TSC-P2</div><div class="crit">Privacy</div><div class="item">Data residency / region tagging<small>W769 ships region tagging; not yet wired in this surface</small></div><div class="status ext">NO &middot; sibling wave</div></div>
+  <div class="row"><div class="id">TSC-P2</div><div class="crit">Privacy</div><div class="item">Data residency / region tagging<small>W769 ships region tagging; sibling-wave integration in progress on this surface</small></div><div class="status ext">NO &middot; sibling wave</div></div>
   <div class="row"><div class="id">TSC-P3</div><div class="crit">Privacy</div><div class="item">Privacy policy + DPIA + DPA<small>customer legal + DPIA template at /privacy</small></div><div class="status ext">NO &middot; auditor</div></div>
   <div class="row"><div class="id">TSC-CC1</div><div class="crit">Continuous Monitoring</div><div class="item">TSC -&gt; signal map with auditor read access<small>W767-4 /v1/security/continuous-monitoring/snapshot</small></div><div class="status ok">YES &middot; kolm</div></div>
 </div>

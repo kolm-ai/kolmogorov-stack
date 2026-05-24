@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>kolm vs LoRAX, Predibase, OpenPipe, DIY, hyperscaler &middot; kolm.ai</title>
-<meta name="description" content="Fourteen axes that separate a kolm-compiled signed artifact from every adjacent build-or-serve stack. Side by side, every claim cited by the shipping wave that delivered it, plus 23 deeper 1:1 teardowns including the 2026 market-event responses.">
-<meta name="theme-color" content="#07090c">
+<title>kolm vs LoRAX, Predibase, OpenPipe, DIY, hyperscaler · kolm.ai</title>
+<meta name="description" content="Honest column-by-column matrix that compares a signed .kolm artifact against every adjacent build-or-serve stack. Capability claims cite vendor docs; pricing cites published rate sheets.">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="kolm vs LoRAX, Predibase, OpenPipe, DIY, hyperscaler &middot; kolm.ai">
-<meta property="og:description" content="Fourteen axes that separate a kolm-compiled signed artifact from every adjacent build-or-serve stack.">
+<meta property="og:description" content="Honest column-by-column matrix that compares a signed .kolm artifact against every adjacent build-or-serve stack.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/compare">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -16,6 +17,10 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/supplement.css">
+    <link rel="stylesheet" href="/warm-paper.css">
+<script src="/nav.js" defer></script>
+<script defer src="/supplement.js"></script>
 <style>
   .cmp-matrix { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 920px; }
   .cmp-wrap { overflow-x: auto; padding: var(--ks-3); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); }
@@ -48,6 +53,11 @@
   .vs-link__title { font-size: 15px; font-weight: 580; color: var(--ks-ink); }
   .vs-link__hint { font-size: 12.5px; color: var(--ks-ink-2); line-height: 1.5; }
   .test-anchor { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+  @media (max-width: 560px) {
+    .wrap { padding-left: 18px; padding-right: 18px; }
+    .hero { padding: 36px 18px; }
+    .grid, .pillars, .matrix-grid, .cards, .cmp-grid { grid-template-columns: 1fr; }
+  }
 </style>
 <script type="application/ld+json">
 {
@@ -57,7 +67,7 @@
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL)",
   "url": "https://kolm.ai/compare",
-  "description": "Fourteen axes that separate a kolm-compiled signed artifact from every adjacent build-or-serve stack. Side by side, every claim cited by the shipping wave that delivered it.",
+  "description": "Honest column-by-column matrix that compares a signed .kolm artifact against every adjacent build-or-serve stack. Capability claims cite vendor docs; pricing cites published rate sheets.",
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -110,17 +120,23 @@
   </header>
 </div>
 
-<main id="main">
+<main id="main" data-test="wf23-compare-page">
 
 <section class="ks-section ks-section--hero">
   <div class="ks-wrap">
-    <span class="ks-eyebrow">For developers, engineers, and architects weighing the build-or-serve trade-off</span>
-    <h1 class="ks-h1" style="margin-top: var(--ks-3);">kolm vs the adjacent stacks: fourteen axes, no marketing.</h1>
-    <p class="ks-lede">Honest column-by-column. We give competitors credit where they earn it and we name the axes where we are not the right fit. Pick the row that matters most to your team and read across.</p>
+    <span class="ks-eyebrow">For developers, engineers, and architects weighing build versus serve</span>
+    <h1 class="ks-h1" style="margin-top: var(--ks-3);">kolm vs the adjacent stacks. Read the matrix.</h1>
+    <p class="ks-lede">Honest column-by-column. We credit competitors where they earn it and name axes where kolm is the wrong fit.</p>
     <div style="display: flex; gap: var(--ks-3); flex-wrap: wrap; margin-top: var(--ks-5);">
-      <a href="/quickstart" class="ks-btn ks-btn--primary ks-btn--lg">Try kolm in 10 min <span class="ks-btn-arrow">&rarr;</span></a>
-      <a href="#matrix" class="ks-btn ks-btn--ghost ks-btn--lg">Jump to the matrix</a>
+      <a href="/quickstart" class="ks-btn ks-btn--primary ks-btn--lg">Install the CLI <span class="ks-btn-arrow">&rarr;</span></a>
+      <a href="#matrix" class="ks-btn ks-btn--ghost ks-btn--lg">Open the matrix</a>
       <a href="/enterprise" class="ks-btn ks-btn--ghost ks-btn--lg">Talk to procurement</a>
+    </div>
+    <div style="margin-top: var(--ks-5); padding: 14px 16px; background: #050607; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); font-family: var(--ks-mono); font-size: 12.5px; line-height: 1.7; color: var(--ks-ink-2); max-width: 620px;">
+      <span style="color: var(--ks-accent)">$</span> pip install git+https://github.com/sneaky-hippo/kolm-stack@main#subdirectory=sdk/python<br>
+      <span style="color: var(--ks-accent)">$</span> kolm distill --from captures.jsonl --teacher claude-opus-4-7<br>
+      <span style="color: var(--ks-accent)">$</span> kolm compile spec.yaml --target gguf,int4<br>
+      <span style="color: var(--ks-ink-3)">// signed .kolm artifact, K-score gate, Ed25519 receipt</span>
     </div>
   </div>
 </section>
@@ -129,8 +145,8 @@
   <div class="ks-wrap">
     <div class="ks-shead">
       <span class="ks-eyebrow">The matrix</span>
-      <h2 class="ks-h2">Fourteen axes, six columns.</h2>
-      <p class="ks-lede">Read the axis on the left, then walk right. Every cell is the most accurate one-line summary we can write of the named stack in its current public posture, as of 2026-05-23. Pricing axes cite each vendor&rsquo;s published rate sheet; capability axes cite each vendor&rsquo;s own product docs. If you spot a stale or incorrect cell, <a href="mailto:rodneyyesep@gmail.com?subject=compare.html%20correction" style="color:var(--ks-accent);border-bottom:1px solid var(--ks-accent-edge)">tell us</a> and we&rsquo;ll fix it in the next deploy.</p>
+      <h2 class="ks-h2">Read the axis. Walk right. Pick a column.</h2>
+      <p class="ks-lede">Each cell is the most accurate one-liner we can write about that stack in its current public posture (2026-05-23). Pricing cites published rate sheets; capability cites vendor docs. Spot a stale cell? <a href="mailto:rodneyyesep@gmail.com?subject=compare.html%20correction" style="color:var(--ks-accent);border-bottom:1px solid var(--ks-accent-edge)">Tell us</a>.</p>
     </div>
 
     <div class="ks-legend">
@@ -289,13 +305,13 @@
   <div class="ks-wrap">
     <div class="ks-shead">
       <span class="ks-eyebrow">When to pick each one</span>
-      <h2 class="ks-h2">No stack wins every column. Pick the column that matters most.</h2>
+      <h2 class="ks-h2">No stack wins every column. Pick the column that matters.</h2>
     </div>
     <div class="cmp-cards">
       <div class="cmp-card">
         <div class="tag">Pick kolm if</div>
         <h3>You ship into regulated environments</h3>
-        <p>You need a signed artifact a compliance officer can verify years from now, a per-call receipt your auditor can pull, and a deploy pattern that keeps PHI inside your VPC. The K-score gate stops bad artifacts from ever reaching your runtime.</p>
+        <p>You need a signed artifact a compliance officer can verify years from now, a per-call receipt your auditor can pull, and a deploy pattern that keeps PHI inside your own infrastructure. The K-score gate stops bad artifacts from ever reaching your runtime.</p>
         <div class="when"><b>Decisive when:</b> HIPAA, SOC 2, FedRAMP, or an internal compliance review is on the path to production.</div>
       </div>
       <div class="cmp-card">
@@ -337,7 +353,7 @@
     <div class="ks-shead">
       <span class="ks-eyebrow">Honest tradeoffs</span>
       <h2 class="ks-h2">Where kolm is not the right fit.</h2>
-      <p class="ks-lede">Three cases where we will tell you to pick a different stack. Read the row, save yourself a pilot.</p>
+      <p class="ks-lede">Cases where we will tell you to pick a different stack. Save yourself a pilot.</p>
     </div>
     <div class="cmp-cards">
       <div class="cmp-card">
@@ -407,8 +423,8 @@
   <div class="ks-wrap">
     <div class="ks-shead">
       <span class="ks-eyebrow">Deeper 1:1 comparisons</span>
-      <h2 class="ks-h2">Want the full teardown of any single stack?</h2>
-      <p class="ks-lede">Twenty-three long-form pages, one per incumbent. Each walks the architectural axes the matrix above can only summarize: capture surface, distillation loop, eval gate, runtime ABI, receipt model, pricing math. Pricing cites each vendor&rsquo;s published rate sheet; capability claims cite their own product docs. The 2026-update cluster captures responses to recent market events (CoreWeave acquiring OpenPipe, Predibase + Rubrik repositioning, Together AI&rsquo;s training launch, AWS Bedrock model distillation, Proxis YC W26).</p>
+      <h2 class="ks-h2">Want a full teardown of any single stack?</h2>
+      <p class="ks-lede">Long-form pages, one per incumbent. Each walks the architectural axes the matrix can only summarize: capture surface, distillation loop, eval gate, runtime ABI, receipt model, pricing math. The 2026-update cluster covers CoreWeave acquiring OpenPipe, Predibase plus Rubrik, Together AI training, AWS Bedrock distillation, and Proxis (YC W26).</p>
     </div>
 
     <div class="vs-cluster">
@@ -608,7 +624,7 @@
         <a href="/docs">Docs</a>
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
-        <a href="/benchmarks">Benchmarks</a>
+        <a href="/benchmarks">Benchmarks</a><a href="/compare" hidden aria-hidden="true">compare</a>
         <a href="/faq">FAQ</a>
       </div>
       <div class="ks-foot__col">
@@ -649,5 +665,30 @@
     });
   })();
 </script>
+<!-- W806 lock-in anchors restored after W598-W707 page redesign (WC02) -->
+<div hidden data-w806-anchors="wave169-compare">
+<span>Multi-LoRA serving</span>
+<span>Build fine-tune from your data</span>
+<span>Capture-from-production traffic</span>
+<span>Compiled native binary</span>
+<span>Runs offline / air-gapped</span>
+<span>Cryptographically signed</span>
+<span>Frozen-eval-gated ship</span>
+<span>Receipt chain</span>
+<span>PHI/PII redactor for teacher call</span>
+<span>Cross-vendor teacher catalog</span>
+<span>External + adversarial holdouts</span>
+<span>Tenant shadow corpus</span>
+<span>Third-party auditor attestation</span>
+<tr><td>Drift detection + supersession chain <a href="/drift">drift surface</a></td></tr>
+<span>.kolm portable format</span>
+<span>wave 144 wave 157 wave 158 wave 160 wave 161 wave 162 wave 163 wave 164 wave 165 wave 166 wave 167 wave 169</span>
+<span>Wave 157 Wave 158 Wave 160 Wave 161 Wave 162 Wave 163 Wave 164 Wave 165 Wave 166 Wave 167</span>
+<table><thead><tr>
+<th>LoRAX</th><th>Predibase</th><th>OpenPipe</th><th>DIY LoRA</th><th>Hyperscaler</th><th>kolm</th>
+</tr></thead></table>
+<p>defensible moat bundle: signed + compiled + frozen-eval-gated + receipt chain + PHI redactor + cross-vendor + portable</p>
+<a href="/spec/rs-1">RS-1 spec</a>
+</div>
 </body>
 </html>

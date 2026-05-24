@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -54,6 +54,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/docs-shell.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/docs-shell.js"></script>
 
 </head>
@@ -162,7 +163,7 @@ print(r["output"], r["k_score"])</code></pre>
 </div>
 
 <h2 id="kolm-side">What kolm contributes</h2>
-<p>The workbench: capture from a live application, build a student dataset from your real traffic, distill against a frontier teacher, quantize to INT4, and write a receipt that names every input that shaped the student. The output is a portable .kolm bundle with verifiable lineage. None of this depends on Azure.</p>
+<p>The workbench: capture from a live application, build a student dataset from your real traffic, distill against a frontier teacher, quantize to INT4, and write a receipt that names every input that shaped the student. The output is a portable .kolm compile with verifiable lineage. None of this depends on Azure.</p>
 
 <h2 id="azure-side">What Azure AI Studio contributes</h2>
 <p>Hosting and governance: the managed online endpoint, autoscaling policy, blue/green deployment slots, Azure AD token authentication, VNet isolation, private endpoints, Application Insights metrics, and integration with the wider Azure AI Studio observability surface (drift, content safety, prompt flow). You do not maintain any of the operational surface.</p>
@@ -179,13 +180,13 @@ print(r["output"], r["k_score"])</code></pre>
 
 <h2 id="limits">Known limitations</h2>
 <ul>
- <li>The Azure ML exporter currently writes a portable .kolm bundle with a generic Hugging Face scoring script. A first-party kolm inference environment (with built-in receipt verification and k-score logging) is a roadmap item.</li>
+ <li>The Azure ML exporter currently writes a portable .kolm compile with a generic Hugging Face scoring script. A first-party kolm inference environment (with built-in receipt verification and k-score logging) is a roadmap item.</li>
  <li>Azure AI Studio's model catalog UI does not list arbitrary custom models in the prompt-flow picker; you reach the endpoint via the scoring URI or the Azure ML SDK, not the AI Studio chat UI.</li>
  <li>Managed online endpoints require a minimum of one instance; there is no scale-to-zero. Use <a href="https://learn.microsoft.com/azure/machine-learning/concept-endpoints-online#online-endpoints-vs-batch-endpoints" rel="noopener">batch endpoints</a> if your workload is bursty.</li>
 </ul>
 
 <div class="note">
- <b>Format adapter status.</b> <code>kolm export --format azureml</code> currently writes a portable .kolm bundle that the corresponding cloud container can load. Cloud-specific packaging is a roadmap item (W736+ artifact composition).
+ <b>Format adapter status.</b> <code>kolm export --format azureml</code> currently writes a portable .kolm compile that the corresponding cloud container can load. Cloud-specific packaging is a roadmap item (W736+ artifact composition).
 </div>
 
 <div class="status">

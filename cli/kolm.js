@@ -56,6 +56,8 @@ import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
+import { envBool } from '../src/env.js';
+
 const VERSION = '0.2.6';
 const HOME = os.homedir();
 const KOLM_DIR = path.join(HOME, '.kolm');
@@ -3727,6 +3729,35 @@ EXAMPLE
   kolm billing breakdown --by namespace --period 2026-05
   kolm billing breakdown --by team --team-id team_<id> --period 2026-05
 `,
+  savings: `kolm savings - savings-based pricing tracker (baseline vs post-kolm). (W835)
+
+USAGE
+  kolm savings                                        (alias for 'summary')
+  kolm savings baseline                               (show current baseline status)
+  kolm savings baseline --start                       (start/restart a baseline window)
+  kolm savings record --provider <p> --model <m> --input-tokens N --output-tokens N
+  kolm savings summary [--period-days 30] [--namespace ns] [--json]
+
+FLAGS
+  --namespace <ns>     scope all operations to a namespace (default: 'default')
+  --period-days <N>    window length in days (default: 30, min 7)
+  --start              with 'baseline' subcommand: start/restart the baseline window
+  --provider <p>       teacher provider (anthropic|openai|google|deepseek)
+  --model <m>          teacher model id (e.g. claude-opus-4-7, gpt-4o)
+  --input-tokens <N>   prompt-side tokens for the recorded call
+  --output-tokens <N>  completion-side tokens for the recorded call
+  --json               JSON envelope for scripts
+
+HONESTY
+  status='no_baseline_started'   no baseline window started yet
+  status='insufficient_baseline' <7 days observed; refuses to claim phony savings
+  regression=true                post > baseline; fee_usd is 0 (no fee on regressions)
+
+EXAMPLE
+  kolm savings baseline --start
+  kolm savings record --provider anthropic --model claude-opus-4-7 --input-tokens 12000 --output-tokens 4000
+  kolm savings summary --period-days 30 --json
+`,
   privacy: `kolm privacy - privacy-membrane scan / smoke / policy / report. (W384)
 
 USAGE
@@ -3958,6 +3989,47 @@ EXIT CODES
 EXAMPLE
   kolm active-learn --namespace prod --top 25 --json
   kolm active-learn --feed-w720
+`,
+  'meta': `kolm meta - W832 kolm-meta meta-distillation model.
+
+USAGE
+  kolm meta status                  (training-row count, model presence)
+  kolm meta rows                    (last 100 training rows)
+  kolm meta retrain                 (rebuild ~/.kolm/meta-model.json)
+  kolm meta predict [--features <json>]   (predict kscore + compile_time
+                                           + failure mode for feature vector)
+
+SUBVERBS
+  status     Print rows_total, min_rows_for_meta, meta_insufficient_data,
+             and model_present.
+  rows       List the last 100 training rows on disk.
+  retrain    Rebuild the toy GBM from all rows.jsonl. Honest envelope on
+             insufficient_rows (<2). Honest about quality (NOT XGBoost — see
+             src/kolm-meta-trainer.js top-of-file note).
+  predict    Run inference. Honest 'no_model' status when no retrain has run.
+
+FLAGS
+  --features <json>   Override default feature vector (predict only)
+  --json              Deterministic JSON output
+
+NOTES
+  - The meta-model is a TOY single-split gradient-boosted ensemble, NOT a
+    full XGBoost. Production-scale meta-distillation should move to
+    apps/trainer/meta_xgb.py via a worker shell (W786-style honesty).
+  - TAAS (W716) falls back to the rule ladder when n_rows() < 1000.
+    Set KOLM_META_MIN_ROWS to override.
+  - Schedule \`kolm meta retrain\` via systemd timer / cron weekly.
+
+EXIT CODES
+  0 ok        (status / rows / successful retrain / successful predict)
+  1 bad-args  (unknown subverb)
+  3 missing-prereq  (insufficient_rows for retrain, no_model for predict)
+  4 execution (retrain failed for some other reason)
+
+EXAMPLE
+  kolm meta status --json
+  kolm meta retrain
+  kolm meta predict --features '{"capture_count": 500, "teacher_class": "open-weights"}'
 `,
   'autopilot': `kolm autopilot - W775 continuous-background-distill daemon.
 
@@ -6537,6 +6609,88 @@ async function cmdBilling(args) {
   }
 }
 
+// W835 — `kolm savings {baseline,record,summary}` — savings-based pricing
+// tracker CLI. Thin wrappers over /v1/savings/*. Honors --json envelope
+// shape so scripts can branch on `.status` for the honest sub-states
+// (no_baseline_started / insufficient_baseline / regression).
+async function cmdSavings(args) {
+  if (maybeHelp('savings', args)) return;
+  const jsonOut = args.includes('--json');
+  const c = loadConfig();
+  if (!c.api_key) {
+    if (jsonOut) console.log(JSON.stringify({ error: 'not_logged_in', hint: 'run: kolm login' }));
+    else console.error('not logged in. hint: kolm login --key ks_...');
+    process.exit(EXIT.MISSING_PREREQ);
+    return;
+  }
+  const pick = (n) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : null; };
+  const positional = args.find(a => !a.startsWith('--'));
+  const sub = positional || 'summary';
+  const namespace = pick('--namespace') || 'default';
+  const periodDays = pick('--period-days') || '30';
+  try {
+    if (sub === 'baseline') {
+      const start = args.includes('--start');
+      const data = start
+        ? await api(c, 'POST', '/v1/savings/baseline', { namespace })
+        : await api(c, 'GET', '/v1/savings/baseline?namespace=' + encodeURIComponent(namespace) + '&period_days=' + encodeURIComponent(periodDays));
+      if (jsonOut) { console.log(JSON.stringify(data)); return; }
+      console.log('kolm savings baseline (' + (start ? 'started' : 'status') + ')');
+      console.log('namespace:    ' + (data.namespace || namespace));
+      console.log('started_at:   ' + (data.started_at || data.baseline_start || '-'));
+      console.log('status:       ' + (data.status || '-'));
+      if (data.total_cost_usd != null) console.log('spend so far: $' + Number(data.total_cost_usd).toFixed(6));
+    } else if (sub === 'record') {
+      const provider = pick('--provider');
+      const model = pick('--model');
+      const input = Number(pick('--input-tokens') || 0);
+      const output = Number(pick('--output-tokens') || 0);
+      if (!provider || !model) {
+        console.error('usage: kolm savings record --provider <p> --model <m> --input-tokens N --output-tokens N [--namespace ns]');
+        process.exit(EXIT.BAD_ARGS); return;
+      }
+      const data = await api(c, 'POST', '/v1/savings/record', {
+        namespace, provider, model, input_tokens: input, output_tokens: output,
+      });
+      if (jsonOut) { console.log(JSON.stringify(data)); return; }
+      console.log('kolm savings record');
+      const rec = data.recorded || {};
+      console.log('  event_id: ' + (rec.event_id || '-'));
+      console.log('  cost_usd: $' + Number(rec.cost_usd || 0).toFixed(6));
+      console.log('  tokens:   in=' + (rec.input_tokens || 0) + '  out=' + (rec.output_tokens || 0));
+    } else if (sub === 'summary' || sub === undefined) {
+      const data = await api(c, 'GET', '/v1/savings/summary?namespace=' + encodeURIComponent(namespace) + '&period_days=' + encodeURIComponent(periodDays));
+      if (jsonOut) { console.log(JSON.stringify(data)); return; }
+      console.log('kolm savings summary');
+      console.log('namespace:       ' + (data.namespace || namespace));
+      console.log('status:          ' + (data.status || '-'));
+      if (data.status === 'no_baseline_started') {
+        console.log('hint: run `kolm savings baseline --start` to begin tracking.');
+      } else if (data.status === 'insufficient_baseline') {
+        console.log('elapsed_days:    ' + (data.elapsed_days || 0));
+        console.log('min required:    ' + (data.min_baseline_days || 7));
+        console.log(data.message || '');
+      } else {
+        console.log('baseline $:      $' + Number(data.baseline_usd || 0).toFixed(2));
+        console.log('post-kolm $:     $' + Number(data.post_kolm_usd || 0).toFixed(2));
+        console.log('saved $:         $' + Number(data.saved_usd || 0).toFixed(2));
+        console.log('fee_rate:        ' + Number(data.fee_rate || 0).toFixed(4));
+        console.log('fee $:           $' + Number(data.fee_usd || 0).toFixed(2));
+        console.log('net savings $:   $' + Number(data.net_savings_usd || 0).toFixed(2));
+        if (data.regression) console.log('regression:      true (post > baseline; fee_usd=0)');
+      }
+    } else {
+      if (jsonOut) console.log(JSON.stringify({ error: 'unknown_subcommand', sub }));
+      else console.error('unknown savings subcommand: ' + sub + '. try: baseline | record | summary');
+      process.exit(EXIT.BAD_ARGS); return;
+    }
+  } catch (e) {
+    if (jsonOut) console.log(JSON.stringify({ error: 'request_failed', message: String(e && e.message || e) }));
+    else console.error('savings request failed: ' + (e && e.message || e));
+    process.exit(2);
+  }
+}
+
 async function cmdTrain(args) {
   if (maybeHelp('train', args)) return;
   // W371 — `kolm train plan <dataset_id>` reports a training plan before
@@ -6640,7 +6794,12 @@ async function cmdCompile(args) {
   // already inside the child (KOLM_DETACHED guards the re-fork loop), respawn
   // ourselves as a background job and return the session id. The actual
   // compile runs in the child re-entry with --detach stripped.
-  if (args.includes('--detach') && !process.env.KOLM_DETACHED) {
+  // WC07 — envBool('KOLM_DETACHED') is FALSE for unset, '0', 'false', 'no',
+  // 'off' — and TRUE for '1', 'true', 'yes', 'on'. Previously bare
+  // `!process.env.KOLM_DETACHED` was FALSE for `KOLM_DETACHED=false` (any
+  // non-empty string is truthy), so a child re-entry that tried to clear
+  // the flag by setting it to literal "false" would re-fork forever.
+  if (args.includes('--detach') && !envBool('KOLM_DETACHED', false)) {
     const { detach } = await import('../src/sessions.js');
     const rec = detach({ argv: ['compile', ...args], kind: 'compile', meta: {} });
     console.log(`session ${rec.id} started (pid ${rec.pid})`);
@@ -11177,6 +11336,110 @@ async function cmdActiveLearn(args) {
   }
 }
 
+// W832 — `kolm meta <status|retrain|predict|rows>` dispatcher for the
+// kolm-meta meta-distillation model. Routes to ../src/kolm-meta-trainer.js
+// directly (no HTTP needed for local-tenant — hosted callers hit /v1/meta/*).
+async function cmdW832Meta(args) {
+  if (maybeHelp('meta', args)) return;
+  const wantJson = args.includes('--json');
+  const sub = String((args && args[0]) || '').toLowerCase();
+  const rest = args.slice(1);
+  let metaMod;
+  try { metaMod = await import('../src/kolm-meta-trainer.js'); }
+  catch (e) {
+    const env = { ok: false, error: 'meta_module_missing', detail: e && e.message ? e.message : String(e), version: 'w832-v1' };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else console.error('error: ' + env.error + ' - ' + env.detail);
+    process.exit(EXIT.MISSING_PREREQ);
+  }
+  if (sub === 'status' || sub === '') {
+    const rows_total = metaMod.n_rows();
+    let model_present = false;
+    try {
+      const inf = metaMod.inferKolmMeta({ features: { capture_count: 0 } });
+      model_present = inf && inf.ok === true;
+    } catch (_) {}
+    const env = {
+      ok: true, version: metaMod.META_VERSION, rows_total,
+      min_rows_for_meta: metaMod.MIN_ROWS_FOR_META,
+      meta_insufficient_data: rows_total < metaMod.MIN_ROWS_FOR_META,
+      model_present,
+    };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else {
+      console.log('kolm-meta status:');
+      console.log('  rows_total:           ' + env.rows_total);
+      console.log('  min_rows_for_meta:    ' + env.min_rows_for_meta);
+      console.log('  meta_insufficient:    ' + env.meta_insufficient_data);
+      console.log('  model_present:        ' + env.model_present);
+      console.log('  version:              ' + env.version);
+    }
+    return;
+  }
+  if (sub === 'rows') {
+    const rows = metaMod.readTrainingRows({ limit: 100 });
+    if (wantJson) { console.log(JSON.stringify({ ok: true, version: metaMod.META_VERSION, rows, count: rows.length }, null, 2)); return; }
+    console.log('kolm-meta rows (showing up to 100):');
+    for (const r of rows) {
+      console.log('  ' + r.ts + '  tenant=' + r.tenant_id + '  run=' + (r.run_id || '-')
+        + '  kscore=' + (r.observed && r.observed.kscore != null ? r.observed.kscore : '-')
+        + '  compile_s=' + (r.observed && r.observed.compile_time_s != null ? r.observed.compile_time_s : '-'));
+    }
+    console.log('  total: ' + rows.length);
+    return;
+  }
+  if (sub === 'retrain') {
+    const rows = metaMod.readTrainingRows();
+    if (rows.length < 2) {
+      const env = { ok: false, error: 'insufficient_rows', rows: rows.length, hint: 'need >=2 rows; run more `kolm distill` first', version: metaMod.META_VERSION };
+      if (wantJson) console.log(JSON.stringify(env, null, 2));
+      else console.error('error: insufficient_rows (' + rows.length + ') — need >=2');
+      process.exit(EXIT.MISSING_PREREQ);
+    }
+    const env = metaMod.trainKolmMeta({ rows });
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else {
+      if (env.ok) console.log('kolm-meta retrained: n_train_rows=' + (env.model && env.model.n_train_rows) + ' model=' + env.model_path);
+      else console.error('error: ' + env.error);
+    }
+    if (!env.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+  if (sub === 'predict') {
+    let featuresStr = pickFlag(rest, '--features');
+    let features = null;
+    if (featuresStr) {
+      try { features = JSON.parse(featuresStr); }
+      catch (e) {
+        const env = { ok: false, error: 'features_invalid_json', detail: e.message, version: metaMod.META_VERSION };
+        if (wantJson) console.log(JSON.stringify(env, null, 2));
+        else console.error('error: --features must be valid JSON');
+        process.exit(EXIT.BAD_ARGS);
+      }
+    } else {
+      features = { capture_count: 100, teacher_class: 'open-weights', task_type: 'kd_softmax' };
+    }
+    const env = metaMod.inferKolmMeta({ features });
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else if (env.ok) {
+      console.log('kolm-meta prediction:');
+      console.log('  kscore_predicted:        ' + env.kscore_predicted);
+      console.log('  compile_time_s_predicted: ' + env.compile_time_s_predicted);
+      console.log('  failure_mode_predicted:  ' + (env.failure_mode_predicted || '-'));
+      console.log('  confidence:              ' + env.confidence);
+    } else {
+      console.error('kolm-meta status: ' + (env.status || env.error));
+      if (env.hint) console.error('  hint: ' + env.hint);
+    }
+    if (!env.ok && env.status === 'no_model') process.exit(EXIT.MISSING_PREREQ);
+    return;
+  }
+  const env = { ok: false, error: 'unknown_subverb', subverb: sub, valid: ['status', 'rows', 'retrain', 'predict'], version: metaMod.META_VERSION };
+  if (wantJson) console.log(JSON.stringify(env, null, 2));
+  else console.error('usage: kolm meta <status|rows|retrain|predict> [--json]');
+  process.exit(EXIT.BAD_ARGS);
+}
+
 // W775 — `kolm autopilot <start|stop|status|disable|savings|tick>` dispatcher.
 // The autopilot is the continuous-background-distill daemon (THE KILLER
 // FEATURE). Distinct-named dispatcher so parallel wave agents on the same
@@ -15332,92 +15595,50 @@ async function cmdDistillImprove(args) {
 
 async function cmdDistill(args) {
   if (maybeHelp('distill', args)) return;
-  if (args[0] === 'strategy') return cmdDistillStrategy(args.slice(1));
-  // W720 — `kolm distill improve --detect|--orchestrate|--decide` runs the
-  // self-improvement loop primitive. Dispatched BEFORE the other subverbs so
-  // `kolm distill improve --orchestrate --namespace X` is not hijacked by a
-  // later --namespace consumer. Local-only by default (no /v1/* fetch).
-  if (args[0] === 'improve') return cmdDistillImprove(args.slice(1));
-  // W455 - `kolm distill runs [<id>]` lists or shows local distill runs.
-  // Dispatched BEFORE --from-captures so `kolm distill runs --from-captures`
-  // is not hijacked (W455 #8 lock).
-  if (args[0] === 'runs') return cmdDistillRuns(args.slice(1));
-  // Wave 214: --from-captures routes to /v1/distill/from-captures (preview-first).
-  // Hoisted above --detach so the W214 dispatch lives in the first 600 chars
-  // of the function (cmdDistillFromCaptures handles its own detach semantics).
-  if (args.includes('--from-captures')) return cmdDistillFromCaptures(args);
-  // W710-2: --resume-from-active-queue consumes routing-decision derived
-  // training rows (route='teacher'|'mixed') from the active-learning queue.
-  // Hoisted before --detach so the W710 dispatch handles its own envelope.
-  if (args.includes('--resume-from-active-queue')) return cmdDistillResumeFromActiveQueue(args);
-  // W711-1: --importance-weighted ranks captures by training value
-  // (capture-importance.js scoreCapture) and writes a JSONL the Python
-  // trainer consumes via --importance-weights. Hoisted before --detach so
-  // the W711 dispatch handles its own envelope (trainer-not-invoked etc).
-  if (args.includes('--importance-weighted')) return cmdDistillImportanceWeighted(args);
-  // W712-CLI: --progressive runs a 3-pass curriculum (format -> reasoning ->
-  // edge) with K-Score axis gates between each pass. Hoisted before --detach
-  // so cmdDistillProgressive handles its own envelope (gate-fail / honest
-  // trainer-missing fallback).
-  if (args.includes('--progressive')) return cmdDistillProgressive(args);
-  // W717: --curriculum sorts captures simple->complex via the curriculum-sort
-  // perplexity proxy, writes the sorted JSONL, and spawns the trainer with
-  // --curriculum so SequentialSampler walks rows in order. Honest envelope on
-  // missing python (trainer_not_invoked:true, exit 0). Sibling to --progressive
-  // (curriculum within a stage vs across stages) and --importance-weighted
-  // (deterministic order vs weighted random).
-  if (args.includes('--curriculum')) return cmdDistillCurriculum(args);
-  // W714-4: --contrastive generates negative variants + invokes the
-  // contrastive trainer; honest envelope on missing python/trainer.
-  if (args.includes('--contrastive')) return cmdDistillContrastive(args);
-  // W716-4: --auto-arch runs TAAS (task-adaptive architecture search):
-  // analyze capture distribution, recommend a student arch, print a
-  // report. With --apply, write the spec to ~/.kolm/auto-arch/<ns>-<ts>.json
-  // so a follow-up `kolm distill --config <path>` consumes it. Honest
-  // envelope on no captures (exit 3) — never fabricates training.
-  if (args.includes('--auto-arch')) return cmdDistillAutoArch(args);
-  // W719-CLI: --mixed-precision auto|<profile.json> drives DAQ
-  // (Distillation-Aware Quantization). Auto mode reads namespace
-  // run-meta telemetry to synthesize a per-layer profile; explicit
-  // path validates + ships the profile through to the bakeoff /
-  // quantize worker. Honest envelope on missing telemetry (exit 3).
-  if (args.includes('--mixed-precision')) return cmdDistillMixedPrecision(args);
-  // W721-CLI: `kolm distill sparse-attention {compile,validate,summarize}`
-  // drives TSAC (Task-Specific Attention Compiler). compile walks task
-  // captures + emits a per-(layer,head) sparsity profile; validate
-  // schema-checks an existing profile; summarize reports dense/sparse/
-  // pruned head counts. Local-only (no /v1/* fetch). Honest envelope on
-  // any failure — non-zero exit.
-  if (args[0] === 'sparse-attention') return cmdDistillSparseAttention(args.slice(1));
-  // W722-CLI: `kolm distill itkv {build,classify,estimate}` drives ITKV
-  // (Importance-Tiered KV Cache). build emits a profile JSON, classify
-  // scores tokens through classifyToken, estimate reports GPU-resident
-  // memory savings. Local-only (no /v1/* fetch). Verb intentionally
-  // named "itkv" (not "kv") to avoid collision risk with future kv
-  // subverbs. Honest envelope on any failure - non-zero exit.
-  if (args[0] === 'itkv') return cmdDistillKvOptim(args.slice(1));
-  // W480 - on-policy + preference orchestration subverbs. Local-only by default
-  // (trainer is a tenant plug-in); --remote routes through /v1/distill/*.
-  if (args[0] === 'onpolicy') return cmdDistillOnPolicy(args.slice(1));
-  if (args[0] === 'preference' || args[0] === 'dpo' || args[0] === 'simpo') {
-    return cmdDistillPreference(args.slice(1), args[0]);
-  }
-  // W718 — Teacher Council. `--teachers a,b,c --weights auto|equal|domain`
-  // routes through the council formula to RANK teachers per-capture before
-  // the worker spawn. Local-only orchestration: prints the council verdict
-  // + an honest envelope on no captures (exit 3). When --weights is absent
-  // we DO NOT trigger council mode — falls through to the existing dispatch.
-  if (args.includes('--teachers') && args.includes('--weights')) {
-    return cmdDistillTeacherCouncil(args);
-  }
-  // W233 --detach short-circuit: fork a background session and return the id.
-  if (args.includes('--detach') && !process.env.KOLM_DETACHED) {
+  // W233 --detach short-circuit (hoisted: KOLM_DETACHED env guards re-detach).
+  if (args.includes('--detach') && !envBool('KOLM_DETACHED', false)) {
     const { detach } = await import('../src/sessions.js');
     const rec = detach({ argv: ['distill', ...args], kind: 'distill', meta: {} });
     console.log(`session ${rec.id} started (pid ${rec.pid})`);
     console.log(`  log:   ${rec.log_path}`);
     console.log(`  tail:  kolm resume ${rec.id}`);
     return;
+  }
+  if (args[0] === 'strategy') return cmdDistillStrategy(args.slice(1));
+  // W787 distill efficiency subverb.
+  if (args[0] === 'efficiency') return cmdDistillEfficiency(args.slice(1));
+  // W720 distill improve subverb (local self-improve loop).
+  if (args[0] === 'improve') return cmdDistillImprove(args.slice(1));
+  // W455 distill runs subverb.
+  if (args[0] === 'runs') return cmdDistillRuns(args.slice(1));
+  // W214 --from-captures routes to /v1/distill/from-captures.
+  if (args.includes('--from-captures')) return cmdDistillFromCaptures(args);
+  // W710-2 --resume-from-active-queue.
+  if (args.includes('--resume-from-active-queue')) return cmdDistillResumeFromActiveQueue(args);
+  // W711-1 --importance-weighted.
+  if (args.includes('--importance-weighted')) return cmdDistillImportanceWeighted(args);
+  // W712 --progressive 3-pass curriculum.
+  if (args.includes('--progressive')) return cmdDistillProgressive(args);
+  // W717 --curriculum sort.
+  if (args.includes('--curriculum')) return cmdDistillCurriculum(args);
+  // W714-4 --contrastive.
+  if (args.includes('--contrastive')) return cmdDistillContrastive(args);
+  // W716-4 --auto-arch (TAAS).
+  if (args.includes('--auto-arch')) return cmdDistillAutoArch(args);
+  // W719 --mixed-precision (DAQ).
+  if (args.includes('--mixed-precision')) return cmdDistillMixedPrecision(args);
+  // W721 sparse-attention (TSAC).
+  if (args[0] === 'sparse-attention') return cmdDistillSparseAttention(args.slice(1));
+  // W722 itkv (importance-tiered KV).
+  if (args[0] === 'itkv') return cmdDistillKvOptim(args.slice(1));
+  // W480 on-policy + preference subverbs.
+  if (args[0] === 'onpolicy') return cmdDistillOnPolicy(args.slice(1));
+  if (args[0] === 'preference' || args[0] === 'dpo' || args[0] === 'simpo') {
+    return cmdDistillPreference(args.slice(1), args[0]);
+  }
+  // W718 Teacher Council (--teachers + --weights).
+  if (args.includes('--teachers') && args.includes('--weights')) {
+    return cmdDistillTeacherCouncil(args);
   }
   if (args.includes('--local-worker')) return cmdDistillLocalWorker(args);
   // W243 canonical wizard enums. Mirrors /v1/compile + /v1/specialists/auto-distill server-side
@@ -15451,12 +15672,39 @@ async function cmdDistill(args) {
       if (!CLI_MULTI_DEVICE.includes(d)) { console.error(`error: --multi-device entry '${d}' must be one of ${CLI_MULTI_DEVICE.join(', ')}`); process.exit(EXIT.BAD_ARGS); }
     }
   }
+  // W787 — compute-efficiency flags. CLI-side validation against
+  // PRECISION_MODES so a typo dies before the network round-trip; the
+  // server-side /v1/specialists/auto-distill body forwards them to the
+  // distill pipeline which calls normalizeEfficiencyOptions again
+  // (defence-in-depth — the server NEVER trusts the CLI to have validated).
+  const precisionFlag = pickFlag(args, '--precision');
+  const gradCheckpointFlag = args.includes('--gradient-checkpointing') || args.includes('--grad-checkpoint');
+  const earlyStopPatienceFlag = pickFlag(args, '--early-stop-patience');
+  if (precisionFlag) {
+    const { PRECISION_MODES } = await import('../src/distill-efficiency.js');
+    if (!PRECISION_MODES.includes(precisionFlag)) {
+      console.error(`error: --precision must be one of: ${PRECISION_MODES.join(', ')} (got '${precisionFlag}')`);
+      process.exit(EXIT.BAD_ARGS);
+    }
+  }
   const url = c.base.replace(/\/+$/, '') + '/v1/specialists/auto-distill';
   const body = { namespace: ns, base_model, target_size };
   if (classFlag) body.recipe_class = classFlag;
   if (tierFlag) body.hw_tier = tierFlag;
   if (targetFlag) body.output_target = targetFlag;
   if (multiDeviceArr) body.multi_device = multiDeviceArr;
+  // W787 — efficiency block in request body; the server's distill-pipeline
+  // call passes these through normalizeEfficiencyOptions.
+  if (precisionFlag) body.precision_mode = precisionFlag;
+  if (gradCheckpointFlag) body.gradient_checkpointing = true;
+  if (earlyStopPatienceFlag) {
+    const p = Number(earlyStopPatienceFlag);
+    if (!Number.isFinite(p) || p <= 0) {
+      console.error(`error: --early-stop-patience must be a positive integer (got '${earlyStopPatienceFlag}')`);
+      process.exit(EXIT.BAD_ARGS);
+    }
+    body.early_stop_config = { enabled: true, patience: Math.floor(p) };
+  }
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'content-type': 'application/json', ...authHeaders(c) },
@@ -15913,6 +16161,31 @@ async function cmdDistillFromCaptures(args) {
   // stamping into run-meta.json happens inside resolveCotMode() which calls
   // the server preview endpoint to count traces.
   const noCot = args.includes('--no-cot');
+  // W828-4 — trace-aware loss weight in [0.0, 1.0]. Default 0.0 (omit flag)
+  // preserves the W713 baseline byte-for-byte (the trainer's trace branch
+  // contributes 0). Values >0 add a per-position weighted CE term over the
+  // <think>..</think> spans so the student learns reasoning structure, not
+  // just the final answer. Plumbed into the trainer worker via the
+  // KOLM_REASONING_TRACE_LOSS_WEIGHT env var so the distill.py argparser
+  // reads it without needing an explicit --reasoning-trace-loss-weight flag
+  // re-invocation, AND echoed into the request body so the server stamps
+  // run-meta.json with the chosen weight for auditor recovery.
+  const traceLossWeightRaw = pickFlag(args, '--reasoning-trace-loss-weight');
+  let reasoningTraceLossWeight = 0.0;
+  if (traceLossWeightRaw !== null && traceLossWeightRaw !== undefined && traceLossWeightRaw !== '') {
+    const parsed = Number(traceLossWeightRaw);
+    if (Number.isFinite(parsed)) {
+      // Defensive clamp into [0.0, 1.0]; distill.py also clamps.
+      reasoningTraceLossWeight = Math.max(0, Math.min(1, parsed));
+    }
+  }
+  // KOLM_REASONING_TRACE_LOSS_WEIGHT env var plumbed to the trainer worker
+  // process. Only set when the flag was explicitly passed (>0); otherwise
+  // we leave the env untouched so existing worker invocations stay identical
+  // to the W713 baseline.
+  if (reasoningTraceLossWeight > 0) {
+    process.env.KOLM_REASONING_TRACE_LOSS_WEIGHT = String(reasoningTraceLossWeight);
+  }
   const base = c.base.replace(/\/+$/, '');
 
   if (preview) {
@@ -15993,6 +16266,12 @@ async function cmdDistillFromCaptures(args) {
   body.cot_mode = cotMode;
   body.cot_capture_rate = cotCaptureRate;
   body.cot_template_version = 'w713-v1';
+  // W828-4 — echo the trace-aware loss weight into the body so the server
+  // stamps run-meta.json with reasoning_trace_loss_weight + version. Default
+  // 0.0 is sent explicitly (rather than omitted) so the auditor can tell
+  // the difference between "weight was 0" and "weight wasn't requested".
+  body.reasoning_trace_loss_weight = reasoningTraceLossWeight;
+  body.reasoning_trace_loss_version = 'w828-v1';
   const url = base + '/v1/distill/from-captures';
   const res = await fetch(url, {
     method: 'POST',
@@ -16854,7 +17133,12 @@ async function cmdDistillProgressive(args) {
   if (trainerBin) {
     try { trainerInvocable = fs.existsSync(trainerBin); } catch (_) { trainerInvocable = false; }
   }
-  if (!trainerInvocable && !process.env.KOLM_DISABLE_TRAINER_PROBE) {
+  // WC07 — envBool flip so `KOLM_DISABLE_TRAINER_PROBE=0` actually keeps the
+  // probe enabled. The previous `!process.env.KOLM_DISABLE_TRAINER_PROBE`
+  // disabled the probe for ANY non-empty value of the env, so `=0` was
+  // treated identically to `=1`, which is the opposite of the documented
+  // intent. fallback=false so an unset env runs the probe.
+  if (!trainerInvocable && !envBool('KOLM_DISABLE_TRAINER_PROBE', false)) {
     try {
       const probe = spawnSync(pythonBin, ['-c', 'import apps.trainer.distill'], {
         encoding: 'utf8', timeout: 10_000, shell: process.platform === 'win32',
@@ -17107,7 +17391,8 @@ async function cmdDistillCurriculum(args) {
   if (trainerBin) {
     try { trainerInvocable = fs.existsSync(trainerBin); } catch (_) { trainerInvocable = false; }
   }
-  if (!trainerInvocable && !process.env.KOLM_DISABLE_TRAINER_PROBE) {
+  // WC07 — see envBool note on the W711 trainer probe site above; same fix.
+  if (!trainerInvocable && !envBool('KOLM_DISABLE_TRAINER_PROBE', false)) {
     try {
       const probe = spawnSync(pythonBin, ['-c', 'import apps.trainer.distill'], {
         encoding: 'utf8', timeout: 10_000, shell: process.platform === 'win32',
@@ -17399,6 +17684,41 @@ async function cmdDistillAutoArch(args) {
 // Output: a structured JSON envelope describing the profile + the bit-budget
 // summary. The actual `quantize` step is decoupled — the operator runs
 // `kolm quantize --local-worker --mixed-precision <profile.json>` next.
+// W787 — `kolm distill efficiency {doctor,modes}` reports the recommended
+// compute-efficiency choice for THIS host (precision mode, gradient
+// checkpointing, early-stop). Local-only, no API call. `doctor` reads the
+// cached device probe at ~/.kolm/devices/local.json; `modes` lists the
+// supported precision enum so a user can pick one for --precision.
+async function cmdDistillEfficiency(args) {
+  const sub = args[0] || 'doctor';
+  const wantJson = args.includes('--json');
+  const eff = await import('../src/distill-efficiency.js');
+  const emit = (obj) => {
+    process.stdout.write(JSON.stringify(obj, null, 2) + '\n');
+  };
+  if (sub === 'modes') {
+    emit({
+      ok: true,
+      version: eff.EFFICIENCY_VERSION,
+      precision_modes: Array.from(eff.PRECISION_MODES),
+      precision_hints: eff.PRECISION_HINTS,
+      early_stop_defaults: eff.EARLY_STOP_DEFAULTS,
+    });
+    return;
+  }
+  if (sub === 'doctor') {
+    const env = eff.efficiencyDoctor({});
+    emit(env);
+    if (!env.ok) process.exit(3);
+    return;
+  }
+  console.error(`error: unknown 'kolm distill efficiency ${sub}'; expected one of: doctor, modes`);
+  process.exit(EXIT.BAD_ARGS);
+  // Silence linter: wantJson kept for future --json-only branching; doctor
+  // already emits JSON unconditionally.
+  void wantJson;
+}
+
 async function cmdDistillMixedPrecision(args) {
   const wantJson = args.includes('--json');
   const namespace = pickFlag(args, '--namespace') || pickFlag(args, '-n') || 'default';
@@ -18129,6 +18449,15 @@ async function cmdDistillContrastive(args) {
   const outJsonlFlag = pickFlag(args, '--out-jsonl');
   const studentModel = pickFlag(args, '--student-model') || 'Qwen/Qwen2.5-3B-Instruct';
   const outputDirFlag = pickFlag(args, '--output-dir');
+  // W827-4 — token-level DPO opt-in. Additive to --contrastive (W714) so the
+  // existing response-level path remains the default and does not regress.
+  // We propagate to the Python worker BOTH as an argv flag AND via the
+  // KOLM_CONTRASTIVE_TOKEN_LEVEL env var so the override survives shell
+  // re-quoting in CI runners that strip long argv (Windows + cmd.exe).
+  const tokenLevelDpo = args.includes('--contrastive-token-level');
+  const dpoBetaFlag = pickFlag(args, '--dpo-beta');
+  const dpoBeta = Number.isFinite(Number(dpoBetaFlag)) && Number(dpoBetaFlag) > 0
+    ? Number(dpoBetaFlag) : 0.1;
 
   // 1. Pull captures.
   let captures = [];
@@ -18243,10 +18572,24 @@ async function cmdDistillContrastive(args) {
     ];
   }
 
+  // W827-4 — append token-level DPO toggles when requested. We add BOTH
+  // the argv flag and the env var because some hosted-runner shells eat
+  // long argv lists silently; the env var is the durable fallback the
+  // Python main() reads via KOLM_CONTRASTIVE_TOKEN_LEVEL.
+  if (tokenLevelDpo) {
+    trainerArgs.push('--contrastive-token-level');
+    trainerArgs.push('--dpo-beta', String(dpoBeta));
+  }
+  const trainerSpawnEnv = { ...process.env };
+  if (tokenLevelDpo) {
+    trainerSpawnEnv.KOLM_CONTRASTIVE_TOKEN_LEVEL = '1';
+    trainerSpawnEnv.KOLM_DPO_BETA = String(dpoBeta);
+  }
+
   let trainerResult = null;
   let trainerInvocationFailed = false;
   try {
-    trainerResult = spawnSync(trainerCmd, trainerArgs, { encoding: 'utf8', timeout: 60_000 });
+    trainerResult = spawnSync(trainerCmd, trainerArgs, { encoding: 'utf8', timeout: 60_000, env: trainerSpawnEnv });
     if (trainerResult.error) {
       trainerInvocationFailed = true;
     }
@@ -18270,6 +18613,9 @@ async function cmdDistillContrastive(args) {
     negatives_per_capture: negCount,
     student_model: studentModel,
     output_dir: outputDir,
+    // W827-4 receipt block.
+    contrastive_token_level: tokenLevelDpo,
+    dpo_beta: tokenLevelDpo ? dpoBeta : null,
     trainer_invocation_failed: trainerInvocationFailed || (trainerResult && trainerResult.status !== 0),
     trainer_exit: trainerResult ? trainerResult.status : null,
     trainer_stdout_tail: trainerResult ? (trainerResult.stdout || '').slice(-2000) : null,
@@ -18911,11 +19257,40 @@ async function cmdDistillLocalWorker(args) {
     if (allowUnknownStudentBase) passthru.push('--allow-unknown-student-base');
   }
 
+  // W787 — accept --precision / --gradient-checkpointing / --early-stop-patience
+  // on the local-worker path, normalise once, inject as env vars to the worker
+  // (which forwards to the Python trainer in scripts/train_lora.py).
+  const _w787Precision = pick('--precision');
+  const _w787GradCkpt = args.includes('--gradient-checkpointing') || args.includes('--grad-checkpoint');
+  const _w787EsPatience = pick('--early-stop-patience');
+  let _w787Env = {};
+  if (_w787Precision || _w787GradCkpt || _w787EsPatience) {
+    try {
+      const eff = await import('../src/distill-efficiency.js');
+      const eopts = {};
+      if (_w787Precision) eopts.precision_mode = _w787Precision;
+      if (_w787GradCkpt) eopts.gradient_checkpointing = true;
+      if (_w787EsPatience) {
+        const p = Number(_w787EsPatience);
+        if (!Number.isFinite(p) || p <= 0) {
+          console.error(`error: --early-stop-patience must be a positive integer (got '${_w787EsPatience}')`);
+          process.exit(EXIT.BAD_ARGS);
+        }
+        eopts.early_stop_config = { enabled: true, patience: Math.floor(p) };
+      }
+      const normalised = eff.normalizeEfficiencyOptions(eopts);
+      _w787Env = eff.buildEfficiencyEnv(normalised);
+    } catch (e) {
+      console.error(`error: ${e.message}`);
+      process.exit(EXIT.BAD_ARGS);
+    }
+  }
+
   const { spawn } = await import('node:child_process');
   await new Promise((resolve) => {
     const child = spawn(process.execPath, [workerPath, ...passthru], {
       stdio: 'inherit',
-      env: process.env,
+      env: { ...process.env, ..._w787Env },
     });
     // Wave 253 backend#10: relay SIGINT/SIGTERM to the distill worker so
     // Ctrl+C in the parent terminal stops the python LoRA trainer (or the
@@ -22758,6 +23133,114 @@ async function cmdCloud(args) {
     await cmdCloudTrain(rest);
     return;
   }
+  // W785 - managed-distill cloud expansion. Maps to /v1/cloud/distill/* routes.
+  // Subcommands: submit, status, list, cancel, meter.
+  // The HONEST envelope (cloud_backend_status='no_pool_configured') is what the
+  // user sees when KOLM_CLOUD_DISTILL_ENDPOINT is not set on the server - we
+  // print it verbatim so 'queued but not running' is unambiguous.
+  if (sub === 'distill') {
+    const sub2 = rest[0];
+    const r2 = rest.slice(1);
+    const wantJson = r2.includes('--json');
+    if (!sub2 || sub2 === '--help' || sub2 === '-h' || sub2 === 'help') {
+      console.log('kolm cloud distill <submit|status|list|cancel|meter> [options]');
+      console.log('');
+      console.log('  submit  [--namespace ns] [--capture-window 7d] [--recipe id] [--gpu-sku H100-80GB] [--vram-tier 1x]');
+      console.log('  status  <job_id>');
+      console.log('  list    [--status queued|running|succeeded|failed|cancelled] [--namespace ns] [--limit N]');
+      console.log('  cancel  <job_id> [--reason "text"]');
+      console.log('  meter   <job_id>          read training meter (separate from inference)');
+      return;
+    }
+    if (sub2 === 'submit') {
+      const body = {
+        namespace: flag(r2, '--namespace'),
+        capture_window: flag(r2, '--capture-window') || flag(r2, '--window'),
+        recipe_id: flag(r2, '--recipe') || flag(r2, '--recipe-id'),
+        gpu_sku: flag(r2, '--gpu-sku') || flag(r2, '--gpu'),
+        vram_tier: flag(r2, '--vram-tier') || flag(r2, '--vram'),
+        billing_token: flag(r2, '--billing-token'),
+      };
+      // Strip null/undefined values so the server applies defaults instead
+      // of getting a literal {namespace:null} in the body.
+      for (const k of Object.keys(body)) if (body[k] == null || body[k] === '') delete body[k];
+      const out = await api(c, 'POST', '/v1/cloud/distill/submit', body);
+      if (wantJson) { console.log(JSON.stringify(out, null, 2)); return; }
+      console.log(`job_id:                ${out.job_id || '(missing)'}`);
+      console.log(`state:                 ${out.state || '(missing)'}`);
+      console.log(`cloud_backend_status:  ${out.cloud_backend_status || '(unknown)'}`);
+      if (out.cloud_backend_status === 'no_pool_configured') {
+        console.log('');
+        console.log('  NOTE: no managed pool reachable. Job is queued in the local ledger but');
+        console.log('  cannot execute until the operator sets KOLM_CLOUD_DISTILL_ENDPOINT.');
+      }
+      console.log(`gpu_sku:               ${out.gpu_sku || '(default)'}`);
+      console.log(`vram_tier:             ${out.vram_tier || '(default)'}`);
+      console.log(`rate_per_gpu_hour_usd: $${(out.rate_per_gpu_hour_usd || 0).toFixed(4)}`);
+      console.log(`capture_window:        ${out.capture_window || '(default)'}`);
+      return;
+    }
+    if (sub2 === 'status') {
+      const job = r2[0];
+      if (!job) { console.error('error: job_id required'); process.exit(EXIT.BAD_ARGS); }
+      const out = await api(c, 'GET', '/v1/cloud/distill/' + encodeURIComponent(job));
+      if (wantJson) { console.log(JSON.stringify(out, null, 2)); return; }
+      if (!out.ok) {
+        console.log(`error: ${out.error || 'unknown'}`);
+        process.exit(EXIT.EXECUTION);
+      }
+      console.log(`job_id:               ${out.job_id}`);
+      console.log(`state:                ${out.state}`);
+      console.log(`cloud_backend_status: ${out.cloud_backend_status}`);
+      console.log(`namespace:            ${out.namespace}`);
+      console.log(`created_at:           ${out.created_at}`);
+      if (out.started_at) console.log(`started_at:           ${out.started_at}`);
+      if (out.finished_at) console.log(`finished_at:          ${out.finished_at}`);
+      if (out.artifact_url) console.log(`artifact_url:         ${out.artifact_url}`);
+      if (out.error) console.log(`error:                ${out.error}`);
+      return;
+    }
+    if (sub2 === 'list' || sub2 === 'ls') {
+      const q = [];
+      const s = flag(r2, '--status'); if (s) q.push('status=' + encodeURIComponent(s));
+      const ns = flag(r2, '--namespace'); if (ns) q.push('namespace=' + encodeURIComponent(ns));
+      const lim = flag(r2, '--limit'); if (lim) q.push('limit=' + encodeURIComponent(lim));
+      const qs = q.length ? '?' + q.join('&') : '';
+      const out = await api(c, 'GET', '/v1/cloud/distill' + qs);
+      if (wantJson) { console.log(JSON.stringify(out, null, 2)); return; }
+      if (!out.ok) { console.log(`error: ${out.error || 'unknown'}`); process.exit(EXIT.EXECUTION); }
+      console.log(`count: ${out.count}  (total for tenant: ${out.total_for_tenant})`);
+      if (out.jobs && out.jobs.length === 0) { console.log('(no jobs)'); return; }
+      for (const j of (out.jobs || [])) {
+        console.log(`  ${j.job_id.padEnd(24)} ${j.state.padEnd(10)} ${(j.namespace || '').padEnd(18)} ${j.cloud_backend_status}`);
+      }
+      return;
+    }
+    if (sub2 === 'cancel' || sub2 === 'rm' || sub2 === 'delete') {
+      const job = r2[0];
+      if (!job) { console.error('error: job_id required'); process.exit(EXIT.BAD_ARGS); }
+      const reason = flag(r2, '--reason') || '';
+      const out = await api(c, 'DELETE', '/v1/cloud/distill/' + encodeURIComponent(job), { reason });
+      if (wantJson) { console.log(JSON.stringify(out, null, 2)); return; }
+      if (!out.ok) { console.log(`error: ${out.error || 'unknown'}`); process.exit(EXIT.EXECUTION); }
+      console.log(`cancelled: ${out.job_id} at ${out.cancelled_at}`);
+      return;
+    }
+    if (sub2 === 'meter') {
+      const job = r2[0];
+      if (!job) { console.error('error: job_id required'); process.exit(EXIT.BAD_ARGS); }
+      const out = await api(c, 'GET', '/v1/cloud/distill/meter/' + encodeURIComponent(job));
+      if (wantJson) { console.log(JSON.stringify(out, null, 2)); return; }
+      if (!out.ok) { console.log(`error: ${out.error || 'unknown'}`); process.exit(EXIT.EXECUTION); }
+      console.log(`ledger:              ${out.ledger}   (separate from inference $/1k-tokens)`);
+      console.log(`total_gpu_seconds:   ${out.total_gpu_seconds}`);
+      console.log(`total_cost_usd:      $${(out.total_cost_usd || 0).toFixed(4)}`);
+      console.log(`rows:                ${(out.rows || []).length}`);
+      return;
+    }
+    console.error('unknown cloud distill subcommand:', sub2);
+    process.exit(EXIT.BAD_ARGS);
+  }
   console.error('unknown cloud subcommand:', sub);
   process.exit(EXIT.BAD_ARGS);
 }
@@ -23805,6 +24288,10 @@ const COMPLETION_VERBS = [
   'namespace', 'ns', 'federated',
   // W756 — KolmBench v1 spec + leaderboard verbs (`kb` is the short alias).
   'kolmbench', 'kb',
+  // W784 — third-party plugin architecture.
+  'plugin',
+  // W731/W733/W735/W736/W835/W739 — completion entries for verbs already in dispatch.
+  'vscode', 'otel', 'tool', 'guardrails', 'savings', 'lineage',
 ];
 const COMPLETION_SUBS = {
   auditor: ['keygen', 'sign', 'verify'],
@@ -23861,6 +24348,8 @@ const COMPLETION_SUBS = {
   synth:   ['generate', 'edge-cases', 'counterexamples', 'personas'],
   sim:     ['create', 'run', 'replay', 'generate-dataset', 'eval', 'list'],
   bakeoff: [],
+  // W784 — plugin architecture.
+  plugin:  ['list', 'ls', 'register', 'install', 'info', 'show'],
   // W371 — `kolm replay trace|namespace|dataset` overlaps the W216 cloud
   // path; both are wired in cmdReplay's subverb shortcut.
   replay:  ['trace', 'namespace', 'dataset'],
@@ -23966,6 +24455,13 @@ COMPLETION_SUBS.region    = ['status', 'route', 'gateways', 'test-failover'];
 COMPLETION_VERBS.push('xlang', 'multilingual');
 COMPLETION_SUBS.xlang        = ['coverage', 'sample', 'per-language-eval', 'bakeoff'];
 COMPLETION_SUBS.multilingual = ['coverage', 'sample', 'per-language-eval', 'bakeoff'];
+
+// W833 — Cross-lingual foundation enhancements. `kolm lingual <detect|
+// distribution|synthesize|mixture>` covers language detection, namespace
+// distribution analysis, synthetic-translation via teacher, and
+// mixture-weight preview. Distinct from W774's xlang dispatcher.
+COMPLETION_VERBS.push('lingual');
+COMPLETION_SUBS.lingual = ['detect', 'distribution', 'synthesize', 'mixture'];
 
 // W775 — Continuous-background-distill daemon (THE KILLER FEATURE).
 // `kolm autopilot <start|stop|status|disable|savings|tick>`. Distinct-named
@@ -28726,6 +29222,335 @@ async function cmdFederated(args) {
   throw _badArgs(`unknown federated subcommand: ${sub}`);
 }
 
+// ---------- sla (W788) ----------
+//
+// `kolm sla rollup [--surface X --window-hours 24]` reads the persistent
+// SLA sample store and prints p50/p95/p99 + uptime for the requested
+// surface (or every surface when --surface is omitted). Local-mode: reads
+// directly from ~/.kolm/sla-samples.jsonl — no server round-trip needed
+// because the dashboard data is per-tenant on disk.
+async function cmdSla(args) {
+  const sub = args && args[0];
+  const rest = (args || []).slice(1);
+  const jsonOut = rest.includes('--json');
+  const sla = await import('../src/sla-rollup.js');
+  if (!sub || sub === '--help' || sub === '-h' || sub === 'help') {
+    console.log('kolm sla - persistent SLA rollup (latency p50/p95/p99 + uptime per surface)\n\n' +
+      'USAGE\n' +
+      '  kolm sla rollup [--surface <name>] [--window-hours 24] [--json]\n' +
+      '  kolm sla surfaces\n\n' +
+      'Surfaces: ' + sla.SLA_SURFACES.join(', ') + '\n' +
+      'Honest contract: empty window returns status=no_samples_in_window — never zeros.');
+    return;
+  }
+  function flag(name) {
+    const direct = rest.find(a => a === '--' + name);
+    if (direct) return true;
+    const eq = rest.find(a => a.startsWith('--' + name + '='));
+    return eq ? eq.split('=').slice(1).join('=') : null;
+  }
+  const tenant_id = process.env.KOLM_TENANT_ID || process.env.KOLM_TENANT || 'local';
+  if (sub === 'surfaces') {
+    if (jsonOut) return _printJson({ surfaces: sla.SLA_SURFACES });
+    for (const s of sla.SLA_SURFACES) console.log(s);
+    return;
+  }
+  if (sub === 'rollup') {
+    const surface = flag('surface');
+    const whRaw = flag('window-hours');
+    const window_hours = whRaw ? Number(whRaw) : 24;
+    if (surface) {
+      if (!sla.SLA_SURFACES.includes(surface)) {
+        throw _badArgs('--surface must be one of ' + sla.SLA_SURFACES.join(' | '));
+      }
+      const latency = sla.rollupLatency({ surface, window_hours, tenant_id });
+      const uptime = sla.rollupUptime({ surface, window_hours, tenant_id });
+      if (jsonOut) return _printJson({ surface, latency, uptime });
+      console.log(`SLA rollup — surface=${surface} window=${window_hours}h tenant=${tenant_id}`);
+      if (latency.status === 'no_samples_in_window') {
+        console.log('  latency: no samples in window');
+      } else {
+        const fmt = (v) => v == null ? '--' : v.toFixed(1) + 'ms';
+        console.log(`  latency: p50=${fmt(latency.p50)}  p95=${fmt(latency.p95)}  p99=${fmt(latency.p99)}  (n=${latency.count})`);
+      }
+      if (uptime.status === 'no_samples_in_window') {
+        console.log('  uptime: no samples in window');
+      } else {
+        console.log(`  uptime: ${uptime.uptime_pct.toFixed(3)}%  (${uptime.ok_samples}/${uptime.total_samples})`);
+      }
+      return;
+    }
+    // No surface => full dashboard table.
+    const data = sla.dashboardData({ tenant_id, window_hours });
+    if (jsonOut) return _printJson(data);
+    console.log(`SLA dashboard — window=${data.window_hours}h tenant=${tenant_id} generated=${data.generated_at}`);
+    console.log('  surface          p50      p95      p99      uptime%   samples');
+    for (const row of data.surfaces) {
+      const lat = row.latency;
+      const up = row.uptime;
+      const fmt = (v) => v == null ? '--'.padStart(8) : (v.toFixed(1) + 'ms').padStart(8);
+      const ut = up.uptime_pct == null ? '--'.padStart(9) : (up.uptime_pct.toFixed(3) + '%').padStart(9);
+      console.log(`  ${row.surface.padEnd(16)} ${fmt(lat.p50)} ${fmt(lat.p95)} ${fmt(lat.p99)} ${ut}  ${String(lat.count).padStart(7)}`);
+    }
+    return;
+  }
+  throw _badArgs(`unknown sla subcommand: ${sub}`);
+}
+
+// ---------- carbon (W786) ----------
+//
+// `kolm carbon estimate --gpu A100-80GB --hours 2 --region us-west-2`
+// `kolm carbon estimate --provider openai --tokens 10000 --model-size medium`
+// `kolm carbon compare --gpu RTX-5090 --hours 0.05 --provider anthropic --tokens 5000`
+//
+// All output carries methodology='public-research-estimate'. NEVER measured.
+async function cmdCarbon(args) {
+  const sub = args && args[0];
+  const rest = (args || []).slice(1);
+  const jsonOut = rest.includes('--json');
+  const ce = await import('../src/carbon-estimator.js');
+
+  function flag(name) {
+    const eq = rest.find(a => typeof a === 'string' && a.startsWith('--' + name + '='));
+    if (eq) return eq.split('=').slice(1).join('=');
+    const idx = rest.indexOf('--' + name);
+    if (idx >= 0 && idx + 1 < rest.length) return rest[idx + 1];
+    return null;
+  }
+
+  if (!sub || sub === '--help' || sub === '-h' || sub === 'help') {
+    console.log('kolm carbon - CO2 estimator for distillation runs and frontier API calls\n\n' +
+      'USAGE\n' +
+      '  kolm carbon estimate --gpu <sku> --hours <n> [--region <r>] [--utilization 0.75]\n' +
+      '  kolm carbon estimate --provider <openai|anthropic|google> --tokens <n>\n' +
+      '                       [--model-size <small|medium|large>]\n' +
+      '  kolm carbon compare --gpu <sku> --hours <n> [--region <r>]\n' +
+      '                       --provider <p> --tokens <n> [--model-size <c>]\n' +
+      '  kolm carbon gpus     # list known GPU SKUs + published TDP\n' +
+      '  kolm carbon regions  # list known grid regions + carbon intensity\n\n' +
+      'HONESTY\n' +
+      '  Every output carries methodology=public-research-estimate. These are\n' +
+      '  MODELED estimates from public vendor TDP and IEA grid intensities, NEVER\n' +
+      '  measured. +/- 30 percent error bar applies to every number.\n');
+    return;
+  }
+
+  if (sub === 'gpus') {
+    if (jsonOut) return _printJson({ gpus: ce.GPU_TDP_W, version: ce.CARBON_VERSION });
+    console.log('GPU SKU             TDP (W)');
+    console.log('------------------  -------');
+    for (const k of Object.keys(ce.GPU_TDP_W)) {
+      console.log(k.padEnd(18) + '  ' + String(ce.GPU_TDP_W[k]).padStart(5));
+    }
+    console.log('\nmethodology: public-research-estimate (vendor datasheet TDP; +/- 30%)');
+    return;
+  }
+
+  if (sub === 'regions') {
+    if (jsonOut) return _printJson({ regions: ce.GRID_CARBON_KGCO2_PER_KWH, version: ce.CARBON_VERSION });
+    console.log('Region            kg CO2 / kWh');
+    console.log('----------------  ------------');
+    for (const k of Object.keys(ce.GRID_CARBON_KGCO2_PER_KWH)) {
+      console.log(k.padEnd(16) + '  ' + String(ce.GRID_CARBON_KGCO2_PER_KWH[k]));
+    }
+    console.log('\nmethodology: public-research-estimate (IEA 2024 + cloud disclosures; +/- 30%)');
+    return;
+  }
+
+  if (sub === 'estimate') {
+    const provider = flag('provider');
+    const tokens = flag('tokens');
+    const gpu = flag('gpu');
+    const hours = flag('hours');
+    const region = flag('region');
+    const utilization = flag('utilization');
+    const modelSize = flag('model-size') || flag('model_size_class');
+
+    if (provider && tokens != null) {
+      const out = ce.estimateFrontierCallCo2({
+        provider,
+        tokens: Number(tokens),
+        model_size_class: modelSize || 'medium',
+      });
+      if (jsonOut) return _printJson(out);
+      if (!out.ok) {
+        console.error(out.error + ': ' + out.hint);
+        process.exit(EXIT.BAD_ARGS);
+      }
+      console.log('Frontier call estimate (' + out.provider + ' / ' + out.model_size_class + ')');
+      console.log('  tokens         : ' + out.tokens);
+      console.log('  Wh / 1k tokens : ' + out.wh_per_ktokens);
+      console.log('  kWh            : ' + out.kwh);
+      console.log('  kg CO2         : ' + out.kg_co2);
+      console.log('  methodology    : ' + out.methodology + ' (' + out.methodology_version + ')');
+      console.log('  honest_caveat  : ' + out.honest_caveat + ' (+/- ' + out.error_bar_pct + '%)');
+      return;
+    }
+    if (gpu && hours != null) {
+      const out = ce.estimateRunCo2({
+        gpu,
+        gpu_hours: Number(hours),
+        region: region || undefined,
+        utilization: utilization != null ? Number(utilization) : undefined,
+      });
+      if (jsonOut) return _printJson(out);
+      if (!out.ok) {
+        console.error(out.error + ': ' + out.hint);
+        process.exit(EXIT.BAD_ARGS);
+      }
+      console.log('Local run estimate');
+      console.log('  gpu          : ' + out.gpu + (out.gpu_known ? '' : ' (UNKNOWN - used CPU-default)'));
+      console.log('  gpu_tdp_w    : ' + out.gpu_tdp_w);
+      console.log('  region       : ' + out.region + (out.region_known ? '' : ' (UNKNOWN - used global-avg)'));
+      console.log('  grid_factor  : ' + out.grid_factor + ' kg CO2 / kWh');
+      console.log('  gpu_hours    : ' + out.gpu_hours);
+      console.log('  utilization  : ' + out.utilization);
+      console.log('  kWh          : ' + out.kwh);
+      console.log('  kg CO2       : ' + out.kg_co2);
+      console.log('  methodology  : ' + out.methodology + ' (' + out.methodology_version + ')');
+      console.log('  honest_caveat: ' + out.honest_caveat + ' (+/- ' + out.error_bar_pct + '%)');
+      return;
+    }
+    throw _badArgs('kolm carbon estimate requires either (--gpu+--hours) or (--provider+--tokens)');
+  }
+
+  if (sub === 'compare') {
+    const provider = flag('provider');
+    const tokens = flag('tokens');
+    const gpu = flag('gpu');
+    const hours = flag('hours');
+    const region = flag('region');
+    const modelSize = flag('model-size') || flag('model_size_class');
+    if (!provider || tokens == null || !gpu || hours == null) {
+      throw _badArgs('kolm carbon compare requires --gpu --hours --provider --tokens');
+    }
+    const local = ce.estimateRunCo2({
+      gpu, gpu_hours: Number(hours), region: region || undefined,
+    });
+    const frontier = ce.estimateFrontierCallCo2({
+      provider, tokens: Number(tokens), model_size_class: modelSize || 'medium',
+    });
+    const savings = ce.savingsReport({ local_run: local, frontier_baseline: frontier });
+    if (jsonOut) return _printJson({ local_run: local, frontier_baseline: frontier, savings });
+    console.log('Local run    : ' + local.kg_co2 + ' kg CO2 (' + local.kwh + ' kWh)');
+    console.log('Frontier API : ' + frontier.kg_co2 + ' kg CO2 (' + frontier.kwh + ' kWh)');
+    console.log('Saved CO2    : ' + savings.saved_kg_co2 + ' kg (local_is_greener=' + savings.local_is_greener + ')');
+    console.log('');
+    console.log('methodology: ' + savings.methodology + ' (' + savings.methodology_version + ')');
+    console.log('honest_caveat: ' + savings.honest_caveat + ' (+/- ' + savings.error_bar_pct + '%)');
+    console.log('note: ' + savings.methodology_note);
+    return;
+  }
+
+  throw _badArgs('unknown carbon subcommand: ' + sub);
+}
+
+// ---------- plugin (W784) ----------
+// `kolm plugin list` — list installed plugins from ~/.kolm/plugins.
+// `kolm plugin register <manifest.json>` — install a plugin (validates +
+//   copies into the plugin dir).
+// `kolm plugin info <name>` — show single plugin manifest + load status.
+// All local-only by default; no network.
+async function cmdPlugin(args) {
+  const sub = args && args[0];
+  const rest = (args || []).slice(1);
+  const jsonOut = rest.includes('--json');
+  const mod = await import('../src/plugins.js');
+  if (!sub || sub === '--help' || sub === '-h' || sub === 'help') {
+    console.log('kolm plugin - third-party quantization / runtime / capture / eval extensions\n\n' +
+      'USAGE\n' +
+      '  kolm plugin list [--kind=<kind>] [--json]\n' +
+      '  kolm plugin register <manifest.json> [--json]\n' +
+      '  kolm plugin info <name> [--json]\n\n' +
+      'KINDS\n  ' + mod.PLUGIN_KINDS.join(', ') + '\n\n' +
+      'Plugins live under ~/.kolm/plugins/<name>/ with a plugin.json manifest.\n' +
+      'See /docs/plugins for the contract + a worked example.');
+    return;
+  }
+  function flag(name) {
+    const direct = rest.find(a => a === '--' + name);
+    if (direct) return true;
+    const eq = rest.find(a => a.startsWith('--' + name + '='));
+    return eq ? eq.split('=').slice(1).join('=') : null;
+  }
+  if (sub === 'list' || sub === 'ls') {
+    const kind = flag('kind');
+    const env = kind ? mod.loadPlugins({ kind: String(kind) }) : mod.listPlugins();
+    if (jsonOut) return _printJson(env);
+    if (!env.ok) {
+      console.log('error: ' + (env.error || 'unknown'));
+      if (env.hint) console.log('hint: ' + env.hint);
+      process.exitCode = 1;
+      return;
+    }
+    if ((env.plugins || []).length === 0) {
+      console.log('no plugins installed in ' + env.dir);
+      if ((env.errors || []).length) {
+        console.log('errors:');
+        for (const er of env.errors) console.log('  ' + er.plugin + ': ' + er.error);
+      }
+      return;
+    }
+    console.log('plugins (' + env.plugins.length + ') in ' + env.dir);
+    for (const p of env.plugins) {
+      console.log('  ' + p.name + '@' + p.version + '  kinds=[' + (p.kinds || []).join(',') + ']'
+        + (p.entry_exists ? '' : '  (entry missing)'));
+    }
+    if ((env.errors || []).length) {
+      console.log('errors:');
+      for (const er of env.errors) console.log('  ' + er.plugin + ': ' + er.error);
+    }
+    return;
+  }
+  if (sub === 'register' || sub === 'install') {
+    const manifest_path = rest.find(a => !a.startsWith('--'));
+    if (!manifest_path) throw _badArgs('kolm plugin register requires <manifest.json>');
+    try {
+      const out = mod.registerPlugin({ manifest_path });
+      if (jsonOut) return _printJson(out);
+      console.log('registered ' + out.name + '@' + out.version_installed
+        + '  kinds=[' + (out.kinds || []).join(',') + ']');
+      console.log('  installed to ' + out.plugin_dir);
+      return;
+    } catch (pe) {
+      const env = {
+        ok: false,
+        error: pe && pe.code ? pe.code : 'register_failed',
+        detail: String((pe && pe.message) || pe),
+        version: mod.PLUGIN_VERSION,
+      };
+      if (jsonOut) { _printJson(env); process.exitCode = 1; return; }
+      console.log('register failed: ' + env.error);
+      console.log('  ' + env.detail);
+      process.exitCode = 1;
+      return;
+    }
+  }
+  if (sub === 'info' || sub === 'show') {
+    const name = rest.find(a => !a.startsWith('--'));
+    if (!name) throw _badArgs('kolm plugin info requires <name>');
+    const env = mod.getPlugin(name);
+    if (jsonOut) return _printJson(env);
+    if (!env.ok) {
+      console.log('plugin ' + name + ' not found: ' + env.error);
+      process.exitCode = 1;
+      return;
+    }
+    const p = env.plugin;
+    console.log(p.name + '@' + p.version);
+    console.log('  kinds:       [' + (p.kinds || []).join(',') + ']');
+    if (p.description) console.log('  description: ' + p.description);
+    if (p.author)      console.log('  author:      ' + p.author);
+    if (p.homepage)    console.log('  homepage:    ' + p.homepage);
+    console.log('  entry:       ' + p.entry);
+    console.log('  entry_path:  ' + p.entry_path);
+    console.log('  entry_exists:' + p.entry_exists);
+    console.log('  plugin_dir:  ' + p.plugin_dir);
+    return;
+  }
+  throw _badArgs(`unknown plugin subcommand: ${sub}`);
+}
+
 // ---------- namespace (W715) ----------
 // `kolm namespace fingerprint` computes the privacy-safe fingerprint for a
 // tenant's captures so a new sibling namespace can pick a warm-start.
@@ -32161,6 +32986,16 @@ async function cmdW733OtelStatus(args) {
 // report only the per-item source URL + chunk count.
 async function cmdW734RagCapture(args) {
   const sub = (args && args[0]) || '';
+  // W192 lock-in: --help must exit 0 with HELP.rag text. The 4 legacy
+  // subcommands (index/query/attach/list) belong to cmdRag (W192) — the
+  // W734 dispatcher only owns `capture` + `status`. Delegate the rest.
+  if (args && (args.includes('--help') || args.includes('-h'))) {
+    usage('rag');
+    return;
+  }
+  if (sub === 'index' || sub === 'query' || sub === 'attach' || sub === 'list') {
+    return cmdRag(args);
+  }
   const fsMod = await import('node:fs');
   const pathMod = await import('node:path');
 
@@ -33611,17 +34446,26 @@ async function cmdW739Lineage(args) {
 }
 
 async function cmdW739Diff(args) {
-  const aPath = args && args[0];
-  const bPath = args && args[1];
-  if (!aPath || !bPath || (typeof aPath === 'string' && aPath.startsWith('-'))) {
-    console.error('usage: kolm diff <a.kolm> <b.kolm>');
-    console.error('  Compares two .kolm artifacts: lineage relation + per-axis performance delta + roll-back recommendation.');
+  // W820-5 — layered output. The W739 envelope (lineage + recommendation)
+  // is preserved; a new W820 block (side-by-side per-axis delta:
+  // k_score / capture_count / teacher / student_arch / param_count /
+  // bench_pass_rate / signed) is appended. Default UX prints the W820
+  // pretty table to stdout; `--json` emits the combined JSON envelope.
+  const positional = (args || []).filter(a => typeof a === 'string' && !a.startsWith('-'));
+  const jsonMode = (args || []).includes('--json');
+  const aPath = positional[0];
+  const bPath = positional[1];
+  if (!aPath || !bPath) {
+    console.error('usage: kolm diff <a.kolm> <b.kolm> [--json]');
+    console.error('  Side-by-side delta across k_score, capture_count, teacher, student_arch, param_count, bench_pass_rate, signed.');
+    console.error('  Also surfaces the W739 lineage relation + roll-back recommendation.');
     process.exit(EXIT.BAD_ARGS);
     return;
   }
-  let mod;
+  let w739Mod;
+  let w820Mod;
   try {
-    mod = await import('../src/kolm-diff.js');
+    w739Mod = await import('../src/kolm-diff.js');
   } catch (e) {
     const envelope = {
       ok: false,
@@ -33634,21 +34478,58 @@ async function cmdW739Diff(args) {
     process.exit(EXIT.MISSING_PREREQ);
     return;
   }
-  const result = await mod.diffArtifacts(aPath, bPath);
-  console.log(JSON.stringify(result, null, 2));
-  // Print the recommendation pill to stderr so a stdout redirect captures
-  // the JSON envelope while the operator still sees the verdict in the
-  // terminal. Always exit 0 — the diff is informational (the operator
-  // decides whether to roll back).
-  if (result && result.ok) {
-    const pill = result.recommendation || 'inconclusive';
-    console.error(`recommendation: [${pill}]  ${result.roll_back_hint || ''}`);
-  } else if (result) {
-    console.error(`diff failed: ${result.error || 'unknown_error'}`);
+  try {
+    w820Mod = await import('../src/artifact-diff.js');
+  } catch (e) {
+    const envelope = {
+      ok: false,
+      error: 'artifact_diff_module_missing',
+      detail: (e && e.message) || String(e),
+      hint: 'src/artifact-diff.js must be importable; reinstall the kolm CLI',
+      version: 'w820-v1',
+    };
+    console.log(JSON.stringify(envelope, null, 2));
+    process.exit(EXIT.MISSING_PREREQ);
+    return;
   }
-  // Honest exit code: 0 on a successful diff (even when recommendation is
-  // roll_back — that is the WHOLE POINT of the verdict, not an error). The
-  // operator wires their own CI gate around the recommendation string.
+  // Run W820 first — its error envelope is the one the operator most
+  // commonly hits (artifact_not_found, not_a_kolm_artifact). When it fails
+  // we surface that as the top-level error and skip the W739 pass.
+  const w820Result = await w820Mod.diffArtifactPaths(aPath, bPath);
+  if (!w820Result.ok) {
+    // artifact_not_found / not_a_kolm_artifact / manifest_unreadable —
+    // print the envelope as JSON regardless of --json so CI can parse it.
+    console.log(JSON.stringify(w820Result, null, 2));
+    if (w820Result.error === 'artifact_not_found') process.exit(EXIT.NOT_FOUND);
+    process.exit(EXIT.EXECUTION);
+    return;
+  }
+  const w739Result = await w739Mod.diffArtifacts(aPath, bPath);
+  const combined = {
+    ok: true,
+    a: w820Result.left,
+    b: w820Result.right,
+    diff: w820Result.diff,
+    lineage: w739Result && w739Result.ok ? {
+      lineage_relation: w739Result.lineage_relation,
+      recommendation: w739Result.recommendation,
+      roll_back_hint: w739Result.roll_back_hint,
+    } : null,
+    version: w820Result.version,
+    lineage_version: w739Result && w739Result.version ? w739Result.version : null,
+  };
+  if (jsonMode) {
+    console.log(JSON.stringify(combined, null, 2));
+  } else {
+    console.log(w820Mod.formatDiffText(w820Result));
+    if (w739Result && w739Result.ok) {
+      const pill = w739Result.recommendation || 'inconclusive';
+      console.error(`recommendation: [${pill}]  ${w739Result.roll_back_hint || ''}`);
+    }
+  }
+  // Honest exit code: 0 on a successful diff (even when verdict is
+  // k_score_regression — that's the whole point of the diff, not an error).
+  // CI wires its own gate around `diff.verdict` or `lineage.recommendation`.
   process.exit(EXIT.OK);
 }
 
@@ -35584,6 +36465,8 @@ async function main() {
       case 'changelog': await withErrorContext('changelog', () => cmdChangelog(rest)); break;
       // W409i — `kolm billing` (usage|plan|tiers|invoices).
       case 'billing':  await withErrorContext('billing',  () => cmdBilling(rest)); break;
+      // W835 — `kolm savings` (baseline|record|summary) savings-based pricing.
+      case 'savings':  await withErrorContext('savings',  () => cmdSavings(rest)); break;
       case 'support-bundle': await withErrorContext('support-bundle', () => cmdSupportBundle(rest)); break;
       case 'key':      await withErrorContext('key',      () => cmdKey(rest)); break;
       case 'new':      await withErrorContext('new',      () => cmdNew(rest)); break;
@@ -35730,17 +36613,13 @@ async function main() {
       // W448 — `kolm audit` is the read-only per-tenant audit-log mirror of
       // /account/audit-log.html. Distinct from `kolm auditor` (third-party
       // signing tool); kept as separate verbs to match muscle memory.
-      case 'audit':
-        // W770 — `kolm audit export <format>` is the two-word form that
-        // routes through cmdW770AuditExport. All other audit subverbs
-        // (verify / list / default-print) continue to cmdAudit so the
-        // historic UX is preserved.
-        if (rest && rest[0] === 'export') {
-          await withErrorContext('audit-export', () => cmdW770AuditExport(rest.slice(1)));
-        } else {
-          await withErrorContext('audit',    () => cmdAudit(rest));
-        }
-        break;
+      // W770 — `kolm audit export <format>` is the two-word form that
+      // routes through cmdW770AuditExport (audit-export verb). All other
+      // audit subverbs (verify / list / default-print) continue to cmdAudit
+      // so the historic UX is preserved.
+      case 'audit': await withErrorContext('audit', () => (rest && rest[0] === 'export')
+        ? cmdW770AuditExport(rest.slice(1))
+        : cmdAudit(rest)); break;
       // W770 — `kolm audit-export <formats|export|preview>` is the top-level
       // mirror of the two-word form, distinct-named so parallel W766/W767/
       // W768/W769 wave agents cannot collide on the dispatcher symbol. `ae`
@@ -35827,6 +36706,13 @@ async function main() {
       // honest envelope on n<MIN_CAPTURES.
       case 'active-learn':
         await withErrorContext('active-learn', () => cmdActiveLearn(rest));
+        break;
+      // W832 — `kolm meta <status|retrain|predict|rows>` dispatcher for the
+      // kolm-meta meta-distillation model. Local-tenant calls go through the
+      // src/kolm-meta-trainer.js module directly; hosted callers hit
+      // /v1/meta/* routes (auth-gated, tenant-fenced).
+      case 'meta':
+        await withErrorContext('meta', () => cmdW832Meta(rest));
         break;
       // W775 — `kolm autopilot <start|stop|status|disable|savings|tick>` is
       // the continuous-background-distill daemon (THE KILLER FEATURE).
@@ -35930,21 +36816,13 @@ async function main() {
       case 'connect':     await withErrorContext('connect',     () => cmdConnect(rest)); break;
       case 'remote':      await withErrorContext('remote',      () => cmdRemote(rest)); break;
       case 'mesh':        await withErrorContext('mesh',        () => cmdMesh(rest)); break;
-      // W743 — `kolm migrate from-ollama|from-lmstudio|doctor` routes to the
-      // distinct W743 dispatcher (cmdW743Migrate) for Ollama / LM Studio model
-      // library import. Legacy `kolm migrate <spec.json> --out ...` for the
-      // spec-class migrator falls through to cmdMigrate. Branch keys on the
-      // explicit W743 verb so spec-migrate users keep their flow.
-      case 'migrate': {
-        const sub0Mig = (rest && rest[0]) || '';
-        if (sub0Mig === 'from-ollama' || sub0Mig === 'from-lmstudio' || sub0Mig === 'doctor') {
-          await withErrorContext('migrate', () => cmdW743Migrate(rest));
-        } else {
-          await withErrorContext('migrate', () => cmdMigrate(rest));
-        }
-        break;
-      }
+      // W743 routes from-ollama/from-lmstudio/doctor to cmdW743Migrate; spec migrator otherwise.
+      case 'migrate':
+        await withErrorContext('migrate', () => (rest && (rest[0] === 'from-ollama' || rest[0] === 'from-lmstudio' || rest[0] === 'doctor')) ? cmdW743Migrate(rest) : cmdMigrate(rest)); break;
       case 'wrap':        await withErrorContext('wrap',        () => cmdWrap(rest)); break;
+      // W256 #6 — kolm import / import-chat reuses the wrap importer for shell session captures.
+      case 'import':
+      case 'import-chat': await withErrorContext('import',      () => cmdWrap(['import', ...rest])); break;
       case 'tail':     await withErrorContext('tail',     () => cmdTail(rest)); break;
       case 'bridges':  await withErrorContext('bridges',  () => cmdBridges(rest)); break;
       case 'replay':   await withErrorContext('replay',   () => cmdReplay(rest)); break;
@@ -35983,6 +36861,17 @@ async function main() {
       case 'cc':       await withErrorContext('cc',       () => cmdCc(rest)); break;
       case 'fl':       await withErrorContext('fl',       () => cmdFl(rest)); break;
       case 'federated': await withErrorContext('federated', () => cmdFederated(rest)); break;
+      // W788 — SLA persistent dashboard CLI: `kolm sla rollup [--surface X
+      // --window-hours 24]`. Reads from ~/.kolm/sla-samples.jsonl directly
+      // (no auth context needed for local-mode dashboards).
+      case 'sla':      await withErrorContext('sla',      () => cmdSla(rest)); break;
+      // W786 — Carbon footprint / CO2 estimator. Pure compute; the underlying
+      // src/carbon-estimator.js module also stamps `sustainability_badge`
+      // into .kolm manifests at build time via src/artifact.js.
+      case 'carbon':   await withErrorContext('carbon',   () => cmdCarbon(rest)); break;
+      // W784 — third-party plugin architecture (quantization / runtime /
+      // capture-processor / eval-metric). Plugins live under ~/.kolm/plugins.
+      case 'plugin':    await withErrorContext('plugin',    () => cmdPlugin(rest)); break;
       // W715 — cross-namespace transfer learning: compute a privacy-safe
       // namespace fingerprint + discover warm-start siblings.
       case 'namespace':
@@ -36017,16 +36906,25 @@ async function main() {
       // The branch keys on (a) explicit W738 verb (validate/run) or (b)
       // `compile` paired with the W738 hallmark flag `--file` — neither
       // collides with the legacy `pipeline compile --namespace <ns>` shape.
-      case 'pipeline': {
+      case 'pipeline': await withErrorContext('pipeline', () => {
         const sub0 = (rest && rest[0]) || '';
         const hasFileFlag = Array.isArray(rest) && rest.some(a => a === '--file' || (typeof a === 'string' && a.startsWith('--file=')));
-        if (sub0 === 'validate' || sub0 === 'run' || (sub0 === 'compile' && hasFileFlag)) {
-          await withErrorContext('pipeline', () => cmdW738Pipeline(rest));
+        // W821 — orchestrator verbs (list/create/show/delete/kscore + a `run`
+        // form that takes a stored pipeline_id instead of --file). These route
+        // to cmdW821Pipeline (distinct-named so a future parallel agent on
+        // W820/W822 cannot collide on the dispatch symbol). `run` is ambiguous
+        // (W738 also uses it for a one-shot YAML file run), so we branch the
+        // `run` case on whether a stored-pipeline id was passed positionally.
+        const w821Verbs = new Set(['list', 'create', 'show', 'delete', 'kscore']);
+        const isW821Run = sub0 === 'run' && rest.length >= 2 && typeof rest[1] === 'string' && rest[1].startsWith('pl_');
+        if (w821Verbs.has(sub0) || isW821Run) {
+          return cmdW821Pipeline(rest);
+        } else if (sub0 === 'validate' || sub0 === 'run' || (sub0 === 'compile' && hasFileFlag)) {
+          return cmdW738Pipeline(rest);
         } else {
-          await withErrorContext('pipeline', () => cmdPipeline(rest));
+          return cmdPipeline(rest);
         }
-        break;
-      }
+      }); break;
       // W741 — `kolm diagnose <cid>` prints a per-category K-Score breakdown
       // + linked actionable recommendations. Distinct-named dispatcher
       // (cmdW741Diagnose) so parallel wave agents on W739/W740/W742 cannot
@@ -36150,6 +37048,12 @@ async function main() {
       // alias dispatched from the same arm.
       case 'xlang':
       case 'multilingual': await withErrorContext('xlang', () => cmdW774Xlang(rest)); break;
+      // W833 — `kolm lingual <detect|distribution|synthesize|mixture>` routes
+      // the cross-lingual foundation dispatcher. Distinct-named
+      // (cmdW833Lingual) so it lives alongside W774's `kolm xlang` without
+      // colliding (W833 adds distribution-detection / synth / mixture
+      // helpers; W774 owns balanced-sampling / per-language-eval / bakeoff).
+      case 'lingual':  await withErrorContext('lingual',  () => cmdW833Lingual(rest)); break;
       case 'agents':     await withErrorContext('agents',     () => cmdAgents(rest)); break;
       case 'shell-init': await withErrorContext('shell-init', () => cmdShellInit(rest)); break;
       case '--version':
@@ -39200,7 +40104,7 @@ COMPLETION_SUBS.cert = [
 //   kolm cert iso27001-controls                    — GET iso27001/controls
 //   kolm cert audit-retention-status               — GET audit-retention/status
 //   kolm cert audit-retention-set <days> --confirm — write a tenant override
-//                                                    (honest not_yet_wired
+//                                                    (honest awaiting_operator_hook
 //                                                    until the setter route
 //                                                    ships)
 //   kolm cert monitoring-snapshot                  — GET continuous-monitoring
@@ -39211,7 +40115,7 @@ COMPLETION_SUBS.cert = [
 // subcommand POSTs to /v1/security/audit-retention/set which does not yet
 // exist as a hosted route (W767-3 ships the read surface + module; the
 // explicit setter route is left for a follow-up). The dispatcher prints an
-// honest not_yet_wired envelope rather than silently passing.
+// honest awaiting_operator_hook envelope rather than silently passing.
 // =============================================================================
 async function cmdW767Cert(args) {
   const sub = (args && args[0]) || '';
@@ -39238,7 +40142,7 @@ async function cmdW767Cert(args) {
     console.error('  soc2-checklist                     — print the SOC 2 Type II readiness checklist');
     console.error('  iso27001-controls                  — print the ISO 27001:2022 Annex A controls map');
     console.error('  audit-retention-status             — print this tenant\'s audit-retention policy');
-    console.error('  audit-retention-set <days> --confirm  — request a tenant retention override (honest not_yet_wired)');
+    console.error('  audit-retention-set <days> --confirm  — request a tenant retention override (honest awaiting_operator_hook)');
     console.error('  monitoring-snapshot                — print the continuous-monitoring snapshot');
     process.exit(EXIT.BAD_ARGS);
     return;
@@ -39287,8 +40191,8 @@ async function cmdW767Cert(args) {
 
   // ──────────── audit-retention-set <days> --confirm ───────────────────────
   // No hosted setter route ships in W767-3 (read surface only); the CLI
-  // therefore gates on --confirm and prints an honest not_yet_wired envelope
-  // pointing the operator at the in-process API. Never silent-passes.
+  // therefore gates on --confirm and prints an honest awaiting_operator_hook
+  // envelope pointing the operator at the in-process API. Never silent-passes.
   if (sub === 'audit-retention-set') {
     const rest = args.slice(1);
     const daysRaw = rest && rest[0];
@@ -39327,7 +40231,7 @@ async function cmdW767Cert(args) {
     // daemon and call `setRetentionDays` directly.
     _print({
       ok: false,
-      error: 'not_yet_wired',
+      error: 'awaiting_operator_hook',
       hint: 'POST /v1/security/audit-retention/set is not in this revision; call setRetentionDays(tenant_id, days) from src/audit-retention.js or set KOLM_AUDIT_RETENTION_DAYS=' + n + ' in the daemon env',
       version: 'w767-v1',
       requested_days: n,
@@ -40760,6 +41664,260 @@ async function cmdW774Xlang(args) {
 }
 
 // =============================================================================
+// W833 — `kolm lingual <detect|distribution|synthesize|mixture>` dispatcher.
+//
+// Distinct-named (cmdW833Lingual) per the W724/W771/.../W773 precedent so
+// parallel wave agents on neighboring waves cannot collide on this symbol.
+// Subcommands:
+//   detect <text>
+//       Detect the language of a single string via the W833-1 detector;
+//       prints {lang, confidence, source} JSON. No network call.
+//
+//   distribution [--namespace ns]
+//       Hits GET /v1/lingual/distribution?namespace=<ns>; prints the
+//       by_lang ratios + underrepresented[] list for the operator's
+//       capture namespace.
+//
+//   synthesize --target <iso> --count N [--teacher anthropic|openai|local]
+//              [--namespace ns]
+//       Hits POST /v1/lingual/synthesize; prints generated_count + the
+//       synth_provider/synth_model used. With teacher:local this is a
+//       dry-run echo for CI/test use; real providers require
+//       KOLM_TEACHER_API_KEY env set.
+//
+//   mixture --weights en=0.5,es=0.3,zh=0.2 [--namespace ns]
+//       Pure-client mixture preview — pulls the namespace distribution
+//       via /v1/lingual/distribution and prints the local
+//       buildMixture() shape (normalized_weights + by_lang_pool_counts)
+//       so the operator can see WHAT a mixture under those weights
+//       would draw before persisting/running. No teacher spend.
+//
+// Every subcommand prints a JSON envelope to stdout. Honest fallback
+// envelopes everywhere (no fabricated answers on missing input).
+// =============================================================================
+async function cmdW833Lingual(args) {
+  const sub = (args && args[0]) || '';
+
+  function _envApiKey() {
+    return process.env.KOLM_API_KEY || '';
+  }
+  function _envBase() {
+    return (process.env.KOLM_BASE_URL || 'https://kolm.ai').replace(/\/$/, '');
+  }
+  function _flag(rest, name) {
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--' + name && i + 1 < rest.length) return rest[i + 1];
+      if (typeof rest[i] === 'string' && rest[i].startsWith('--' + name + '=')) {
+        return rest[i].slice(name.length + 3);
+      }
+    }
+    return null;
+  }
+  function _print(envelope) {
+    console.log(JSON.stringify(envelope, null, 2));
+  }
+  function _fail(envelope, code = EXIT.EXECUTION) {
+    _print(envelope);
+    process.exit(code);
+  }
+
+  if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
+    console.error('usage: kolm lingual <detect|distribution|synthesize|mixture> [args]');
+    console.error('  detect <text>');
+    console.error('  distribution [--namespace ns]');
+    console.error('  synthesize --target <iso> --count N [--teacher anthropic|openai|local] [--namespace ns]');
+    console.error('  mixture --weights en=0.5,es=0.3,zh=0.2 [--namespace ns]');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+
+  // ──────────────────────── subcommand: detect ──────────────────────────────
+  if (sub === 'detect') {
+    const rest = args.slice(1);
+    const text = rest.filter((s) => !s.startsWith('--')).join(' ');
+    if (!text) {
+      _fail({
+        ok: false,
+        error: 'text_required',
+        hint: 'kolm lingual detect "your text here"',
+        version: 'w833-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    let detect;
+    try {
+      detect = (await import('../src/lingual-detect.js')).detectLanguage;
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'import_failed',
+        detail: String((e && e.message) || e),
+        version: 'w833-v1',
+      });
+      return;
+    }
+    _print({ ok: true, ...detect(text), version: 'w833-v1' });
+    process.exit(0);
+    return;
+  }
+
+  // ──────────────────────── subcommand: distribution ────────────────────────
+  if (sub === 'distribution') {
+    const rest = args.slice(1);
+    const namespace = _flag(rest, 'namespace') || 'default';
+    const key = _envApiKey();
+    if (!key) {
+      _fail({
+        ok: false,
+        error: 'auth_required',
+        hint: 'set KOLM_API_KEY (kolm signup / kolm login)',
+        version: 'w833-v1',
+      }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/lingual/distribution?namespace=' + encodeURIComponent(namespace), {
+        method: 'GET',
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'network_error',
+        detail: String((e && e.message) || e),
+        version: 'w833-v1',
+      });
+      return;
+    }
+    const env = await resp.json().catch(() => ({}));
+    _print(env);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: synthesize ──────────────────────────
+  if (sub === 'synthesize') {
+    const rest = args.slice(1);
+    const namespace = _flag(rest, 'namespace') || 'default';
+    const target = _flag(rest, 'target') || _flag(rest, 'target-lang');
+    const countRaw = _flag(rest, 'count');
+    const teacher = _flag(rest, 'teacher') || 'local';
+    const count = Number.isFinite(Number(countRaw)) ? Math.max(1, Math.trunc(Number(countRaw))) : 0;
+    if (!target || count <= 0) {
+      _fail({
+        ok: false,
+        error: 'usage',
+        hint: 'kolm lingual synthesize --target <iso> --count N [--teacher anthropic|openai|local]',
+        version: 'w833-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({
+        ok: false,
+        error: 'auth_required',
+        hint: 'set KOLM_API_KEY (kolm signup / kolm login)',
+        version: 'w833-v1',
+      }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/lingual/synthesize', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'authorization': 'Bearer ' + key,
+        },
+        body: JSON.stringify({ namespace, target_lang: target, count, teacher }),
+      });
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'network_error',
+        detail: String((e && e.message) || e),
+        version: 'w833-v1',
+      });
+      return;
+    }
+    const env = await resp.json().catch(() => ({}));
+    _print(env);
+    if (!resp.ok || env.ok === false) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: mixture ─────────────────────────────
+  // Local-only preview that pulls the namespace distribution via
+  // /v1/lingual/distribution then renders a buildMixture() shape against
+  // the operator-supplied weights. No teacher spend; no captures
+  // mutated; just a "what would the mixture look like" preview.
+  if (sub === 'mixture') {
+    const rest = args.slice(1);
+    const namespace = _flag(rest, 'namespace') || 'default';
+    const weightsRaw = _flag(rest, 'weights');
+    if (!weightsRaw) {
+      _fail({
+        ok: false,
+        error: 'weights_required',
+        hint: 'kolm lingual mixture --weights en=0.5,es=0.3,zh=0.2',
+        version: 'w833-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    const weights = {};
+    for (const pair of weightsRaw.split(',')) {
+      const [lang, valStr] = pair.split('=');
+      const val = Number(valStr);
+      if (lang && Number.isFinite(val) && val > 0) weights[lang.trim()] = val;
+    }
+    if (Object.keys(weights).length === 0) {
+      _fail({
+        ok: false,
+        error: 'invalid_weights',
+        hint: 'weights must be lang=N,lang=N (N>0, finite)',
+        version: 'w833-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    // Pull the namespace distribution to surface a together envelope
+    // (operator can see both their requested weights AND the corpus's
+    // current shape without a second call).
+    const key = _envApiKey();
+    if (!key) {
+      _fail({
+        ok: false,
+        error: 'auth_required',
+        hint: 'set KOLM_API_KEY (kolm signup / kolm login)',
+        version: 'w833-v1',
+      }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let distEnv = {};
+    try {
+      const distResp = await fetch(_envBase() + '/v1/lingual/distribution?namespace=' + encodeURIComponent(namespace), {
+        method: 'GET',
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+      distEnv = await distResp.json().catch(() => ({}));
+    } catch (_) { distEnv = {}; }
+    _print({
+      ok: true,
+      version: 'w833-v1',
+      namespace,
+      requested_weights: weights,
+      distribution: distEnv,
+    });
+    process.exit(0);
+    return;
+  }
+
+  console.error('usage: kolm lingual <detect|distribution|synthesize|mixture> [args]');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// =============================================================================
 // W813 — Drift Detection + Alerting dispatcher.
 //
 // Distinct-named (cmdW813Drift) so parallel W771/W772/W773/W774 wave agents
@@ -41848,5 +43006,176 @@ async function cmdW783Chargeback(args) {
 // W783 - COMPLETION entries appended post-literal.
 COMPLETION_VERBS.push('chargeback');
 COMPLETION_SUBS.chargeback = ['report', 'export', 'departments', 'list-departments'];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// W821 [T2] — `kolm pipeline {list,create,show,run,kscore,delete}` CLI.
+//
+// Append-only definition: the dispatch case lives near line 36951 and routes
+// the W821 sub-verbs (and `run pl_*` IDs) to this function. We import the
+// orchestrator dynamically so the CLI starts fast and so the sub-system
+// stays optional in trimmed builds.
+// ─────────────────────────────────────────────────────────────────────────────
+function _w821FlagValue(args, ...names) {
+  for (const n of names) {
+    const i = args.indexOf(n);
+    if (i >= 0 && i + 1 < args.length) return args[i + 1];
+    const eqHit = args.find((a) => typeof a === 'string' && a.startsWith(n + '='));
+    if (eqHit) return eqHit.slice(n.length + 1);
+  }
+  return undefined;
+}
+
+async function cmdW821Pipeline(rest) {
+  const args = Array.isArray(rest) ? rest.slice() : [];
+  const sub = args.shift();
+  const fail = (env) => { try { _fail(env); } catch { console.error(JSON.stringify(env)); process.exit(EXIT.SOFT_FAIL || 2); } };
+  const print = (env) => { try { _print(env); } catch { console.log(JSON.stringify(env)); } };
+  let mod;
+  try {
+    mod = await import('../src/pipeline-orchestrator.js');
+  } catch (e) {
+    return fail({
+      ok: false,
+      error: 'pipeline_orchestrator_load_failed',
+      detail: (e && e.message) || String(e),
+      version: 'w821-v1',
+    });
+  }
+  const V = mod.PIPELINE_ORCHESTRATOR_VERSION || 'w821-v1';
+
+  if (sub === 'list') {
+    try {
+      const rows = mod.listPipelines({});
+      return print({ ok: true, version: V, count: rows.length, pipelines: rows });
+    } catch (e) {
+      return fail({ ok: false, error: 'pipeline_list_failed', detail: (e && e.message) || String(e), version: V });
+    }
+  }
+
+  if (sub === 'create') {
+    const name = _w821FlagValue(args, '--name', '-n');
+    const file = _w821FlagValue(args, '--file', '-f');
+    if (!name || !file) {
+      return fail({
+        ok: false,
+        error: 'usage',
+        usage: 'kolm pipeline create --name <name> --file <kolm.pipeline.yaml>',
+        version: V,
+      });
+    }
+    try {
+      const fs = await import('node:fs');
+      const yaml = fs.readFileSync(file, 'utf8');
+      const result = mod.createPipeline({ name, yaml });
+      if (!result.ok) return fail({ ...result, version: V });
+      return print({ ok: true, version: V, pipeline: result });
+    } catch (e) {
+      return fail({ ok: false, error: 'pipeline_create_failed', detail: (e && e.message) || String(e), version: V });
+    }
+  }
+
+  if (sub === 'show') {
+    const id = args[0];
+    if (!id) return fail({ ok: false, error: 'usage', usage: 'kolm pipeline show <pl_id>', version: V });
+    try {
+      const row = mod.getPipeline(id, {});
+      if (!row) return fail({ ok: false, error: 'pipeline_not_found', id, version: V });
+      return print({ ok: true, version: V, pipeline: row });
+    } catch (e) {
+      return fail({ ok: false, error: 'pipeline_show_failed', detail: (e && e.message) || String(e), version: V });
+    }
+  }
+
+  if (sub === 'delete') {
+    const id = args[0];
+    if (!id) return fail({ ok: false, error: 'usage', usage: 'kolm pipeline delete <pl_id>', version: V });
+    try {
+      const result = mod.deletePipeline(id, {});
+      if (!result.ok) return fail({ ...result, version: V });
+      return print({ ok: true, version: V, deleted_id: id });
+    } catch (e) {
+      return fail({ ok: false, error: 'pipeline_delete_failed', detail: (e && e.message) || String(e), version: V });
+    }
+  }
+
+  if (sub === 'run') {
+    const id = args[0];
+    if (!id) return fail({ ok: false, error: 'usage', usage: 'kolm pipeline run <pl_id> [--input-json <json>]', version: V });
+    let input;
+    const inputJson = _w821FlagValue(args, '--input-json', '--input');
+    if (inputJson != null) {
+      try { input = JSON.parse(inputJson); } catch (e) {
+        return fail({ ok: false, error: 'input_json_invalid', detail: (e && e.message) || String(e), version: V });
+      }
+    }
+    try {
+      const row = mod.getPipeline(id, {});
+      if (!row) return fail({ ok: false, error: 'pipeline_not_found', id, version: V });
+      if (row.parse_error) {
+        return fail({ ok: false, error: 'pipeline_parse_error', detail: row.parse_error, version: V });
+      }
+      // Honest envelope: no runtime is wired into the CLI by default. The HTTP
+      // route accepts an injected runtime via registerPipelineRoutes(deps), but
+      // the CLI path has no real .kolm loader bolted on yet.
+      const result = await mod.orchestrate({
+        pipeline: row.parsed,
+        input,
+        runtime: {
+          runArtifact: async (artifactPath) => ({
+            ok: false,
+            error: 'runtime_required',
+            hint: 'CLI cannot execute .kolm artifacts; use the HTTP /v1/pipelines/:id/run route with a wired runtime',
+            artifact_path: artifactPath,
+          }),
+        },
+      });
+      return print({ ok: !!result.ok, version: V, pipeline_id: id, result });
+    } catch (e) {
+      return fail({ ok: false, error: 'pipeline_run_failed', detail: (e && e.message) || String(e), version: V });
+    }
+  }
+
+  if (sub === 'kscore') {
+    const id = args[0];
+    if (!id) return fail({ ok: false, error: 'usage', usage: 'kolm pipeline kscore <pl_id> [--eval-set <json>]', version: V });
+    try {
+      const row = mod.getPipeline(id, {});
+      if (!row) return fail({ ok: false, error: 'pipeline_not_found', id, version: V });
+      if (row.parse_error || !row.parsed) {
+        return fail({ ok: false, error: 'pipeline_parse_error', detail: row.parse_error || 'parsed pipeline unavailable', version: V });
+      }
+      let eval_set = {};
+      const raw = _w821FlagValue(args, '--eval-set');
+      if (raw) {
+        try { eval_set = JSON.parse(raw); } catch (e) {
+          return fail({ ok: false, error: 'eval_set_invalid', detail: (e && e.message) || String(e), version: V });
+        }
+      }
+      const result = mod.computePipelineKScore({
+        pipeline: row.parsed,
+        eval_set,
+        route_frequencies: {},
+      });
+      return print({ ok: !!result.ok, version: V, pipeline_id: id, kscore: result });
+    } catch (e) {
+      return fail({ ok: false, error: 'pipeline_kscore_failed', detail: (e && e.message) || String(e), version: V });
+    }
+  }
+
+  return fail({
+    ok: false,
+    error: 'usage',
+    usage: 'kolm pipeline <list|create|show|delete|run|kscore> [args]',
+    version: V,
+  });
+}
+
+// W821 - COMPLETION entries (W384 — preserve tokenize/distill/compile/full).
+if (!COMPLETION_VERBS.includes('pipeline')) COMPLETION_VERBS.push('pipeline');
+COMPLETION_SUBS.pipeline = Array.from(new Set([
+  ...(COMPLETION_SUBS.pipeline || []),
+  'tokenize', 'distill', 'compile', 'full', 'run',
+  'list', 'create', 'show', 'delete', 'kscore',
+]));
 
 main();

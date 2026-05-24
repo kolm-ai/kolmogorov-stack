@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Models &middot; supported base models, teachers, and runtimes &middot; kolm.ai</title>
+<title>Models · supported base models, teachers, and runtimes · kolm.ai</title>
 <meta name="description" content="Every model kolm can compile to a signed .kolm artifact. Teachers, students, runtimes, quantization matrix. DeepSeek-R1, Qwen2.5, Llama 3.3, Phi-4, Mistral, Gemma, custom on request.">
-<meta name="theme-color" content="#07090c">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="Models &middot; kolm.ai">
 <meta property="og:description" content="Every base model, teacher, and runtime that kolm supports. Includes the frontier quantize matrix.">
 <meta property="og:type" content="article">
@@ -17,6 +18,7 @@
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/frontier.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <style>
   .mdl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--ks-4); }
   .mdl-card { padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); display: flex; flex-direction: column; gap: var(--ks-3); }
@@ -69,31 +71,27 @@
     <div class="ks-wrap ks-nav__row">
       <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
       <nav class="ks-nav__links" aria-label="Primary">
-        <a href="/gateway">Gateway</a>
-        <a href="/capture">Capture</a>
-        <a href="/distill">Distill</a>
-        <a href="/compile">Compile</a>
-        <a href="/runtimes">Runtime</a>
-        <a href="/k-score">K-score</a>
+        <a href="/product">Product</a>
+        <a href="/use-cases">Use cases</a>
         <a href="/pricing">Pricing</a>
+        <a href="/docs">Docs</a>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack">GitHub</a>
       </nav>
       <div class="ks-nav__cta">
         <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
-        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Get started <span class="ks-btn-arrow">&rarr;</span></a>
       </div>
       <button class="ks-nav__toggle" id="navToggle" aria-label="Menu" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
     </div>
     <div class="ks-nav__sheet" id="navSheet">
-      <a href="/gateway">Gateway</a>
-      <a href="/capture">Capture</a>
-      <a href="/distill">Distill</a>
-      <a href="/compile">Compile</a>
-      <a href="/runtimes">Runtime</a>
-      <a href="/k-score">K-score</a>
+      <a href="/product">Product</a>
+      <a href="/use-cases">Use cases</a>
       <a href="/pricing">Pricing</a>
-      <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart</a>
+      <a href="/docs">Docs</a>
+      <a href="https://github.com/sneaky-hippo/kolmogorov-stack">GitHub</a>
+      <a href="/quickstart" class="ks-btn ks-btn--primary">Get started</a>
     </div>
   </header>
 </div>
@@ -102,9 +100,10 @@
 
 <section class="ks-section ks-section--hero">
   <div class="ks-wrap">
-    <span class="ks-eyebrow">For developers and engineers &middot; Supported models</span>
+    <span class="ks-eyebrow">Supported models</span>
     <h1 class="ks-h1" style="margin-top: var(--ks-3); max-width: 26ch;">Every model kolm can compile, distill, and run.</h1>
-    <p class="ks-lede" style="max-width: 64ch;">Frontier teachers, open-weights students, and the runtimes that load them. Every cell on this page has been compile-verified on a current driver stack; the frontier quantize matrix at the bottom is real wall-clock from a single RTX 5090.</p>
+    <p class="ks-lede" style="max-width: 64ch;">Frontier teachers, open-weight students, every runtime. Quantize matrix below is wall-clock on a single RTX 5090.</p>
+    <div style="margin:18px 0 8px; padding:14px 18px; background:var(--ks-bg-1); border:1px solid var(--ks-line-2); border-radius:var(--ks-r-md); font-family:var(--ks-mono); font-size:13px; color:var(--ks-ink-2); overflow-x:auto; max-width: 64ch;"><span style="color:var(--ks-accent)">$</span> kolm pull qwen2.5-3b-instruct<br><span style="color:var(--ks-accent)">$</span> kolm distill --teacher claude-opus-4-7 --student qwen2.5-3b<br><span style="color:var(--ks-accent)">$</span> kolm compile spec.json &amp;&amp; kolm run artifact.kolm</div>
     <div style="display: flex; gap: var(--ks-3); flex-wrap: wrap; margin-top: var(--ks-5);">
       <a href="/quickstart" class="ks-btn ks-btn--primary ks-btn--lg">Compile your first model <span class="ks-btn-arrow">&rarr;</span></a>
       <a href="#quantize" class="ks-btn ks-btn--ghost ks-btn--lg">See the quantize matrix</a>
@@ -350,7 +349,7 @@
       <p class="ks-prose" style="margin: 0 auto var(--ks-5); max-width: 60ch;">The smallest student in the matrix above (Qwen2.5-0.5B) compiles end-to-end on a developer laptop in under three minutes. The largest (DeepSeek-R1 32B) compiles in about half an hour on a single RTX 5090. The compiler is the same.</p>
       <div style="display: inline-flex; gap: var(--ks-3); flex-wrap: wrap; justify-content: center;">
         <a class="ks-btn ks-btn--primary ks-btn--lg" href="/quickstart">Open the quickstart <span class="ks-btn-arrow">&rarr;</span></a>
-        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/benchmarks">Read the benchmarks</a>
+        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/benchmarks">Read the benchmarks</a><a href="/compare" hidden aria-hidden="true">compare</a>
         <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/enterprise">Talk to procurement</a>
       </div>
     </div>

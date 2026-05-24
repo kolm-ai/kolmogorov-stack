@@ -154,6 +154,133 @@ PROGRESSIVE_VERSION = "w712-v1"
 
 CURRICULUM_VERSION = "w717-v1"
 
+# W828-3/-4 — TRACE-AWARE LOSS.
+#
+# W713 captured reasoning traces (Anthropic thinking blocks, OpenAI o1
+# reasoning_tokens, DeepSeek-R1 <think>...</think>) and inlined them as
+# training rows of shape "<think>{reasoning}</think>{answer}". The base
+# distillation loss treats every response token uniformly though, so the
+# student ends up over-fitting to the (longer) reasoning portion while
+# under-weighting the (shorter, more important) final answer — or vice
+# versa, depending on the corpus.
+#
+# trace_aware_loss splits the per-position loss into two means:
+#   * answer_loss: mean -log p over tokens BETWEEN </think> and end-of-seq.
+#   * trace_loss : mean -log p over tokens BETWEEN <think> and </think>.
+# and combines them as
+#   loss = (1 - w) * answer_loss + w * trace_loss
+# where w = args.reasoning_trace_loss_weight (default 0.0 → behaves
+# identically to the W713 baseline, which is the W828-4 opt-in contract).
+#
+# Honesty contracts:
+#   * Default weight 0.0 means trace tokens contribute ZERO additional
+#     loss; the existing W713 path is byte-identical when --reasoning-
+#     trace-loss-weight is omitted.
+#   * trace_mask MUST be aligned 1:1 with target_ids (same shape). The
+#     dataset builder tags <think>..</think> spans by setting trace_mask=1
+#     on those positions, 0 elsewhere.
+#   * When trace_mask.sum() == 0 (no traces in batch), the trace term is
+#     identically 0 and the answer term carries the full weight — never
+#     NaN, never divide-by-zero (we clamp denominators to min=1).
+#   * Branch only when args.reasoning_trace_loss_weight > 0; the W713
+#     baseline path stays untouched at weight=0.
+
+REASONING_TRACE_LOSS_VERSION = "w828-v1"
+
+
+def trace_aware_loss(logits, target_ids, trace_mask, attention_mask, w=0.5):
+    """Weighted distillation loss that separates reasoning-trace tokens from
+    final-answer tokens.
+
+    Args:
+      logits:         student logits at every position, shape (B, T, V).
+      target_ids:     gold next-token ids, shape (B, T).
+      trace_mask:     1 on positions inside <think>..</think>, else 0; same
+                      shape as target_ids. Build via the dataset tagger that
+                      walks the rendered prompt+response sequence.
+      attention_mask: 1 on response positions, 0 on pad / prompt positions;
+                      same shape as target_ids.
+      w:              weight on the trace term. 0.0 = answer-only (W713 base),
+                      0.5 = even split, 1.0 = trace-only (debug — does not
+                      teach the student to produce final answers).
+
+    Returns:
+      Scalar tensor; (1 - w) * answer_loss + w * trace_loss.
+
+    Honesty contract: when the masks zero out an entire side, that side's
+    denominator clamps to 1, producing a 0 contribution rather than NaN.
+    Never throws; shape mismatches propagate as torch errors (the caller is
+    responsible for building masks aligned to target_ids).
+    """
+    if not _HAS_TORCH:
+        raise RuntimeError(
+            "trace_aware_loss requires torch. Install with: pip install 'torch>=2.4'"
+        )
+    # answer_mask = attention_mask AND NOT trace_mask. Both come in as 0/1
+    # tensors; we cast to bool for the AND, then back to the dtype of
+    # attention_mask so the multiplication below stays in float space.
+    am_bool = attention_mask.bool()
+    tm_bool = trace_mask.bool()
+    answer_mask = (am_bool & ~tm_bool).to(attention_mask.dtype)
+    trace_mask_f = tm_bool.to(attention_mask.dtype)
+    # -log p at each position for the target token.
+    log_probs = F.log_softmax(logits, dim=-1)
+    # gather over the vocab dim; target_ids must be (B, T) -> (B, T, 1).
+    lp = -log_probs.gather(-1, target_ids.unsqueeze(-1)).squeeze(-1)
+    # Masked means with clamp-to-1 denominator to dodge divide-by-zero.
+    answer_denom = answer_mask.sum().clamp(min=1)
+    trace_denom = trace_mask_f.sum().clamp(min=1)
+    answer_loss = (lp * answer_mask).sum() / answer_denom
+    trace_loss = (lp * trace_mask_f).sum() / trace_denom
+    return (1.0 - w) * answer_loss + w * trace_loss
+
+
+def _build_trace_mask_from_text(prompt: str, response: str, tokenizer, max_length: int):
+    """Tokenize prompt+response and produce a trace_mask tagging positions
+    inside <think>..</think> within the response.
+
+    Returns a (input_ids, trace_mask, attention_mask) tuple where each list
+    is the same length. Defensive against unbalanced tags — falls back to
+    all-zeros trace_mask (no trace) rather than raising.
+    """
+    open_tag = "<think>"
+    close_tag = "</think>"
+    open_idx = response.find(open_tag)
+    close_idx = response.find(close_tag, open_idx + len(open_tag)) if open_idx >= 0 else -1
+    p_ids = tokenizer(prompt, add_special_tokens=False)["input_ids"]
+    if open_idx < 0 or close_idx < 0:
+        # No well-formed trace — full response treated as answer.
+        r_ids = tokenizer(response, add_special_tokens=False)["input_ids"]
+        input_ids = p_ids + r_ids
+        trace_mask = [0] * len(input_ids)
+        attention_mask = [0] * len(p_ids) + [1] * len(r_ids)
+    else:
+        before = response[:open_idx]
+        trace_text = response[open_idx + len(open_tag):close_idx]
+        after = response[close_idx + len(close_tag):]
+        before_ids = tokenizer(before, add_special_tokens=False)["input_ids"] if before else []
+        trace_ids = tokenizer(trace_text, add_special_tokens=False)["input_ids"] if trace_text else []
+        after_ids = tokenizer(after, add_special_tokens=False)["input_ids"] if after else []
+        input_ids = p_ids + before_ids + trace_ids + after_ids
+        trace_mask = (
+            [0] * len(p_ids)
+            + [0] * len(before_ids)
+            + [1] * len(trace_ids)
+            + [0] * len(after_ids)
+        )
+        attention_mask = (
+            [0] * len(p_ids)
+            + [1] * len(before_ids)
+            + [1] * len(trace_ids)
+            + [1] * len(after_ids)
+        )
+    if len(input_ids) > max_length:
+        over = len(input_ids) - max_length
+        input_ids = input_ids[over:]
+        trace_mask = trace_mask[over:]
+        attention_mask = attention_mask[over:]
+    return input_ids, trace_mask, attention_mask
+
 
 def _curriculum_sort_rows(rows: list[dict]) -> tuple[list[dict], dict]:
     """Sort training rows by ascending complexity_proxy.
@@ -798,6 +925,7 @@ def distill_trainer(
     progressive_pass: Optional[int] = None,
     progressive_gate: Optional[str] = None,
     curriculum: bool = False,
+    reasoning_trace_loss_weight: float = 0.0,
 ) -> DistillSession:
     """Build a configured KD trainer ready for .train().
 
@@ -938,12 +1066,21 @@ def distill_trainer(
     T = cfg.temperature
     alpha = cfg.alpha
     top_k = cfg.top_k
+    # W828-3/-4 — when reasoning_trace_loss_weight > 0, ADD a trace-aware
+    # cross-entropy term on top of the KD+CE base. Weight=0.0 keeps the loop
+    # byte-identical to the W713 baseline (honesty contract).
+    rt_loss_w = float(max(0.0, min(1.0, reasoning_trace_loss_weight or 0.0)))
 
     class _DistillTrainer(Trainer):
         def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
             labels = inputs.pop("labels")
             input_ids = inputs["input_ids"]
             attention_mask = inputs["attention_mask"]
+            # W828-3 — trace_mask is supplied per-row by the dataset when the
+            # row carries reasoning_trace; absent → all-zeros (no trace, the
+            # trace branch contributes 0 and the answer term carries full
+            # weight, identical to W713 behavior).
+            trace_mask = inputs.pop("trace_mask", None)
 
             with torch.no_grad():
                 t_out = teacher(input_ids=input_ids, attention_mask=attention_mask).logits
@@ -972,8 +1109,28 @@ def distill_trainer(
                                       l_shift.view(-1), ignore_index=-100)
 
             loss = alpha * loss_kd + (1.0 - alpha) * loss_ce
+            # W828-3 — additive trace-aware loss. Default rt_loss_w == 0.0 so
+            # this branch contributes 0 and the loop matches the W713 baseline.
+            loss_trace = s_shift.new_zeros(())
+            if rt_loss_w > 0 and trace_mask is not None:
+                tm_shift = trace_mask[..., 1:].contiguous()
+                # answer_mask = response positions AND NOT trace positions.
+                # Use the labels mask (l_shift != -100) as the response gate.
+                am = mask
+                # trace_aware_loss expects full (B,T,V) shapes; we pass
+                # unflattened slices so the per-position mask alignment works.
+                loss_trace = trace_aware_loss(
+                    s_shift, l_shift.clamp(min=0), tm_shift, am, w=rt_loss_w,
+                )
+                loss = loss + loss_trace
             if return_outputs:
-                return loss, {"loss_kd": loss_kd.detach(), "loss_ce": loss_ce.detach()}
+                outputs = {
+                    "loss_kd": loss_kd.detach(),
+                    "loss_ce": loss_ce.detach(),
+                }
+                if rt_loss_w > 0:
+                    outputs["loss_trace"] = loss_trace.detach()
+                return loss, outputs
             return loss
 
     # W711-2: optional importance-weighted sampling. When the CLI passes
@@ -1163,6 +1320,11 @@ __all__ = [
     "KDObjective",
     "distill_trainer",
     "receipt_block",
+    # W828-3 — trace-aware loss exposed so a worker harness can call the
+    # primitive directly without invoking the full trainer (the bench scaffold
+    # bench_trace_aware.py uses this path).
+    "trace_aware_loss",
+    "REASONING_TRACE_LOSS_VERSION",
 ]
 
 
@@ -1234,6 +1396,24 @@ def _build_argparser() -> argparse.ArgumentParser:
                    help="W717 curriculum-distillation: sort rows by ascending "
                         "complexity_proxy and walk them with SequentialSampler. "
                         "Wins over --importance-weights when both are set.")
+    # W828-4 — trace-aware loss weight. Default 0.0 → behaves identically to
+    # the W713 baseline (the trace branch contributes 0). Values up to 1.0
+    # progressively shift loss mass toward reasoning-trace tokens vs final-
+    # answer tokens. Env var KOLM_REASONING_TRACE_LOSS_WEIGHT overrides the
+    # default when the flag is omitted so the worker can be configured
+    # without changing the CLI invocation.
+    _env_rt_weight = os.environ.get("KOLM_REASONING_TRACE_LOSS_WEIGHT", "")
+    try:
+        _env_rt_weight_val = float(_env_rt_weight) if _env_rt_weight else 0.0
+    except ValueError:
+        _env_rt_weight_val = 0.0
+    p.add_argument("--reasoning-trace-loss-weight", dest="reasoning_trace_loss_weight",
+                   type=float, default=_env_rt_weight_val,
+                   help="W828 trace-aware loss weight in [0.0, 1.0]. Default 0.0 "
+                        "behaves identically to the W713 baseline; values >0 add "
+                        "a per-position weighted CE term over <think>..</think> "
+                        "trace tokens vs final-answer tokens. Overridable via "
+                        "env KOLM_REASONING_TRACE_LOSS_WEIGHT when flag omitted.")
     return p
 
 
@@ -1273,6 +1453,9 @@ def main(argv: Optional[list[str]] = None) -> int:
             file=sys.stderr,
         )
         return 2
+    # W828-4 — clamp into [0.0, 1.0] defensively; the trainer itself also
+    # clamps, but logging an out-of-range value here aids debugging.
+    rt_weight = float(max(0.0, min(1.0, args.reasoning_trace_loss_weight or 0.0)))
     session = distill_trainer(
         teacher_model=args.teacher_model,
         student_model=args.student_model,
@@ -1284,6 +1467,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         progressive_pass=args.prog_pass,
         progressive_gate=args.prog_gate,
         curriculum=args.curriculum,
+        reasoning_trace_loss_weight=rt_weight,
     )
     summary = session.train()
     receipt = receipt_block(session, summary)

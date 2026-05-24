@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -160,6 +160,7 @@
 
 
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <a href="#main" class="ks-skip">Skip to content</a>
@@ -226,10 +227,10 @@
  <p>You are already paying the frontier model to do work for you. The output it returns is, under every major provider's terms of service, yours to use. <b>What we add is a thin proxy that captures the verified <code>(input, output, latency)</code> tuple for each call and a compiler that turns the captured corpus into a signed LoRA on an open base.</b> When the LoRA is good enough to retire the proxy on a slice of traffic, you stop paying for that slice. The local artifact compounds in coverage as your traffic does. Every dollar of frontier spend you pass through the proxy is, mechanically, also a deposit into the local model. That is the rent-to-own moment for AI compute.</p>
 
  <h2 id="how">How capture-and-distill actually works.</h2>
- <p>There are four moving parts. None of them are exotic.</p>
+ <p>The moving parts are not exotic.</p>
 
  <h3>1. The capture proxy.</h3>
- <p>Two endpoints, <code>POST /v1/capture/anthropic</code> and <code>POST /v1/capture/openai</code>, accept the same body shape as the upstream provider. You send your customer's API key in a header that we strip before forwarding. The upstream call is unmodified. The response is unmodified. Before returning, we record a tuple of <code>(input, output, model, latency_us, namespace, tenant)</code> to your tenant's <code>observations</code> table. Surface area for the caller is one base-URL change in their codebase.</p>
+ <p>The endpoints <code>POST /v1/capture/anthropic</code> and <code>POST /v1/capture/openai</code> accept the same body shape as the upstream provider. You send your customer's API key in a header that we strip before forwarding. The upstream call is unmodified. The response is unmodified. Before returning, we record a tuple of <code>(input, output, model, latency_us, namespace, tenant)</code> to your tenant's <code>observations</code> table. Surface area for the caller is one base-URL change in their codebase.</p>
 
  <h3>2. The verifier sample.</h3>
  <p>By default a configurable fraction of captures are run through k-sample verification (the same primitive that powers <a href="/articles/k-sample-verified-inference">verified inference</a> on the compile path) to attach a confidence score to each label. Captures that fail verification are still recorded but tagged so the distiller can quarantine them. The verifier is the brake that stops you from training on outputs the frontier model itself was uncertain about.</p>
@@ -240,7 +241,7 @@
  <h3>4. The distill bridge.</h3>
  <p><code>POST /v1/specialists/auto-distill</code> takes a namespace, a base model, and a target footprint. At a configurable threshold (default one thousand verified pairs) the bridge fires a LoRA training job, runs the K-score gate on a held-out evaluation slice, and ships back a signed <code>.kolm</code> artifact when the gate passes. From the operator's view it is a single CLI call and a download.</p>
 
- <p>The five-line CLI surface that wraps these endpoints:</p>
+ <p>The CLI surface that wraps these endpoints:</p>
  <pre><span class="com"># point your existing OpenAI / Anthropic SDK at our capture endpoint</span>
 kolm capture --provider anthropic --as <span class="arg">support-replies</span> --namespace <span class="arg">prod-tickets</span>
 
@@ -275,7 +276,7 @@ kolm inspect ~/.kolm/artifacts/<span class="arg">prod-tickets.kolm</span></pre>
  <p><b>Twelve-month total:</b> ~$48k in frontier spend (down from $144k linear), one signed local artifact owned in perpetuity, sub-hundred-millisecond p50 latency on most calls, no PHI or customer data leaving the perimeter on the local-served slice. <b>The frontier bill paid for the artifact.</b> That is the rent-to-own moment.</p>
 
  <h2 id="legal">The legal frame: who owns what.</h2>
- <p>The legal question every counsel asks first is whether training a model on frontier-model outputs is permitted. Three things resolve it cleanly:</p>
+ <p>The legal question every counsel asks first is whether training a model on frontier-model outputs is permitted. The shape of the answer:</p>
  <ul>
  <li><b>Anthropic and OpenAI both grant the customer ownership of the outputs they paid for</b>, with carve-outs for prompt content and a no-competing-model clause that targets training a general-purpose foundation model. We are not training a competing general model; we are training a task-specific LoRA on the customer's own prompts and the outputs they purchased.</li>
  <li><b>The artifact is task-specific by construction.</b> The signed manifest names the namespace, the prompt schema, the verifier, and the holdout eval. It is a calculator, not a chatbot. Provider TOS allow this use.</li>
@@ -284,7 +285,7 @@ kolm inspect ~/.kolm/artifacts/<span class="arg">prod-tickets.kolm</span></pre>
  <p>Counsel still has to read the relevant TOS for the customer's specific contract tier. We are not a substitute for that. But the structure of capture-and-distill is the structure that the TOS authors clearly contemplated, not a loophole.</p>
 
  <h2 id="privacy">The privacy frame: who sees what.</h2>
- <p>The capture proxy is a network hop. It sees the prompt and the response in transit. Three things make this safer than it sounds:</p>
+ <p>The capture proxy is a network hop. It sees the prompt and the response in transit. What makes this safer than it sounds:</p>
  <ul>
  <li><b>TLS end-to-end.</b> The proxy terminates TLS, inspects the body for capture, and re-establishes TLS to the upstream provider. No plaintext on disk.</li>
  <li><b>Tenant-scoped storage.</b> Captured pairs are stored in a database row keyed by tenant id. There is no cross-tenant join path. We never train on captured data without an explicit, per-namespace consent flag flipped on the tenant's account.</li>
@@ -302,7 +303,7 @@ kolm inspect ~/.kolm/artifacts/<span class="arg">prod-tickets.kolm</span></pre>
  </blockquote>
 
  <h2 id="vs">vs. fine-tuning, vs. observability, vs. RAG.</h2>
- <p>Three categories of tool look adjacent on the surface. They are not the same product.</p>
+ <p>Adjacent tools look similar on the surface. They are not the same product.</p>
  <h3>vs. OpenAI / Anthropic fine-tuning.</h3>
  <p>Fine-tuning hosted by the same provider you are renting from gives you a lower per-call rate but no local artifact. The model still lives in their data center, the data still leaves your perimeter, the latency floor is unchanged, and you are still on the deprecation treadmill. We ship a file. They ship a charge code.</p>
  <h3>vs. observability tools (LangSmith, Langfuse).</h3>
@@ -323,7 +324,7 @@ kolm inspect ~/.kolm/artifacts/<span class="arg">prod-tickets.kolm</span></pre>
  </div>
 
  <h2 id="starthere">Start here.</h2>
- <p>Two ways in. <b>Smallest commitment:</b> install the CLI, point one of your existing services at the capture endpoint for a week, run <code>kolm capture status</code> to see what your verified pair count looks like. There is no charge for capture under a hundred thousand pairs per month. <b>Larger commitment:</b> book a thirty-minute design-partner call and we will scope a namespace plan with your team, including the bring-your-own-VPC option if your data residency requires it.</p>
+ <p><b>Smallest commitment:</b> install the CLI, point one of your existing services at the capture endpoint for a week, run <code>kolm capture status</code> to see what your verified pair count looks like. There is no charge for capture under a hundred thousand pairs per month. <b>Larger commitment:</b> book a thirty-minute design-partner call and we will scope a namespace plan with your team, including the bring-your-own-VPC option if your data residency requires it.</p>
 
  <pre>npm i -g github:sneaky-hippo/kolm-stack
 kolm config base <span class="arg">https://kolm.ai</span>
@@ -338,7 +339,7 @@ kolm capture --provider anthropic --as <span class="arg">first-run</span></pre>
  <a href="/use-cases/capture-and-distill">
  <span class="lab">use case</span>
  <span class="v">Capture &amp; distill <span class="arrow">&rarr;</span></span>
- <p>The end-to-end shape, with the four endpoints and the CLI surface laid out.</p>
+ <p>The end-to-end shape, with the endpoints and the CLI surface laid out.</p>
  </a>
  <a href="/articles/k-sample-verified-inference">
  <span class="lab">read</span>

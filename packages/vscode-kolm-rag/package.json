@@ -1,0 +1,82 @@
+{
+  "name": "vscode-kolm-rag",
+  "displayName": "Kolm RAG: passive monitor + distill workflow",
+  "description": "W819 - Passive Copilot/Cursor/Claude-Code suggestion-acceptance monitor, repetition-cluster detection, and post-distill local-student routing for VS Code.",
+  "version": "0.1.0",
+  "publisher": "kolm",
+  "license": "Apache-2.0",
+  "homepage": "https://kolm.ai",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sneaky-hippo/kolm-stack.git",
+    "directory": "packages/vscode-kolm-rag"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["AI", "Other", "Programming Languages"],
+  "keywords": ["kolm", "rag", "copilot", "claude-code", "cursor", "distill", "passive-monitor"],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      { "command": "kolm.rag.openDistillDialog", "title": "Kolm RAG: open distill dialog" },
+      { "command": "kolm.rag.viewClusters",      "title": "Kolm RAG: view detected clusters" },
+      { "command": "kolm.rag.toggleRouting",     "title": "Kolm RAG: toggle post-distill routing" }
+    ],
+    "configuration": {
+      "title": "Kolm RAG",
+      "properties": {
+        "kolm.cluster.threshold": {
+          "type": "number",
+          "default": 3,
+          "minimum": 1,
+          "description": "W819-3 - minimum cluster count before the status-bar 'ready to distill' CTA lights up."
+        },
+        "kolm.teacher.preference": {
+          "type": "string",
+          "default": "auto",
+          "enum": ["auto", "anthropic", "openai", "kolm"],
+          "description": "W819-5 - preferred teacher model for distill jobs. 'auto' lets the kolm runtime choose."
+        },
+        "kolm.namespace": {
+          "type": "string",
+          "default": "vscode-rag",
+          "description": "W819-5 - namespace used for captures + downstream distill artifacts."
+        },
+        "kolm.routing.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "W819-4 - after a distill job completes, route matching completion requests (Jaccard > 0.7) to the local student."
+        },
+        "kolm.routing.jaccardThreshold": {
+          "type": "number",
+          "default": 0.7,
+          "minimum": 0,
+          "maximum": 1,
+          "description": "W819-4 - Jaccard similarity required against cluster fingerprints before routing to the local student."
+        },
+        "kolm.passiveMonitor.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "W819-1 - watch document changes for large-block insertions (Copilot/Cursor/Claude-Code suggestion-acceptance signals)."
+        },
+        "kolm.passiveMonitor.minBlockChars": {
+          "type": "number",
+          "default": 80,
+          "description": "W819-1 - minimum inserted-block size (chars) for the passive monitor to treat a change as a suggestion-acceptance."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsc -p .",
+    "vscode:prepublish": "npm run build"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.4.0"
+  }
+}

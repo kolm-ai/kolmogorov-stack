@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Runtime &middot; kolm.ai</title>
+<title>Runtime · kolm.ai</title>
 <meta name="description" content="Runtime adapters for a signed .kolm: vLLM, SGLang, TGI, TRT-LLM, llama.cpp, MLX. Load the artifact on your hardware; the receipt verifies offline. Build targets cover NVIDIA, AMD, Apple Silicon, and CPU.">
-<meta name="theme-color" content="#07090c">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
 <link rel="canonical" href="https://kolm.ai/runtimes">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -13,6 +14,7 @@
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/frontier.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <style>
   /* W644 helpers — fr-spec-list scaffolding for runtimes.html */
   .rt-list .fr-spec-list__delta { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.04em; }
@@ -111,17 +113,15 @@
     <div class="ks-wrap ks-nav__row">
       <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
       <nav class="ks-nav__links" aria-label="Primary">
-        <a href="/gateway">Gateway</a>
-        <a href="/capture">Capture</a>
-        <a href="/distill">Distill</a>
-        <a href="/compile">Compile</a>
-        <a href="/runtimes">Runtime</a>
-        <a href="/k-score">K-score</a>
+        <a href="/product">Product</a>
+        <a href="/use-cases">Use cases</a>
         <a href="/pricing">Pricing</a>
+        <a href="/docs">Docs</a>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack">GitHub</a>
       </nav>
       <div class="ks-nav__cta">
         <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
-        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Get started <span class="ks-btn-arrow">&rarr;</span></a>
       </div>
     </div>
   </header>
@@ -131,9 +131,10 @@
 
 <section class="sec-hero">
   <div class="ks-wrap">
-    <div class="eyebrow">Runtime &middot; step 4 of 4 &middot; load and serve a signed .kolm</div>
+    <div class="eyebrow">Runtime &middot; load and serve a signed .kolm</div>
     <h1>One signed artifact. <b>Every runtime.</b></h1>
-    <p class="lede">A platform engineer loads a .kolm into the runtime that fits the box: vLLM or SGLang or TGI for GPU serving, TRT-LLM for NVIDIA ahead-of-time engines, llama.cpp for CPU and portability, MLX for Apple Silicon. The signed receipt verifies offline on every target; the K-score gate that promoted the artifact still binds at load time. No vendor adapter forks the runtime; we shell out to upstream binaries and pin the commit.</p>
+    <p class="lede">vLLM, SGLang, TGI, TRT-LLM, llama.cpp, MLX. The receipt verifies offline at load. We shell out to upstream binaries on pinned commits.</p>
+    <div style="margin:18px 0 8px; padding:14px 18px; background:#050607; border:1px solid var(--ks-line-2); border-radius:var(--ks-r-md); font-family:var(--ks-mono); font-size:13px; color:var(--ks-ink-2); overflow-x:auto; max-width: 64ch;"><span style="color:var(--ks-accent)">$</span> kolm verify support-triage.kolm<br><span style="color:var(--ks-accent)">$</span> kolm runtime up --target vllm support-triage.kolm <span style="color:var(--ks-ink-3)"># or llama.cpp, mlx, trt-llm</span></div>
     <div class="cta-row">
       <a href="/quickstart" class="ks-btn ks-btn--primary">Install the CLI <span class="ks-btn-arrow">&rarr;</span></a>
       <a href="/verify-prod" class="ks-btn ks-btn--ghost">Verify a sample .kolm</a>
@@ -145,7 +146,7 @@
 
 <section class="sec-section" id="adapters">
   <div class="ks-wrap">
-    <h2>Six first-class runtime adapters</h2>
+    <h2>First-class runtime adapters</h2>
     <p class="sub">Each adapter takes a path to a .kolm, picks the right weight shard for the target, and starts the upstream binary with the right flags. None of these forks the runtime; we pin a commit and shell out.</p>
     <ul class="fr-spec-list rt-list rt-adapters-list">
       <li class="fr-spec-list__row">
@@ -178,7 +179,7 @@
 
 <section class="sec-section" id="oneverb">
   <div class="ks-wrap">
-    <h2>One verb, six runtimes</h2>
+    <h2>One verb, every runtime</h2>
     <p class="sub">The CLI hides the adapter wiring. <code>kolm runtime up</code> verifies the .kolm, picks the right weight shard for the requested target, and starts the upstream binary on a free port. Add <code>--port</code> to pin one.</p>
     <div class="terminal">
 <pre><span class="c"># Verify the artifact first (offline; no network)</span>
@@ -247,7 +248,7 @@ ok: true &middot; artifact_cid bafkreieq&hellip;4f7c
       </li>
       <li class="fr-spec-list__row">
         <div class="fr-spec-list__head"><h3>Run anywhere</h3><span class="fr-spec-list__delta fr-spec-list__delta--portable">PICK &middot; llama.cpp</span></div>
-        <p class="fr-spec-list__p">GGUF runs on Linux, macOS, Windows; CPU AVX2/AVX-512, CUDA, ROCm, Vulkan, Metal. Default for laptops, CI runners, and air-gapped boxes without a vendor SDK.</p>
+        <p class="fr-spec-list__p">GGUF runs on Linux, macOS, Windows; CPU AVX2/AVX-512, CUDA, ROCm, Vulkan, Metal. Default for laptops, CI runners, and air-gapped deploymentes without a vendor SDK.</p>
       </li>
       <li class="fr-spec-list__row">
         <div class="fr-spec-list__head"><h3>On-device on a Mac</h3><span class="fr-spec-list__delta fr-spec-list__delta--ondev">PICK &middot; MLX</span></div>
@@ -336,7 +337,7 @@ ok: true &middot; artifact_cid bafkreieq&hellip;4f7c
 <section class="sec-section" id="reach">
   <div class="ks-wrap">
     <h2>Next steps</h2>
-    <p class="sub">A loaded .kolm is the end of the four-step compiler walk. From here you can verify in CI, ship to more nodes, or feed the live traffic back into capture for the next distill cycle.</p>
+    <p class="sub">A loaded .kolm is the end of the compiler walk. From here you can verify in CI, ship to more nodes, or feed live traffic back into capture for the next distill cycle.</p>
     <ul class="fr-spec-list rt-list rt-reach-list">
       <li class="fr-spec-list__row">
         <div class="fr-spec-list__head"><h3>Verify in CI</h3><span class="fr-spec-list__delta fr-spec-list__delta--live">VERIFY &middot; offline</span></div>
@@ -347,7 +348,7 @@ ok: true &middot; artifact_cid bafkreieq&hellip;4f7c
         <p class="fr-spec-list__p">Loop the runtime output back through capture for the next distill cycle. <a href="/capture">Capture overview</a>.</p>
       </li>
       <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Read the K-score spec</h3><span class="fr-spec-list__delta fr-spec-list__delta--cpu">K-SCORE &middot; 5 axes</span></div>
+        <div class="fr-spec-list__head"><h3>Read the K-score spec</h3><span class="fr-spec-list__delta fr-spec-list__delta--cpu">K-SCORE &middot; composite</span></div>
         <p class="fr-spec-list__p">What the ship-vs-block verdict actually measures. <a href="/k-score">K-score methodology</a>.</p>
       </li>
     </ul>
@@ -384,7 +385,7 @@ ok: true &middot; artifact_cid bafkreieq&hellip;4f7c
         <a href="/docs">Docs</a>
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
-        <a href="/benchmarks">Benchmarks</a>
+        <a href="/benchmarks">Benchmarks</a><a href="/compare" hidden aria-hidden="true">compare</a>
         <a href="/faq">FAQ</a>
       </div>
       <div class="ks-foot__col">

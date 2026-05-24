@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -39,6 +39,7 @@
 <meta name="twitter:description" content="Internal bootstrap doc for the kolm Discord. Channels, roles, pinned message templates, moderation philosophy, bot config notes.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <a href="#main" class="ks-skip">Skip to content</a>
@@ -68,7 +69,7 @@
  <div class="dc-wrap">
  <p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; <a href="/community">community</a> &nbsp;/&nbsp; discord server bootstrap</p>
  <h1>Discord server bootstrap.</h1>
- <p class="lede">Internal doc for setting up and running the kolm Discord. Five channels, three roles, light-touch moderation, no bots day one. Read top-to-bottom before opening invites.</p>
+ <p class="lede">Internal doc for setting up and running the kolm Discord. Tight channel list, flat roles, light-touch moderation, no bots day one. Read top-to-bottom before opening invites.</p>
  </div>
 </section>
 
@@ -83,7 +84,7 @@
 <section class="dc-section">
  <div class="dc-wrap">
  <h2>Server structure.</h2>
- <p>Five channels. No more, no fewer, for the first six months. A bigger channel list signals a bigger server; we are not that yet and pretending otherwise wastes attention.</p>
+ <p>A tight channel list, frozen for the first six months. A bigger list signals a bigger server; we are not that yet and pretending otherwise wastes attention.</p>
  <ul class="dc-list">
  <li><b>#welcome.</b> Pinned: read-only intro, link to /docs, link to /spec/rs-1, link to the CoC. New-member rule: post a one-liner about what you are building. No introductions = no other channel access (manual). This is the only read-only channel for non-staff.</li>
  <li><b>#announcements.</b> Read-only for everyone except staff. New release notes, breaking changes, security advisories, the HN/X launch links. Posts are signed by a real human, not a bot.</li>
@@ -97,7 +98,7 @@
 <section class="dc-section">
  <div class="dc-wrap">
  <h2>Roles.</h2>
- <p>Three tiers. Permissions are deliberately flat.</p>
+ <p>Permissions are deliberately flat.</p>
  <ul class="dc-list">
  <li><b>member.</b> Default for everyone who passes the welcome step. Read + write in #help, #showcase, #compliance-q-and-a. React-add in #announcements.</li>
  <li><b>contributor.</b> Anyone with a merged PR on the public repo. Auto-granted by the verify-on-PR Action once we wire it (manual until then). Same channels as member plus the ability to start polls and pin messages in #showcase.</li>
@@ -140,7 +141,7 @@ Sensitive disclosures (potential PHI exposure, customer-data incidents) go to de
 <section class="dc-section">
  <div class="dc-wrap">
  <h2>Moderation philosophy.</h2>
- <p>Light touch. Three rules.</p>
+ <p>Light touch.</p>
  <ul class="dc-list">
  <li><b>No spam.</b> One warning, then ban. No tolerance. Crypto airdrops, "earn $5k a week," DM-trading lists: instant ban, no warning.</li>
  <li><b>Disagreements stay technical.</b> If the conversation shifts from "your number is wrong" to "you are wrong," a staff member steps in. We use Contributor Covenant 2.1 wording for the warning.</li>

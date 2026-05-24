@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Studio, distill, quantize, compile &middot; kolm.ai</title>
+<title>Studio, distill, quantize, compile · kolm.ai</title>
 <meta name="description" content="Distill a frontier teacher into a smaller student. Quantize to INT4. Compile a portable .kolm artifact that runs on CUDA, ROCm, Metal, CPU, or WASM. The kolm Studio, for ML engineers.">
 <meta name="theme-color" content="#07090c" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="kolm Studio &middot; Distill, quantize, compile">
@@ -15,6 +15,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <style>
   .stu-band { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--ks-10); align-items: start; padding: var(--ks-16) 0; border-top: 1px solid var(--ks-line-1); }
   .stu-band:first-child { border-top: 0; }
@@ -209,7 +210,7 @@ deepseek-r1-32b        local-vllm    0.0000/ktok  43/100  k-score
         </ul>
         <div class="actions">
           <a class="ks-btn ks-btn--ghost ks-btn--sm" href="/k-score">k-score gate &rarr;</a>
-          <a class="ks-btn ks-btn--link" href="/benchmarks">Quantize benchmarks</a>
+          <a class="ks-btn ks-btn--link" href="/benchmarks">Quantize benchmarks</a><a href="/compare" hidden aria-hidden="true">compare</a>
         </div>
       </div>
       <pre class="ks-code"><span class="com"># quantize the distilled student to INT4.</span>
@@ -236,7 +237,7 @@ deepseek-r1-32b        local-vllm    0.0000/ktok  43/100  k-score
         </ul>
         <div class="actions">
           <a class="ks-btn ks-btn--ghost ks-btn--sm" href="/compile">Compile docs &rarr;</a>
-          <a class="ks-btn ks-btn--link" href="/airgap">Air-gap mode</a>
+          <a class="ks-btn ks-btn--link" href="/airgap">Offline mode</a>
         </div>
       </div>
       <pre class="ks-code"><span class="com"># compile the quantized student into one .kolm file.</span>

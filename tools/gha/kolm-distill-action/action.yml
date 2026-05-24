@@ -1,0 +1,201 @@
+# W820-2 — kolm/distill-action@v1 composite action.
+#
+# Reusable GitHub Action downstream kolm users copy into THEIR repo (or, once
+# the action is published to the Marketplace, reference as `kolm/distill-action@v1`).
+# This file is the source of truth for the input/output contract reviewers
+# can hold us to before the v1 tag is cut on GitHub Marketplace.
+#
+# Wave: W820 (T2) — GitHub Actions integration.
+# Status: TEMPLATE. Not published to GHA Marketplace this wave. The file ships
+#         under tools/gha/ so downstream users can copy or reference it via
+#         `uses: ./tools/gha/kolm-distill-action` from a local checkout.
+#
+# Pairs with:
+#   - tools/gha/kolm-distill-action/README.md   (input/output contract + examples)
+#   - .github/workflows/kolm-template.yml       (downstream-copyable workflow)
+#   - docs/spec/kolm-yaml-schema.md             (the kolm.yaml schema)
+#   - docs/cookbook/kolm.yaml                   (example kolm.yaml a user copies)
+
+name: 'kolm distill + bench gate'
+description: 'Run K-Score bench on a .kolm artifact, optionally re-distill on drop, optionally publish to GitHub Releases.'
+author: 'kolm'
+branding:
+  icon: 'cpu'
+  color: 'blue'
+
+# ----------------------------------------------------------------------------
+# Inputs — align with the W820 spec field names (kebab-case). The README and
+# kolm.yaml schema document these.
+# ----------------------------------------------------------------------------
+inputs:
+  kolm-api-key:
+    description: 'Tenant API key (ks_...). Pass via secrets: `kolm-api-key: ${{ secrets.KOLM_API_KEY }}`.'
+    required: true
+  namespace:
+    description: 'kolm capture namespace whose .kolm artifact should be bench-gated. Default: read from kolm.yaml.'
+    required: false
+    default: ''
+  k-score-gate:
+    description: 'Minimum K-Score; if measured K-Score < this value, the gate fails. Default 0.85.'
+    required: false
+    default: '0.85'
+  redistill-on-drop:
+    description: 'If true, automatically run `kolm distill` when the K-Score drops below the gate. Default true.'
+    required: false
+    default: 'true'
+  publish-release:
+    description: 'If true (and the workflow runs on a release event), upload the produced .kolm to the release as an asset.'
+    required: false
+    default: 'false'
+  kolm-yaml-path:
+    description: 'Path inside the repo to kolm.yaml. Useful for monorepos. Default ./kolm.yaml.'
+    required: false
+    default: './kolm.yaml'
+  kolm-base-url:
+    description: 'kolm base URL. Override for self-hosted installs. Default https://kolm.ai.'
+    required: false
+    default: 'https://kolm.ai'
+  artifact-out:
+    description: 'Directory the produced .kolm artifact lands in. Default ${{ runner.temp }}/kolm.'
+    required: false
+    default: ''
+
+# ----------------------------------------------------------------------------
+# Outputs — strings because GitHub Action outputs are always stringified.
+# Compare them as strings: `if: steps.kolm.outputs.kscore-passed != 'true'`.
+# ----------------------------------------------------------------------------
+outputs:
+  kscore:
+    description: 'The measured K-Score for this run, as a string (e.g. "0.873").'
+    value: ${{ steps.bench.outputs.kscore }}
+  kscore-passed:
+    description: '"true" if measured K-Score >= k-score-gate, "false" otherwise.'
+    value: ${{ steps.bench.outputs.kscore-passed }}
+  distill-ran:
+    description: '"true" if a re-distill was triggered this run, "false" otherwise.'
+    value: ${{ steps.distill.outputs.distill-ran }}
+  artifact-path:
+    description: 'Local filesystem path to the produced .kolm artifact (empty when no re-distill ran).'
+    value: ${{ steps.distill.outputs.artifact-path }}
+  release-url:
+    description: 'GitHub Release URL when publish-release: true and a release was published; empty otherwise.'
+    value: ${{ steps.publish.outputs.release-url }}
+
+# ----------------------------------------------------------------------------
+# Composite implementation.
+#
+# - setup-node@v4 (node 20) — matches package.json engines.node ">=20.0.0".
+# - install kolm CLI via npm. We default to `npm install -g kolm-stack`
+#   (the package.json `name` is `kolm-stack`) but fall back to installing
+#   from the current checkout for self-hosted dogfood runs.
+# - bench: read K-Score, set outputs.
+# - distill: re-run when redistill-on-drop AND gate failed.
+# - publish: upload as a release asset when publish-release AND release event.
+#
+# Every step is honest: on missing-secret or missing-kolm-CLI we emit a
+# snake_case `error:` field on stderr + exit non-zero, so the workflow author
+# can branch on it. We do NOT silently downgrade to a no-op (the W211 pattern
+# of "skip when secret missing" lives in the consumer workflow, not the action).
+# ----------------------------------------------------------------------------
+runs:
+  using: 'composite'
+  steps:
+    - name: setup node 20
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: install kolm CLI
+      shell: bash
+      env:
+        KOLM_API_KEY: ${{ inputs.kolm-api-key }}
+      run: |
+        # Prefer the published package; fall back to `npm install -g .` if the
+        # checkout itself contains the CLI (dogfood / fork case). The double-
+        # fallback keeps the action useful before kolm-stack is on npm.
+        if ! command -v kolm >/dev/null 2>&1; then
+          npm install -g kolm-stack@latest \
+            || (test -f package.json && grep -q '"name": "kolm-stack"' package.json && npm install -g .) \
+            || (echo "error=kolm_cli_install_failed" >&2; exit 3)
+        fi
+        kolm --version || (echo "error=kolm_cli_not_on_path" >&2; exit 3)
+
+    - name: bench K-Score
+      id: bench
+      shell: bash
+      env:
+        KOLM_API_KEY: ${{ inputs.kolm-api-key }}
+        KOLM_BASE_URL: ${{ inputs.kolm-base-url }}
+        KSCORE_GATE: ${{ inputs.k-score-gate }}
+        NAMESPACE_OVERRIDE: ${{ inputs.namespace }}
+        KOLM_YAML_PATH: ${{ inputs.kolm-yaml-path }}
+      # `kolm bakeoff --json` returns a structured envelope including
+      # `kscore` (number). We parse it with `node -e` so we don't depend on
+      # `jq` being on the runner image. If kolm bakeoff fails for any reason,
+      # the step exits non-zero and the workflow stops cleanly.
+      run: |
+        set -o pipefail
+        # Optional namespace override; otherwise let kolm bakeoff read kolm.yaml.
+        NS_ARG=""
+        if [ -n "$NAMESPACE_OVERRIDE" ]; then NS_ARG="--namespace $NAMESPACE_OVERRIDE"; fi
+        kolm bakeoff $NS_ARG --json > bench.json || (echo "error=bench_failed" >&2; exit 4)
+        KSCORE=$(node -e "const j=JSON.parse(require('fs').readFileSync('bench.json','utf8'));process.stdout.write(String(j.kscore ?? j.k_score ?? ''))")
+        if [ -z "$KSCORE" ]; then echo "error=kscore_missing_from_bench_json" >&2; exit 4; fi
+        # String compare against the gate via node so we don't depend on `bc`.
+        PASSED=$(node -e "process.stdout.write(Number('$KSCORE') >= Number('$KSCORE_GATE') ? 'true' : 'false')")
+        echo "kscore=$KSCORE"        >> "$GITHUB_OUTPUT"
+        echo "kscore-passed=$PASSED" >> "$GITHUB_OUTPUT"
+
+    - name: re-distill on drop
+      id: distill
+      shell: bash
+      if: inputs.redistill-on-drop == 'true' && steps.bench.outputs.kscore-passed == 'false'
+      env:
+        KOLM_API_KEY: ${{ inputs.kolm-api-key }}
+        KOLM_BASE_URL: ${{ inputs.kolm-base-url }}
+        NAMESPACE_OVERRIDE: ${{ inputs.namespace }}
+        ARTIFACT_OUT_INPUT: ${{ inputs.artifact-out }}
+      # `kolm distill --out <dir>` produces a new .kolm artifact. The
+      # workspace location is keyed off runner.temp so cleanup is automatic
+      # at the end of the job.
+      run: |
+        set -o pipefail
+        OUT_DIR="$ARTIFACT_OUT_INPUT"
+        if [ -z "$OUT_DIR" ]; then OUT_DIR="$RUNNER_TEMP/kolm"; fi
+        mkdir -p "$OUT_DIR"
+        NS_ARG=""
+        if [ -n "$NAMESPACE_OVERRIDE" ]; then NS_ARG="--namespace $NAMESPACE_OVERRIDE"; fi
+        kolm distill $NS_ARG --out "$OUT_DIR" || (echo "error=distill_failed" >&2; exit 4)
+        # Resolve the newest .kolm in OUT_DIR — distill writes one per run.
+        ARTIFACT=$(node -e "const fs=require('fs'),p=require('path');const d='$OUT_DIR';const files=fs.readdirSync(d).filter(f=>f.endsWith('.kolm')).map(f=>({f,m:fs.statSync(p.join(d,f)).mtimeMs})).sort((a,b)=>b.m-a.m);process.stdout.write(files.length?p.join(d,files[0].f):'')")
+        echo "distill-ran=true"        >> "$GITHUB_OUTPUT"
+        echo "artifact-path=$ARTIFACT" >> "$GITHUB_OUTPUT"
+
+    - name: mark distill as not-run when gate passed
+      id: distill-skip
+      shell: bash
+      if: steps.bench.outputs.kscore-passed == 'true' || inputs.redistill-on-drop != 'true'
+      # The distill step above only runs when the gate failed AND
+      # redistill-on-drop is true. When skipped, outputs propagate empty,
+      # so downstream steps still get a deterministic distill-ran=false.
+      run: |
+        echo "distill-ran=false" >> "$GITHUB_OUTPUT"
+        echo "artifact-path="    >> "$GITHUB_OUTPUT"
+
+    - name: publish to GitHub Release
+      id: publish
+      shell: bash
+      # Only attach to a release when (a) publish-release is true, (b) a
+      # release event triggered the workflow, AND (c) we produced an artifact.
+      # We use the `gh` CLI which is preinstalled on hosted runners; the
+      # workflow MUST grant `contents: write` for this to succeed.
+      if: inputs.publish-release == 'true' && github.event_name == 'release' && steps.distill.outputs.artifact-path != ''
+      env:
+        GH_TOKEN: ${{ env.GITHUB_TOKEN }}
+        ARTIFACT_PATH: ${{ steps.distill.outputs.artifact-path }}
+        RELEASE_TAG: ${{ github.event.release.tag_name }}
+      run: |
+        if [ -z "$GH_TOKEN" ]; then echo "error=github_token_not_set" >&2; exit 3; fi
+        gh release upload "$RELEASE_TAG" "$ARTIFACT_PATH" --clobber || (echo "error=gh_release_upload_failed" >&2; exit 4)
+        RELEASE_URL=$(gh release view "$RELEASE_TAG" --json url -q .url)
+        echo "release-url=$RELEASE_URL" >> "$GITHUB_OUTPUT"

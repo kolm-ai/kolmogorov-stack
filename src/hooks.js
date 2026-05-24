@@ -34,6 +34,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 
+import { envBool } from './env.js';
+
 const VALID_EVENTS = new Set([
   'PreCompile', 'PostCompile',
   'PreRun',     'PostRun',
@@ -187,7 +189,12 @@ function normalizeHook(v) {
 // Caller decides whether to bail on `blocked`. `event` must be one of
 // VALID_EVENTS; payload is the JSON object sent to each hook on stdin.
 export async function runHooks(event, payload, opts = {}) {
-  if (process.env.KOLM_HOOKS_OFF === '1') return { ok: true, blocked: false, results: [], skipped: 'KOLM_HOOKS_OFF' };
+  // WC07 — accept the full envBool truth-table: '1', 'true', 'yes', 'on'
+  // (case-insensitive) all disable hooks. Previously only the literal '1'
+  // matched, so the documented `KOLM_HOOKS_OFF=true` was silently a no-op.
+  // envBool with fallback=false keeps hooks ON by default and only flips OFF
+  // when the operator explicitly opts out.
+  if (envBool('KOLM_HOOKS_OFF', false)) return { ok: true, blocked: false, results: [], skipped: 'KOLM_HOOKS_OFF' };
   if (!VALID_EVENTS.has(event)) throw new Error('unknown hook event: ' + event);
   const proj = findKolmYamlWithHooks(opts.cwd || process.cwd());
   if (!proj) return { ok: true, blocked: false, results: [] };

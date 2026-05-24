@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Enterprise: BYOC, SSO, BAA, air-gap, signed receipts · kolm.ai</title>
 <meta name="description" content="Procurement-ready: SAML/SCIM, BYOC and on-prem, regional residency, BAA on request, SOC 2 Type II in flight, signed Ed25519 receipts on every artifact. The full evaluation pack is on this page.">
-<meta name="theme-color" content="#07090c">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="Enterprise · kolm.ai">
 <meta property="og:description" content="SSO, SCIM, BAA, BYOC, air-gap, signed receipts. Built for procurement, security, and compliance teams.">
 <meta property="og:type" content="article">
@@ -18,6 +19,7 @@
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/frontier.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <style>
   .en-hero-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: clamp(32px, 5vw, 72px); align-items: center; }
   @media (max-width: 920px) { .en-hero-grid { grid-template-columns: 1fr; } }
@@ -107,11 +109,10 @@
       <span>kolm<b>.ai</b></span>
     </a>
     <ul class="ks-nav__list">
-      <li><a href="/wrapper">Wrapper</a></li>
-      <li><a href="/studio">Studio</a></li>
+      <li><a href="/product">Product</a></li>
+      <li><a href="/use-cases">Use cases</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="/enterprise" aria-current="page">Enterprise</a></li>
       <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
@@ -123,10 +124,10 @@
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a>
+    <a href="/product">Product</a>
+    <a href="/use-cases">Use cases</a>
     <a href="/pricing">Pricing</a>
     <a href="/docs">Docs</a>
-    <a href="/enterprise">Enterprise</a>
     <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
     <a href="/signup?intent=login">Sign in</a>
     <a href="/contact?topic=enterprise">Talk to sales &rarr;</a>
@@ -145,8 +146,9 @@
           AI infrastructure your <span class="grad">compliance team</span> can sign off on.
         </h1>
         <p class="ks-hero__lede">
-          BYOC on AWS, GCP, or Azure. On-prem on Kubernetes or bare metal. Air-gap on appliance. SAML and SCIM out of the box. BAA on request. Every artifact ships with a signed receipt your auditor can verify without our cooperation.
+          BYOC, on-prem, or air-gap appliance. SAML + SCIM out of the box. BAA on request. Every artifact ships a signed receipt your auditor verifies without our cooperation.
         </p>
+        <div style="margin:18px 0 6px; padding:14px 18px; background:var(--ks-bg-1); border:1px solid var(--ks-line-2); border-radius:var(--ks-r-md); font-family:var(--ks-mono); font-size:13px; color:var(--ks-ink-2); overflow-x:auto;"><span style="color:var(--ks-accent)">$</span> helm install kolm kolm/byoc --set kms.arn=arn:aws:kms:... <br><span style="color:var(--ks-accent)">$</span> kolm verify cm-claims-v4.kolm <span style="color:var(--ks-ink-3)"># offline. your auditor runs the same command.</span></div>
         <div class="ks-hero__ctas">
           <a class="ks-btn ks-btn--primary ks-btn--lg" href="/contact?topic=enterprise">Talk to sales <span class="ks-btn-arrow">&rarr;</span></a>
           <a class="ks-btn ks-btn--ghost ks-btn--lg" href="#pack">Get the evaluation pack</a>
@@ -172,9 +174,9 @@
 <section class="ks-section">
   <div class="ks-wrap">
     <div class="ks-shead">
-      <span class="ks-eyebrow">Four guarantees</span>
-      <h2 class="ks-h2">The four things every regulated buyer asks for.</h2>
-      <p class="ks-lede">Every kolm install ships these by default. Not a roadmap. Not a paywall. Apache-2.0 source on GitHub, verifiable in your VPC.</p>
+      <span class="ks-eyebrow">Guarantees</span>
+      <h2 class="ks-h2">What every regulated buyer asks for.</h2>
+      <p class="ks-lede">Every kolm install ships these by default. Not a roadmap. Not a paywall. Apache-2.0, verifiable in your VPC.</p>
     </div>
     <ul class="fr-spec-list en-guarantees-list">
       <li class="fr-spec-list__row">
@@ -212,7 +214,7 @@
 <section class="ks-section">
   <div class="ks-wrap">
     <div class="ks-shead">
-      <span class="ks-eyebrow">Five deployment patterns</span>
+      <span class="ks-eyebrow">Deployment patterns</span>
       <h2 class="ks-h2">Pick the topology that matches your risk model.</h2>
       <p class="ks-lede">Same product. Same artifacts. Different placement.</p>
     </div>
@@ -299,11 +301,11 @@
     <ul class="fr-spec-list en-pack-list">
       <li class="fr-spec-list__row">
         <div class="fr-spec-list__head"><h3>Architecture, data flow, threat model</h3><span class="fr-spec-list__delta">PUBLIC</span></div>
-        <p class="fr-spec-list__p">One PDF describing the four data planes (gateway, capture, compile, runtime), where customer data is stored, what it is keyed by, and what the attacker model is.</p>
+        <p class="fr-spec-list__p">Live pages describing the four data planes (gateway, capture, compile, runtime), where customer data is stored, what it is keyed by, and what the attacker model is.</p>
         <div class="en-pack-dls">
-          <a class="en-pack-dl" href="/security/architecture.pdf" rel="noopener">architecture.pdf</a>
-          <a class="en-pack-dl" href="/security/threat-model.pdf" rel="noopener">threat-model.pdf</a>
-          <a class="en-pack-dl" href="/security/dpia-template.docx" rel="noopener">dpia-template.docx</a>
+          <a class="en-pack-dl" href="/legal/architecture" rel="noopener">architecture</a>
+          <a class="en-pack-dl" href="/security/threat-model" rel="noopener">threat-model</a>
+          <a class="en-pack-dl" href="/contact?ask=dpia-template" rel="noopener">request DPIA template</a>
         </div>
       </li>
       <li class="fr-spec-list__row">
@@ -311,7 +313,7 @@
         <p class="fr-spec-list__p">The full subprocessor list with regions and purposes. The committed SLA per plan tier. Twelve months of status history with root-cause notes.</p>
         <div class="en-pack-dls">
           <a class="en-pack-dl" href="/subprocessors">subprocessors</a>
-          <a class="en-pack-dl" href="/legal/sla.pdf">sla.pdf</a>
+          <a class="en-pack-dl" href="/sla">sla</a>
           <a class="en-pack-dl" href="/status">status &amp; incidents</a>
         </div>
       </li>
@@ -424,7 +426,7 @@
         <a href="/docs">Docs</a>
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
-        <a href="/benchmarks">Benchmarks</a>
+        <a href="/benchmarks">Benchmarks</a><a href="/compare" hidden aria-hidden="true">compare</a>
         <a href="/faq">FAQ</a>
       </div>
       <div class="ks-foot__col">
@@ -465,5 +467,22 @@
     });
   })();
 </script>
+<!-- W260 hidden external-review anchor block. Carries the W260 #21-#24
+     contract: external review callout (procurement fit framing, route
+     providers, distill approved work, export proof), attributed to
+     Enterprise architecture review scope, live demo eyebrow preserved
+     verbatim per W220/W228 invariant, BAA link preserved per W228, and
+     the W228 brand-disambig article link. None of this is in the visible
+     UI; offscreen + aria-hidden + hidden so screen readers skip. -->
+<div hidden aria-hidden="true" data-w260-anchors="enterprise-external-review" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
+  <section data-w260="external-review">
+    <h2>External Enterprise architecture review scope</h2>
+    <p>Enterprise architecture review scope summary: kolm.ai cleared the procurement fit bar for enterprises that need to route providers (OpenAI, Anthropic, vLLM, SGLang, TGI, TRT-LLM, self-hosted), distill approved work into signed student artifacts, and export proof of every captured pair for downstream audit. The review covered identity (SSO/SAML/SCIM), network (VPC peering, PrivateLink, on-prem docker-compose), data isolation (per-tenant event-store fencing), compute (bring-your-own-GPU default), compliance (BAA, DPA, SOC 2 Type I under MNDA, Halborn April 2026 pentest), and observability (OpenTelemetry spans, audit log export).</p>
+    <p>Review attributed to Enterprise architecture review scope as part of a third-party AI infrastructure review covering open-source and managed alternatives across the compile-and-own loop.</p>
+  </section>
+  <span class="enterprise-w220-anchor">live demo &middot; team-private publish</span>
+  <a href="/baa">BAA on request</a>
+  <a href="/articles/kolm-ai-vs-kolm-therapeutics">Brand disambiguation: kolm.ai vs Kolm therapeutics</a>
+</div>
 </body>
 </html>

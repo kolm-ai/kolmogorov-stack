@@ -1,7 +1,10 @@
+// W584 — consolidated from .test.js + -contract.test.js by WC03 dedup pass. Pins distillStrategyCatalog + planDistillStrategy public surface.
 // Wave 584 - distillation strategy oracle.
 // Locks the behavior-selection layer above raw train/distill commands:
-// no fake teacher plans, no synthetic-only production training, and explicit
-// objective choice for KD, rejection sampling, preference, and on-policy paths.
+// no fake teacher plans, no synthetic-only production training, explicit
+// objective choice for KD, rejection sampling, preference, and on-policy paths,
+// and ensures the planner is executable from module, script, CLI, and API
+// without launching training or leaking secrets.
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -18,6 +21,7 @@ import { buildRouter } from '../src/router.js';
 import { provisionAnonTenant } from '../src/auth.js';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
+const CLI = path.join(ROOT, 'cli', 'kolm.js');
 
 test('W584 #1 - catalog covers no-train, supervised, KD, preference, on-policy, and serving strategies', () => {
   const catalog = distillStrategyCatalog();
@@ -29,7 +33,17 @@ test('W584 #1 - catalog covers no-train, supervised, KD, preference, on-policy, 
   assert.ok(catalog.privacy_modes.includes('airgap'));
 });
 
-test('W584 #2 - generation with enough reviewed data and teacher chooses softmax KD', () => {
+test('W584 #2 - catalog exposes spec id, family coverage, and teacher_required flag on KD softmax', () => {
+  const catalog = distillStrategyCatalog();
+  assert.equal(catalog.spec, 'kolm-distill-strategy/1');
+  const families = new Set(catalog.strategies.map((s) => s.family));
+  for (const family of ['data', 'no-train', 'supervised', 'distill', 'preference', 'online', 'serving']) {
+    assert.ok(families.has(family), `missing family ${family}`);
+  }
+  assert.ok(catalog.strategies.some((s) => s.id === 'kd_softmax' && s.teacher_required));
+});
+
+test('W584 #3 - generation with enough reviewed data and teacher chooses softmax KD', () => {
   const plan = planDistillStrategy({
     task: 'generation',
     real_pairs: 1500,
@@ -43,7 +57,22 @@ test('W584 #2 - generation with enough reviewed data and teacher chooses softmax
   assert.doesNotMatch(JSON.stringify(plan), /sk-|secret-key|ANTHROPIC_API_KEY_VALUE/);
 });
 
-test('W584 #3 - synthetic-only data refuses production distillation and asks for real pairs', () => {
+test('W584 #4 - teacher-backed generation honors caller namespace and gates secret values from output', () => {
+  const plan = planDistillStrategy({
+    task: 'generation',
+    namespace: 'support-copilot',
+    real_pairs: 1500,
+    holdout_pairs: 300,
+    base_model: 'Qwen/Qwen2.5-7B-Instruct',
+  }, { ANTHROPIC_API_KEY: 'secret-value' });
+  assert.equal(plan.ok, true);
+  assert.equal(plan.recommendation.id, 'kd_softmax');
+  assert.match(plan.recommendation.command, /kolm distill --namespace support-copilot/);
+  assert.equal(plan.secret_values_included, false);
+  assert.doesNotMatch(JSON.stringify(plan), /secret-value/);
+});
+
+test('W584 #5 - synthetic-only data refuses production distillation and asks for real pairs', () => {
   const plan = planDistillStrategy({
     task: 'generation',
     real_pairs: 0,
@@ -57,7 +86,21 @@ test('W584 #3 - synthetic-only data refuses production distillation and asks for
   assert.ok(plan.next_actions.some((a) => a.kind === 'collect'));
 });
 
-test('W584 #4 - airgap privacy blocks external teacher KD and keeps local-safe strategies feasible', () => {
+test('W584 #6 - cold-start synthetic-only workload emits null command and label-next action hint', () => {
+  const plan = planDistillStrategy({
+    task: 'generation',
+    real_pairs: 0,
+    synthetic_pairs: 500,
+    holdout_pairs: 0,
+  }, {});
+  assert.equal(plan.ok, true);
+  assert.equal(plan.recommendation.id, 'collect_more_real_pairs');
+  assert.equal(plan.recommendation.command, null);
+  assert.ok(plan.next_actions.some((a) => /label next/.test(a.value)));
+  assert.ok(plan.ranked.some((r) => r.blockers.includes('synthetic_only_not_trainable')));
+});
+
+test('W584 #7 - airgap privacy blocks external teacher KD and keeps local-safe strategies feasible', () => {
   const plan = planDistillStrategy({
     task: 'extraction',
     real_pairs: 800,
@@ -70,7 +113,7 @@ test('W584 #4 - airgap privacy blocks external teacher KD and keeps local-safe s
   assert.ok(plan.ranked.find((r) => r.id === 'kd_top_k').blockers.includes('privacy_mode_airgap_not_allowed'));
 });
 
-test('W584 #5 - preference pairs beat generic SFT when enough rankings exist', () => {
+test('W584 #8 - preference pairs beat generic SFT when enough rankings exist', () => {
   const plan = planDistillStrategy({
     task: 'chat',
     real_pairs: 600,
@@ -83,7 +126,7 @@ test('W584 #5 - preference pairs beat generic SFT when enough rankings exist', (
   assert.match(plan.recommendation.command, /kolm distill preference/);
 });
 
-test('W584 #6 - API exposes distill strategy planning without auth-only side effects', async (t) => {
+test('W584 #9 - API exposes distill strategy planning without auth-only side effects', async (t) => {
   const app = express();
   app.use(express.json({ limit: '1mb' }));
   app.use(buildRouter());
@@ -108,7 +151,45 @@ test('W584 #6 - API exposes distill strategy planning without auth-only side eff
   assert.equal(body.data.plan.recommendation.id, 'kd_softmax');
 });
 
-test('W584 #7 - CLI/script and package gates expose strategy verification', () => {
+test('W584 #10 - API exposes authenticated catalog and planner envelopes with surface + readiness metadata', async (t) => {
+  const app = express();
+  app.use(express.json({ limit: '1mb' }));
+  app.use(buildRouter());
+  const tenant = provisionAnonTenant({ ttl_days: 1, quota: 5000 });
+  const server = await new Promise((resolve) => {
+    const s = app.listen(0, '127.0.0.1', () => resolve(s));
+  });
+  t.after(() => server.close());
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const headers = { authorization: 'Bearer ' + tenant.api_key };
+
+  const catalog = await fetch(base + '/v1/distill/strategy/catalog', { headers });
+  assert.equal(catalog.status, 200);
+  const catalogBody = await catalog.json();
+  assert.equal(catalogBody.ok, true);
+  assert.equal(catalogBody.surface, 'capture-data-eval-training');
+  assert.ok(catalogBody.data.catalog.strategies.some((s) => s.id === 'lora_sft'));
+
+  const planned = await fetch(base + '/v1/distill/strategy', {
+    method: 'POST',
+    headers: { ...headers, 'content-type': 'application/json' },
+    body: JSON.stringify({
+      task: 'extraction',
+      namespace: 'claims',
+      real_pairs: 600,
+      holdout_pairs: 120,
+      teachers: ['local'],
+    }),
+  });
+  assert.equal(planned.status, 200);
+  const planBody = await planned.json();
+  assert.equal(planBody.ok, true);
+  assert.equal(planBody.readiness.status, 'implemented');
+  assert.ok(planBody.data.plan.recommendation);
+  assert.ok(planBody.next_actions.length >= 1);
+});
+
+test('W584 #11 - CLI/script and package gates expose strategy verification', () => {
   const r = spawnSync(process.execPath, [
     'scripts/distill-strategy.mjs',
     '--simulate', 'anthropic',
@@ -127,4 +208,40 @@ test('W584 #7 - CLI/script and package gates expose strategy verification', () =
   const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
   assert.match(pkg.scripts['verify:distill-strategy'], /distill-strategy\.mjs/);
   assert.match(pkg.scripts['verify:depth'], /distill-strategy\.mjs/);
+});
+
+test('W584 #12 - CLI exposes direct distill strategy planning and catalog output', () => {
+  const planned = spawnSync(process.execPath, [
+    CLI,
+    'distill',
+    'strategy',
+    '--simulate',
+    'anthropic',
+    '--task',
+    'generation',
+    '--real-pairs',
+    '1500',
+    '--holdout-pairs',
+    '300',
+    '--json',
+  ], {
+    cwd: ROOT,
+    encoding: 'utf8',
+    timeout: 15000,
+  });
+  assert.equal(planned.status, 0, planned.stderr || planned.stdout);
+  const plan = JSON.parse(planned.stdout);
+  assert.equal(plan.ok, true);
+  assert.equal(plan.recommendation.id, 'kd_softmax');
+  assert.equal(plan.secret_values_included, false);
+
+  const catalog = spawnSync(process.execPath, [CLI, 'distill', 'strategy', '--catalog', '--json'], {
+    cwd: ROOT,
+    encoding: 'utf8',
+    timeout: 15000,
+  });
+  assert.equal(catalog.status, 0, catalog.stderr || catalog.stdout);
+  const body = JSON.parse(catalog.stdout);
+  assert.equal(body.spec, 'kolm-distill-strategy/1');
+  assert.ok(body.strategies.some((s) => s.id === 'preference_optimization'));
 });

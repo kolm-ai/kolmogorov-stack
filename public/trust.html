@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trust &middot; kolm.ai</title>
+<meta name="description" content="What kolm signs, where the receipts live, and the exact gate that decides when a .kolm artifact is sigstore-attested.">
+<link rel="canonical" href="https://kolm.ai/trust">
+<meta property="og:title" content="Trust &middot; kolm.ai">
+<meta property="og:description" content="What kolm signs and the exact gate that decides when a .kolm artifact is sigstore-attested.">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/trust">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Trust &middot; kolm.ai">
+<meta name="twitter:description" content="What kolm signs and the exact gate that decides when a .kolm artifact is sigstore-attested.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"Trust and signature_sigstore gate","description":"The trust surface for kolm: receipts, ed25519, and the exact signature_sigstore/Rekor gate.","url":"https://kolm.ai/trust","mainEntityOfPage":"https://kolm.ai/trust","author":{"@type":"Organization","name":"kolm.ai"}}
+</script>
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/supplement.css">
+    <link rel="stylesheet" href="/warm-paper.css">
+<script defer src="/supplement.js"></script>
+<style>
+ :root{--ink:#20242a;--muted:#5d6672;--line:#dfe4e8;--bg:#fbfcfb;--panel:#fff;--accent:#0f8f69;--warn:#9a6700;--bad:#b42318;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+ .wrap{max-width:920px;margin:0 auto;padding:0 24px}
+ main{padding:54px 0 34px}
+ .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+ h1{font-size:44px;line-height:1.08;margin:0 0 16px;font-weight:600;letter-spacing:0}
+ .lede{font-size:18px;line-height:1.6;color:var(--muted);max-width:820px;margin:0 0 26px}
+ section{padding:30px 0;border-top:1px solid var(--line)}
+ h2{font-size:24px;margin:0 0 12px;letter-spacing:0}
+ h3{font-size:17px;margin:18px 0 8px;letter-spacing:0}
+ p{margin:0 0 14px;color:var(--muted)}
+ code,pre{font-family:var(--mono)}
+ code{background:#eef3f0;border:1px solid #dbe7e1;border-radius:4px;padding:1px 5px;color:#18382d}
+ pre{background:#0d1117;color:#e6edf3;border-radius:8px;padding:16px;overflow:auto;font-size:13px;line-height:1.55}
+ table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}
+ th,td{border-bottom:1px solid var(--line);padding:10px 8px;text-align:left;vertical-align:top}
+ th{font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:500}
+ .ok{color:var(--accent)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+ ul{margin:0 0 14px;padding-left:22px;color:var(--muted)}
+</style>
+</head>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolm-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main">
+  <div class="wrap">
+    <p class="eyebrow">kolm.ai &middot; trust</p>
+    <h1>Trust surface</h1>
+    <p class="lede">What kolm signs by default, where the receipts live, and the exact field that gates external attestation. No marketing claims that we cannot verify on disk right now.</p>
+  </div>
+
+  <section>
+    <div class="wrap">
+      <h2>Default receipt content</h2>
+      <p>Every <code>.kolm</code> artifact ships an ed25519 receipt chain that covers the manifest, the recipe source, the seed corpus split, and the K-score eval block. <code>kolm verify &lt;artifact&gt;</code> walks the chain offline against the artifact bytes.</p>
+      <table>
+        <thead><tr><th>Field</th><th>Status</th><th>Where</th></tr></thead>
+        <tbody>
+          <tr><td><code>artifact_hash</code></td><td class="ok">required</td><td>manifest, computed sha256 of zipped payload</td></tr>
+          <tr><td><code>ed25519_signature</code></td><td class="ok">required</td><td>receipt chain, key on GET <code>/v1/keys/public</code></td></tr>
+          <tr><td><code>k_score</code></td><td class="ok">required</td><td>manifest, source = real holdout split</td></tr>
+          <tr><td><code>seed_provenance</code></td><td class="ok">required</td><td>manifest, with train/holdout counts</td></tr>
+          <tr><td><code>signature_sigstore</code></td><td class="warn">optional / dry-run bundle</td><td>manifest, populated when <code>kolm sigstore-attest</code> is wired</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>The signature_sigstore gate</h2>
+      <p><code>kolm sigstore-attest</code> attaches a sigstore bundle to the artifact and writes a <code>signature_sigstore</code> block into the manifest. In the current release this is a dry-run bundle &mdash; the signature flow runs end-to-end and the bundle shape is real, but the Rekor inclusion proof is not yet a hard production gate.</p>
+      <p>External callers that must refuse non-attested artifacts can set <code>KOLM_REQUIRE_REKOR=1</code>. With that flag, <code>kolm verify</code> escalates a missing or unverified <code>signature_sigstore.rekor_log_entry</code> to a non-zero exit code instead of a warning. Without the flag, the field stays informational so the rest of the receipt chain still verifies offline.</p>
+      <pre>$ KOLM_REQUIRE_REKOR=1 kolm verify ./examples/claims-redactor/claims-redactor.kolm
+artifact_hash ok
+ed25519 ok
+receipt chain ok
+signature_sigstore: dry-run bundle (no Rekor proof) &mdash; FAIL (KOLM_REQUIRE_REKOR=1)
+exit 2</pre>
+      <p>The honest read: today <code>signature_sigstore</code> is best-effort and is not part of the default verification gate. Setting <code>KOLM_REQUIRE_REKOR=1</code> is the explicit opt-in for callers who want to refuse anything that does not have a verifiable Rekor entry. When that becomes the default, this page will say so.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>What we do not claim</h2>
+      <ul>
+        <li>No SLSA Level 3 attestation. The build provenance status lives at <a href="/slsa">/slsa</a>; the short version is "Level 3 is a target, not yet shipped."</li>
+        <li>No multi-anchor timestamping. Earlier copy mentioned external timestamp anchors; that surface was removed because it was not actually wired. The only chain we publish is the ed25519 receipt chain plus the optional sigstore bundle described above.</li>
+        <li>No registry-published cosign signatures. The artifact is signed locally before upload; <code>kolm sigstore-attest</code> is the only path to an external transparency log entry.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a> &middot; <a href="/trust">Trust</a> &middot; <a href="/status">Status</a></span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

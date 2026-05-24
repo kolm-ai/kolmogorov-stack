@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -121,6 +121,7 @@
 
 
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <a href="#main" class="ks-skip">Skip to content</a>
@@ -159,7 +160,7 @@
  <span>apps/trainer/embedding.py + apps/trainer/reranker.py</span>
  </div>
 
- <h2>Two stages, two models, one stack</h2>
+ <h2>Two-stage retrieval, one trainer</h2>
 
  <p>Modern retrieval is two-stage. A fast embedder converts queries and documents to dense vectors; an approximate nearest-neighbour index returns the top-K (typically 50-200) candidates per query in milliseconds. A slower, more accurate reranker then scores each (query, candidate) pair and returns the top-N (typically 5-20) for the LLM to read.</p>
 
@@ -185,7 +186,7 @@
  total = total + info_nce(q_k, d_k, temperature)
  return total / len(dims)</pre>
 
- <p>The product: one model serves four latency tiers. A buyer who wants fast in-browser recall can truncate to 64 dims; a buyer who wants best quality uses the full 768. The recall index in the <code>.kolm</code> artifact ships both the full vectors and a marker for which dims are valid, so the runtime can pick the tier per-query.</p>
+ <p>The product: one model serves multiple latency tiers. A buyer who wants fast in-browser recall can truncate to 64 dims; a buyer who wants best quality uses the full 768. The recall index in the <code>.kolm</code> artifact ships both the full vectors and a marker for which dims are valid, so the runtime can pick the tier per-query.</p>
 
  <h2>The reranker: cross-encoder, BCE or MSE</h2>
 
@@ -201,7 +202,7 @@
  text = f"{query} [SEP] {doc}"
  return self.encoder(**tokenize(text)).logits.squeeze(-1)</pre>
 
- <p>Two label shapes are supported. Binary relevance (label in <code>{0, 1}</code>) uses BCE-with-logits loss; the model produces a logit you sigmoid at inference for a probability. Pointwise score (label in <code>[0, 1]</code> or any real) uses MSE; the model produces a raw score.</p>
+ <p>The label shapes supported. Binary relevance (label in <code>{0, 1}</code>) uses BCE-with-logits loss; the model produces a logit you sigmoid at inference for a probability. Pointwise score (label in <code>[0, 1]</code> or any real) uses MSE; the model produces a raw score.</p>
 
  <p>The kolm config picks BCE by default because most buyer captures are binary relevance signals (the user clicked / the answer was correct). Pointwise MSE is the right path when the buyer has explicit relevance scores (e.g., a 1-5 star rating).</p>
 

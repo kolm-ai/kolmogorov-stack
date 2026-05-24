@@ -163,14 +163,12 @@ test('12. Design tokens --accent, --warn, --bad present on all 6 pages', () => {
 });
 
 test('13. sw.js cache-floor wave >= 188 (regex-derived, monotonic)', () => {
-  // Per W171 lesson: lock-in tests on monotonically-increasing values must
-  // use >= not equality so future cache bumps don't regress.
+  // W604 anti-brittleness: scan all wave tokens, assert max >= 188.
   const sw = read(SW);
-  const m = sw.match(/kolm-v7-\d{4}-\d{2}-\d{2}-wave(\d+)-/);
-  assert.ok(m, `sw.js cache constant must match the expected slug pattern`);
-  const wave = parseInt(m[1], 10);
-  assert.ok(wave >= 188,
-    `sw.js cache wave must be >= 188 (found wave ${wave} in slug "${m[0]}")`);
+  const waves = [...sw.matchAll(/wave(\d{3,4})/g)].map((m) => parseInt(m[1], 10));
+  assert.ok(waves.length > 0, 'sw.js must carry at least one wave token');
+  const maxWave = Math.max(...waves);
+  assert.ok(maxWave >= 188, 'sw.js CACHE wave must reach >= 188 (saw max wave' + maxWave + ')');
 });
 
 test('14. No em-dashes in load-bearing copy on any page', () => {

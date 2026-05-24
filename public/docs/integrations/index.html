@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -55,6 +55,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/docs-shell.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/docs-shell.js"></script>
 
 </head>
@@ -92,7 +93,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p class="lede">Frontier AI on your own infrastructure. Distill a teacher model into a compact .kolm artifact in your workbench, then deploy that artifact behind a managed inference endpoint in whichever cloud already runs your application. Your data, your VPC, your IAM.</p>
 
 <h2 id="why">Why integrate</h2>
-<p>kolm produces a portable .kolm bundle: weights plus a receipt that names every input that shaped them. That bundle is a self-contained model artifact, not a service. The cloud hosting layer (SageMaker, Azure ML, Vertex AI) takes that artifact and wraps it in a load balancer, autoscaler, IAM perimeter, and metrics pipeline. Splitting the responsibilities lets you keep distillation reproducible and on-prem if you want to, while leveraging the cloud surface you already pay for.</p>
+<p>kolm produces a portable .kolm compile: weights plus a receipt that names every input that shaped them. That bundle is a self-contained model artifact, not a service. The cloud hosting layer (SageMaker, Azure ML, Vertex AI) takes that artifact and wraps it in a load balancer, autoscaler, IAM perimeter, and metrics pipeline. Splitting the responsibilities lets you keep distillation reproducible and on-prem if you want to, while leveraging the cloud surface you already pay for.</p>
 <ul>
  <li><b>Distillation lives in kolm.</b> Capture, dataset construction, training, quantization, receipts, k-score.</li>
  <li><b>Hosting lives in your cloud.</b> Endpoints, autoscaling, observability, identity, governance.</li>

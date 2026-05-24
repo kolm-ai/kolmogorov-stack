@@ -317,22 +317,11 @@ test('17. docs that mention CLI flags also instruct readers to verify against th
 
 test('18. sw.js wave-floor regex >= 206', () => {
   const sw = read(SW);
-  const m = sw.match(/kolm-v7-\d{4}-\d{2}-\d{2}-wave(\d+)-/);
-  assert.ok(m, 'sw.js must contain a kolm-v7-<date>-wave<N>- cache slug');
-  // NOTE: this test ships before coordinator bumps sw.js to >= 206. The
-  // wave-floor lock guarantees a future cache bump never silently regresses
-  // past W206. Until the bump lands, the test fails loudly and signals the
-  // pending handoff. We use `>= 206 || pending` semantics: if the wave is
-  // less than 206, the test still records the gap so the coordinator sees it.
-  const wave = parseInt(m[1], 10);
-  if (wave < 206) {
-    // Soft pass: surface the gap. Coordinator wave bump is the load-bearing fix.
-    assert.ok(wave >= 201,
-      `sw.js wave ${wave} is older than W201 baseline; coordinator handoff regressed`);
-  } else {
-    assert.ok(wave >= 206,
-      `sw.js wave ${wave} must be >= 206 for W206`);
-  }
+  // W604 anti-brittleness: scan all wave tokens, assert max >= 206.
+  const waves = [...sw.matchAll(/wave(\d{3,4})/g)].map((m) => parseInt(m[1], 10));
+  assert.ok(waves.length > 0, 'sw.js must carry at least one wave token');
+  const maxWave = Math.max(...waves);
+  assert.ok(maxWave >= 206, 'sw.js CACHE wave must reach >= 206 (saw max wave' + maxWave + ')');
 });
 
 test('19. CLI stubs reference verify before ship + cross-link to /spec/rs-1', () => {

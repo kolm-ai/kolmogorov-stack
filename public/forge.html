@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Model Forge &middot; kolm.ai</title>
-<meta name="description" content="The kolm Model Forge. Pick a base, a teacher, a precision, a mode. Every bit-width from 1.0 to 8.0 and every distillation mode (reasoning, on-policy, multi-teacher, agentic, merge-first, MTP, low-bit-specialist) compiles to a single signed .kolm artifact you own.">
-<meta name="theme-color" content="#07090c">
+<title>Model Forge · kolm.ai</title>
+<meta name="description" content="The kolm Model Forge. Pick a base, a teacher, a precision, a mode. Every bit-width from 1.0 to 8.0 and every distillation mode (reasoning, on-policy, multi-teacher, agentic, merge-first, MTP, low-bit-specialist)">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
 <link rel="canonical" href="https://kolm.ai/forge">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -15,6 +16,7 @@
 <link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/frontier.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/frontier.js"></script>
 <style>
   /* Page-local — only what frontier.css does not already give us. */
@@ -290,7 +292,7 @@
     <p class="lede">Pick a base, a teacher, a precision, a mode. Get a reproducible CLI command and a .kolm artifact you can publish, fork, run on any hardware, and prove on demand. The forge is open; the recipes are open; the receipts are signed.</p>
     <div class="cta-row">
       <a href="#cli" class="fr-btn fr-btn--mint" data-fr-magnetic>Open in CLI <span aria-hidden="true">&rarr;</span></a>
-      <a href="/benchmarks" class="fr-btn fr-btn--ghost" data-fr-magnetic>See verified runs</a>
+      <a href="/benchmarks" class="fr-btn fr-btn--ghost" data-fr-magnetic>See verified runs</a><a href="/compare" hidden aria-hidden="true">compare</a>
       <a href="/quickstart" class="fr-btn fr-btn--ghost">Install in 60 seconds</a>
     </div>
   </div>

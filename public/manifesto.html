@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Manifesto: why an open-source AI compiler is the only honest path &middot; kolm.ai</title>
-<meta name="description" content="The model that makes the decision should be the model that gets audited. The artifact that runs in your VPC should be the artifact your compliance team signed. Six principles, written down so we can be held to them.">
-<meta name="theme-color" content="#07090c">
+<title>Manifesto: why an open-source AI compiler is the only honest path · kolm.ai</title>
+<meta name="description" content="The model that decides should be the model that gets audited. The artifact that runs in your VPC should be the artifact your compliance team signed. Principles, written down so we can be held to them.">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="Manifesto &middot; kolm.ai">
-<meta property="og:description" content="Six principles behind the open-source AI compiler. Written down so we can be held to them.">
+<meta property="og:description" content="Principles behind the open-source AI compiler. Written down so we can be held to them.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/manifesto">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -16,6 +17,7 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <style>
   .mf-prose { max-width: 68ch; margin: 0 auto; font-size: 18px; line-height: 1.7; color: var(--ks-ink-2); }
   .mf-prose p { margin: 0 0 var(--ks-4); }
@@ -23,6 +25,7 @@
   .mf-prose a { color: var(--ks-accent); text-decoration: underline; text-decoration-color: var(--ks-accent-edge); text-underline-offset: 3px; }
   .mf-principle { padding: var(--ks-6); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--ks-5); }
   @media (max-width: 720px) { .mf-principle { grid-template-columns: 1fr; gap: var(--ks-3); } }
+  @media (max-width: 560px) { .mf-principle { grid-template-columns: 1fr; gap: var(--ks-2); } .wrap { padding-left: 18px; padding-right: 18px; } }
   .mf-principle .n { font-family: var(--ks-mono); font-size: 13px; color: var(--ks-accent); font-weight: 600; padding-top: 4px; letter-spacing: 0.04em; }
   .mf-principle h3 { margin: 0 0 var(--ks-3); font-size: 22px; font-weight: 580; color: var(--ks-ink); line-height: 1.25; letter-spacing: -0.01em; }
   .mf-principle p { margin: 0 0 var(--ks-3); font-size: 15.5px; color: var(--ks-ink-2); line-height: 1.7; }
@@ -42,7 +45,7 @@
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL)",
   "url": "https://kolm.ai/manifesto",
-  "description": "The model that makes the decision should be the model that gets audited. The artifact that runs in your VPC should be the artifact your compliance team signed. Six principles, written down so we can be held to them.",
+  "description": "The model that decides should be the model that gets audited. The artifact that runs in your VPC should be the artifact your compliance team signed. Principles, written down so we can be held to them.",
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -99,18 +102,25 @@
 
 <section class="ks-section ks-section--hero">
   <div class="ks-wrap">
-    <span class="ks-eyebrow">For the developers, engineers, and compliance leads who care &middot; A short manifesto</span>
+    <span class="ks-eyebrow">For developers, engineers, and compliance leads &middot; A short manifesto</span>
     <h1 class="ks-h1" style="margin-top: var(--ks-3); max-width: 22ch;">The model that decides should be the model that gets audited.</h1>
-    <p class="ks-lede" style="max-width: 60ch;">We wrote kolm because the gap between "a model that works in a demo" and "a model that you can defend in a deposition" is the entire job, and almost nobody is doing it.</p>
+    <p class="ks-lede" style="max-width: 60ch;">The gap between a model that demos and a model you can defend in a deposition is the entire job. Almost nobody is doing it.</p>
+    <div style="display:flex;gap:var(--ks-3);flex-wrap:wrap;margin-top:var(--ks-5);">
+      <a href="/quickstart" class="ks-btn ks-btn--primary ks-btn--lg">Compute your first artifact <span class="ks-btn-arrow">&rarr;</span></a>
+      <a href="/why-kolm" class="ks-btn ks-btn--ghost ks-btn--lg">The case for kolm</a>
+    </div>
+    <pre style="margin-top:var(--ks-5);max-width:60ch;background:#0b0d11;border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md);padding:14px 18px;font-family:var(--ks-mono);font-size:13px;color:var(--ks-ink-2);line-height:1.6;overflow:auto;"><span style="color:var(--ks-ink-3)"># the chain in two commands</span>
+$ kolm compile spec.json     <span style="color:var(--ks-ink-3)"># spec &rarr; signed .kolm</span>
+$ kolm verify artifact.kolm  <span style="color:var(--ks-ink-3)"># receipt: ok, K=0.92</span></pre>
   </div>
 </section>
 
 <section class="ks-section">
   <div class="ks-wrap">
     <div class="mf-prose">
-      <p>For the past four years, a quiet thing has been true and almost no one has said it out loud. The model behind every consequential AI decision in production today is opaque to the people whose decisions it makes. A radiologist trusts a triage recommendation she cannot inspect. A claims examiner approves a denial whose rationale is a vendor's commercial secret. A bank's compliance team writes "we use AI" in its annual report and hopes the regulator does not ask which one, on which date, with which weights, against which evals.</p>
+      <p>For four years, a quiet thing has been true. The model behind every consequential AI decision in production today is opaque to the people whose decisions it makes. A radiologist trusts a triage call she cannot inspect. A claims examiner approves a denial whose rationale is a vendor's commercial secret. A bank's compliance team writes "we use AI" in its annual report and hopes the regulator does not ask which one, on which date, with which weights, against which evals.</p>
       <p>This is fine until it is not, and then it is the whole story.</p>
-      <p>Every developer who has tried to ship a serious AI feature into a regulated environment has hit the same wall. The model you call is not the model you can sign. The artifact that runs in production is not the artifact your compliance team reviewed. The eval pack you ran in the demo is not the eval pack the regulator will ask about. The chain of custody from <strong>your captures</strong>, through <strong>your teacher</strong>, into <strong>your distilled student</strong>, through <strong>your runtime</strong>, into <strong>your decision</strong>, is a chain of trust nobody is keeping.</p>
+      <p>Every developer shipping AI into a regulated environment hits the same wall. The model you call is not the model you can sign. The artifact in production is not the artifact your compliance team reviewed. The eval pack from the demo is not the pack the regulator will ask about. The chain of custody from <strong>your captures</strong>, through <strong>your teacher</strong>, into <strong>your distilled student</strong>, through <strong>your runtime</strong>, into <strong>your decision</strong>, is a chain of trust nobody is keeping.</p>
       <p>Kolm exists to keep the chain.</p>
     </div>
   </div>
@@ -128,9 +138,9 @@
 <section class="ks-section">
   <div class="ks-wrap">
     <div class="ks-shead">
-      <span class="ks-eyebrow">Six principles</span>
+      <span class="ks-eyebrow">Principles</span>
       <h2 class="ks-h2">What we will not compromise on.</h2>
-      <p class="ks-lede">Written down so we can be held to them. Each one named the wave that shipped it; each one is testable in the open source.</p>
+      <p class="ks-lede">Written down so we can be held to them. Each is testable in the open source.</p>
     </div>
     <div style="display: grid; gap: var(--ks-4); max-width: 880px; margin: 0 auto;">
 
@@ -196,8 +206,8 @@
   <div class="ks-wrap">
     <div class="mf-prose">
       <h2 class="ks-h2" style="text-align: left; margin-bottom: var(--ks-5);">What we will not do.</h2>
-      <p>We will not ship a feature whose receipt would be a lie. We will not gate the verifier behind a paywall. We will not "deprecate" an older eval-pack version in a way that makes a regulator's old receipt unverifiable. We will not store your captures or your artifacts in our cloud unless you explicitly route them there, and we will not add a feature that requires us to.</p>
-      <p>We will not, in marketing copy, claim a benchmark our compiler did not compute under the exact protocol we publish. We will not use the kind of throat-clearing superlatives that pad a hero and carry zero information; you know the words, we will not type them. We will not write fluff to fill a hero. We will not put an emoji on a feature that does not yet exist.</p>
+      <p>We will not ship a feature whose receipt would be a lie. We will not gate the verifier behind a paywall. We will not "deprecate" an older eval-pack version in a way that makes an old receipt unverifiable. We will not store your captures or artifacts in our cloud unless you route them there, and we will not add a feature that requires us to.</p>
+      <p>We will not claim a benchmark our compiler did not compute under the published protocol. We will not pad a hero with throat-clearing superlatives. We will not put an emoji on a feature that does not yet exist.</p>
       <p>And we will not, ever, ship a model into production whose decision was opaque to the person whose decision it made. That is the floor.</p>
     </div>
   </div>
@@ -207,9 +217,9 @@
   <div class="ks-wrap">
     <div class="mf-prose">
       <h2 class="ks-h2" style="text-align: left; margin-bottom: var(--ks-5);">What we are betting on.</h2>
-      <p>The frontier model labs will keep getting better, faster than we can keep up. That is fine. <strong>We are not building a frontier lab.</strong> We are building the layer that makes those frontier models deployable into the environments where the decisions actually carry weight. The labs ship intelligence; we ship the chain of custody around that intelligence.</p>
+      <p>The frontier labs will keep getting better, faster than we can keep up. That is fine. <strong>We are not building a frontier lab.</strong> We build the layer that makes those frontier models deployable where the decisions carry weight. Labs ship intelligence; we ship the chain of custody around it.</p>
       <p>In ten years, the model behind every consequential AI decision will be a distilled specialist, signed, scored, runnable on commodity hardware, with a receipt that travels with the decision. The frontier model will be the teacher, not the runtime. The runtime will be yours. The receipt will be the contract between you and the person whose decision was made.</p>
-      <p>That is the bet. The compiler that makes it true is open source. The five axes are written down. The receipt format is published. The verifier is a hundred lines of Python. The whole stack is yours to audit, fork, run, and improve.</p>
+      <p>That is the bet. The compiler is open source. The K-score axes are written down. The receipt format is published. The verifier is a hundred lines of Python. The whole stack is yours to audit, fork, run, and improve.</p>
       <p><a href="/quickstart">Compute your first artifact. Read your first receipt. Decide for yourself.</a></p>
     </div>
   </div>

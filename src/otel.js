@@ -388,6 +388,22 @@ const KOLM_OTEL_ATTRS = Object.freeze({
   // W245 namespace (already public — appears in routes, capture rows,
   // metrics). Safe to emit raw.
   NAMESPACE: 'kolm.namespace',
+  // W823-1 — extends W733 attrs.
+  //
+  // ARTIFACT_ID is a stable per-deployment identifier (the W144 artifact
+  // pointer the runtime is currently serving). This is different from
+  // ARTIFACT_CID (the immutable content-id of the on-disk .kolm) — buyers
+  // dashboard by deployment, not by content-hash, so both must travel.
+  ARTIFACT_ID: 'kolm.artifact.id',
+  // W823 p50/p95 token confidence — distribution stats over a span. We
+  // already expose TOKEN_CONFIDENCE (mean entropy); these add the
+  // percentile pair for histogram-class panels.
+  TOKEN_CONFIDENCE_P50: 'kolm.token.confidence_p50',
+  TOKEN_CONFIDENCE_P95: 'kolm.token.confidence_p95',
+  // W823 kscore_drift — caller-supplied drift window (default 24h above
+  // via KSCORE_DRIFT_24H; KSCORE_DRIFT is the open-window variant so the
+  // buyer can pick the comparison baseline). Unit: K-Score points.
+  KSCORE_DRIFT: 'kolm.kscore.drift',
 });
 
 const KOLM_OTEL_SPAN_NAMES = Object.freeze({
@@ -453,7 +469,11 @@ function setRoutingAttributes(span, block) {
   if (Number.isFinite(Number(block.confidence))) out[KOLM_OTEL_ATTRS.TOKEN_CONFIDENCE] = Number(block.confidence);
   if (Number.isFinite(Number(block.kscore))) out[KOLM_OTEL_ATTRS.KSCORE_VALUE] = Number(block.kscore);
   if (Number.isFinite(Number(block.kscore_drift_24h))) out[KOLM_OTEL_ATTRS.KSCORE_DRIFT_24H] = Number(block.kscore_drift_24h);
+  if (Number.isFinite(Number(block.kscore_drift))) out[KOLM_OTEL_ATTRS.KSCORE_DRIFT] = Number(block.kscore_drift);
   if (typeof block.artifact_cid === 'string') out[KOLM_OTEL_ATTRS.ARTIFACT_CID] = block.artifact_cid;
+  if (typeof block.artifact_id === 'string') out[KOLM_OTEL_ATTRS.ARTIFACT_ID] = block.artifact_id;
+  if (Number.isFinite(Number(block.token_confidence_p50))) out[KOLM_OTEL_ATTRS.TOKEN_CONFIDENCE_P50] = Number(block.token_confidence_p50);
+  if (Number.isFinite(Number(block.token_confidence_p95))) out[KOLM_OTEL_ATTRS.TOKEN_CONFIDENCE_P95] = Number(block.token_confidence_p95);
   if (typeof block.namespace === 'string') out[KOLM_OTEL_ATTRS.NAMESPACE] = block.namespace;
   if (block.tenant_id) {
     // Privacy — only the sha256 prefix ever crosses the OTel boundary.

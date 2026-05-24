@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Kolm for Healthcare — distill HIPAA-safe models without sending PHI to OpenAI · kolm.ai</title>
-<meta name="description" content="Stop paying $0.03 per chart summary to a vendor that just received protected health information. Distill your own HIPAA-eligible specialist with kolm. PHI never leaves your VPC. Ed25519 receipts on every model and every inference. BAA on request.">
-<meta name="theme-color" content="#07090c">
+<title>Kolm for Healthcare — distill HIPAA-safe models without sending PHI to OpenAI</title>
+<meta name="description" content="Stop paying $0.03 per chart summary to a vendor that just received protected health information. Distill your own HIPAA-eligible specialist with kolm. PHI stays on your hardware your VPC. Ed25519 receipts on every model">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="Kolm for Healthcare · kolm.ai">
-<meta property="og:description" content="Distill HIPAA-safe support models without sending PHI to OpenAI. PHI never leaves your VPC. BAA on request. Signed Ed25519 receipts.">
+<meta property="og:description" content="Distill HIPAA-safe support models without sending PHI to OpenAI. PHI stays on your hardware your VPC. BAA on request. Signed Ed25519 receipts.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/for/healthcare">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -17,6 +18,7 @@
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/for-shell.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -25,7 +27,7 @@
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL)",
   "url": "https://kolm.ai/for/healthcare",
-  "description": "Distill HIPAA-eligible specialists from your own captures. PHI never leaves your VPC. Signed Ed25519 receipts.",
+  "description": "Distill HIPAA-eligible specialists from your own captures. PHI stays on your hardware your VPC. Signed Ed25519 receipts.",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
   "publisher": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" }
 }
@@ -70,7 +72,7 @@
   <div class="for-section__head">
     <span class="for-eyebrow"><a href="/healthcare" style="color:var(--ks-ink-3,#737c73); text-decoration:none">&larr; Healthcare vertical</a> &middot; cost-compression angle</span>
     <h1 class="for-h1">Distill HIPAA-safe support models without sending PHI to OpenAI.</h1>
-    <p class="for-lede">Every chart summary, prior-auth draft, and triage message you route to a hosted frontier model is a covered disclosure. Kolm turns your approved capture history into a specialist that runs inside your perimeter. PHI never leaves your VPC. Every model carries an Ed25519 receipt. BAA on request.</p>
+    <p class="for-lede">Every chart summary, prior-auth draft, and triage message you route to a hosted frontier model is a covered disclosure. Kolm turns your approved capture history into a specialist that runs inside your perimeter. PHI stays on your hardware your VPC. Every model carries an Ed25519 receipt. BAA on request.</p>
     <div class="for-hero__ctas">
       <a class="for-cta-primary" href="mailto:rodneyyesep@gmail.com?subject=BAA%20request%20%E2%80%94%20kolm%20for%20healthcare">Request a BAA <span aria-hidden="true">&rarr;</span></a>
       <a class="for-cta-secondary" href="/security">Read the security model</a>
@@ -81,7 +83,7 @@
 <section class="for-section">
   <div class="for-section__head">
     <span class="for-eyebrow">The problem</span>
-    <h2 class="for-h2">Four ways the hosted-LLM contract breaks in healthcare.</h2>
+    <h2 class="for-h2">How the hosted-LLM contract breaks in healthcare.</h2>
   </div>
   <div class="for-pain">
     <div class="for-pain__item">
@@ -116,7 +118,7 @@
   <div class="for-recipe">
     <div class="for-recipe__step">
       <span class="for-recipe__num">Step 01</span>
-      <h3 class="for-recipe__h">Capture inside your VPC</h3>
+      <h3 class="for-recipe__h">Capture inside your own infrastructure</h3>
       <p class="for-recipe__p">Wrap your existing model calls with the kolm gateway running in your AWS / GCP / Azure account. Captures land in your encrypted bucket, never in ours.</p>
       <code class="for-recipe__cmd"><span class="p">$</span> <span class="c">kolm gateway up --provider anthropic \</span><br>&nbsp;&nbsp;<span class="c">--namespace charts.prod --vpc-only</span></code>
     </div>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -17,6 +17,7 @@
 <link rel="stylesheet" href="/ks.css">
 <!-- ds-shell W619 -->
 <link rel="stylesheet" href="/docs-shell.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/docs-shell.js"></script>
 
 <style>
@@ -87,10 +88,10 @@
 <h2 data-w780="dns-layout">DNS layout</h2>
 <p>The full DNS schema lives at <a href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/infra/dns-schema.json"><code>infra/dns-schema.json</code></a>. It describes the Route53 + Cloudflare records required to launch:</p>
 <ul>
-<li><strong>Apex GeoDNS</strong> — <code>kolm.ai</code> resolves to the closest region by client IP. Weight 100 per geo bucket (NA -&gt; us, EU/AF -&gt; eu, APAC/OCEANIA -&gt; apac).</li>
-<li><strong>Per-region hostnames</strong> — <code>us.kolm.ai</code>, <code>eu.kolm.ai</code>, <code>ap.kolm.ai</code>. Each terminates its own TLS cert (SAN-per-region by default; rotation is region-independent).</li>
-<li><strong>Health checks</strong> — every 30 seconds against <code>/v1/health</code>; three consecutive failures pull a region out of rotation. Same path <code>src/multi-region.js</code> #testFailover probes.</li>
-<li><strong>Fallback region</strong> — when no geo match (e.g., satellite uplinks reporting as anycast), the apex falls back to <code>us</code>.</li>
+<li><strong>Apex GeoDNS</strong>  -  <code>kolm.ai</code> resolves to the closest region by client IP. Weight 100 per geo bucket (NA -&gt; us, EU/AF -&gt; eu, APAC/OCEANIA -&gt; apac).</li>
+<li><strong>Per-region hostnames</strong>  -  <code>us.kolm.ai</code>, <code>eu.kolm.ai</code>, <code>ap.kolm.ai</code>. Each terminates its own TLS cert (SAN-per-region by default; rotation is region-independent).</li>
+<li><strong>Health checks</strong>  -  every 30 seconds against <code>/v1/health</code>; three consecutive failures pull a region out of rotation. Same path <code>src/multi-region.js</code> #testFailover probes.</li>
+<li><strong>Fallback region</strong>  -  when no geo match (e.g., satellite uplinks reporting as anycast), the apex falls back to <code>us</code>.</li>
 </ul>
 
 <h2 data-w780="env">Environment variables</h2>
@@ -117,9 +118,9 @@ KOLM_REGION_GATEWAY_URLS = '{"us":"https://us.kolm.ai","eu":"https://eu.kolm.ai"
 <h2 data-w780="region-aware-capture">Region-aware capture routing</h2>
 <p>W780 joins with <a href="/compliance/data-residency">W769 data residency</a> to decide which region a capture should land in. The resolution ladder:</p>
 <ol>
-<li>The W769 <strong>namespace default region</strong> (from <code>configureNamespaceRegion</code>) — if a namespace is pinned to <code>EU_WEST</code>, every capture in that namespace routes to <code>eu</code>.</li>
-<li>The W769 <strong>tenant inference</strong> from ISO country code — a tenant signed up from <code>DE</code> maps to <code>eu</code>.</li>
-<li>The runtime <strong>current region</strong> from <code>$KOLM_REGION</code> — the final fallback.</li>
+<li>The W769 <strong>namespace default region</strong> (from <code>configureNamespaceRegion</code>)  -  if a namespace is pinned to <code>EU_WEST</code>, every capture in that namespace routes to <code>eu</code>.</li>
+<li>The W769 <strong>tenant inference</strong> from ISO country code  -  a tenant signed up from <code>DE</code> maps to <code>eu</code>.</li>
+<li>The runtime <strong>current region</strong> from <code>$KOLM_REGION</code>  -  the final fallback.</li>
 </ol>
 <p>The join logic is honest about each rung: the returned envelope carries <code>reason</code> (one of <code>w769_namespace_default</code>, <code>w769_tenant_inference</code>, <code>w769_global_uses_current_region</code>) so callers can audit which rung made the decision.</p>
 
@@ -135,7 +136,7 @@ $ kolm region test-failover</code></pre>
 GET  /v1/region/gateways   -> { gateways: {us, eu, apac}, region_count, version }
 POST /v1/region/route      -> { region, gateway_url, reason, version }
   body: { request_hash, residency_requirement?, prefer_region? }</code></pre>
-<p>All auth-gated. <code>residency_requirement</code> is a HARD constraint — a request tagged <code>eu</code> against a gateway map without an <code>eu</code> entry returns HTTP 400 with <code>{ok:false,error:"no_gateway_for_residency_requirement",available_regions:[...]}</code>. We NEVER silently downgrade.</p>
+<p>All auth-gated. <code>residency_requirement</code> is a HARD constraint  -  a request tagged <code>eu</code> against a gateway map without an <code>eu</code> entry returns HTTP 400 with <code>{ok:false,error:"no_gateway_for_residency_requirement",available_regions:[...]}</code>. We NEVER silently downgrade.</p>
 
 <h2 data-w780="see-also">See also</h2>
 <ul>

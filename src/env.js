@@ -250,3 +250,39 @@ function receiptSecretLooksProductionSafe(secret) {
     secret !== DEV_RECEIPT_SECRET &&
     !/^ks_receipt_(live|test|dev|change)/i.test(secret);
 }
+
+// WC07 — type-safe env readers. Audit found 10 sites where bare
+// `process.env.FOO` reads silently corrupt:
+//   * `!!process.env.KOLM_LOCAL_DAEMON` returns TRUE for `KOLM_LOCAL_DAEMON=false`
+//     because non-empty strings are truthy. So `=false` does the OPPOSITE of
+//     what every operator expects.
+//   * `process.env.KOLM_SIGNING_KEY` with no fallback signs with the string
+//     `"undefined"` when unset, silently producing forgeable signatures.
+// envBool / envSecret are the two helpers all such reads should route through.
+
+// True iff env var is set to a truthy string. Treats '0', 'false', 'no', 'off'
+// (case-insensitive) as FALSE. Treats unset/empty as the provided fallback
+// (default: false). Unrecognized non-empty strings (e.g. 'maybe') return the
+// fallback rather than silently coercing — this prevents 'KOLM_FOO=disabled'
+// from being read as `true` just because the string is non-empty.
+export function envBool(name, fallback = false) {
+  const v = process.env[name];
+  if (v === undefined || v === null || v === '') return fallback;
+  const s = String(v).trim().toLowerCase();
+  if (s === '0' || s === 'false' || s === 'no' || s === 'off') return false;
+  if (s === '1' || s === 'true' || s === 'yes' || s === 'on') return true;
+  return fallback;
+}
+
+// Returns env var value iff it's non-empty after trim, else null. NEVER
+// returns ''. Caller MUST handle null (e.g. throw / disable feature / log).
+// Use this for SECRETS and other "must be present and meaningful" reads —
+// the bare `process.env.FOO || ''` pattern lets `FOO=""` flow through as a
+// "configured" value, which then collides with omitted-header empty-string
+// comparisons in constant-time auth paths.
+export function envSecret(name) {
+  const v = process.env[name];
+  if (v === undefined || v === null) return null;
+  const s = String(v).trim();
+  return s.length > 0 ? s : null;
+}

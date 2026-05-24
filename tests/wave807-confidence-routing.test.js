@@ -1,3 +1,4 @@
+// @unauthed-test — pure unit tests of src/confidence-router.js + src/splice-to-teacher.js; never mounts buildRouter().
 // W807 — confidence-aware adaptive routing tests.
 //
 // The atomic items (per KOLM_W707_SYSTEM_UPGRADE_PLAN.md W807-1..6):

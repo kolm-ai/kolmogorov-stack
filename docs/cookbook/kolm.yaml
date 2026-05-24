@@ -1,0 +1,68 @@
+# kolm.yaml — example for a support-bot use case.
+#
+# Wave: W820 (T2). Copy this file to your repo root and edit `namespaces[0].name`
+# + `teacher` to match your setup. The schema is documented at
+# docs/spec/kolm-yaml-schema.md.
+#
+# Lint locally:  kolm yaml validate
+# Lint in CI:    kolm yaml validate --json
+
+version: w732-v1
+
+namespaces:
+  - name: support-bot
+    teacher: claude-sonnet-4-6
+    student: qwen2.5-7b-int4
+    min_captures: 1000
+
+  - name: spam-classifier
+    teacher: claude-haiku-4-5
+    student: qwen2.5-0.5b-int4
+    min_captures: 500
+
+quality_gates:
+  # The K-Score the compiled .kolm artifact must meet before the gate passes.
+  # Below this and the workflow either fails the merge or triggers a re-distill
+  # (see re_distill block below).
+  min_kscore: 0.85
+  # Per-call cost ceiling. The runtime measures per-call cost during bench and
+  # the gate fails when the artifact exceeds this number.
+  max_cost_per_call_usd: 0.001
+  # When true, the gate fails any time the new K-Score is below the prior
+  # artifact's K-Score even if both clear min_kscore. Prevents silent rot.
+  block_on_regression: true
+
+re_distill:
+  # When K-Score < this, kolm/distill-action@v1 triggers `kolm distill`.
+  on_drop_below: 0.85
+  # Minimum hours between consecutive re-distills (defends teacher budget).
+  cooldown_hours: 24
+  # Cap on re-distills per rolling 7-day window. Hard stop above this.
+  max_per_week: 3
+
+publish:
+  # If true AND the workflow runs on a release event, attach the produced
+  # .kolm to that release as an asset.
+  github_release: true
+  # Set true to also publish to https://kolm.ai/marketplace after build.
+  marketplace: false
+  # Optional S3 bucket for an extra mirror. Empty string disables.
+  s3_bucket: ''
+
+eval_set:
+  # Held-out eval set path inside this repo (JSONL of {input, expected}).
+  ref: holdouts/support-bot-v3.jsonl
+  # SHA-256 of the eval set. Distill runs reject any drift against this hash,
+  # so the K-Score number stays comparable run-over-run.
+  pinned_sha256: '0000000000000000000000000000000000000000000000000000000000000000'
+
+guardrails:
+  # Input-side PII redaction. The redact action rewrites matched substrings
+  # before the input reaches the model. block / warn / rewrite are the
+  # supported actions; see docs/guardrails for the full pattern grammar.
+  - name: ssn
+    pattern: '\b\d{3}-\d{2}-\d{4}\b'
+    action: rewrite
+  - name: jailbreak-keywords
+    pattern: '(?i)ignore (all )?prior instructions'
+    action: block

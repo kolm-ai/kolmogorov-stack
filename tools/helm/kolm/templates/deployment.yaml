@@ -1,0 +1,160 @@
+{{- /*
+W824-1 + W824-5 + W824-6 — Deployment with artifact-pulling initContainer
+and zero-downtime rolling-update strategy.
+
+The initContainer (W824-5) shells out to `kolm pull $KOLM_ARTIFACT_ID --to
+/artifacts/` so the main container starts with the .kolm artifact already on
+the persistent volume. Rolling-update (W824-6) is maxSurge=1, maxUnavailable=0
+so a new artifact version always boots in parallel before the old one drains.
+The preStop hook gives in-flight requests `drainSeconds` to settle before
+SIGTERM (W824-6).
+*/ -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kolm.fullname" . }}
+  labels:
+    {{- include "kolm.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.hpa.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: {{ .Values.rollingUpdate.maxSurge }}
+      maxUnavailable: {{ .Values.rollingUpdate.maxUnavailable }}
+  selector:
+    matchLabels:
+      {{- include "kolm.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "kolm.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        # Trigger a roll on config / artifact changes (rolling-update + zero-downtime).
+        kolm.ai/artifact-id: {{ .Values.artifactRegistry.artifactId | quote }}
+        kolm.ai/artifact-registry: {{ .Values.artifactRegistry.url | quote }}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: {{ .Values.service.targetPort | quote }}
+        prometheus.io/path: "/metrics"
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "kolm.serviceAccountName" . }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      # W824-5 — initContainer pulls the .kolm artifact from the registry
+      # BEFORE the main container boots. The main container then mounts
+      # /artifacts/ and reads $KOLM_ARTIFACT_ID off the volume.
+      initContainers:
+        - name: artifact-puller
+          image: {{ include "kolm.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["sh","-c","kolm pull $KOLM_ARTIFACT_ID --to /artifacts/"]
+          env:
+            - name: KOLM_ARTIFACT_ID
+              value: {{ .Values.artifactRegistry.artifactId | quote }}
+            - name: KOLM_ARTIFACT_REGISTRY_URL
+              value: {{ .Values.artifactRegistry.url | quote }}
+            {{- if .Values.artifactRegistry.secretRef }}
+            - name: KOLM_ARTIFACT_REGISTRY_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.artifactRegistry.secretRef }}
+                  key: token
+            {{- end }}
+          volumeMounts:
+            - name: artifacts
+              mountPath: /artifacts
+      containers:
+        - name: kolm
+          image: {{ include "kolm.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ include "kolm.fullname" . }}-env
+          env:
+            {{- range .Values.extraEnv }}
+            - {{ toYaml . | nindent 14 | trim }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.probes.readiness.path }}
+              port: http
+            initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
+            failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.probes.liveness.path }}
+              port: http
+            initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
+            failureThreshold: {{ .Values.probes.liveness.failureThreshold }}
+          # W824-6 — preStop drain hook: sleep N seconds so the loadbalancer
+          # finishes removing this pod from its rotation, then send SIGTERM
+          # to the main process so the Node app can flush its event-store
+          # writes and exit cleanly.
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh","-c","sleep {{ .Values.preStop.drainSeconds }} && kill -TERM 1"]
+          volumeMounts:
+            - name: artifacts
+              mountPath: /artifacts
+            {{- if .Values.persistence.enabled }}
+            - name: kolm-data
+              mountPath: {{ .Values.persistence.mountPath }}
+            {{- end }}
+      volumes:
+        - name: artifacts
+          emptyDir: {}
+        {{- if .Values.persistence.enabled }}
+        - name: kolm-data
+          persistentVolumeClaim:
+            claimName: {{ include "kolm.fullname" . }}-data
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- if .Values.persistence.enabled }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "kolm.fullname" . }}-data
+  labels:
+    {{- include "kolm.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - {{ .Values.persistence.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.size }}
+  {{- if .Values.persistence.storageClass }}
+  storageClassName: {{ .Values.persistence.storageClass }}
+  {{- end }}
+{{- end }}

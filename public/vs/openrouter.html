@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -22,6 +22,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <style>
  :root {
  --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
@@ -126,7 +127,7 @@
  <ul>
  <li><b>You want a deliverable, not a router.</b> OpenRouter shapes the bill and the failover, but you never end up with a model you own. kolm produces a <code>.kolm</code> file you can ship to your laptop, a customer, or an air-gapped deploy.</li>
  <li><b>High-volume narrow tasks.</b> Once compiled, a kolm artifact runs at zero marginal teacher cost. OpenRouter is still billing per token, just with cleaner accounting.</li>
- <li><b>Data residency.</b> Calls through OpenRouter still cross the upstream provider boundary. The compiled kolm artifact runs entirely inside your VPC or on-device.</li>
+ <li><b>Data residency.</b> Calls through OpenRouter still cross the upstream provider boundary. The compiled kolm artifact runs entirely inside your own infrastructure or on-device.</li>
  </ul>
  </div>
 
@@ -153,7 +154,7 @@
  <tr><td class="row-h">Provider failover</td><td data-l="OpenRouter"><span class="ok">yes</span> - chained fallback</td><td data-l="kolm"><span class="no">no</span> - single upstream per route</td></tr>
  <tr><td class="row-h">Distillation</td><td data-l="OpenRouter"><span class="no">no</span></td><td data-l="kolm"><span class="ok">yes</span> - core primitive</td></tr>
  <tr><td class="row-h">Local inference after compile</td><td data-l="OpenRouter"><span class="no">no</span> - hosted only</td><td data-l="kolm"><span class="ok">yes</span> - GGUF, ONNX, MLX, vLLM, TRT-LLM</td></tr>
- <tr><td class="row-h">Data residency</td><td data-l="OpenRouter">Calls cross upstream provider boundary</td><td data-l="kolm">After compile, inference inside your VPC</td></tr>
+ <tr><td class="row-h">Data residency</td><td data-l="OpenRouter">Calls cross upstream provider boundary</td><td data-l="kolm">After compile, inference inside your own infrastructure</td></tr>
  <tr><td class="row-h">Open source</td><td data-l="OpenRouter"><span class="no">no</span> - SaaS</td><td data-l="kolm"><span class="ok">yes</span> - Apache-2.0</td></tr>
  <tr><td class="row-h">Receipts / signing</td><td data-l="OpenRouter"><span class="no">no</span></td><td data-l="kolm"><span class="ok">Ed25519</span> per artifact + per call</td></tr>
  </tbody>

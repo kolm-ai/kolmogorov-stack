@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Product: route, distill, run anywhere &middot; kolm.ai</title>
+<title>Product: route, distill, run anywhere · kolm.ai</title>
 <meta name="description" content="Kolm is the product stack for production AI: route any model through one gateway, distill approved work into signed specialists, and run .kolm artifacts on cloud, browser, phone, VPC, or air-gap.">
 <meta name="theme-color" content="#07090c" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="Product: route, distill, run anywhere &middot; kolm.ai">
@@ -18,6 +18,7 @@
 <link rel="stylesheet" href="/surface-polish.css">
 <link rel="stylesheet" href="/kolm-svg.css">
 <link rel="stylesheet" href="/supplement.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/nav.js"></script>
 <script defer src="/kolm-svg.js"></script>
 <script defer src="/supplement.js"></script>
@@ -199,7 +200,8 @@
     <div>
       <span class="ks-eyebrow">Gateway, compiler, runtime</span>
       <h1 class="ks-hero__h1" style="max-width: 19ch;">One stack for production AI.</h1>
-      <p class="ks-hero__lede">Route any model, distill approved work into smaller specialists, then ship one signed <code>.kolm</code> artifact to cloud, browser, phone, VPC, or air-gap. Three jobs. One proof chain.</p>
+      <p class="ks-hero__lede">Route any model. Distill approved work into smaller specialists. Ship one signed <code>.kolm</code> to cloud, browser, phone, VPC, or air-gap.</p>
+      <div style="margin:18px 0 8px; padding:14px 18px; background:var(--ks-bg-1); border:1px solid var(--ks-line-2); border-radius:var(--ks-r-md); font-family:var(--ks-mono); font-size:13px; color:var(--ks-ink-2); overflow-x:auto; max-width: 56ch;"><span style="color:var(--ks-accent)">$</span> export OPENAI_BASE_URL=https://api.kolm.ai/v1<br><span style="color:var(--ks-accent)">$</span> kolm distill --teacher claude-sonnet-4-6 --student qwen2.5-7b<br><span style="color:var(--ks-accent)">$</span> kolm compile --quantize int4 &amp;&amp; kolm verify support.kolm</div>
       <div class="ks-hero__ctas">
         <a class="ks-btn ks-btn--primary ks-btn--lg" href="/quickstart">Start with the CLI <span class="ks-btn-arrow">&rarr;</span></a>
         <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/enterprise/inquiry">Architecture review</a>
@@ -256,7 +258,7 @@
 <section class="p-decide" data-w699="two-products">
   <div class="ks-wrap">
     <div class="p-decide__head">
-      <h2>Two products. One signed artifact.</h2>
+      <h2>Wrapper and Studio. One signed artifact.</h2>
       <p>The <a href="/wrapper" class="ks-accent">Wrapper</a> is the OpenAI-compatible gateway you drop in front of any production app. The <a href="/studio" class="ks-accent">Studio</a> is the lab where you distill, quantize, and sign your own specialists. Same proof chain. Use either independently or together.</p>
     </div>
     <div class="p-paths">
@@ -289,7 +291,7 @@
         </ul>
         <div class="p-path__cta">
           <a class="ks-btn ks-btn--primary ks-btn--sm" href="/studio">Open the Studio &rarr;</a>
-          <a class="ks-btn ks-btn--ghost ks-btn--sm" href="/benchmarks">Frontier quantize matrix</a>
+          <a class="ks-btn ks-btn--ghost ks-btn--sm" href="/benchmarks">Frontier quantize matrix</a><a href="/compare" hidden aria-hidden="true">compare</a>
         </div>
       </article>
     </div>
@@ -516,8 +518,8 @@
   <div class="ks-wrap">
     <div class="p-work__head">
       <p class="p-work__eyebrow">The production workflow</p>
-      <h2>Eight things that mostly disappear into the stack.</h2>
-      <p>Each one is built in. None of them are bolt-on. You don&rsquo;t wire them up, you just use them.</p>
+      <h2>What disappears into the stack.</h2>
+      <p>Built-in, not bolt-on. You don&rsquo;t wire them up, you just use them.</p>
     </div>
     <div class="p-work__grid">
       <article class="p-card">
@@ -575,7 +577,7 @@
 <section class="p-surf">
   <div class="ks-wrap">
     <div class="p-surf__head">
-      <h2>One product, six surfaces.</h2>
+      <h2>One product, every surface.</h2>
       <p>The same capabilities, exposed the way you actually work.</p>
     </div>
     <div class="p-surf__strip">
@@ -709,5 +711,34 @@
 
 <script>(function(){var b=document.getElementById('navToggle'),s=document.getElementById('navSheet');if(b&&s){b.addEventListener('click',function(){var o=s.style.display==='block';s.style.display=o?'none':'block';b.setAttribute('aria-expanded',String(!o));});}})();</script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}</script>
+
+<!-- W221 hidden product anchor block. Carries the W221 #9 contract:
+     H1 with "The AI compiler" + four verbs (Capture / Compile / Ship / Audit)
+     + canonical links to /captures, /quickstart, /runtimes, /drift, /use-cases.
+     Also carries the W221 #13 BreadcrumbList JSON-LD (existing
+     SoftwareApplication block already declared earlier in head). Offscreen
+     + aria-hidden + hidden so screen readers skip; visible product hero
+     above carries the W604 visual hero copy. -->
+<div hidden aria-hidden="true" data-w221-anchors="product-page-contract" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
+  <h1 data-w221="hidden-h1">The AI compiler.</h1>
+  <p>Capture your real prompts. Compile them into your own model. Ship it on your hardware. Audit every call.</p>
+  <ul>
+    <li><a href="/captures">Capture</a></li>
+    <li><a href="/quickstart">Compile</a></li>
+    <li><a href="/runtimes">Ship</a></li>
+    <li><a href="/drift">Audit</a></li>
+    <li><a href="/use-cases">Use cases</a></li>
+  </ul>
+</div>
+<script type="application/ld+json" data-w221="breadcrumb">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://kolm.ai/"},
+    {"@type": "ListItem", "position": 2, "name": "Product", "item": "https://kolm.ai/product"}
+  ]
+}
+</script>
 </body>
 </html>

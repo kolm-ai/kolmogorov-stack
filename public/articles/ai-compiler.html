@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -171,6 +171,7 @@
 
 
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <a href="#main" class="ks-skip">Skip to content</a>
@@ -213,9 +214,9 @@
  <ol>
  <li><a href="#why">Why the cloud-AI line is the wrong line</a></li>
  <li><a href="#what">What an AI compiler actually does</a></li>
- <li><a href="#stages">Four stages of <code>kolm compile</code></a></li>
+ <li><a href="#stages">The stages of <code>kolm compile</code></a></li>
  <li><a href="#size">Why the artifact is 4GB and not 70GB</a></li>
- <li><a href="#five">Compile your first AI in five minutes</a></li>
+ <li><a href="#five">Compile your first AI in minutes</a></li>
  <li><a href="#k">The K-score, and why a number on the cover matters</a></li>
  <li><a href="#faq">FAQ</a></li>
  </ol>
@@ -235,8 +236,8 @@
  <p>The artifact contract is a signed zip with a manifest, recipe pack, eval metadata, verifier evidence, receipt body, and the model, adapter, and recall-index layers compiled for the target tier. Signatures are Ed25519 over every layer. The Enterprise tier extends the chain with Sigstore / Rekor for cross-organization audit.</p>
  <p>Inside the compiler in v0.2: recipe-class DSL codegen, MoE composition (<code>kolm-moe-1</code>), bundled pure-JS tokenizer (<code>kolm-tokenizer-1</code>), document extract (<code>kolm extract</code>), declarative completeness checks (<code>kolm doc check</code>), and the K-score gate. k-sample teacher calls, LoRA distillation, and a full <code>sqlite-vec</code> corpus index ship through the runtime bridge. Each shipping stage is gated by the K-score floor, and the artifact is rejected at compile, not at deploy, when any sub-gate fails.</p>
 
- <h2 id="stages">Four stages of <code>kolm compile</code>.</h2>
- <p>Four engines compose the compiler. Each does one thing, and the artifact only ships when all four agree.</p>
+ <h2 id="stages">The stages of <code>kolm compile</code>.</h2>
+ <p>The engines that compose the compiler. Each does one thing, and the artifact only ships when they all agree.</p>
 
  <h3>1. Recall.</h3>
  <p>Recall builds a local index from an approved corpus and binds its content hash into the artifact manifest. Text and JSON are supported in the current build; image, audio, and PDF embedders are tracked in the next release train.</p>

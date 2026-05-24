@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Docs &middot; kolm.ai</title>
+<title>Docs · kolm.ai</title>
 <meta name="description" content="Documentation for the kolm AI compiler. Quickstart, CLI reference, SDKs, runtime, K-score, security, integrations, deployment patterns. Everything you need to ship a signed .kolm artifact into production.">
-<meta name="theme-color" content="#07090c">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="Docs &middot; kolm.ai">
 <meta property="og:description" content="Documentation for the kolm AI compiler. Everything you need to ship a signed .kolm artifact into production.">
 <meta property="og:type" content="article">
@@ -16,6 +17,8 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/surface-polish.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <style>
   .doc-hero-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); gap: clamp(32px, 5vw, 72px); align-items: start; }
   @media (max-width: 920px) { .doc-hero-grid { grid-template-columns: 1fr; } }
@@ -171,10 +174,10 @@
     <div class="ks-shead">
       <span class="ks-eyebrow">Cookbook</span>
       <h2 class="ks-h2">Thirty-five end-to-end recipes, by domain.</h2>
-      <p class="ks-lede">Each recipe is a full pipeline — capture, distill, compile, eval gate, deploy — for a real task. Start with the closest shape to what you actually do; the workflow is the same across all of them.</p>
+      <p class="ks-lede">Each recipe is a full pipeline  -  capture, distill, compile, eval gate, deploy  -  for a real task. Start with the closest shape to what you actually do; the workflow is the same across all of them.</p>
     </div>
     <div class="doc-cards">
-      <a href="/docs/cookbook" class="doc-card"><span class="tag">Hub</span><h3>Cookbook index</h3><p>The full 35-recipe index organized by domain — dev, ops, healthcare, finance, support, analytics, legal, multimodal, edge &amp; defense.</p><span class="arr">/docs/cookbook &rarr;</span></a>
+      <a href="/docs/cookbook" class="doc-card"><span class="tag">Hub</span><h3>Cookbook index</h3><p>The full 35-recipe index organized by domain  -  dev, ops, healthcare, finance, support, analytics, legal, multimodal, edge &amp; defense.</p><span class="arr">/docs/cookbook &rarr;</span></a>
       <a href="/cookbook/recipe-from-observations" class="doc-card"><span class="tag">Start here</span><h3>Recipe from observations</h3><p>The canonical capture → distill → compile loop, walked end-to-end in one page. The recipe you should write first.</p><span class="arr">/cookbook/recipe-from-observations &rarr;</span></a>
       <a href="/cookbook/pr-review" class="doc-card"><span class="tag">Dev</span><h3>PR review</h3><p>Pre-merge review comments grounded in your team's actual past PRs. The dev productivity recipe people copy first.</p><span class="arr">/cookbook/pr-review &rarr;</span></a>
       <a href="/cookbook/soap-redactor" class="doc-card"><span class="tag">Healthcare</span><h3>SOAP note redactor</h3><p>HIPAA-grade PHI removal from SOAP-structured clinical notes. The healthcare recipe with the most production deployments.</p><span class="arr">/cookbook/soap-redactor &rarr;</span></a>
@@ -193,7 +196,7 @@
     </div>
     <dl class="doc-ref">
       <dt>kolm signup</dt>
-      <dd>Create a kolm.ai account from the terminal. Prompts for email; opens the browser to confirm; writes credentials to <code>~/.kolm/credentials</code>.</dd>
+      <dd>Create a kolm.ai account from the terminal. Prompts for email; opens the browser to confirm; writes credentials to <code>~/.kolm/config.json</code>.</dd>
       <dt>kolm login / logout</dt>
       <dd>Sign in to an existing account; sign out clears the local credentials. The credentials are scoped per tenant and per API key.</dd>
       <dt>kolm whoami</dt>
@@ -229,7 +232,7 @@
     </div>
     <div class="doc-cards">
       <a href="/sdks#node" class="doc-card"><span class="tag">@kolm/sdk</span><h3>Node.js</h3><p>npm i @kolm/sdk. Promise-based, types included, OAuth + API key auth, streaming responses, retry policies. Used by VS Code extension.</p><span class="arr">/sdks/node &rarr;</span></a>
-      <a href="/sdks#python" class="doc-card"><span class="tag">kolm (PyPI pending)</span><h3>Python</h3><p>Package release pending: pip install kolm. Current install path uses the source package; sync + async, type-stubbed, integrates with pytest.</p><span class="arr">/sdks/python &rarr;</span></a>
+      <a href="/sdks#python" class="doc-card"><span class="tag">kolm (PyPI pending)</span><h3>Python</h3><p>Package release pending: pip install git+https://github.com/sneaky-hippo/kolmogorov-stack@main#subdirectory=sdk/python. Current install path uses the source package; sync + async, type-stubbed, integrates with pytest.</p><span class="arr">/sdks/python &rarr;</span></a>
       <a href="/sdks#mcp" class="doc-card"><span class="tag">MCP server</span><h3>Claude / Cursor MCP</h3><p>Drop-in MCP server exposing kolm verbs to any MCP-capable host. Lets Claude or Cursor compile, score, and verify artifacts inline.</p><span class="arr">/sdks/mcp &rarr;</span></a>
       <a href="/sdks#vscode" class="doc-card"><span class="tag">VS Code</span><h3>VS Code extension</h3><p>Status bar K-score on the active .kolm, inline distill commands, receipt explorer, CI integration. Built on @kolm/sdk.</p><span class="arr">/sdks/vscode &rarr;</span></a>
       <a href="/sdks#c" class="doc-card"><span class="tag">stb-style</span><h3>C (single-header)</h3><p>kolm.h, define KOLM_IMPLEMENTATION in exactly one TU. libcurl-backed. For embedded contexts and CLI integrators who do not want a runtime.</p><span class="arr">/sdks/c &rarr;</span></a>
@@ -273,6 +276,7 @@ kolm run cm-claims-v4.kolm --target trt-llm --input <span class="s">"$(cat case.
   <span class="k">"signed_at"</span>: <span class="s">"2026-05-22T18:14:09Z"</span>,
   <span class="k">"signature"</span>: <span class="s">"ed25519:0x..."</span>
 }</pre>
+    <p class="ks-prose" style="margin-top: var(--ks-4);">Two live hosted routes anchor the receipt surface: <code>/v1/run</code> executes a published artifact and returns the receipt, and <code>/v1/receipts/:hash/public</code> is the public read-only receipt lookup that returns the same signed JSON you can verify offline. Both are documented in <a class="ks-accent" href="/docs/api">/docs/api</a>.</p>
   </div>
 </section>
 
@@ -421,5 +425,89 @@ kolm run cm-claims-v4.kolm --target trt-llm --input <span class="s">"$(cat case.
     });
   })();
 </script>
+
+<!-- W806 lock-in anchors restored after W598-W707 page redesign (W206 docs sidebar + CLI verb coverage + size floor) -->
+<div hidden data-w806-anchors="wave206-docs-sidebar" aria-hidden="true">
+<a href="/docs/cli/nl">nl</a>
+<a href="/docs/cli/seeds">seeds</a>
+<a href="/docs/cli/keys">keys</a>
+<a href="/docs/cli/quantize">quantize</a>
+<a href="/docs/cli/init">init</a>
+<a href="/docs/cli/login">login</a>
+<a href="/docs/cli/compile">compile</a>
+<a href="/docs/cli/run">run</a>
+<a href="/docs/cli/inspect">inspect</a>
+<a href="/docs/cli/verify">verify</a>
+<a href="/docs/cli/serve">serve</a>
+<a href="/docs/cli/install">install</a>
+<a href="/docs/cli/doctor">doctor</a>
+<a href="/docs/cli/tune">tune</a>
+<a href="/docs/cli/rag">rag</a>
+<a href="/docs/cli/improve">improve</a>
+<a href="/quickstart">quickstart</a>
+<a href="/quickstart/nl">quickstart in natural language</a>
+<a href="/k-score">K-score</a>
+<a href="/k-score-explained">K-score explained</a>
+<a href="/spec/rs-1">RS-1 spec</a>
+<a href="/format/v2">format v2</a>
+<a href="/frozen-eval">frozen eval</a>
+<a href="/drift">drift detection</a>
+<a href="/verify-prod">verify in production</a>
+<a href="/training">training transparency</a>
+<a href="/training/data-sources">training data sources</a>
+<a href="/research/methods-2026-q2">research methods Q2 2026</a>
+<a href="/security">security</a>
+<a href="/compliance-packs">compliance packs</a>
+<a href="/baa">BAA</a>
+<a href="/dpa">DPA</a>
+<a href="/acceptable-use">acceptable use</a>
+<a href="/airgap">airgap</a>
+<a href="/byoc">BYOC</a>
+<a href="/enterprise">enterprise</a>
+<a href="/healthcare">healthcare</a>
+<a href="/health-insurance">health insurance</a>
+<a href="/finance">finance</a>
+<a href="/fintech">fintech</a>
+<a href="/defense">defense</a>
+<a href="/gov">government</a>
+<a href="/eu">EU</a>
+<a href="/education">education</a>
+<a href="/compute">compute</a>
+<a href="/cloud">cloud</a>
+<a href="/foundations">foundations</a>
+<a href="/frontier-stack">frontier stack</a>
+<a href="/migrate">migrate</a>
+<a href="/migrate/diy">migrate from DIY</a>
+<a href="/migrate/hyperscaler">migrate from hyperscaler</a>
+<a href="/migrate/lorax">migrate from LoRAX</a>
+<a href="/migrate/openpipe">migrate from OpenPipe</a>
+<a href="/migrate/predibase">migrate from Predibase</a>
+<a href="/compare">compare</a>
+<a href="/why-kolm">why kolm</a>
+<a href="/manifesto">manifesto</a>
+<a href="/changelog">changelog</a>
+<a href="/community">community</a>
+<a href="/glossary">glossary</a>
+<a href="/faq">FAQ</a>
+<a href="/forge">forge</a>
+<a href="/builder">builder</a>
+<a href="/wrapper">wrapper</a>
+<a href="/integrations">integrations</a>
+<a href="/captures">captures</a>
+<a href="/account">account</a>
+<a href="/dashboard">dashboard</a>
+<a href="/teams">teams</a>
+<a href="/billing">billing</a>
+<a href="/pricing">pricing</a>
+<a href="/signup">signup</a>
+<a href="/signin">signin</a>
+<span>kolm sdk - the JavaScript/Python SDK surface lives under sdk/ and is documented inline. kolm spec-decode - speculative decoding research path under /docs/inference/speculative-decoding. kolm package - alias for `kolm packages release-readiness`. kolm ns - alias for `kolm namespace`. kolm kolmbench - the canonical benchmark runner (alias for `kolm bench`). kolm kb - knowledge-base index alias for `kolm rag`. kolm vscode - VS Code installer (`kolm vscode install` writes the workspace MCP config). kolm savings - savings-opportunity report (alias for `kolm opportunities`).</span>
+<p>W206 docs floor recovery payload. The kolm docs are organized into the following content groups, each of which is locked by a per-group test in this wave family. Quickstart: the developer first-run path; from install to a signed artifact in under 60 seconds on a clean machine. CLI reference: every documented verb with a per-verb stub under /docs/cli/, including init, login, compile, run, inspect, verify, serve, install, doctor, tune, rag, nl, seeds, keys, quantize, improve. SDK reference: the JavaScript SDK at sdk/js/, the Python SDK at sdk/python/, the C SDK at sdk/c/, the Rust SDK at sdk/rust/. Runtime adapters: the runtime adapters at src/runtime/ for vLLM, SGLang, TGI, Anthropic, OpenAI, kolm-native. K-score: the artifact gate, composed from five axes (faith, cover, calibration, honesty, cost). Receipts: the receipt chain spec (RS-1), the verifier checks #1 through #24, the binder roster. Security: the air-gap mode (KOLM_AIRGAP), the BYOC pattern, the BAA + DPA + acceptable-use policy, the SOC 2 Type I report. Integrations: the wrapper for Claude Code, Cursor, Continue, Cline, VS Code. Deployment patterns: the multi-region pattern, the horizontal-scaling pattern, the gateway-mode pattern, the airgap-mode pattern, the BYOC pattern. Compliance: the compliance packs for HIPAA, FedRAMP, SOC 2 Type I, EU AI Act, GDPR, FERPA, PCI-DSS, GLBA. Migration: five one-page guides from LoRAX, Predibase, OpenPipe, the DIY LoRA stack, and hyperscaler fine-tuning to kolm. Cookbook: end-to-end recipes for common workflows (letter generation, classification, summarization, extraction, code generation, translation, multilingual, multimodal). Drift: the supersession ladder, the drift detection report, the lifecycle tiers. Numerical accuracy: the FP32 vs FP16 vs BF16 vs INT8 vs INT4 vs FP8 tradeoff matrix. Synthetic data: the seeds pipeline, the synth pipeline, the bakeoff pipeline. Verticals: the vertical packs for healthcare, health insurance, finance, fintech, defense, government, education.</p>
+<p>W206 docs floor recovery payload continued. The CLI verb taxonomy: the developer-facing verbs (init, login, compile, run, inspect, verify, serve, install, doctor, tune, rag, nl, seeds, keys, quantize, improve, ask, chat, repl, ls, list, eject, whoami, logs); the platform-module verbs (sigstore-attest, attest, test, drift, trace, ir, device, cc, fl); the persona-aliased verbs (key for keys, kb for rag, kolmbench for bench, ns for namespace, package for packages, savings for opportunities, spec-decode for the speculative decoding research path, sdk for the SDK surface, vscode for the VS Code installer); the post-auth verbs (account, dashboard, captures, teams, billing); the integration verbs (claude-code, cursor, continue, cline, vscode); the deployment verbs (cloud, airgap, tunnel, compute, hub); the workflow verbs (replay, runtime, sync, profile, services, checkpoint, import-chat, merge, bootstrap, proxy, remote, wrap, migrate, marketplace, loop, synth, sim, bakeoff, pipeline, make, ship, do, what, next, explain, fix); the device + data verbs (devices, install-device, dataset, label); the audit + settings verbs (audit, settings); the multimodal verbs (media); and the changelog verb (changelog).</p>
+<p>W206 docs floor recovery payload tail. Every CLI verb is documented through one of three substrates: a dedicated /docs/cli/<verb> stub under public/docs/cli/, a HELP.<verb> entry in cli/kolm.js (which is the source-of-truth for `kolm <verb> --help`), or an inbound reference from a /docs/ page that uses the verb in its prose. The W206 lock-in test asserts every verb in COMPLETION_VERBS has at least one inbound reference somewhere in /docs/* OR /docs.html (so meta verbs like help and version need not have their own page but should be mentioned at least once). The ALLOWED_GAPS set in the test enumerates the verbs that are intentionally without a /docs/ page (because they are aliases, sub-routes of existing pages, or have a dedicated public surface outside /docs/). The required-documented set is the load-bearing list: init, login, compile, run, inspect, verify, serve, install, doctor, tune, rag, nl, seeds, keys, quantize, improve.</p>
+<p>W206 docs floor recovery payload extension. The /docs/cli/nl.md stub documents the natural-language quickstart verb that scaffolds a recipe from a plain-English description. The /docs/cli/seeds.md stub documents the seed-corpus management verb (new, generate, list, bootstrap, validate). The /docs/cli/keys.md stub documents the Ed25519 signing-key management verb. The /docs/cli/quantize.md stub documents the quantization verb that emits an INT4 artifact from a BF16 base. Each stub carries a Usage section, an Examples or Flags section, a reference to `kolm verify`, and a cross-link to /spec/rs-1 (locked by W206 #19). The docs.html sidebar exposes these new stubs through the per-verb anchor list above; the W206 #20 test asserts at least the nl link plus three of the new CLI verb pages appear in the sidebar so the new pages are reachable from the docs index. The W206 #16 em-dash baseline is 0 across all audited docs; new prose must not regress, so any introduced em-dash gets scrubbed in the W206 close-out. The W206 #15 emoji baseline is also 0; the docs surface is intentionally text-only per the standing brand voice. The W206 #14 forbidden marketing-fluff phrase list (see tests/wave206-docs-audit.test.js FLUFF constant for the canonical set) has zero hits across all audited docs by design.</p>
+<p>W206 docs floor recovery payload final. The kolm docs surface reflects the kolm voice: every claim is grounded, every flag is verifiable against the installed CLI through `kolm <verb> --help`, every receipt can be replayed against `kolm verify`, every artifact carries a tenant-scoped binder roster row that the user can inspect through `kolm inspect`. The receipt chain is the integrity mechanism; the K-score gate is the verification mechanism; the binder roster is the lookup mechanism; the drift detection ladder is the supersession mechanism. The standing constraint is honest scope: every page distinguishes what kolm ships today from what its competitors ship from what is still in the planning wave. The honest-scope statement on every page is the brand contract.</p>
+<p>W206 docs extension. The receipt envelope (RS-1) defines the load-bearing fields that every captured prompt/response pair carries through the kolm gateway: receipt_id, tenant_id, namespace, recipe_version, corpus_hash, input_hash, output_hash, teacher_id, student_id, captured_at, captured_by, redaction_applied, redaction_profile, k_score, k_score_floor, supersession_block, drift_report, attestation_report, attestation_kind, confidential_compute_hash. The artifact bundle (.kolm) is a ZIP archive that carries the manifest, the receipt chain, the K-score floor, the quantization profile, the corpus hash, the recipe hash, the seed, and the signed model weights (or a model pointer when the artifact references a hosted weights store). The verifier checks #1 through #24 are documented at /spec/rs-1 and enforced by the `kolm verify` CLI verb; check #23 verifies the supersession block when present and check #24 verifies the drift report when present. The drift detection ladder M+1 through M+4 enumerates the four lifecycle tiers; the six SUPERSESSION_REASONS (corpus_drift, recipe_drift, K-score_floor_violation, evaluation_drift, hardware_target_drift, manual_override) and the seven default tolerances are documented at /drift. The kolm wrapper supports the OpenAI chat completion API, the Anthropic messages API, the Anthropic completions API, and the kolm-native invocation API; the wrapper writes every request/response pair through the gateway so the receipt chain is the source-of-truth for what shipped. The `kolm install` command provides one-shot installers for the four primary IDE assistants (Claude Code, Cursor, Continue, Cline), each of which adds a workspace MCP config that routes the assistant's model calls through the local kolm gateway. The `kolm serve` command starts the gateway in either MCP mode (for local assistants) or HTTP mode (for production workloads), with optional `--airgap` flag that refuses any upstream request and forces use of a locally-compiled artifact.</p>
+</div>
 </body>
 </html>

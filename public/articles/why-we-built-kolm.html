@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -158,6 +158,7 @@
 
 
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <a href="#main" class="ks-skip">Skip to content</a>
@@ -210,20 +211,20 @@
 
  <h2 id="shape">The shape of every shipped AI feature.</h2>
  <p>Pull a Series-A AI-native SaaS off the shelf and look at how its inference path is wired. There is a <code>POST /v1/chat/completions</code> on a frontier vendor. There is a prompt template glued together by <code>jinja2</code> that is <i>actually</i> the contract, even though no one has typed it. There is a regex that catches the JSON output, with a fallback for when the regex fails. There is a retry loop. There is an evaluator that runs in CI on Tuesdays if Tuesday isn't a holiday. <b>There is no artifact.</b> There is no version. There is no signature. There is no number on the cover that says whether this thing should ship.</p>
- <p>What we built kolm to fix is the absence of a noun. There is no thing you can point to and say <i>this is the AI feature</i>. The feature is a verb tense scattered across five repos and a vendor account. <b>You cannot ship what you cannot package, and the AI feature has no package.</b></p>
+ <p>What we built kolm to fix is the absence of a noun. There is no thing you can point to and say <i>this is the AI feature</i>. The feature is a verb tense scattered across repos and a vendor account. <b>You cannot ship what you cannot package, and the AI feature has no package.</b></p>
 
  <blockquote>
  <p>The thing we&rsquo;ve been missing isn&rsquo;t a smaller model, a faster GPU, a better prompt, or a smarter eval. It&rsquo;s a file.</p>
  </blockquote>
 
  <h2 id="analogy">Webpack, Docker, App Store, .kolm.</h2>
- <p>Three times in the last twenty years, an industry got a build step that turned a sprawling deployment problem into a single shippable noun.</p>
+ <p>The pattern keeps recurring: an industry gets a build step that turns a sprawling deployment problem into a single shippable noun.</p>
  <ul>
  <li><b>Webpack made web apps shippable.</b> Before it, a web app was a folder of files in a particular order, plus a server config, plus some Apache rewrites, plus the prayers of the deploy engineer. Webpack collapsed that to <code>dist/bundle.js</code>. The artifact had a hash; the hash had a deploy.</li>
  <li><b>Docker made services shippable.</b> Before it, a service was a tarball, plus a runbook, plus six environment variables nobody documented. <code>docker build</code> collapsed that to an image. The image ran on your laptop. The image ran in prod. The image was the noun.</li>
  <li><b>The App Store made mobile apps shippable.</b> Before it, a mobile app was a side-loaded APK and a bug report. The Store made the IPA the noun: signed, versioned, distributed, attested.</li>
  </ul>
- <p>Each of these formats had three properties: <b>signed, versioned, portable.</b> Each one was opinionated about a thing the industry had been refusing to standardize. Each one looked like a step backwards in flexibility and turned out to be a step forward in everything that mattered: deployability, auditability, gross margin.</p>
+ <p>Each of these formats was <b>signed, versioned, portable.</b> Each was opinionated about a thing the industry had been refusing to standardize. Each looked like a step backwards in flexibility and turned out to be a step forward in everything that mattered: deployability, auditability, gross margin.</p>
  <p><code>.kolm</code> is the same shape, for AI features. <b>One signed file.</b> A manifest you can read. A K-score on the cover. An Ed25519 receipt chain you (or anyone holding your tenant receipt secret) can re-verify offline. A runtime contract you can test against. The same artifact runs on a laptop, a phone, an edge box, and your prod GPU. The artifact is the noun.</p>
 
  <h2 id="format">Why a file, not a service.</h2>
@@ -247,7 +248,7 @@
  </blockquote>
 
  <h2 id="what">What we are not.</h2>
- <p>Three things we keep getting confused with, and explicitly are not.</p>
+ <p>Adjacent things we keep getting confused with, and explicitly are not.</p>
  <ul>
  <li><b>Not an inference platform.</b> We do not host your inference (well, kolm Cloud does as an option, but it&rsquo;s a thin layer; you can run the artifact yourself). We are the compiler. The runtime can be ours, llama.cpp, ExecuTorch, MLC, or anything that loads the manifest.</li>
  <li><b>Not a fine-tuning service.</b> We use LoRA fine-tuning <i>inside</i> the compile pipeline, but the output is an artifact, not a fine-tuned model on a vendor endpoint. The fine-tune is one stage of seven; you cannot point at it as a product.</li>
@@ -255,7 +256,7 @@
  </ul>
 
  <h2 id="now">Why this had to happen now.</h2>
- <p>Three forces converged in 2026 to make the format possible. Each, alone, would not have been enough.</p>
+ <p>The forces converged in 2026 to make the format possible. None, alone, would have been enough.</p>
  <p><b>Open weights matched yesterday&rsquo;s frontier.</b> Qwen 2.5, Llama 3, Phi-3, Hermes-3 in the 3B-7B range now match GPT-4 of two years ago on narrow tasks. The student became good enough to ship.</p>
  <p><b>Verification became cheap.</b> K-sample verified inference, recipe-drafted speculative decoding, and signed receipt chains all became table-stakes engineering. None were possible at this cost three years ago.</p>
  <p><b>The audit pressure became real.</b> EU AI Act enforcement, HIPAA on AI workflows, SR 11-7 model risk management on LLMs. Every cloud call became an audit row. The shape of the answer had to be an artifact, not a vendor SLA.</p>

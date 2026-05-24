@@ -43,6 +43,8 @@ import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 import { listEvents } from './event-store.js';
+// W787 — compute-efficiency knobs (precision mode, grad checkpointing, early stop).
+import { normalizeEfficiencyOptions, buildEfficiencyEnv } from './distill-efficiency.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const ROOT = path.resolve(path.dirname(__filename), '..');
@@ -482,11 +484,27 @@ export async function* distill({
   tenant = null,                   // W422 P0-4 — shorthand alias for tenant_id
   teacher_fallback = true,         // W459 — auto-retry with next teacher on worker_error
   resume_from = null,              // W459 — resume a prior run_<id>: replay seeds + skip completed steps
+  // W787 — compute-efficiency knobs (default "off"). See normalizeEfficiencyOptions.
+  precision_mode = null,
+  gradient_checkpointing = null,
+  early_stop_config = null,
 } = {}) {
   if (!MODES.includes(pipeline_mode)) {
     throw new Error(`pipeline_mode must be one of [${MODES.join(', ')}]`);
   }
   if (!student_base) throw new Error('distill requires {student_base}');
+  // W787 — normalise the compute-efficiency block ONCE up front. Throws on a
+  // bogus precision_mode (caller bug) BEFORE any worker spawn. Safe to call
+  // with all-nulls — defaults to bf16 + no grad-checkpoint + no early-stop.
+  const _efficiencyRequested = (precision_mode != null) || (gradient_checkpointing != null) || (early_stop_config != null);
+  const _efficiency = _efficiencyRequested
+    ? normalizeEfficiencyOptions({
+        precision_mode: precision_mode == null ? undefined : precision_mode,
+        gradient_checkpointing: gradient_checkpointing == null ? undefined : gradient_checkpointing,
+        early_stop_config: early_stop_config == null ? undefined : early_stop_config,
+      })
+    : null;
+  const _efficiencyEnv = _efficiency ? buildEfficiencyEnv(_efficiency) : {};
   const jobId = 'distill_' + Date.now().toString(36) + '_' + crypto.randomBytes(3).toString('hex');
   // W422 P0-4 — resolve the tenant scope BEFORE any corpus read. The audit
   // (2026-05-19) flagged that direct distill({teacher_namespace, ...}) calls
@@ -615,6 +633,11 @@ export async function* distill({
       teacher_council_choice,
       teacher_council_weights,
       resume_from: resume_from || null,
+      // W787 — record the normalised efficiency block so a downstream auditor
+      // (or `kolm distill runs <id>`) can answer "was bf16 + grad_checkpoint
+      // used on this run?" without reading the worker log. Null when no
+      // efficiency knobs were passed (existing-caller compat).
+      efficiency: _efficiency,
       created_at: new Date().toISOString(),
     }, null, 2));
   } catch (_) {}
@@ -684,7 +707,11 @@ export async function* distill({
     const child = spawn(process.execPath, args, {
       detached: true,
       stdio: ['ignore', logFd, logFd],
-      env: { ...process.env, KOLM_JOB_ID: jobId, KOLM_DISTILL_ATTEMPT: String(attemptIdx + 1) },
+      // W787 — efficiencyEnv adds KOLM_PRECISION + KOLM_GRAD_CHECKPOINT +
+      // KOLM_EARLY_STOP_* so the worker (and the Python trainer it spawns)
+      // pick up the caller's compute-efficiency choice. Empty object when
+      // no efficiency knobs were passed, so the spread is a no-op.
+      env: { ...process.env, ..._efficiencyEnv, KOLM_JOB_ID: jobId, KOLM_DISTILL_ATTEMPT: String(attemptIdx + 1) },
       windowsHide: true,
     });
     if (typeof child.unref === 'function') child.unref();
@@ -797,6 +824,48 @@ export async function* distill({
   } catch (e) {
     _w808_gate = { ok: false, error: 'w808_gate_threw', detail: String(e && e.message || e), version: 'w808-v1' };
   }
+  // W832 — append one meta-training row per successful distill. Best-effort:
+  // any failure here MUST NOT break the distill run (the meta-model is a
+  // hint, not a critical path). Features are derived from what we already
+  // have on the worker manifest + the resolved tenant; observed.kscore is
+  // pulled from the W808 gate so we don't re-read the manifest.
+  try {
+    const _winningTeacher_w832 = teacher_used || (attemptList[0] || null);
+    const _teacher_source_w832 = _winningTeacher_w832 ? classifyTeacher(_winningTeacher_w832) : 'unknown';
+    const _features_w832 = {
+      capture_count: pairs.length,
+      capture_diversity: 0,
+      avg_input_tokens: 0,
+      avg_output_tokens: 0,
+      teacher_class: _teacher_source_w832,
+      task_type: pipeline_mode || 'kd_softmax',
+      hw_tier: String(process.env.KOLM_HW_TIER || 'unknown'),
+      has_reasoning: 0,
+      has_tool_use: 0,
+      has_multimodal: 0,
+    };
+    const _kscore_w832 = _w808_gate && Number.isFinite(Number(_w808_gate.candidate_kscore))
+      ? Number(_w808_gate.candidate_kscore)
+      : null;
+    const _compile_time_w832 = (Date.now() - start) / 1000;
+    const _failure_modes_w832 = [];
+    if (_w808_gate && _w808_gate.error === 'no_candidate_kscore') _failure_modes_w832.push('no_kscore');
+    if (workerManifest && workerManifest.teacher_error) _failure_modes_w832.push('teacher_error');
+    if (exitInfo && exitInfo.code !== 0) _failure_modes_w832.push('worker_nonzero_exit');
+    const _metaMod = await import('./kolm-meta-trainer.js').catch(() => null);
+    if (_metaMod && _metaMod.appendTrainingRow) {
+      _metaMod.appendTrainingRow({
+        tenant_id: resolvedTenant,
+        run_id: path.basename(outDir),
+        features: _features_w832,
+        observed: {
+          kscore: _kscore_w832,
+          compile_time_s: _compile_time_w832,
+          failure_modes: _failure_modes_w832,
+        },
+      });
+    }
+  } catch (_) { /* W832 row emission is best-effort */ }
   yield {
     done: true,
     artifact_path: outDir,

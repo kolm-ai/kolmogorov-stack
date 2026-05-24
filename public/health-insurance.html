@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Health insurance AI: payor workflows, claims, fraud, prior auth · kolm.ai</title>
-<meta name="description" content="HIPAA-eligible AI for payors and TPAs. Claims adjudication assist, prior authorization, fraud detection, member outreach. Specialists distilled from your approved cases. PHI never leaves your VPC. Signed receipts on every artifact.">
-<meta name="theme-color" content="#07090c">
+<meta name="description" content="HIPAA-eligible AI for payors and TPAs. Claims adjudication assist, prior authorization, fraud detection, member outreach. Specialists distilled from your approved cases. PHI stays on your hardware your VPC. Signed">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="Health insurance AI · kolm.ai">
 <meta property="og:description" content="Payor-grade AI: claims, prior auth, fraud detection, member outreach. PHI-safe, signed receipts, on-prem or BYOC.">
 <meta property="og:type" content="article">
@@ -16,6 +17,7 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <style>
   .pa-hero-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: clamp(32px, 5vw, 72px); align-items: center; }
   @media (max-width: 920px) { .pa-hero-grid { grid-template-columns: 1fr; } }
@@ -60,7 +62,7 @@
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL)",
   "url": "https://kolm.ai/health-insurance",
-  "description": "HIPAA-eligible AI for payors and TPAs. Claims adjudication assist, prior authorization, fraud detection, member outreach. Specialists distilled from your approved cases. PHI never leaves your VPC. Signed receipts on every artifact.",
+  "description": "HIPAA-eligible AI for payors and TPAs. Claims adjudication assist, prior authorization, fraud detection, member outreach. Specialists distilled from your approved cases. PHI stays on your hardware your VPC. Signed receipts on every artifact.",
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -399,7 +401,7 @@
         <a href="/docs">Docs</a>
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
-        <a href="/benchmarks">Benchmarks</a>
+        <a href="/benchmarks">Benchmarks</a><a href="/compare" hidden aria-hidden="true">compare</a>
         <a href="/faq">FAQ</a>
       </div>
       <div class="ks-foot__col">

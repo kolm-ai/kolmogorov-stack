@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -132,6 +132,7 @@
 
 
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <a href="#main" class="ks-skip">Skip to content</a>
@@ -191,7 +192,7 @@
  <p>The cost of getting there is a pre-flight discipline. Anything the runtime might want at first boot has to be on local disk before the deploy machine is moved inside the boundary. The <code>kolm airgap</code> verbs exist to make that discipline a workflow, not an audit checklist.</p>
 
  <h2 id="switches">The offline switches.</h2>
- <p>Three environment variables, one config file, and one CLI verb. The switches are designed so that an air-gap-violating call fails loudly at startup, not silently on the seventh user request.</p>
+ <p>A handful of env vars, one config file, one CLI verb. The switches are designed so that an air-gap-violating call fails loudly at startup, not silently on the seventh user request.</p>
 
  <pre><span class="com"># the three switches kolm respects at process start</span>
 <span class="kw">$</span> export KOLM_AIRGAP=1
@@ -222,7 +223,7 @@
  <p>The status output is the first thing an operator checks before moving a workstation into the regulated network. If any of the three switches says <code>(unset)</code>, the pre-flight is incomplete.</p>
 
  <h2 id="preflight">Pre-flight: prime the cache.</h2>
- <p>The hardest mistake to recover from is a runtime that gets to the bounded network and then realizes it needs a tokenizer file. The pre-flight sequence is the same five steps in every environment we have shipped into.</p>
+ <p>The hardest mistake to recover from is a runtime that gets to the bounded network and then realizes it needs a tokenizer file. The pre-flight sequence is the same in every environment we have shipped into.</p>
 
  <p><b>Step one: list every weight the artifact will reach for.</b> The artifact manifest names a base model, an adapter, and a recall index. The manifest does not embed the base weights; it points at a HuggingFace repo and a revision SHA. The <code>kolm inspect</code> verb produces a flat list of every base the runtime will load.</p>
 
@@ -272,7 +273,7 @@
  <p>TOFU is not cryptographic certainty. It is pragmatic enough for the cases that air-gap is the right answer for: the bounded environment is already trusted under a different controls regime, and the attestation is one more verifiable signal, not a sole control. The audit log records every pinning event, every mismatch, and every operator override. The regulator's review is over those records, not over the attestation root.</p>
 
  <h2 id="sectors">Where this lands in practice.</h2>
- <p>Four sectors where the air-gapped path is the deployment, not an edge case.</p>
+ <p>Sectors where the air-gapped path is the deployment, not an edge case.</p>
 
  <p><b>Defense.</b> The classified enclave is the bounded network. The artifact lands on a workstation cleared for the same classification level. The model can answer questions about classified material because the material never leaves the enclave. The compile happens on the unclassified side from de-identified examples; the artifact's K-score on the embedded eval pack is what the program office reviews.</p>
 
@@ -283,7 +284,7 @@
  <p><b>Regulated finance.</b> A market-making firm's trading network. Surveillance, supervision, and regulator-bounded analytics live on the inside. A compiled artifact for a specific surveillance task answers questions on the bounded side; the receipt chain is what the firm produces under an SR 11-7 model-risk review.</p>
 
  <h2 id="limits">Documented limits.</h2>
- <p>Three things an air-gap cannot give you.</p>
+ <p>What an air-gap cannot give you.</p>
 
  <p><b>Model updates require manual sync.</b> A static artifact is static. The same compile job, run six months later against a refreshed corpus, produces a new artifact with a new CID and a new receipt. The pre-flight sequence above runs again. There is no auto-update path that survives the airlock; that is by construction. The operational cadence is whatever the regulated environment's change-management process supports: weekly, monthly, quarterly. The artifact format is small enough that a quarterly refresh is reasonable, but it is a human-driven cycle.</p>
 
@@ -297,7 +298,7 @@
  <a href="/research/byoc-deploy-modes">
  <span class="lab">read next</span>
  <span class="v">BYOC deploy modes <span class="arrow">&rarr;</span></span>
- <p>Five attestation tiers, four vendor TEEs plus docker. When TOFU is enough and when you need a vendor-rooted chain.</p>
+ <p>Vendor TEEs plus a docker escape hatch. When TOFU is enough and when you need a vendor-rooted chain.</p>
  </a>
  <a href="/research/receipt-chains">
  <span class="lab">read next</span>

@@ -1,3 +1,4 @@
+// @public-routes-only — exercises /v1/signup (public, mounted before authMiddleware via signupLimiter).
 // W708 — capture copyright-risk flagger (W708-4) + signup geo-fence (W708-5).
 //
 // These tests assert observable behavior, NOT page copy:

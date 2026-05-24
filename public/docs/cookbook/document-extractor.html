@@ -8,16 +8,17 @@
 <meta name="description" content="A real capture-distill-compile-deploy walkthrough that turns invoices, contracts, or clinical notes into validated structured JSON using a small INT4 model that fits on a Jetson-class device.">
 <link rel="canonical" href="https://kolm.ai/docs/cookbook/document-extractor">
 <meta property="og:title" content="Distill a document extractor &middot; cookbook &middot; kolm.ai">
-<meta property="og:description" content="Compress a structured-extraction teacher into a 3B INT4 model that validates against your schema.">
+<meta property="og:description" content="Compress a structured-extraction teacher into a 32B INT4 model that validates against your schema.">
 <meta property="og:url" content="https://kolm.ai/docs/cookbook/document-extractor">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Distill a document extractor &middot; cookbook &middot; kolm.ai">
-<meta name="twitter:description" content="Compress a structured-extraction teacher into a 3B INT4 model that validates against your schema.">
+<meta name="twitter:description" content="Compress a structured-extraction teacher into a 32B INT4 model that validates against your schema.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/docs-shell.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/docs-shell.js"></script>
 <style>
 .step{padding:18px 22px;border:1px solid var(--line,rgba(236,231,220,0.08));border-radius:12px;background:var(--bg-elev,#101316);margin:14px 0}
@@ -65,7 +66,7 @@ pre{background:#06080a;color:#e9eef3;border:1px solid var(--line,rgba(236,231,22
 
 <section data-w789="build">
  <h2>What you will build</h2>
- <p>A 3B INT4 extractor that reads a document, returns JSON conforming to your schema, and ships an attached confidence score per field. The example artifact runs at INT4 on a Jetson Orin or a small GPU, with the schema bound into the deployment so the runtime refuses to emit malformed output.</p>
+ <p>A 32B INT4 extractor that reads a document, returns JSON conforming to your schema, and ships an attached confidence score per field. The example artifact runs at INT4 on a Jetson Orin or a small GPU, with the schema bound into the deployment so the runtime refuses to emit malformed output.</p>
  <p>The example use case is a finance team extracting vendor, line items, totals, and payment terms from PDF invoices. In a representative run the team saw schema-valid output on roughly 98% of held-out invoices and field-level agreement with reviewers on ~93%. Your numbers will differ &mdash; these are example values from one representative run.</p>
 </section>
 

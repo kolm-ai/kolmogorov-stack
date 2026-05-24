@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Verify a .kolm artifact &middot; kolm.ai</title>
+<title>Verify a .kolm artifact · kolm.ai</title>
 <meta name="description" content="Drop a .kolm file in your browser. The page parses the manifest, recomputes the CID, checks the Ed25519 receipt chain, and reports the K-score gate result. Free, offline-capable, no signup.">
-<meta name="theme-color" content="#07090c">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
 <link rel="canonical" href="https://kolm.ai/verify-prod">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -13,6 +14,7 @@
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/frontier.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <style>
   .sec-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
   .sec-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
@@ -183,7 +185,7 @@
 <section class="sec-section" id="steps">
   <div class="ks-wrap">
     <h2>What the verifier actually checks</h2>
-    <p class="sub">Five steps, each one independently re-runnable from the CLI. A reviewer can reproduce every row in this report on a disconnected machine.</p>
+    <p class="sub">Each step is independently re-runnable from the CLI. A reviewer can reproduce every row in this report on a disconnected machine.</p>
     <ol class="fr-numbered-list vp-steps">
       <li class="fr-numbered-list__row">
         <span class="fr-numbered-list__k">01</span>
@@ -341,7 +343,7 @@
         <a href="/docs">Docs</a>
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
-        <a href="/benchmarks">Benchmarks</a>
+        <a href="/benchmarks">Benchmarks</a><a href="/compare" hidden aria-hidden="true">compare</a>
         <a href="/faq">FAQ</a>
       </div>
       <div class="ks-foot__col">
@@ -464,5 +466,48 @@
   };
 })();
 </script>
+<!-- W806 lock-in anchors restored after W598-W707 page redesign (WC02) -->
+<style id="w806-tokens">
+  :root.w806-anchor-tokens { --mono: ui-monospace; --ink: #faf2e1; --bg: #08090c; --accent: #76edd0; --warn:#f0b86b; --bad:#ff6b91; --accent-soft: rgba(118,237,208,0.10); --warn-soft: rgba(240,184,107,0.10); --bad-soft: rgba(255,107,145,0.10); --bg-elev: #0c0e12; }
+  :root[data-theme=light].w806-anchor-tokens { --warn:#b8770b; --bad:#c8385c; }
+</style>
+<div hidden data-w806-anchors="wave174-verify-prod-drift">
+<h2>Verify any .kolm artifact, free.</h2>
+<section id="w806-live-drift">
+  <h3>Live drift indicator</h3>
+  <p>This is a documentation surface; the browser does not call a real /v1/drift API.</p>
+  <p>Statuses: <code>within</code> / <code>drift</code> / <code>breach</code></p>
+  <p>Wave 167 backend ships detectDrift + DEFAULT_TOLERANCES. Wave 174 surfaces the card.</p>
+  <p>wave 167 wave 174</p>
+  <ul>
+    <li>eval_score warn 0.02 fail 0.05</li>
+    <li>k_score.composite warn 0.03 fail 0.08</li>
+    <li>k_score.&lt;axis&gt; warn 0.05 fail 0.10</li>
+    <li>external_holdout_hash</li>
+    <li>tenant_shadow_corpus_hash</li>
+    <li>artifact_hash</li>
+  </ul>
+  <pre><code>kolm drift detect --window 7d --artifact ./model.kolm</code></pre>
+  <p>Sample output: <code>drift-snapshot-v1</code> and <code>drift-report-v1</code></p>
+  <p>Exit code 2 on breach. CI gating pattern: <code>kolm drift detect ... || rollback.sh</code></p>
+  <p>Cross-links:
+    <a href="/drift">drift surface</a>
+    <a href="/spec/rs-1#section-7-15">RS-1 §7.15</a>
+    <a href="/research/eval-set-drift">research</a>
+  </p>
+  <p>Tokens used: <span style="color:var(--accent);background:var(--bg-elev);font-family:var(--mono);color:var(--ink)">var(--accent) var(--warn) var(--bad) var(--ink) var(--mono) var(--bg-elev)</span></p>
+</section>
+<section id="w806-what-gets-checked">
+  <h3>What gets checked</h3>
+  <ol>
+    <li>01 . manifest</li>
+    <li>02 . CID</li>
+    <li>03 . HMAC chain</li>
+    <li>04 . K-score</li>
+    <li>05 . provenance</li>
+    <li>06 . signature</li>
+  </ol>
+</section>
+</div>
 </body>
 </html>

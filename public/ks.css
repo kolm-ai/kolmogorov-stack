@@ -20,43 +20,43 @@
 
 /* ----- 1. Tokens ---------------------------------------------------------- */
 :root {
-  /* Canvas — warm neutral dark (W612: shifted off cool blue tint) */
-  --ks-bg:          #0a0a0c;
-  --ks-bg-1:        #111114;
-  --ks-bg-2:        #17171b;
-  --ks-bg-3:        #1d1e22;
-  --ks-line-1:      rgba(255,250,240,0.055);
-  --ks-line-2:      rgba(255,250,240,0.09);
-  --ks-line-3:      rgba(255,250,240,0.14);
+  /* Canvas — "Warm Paper" identity (2026-05-24 redesign).
+     Default light/warm; dark mode is an opt-in via [data-theme="dark"]. */
+  --ks-bg:          #faf9f7;
+  --ks-bg-1:        #ffffff;
+  --ks-bg-2:        #f4f3f0;
+  --ks-bg-3:        #eae8e4;
+  --ks-line-1:      rgba(28,27,26,0.06);
+  --ks-line-2:      rgba(28,27,26,0.10);
+  --ks-line-3:      rgba(28,27,26,0.16);
 
-  /* Ink — warm cream */
-  --ks-ink:         #f5f1e8;
-  --ks-ink-2:       rgba(245,241,232,0.76);
-  --ks-ink-3:       rgba(245,241,232,0.54);
-  --ks-ink-4:       rgba(245,241,232,0.36);
+  /* Ink — warm near-black, not pure */
+  --ks-ink:         #1c1b1a;
+  --ks-ink-2:       #57534e;
+  --ks-ink-3:       #8c8a85;
+  --ks-ink-4:       #c8c6c2;
 
-  /* Accent — W683: single-hue brand palette. Mint is the brand color and the
-     only chroma in the marketing surface. Warm is kept for editorial numerics
-     ONLY (prices, durations, K-Score deltas) — never for backgrounds, hover
-     states, or atmosphere. Lavender/cool was retired — it was a layered hue
-     that read as "rainbow" against the mint primary; the .ks-cool and
-     .ks-table .accent-cool utility classes are aliased back to mint so legacy
-     usage on older pages degrades cleanly instead of bleeding purple.
-       --ks-accent      : the primary action / CTA / live state token.
-       --ks-accent-2    : same-family lighter mint, used only for hover/active.
-       --ks-accent-warm : editorial numerics only (prices, durations, deltas). */
-  --ks-accent:      #2bf5b3;
-  --ks-accent-2:    #92ffd9;
-  --ks-accent-soft: rgba(43,245,179,0.12);
-  --ks-accent-edge: rgba(43,245,179,0.34);
-  --ks-accent-glow: rgba(43,245,179,0.22);
-  --ks-accent-warm: #ffb155;
-  --ks-accent-warm-soft: rgba(255,177,85,0.14);
+  /* Accent — burnt sienna (the "wax-seal" mark). Single chroma; everything
+     else is grayscale. Reserved for primary CTAs, K-Score numerals, active
+     state, and editorial accents (delta arrows, hover underlines).
+       --ks-accent       : primary action / CTA fill.
+       --ks-accent-2     : darker on hover.
+       --ks-accent-soft  : 8% tint for badges, callouts.
+       --ks-accent-edge  : 28% for hairline rules, focus rings.
+       --ks-accent-glow  : 18% radial for atmosphere only.
+       --ks-accent-warm  : alias retained — same family, used for numerals. */
+  --ks-accent:      #c2410c;
+  --ks-accent-2:    #9a3412;
+  --ks-accent-soft: rgba(194,65,12,0.08);
+  --ks-accent-edge: rgba(194,65,12,0.28);
+  --ks-accent-glow: rgba(194,65,12,0.18);
+  --ks-accent-warm: #c2410c;
+  --ks-accent-warm-soft: rgba(194,65,12,0.10);
 
   /* Status — used only in product / dashboards, not marketing */
-  --ks-pos:         #6ee7a8;
-  --ks-warn:        #f7c97d;
-  --ks-err:         #ff8a8a;
+  --ks-pos:         #15803d;
+  --ks-warn:        #a16207;
+  --ks-err:         #b91c1c;
 
   /* Type */
   --ks-sans: "Geist", "Inter", system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
@@ -119,24 +119,53 @@
   --ks-ease:  cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Light mode tokens (only if explicitly set; default is dark) */
+/* Light mode = the new default. This block is kept (and identical to :root)
+   only so existing toggle UI that sets [data-theme="light"] continues to
+   work without flicker. The Warm Paper palette is the canonical state. */
 [data-theme="light"] {
-  --ks-bg:    #fbfaf6;
-  --ks-bg-1:  #f3f1ec;
-  --ks-bg-2:  #ebe9e3;
-  --ks-bg-3:  #e1ded7;
-  --ks-line-1: rgba(10,16,22,0.06);
-  --ks-line-2: rgba(10,16,22,0.10);
-  --ks-line-3: rgba(10,16,22,0.16);
-  --ks-ink:   #0c111a;
-  --ks-ink-2: rgba(12,17,26,0.78);
-  --ks-ink-3: rgba(12,17,26,0.56);
-  --ks-ink-4: rgba(12,17,26,0.38);
-  --ks-accent: #0e9a6b;
-  --ks-accent-2: #08754f;
-  --ks-accent-soft: rgba(14,154,107,0.12);
-  --ks-accent-edge: rgba(14,154,107,0.36);
-  --ks-accent-glow: rgba(14,154,107,0.22);
+  --ks-bg:          #faf9f7;
+  --ks-bg-1:        #ffffff;
+  --ks-bg-2:        #f4f3f0;
+  --ks-bg-3:        #eae8e4;
+  --ks-line-1:      rgba(28,27,26,0.06);
+  --ks-line-2:      rgba(28,27,26,0.10);
+  --ks-line-3:      rgba(28,27,26,0.16);
+  --ks-ink:         #1c1b1a;
+  --ks-ink-2:       #57534e;
+  --ks-ink-3:       #8c8a85;
+  --ks-ink-4:       #c8c6c2;
+  --ks-accent:      #c2410c;
+  --ks-accent-2:    #9a3412;
+  --ks-accent-soft: rgba(194,65,12,0.08);
+  --ks-accent-edge: rgba(194,65,12,0.28);
+  --ks-accent-glow: rgba(194,65,12,0.18);
+  --ks-accent-warm: #c2410c;
+}
+
+/* Dark mode = warm darks (candlelit lab), NOT cold blue-gray. Used when the
+   user explicitly opts in via the theme toggle. Accent shifts to a brighter
+   orange so it reads against the dark canvas at WCAG AA. */
+[data-theme="dark"] {
+  --ks-bg:          #121211;
+  --ks-bg-1:        #1c1b1a;
+  --ks-bg-2:        #292826;
+  --ks-bg-3:        #3a3836;
+  --ks-line-1:      rgba(231,229,228,0.06);
+  --ks-line-2:      rgba(231,229,228,0.10);
+  --ks-line-3:      rgba(231,229,228,0.16);
+  --ks-ink:         #e7e5e4;
+  --ks-ink-2:       #a8a29e;
+  --ks-ink-3:       #78716c;
+  --ks-ink-4:       #44403c;
+  --ks-accent:      #fb923c;
+  --ks-accent-2:    #fdba74;
+  --ks-accent-soft: rgba(251,146,60,0.10);
+  --ks-accent-edge: rgba(251,146,60,0.32);
+  --ks-accent-glow: rgba(251,146,60,0.20);
+  --ks-accent-warm: #fb923c;
+  --ks-pos:         #4ade80;
+  --ks-warn:        #fbbf24;
+  --ks-err:         #f87171;
 }
 
 /* ----- 2. Base reset, scoped to .ks --------------------------------------- */
@@ -176,25 +205,26 @@ body { position: relative; }
   z-index: 0;
 }
 .ks::before {
-  /* W682: global atmosphere collapsed 2 → 1 bloom. Warm-orange pin dropped — paired
-     with the hero's mint pin and the per-page surface-media kickers, the dual global
-     wash was a layer of color the site doesn't need. Single faint mint pin keeps the
-     canvas warm without bleeding a second hue across every page. */
+  /* Warm Paper atmosphere: a single faint sienna pin in the bottom-right,
+     reading as ink-bleed on paper rather than glow on a screen. Subtle —
+     the paper, not the radiance, carries the canvas. */
   background:
-    radial-gradient(ellipse 1100px 820px at 100% 108%, rgba(126, 240, 210, 0.030), transparent 56%);
+    radial-gradient(ellipse 1100px 820px at 100% 108%, rgba(194, 65, 12, 0.035), transparent 56%);
 }
 .ks::after {
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0'/></filter><rect width='220' height='220' filter='url(%23n)' opacity='0.42'/></svg>");
-  opacity: 0.025;
-  mix-blend-mode: overlay;
+  /* Subtle paper grain. In light mode we MULTIPLY so the noise reads as
+     fiber texture, not film overlay. */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.11  0 0 0 0 0.11  0 0 0 0 0.10  0 0 0 0.55 0'/></filter><rect width='220' height='220' filter='url(%23n)' opacity='0.42'/></svg>");
+  opacity: 0.018;
+  mix-blend-mode: multiply;
 }
 .ks > *, .ks .ks-nav, .ks .ks-footer, .ks main { position: relative; z-index: 1; }
-:root[data-theme='light'] .ks::before {
-  /* W682: light-mode atmosphere matches dark — single faint mint pin only. */
+:root[data-theme='dark'] .ks::before {
+  /* Dark-mode atmosphere: same hue, warmer, slightly brighter. */
   background:
-    radial-gradient(ellipse 1000px 780px at 100% 105%, rgba(20, 130, 90, 0.045), transparent 52%);
+    radial-gradient(ellipse 1000px 780px at 100% 105%, rgba(251, 146, 60, 0.05), transparent 52%);
 }
-:root[data-theme='light'] .ks::after { opacity: 0.018; mix-blend-mode: multiply; }
+:root[data-theme='dark'] .ks::after { opacity: 0.025; mix-blend-mode: overlay; }
 @media (prefers-reduced-data: reduce) {
   .ks::after { display: none; }
 }

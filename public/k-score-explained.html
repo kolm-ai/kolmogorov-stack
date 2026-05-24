@@ -1,22 +1,22 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>K-score explained: the quality gate every .kolm must · kolm.ai</title>
-<meta name="description" content="A K-score gate decides whether a .kolm ships. Four axes (groundedness, coverage, safety, behavioral_drift), four per-class default gates (rule 0.88,...">
+<meta name="description" content="A K-score gate decides whether a .kolm ships. Composite of groundedness, coverage, safety, and behavioral_drift, with per-class default gates (rule 0.88, ...).">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:site_name" content="kolm">
 <meta property="og:title" content="K-score explained: the quality gate every .kolm must · kolm.ai">
-<meta property="og:description" content="A K-score gate decides whether a .kolm ships. Four axes (groundedness, coverage, safety, behavioral_drift), four per-class default gates (rule 0.88,...">
+<meta property="og:description" content="A K-score gate decides whether a .kolm ships. Composite of groundedness, coverage, safety, and behavioral_drift, with per-class default gates (rule 0.88, ...).">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="K-score explained: the quality gate every .kolm must · kolm.ai">
-<meta name="twitter:description" content="A K-score gate decides whether a .kolm ships. Four axes (groundedness, coverage, safety, behavioral_drift), four per-class default gates (rule 0.88,...">
+<meta name="twitter:description" content="A K-score gate decides whether a .kolm ships. Composite of groundedness, coverage, safety, and behavioral_drift, with per-class default gates (rule 0.88, ...).">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/k-score-explained">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -107,7 +107,7 @@
  "applicationCategory": "DeveloperApplication",
  "operatingSystem": "Linux, macOS, Windows (WSL)",
  "url": "https://kolm.ai/k-score-explained",
- "description": "A K-score gate decides whether a .kolm ships. Four axes (groundedness, coverage, safety, behavioral_drift), four per-class default gates (rule 0.88, synthesized_rule 0.90, compiled_rule 0.92, distilled_model 0.85), one frozen holdout, one verifier check that re-derives the composite at ingest.",
+ "description": "A K-score gate decides whether a .kolm ships. Composite of groundedness, coverage, safety, and behavioral_drift, with per-class default gates (rule 0.88, synthesized_rule 0.90, compiled_rule 0.92, distilled_model 0.85), a frozen holdout, and a verifier check that re-derives the composite at ingest.",
  "offers": {
  "@type": "Offer",
  "price": "0",
@@ -122,6 +122,7 @@
 </script>
 
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
@@ -223,7 +224,7 @@
 <section class="section">
  <div class="wrap">
  <h2>What happens when the gate fails.</h2>
- <p class="lede">Gate failure is a hard stop, not a warning. Four effects fire together; no single one ships in isolation, so a tenant cannot accidentally end up with a half-built artifact whose K-score was checked but whose signature was skipped.</p>
+ <p class="lede">Gate failure is a hard stop, not a warning. The effects below fire together, so a tenant cannot accidentally end up with a half-built artifact whose K-score was checked but whose signature was skipped.</p>
  <div class="grid-4">
  <div class="card">
  <span class="vt">effect a</span>
@@ -277,7 +278,7 @@
 <section class="section">
  <div class="wrap">
  <h2>The CLI flow, end to end.</h2>
- <p class="lede">Four commands compose the K-score lifecycle: compute, gate-check, auto-gate at compile, read-back from a shipped receipt. The exit-code contract is uniform: zero on pass, two on gate failure, one on other error.</p>
+ <p class="lede">Compute, gate-check, auto-gate at compile, read-back from a shipped receipt. The exit-code contract is uniform: zero on pass, two on gate failure, one on other error.</p>
  <div class="grid-2">
  <div class="card">
  <span class="vt">01 &middot; compute</span>

@@ -519,13 +519,25 @@ function detectInternalHost(text) {
 // Default: CUST-XXXX / CID-XXXX / ACCT-XXXX. Override via KOLM_CUSTOMER_ID_PATTERN
 // env var (must be a valid JS regex source string).
 
+const DEFAULT_CUSTOMER_ID_SRC = '\\b(?:CUST|CID|ACCT|CUSTOMER)[\\-_][A-Z0-9]{3,16}\\b';
+
+let _customerIdReCache = null;
+let _customerIdReSrc = null;
+
 function _customerIdRe() {
-  const src = process.env.KOLM_CUSTOMER_ID_PATTERN;
-  if (src) {
-    try { return new RegExp(src, 'g'); }
-    catch { /* fall through to default */ }
+  const envSrc = process.env.KOLM_CUSTOMER_ID_PATTERN;
+  // Resolve the *effective* source. If the env var is set but invalid we
+  // silently fall back to the default — but we still key the cache off the
+  // env-string the caller passed, so the next legitimate change re-invalidates.
+  let src = envSrc || DEFAULT_CUSTOMER_ID_SRC;
+  if (envSrc) {
+    try { new RegExp(envSrc, 'g'); }
+    catch { src = DEFAULT_CUSTOMER_ID_SRC; }
   }
-  return /\b(?:CUST|CID|ACCT|CUSTOMER)[\-_][A-Z0-9]{3,16}\b/g;
+  if (_customerIdReCache && _customerIdReSrc === src) return _customerIdReCache;
+  _customerIdReSrc = src;
+  _customerIdReCache = new RegExp(src, 'g');
+  return _customerIdReCache;
 }
 
 function detectCustomerId(text) {
@@ -543,26 +555,86 @@ function detectCustomerId(text) {
 //   { "terms": ["Acme Falcon", "Project Athena", ...] }
 // Case-insensitive whole-word match.
 
+// Cache the parsed terms file by mtime so the privacy hot-path doesn't
+// re-read + re-JSON.parse on every scan() call. recordCapture() can scan
+// up to 200 items per /v1/capture/log request — the per-call disk hit was
+// a measurable tax. (WC15)
+let _proprietaryTermsCache = null;
+let _proprietaryTermsMtime = 0;
+let _proprietaryTermsPathCache = null;
+
 function _loadProprietaryTerms() {
   const p = _proprietaryTermsPath();
-  if (!fs.existsSync(p)) return [];
+  let st;
+  try { st = fs.statSync(p); }
+  catch {
+    _proprietaryTermsCache = [];
+    _proprietaryTermsMtime = 0;
+    _proprietaryTermsPathCache = p;
+    return _proprietaryTermsCache;
+  }
+  if (
+    _proprietaryTermsCache &&
+    _proprietaryTermsPathCache === p &&
+    st.mtimeMs === _proprietaryTermsMtime
+  ) {
+    return _proprietaryTermsCache;
+  }
+  _proprietaryTermsMtime = st.mtimeMs;
+  _proprietaryTermsPathCache = p;
   try {
     const raw = JSON.parse(fs.readFileSync(p, 'utf-8'));
-    if (Array.isArray(raw)) return raw.filter((t) => typeof t === 'string' && t.length > 0);
-    if (raw && Array.isArray(raw.terms)) return raw.terms.filter((t) => typeof t === 'string' && t.length > 0);
-    return [];
-  } catch { return []; }
+    if (Array.isArray(raw)) {
+      _proprietaryTermsCache = raw.filter((t) => typeof t === 'string' && t.length > 0);
+    } else if (raw && Array.isArray(raw.terms)) {
+      _proprietaryTermsCache = raw.terms.filter((t) => typeof t === 'string' && t.length > 0);
+    } else {
+      _proprietaryTermsCache = [];
+    }
+  } catch { _proprietaryTermsCache = []; }
+  return _proprietaryTermsCache;
 }
 
 function _escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 
-function detectProprietary(text) {
+// Compiled-regex cache keyed by the same mtime as the terms cache. Without
+// this, detectProprietary was paying `new RegExp(term, 'gi')` per term per
+// scan call — quadratic compile cost on the hot capture path. (WC15)
+let _proprietaryRegexCache = null;
+let _proprietaryRegexMtime = -1;
+let _proprietaryRegexPath = null;
+
+function _getProprietaryRegexes() {
   const terms = _loadProprietaryTerms();
-  if (terms.length === 0) return [];
+  if (!terms || terms.length === 0) {
+    _proprietaryRegexCache = [];
+    _proprietaryRegexMtime = _proprietaryTermsMtime;
+    _proprietaryRegexPath = _proprietaryTermsPathCache;
+    return _proprietaryRegexCache;
+  }
+  if (
+    _proprietaryRegexCache &&
+    _proprietaryRegexMtime === _proprietaryTermsMtime &&
+    _proprietaryRegexPath === _proprietaryTermsPathCache
+  ) {
+    return _proprietaryRegexCache;
+  }
+  _proprietaryRegexMtime = _proprietaryTermsMtime;
+  _proprietaryRegexPath = _proprietaryTermsPathCache;
+  _proprietaryRegexCache = terms.map((term) => ({
+    re: new RegExp(`\\b${_escapeRe(term)}\\b`, 'gi'),
+    term,
+  }));
+  return _proprietaryRegexCache;
+}
+
+function detectProprietary(text) {
+  const compiled = _getProprietaryRegexes();
+  if (!compiled || compiled.length === 0) return [];
   const out = [];
   const seen = new Set();
-  for (const term of terms) {
-    const re = new RegExp(`\\b${_escapeRe(term)}\\b`, 'gi');
+  for (const { re } of compiled) {
+    re.lastIndex = 0; // matchAll on /g handles this but be defensive in case of future .exec usage
     for (const m of text.matchAll(re)) {
       const start = m.index;
       const end = start + m[0].length;
@@ -1018,4 +1090,25 @@ export function differentialPrivacyStats(stats, opts = {}) {
 export function _resetCacheForTests() {
   _policyCache = null;
   _policyCachePath = null;
+  _proprietaryTermsCache = null;
+  _proprietaryTermsMtime = 0;
+  _proprietaryTermsPathCache = null;
+  _proprietaryRegexCache = null;
+  _proprietaryRegexMtime = -1;
+  _proprietaryRegexPath = null;
+  _customerIdReCache = null;
+  _customerIdReSrc = null;
+}
+
+// Test hook: peek the caches without exposing module internals to non-test
+// callers. Used by tests/wave-wc15-perf-cache.test.js to assert reference
+// equality across calls. (WC15)
+export function _peekCachesForTests() {
+  return {
+    proprietary_terms: _proprietaryTermsCache,
+    proprietary_terms_mtime: _proprietaryTermsMtime,
+    proprietary_regex: _proprietaryRegexCache,
+    customer_id_re: _customerIdReCache,
+    customer_id_src: _customerIdReSrc,
+  };
 }

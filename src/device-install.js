@@ -79,6 +79,20 @@ function _assertSafeRemotePath(p) {
   return s;
 }
 
+// WC14 — generic leading-`-` guard for any value that flows into a CLI argv
+// position. Empty input passes (callers gate on the truthiness check before
+// passing to argv). Used for identity_file and any future device-profile
+// fields that get spawned as ssh/scp args. Mirrors the host/remote-path
+// pattern above so a device profile cannot smuggle `-oProxyCommand=evil`.
+function _assertSafeFlag(value, fieldName) {
+  const s = String(value || '');
+  if (s.startsWith('-')) {
+    throw new Error(`${fieldName} must not start with '-' (flag injection guard)`);
+  }
+  return s;
+}
+export { _assertSafeFlag };
+
 export async function installToDevice(artifactPath, { deviceId, opts = {} } = {}) {
   if (!artifactPath || !fs.existsSync(artifactPath)) {
     const err = new Error(`artifact not found: ${artifactPath}`);
@@ -160,7 +174,7 @@ function _scpToHost(localPath, device) {
     const user = device.ssh.user ? `${device.ssh.user}@` : '';
     const args = ['-o', 'StrictHostKeyChecking=accept-new'];
     if (device.ssh.port) { args.push('-P', String(Number(device.ssh.port))); }
-    if (device.ssh.identity_file) { args.push('-i', String(device.ssh.identity_file)); }
+    if (device.ssh.identity_file) { args.push('-i', _assertSafeFlag(device.ssh.identity_file, 'identity_file')); }
     args.push('--', localPath, `${user}${host}:${remote}`);
     const r = spawnSync('scp', args, { encoding: 'utf8', timeout: 60_000 });
     if (r.error) return { ok: false, transport: 'ssh', reason: r.error.message };
@@ -248,7 +262,7 @@ export async function testInstall(deviceId, artifactId) {
       const user = device.ssh.user ? `${device.ssh.user}@` : '';
       const args = ['-o', 'StrictHostKeyChecking=accept-new', '-o', 'ConnectTimeout=5'];
       if (device.ssh.port) { args.push('-p', String(Number(device.ssh.port))); }
-      if (device.ssh.identity_file) { args.push('-i', String(device.ssh.identity_file)); }
+      if (device.ssh.identity_file) { args.push('-i', _assertSafeFlag(device.ssh.identity_file, 'identity_file')); }
       args.push('--', `${user}${host}`, 'echo kolm-ok');
       const r = spawnSync('ssh', args, { encoding: 'utf8', timeout: 10_000 });
       if (r.status === 0 && /kolm-ok/.test(r.stdout)) {

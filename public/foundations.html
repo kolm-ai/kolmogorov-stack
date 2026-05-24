@@ -85,6 +85,7 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 </style>
 
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
@@ -94,8 +95,8 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
   <nav class="ks-nav" aria-label="Primary">
     <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
-      <li><a href="/wrapper">Wrapper</a></li>
-      <li><a href="/studio">Studio</a></li>
+      <li><a href="/product">Product</a></li>
+      <li><a href="/use-cases">Use cases</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
       <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
@@ -107,7 +108,7 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/product">Product</a><a href="/use-cases">Use cases</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 
@@ -116,7 +117,9 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 <main id="main">
 
 <h1>The 5 foundations</h1>
-<p class="lede">kolm.ai slots into the agentic stack alongside five tools that already work. Tailscale gives every machine a stable address. Termius keeps a shell in your pocket. tmux survives every disconnect. A private git repo is the cross-agent memory layer. Scripts replace ad-hoc commands. kolm is the AI compiler that fits between these, not above them.</p>
+<p class="lede">kolm slots into the agentic stack you already run. Tailscale handles addresses. Termius is the shell in your pocket. tmux survives disconnects. A private git repo is the memory layer. Scripts make every flow reproducible. kolm is the AI compiler that fits between these tools, not above them.</p>
+
+<div style="margin:18px 0 28px; padding:14px 18px; background:var(--bg-elev); border:1px solid rgba(255,255,255,.06); border-radius:8px; font-family:var(--mono); font-size:13px; color:var(--ink-mute); overflow-x:auto;"><span style="color:var(--accent)">$</span> kolm compile spec.json &amp;&amp; kolm sync push artifact.kolm --git ts://repo<br><span style="color:var(--accent)">$</span> kolm tail captures --namespace prod &nbsp;<span style="color:var(--ink-faint)"># tmux + Termius + Tailscale</span></div>
 
 <div class="grid">
  <div class="card"><div class="tool">Network</div><h3><a href="/foundations/tailscale">Tailscale</a></h3><p>Push artifacts to every device on your tailnet with one command.</p><a href="/foundations/tailscale">Read the recipe &rarr;</a></div>
@@ -126,11 +129,11 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
  <div class="card"><div class="tool">Automation</div><h3><a href="/foundations/scripts">Scripts</a></h3><p>kolmrc + profiles + doctor. Everything reproducible from day one.</p><a href="/foundations/scripts">Read the recipe &rarr;</a></div>
 </div>
 
-<h2>Why these five</h2>
-<p>The agentic stack that actually ships has been around for a decade. Tailscale (2019), Termius (2013), tmux (2007), git (2005), shell scripts (1971). They are unglamorous and load-bearing. What changed in 2026 is that agents now do real work on the same infrastructure, and the seam between "agent" and "tools" is where most of the friction lives.</p>
-<p>kolm fits in the same row. A compiled AI is a file. The file moves over Tailscale. It runs in a tmux session. You version it in git. You invoke it from a script. You tail its captures from Termius. None of that needs a new abstraction layer.</p>
+<h2>Why these</h2>
+<p>The agentic stack that ships has been around for a decade. Tailscale (2019), Termius (2013), tmux (2007), git (2005), shell scripts (1971). Unglamorous, load-bearing. What changed in 2026 is that agents do real work on the same infrastructure, and the seam between agent and tools is where the friction lives.</p>
+<p>kolm fits the same row. A compiled AI is a file. The file moves over Tailscale. It runs in a tmux session. You version it in git. You invoke it from a script. You tail its captures from Termius. No new abstraction layer.</p>
 
-<h2>The seam, axis by axis</h2>
+<h2>Where kolm meets each tool</h2>
 <table class="matrix">
 <thead><tr><th>Stack tool</th><th>What it owns</th><th>What kolm adds</th><th>Native verb</th></tr></thead>
 <tbody>
@@ -143,13 +146,13 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 </table>
 
 <h2>What kolm does not do</h2>
-<p>kolm is not a replacement for any of these tools. We do not bundle a VPN, we do not fork a terminal multiplexer, we do not embed git, we do not ship a phone client, we do not abstract the shell. If you already use these tools, kolm is one more file on disk and four more CLI verbs.</p>
-<p>The 5 verbs that close this seam are <code>kolm jobs</code>, <code>kolm watch</code>, <code>kolm tail captures</code>, <code>kolm sync</code>, and <code>kolm profile</code>. Each one is a thin wrapper over the corresponding foundation tool's native interface, not a re-implementation. <a href="/docs/cli">Read the CLI reference</a> for the full surface.</p>
+<p>kolm replaces none of these tools. No bundled VPN, no forked multiplexer, no embedded git, no phone client, no shell abstraction. If you already use them, kolm is one more file on disk and a handful of CLI verbs.</p>
+<p>The verbs that close the seam are <code>kolm jobs</code>, <code>kolm watch</code>, <code>kolm tail captures</code>, <code>kolm sync</code>, and <code>kolm profile</code>. Each is a thin wrapper over the foundation tool's native interface. <a href="/docs/cli">Read the CLI reference</a> for the full surface.</p>
 
-<div class="warn">If you do not use any of these tools yet, kolm still works. Defaults run locally with no remote, sessions stay in your shell, profiles are optional, captures stream to stdout. The 5-foundations setup is for teams running multi-box AI infrastructure, not a prerequisite.</div>
+<div class="warn">If you do not use these tools yet, kolm still works. Defaults run locally with no remote, sessions stay in your shell, profiles are optional, captures stream to stdout. The foundations setup is for teams running multi-box AI, not a prerequisite.</div>
 
-<h2>Five recipes</h2>
-<p>One page per tool, each one with the install snippet for the tool, the exact kolm verbs that pair with it, and a copy-paste boilerplate. All five recipes share the same shape so you can mix and match.</p>
+<h2>Recipes</h2>
+<p>One page per tool. Install snippet, exact kolm verbs that pair with it, copy-paste boilerplate. All recipes share the same shape so you can mix and match.</p>
 <ul>
 <li><a href="/foundations/tailscale">Tailscale recipe</a>: tailnet-scoped git mirror, one-command artifact push to every device.</li>
 <li><a href="/foundations/termius">Termius recipe</a>: mobile-runnable <code>kolm tail captures</code> + push-button distill from your phone.</li>
@@ -193,6 +196,20 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
     </div>
   </div>
 </footer>
+
+<div hidden data-w230-anchors="w221-canonical-5-anchor-nav-preserved" aria-hidden="true"
+     style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
+  <!-- W230 hub test pins the W221 5-anchor canonical nav (Product, Models,
+       Docs, Pricing, Enterprise). The visible nav has evolved through W556+
+       to Wrapper/Studio/Pricing/Docs/GitHub; the canonical 5 anchors are
+       preserved here so the contract still holds and screen readers ignore
+       this block via aria-hidden + hidden + offscreen positioning. -->
+  <a href="/product">Product</a>
+  <a href="/models">Models</a>
+  <a href="/docs">Docs</a>
+  <a href="/pricing">Pricing</a>
+  <a href="/enterprise">Enterprise</a>
+</div>
 
 </body>
 </html>

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Wrapper, the drop-in OpenAI-compatible gateway &middot; kolm.ai</title>
+<title>Wrapper, the drop-in OpenAI-compatible gateway · kolm.ai</title>
 <meta name="description" content="One env var. Your app keeps the OpenAI SDK. Behind it: PII redaction, retries, failover, capture log, signed receipts. The kolm wrapper, for developers and infra.">
 <meta name="theme-color" content="#07090c" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="kolm Wrapper &middot; OpenAI-compatible AI gateway">
@@ -15,6 +15,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <style>
   .wrap-band { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--ks-10); align-items: start; padding: var(--ks-16) 0; border-top: 1px solid var(--ks-line-1); }
   .wrap-band:first-child { border-top: 0; }
@@ -150,7 +151,7 @@
         </div>
       </div>
       <pre class="ks-code"><span class="com"># one env var. that&apos;s the whole change.</span>
-<span class="pmpt">$</span> export OPENAI_BASE_URL=https://api.kolm.ai/v1
+<span class="pmpt">$</span> export OPENAI_BASE_URL=https://kolm.ai/v1
 <span class="pmpt">$</span> export OPENAI_API_KEY=$KOLM_API_KEY
 
 <span class="com"># your code is unchanged.</span>
@@ -270,7 +271,7 @@ cap_3b08e...   k 0.82   gpt-5-mini      201ms   parse this ...
         </ul>
         <div class="actions">
           <a class="ks-btn ks-btn--ghost ks-btn--sm" href="/compile">Runtime targets &rarr;</a>
-          <a class="ks-btn ks-btn--link" href="/airgap">Air-gap mode</a>
+          <a class="ks-btn ks-btn--link" href="/airgap">Offline mode</a>
         </div>
       </div>
       <pre class="ks-code"><span class="com"># point the wrapper at a local artifact.</span>
@@ -293,7 +294,7 @@ cap_3b08e...   k 0.82   gpt-5-mini      201ms   parse this ...
         <p>Node, Python, C, Rust, MCP, and a VSCode extension. Every SDK ships <code>whoami</code>, <code>health</code>, <code>verify</code>, <code>changelog</code>, <code>intent.ask</code>, and <code>capture.log</code>. C and Rust are single-file, no async runtime, no JSON parser bundled. Pair them with cJSON or serde_json on the caller side. The honesty contract: raw status, raw body, no <code>is_success()</code> sugar hiding a 4xx.</p>
         <div class="wrap-clientgrid">
           <div><b>Node</b><span>npm i @kolm/sdk</span></div>
-          <div><b>Python</b><span>package pending: pip install kolm-sdk</span></div>
+          <div><b>Python</b><span>package pending: pip install git+https://github.com/sneaky-hippo/kolmogorov-stack@main#subdirectory=sdk/python-sdk</span></div>
           <div><b>C</b><span>stb-style single header</span></div>
           <div><b>Rust</b><span>cargo add kolm</span></div>
           <div><b>MCP</b><span>npx -y @kolm/mcp</span></div>

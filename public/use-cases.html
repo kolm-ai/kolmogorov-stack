@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -125,7 +125,7 @@
  section.verticals h2 { margin: 0 0 10px; font-size: clamp(26px, 2.8vw, 34px); font-weight: 500; letter-spacing: -0.012em; }
  section.verticals p.sec-lede { margin: 0 0 8px; color: var(--ink-mute); font-size: 16px; max-width: 64ch; line-height: 1.6; }
 
- /* W649: verticals magazine spread — 2-col grid, no card chrome, typography-only hierarchy. */
+ /* W649: verticals magazine spread - 2-col grid, no card chrome, typography-only hierarchy. */
  .verts-spread { display: grid; grid-template-columns: 1fr 1fr; column-gap: 64px; row-gap: 48px; margin-top: 44px; }
  .vert-row { padding: 0; }
  .vert-row__head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 14px; }
@@ -140,7 +140,7 @@
  .vert-row__cta { font-family: var(--mono); font-size: 12.5px; color: var(--good); border-bottom: 1px solid rgba(126,240,210,0.35); padding-bottom: 1px; }
  .vert-row__cta:hover { border-bottom-color: var(--good); }
  .vert-row__badge { font-family: var(--mono); font-size: 10px; color: var(--ink-faint); letter-spacing: 0.08em; text-transform: uppercase; margin-left: 8px; }
- /* W652: prove-it receipt line under chips — artifact filename + size + sha + verify link */
+ /* W652: prove-it receipt line under chips - artifact filename + size + sha + verify link */
  .vert-row__receipt { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); margin: 0 0 14px 0; padding: 8px 0 8px 12px; border-left: 1px solid rgba(126,240,210,0.25); display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; line-height: 1.5; }
  .vert-row__receipt code { font-family: var(--mono); color: var(--ink); background: transparent; padding: 0; font-size: 11.5px; }
  .vert-row__receipt .meta { color: var(--ink-faint); }
@@ -155,7 +155,7 @@
  section.workflows h2 { margin: 0 0 10px; font-size: clamp(24px, 2.6vw, 32px); font-weight: 500; letter-spacing: -0.012em; }
  section.workflows p.sec-lede { margin: 0 0 8px; color: var(--ink-mute); font-size: 16px; max-width: 64ch; line-height: 1.6; }
 
- /* W649: cases editorial list — horizontal rows with no card box; numerated by typography, not cards. */
+ /* W649: cases editorial list - horizontal rows with no card box; numerated by typography, not cards. */
  .cases-list { list-style: none; margin: 36px 0 0 0; padding: 0; border-top: 1px solid var(--line); }
  .cases-list__row { display: grid; grid-template-columns: 168px 1fr 240px; gap: 32px; align-items: start; padding: 22px 0; border-bottom: 1px solid var(--line); }
  .cases-list__num { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); padding-top: 4px; }
@@ -184,6 +184,7 @@
 </style>
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/kolm-svg.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/kolm-svg.js"></script>
 </head>
 <body class="ks">
@@ -370,7 +371,7 @@
  <div class="cases-list__num case-num">05 &middot; knowledge</div>
  <div class="cases-list__body">
  <h3 class="cases-list__h">Internal Q&amp;A bot (RAG)</h3>
- <p class="cases-list__p">Index your wiki, retrieve before you reply, cite source paragraphs. The retriever and reranker ship in the artifact &mdash; no hosted vector DB.</p>
+ <p class="cases-list__p">Index your wiki, retrieve before you reply, cite source paragraphs. The retriever and reranker ship in the artifact, no hosted vector DB.</p>
  <div class="cases-list__art art">rag-qa.kolm &middot; 87% answer accuracy</div>
  </div>
  <div class="cases-list__refs row"><a href="/docs">Docs &rarr;</a><a href="/cookbook/recipe-from-observations">Recipe &rarr;</a></div>
@@ -418,7 +419,7 @@
 <section class="verticals" aria-label="By problem shape (cross-vertical)" id="w695-by-shape" style="border-top:1px solid var(--ks-rule)">
  <div class="wrap">
  <h2>Or by problem shape.</h2>
- <p class="sec-lede">If your problem cuts across industries &mdash; support tickets, multi-step agents, anything that has to fit on a phone or a Pi &mdash; start here. Same compilation flow as the vertical pages above; different surface.</p>
+ <p class="sec-lede">If your problem cuts across industries (support tickets, multi-step agents, anything that has to fit on a phone or a Pi), start here. Same compilation flow as the vertical pages above; different surface.</p>
  <div class="verts-spread vert-grid" data-w695="shape-grid" style="grid-template-columns:repeat(3,minmax(0,1fr))">
 
  <div class="vert-row vert" data-shape="support-automation">

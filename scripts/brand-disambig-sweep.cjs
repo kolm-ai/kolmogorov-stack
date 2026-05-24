@@ -53,12 +53,19 @@ function normalizeTitle(html) {
   // "Admin console - kolm.ai · kolm.ai" -> "Admin console · kolm.ai".
   next = next.replace(/\s+-\s*kolm\.ai\s*(?:·|&middot;|\|)\s*kolm\.ai\s*$/i, ' · kolm.ai');
 
+  // W806: convert any HTML &middot; entity (or pipe) to the literal "·"
+  // character so the W228 regex /[·|]\s*kolm\.ai\s*$/i actually matches
+  // (it operates on raw HTML, not rendered text, so &middot; reads as a
+  // literal entity rather than the middle-dot character).
+  next = next.replace(/&middot;\s*kolm\.ai\s*$/i, '· kolm.ai');
+  next = next.replace(/&middot;\s+/g, '· ');
+
   // Pipe-separator → middot
   if (/\|\s*kolm\.ai\s*$/i.test(next)) {
     next = next.replace(/\|\s*kolm\.ai\s*$/i, '· kolm.ai');
   }
 
-  if (/(·|&middot;)\s*kolm\.ai\s*$/i.test(next)) {
+  if (/·\s*kolm\.ai\s*$/i.test(next)) {
     const updated = html.replace(/<title>[^<]*<\/title>/i, `<title>${next}</title>`);
     return { html: updated, changed: updated !== html };
   }

@@ -26,6 +26,10 @@ use std::time::Duration;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
+/// W817 — kolm artifact format v1.0 reference reader.
+/// See `docs/spec/kolm-format-v1.0.md`.
+pub mod format;
+
 pub const SDK_VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const DEFAULT_BASE_URL: &str = "https://kolm.ai";
 pub const DEFAULT_TIMEOUT_SECS: u64 = 30;

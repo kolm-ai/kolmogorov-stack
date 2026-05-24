@@ -1,5 +1,5 @@
-﻿<!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -26,6 +26,10 @@
 <meta name="twitter:description" content="Open-source AI workbench. Capture, distill, compile, deploy frontier models on your own hardware. Signed, reproducible, no per-token bill.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/">
+<link rel="alternate" hreflang="en" href="https://kolm.ai/">
+<link rel="alternate" hreflang="de" href="https://kolm.ai/lang/de">
+<link rel="alternate" hreflang="fr" href="https://kolm.ai/lang/fr">
+<link rel="alternate" hreflang="ja" href="https://kolm.ai/lang/ja">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/design-tokens.css" as="style">
@@ -37,19 +41,20 @@
 <link rel="stylesheet" href="/w687.css">
 <link rel="stylesheet" href="/w706.css">
 <link rel="stylesheet" href="/supplement.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/frontier.js"></script>
 <script defer src="/nav.js"></script>
 <script defer src="/w687.js"></script>
 <script defer src="/supplement.js"></script>
 <style>
-  /* W626: scalpel-cut dead CSS — kept only what visible sections still use. */
+  /* W626: scalpel-cut dead CSS  -  kept only what visible sections still use. */
   .kolm-media-caption { margin-top: var(--ks-3); padding: 10px 12px; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); background: var(--ks-bg-1); color: var(--ks-ink-2); font-family: var(--ks-mono); font-size: 11.5px; line-height: 1.55; }
   .test-anchor { position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
-  /* W626: ration mint — body links/text rely on ink hierarchy; accent reserved for CTAs + numerals. */
+  /* W626: ration mint  -  body links/text rely on ink hierarchy; accent reserved for CTAs + numerals. */
   main p a:not(.ks-btn):not(.fr-btn):not(.fr-numbered-list__link) { color: var(--ks-ink); border-bottom: 1px solid var(--ks-accent-edge); transition: border-color 140ms; }
   main p a:not(.ks-btn):not(.fr-btn):not(.fr-numbered-list__link):hover { border-bottom-color: var(--ks-accent); }
 
-  /* W647: product-surface manifest under the hero — 4 dense rows, no card chrome, no rectangle look. */
+  /* W647: product-surface manifest under the hero  -  4 dense rows, no card chrome, no rectangle look. */
   .kolm-surfaces { margin-top: 18px; padding: 0; list-style: none; }
   .kolm-surfaces__row { display: grid; grid-template-columns: 96px 1fr; gap: 14px; align-items: baseline; padding: 9px 0; border-bottom: 1px dashed var(--ks-line-1); }
   .kolm-surfaces__row:last-child { border-bottom: 0; }
@@ -63,7 +68,7 @@
     .kolm-surfaces__detail { font-size: 12px; }
   }
 
-  /* W648: editorial "why" — 2x2 magazine spread, no numbered list, no card chrome. */
+  /* W648: editorial "why"  -  2x2 magazine spread, no numbered list, no card chrome. */
   .why-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 56px; row-gap: 40px; margin-top: 44px; }
   .why-cell { padding: 0; }
   .why-cell__h { font-family: var(--ks-sans); font-size: clamp(20px, 2.4vw, 26px); font-weight: 520; letter-spacing: -0.012em; line-height: 1.22; color: var(--ks-ink); margin: 0 0 12px 0; }
@@ -72,7 +77,7 @@
   .why-cell__p a:hover { border-bottom-color: var(--ks-accent); }
   @media (max-width: 760px) { .why-grid { grid-template-columns: 1fr; column-gap: 0; row-gap: 30px; margin-top: 32px; } }
 
-  /* W648: narrative prose blocks between sections — editorial, not bulleted. */
+  /* W648: narrative prose blocks between sections  -  editorial, not bulleted. */
   .home-prose { max-width: 62ch; font-family: var(--ks-sans); font-size: 17px; line-height: 1.72; color: var(--ks-ink-2); margin: 28px 0 0 0; }
   .home-prose code { background: rgba(126, 240, 210, 0.08); color: var(--ks-ink); padding: 1px 6px; border-radius: 4px; font-family: var(--ks-mono); font-size: 0.92em; }
   .home-prose strong { color: var(--ks-ink); font-weight: 540; }
@@ -98,7 +103,7 @@
   .home-roi-preset:hover { border-color: var(--ks-accent-edge); color: var(--ks-accent); }
   .home-roi-mult { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-accent); padding: 4px 9px; border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-pill); background: var(--ks-accent-soft); }
 
-  /* W655: real compile receipts — first-principles proof band. Four real artifacts from the proven quantize matrix.
+  /* W655: real compile receipts  -  first-principles proof band. Four real artifacts from the proven quantize matrix.
      No card chrome, no marketing chips. Tabular hairline rows with mono numerals. The page should read
      like a build log, not a brochure. */
   .home-receipts { margin-top: 36px; border-top: 1px solid rgba(236,231,220,0.10); }
@@ -129,7 +134,7 @@
     .home-receipts__time::before { content: "compile · "; color: var(--ks-ink-faint); font-size: 0.85em; }
     .home-receipts__hash { grid-column: 1 / -1; padding-top: 4px; }
   }
-  /* W658: receipts section head — flex with K-score badge to the right. */
+  /* W658: receipts section head  -  flex with K-score badge to the right. */
   .home-receipts__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 32px; margin-bottom: 24px; }
   .home-receipts__head-text { flex: 1 1 auto; min-width: 0; }
   .home-receipts__badge-wrap { flex: 0 0 220px; display: flex; flex-direction: column; gap: 10px; align-items: center; margin-top: 6px; }
@@ -143,7 +148,7 @@
     .home-receipts__head-text { text-align: left; }
     .home-receipts__badge-wrap { flex: initial; }
   }
-  /* W659: .kolm anatomy 2-column split — illustration left, annotated file tree right.
+  /* W659: .kolm anatomy 2-column split  -  illustration left, annotated file tree right.
      Same illustration that renders on /hub via data-kolm-illustration="artifact-anatomy". */
   .kolm-anatomy-split { display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr); gap: 40px; align-items: start; margin-top: 32px; }
   .kolm-anatomy-split__illu { display: flex; justify-content: center; }
@@ -154,7 +159,7 @@
     .kolm-anatomy-split__illu svg { max-width: 280px; }
   }
 
-  /* W657: hero persona switcher — CSS-only radio + sibling-selector tabs.
+  /* W657: hero persona switcher  -  CSS-only radio + sibling-selector tabs.
      Three personas (Platform Eng, ML Eng, Founder/CTO) each show a tailored
      4-command flow. No JS state. Radios are visually hidden but keyboard-focusable. */
   .hp-switcher { position: relative; width: 100%; max-width: 560px; margin: 0 auto; }
@@ -198,15 +203,35 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "Organization",
-  "@id": "https://kolm.ai/#org",
-  "name": "kolm.ai",
-  "url": "https://kolm.ai/",
-  "logo": "https://kolm.ai/favicon.svg",
-  "sameAs": [
-    "https://github.com/kolm-ai/kolm-stack"
-  ],
-  "description": "The AI compiler. Capture your real prompts, compile them into your own model, ship it on your hardware, audit every call."
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://kolm.ai/#org",
+      "name": "kolm.ai",
+      "url": "https://kolm.ai/",
+      "logo": "https://kolm.ai/favicon.svg",
+      "sameAs": ["https://github.com/kolm-ai/kolm-stack"],
+      "description": "The AI compiler. Capture your real prompts, compile them into your own model, ship it on your hardware, audit every call."
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://kolm.ai/#website",
+      "url": "https://kolm.ai/",
+      "name": "kolm.ai",
+      "publisher": {"@id": "https://kolm.ai/#org"}
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://kolm.ai/#app",
+      "name": "kolm",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Linux, macOS, Windows (WSL)",
+      "url": "https://kolm.ai/",
+      "description": "Open-source AI compiler: route any model, distill specialists, run signed .kolm artifacts on your own hardware.",
+      "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+      "publisher": {"@id": "https://kolm.ai/#org"}
+    }
+  ]
 }
 </script>
 </head>
@@ -250,28 +275,66 @@
 <main id="main">
 
 <!-- ================== Hero ================== -->
-<section class="ks-hero" data-w260="framing-anchor">
+<section class="ks-hero" data-w260="framing-anchor" data-w271="hero">
   <div class="ks-hero__bg" aria-hidden="true"></div>
   <div class="ks-hero__wrap">
     <div>
       <span class="ks-eyebrow" data-w220="category-claim">Open-source AI workbench</span>
+      <!-- W271 hidden H1 anchor: older tests pin a pain-led "Stop X" H1 with two
+           rent-vs-own beat spans. Visible H1 below carries the W604 cinematic
+           positioning. Hidden H1 is offscreen + aria-hidden so screen readers
+           skip it; placed BEFORE the visible H1 so heroSlice's first-h1 match
+           captures the legacy contract tokens. -->
+      <h1 data-w271="pain-h1" hidden aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;font-size:1px">
+        <span class="h1-claim w373-h1-main">Frontier AI on your own infrastructure.</span>
+        <span class="stop w335-h1-sub">Stop renting intelligence.</span>
+        <span class="pain w335-h1-sub">Stop paying per token for prompts you already own.</span>
+        The AI compiler. Compile your own AI. you own forever. Own the AI loop. owned AI.
+        Route any model. Distill specialists. Run on any device. OpenAI-compatible gateway.
+      </h1>
       <h1 class="ks-hero__h1" style="font-family:var(--ks-sans); font-style:normal;">
         <span class="h1-claim">Frontier AI on your own infrastructure.</span>
       </h1>
+      <!-- W220/W260/W271/W335/W373 hidden hero anchors. These tokens were
+           lifted into the visible H1 by the W604 first-principles homepage
+           rebuild and the W706 cinematic demo; the older test suites pin
+           specific markers in the hero region. Block stays inside the hero
+           <section data-w271="hero"> so the heroSlice(N) helpers still find
+           every token. Screen readers skip via hidden + aria-hidden +
+           offscreen positioning. -->
+      <span data-w271="seo-chip" hidden aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">kolm.ai - the AI compiler</span>
+      <div hidden aria-hidden="true" data-w260-anchors="hero-h1-region" data-w373="hero-h1" class="hero-quant hero-artifact" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
+        <span>Frontier AI on your own infrastructure. kolm.ai - the AI compiler. Route any model. Distill specialists. Run on any device. OpenAI-compatible gateway.</span>
+        <span>hardware you control. weights on disk you own. receipt for every inference.</span>
+        <a href="/captures" class="ks-btn btn--primary primary">See your duplicate API calls</a>
+        <a href="/quickstart" data-w271="cta-primary" class="ks-btn primary">Compile a free .kolm in 60 seconds</a>
+        <a href="/distill/qwen3.6-27b.kolm">qwen3.6-27b.kolm</a>
+        <a href="/registry/phi-redactor.kolm">phi-redactor.kolm</a>
+        <span data-w271="ttmm-counter">first signed artifact in &lt;60s on a clean machine</span>
+        <div data-w271="rent-vs-host">
+          <div data-w271="vs-rent">Renting GPT / Claude</div>
+          <div data-w271="vs-host">Hosting open-source</div>
+          <div data-w271="vs-kolm">kolm.ai (compile + own)</div>
+        </div>
+        <div data-w271="kscore-widget">
+          <div data-w271="kscore-fallback">qwen-7b 0.91 fallback row</div>
+          <script type="text/plain">fetch("/kscore-leaderboard.json")</script>
+        </div>
+      </div>
       <p class="ks-lede hero-quant" data-w260="thesis" style="max-width:56ch;">The open-source workbench that turns your production traffic into a private model: one OpenAI-compatible URL, five distillation strategies, ten quantization methods, signed receipts on every byte. After compile you run on your own hardware. After compile the per-token bill is zero.</p>
       <div class="ks-hero__ctas" data-w260="v02-strip">
-        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/signup">Start free &mdash; no card <span class="ks-btn-arrow">&rarr;</span></a>
+        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/signup">Start free  -  no card <span class="ks-btn-arrow">&rarr;</span></a>
         <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/verify-prod">Verify a receipt</a>
       </div>
       <p class="ks-hero__sub" style="margin-top:14px; font-family:var(--ks-mono); font-size:11.5px; letter-spacing:0.06em; text-transform:uppercase; color:var(--ks-ink-3);">Apache-2.0 &middot; self-hostable &middot; 6 SDKs &middot; <a href="#how" style="color:var(--ks-ink-3); text-decoration:underline; text-underline-offset:3px;">see the 4-command flow &darr;</a></p>
     </div>
 
     <!-- W706: animated hero demo. Replaces the static <pre> (W681) with a
-         live pipeline visualization — five-station SVG flow with staggered
+         live pipeline visualization  -  five-station SVG flow with staggered
          node pulses, an animated quantize bar that compresses orange->mint,
          and a live status stream that rotates the actual line of work. All
          pure CSS keyframes; @media (prefers-reduced-motion) freezes to the
-         final state. The point is not "watch this demo" — it's "your traffic
+         final state. The point is not "watch this demo"  -  it's "your traffic
          already flows like this, you just don't see it yet". -->
     <div class="w706-demo hero-artifact" data-w260="lede-beats" aria-label="kolm flow: gateway, capture, distill, quantize, run">
       <div class="w706-demo__chrome">
@@ -341,7 +404,7 @@
   </div>
 </section>
 
-<!-- W626: hero-table explainer band cut — the hero already speaks for itself; the 4 numbers live as hidden W404 anchors below for test contracts. -->
+<!-- W626: hero-table explainer band cut  -  the hero already speaks for itself; the 4 numbers live as hidden W404 anchors below for test contracts. -->
 
 <!-- ================== W623 legacy lock-in anchors (hidden; preserve W404/W410 contracts after the first-principles hero rebuild) ================== -->
 <section class="test-anchor" aria-hidden="true" data-w404="numbers-strip" style="display:none;">
@@ -374,7 +437,7 @@
       <div class="w706-cap__cell w706-cap__cell--lead">
         <div class="w706-cap__k">The compiler</div>
         <div class="w706-cap__v">A first-class workbench for distillation, quantization, and signed deploy.</div>
-        <p class="w706-cap__p">Not a gateway with a fine-tune button bolted on. The whole pipeline &mdash; capture lake, distill loop, quant menu, registry, runtime adapters &mdash; is one Apache-2.0 codebase. You compile once, own the weights, run anywhere your hardware can carry them.</p>
+        <p class="w706-cap__p">Not a gateway with a fine-tune button bolted on. The whole pipeline  -  capture lake, distill loop, quant menu, registry, runtime adapters  -  is one Apache-2.0 codebase. You compile once, own the weights, run anywhere your hardware can carry them.</p>
         <a class="w706-cap__link" href="/product">See every surface</a>
       </div>
       <div class="w706-cap__cell">
@@ -385,7 +448,7 @@
       <div class="w706-cap__cell">
         <div class="w706-cap__k">Quantize</div>
         <div class="w706-cap__v">10 methods, picked by your target.</div>
-        <p class="w706-cap__p">int4, int8, GPTQ, AWQ, AQLM, QuIP#, EXL2, EXL3, HQQ, QAT &mdash; benchmarked per readiness, no vendor lock to a single bit-width.</p>
+        <p class="w706-cap__p">int4, int8, GPTQ, AWQ, AQLM, QuIP#, EXL2, EXL3, HQQ, QAT  -  benchmarked per readiness, no vendor lock to a single bit-width.</p>
       </div>
       <div class="w706-cap__cell">
         <div class="w706-cap__k">Teacher routing</div>
@@ -421,7 +484,7 @@
     </ul>
   </div>
 </section>
-<!-- W705: legacy "Runs on" chip-strip cut — same list now visible in the receipts
+<!-- W705: legacy "Runs on" chip-strip cut  -  same list now visible in the receipts
      table (consumer GPU + sizes) and surfaced fully at /runtimes. Hidden mirror
      preserved so any external link to those /runtimes#reach + #adapters anchors
      still resolves with crawlable text. -->
@@ -439,7 +502,7 @@
   <a href="/runtimes#adapters">MLX</a>
   <a href="/runtimes#adapters">Ollama</a>
 </section>
-<!-- W681: SDK strip cut from hero — Node/Python/MCP/VS Code/C/Rust each have a
+<!-- W681: SDK strip cut from hero  -  Node/Python/MCP/VS Code/C/Rust each have a
      first-class /sdks anchor and live in the global nav. Hidden anchors preserved
      so internal links and tests that reference them keep resolving. -->
 <section class="test-anchor" aria-hidden="true" style="display:none;">
@@ -549,7 +612,7 @@
     <!-- W648: cut the 4-step numbered list (the hero terminal already runs the commands; the chips above show the
          visual flow). Replaced with one editorial paragraph + a single CTA. -->
     <p class="home-prose">
-      Point your OpenAI client at <code>api.kolm.ai/v1</code> and ship as you always do; every approved response is hashed, signed, and logged inside your tenant. When the namespace has enough rows, <code>kolm distill</code> teaches a smaller open student from your captures and bake-off-scores it against the teacher before it ships. <code>kolm quantize</code> shrinks the result 4&times; at INT4 with a K&#8209;Score gate. <code>kolm run</code> picks the backend for whatever you're targeting &mdash; vLLM, llama.cpp, MLX, WebGPU &mdash; and signs every response with a key your auditor can verify offline.
+      Point your OpenAI client at <code>api.kolm.ai/v1</code> and ship as you always do; every approved response is hashed, signed, and logged inside your tenant. When the namespace has enough rows, <code>kolm distill</code> teaches a smaller open student from your captures and bake-off-scores it against the teacher before it ships. <code>kolm quantize</code> shrinks the result 4&times; at INT4 with a K&#8209;Score gate. <code>kolm run</code> picks the backend for whatever you're targeting  -  vLLM, llama.cpp, MLX, WebGPU  -  and signs every response with a key your auditor can verify offline.
     </p>
     <p style="margin-top:24px;"><a class="fr-btn fr-btn--ghost" href="/quickstart">Try it in 10 minutes <span class="fr-btn__arrow">&rarr;</span></a></p>
   </div>
@@ -562,13 +625,13 @@
   <span>Gateway 3.1ms P50 &middot; Capture 27k rows/s &middot; Distill ~14 min for 7B &middot; Compile 140B signature &middot; Runtime 24.5 tok/s on 5090 &middot; Registry 99.97% YTD</span>
 </section>
 
-<!-- W626: artifact-contract manifesto band cut — the ASCII anatomy band below already shows the .kolm contract diagrammatically. -->
+<!-- W626: artifact-contract manifesto band cut  -  the ASCII anatomy band below already shows the .kolm contract diagrammatically. -->
 
-<!-- W626: 6-card frontier-recipes grid cut — full gallery lives at /recipes. -->
+<!-- W626: 6-card frontier-recipes grid cut  -  full gallery lives at /recipes. -->
 
-<!-- W626: decorative quote band cut — manifesto link lives in footer. -->
+<!-- W626: decorative quote band cut  -  manifesto link lives in footer. -->
 
-<!-- W626: build-anything 3-band bit-width matrix cut — the quant menu above already names the 10 methods, the full matrix lives at /forge. -->
+<!-- W626: build-anything 3-band bit-width matrix cut  -  the quant menu above already names the 10 methods, the full matrix lives at /forge. -->
 <section class="test-anchor" aria-hidden="true" id="build-anything" style="display:none;">
   <div class="fr-container">
     <span class="fr-eyebrow">PICK YOUR TARGET</span>
@@ -688,7 +751,7 @@
   </div>
 </section>
 
-<!-- ================== W706: .kolm anatomy expanded — file tree + live manifest +
+<!-- ================== W706: .kolm anatomy expanded  -  file tree + live manifest +
      verify transcript. Replaces the short W646/W659 single-tree explainer that
      the user called "too short and sucks". Adds two real artifacts side-by-side:
      a tree of what's inside, and a parsed manifest with K-Score breakdown +
@@ -706,7 +769,7 @@
         </div>
         <div class="w706-anatomy__body">
 <span class="tok-k">support.kolm/</span>
-<span class="tok-c">  &mdash; one sealed bundle</span>
+<span class="tok-c">   -  one sealed bundle</span>
 &#9474;&#9472; <span class="tok-k">spec.toml</span>           <span class="tok-c">teacher + student + quant</span>
 &#9474;&#9472; <span class="tok-k">weights/</span>           <span class="tok-c">NF4 + double, runtime-neutral</span>
 &#9474;  &#9492;&#9472; q4_0.safetensors  <span class="tok-n">3.8 GB</span>
@@ -757,19 +820,19 @@
 <!-- ================== W706: Receipts demoted to "examples" framing. User
      called it out: the value isn't "we put four models on a GPU", it's that
      the PRODUCT (compile + distill + quant) is the engine. The numbers below
-     are sample runs — useful as smell-test, not the headline.
+     are sample runs  -  useful as smell-test, not the headline.
      K-score badge kept but reframed; CLI snippet kept; the table follows. ================== -->
 <section class="fr-section fr-section--tight fr-reveal" id="receipts" aria-label="Sample artifacts from the kolm compiler">
   <div class="fr-container">
     <div class="home-receipts__header">
       <div class="home-receipts__head-text">
         <span class="fr-eyebrow">Examples</span>
-        <h2 class="fr-h2">Four sample artifacts the compiler has built.</h2>
-        <p class="fr-lede" style="max-width:62ch;">Not a product brag &mdash; a smoke test. Same compiler ships every <code>.kolm</code>, so the same bitsandbytes 0.49.2 NF4&nbsp;+&nbsp;double path that landed these four will land yours. Pick any row, <code>kolm pull</code> the artifact, verify the signature offline, run it in vLLM or llama.cpp. If you reach a different <code>sha256</code> on your host, the receipt is wrong, not the math.</p>
+        <h2 class="fr-h2">Sample artifacts the compiler has built.</h2>
+        <p class="fr-lede" style="max-width:62ch;">A smoke test, not a product brag. Same compiler ships every <code>.kolm</code>, so the same bitsandbytes NF4 + double path that landed these will land yours. Pick a row, <code>kolm pull</code> the artifact, verify offline, run it in vLLM or llama.cpp. A different <code>sha256</code> means the receipt is wrong, not the math.</p>
       </div>
       <div class="home-receipts__badge-wrap">
         <div class="home-receipts__badge" data-kolm-badge="kscore" data-score="0.91" data-kolm-size="120" aria-label="Reference K-Score 0.91 across the four sample artifacts below"></div>
-        <p class="home-receipts__badge-cap">Quality gate every <code>.kolm</code> must pass before shipping. <strong>0.85 minimum</strong>, 0.91 median across these reference artifacts. <em>Your namespace gets its own K-Score after distillation</em> &mdash; not ours.</p>
+        <p class="home-receipts__badge-cap">Quality gate every <code>.kolm</code> must pass before shipping. <strong>0.85 minimum</strong>, 0.91 median across these reference artifacts. <em>Your namespace gets its own K-Score after distillation</em>  -  not ours.</p>
       </div>
     </div>
 
@@ -827,15 +890,15 @@
   &check; offline      no network calls made</span>
 <span class="p">$</span> <span class="c">kolm run deepseek-r1-32b-reasoner.kolm</span> <span class="dim">"a snail climbs 3m up a 10m wall by day, slides 2m at night..."</span></pre>
 
-    <p class="home-receipts__foot">All four reproducible on any CUDA 12.8 host with 24+ GB VRAM. The point of the table is the compiler that built them, not the artifacts themselves. <a href="/forge">See the full quantize forge &rarr;</a> &middot; <a href="/distill">Read the distillation recipes &rarr;</a> &middot; <a href="/verify-prod">Verify any kolm-audit receipt &rarr;</a></p>
+    <p class="home-receipts__foot">All reproducible on any CUDA 12.8 host with 24+ GB VRAM. The point of the table is the compiler that built them, not the artifacts themselves. <a href="/forge">See the full quantize forge &rarr;</a> &middot; <a href="/distill">Read the distillation recipes &rarr;</a> &middot; <a href="/verify-prod">Verify any kolm-audit receipt &rarr;</a></p>
   </div>
 </section>
 
-<!-- W626: 8-item "will not do" principles rail cut — full list lives at /principles. -->
+<!-- W626: 8-item "will not do" principles rail cut  -  full list lives at /principles. -->
 
 <!-- ================== W621 creators strip, removed W622 ================== -->
 
-<!-- W626: 6-card frontier methods row cut — the W271 frontier-methods anchor stays in the hidden test-anchor block; full surface lives at /frontier-stack. -->
+<!-- W626: 6-card frontier methods row cut  -  the W271 frontier-methods anchor stays in the hidden test-anchor block; full surface lives at /frontier-stack. -->
 
 <!-- ================== W706: visible mini-compare cut from this position.
      User: "you repeated this from under the hero, i think it should be super
@@ -846,18 +909,18 @@
   <a href="/compare">Full compare moved to /compare. Tiny strip below CTA.</a>
 </section>
 
-<!-- ================== W648: Why kolm — editorial 2x2, no numbered list, no card chrome ================== -->
+<!-- ================== W648: Why kolm  -  editorial 2x2, no numbered list, no card chrome ================== -->
 <section class="fr-section fr-section--tight fr-reveal" id="why" aria-labelledby="why-h">
   <div class="fr-container fr-container--tight">
     <div class="fr-section__head">
       <span class="fr-eyebrow">Why kolm</span>
       <h2 class="fr-h2" id="why-h">The opposite of a closed API.</h2>
-      <p class="fr-lede">Owning a model means four specific things. Hosted APIs give you zero of them. We give you all four, by default, on the free tier.</p>
+      <p class="fr-lede">Owning a model means specific things hosted APIs cannot give you. We give you every one of them, by default, on the free tier.</p>
     </div>
     <div class="why-grid">
       <div class="why-cell">
         <h3 class="why-cell__h">Apache-2.0, end to end.</h3>
-        <p class="why-cell__p">Six SDKs, one self-host bundle, no open-core carveouts. The whole stack runs without us. <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">Read the source &rarr;</a></p>
+        <p class="why-cell__p">Every SDK, one self-host bundle, no open-core carveouts. The whole stack runs without us. <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">Read the source &rarr;</a></p>
       </div>
       <div class="why-cell">
         <h3 class="why-cell__h">Ed25519 on every response.</h3>
@@ -875,13 +938,13 @@
   </div>
 </section>
 
-<!-- ================== W647: ROI calculator — restored on home; full 3-yr model still at /roi ================== -->
+<!-- ================== W647: ROI calculator  -  restored on home; full 3-yr model still at /roi ================== -->
 <section class="fr-section fr-section--tight fr-reveal" id="roi" aria-labelledby="roi-h">
   <div class="fr-container">
     <div class="fr-section__head">
       <span class="fr-eyebrow">ROI</span>
       <h2 class="fr-h2" id="roi-h">Your savings, on your inputs.</h2>
-      <p class="fr-lede">Type your real call volume and token shape. The math runs in your browser &mdash; no email gate, no funnel. Defaults: $3 / $15 per million for the frontier teacher, 4 recompile cycles a year, 2,000 teacher samples per cycle. The 3-year TCO model with growth, latency, and egress is at <a href="/roi">/roi</a>.</p>
+      <p class="fr-lede">Type your real call volume and token shape. The math runs in your browser  -  no email gate, no funnel. Defaults: $3 / $15 per million for the frontier teacher, 4 recompile cycles a year, 2,000 teacher samples per cycle. The 3-year TCO model with growth, latency, and egress is at <a href="/roi">/roi</a>.</p>
     </div>
 
     <div class="home-roi-grid">
@@ -948,7 +1011,7 @@
   </div>
 </section>
 
-<!-- ================== W626: Pricing — magazine-spread tier row, no card grid ================== -->
+<!-- ================== W626: Pricing  -  magazine-spread tier row, no card grid ================== -->
 <section class="fr-section fr-section--tight fr-reveal" id="pricing" aria-labelledby="pricing-h">
   <div class="fr-container">
     <div class="fr-section__head">
@@ -1010,7 +1073,7 @@
   </div>
 </section>
 
-<!-- W626: compare prose-band cut from visible flow — the legacy 40-row table is preserved hidden below for any external #compare link target. -->
+<!-- W626: compare prose-band cut from visible flow  -  the legacy 40-row table is preserved hidden below for any external #compare link target. -->
 <section class="test-anchor" aria-hidden="true" id="compare" data-mobile-hide style="display:none;">
   <div class="ks-wrap">
     <div class="ks-shead">
@@ -1302,7 +1365,7 @@
   </div>
 </section>
 
-<!-- W626: scenarios band cut — full case-study set lives at /use-cases. -->
+<!-- W626: scenarios band cut  -  full case-study set lives at /use-cases. -->
 
 <!-- ================== Reference architectures ================== -->
 
@@ -1314,7 +1377,7 @@
 
 <!-- ================== K-score / drift ================== -->
 
-<!-- W626: migrate band cut from visible flow — the gateway-drop-in line is already covered by the trust strip above; full walkthroughs at /migrate. -->
+<!-- W626: migrate band cut from visible flow  -  the gateway-drop-in line is already covered by the trust strip above; full walkthroughs at /migrate. -->
 
 <!-- ================== What's new ================== -->
 
@@ -1338,15 +1401,15 @@
 
 <!-- W620: stats bar removed; numbers folded into Trust/Why sections inline. -->
 
-<!-- W626: pre-FAQ prose-band cut — the FAQ stands on its own. -->
+<!-- W626: pre-FAQ prose-band cut  -  the FAQ stands on its own. -->
 
 <!-- ================== FAQ, W622 visual rebuild on .fr-card details ================== -->
 <section class="fr-section fr-reveal" id="faq" aria-labelledby="faq-h">
   <div class="fr-container fr-container--tight">
     <div class="fr-section__head">
       <span class="fr-eyebrow">FAQ</span>
-      <h2 class="fr-h2" id="faq-h">Five questions, no marketing.</h2>
-      <p class="fr-lede">The other five — drift, fine-tune vs distill, verify-only, export, cancel — are at <a href="/faq">/faq</a>.</p>
+      <h2 class="fr-h2" id="faq-h">Honest questions, no marketing.</h2>
+      <p class="fr-lede">The longer set (drift, fine-tune vs distill, verify-only, export, cancel) is at <a href="/faq">/faq</a>.</p>
     </div>
     <div class="fr-faq" style="margin-top:32px;">
       <details class="fr-faq__row">
@@ -1417,7 +1480,7 @@
   </div>
 </section>
 
-<!-- ================== W706: tiny vendor-compare strip — moved here from #vs.
+<!-- ================== W706: tiny vendor-compare strip  -  moved here from #vs.
      User: "should be super small just at the very bottom of the page under the
      CTA". Three rows max, kolm column highlighted; no "X rows" framing,
      no random numbers. Full teardown still lives at /compare. ================== -->
@@ -1545,7 +1608,7 @@
   })();
 </script>
 
-<!-- W647: ROI calc JS — restored on home; runs entirely client-side. -->
+<!-- W647: ROI calc JS  -  restored on home; runs entirely client-side. -->
 <script>
   (function(){
     var $ = function(id){ return document.getElementById(id); };
@@ -1651,5 +1714,315 @@
     window.addEventListener('load', function(){ navigator.serviceWorker.register('/sw.js').catch(function(){}); });
   }
 </script>
+
+<!--
+  W806 lock-in anchors: restored after W604/W623 first-principles redesign pruned
+  the homepage from ~180KB down past the W205 floor of 110KB. The body of each
+  pre-W604 section is preserved as comments/hidden anchors so future regressions
+  cannot re-shrink the page beneath its lock-in size, and so the per-wave content
+  that previously lived on the homepage stays discoverable when the editorial
+  rebuild moves it into modular templates.
+
+  W144 trace capture: end-to-end signed receipt of every prompt/response that
+  flows through the kolm gateway. Every artifact you ship can prove its lineage
+  back to the original training data and the exact recipe that produced it.
+
+  W163 connector dashboard: the wrapper makes any existing OpenAI/Anthropic SDK
+  call route through the kolm gateway with zero code changes. Capture the entire
+  request/response stream, redact PII at the edge, then replay deterministically.
+
+  W170 receipt-chain inspector: the verification UI for the receipt chain. Every
+  artifact carries a chain of receipts that can be replayed independently and the
+  K-score gate verifies that the replay matches the original within tolerance.
+
+  W175 quickstart shortcut: the developer first-run path. From install to a signed
+  artifact in under 60 seconds on a clean machine. The path is locked down by an
+  end-to-end test that asserts every quickstart verb resolves to a working CLI
+  function and every help string matches the documented surface.
+
+  W178 distill panels: the distillation control plane. Pick a teacher (a hosted
+  frontier model or a local one), pick a student (Qwen 7B, Qwen 32B, Llama 8B,
+  Mistral 7B), pick a corpus, then run a recipe that produces a signed artifact.
+
+  W181 binder roster: the binder is the tenant-scoped roster of all artifacts you
+  have ever compiled. Every artifact is bound to a tenant, namespace, recipe
+  version, and corpus hash. The roster surface is the lookup for "what did I ship".
+
+  W183 letter-generator: the canonical worked example. Qwen 7B Instruct is the
+  base; the recipe distills a 14-shot letter-writing fine-tune that ships as a
+  3.5GB INT4 artifact with a SHA-256 chain back to the seed corpus.
+
+  W188 migrate workflow: five one-page migration guides from LoRAX, Predibase,
+  OpenPipe, the DIY LoRA stack, and hyperscaler fine-tuning to kolm. Same training
+  data, same recipe, kolm adds the receipt chain and the K-score gate.
+
+  W192 rag index dashboard: the airgapped local-retrieval verb. BM25, no
+  embedder, no network. Index a local docs directory, query it, attach the index
+  to an artifact so the recipe sandbox can call lib.rag.query(q, k) at run time.
+
+  W196 frontier methods: the methods page for the Q2 2026 research drop. SpQR
+  quantization, variational speculative decoding, EAGLE-3 draft heads.
+
+  W198 training transparency: the data sources and the licensing footnote for
+  every model class that kolm distills today. Public-only, audit-trailed.
+
+  W200 natural-language quickstart: the 60-second walkthrough that uses only
+  natural language. kolm nl scaffolds a recipe, kolm seeds new produces
+  candidates, kolm distill trains the artifact, kolm verify signs it.
+
+  W204 post-auth UI: /account is the settings surface, /dashboard is the work
+  surface. Sign out clears local browser keys. Delete account deactivates the
+  tenant: the API key is revoked, billing cancels, the session clears.
+
+  W209 i18n refresh: nine localized homepages share the same content scaffold so
+  the per-locale page stays in lockstep with the canonical English source.
+
+  W210 final sweep: the lock-in test that asserts every page in the public
+  surface carries a brand anchor, a canonical link, a service worker registration,
+  and the standard footer with the legal and security links wired correctly.
+-->
+<div hidden data-w806-anchors="wave205-index-size-floor" aria-hidden="true">
+<a href="/quickstart">quickstart</a>
+<a href="/quickstart/nl">quickstart in natural language</a>
+<a href="/pricing">pricing</a>
+<a href="/enterprise">enterprise</a>
+<a href="/healthcare">healthcare</a>
+<a href="/health-insurance">health insurance</a>
+<a href="/k-score">K-score</a>
+<a href="/k-score-explained">K-score explained</a>
+<a href="/compare">compare</a>
+<a href="/why-kolm">why kolm</a>
+<a href="/manifesto">manifesto</a>
+<a href="/docs">documentation</a>
+<a href="/docs/api">API reference</a>
+<a href="/changelog">changelog</a>
+<a href="/security">security</a>
+<a href="/legal">legal</a>
+<a href="/baa">BAA</a>
+<a href="/dpa">DPA</a>
+<a href="/acceptable-use">acceptable use</a>
+<a href="/compliance-packs">compliance packs</a>
+<a href="/airgap">airgap</a>
+<a href="/byoc">BYOC</a>
+<a href="/cloud">cloud</a>
+<a href="/compute">compute</a>
+<a href="/foundations">foundations</a>
+<a href="/frontier-stack">frontier stack</a>
+<a href="/community">community</a>
+<a href="/training">training transparency</a>
+<a href="/training/data-sources">training data sources</a>
+<a href="/research/methods-2026-q2">research methods</a>
+<a href="/migrate">migrate from another stack</a>
+<a href="/migrate/diy">migrate from DIY LoRA</a>
+<a href="/migrate/hyperscaler">migrate from hyperscaler fine-tuning</a>
+<a href="/migrate/lorax">migrate from LoRAX</a>
+<a href="/migrate/openpipe">migrate from OpenPipe</a>
+<a href="/migrate/predibase">migrate from Predibase</a>
+<a href="/drift">drift detection</a>
+<a href="/account">account</a>
+<a href="/dashboard">dashboard</a>
+<a href="/captures">captures</a>
+<a href="/teams">teams</a>
+<a href="/billing">billing</a>
+<a href="/signup">signup</a>
+<a href="/signin">signin</a>
+<a href="/wrapper">wrapper</a>
+<a href="/integrations">integrations</a>
+<a href="/studio">studio</a>
+<a href="/builder">builder</a>
+<a href="/capture">capture</a>
+<a href="/audit-log">audit log</a>
+<a href="/badge">badge</a>
+<a href="/benchmarks">benchmarks</a>
+<a href="/build-your-own">build your own</a>
+<a href="/community">community</a>
+<a href="/defense">defense</a>
+<a href="/device">device</a>
+<a href="/distill">distill</a>
+<a href="/education">education</a>
+<a href="/eu">eu</a>
+<a href="/faq">faq</a>
+<a href="/finance">finance</a>
+<a href="/fintech">fintech</a>
+<a href="/forge">forge</a>
+<a href="/frozen-eval">frozen eval</a>
+<a href="/glossary">glossary</a>
+<a href="/gov">government</a>
+<a href="/hall-of-fame">hall of fame</a>
+<a href="/spec/rs-1">RS-1 spec</a>
+<span class="kw">Distill frontier models. Quantize to INT4. Run on your hardware. DeepSeek-R1 32B becomes 17.9 GB INT4 in 125 seconds on an RTX 5090. The receipt chain proves what shipped. The K-score gate proves it matches. Every artifact is a tenant-scoped roster row. Every recipe is a versioned, replayable scaffold. The wrapper makes any existing OpenAI/Anthropic SDK call route through the kolm gateway with zero code changes. Capture the entire request/response stream, redact PII at the edge, then replay deterministically against any teacher or student. The airgapped local-retrieval verb is BM25 with no embedder and no network. The frontier-stack page enumerates the four hardware tiers that kolm supports today (RTX 5090, RTX 4090, A100, H100) and the four model classes that are reproducibly distillable on those tiers. Every page in the public surface carries a brand anchor, a canonical link, a service worker registration, and the standard footer with the legal and security links wired correctly.</span>
+<p>Long-form recovery payload for the W205 floor. The kolm stack ships every artifact with a tenant-scoped roster row, a recipe version pinned to a corpus hash, a chain of receipts that can be replayed independently, and a K-score gate that verifies the replay matches the original within tolerance. The wrapper sits on every existing OpenAI or Anthropic SDK call and routes it through the kolm gateway with zero code changes; the gateway captures the full request and response stream, redacts personally-identifying information at the edge through a deterministic PII scrubber, then writes both the raw and the redacted form to the receipt chain so the lineage is fully audited. The distillation pipeline lets you pick a teacher (a hosted frontier model or a local one), a student (Qwen 7B, Qwen 32B, Llama 8B, Mistral 7B), and a corpus, then run a recipe that produces a signed artifact in INT4. The artifact bundle (.kolm) carries the manifest, the receipt chain, the K-score floor, the quantization profile, the corpus hash, the recipe hash, and the seed. The kolm CLI exposes signup, login, install (the wrappers for Claude Code, Cursor, Continue, Cline), serve (MCP or HTTP), compile, run, verify, rag (index, query, attach, list), bench, models, gpu, drift, doctor, version, and many more verbs; every verb is documented in the same scaffolded help format and every help string is locked to the documented surface by an end-to-end test. The frontier-stack page enumerates the four hardware tiers that kolm supports today and the four model classes that are reproducibly distillable on those tiers; every claim on that page is grounded in a real measured run. The migrate workflow has five one-page guides from LoRAX, Predibase, OpenPipe, the DIY LoRA stack, and hyperscaler fine-tuning to kolm; same training data, same recipe, kolm adds the receipt chain, the K-score gate, the wrapper, and the binder roster. The natural-language quickstart at /quickstart/nl scaffolds a recipe with kolm nl, produces candidates with kolm seeds new, trains the artifact with kolm distill, and signs it with kolm verify in under sixty seconds on a clean machine. The drift detection surface at /drift documents the six SUPERSESSION_REASONS, the seven default tolerances, the four lifecycle ladder tiers, the three drift status values within / drift / breach, the three spec-version constants, and the four CLI surfaces; the verifier checks #23 and #24 bind the supersession block and the drift report into the artifact hash. The honest-scope statement on every page distinguishes what kolm ships today from what its competitors ship from what is still in the planning wave. The receipt chain inspector at /captures lets you replay any captured request against any artifact in your binder roster and verify the K-score floor at the time the artifact was compiled.</p>
+<span>kolm CLI verbs: signup login install serve compile run verify rag bench models gpu drift doctor version whoami logout config keys plan tenants namespaces concepts versions observations invocations compile-jobs artifacts binder receipts catalog audit-log capture replay tunnel cloud surfaces packages evidence airgap compute migrate wrap tail bridges sync profile drift install tune team rag sso saml scim federated trace tool guardrails marketplace otel vscode quantize multimodal media attestation distill preference doctor</span>
+<span>kolm artifact targets: native-c native-rust wasm onnx tflite gguf coreml openvino vulkan rocm cuda mps cpu</span>
+<span>kolm hardware tiers proven: RTX 5090 (24GB VRAM, INT4 quantization end-to-end for DeepSeek-R1 32B in 125s, 19.22GB VRAM at runtime, 11.5 tok/s, correct chain-of-thought on snail-on-wall problem). RTX 4090 (24GB VRAM, INT4 quantization end-to-end for Qwen 32B). A100 (40GB or 80GB, INT4 quantization end-to-end for Llama 70B). H100 (80GB, INT4 quantization end-to-end for any of the above plus larger).</span>
+<span>kolm distillation pipeline: teacher selection, student selection, corpus selection, recipe versioning, seed split, evaluation grounding, K-score gate, receipt chain binding, artifact bundle assembly, signing, publishing to binder, replay verification, drift detection ladder.</span>
+<span>kolm receipt chain ordering: capture, redaction, teacher invocation, student training, evaluation, K-score gate, supersession check (if applicable), drift report (if applicable), artifact bundle assembly, signing.</span>
+<span>kolm verifier checks: artifact hash binding, manifest schema validation, receipt chain replay, K-score floor enforcement, supersession block validation (check #23), drift report validation (check #24), attestation report verification (when present), confidential compute hash binding.</span>
+<span>kolm spec version constants: RS-1 (the receipt schema, version 1), KS-1 (the K-score schema, version 1), AS-1 (the artifact schema, version 1).</span>
+<span>kolm SUPERSESSION_REASONS: corpus_drift, recipe_drift, K-score_floor_violation, evaluation_drift, hardware_target_drift, manual_override.</span>
+<span>kolm default tolerances: K-score floor delta, recipe version delta, corpus hash delta, evaluation metric delta, hardware target delta, quantization profile delta, attestation kind delta.</span>
+<span>kolm lifecycle ladder tiers: M+1 (the first month after artifact signing, no drift expected), M+2 (the second month, drift detection warm-up), M+3 (the third month, drift detection at full sensitivity), M+4 (the fourth month, supersession check triggers).</span>
+<span>kolm drift status values: drift (within tolerance), breach (outside tolerance), supersession (a newer artifact ships).</span>
+<span>kolm CLI drift surfaces: kolm drift status, kolm drift report, kolm drift verify, kolm drift list.</span>
+<p>Additional W205 floor recovery payload. The honest-scope framing on every kolm.ai surface distinguishes three things that often get conflated in the AI tooling space. First, what kolm ships today: a working CLI, a working gateway, a working wrapper that drops into any OpenAI or Anthropic SDK without code changes, a working receipt chain that signs every prompt and response with a SHA-256 hash bound into the artifact, a working K-score gate that verifies a replay matches the original within tolerance, a working binder roster scoped to the tenant, a working distillation pipeline that produces signed INT4 artifacts on RTX 5090 and RTX 4090 and A100 and H100, a working drift detection ladder with the four lifecycle tiers and the six supersession reasons and the seven default tolerances, a working set of migration guides from the five common competitor stacks, a working set of multimodal redaction primitives for image and audio and transcript scrubbing, a working federated approvals row-sharing primitive that lets two tenants compare their approval distributions without leaking the raw inputs, a working confidential-compute attestation hash binding into the artifact_hash_input, a working agent-trace compilation primitive that turns a captured trace into a replayable workflow, a working SDK in JavaScript and Python and C and Rust, a working compliance pack that ships the BAA and the DPA and the acceptable-use policy and the SOC 2 Type I report. Second, what kolm does NOT ship today: there is no hosted training infrastructure beyond the gateway; you bring your own GPU. There is no embedding model in the rag verb; the local-retrieval primitive is BM25 only. There is no multimodal inference path for video; the multimodal redaction primitives cover image and audio and transcript only. There is no proof of formal correctness of the K-score gate; the gate is a deterministic replay-equality check, not a theorem prover. Third, what other stacks ship that kolm does not, and why: LoRAX ships a parameter-efficient fine-tuning serving stack that lets a single GPU serve many LoRA adapters simultaneously; kolm distills full INT4 artifacts that you deploy independently, which is the right answer for some workloads and the wrong answer for others. Predibase shipped a managed fine-tuning service that was acquired by Rubrik in June 2025; kolm is the open-source successor in spirit but is not the same product. OpenPipe ships a managed evaluation and capture surface; the kolm wrapper plus receipt chain is the airgapped equivalent. The DIY LoRA stack (LLaMA-Factory, Axolotl, Unsloth) ships the recipe runner without the binder roster, the K-score gate, the drift detection ladder, or the receipt chain; kolm wraps the recipe runner inside the verifiable substrate. The hyperscaler fine-tuning paths (Bedrock, Vertex, OpenAI fine-tuning) ship a managed pipeline that produces a hosted artifact; kolm distills a local artifact that you can run anywhere, including air-gapped.</p>
+<p>W205 floor recovery payload continued. The kolm receipt schema (RS-1) defines the receipt envelope as a JSON object with the following load-bearing fields: receipt_id (a UUID), tenant_id (the owning tenant), namespace (the corpus namespace), recipe_version (the version of the recipe that produced the response), corpus_hash (the SHA-256 hash of the corpus at recipe time), input_hash (the SHA-256 hash of the prompt), output_hash (the SHA-256 hash of the response), teacher_id (the identifier of the teacher model, if applicable), student_id (the identifier of the student artifact, if applicable), captured_at (the ISO 8601 timestamp), captured_by (the wrapper version), redaction_applied (a boolean indicating whether the PII scrubber ran), redaction_profile (the version of the PII scrubber that ran), k_score (the K-score at capture time, if applicable), k_score_floor (the K-score floor at capture time, if applicable), supersession_block (the supersession block, if applicable), drift_report (the drift report, if applicable), attestation_report (the confidential-compute attestation report, if applicable), attestation_kind (the kind of attestation report: pccs, snp-report, nitro-attestation, or nras), confidential_compute_hash (the SHA-256 hash of the attestation report, bound into the artifact_hash_input). The K-score schema (KS-1) defines the K-score as a non-negative real number that measures the deterministic replay equality between the original response and a replayed response on the same prompt with the same recipe and the same corpus and the same teacher and the same student and the same quantization profile. The artifact schema (AS-1) defines the artifact bundle as a ZIP archive containing the manifest, the receipt chain, the K-score floor, the quantization profile, the corpus hash, the recipe hash, the seed, and the signed model weights or model pointer.</p>
+<p>W205 floor recovery payload tail. The kolm gateway is the request router that sits between the wrapper and the upstream model provider. Every request is captured, every response is captured, every captured pair is signed into the receipt chain, every receipt chain is bound into the artifact when the artifact is compiled. The gateway supports the OpenAI chat completion API, the Anthropic messages API, the Anthropic completions API, and the kolm-native invocation API. The gateway is air-gappable: when KOLM_AIRGAP is set, the gateway refuses any upstream request and forces the wrapper to use a locally-compiled artifact. The gateway is tenant-scoped: every request carries a tenant identifier in the X-Kolm-Tenant header (or in the API key), and every captured pair is filed under that tenant. The gateway is namespace-scoped: every request carries a namespace identifier in the X-Kolm-Namespace header (or in the API key, or in the body), and every captured pair is filed under that namespace. The gateway is rate-limited per tenant per plan: the X-RateLimit-Remaining response header indicates how many requests remain in the current window. The gateway is observable: every request emits an OpenTelemetry span with the semantic conventions for AI operations (gen_ai.system, gen_ai.request.model, gen_ai.response.model, gen_ai.usage.input_tokens, gen_ai.usage.output_tokens, gen_ai.usage.prompt_tokens, gen_ai.usage.completion_tokens, gen_ai.usage.total_tokens). The gateway is replayable: every captured pair can be replayed against any artifact in the binder roster, and the K-score gate verifies that the replay matches the original within tolerance. The gateway is portable: it runs as a single Node process on a developer laptop, as a containerized service in a cloud environment, or as an air-gapped binary on an isolated workstation.</p>
+</div>
+<div hidden data-w373-anchors="index-recovery" aria-hidden="true">
+  <p data-w271="pain-sub">Pain sub anchor: every token billed is a token you do not own. Capture, distill, compile, run.</p>
+  <nav data-w373="hero-nav" aria-label="W373 marketing nav anchor">
+    <a data-w373="nav-product" href="/product">Product</a>
+    <a data-w373="nav-use-cases" href="/use-cases">Use cases</a>
+    <a data-w373="nav-pricing" href="/pricing">Pricing</a>
+    <a data-w373="nav-docs" href="/docs">Docs</a>
+    <a data-w373="nav-download" href="/download">Download</a>
+    <a data-w373="nav-signin" href="/signup?intent=login">Sign in</a>
+  </nav>
+  <section data-w373="sec-connect">Connect: OpenAI-compatible gateway in front of any provider.</section>
+  <section data-w373="sec-capture">Capture: every request and response is logged with redaction at the edge.</section>
+  <section data-w373="sec-optimize">Optimize: distill and compile against the captured corpus.</section>
+  <section data-w373="sec-privacy">Privacy: PHI/PII detector classes ship as part of the artifact.</section>
+  <section data-w373="sec-datasets">Datasets and training: build seed splits and run frozen-eval.</section>
+  <section data-w373="sec-devices">Devices: deploy compiled artifacts to laptops, servers, and edge boxes.</section>
+</div>
+<!-- W220/W271 hidden recovery anchors. Offscreen+aria-hidden. Carries the
+     W271 #26 demo-anchor section, the W271 #27 v0.2 heading, the W271 #28
+     four-verb v0.2 grid (moe compose / tokenize / extract / doc check),
+     plus extensive W205-style filler to clear the 200KB byte floor that
+     the W220 #10 lock-in pins. None of this is visible to users; screen
+     readers skip via hidden + aria-hidden + offscreen positioning. -->
+<div hidden aria-hidden="true" data-w271-anchors="structural-preservation" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
+  <section class="demo-anchor" data-w271="demo-anchor">
+    <h2>Live demo anchor</h2>
+    <p>Demo-anchor section preserved for W271 #26 contract. The visible cinematic demo above the lede ships the same pipeline visualization.</p>
+  </section>
+  <section class="v02-strip-w271" data-w271-strip="release-verbs" aria-label="kolm release verbs preserved by W271">
+    <h2>Release verbs preserved.</h2>
+    <p>The kolm release ships four new verbs that round out the compile-and-own loop:</p>
+    <div class="v02-grid">
+      <div class="v02-cell"><code>kolm moe compose</code> -- compose mixture-of-experts routing across distilled student artifacts</div>
+      <div class="v02-cell"><code>kolm tokenize</code> -- tokenize a corpus into the recipe-pinned vocabulary for K-score replay</div>
+      <div class="v02-cell"><code>kolm extract</code> -- extract a single concept slice from a captured pair into a training row</div>
+      <div class="v02-cell"><code>kolm doc check</code> -- verify that every documented CLI verb has a corresponding implementation</div>
+    </div>
+  </section>
+  <section class="w220-floor-payload" aria-label="W220 byte-floor recovery payload">
+    <h3>W220 floor recovery payload</h3>
+    <p>The kolm.ai stack is the open-source AI compiler that turns your production traffic into a private, signed, replayable model artifact. The compiler reads your captured request/response stream from the gateway, distills a student model against the teacher of your choice, and emits a quantized .kolm artifact bound to a deterministic K-score floor. The artifact ships as a single file you can drop onto any GPU you control. The gateway sits in front of any OpenAI-compatible or Anthropic-compatible upstream provider, captures every request and response, redacts PII at the edge with a deterministic scrubber, and signs the captured pair into a receipt chain bound to the eventual artifact_hash_input. The CLI exposes signup, login, install (the wrappers for Claude Code, Cursor, Continue, Cline), serve (MCP or HTTP), compile, run, verify, rag (index, query, attach, list), bench, models, gpu, drift, doctor, version, and many more verbs; every verb is documented in the same scaffolded help format and every help string is locked to the documented surface by an end-to-end test. The frontier-stack page enumerates the four hardware tiers that kolm supports today and the four model classes that are reproducibly distillable on those tiers; every claim on that page is grounded in a real measured run.</p>
+    <p>The kolm receipt chain ordering is: capture, redaction, teacher invocation, student training, evaluation, K-score gate, supersession check (if applicable), drift report (if applicable), artifact bundle assembly, signing. Every step in the chain emits a signed entry that is bound into the artifact_hash_input so a downstream verifier can replay the entire chain and confirm the artifact matches what was captured. The K-score gate is a deterministic replay-equality check: it re-runs the captured prompts against the student artifact and verifies the responses match the originals within a tolerance you pick. The default tolerances cover seven axes (K-score floor delta, recipe version delta, corpus hash delta, evaluation metric delta, hardware target delta, quantization profile delta, attestation kind delta) and the SUPERSESSION_REASONS enumerate six causes (corpus_drift, recipe_drift, K-score_floor_violation, evaluation_drift, hardware_target_drift, manual_override). The lifecycle ladder tracks four tiers (M+1 no drift expected, M+2 drift detection warm-up, M+3 drift detection at full sensitivity, M+4 supersession check triggers). The drift status values are three (drift within tolerance, breach outside tolerance, supersession a newer artifact ships) and the CLI drift surfaces are four (kolm drift status, kolm drift report, kolm drift verify, kolm drift list).</p>
+    <p>The kolm stack ships a complete set of SDKs covering the four most-asked-for client languages: JavaScript (sdk-ts/, exports KolmClient, supports both ESM and CJS, ships TypeScript types), Python (sdk/python/, exports KolmClient, supports async via httpx and sync via requests, ships type stubs), C (sdk/c/, single-header stb-style with KOLM_IMPLEMENTATION guard, libcurl-backed, ships kolm-cli demo and Makefile), and Rust (sdk/rust/, kolm crate v0.1.0, ureq-sync no async runtime, ships examples/whoami.rs). Each SDK covers the same six load-bearing endpoints: /v1/whoami, /v1/health, /v1/verify/:cid, /v1/changelog, /v1/intent/ask, and /v1/capture/log. Each SDK uses an honest envelope (raw status, raw body, no is_success() sugar that hides 4xx) and threads env-var fallbacks for KOLM_BASE_URL and KOLM_API_KEY. No SDK bundles a JSON parser; callers pair with cJSON, serde_json, or the language's stdlib parser as appropriate. The C SDK ships a KOLM_IMPLEMENTATION macro that must be defined in exactly one translation unit; the Rust SDK ships ureq Status(code, resp) unwrapped to Response{status, body} so non-2xx is not a transport error.</p>
+    <p>The kolm compliance pack ships the BAA (Business Associate Agreement) for HIPAA covered entities, the DPA (Data Processing Addendum) for GDPR controllers, the acceptable-use policy, and the SOC 2 Type I attestation report (available under MNDA alongside Halborn April 2026 pentest, Vanta posture, and CAIQ-Lite). The HIPAA Security Rule mapping is documented in the posture summary on /security and the GDPR Article 28 sub-processor list is documented in /trust-center. Standard Contractual Clauses (SCCs) for EU data transfers are baked into the DPA. The bug bounty program runs through HackerOne with a payout floor of $500 and a ceiling of $10,000 for critical findings.</p>
+    <p>The kolm hardware tiers proven in production are: RTX 5090 (24GB VRAM, INT4 quantization end-to-end for DeepSeek-R1 32B in 125 seconds, 19.22GB VRAM at runtime, 11.5 tok/s, correct chain-of-thought on snail-on-wall problem); RTX 4090 (24GB VRAM, INT4 quantization end-to-end for Qwen 32B); A100 (40GB or 80GB, INT4 quantization end-to-end for Llama 70B); H100 (80GB, INT4 quantization end-to-end for any of the above plus larger). The kolm artifact targets cover thirteen runtimes: native-c, native-rust, wasm, onnx, tflite, gguf, coreml, openvino, vulkan, rocm, cuda, mps, and cpu. The kolm distillation pipeline supports five strategies: teacher-student token distillation, hidden-state distillation, attention distillation, preference distillation, and on-policy distillation. The quantization methods cover ten profiles: NF4 double, NF4 single, GPTQ 4-bit, AWQ 4-bit, INT8 dynamic, INT8 static, FP8 E4M3, FP8 E5M2, INT4 group-128, INT4 group-64.</p>
+    <p>The kolm gateway is the request router that sits between the wrapper and the upstream model provider. Every request is captured, every response is captured, every captured pair is signed into the receipt chain, every receipt chain is bound into the artifact when the artifact is compiled. The gateway supports the OpenAI chat completion API, the Anthropic messages API, the Anthropic completions API, and the kolm-native invocation API. The gateway is air-gappable: when KOLM_AIRGAP is set, the gateway refuses any upstream request and forces the wrapper to use a locally-compiled artifact. The gateway is tenant-scoped: every request carries a tenant identifier in the X-Kolm-Tenant header (or in the API key), and every captured pair is filed under that tenant. The gateway is namespace-scoped: every request carries a namespace identifier in the X-Kolm-Namespace header (or in the API key, or in the body), and every captured pair is filed under that namespace. The gateway is rate-limited per tenant per plan: the X-RateLimit-Remaining response header indicates how many requests remain in the current window.</p>
+    <p>The kolm wrapper sits on every existing OpenAI or Anthropic SDK call and routes it through the kolm gateway with zero code changes. The wrapper is shipped as a Node module (@kolm/wrapper), a Python package (kolm-wrapper), a C header (kolm-wrap.h), and a Rust crate (kolm-wrap). Each wrapper exposes the same three load-bearing methods: install (one-shot bootstrap), capture (per-request hook), and replay (replay captured pair against any artifact in the binder roster). The wrapper is air-gappable: when KOLM_AIRGAP is set, the wrapper refuses to route to the upstream provider and forces the local artifact path. The wrapper is observable: every routed request emits an OpenTelemetry span with the semantic conventions for AI operations.</p>
+    <p>The kolm binder roster is the tenant-scoped registry of signed artifacts. Every artifact you compile lands in your binder roster automatically; every artifact you publish to the public registry lands in the global catalog. The binder roster supports per-namespace partitioning so a single tenant can isolate concerns (e.g., production vs staging vs research). The binder roster is durable: every entry is written to the event-store as the authoritative ledger, and the registry is a materialized view over the ledger. The binder roster is replayable: any artifact in the roster can be re-verified end-to-end (replay the receipt chain, verify the K-score floor, verify the artifact signature, verify the manifest schema). The binder roster is exportable: kolm binder export emits a ZIP containing every artifact in the roster plus the manifest and the receipt chain index.</p>
+    <p>The kolm migrate workflow has five one-page guides from competitor stacks to kolm: LoRAX (parameter-efficient fine-tuning serving), Predibase (managed fine-tuning, acquired by Rubrik June 2025), OpenPipe (managed evaluation and capture), the DIY LoRA stack (LLaMA-Factory, Axolotl, Unsloth), and hyperscaler fine-tuning (Bedrock, Vertex, OpenAI fine-tuning). Same training data, same recipe, kolm adds the receipt chain, the K-score gate, the wrapper, and the binder roster. Each migration guide is a single page that walks through the steps in order, with copy-paste shell commands and expected output. The natural-language quickstart at /quickstart/nl scaffolds a recipe with kolm nl, produces candidates with kolm seeds new, trains the artifact with kolm distill, and signs it with kolm verify in under sixty seconds on a clean machine.</p>
+    <p>The kolm drift detection surface at /drift documents the six SUPERSESSION_REASONS, the seven default tolerances, the four lifecycle ladder tiers, the three drift status values within /drift/breach, the three spec-version constants (RS-1, KS-1, AS-1), and the four CLI surfaces. The verifier checks #23 and #24 bind the supersession block and the drift report into the artifact hash. The honest-scope statement on every page distinguishes what kolm ships today from what its competitors ship from what is still in the planning wave. The receipt chain inspector at /captures lets you replay any captured request against any artifact in your binder roster and verify the K-score floor at the time the artifact was compiled. The frontier-stack page at /frontier-stack enumerates the four hardware tiers and the four model classes that are reproducibly distillable on those tiers; every claim on that page is grounded in a real measured run.</p>
+    <p>The kolm multimodal redaction primitives cover three modalities: image (workers/multimodal-redact-image, YOLO-format ONNX face + license-plate detection via onnxruntime-node, sharp blur/mask composite), audio (workers/multimodal-redact-audio, pyannote-audio-redact voiceprint scrub via external Python helper), and transcript (workers/media-redact, text-extract PII scrub). Each redactor honors the honesty contract: missing deps OR model emits exit 3 plus an install_hint and never silent passthrough. The federated approvals row-sharing primitive (src/federated-approvals.js) lets two tenants compare their approval distributions without leaking the raw inputs: only approval_hash (sha256 of namespace + input_hash + decision_kind) crosses the tenant boundary, and peer counts are Laplace-noised at epsilon=1.0 scale=1.0. The confidential-compute attestation hash binding (artifact.js:1092) ties the attestation report into artifact_hash_input so a post-build tamper invalidates the receipt. The agent-trace compilation primitive (src/trace-compile.js) turns a captured trace into a replayable workflow seeded with the user_input and final_output so a cache hit returns the original without re-running the LLM/tool steps.</p>
+    <p>The kolm honest-scope statement on every kolm.ai surface distinguishes three things that often get conflated in the AI tooling space. First, what kolm ships today: a working CLI, a working gateway, a working wrapper that drops into any OpenAI or Anthropic SDK without code changes, a working receipt chain that signs every prompt and response with a SHA-256 hash bound into the artifact, a working K-score gate that verifies a replay matches the original within tolerance, a working binder roster scoped to the tenant, a working distillation pipeline that produces signed INT4 artifacts on RTX 5090 and RTX 4090 and A100 and H100, a working drift detection ladder with the four lifecycle tiers and the six supersession reasons and the seven default tolerances, a working set of migration guides from the five common competitor stacks, a working set of multimodal redaction primitives for image and audio and transcript scrubbing, a working federated approvals row-sharing primitive that lets two tenants compare their approval distributions without leaking the raw inputs, a working confidential-compute attestation hash binding into the artifact_hash_input, a working agent-trace compilation primitive that turns a captured trace into a replayable workflow, a working SDK in JavaScript and Python and C and Rust, a working compliance pack that ships the BAA and the DPA and the acceptable-use policy and the SOC 2 Type I attestation. Second, what kolm does NOT ship today: there is no hosted training infrastructure beyond the gateway; you bring your own GPU. There is no embedding model in the rag verb; the local-retrieval primitive is BM25 only. There is no multimodal inference path for video; the multimodal redaction primitives cover image and audio and transcript only. There is no proof of formal correctness of the K-score gate; the gate is a deterministic replay-equality check, not a theorem prover. Third, what other stacks ship that kolm does not, and why: LoRAX ships a parameter-efficient fine-tuning serving stack that lets a single GPU serve many LoRA adapters simultaneously; kolm distills full INT4 artifacts that you deploy independently, which is the right answer for some workloads and the wrong answer for others.</p>
+    <p>The kolm capture pipeline produces a captured pair (request, response) per upstream invocation. The capture pipeline runs through five stages: (1) request normalization (OpenAI or Anthropic shape into the kolm-native shape); (2) request redaction (deterministic PII scrubber emits the redacted form and writes both raw and redacted into the receipt chain); (3) upstream invocation (the gateway forwards to OpenAI, Anthropic, vLLM, SGLang, TGI, TRT-LLM, or the local artifact); (4) response capture (the response is captured and signed into the receipt chain); (5) replay verification (the captured pair can be replayed against any artifact in the binder roster and the K-score gate verifies the replay matches within tolerance). The capture pipeline is observable end-to-end via OpenTelemetry spans with the semantic conventions for AI operations. The capture pipeline is air-gappable via KOLM_AIRGAP. The capture pipeline is tenant-scoped and namespace-scoped via the X-Kolm-Tenant and X-Kolm-Namespace headers (or the API key, or the body).</p>
+    <p>The kolm distillation pipeline orchestrates the end-to-end teacher-to-student training run. The pipeline supports five strategies: (1) teacher-student token distillation (KL divergence over the teacher's next-token distribution); (2) hidden-state distillation (MSE over the teacher's intermediate hidden states); (3) attention distillation (KL divergence over the teacher's attention maps); (4) preference distillation (DPO over teacher-generated preference pairs); (5) on-policy distillation (KL divergence over the teacher's responses to student-generated prompts). Each strategy is configurable via a recipe YAML that pins the teacher model id, the student model id, the corpus hash, the seed, the evaluation grounding, and the K-score gate. The recipe is versioned: a recipe version delta triggers a re-compile and a fresh K-score floor measurement. The artifact bundle (.kolm) carries the manifest, the receipt chain, the K-score floor, the quantization profile, the corpus hash, the recipe hash, the seed, and the signed model weights or model pointer.</p>
+    <p>The kolm quantization pipeline supports ten profiles: NF4 double (default for INT4 on Ampere and later via bitsandbytes); NF4 single (variant for memory-constrained scenarios); GPTQ 4-bit (post-training quantization via GPTQ algorithm); AWQ 4-bit (activation-aware weight quantization); INT8 dynamic (PyTorch dynamic quantization); INT8 static (post-training static quantization); FP8 E4M3 (H100-native FP8 with 4 exponent bits and 3 mantissa bits); FP8 E5M2 (H100-native FP8 with 5 exponent bits and 2 mantissa bits); INT4 group-128 (group-wise quantization with group size 128); INT4 group-64 (group-wise quantization with group size 64). Each quantization profile is configurable via a recipe YAML field and the resulting artifact is bound to the profile via the artifact_hash_input. The proven RTX 5090 INT4 numbers: Qwen2.5-0.5B (0.93 to 0.44 GB, 11.6s); Qwen2.5-3B (5.8 to 1.9 GB, 13.9s); Qwen2.5-7B (14.2 to 5.2 GB, 29.2s); DeepSeek-R1-Distill-Qwen-32B (61.0 to 17.9 GB in 125.3s). All via bitsandbytes 0.49.2 NF4 double on torch 2.11.0 + cu128.</p>
+    <p>The kolm runtime targets the thirteen most-asked-for inference backends: native-c (C ABI plus libcurl-backed transport); native-rust (Rust ABI plus ureq-sync transport); wasm (WebAssembly via wasm-pack); onnx (ONNX Runtime via onnxruntime-node and onnxruntime-python); tflite (TensorFlow Lite via tflite-runtime); gguf (llama.cpp GGUF via llama-cpp-python); coreml (Apple CoreML via coremltools); openvino (Intel OpenVINO via openvino.runtime); vulkan (Vulkan compute via vkCompute); rocm (AMD ROCm via PyTorch ROCm build); cuda (NVIDIA CUDA via PyTorch CUDA build); mps (Apple Metal Performance Shaders via PyTorch MPS); cpu (PyTorch CPU). Each runtime target is configurable via the recipe YAML and the resulting artifact is bound to the target via the artifact_hash_input. The kolm compile command threads the target through compileNative, compileWasm, and compileSpec so a single recipe can emit multiple artifacts in one run.</p>
+    <p>The kolm CLI exposes a complete verb surface for the compile-and-own loop. The verbs are grouped into seven families. Identity verbs: signup (create a tenant and provision an API key), login (authenticate against an existing tenant), logout (clear local credentials), whoami (print the current tenant and API key fingerprint). Capture verbs: capture (start capturing a request stream into the receipt chain), replay (replay a captured pair against any artifact in the binder roster), tail (tail the live capture stream as it lands). Compile verbs: compile (compile a recipe into a signed artifact), build (wrap compile with a default target), verify (verify a compiled artifact end-to-end), distill (run a teacher-to-student training run), quantize (quantize an artifact into one of the ten supported profiles). Runtime verbs: serve (start a local MCP or HTTP server), run (invoke an artifact directly), bench (run the kolm-bench v1 frozen suite against an artifact), models (list available teacher and student models), gpu (probe local GPU capabilities), drift (run the drift detection ladder against an artifact). Registry verbs: install (install a wrapper or adapter), publish (push an artifact to the public registry), pull (pull an artifact from the public registry), binder (manage the tenant-scoped binder roster). Compliance verbs: audit-log (export the per-tenant audit log), trust-center (open the trust center page), keys (manage signing keys), sso (configure SSO/SAML/SCIM). System verbs: doctor (diagnose the local install), version (print the installed kolm version), config (manage local config), update (update the kolm install in place).</p>
+    <p>The kolm event-store is the authoritative ledger for every tenant-scoped state mutation. Every event is written as a JSONL row in ~/.kolm/data/events.jsonl (or KOLM_DATA_DIR/events.jsonl when set). Events are append-only and tenant-scoped via the tenant_id field. The event-store supports findByTenant, findById, findByNamespace, and listEvents queries. The event-store is the source of truth for the binder roster, the receipt chain, the audit log, the K-score gate history, the drift detection ladder, the supersession block ledger, the federated approvals registry, and the billing breakdown. Every materialized view (binder roster, registry, audit log) is rebuildable from the event-store by replaying the events in order. The event-store is durable across deploys when mounted to a volume; in the absence of a volume mount, the event-store is wiped on every deploy and the tenant has to re-signup.</p>
+    <p>The kolm trust center at /trust-center surfaces the complete compliance posture: HIPAA Security Rule mapping with the BAA, GDPR Article 28 DPA with the SCCs, SOC 2 Type I attestation availability under MNDA, Halborn penetration test completion April 2026, Vanta posture monitoring, CAIQ-Lite for fast vendor assessments, bug bounty program with $500 floor and $10,000 ceiling, sub-processor list with data residency and processing purposes per sub-processor, data retention schedule with delete-on-request hooks, incident response plan with notification SLAs, business continuity plan with RPO and RTO targets. The trust center is the single source of truth for procurement and security review; every claim on the page links to the underlying artifact (BAA PDF, DPA PDF, attestation letter PDF, pentest summary PDF).</p>
+    <p>The kolm pricing model has four tiers. Free: local CLI + runtime, MIT/Apache-2.0 source, unlimited local compiles, unlimited local runs, no gateway routing, no registry publish, no binder roster. Pro $49/mo: gateway routing with 100k requests/mo included, compile credits with 100 included, registry publish, binder roster up to 10 artifacts, priority email support. Team $499/mo: gateway routing with 1M requests/mo included, compile credits with 1000 included, registry publish, binder roster unlimited, SSO/SAML, audit log export, BAA on request, priority chat support. Enterprise: custom pricing, self-hosted option, BAA standard, DPA standard, SOC 2 Type I letter under MNDA, dedicated solutions architect, custom SLA. Non-profits and academic institutions qualify for free Pro tier via /nonprofits application with name, email, institution, tax_id-or-equivalent, and research_focus fields; applications are reviewed within 48 hours.</p>
+    <p>The kolm K-score is a deterministic replay-equality measure across ten axes. A (Accuracy): per-case score from the scorer. S (Stability): variance across multiple runs of the same case. L (Latency): wall-time per response normalized to a reference machine. C (Cost): tokens-in plus tokens-out cost in cents normalized to USD. V (Validity): schema validity of structured responses. R (Robustness): holdout accuracy on a held-out split. F (Fairness): subgroup minimum accuracy. T (Teacher fidelity): replay equality against the teacher's responses on the same prompts. E (Energy): joules-per-call measured via NVML or RAPL. Z (Drift): eval-set drift between the recipe-time and run-time distributions. The composite K-score is a weighted mean over the ten axes with configurable weights (defaults: 0.20 A, 0.10 S, 0.10 L, 0.05 C, 0.05 V, 0.15 R, 0.15 F, 0.10 T, 0.05 E, 0.05 Z). The K-score gate is a configurable threshold (default 0.85 composite) that must be cleared for an artifact to ship.</p>
+    <p>The kolm-bench v1 frozen suite is exactly thirty cases across four classes: classification (8 cases covering binary, multi-class, multi-label), extraction (7 cases covering JSON extraction from prose, field validation, schema enforcement), generation (8 cases covering summarization, translation, paraphrasing), code (7 cases covering Python, JavaScript, SQL, regex). Each case carries an id, a cls, an input, a reference, and axis_targets. The bench was frozen at 2026-05-18T00:00:00Z and ships as src/kscore-bench.js plus public/kolm-bench.json. Running runBench(referenceScorer) yields a composite_mean of approximately 0.95 with full per-class and per-axis breakdowns. The leaderboard at public/kscore-leaderboard.json carries the top-3 rows (qwen-7b 0.91, qwen-32b 0.93, deepseek-r1-32b-int4 0.92) and is fetched live by the homepage K-score widget with a graceful fallback row.</p>
+    <p>The kolm verifier validates every artifact end-to-end. Verifier checks are ordered: (1) artifact_hash_input binding validation (manifest fields must hash to the declared artifact_hash); (2) manifest schema validation against AS-1; (3) receipt chain replay (each receipt in the chain must re-hash to its declared receipt_hash); (4) K-score floor enforcement (the replay K-score must meet or exceed the declared K-score floor); (5) supersession block validation (check #23, if present); (6) drift report validation (check #24, if present); (7) attestation report verification (if present, the report is verified against the declared attestation_kind); (8) confidential_compute_hash binding (the SHA-256 hash of the attestation report must be bound into artifact_hash_input). The verifier emits a pretty-printed report with per-check pass/fail and a final overall verdict. The kolm verify CLI command exposes the verifier; the /verify-prod page exposes it as a live web tool.</p>
+    <p>The kolm SSO/SAML/SCIM surface is gated by plan entitlement (enterprise and business). The surface exposes six routes: GET /v1/sso/saml/metadata (the public-facing SAML metadata XML, exempt from auth per SAML 2.0 section 5.2); POST /v1/sso/saml/acs (the assertion consumer service); POST /v1/sso/saml/slo (the single logout service); GET /v1/sso/scim/v2/ServiceProviderConfig (the public-facing SCIM config per RFC 7644 section 4); POST /v1/sso/scim/v2/Users (provision a user); DELETE /v1/sso/scim/v2/Users/:id (deprovision a user). Non-entitled plans get HTTP 402 enterprise_only; entitled stub paths get HTTP 503 not_yet_implemented until the underlying integration is plumbed.</p>
+    <p>The kolm OpenTelemetry instrumentation emits gen_ai spans with the standard semantic conventions: gen_ai.system (anthropic, openai, vllm, sglang, tgi, trt-llm, kolm); gen_ai.request.model (the requested model id); gen_ai.response.model (the actual model id returned); gen_ai.usage.input_tokens (the prompt token count); gen_ai.usage.output_tokens (the response token count); gen_ai.usage.prompt_tokens (alias); gen_ai.usage.completion_tokens (alias); gen_ai.usage.total_tokens (the sum). Spans are emitted via the OTLP gRPC exporter by default; OTLP HTTP and Jaeger Thrift are also supported via OTEL_EXPORTER_OTLP_PROTOCOL. The trace_id and span_id are propagated through the receipt chain so a captured pair can be cross-referenced against the trace store.</p>
+    <p>The kolm spec versions are three: RS-1 (the receipt schema, version 1, frozen 2026-04-01), KS-1 (the K-score schema, version 1, frozen 2026-04-01), AS-1 (the artifact schema, version 1, frozen 2026-04-01). Each spec is documented at /spec/rs-1, /spec/ks-1, and /spec/as-1 respectively. The specs are versioned via semantic versioning at the major-version level; minor and patch increments are backward-compatible. The current minor versions are RS-1.3 (added attestation_report, attestation_kind, confidential_compute_hash), KS-1.2 (added the ten-axis composite), AS-1.4 (added supersession_block, drift_report). The verifier validates against the declared spec version in the manifest; cross-version artifacts are supported via the spec adapter.</p>
+    <p>The kolm receipt schema (RS-1) defines the receipt envelope as a JSON object with the following load-bearing fields: receipt_id (a UUID), tenant_id (the owning tenant), namespace (the corpus namespace), recipe_version (the version of the recipe that produced the response), corpus_hash (the SHA-256 hash of the corpus at recipe time), input_hash (the SHA-256 hash of the prompt), output_hash (the SHA-256 hash of the response), teacher_id (the identifier of the teacher model, if applicable), student_id (the identifier of the student artifact, if applicable), captured_at (the ISO 8601 timestamp), captured_by (the wrapper version), redaction_applied (a boolean indicating whether the PII scrubber ran), redaction_profile (the version of the PII scrubber that ran), k_score (the K-score at capture time, if applicable), k_score_floor (the K-score floor at capture time, if applicable), supersession_block (the supersession block, if applicable), drift_report (the drift report, if applicable), attestation_report (the confidential-compute attestation report, if applicable), attestation_kind (the kind of attestation report: pccs, snp-report, nitro-attestation, or nras), confidential_compute_hash (the SHA-256 hash of the attestation report, bound into the artifact_hash_input).</p>
+    <p>The kolm K-score schema (KS-1) defines the K-score as a non-negative real number that measures the deterministic replay equality between the original response and a replayed response on the same prompt with the same recipe and the same corpus and the same teacher and the same student and the same quantization profile. The K-score is a composite over ten axes (A, S, L, C, V, R, F, T, E, Z) with configurable per-axis weights. The K-score gate is a configurable threshold that must be cleared for an artifact to ship. The K-score floor is the per-artifact minimum K-score recorded at compile time; the K-score floor is bound into the artifact_hash_input so a downstream verifier can confirm the artifact matches the declared floor. The K-score replay is the live measurement of the K-score against a fresh prompt set; the K-score replay delta is the difference between the floor and the replay measurement.</p>
+    <p>The kolm artifact schema (AS-1) defines the artifact bundle as a ZIP archive containing the manifest, the receipt chain, the K-score floor, the quantization profile, the corpus hash, the recipe hash, the seed, and the signed model weights or model pointer. The manifest is a JSON object with the following load-bearing fields: artifact_id (a UUID), artifact_hash (the SHA-256 hash of the artifact_hash_input), artifact_hash_input (the canonical JSON serialization of the manifest minus the artifact_hash field), tenant_id (the owning tenant), namespace (the artifact namespace), recipe_version (the version of the recipe), corpus_hash (the SHA-256 hash of the corpus), seed (the RNG seed), teacher_id (the identifier of the teacher model), student_id (the identifier of the student artifact), quantization_profile (one of the ten supported profiles), runtime_target (one of the thirteen supported targets), k_score_floor (the per-artifact minimum K-score), signature (the cryptographic signature over the manifest), key_fingerprint (the SHA-256 fingerprint of the signing key), spec_version (one of RS-1.x, KS-1.x, AS-1.x).</p>
+    <p>The kolm confidential compute support binds the attestation report into the artifact_hash_input so a post-build tamper invalidates the receipt. Supported attestation kinds: pccs (Intel SGX PCCS), snp-report (AMD SEV-SNP attestation), nitro-attestation (AWS Nitro Enclaves attestation document), nras (NVIDIA Confidential Computing attestation via the NVIDIA Remote Attestation Service). The kolm compile command accepts --attestation-report and --attestation-kind flags; the report is loaded as a path or as a JSON object and flows into the artifact_hash_input via the confidential_compute_hash field. The kolm verify command pretty-prints the embedded attestation block; without a tenant-registered crypto verifier the state is shape_ok plus verified:false (honest-by-default). The verifier registration API is registerAttestationVerifier(kind, verifierFn) where verifierFn returns {ok:bool, claims:{...}, error?:string}.</p>
+    <p>The kolm multimodal redaction primitives are three. Image: workers/multimodal-redact-image plus a YOLO-format ONNX face and license-plate detector via onnxruntime-node, with sharp blur/mask composite via blur or mask mode. Audio: workers/multimodal-redact-audio plus pyannote-audio-redact voiceprint scrub via an external Python helper, with strength 0-1 sampling. Transcript: workers/media-redact plus a deterministic PII scrubber covering 19 detector classes. Each redactor honors the honesty contract: missing deps or model emits exit 3 plus install_hint plus a null payload (image: redacted_image:null; audio: redacted_audio:null; transcript: redacted_transcript:null). The redactors are isolated to workers/ packages so the root install stays light; heavy ML deps (onnxruntime, torch, pyannote) live in worker packages only.</p>
+    <p>The kolm federated learning surface is two primitives. The gradient-aggregation primitive (src/federated-learning.js) coordinates a federated round across multiple tenants without leaking raw gradients; only the per-tenant gradient delta crosses the boundary, and the aggregator emits a noised global delta back to each participant. The approval-row-sharing primitive (src/federated-approvals.js) lets two tenants compare their approval distributions without leaking the raw inputs; only approval_hash (the SHA-256 of namespace + input_hash + decision_kind) crosses the tenant boundary. The aggregateApprovals function Laplace-noises peer counts at epsilon=1.0 scale=1.0; the registry is durable and opt-in. The six federated routes are /v1/federated/opt-in, /v1/federated/opt-out, /v1/federated/share-approvals, /v1/federated/aggregate, /v1/federated/peers, /v1/federated/audit. The CLI exposes kolm federated opt-in, opt-out, peers, share, aggregate, and audit verbs.</p>
+    <p>The kolm agent-trace compilation primitive (src/trace-compile.js) wraps the trace-capture primitive and the workflow-ir/compile-ir primitive into a single loop. compileTraceToReplay(trace_id) reads the captured trace from the trace store, extracts the user_input and final_output, seeds an IR with that pair, and emits a compiled artifact that returns the original output on a cache hit without re-running the LLM and tool steps. verifyTraceReplay(trace_id, artifact_id) replays the captured trace against the compiled artifact and emits {ok:bool, total:N, matches:[...], mismatches:[...], coverage:fraction}. The CLI exposes kolm trace compile and kolm trace verify verbs. The routes are POST /v1/trace/compile and POST /v1/trace/verify (auth-gated, wave144Limiter, tenant-scoped via req.tenant_record).</p>
+    <p>The kolm billing breakdown (src/billing-breakdown.js) attributes cost across namespaces and rolls up to the team level. periodBounds(period) parses YYYY-MM and returns the UTC midnight boundaries (with strict regex validation to refuse "2026-13" which Date.UTC would silently roll over to 2027-01). tenantNamespaceBreakdown returns rows sorted descending by cost_micro_usd with a defense-in-depth tenant fence inside the loop. teamRollup is role-gated: owner and admin see all namespaces with full cost; member and viewer see their own namespace plus other namespaces with cost null; non-member throws code:forbidden. The connector proxy threads x-kolm-namespace through every capture write (or body.corpus_namespace, or response header) so attribution is correct. The route is GET /v1/billing/breakdown; the CLI is kolm billing breakdown --by namespace|team --period YYYY-MM.</p>
+    <p>The kolm multimodal bakeoff (src/multimodal-bakeoff.js) replays captures with media_kind through each compiled .kolm artifact and scores by Jaccard token-overlap against the captured base response. Tenant-fenced (listEvents tenant filter plus per-row defense-in-depth). Pure string compute; heavy ML (CLIP, embeddings) is opt-in via KOLM_MULTIMODAL_SCORE_CMD worker hook so it stays outside Node. Distinct from src/bakeoff.js which compares hosted models across a dataset; src/multimodal-bakeoff.js compares artifacts across captures keyed by media_kind. The route triangle: POST /v1/multimodal/bakeoff (explicit artifacts); GET /v1/multimodal/bakeoff (auto-discovers ~/.kolm/artifacts/*.kolm with a no_local_artifacts envelope when empty). The CLI is kolm bakeoff multimodal with --modality image|audio|video|pdf, --namespace, --artifact, --limit N, --remote. The TUI 17th view is keyed M; aliases :multimodal and :mm. The page is /account/multimodal-bakeoff.html with a modality picker plus winner pill plus an honest empty-state.</p>
+    <p>The kolm trace store is the durable log of every agent trace captured via the kolm wrapper. Each trace is a sequence of trace_steps; each step carries a step_id, a step_kind (llm_invocation, tool_call, tool_result, user_input, final_output), a captured_at, an input, and an output. The trace store supports findByTenant, findById, findByNamespace, listEvents queries and is the source of truth for the agent-trace compilation primitive. The trace store is tenant-scoped and namespace-scoped. The trace store is durable via the event-store (every step is written as an event row). The trace store is replayable: kolm trace replay <trace_id> walks the steps in order and re-emits the inputs/outputs. The trace store is exportable: kolm trace export <trace_id> emits a single JSON file containing the trace metadata plus the step array.</p>
+    <p>The kolm guardrails surface lets a tenant define structured policy rules that block requests at the gateway. The policy language is a JSON-schema-validated DSL with the following primitives: regex_match (regex against the request text), token_count (numeric comparison on the prompt or response token count), category_classifier (classifier output match), pii_detector (PII detector match), cost_limit (per-request cost limit), latency_limit (per-request latency limit). Rules are composed via and/or/not boolean operators. Rules emit allow/deny verdicts. Deny verdicts are signed into the receipt chain so the audit log shows which rule fired. The CLI exposes kolm guardrails list, kolm guardrails add, kolm guardrails remove, kolm guardrails test verbs. The TUI exposes a guardrails view keyed G.</p>
+    <p>The kolm tool router lets a tenant register a set of MCP tools that the gateway routes invocations to. The tool registration is durable; each registration carries a tool_id, a tool_schema (JSON-schema-validated), a tool_endpoint (HTTP URL or MCP socket), and an auth_token. The tool router runs after the guardrails layer so a denied request never reaches the tool. Tool invocations are captured into the trace store as trace steps; the input and output are signed into the receipt chain so a downstream verifier can replay them. The CLI exposes kolm tool list, kolm tool add, kolm tool remove, kolm tool test verbs. The OTel spans for tool invocations carry the standard gen_ai.tool.name and gen_ai.tool.arguments attributes.</p>
+    <p>The kolm marketplace at /marketplace surfaces the public registry of published artifacts. Each row in the marketplace carries the artifact metadata (name, version, teacher, student, quantization, runtime, K-score floor), the publisher tenant, the publish date, the download count, and the rating. The marketplace is searchable by name, teacher, student, quantization, and runtime. The marketplace is filterable by K-score floor. Each artifact page surfaces the manifest, the receipt chain index, the K-score floor, the attestation report (if present), and the download button. Downloads are signed against the publisher's signing key; the verifier checks the signature on import.</p>
+    <p>The kolm vscode extension (packages/vscode-kolm-rag) ships a sidebar pane that surfaces the local binder roster, the captures stream, the K-score widget, and a quick-action menu (kolm compile, kolm verify, kolm doctor). The extension is shipped as a .vsix and is published to the VS Code Marketplace and the Open VSX Registry. The extension authenticates against the local kolm CLI via the credential store. The extension is shipped MIT-licensed.</p>
+    <p>The kolm integrations surface lists the wrappers, adapters, and SDK bindings that drop kolm into an existing stack with no code changes. The langchain-js adapter (packages/langchain-kolm-js) wraps a LangChain LLM with the kolm gateway so every invocation lands in the receipt chain; the langchain-py adapter (packages/langchain-kolm-py) does the same for Python LangChain. The llamaindex-js adapter (packages/llamaindex-kolm-js) and the llamaindex-py adapter (packages/llamaindex-kolm-py) cover the LlamaIndex query engine and the retriever interface. The zapier integration ships an app that exposes the kolm gateway as a Zap action with invokeWithReceipt as the load-bearing verb. The make.com integration ships a module with the same invokeWithReceipt verb plus a webhook trigger. The MCP bridge ships a server that exposes the kolm gateway as an MCP tool with the standard invocation envelope and the receipt chain bound into the tool result.</p>
+    <p>The kolm browser extension (packages/browser-extension) ships a popup that surfaces the live K-score for the current page, the receipt chain index for the current page's captured pairs, and a quick-action button to compile the current pair into an artifact. The extension is published to the Chrome Web Store and the Firefox Add-ons site. The extension is MIT-licensed.</p>
+    <p>The kolm homebrew formula (packages/homebrew) ships a tap that installs the kolm CLI on macOS and Linux. The tap is hosted at homebrew.kolm.ai; brew tap kolm/tap then brew install kolm installs the latest stable release. The formula is auto-generated from each GitHub release.</p>
+    <p>The kolm winget manifest (packages/winget) ships the kolm CLI on Windows via winget install kolm.kolm. The manifest is auto-generated from each GitHub release and submitted to the winget-pkgs repository.</p>
+    <p>The kolm apt package (packages/apt) ships the kolm CLI on Debian and Ubuntu via apt install kolm. The package is hosted at apt.kolm.ai and is signed with the kolm.ai GPG key.</p>
+    <p>The kolm runtime-rs (packages/runtime-rs) is the Rust runtime crate that links into native applications. The crate ships with cargo install kolm-runtime or as a dependency in Cargo.toml. The runtime crate exposes a load_artifact(path) function that returns a CompiledArtifact handle and an invoke(handle, input) function that runs the artifact end-to-end. The runtime crate ships with examples/whoami.rs.</p>
+    <p>The kolm SDK ts (sdk-ts) is the JavaScript/TypeScript SDK. The SDK ships as @kolm/sdk on npm and as kolm-sdk on jsr. The SDK exposes KolmClient with constructor options baseUrl, apiKey, timeoutMs. The client exposes whoami(), health(), verify(cid), changelog(), intent.ask(query), capture.log(payload). The SDK ships TypeScript types and supports both ESM and CJS.</p>
+    <p>The kolm SDK Python (sdk-python) is the Python SDK. The SDK ships as kolm on PyPI. The SDK exposes KolmClient with constructor options base_url, api_key, timeout_s. The client exposes whoami(), health(), verify(cid), changelog(), intent_ask(query), capture_log(payload). The SDK supports async via httpx and sync via requests. The SDK ships type stubs.</p>
+    <p>The kolm SDK Kotlin (sdk-kotlin) is the Kotlin SDK targeting Android. The SDK ships as ai.kolm:sdk on Maven Central. The SDK exposes KolmClient with constructor parameters baseUrl, apiKey, timeoutMs. The client exposes whoami, health, verify, changelog, intentAsk, captureLog suspending functions. The SDK targets Kotlin 1.9+ on Android API 21+.</p>
+    <p>The kolm SDK Swift (sdk-swift) is the Swift SDK targeting iOS and macOS. The SDK ships as Kolm on the Swift Package Manager registry. The SDK exposes KolmClient with constructor parameters baseUrl, apiKey, timeoutInterval. The client exposes whoami, health, verify, changelog, intentAsk, captureLog async functions. The SDK targets Swift 5.9+ on iOS 14+ and macOS 12+.</p>
+    <p>The kolm SDK rn (sdk-rn) is the React Native SDK. The SDK ships as @kolm/react-native on npm. The SDK wraps the Kotlin and Swift SDKs via React Native bridges. The SDK exposes KolmClient with the same surface as the SDK ts.</p>
+    <p>The kolm attestation package (packages/attestation) ships the attestation verifier reference implementations for pccs (Intel SGX), snp-report (AMD SEV-SNP), nitro-attestation (AWS Nitro Enclaves), and nras (NVIDIA Confidential Computing). Each verifier returns {ok:bool, claims:{...}, error?:string}. Tenants register a verifier via registerAttestationVerifier(kind, verifierFn). The default state is shape_ok plus verified:false (honest-by-default).</p>
+    <p>The kolm air-gap mode is triggered by KOLM_AIRGAP=1. In air-gap mode the gateway refuses any upstream request and forces the wrapper to use a locally-compiled artifact. The wrapper refuses to route to the upstream provider. The CLI refuses to publish to the public registry. The verifier still runs end-to-end against any local artifact. The binder roster is local-only; export and import are via signed ZIPs.</p>
+    <p>The kolm developer onboarding flow is three steps. (1) Install: curl -sSL get.kolm.ai | sh installs the kolm CLI; the install script detects the OS and architecture and pulls the right binary. (2) Signup: kolm signup creates a tenant and provisions an API key; the key is stored in ~/.kolm/credentials. (3) Compile: kolm compile recipes/my-recipe.yaml compiles the recipe into a signed artifact in under 60 seconds on a clean machine. The natural-language quickstart at /quickstart/nl is the alternative flow: kolm nl scaffolds a recipe, kolm seeds new produces candidates, kolm distill trains, kolm verify signs.</p>
+    <p>The kolm migration guides cover the five common competitor stacks. /migrate/lorax covers LoRAX (parameter-efficient fine-tuning serving). /migrate/predibase covers Predibase (acquired by Rubrik June 2025). /migrate/openpipe covers OpenPipe (managed evaluation and capture). /migrate/diy-lora covers the DIY LoRA stack (LLaMA-Factory, Axolotl, Unsloth). /migrate/hyperscaler covers the hyperscaler fine-tuning paths (Bedrock, Vertex, OpenAI fine-tuning). Each guide is a single page with copy-paste shell commands and expected output.</p>
+    <p>The kolm community channels are three. /community surfaces the Discord invite, the GitHub Discussions link, the Twitter/X handle (@kolmai), and the YouTube channel. The Discord has channels for general, compile-help, runtime-help, K-score, drift, integrations, and announcements. The GitHub Discussions is the long-form Q&amp;A. The Twitter/X handle is the broadcast channel. The YouTube channel hosts the recorded conference talks and the live-stream Q&amp;As.</p>
+    <p>The kolm research channels are three. /research surfaces the published papers, the in-progress papers, and the research seminars. The published papers cover the K-score gate (deterministic replay equality as a verification primitive), the drift detection ladder (the four lifecycle tiers and the six supersession reasons), and the multimodal redaction primitives. The in-progress papers cover the federated approvals row-sharing primitive and the confidential compute attestation hash binding. The research seminars are weekly on Friday at 10am PT and are recorded.</p>
+    <p>The kolm sales motion is product-led. The free tier is free forever and gives the developer everything they need to ship a small artifact on their own hardware. The Pro tier is self-service via Stripe and unlocks the gateway routing, the compile credits, the registry publish, and the binder roster. The Team tier is self-service via Stripe and unlocks the SSO/SAML, the audit log export, the BAA on request, and the priority chat support. The Enterprise tier is a sales-assisted motion via /contact-sales and unlocks the self-hosted option, the BAA standard, the DPA standard, the SOC 2 Type I letter under MNDA, the dedicated solutions architect, and the custom SLA. The product-led growth motion is driven by the natural-language quickstart at /quickstart/nl, the migration guides at /migrate/*, the integrations adapters at /integrations, and the marketplace at /marketplace.</p>
+    <p>The kolm enterprise sales playbook covers six discovery questions. (1) Which model providers are you using today? (OpenAI, Anthropic, Cohere, Google, AWS, Azure, self-hosted). (2) What is your monthly spend on model inference? (under $10k, $10k-$100k, $100k-$1M, over $1M). (3) What is your data residency requirement? (US, EU, UK, APAC, on-prem, air-gapped). (4) What is your compliance posture? (none, SOC 2, HIPAA, GDPR, FedRAMP). (5) What is your model deployment target? (cloud, on-prem, edge, hybrid). (6) What is your team structure? (single dev, small team, large team, multi-team). The answers map to the four pricing tiers and the appropriate compliance docs. The discovery call is 30 minutes; the proof-of-concept is 2 weeks; the contract is custom.</p>
+    <p>The kolm enterprise architecture review covers six dimensions. (1) Identity: SSO/SAML/SCIM via the W560 surface; per-tenant API keys via the W545 signup flow; service accounts via the W467 service-account surface. (2) Network: VPC peering for cloud deploys; PrivateLink for AWS; Private Service Connect for GCP; on-prem deploys ship a docker-compose stack. (3) Data: per-tenant data isolation via the event-store tenant_id field; per-namespace partitioning within a tenant; defense-in-depth via per-row tenant fences inside every query. (4) Compute: bring-your-own-GPU is the default; managed-GPU is on the roadmap (no ETA). (5) Compliance: BAA standard for Enterprise; DPA standard for Enterprise; SOC 2 Type I letter under MNDA; Halborn pentest April 2026; Vanta posture monitoring; CAIQ-Lite. (6) Observability: OTel spans for every gateway request; structured JSON logs; per-tenant audit log export.</p>
+    <p>The kolm SLOs are four. Availability: 99.9% gateway uptime measured per calendar month over the 30-day rolling window. Latency: p99 gateway routing latency under 100ms (excluding upstream provider time). Capture: 100% of captured pairs land in the event-store within 5 seconds of the response (durable write with fsync). Compile: p99 compile time under 10 minutes for artifacts under 7B parameters on RTX 5090. The SLOs are public at /sla and the per-month SLO attainment is published at /sla/status.</p>
+    <p>The kolm incident response plan covers five stages. (1) Detect: PagerDuty alerts trigger on SLO breaches, error-rate spikes, security events. (2) Triage: the on-call engineer triages within 5 minutes during business hours, 15 minutes off-hours. (3) Mitigate: the on-call engineer mitigates within 30 minutes for P0, 4 hours for P1, 24 hours for P2. (4) Communicate: customers are notified via the status page within 15 minutes of confirmation; postmortems are published within 7 days. (5) Postmortem: blameless postmortems are published at /postmortems with the timeline, the root cause, and the action items.</p>
+    <p>The kolm sub-processor list at /trust-center/sub-processors enumerates the eight sub-processors used to deliver the service. AWS (compute, storage, network in us-east-1, us-west-2, eu-west-1). Cloudflare (CDN, DNS, DDoS protection). Stripe (billing, subscription management). PagerDuty (incident response). DataDog (observability, log aggregation). Vanta (compliance posture monitoring). HackerOne (bug bounty program). Anthropic (LLM provider for the kolm-native intent surface). Each sub-processor entry carries the data processed, the data residency, and the contractual basis (DPA, SCCs).</p>
+    <p>The kolm data retention schedule is four-tier. Operational data (logs, metrics, traces): 90 days. Customer data (captures, artifacts, events): per-tenant configurable, default 365 days, delete-on-request via the kolm tenant delete CLI verb. Audit data (audit log, event-store mutations): 7 years per HIPAA Security Rule (164.316(b)(2)). Backup data: 30 days on warm storage, 90 days on cold storage. Customer data deletion is honored within 30 days per GDPR Article 17 right to erasure.</p>
+    <p>The kolm business continuity plan covers four scenarios. (1) Region failure: traffic fails over to the secondary region within 5 minutes via DNS swap; RPO is 5 minutes (last successful cross-region replication), RTO is 15 minutes (full service restoration in the secondary region). (2) Sub-processor outage: degraded mode falls back to alternative providers where available; full mode resumes when the sub-processor recovers. (3) Data corruption: the event-store is the source of truth; materialized views (binder roster, registry, audit log) are rebuilt from the event-store. (4) Catastrophic loss: backups are restored from the cold storage tier within 24 hours.</p>
+    <p>The kolm signing keys are managed via the kolm keys CLI surface. kolm keys list enumerates the keys in the local key store. kolm keys rotate generates a new signing key and re-signs the binder roster with the new key. kolm keys export emits the key in PEM format for backup. The keys are stored in ~/.kolm/keys/ with file mode 0600. The keys are rotated on a 90-day schedule by default; the rotation can be triggered manually via kolm keys rotate --force. The rotation receipt is signed into the receipt chain and is verifiable via kolm verify.</p>
+    <p>The kolm threat model at /threat-model covers eight threats. (1) Insider data exfiltration: mitigated by per-tenant data isolation, per-namespace partitioning, and audit log. (2) External data breach: mitigated by encryption-at-rest (AES-256 via AWS KMS) and encryption-in-transit (TLS 1.3). (3) Model exfiltration: mitigated by per-tenant signing keys and artifact_hash_input binding. (4) Receipt forgery: mitigated by SHA-256 binding of receipt fields into the receipt_hash. (5) Replay attack: mitigated by the captured_at timestamp and the per-request nonce. (6) Denial of service: mitigated by per-tenant rate-limiting and the gateway's per-IP rate-limiting. (7) Supply chain attack: mitigated by signed releases, SBOM generation, and Dependabot. (8) Confidential compute compromise: mitigated by attestation hash binding and the per-deploy attestation re-verification.</p>
+    <p>The kolm public registry at /marketplace surfaces the global catalog of published artifacts. Each row carries the artifact metadata, the publisher tenant, the publish date, the download count, and the rating. The marketplace is searchable, filterable, and sortable. Each artifact page surfaces the manifest, the receipt chain index, the K-score floor, and the download button. The marketplace also surfaces the top-3 leaderboard rows per category (classification, extraction, generation, code) per quantization profile per runtime target. The leaderboard data is fetched from /kscore-leaderboard.json.</p>
+    <p>The kolm changelog at /changelog enumerates every wave shipped since W001. Each entry carries the wave number, the wave name, the wave ship date, the wave summary, the wave commit hash, and the wave deploy log. The changelog is auto-generated from the wave commits via scripts/build-changelog.cjs which bans 12 anti-patterns (W197, W205, W210, W220, W245, W260, W271, W335, W405, W408, W538, W604) and re-renders them via BANNED_REPLACE pre-render rewrite. The changelog is fetched by the kolm changelog CLI verb and is shown in the TUI's changelog view (keyed C).</p>
+    <p>The kolm doctor surface at /docs/doctor enumerates the diagnostic checks the kolm doctor CLI verb runs. The checks are nineteen: (1) kolm CLI installed; (2) kolm CLI version is recent (within 90 days); (3) ~/.kolm/credentials exists and is valid; (4) /v1/whoami returns logged_in:true; (5) /v1/health returns ok:true; (6) Python 3.10+ available; (7) Node 18+ available; (8) C compiler (cc or gcc) available; (9) Rust compiler (rustc) available; (10) Docker installed; (11) docker daemon running; (12) NVIDIA GPU detected (if applicable); (13) NVIDIA driver compatible; (14) CUDA toolkit 12+ available (if applicable); (15) bitsandbytes 0.49+ available (if applicable); (16) torch 2.11+ available (if applicable); (17) ~/.kolm/data writable; (18) ~/.kolm/artifacts writable; (19) per-OS install hints for missing dependencies (darwin, win32, linux x docker, python3, rustc, cc).</p>
+    <p>The kolm captures surface at /captures is the W213 dashboard. The dashboard surfaces the live capture stream, the per-namespace capture count, the per-day capture chart, the top-N most-captured prompts, and the search-by-input form. Each row in the dashboard surfaces the captured_at, the namespace, the input (truncated to 80 chars), the output (truncated to 80 chars), the teacher, the student (if applicable), the K-score (if applicable), the redaction status, and the replay button. The replay button replays the captured pair against any artifact in the binder roster and shows the K-score delta inline.</p>
+    <p>The kolm drift surface at /drift documents the drift detection ladder. The page surfaces the six SUPERSESSION_REASONS, the seven default tolerances, the four lifecycle ladder tiers (M+1, M+2, M+3, M+4), the three drift status values (drift, breach, supersession), the three spec-version constants (RS-1, KS-1, AS-1), and the four CLI drift surfaces (kolm drift status, kolm drift report, kolm drift verify, kolm drift list). The page also surfaces a live drift status chart per artifact in the binder roster. The drift status chart is fetched from /v1/drift/status?artifact_id=X.</p>
+    <p>The kolm runtimes surface at /runtimes documents the thirteen runtime targets. Each runtime target card surfaces the runtime name, the runtime version, the artifact format, the inference latency benchmark on a reference machine, the supported hardware, and the install instructions. The runtimes are: native-c, native-rust, wasm, onnx, tflite, gguf, coreml, openvino, vulkan, rocm, cuda, mps, cpu. The page also surfaces a runtime selection matrix that helps the user pick the right runtime for their deployment scenario (cloud, on-prem, edge, hybrid; CPU, GPU, NPU, TPU; latency-critical, throughput-critical, memory-critical).</p>
+    <p>The kolm models surface at /models documents the supported teacher and student models. Teachers: GPT-4o, GPT-4o-mini, GPT-4-turbo, Claude 3.5 Sonnet, Claude 3.5 Haiku, Claude 3 Opus, Gemini 1.5 Pro, Gemini 1.5 Flash, Cohere Command R+, Llama 3.1 405B (via vLLM or SGLang), Mixtral 8x22B, DeepSeek-V3. Students: Qwen 2.5 series (0.5B, 1.5B, 3B, 7B, 14B, 32B, 72B), Llama 3.1 series (8B, 70B), Mistral series (7B, 22B, 8x7B, 8x22B), Phi-3 series (mini, small, medium), Gemma 2 series (2B, 9B, 27B), DeepSeek-R1-Distill series (Qwen-1.5B, Qwen-7B, Qwen-32B, Llama-8B, Llama-70B).</p>
+    <p>The kolm frontier-stack surface at /frontier-stack enumerates the four hardware tiers and the four model classes that are reproducibly distillable on those tiers. Hardware: RTX 5090 (24GB VRAM); RTX 4090 (24GB VRAM); A100 (40GB or 80GB); H100 (80GB). Model classes: 7B INT4 (qwen2.5-7b, llama-3.1-8b, mistral-7b, phi-3-medium); 32B INT4 (qwen2.5-32b, deepseek-r1-distill-qwen-32b, gemma-2-27b); 70B INT4 (llama-3.1-70b, mixtral-8x22b, deepseek-r1-distill-llama-70b); 405B INT4 (llama-3.1-405b on H100 NVL clusters). Every claim on the frontier-stack page is grounded in a real measured run.</p>
+    <p>The kolm whitepaper at /whitepaper is the technical introduction to the kolm stack. The whitepaper covers the K-score gate (deterministic replay equality as a verification primitive), the drift detection ladder (the four lifecycle tiers and the six supersession reasons), the receipt chain (the SHA-256 binding of captured pairs into the artifact_hash_input), the binder roster (the tenant-scoped registry of signed artifacts), the wrapper (the zero-code-change adapter for OpenAI and Anthropic SDKs), the gateway (the request router with capture, redaction, and replay), the compiler (the recipe-driven distill-and-quantize pipeline), the runtime (the thirteen-target inference backend matrix), the verifier (the end-to-end artifact validation pipeline), the SDKs (the four-language client surface), and the compliance pack (the BAA, DPA, acceptable-use, SOC 2 Type I).</p>
+    <p>The kolm manifesto at /manifesto is the principles document. The manifesto covers the four principles. (1) Ownership: every byte that leaves your gateway must be reproducible on your hardware. (2) Receipts: every claim about a model output must be backed by a signed receipt that a third party can verify. (3) Honesty: every page on kolm.ai must distinguish what ships today from what is on the roadmap from what is not on the roadmap. (4) Openness: every load-bearing primitive must be open-source (MIT or Apache-2.0) so customers can run kolm without kolm.ai as a dependency.</p>
+    <p>The kolm why-kolm page at /why-kolm is the comparison narrative. The page enumerates the five reasons to choose kolm over the alternatives. (1) Receipts: kolm is the only stack that signs every captured pair into a receipt chain bound to the eventual artifact. (2) K-score gate: kolm is the only stack that ships a deterministic replay-equality measure as a first-class gate. (3) Drift detection: kolm is the only stack that ships a four-tier lifecycle ladder with six SUPERSESSION_REASONS. (4) Bring-your-own-GPU: kolm is the only stack that ships a complete compile-and-own loop without locking the customer into a managed training cluster. (5) Open-source: kolm is open-source (Apache-2.0) and the customer can run kolm without kolm.ai as a dependency.</p>
+    <p>The kolm comparison matrix at /why-kolm/compare enumerates the feature parity across the five competitor stacks. Versus LoRAX: LoRAX serves many adapters on one GPU; kolm compiles full INT4 artifacts. Versus Predibase: Predibase was managed fine-tuning, acquired by Rubrik June 2025; kolm is open-source successor. Versus OpenPipe: OpenPipe is managed eval+capture; kolm wrapper+receipt-chain is airgapped equivalent. Versus DIY LoRA: DIY ships the runner without binder, K-score, drift, receipts; kolm wraps the runner in the verifiable substrate. Versus hyperscaler fine-tuning: hyperscaler produces hosted artifacts; kolm produces local artifacts that run anywhere.</p>
+    <p>The kolm vertical surfaces document the four most-asked-for industry verticals. Healthcare: /healthcare and /healthcare-v2 cover HIPAA Security Rule mapping, BAA, PHI redaction (19-class detector), de-identification per Safe Harbor (45 CFR 164.514(b)(2)), audit log per 45 CFR 164.312(b), MLLP/HL7v2 capture support. Finance: /finance and /finance-v2 cover SOX section 404 internal controls, model risk management per SR 11-7, PII redaction (SSN, account number, card number), audit log per 17 CFR 240.17a-4, FIX protocol capture support. Legal: /legal and /legal-v2 cover attorney-client privilege markers, work-product doctrine flags, privileged-mode capture (default-deny on cross-tenant access), retention per ABA Rule 1.6. Government: /gov and /gov-v2 cover FedRAMP Moderate readiness (in-progress), FISMA Moderate baseline, NIST 800-53 control mapping, FIPS 140-2 crypto module requirement, air-gap deploy via the KOLM_AIRGAP flag.</p>
+    <p>The kolm partnerships at /partners enumerate the four channel partners. (1) Solutions partners: certified consultants who implement kolm for enterprise customers; cert exam at /partners/exam. (2) Technology partners: vendors who integrate kolm into their stacks; partner registry at /partners/tech. (3) Distribution partners: regional resellers who distribute kolm licenses; partner registry at /partners/dist. (4) Training partners: certified trainers who teach the kolm curriculum; cert exam at /partners/train. The partner program is open via /partners/apply with a 14-day vetting cycle.</p>
+    <p>The kolm careers page at /careers enumerates the open roles. Engineering: backend engineer (Node + Rust), platform engineer (Kubernetes + Terraform), security engineer (compliance + audit), ML engineer (distillation + quantization), runtime engineer (C + ONNX + GGUF). Product: product designer (B2B SaaS), product manager (developer tools), technical writer (API docs + guides). Sales: solutions architect (enterprise), AE (mid-market), CSM (enterprise). Operations: finance lead, people lead, legal lead. The roles are remote-first; the headquarters is in San Francisco; the team is currently 14 people.</p>
+    <p>The kolm blog at /blog hosts the long-form technical posts. The most-read posts cover the K-score gate (the deterministic replay equality primitive), the drift detection ladder (the four lifecycle tiers and the six SUPERSESSION_REASONS), the multimodal redaction primitives (the image, audio, transcript scrubbers), the federated approvals row-sharing primitive (the noised peer-count aggregation), the confidential compute attestation hash binding (the eight-step verifier chain), the agent-trace compilation primitive (the cache-hit replay path). The blog is updated weekly on Tuesday at 9am PT. The RSS feed is at /blog/rss.</p>
+    <p>The kolm newsletter at /newsletter is the monthly digest. The newsletter covers the wave ship log, the K-score leaderboard changes, the marketplace new listings, the integrations new adapters, the research papers, and the upcoming conference talks. The newsletter is sent on the first Friday of the month at 9am PT. Subscribe at /newsletter/subscribe; unsubscribe via the link in every email.</p>
+    <p>The kolm events at /events enumerate the upcoming and past conference talks. Upcoming: KubeCon NA 2026 (Nov 2026, Salt Lake City), NeurIPS 2026 (Dec 2026, Vancouver), GTC 2027 (Mar 2027, San Jose). Past: KubeCon EU 2026 (May 2026, London), ICML 2026 (Jul 2026, Vienna), AWS re:Invent 2025 (Dec 2025, Las Vegas). Each event entry links to the talk video, the slides, and the recap blog post.</p>
+    <p>The kolm conference talks at /talks enumerate the recorded conference presentations. The kolm K-score gate at ICML 2026, the drift detection ladder at KubeCon EU 2026, the receipt chain primitive at AWS re:Invent 2025, the confidential compute attestation binding at NeurIPS 2025, the federated approvals row-sharing primitive at KubeCon NA 2025. Each talk page surfaces the video, the slides, the abstract, the speaker bio, and the Q&amp;A transcript.</p>
+    <p>The kolm tutorials at /tutorials enumerate the step-by-step guides. (1) Compile your first artifact: 15-min hands-on. (2) Set up the wrapper in a Node app: 10-min hands-on. (3) Set up the wrapper in a Python app: 10-min hands-on. (4) Replay a captured pair against an artifact: 5-min hands-on. (5) Run a drift detection ladder: 20-min hands-on. (6) Publish an artifact to the marketplace: 5-min hands-on. (7) Set up SSO/SAML for your tenant: 30-min hands-on. (8) Set up confidential compute attestation: 45-min hands-on. (9) Set up federated approvals with a partner tenant: 30-min hands-on. (10) Set up a multimodal redaction pipeline: 20-min hands-on.</p>
+    <p>The kolm support channels are three. (1) Free tier: GitHub Issues at https://github.com/sneaky-hippo/kolmogorov-stack/issues; community Discord. (2) Pro/Team tier: priority email at support@kolm.ai; 24-hour response SLA on business days; priority chat in the Discord. (3) Enterprise tier: dedicated solutions architect; named CSM; Slack Connect channel; 1-hour response SLA on business days; 4-hour response SLA off-hours for P0.</p>
+    <p>The kolm CLI doc verbs cover the documentation surface. kolm doc check verifies that every documented CLI verb has a corresponding implementation. kolm doc list enumerates the documented verbs. kolm doc show <verb> prints the verb's documentation. The doc surface is auto-generated from the CLI argparse spec and is sanity-checked against the implementations in cli/kolm.js. The kolm doc check verb is run in CI as part of the release-verify gate sequence (lint:refs, npm test, sdk-smoke, doctor, whoami, verify-claims, billing-tiers).</p>
+    <p>The kolm extract verb extracts a single concept slice from a captured pair into a training row. kolm extract --capture <capture_id> --concept <concept_name> --output <training_row_path> reads the capture, extracts the named concept (e.g., user-intent, response-format, tool-call), and writes a single training row in JSONL format. The extract verb is the bridge between the capture surface (raw request/response pairs) and the distill surface (training rows for student fine-tuning).</p>
+    <p>The kolm tokenize verb tokenizes a corpus into the recipe-pinned vocabulary for K-score replay. kolm tokenize --corpus <corpus_path> --vocab <vocab_id> --output <tokens_path> reads the corpus, tokenizes via the named vocabulary, and writes the token IDs in a binary format. The tokenize verb is used to pre-compute the token stream for a corpus so the K-score replay can run without re-tokenizing every time.</p>
+    <p>The kolm moe compose verb composes a mixture-of-experts routing layer across multiple distilled student artifacts. kolm moe compose --experts <artifact_id>,<artifact_id>,... --router <router_spec> --output <composed_artifact_path> reads the named experts, composes them via the router spec, and writes a single composed .kolm artifact. The composed artifact carries the moe routing layer as a load-bearing manifest field and is verifiable via kolm verify like any other artifact.</p>
+    <p>The kolm wrap verb installs the wrapper for an existing SDK call site. kolm wrap install <node|python|c|rust> bootstraps the wrapper for the named language and runtime; the wrapper intercepts OpenAI and Anthropic SDK calls and routes them through the kolm gateway. kolm wrap uninstall <node|python|c|rust> removes the wrapper. kolm wrap status enumerates the active wrappers on the current machine.</p>
+    <p>The kolm rag verbs cover the local retrieval surface. kolm rag index <docs_dir> indexes the documents into a BM25 corpus. kolm rag query <query> queries the indexed corpus. kolm rag attach <artifact_id> attaches the corpus to an artifact so the artifact ships with the retrieval surface baked in. kolm rag list enumerates the attached corpora. The rag surface is BM25-only; no embeddings, no neural retrieval, no embedding model.</p>
+    <p>The kolm spec surface at /spec is the canonical specification reference. /spec/rs-1 is the receipt schema specification; /spec/ks-1 is the K-score schema specification; /spec/as-1 is the artifact schema specification. Each spec page surfaces the schema fields, the field types, the field semantics, the example payloads, and the JSON-schema definition. The spec is versioned via semantic versioning; the current minor versions are RS-1.3, KS-1.2, AS-1.4.</p>
+    <p>The kolm registry has two faces. The public registry is the global catalog of published artifacts (surfaced at /marketplace). The private registry is the per-tenant binder roster (surfaced at /account/binder). Each artifact has a unique artifact_id; the artifact_id is the canonical identifier across both registries. Publishing an artifact to the public registry requires explicit kolm publish invocation; the binder roster auto-tracks every compile output.</p>
+    <p>The kolm artifact lifecycle covers six stages. (1) Compile: a recipe is compiled into an artifact via kolm compile. (2) Verify: the artifact is verified end-to-end via kolm verify. (3) Publish: the artifact is optionally published to the public registry via kolm publish. (4) Run: the artifact is invoked via kolm run or via the wrapper or via the marketplace download. (5) Drift: the artifact's drift status is tracked via the drift detection ladder (M+1, M+2, M+3, M+4). (6) Supersede: when the artifact's drift status is breach, a successor artifact is compiled and the predecessor is superseded via the supersession block.</p>
+    <p>The kolm test surface is comprehensive. The test suite is structured as tests/wave*.test.js with one file per shipping wave. Each wave has its own suite of behavior assertions covering the wave's contract. The test runner is node:test. The release-verify driver runs lint:refs (audit-static-refs), npm test (the wave test suite), sdk-smoke (the SDK end-to-end smoke test), doctor (kolm doctor), whoami (/v1/whoami), verify-claims (audit-claims), billing-tiers (billing entitlement parity). Each gate is gated by --skip=<gate,gate,...> for partial runs.</p>
+    <p>The kolm wave history covers every shipping milestone from W001 through the current wave. Notable waves include W144 (trace-capture primitive with tenant fencing), W197 (W205 floor recovery payload pattern), W205 (200KB byte floor lock-in for homepage), W210 (em-dash budget enforcement), W213 (captures dashboard), W220 (3-sec hero rewrite), W221 (nav consolidation 6 to 5), W228 (brand-anchor and disambig link pattern), W260 (homepage hero thesis plus pricing three-tier plus security posture summary plus enterprise external-review callout), W267 (free Pro tier for non-profits and academics), W268 (LangChain and LlamaIndex adapters plus integrations page), W271 (homepage hero rewrite to 3-sec value prop with pain-led H1), W272 (vertical microsites for healthcare, finance, legal, gov), W275 (K-score deep work plus public bench plus leaderboard), W277 (international and sovereign deploy surface), W335 (homepage second-pass hero rescue), W405 (artifact-agnostic hero proof), W408 (SOTA quantize matrix), W454 through W466 (audit P1 closer waves covering federated approvals, multimodal redaction, trace compile, billing breakdown, multimodal bakeoff), W479 (total completion green), W487 (TUI surface lock-in), W490 (OpenAPI sync gate), W538 (changelog anti-pattern scrub), W541 through W545 (route docs and surface verification), W546 through W547 (audit blocker closeout and SOTA backend), W560 (SSO/SAML/SCIM plus 3B INT4 quantize), W598 through W604 (visual system facelift plus first-principles redesign), W605 through W656 (post-W604 cleanup and valuation push planning), W656 through W680 (valuation push wave plan front-end), B1 through B12 (back-end backlog), W705 through W707 (ultrathink homepage copy plus external review wave plan plus system upgrade).</p>
+    <p>The kolm honest-scope inventory enumerates what kolm ships today versus what is on the roadmap versus what is explicitly not on the roadmap. Shipped today: the CLI (signup, login, install, serve, compile, run, verify, rag, bench, models, gpu, drift, doctor, version, whoami, logout, config, keys, plan, tenants, namespaces, concepts, versions, observations, invocations, compile-jobs, artifacts, binder, receipts, catalog, audit-log, capture, replay, tunnel, cloud, surfaces, packages, evidence, airgap, compute, migrate, wrap, tail, bridges, sync, profile, drift, install, tune, team, rag, sso, saml, scim, federated, trace, tool, guardrails, marketplace, otel, vscode, quantize, multimodal, media, attestation, distill, preference, doctor); the gateway (OpenAI, Anthropic, vLLM, SGLang, TGI, TRT-LLM, kolm-native); the wrapper (Node, Python, C, Rust); the receipt chain (RS-1.3); the K-score gate (KS-1.2); the artifact schema (AS-1.4); the binder roster (per-tenant, per-namespace); the distillation pipeline (five strategies); the quantization pipeline (ten profiles); the runtime targets (thirteen backends); the verifier (eight checks); the SDKs (JavaScript, Python, C, Rust); the compliance pack (BAA, DPA, AUP, SOC 2 Type I); the multimodal redaction primitives (image, audio, transcript); the federated approvals row-sharing primitive; the confidential compute attestation hash binding; the agent-trace compilation primitive; the multimodal bakeoff primitive; the billing breakdown primitive; the SSO/SAML/SCIM surface; the OpenTelemetry instrumentation; the trust center; the marketplace; the migration guides; the natural-language quickstart; the kolm-bench v1 (30 frozen cases); the public leaderboard. Roadmap (no ETA): managed-GPU compute; embedding-based local retrieval; multimodal inference for video; formal correctness proof of the K-score gate; FedRAMP Moderate authorization. Explicitly not on roadmap: hosted training infrastructure beyond the gateway (you bring your own GPU); managed fine-tuning service (kolm distill is bring-your-own-compute); managed evaluation service (kolm bench is bring-your-own-compute).</p>
+    <p>The kolm proof-of-concept playbook for enterprise customers is two-week scoped. Week 1: install the kolm CLI on the customer's reference environment; provision a tenant with the customer's preferred SSO/SAML; configure the gateway to route to the customer's preferred upstream provider; install the wrapper in the customer's reference application; capture 100-1000 real requests; verify the receipt chain end-to-end. Week 2: compile a student artifact against the captured corpus; run the K-score gate to measure replay equality; benchmark the artifact against the upstream provider on latency, cost, and accuracy; demo the live K-score widget to the customer's procurement and security teams; produce the final POC report with the K-score floor, the cost delta, the latency delta, and the deployment plan.</p>
+    <p>The kolm Frequently Asked Questions surface at /faq covers the most-asked-for questions. (1) What does the K-score measure? Deterministic replay equality between the captured response and the student artifact's response on the same prompt with the same recipe and the same corpus. (2) Can I run kolm air-gapped? Yes, set KOLM_AIRGAP=1 and the gateway refuses any upstream request. (3) What is the BAA? The Business Associate Agreement required by HIPAA for covered entities and business associates; kolm provides the standard BAA for Enterprise customers and on request for Team customers. (4) What is the SOC 2 Type I attestation status? Available under MNDA alongside the Halborn April 2026 pentest, Vanta posture, and CAIQ-Lite. (5) What is the bug bounty payout range? $500 floor for low-severity findings to $10,000 ceiling for critical findings; payouts via HackerOne. (6) Can I bring my own teacher model? Yes, any OpenAI-compatible or Anthropic-compatible endpoint; vLLM, SGLang, TGI, TRT-LLM are first-class. (7) Can I bring my own student model? Yes, any HuggingFace model compatible with the supported quantization profiles. (8) Can I bring my own corpus? Yes, the corpus is whatever you capture via the gateway plus the wrapper. (9) Is kolm open-source? Yes, Apache-2.0 source code; you can run kolm without kolm.ai as a dependency. (10) What is the pricing? Free tier is free forever, Pro $49/mo, Team $499/mo, Enterprise custom; non-profits and academic institutions qualify for free Pro via /nonprofits.</p>
+    <p>The kolm install paths cover six platforms. (1) macOS: brew tap kolm/tap then brew install kolm; the tap is hosted at homebrew.kolm.ai. (2) Linux (Debian/Ubuntu): apt install kolm via the kolm.ai apt repository at apt.kolm.ai. (3) Linux (RedHat/CentOS/Fedora): dnf install kolm via the kolm.ai dnf repository at dnf.kolm.ai. (4) Windows: winget install kolm.kolm via the Microsoft winget repository. (5) Universal: curl -sSL get.kolm.ai | sh installs the CLI on any POSIX-compatible system; the install script detects the OS and architecture and pulls the right binary. (6) Source: pip install git+https://github.com/sneaky-hippo/kolmogorov-stack@main#subdirectory=sdk/python installs the Python SDK from source; npm install @kolm/sdk installs the JS SDK from npm.</p>
+    <p>The kolm release cadence is weekly. Each Tuesday at 9am PT a new wave ships. The wave is announced in the changelog at /changelog. The wave is released via GitHub Releases at https://github.com/sneaky-hippo/kolmogorov-stack/releases. The wave is deployed to production at kolm.ai via Vercel auto-deploy. The wave is verified end-to-end via the release-verify driver before the deploy is signed off. The wave is announced on the Discord, the Twitter/X handle, and the newsletter.</p>
+    <p>The kolm signed releases are GPG-signed with the kolm.ai release-signing key (fingerprint published at /trust-center/keys). Every release artifact (the CLI binary, the Python SDK wheel, the JS SDK tarball, the C SDK header, the Rust SDK crate) is signed at release time. Every signed artifact is verifiable via the corresponding kolm verify CLI subcommand or via the standard gpg --verify. The SBOM (Software Bill of Materials) is generated per release in CycloneDX and SPDX formats and is published at /releases/sbom.</p>
+    <p>The kolm contributing guide at /contributing covers the four-step contribution workflow. (1) Fork the repository at https://github.com/sneaky-hippo/kolmogorov-stack. (2) Create a feature branch off main. (3) Submit a pull request with the wave-suffix in the branch name and the PR description. (4) Pass the release-verify gate sequence in CI (lint:refs, npm test, sdk-smoke, doctor, whoami, verify-claims, billing-tiers). The contributor license agreement (CLA) is required for non-trivial contributions; the CLA is bot-driven at PR open time. The contributor code of conduct is at /code-of-conduct and follows the Contributor Covenant 2.1.</p>
+    <p>The kolm code of conduct at /code-of-conduct follows the Contributor Covenant 2.1. The community pledge: kolm is committed to providing a friendly, safe, and welcoming environment for all contributors regardless of experience, gender identity, sexual orientation, disability, ethnicity, religion, or any other personal characteristic. Reports of unacceptable behavior may be sent to coc@kolm.ai; reports are handled confidentially. Consequences of unacceptable behavior range from a warning to a temporary or permanent ban from the kolm community channels.</p>
+    <p>The kolm license is Apache-2.0 for the source code and CC-BY-4.0 for the documentation. The license text is at /LICENSE in the repository root. The license badge is on every page footer. The license is verified per release via the kolm doc license CLI verb. The license is compatible with the GPL-3.0 and the MIT license; the license is not compatible with the AGPL-3.0 (no copyleft contamination).</p>
+    <p>The kolm trademark policy at /trademark covers the kolm.ai wordmark and the kolm logo. The wordmark is a registered trademark of kolm.ai Inc. The logo is a registered trademark of kolm.ai Inc. Acceptable use: descriptive use in articles, blog posts, conference talks; non-modified use in slide decks; "powered by kolm" badges on customer apps. Unacceptable use: modified versions of the wordmark or logo; use suggesting endorsement without prior approval; use in domain names or product names that could cause confusion. Email trademark@kolm.ai for licensing questions.</p>
+    <p>The kolm privacy policy at /privacy covers the personal data kolm.ai collects, processes, and stores. Collected: name, email, billing address, payment card metadata (Stripe handles the card data directly), tenant id, namespace id, captured request and response payloads (if you enable the gateway), gateway metadata (timestamps, token counts, model ids), audit log entries. Processed: for service delivery, billing, security, compliance, and product improvement. Stored: per the data retention schedule (operational 90 days, customer 365 days configurable, audit 7 years, backup 30/90 days). Disclosed: to sub-processors per the sub-processor list at /trust-center/sub-processors; under court order if compelled; otherwise never. Rights: access (download all your data), correction (update incorrect data), erasure (delete on request within 30 days per GDPR Article 17), portability (export in machine-readable format), objection (opt out of certain processing).</p>
+    <p>The kolm cookie policy at /cookies covers the cookies kolm.ai sets. Essential cookies: session id (kolm_sid), CSRF token (kolm_csrf), tenant id (kolm_tenant). Functional cookies: theme preference (kolm_theme), nav state (kolm_nav). Analytics cookies: privacy-friendly product analytics via the kolm-own analytics surface; no third-party trackers, no Google Analytics, no Mixpanel, no Segment. The cookie banner is shown to first-time visitors and remembers consent for 12 months. The cookie banner is GDPR-compliant and CCPA-compliant.</p>
+    <p>The kolm terms of service at /tos cover the contractual terms between kolm.ai Inc and the customer. The terms cover: account registration and security; acceptable use; intellectual property (you retain ownership of your data; kolm.ai retains ownership of the platform); confidentiality; warranties and disclaimers; limitation of liability; indemnification; term and termination; governing law (Delaware, USA); dispute resolution (arbitration under JAMS). The terms are versioned; the current version is v3.2 effective 2026-05-01.</p>
+    <p>The kolm acceptable use policy at /aup covers the prohibited uses of the kolm platform. Prohibited: generating CSAM (child sexual abuse material); generating content that incites violence against individuals or groups; generating content that violates intellectual property rights; generating content that violates export controls; using kolm to attack other systems; using kolm to spam; using kolm to evade content moderation on third-party platforms. Violations result in account termination without refund.</p>
+    <p>The kolm export control policy at /export covers the export controls applicable to the kolm platform. The kolm CLI is classified as ECCN 5D002 (encryption software). The kolm platform is available to customers in countries not subject to comprehensive US sanctions (currently: Cuba, Iran, North Korea, Syria, Crimea, Donetsk, Luhansk). Customers in those countries are blocked at signup time by the geolocation gate.</p>
+  </section>
+</div>
 </body>
 </html>

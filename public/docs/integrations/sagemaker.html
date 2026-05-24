@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -54,6 +54,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/docs-shell.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/docs-shell.js"></script>
 
 </head>
@@ -152,7 +153,7 @@ print(r["output"], r["k_score"])</code></pre>
 </div>
 
 <h2 id="kolm-side">What kolm contributes</h2>
-<p>The distillation pipeline: capture in production, build a student dataset, train a smaller open-weights model against the teacher, quantize to INT4, write a receipt that names every input that shaped the artifact. The output is a portable .kolm bundle with verifiable lineage. None of that needs SageMaker.</p>
+<p>The distillation pipeline: capture in production, build a student dataset, train a smaller open-weights model against the teacher, quantize to INT4, write a receipt that names every input that shaped the artifact. The output is a portable .kolm compile with verifiable lineage. None of that needs SageMaker.</p>
 
 <h2 id="aws-side">What SageMaker contributes</h2>
 <p>Hosting and operations: the inference container, the load balancer in front of it, the autoscaling group, CloudWatch metrics for latency and 5xx, IAM-gated invocation, VPC isolation, and the ability to roll a new model version without dropping traffic. None of that needs to be written in kolm.</p>
@@ -169,13 +170,13 @@ print(r["output"], r["k_score"])</code></pre>
 
 <h2 id="limits">Known limitations</h2>
 <ul>
- <li>The SageMaker exporter currently packages a portable .kolm bundle with a generic Hugging Face handler. Cloud-specific packaging (custom kolm inference container with built-in receipt verification) is a roadmap item.</li>
+ <li>The SageMaker exporter currently packages a portable .kolm compile with a generic Hugging Face handler. Cloud-specific packaging (custom kolm inference container with built-in receipt verification) is a roadmap item.</li>
  <li>SageMaker Serverless Inference is supported only for artifacts that fit in 6 GB of RAM, which excludes most quantized 7B and up. Use real-time endpoints for those.</li>
  <li>Streaming responses require SageMaker's <code>InvokeEndpointWithResponseStream</code> API; the kolm SDK exposes that as <code>c.stream(...)</code> but only on Python at the time of writing.</li>
 </ul>
 
 <div class="note">
- <b>Format adapter status.</b> <code>kolm export --format sagemaker</code> currently writes a portable .kolm bundle that the corresponding cloud container can load. Cloud-specific packaging is a roadmap item (W736+ artifact composition).
+ <b>Format adapter status.</b> <code>kolm export --format sagemaker</code> currently writes a portable .kolm compile that the corresponding cloud container can load. Cloud-specific packaging is a roadmap item (W736+ artifact composition).
 </div>
 
 <div class="status">

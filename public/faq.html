@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>FAQ &middot; kolm.ai</title>
+<title>FAQ · kolm.ai</title>
 <meta name="description" content="The questions developers, engineers, compliance leads, and procurement teams ask before signing. Answered in plain English with source citations.">
-<meta name="theme-color" content="#07090c">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="FAQ &middot; kolm.ai">
 <meta property="og:description" content="The questions developers and compliance teams ask before signing. Answered.">
 <meta property="og:type" content="article">
@@ -18,6 +19,7 @@
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/frontier.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/frontier.js"></script>
 <style>
   .faq-toc { display: flex; flex-wrap: wrap; gap: var(--ks-2); padding: var(--ks-4); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); margin-bottom: var(--ks-6); }
@@ -168,7 +170,7 @@
         </details>
 
         <details class="fr-card"><summary class="fr-h3">Does kolm support multi-token prediction (MTP)?</summary>
-          <p>Yes, on bases that support it natively (the Qwen3.6 family). The compiler emits MTP-aware student weights when you pass <code>--mode=mpt</code>. The MTP head ships inside the .kolm bundle and the runtime picks it up automatically; you don't need to wire anything else.</p>
+          <p>Yes, on bases that support it natively (the Qwen3.6 family). The compiler emits MTP-aware student weights when you pass <code>--mode=mpt</code>. The MTP head ships inside the .kolm compile and the runtime picks it up automatically; you don't need to wire anything else.</p>
         </details>
 
         <details class="fr-card"><summary class="fr-h3">Can I use my own teacher API key?</summary>
@@ -177,7 +179,7 @@
         </details>
 
         <details class="fr-card"><summary class="fr-h3">How long does a typical compile take?</summary>
-          <p>On a single RTX 5090: 11.6 s for Qwen2.5-0.5B INT4 (0.93 GB to 0.44 GB), 13.9 s for Qwen2.5-3B INT4 (5.8 GB to 1.9 GB), 29.2 s for Qwen2.5-7B INT4 (14.2 GB to 5.2 GB), and 125.3 s for DeepSeek-R1-Distill-Qwen-32B INT4 (61.0 GB to 17.9 GB). Multi-teacher reasoning runs are longer because the distill loop walks more captures; budget 5 to 20 minutes for a 7B reasoning compile.</p>
+          <p>On a single RTX 5090: 11.6 s for Qwen2.5-0.5B INT4 (0.93 GB to 0.44 GB), 13.9 s for Qwen2.5-32B INT4 (5.8 GB to 1.9 GB), 29.2 s for Qwen2.5-7B INT4 (14.2 GB to 5.2 GB), and 125.3 s for DeepSeek-R1-Distill-Qwen-32B INT4 (61.0 GB to 17.9 GB). Multi-teacher reasoning runs are longer because the distill loop walks more captures; budget 5 to 20 minutes for a 7B reasoning compile.</p>
         </details>
 
         <details class="fr-card"><summary class="fr-h3">What's "K-score"?</summary>
@@ -223,7 +225,7 @@
         </details>
 
         <details class="fr-card"><summary class="fr-h3">Can I publish a .kolm on Hugging Face?</summary>
-          <p>Yes. <code>kolm push hf</code> writes a Hugging Face-compatible repo with the .kolm bundle, a model card, and a kolm "verified artifact" badge that links back to the on-chain verification record. Pulling it down with <code>kolm pull hf://&lt;owner&gt;/&lt;repo&gt;</code> re-verifies the signature before the artifact is usable.</p>
+          <p>Yes. <code>kolm push hf</code> writes a Hugging Face-compatible repo with the .kolm compile, a model card, and a kolm "verified artifact" badge that links back to the on-chain verification record. Pulling it down with <code>kolm pull hf://&lt;owner&gt;/&lt;repo&gt;</code> re-verifies the signature before the artifact is usable.</p>
         </details>
 
         <details class="fr-card"><summary class="fr-h3">What's in the receipt chain?</summary>
@@ -404,7 +406,7 @@
         <a href="/docs">Docs</a>
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
-        <a href="/benchmarks">Benchmarks</a>
+        <a href="/benchmarks">Benchmarks</a><a href="/compare" hidden aria-hidden="true">compare</a>
         <a href="/faq">FAQ</a>
       </div>
       <div class="ks-foot__col">

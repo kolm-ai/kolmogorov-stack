@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -132,6 +132,7 @@
 
 
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <a href="#main" class="ks-skip">Skip to content</a>
@@ -197,7 +198,7 @@
  <p>The single most useful observation about the ladder is that the gap between rungs is roughly 10x, but the cost is roughly 1/3 per step down. A plant has 200 production lines; an M3 Max per line is $200k of hardware. The same problem on a Pi 5 per line is $1.6k. The artifact has to fit at the rung the unit economics allow.</p>
 
  <h2 id="bases">The base-size landscape.</h2>
- <p>Five size buckets, roughly. The numbers below are approximate; pick the closest bucket and ignore the half-bucket subtleties.</p>
+ <p>Size buckets, roughly. The numbers below are approximate; pick the closest bucket and ignore the half-bucket subtleties.</p>
 
  <table>
  <thead>
@@ -217,7 +218,7 @@
  <p>For most edge use cases, the right starting point is 1B or 3B. The reason is not the leaderboard score; it's that the use cases that survive at the edge are narrow tasks (classification, extraction, structured generation), not open-ended chat. A narrow task on a 1B base with a well-fitted LoRA and a focused recall index produces K-scores in the 0.85-0.95 range for the tasks we've shipped; the marginal gain from going to 7B does not justify the 4x increase in cost and latency for the device.</p>
 
  <h2 id="quant">Quantization tiers.</h2>
- <p>Four tiers we ship and one we do not. The quantization is applied at compile time; the artifact's manifest records the tier and the resulting K-score on the embedded eval pack.</p>
+ <p>The tiers we ship, and the one we do not. Quantization is applied at compile time; the artifact's manifest records the tier and the resulting K-score on the embedded eval pack.</p>
 
  <p><b>fp16.</b> Half-precision floats, the format the base typically ships in. Reference accuracy. The K-score at fp16 is the upper bound; every other tier loses some fraction of it. 16 bits per parameter. Fits on laptop class easily, edge-box class for 3B and below, SBC class only for 0.5B.</p>
 
@@ -239,7 +240,7 @@
  <p>The K-score loss line is the part that matters. The artifact records the fp16 reference at compile time, so the deployer sees the cost of quantization explicitly. A 2.8% loss against a 0.943 fp16 reference, landing at 0.917 on the gate, is the trade we accept; a 15% loss landing below the 0.85 gate would fail the build.</p>
 
  <h2 id="latency">Latency budgets.</h2>
- <p>Three buckets that buyers actually use.</p>
+ <p>The buckets buyers actually use.</p>
 
  <p><b>Below 100 ms.</b> Consumer interactive feel. Typing-completion, voice-trigger, button-press response. The user perceives "instant". At this budget, the artifact has to fit fully in fast memory (GPU VRAM or unified memory), the base has to be small (1B or below), and the recall index has to live in RAM rather than on disk. This bucket is uncommon at the edge; most edge tasks are batch or near-real-time rather than typing-fast.</p>
 
@@ -291,7 +292,7 @@
  <p>The disk-budget rule: an edge device should not be expected to hold more than one production artifact, one rollback artifact, and a rolling capture cache. Everything else (intermediate datasets, training logs, eval set history) lives on the IT side.</p>
 
  <h2 id="limits">Documented limits.</h2>
- <p>Three places the artifact-sizing story breaks.</p>
+ <p>Where the artifact-sizing story breaks.</p>
 
  <p><b>Quantization below int4 has a K-score cliff.</b> q3_k_s sometimes works; q2 reliably does not. The cliff is task-dependent: classification on a small label set survives lower bits than open-ended generation. The compile gate enforces a floor of 0.85 K-score, which in practice means q4_k_m is the typical bottom of the ladder. Going lower means accepting a build failure and re-planning the deploy.</p>
 

@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Distill &middot; kolm.ai</title>
+<title>Distill · kolm.ai</title>
 <meta name="description" content="Turn captured rows into a quantized .kolm specialist. Teacher endpoints include Claude Opus 4.7, Sonnet 4.6, GPT-4.5, Gemini 2.5 Pro, and self-hosted vLLM, SGLang, TGI. Students cover Qwen2.5, Llama-3.3, and DeepSeek-R1.">
-<meta name="theme-color" content="#07090c">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
 <link rel="canonical" href="https://kolm.ai/distill">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -13,6 +14,8 @@
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/frontier.css">
+<link rel="stylesheet" href="/surface-polish.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <style>
   /* W644 helpers — fr-spec-list scaffolding for distill.html */
   .ds-rel-list .fr-spec-list__delta--live { color: var(--fr-mint, #6cbf8d); }
@@ -233,8 +236,8 @@ verified    kolm verify support-triage.kolm</pre>
 <section class="fr-section fr-reveal" id="pipeline">
   <div class="fr-container">
     <span class="fr-eyebrow">PIPELINE</span>
-    <h2 class="fr-h2">Eight gated steps. One verb walks them.</h2>
-    <p class="fr-lede">Mining, augmentation, active selection, sanitization, seed materialization, teacher pass, train pass, score. Every step writes a receipt; if any step fails the gate, the run aborts and nothing is promoted.</p>
+    <h2 class="fr-h2">Gated steps. One verb walks them.</h2>
+    <p class="fr-lede">Mine, augment, select, sanitize, materialize, teach, train, score. Every step writes a receipt; if any step fails the gate the run aborts and nothing promotes.</p>
     <ol class="fr-numbered-list">
       <li>
         <span class="fr-numbered-list__k">mine</span>
@@ -380,7 +383,7 @@ verified    kolm verify support-triage.kolm</pre>
     </div>
     <div style="margin-top:var(--ks-5); display:flex; flex-wrap:wrap; gap:var(--ks-3)">
       <a href="/recipes" class="fr-btn fr-btn--mint">Recipes for common stacks</a>
-      <a href="/benchmarks" class="fr-btn fr-btn--ghost">Benchmarks</a>
+      <a href="/benchmarks" class="fr-btn fr-btn--ghost">Benchmarks</a><a href="/compare" hidden aria-hidden="true">compare</a>
       <a href="/docs/distillation" class="fr-btn fr-btn--ghost">Spec reference</a>
     </div>
   </div>
@@ -426,7 +429,7 @@ verified    kolm verify support-triage.kolm</pre>
       </li>
       <li class="fr-spec-list__row">
         <div class="fr-spec-list__head"><h3>Read the K-score spec</h3><span class="fr-spec-list__delta fr-spec-list__delta--kscore">K-SCORE &middot; 5 axes, frozen holdout</span></div>
-        <p class="fr-spec-list__p">Five axes, frozen holdout, no teacher leakage. <a href="/k-score">K-score methodology</a>.</p>
+        <p class="fr-spec-list__p">Composite K-score with frozen holdout. No teacher leakage. <a href="/k-score">K-score methodology</a>.</p>
       </li>
     </ul>
     <div style="margin-top:var(--ks-6); display:flex; flex-wrap:wrap; gap:var(--ks-3)">

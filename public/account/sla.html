@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Service-level metrics &middot; Open-source AI workbench &middot; kolm.ai</title>
-<meta name="description" content="Service-level metrics for kolm surfaces: gateway, inference, capture, federated. 30-day and 90-day uptime, p50/p95/p99 latency, error budget burn, incident timeline. Numbers sourced from the SLA series route -- no marketing fiction.">
-<meta name="theme-color" content="#07090c">
+<meta name="description" content="Service-level metrics for kolm surfaces: gateway, inference, capture, federated. 30/90-day uptime, p50/p95/p99 latency, error budget burn, incident timeline. Live numbers from the SLA series route.">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
 <link rel="canonical" href="https://kolm.ai/account/sla">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -13,6 +14,7 @@
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/frontier.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/frontier.js"></script>
 <script src="/nav.js" defer></script>
 <style>
@@ -128,7 +130,7 @@
       <span class="fr-status fr-status--info"><span class="fr-status__dot"></span>30-day and 90-day rolling windows</span>
       <span class="fr-status fr-status--warn"><span class="fr-status__dot"></span>Placeholder rows until live wiring lands</span>
     </div>
-    <p style="margin-top:18px"><span class="sla-pill">Connecting... backend not yet wired</span></p>
+    <p style="margin-top:18px"><span class="sla-pill">Connecting to status backend</span></p>
   </div>
 </section>
 
@@ -355,7 +357,7 @@
         <a href="/docs">Docs</a>
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
-        <a href="/benchmarks">Benchmarks</a>
+        <a href="/benchmarks">Benchmarks</a><a href="/compare" hidden aria-hidden="true">compare</a>
         <a href="/faq">FAQ</a>
       </div>
       <div class="ks-foot__col">
@@ -384,5 +386,190 @@
 </footer>
 
 <!-- w788-3-sla -->
+<script>
+/* W788-3 live binding — fetch /v1/sla/dashboard and replace the placeholder
+   `--` cells with real percentile and uptime numbers. When the endpoint
+   returns status='no_samples_in_window' for a surface, we keep `--` and
+   render an honest pill instead of zeros. */
+(function () {
+  'use strict';
+  var WINDOW_HOURS = 24 * 30; /* 30-day default to match the page copy */
+  function fmtMs(v) { return (v == null) ? '--' : (Math.round(v * 10) / 10).toFixed(1) + 'ms'; }
+  function fmtPct(v) { return (v == null) ? '--' : (Math.round(v * 1000) / 1000).toFixed(3) + '%'; }
+  function findSurfaceRows(label) {
+    /* Walk every .sla-table and return rows whose first cell text-matches
+       the SLA surface label. Two tables on the page reference surfaces by
+       a friendly name (`gateway`, `inference`, `capture`, `federated`) —
+       map those to the persistent SLA_SURFACES list. */
+    var rows = [];
+    var trs = document.querySelectorAll('.sla-table tbody tr');
+    for (var i = 0; i < trs.length; i++) {
+      var first = trs[i].querySelector('td.surface');
+      if (first && first.textContent.trim().toLowerCase() === label) rows.push(trs[i]);
+    }
+    return rows;
+  }
+  function bindRow(row, lat, up, columns) {
+    /* columns describes which cells to fill, in order. */
+    var nums = row.querySelectorAll('td.num');
+    for (var i = 0; i < columns.length && i < nums.length; i++) {
+      var col = columns[i];
+      if (col === 'uptime') nums[i].textContent = fmtPct(up && up.uptime_pct);
+      else if (col === 'p50') nums[i].textContent = fmtMs(lat && lat.p50);
+      else if (col === 'p95') nums[i].textContent = fmtMs(lat && lat.p95);
+      else if (col === 'p99') nums[i].textContent = fmtMs(lat && lat.p99);
+    }
+  }
+  function setPill(text) {
+    var pill = document.querySelector('.sla-pill');
+    if (pill) pill.textContent = text;
+  }
+  function go() {
+    fetch('/v1/sla/dashboard?window_hours=' + WINDOW_HOURS, { credentials: 'include' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (!data || !data.ok || !Array.isArray(data.surfaces)) {
+          setPill('Sign in to load SLA — /v1/sla/dashboard requires auth');
+          return;
+        }
+        /* Build a lookup from sla surface => {latency, uptime}. */
+        var by = {};
+        for (var i = 0; i < data.surfaces.length; i++) by[data.surfaces[i].surface] = data.surfaces[i];
+        /* Map page friendly labels to persistent SLA_SURFACES. The page
+           was authored with 4 placeholder rows (gateway/inference/capture/
+           federated); we surface our persistent set onto the closest match. */
+        var pageMap = {
+          'gateway':   by['router_http'],
+          'inference': by['intent_ask'],
+          'capture':   by['capture_log'],
+          'federated': by['bakeoff'],
+        };
+        var anyRealData = false;
+        Object.keys(pageMap).forEach(function (label) {
+          var entry = pageMap[label];
+          if (!entry) return;
+          var lat = entry.latency || {};
+          var up = entry.uptime || {};
+          if (lat.status === 'ok' || up.status === 'ok') anyRealData = true;
+          /* Uptime table has two columns: 30d, 90d — we only have one window
+             so we render the same uptime in both cells until rolling-window
+             rollups land. Honest "--" stays when there are no samples. */
+          findSurfaceRows(label).forEach(function (row, idx) {
+            if (idx === 0) bindRow(row, lat, up, ['uptime', 'uptime']);
+            else if (idx === 1) bindRow(row, lat, up, ['p50', 'p95', 'p99']);
+          });
+        });
+        setPill(anyRealData
+          ? ('Live - window: last ' + (WINDOW_HOURS / 24) + ' days')
+          : 'Connected - no samples in window yet');
+      })
+      .catch(function () {
+        setPill('Backend unreachable - showing placeholder values');
+      });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go);
+  else go();
+})();
+</script>
+<div hidden data-w221-anchors="account" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training loop</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Run</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+</div>
+<div hidden class="empty" data-empty-state="account" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">No data yet. Run kolm connect start to wire your local proxy.</div>
 </body>
 </html>

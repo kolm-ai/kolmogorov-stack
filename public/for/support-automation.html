@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Kolm for Support Automation &mdash; per-ticket cost compression · kolm.ai</title>
-<meta name="description" content="Your support automation pipeline bills you per ticket forever. Kolm distills the deflection prompts that already work into a specialist that runs for 4&cent; per thousand. Same eval. Same accept rate. Your weights, your hardware, your receipts.">
-<meta name="theme-color" content="#07090c">
+<meta name="description" content="Your support automation pipeline bills you per ticket forever. Kolm distills the deflection prompts that already work into a specialist that runs for 4&cent; per thousand. Same eval. Same accept rate. Your weights, your">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="Kolm for Support Automation · kolm.ai">
 <meta property="og:description" content="Per-ticket cost compression. Distill your deflection prompts into a specialist with signed receipts.">
 <meta property="og:type" content="article">
@@ -17,6 +18,7 @@
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/for-shell.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -79,7 +81,7 @@
 <section class="for-section">
   <div class="for-section__head">
     <span class="for-eyebrow">The problem</span>
-    <h2 class="for-h2">Four reasons your per-ticket bill keeps climbing.</h2>
+    <h2 class="for-h2">Why your per-ticket bill keeps climbing.</h2>
   </div>
   <div class="for-pain">
     <div class="for-pain__item">
@@ -108,8 +110,8 @@
 <section class="for-section">
   <div class="for-section__head">
     <span class="for-eyebrow">What kolm changes</span>
-    <h2 class="for-h2">Three steps from reviewed responses to a deployable specialist.</h2>
-    <p class="for-prose">You already produced the training data &mdash; every accepted draft your agents shipped is a (ticket, ideal-response) pair. Kolm just turns the corpus you already own into a deployable specialist.</p>
+    <h2 class="for-h2">From reviewed responses to a deployable specialist.</h2>
+    <p class="for-prose">You already produced the training data: every accepted draft your agents shipped is a (ticket, ideal-response) pair. Kolm turns that corpus into a deployable specialist.</p>
   </div>
   <div class="for-recipe">
     <div class="for-recipe__step">
@@ -127,7 +129,7 @@
     <div class="for-recipe__step">
       <span class="for-recipe__num">Step 03</span>
       <h3 class="for-recipe__h">Run on a single L40S</h3>
-      <p class="for-recipe__p">A 3B INT4 specialist serves your full ticket volume on one consumer GPU. The signed receipt lets your security team pin the exact version of the model in change control.</p>
+      <p class="for-recipe__p">A 32B INT4 specialist serves your full ticket volume on one consumer GPU. The signed receipt lets your security team pin the exact version of the model in change control.</p>
       <code class="for-recipe__cmd"><span class="p">$</span> <span class="c">kolm runtime up cx-specialist.kolm --target vllm</span><br><span class="o">listening on :8080 &middot; p50 first-token 42ms</span></code>
     </div>
   </div>
@@ -157,7 +159,7 @@
 <section class="for-section">
   <div class="for-section__head">
     <span class="for-eyebrow">A real artifact</span>
-    <h2 class="for-h2">A 3B INT4 specialist that fits on one L40S.</h2>
+    <h2 class="for-h2">A 32B INT4 specialist that fits on one L40S.</h2>
     <p class="for-prose">One signed file, sized for a single consumer GPU. Weights + frozen eval + bakeoff + receipt. The same file deploys to vLLM, llama.cpp, or MLX without conversion.</p>
   </div>
   <div class="for-receipt">

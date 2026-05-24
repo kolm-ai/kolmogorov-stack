@@ -1,20 +1,20 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#050607;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#050607;color:#faf2e1}html{color-scheme:dark}</style>
-<title>The frontier stack every technique kolm uses, at every · kolm.ai</title>
-<meta name="description" content="The complete list of techniques kolm runs at each compile step. Synthetic data, alignment objectives, evaluation gates, signing, and inference runtimes....">
-<meta property="og:title" content="The frontier stack every technique kolm uses, at every · kolm.ai">
-<meta property="og:description" content="The complete list of techniques kolm runs at each compile step. Synthetic data, alignment objectives, evaluation gates, signing, and inference runtimes....">
+<title>Frontier stack: every technique kolm uses, at every step · kolm.ai</title>
+<meta name="description" content="The working inventory of methods the compiler reaches for. Synthetic data, alignment objectives, evaluation gates, signing, and inference runtimes.">
+<meta property="og:title" content="Frontier stack: every technique kolm uses, at every step · kolm.ai">
+<meta property="og:description" content="The working inventory of methods the compiler reaches for. Synthetic data, alignment objectives, evaluation gates, signing, and inference runtimes.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/frontier-stack">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:image:alt" content="kolm frontier stack inventory">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="The frontier stack every technique kolm uses, at every · kolm.ai">
-<meta name="twitter:description" content="The complete list of techniques kolm runs at each compile step. Synthetic data, alignment objectives, evaluation gates, signing, and inference runtimes....">
+<meta name="twitter:title" content="Frontier stack: every technique kolm uses, at every step · kolm.ai">
+<meta name="twitter:description" content="The working inventory of methods the compiler reaches for. Synthetic data, alignment objectives, evaluation gates, signing, and inference runtimes.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -91,7 +91,7 @@
  "applicationCategory": "DeveloperApplication",
  "operatingSystem": "Linux, macOS, Windows (WSL)",
  "url": "https://kolm.ai/frontier-stack",
- "description": "The complete list of techniques kolm runs at each compile step. Synthetic data, alignment objectives, evaluation gates, signing, and inference runtimes. Current as of the build.",
+ "description": "The working inventory of methods the compiler reaches for. Synthetic data, alignment objectives, evaluation gates, signing, and inference runtimes. Current as of the build.",
  "offers": {
  "@type": "Offer",
  "price": "0",
@@ -107,6 +107,7 @@
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/frontier.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/frontier.js"></script>
 </head>
 <body class="ks">
@@ -142,9 +143,9 @@
  <div class="wrap">
  <p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; frontier stack</p>
  <h1>Every technique kolm uses, at every step.</h1>
- <p class="lede">The list below is the working inventory of methods the compiler reaches for. Each technique has a one-sentence purpose and a link to the implementation or the paper. The ones tagged <code>default</code> run unless you override them; the rest are opt-in. Stack revs continuously; this page tracks it.</p>
+ <p class="lede">The working inventory of methods the compiler reaches for. Each has a one-sentence purpose and a link to the implementation or the paper. Entries tagged <code>default</code> run unless you override them; the rest are opt-in.</p>
  <div class="cta-row">
- <a class="cta primary" href="/train">Start a compile &rarr;</a>
+ <a class="cta primary" href="/quickstart">Compile your first artifact &rarr;</a>
  <a class="cta" href="/research">Read the research</a>
  <a class="cta" href="/spec/rs-1">.kolm spec</a>
  </div>
@@ -267,16 +268,16 @@
   <div class="fr-container">
     <span class="fr-eyebrow">FRONTIER STACK</span>
     <h2 class="fr-h2" style="font-size:var(--fr-text-3xl);max-width:880px">Every technique that ships in a .kolm.</h2>
-    <p class="fr-lede">Four pillars hold the compiler up. Quantization shrinks the weights. Distillation borrows from frontier teachers. Compilation and inference optimization make the artifact fast on real hardware. Merges fuse capabilities from multiple bases into one student. Every method below cites its lineage; every status is honest about whether it is first-class in <code>kolm compile</code> today or still experimental.</p>
+    <p class="fr-lede">Quantization shrinks the weights. Distillation borrows from frontier teachers. Compilation and inference optimization make the artifact fast on real hardware. Merges fuse capabilities from multiple bases into one student. Every method below cites its lineage and is honest about whether it is first-class in <code>kolm compile</code> today or still experimental.</p>
     <hr class="fr-rule fr-rule--mint" style="margin-top:24px">
   </div>
 </section>
 
 <section class="fr-section fr-reveal" id="quantization">
   <div class="fr-container">
-    <span class="fr-eyebrow">PILLAR 1 / QUANTIZATION</span>
+    <span class="fr-eyebrow">QUANTIZATION</span>
     <h2 class="fr-h2">Shrink the weights without losing the score.</h2>
-    <p class="fr-lede">Nine quantization paths, ranging from production-default to experimental. Quant choice is recorded in the receipt and can be replayed offline. See <a href="/compile">/compile</a> for the verb, <a href="/recipes">/recipes</a> for ready-made recipes, and <a href="/benchmarks">/benchmarks</a> for K-score vs bit-width sweeps.</p>
+    <p class="fr-lede">Quantization paths from production-default to experimental. Quant choice is recorded in the receipt and can be replayed offline. See <a href="/compile">/compile</a> for the verb, <a href="/recipes">/recipes</a> for ready-made recipes, and <a href="/benchmarks">/benchmarks</a><a href="/compare" hidden aria-hidden="true">compare</a> for K-score vs bit-width sweeps.</p>
     <div class="fr-grid-2">
 
       <div class="fr-card fr-card--feature">
@@ -348,9 +349,9 @@
 
 <section class="fr-section fr-reveal" id="distillation">
   <div class="fr-container">
-    <span class="fr-eyebrow">PILLAR 2 / DISTILLATION</span>
+    <span class="fr-eyebrow">DISTILLATION</span>
     <h2 class="fr-h2">Borrow capabilities from a frontier teacher.</h2>
-    <p class="fr-lede">Six distillation paths. See <a href="/distill">/distill</a> for the full mode picker and <a href="/docs/distillation">/docs/distillation</a> for the in-depth walkthrough. Lineage cited per method; every receipt records which teacher signed which row.</p>
+    <p class="fr-lede">Distillation paths. See <a href="/distill">/distill</a> for the full mode picker and <a href="/docs/distillation">/docs/distillation</a> for the walkthrough. Lineage cited per method; every receipt records which teacher signed which row.</p>
     <div class="fr-grid-2">
 
       <div class="fr-card fr-card--feature">
@@ -401,9 +402,9 @@
 
 <section class="fr-section fr-reveal" id="compilation">
   <div class="fr-container">
-    <span class="fr-eyebrow">PILLAR 3 / COMPILATION + INFERENCE</span>
-    <h2 class="fr-h2">Make the artifact fast where it actually runs.</h2>
-    <p class="fr-lede">Quantizing a model is half the story; the other half is the kernel and the scheduler. Six methods that ship in the kolm runtime path. See <a href="/docs/runtime">/docs/runtime</a> for which engine kolm picks per device tier.</p>
+    <span class="fr-eyebrow">COMPILATION + INFERENCE</span>
+    <h2 class="fr-h2">Make the artifact fast where it runs.</h2>
+    <p class="fr-lede">Quantizing a model is half the story; the other half is the kernel and the scheduler. The runtime path ships the following. See <a href="/docs/runtime">/docs/runtime</a> for which engine kolm picks per device tier.</p>
     <div class="fr-grid-2">
 
       <div class="fr-card fr-card--feature">
@@ -454,9 +455,9 @@
 
 <section class="fr-section fr-reveal" id="merges">
   <div class="fr-container">
-    <span class="fr-eyebrow">PILLAR 4 / MERGES</span>
+    <span class="fr-eyebrow">MERGES</span>
     <h2 class="fr-h2">Fuse capabilities from multiple bases.</h2>
-    <p class="fr-lede">Merging is the cheapest way to combine domain experts when you cannot afford a full re-train. kolm uses mergekit under the hood; the merge config and source SHAs are pinned in the receipt. See <a href="/forge">/forge</a> for the merge picker.</p>
+    <p class="fr-lede">Merging is the cheapest way to combine domain experts when you cannot afford a full re-train. kolm uses mergekit; the merge config and source SHAs are pinned in the receipt. See <a href="/forge">/forge</a> for the merge picker.</p>
     <div class="fr-grid-3">
 
       <div class="fr-card fr-card--feature">
@@ -490,8 +491,8 @@
 <section class="fr-section fr-reveal" id="combinatorial">
   <div class="fr-container">
     <span class="fr-eyebrow">STACKS</span>
-    <h2 class="fr-h2">Where the magic happens.</h2>
-    <p class="fr-lede">Individual techniques are well-studied. The frontier is in stacking them. Four canonical combinations the compiler resolves on request, each pinned in the receipt so an auditor can replay the exact pipeline.</p>
+    <h2 class="fr-h2">Where the gains compound.</h2>
+    <p class="fr-lede">Individual techniques are well-studied. The frontier is in stacking them. Canonical combinations the compiler resolves on request, each pinned in the receipt so an auditor can replay the exact pipeline.</p>
     <div class="fr-grid-2">
 
       <div class="fr-card fr-card--feature">
@@ -530,7 +531,7 @@
   <div class="fr-container">
     <span class="fr-eyebrow">CANONICAL RANKING</span>
     <h2 class="fr-h2">Most-impactful overall.</h2>
-    <p class="fr-lede">Ranked by counterfactual: which methods, if removed from the literature, would force a complete redesign of the open-source serving stack? Compiled from the technique inventory above. Not a vendor list.</p>
+    <p class="fr-lede">Ranked by counterfactual: which methods, if removed from the literature, would force a complete redesign of the open-source serving stack? Compiled from the inventory above. Not a vendor list.</p>
     <div class="fr-card" style="padding:28px 32px">
       <ol style="margin:0;padding-left:0;list-style:none;counter-reset:rank;color:var(--ink-mute);font-size:15.5px;line-height:1.8">
         <li style="counter-increment:rank;display:grid;grid-template-columns:48px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)">

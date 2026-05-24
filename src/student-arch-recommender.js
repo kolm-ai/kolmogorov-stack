@@ -197,3 +197,78 @@ export function recommendArch(stats) {
     },
   };
 }
+
+// =============================================================================
+// W832 — Meta-augmented recommender.
+//
+// If the kolm-meta trainer has accumulated >= MIN_ROWS_FOR_META training rows
+// AND a trained model exists on disk, we consult the meta-model and surface
+// its prediction alongside the rule-based pick. The rule pick stays the
+// authority on architecture SELECTION — meta predictions ride on the envelope
+// as a hint (predicted kscore, compile_time, failure mode) so the operator
+// can decide whether to push past the rule's safe pick.
+//
+// Below MIN_ROWS_FOR_META, the envelope carries `meta_insufficient_data:true`
+// so the dashboard can tell the user "we'll start meta-routing at N rows."
+//
+// `features` is the same shape kolm-meta-trainer expects (META_FEATURES keys).
+// `stats` is the same capture-stats profile the rule-based recommendArch eats.
+// Callers can pass both — the rule path uses stats, the meta path uses features.
+// =============================================================================
+
+export async function recommendArchWithMeta({ stats = null, features = null } = {}) {
+  const ruleEnv = recommendArch(stats || {});
+  let metaMod;
+  try { metaMod = await import('./kolm-meta-trainer.js'); }
+  catch (_) {
+    return {
+      ...ruleEnv,
+      source: 'rules',
+      meta_insufficient_data: true,
+      meta_status: 'meta_module_missing',
+      rows: 0,
+    };
+  }
+  let rows = 0;
+  try { rows = metaMod.n_rows(); } catch (_) { rows = 0; }
+  if (rows < metaMod.MIN_ROWS_FOR_META) {
+    return {
+      ...ruleEnv,
+      source: 'rules',
+      meta_insufficient_data: true,
+      rows,
+      min_rows_for_meta: metaMod.MIN_ROWS_FOR_META,
+    };
+  }
+  // n >= threshold — try the meta model.
+  let metaEnv = null;
+  try { metaEnv = metaMod.inferKolmMeta({ features: features || {} }); }
+  catch (e) { metaEnv = { ok: false, status: 'infer_threw', detail: String(e && e.message || e) }; }
+  if (!metaEnv || metaEnv.ok !== true) {
+    return {
+      ...ruleEnv,
+      source: 'rules',
+      meta_insufficient_data: false,
+      meta_status: (metaEnv && metaEnv.status) || 'meta_unavailable',
+      rows,
+    };
+  }
+  // Honest envelope: meta source kicks in. Rule pick stays exposed so the
+  // operator can compare; meta adds its prediction block.
+  return {
+    ...ruleEnv,
+    source: 'meta',
+    meta_insufficient_data: false,
+    rows,
+    min_rows_for_meta: metaMod.MIN_ROWS_FOR_META,
+    meta_prediction: {
+      kscore_predicted: metaEnv.kscore_predicted,
+      compile_time_s_predicted: metaEnv.compile_time_s_predicted,
+      failure_mode_predicted: metaEnv.failure_mode_predicted,
+      failure_mode_scores: metaEnv.failure_mode_scores,
+      confidence: metaEnv.confidence,
+      n_train_rows: metaEnv.n_train_rows,
+      version: metaEnv.version,
+    },
+  };
+}

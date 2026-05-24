@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -63,6 +63,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <link rel="stylesheet" href="/ks.css">
 <!-- ds-shell W619 -->
 <link rel="stylesheet" href="/docs-shell.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/docs-shell.js"></script>
 
 </head>
@@ -131,7 +132,7 @@ kolm whoami            # confirm your tenant_id (this is your publisher_id)</cod
   </tbody>
 </table>
 <p>The platform share covers hosting the .kolm bytes, running the K-Score gate that powers the Verified pill, serving the catalog manifest, and the ratings/reviews infrastructure described below.</p>
-<p><strong>Payout integration is honestly NOT YET WIRED.</strong> This page is the TOS that locks in the contract for when payouts ship in a future wave. Today the <code>computeRoyalty()</code> function returns the math (you can call it via <code>POST /v1/marketplace/listings</code>) but no Stripe connection writes a balance. Publishing today is free, and any revenue accrued before the payout pipe ships will be honored at the rates above when it does.</p>
+<p><strong>Payout integration is on the public roadmap.</strong> This page is the TOS that locks in the contract for when payouts ship in a follow-up wave. Today the <code>computeRoyalty()</code> function returns the math (you can call it via <code>POST /v1/marketplace/listings</code>) and no Stripe connection writes a balance. Publishing today is free, and any revenue accrued before the payout pipe ships will be honored at the rates above when it does.</p>
 
 <h2 id="reviews-ratings">Reviews and ratings</h2>
 <p>Buyers can leave one review per listing using a 1&ndash;5 star scale plus a text body. The aggregate <code>ratings_avg</code> + <code>ratings_count</code> on each listing card is computed live from the underlying event-store rows &mdash; no denormalised counter that can drift from the truth.</p>
@@ -180,7 +181,7 @@ kolm whoami            # confirm your tenant_id (this is your publisher_id)</cod
   <span data-test="w737-revenue-split">70/30 publisher/platform</span>
   <span data-test="w737-reviews-ratings">ratings and reviews</span>
   <span data-test="w737-transfer-learning">transfer learning namespace-fingerprint</span>
-  <span data-test="w737-payouts-not-wired">payout integration is honestly NOT YET WIRED</span>
+  <span data-test="w737-payouts-not-wired">payout integration is on the public roadmap</span>
 </div>
 
 </body>

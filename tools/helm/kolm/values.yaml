@@ -1,0 +1,98 @@
+# W824-1 — Default values for the kolm Helm chart.
+#
+# Override at install/upgrade time with `--set` or a custom -f values.yaml.
+# Every value below has a sensible production-leaning default (replicaCount=2,
+# rolling-update zero-downtime, HPA bounded between 2 and 20).
+
+# Container image — override repository + tag for your registry.
+image:
+  repository: ghcr.io/sneaky-hippo/kolm
+  tag: ""              # empty → falls back to .Chart.AppVersion (1.0.0)
+  pullPolicy: IfNotPresent
+  pullSecrets: []      # e.g. [{ name: ghcr-pull }]
+
+# Number of pods at boot. HPA (if enabled) overrides this at runtime.
+replicaCount: 2
+
+# Service exposing the inference runtime to the cluster.
+service:
+  type: ClusterIP
+  port: 3000
+  targetPort: 3000
+  # Optional annotations (e.g. for AWS NLB or GCP internal LB).
+  annotations: {}
+
+# Pod resource requests/limits. Tune to your hardware.
+resources:
+  requests:
+    cpu: "500m"
+    memory: "1Gi"
+  limits:
+    cpu: "2"
+    memory: "4Gi"
+
+# Persistent storage for KOLM_DATA_DIR (event-store, cached artifacts).
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClass: ""    # empty → cluster default
+  accessMode: ReadWriteOnce
+  mountPath: /var/lib/kolm
+
+# Artifact registry — the initContainer (W824-5) pulls the `.kolm` artifact
+# from here before the main container starts.
+artifactRegistry:
+  url: ""                          # e.g. oci://ghcr.io/sneaky-hippo/artifacts
+  secretRef: ""                    # pull secret name in the install namespace
+  artifactId: "production-latest"  # KOLM_ARTIFACT_ID passed to `kolm pull`
+
+# Horizontal Pod Autoscaler — W824-4 keys on the custom external metric
+# `inference_queue_depth` (exposed at /metrics/extended by W824-3).
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 20
+  targetQueueDepth: 50    # avg pods upscale when queue > 50
+
+# Rolling-update strategy — zero-downtime model swaps (W824-6).
+rollingUpdate:
+  maxSurge: 1
+  maxUnavailable: 0
+
+# preStop drain period — give in-flight requests time to finish before
+# SIGTERM. Kubernetes will then wait up to terminationGracePeriodSeconds
+# (default 30) before forcing SIGKILL.
+preStop:
+  drainSeconds: 15
+
+terminationGracePeriodSeconds: 60
+
+# Pod-level metadata.
+podAnnotations: {}
+podLabels: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Optional service account — leave empty to use the cluster default.
+serviceAccount:
+  create: false
+  name: ""
+  annotations: {}
+
+# Probes — readiness uses W824-2's /ready/deep so traffic only arrives once
+# the artifact is loaded. Liveness stays on the cheap /health.
+probes:
+  readiness:
+    path: /ready/deep
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    failureThreshold: 6
+  liveness:
+    path: /health
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    failureThreshold: 3
+
+# Extra environment variables merged into the main container.
+extraEnv: []

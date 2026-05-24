@@ -78,11 +78,13 @@ except Exception as _torch_err:  # pragma: no cover - exercised at runtime
 
 
 CONTRASTIVE_VERSION = "w714-v1"
+TOKEN_LEVEL_DPO_VERSION = "w827-v1"
 DEFAULT_LAMBDA = 0.5
 DEFAULT_NEGATIVES_PER_CAPTURE = 3
 DEFAULT_TEMPERATURE = 2.0
 DEFAULT_LR = 5e-5
 DEFAULT_GRAD_CLIP = 1.0
+DEFAULT_DPO_BETA = 0.1
 
 
 # ---------------------------------------------------------------------------
@@ -126,6 +128,84 @@ def contrastive_loss(student_logits, positive_teacher_logits, negative_teacher_l
     neg_terms = [_forward_kl(student_logits, n, T) for n in negative_teacher_logits_list]
     neg_mean = torch.stack(neg_terms).mean()
     return pos - lam * neg_mean
+
+
+# ---------------------------------------------------------------------------
+# W827-3 — Token-level DPO loss.
+#
+# W714 (response-level) only learns "the whole positive output is preferred to
+# the whole negative output" — one signal per row. Token-level DPO gives the
+# student a per-token credit-assignment signal: at each position, compare the
+# negative log-likelihood of the target_id under the positive-conditioned
+# distribution vs the negative-conditioned distribution, and apply a
+# logsigmoid DPO objective per token. The result is summed over real tokens
+# (mask out padding via attention_mask) and normalized by the token count, so
+# per-row magnitude is comparable across captures with different lengths.
+#
+# Math (Rafailov 2023 DPO, applied per token):
+#     lp_pos[t] = -log_softmax(logits_pos)[t, target_ids[t]]    # per-tok NLL on pos
+#     lp_neg[t] = -log_softmax(logits_neg)[t, target_ids[t]]    # per-tok NLL on neg
+#     per_tok_dpo[t] = -logsigmoid( beta * (lp_neg[t] - lp_pos[t]) )
+#
+# Note the sign: lp_neg - lp_pos is positive when the positive logits give the
+# target a HIGHER probability (lower NLL) than the negatives, which is the
+# direction we want; logsigmoid of a positive number is close to 0, so
+# `-logsigmoid(...)` becomes a SMALL loss when the model already prefers the
+# positive — exactly the DPO contract.
+#
+# This is NOT a replacement for `contrastive_loss` — it is an additional loss
+# selectable via `--contrastive-token-level`. The W714 response-level loss
+# stays the default path; W827 is opt-in.
+# ---------------------------------------------------------------------------
+
+def token_level_dpo_loss(logits_pos, logits_neg, target_ids, attention_mask, beta: float = DEFAULT_DPO_BETA):
+    """Per-token DPO loss.
+
+    Args:
+        logits_pos: (B, T, V) logits under the positive-conditioned forward pass.
+        logits_neg: (B, T, V) logits under the negative-conditioned forward pass.
+        target_ids: (B, T) the token IDs whose log-prob we are comparing.
+        attention_mask: (B, T) 1 for real tokens, 0 for padding.
+        beta: DPO temperature (Rafailov 2023 default 0.1).
+
+    Returns:
+        Scalar tensor: sum-of-per-token-loss / sum-of-real-tokens.
+
+    Edge cases:
+        - attention_mask all zeros -> returns 0.0 (no real tokens to score).
+        - logits_pos/logits_neg shape mismatch -> caller must align lengths.
+          We do NOT silently truncate here; the caller has more context.
+    """
+    # log_softmax over the vocab axis. F.log_softmax is numerically stable
+    # versus log(softmax(...)), which matters when the per-token gather() picks
+    # out a single id from a long vocabulary (vocab_size ~ 100K).
+    log_p_pos = F.log_softmax(logits_pos, dim=-1)
+    log_p_neg = F.log_softmax(logits_neg, dim=-1)
+
+    # Gather the log-prob of the target token at each position.
+    # gather requires a (B, T, 1) index tensor; unsqueeze, gather, squeeze.
+    tgt = target_ids.unsqueeze(-1)
+    lp_pos_tok = log_p_pos.gather(-1, tgt).squeeze(-1)  # (B, T)
+    lp_neg_tok = log_p_neg.gather(-1, tgt).squeeze(-1)  # (B, T)
+
+    # Per-token NLL is -log_prob (positive number, smaller = better fit).
+    # The DPO log-ratio is (lp_neg - lp_pos) in NLL space, equivalently
+    # (log_p_pos - log_p_neg) in log-prob space. They are the same number
+    # because the negation cancels: -lp_neg - (-lp_pos) = lp_pos - lp_neg
+    # (NLL space) is the negative of (log_p_pos - log_p_neg). To match the
+    # spec ("lp_neg - lp_pos"), we work in NLL space:
+    nll_pos = -lp_pos_tok  # (B, T)
+    nll_neg = -lp_neg_tok  # (B, T)
+    per_tok_dpo = -F.logsigmoid(beta * (nll_neg - nll_pos))  # (B, T)
+
+    # Mask out padding before reduction.
+    mask = attention_mask.to(per_tok_dpo.dtype)
+    masked = per_tok_dpo * mask
+    denom = mask.sum()
+    if denom.item() == 0:
+        # No real tokens; return zero loss so the optimizer step is a no-op.
+        return torch.zeros((), dtype=per_tok_dpo.dtype, device=per_tok_dpo.device)
+    return masked.sum() / denom
 
 
 # ---------------------------------------------------------------------------
@@ -251,6 +331,8 @@ def train(
     learning_rate: float = DEFAULT_LR,
     grad_clip: float = DEFAULT_GRAD_CLIP,
     dry_run: bool = False,
+    contrastive_token_level: bool = False,
+    dpo_beta: float = DEFAULT_DPO_BETA,
 ) -> dict[str, Any]:
     """Run contrastive distillation. Returns a structured receipt for the
     JS caller (envelope, identical shape across success / failure)."""
@@ -302,6 +384,12 @@ def train(
         "contrastive_teacher_model": teacher_model,
         "contrastive_input_jsonl": jsonl_path,
         "contrastive_dry_run": bool(dry_run),
+        # W827 token-level DPO upgrade. When False (default), the W714
+        # response-level loss is used; when True, token_level_dpo_loss() is
+        # substituted into the per-row training step.
+        "contrastive_token_level": bool(contrastive_token_level),
+        "contrastive_token_level_version": TOKEN_LEVEL_DPO_VERSION if contrastive_token_level else None,
+        "contrastive_dpo_beta": dpo_beta if contrastive_token_level else None,
     }
 
     if dry_run:
@@ -408,7 +496,50 @@ def train(
             )
             continue
 
-        loss = contrastive_loss(s_logits, t_pos, t_neg_list, lam=lam, T=temperature)
+        if contrastive_token_level:
+            # W827-3: per-token DPO branch. We need a paired forward of the
+            # student against the negative-conditioned input to get
+            # logits_neg of the same shape as logits_pos (s_logits). The
+            # positive forward already lives in `s_logits`; here we run the
+            # student again on prompt+negative for each negative and average
+            # the per-tok DPO loss across negatives — mirroring the
+            # response-level recipe's "average over negatives" reduction.
+            #
+            # The target_ids are the positive token IDs (we want the student
+            # to predict the POSITIVE tokens better than the negative
+            # alternative would). attention_mask is all-ones over the
+            # positive-length suffix; we don't pad here because pos_ids
+            # has no padding (single-row tokenization).
+            target_ids = pos_ids  # (1, L_pos)
+            # s_logits was already truncated above to match teacher; align
+            # target_ids the same way.
+            L_t = s_logits.shape[1]
+            target_ids = target_ids[:, :L_t]
+            attn = torch.ones_like(target_ids, dtype=s_logits.dtype)
+
+            tok_dpo_terms = []
+            for n_ids in neg_ids_list:
+                n_input = torch.cat([prompt_ids, n_ids], dim=1)
+                # Student's logits on the negative-conditioned input,
+                # cropped to the positive suffix length so the gather()
+                # against target_ids lines up.
+                neg_full = student(input_ids=n_input).logits[:, prompt_ids.shape[1]:, :]
+                Lp = min(neg_full.shape[1], L_t)
+                logits_pos_aligned = s_logits[:, :Lp, :]
+                logits_neg_aligned = neg_full[:, :Lp, :]
+                tgt = target_ids[:, :Lp]
+                m = attn[:, :Lp]
+                tok_dpo_terms.append(token_level_dpo_loss(
+                    logits_pos_aligned, logits_neg_aligned, tgt, m, beta=dpo_beta,
+                ))
+            if tok_dpo_terms:
+                loss = torch.stack(tok_dpo_terms).mean()
+            else:
+                # No negatives; fall back to the response-level positive term
+                # alone so the row still contributes a gradient signal.
+                loss = contrastive_loss(s_logits, t_pos, [], lam=lam, T=temperature)
+        else:
+            loss = contrastive_loss(s_logits, t_pos, t_neg_list, lam=lam, T=temperature)
         optimizer.zero_grad()
         loss.backward()
         torch.nn.utils.clip_grad_norm_(student.parameters(), max_norm=grad_clip)
@@ -485,11 +616,26 @@ def _build_argparser() -> argparse.ArgumentParser:
     p.add_argument("--dry-run", action="store_true",
                    help="Parse JSONL, write run-meta.json with the contrastive block, "
                         "and exit — no model load, no GPU. Used for contract tests.")
+    # W827-3 + W827-4 — token-level DPO opt-in. Default is False so the W714
+    # response-level path remains the default and does not regress.
+    p.add_argument("--contrastive-token-level", action="store_true",
+                   help="W827: switch the per-row loss from the W714 response-level "
+                        "contrastive_loss to token_level_dpo_loss (per-token DPO "
+                        "log-ratio of positive vs negative). Additive to --contrastive.")
+    p.add_argument("--dpo-beta", type=float, default=DEFAULT_DPO_BETA,
+                   help="W827: DPO temperature beta (Rafailov 2023 default 0.1). "
+                        "Only used when --contrastive-token-level is set.")
     return p
 
 
 def main(argv: Optional[list[str]] = None) -> int:
     args = _build_argparser().parse_args(argv)
+    # W827-4 plumbing: in addition to the explicit --contrastive-token-level
+    # flag we also accept the KOLM_CONTRASTIVE_TOKEN_LEVEL=1 environment
+    # variable so the JS-side `kolm distill --contrastive-token-level` can
+    # propagate the toggle to a child Python worker without re-quoting argv.
+    env_toggle = os.environ.get("KOLM_CONTRASTIVE_TOKEN_LEVEL", "").strip().lower()
+    token_level_via_env = env_toggle in ("1", "true", "yes", "on")
     env = train(
         jsonl_path=args.jsonl,
         output_dir=args.output,
@@ -501,6 +647,8 @@ def main(argv: Optional[list[str]] = None) -> int:
         learning_rate=args.lr,
         grad_clip=args.grad_clip,
         dry_run=args.dry_run,
+        contrastive_token_level=bool(args.contrastive_token_level or token_level_via_env),
+        dpo_beta=args.dpo_beta,
     )
     return 0 if env.get("ok") else 3
 

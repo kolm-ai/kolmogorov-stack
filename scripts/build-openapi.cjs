@@ -157,7 +157,15 @@ function operationHasStaleStubFlag(op, route) {
 function operationHasStaleUndocumentedFlag(op, route) {
   if (!op || !route) return false;
   if (op['x-kolm-undocumented']) return true;
-  return !!(op['x-kolm-source-indexed'] && !route.stub);
+  if (op['x-kolm-source-indexed'] && !route.stub) return true;
+  // W511 #3: route just became stub:true but op still lacks the flag — must refresh.
+  if (route.stub && !op['x-kolm-source-indexed']) return true;
+  // W511 #3: stub op must use the canonical source-indexed summary.
+  if (route.stub && op['x-kolm-source-indexed']) {
+    const summary = String(op.summary || '');
+    if (!/source-indexed route; contract generated from route source/.test(summary)) return true;
+  }
+  return false;
 }
 
 function operationContainsStaleDeviceCopy(op, route) {

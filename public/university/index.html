@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>kolm university &middot; Open-source AI workbench &middot; kolm.ai</title>
-<meta name="description" content="kolm university teaches the discipline behind distilling, compiling, and shipping your own frontier AI. Lessons in distillation, evaluation, multimodal compilation. Open-source AI workbench. Frontier AI on your own infrastructure.">
+<meta name="description" content="kolm university teaches the discipline behind distilling, compiling, and shipping your own frontier AI. Lessons in distillation, evaluation, multimodal compilation. Open-source AI workbench. Frontier AI on your own">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="kolm university &middot; Open-source AI workbench &middot; kolm.ai">
@@ -69,6 +69,7 @@ code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg
 .sr-only{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 </style>
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script src="/nav.js" defer></script>
 </head>
 <body class="ks">
@@ -107,7 +108,7 @@ code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg
 <p>kolm university exists because most AI education today is written either by hosted-API vendors who want you to stay on their bill, or by academics whose notebooks never make it to production. The lessons here are written by the people who built the compiler. They assume you want to leave the API, run on hardware you control, and audit every step. The first lesson is live. More are coming.</p>
 
 <h2 id="curriculum">Curriculum</h2>
-<p>Each lesson is a single page you can read end-to-end in under twenty minutes. Code blocks are runnable against the open-source CLI (<code>npm i -g kolm</code> or <code>pip install git+https://github.com/sneaky-hippo/kolmogorov-stack@main#subdirectory=sdk/python</code>). Numbers are reproducible &mdash; we show the exact hardware, the exact dataset size, and the exact K-score range.</p>
+<p>Each lesson is a single page you can read end-to-end in under twenty minutes. Code blocks are runnable against the open-source CLI (<code>npm i -g github:sneaky-hippo/kolm-stack</code> or <code>pip install git+https://github.com/sneaky-hippo/kolm-stack@main#subdirectory=sdk/python</code>). Numbers are reproducible &mdash; we show the exact hardware, the exact dataset size, and the exact K-score range.</p>
 
 <div class="lessons">
 

@@ -15,7 +15,7 @@
       }
     ]
   },
-  "description": "kolm.ai runtime reference dashboard. Panels: K-Score over time, local-vs-teacher token ratio, fallback rate, p95 splice latency. Replace the data source UID and the namespace label values before saving.",
+  "description": "kolm.ai runtime reference dashboard (W823 upgrade). 6 panels: K-Score over time, K-Score drift gauge, p95 latency by artifact, fallback rate (stacked area), token confidence distribution, routing-decision breakdown. Replace PROMETHEUS_DS_UID and namespace label values before saving.",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
@@ -89,15 +89,15 @@
         "type": "prometheus",
         "uid": "PROMETHEUS_DS_UID"
       },
-      "description": "Fraction of response tokens served by the local model vs the teacher. Higher values indicate the local model is handling more of the load.",
+      "description": "W823 K-Score drift gauge. Surfaces kolm.kscore.drift (signed delta vs 24h baseline). Red beyond +/-0.05 — matches the W823-3 alert threshold so the dashboard and alerts agree on what 'drift' means.",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
           "mappings": [],
-          "max": 1,
-          "min": 0,
+          "min": -0.2,
+          "max": 0.2,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -107,15 +107,23 @@
               },
               {
                 "color": "yellow",
-                "value": 0.5
+                "value": -0.05
               },
               {
                 "color": "green",
-                "value": 0.85
+                "value": -0.02
+              },
+              {
+                "color": "yellow",
+                "value": 0.02
+              },
+              {
+                "color": "red",
+                "value": 0.05
               }
             ]
           },
-          "unit": "percentunit"
+          "unit": "none"
         },
         "overrides": []
       },
@@ -135,7 +143,7 @@
           "fields": "",
           "values": false
         },
-        "showThresholdLabels": false,
+        "showThresholdLabels": true,
         "showThresholdMarkers": true
       },
       "pluginVersion": "10.0.0",
@@ -146,13 +154,13 @@
             "uid": "PROMETHEUS_DS_UID"
           },
           "editorMode": "code",
-          "expr": "kolm_local_token_ratio",
+          "expr": "kolm_kscore_drift",
           "legendFormat": "{{namespace}}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Local-vs-teacher token ratio",
+      "title": "K-Score drift gauge",
       "type": "gauge"
     },
     {
@@ -160,78 +168,7 @@
         "type": "prometheus",
         "uid": "PROMETHEUS_DS_UID"
       },
-      "description": "Rate of fallback-to-teacher routing decisions. Spikes above 20 percent suggest the response distribution has shifted faster than drift detection caught.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 0.1
-              },
-              {
-                "color": "red",
-                "value": 0.2
-              }
-            ]
-          },
-          "unit": "percentunit"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 18,
-        "y": 0
-      },
-      "id": 3,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "10.0.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROMETHEUS_DS_UID"
-          },
-          "editorMode": "code",
-          "expr": "kolm_fallback_rate",
-          "legendFormat": "{{namespace}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Fallback rate",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PROMETHEUS_DS_UID"
-      },
-      "description": "95th percentile splice latency in milliseconds. Splice latency is the local-to-teacher handoff time; regressions usually indicate network or teacher backend degradation.",
+      "description": "W823 p95 inference latency per artifact_id (kolm.artifact.id). Regressions above the 24h baseline of >25% match the W823-3 latency-regression alert.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -254,7 +191,89 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 24,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "id": 3,
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROMETHEUS_DS_UID"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum(rate(kolm_inference_latency_ms_bucket[5m])) by (le, artifact_id))",
+          "legendFormat": "{{artifact_id}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "p95 latency by artifact",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROMETHEUS_DS_UID"
+      },
+      "description": "W823 fallback rate stacked area — fallback-to-teacher decisions split by routing.decision (student vs teacher vs mixed). Spike above 15% in 15min trips the W823-3 fallback alert.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "ratio",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 70,
+            "lineWidth": 1,
+            "pointSize": 4,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            }
+          },
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.1
+              },
+              {
+                "color": "red",
+                "value": 0.15
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
         "x": 0,
         "y": 8
       },
@@ -277,14 +296,157 @@
             "uid": "PROMETHEUS_DS_UID"
           },
           "editorMode": "code",
-          "expr": "kolm_splice_latency_p95_ms",
-          "legendFormat": "{{namespace}}",
+          "expr": "sum(rate(kolm_routing_decision_total[5m])) by (routing_decision)",
+          "legendFormat": "{{routing_decision}}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "p95 splice latency",
+      "title": "Fallback rate (stacked area)",
       "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROMETHEUS_DS_UID"
+      },
+      "description": "W823 token confidence distribution — histogram of kolm.token.confidence_p50 (entropy in nats). Lower entropy = higher confidence; the long-right tail captures degenerate prompts the local model finds uncertain.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "axisLabel": "count",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 5,
+      "options": {
+        "bucketSize": 0.05,
+        "combine": false,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROMETHEUS_DS_UID"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(kolm_token_confidence_p50_bucket[5m])) by (le)",
+          "format": "heatmap",
+          "legendFormat": "{{le}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Token confidence distribution",
+      "type": "histogram"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROMETHEUS_DS_UID"
+      },
+      "description": "W823 routing-decision breakdown — pie split across student / teacher / mixed using the W823-1 kolm.routing.decision attribute. Sum over the dashboard time range.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": [],
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 6,
+      "options": {
+        "displayLabels": [
+          "name",
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "values": [
+            "value",
+            "percent"
+          ]
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROMETHEUS_DS_UID"
+          },
+          "editorMode": "code",
+          "expr": "sum(increase(kolm_routing_decision_total[$__range])) by (routing_decision)",
+          "legendFormat": "{{routing_decision}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Routing-decision breakdown",
+      "type": "piechart"
     }
   ],
   "refresh": "30s",
@@ -293,7 +455,8 @@
   "tags": [
     "kolm",
     "runtime",
-    "ai-compiler"
+    "ai-compiler",
+    "w823"
   ],
   "templating": {
     "list": []
@@ -306,6 +469,6 @@
   "timezone": "",
   "title": "kolm.ai runtime",
   "uid": "kolm-runtime",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }

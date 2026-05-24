@@ -1,0 +1,38 @@
+{{- /*
+W824-4 — HorizontalPodAutoscaler keyed on the custom external metric
+`inference_queue_depth`. The metric is exported by W824-3's /metrics/extended
+endpoint as a Prometheus gauge with label app=kolm; a metrics-adapter
+(e.g. prometheus-adapter or stackdriver) makes it available to the HPA as
+an External metric.
+
+The target is averageValue (NOT averageUtilization — utilization needs a
+request, queue depth doesn't). When avg per pod climbs above
+.Values.hpa.targetQueueDepth, the HPA scales up; when it drops below, it
+scales down to .Values.hpa.minReplicas.
+*/ -}}
+{{- if .Values.hpa.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "kolm.fullname" . }}
+  labels:
+    {{- include "kolm.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "kolm.fullname" . }}
+  minReplicas: {{ .Values.hpa.minReplicas }}
+  maxReplicas: {{ .Values.hpa.maxReplicas }}
+  metrics:
+    - type: External
+      external:
+        metric:
+          name: inference_queue_depth
+          selector:
+            matchLabels:
+              app: kolm
+        target:
+          type: AverageValue
+          averageValue: {{ .Values.hpa.targetQueueDepth | quote }}
+{{- end }}

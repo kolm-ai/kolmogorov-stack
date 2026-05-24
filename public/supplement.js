@@ -1,11 +1,12 @@
-/* W707 supplement bundle (frontend) — WF02 mega-menu, WF04 sticky-scroll, WF05 Cmd+K, WF25 cookie, WF26 announce.
+/* W707 supplement bundle (frontend) — WF02 mega-menu, WF03 mobile-nav overlay, WF04 sticky-scroll,
+   WF05 Cmd+K, WF06 breadcrumbs, WF25 cookie, WF26 announce.
    Load order: after nav.js. Idempotent — re-invocations are safe. */
 (function () {
   'use strict';
   if (window.__kolmSupplementLoaded) return;
   window.__kolmSupplementLoaded = true;
 
-  var SUPPLEMENT_VERSION = 'w707-supp-v1';
+  var SUPPLEMENT_VERSION = 'w707-supp-v2';
   var ANNOUNCE_KEY = 'kolm.announce.dismiss.v1';
   var COOKIE_KEY = 'kolm.cookie.consent.v1';
   var doc = document;
@@ -309,7 +310,7 @@
           ['/runtimes',  'Runtimes',     'CPU/GPU/edge/browser'],
           ['/device',    'On-device',    'Mac, Raspberry Pi, Jetson, iPhone'],
           ['/self-host', 'Self-host',    'Docker, Helm, air-gapped'],
-          ['/byoc',      'BYOC',         'Cloudflare R2, S3, Azure Blob']
+          ['/byoc',      'BYOC',         'S3-compatible storage, S3, Azure Blob']
         ]},
         { h: 'Trust',  items: [
           ['/k-score',     'K-Score',     'Quality gate per namespace'],
@@ -351,6 +352,174 @@
     doc.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
   }
 
+  /* ──────────────── WF03 mobile nav full-screen overlay ──────────────── */
+  /* Looks for a hamburger trigger via [data-kolm-mobile-nav], a nav element
+     (preferred: <nav class="ks-nav">), and projects a curated link list into a
+     full-screen sheet. Falls back gracefully if no trigger exists. */
+  var MOBILE_NAV_LINKS = [
+    { group: 'Product', items: [
+      ['/product',     'Product overview'],
+      ['/distill',     'Distill'],
+      ['/capture',     'Capture'],
+      ['/compile',     'Compile'],
+      ['/runtimes',    'Run'],
+      ['/forge',       'Forge']
+    ]},
+    { group: 'Trust', items: [
+      ['/security',    'Security'],
+      ['/status',      'Status'],
+      ['/k-score',     'K-Score'],
+      ['/leaderboard', 'KolmBench']
+    ]},
+    { group: 'Developer', items: [
+      ['/docs',        'Docs'],
+      ['/api',         'API reference'],
+      ['/sdks',        'SDKs'],
+      ['/shortcuts',   'Shortcuts'],
+      ['/changelog',   'Changelog']
+    ]},
+    { group: 'Company', items: [
+      ['/pricing',     'Pricing'],
+      ['/enterprise',  'Enterprise'],
+      ['/manifesto',   'Manifesto'],
+      ['/contact',     'Contact']
+    ]}
+  ];
+  var mobileNavOverlay = null;
+  function ensureMobileNavBuilt() {
+    if (mobileNavOverlay) return;
+    mobileNavOverlay = el('div', {
+      class: 'kolm-mobile-nav', role: 'dialog', 'aria-modal': 'true',
+      'aria-label': 'Site navigation', hidden: 'hidden'
+    });
+    var sheet = el('div', { class: 'kolm-mobile-nav__sheet' });
+    var header = el('div', { class: 'kolm-mobile-nav__head' });
+    header.innerHTML = '<span class="kolm-mobile-nav__brand">kolm<b>.ai</b></span>';
+    var closeBtn = el('button', {
+      type: 'button', class: 'kolm-mobile-nav__close',
+      'aria-label': 'Close navigation'
+    });
+    closeBtn.innerHTML = '×';
+    closeBtn.addEventListener('click', closeMobileNav);
+    header.appendChild(closeBtn);
+    sheet.appendChild(header);
+    for (var i = 0; i < MOBILE_NAV_LINKS.length; i++) {
+      var g = MOBILE_NAV_LINKS[i];
+      var section = el('div', { class: 'kolm-mobile-nav__group' });
+      section.appendChild(el('h4', { text: g.group }));
+      var ul = el('ul');
+      for (var j = 0; j < g.items.length; j++) {
+        var it = g.items[j];
+        var li = el('li');
+        var a = el('a', { href: it[0], text: it[1] });
+        li.appendChild(a);
+        ul.appendChild(li);
+      }
+      section.appendChild(ul);
+      sheet.appendChild(section);
+    }
+    var cta = el('div', { class: 'kolm-mobile-nav__cta' });
+    cta.innerHTML =
+      '<a href="/signup?intent=login" class="kolm-mobile-nav__btn">Sign in</a>' +
+      '<a href="/signup" class="kolm-mobile-nav__btn kolm-mobile-nav__btn--primary">Get started</a>';
+    sheet.appendChild(cta);
+    mobileNavOverlay.appendChild(sheet);
+    mobileNavOverlay.addEventListener('click', function (e) {
+      if (e.target === mobileNavOverlay) closeMobileNav();
+    });
+    doc.body.appendChild(mobileNavOverlay);
+  }
+  function openMobileNav() {
+    ensureMobileNavBuilt();
+    mobileNavOverlay.removeAttribute('hidden');
+    doc.documentElement.style.overflow = 'hidden';
+    setTimeout(function () {
+      var first = mobileNavOverlay.querySelector('.kolm-mobile-nav__close');
+      if (first) first.focus();
+    }, 30);
+  }
+  function closeMobileNav() {
+    if (!mobileNavOverlay) return;
+    mobileNavOverlay.setAttribute('hidden', '');
+    doc.documentElement.style.overflow = '';
+  }
+  function installMobileNav() {
+    var triggers = $$('[data-kolm-mobile-nav]');
+    if (!triggers.length) {
+      var btn = el('button', {
+        type: 'button',
+        class: 'kolm-mobile-nav__trigger',
+        'aria-label': 'Open navigation',
+        'data-kolm-mobile-nav': ''
+      });
+      btn.innerHTML = '<span></span><span></span><span></span>';
+      doc.body.appendChild(btn);
+      triggers = [btn];
+    }
+    triggers.forEach(function (t) {
+      t.addEventListener('click', function (e) {
+        e.preventDefault();
+        openMobileNav();
+      });
+    });
+    doc.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && mobileNavOverlay && !mobileNavOverlay.hasAttribute('hidden')) {
+        closeMobileNav();
+      }
+    });
+  }
+
+  /* ──────────────── WF06 breadcrumbs (docs + subpages) ──────────────── */
+  /* Auto-generates a breadcrumb trail from window.location.pathname when:
+       (a) the page declares <meta name="kolm:breadcrumbs" content="auto">  OR
+       (b) the page contains <nav class="kolm-breadcrumbs" data-kolm-auto> placeholder, OR
+       (c) the path lives under /docs/ or /account/ and no manual nav.crumbs is present.
+     Skips homepage. */
+  function installBreadcrumbs() {
+    var meta = $('meta[name="kolm:breadcrumbs"]');
+    var auto = meta && meta.getAttribute('content') === 'auto';
+    var placeholder = $('nav.kolm-breadcrumbs[data-kolm-auto]');
+    var path = (window.location.pathname || '/').replace(/\/+$/, '') || '/';
+    var underScopedSection = /^\/(docs|account|use-cases|guides)\//.test(path);
+    if (path === '/' || (!auto && !placeholder && !underScopedSection)) return;
+    if ($('nav.kolm-breadcrumbs:not([data-kolm-auto])')) return;
+
+    var parts = path.split('/').filter(Boolean);
+    var crumbs = [{ href: '/', label: 'Home' }];
+    var accum = '';
+    for (var i = 0; i < parts.length; i++) {
+      accum += '/' + parts[i];
+      crumbs.push({ href: accum, label: humanize(parts[i]) });
+    }
+    var nav = placeholder || el('nav', {
+      class: 'kolm-breadcrumbs',
+      'aria-label': 'Breadcrumb'
+    });
+    var ol = el('ol');
+    for (var k = 0; k < crumbs.length; k++) {
+      var li = el('li');
+      if (k === crumbs.length - 1) {
+        li.appendChild(el('span', { text: crumbs[k].label, 'aria-current': 'page' }));
+      } else {
+        li.appendChild(el('a', { href: crumbs[k].href, text: crumbs[k].label }));
+        li.appendChild(el('span', { class: 'kolm-breadcrumbs__sep', 'aria-hidden': 'true', text: '/' }));
+      }
+      ol.appendChild(li);
+    }
+    nav.innerHTML = '';
+    nav.appendChild(ol);
+    if (!placeholder) {
+      var main = $('main') || doc.body;
+      if (main.firstChild) main.insertBefore(nav, main.firstChild);
+      else main.appendChild(nav);
+    }
+  }
+  function humanize(seg) {
+    var raw = decodeURIComponent(seg).replace(/[-_]+/g, ' ');
+    raw = raw.replace(/\.html?$/i, '');
+    return raw.replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+  }
+
   /* ──────────────── bootstrap ──────────────── */
   function boot() {
     try { installAnnouncementBar(); } catch (e) {}
@@ -359,6 +528,8 @@
     try { installCmdKTrigger(); }    catch (e) {}
     try { installCookieConsent(); }  catch (e) {}
     try { installMegaMenu(); }       catch (e) {}
+    try { installMobileNav(); }      catch (e) {}
+    try { installBreadcrumbs(); }    catch (e) {}
   }
   if (doc.readyState === 'loading') {
     doc.addEventListener('DOMContentLoaded', boot);
@@ -370,6 +541,9 @@
     version: SUPPLEMENT_VERSION,
     openCmdK: openCmdk,
     closeCmdK: closeCmdk,
-    cmdkItems: CMDK_ITEMS
+    openMobileNav: openMobileNav,
+    closeMobileNav: closeMobileNav,
+    cmdkItems: CMDK_ITEMS,
+    mobileNavLinks: MOBILE_NAV_LINKS
   };
 })();

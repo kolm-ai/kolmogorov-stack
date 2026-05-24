@@ -74,11 +74,6 @@
       "permanent": true
     },
     {
-      "source": "/cloud",
-      "destination": "/enterprise",
-      "permanent": true
-    },
-    {
       "source": "/edge",
       "destination": "/device",
       "permanent": true
@@ -261,6 +256,22 @@
   ],
   "rewrites": [
     {
+      "source": "/account/pipelines",
+      "destination": "/account/pipelines/index.html"
+    },
+    {
+      "source": "/account/pipelines/",
+      "destination": "/account/pipelines/index.html"
+    },
+    {
+      "source": "/account/pipelines/index",
+      "destination": "/account/pipelines/index.html"
+    },
+    {
+      "source": "/account/pipelines/:id",
+      "destination": "/account/pipelines/_template.html"
+    },
+    {
       "source": "/health",
       "destination": "https://kolmogorov-stack-production.up.railway.app/health"
     },
@@ -299,6 +310,10 @@
     {
       "source": "/compile",
       "destination": "/compile.html"
+    },
+    {
+      "source": "/cloud",
+      "destination": "/cloud.html"
     },
     {
       "source": "/run",
@@ -443,6 +458,10 @@
     {
       "source": "/account/namespaces/new",
       "destination": "/account/namespaces/new.html"
+    },
+    {
+      "source": "/account/federated/consortium",
+      "destination": "/account/federated/consortium.html"
     },
     {
       "source": "/settings",
@@ -1027,6 +1046,10 @@
     {
       "source": "/docs/multi-region",
       "destination": "/docs/multi-region.html"
+    },
+    {
+      "source": "/docs/plugins",
+      "destination": "/docs/plugins.html"
     },
     {
       "source": "/byoc",
@@ -1863,6 +1886,10 @@
     {
       "source": "/docs/distill",
       "destination": "/docs/distill.html"
+    },
+    {
+      "source": "/docs/efficiency",
+      "destination": "/docs/efficiency.html"
     },
     {
       "source": "/docs/failure-modes",

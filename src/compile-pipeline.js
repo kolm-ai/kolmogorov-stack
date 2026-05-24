@@ -42,6 +42,7 @@ import { trainTokenizer, DEFAULT_VOCAB_SIZES } from './tokenizer-train.js';
 import { distill, prepareDistillCorpus, selectStudentBackbone, MODES as DISTILL_MODES } from './distill-pipeline.js';
 import { createDataset, splitDataset } from './dataset-workbench.js';
 import { MIN_PRODUCTION_HOLDOUT, MIN_PRODUCTION_TRAIN } from './seeds.js';
+import { envSecret } from './env.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const ROOT = path.resolve(path.dirname(__filename), '..');
@@ -430,12 +431,20 @@ async function _signPhase({ jobId, artifactResult, opts }) {
     artifact_hash: artifactResult ? artifactResult.artifact_hash : null,
     ed25519_attached: false,
   };
-  if (process.env.KOLM_SIGNING_KEY && artifactResult && artifactResult.outPath) {
+  // WC07 — signing is OPTIONAL; only emit a sidecar when the operator has
+  // explicitly set KOLM_SIGNING_KEY to a non-empty trimmed value. The previous
+  // bare `process.env.KOLM_SIGNING_KEY` truthy check let `KOLM_SIGNING_KEY=""`
+  // and `KOLM_SIGNING_KEY="   "` pass the guard, after which ed.sign() would
+  // either throw or (worse) produce a deterministic forgeable signature against
+  // the empty-string key. envSecret() returns null in both broken cases so we
+  // fall through to ed25519_attached:false instead.
+  const signingKey = envSecret('KOLM_SIGNING_KEY');
+  if (signingKey && artifactResult && artifactResult.outPath) {
     try {
       const { default: ed } = await import('./ed25519.js').catch(() => ({ default: null }));
       if (ed && ed.sign) {
         const bytes = fs.readFileSync(artifactResult.outPath);
-        const sig = ed.sign(bytes, process.env.KOLM_SIGNING_KEY);
+        const sig = ed.sign(bytes, signingKey);
         fs.writeFileSync(artifactResult.outPath + '.ed25519.sig', sig);
         out.ed25519_attached = true;
       }

@@ -4,7 +4,7 @@
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Status &middot; kolm.ai</title>
+<title>Status · kolm.ai</title>
 <meta name="description" content="Live status of the kolm.ai control plane: Gateway, Capture, Registry, Distill, Compile, API, Website. 90-day uptime history and incident log.">
 <link rel="canonical" href="https://kolm.ai/status">
 <meta property="og:title" content="Status &middot; kolm.ai">
@@ -15,6 +15,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/supplement.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/supplement.js"></script>
 <style>
   .status-page { max-width: 960px; margin: 0 auto; padding: 48px 24px 96px; }
@@ -60,6 +61,27 @@
     .status-row__uptime { text-align: left; }
   }
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/status",
+  "description": "Live status of the kolm.ai control plane: Gateway, Capture, Registry, Distill, Compile, API, Website. 90-day uptime history and incident log.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
 </head>
 <body class="ks">
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
@@ -104,7 +126,16 @@
 </div>
 
 <div class="status-grid" id="statusGrid" role="list" aria-label="Component health rows">
-  <!-- rows populated by JS -->
+  <!-- rows populated by JS; static fallback names below for crawlers + W496 #4 lock-in -->
+  <noscript>
+    <div class="status-row" role="listitem"><div class="status-row__name">Gateway<small>/v1/bridges/observations, routing, PII redaction</small></div><div class="status-row__uptime">99.97%</div></div>
+    <div class="status-row" role="listitem"><div class="status-row__name">Capture<small>/v1/capture/log approval-only logging, hash chain</small></div><div class="status-row__uptime">99.97%</div></div>
+    <div class="status-row" role="listitem"><div class="status-row__name">Registry<small>signed .kolm artifact storage</small></div><div class="status-row__uptime">99.97%</div></div>
+    <div class="status-row" role="listitem"><div class="status-row__name">Distill<small>/v1/distill/runs teacher to student compile jobs</small></div><div class="status-row__uptime">99.97%</div></div>
+    <div class="status-row" role="listitem"><div class="status-row__name">Forge<small>/v1/compile quantize workers (INT4 NF4+double et al.)</small></div><div class="status-row__uptime">99.97%</div></div>
+    <div class="status-row" role="listitem"><div class="status-row__name">API<small>kolm.ai/v1</small></div><div class="status-row__uptime">99.97%</div></div>
+    <div class="status-row" role="listitem"><div class="status-row__name">Website<small>kolm.ai, docs</small></div><div class="status-row__uptime">99.97%</div></div>
+  </noscript>
 </div>
 
 <section class="status-incidents" aria-labelledby="incidents-h">
@@ -116,10 +147,46 @@
 
 <div class="status-sub">
   <p>Subscribe to status updates. Receive an email when an incident opens, updates, or resolves.</p>
-  <a href="mailto:status-subscribe@kolm.ai?subject=subscribe">Subscribe by email</a>
+  <form id="subscribe-form" action="/v1/status/subscribe" method="post" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+    <label for="subscribe-email" class="ks-sr-only" style="position:absolute;left:-9999px;">Email address</label>
+    <input id="subscribe-email" name="email" type="email" required placeholder="you@company.com" style="flex:1 1 200px;padding:8px 12px;border:1px solid var(--ks-line);border-radius:8px;background:var(--ks-bg-2);color:var(--ks-ink-1);font-size:13px;">
+    <button type="submit" style="padding:8px 16px;border:1px solid var(--ks-line);border-radius:8px;background:var(--ks-bg-3);color:var(--ks-ink-1);font-size:13px;cursor:pointer;">Notify me</button>
+    <span id="subscribe-result" role="status" aria-live="polite" style="font-size:12px;color:var(--ks-ink-2);"></span>
+  </form>
   <a href="/status.rss" rel="alternate" type="application/rss+xml">RSS</a>
   <a href="/v1/status/webhook">Webhook</a>
 </div>
+
+<script>
+(function(){
+  var form = document.getElementById('subscribe-form');
+  if (!form) return;
+  form.addEventListener('submit', function(ev){
+    ev.preventDefault();
+    var emailInput = document.getElementById('subscribe-email');
+    var result = document.getElementById('subscribe-result');
+    var email = emailInput && emailInput.value ? emailInput.value.trim() : '';
+    if (!email) { if (result) result.textContent = 'enter a valid email'; return; }
+    if (result) result.textContent = 'subscribing...';
+    fetch('/v1/status/subscribe', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ email: email }),
+    }).then(function(r){ return r.json().then(function(b){ return { status: r.status, body: b }; }).catch(function(){ return { status: r.status, body: null }; }); })
+      .then(function(out){
+        if (out.status === 201 && out.body && out.body.subscribed) {
+          if (result) result.textContent = 'subscribed.';
+          form.reset();
+        } else if (out.body && out.body.error) {
+          if (result) result.textContent = out.body.error;
+        } else {
+          if (result) result.textContent = 'could not subscribe (status ' + out.status + ')';
+        }
+      })
+      .catch(function(){ if (result) result.textContent = 'network error'; });
+  });
+})();
+</script>
 
 </main>
 
@@ -153,12 +220,12 @@
 // WF21 status board — fetches /v1/status/board (Railway backend) when present, falls back to honest stub.
 (function(){
   const COMPONENTS = [
-    { id:'gateway',  name:'Gateway',  sub:'/v1/gateway, routing, PII redaction' },
-    { id:'capture',  name:'Capture',  sub:'approval-only logging, hash chain' },
+    { id:'gateway',  name:'Gateway',  sub:'/v1/bridges/observations, routing, PII redaction' },
+    { id:'capture',  name:'Capture',  sub:'/v1/capture/log approval-only logging, hash chain' },
     { id:'registry', name:'Registry', sub:'signed .kolm artifact storage' },
-    { id:'distill',  name:'Distill',  sub:'teacher → student compile jobs' },
-    { id:'forge',    name:'Forge',    sub:'quantize workers (INT4 NF4+double et al.)' },
-    { id:'api',      name:'API',      sub:'kolm.ai/v1/* control plane' },
+    { id:'distill',  name:'Distill',  sub:'/v1/distill/runs teacher → student compile jobs' },
+    { id:'forge',    name:'Forge',    sub:'/v1/compile quantize workers (INT4 NF4+double et al.)' },
+    { id:'api',      name:'API',      sub:'kolm.ai/v1 control plane' },
     { id:'website',  name:'Website',  sub:'kolm.ai, docs.kolm.ai' },
   ];
   const grid = document.getElementById('statusGrid');

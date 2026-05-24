@@ -1,21 +1,20 @@
 /* design-tokens.css — WF01 (W707 sprint) design-system v1.
    Loads FIRST so every subsequent stylesheet cascades on top.
 
-   PRESERVED: every W598/W604 token below (--brand-*, --surface-*, --ink-*,
-   --line-*, --status-*, --space-*, --radius-*, --shadow-*, --duration-*,
-   --ease-*, --text-*, --z-*, and the legacy --accent-* / --kolm-* aliases).
-   Removing any of them would break ~20 production HTML pages.
+   2026-05-24 REDESIGN: "Warm Paper" — replaces dark+mint default with
+   light burnt-sienna-on-paper monochrome. Token NAMES preserved per
+   wavewf01-design-system test #2-#9 (presence-only). Token VALUES
+   swapped site-wide; ~510 HTML pages cascade from this file +
+   ks.css :root without any per-page rewrite.
 
-   ADDED (WF01): new --ks-* token scale per master plan PART VII.
-     · --ks-color-*    full Linear/Stripe-grade palette (brand, surface×4,
-                       text×4, border×3, state×4×3)
-     · --ks-space-*    4 / 8 / 12 / 16 / 24 / 32 / 48 / 64 / 96
-     · --ks-type-*     12 / 14 / 16 / 18 / 24 / 32 / 48 / 64 / 96
-     · --ks-radius-*   4 / 8 / 12 / 16 / 24
-     · --ks-shadow-*   sm / md / lg / xl / 2xl
-     · --ks-motion-*   75 / 150 / 250 / 350 / 500 ms × ease curves
-     · --ks-font-*     Geist + Geist Mono with system-ui fallback
-                       (no @font-face — no CDN authorized, see WF01 spec).
+   Palette anchors:
+     · paper       #faf9f7   warm off-white base
+     · ink         #1c1b1a   ink, near-black with brown bias
+     · sienna      #c2410c   burnt-sienna accent (CTAs, links, focus)
+     · sienna-2    #9a3412   darker for hover/active
+     · candle      #fb923c   warm-dark mode accent (opt-in only)
+
+   Mode default: LIGHT. [data-theme="dark"] is opt-in.
 
    CONTRAST: every text/surface pair below meets WCAG AA 4.5:1.
    See public/design-system.html for the verified pair table. */
@@ -25,41 +24,41 @@
      LEGACY TOKENS — DO NOT REMOVE (consumed by ~20 HTML pages)
      ============================================================ */
 
-  /* Brand color — the mint that defines kolm.ai */
-  --brand-primary: #7ef0d2;
-  --brand-primary-strong: #5fcfb0;
-  --brand-primary-soft: rgba(126, 240, 210, 0.12);
-  --brand-primary-edge: rgba(126, 240, 210, 0.28);
+  /* Brand color — burnt sienna is the new wax-seal accent */
+  --brand-primary: #c2410c;
+  --brand-primary-strong: #9a3412;
+  --brand-primary-soft: rgba(194, 65, 12, 0.08);
+  --brand-primary-edge: rgba(194, 65, 12, 0.28);
 
-  /* Paper/clay — warm accent for headlines and primary CTAs on dark */
-  --brand-paper: #faf2e1;
-  --brand-paper-strong: #ece7dc;
-  --brand-paper-dim: #c9c2b2;
+  /* Paper/clay — was warm cream; now reads as deep ink on light */
+  --brand-paper: #1c1b1a;
+  --brand-paper-strong: #0c0b0a;
+  --brand-paper-dim: #57534e;
 
-  /* Semantic surface system — dark mode defaults */
-  --surface-0: #08090c;
-  --surface-1: #0e1014;
-  --surface-2: #13161c;
-  --surface-3: #1a1e26;
-  --surface-input: #0c0d11;
+  /* Semantic surface system — Warm Paper light defaults */
+  --surface-0: #faf9f7;
+  --surface-1: #ffffff;
+  --surface-2: #f4f3f0;
+  --surface-3: #eae8e4;
+  --surface-input: #ffffff;
 
-  /* Ink scale — text on dark surfaces */
-  --ink-1: #faf2e1;
-  --ink-2: #b5bdb1;
-  --ink-3: #797466;
-  --ink-4: #565144;
+  /* Ink scale — text on warm paper */
+  --ink-1: #1c1b1a;
+  --ink-2: #57534e;
+  --ink-3: #8c8a85;
+  --ink-4: #c8c6c2;
 
-  /* Line scale — borders and dividers (alpha on warm cream) */
-  --line-1: rgba(236, 231, 220, 0.08);
-  --line-2: rgba(236, 231, 220, 0.16);
-  --line-3: rgba(236, 231, 220, 0.28);
-  --line-strong: rgba(236, 231, 220, 0.40);
+  /* Line scale — borders and dividers (alpha on dark ink) */
+  --line-1: rgba(28, 27, 26, 0.06);
+  --line-2: rgba(28, 27, 26, 0.10);
+  --line-3: rgba(28, 27, 26, 0.16);
+  --line-strong: rgba(28, 27, 26, 0.40);
 
   /* Status semantics */
-  --status-good: #7ef0d2;
-  --status-warn: #f0c77a;
-  --status-bad: #ff8a8a;
-  --status-info: #80cfff;
+  --status-good: #15803d;
+  --status-warn: #a16207;
+  --status-bad: #b91c1c;
+  --status-info: #1e40af;
 
   /* 4 / 8 spacing scale */
   --space-0: 0;
@@ -81,12 +80,12 @@
   --radius-xl: 20px;
   --radius-pill: 999px;
 
-  /* Shadow scale — built for dark surface; light mode overrides below */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.18), 0 1px 1px rgba(0, 0, 0, 0.12);
-  --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.28), 0 2px 4px rgba(0, 0, 0, 0.16);
-  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.42), 0 6px 12px rgba(0, 0, 0, 0.22);
-  --shadow-xl: 0 32px 80px rgba(0, 0, 0, 0.54), 0 12px 24px rgba(0, 0, 0, 0.28);
-  --shadow-glow-brand: 0 0 0 1px var(--brand-primary-edge), 0 12px 36px rgba(126, 240, 210, 0.18);
+  /* Shadow scale — Warm Paper uses near-zero shadows (1px borders carry the load) */
+  --shadow-sm: 0 1px 2px rgba(28, 24, 16, 0.04);
+  --shadow-md: 0 4px 10px rgba(28, 24, 16, 0.06), 0 1px 2px rgba(28, 24, 16, 0.04);
+  --shadow-lg: 0 12px 28px rgba(28, 24, 16, 0.08), 0 4px 8px rgba(28, 24, 16, 0.05);
+  --shadow-xl: 0 24px 56px rgba(28, 24, 16, 0.10), 0 8px 16px rgba(28, 24, 16, 0.06);
+  --shadow-glow-brand: 0 0 0 1px var(--brand-primary-edge), 0 8px 24px rgba(194, 65, 12, 0.12);
 
   /* Motion tokens — durations + easings */
   --duration-instant: 80ms;
@@ -139,54 +138,54 @@
      ============================================================ */
 
   /* --- Color: brand ---------------------------------------- */
-  --ks-color-brand-primary: #7ef0d2;
-  --ks-color-brand-primary-hover: #95f3da;
-  --ks-color-brand-primary-active: #5fcfb0;
-  --ks-color-brand-secondary: #faf2e1;
-  --ks-color-brand-secondary-hover: #fff8e9;
-  --ks-color-brand-secondary-active: #ece7dc;
-  --ks-color-brand-on-primary: #08090c;
-  --ks-color-brand-on-secondary: #08090c;
+  --ks-color-brand-primary: #c2410c;
+  --ks-color-brand-primary-hover: #9a3412;
+  --ks-color-brand-primary-active: #7c2d12;
+  --ks-color-brand-secondary: #1c1b1a;
+  --ks-color-brand-secondary-hover: #292826;
+  --ks-color-brand-secondary-active: #0c0b0a;
+  --ks-color-brand-on-primary: #ffffff;
+  --ks-color-brand-on-secondary: #ffffff;
 
   /* --- Color: surface (4 levels) --------------------------- */
-  --ks-color-surface-0: #08090c;
-  --ks-color-surface-1: #0e1014;
-  --ks-color-surface-2: #13161c;
-  --ks-color-surface-3: #1a1e26;
+  --ks-color-surface-0: #faf9f7;
+  --ks-color-surface-1: #ffffff;
+  --ks-color-surface-2: #f4f3f0;
+  --ks-color-surface-3: #eae8e4;
 
   /* --- Color: text (4 levels) ------------------------------ */
-  --ks-color-text-1: #faf2e1;
-  --ks-color-text-2: #c9c2b2;
-  --ks-color-text-3: #797466;
-  --ks-color-text-4: #565144;
+  --ks-color-text-1: #1c1b1a;
+  --ks-color-text-2: #57534e;
+  --ks-color-text-3: #8c8a85;
+  --ks-color-text-4: #c8c6c2;
 
   /* --- Color: border (3 levels) ---------------------------- */
-  --ks-color-border-1: rgba(236, 231, 220, 0.08);
-  --ks-color-border-2: rgba(236, 231, 220, 0.16);
-  --ks-color-border-3: rgba(236, 231, 220, 0.28);
+  --ks-color-border-1: rgba(28, 27, 26, 0.06);
+  --ks-color-border-2: rgba(28, 27, 26, 0.10);
+  --ks-color-border-3: rgba(28, 27, 26, 0.16);
 
   /* --- Color: state success (3 levels) --------------------- */
-  --ks-color-success-1: rgba(126, 240, 210, 0.10);
-  --ks-color-success-2: rgba(126, 240, 210, 0.32);
-  --ks-color-success-3: #7ef0d2;
+  --ks-color-success-1: rgba(21, 128, 61, 0.08);
+  --ks-color-success-2: rgba(21, 128, 61, 0.28);
+  --ks-color-success-3: #15803d;
 
   /* --- Color: state warning (3 levels) --------------------- */
-  --ks-color-warning-1: rgba(240, 199, 122, 0.10);
-  --ks-color-warning-2: rgba(240, 199, 122, 0.32);
-  --ks-color-warning-3: #f0c77a;
+  --ks-color-warning-1: rgba(161, 98, 7, 0.08);
+  --ks-color-warning-2: rgba(161, 98, 7, 0.28);
+  --ks-color-warning-3: #a16207;
 
   /* --- Color: state error (3 levels) ----------------------- */
-  --ks-color-error-1: rgba(255, 138, 138, 0.10);
-  --ks-color-error-2: rgba(255, 138, 138, 0.32);
-  --ks-color-error-3: #ff8a8a;
+  --ks-color-error-1: rgba(185, 28, 28, 0.08);
+  --ks-color-error-2: rgba(185, 28, 28, 0.28);
+  --ks-color-error-3: #b91c1c;
 
   /* --- Color: state info (3 levels) ------------------------ */
-  --ks-color-info-1: rgba(128, 207, 255, 0.10);
-  --ks-color-info-2: rgba(128, 207, 255, 0.32);
-  --ks-color-info-3: #80cfff;
+  --ks-color-info-1: rgba(30, 64, 175, 0.08);
+  --ks-color-info-2: rgba(30, 64, 175, 0.28);
+  --ks-color-info-3: #1e40af;
 
   /* --- Color: focus ring ----------------------------------- */
-  --ks-color-focus-ring: rgba(126, 240, 210, 0.55);
+  --ks-color-focus-ring: rgba(194, 65, 12, 0.45);
 
   /* --- Space (4 / 8 / 12 / 16 / 24 / 32 / 48 / 64 / 96) ---- */
   --ks-space-4: 4px;
@@ -215,7 +214,7 @@
   --ks-leading-snug: 1.30;
   --ks-leading-normal: 1.50;
   --ks-leading-relaxed: 1.65;
-  --ks-tracking-tight: -0.02em;
+  --ks-tracking-tight: -0.035em;
   --ks-tracking-normal: 0;
   --ks-tracking-wide: 0.04em;
 
@@ -234,12 +233,12 @@
   --ks-radius-pill: 999px;
   --ks-radius-circle: 50%;
 
-  /* --- Shadow (sm / md / lg / xl / 2xl) -------------------- */
-  --ks-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.18), 0 1px 1px rgba(0, 0, 0, 0.12);
-  --ks-shadow-md: 0 6px 16px rgba(0, 0, 0, 0.28), 0 2px 4px rgba(0, 0, 0, 0.16);
-  --ks-shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.42), 0 6px 12px rgba(0, 0, 0, 0.22);
-  --ks-shadow-xl: 0 32px 80px rgba(0, 0, 0, 0.54), 0 12px 24px rgba(0, 0, 0, 0.28);
-  --ks-shadow-2xl: 0 48px 120px rgba(0, 0, 0, 0.62), 0 20px 48px rgba(0, 0, 0, 0.36);
+  /* --- Shadow (sm / md / lg / xl / 2xl) — paper-soft -------- */
+  --ks-shadow-sm: 0 1px 2px rgba(28, 24, 16, 0.04);
+  --ks-shadow-md: 0 4px 10px rgba(28, 24, 16, 0.06), 0 1px 2px rgba(28, 24, 16, 0.04);
+  --ks-shadow-lg: 0 12px 28px rgba(28, 24, 16, 0.08), 0 4px 8px rgba(28, 24, 16, 0.05);
+  --ks-shadow-xl: 0 24px 56px rgba(28, 24, 16, 0.10), 0 8px 16px rgba(28, 24, 16, 0.06);
+  --ks-shadow-2xl: 0 36px 80px rgba(28, 24, 16, 0.12), 0 14px 28px rgba(28, 24, 16, 0.08);
   --ks-shadow-focus: 0 0 0 3px var(--ks-color-focus-ring);
 
   /* --- Motion: durations (75 / 150 / 250 / 350 / 500) ------ */
@@ -256,17 +255,19 @@
   --ks-ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
   --ks-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-  /* --- Font stack — Geist + Geist Mono w/ system fallback -- */
-  /* WF01 spec note: no CDN authorized; @font-face requires hosting
-     the woff2. System-ui chain matches Vercel/Linear visual weight
-     until packages/fonts/* lands. */
+  /* --- Font stack — Inter + JetBrains Mono w/ system fallback */
+  /* Inter is the new sans (replaces Geist); JetBrains Mono is the code face.
+     System chain still works without webfonts. */
   --ks-font-sans:
-    "Geist", "Geist Sans",
+    "Inter", "Geist", "Geist Sans",
     ui-sans-serif, system-ui, -apple-system, "Segoe UI",
     "Helvetica Neue", Arial, sans-serif;
   --ks-font-mono:
-    "Geist Mono", ui-monospace, "SF Mono", "JetBrains Mono",
+    "JetBrains Mono", "Geist Mono", ui-monospace, "SF Mono",
     "Fira Code", Menlo, Consolas, "Liberation Mono", monospace;
+  --ks-font-serif:
+    "Source Serif Pro", "Source Serif", "Iowan Old Style",
+    "Apple Garamond", "Baskerville", Georgia, serif;
 
   /* --- Z-index --------------------------------------------- */
   --ks-z-base: 1;
@@ -278,94 +279,190 @@
 }
 
 /* ============================================================
-   LIGHT MODE OVERRIDES — both legacy and WF01 tokens.
+   LIGHT MODE OVERRIDES — duplicate of :root so the explicit
+   data-theme="light" attribute resets cleanly when toggling away
+   from dark. wavewf01-design-system test #12 requires this block
+   to override --ks-color-brand-primary + 4 other tokens.
    ============================================================ */
 
 [data-theme="light"] {
   /* legacy */
-  --brand-primary: #0a8862;
-  --brand-primary-strong: #086b4d;
-  --brand-primary-soft: rgba(10, 136, 98, 0.10);
-  --brand-primary-edge: rgba(10, 136, 98, 0.25);
+  --brand-primary: #c2410c;
+  --brand-primary-strong: #9a3412;
+  --brand-primary-soft: rgba(194, 65, 12, 0.08);
+  --brand-primary-edge: rgba(194, 65, 12, 0.28);
 
-  --brand-paper: #18171a;
-  --brand-paper-strong: #0c0e10;
-  --brand-paper-dim: #4b5158;
+  --brand-paper: #1c1b1a;
+  --brand-paper-strong: #0c0b0a;
+  --brand-paper-dim: #57534e;
 
-  --surface-0: #f7f4ec;
+  --surface-0: #faf9f7;
   --surface-1: #ffffff;
-  --surface-2: #fbfaf3;
-  --surface-3: #f1ece1;
+  --surface-2: #f4f3f0;
+  --surface-3: #eae8e4;
   --surface-input: #ffffff;
 
-  --ink-1: #18171a;
-  --ink-2: #4b5158;
-  --ink-3: #6f7079;
-  --ink-4: #8f9098;
+  --ink-1: #1c1b1a;
+  --ink-2: #57534e;
+  --ink-3: #8c8a85;
+  --ink-4: #c8c6c2;
 
-  --line-1: rgba(24, 23, 26, 0.07);
-  --line-2: rgba(24, 23, 26, 0.14);
-  --line-3: rgba(24, 23, 26, 0.24);
-  --line-strong: rgba(24, 23, 26, 0.36);
+  --line-1: rgba(28, 27, 26, 0.06);
+  --line-2: rgba(28, 27, 26, 0.10);
+  --line-3: rgba(28, 27, 26, 0.16);
+  --line-strong: rgba(28, 27, 26, 0.40);
 
-  --status-good: #0a8862;
-  --status-warn: #a35a14;
-  --status-bad: #c0394d;
-  --status-info: #0a4a7a;
+  --status-good: #15803d;
+  --status-warn: #a16207;
+  --status-bad: #b91c1c;
+  --status-info: #1e40af;
 
-  --shadow-sm: 0 1px 2px rgba(28, 24, 16, 0.06), 0 1px 1px rgba(28, 24, 16, 0.04);
-  --shadow-md: 0 6px 16px rgba(28, 24, 16, 0.10), 0 2px 4px rgba(28, 24, 16, 0.06);
-  --shadow-lg: 0 16px 40px rgba(28, 24, 16, 0.14), 0 6px 12px rgba(28, 24, 16, 0.08);
-  --shadow-xl: 0 32px 80px rgba(28, 24, 16, 0.18), 0 12px 24px rgba(28, 24, 16, 0.10);
-  --shadow-glow-brand: 0 0 0 1px var(--brand-primary-edge), 0 12px 36px rgba(10, 136, 98, 0.12);
+  --shadow-sm: 0 1px 2px rgba(28, 24, 16, 0.04);
+  --shadow-md: 0 4px 10px rgba(28, 24, 16, 0.06), 0 1px 2px rgba(28, 24, 16, 0.04);
+  --shadow-lg: 0 12px 28px rgba(28, 24, 16, 0.08), 0 4px 8px rgba(28, 24, 16, 0.05);
+  --shadow-xl: 0 24px 56px rgba(28, 24, 16, 0.10), 0 8px 16px rgba(28, 24, 16, 0.06);
+  --shadow-glow-brand: 0 0 0 1px var(--brand-primary-edge), 0 8px 24px rgba(194, 65, 12, 0.12);
 
   /* WF01 */
-  --ks-color-brand-primary: #0a8862;
-  --ks-color-brand-primary-hover: #0c9d72;
-  --ks-color-brand-primary-active: #086b4d;
-  --ks-color-brand-secondary: #18171a;
-  --ks-color-brand-secondary-hover: #2a2a2e;
-  --ks-color-brand-secondary-active: #0c0e10;
+  --ks-color-brand-primary: #c2410c;
+  --ks-color-brand-primary-hover: #9a3412;
+  --ks-color-brand-primary-active: #7c2d12;
+  --ks-color-brand-secondary: #1c1b1a;
+  --ks-color-brand-secondary-hover: #292826;
+  --ks-color-brand-secondary-active: #0c0b0a;
   --ks-color-brand-on-primary: #ffffff;
   --ks-color-brand-on-secondary: #ffffff;
 
-  --ks-color-surface-0: #f7f4ec;
+  --ks-color-surface-0: #faf9f7;
   --ks-color-surface-1: #ffffff;
-  --ks-color-surface-2: #fbfaf3;
-  --ks-color-surface-3: #f1ece1;
+  --ks-color-surface-2: #f4f3f0;
+  --ks-color-surface-3: #eae8e4;
 
-  --ks-color-text-1: #18171a;
-  --ks-color-text-2: #4b5158;
-  --ks-color-text-3: #6f7079;
-  --ks-color-text-4: #8f9098;
+  --ks-color-text-1: #1c1b1a;
+  --ks-color-text-2: #57534e;
+  --ks-color-text-3: #8c8a85;
+  --ks-color-text-4: #c8c6c2;
 
-  --ks-color-border-1: rgba(24, 23, 26, 0.07);
-  --ks-color-border-2: rgba(24, 23, 26, 0.14);
-  --ks-color-border-3: rgba(24, 23, 26, 0.24);
+  --ks-color-border-1: rgba(28, 27, 26, 0.06);
+  --ks-color-border-2: rgba(28, 27, 26, 0.10);
+  --ks-color-border-3: rgba(28, 27, 26, 0.16);
 
-  --ks-color-success-1: rgba(10, 136, 98, 0.08);
-  --ks-color-success-2: rgba(10, 136, 98, 0.28);
-  --ks-color-success-3: #0a8862;
+  --ks-color-success-1: rgba(21, 128, 61, 0.08);
+  --ks-color-success-2: rgba(21, 128, 61, 0.28);
+  --ks-color-success-3: #15803d;
 
-  --ks-color-warning-1: rgba(163, 90, 20, 0.08);
-  --ks-color-warning-2: rgba(163, 90, 20, 0.28);
-  --ks-color-warning-3: #a35a14;
+  --ks-color-warning-1: rgba(161, 98, 7, 0.08);
+  --ks-color-warning-2: rgba(161, 98, 7, 0.28);
+  --ks-color-warning-3: #a16207;
 
-  --ks-color-error-1: rgba(192, 57, 77, 0.08);
-  --ks-color-error-2: rgba(192, 57, 77, 0.28);
-  --ks-color-error-3: #c0394d;
+  --ks-color-error-1: rgba(185, 28, 28, 0.08);
+  --ks-color-error-2: rgba(185, 28, 28, 0.28);
+  --ks-color-error-3: #b91c1c;
 
-  --ks-color-info-1: rgba(10, 74, 122, 0.08);
-  --ks-color-info-2: rgba(10, 74, 122, 0.28);
-  --ks-color-info-3: #0a4a7a;
+  --ks-color-info-1: rgba(30, 64, 175, 0.08);
+  --ks-color-info-2: rgba(30, 64, 175, 0.28);
+  --ks-color-info-3: #1e40af;
 
-  --ks-color-focus-ring: rgba(10, 136, 98, 0.45);
+  --ks-color-focus-ring: rgba(194, 65, 12, 0.45);
 
-  --ks-shadow-sm: 0 1px 2px rgba(28, 24, 16, 0.06), 0 1px 1px rgba(28, 24, 16, 0.04);
-  --ks-shadow-md: 0 6px 16px rgba(28, 24, 16, 0.10), 0 2px 4px rgba(28, 24, 16, 0.06);
-  --ks-shadow-lg: 0 16px 40px rgba(28, 24, 16, 0.14), 0 6px 12px rgba(28, 24, 16, 0.08);
-  --ks-shadow-xl: 0 32px 80px rgba(28, 24, 16, 0.18), 0 12px 24px rgba(28, 24, 16, 0.10);
-  --ks-shadow-2xl: 0 48px 120px rgba(28, 24, 16, 0.22), 0 20px 48px rgba(28, 24, 16, 0.12);
+  --ks-shadow-sm: 0 1px 2px rgba(28, 24, 16, 0.04);
+  --ks-shadow-md: 0 4px 10px rgba(28, 24, 16, 0.06), 0 1px 2px rgba(28, 24, 16, 0.04);
+  --ks-shadow-lg: 0 12px 28px rgba(28, 24, 16, 0.08), 0 4px 8px rgba(28, 24, 16, 0.05);
+  --ks-shadow-xl: 0 24px 56px rgba(28, 24, 16, 0.10), 0 8px 16px rgba(28, 24, 16, 0.06);
+  --ks-shadow-2xl: 0 36px 80px rgba(28, 24, 16, 0.12), 0 14px 28px rgba(28, 24, 16, 0.08);
+  --ks-shadow-focus: 0 0 0 3px var(--ks-color-focus-ring);
+}
+
+/* ============================================================
+   WARM DARK MODE — opt-in only (data-theme="dark" set by toggle).
+   Reads as a candlelit lab, not a cold blue-gray IDE.
+   ============================================================ */
+
+[data-theme="dark"] {
+  /* legacy */
+  --brand-primary: #fb923c;
+  --brand-primary-strong: #fdba74;
+  --brand-primary-soft: rgba(251, 146, 60, 0.10);
+  --brand-primary-edge: rgba(251, 146, 60, 0.32);
+
+  --brand-paper: #e7e5e4;
+  --brand-paper-strong: #f5f5f4;
+  --brand-paper-dim: #a8a29e;
+
+  --surface-0: #121211;
+  --surface-1: #1c1b1a;
+  --surface-2: #292826;
+  --surface-3: #3a3836;
+  --surface-input: #1c1b1a;
+
+  --ink-1: #e7e5e4;
+  --ink-2: #a8a29e;
+  --ink-3: #78716c;
+  --ink-4: #44403c;
+
+  --line-1: rgba(231, 229, 228, 0.06);
+  --line-2: rgba(231, 229, 228, 0.10);
+  --line-3: rgba(231, 229, 228, 0.16);
+  --line-strong: rgba(231, 229, 228, 0.40);
+
+  --status-good: #4ade80;
+  --status-warn: #fbbf24;
+  --status-bad: #f87171;
+  --status-info: #60a5fa;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.30);
+  --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.40), 0 2px 4px rgba(0, 0, 0, 0.24);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.50), 0 6px 12px rgba(0, 0, 0, 0.30);
+  --shadow-xl: 0 32px 80px rgba(0, 0, 0, 0.60), 0 12px 24px rgba(0, 0, 0, 0.36);
+  --shadow-glow-brand: 0 0 0 1px var(--brand-primary-edge), 0 12px 36px rgba(251, 146, 60, 0.20);
+
+  /* WF01 */
+  --ks-color-brand-primary: #fb923c;
+  --ks-color-brand-primary-hover: #fdba74;
+  --ks-color-brand-primary-active: #f97316;
+  --ks-color-brand-secondary: #e7e5e4;
+  --ks-color-brand-secondary-hover: #f5f5f4;
+  --ks-color-brand-secondary-active: #d6d3d1;
+  --ks-color-brand-on-primary: #121211;
+  --ks-color-brand-on-secondary: #121211;
+
+  --ks-color-surface-0: #121211;
+  --ks-color-surface-1: #1c1b1a;
+  --ks-color-surface-2: #292826;
+  --ks-color-surface-3: #3a3836;
+
+  --ks-color-text-1: #e7e5e4;
+  --ks-color-text-2: #a8a29e;
+  --ks-color-text-3: #78716c;
+  --ks-color-text-4: #44403c;
+
+  --ks-color-border-1: rgba(231, 229, 228, 0.06);
+  --ks-color-border-2: rgba(231, 229, 228, 0.10);
+  --ks-color-border-3: rgba(231, 229, 228, 0.16);
+
+  --ks-color-success-1: rgba(74, 222, 128, 0.10);
+  --ks-color-success-2: rgba(74, 222, 128, 0.32);
+  --ks-color-success-3: #4ade80;
+
+  --ks-color-warning-1: rgba(251, 191, 36, 0.10);
+  --ks-color-warning-2: rgba(251, 191, 36, 0.32);
+  --ks-color-warning-3: #fbbf24;
+
+  --ks-color-error-1: rgba(248, 113, 113, 0.10);
+  --ks-color-error-2: rgba(248, 113, 113, 0.32);
+  --ks-color-error-3: #f87171;
+
+  --ks-color-info-1: rgba(96, 165, 250, 0.10);
+  --ks-color-info-2: rgba(96, 165, 250, 0.32);
+  --ks-color-info-3: #60a5fa;
+
+  --ks-color-focus-ring: rgba(251, 146, 60, 0.55);
+
+  --ks-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.30);
+  --ks-shadow-md: 0 6px 16px rgba(0, 0, 0, 0.40), 0 2px 4px rgba(0, 0, 0, 0.24);
+  --ks-shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.50), 0 6px 12px rgba(0, 0, 0, 0.30);
+  --ks-shadow-xl: 0 32px 80px rgba(0, 0, 0, 0.60), 0 12px 24px rgba(0, 0, 0, 0.36);
+  --ks-shadow-2xl: 0 48px 120px rgba(0, 0, 0, 0.68), 0 20px 48px rgba(0, 0, 0, 0.42);
   --ks-shadow-focus: 0 0 0 3px var(--ks-color-focus-ring);
 }
 

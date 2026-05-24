@@ -1,0 +1,130 @@
+# tools/alerts/grafana-kolm.yaml
+#
+# W823-3 — Grafana alerting rules for kolm.ai runtime.
+#
+# These are Grafana unified-alerting Rule Group declarations (apiVersion 1).
+# They sit alongside tools/grafana/kolm-dashboard.json and share the same
+# canonical thresholds with datadog-kolm.yaml and honeycomb-kolm.yaml:
+#
+#   - kscore_drift          > 0.05 over 1h
+#   - fallback_rate         > 0.15 over 15min
+#   - p95_latency_increase  > 25 percent vs 24h baseline
+#
+# Import:
+#   grafanactl alert-rule import --file tools/alerts/grafana-kolm.yaml
+#   OR via the Grafana Terraform provider:
+#     resource "grafana_rule_group" "kolm" { ... }
+#
+# Replace ${PROMETHEUS_DS_UID} with your Prometheus datasource UID and
+# ${KOLM_NAMESPACE} with the namespace label value you scrape.
+
+apiVersion: 1
+namespace: kolm
+groups:
+  - orgId: 1
+    name: kolm-runtime
+    folder: kolm
+    interval: 1m
+    rules:
+
+      - uid: kolm-kscore-drift
+        title: "kolm.ai — K-Score drift > 0.05 (1h)"
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: ${PROMETHEUS_DS_UID}
+            model:
+              expr: "abs(kolm_kscore_drift{namespace=\"${KOLM_NAMESPACE}\"})"
+              instant: true
+              refId: A
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [0.05]
+        noDataState: NoData
+        execErrState: Error
+        for: 5m
+        annotations:
+          description: "K-Score has drifted more than 0.05 points away from the 24h baseline over the last hour."
+          runbook_url: "https://kolm.ai/docs/runbook/kscore-drift"
+          summary: "K-Score drift exceeded threshold"
+        labels:
+          wave: w823
+          severity: warning
+          service: kolm
+
+      - uid: kolm-fallback-spike
+        title: "kolm.ai — Fallback rate spike > 0.15 (15min)"
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 900
+              to: 0
+            datasourceUid: ${PROMETHEUS_DS_UID}
+            model:
+              expr: "sum(rate(kolm_routing_decision_total{routing_decision=\"teacher\",namespace=\"${KOLM_NAMESPACE}\"}[15m])) / sum(rate(kolm_routing_decision_total{namespace=\"${KOLM_NAMESPACE}\"}[15m]))"
+              instant: true
+              refId: A
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [0.15]
+        noDataState: NoData
+        execErrState: Error
+        for: 5m
+        annotations:
+          description: "Local-model fallback-to-teacher rate has exceeded 15% over the last 15 minutes."
+          runbook_url: "https://kolm.ai/docs/runbook/fallback-spike"
+          summary: "Fallback rate exceeded threshold"
+        labels:
+          wave: w823
+          severity: warning
+          service: kolm
+
+      - uid: kolm-p95-latency-regression
+        title: "kolm.ai — p95 latency regression > 25% vs 24h baseline"
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 900
+              to: 0
+            datasourceUid: ${PROMETHEUS_DS_UID}
+            model:
+              expr: "histogram_quantile(0.95, sum(rate(kolm_inference_latency_ms_bucket{namespace=\"${KOLM_NAMESPACE}\"}[15m])) by (le)) / histogram_quantile(0.95, sum(rate(kolm_inference_latency_ms_bucket{namespace=\"${KOLM_NAMESPACE}\"}[15m] offset 24h)) by (le))"
+              instant: true
+              refId: A
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [1.25]
+        noDataState: NoData
+        execErrState: Error
+        for: 10m
+        annotations:
+          description: "Inference p95 latency has increased more than 25% relative to the 24h baseline."
+          runbook_url: "https://kolm.ai/docs/runbook/latency-regression"
+          summary: "p95 latency regression exceeded threshold"
+        labels:
+          wave: w823
+          severity: warning
+          service: kolm

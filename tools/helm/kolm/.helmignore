@@ -1,0 +1,25 @@
+# W824-1 — Files Helm should skip when packaging the chart.
+# Patterns are gitignore-style. Defaults from `helm create` + a few kolm extras.
+.DS_Store
+.git/
+.gitignore
+.bzr/
+.bzrignore
+.hg/
+.hgignore
+.svn/
+*.swp
+*.bak
+*.tmp
+*.orig
+*~
+.project
+.idea/
+*.tmproj
+.vscode/
+# Local test/dev artifacts that should never ship in a published chart.
+*.tgz
+*.lock
+node_modules/
+coverage/
+.kolm/

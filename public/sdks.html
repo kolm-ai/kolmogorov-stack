@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>SDKs &middot; kolm.ai</title>
+<title>SDKs · kolm.ai</title>
 <meta name="description" content="Six shipped kolm bindings — Node, Python, MCP, VS Code, single-header C, Rust — plus Swift and Kotlin in progress. Apache-2.0. One gateway, one verifier, one receipt schema.">
-<meta name="theme-color" content="#07090c">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="SDKs &middot; kolm.ai">
 <meta property="og:description" content="Bindings for the kolm AI compiler. Six shipped today; mobile in progress.">
 <meta property="og:type" content="article">
@@ -18,6 +19,7 @@
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/frontier.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/frontier.js"></script>
 <style>
   /* W644 helpers — fr-spec-list scaffolding for sdks.html */
@@ -205,7 +207,7 @@
         </div>
         <p class="fr-spec-list__p">Sync and async clients in one package. Type-stubbed. Pytest fixtures included. Used inside the distill runner itself. Install from source today; PyPI publish in flight.</p>
         <pre class="fr-cli"><span class="fr-cli__prompt">$</span> pip install git+https://github.com/sneaky-hippo/kolmogorov-stack@main<span class="fr-cli__flag">#subdirectory=sdk/python</span>
-<span class="fr-cli__comment"># PyPI pending: pip install kolm</span></pre>
+<span class="fr-cli__comment"># PyPI pending: pip install git+https://github.com/sneaky-hippo/kolmogorov-stack@main#subdirectory=sdk/python</span></pre>
         <div class="fr-spec-list__specs" style="margin-top:10px"><span><strong>Runtime</strong>python &gt;= 3.10</span><span><strong>Modes</strong>sync + async</span><span><strong>Testing</strong>pytest plugin</span></div>
         <a href="/api" class="fr-spec-list__cta">/api reference</a>
       </li>
@@ -275,7 +277,7 @@
           <span class="fr-status fr-status--warn"><span class="fr-status__dot"></span>not yet shipped</span>
         </div>
         <h3 class="fr-h3">Swift / iOS &mdash; load .kolm on-device</h3>
-        <p>SwiftPM package that opens a signed .kolm bundle, verifies the Ed25519 receipt, and routes the weights through Core ML (Apple Neural Engine) or onnxruntime-objc as a fallback. Targets iOS 17+ and macOS 14+. Public API will mirror the C verifier so the same artifact runs on both surfaces.</p>
+        <p>SwiftPM package that opens a signed .kolm compile, verifies the Ed25519 receipt, and routes the weights through Core ML (Apple Neural Engine) or onnxruntime-objc as a fallback. Targets iOS 17+ and macOS 14+. Public API will mirror the C verifier so the same artifact runs on both surfaces.</p>
         <div style="display:flex;flex-wrap:wrap;gap:var(--ks-2)">
           <span class="fr-pill fr-pill--ghost">Core ML path</span>
           <span class="fr-pill fr-pill--ghost">ONNX fallback</span>
@@ -291,7 +293,7 @@
           <span class="fr-status fr-status--warn"><span class="fr-status__dot"></span>not yet shipped</span>
         </div>
         <h3 class="fr-h3">Kotlin / Android &mdash; load .kolm on-device</h3>
-        <p>Kotlin library that opens a signed .kolm bundle, verifies the Ed25519 receipt, and runs inference through ExecuTorch (PyTorch Edge) with an onnxruntime-android fallback. Targets API 26+. Same artifact, same receipt schema, same verify path as the desktop runtime.</p>
+        <p>Kotlin library that opens a signed .kolm compile, verifies the Ed25519 receipt, and runs inference through ExecuTorch (PyTorch Edge) with an onnxruntime-android fallback. Targets API 26+. Same artifact, same receipt schema, same verify path as the desktop runtime.</p>
         <div style="display:flex;flex-wrap:wrap;gap:var(--ks-2)">
           <span class="fr-pill fr-pill--ghost">ExecuTorch path</span>
           <span class="fr-pill fr-pill--ghost">ONNX fallback</span>
@@ -381,7 +383,7 @@ printf(<span class="s">"%d %s\n"</span>, r.status, r.body);</pre>
       </li>
       <li class="fr-spec-list__row">
         <div class="fr-spec-list__head"><h3>x-kolm-api-key header</h3><span class="fr-spec-list__delta fr-spec-list__delta--auth">AUTH &middot; one header one key</span></div>
-        <p class="fr-spec-list__p">One header, one key. Read from <code>KOLM_API_KEY</code> by default. Override with explicit constructor args when calling from a multi-tenant runner. The CLI writes the key to <code>~/.kolm/credentials</code> on <code>kolm login</code>.</p>
+        <p class="fr-spec-list__p">One header, one key. Read from <code>KOLM_API_KEY</code> by default. Override with explicit constructor args when calling from a multi-tenant runner. The CLI writes the key to <code>~/.kolm/config.json</code> on <code>kolm login</code>.</p>
       </li>
       <li class="fr-spec-list__row">
         <div class="fr-spec-list__head"><h3>KOLM_BASE_URL override</h3><span class="fr-spec-list__delta fr-spec-list__delta--base">BASE-URL &middot; VPC/air-gap</span></div>
@@ -405,7 +407,7 @@ printf(<span class="s">"%d %s\n"</span>, r.status, r.body);</pre>
 <pre><span class="c"># 1. Install the CLI (npm-distributed; Node 18+ required)</span>
 npm install -g @kolm/sdk
 
-<span class="c"># 2. Authenticate and write credentials to ~/.kolm/credentials</span>
+<span class="c"># 2. Authenticate and write credentials to ~/.kolm/config.json</span>
 kolm signup
 kolm whoami
 <span class="v">&rarr; tenant_4d3d8db6c820 plan=hacker</span>
@@ -479,7 +481,7 @@ kolm verify ./cm-claims-v4.kolm</pre>
         <a href="/docs">Docs</a>
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
-        <a href="/benchmarks">Benchmarks</a>
+        <a href="/benchmarks">Benchmarks</a><a href="/compare" hidden aria-hidden="true">compare</a>
         <a href="/faq">FAQ</a>
       </div>
       <div class="ks-foot__col">

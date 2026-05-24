@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -128,6 +128,7 @@
 
 
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <a href="#main" class="ks-skip">Skip to content</a>
@@ -158,7 +159,7 @@
  <div class="wrap">
  <span class="pill"><span class="dot"></span>Research &middot; Verification &middot; 2026-05-14 &middot; 12 min read</span>
  <h1>Receipt chains for <span class="tone">fine-tuned models.</span></h1>
- <p class="lede">A fine-tune is a function of code, data, and a base model. <b>The receipt chain is the proof that the artifact in your hand is that exact function.</b> Five HMAC steps over canonical JSON, one content identifier, one optional TEE binding, one Rust verifier you can run offline.</p>
+ <p class="lede">A fine-tune is a function of code, data, and a base model. <b>The receipt chain proves the artifact in your hand is that exact function.</b> HMAC over canonical JSON, a content identifier, an optional TEE binding, and a Rust verifier you can run offline.</p>
  <div class="meta"><span><b>By</b>&nbsp;kolm</span><span><b>Tag</b>&nbsp;provenance &middot; cryptography &middot; spec</span></div>
  </div>
 </section>
@@ -170,7 +171,7 @@
  <h5>Contents</h5>
  <ol>
  <li><a href="#problem">The provenance problem</a></li>
- <li><a href="#chain">The five-step chain</a></li>
+ <li><a href="#chain">The hash-ladder chain</a></li>
  <li><a href="#canonical">Canonical JSON</a></li>
  <li><a href="#cid">The content identifier</a></li>
  <li><a href="#tee">TEE attestation as an optional binding</a></li>
@@ -180,11 +181,11 @@
  </div>
 
  <h2 id="problem">The provenance problem.</h2>
- <p>You hand a fine-tuned model to a regulator. They ask three questions. What data trained it. What code produced it. What base model it descended from. The evidenced answer for most production fine-tunes today is a Slack thread, a Notion page, and a hope that the engineer who ran the job has not switched companies. The model itself is a tarball of weights with a filename and no embedded provenance.</p>
+ <p>You hand a fine-tuned model to a regulator. They ask: what data trained it, what code produced it, what base model it descended from. The evidenced answer for most production fine-tunes today is a Slack thread, a Notion page, and a hope that the engineer who ran the job has not switched companies. The model itself is a tarball of weights with a filename and no embedded provenance.</p>
  <p>A receipt chain solves this at the artifact layer. <b>Every <code>.kolm</code> file carries an in-band proof of how it was built, signed under a tenant key, verifiable from the bytes alone.</b> No network call. No registry lookup. No trust in our continued existence. The verifier is open-source Rust; you can vendor it, embed it, and run it in an air-gapped network.</p>
 
- <h2 id="chain">The five-step chain.</h2>
- <p>The chain is a sequence of five HMAC seals. Each step hashes a canonical-JSON envelope over <code>(step, input_hash, output_hash)</code> and HMACs the result under the tenant receipt secret. The previous step's <code>output_hash</code> is the next step's <code>input_hash</code>; a single mutation anywhere in the build pipeline produces a different chain.</p>
+ <h2 id="chain">The hash-ladder chain.</h2>
+ <p>The chain is a sequence of HMAC seals. Each step hashes a canonical-JSON envelope over <code>(step, input_hash, output_hash)</code> and HMACs the result under the tenant receipt secret. The previous step's <code>output_hash</code> is the next step's <code>input_hash</code>; a single mutation anywhere in the build pipeline produces a different chain.</p>
 
  <pre><span class="kw">step 1</span> task spec_hash &rarr; task_hash
 <span class="kw">step 2</span> seeds task_hash &rarr; training_stats_hash
@@ -194,7 +195,7 @@
 
  <p>Each <code>output_hash</code> is a sha256 over canonical-JSON of the corresponding input. The <code>spec_hash</code> is over the static artifact specification version (so a future format break invalidates old chains). The <code>task_hash</code> is over the user-supplied task description. The <code>training_stats_hash</code> is over the run-level metrics the trainer emitted. The <code>recipes_hash</code> is over the deterministic recipe registry the compiler synthesized. The <code>eval_set_hash</code> is over the held-out cases the K-score was computed against. The <code>artifact_hash</code> is over the canonical join of every emitted file's sha256.</p>
 
- <p><b>Waves 164-167 extend the chain.</b> The original five-step ladder is unchanged; four additional optional blocks now bind into <code>artifact_hash_input</code> alongside the receipt body: <b>external + adversarial holdouts</b> (RS-1 &sect;7.12, R-axis, shipped wave 164), <b>tenant shadow corpus</b> (&sect;7.13, residency-preserving, wave 165), <b>third-party auditor attestation</b> (&sect;7.14, independent co-signer, wave 166), and <b>drift detection + supersession chain</b> (&sect;7.15, M+3/M+4 lifecycle tiers, wave 167). Verifier checks #20-#24 enforce the new blocks; receipts written before wave 164 still verify because each block is optional and absence is canonical. See <a href="/drift" style="color:#10b981">/drift</a> for the lifecycle ladder and <a href="/spec/rs-1" style="color:#10b981">/spec/rs-1</a> for the per-section schema.</p>
+ <p><b>Waves 164-167 extend the chain.</b> The original ladder is unchanged; additional optional blocks now bind into <code>artifact_hash_input</code> alongside the receipt body: <b>external + adversarial holdouts</b> (RS-1 &sect;7.12, R-axis, shipped wave 164), <b>tenant shadow corpus</b> (&sect;7.13, residency-preserving, wave 165), <b>third-party auditor attestation</b> (&sect;7.14, independent co-signer, wave 166), and <b>drift detection + supersession chain</b> (&sect;7.15, M+3/M+4 lifecycle tiers, wave 167). Verifier checks #20-#24 enforce the new blocks; receipts written before wave 164 still verify because each block is optional and absence is canonical. See <a href="/drift" style="color:#10b981">/drift</a> for the lifecycle ladder and <a href="/spec/rs-1" style="color:#10b981">/spec/rs-1</a> for the per-section schema.</p>
 
  <p>The Node reference implementation is short:</p>
 
@@ -217,11 +218,11 @@
  <p>The whole chain plus the body of the receipt is then sealed under one final HMAC, the receipt body signature. A verifier walks the chain forward (every step's <code>hmac</code> must reproduce under the secret), confirms the linkage between steps (each step's <code>input_hash</code> equals the previous step's <code>output_hash</code>), and re-verifies the body HMAC over the canonical-JSON of the receipt body.</p>
 
  <blockquote>
- <p>The chain is not a Merkle tree. It is a linear hash ladder. The trade is simpler verification at the cost of one extra hash per step. For five steps this is free; for fifty steps it would not be.</p>
+ <p>The chain is not a Merkle tree. It is a linear hash ladder. The trade is simpler verification at the cost of one extra hash per step. For a short ladder this is free; for a fifty-step pipeline it would not be.</p>
  </blockquote>
 
  <h2 id="canonical">Canonical JSON.</h2>
- <p>The hardest bug in any cross-language verifier is JSON serialization drift. Two implementations that produce semantically identical JSON but format it differently produce different sha256 hashes and a <code>hmac mismatch</code> failure that is excruciating to debug. The fix is canonical JSON: a deterministic serialization with sorted keys and no whitespace.</p>
+ <p>The hardest bug in any cross-language verifier is JSON serialization drift. Implementations that produce semantically identical JSON but format it differently produce different sha256 hashes and a <code>hmac mismatch</code> failure that is excruciating to debug. The fix is canonical JSON: a deterministic serialization with sorted keys and no whitespace.</p>
 
  <p>The kolm canonical form is short enough to memorize:</p>
 
@@ -233,7 +234,7 @@
  <span class="kw">return</span> <span class="arg">'{'</span> + k.map(x =&gt; JSON.stringify(x) + <span class="arg">':'</span> + canonicalJson(v[x])).join(<span class="arg">','</span>) + <span class="arg">'}'</span>;
 }</pre>
 
- <p>Three rules. Scalars use the host language's default JSON serializer. Arrays recurse element-by-element with no whitespace. Objects sort keys lexicographically, then recurse. The Rust verifier in <code>packages/runtime-rs/</code> implements the same function on the same rule set; the Python reference in <code>apps/trainer/</code> matches; an Ed25519 verifier we are sketching follows the same canonical form.</p>
+ <p>The rules. Scalars use the host language's default JSON serializer. Arrays recurse element-by-element with no whitespace. Objects sort keys lexicographically, then recurse. The Rust verifier in <code>packages/runtime-rs/</code> implements the same function on the same rule set; the Python reference in <code>apps/trainer/</code> matches; an Ed25519 verifier we are sketching follows the same canonical form.</p>
 
  <p>The subtle bug we fixed during the infra wave was a missing array recursion. A first implementation passed arrays through with default <code>JSON.stringify</code>, which produced the same bytes for primitive arrays but differed for arrays of objects (key order inside elements was not normalized). The chain verified on round-trip from the same implementation but failed cross-language. The fix was the one line above: <code>v.map(canonicalJson).join</code> instead of <code>JSON.stringify(v)</code>.</p>
 
@@ -251,9 +252,9 @@
  }
 }</pre>
 
- <p>The CID is embedded in three places: the manifest, the receipt body, and the audit log row written by the registry. A third party verifier reads any one of those, recomputes the CID from the manifest hashes, and confirms they match. A re-sealed receipt (different signing key, same content) produces the same CID; a re-trained artifact (any byte different) produces a different CID. The public endpoint <code>GET /v1/cid/:cid</code> resolves the CID against the registry for the audit lookup path.</p>
+ <p>The CID is embedded in the manifest, the receipt body, and the audit log row written by the registry. A third party verifier reads any one of those, recomputes the CID from the manifest hashes, and confirms they match. A re-sealed receipt (different signing key, same content) produces the same CID; a re-trained artifact (any byte different) produces a different CID. The public endpoint <code>GET /v1/cid/:cid</code> resolves the CID against the registry for the audit lookup path.</p>
 
- <p>Two compile jobs that produce the same CID can be deduplicated in storage. The audit log is never deduplicated: every compile remains a distinct event with its own receipt, but the underlying artifact is one row. This is the same trade Git makes between objects and refs.</p>
+ <p>Compile jobs that produce the same CID can be deduplicated in storage. The audit log is never deduplicated: every compile remains a distinct event with its own receipt, but the underlying artifact is one row. This is the same trade Git makes between objects and refs.</p>
 
  <h2 id="tee">TEE attestation as an optional binding.</h2>
  <p>The receipt chain proves the artifact came out of the build pipeline. It does <i>not</i> prove the build pipeline ran on the hardware you think it did. For workloads where that matters (regulated deployments, multi-party compute, supply-chain attestation), TEE attestation adds a fifth optional binding to the receipt body.</p>

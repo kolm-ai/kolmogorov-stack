@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pipelines — Kolm</title>
+<meta name="description" content="W821 pipeline orchestrator: classifier + specialists, weighted K-Score, flow diagram. List all pipelines in your tenant." />
+<meta name="kolm:wave" content="wave821" />
+<link rel="stylesheet" href="/design-tokens.css" />
+    <link rel="stylesheet" href="/warm-paper.css">
+<style>
+  :root { color-scheme: light dark; }
+  body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; margin: 0; padding: 24px; max-width: 1024px; margin-inline: auto; }
+  h1 { font-size: 24px; margin: 0 0 4px; }
+  .lede { color: #666; margin: 0 0 24px; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; background: rgba(0,0,0,0.06); margin-left: 8px; vertical-align: middle; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid rgba(0,0,0,0.08); }
+  th { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: #555; }
+  tr:hover { background: rgba(0,0,0,0.03); }
+  a { color: #2a5edb; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .empty { padding: 32px; border: 1px dashed rgba(0,0,0,0.15); border-radius: 8px; color: #555; text-align: center; }
+  code { background: rgba(0,0,0,0.05); padding: 1px 4px; border-radius: 3px; font-size: 13px; }
+  .err { color: #b00020; }
+  .toolbar { display: flex; gap: 8px; margin: 16px 0; flex-wrap: wrap; }
+  button, .btn { font: inherit; padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.2); background: #fff; cursor: pointer; }
+  button:hover { background: #f5f5f5; }
+  .btn-primary { background: #2a5edb; color: white; border-color: #2a5edb; }
+</style>
+</head>
+<body>
+<nav aria-label="Breadcrumb"><a href="/account">Account</a> <span aria-hidden="true">›</span> Pipelines <span class="pill" data-wave="wave821">wave821</span></nav>
+<h1>Pipelines</h1>
+<p class="lede">W821 pipeline orchestrator. Compose <strong>classifier + specialist</strong> artifacts into a single named pipeline. Run via <code>POST /v1/pipelines/:id/run</code> or CLI <code>kolm pipeline run pl_… --input-json '{…}'</code>.</p>
+
+<div class="toolbar">
+  <a class="btn btn-primary" href="/docs/pipelines">Read the docs</a>
+  <button id="refresh" type="button">Refresh</button>
+</div>
+
+<div id="status" hidden></div>
+<div id="content"></div>
+
+<details style="margin-top: 32px;">
+  <summary>Create a new pipeline</summary>
+  <p>The web UI for creating a pipeline ships in a follow-up wave. For now, use either:</p>
+  <ul>
+    <li><strong>CLI</strong>: <code>kolm pipeline create --name &lt;name&gt; --file kolm.pipeline.yaml</code></li>
+    <li><strong>HTTP</strong>: <code>POST /v1/pipelines</code> with body <code>{name, yaml}</code></li>
+  </ul>
+  <p>YAML schema (W821 friendly format, distinct from W738 cid-pinned format):</p>
+  <pre><code>version: v1
+classifier: ./classifier.kolm
+routes:
+  - match: {intent: refund}
+    artifact: ./specialists/refund.kolm
+  - match: {intent: status}
+    artifact: ./specialists/status.kolm
+  - default: true
+    artifact: ./specialists/fallback.kolm
+</code></pre>
+</details>
+
+<script>
+(async function () {
+  const $status = document.getElementById('status');
+  const $content = document.getElementById('content');
+  function setStatus(msg, isErr) {
+    $status.hidden = false;
+    $status.className = isErr ? 'err' : '';
+    $status.textContent = msg;
+  }
+  async function load() {
+    setStatus('Loading…', false);
+    try {
+      const resp = await fetch('/v1/pipelines', { credentials: 'include' });
+      const body = await resp.json();
+      if (!resp.ok || !body.ok) {
+        setStatus('Failed to load pipelines: ' + (body.error || resp.statusText), true);
+        $content.innerHTML = '';
+        return;
+      }
+      $status.hidden = true;
+      const rows = body.pipelines || [];
+      if (rows.length === 0) {
+        $content.innerHTML = '<div class="empty">No pipelines yet. Use the CLI or HTTP to create one (see the section below).</div>';
+        return;
+      }
+      const tbody = rows.map(function (r) {
+        const parsed = r.parsed || {};
+        const nRoutes = Array.isArray(parsed.routes) ? parsed.routes.length : 0;
+        const classifier = parsed.classifier || '(none)';
+        return '<tr><td><a href="/account/pipelines/' + encodeURIComponent(r.id) + '">' + r.id + '</a></td>' +
+               '<td>' + (r.name || '') + '</td>' +
+               '<td><code>' + classifier + '</code></td>' +
+               '<td>' + nRoutes + '</td>' +
+               '<td>' + (r.parse_error ? '<span class="err">parse_error</span>' : 'ok') + '</td>' +
+               '<td>' + (r.created_at || '') + '</td></tr>';
+      }).join('');
+      $content.innerHTML = '<table><thead><tr><th>ID</th><th>Name</th><th>Classifier</th><th>Routes</th><th>Status</th><th>Created</th></tr></thead><tbody>' + tbody + '</tbody></table>';
+    } catch (e) {
+      setStatus('Network error: ' + e.message, true);
+    }
+  }
+  document.getElementById('refresh').addEventListener('click', load);
+  load();
+})();
+</script>
+</body>
+</html>

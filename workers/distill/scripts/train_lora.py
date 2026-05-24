@@ -112,7 +112,21 @@ def main():
     model = get_peft_model(base, lora_cfg)
     model.print_trainable_parameters()
 
-    training = TrainingArguments(
+    # W787 — read compute-efficiency knobs from env so the Node-side
+    # `kolm distill --precision/--gradient-checkpointing/--early-stop-patience`
+    # flags actually steer the trainer instead of being marketing copy.
+    # Default precision = bf16 when supported, fp16 fallback otherwise
+    # (matches the trainer_real.py auto-detect convention).
+    precision = os.environ.get("KOLM_PRECISION", "auto").lower()
+    if precision == "auto":
+        precision = "bf16" if hasattr(torch, "cuda") and torch.cuda.is_available() and getattr(torch.cuda, "is_bf16_supported", lambda: False)() else "fp16"
+    fp16_flag = precision in ("fp16", "mixed-fp16")
+    bf16_flag = precision in ("bf16", "mixed-bf16")
+    if precision == "fp32":
+        fp16_flag = False
+        bf16_flag = False
+    grad_ckpt_flag = os.environ.get("KOLM_GRAD_CHECKPOINT", "0") == "1"
+    ta_kwargs = dict(
         output_dir=args.out,
         num_train_epochs=args.epochs,
         per_device_train_batch_size=args.batch_size,
@@ -120,14 +134,46 @@ def main():
         save_strategy="epoch",
         logging_steps=10,
         report_to=[],
-        fp16=True,
+        fp16=fp16_flag,
+        bf16=bf16_flag,
+        gradient_checkpointing=grad_ckpt_flag,
     )
+    if grad_ckpt_flag:
+        ta_kwargs["gradient_checkpointing_kwargs"] = {"use_reentrant": False}
+    # W787-1 — early-stop knobs. transformers's EarlyStoppingCallback needs
+    # eval steps; when the operator opts in we switch to per-epoch eval +
+    # load_best_model_at_end so the callback has something to compare.
+    early_stop_enabled = os.environ.get("KOLM_EARLY_STOP", "0") == "1"
+    if early_stop_enabled:
+        ta_kwargs["evaluation_strategy"] = "epoch"
+        ta_kwargs["load_best_model_at_end"] = True
+        ta_kwargs["metric_for_best_model"] = "eval_loss"
+        ta_kwargs["greater_is_better"] = False
+    training = TrainingArguments(**ta_kwargs)
+
+    callbacks = []
+    if early_stop_enabled:
+        # W787-1 — EarlyStoppingCallback. patience = KOLM_EARLY_STOP_PATIENCE
+        # (default 3) maps to the transformers `early_stopping_patience`
+        # semantic (number of eval rounds with no improvement). delta maps
+        # to early_stopping_threshold.
+        try:
+            from transformers import EarlyStoppingCallback
+            patience = int(os.environ.get("KOLM_EARLY_STOP_PATIENCE", "3"))
+            delta = float(os.environ.get("KOLM_EARLY_STOP_DELTA", "0.005"))
+            callbacks.append(EarlyStoppingCallback(
+                early_stopping_patience=patience,
+                early_stopping_threshold=delta,
+            ))
+        except Exception as e:
+            sys.stderr.write(f"[train_lora] KOLM_EARLY_STOP=1 but EarlyStoppingCallback unavailable: {e}\n")
 
     trainer = Trainer(
         model=model,
         args=training,
         train_dataset=ds,
         data_collator=DataCollatorForLanguageModeling(tok, mlm=False),
+        callbacks=callbacks,
     )
 
     trainer.train()
@@ -144,6 +190,18 @@ def main():
             "lr": args.lr,
             "max_length": args.max_length,
             "pairs": len(rows),
+            # W787 — record the effective compute-efficiency choices so the
+            # downstream .kolm receipt chain documents which precision + grad-
+            # checkpoint + early-stop config trained this adapter.
+            "efficiency": {
+                "precision": precision,
+                "fp16": fp16_flag,
+                "bf16": bf16_flag,
+                "gradient_checkpointing": grad_ckpt_flag,
+                "early_stop_enabled": early_stop_enabled,
+                "early_stop_patience": int(os.environ.get("KOLM_EARLY_STOP_PATIENCE", "3")) if early_stop_enabled else None,
+                "early_stop_delta": float(os.environ.get("KOLM_EARLY_STOP_DELTA", "0.005")) if early_stop_enabled else None,
+            },
         }, f, indent=2)
 
     print(f"[train_lora] done. adapter at {args.out}")

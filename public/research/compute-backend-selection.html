@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -132,6 +132,7 @@
 
 
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <a href="#main" class="ks-skip">Skip to content</a>
@@ -263,7 +264,7 @@ S = 0.35 * available
 <span class="arg">filtered out:</span> modal ($2.50/hr > 1.00), runpod ($1.20/hr > 1.00), lambda ($2.00/hr > 1.00)</pre>
 
  <h2 id="examples">Worked examples.</h2>
- <p>Three concrete invocations and what they teach.</p>
+ <p>Concrete invocations and what they teach.</p>
 
  <p><b>Example one: airgap mode on a laptop.</b></p>
  <pre><span class="kw">$</span> kolm compute pick --airgap
@@ -301,7 +302,7 @@ S = 0.35 * available
  <p>The test verb exists because the worst failure mode is the one that surfaces inside <code>kolm compile</code> when you have already spent an hour preparing the corpus. <code>kolm compute test</code> exercises auth, provisioning, the trainer entry point, and a receipt round-trip in under thirty seconds.</p>
 
  <h2 id="tradeoffs">Verifiable tradeoffs.</h2>
- <p>Three real costs the picker cannot abstract away.</p>
+ <p>Real costs the picker cannot abstract away.</p>
 
  <p><b>Cold-start cost.</b> Cloud cold starts are charged against your wallclock, not the backend's. Modal at 5 seconds is acceptable for a 20-minute compile; runpod at 60 seconds is acceptable for a 4-hour run. The score function encodes this, but the score is on [0, 1]; when you are watching a queue, the difference between 5 seconds and 90 seconds is not 0.1 of a number.</p>
 

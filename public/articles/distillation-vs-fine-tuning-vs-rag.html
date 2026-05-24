@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -164,6 +164,7 @@
 
 
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <a href="#main" class="ks-skip">Skip to content</a>
@@ -205,7 +206,7 @@
  <div class="toc">
  <h5>Contents</h5>
  <ol>
- <li><a href="#three">The three techniques, in one paragraph each</a></li>
+ <li><a href="#three">The techniques, in one paragraph each</a></li>
  <li><a href="#tree">The decision tree, by question</a></li>
  <li><a href="#cost">The cost matrix</a></li>
  <li><a href="#rag">When RAG wins (and where it dies)</a></li>
@@ -216,7 +217,7 @@
  </ol>
  </div>
 
- <h2 id="three">The three techniques, in one paragraph each.</h2>
+ <h2 id="three">The techniques, in one paragraph each.</h2>
  <p><b>RAG (retrieval-augmented generation).</b> At inference time, search a vector index, paste the top-k chunks into the prompt, ask the model to answer using them. The model is unchanged; the system is.</p>
  <p><b>Fine-tuning (LoRA / QLoRA / full).</b> Take an open-weight base model, train it on labeled (input, output) pairs from your domain. The model parameters change. The model is now <i>your</i> model.</p>
  <p><b>Distillation.</b> Use a larger teacher model to label a large dataset, then fine-tune a smaller student to match. Often paired with <i>verified inference</i>: k-sample the teacher and only keep labels that pass a deterministic check. The student learns the teacher&rsquo;s behavior on your specific tasks; the cost shifts from per-call to one-time.</p>
@@ -226,7 +227,7 @@
  </blockquote>
 
  <h2 id="tree">The decision tree, by question.</h2>
- <p>Five questions. Asked in this order, they get most teams to the right answer in under a minute.</p>
+ <p>Asked in this order, these questions get most teams to the right answer in under a minute.</p>
  <ul>
  <li><b>1. Does the answer change as your data changes?</b> If yes (knowledge base, ticket archive, fresh news), <b>RAG is mandatory at the base.</b> Stop here unless the next questions push you further.</li>
  <li><b>2. Is the task structured?</b> Does it always produce JSON, a fixed schema, a label from a closed set, code in a known style? If yes, <b>fine-tuning helps a lot;</b> distillation helps even more.</li>
@@ -281,7 +282,7 @@
  </blockquote>
 
  <h2 id="combo">The combinations that actually ship.</h2>
- <p>None of the three techniques are pure in production. The combinations win.</p>
+ <p>None of these are pure in production. The combinations win.</p>
  <ul>
  <li><b>RAG + fine-tune.</b> Fine-tune the base to follow your output schema, RAG over your knowledge base for the answer content. Common for support copilots.</li>
  <li><b>Recipe + Recall + MoE (the kolm v0.2 shape).</b> The artifact ships with the recipe-class compiled code, a <code>KOLMIDX</code> deterministic lookup container, a bundled byte-level BPE tokenizer, and (when defined) a <code>kolm-moe-1</code> router across N expert recipes. A full <code>sqlite-vec</code> embedding index and a LoRA-fit base ship through the runtime bridge.</li>
@@ -312,7 +313,7 @@
  <a href="/articles/running-our-marketing-on-distilled-models">
  <span class="lab">dogfood</span>
  <span class="v">Our marketing runs on distilled models <span class="arrow">&rarr;</span></span>
- <p>Four Specialists run features on this site. Here&rsquo;s the K-scores and the bill.</p>
+ <p>The Specialists running features on this site. Here&rsquo;s the K-scores and the bill.</p>
  </a>
  <a href="/use-cases/ai-saas">
  <span class="lab">act</span>

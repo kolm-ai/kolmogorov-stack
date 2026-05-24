@@ -1,3 +1,4 @@
+// @public-routes-only — exercises /v1/product/frontier-contracts (public, mounted before authMiddleware).
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';

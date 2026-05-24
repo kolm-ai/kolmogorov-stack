@@ -1,3 +1,4 @@
+// @unauthed-test — pure unit test of src/runtime-confidence-router.js; never mounts buildRouter().
 // W709 — runtime confidence-aware router tests. Pins the entropy primitive
 // and the routing-decision contract that the /v1/route/chat/completions
 // endpoint depends on. Honest-degradation behavior (no_entropy_signal_available)

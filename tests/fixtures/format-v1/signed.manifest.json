@@ -1,0 +1,67 @@
+{
+  "spec": "kolm-1",
+  "format_version": "1.0",
+  "job_id": "00000000-0000-0000-0000-000000000003",
+  "task": "compile.rule.signed",
+  "created_at": "2026-05-24T00:02:00.000Z",
+  "runtime": "js",
+  "runtime_target": "js",
+  "artifact_class": "compiled_rule",
+  "base_model": "Qwen/Qwen2.5-3B-Instruct",
+  "tier": "bundle",
+  "judge_id": "exact-match",
+  "eval_score": 0.99,
+  "recipes": { "n": 8, "registry_hash": "9999999999999999999999999999999999999999999999999999999999999999" },
+  "evals": { "n": 128, "spec": "kolm-evals-1", "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" },
+  "seed_provenance": {
+    "seeds_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "split_seed": 1337,
+    "holdout_ratio": 0.25,
+    "train_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "holdout_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "train_count": 384,
+    "holdout_count": 128,
+    "eval_source": "real_eval",
+    "comparator": "exact",
+    "production_ready": true,
+    "eval_provenance": "real_eval"
+  },
+  "hashes": {
+    "model_pointer": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "recipes_json": "9999999999999999999999999999999999999999999999999999999999999999",
+    "lora_bin": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "index_bin": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "evals_json": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "recipe_bundle_mjs": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+  },
+  "cid": "0000000000000000000000000000000000000000000000000000000000000003",
+  "policy": { "require_ed25519": true, "require_rekor": true },
+  "binaries": [
+    {
+      "target": "native",
+      "kind": "c",
+      "recipe_id": "rule-001",
+      "filename": "rule-001-native.bin",
+      "sha256": "1010101010101010101010101010101010101010101010101010101010101010",
+      "size": 14336
+    }
+  ],
+  "compiled_binary": true,
+  "production_ready": true,
+  "memory_requirement_mb": 5,
+  "offline_capable": true,
+  "license": "Apache-2.0",
+  "entry": {
+    "file": "recipe.bundle.mjs",
+    "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "runtime": "node>=18 | bun>=1 | deno>=1.40",
+    "class": "compiled_rule",
+    "export": "default"
+  },
+  "parent_cid": "0000000000000000000000000000000000000000000000000000000000000002",
+  "region": "EU_WEST",
+  "guardrails": [
+    { "name": "no-pii", "pattern": "raw:/\\b\\d{3}-\\d{2}-\\d{4}\\b/", "action": "block" }
+  ],
+  "artifact_hash": "0000000000000000000000000000000000000000000000000000000000000003"
+}

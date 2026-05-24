@@ -1,0 +1,47 @@
+--- /dev/null
++++ b/src/kolm-loader.cpp
+@@ -0,0 +1,200 @@
++// SEE tools/llama-cpp-kolm-loader/kolm-loader.cpp in the kolm.ai upstream for
++// the canonical version of this file. This patch reproduces it here so the
++// llama.cpp tree owns the source after the merge lands.
++
++// (full file body shipped at the same path inside this draft directory)
++
++// W818-1 draft. Will become a real .patch after the llama.cpp maintainers
++// confirm the three-commit cut + the signature-verify hook policy. Reference:
++// see this directory's README.md for the full patch-series outline.
+
+--- a/src/llama.cpp
++++ b/src/llama.cpp
+@@ -1234,7 +1234,12 @@ struct llama_model * llama_model_load_from_file(
+         const char * path_model,
+         const struct llama_model_params params) {
+-    return llama_model_load_from_file_internal(path_model, params, nullptr);
++    // W818-1: detect .kolm wrapper. If the path ends in .kolm (or sniff the
++    // PK\x03\x04 + KOLM magic prefix), delegate to the kolm loader which
++    // verifies signature, locates weights.bin inside the zip, and re-enters
++    // this function on the inner GGUF byte range.
++    if (kolm::is_kolm_artifact(path_model)) {
++        return kolm::load_from_kolm(path_model, params);
++    }
++    return llama_model_load_from_file_internal(path_model, params, nullptr);
+ }
+
+--- a/Makefile
++++ b/Makefile
+@@ -42,6 +42,8 @@ OBJS += build/llama.o
+ OBJS += build/sampling.o
+ OBJS += build/grammar.o
++# W818-1: kolm artifact loader (depends on already-vendored miniz.c)
++OBJS += build/kolm-loader.o
+
+--- /dev/null
++++ b/tests/test-kolm-loader.cpp
+@@ -0,0 +1,50 @@
++// W818-1 integration test. Loads a fixture .kolm, asserts:
++//   1. valid signature -> model loads + generates tokens
++//   2. flipped byte    -> loader refuses, returns nullptr, exit code != 0
++// Fixture artifact (TinyLlama distilled to 1.1B, ~2MB) is checked in under
++// tests/fixtures/wave818-tinyllama.kolm pending upstream acceptance.
++
++// (full test body shipped in the kolm.ai draft repo)

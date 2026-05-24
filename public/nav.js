@@ -1,4 +1,26 @@
 (function () {
+ // Warm Paper theme bootstrap: pages now default to LIGHT (data-theme
+ // attribute absent on <html>). Honor a previously-saved 'dark' choice
+ // before first paint to avoid a flash. If no saved choice, fall back to
+ // prefers-color-scheme. This runs once per page load, as early as
+ // possible in the nav.js IIFE.
+ (function bootstrapTheme() {
+ try {
+ var saved = null;
+ try { saved = localStorage.getItem('kolm-theme'); } catch (e) {}
+ var html = document.documentElement;
+ if (saved === 'dark' || saved === 'light') {
+ html.setAttribute('data-theme', saved);
+ } else if (!html.hasAttribute('data-theme')) {
+ try {
+ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+ html.setAttribute('data-theme', 'dark');
+ }
+ } catch (e) {}
+ }
+ } catch (e) {}
+ })();
+
  function installSurfaceGuard() {
  if (document.getElementById('kolm-surface-guard')) return;
  var style = document.createElement('style');
@@ -55,7 +77,7 @@ installSurfaceGuard();
  // pages should not make the Product tab look active.
  // /models + /runtimes both activate the Models tab.
  var path = (window.location.pathname || '/').replace(/\/+$/, '') || '/';
-var prdRe = /^\/(product|whitepaper|motion|capture|captures|quickstart|compile|distill|training|train|run|recall|serve|evolve|anatomy|k-score|build-your-own|integrations)(\/|$)/;
+var prdRe = /^\/(product|whitepaper|motion|capture|captures|quickstart|compile|distill|training|train|run|recall|serve|evolve|anatomy|k-score|build-your-own|integrations|use-cases|healthcare|finance)(\/|$)/;
 var solRe = /^\/(use-cases|healthcare|finance|legal|defense|edge|devtools|insure|health-insurance|saas|eu|gov|compare|vs-|how-vs|migrate|case-studies|frontier-stack|sovereign-ai|why-now|why-kolm)(\/|$)/;
 var modRe = /^\/(models|runtimes|frontier-stack|compute|device|hub|registry|marketplace|atlas)(\/|$)/;
 var devRe = /^\/(docs|research|training|train|spec|api|sdk|articles|cookbook|architecture|launch|troubleshooting|faq|press|changelog|benchmarks|leaderboard|kscore-bench|kscore-leaderboard)(\/|$)/;

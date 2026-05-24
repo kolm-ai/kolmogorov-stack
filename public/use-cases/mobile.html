@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -183,6 +183,7 @@
 
 
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <a href="#main" class="ks-skip">Skip to content</a>
@@ -276,8 +277,8 @@
 <section>
  <div class="wrap">
  <div class="eyebrow"><span class="num">03</span> &middot; runtime stack</div>
- <h2>Three layers. <span class="tone">No native code you have to maintain.</span></h2>
- <p class="sec-lede">The mobile runtime ships as a React Native / Swift / Kotlin SDK. Embedded llama.cpp + ExecuTorch handle inference; recipe drafts + sqlite-vec recall handle the structured-output and grounding layers. You ship features, not inference plumbing.</p>
+ <h2>The runtime layers. <span class="tone">No native code you have to maintain.</span></h2>
+ <p class="sec-lede">React Native, Swift, and Kotlin SDKs. Embedded llama.cpp + ExecuTorch handle inference; recipe drafts + sqlite-vec recall handle structured output and grounding. You ship features, not inference plumbing.</p>
  <div class="triplets">
  <div class="trip">
  <div class="icn">RT</div>
@@ -301,7 +302,7 @@
 <section>
  <div class="wrap">
  <div class="eyebrow"><span class="num">04</span> &middot; integration</div>
- <h2>Five lines of <span class="tone">React Native.</span></h2>
+ <h2>The <span class="tone">React Native call.</span></h2>
  <p class="sec-lede">Drop a <code>.kolm</code> in your bundle (or stream it on first launch via on-demand resources). Open it. Call it. The SDK handles model loading, NPU offload, receipt signing, recall. <em style="color:var(--ink-mute,#b5bdb1)">(React Native module ships alongside the browser-WASM-via-WebView path; the API below is the locked surface.)</em></p>
  <div class="term" style="max-width:880px">
  <div class="hd"><span class="dot"></span><span>App.tsx</span></div>

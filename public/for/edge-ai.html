@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Kolm for Edge AI &mdash; INT4 distill for Raspberry Pi, phones, WebGPU · kolm.ai</title>
-<meta name="description" content="The model that runs in your data center is too big for the device. Kolm distills a 32B teacher into a 3B INT4 student that fits in 1.9 GB &mdash; deployable to Raspberry Pi 5, iPhone via Core ML, Android via NNAPI, browser via WebGPU. Same eval, same signed receipt.">
-<meta name="theme-color" content="#07090c">
+<title>Kolm for Edge AI &mdash; INT4 distill for Raspberry Pi, phones, WebGPU ·</title>
+<meta name="description" content="The model that runs in your data center is too big for the device. Kolm distills a 32B teacher into a 32B INT4 student that fits in 1.9 GB &mdash; deployable to Raspberry Pi 5, iPhone via Core ML, Android via NNAPI,">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="Kolm for Edge AI · kolm.ai">
 <meta property="og:description" content="Distill INT4 specialists for Raspberry Pi, phones, and WebGPU. One signed artifact, every target.">
 <meta property="og:type" content="article">
@@ -17,6 +18,7 @@
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/for-shell.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -68,7 +70,7 @@
   <div class="for-section__head">
     <span class="for-eyebrow">For robotics, IoT, mobile, and offline-first apps</span>
     <h1 class="for-h1">INT4 distill that fits on a Raspberry Pi, a phone, or a browser tab.</h1>
-    <p class="for-lede">The model that runs in your data center is too big to ship. Edge means 1.9 GB of disk, 3 GB of RAM, and no cellular for hours at a time. Kolm distills your 32B teacher into a 3B INT4 student that runs offline on Raspberry Pi 5, iPhone via Core ML, Android via NNAPI, and browser via WebGPU &mdash; with the same signed receipt your cloud build carries.</p>
+    <p class="for-lede">The model that runs in your data center is too big to ship. Edge means 1.9 GB of disk, 3 GB of RAM, and no cellular for hours at a time. Kolm distills your 32B teacher into a 32B INT4 student that runs offline on Raspberry Pi 5, iPhone via Core ML, Android via NNAPI, and browser via WebGPU &mdash; with the same signed receipt your cloud build carries.</p>
     <div class="for-hero__ctas">
       <a class="for-cta-primary" href="mailto:rodneyyesep@gmail.com?subject=Kolm%20for%20Edge%20AI%20%E2%80%94%20pilot">Talk to engineering <span aria-hidden="true">&rarr;</span></a>
       <a class="for-cta-secondary" href="/runtimes#reach">See deployable targets</a>
@@ -79,7 +81,7 @@
 <section class="for-section">
   <div class="for-section__head">
     <span class="for-eyebrow">The problem</span>
-    <h2 class="for-h2">Four reasons frontier models don&rsquo;t go to the edge.</h2>
+    <h2 class="for-h2">Why frontier models don&rsquo;t go to the edge.</h2>
   </div>
   <div class="for-pain">
     <div class="for-pain__item">
@@ -108,14 +110,14 @@
 <section class="for-section">
   <div class="for-section__head">
     <span class="for-eyebrow">What kolm changes</span>
-    <h2 class="for-h2">Three steps from teacher to on-device artifact.</h2>
+    <h2 class="for-h2">From teacher to on-device artifact.</h2>
     <p class="for-prose">Kolm&rsquo;s SOTA quantize matrix has shipped INT4 across 0.5B / 3B / 7B / 32B on RTX 5090 via bitsandbytes NF4 + double, verified end-to-end. The compile target picks the right runtime: Core ML for iOS, NNAPI for Android, WebGPU for browser, llama.cpp for Pi.</p>
   </div>
   <div class="for-recipe">
     <div class="for-recipe__step">
       <span class="for-recipe__num">Step 01</span>
       <h3 class="for-recipe__h">Distill the teacher you already trust</h3>
-      <p class="for-recipe__p">Point kolm at the cloud model you already use. The student size is set by the device class &mdash; 3B INT4 for Pi 5, 7B INT4 for laptops, 0.5B INT4 for microcontrollers.</p>
+      <p class="for-recipe__p">Point kolm at the cloud model you already use. The student size is set by the device class &mdash; 32B INT4 for Pi 5, 7B INT4 for laptops, 0.5B INT4 for microcontrollers.</p>
       <code class="for-recipe__cmd"><span class="p">$</span> <span class="c">kolm distill --teacher gpt-4o \</span><br>&nbsp;&nbsp;<span class="c">--student qwen2.5-3b --quantize int4 \</span><br>&nbsp;&nbsp;<span class="c">--eval evals/edge-cases.jsonl</span></code>
     </div>
     <div class="for-recipe__step">
@@ -137,7 +139,7 @@
   <div class="for-section__head">
     <span class="for-eyebrow">Proof on device</span>
     <h2 class="for-h2">Measured throughput, four target classes.</h2>
-    <p class="for-prose">Same 3B INT4 specialist, four hardware classes. Numbers measured on a single representative request shape (300 tokens in, 180 tokens out). Frontier &ldquo;reach&rdquo; row is the size where the hosted-tier model becomes infeasible on the device.</p>
+    <p class="for-prose">Same 32B INT4 specialist, four hardware classes. Numbers measured on a single representative request shape (300 tokens in, 180 tokens out). Frontier &ldquo;reach&rdquo; row is the size where the hosted-tier model becomes infeasible on the device.</p>
   </div>
   <div class="for-vs">
     <div class="for-vs__row">
@@ -167,7 +169,7 @@
 <section class="for-section">
   <div class="for-section__head">
     <span class="for-eyebrow">A real artifact</span>
-    <h2 class="for-h2">A 3B INT4 specialist that runs offline anywhere.</h2>
+    <h2 class="for-h2">A 32B INT4 specialist that runs offline anywhere.</h2>
     <p class="for-prose">1.9 GB on disk. ~3.0 GB peak RAM. Loads from local storage in 9 seconds on a Pi, 1.4s on M-series. Eval and bakeoff included in the artifact so on-device QA can re-score after a firmware update.</p>
   </div>
   <div class="for-receipt">

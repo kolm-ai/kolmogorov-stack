@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Compute · rent training and inference across 14 · kolm.ai</title>
-<meta name="description" content="Train and serve on your local box, on Modal, RunPod, Vast, Lambda, Together, Replicate, or your own SSH host. One CLI. Quote before you spend. Receipts pin...">
+<title>Compute: rent training and inference, one CLI · kolm.ai</title>
+<meta name="description" content="Train and serve on your local box, on Modal, RunPod, Vast, Lambda, Together, Replicate, fal, or your own SSH host. One CLI. Quote before you spend. Receipts pin the backend.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="Compute · rent training and inference across 14 · kolm.ai">
-<meta property="og:description" content="Train and serve on your local box, on Modal, RunPod, Vast, Lambda, Together, Replicate, or your own SSH host. One CLI. Quote before you spend. Receipts pin...">
+<meta property="og:title" content="Compute: rent training and inference, one CLI · kolm.ai">
+<meta property="og:description" content="Train and serve on your local box, on Modal, RunPod, Vast, Lambda, Together, Replicate, fal, or your own SSH host. One CLI. Quote before you spend. Receipts pin the backend.">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Compute · rent training and inference across 14 · kolm.ai">
-<meta name="twitter:description" content="Train and serve on your local box, on Modal, RunPod, Vast, Lambda, Together, Replicate, or your own SSH host. One CLI. Quote before you spend. Receipts pin...">
+<meta name="twitter:title" content="Compute: rent training and inference, one CLI · kolm.ai">
+<meta name="twitter:description" content="Train and serve on your local box, on Modal, RunPod, Vast, Lambda, Together, Replicate, fal, or your own SSH host. One CLI. Quote before you spend.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/compute">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -122,6 +122,7 @@
 
 
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
@@ -155,10 +156,10 @@
  <div class="wrap">
  <div class="hero-eyebrow"><span class="he-dot"></span>Compute &amp; rental . v1.0</div>
  <h1>Rent compute. Train anywhere.</h1>
- <p class="lede">kolm dispatches training and inference to the box you choose. Local CUDA on your workstation, MPS on a MacBook, Modal for a five-minute serverless burst, Vast for a six-hour H100 rental, or your own SSH host. One CLI surface, one quote-first flow, one receipt that pins the backend it ran on.</p>
+ <p class="lede">kolm dispatches training and inference to the box you choose. Local CUDA on your workstation, MPS on a MacBook, Modal for a serverless burst, Vast for an H100 rental, or your own SSH host. One CLI, a quote-first flow, a receipt that pins the backend it ran on.</p>
 
- <h2>The 14 backends</h2>
- <p>Every backend ships as a uniform adapter: <code>detect()</code>, <code>quote()</code>, <code>run()</code>, <code>teardown()</code>. The CLI verb <code>kolm compute list</code> prints the same shape at the terminal.</p>
+ <h2>The backend registry</h2>
+ <p>Every backend ships as a uniform adapter: <code>detect()</code>, <code>quote()</code>, <code>run()</code>, <code>teardown()</code>. Run <code>kolm compute list</code> to print the same shape at the terminal.</p>
  <div class="scroll-x">
  <table class="table">
  <thead><tr><th>Backend</th><th>Kind</th><th>Train</th><th>Infer</th><th>Airgap</th><th>$ / hr</th><th>Cold start</th><th>VRAM cap</th><th>Auth</th></tr></thead>
@@ -222,7 +223,7 @@ $ kolm compute rent --spec long-training.spec.json --backend vast --budget 0.50 
  + 0.15 . perf_bias . local-cuda=1, modal=0.9, runpod=0.85, vast=0.8 ...</pre>
  <p>The perf bias is the column that breaks the tie between a free local-cpu and a paid local-cuda: CPU scores 1 on availability and 1 on cost-inverse, but 0.1 on perf-bias, which is enough to flip the pick to the GPU even when GPU costs energy.</p>
 
- <h2>Three rental categories</h2>
+ <h2>Rental categories</h2>
  <p>Not every backend rents the same way. The CLI hides the difference, but the contract differs underneath.</p>
  <div class="grid">
  <div class="card">
@@ -272,7 +273,7 @@ $ kolm compute rent --spec long-training.spec.json --backend vast --budget 0.50 
  <p>The provenance string includes the bundle id, the docker image hash, and a timestamp. Reproducers can verify the image even after the rental is gone.</p>
 
  <h2>CLI</h2>
- <p>Five verbs cover the surface.</p>
+ <p>The verb surface:</p>
  <pre>$ kolm compute list
 14 backends. local-cpu, local-cuda, local-mps, local-mlx, local-rocm,
 local-directml, modal, runpod, together, vast, lambda, replicate, fal,
@@ -325,8 +326,8 @@ $ kolm compute rent --spec my.spec.json --backend vast --budget 0.50 --confirm
  </ul>
 
  <h2>What we are not promising</h2>
- <p>Three things, explicit.</p>
- <p><strong>We do not resell compute.</strong> Your provider token bills your provider account. kolm sits in front of the SDK; it does not proxy the API call, hold the funds, or take a margin.</p>
+ <p>Explicit limits, so there are no surprises.</p>
+ <p><strong>We do not resell compute.</strong> Your provider token bills your provider account. kolm sits in front of the SDK; it does not proxy the API call, hold funds, or take a margin.</p>
  <p><strong>Quotes are estimates.</strong> Cold-start, network, and a 2x slack factor are folded in; the real invoice can drift. The picker uses quotes as ordering, not as billing.</p>
  <p><strong>Backends churn.</strong> Provider APIs ship breaking changes; we re-pin the registry on every adapter version bump. The version in the top-left corner of <code>kolm compute list</code> is the registry version, not the kolm version.</p>
  </div>

@@ -263,11 +263,11 @@ test('19. at least 3 of 10 pages link to /training or /k-score (data scientist)'
 test('20. sw.js cache slug embeds wave >= 205', () => {
   assert.ok(fs.existsSync(SW), `sw.js missing at ${SW}`);
   const sw = read(SW);
-  const m = sw.match(/kolm-v7-\d{4}-\d{2}-\d{2}-wave(\d+)-/);
-  assert.ok(m, `sw.js does not match expected cache-slug pattern`);
-  const wave = parseInt(m[1], 10);
-  assert.ok(wave >= 205,
-    `sw.js wave slug is wave${wave}; expected >= 205. Coordinator must bump sw.js`);
+  // W604 anti-brittleness: scan all wave tokens, assert max >= 205.
+  const waves = [...sw.matchAll(/wave(\d{3,4})/g)].map((m) => parseInt(m[1], 10));
+  assert.ok(waves.length > 0, 'sw.js must carry at least one wave token');
+  const maxWave = Math.max(...waves);
+  assert.ok(maxWave >= 205, 'sw.js CACHE wave must reach >= 205 (saw max wave' + maxWave + ')');
 });
 
 // =====================================================================

@@ -30,12 +30,15 @@ const SW = fs.readFileSync(path.join(PUBLIC, 'sw.js'), 'utf8');
 // concept distinct from compilation; deserves its own surface). The CUTS
 // dict and assertions below were updated accordingly. /edge and /cookbook
 // remain cut.
+// W806 note: '/cloud' was previously cut (dup-of-/enterprise) but has been
+// un-cut as a real 'Cloud distill' product page (referenced from
+// dashboard.html as a distinct managed-runtime surface). Mirrors the
+// /defense and /distill resurrection pattern above.
 const CUTS = {
   '/agents':      '/product',
   '/evolve':      '/product',
   '/bounty':      '/community',
   '/bounties':    '/community',
-  '/cloud':       '/enterprise',
   '/edge':        '/device',
   '/cookbook':    '/docs',
   '/serve':       '/runtimes',
@@ -47,12 +50,13 @@ const CUTS = {
   '/openai':      '/compare/kolm-vs-openai-fine-tune',
 };
 
-test('W224 #1 - at least 14 pages cut from public/ (plan floor)', () => {
+test('W224 #1 - at least 13 pages cut from public/ (plan floor)', () => {
   // W400G note: /distill was un-cut (real concept page), dropping the count
-  // from 15 to 14. The plan floor was originally 15; we lowered to 14 because
-  // a reinstated page is more valuable than maintaining an arbitrary cut count.
-  assert.ok(Object.keys(CUTS).length >= 14,
-    `cut list has ${Object.keys(CUTS).length} entries; floor is 14 post-W400G`);
+  // from 15 to 14. W806: /cloud was un-cut (real product page), dropping to 13.
+  // The plan floor was originally 15; we lower it each time a reinstated page
+  // proves more valuable than maintaining an arbitrary cut count.
+  assert.ok(Object.keys(CUTS).length >= 13,
+    `cut list has ${Object.keys(CUTS).length} entries; floor is 13 post-W806`);
 });
 
 test('W224 #2 - cut .html files no longer exist in public/', () => {
@@ -101,10 +105,14 @@ test('W224 #5 - every 301 destination is itself a real surface (file or rewrite-
 });
 
 test('W224 #6 - sw.js cache slug at or beyond wave 224', () => {
-  const m = SW.match(/const CACHE = 'kolm-v7-[^']+-wave(\d+)-/);
-  assert.ok(m, 'sw.js CACHE must follow the wave-N slug pattern');
-  const waveN = parseInt(m[1], 10);
-  assert.ok(waveN >= 224, `sw.js wave-slug must be >= 224 (saw ${waveN})`);
+  // W604 anti-brittleness: scan all wave tokens in sw.js and check max,
+  // rather than pinning the literal 'kolm-v7-' prefix or a single position.
+  // The cache version slug evolved from kolm-v7- to kolm-v18-/v27- as the
+  // build pipeline matured; the wave floor is the real contract.
+  const waves = [...SW.matchAll(/wave(\d{3,4})/g)].map((mm) => parseInt(mm[1], 10));
+  assert.ok(waves.length > 0, 'sw.js must carry at least one wave token');
+  const maxWave = Math.max(...waves);
+  assert.ok(maxWave >= 224, `sw.js wave-floor must be >= 224 (saw max wave ${maxWave})`);
 });
 
 test('W224 #7 - cut list members are NOT also rewritten (would mask the redirect)', () => {

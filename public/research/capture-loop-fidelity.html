@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -132,6 +132,7 @@
 
 
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <a href="#main" class="ks-skip">Skip to content</a>
@@ -197,7 +198,7 @@
  <p>The legibility matters because every transition is a place where a different retention policy could apply. The simple version is: <b>at every stage we keep the smallest amount of state that lets the next stage do its job</b>, and we surface the decision to the user with a counter.</p>
 
  <h2 id="discard">Discard rules.</h2>
- <p>Three discard rules are in force by default. Each rule is a concession to a category of harm we have seen in adjacent products and have no interest in reproducing.</p>
+ <p>The default discard rules. Each is a concession to a category of harm we have seen in adjacent products and have no interest in reproducing.</p>
 
  <p><b>Rule one: full-text bodies decay to hashes after the namespace retention window.</b> The default window is 30 days from the capture timestamp. Inside the window the inbox shows the full prompt and the full response so the triager can read them and make a real keep-or-discard decision. After the window, the body is hashed (SHA-256 over the canonical UTF-8 text), the original is deleted from the row, and the hash is what persists. Counters and dedup still work; the text is gone.</p>
 
@@ -205,14 +206,14 @@
 
  <p><b>Rule three: no implicit-signal collection without opt-in.</b> A naive system can guess at "user happiness" by watching which responses get retried, which get copy-pasted, or how long a session lasts. We do not do this by default. The only feedback signals the loop reads are <i>explicit</i>: a kept-or-discarded flag from the inbox, or structured feedback submitted with an observation through <code>/v1/capture/log</code>. If the user opts a namespace into implicit signal collection, the dashboard shows the toggle as enabled and the receipt for any downstream distill records the source as <code>signal: implicit</code>.</p>
 
- <p>The pattern is the same in all three rules: <b>the default is conservative; opting in is explicit; the decision is surfaced</b>. None of this is novel. What is unusual is that the rules are visible to the deployer without reading source code.</p>
+ <p>The pattern is the same in every rule: <b>the default is conservative; opting in is explicit; the decision is surfaced</b>. None of this is novel. What is unusual is that the rules are visible to the deployer without reading source code.</p>
 
  <h2 id="bridge">Local loop, not closed loop.</h2>
  <p>The framing matters because "closed-loop AI" is a phrase that gets used loosely. A closed loop in control theory observes its own output, compares to a setpoint, and adjusts continuously. The capture-to-distill loop is not that. It is a local loop with explicit handoffs.</p>
 
  <p>The handoff that makes it local is the bridge boundary. The kolm server holds the corpus and the triage state. The trainer bridge holds the GPU and runs the actual distillation. The artifact, once produced, is signed and delivered back to the customer's storage; the server does not retain a copy of the bytes. The trainer bridge runs as a separate process the customer can host themselves, run on a partner GPU, or call out to a managed instance; whichever option is chosen, the bridge is the place where training actually happens, and the server is the place where the metadata lives.</p>
 
- <p>This design has three concrete consequences.</p>
+ <p>This design has concrete consequences.</p>
 
  <ul>
  <li><b>The compile is human-initiated.</b> A namespace reaching 1,000 kept pairs does not automatically trigger a distill. It unlocks the distill command. A human runs <code>kolm distill --namespace tickets</code>; the trainer bridge accepts or refuses; the artifact is signed; the user inspects the diff against the previous version. No automatic deployment.</li>
@@ -221,9 +222,9 @@
  </ul>
 
  <h2 id="keep">What goes wrong if you keep everything.</h2>
- <p>The temptation to retain every body for the longest possible window is real. More data is more option value; more option value is more leverage during the next compile. We resist it because four kinds of harm compound when the retention horizon is unbounded.</p>
+ <p>The temptation to retain every body for the longest possible window is real. More data is more option value; more option value is more leverage during the next compile. We resist it because compounding harms accumulate when the retention horizon is unbounded.</p>
 
- <p><b>PII bleed.</b> A support inbox accumulates names, addresses, account numbers, and the occasional unredacted credit card. Three years of those tuples are a liability shaped exactly like a breach. The 30-day hash-down rule means the worst breach against a stale capture row produces hashes, not bodies. Hashes are not zero risk, but they are a substantially smaller risk surface than full plaintext.</p>
+ <p><b>PII bleed.</b> A support inbox accumulates names, addresses, account numbers, and the occasional unredacted credit card. Years of those tuples are a liability shaped exactly like a breach. The 30-day hash-down rule means the worst breach against a stale capture row produces hashes, not bodies. Hashes are not zero risk, but they are a substantially smaller risk surface than full plaintext.</p>
 
  <p><b>Distribution drift.</b> An agent trained on a body that is 18 months old is trained on a world that has moved. Catalogs changed; case law updated; pricing rotated. A corpus that retains all bodies forever produces an adapter that is anchored to a past that no longer exists. Aggressive decay forces the loop to keep up.</p>
 
@@ -232,7 +233,7 @@
  <p><b>Regulatory exposure.</b> HIPAA, GDPR, and the ICO breach-notification regime all treat "data we kept past its useful life" as worse than "data we did not collect". A short retention window is a defensible position; an unbounded retention window is an unbounded promise.</p>
 
  <h2 id="lost">What you give up by discarding.</h2>
- <p>The verifiable cost of conservative defaults is real. Three categories of evidence get lost in the discard window.</p>
+ <p>The verifiable cost of conservative defaults is real. Categories of evidence get lost in the discard window.</p>
 
  <p><b>Long-tail edge cases.</b> A bug only fires on the third Tuesday of months with an R in their name. The kept-pair from that incident is 31 days old when the next reproducer would help; the body has decayed to a hash. The operator either re-runs production until the case re-occurs, or they bump the retention window for that namespace before the next reproducer is needed.</p>
 

@@ -1,0 +1,103 @@
+# W820-1 — kolm template workflow.
+#
+# COPY-PASTE TEMPLATE. Downstream kolm users copy this file into their own
+# repo at `.github/workflows/kolm.yml`. It consumes the W820-2 composite
+# action at `./tools/gha/kolm-distill-action` (after publication it will
+# reference `kolm/distill-action@v1` instead).
+#
+# Setup (before the workflow does anything useful)
+# ------------------------------------------------
+# 1. Add a `kolm.yaml` at the repo root. Run `kolm yaml init` locally to
+#    scaffold one, or copy from `docs/cookbook/kolm.yaml` in the kolm repo.
+# 2. Repo Settings -> Secrets and variables -> Actions -> New repository
+#    secret named `KOLM_API_KEY` (a `ks_*` tenant key from
+#    https://kolm.ai/account/keys).
+# 3. Optional: repo variable `KOLM_BASE_URL` for self-hosted kolm installs.
+# 4. Optional: drop the `if: ${{ secrets.KOLM_API_KEY != '' }}` guard if you
+#    want the gate to fail loudly when the secret is missing.
+#
+# Why the secret guard is opt-in
+# ------------------------------
+# A push trigger that exits non-zero on a missing secret marks every
+# unrelated commit as red in the GitHub UI. The W211 / W405 fix pattern
+# is mirrored here: the workflow renders unchanged in forks (so anyone
+# can read the template) but the actual job stays guarded by the secret
+# presence check. Remove the guard once the secret is configured in the
+# environment you are running this in.
+
+name: kolm-template
+
+# 5-minute timeout per spec (W820-1). The bench step finishes in seconds
+# against a warm artifact; the distill step can run longer on a real
+# teacher call, so we set a job-level timeout-minutes: 5 below.
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      force_distill:
+        description: 'Re-distill every namespace even if K-Score passes'
+        required: false
+        default: 'false'
+
+# Top-level permissions default to read-only; the kolm-gate job elevates
+# only what it needs (contents:write for release-asset uploads,
+# pull-requests:write for the K-Score delta PR comment).
+permissions:
+  contents: read
+
+jobs:
+  kolm-gate:
+    name: kolm K-Score gate
+    runs-on: ubuntu-latest
+    # 5-minute job timeout per W820-1. A composite action that depends on
+    # external network calls should never run indefinitely; if the bench or
+    # distill step hangs we want the job to fail loud rather than burn the
+    # GitHub Actions minute budget.
+    timeout-minutes: 5
+    # W211 pattern: skip the job when the secret is unset so forks don't
+    # show red checks on every commit. Remove this guard once KOLM_API_KEY
+    # is configured.
+    if: ${{ secrets.KOLM_API_KEY != '' }}
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      # The action itself runs `actions/setup-node@v4` internally, so the
+      # workflow does NOT need to repeat that step. The composite action
+      # also handles `npm install -g kolm-stack`.
+
+      - name: K-Score gate via local kolm-distill-action
+        id: kolm
+        # After publication this becomes `uses: kolm/distill-action@v1`.
+        # Pre-publication, downstream users either copy the action into
+        # their own repo at `tools/gha/kolm-distill-action/` or git-clone
+        # the kolm repo as a submodule and reference the same local path.
+        uses: ./tools/gha/kolm-distill-action
+        with:
+          kolm-api-key: ${{ secrets.KOLM_API_KEY }}
+          k-score-gate: '0.85'
+          redistill-on-drop: 'true'
+          # Set publish-release: 'true' on workflows triggered by a release
+          # event; on push/pull_request it is a no-op even when true.
+          publish-release: 'false'
+        env:
+          KOLM_BASE_URL: ${{ vars.KOLM_BASE_URL || 'https://kolm.ai' }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: fail merge on K-Score regression
+        # `kscore-passed` is a string output. Compare it as a string.
+        if: steps.kolm.outputs.kscore-passed != 'true'
+        run: |
+          echo "K-Score below threshold; failing the merge gate."
+          echo "Measured K-Score: ${{ steps.kolm.outputs.kscore }}"
+          exit 1

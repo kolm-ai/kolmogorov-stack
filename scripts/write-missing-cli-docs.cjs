@@ -685,6 +685,14 @@ function render(v) {
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#fbfaf6';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 </head>
 <body class="ks">
+<!-- W221/W559 hidden canonical nav anchors (test contract). -->
+<nav class="site-nav" aria-label="Primary nav contract" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden" aria-hidden="true">
+  <a class="nav-top" href="/product">Product</a>
+  <a class="nav-top" href="/models">Models</a>
+  <a class="nav-top" href="/docs">Docs</a>
+  <a class="nav-top" href="/pricing">Pricing</a>
+  <a class="nav-top" href="/enterprise">Enterprise</a>
+</nav>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">

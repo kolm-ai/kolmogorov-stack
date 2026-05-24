@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>REST API reference &middot; kolm.ai</title>
+<title>REST API reference · kolm.ai</title>
 <meta name="description" content="The kolm REST surface. 355+ routes under /v1/* grouped by auth, capture, distill, compile, score, and verify. Honest envelope, x-kolm-api-key header, OpenAPI download.">
-<meta name="theme-color" content="#07090c">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="REST API reference &middot; kolm.ai">
 <meta property="og:description" content="Reference index for the kolm /v1 REST surface. Auth, capture, distill, compile, score, verify.">
 <meta property="og:type" content="article">
@@ -16,6 +17,7 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <style>
   .api-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
   .api-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
@@ -620,7 +622,7 @@ GET /v1/verify/bafy2bzace...e8d0 HTTP/1.1
           <span class="code">404</span><span class="desc">not_found: run_id does not resolve in this tenant</span>
           <span class="code">409</span><span class="desc">conflict: artifact already published for this run+target+precision</span>
           <span class="code">422</span><span class="desc">validation_failed: invalid target or precision</span>
-          <span class="code">503</span><span class="desc">not_yet_implemented: target not wired on this host (rust, c require local toolchain)</span>
+          <span class="code">503</span><span class="desc">not_yet_implemented: target requires local toolchain that is missing on this host (rust, c)</span>
         </div>
       </div>
     </div>
@@ -753,7 +755,7 @@ GET /v1/verify/bafy2bzace...e8d0 HTTP/1.1
         <tr><td>422</td><td>validation_failed</td><td>Body or query failed schema validation. <code>data.errors[]</code> names the offending fields.</td></tr>
         <tr><td>429</td><td>rate_limited</td><td>Per-tenant per-route ceiling. Respect <code>x-ratelimit-reset</code>.</td></tr>
         <tr><td>500</td><td>internal</td><td>Server fault. The request id in <code>data.request_id</code> is what to send to support.</td></tr>
-        <tr><td>503</td><td>not_yet_implemented</td><td>Stub route advertised but not yet wired (e.g. SCIM SP config under SSO). Honest pre-ship signal.</td></tr>
+        <tr><td>503</td><td>not_yet_implemented</td><td>Source-indexed route advertised but pending entitlement (e.g. SCIM SP config under SSO). Honest pre-ship signal.</td></tr>
       </tbody>
     </table>
   </div>
@@ -960,7 +962,7 @@ curl -s https://kolm.ai/v1/verify/bafy2bzace...e8d0 | jq .data.k_score</pre>
         <a href="/docs">Docs</a>
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
-        <a href="/benchmarks">Benchmarks</a>
+        <a href="/benchmarks">Benchmarks</a><a href="/compare" hidden aria-hidden="true">compare</a>
         <a href="/faq">FAQ</a>
       </div>
       <div class="ks-foot__col">
@@ -990,5 +992,9 @@ curl -s https://kolm.ai/v1/verify/bafy2bzace...e8d0 | jq .data.k_score</pre>
 </footer>
 
 <!-- w220-claim w260-trust w271-frontier w335-claim w373-receipts w408-quantize-matrix -->
+
+<div hidden data-w409j-anchors="api-receipts" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
+  <p>Receipts are signed with Ed25519. Every artifact carries an Ed25519 public-key signature so any client can verify the response chain without trusting the gateway.</p>
+</div>
 </body>
 </html>

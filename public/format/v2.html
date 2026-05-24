@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -105,6 +105,7 @@
 </style>
 
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <a href="#main" class="ks-skip">Skip to content</a>
@@ -284,7 +285,7 @@
 <section class="section">
  <div class="wrap">
  <h2>Why a binary bundle, not just JSON.</h2>
- <p class="lede">Promoting the container from one JSON blob to a binary bundle was a deliberate tradeoff. JSON was simpler to inspect with a text editor; the binary bundle costs the verifier a streaming-archive dependency. Four reasons made the tradeoff worth taking.</p>
+ <p class="lede">Promoting the container from one JSON blob to a binary bundle was a deliberate tradeoff. JSON was simpler to inspect with a text editor; the binary bundle costs the verifier a streaming-archive dependency. The reasons below made the tradeoff worth taking.</p>
  <ul class="notes">
  <li><b>Compiled binaries are bytes, not strings.</b> A 15 KB native Rust binary (RS-1 &sect;7.5) inflates to 20 KB of base64 inside JSON, plus the cost of double-decoding to verify <code>bin_hash</code>. A 500 MB GGUF model would balloon to roughly 670 MB of base64 and force the verifier to allocate the whole string before validating the first byte. Storing the binary as a raw archive entry preserves byte-exact identity without an encoding round-trip.</li>
  <li><b>GGUF and WASM each can be 100 MB or more.</b> Distilled student weights routinely cross the 100 MB threshold; large MoE bundles cross 500 MB. A single-object JSON parse forces the parser to materialize the whole document; a streaming-archive reader walks entries one at a time and validates each entry's SHA-256 against the manifest claim without holding the full payload in memory.</li>
@@ -297,7 +298,7 @@
 <section class="section">
  <div class="wrap">
  <h2>The CLI flow, end to end.</h2>
- <p class="lede">Four commands compose the format-aware build, inspect, verify, and downgrade flow. Every flag named below ships in the current <code>cli/kolm.js</code> on disk; the bundle layout itself is already the production default.</p>
+ <p class="lede">Build, inspect, verify, downgrade. Every flag named below ships in the current <code>cli/kolm.js</code> on disk, and the bundle layout itself is the production default.</p>
  <div class="grid-4">
  <div class="card">
  <span class="vt">01 &middot; compile</span>

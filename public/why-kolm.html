@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Why kolm: the case for an open AI compiler over a hosted endpoint &middot; kolm.ai</title>
-<meta name="description" content="Six reasons regulated and security-minded teams pick kolm over a hosted endpoint or a hand-rolled fine-tune. Signed artifacts, deterministic eval gate, runs on your hardware, total cost of ownership written out, open source you can audit.">
-<meta name="theme-color" content="#07090c">
+<title>Why kolm: the case for an open AI compiler over a hosted endpoint · kolm.ai</title>
+<meta name="description" content="Why regulated and security-minded teams pick kolm over a hosted endpoint or a hand-rolled fine-tune. Signed artifacts, deterministic eval gate, runs on your hardware, TCO written out, open source you can audit.">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="Why kolm &middot; kolm.ai">
-<meta property="og:description" content="Six reasons engineers and compliance teams pick kolm over a hosted endpoint or a hand-rolled fine-tune.">
+<meta property="og:description" content="Why engineers and compliance teams pick kolm over a hosted endpoint or a hand-rolled fine-tune.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/why-kolm">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -16,6 +17,7 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <style>
   .wk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--ks-4); }
   .wk-card { padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); display: flex; flex-direction: column; gap: var(--ks-3); }
@@ -26,6 +28,7 @@
   .wk-card .cite b { color: var(--ks-accent); font-weight: 600; }
   .wk-row { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: var(--ks-3) var(--ks-5); padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); }
   @media (max-width: 720px) { .wk-row { grid-template-columns: 1fr; } }
+  @media (max-width: 560px) { .wk-row { grid-template-columns: 1fr; gap: 6px; } .wrap { padding-left: 18px; padding-right: 18px; } }
   .wk-row dt { font-family: var(--ks-mono); font-size: 12px; color: var(--ks-accent); text-transform: uppercase; letter-spacing: 0.05em; padding-top: 3px; }
   .wk-row dd { margin: 0 0 var(--ks-3); font-size: 14px; color: var(--ks-ink-2); line-height: 1.65; }
   .wk-vs { display: grid; gap: var(--ks-3); }
@@ -46,7 +49,7 @@
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL)",
   "url": "https://kolm.ai/why-kolm",
-  "description": "Six reasons regulated and security-minded teams pick kolm over a hosted endpoint or a hand-rolled fine-tune. Signed artifacts, deterministic eval gate, runs on your hardware, total cost of ownership written out, open source you can audit.",
+  "description": "Why regulated and security-minded teams pick kolm over a hosted endpoint or a hand-rolled fine-tune. Signed artifacts, deterministic eval gate, runs on your hardware, TCO written out, open source you can audit.",
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -105,7 +108,11 @@
   <div class="ks-wrap">
     <span class="ks-eyebrow">For developers, engineers, data scientists, and compliance leads &middot; The case</span>
     <h1 class="ks-h1" style="margin-top: var(--ks-3); max-width: 24ch;">Why a compiler beats a hosted endpoint, and why open beats opaque.</h1>
-    <p class="ks-lede" style="max-width: 64ch;">Six reasons regulated, security-minded, and cost-aware teams reach for kolm over a hosted fine-tune or a hand-rolled stack. Each one is testable, each one is shipped, each one is in the source tree.</p>
+    <p class="ks-lede" style="max-width: 64ch;">Regulated, security-minded, and cost-aware teams reach for kolm over a hosted fine-tune or a hand-rolled stack. Every claim below is testable, shipped, and in the source tree.</p>
+    <pre style="margin-top:var(--ks-4);max-width:62ch;background:#0b0d11;border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md);padding:14px 18px;font-family:var(--ks-mono);font-size:13px;color:var(--ks-ink-2);line-height:1.6;overflow:auto;"><span style="color:var(--ks-ink-3)"># the case, in three commands</span>
+$ kolm capture --tap openai     <span style="color:var(--ks-ink-3)"># mirror prompts you already pay for</span>
+$ kolm distill --teacher gpt-4o <span style="color:var(--ks-ink-3)"># compile a signed student</span>
+$ kolm run artifact.kolm        <span style="color:var(--ks-ink-3)"># on your laptop, your VPC, your edge</span></pre>
     <div style="display: flex; gap: var(--ks-3); flex-wrap: wrap; margin-top: var(--ks-5);">
       <a href="/quickstart" class="ks-btn ks-btn--primary ks-btn--lg">Try it in 10 min <span class="ks-btn-arrow">&rarr;</span></a>
       <a href="/compare" class="ks-btn ks-btn--ghost ks-btn--lg">Compare stacks side by side</a>
@@ -117,8 +124,8 @@
 <section class="ks-section">
   <div class="ks-wrap">
     <div class="ks-shead">
-      <span class="ks-eyebrow">Six reasons</span>
-      <h2 class="ks-h2">What you get with kolm that a hosted endpoint cannot give you.</h2>
+      <span class="ks-eyebrow">The case</span>
+      <h2 class="ks-h2">What you get with kolm that a hosted endpoint cannot.</h2>
     </div>
     <div class="wk-grid">
 
@@ -173,7 +180,7 @@
     <div class="ks-shead">
       <span class="ks-eyebrow">Side by side</span>
       <h2 class="ks-h2">A regulated payor's reality check.</h2>
-      <p class="ks-lede">Three columns: a hosted API, a hand-rolled fine-tune, kolm. Three failure modes. Same buyer.</p>
+      <p class="ks-lede">A hosted API on one side, kolm on the other. Same buyer, different failure modes.</p>
     </div>
     <div class="wk-vs">
       <div class="wk-vs-row head">
@@ -214,7 +221,7 @@
   <div class="ks-wrap">
     <div class="ks-shead">
       <span class="ks-eyebrow">Who picks kolm first</span>
-      <h2 class="ks-h2">Four buyer profiles, four reasons.</h2>
+      <h2 class="ks-h2">Buyer profiles.</h2>
     </div>
     <div class="wk-grid">
       <div class="wk-card">
@@ -245,7 +252,7 @@
   <div class="ks-wrap">
     <div class="ks-shead">
       <span class="ks-eyebrow">Common questions</span>
-      <h2 class="ks-h2">Three objections, three answers.</h2>
+      <h2 class="ks-h2">Objections, answered.</h2>
     </div>
     <dl class="wk-row">
       <dt>"We already use a hosted API. Why switch?"</dt>
@@ -264,6 +271,8 @@
       <span class="ks-eyebrow">Decide for yourself</span>
       <h2 class="ks-h2" style="font-size: clamp(28px, 4vw, 40px); margin: var(--ks-3) auto; max-width: 26ch;">Read the source, run the quickstart, read your first receipt.</h2>
       <p class="ks-prose" style="margin: 0 auto var(--ks-5); max-width: 60ch;">The case for kolm is a thing you can verify in about ten minutes of CLI time. No demo call required. No marketing.</p>
+      <pre style="display:inline-block;text-align:left;background:var(--ks-bg-2);border:1px solid var(--ks-line);border-radius:var(--ks-r-md);padding:14px 18px;font-family:ui-monospace,SF Mono,Menlo,Consolas,monospace;font-size:14px;color:var(--ks-ink-1);margin:0 auto var(--ks-5);">$ npm install -g github:sneaky-hippo/kolm-stack</pre>
+      <p class="ks-prose" style="margin: 0 auto var(--ks-5); max-width: 60ch; font-size: 13px; color: var(--ks-ink-2);">Honest source install from GitHub. Kolm is not on the public npm/PyPI registries yet, so we ship from source until those channels are verified.</p>
       <div style="display: inline-flex; gap: var(--ks-3); flex-wrap: wrap; justify-content: center;">
         <a class="ks-btn ks-btn--primary ks-btn--lg" href="/quickstart">Open the quickstart <span class="ks-btn-arrow">&rarr;</span></a>
         <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/enterprise">Talk to procurement</a>

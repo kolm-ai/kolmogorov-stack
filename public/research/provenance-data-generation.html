@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -134,6 +134,7 @@
 
 
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <a href="#main" class="ks-skip">Skip to content</a>
@@ -290,7 +291,7 @@
  <p>The artifact's compliance binder records both numbers, the seed count, the strategy, and the <code>--seed-rng</code> integer. Anyone reproducing the build can re-run the three commands and confirm the bytes match.</p>
 
  <h2 id="limits">Documented limits.</h2>
- <p>Three places this story breaks, named on purpose.</p>
+ <p>Where this story breaks, named on purpose.</p>
 
  <p><b>Templated mutation does not substitute for real data.</b> If you start with 3 real examples, the train loop has 3 real examples to score against. Templated rows test the model's tolerance for surface variation; they do not introduce new semantic cases. A team shipping a redactor that has never seen a real lab report should be told its <code>K_seed</code> is a small-sample estimate. The binder says so.</p>
 
@@ -299,7 +300,7 @@
  <p><b>Local-LLM strategy is only as private as your local LLM.</b> If the user points <code>--local-llm-url</code> at <code>http://localhost:8000</code> and that endpoint is a reverse proxy to a frontier model, the privacy guarantee is broken. We validate the URL hostname is localhost; we cannot validate the daemon behind that port. The user is responsible for what their localhost is.</p>
 
  <blockquote>
- <p>The verifiable path is small. Five rules, four strategies, one optional opt-in. The point is not to generate impressive numbers; the point is that the numbers the binder reports are the numbers the auditor can trust.</p>
+ <p>The verifiable path is small. A handful of rules, a few strategies, one optional opt-in. The point is not to generate impressive numbers; the point is that the numbers the binder reports are the numbers the auditor can trust.</p>
  </blockquote>
 
  <p>The verb is part of kolm v11. The full grammar is documented at <code>kolm seeds --help</code>. The CLI source is on the public mirror at <code>cli/kolm.js</code>. The public-domain phi-redactor seed dataset is in <code>data/public-seeds/</code>.</p>

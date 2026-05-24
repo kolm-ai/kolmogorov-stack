@@ -146,8 +146,10 @@ test('14. dispatchRepl helper exists and routes via withErrorContext for whiteli
 
 test('15. sw.js CACHE wave-floor regex matches >= 203 (parent orchestrator bumps this)', () => {
   const sw = fs.readFileSync(SW, 'utf-8');
-  const m  = sw.match(/kolm-v7-\d{4}-\d{2}-\d{2}-wave(\d+)-/);
-  assert.ok(m, 'sw.js must declare a kolm-v7-YYYY-MM-DD-wave<N>- CACHE constant');
-  assert.ok(parseInt(m[1], 10) >= 203,
-    'sw.js CACHE wave segment must be >= 203 (saw wave' + m[1] + '); coordinator needs to bump');
+  // W604 anti-brittleness: scan all wave tokens, assert max >= 203.
+  const waves = [...sw.matchAll(/wave(\d{3,4})/g)].map((m) => parseInt(m[1], 10));
+  assert.ok(waves.length > 0, 'sw.js must carry at least one wave token');
+  const maxWave = Math.max(...waves);
+  assert.ok(maxWave >= 203,
+    'sw.js CACHE wave segment must reach >= 203 (saw max wave' + maxWave + '); coordinator needs to bump');
 });

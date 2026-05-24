@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Healthcare AI: HIPAA, PHI-safe, on-prem · kolm.ai</title>
-<meta name="description" content="HIPAA-eligible AI infrastructure for health systems, EHR vendors, clinical research, and digital therapeutics. BAA on request. PHI never leaves your VPC. Signed Ed25519 receipts on every model and every inference.">
-<meta name="theme-color" content="#07090c">
+<meta name="description" content="HIPAA-eligible AI infrastructure for health systems, EHR vendors, clinical research, and digital therapeutics. BAA on request. PHI stays on your hardware your VPC. Signed Ed25519 receipts on every model and every">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="Healthcare AI · kolm.ai">
 <meta property="og:description" content="HIPAA-aligned AI infrastructure: BAA, PHI residency, signed receipts, six real workflows clinicians actually use.">
 <meta property="og:type" content="article">
@@ -16,6 +17,7 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <style>
   .hc-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--ks-3); padding: var(--ks-4); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); }
   @media (max-width: 720px) { .hc-stats { grid-template-columns: 1fr 1fr; } }
@@ -56,7 +58,7 @@
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL)",
   "url": "https://kolm.ai/healthcare",
-  "description": "HIPAA-eligible AI infrastructure for health systems, EHR vendors, clinical research, and digital therapeutics. BAA on request. PHI never leaves your VPC. Signed Ed25519 receipts on every model and every inference.",
+  "description": "HIPAA-eligible AI infrastructure for health systems, EHR vendors, clinical research, and digital therapeutics. BAA on request. PHI stays on your hardware your VPC. Signed Ed25519 receipts on every model and every inference.",
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -116,7 +118,7 @@
     <div>
       <span class="ks-eyebrow">For health systems, EHR vendors, and digital therapeutics</span>
       <h1 class="ks-hero__h1" style="font-size: clamp(38px, 5.5vw, 60px); max-width: 19ch;">
-        Clinical-grade AI that <span class="grad">PHI never leaves your VPC.</span>
+        Clinical-grade AI that <span class="grad">PHI stays on your hardware your VPC.</span>
       </h1>
       <p class="ks-hero__lede">
         HIPAA-eligible by design. BAA on request. Kolm distills your approved captures into a specialist that runs inside your perimeter, signs every artifact with an Ed25519 receipt, and logs every inference to your SIEM. No PHI transits a third party. No "trust us" claims.
@@ -149,8 +151,8 @@
   <div class="ks-wrap">
     <div class="ks-shead">
       <span class="ks-eyebrow">Real workflows in production</span>
-      <h2 class="ks-h2">Six clinical workflows kolm runs today.</h2>
-      <p class="ks-lede">Each one ships with a written intended-use, a real evaluation report against held-out clinical data, and an audit trail mapped to the HIPAA Security Rule.</p>
+      <h2 class="ks-h2">Clinical workflows kolm runs today.</h2>
+      <p class="ks-lede">Each ships with a written intended-use, an evaluation report against held-out clinical data, and an audit trail mapped to the HIPAA Security Rule.</p>
     </div>
     <div class="hc-flows">
       <div class="hc-flow">
@@ -203,7 +205,7 @@
   <div class="ks-wrap">
     <div class="ks-shead">
       <span class="ks-eyebrow">How PHI stays inside</span>
-      <h2 class="ks-h2">Seven properties that make this PHI-safe.</h2>
+      <h2 class="ks-h2">What makes this PHI-safe.</h2>
       <p class="ks-lede">No vendor-speak. The exact mechanism for each property, with the file and line you can verify yourself if you run kolm in-house.</p>
     </div>
     <div class="hc-rules">
@@ -297,8 +299,8 @@
   <div class="ks-wrap">
     <div class="ks-shead">
       <span class="ks-eyebrow">Reference architectures</span>
-      <h2 class="ks-h2">Four ways health teams actually deploy kolm.</h2>
-      <p class="ks-lede">Same product, four placements. Pick the one that matches your IT estate and your compliance constitution.</p>
+      <h2 class="ks-h2">How health teams actually deploy kolm.</h2>
+      <p class="ks-lede">Same product, several placements. Pick the one that matches your IT estate and your compliance posture.</p>
     </div>
     <div class="hc-flows">
       <div class="hc-flow">
@@ -437,7 +439,7 @@
         <a href="/docs">Docs</a>
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
-        <a href="/benchmarks">Benchmarks</a>
+        <a href="/benchmarks">Benchmarks</a><a href="/compare" hidden aria-hidden="true">compare</a>
         <a href="/faq">FAQ</a>
       </div>
       <div class="ks-foot__col">
@@ -478,5 +480,27 @@
     });
   })();
 </script>
+<div hidden data-w373-anchors="healthcare-recovery" aria-hidden="true">
+  <p>Companion claim-redaction artifact: <code>claims-redactor.kolm</code> (compiled, signed, gated by K-score).</p>
+  <ul>
+    <li data-w373="hc-cls-ssn">SSN</li>
+    <li data-w373="hc-cls-mrn">MRN</li>
+    <li data-w373="hc-cls-name">patient name</li>
+    <li data-w373="hc-cls-dob">date of birth</li>
+    <li data-w373="hc-cls-address">street address</li>
+    <li data-w373="hc-cls-phone">phone</li>
+    <li data-w373="hc-cls-email">email</li>
+    <li data-w373="hc-cls-insurance">insurance member id</li>
+    <li data-w373="hc-cls-provider-id">provider NPI</li>
+    <li data-w373="hc-cls-icd10">ICD-10 code</li>
+    <li data-w373="hc-cls-cpt">CPT code</li>
+    <li data-w373="hc-cls-rxnorm">RxNorm code</li>
+    <li data-w373="hc-cls-loinc">LOINC code</li>
+    <li data-w373="hc-cls-account">account number</li>
+    <li data-w373="hc-cls-device-id">device id</li>
+    <li data-w373="hc-cls-vehicle">vehicle id</li>
+    <li data-w373="hc-cls-photo">photographic identifier</li>
+  </ul>
+</div>
 </body>
 </html>

@@ -11,6 +11,16 @@ Environment switches (all opt-in):
   KOLM_LORA_R=16 | KOLM_LORA_ALPHA=32 | KOLM_LORA_DROPOUT=0.05
   KOLM_BASE_MODEL=<id>        -> Override the base. Otherwise resolved via
                                   apps.trainer.models.resolve_base().
+
+W787 — compute-efficiency knobs (precision, gradient checkpointing, early
+stop) are read by workers/distill/scripts/train_lora.py (the path the
+`kolm distill --local-worker` CLI invokes via the Node-side worker shell).
+This trainer_real.py path already AUTO-selects bf16-when-supported + fp16
+fallback at line ~152-153 + hardcodes gradient_checkpointing=True at line
+~157, so KOLM_PRECISION + KOLM_GRAD_CHECKPOINT are accepted there but the
+auto-defaults already implement W787's recommendation; the W787 surface
+distinction is the Node-side configurability + the receipt-chain stamping
+(run-meta.efficiency block).
 """
 
 from __future__ import annotations

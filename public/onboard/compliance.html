@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <meta charset="UTF-8">
@@ -60,6 +60,7 @@
 <meta name="twitter:description" content="Audit-led four-step path: BAA plus receipt chain, sample audit report, drift and supersession overview, compliance package request.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <a href="#main" class="ks-skip">Skip to content</a>
@@ -87,7 +88,7 @@
 <main class="ob-wrap" id="main">
  <h1 class="ob-title">Compliance path</h1>
  <h2 class="ob-h1">Receipts your auditor can verify in 30 seconds</h2>
- <p class="ob-lede">kolm is the only stack where every artifact is a tamper-evident receipt chain rooted in Rekor. Four steps to validate the BAA, download a sample audit, understand drift, and request your compliance package.</p>
+ <p class="ob-lede">Every kolm artifact is a tamper-evident receipt chain rooted in Rekor. Validate the BAA, download a sample audit, read up on drift, request your compliance package.</p>
 
  <div class="ob-progress" role="tablist" aria-label="Compliance onboarding progress">
  <div class="ob-pill active" data-step="1">01 . BAA</div>
@@ -159,8 +160,8 @@
  <div class="drift-grid">
  <div class="drift-card"><h4>M+1 stale notification</h4><p>Surfaced 90 days post-freeze. No action required; the notice lands on /dashboard.</p></div>
  <div class="drift-card"><h4>M+2 re-distill cadence</h4><p>Quarterly by default. Configurable per spec. Emits a new artifact and supersession block.</p></div>
- <div class="drift-card"><h4>M+3 drift detection</h4><p>Cron-driven. Compares to tenant shadow corpus. Two tolerance bands (warn, breach).</p></div>
- <div class="drift-card"><h4>M+4 supersession chain</h4><p>Six named reasons. Linked artifacts. Auditor verifies the chain end to end via Rekor.</p></div>
+ <div class="drift-card"><h4>M+3 drift detection</h4><p>Cron-driven. Compares to tenant shadow corpus. Warn and breach tolerance bands.</p></div>
+ <div class="drift-card"><h4>M+4 supersession chain</h4><p>Named reasons. Linked artifacts. Auditor verifies the chain end to end via Rekor.</p></div>
  </div>
  <div class="ob-card"><h3>read more</h3><p>The dedicated <a href="/drift" style="color:var(--accent)">drift surface</a> documents every tier with manifest snippets and verifier check numbers.</p></div>
  <div class="ob-actions">

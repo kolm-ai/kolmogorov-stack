@@ -186,10 +186,44 @@ for (const url of ['/.well-known/security.txt', '/security.txt']) {
   });
 }
 
+// vercel.json rewrites mirrored to server.js so Railway-direct + self-host
+// serves the same routes the live Vercel deploy does. Each entry maps an
+// externally-referenced path to a real on-disk asset. Mounted BEFORE
+// express.static so directory-collision 301s don't fire.
+//
+// /account/audit       (vercel.json:1103) → public/account/audit-log.html
+// /api-routes.json     (vercel.json:91-94) → public/openapi.json (canonical schema)
+// /bench/leaderboard   (vercel.json:1971) → public/bench/leaderboard.json (JSON, not HTML)
+// /security/hof        (vercel.json:197) → public/security.html (Hall of Fame folded in)
+const VERCEL_MIRROR_REWRITES = [
+  { url: '/account/audit', file: 'account/audit-log.html' },
+  { url: '/api-routes.json', file: 'openapi.json' },
+  { url: '/bench/leaderboard', file: 'bench/leaderboard.json' },
+  { url: '/security/hof', file: 'security.html' },
+];
+for (const { url, file } of VERCEL_MIRROR_REWRITES) {
+  app.get(url, (_req, res) => {
+    const f = path.join(__dirname, 'public', file);
+    if (fs.existsSync(f)) return res.sendFile(f);
+    res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
+  });
+}
+
 // Static dashboard with strong caching for hashed assets, weak for HTML.
 // /sdk.js gets a versioned alias (S6) — the unversioned URL stays for
 // back-compat but we encourage `/sdk-<sha>.js` for SRI-pinned imports.
 app.use(express.static(path.join(__dirname, 'public'), {
+  // extensions: ['html'] gives extensionless URL serving so /docs/observability,
+  // /docs/runtime, /docs/sdk, /account/captures etc. resolve to their .html
+  // siblings — matching the Vercel deploy behaviour where vercel.json:rewrites
+  // does the same fallback. Without this, the bare server returns 404 for
+  // every extensionless path that isn't explicitly listed in the SPA-route
+  // table below.
+  // redirect: false avoids the directory-collision 301 — when /docs/observability
+  // exists as BOTH a directory AND .html, the default would 301 to /docs/observability/
+  // and 404 (no index.html). Disabling the redirect lets the extensions fallback fire.
+  extensions: ['html'],
+  redirect: false,
   setHeaders: (res, filePath) => {
     if (filePath.endsWith('.html')) res.setHeader('Cache-Control', 'public, max-age=60, must-revalidate');
     else if (/sdk-[a-f0-9]{8,}\.js$/.test(filePath)) res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
@@ -244,10 +278,19 @@ const ROUTE_ALIASES = {
   // W403 added /datasets vercel rewrite to /docs/datasets.html. Mirror it here
   // so Railway-direct + self-host serve the same route.
   '/datasets': 'docs/datasets',
+  // vercel.json:242-244 redirects /trust → /security; mirror so Railway-direct
+  // resolves the 59 in-repo refs that still point at /trust (footers, CLI doc
+  // shells). Map serves the security page directly to avoid a redirect hop.
+  '/trust': 'security',
+  // vercel.json:97-99 redirects /gateway → /capture; mirror.
+  '/gateway': 'capture',
+  // vercel.json:247-249 redirects /how-it-works → /quickstart (W705 redirect).
+  // No how-it-works.html exists in /public — the destination is /quickstart.
+  '/how-it-works': 'quickstart',
 };
 // /registry + /atlas are handled BEFORE express.static (see top of file) because
 // public/registry/ exists as a subdirectory (submit.html).
-for (const route of ['/', '/dashboard', '/playground', '/docs', '/signup', '/signin', '/login', '/why', '/pricing', '/status', '/account', '/how-it-works', '/device', '/compile', '/run', '/recall', '/cloud', '/k-score', '/benchmarks', '/compare', '/research', '/serve', '/evolve', '/anatomy', '/security', '/privacy', '/terms', '/healthcare', '/finance', '/legal', '/edge', '/cookbook', '/defense', '/manifesto', '/faq', '/quickstart', '/trust', '/integrations', '/press', '/vs-ollama', '/vs-rag', '/vs-fine-tune', '/vs-predibase', '/vs-openpipe', '/vs-langsmith', '/vs-mem0', '/vs-hindsight', '/vs-openai-fine-tune', '/vs-together', '/why-now', '/threat-model', '/roi', '/api', '/whitepaper', '/build-your-own', '/developers', '/solutions', '/audit-log', '/baa', '/captures', '/capture', '/enterprise', '/glossary', '/leaderboard', '/hub', '/spec', '/spec/grammar', '/models', '/compute', '/troubleshooting', '/teams', '/teams/accept', '/tunnels', '/byoc', '/airgap', '/showcase', '/sdks', '/compliance-packs', '/audit', '/cli', '/contact', '/insurance', '/health-insurance', '/distill', '/train', '/frontier-stack', '/license', '/datasets']) {
+for (const route of ['/', '/dashboard', '/playground', '/docs', '/signup', '/signin', '/login', '/why', '/pricing', '/status', '/account', '/how-it-works', '/device', '/compile', '/run', '/recall', '/cloud', '/k-score', '/benchmarks', '/compare', '/research', '/serve', '/evolve', '/anatomy', '/security', '/privacy', '/terms', '/healthcare', '/finance', '/legal', '/edge', '/cookbook', '/defense', '/manifesto', '/faq', '/quickstart', '/trust', '/integrations', '/press', '/vs-ollama', '/vs-rag', '/vs-fine-tune', '/vs-predibase', '/vs-openpipe', '/vs-langsmith', '/vs-mem0', '/vs-hindsight', '/vs-openai-fine-tune', '/vs-together', '/why-now', '/threat-model', '/roi', '/api', '/whitepaper', '/build-your-own', '/developers', '/solutions', '/audit-log', '/baa', '/captures', '/capture', '/enterprise', '/glossary', '/leaderboard', '/hub', '/spec', '/spec/grammar', '/models', '/compute', '/troubleshooting', '/teams', '/teams/accept', '/tunnels', '/byoc', '/airgap', '/showcase', '/sdks', '/compliance-packs', '/audit', '/cli', '/contact', '/insurance', '/health-insurance', '/distill', '/train', '/frontier-stack', '/license', '/datasets', '/gateway']) {
   app.get(route, (_req, res) => {
     const name = route === '/' ? 'index' : (ROUTE_ALIASES[route] || route.slice(1));
     const file = path.join(__dirname, 'public', name + '.html');

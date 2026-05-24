@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -132,6 +132,7 @@
 
 
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <a href="#main" class="ks-skip">Skip to content</a>
@@ -162,7 +163,7 @@
  <div class="wrap">
  <span class="pill"><span class="dot"></span>Research &middot; Applied &middot; 2026-05-14 &middot; 11 min read</span>
  <h1>Continual learning <span class="tone">&middot; capture, train, swap, sign.</span></h1>
- <p class="lede">Frontier models are frozen at the cutoff. <b>The buyer with an industry-specific tail does not get one.</b> kolm closes the loop with captures: live traffic feeds a LoRA distill, the K-score gate refuses to ship a worse one, the receipt chain signs the swap. Four commands, no platform lock-in.</p>
+ <p class="lede">Frontier models are frozen at the cutoff. <b>The buyer with an industry-specific tail does not get one.</b> kolm closes the loop with captures: live traffic feeds a LoRA distill, the K-score gate refuses to ship a worse one, the receipt chain signs the swap. <code>kolm capture &middot; compile &middot; eval &middot; swap</code>, no platform lock-in.</p>
  <div class="meta"><span><b>By</b>&nbsp;kolm</span><span><b>Tag</b>&nbsp;captures &middot; lora &middot; online &middot; applied</span></div>
  </div>
 </section>
@@ -174,7 +175,7 @@
  <h5>Contents</h5>
  <ol>
  <li><a href="#problem">The frozen-model problem</a></li>
- <li><a href="#loop">The four-step loop</a></li>
+ <li><a href="#loop">The loop</a></li>
  <li><a href="#gate">The K-score gate</a></li>
  <li><a href="#swap">Hot-swap mechanics</a></li>
  <li><a href="#provenance">Provenance, every swap</a></li>
@@ -190,8 +191,8 @@
 
  <p>The right answer is a distill that converts the buyer's traffic into weights. The traffic exists already: it is the captures the buyer is sending to a frontier API today. The distill is short: a LoRA over a small base. The risk is regression: the distill is worse than the model it replaces. The fix is a gate.</p>
 
- <h2 id="loop">The four-step loop.</h2>
- <p>The kolm loop is four CLI verbs and one assertion. The buyer runs each step manually, on a schedule (nightly, weekly), or on an event (volume threshold, semantic drift detected).</p>
+ <h2 id="loop">The loop.</h2>
+ <p>The kolm loop is a chain of CLI verbs and one assertion. The buyer runs each step manually, on a schedule (nightly, weekly), or on an event (volume threshold, semantic drift detected).</p>
 
  <pre><span class="com"># 1. Capture: proxy live traffic, tag, redact, store.</span>
 $ kolm capture --tenant acme --tag clinical-intake
@@ -205,7 +206,7 @@ $ kolm eval --artifact ./out/intake_v2.kolm --suite clinical-intake-evals
 <span class="com"># 4. Swap: hot-swap the adapter only if it K-scores higher than the current one.</span>
 $ kolm swap --artifact ./out/intake_v2.kolm --strategy higher-k-wins</pre>
 
- <p>The four verbs map to four files in the source tree: <code>src/capture.js</code>, <code>src/spec-compile.js</code>, <code>src/benchmark.js</code>, <code>src/serve.js</code>. The connecting state is the receipt chain: every step writes a receipt that references the previous step's CID. A swap that ships also writes a registry row with the from-CID and the to-CID so a deployer can roll back the adapter on the fly.</p>
+ <p>The verbs map to files in the source tree: <code>src/capture.js</code>, <code>src/spec-compile.js</code>, <code>src/benchmark.js</code>, <code>src/serve.js</code>. The connecting state is the receipt chain: every step writes a receipt that references the previous step's CID. A swap that ships also writes a registry row with the from-CID and the to-CID so a deployer can roll back the adapter on the fly.</p>
 
  <h2 id="gate">The K-score gate.</h2>
  <p>The K-score is a weighted aggregate of accuracy, size, latency, cost, and coverage. <code>K = 0.40 . A + 0.15 . S + 0.15 . L + 0.15 . C + 0.15 . V</code>. The default ship threshold is 0.85, but in the continual-learning loop the threshold is dynamic: <b>the new artifact must beat the current artifact's K-score, plus a margin.</b></p>
@@ -238,7 +239,7 @@ mv -f adapters/clinical-intake.swap adapters/clinical-intake
  <p>The trade is that two adapters live in memory briefly. For LoRA adapters at <code>r=16</code> on a 7B base, that is two adapters of about 30 MB each, which is negligible against the 14 GB base weights. The window is bounded by the longest in-flight request; on a typical chat path with <code>max_tokens=512</code> at 200 tok/s that is 2.5 seconds.</p>
 
  <h2 id="provenance">Provenance, every swap.</h2>
- <p>Every artifact carries a receipt chain over <code>task &rarr; seeds &rarr; recipes &rarr; evals &rarr; package</code>, signed under the tenant key, with the CID embedded. Every swap writes a registry row that names the from-CID and the to-CID. The deployer can answer five questions without leaving the registry:</p>
+ <p>Every artifact carries a receipt chain over <code>task &rarr; seeds &rarr; recipes &rarr; evals &rarr; package</code>, signed under the tenant key, with the CID embedded. Every swap writes a registry row that names the from-CID and the to-CID. The deployer can answer all the relevant questions without leaving the registry:</p>
 
  <ul>
  <li><b>What task is this model trained for?</b> The task field in the manifest.</li>
@@ -248,10 +249,10 @@ mv -f adapters/clinical-intake.swap adapters/clinical-intake
  <li><b>What did it replace?</b> The from-CID column in the swap log.</li>
  </ul>
 
- <p>A regulator who asks "show me the trail" gets all five from one query. <b>None of those answers depend on us being alive.</b> The verifier is Rust, <code>forbid(unsafe_code)</code>, dependency-pinned, and ships as a 4 MB binary the deployer can vendor.</p>
+ <p>A regulator who asks "show me the trail" gets the full chain from one query. <b>None of those answers depend on us being alive.</b> The verifier is Rust, <code>forbid(unsafe_code)</code>, dependency-pinned, and ships as a 4 MB binary the deployer can vendor.</p>
 
  <h2 id="cadence">Cadence and cost.</h2>
- <p>Three cadences cover most production patterns.</p>
+ <p>The cadences that cover most production patterns.</p>
 
  <table>
  <thead><tr><th>Cadence</th><th>Trigger</th><th>Typical cost</th><th>Suits</th></tr></thead>

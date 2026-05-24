@@ -39,6 +39,9 @@
 //   - All numeric tunables are exported defaults.
 
 import crypto from 'node:crypto';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 
 import { findByField, insert, update, all as storeAll } from './store.js';
 import { appendEvent, listEvents } from './event-store.js';
@@ -725,6 +728,242 @@ export async function listOutcomeEvents({ tenant, ab_test_id, limit = 200 } = {}
   return { ok: true, events: out, count: out.length, version: AB_ROUTER_VERSION };
 }
 
+// =============================================================================
+// W822 -- traffic splitter (per-tenant, per-namespace, jsonl persistence).
+// =============================================================================
+//
+// W822-1 ships a thinner, jsonl-backed traffic splitter alongside the existing
+// W777 ab-router. The W822 surface is the one /v1/ab/* HTTP routes target;
+// W777 ships /v1/ab-tests/* and continues to host the SQLite-backed flow.
+//
+// Why both?
+//   - W777 was designed around a single canonical artifact pair. W822-1 is
+//     plain key=value config: "for (tenant, namespace) split traffic between
+//     these two artifact_ids in this proportion." A namespace can have at
+//     most ONE active W822 config at any time (latest write wins) -- the
+//     jsonl is append-only so the previous configs are still readable for
+//     audit + rollback.
+//   - jsonl storage lives at ~/.kolm/ab-tests/<namespace>.jsonl so it stays
+//     visible to operators via plain `cat` without spinning up Node.
+//
+// Stable variant hashing: pickVariant() uses fnv1a(tenant|namespace|request_id)
+// so the same caller always sees the same variant within a (tenant, namespace,
+// config) window. When the config rotates (new started_at) the window resets.
+
+export const W822_AB_VERSION = 'w822-v1';
+
+function _w822Home() {
+  return process.env.HOME || process.env.USERPROFILE || os.homedir();
+}
+
+function _w822IsTestRunner() {
+  return process.env.NODE_ENV === 'test'
+    || process.env.npm_lifecycle_event === 'test'
+    || (Array.isArray(process.execArgv) && process.execArgv.some((a) => a === '--test' || (typeof a === 'string' && a.startsWith('--test-'))))
+    || (Array.isArray(process.argv) && process.argv.some((a) => a === '--test' || (typeof a === 'string' && a.startsWith('--test-'))));
+}
+
+function _w822BaseDir() {
+  // KOLM_DATA_DIR takes precedence (test harness uses it). Then ~/.kolm.
+  // In test mode without KOLM_DATA_DIR fall back to a per-pid tmp dir so
+  // parallel tests don't fight over the same files.
+  if (process.env.KOLM_DATA_DIR) {
+    return path.join(path.resolve(process.env.KOLM_DATA_DIR), 'ab-tests');
+  }
+  if (_w822IsTestRunner()) {
+    return path.join(os.tmpdir(), 'kolm-ab-tests-' + process.pid);
+  }
+  return path.join(_w822Home(), '.kolm', 'ab-tests');
+}
+
+function _w822SanitizeNs(ns) {
+  // Allow [A-Za-z0-9_.-]. Reject empties + traversal. Keep at most 128 chars.
+  const s = String(ns || '').slice(0, 128);
+  if (!s) return null;
+  if (!/^[A-Za-z0-9_.-]+$/.test(s)) return null;
+  if (s === '.' || s === '..') return null;
+  return s;
+}
+
+function _w822NamespacePath(namespace) {
+  const safe = _w822SanitizeNs(namespace);
+  if (!safe) return null;
+  const dir = _w822BaseDir();
+  fs.mkdirSync(dir, { recursive: true });
+  return path.join(dir, safe + '.jsonl');
+}
+
+function _w822ReadAllConfigs(namespace) {
+  const file = _w822NamespacePath(namespace);
+  if (!file) return [];
+  if (!fs.existsSync(file)) return [];
+  const text = fs.readFileSync(file, 'utf8');
+  const out = [];
+  for (const line of text.split('\n')) {
+    if (!line.trim()) continue;
+    try {
+      const row = JSON.parse(line);
+      if (row && typeof row === 'object') out.push(row);
+    } catch { /* skip malformed line */ }
+  }
+  return out;
+}
+
+function _w822AppendConfig(namespace, cfg) {
+  const file = _w822NamespacePath(namespace);
+  if (!file) throw new Error('setSplit: invalid namespace');
+  fs.appendFileSync(file, JSON.stringify(cfg) + '\n', 'utf8');
+  return cfg;
+}
+
+/**
+ * setSplit({tenant, namespace, version_a, version_b, split, idempotency_key}).
+ *
+ * Returns:
+ *   { ok:true, config:{...}, version:'w822-vN' } on success
+ *   { ok:false, error:'...', hint:'...' } on validation failure
+ *
+ * Idempotency: when idempotency_key matches the latest config row (same
+ * tenant + namespace), we return the existing row instead of appending a
+ * duplicate. Lets retry-on-network-failure stay safe.
+ */
+export function setSplit(args = {}) {
+  const tenant = args.tenant ? String(args.tenant) : '';
+  const namespace = args.namespace ? String(args.namespace) : '';
+  const version_a = args.version_a ? String(args.version_a) : '';
+  const version_b = args.version_b ? String(args.version_b) : '';
+  const split = Number.isFinite(Number(args.split)) ? Number(args.split) : 0.5;
+  const idempotency_key = args.idempotency_key ? String(args.idempotency_key) : null;
+
+  if (!tenant) {
+    return { ok: false, error: 'missing_tenant', hint: 'setSplit requires {tenant}', version: W822_AB_VERSION };
+  }
+  if (!_w822SanitizeNs(namespace)) {
+    return { ok: false, error: 'bad_namespace', hint: 'namespace must match /^[A-Za-z0-9_.-]+$/ and be <=128 chars', version: W822_AB_VERSION };
+  }
+  if (!version_a || !version_b) {
+    return { ok: false, error: 'missing_version', hint: 'version_a + version_b (artifact ids) both required', version: W822_AB_VERSION };
+  }
+  if (version_a === version_b) {
+    return { ok: false, error: 'bad_args', hint: 'version_a must differ from version_b', version: W822_AB_VERSION };
+  }
+  if (!(split >= 0 && split <= 1)) {
+    return { ok: false, error: 'bad_args', hint: 'split must be in [0, 1]; got ' + split, version: W822_AB_VERSION };
+  }
+
+  // Idempotency check -- compare against latest row of THIS tenant.
+  if (idempotency_key) {
+    const all = _w822ReadAllConfigs(namespace).filter(r => String(r.tenant) === tenant);
+    const latest = all.length ? all[all.length - 1] : null;
+    if (latest && latest.idempotency_key === idempotency_key) {
+      return { ok: true, config: latest, idempotent_hit: true, version: W822_AB_VERSION };
+    }
+  }
+
+  const cfg = {
+    tenant,
+    namespace,
+    version_a,
+    version_b,
+    split,
+    started_at: new Date().toISOString(),
+    idempotency_key,
+    w822_version: W822_AB_VERSION,
+  };
+  _w822AppendConfig(namespace, cfg);
+  return { ok: true, config: cfg, version: W822_AB_VERSION };
+}
+
+/**
+ * getSplit({tenant, namespace}) returns the *latest* active config for the
+ * (tenant, namespace) pair. Honest envelope when none exists.
+ */
+export function getSplit(args = {}) {
+  const tenant = args.tenant ? String(args.tenant) : '';
+  const namespace = args.namespace ? String(args.namespace) : '';
+  if (!tenant) {
+    return { ok: false, error: 'missing_tenant', hint: 'getSplit requires {tenant}', version: W822_AB_VERSION };
+  }
+  if (!_w822SanitizeNs(namespace)) {
+    return { ok: false, error: 'bad_namespace', hint: 'namespace must match /^[A-Za-z0-9_.-]+$/', version: W822_AB_VERSION };
+  }
+  const rows = _w822ReadAllConfigs(namespace);
+  // Defense-in-depth: filter by tenant on every read.
+  const mine = rows.filter(r => r && String(r.tenant) === tenant);
+  if (mine.length === 0) {
+    return { ok: false, error: 'no_active_config', hint: 'call setSplit() first to start an A/B test', version: W822_AB_VERSION };
+  }
+  return { ok: true, config: mine[mine.length - 1], history_count: mine.length, version: W822_AB_VERSION };
+}
+
+/**
+ * pickVariant({tenant, namespace, request_id}) returns 'a' or 'b' (deterministic).
+ *
+ * Stable hashing: same request_id maps to the same variant within a config
+ * window. When setSplit() is called again the config's started_at rotates,
+ * which DOES NOT change the hash output -- callers who want a fresh bucket
+ * per config can mix started_at into request_id at the call site. Default
+ * behavior is "sticky across the namespace" so users in flight on variant A
+ * keep getting A even if a new config is written.
+ */
+export function pickVariant(args = {}) {
+  const tenant = args.tenant ? String(args.tenant) : '';
+  const namespace = args.namespace ? String(args.namespace) : '';
+  const request_id = args.request_id == null ? '' : String(args.request_id);
+  if (!tenant || !namespace) {
+    return { ok: false, error: 'missing_args', hint: 'pickVariant requires {tenant, namespace, request_id}', version: W822_AB_VERSION };
+  }
+  const cfgRes = getSplit({ tenant, namespace });
+  if (!cfgRes.ok) {
+    return cfgRes;
+  }
+  const cfg = cfgRes.config;
+  // Hash on (tenant|namespace|request_id) so different tenants on the same
+  // request_id still get independent variant assignments.
+  const h = fnv1a(tenant + '|' + namespace + '|' + request_id);
+  const bucket = h % HASH_BUCKETS;
+  const threshold = Math.floor(Number(cfg.split) * HASH_BUCKETS);
+  // bucket < threshold -> variant 'a'. Equivalent to assignArm() bucket math.
+  const variant = bucket < threshold ? 'a' : 'b';
+  const artifact_id = variant === 'a' ? cfg.version_a : cfg.version_b;
+  return {
+    ok: true,
+    variant,
+    artifact_id,
+    namespace,
+    config_started_at: cfg.started_at,
+    bucket,
+    version: W822_AB_VERSION,
+  };
+}
+
+/**
+ * listSplits({tenant}) -- enumerate active configs across all namespaces for
+ * the tenant. Walks every jsonl file in the base dir; defense-in-depth tenant
+ * filter. Returns {ok:true, configs:[{namespace, config}], count}.
+ */
+export function listSplits(args = {}) {
+  const tenant = args.tenant ? String(args.tenant) : '';
+  if (!tenant) {
+    return { ok: false, error: 'missing_tenant', version: W822_AB_VERSION };
+  }
+  const dir = _w822BaseDir();
+  if (!fs.existsSync(dir)) {
+    return { ok: true, configs: [], count: 0, version: W822_AB_VERSION };
+  }
+  const out = [];
+  for (const file of fs.readdirSync(dir)) {
+    if (!file.endsWith('.jsonl')) continue;
+    const namespace = file.slice(0, -'.jsonl'.length);
+    if (!_w822SanitizeNs(namespace)) continue;
+    const rows = _w822ReadAllConfigs(namespace).filter(r => r && String(r.tenant) === tenant);
+    if (rows.length === 0) continue;
+    out.push({ namespace, config: rows[rows.length - 1] });
+  }
+  out.sort((a, b) => String(b.config.started_at || '').localeCompare(String(a.config.started_at || '')));
+  return { ok: true, configs: out, count: out.length, version: W822_AB_VERSION };
+}
+
 export default {
   AB_ROUTER_VERSION,
   AB_TESTS_TABLE,
@@ -746,4 +985,10 @@ export default {
   promoteArm,
   autoRollback,
   listOutcomeEvents,
+  // W822 surface
+  W822_AB_VERSION,
+  setSplit,
+  getSplit,
+  pickVariant,
+  listSplits,
 };

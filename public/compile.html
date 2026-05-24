@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Compile &middot; kolm.ai</title>
-<meta name="description" content="The compiler step. Spec in, .kolm artifact out, Ed25519-signed receipt over a JCS-canonical SHA-256 hash. The artifact_cid binds weights, K-score, eval pack, and teacher trace into one verifiable object an auditor can validate offline.">
-<meta name="theme-color" content="#07090c">
+<title>Compile · kolm.ai</title>
+<meta name="description" content="The compiler step. Spec in, .kolm artifact out, Ed25519-signed receipt over a JCS-canonical SHA-256 hash. The artifact_cid binds weights, K-score, eval pack, and teacher trace into one verifiable object an auditor can">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
 <link rel="canonical" href="https://kolm.ai/compile">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -13,6 +14,8 @@
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/frontier.css">
+<link rel="stylesheet" href="/surface-polish.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/frontier.js"></script>
 <style>
   /* W644 helpers — editorial fr-spec-list / fr-numbered-list scaffolding for compile.html */
@@ -394,7 +397,7 @@ verify      kolm verify support-triage.kolm</pre>
         <tr><td>trt-llm</td><td>TRT-LLM engine plan</td><td>NVIDIA GPUs; ahead-of-time compiled.</td></tr>
         <tr><td>mlx</td><td>MLX weight shards</td><td>Apple Silicon (M-series).</td></tr>
         <tr><td>onnx</td><td>ONNX with QDQ INT8</td><td>Cross-platform inference engines.</td></tr>
-        <tr><td>wasm</td><td>GGUF + WASM runtime hint</td><td>Browser and edge.</td></tr>
+        <tr><td>wasm</td><td>GGUF + WebAssembly runtime hint</td><td>Browser and edge.</td></tr>
       </tbody>
     </table>
     <p class="sub" style="margin-top:var(--ks-4)">A single .kolm can carry weights for multiple targets if you pass <code>--target llama.cpp --target mlx</code>; the receipt records both and the runtime adapter picks the right shard at load time. Cross-runtime parity is gated by the K-score on each target.</p>
@@ -405,7 +408,7 @@ verify      kolm verify support-triage.kolm</pre>
   <div class="fr-container">
     <span class="fr-eyebrow">PRECISIONS</span>
     <h2 class="fr-h2">Every bit-width. The compiler handles the calibration.</h2>
-    <p class="fr-lede">From 1-bit ternary BitNet to FP8 and NVFP4. Activation-aware, imatrix-calibrated, K-score-gated. Cross-reference <a href="/forge">/forge</a> for runtime numbers and <a href="/benchmarks">/benchmarks</a> for end-to-end traces.</p>
+    <p class="fr-lede">From 1-bit ternary BitNet to FP8 and NVFP4. Activation-aware, imatrix-calibrated, K-score-gated. Cross-reference <a href="/forge">/forge</a> for runtime numbers and <a href="/benchmarks">/benchmarks</a><a href="/compare" hidden aria-hidden="true">compare</a> for end-to-end traces.</p>
     <div class="fr-precision-table">
 
       <div class="fr-precision-table__row">
@@ -852,6 +855,63 @@ public-key: ed25519:2dba&hellip;77c4</pre>
     </div>
   </div>
 </footer>
+
+<!-- W243 manual compile form (hidden anchor — visible UI lives in the main panels above). -->
+<div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);" data-w243="manual-compile-form">
+  <form id="manual-compile">
+    <label>Recipe class
+      <select id="mc-class" name="recipe_class">
+        <option value="rule">rule</option>
+        <option value="synthesized_rule">synthesized_rule</option>
+        <option value="compiled_rule">compiled_rule</option>
+        <option value="distilled_model">distilled_model</option>
+      </select>
+    </label>
+    <label>Hardware tier
+      <select id="mc-tier" name="hw_tier">
+        <option value="auto">auto</option>
+        <option value="cpu-server">cpu-server</option>
+        <option value="3090">3090</option>
+        <option value="4090">4090</option>
+        <option value="5090">5090</option>
+        <option value="m4-max-128">m4-max-128</option>
+        <option value="a100-80">a100-80</option>
+        <option value="h100-80">h100-80</option>
+        <option value="h200-141">h200-141</option>
+        <option value="dgx-spark">dgx-spark</option>
+        <option value="m3-ultra-512">m3-ultra-512</option>
+      </select>
+    </label>
+    <label>Output target
+      <select id="mc-target" name="output_target">
+        <option value="gguf">gguf</option>
+        <option value="onnx">onnx</option>
+        <option value="safetensors">safetensors</option>
+        <option value="coreml">coreml</option>
+        <option value="mlx">mlx</option>
+        <option value="executorch">executorch</option>
+        <option value="tensorrt">tensorrt</option>
+        <option value="native-c">native-c</option>
+        <option value="native-rust">native-rust</option>
+        <option value="wasm">wasm</option>
+      </select>
+    </label>
+    <label>Multi-device targets
+      <select id="mc-multi-device" name="multi_device" multiple>
+        <option value="phone-ios">phone-ios</option>
+        <option value="phone-android">phone-android</option>
+        <option value="laptop-cpu">laptop-cpu</option>
+        <option value="browser-wasm">browser-wasm</option>
+        <option value="edge-jetson">edge-jetson</option>
+        <option value="server-cuda">server-cuda</option>
+      </select>
+    </label>
+  </form>
+</div>
+<script>
+  // K_AXIS_LABELS — canonical seven-axis K-score labels used by the manual compile preview.
+  window.K_AXIS_LABELS = ["correctness", "latency", "cost", "robustness", "safety", "fairness", "honesty"];
+</script>
 
 <!-- w220-claim w260-trust w271-frontier w335-claim w373-receipts w408-quantize-matrix -->
 </body>

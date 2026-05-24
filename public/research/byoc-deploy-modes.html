@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>BYOC deploy modes: choosing among five attestation · kolm.ai</title>
-<meta name="description" content="The five BYOC deploy modes kolm ships: fly, aws-nitro, gcp-cvm, azure-cvm, and docker. Attestation formats, TOFU pinning, vendor-rooted trust chains, the...">
+<title>BYOC deploy modes: vendor-rooted attestation · kolm.ai</title>
+<meta name="description" content="kolm cloud deploy modes: fly, aws-nitro, gcp-cvm, azure-cvm, and docker. Attestation formats, TOFU pinning, vendor-rooted trust chains, the CLI surface.">
 <meta name="keywords" content="BYOC, bring your own cloud, Nitro Enclaves, SEV-SNP, TDX, Confidential VM, MAA, TOFU attestation, kolm cloud">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
@@ -14,12 +14,12 @@
 <meta name="author" content="kolm">
 <meta name="robots" content="index,follow,max-snippet:-1">
 <meta property="og:site_name" content="kolm">
-<meta property="og:title" content="BYOC deploy modes: choosing among five attestation · kolm.ai">
-<meta property="og:description" content="The five BYOC deploy modes kolm ships: fly, aws-nitro, gcp-cvm, azure-cvm, and docker. Attestation formats, TOFU pinning, vendor-rooted trust chains, the...">
+<meta property="og:title" content="BYOC deploy modes: vendor-rooted attestation · kolm.ai">
+<meta property="og:description" content="kolm cloud deploy modes: fly, aws-nitro, gcp-cvm, azure-cvm, and docker. Attestation formats, TOFU pinning, vendor-rooted trust chains, the CLI surface.">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="BYOC deploy modes: choosing among five attestation · kolm.ai">
-<meta name="twitter:description" content="The five BYOC deploy modes kolm ships: fly, aws-nitro, gcp-cvm, azure-cvm, and docker. Attestation formats, TOFU pinning, vendor-rooted trust chains, the...">
+<meta name="twitter:title" content="BYOC deploy modes: vendor-rooted attestation · kolm.ai">
+<meta name="twitter:description" content="kolm cloud deploy modes: fly, aws-nitro, gcp-cvm, azure-cvm, and docker. Attestation formats, TOFU pinning, vendor-rooted trust chains, the CLI surface.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/research/byoc-deploy-modes">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -132,6 +132,7 @@
 
 
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <a href="#main" class="ks-skip">Skip to content</a>
@@ -161,8 +162,8 @@
 <section class="hero">
  <div class="wrap">
  <span class="pill"><span class="dot"></span>Research &middot; Deployment &middot; 2026-05-14 &middot; 12 min read</span>
- <h1>BYOC deploy modes: <span class="tone">five attestation tiers.</span></h1>
- <p class="lede">Five targets, four vendor TEEs plus one no-TEE escape hatch. <b>The attestation document is the thing your auditor reviews; the deploy mode is the thing that produces one.</b> What each mode signs, what the verifier checks, and which tier the regulator on the other side of the table will actually accept.</p>
+ <h1>BYOC deploy modes: <span class="tone">vendor-rooted attestation.</span></h1>
+ <p class="lede">Vendor TEEs plus a no-TEE escape hatch. <b>The attestation document is what your auditor reviews; the deploy mode is what produces one.</b> What each mode signs, what the verifier checks, and which tier the regulator will accept.</p>
  <div class="meta"><span><b>By</b>&nbsp;kolm</span><span><b>Tag</b>&nbsp;byoc &middot; tee &middot; attestation</span></div>
  </div>
 </section>
@@ -173,7 +174,7 @@
  <div class="toc">
  <h5>Contents</h5>
  <ol>
- <li><a href="#five-modes">The five modes at a glance</a></li>
+ <li><a href="#five-modes">Deploy modes at a glance</a></li>
  <li><a href="#attestation">Attestation format per mode</a></li>
  <li><a href="#tofu">The TOFU pinning model</a></li>
  <li><a href="#cli">The kolm cloud CLI</a></li>
@@ -182,8 +183,8 @@
  </ol>
  </div>
 
- <h2 id="five-modes">The five modes at a glance.</h2>
- <p>The <code>packages/attestation</code> module ships parsers for four vendor TEEs and a no-TEE docker fallback. Every deploy produces an attestation document that the verifier writes into the receipt. The five modes are not interchangeable; they sit on a spectrum of vendor coupling, regulatory standing, and operational cost.</p>
+ <h2 id="five-modes">Deploy modes at a glance.</h2>
+ <p>The <code>packages/attestation</code> module ships parsers for the vendor TEEs and a no-TEE docker fallback. Every deploy produces an attestation document that the verifier writes into the receipt. The modes are not interchangeable; they sit on a spectrum of vendor coupling, regulatory standing, and operational cost.</p>
 
  <table>
  <thead>
@@ -200,12 +201,12 @@
 
  <p>The <code>fly</code> target is operationally the cheapest. A region pin and an image SHA are the entire attestation. It's a fast deploy to a fast platform, and the trust model is the same trust model you already have with any platform-as-a-service provider. For a workload where the threat is operational mistakes and the regulator does not require hardware-rooted attestation, this is the right tier.</p>
 
- <p>The three middle modes (<code>aws-nitro</code>, <code>gcp-cvm</code>, <code>azure-cvm</code>) produce a hardware-rooted attestation document. A measurement of the running code lands inside a signed envelope that originates from silicon. The vendor's attestation service signs the document with a key that chains to a vendor-controlled root certificate. The verifier's job is to check the chain, the freshness, and the measurement against an expected value.</p>
+ <p>The hardware-rooted modes (<code>aws-nitro</code>, <code>gcp-cvm</code>, <code>azure-cvm</code>) produce an attestation document signed from silicon. A measurement of the running code lands inside a signed envelope. The vendor's attestation service signs the document with a key that chains to a vendor-controlled root certificate. The verifier's job is to check the chain, the freshness, and the measurement against an expected value.</p>
 
  <p>The <code>docker</code> target is the escape hatch. The attestation is an image SHA and a registry signature, nothing more. There is no TEE. The operator chooses this mode when the deploy is on a private network they already control, when the regulator does not require a hardware root, or when the operational complexity of running Nitro or CVM is not worth the marginal trust gain.</p>
 
  <h2 id="attestation">Attestation format per mode.</h2>
- <p>The four hardware-rooted formats have different shapes. The receipt-chain code parses each one into a common structure and records the canonical form in the artifact's audit log.</p>
+ <p>The hardware-rooted formats have different shapes. The receipt-chain code parses each one into a common structure and records the canonical form in the artifact's audit log.</p>
 
  <h3>aws-nitro: COSE_Sign1 + PCR0 SHA-384</h3>
  <p>Nitro Enclaves produce a COSE_Sign1 envelope. The payload is a CBOR map containing the PCR set (PCR0 is the enclave image SHA-384, PCR1 the bootloader, PCR2 the OS), the public key the enclave was launched with, a user-supplied nonce, and a timestamp. The signature is over the payload with a per-region attestation key. The verifier walks the chain to the AWS Nitro root certificate, then checks PCR0 against the expected enclave image hash.</p>
@@ -241,7 +242,7 @@
  </blockquote>
 
  <h2 id="cli">The kolm cloud CLI.</h2>
- <p>Five verbs. The flag names below are the actual flags exposed by <code>cli/kolm.js</code>.</p>
+ <p>The flag names below are the actual flags exposed by <code>cli/kolm.js</code>.</p>
 
  <pre><span class="kw">$</span> kolm cloud targets
 <span class="arg">available targets:</span>
@@ -274,10 +275,10 @@
 <span class="arg">[destroy]</span> stopping enclave dep_8f3a2c
 <span class="arg">[destroy]</span> deployment status -> destroyed</pre>
 
- <p>The deploy verb takes a <code>--target</code> flag with one of the five tier names, an <code>--artifact</code> flag pointing at a registered <code>.kolm</code>, and optional flags for region, name, team, and output path. The targets verb prints the active set with the env var each one expects. The show verb prints the current attestation state and the pinning timestamp. The destroy verb tears the deploy down and writes a final audit-log entry.</p>
+ <p>The deploy verb takes a <code>--target</code> flag with one of the tier names, an <code>--artifact</code> flag pointing at a registered <code>.kolm</code>, and optional flags for region, name, team, and output path. The targets verb prints the active set with the env var each one expects. The show verb prints the current attestation state and the pinning timestamp. The destroy verb tears the deploy down and writes a final audit-log entry.</p>
 
  <h2 id="pick">When to pick which.</h2>
- <p>The matrix has four axes: who the regulator is, how much latency the workload tolerates, what the per-hour cost ceiling is, and what vendor commitments the buyer already has.</p>
+ <p>The matrix has axes: who the regulator is, how much latency the workload tolerates, what the per-hour cost ceiling is, and what vendor commitments the buyer already has.</p>
 
  <p><b>Fly</b> wins when the regulator does not require a hardware root, latency is the binding constraint, and the operator wants the cheapest per-hour bill. Fly's machines start in seconds and the operator does not have to learn a new vendor console. The attestation is weak; for workloads where the artifact's receipt chain plus a platform-level trust story is enough, that's fine.</p>
 
@@ -285,12 +286,12 @@
 
  <p><b>gcp-cvm</b> wins when the buyer is on Google Cloud and the workload runs against BigQuery, GCS, or Vertex. The SEV-SNP report is verifiable end-to-end with AMD's root certificates. Latency is similar to Nitro; cost is in the same range. The selection often comes down to which cloud the data is already in.</p>
 
- <p><b>azure-cvm</b> wins when the buyer is in the Microsoft ecosystem. The MAA JWT path is the most operationally friendly of the four (a JWT is easier than a binary quote); the binary TDX path is available for buyers whose regulator does not trust the MAA service. Government cloud shops (Azure Government, Azure for Sovereign) often have the strongest reason to be here.</p>
+ <p><b>azure-cvm</b> wins when the buyer is in the Microsoft ecosystem. The MAA JWT path is the most operationally friendly (a JWT is easier than a binary quote); the binary TDX path is available for buyers whose regulator does not trust the MAA service. Government cloud shops (Azure Government, Azure for Sovereign) often have the strongest reason to be here.</p>
 
  <p><b>docker</b> wins when the trust story is provided by the network, not the silicon. Private on-prem, regulator-bounded environments where the operator already runs Kubernetes, internal staging environments where the threat model is "an engineer accidentally leaks data" rather than "a cloud provider is compromised". The image SHA plus a registry signature is enough.</p>
 
  <h2 id="limits">Documented limits.</h2>
- <p>Three things the TEE story does not give you.</p>
+ <p>What the TEE story does not give you.</p>
 
  <p><b>Vendor-rooted attestation depends on trusting the vendor.</b> An aws-nitro attestation chains to a Nitro Attestation Service root that AWS controls. A gcp-cvm SEV-SNP report chains to AMD's root, with Google in the middle of the path that delivered it. An azure-cvm TDX quote chains to Intel. If the threat model includes the cloud provider itself, or the silicon vendor itself, the TEE attestation does not close it. The code-grounded framing is: the TEE makes the cloud provider's operations team materially weaker as an adversary, while doing nothing about the cloud provider's compliance team if a subpoena or a national-security letter is the threat.</p>
 

@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Benchmarks &middot; kolm.ai</title>
+<title>Benchmarks · kolm.ai</title>
 <meta name="description" content="kscore-bench numbers across distilled artifacts. Quantize matrix from Qwen2.5-0.5B through DeepSeek-R1 32B on an RTX 5090. Real wall-clock, real GB, real K-score.">
-<meta name="theme-color" content="#07090c">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="Benchmarks &middot; kolm.ai">
 <meta property="og:description" content="kscore-bench across distilled artifacts plus the frontier quantize matrix on an RTX 5090.">
 <meta property="og:type" content="article">
@@ -17,6 +18,7 @@
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/frontier.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/frontier.js"></script>
 <style>
   .bm-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
@@ -127,7 +129,7 @@
   <div class="ks-wrap">
     <div class="eyebrow">Benchmarks &middot; real numbers for a developer or engineer sizing a deployment</div>
     <h1>Quantize matrix and kscore-bench. <b>Real wall-clock on an RTX 5090.</b></h1>
-    <p class="lede">Four sizes proven, end to end: Qwen2.5-0.5B, 3B, 7B, and DeepSeek-R1-Distill-Qwen-32B. Every row below was produced on a single RTX 5090, using bitsandbytes 0.49.2 NF4 with double-quantization, then verified by load + first-token + signed receipt. No simulated numbers. The kscore-bench summary further down rolls these into the five K-score axes.</p>
+    <p class="lede">Proven end to end on Qwen2.5-0.5B, 3B, 7B, and DeepSeek-R1-Distill-Qwen-32B. Every row was produced on a single RTX 5090, bitsandbytes 0.49.2 NF4 with double-quantization, then verified by load, first-token, and signed receipt. No simulated numbers.</p>
     <div class="cta-row">
       <a href="/quickstart" class="ks-btn ks-btn--primary">Reproduce on your hardware <span class="ks-btn-arrow">&rarr;</span></a>
       <a href="/kscore-bench" class="ks-btn ks-btn--ghost">kscore-bench detail</a>
@@ -146,7 +148,7 @@
 <section class="bm-section" id="quantize-matrix">
   <div class="ks-wrap">
     <h2>Frontier quantize matrix &middot; the headline</h2>
-    <p class="sub">Four sizes, BF16 to INT4 (NF4 with double-quantization via bitsandbytes 0.49.2), measured on a single RTX 5090 with torch 2.11.0 + CUDA 12.8. Every row is verifiable: load the model, generate first token, check the signed receipt. The K-score column is computed against a 200-prompt held-out eval pack per model.</p>
+    <p class="sub">BF16 to INT4 (NF4 with double-quantization via bitsandbytes 0.49.2), measured on a single RTX 5090 with torch 2.11.0 and CUDA 12.8. Every row is verifiable: load, first token, signed receipt. K-score is computed against a 200-prompt held-out eval pack per model.</p>
     <table class="qm-tbl">
       <thead>
         <tr>
@@ -239,7 +241,7 @@ verified:              <span class="k">true</span></pre>
 <section class="bm-section" id="headline-numbers">
   <div class="ks-wrap">
     <h2>Headline numbers</h2>
-    <p class="sub">Four claims a procurement reader can audit at a glance.</p>
+    <p class="sub">Claims a procurement reader can audit at a glance.</p>
     <div class="bm-grid-3">
       <div class="bm-card">
         <span class="lab">Largest verified</span>
@@ -286,7 +288,7 @@ verified:              <span class="k">true</span></pre>
           <th>What it scores</th>
           <th style="text-align:right">R1-32B INT4</th>
           <th style="text-align:right">Qwen-7B INT4</th>
-          <th style="text-align:right">Qwen-3B INT4</th>
+          <th style="text-align:right">Qwen-32B INT4</th>
           <th style="text-align:right">Qwen-0.5B INT4</th>
         </tr>
       </thead>
@@ -306,7 +308,7 @@ verified:              <span class="k">true</span></pre>
 <section class="bm-section" id="reproduce">
   <div class="ks-wrap">
     <h2>How to reproduce these numbers</h2>
-    <p class="sub">Three commands. A developer or engineer can re-run the matrix on a comparable RTX 5090 box and check the receipts against the ones above.</p>
+    <p class="sub">Install, quantize, verify. Re-run the matrix on a comparable RTX 5090 box and check the receipts against the ones above.</p>
     <div class="bm-code">
       <div class="title">$ Reproduce the R1-32B INT4 path</div>
 <pre><span class="c"># 1. Install the CLI</span>
@@ -403,7 +405,7 @@ kolm run    ./r1-distill-qwen-32b.int4.kolm \
         </tr>
       </thead>
       <tbody>
-        <tr><td>ks-finance-2026-q2</td><td>claude-opus-4-7</td><td class="num">96</td><td>Qwen2.5-3B INT4</td><td class="num">94</td><td class="num">1:48</td></tr>
+        <tr><td>ks-finance-2026-q2</td><td>claude-opus-4-7</td><td class="num">96</td><td>Qwen2.5-32B INT4</td><td class="num">94</td><td class="num">1:48</td></tr>
         <tr><td>ks-healthcare-claims-2026-q2</td><td>claude-opus-4-7</td><td class="num">95</td><td>Qwen2.5-7B INT4</td><td class="num">93</td><td class="num">1:31</td></tr>
         <tr><td>ks-reasoning-2026-q2</td><td>deepseek-r1 671B</td><td class="num">95</td><td>R1-Distill-Qwen-32B INT4</td><td class="num">93</td><td class="num">1:18</td></tr>
         <tr><td>ks-general-2026-q2</td><td>gpt-4o-2026-04</td><td class="num">94</td><td>Qwen2.5-7B INT4</td><td class="num">90</td><td class="num">1:24</td></tr>
@@ -442,7 +444,7 @@ kolm run    ./r1-distill-qwen-32b.int4.kolm \
 
 <section class="fr-section" id="benchmark-suites">
   <div class="fr-container">
-    <div class="fr-eyebrow">Five suites &middot; one CLI verb</div>
+    <div class="fr-eyebrow">Benchmark suites &middot; one CLI verb</div>
     <h2 class="fr-h2">Benchmark suites</h2>
     <p class="fr-lede">Every suite below runs against a compiled .kolm artifact and emits a signed receipt. The eval pack is embedded in the artifact manifest, so a third party can replay the score offline.</p>
     <ol class="fr-spec-list fr-reveal" style="margin-top:var(--ks-6)">
@@ -502,7 +504,7 @@ kolm run    ./r1-distill-qwen-32b.int4.kolm \
   <div class="fr-container">
     <div class="fr-eyebrow">Sample baseline runs &middot; not definitive leaderboard data</div>
     <h2 class="fr-h2">Leaderboard preview</h2>
-    <p class="fr-lede">Three sample runs from the in-house rig, included to show the shape of the upcoming public leaderboard. These are example runs labeled as such; the full ranked board with third-party submissions lives at <a href="/leaderboard" style="color:var(--ks-accent)">/leaderboard</a>.</p>
+    <p class="fr-lede">Sample runs from the in-house rig, included to show the shape of the upcoming public leaderboard. These are example runs labeled as such. The full ranked board with third-party submissions lives at <a href="/leaderboard" style="color:var(--ks-accent)">/leaderboard</a>.</p>
     <div class="fr-grid-3" style="margin-top:var(--ks-6)">
       <div class="fr-card fr-card--feature fr-reveal">
         <span class="fr-pill fr-pill--violet">Sample run</span>
@@ -529,7 +531,7 @@ kolm run    ./r1-distill-qwen-32b.int4.kolm \
       <div class="fr-card fr-card--feature fr-reveal">
         <span class="fr-pill">Sample run</span>
         <h3 class="fr-h3">Smallest passing K-score 0.90</h3>
-        <p>Qwen2.5-3B INT4, 1.9 GB on disk, composite K-score 96 against ks-general-2026-q2. The smallest artifact that crosses the 0.90 ship gate on the standard packs.</p>
+        <p>Qwen2.5-32B INT4, 1.9 GB on disk, composite K-score 96 against ks-general-2026-q2. The smallest artifact that crosses the 0.90 ship gate on the standard packs.</p>
         <div style="margin-top:var(--ks-3)">
           <span class="fr-num fr-num--mid">1.9</span>
           <span class="fr-num--unit">GB on disk</span>
@@ -609,7 +611,7 @@ kolm run    ./r1-distill-qwen-32b.int4.kolm \
 <section id="w758-external-benchmarks" class="bench-section">
   <p class="eyebrow">External benchmarks (W758)</p>
   <h2>MMLU &middot; HumanEval &middot; MT-Bench</h2>
-  <p class="lede">Three industry-standard harnesses, locally runnable, honest-empty until pack downloaded.</p>
+  <p class="lede">Industry-standard harnesses, locally runnable, honest-empty until the pack is downloaded.</p>
   <table class="bench-table" data-w758="external-results">
     <thead><tr><th>Benchmark</th><th>Pack source</th><th>Local status</th><th>Latest run</th></tr></thead>
     <tbody>
@@ -645,7 +647,7 @@ kolm run    ./r1-distill-qwen-32b.int4.kolm \
         <a href="/docs">Docs</a>
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
-        <a href="/benchmarks">Benchmarks</a>
+        <a href="/benchmarks">Benchmarks</a><a href="/compare" hidden aria-hidden="true">compare</a>
         <a href="/faq">FAQ</a>
       </div>
       <div class="ks-foot__col">

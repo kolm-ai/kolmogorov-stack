@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -71,6 +71,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <link rel="stylesheet" href="/ks.css">
 <!-- ds-shell W619 -->
 <link rel="stylesheet" href="/docs-shell.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/docs-shell.js"></script>
 
 </head>
@@ -149,7 +150,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="snippets">Code snippets</h2>
 
 <h3>Cloud (default)</h3>
-<pre><code># Nothing to set — KOLM_GATEWAY_MODE defaults to 'cloud'.
+<pre><code># Nothing to set  -  KOLM_GATEWAY_MODE defaults to 'cloud'.
 export OPENAI_API_KEY=sk-...
 export KOLM_API_KEY=ks_...
 
@@ -191,7 +192,7 @@ curl http://localhost:3000/v1/chat/completions \
 export KOLM_MOCK_KIND=echo                          # echo | reverse | fixed
 # (only for 'fixed') export KOLM_MOCK_RESPONSE='predictable test output'
 
-# Same call as above — but every response is deterministic and free.
+# Same call as above  -  but every response is deterministic and free.
 # The response carries kolm_w742.billed:false so a downstream meter
 # can assert that no hosted_inference token was charged.
 </code></pre>

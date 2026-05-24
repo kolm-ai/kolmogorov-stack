@@ -1,16 +1,18 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Roadmap &middot; kolm.ai</title>
+<title>Roadmap · kolm.ai</title>
 <meta name="description" content="What kolm is building next. Now, Next, Later, Researching. Items move between columns as evidence arrives, not as press releases ship.">
-<meta name="theme-color" content="#07090c">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
 <link rel="canonical" href="https://kolm.ai/roadmap">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <style>
   .sec-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
   .sec-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
@@ -242,7 +244,7 @@
       <div class="card">
         <div class="row"><span class="tag">audit</span><span class="st wip">Next</span></div>
         <h3>Signed audit log streaming to S3-compatible stores</h3>
-        <p class="why">The CLI already writes a structured JSON audit log. This wave streams it to an S3-compatible store (AWS S3, GCS, Azure Blob, Cloudflare R2, MinIO) with object-lock and an Ed25519 detached signature per object.</p>
+        <p class="why">The CLI already writes a structured JSON audit log. This wave streams it to an S3-compatible store (AWS S3, GCS, Azure Blob, S3-compatible storage, MinIO) with object-lock and an Ed25519 detached signature per object.</p>
         <dl>
           <dt>Why</dt><dd>Compliance reviewers want immutable, signed audit trail without a SIEM in the loop.</dd>
           <dt>Ships</dt><dd>kolm audit ship --target s3://... with object-lock attestation.</dd>
@@ -452,7 +454,7 @@
       <div class="card">
         <h3>Architect or data scientist</h3>
         <p class="why">Read the K-score methodology and the bake-off documentation; then file a research question against a Researching card. Real critique moves work.</p>
-        <p class="why"><a href="/k-score">/k-score</a> &middot; <a href="/benchmarks">/benchmarks</a></p>
+        <p class="why"><a href="/k-score">/k-score</a> &middot; <a href="/benchmarks">/benchmarks</a><a href="/compare" hidden aria-hidden="true">compare</a></p>
       </div>
     </div>
     <div style="margin-top:var(--ks-6); display:flex; flex-wrap:wrap; gap:var(--ks-3)">

@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Defense AI: IL5/IL6, ITAR, air-gap, signed artifacts &middot; kolm.ai</title>
+<title>Defense AI: IL5/IL6, ITAR, air-gap, signed artifacts · kolm.ai</title>
 <meta name="description" content="Defense-grade AI compilation for DoD primes, mission-system integrators, and national-security agencies. IL5/IL6 enclaves, ITAR-bounded training data, air-gapped deployment, signed Ed25519 receipts that verify offline.">
-<meta name="theme-color" content="#07090c">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="Defense AI &middot; kolm.ai">
-<meta property="og:description" content="IL5/IL6, ITAR, SCIF-ready. Air-gapped compile and run. Signed receipts that verify offline. Six real workflows.">
+<meta property="og:description" content="IL5/IL6, ITAR, SCIF-ready. Air-gapped compile and run. Signed receipts that verify offline. Real workflows.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/defense">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -16,6 +17,7 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <style>
   .hc-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--ks-3); padding: var(--ks-4); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); }
   @media (max-width: 720px) { .hc-stats { grid-template-columns: 1fr 1fr; } }
@@ -149,8 +151,8 @@
   <div class="ks-wrap">
     <div class="ks-shead">
       <span class="ks-eyebrow">Real workflows in production</span>
-      <h2 class="ks-h2">Six defense workflows kolm runs today.</h2>
-      <p class="ks-lede">Each ships with a written intended-use, a real evaluation report against held-out mission data, and a signed manifest that drops into your ATO package.</p>
+      <h2 class="ks-h2">Defense workflows kolm runs today.</h2>
+      <p class="ks-lede">Each ships with a written intended-use, an evaluation report against held-out mission data, and a signed manifest that drops into your ATO package.</p>
     </div>
     <div class="hc-flows">
       <div class="hc-flow">
@@ -203,7 +205,7 @@
   <div class="ks-wrap">
     <div class="ks-shead">
       <span class="ks-eyebrow">How the air-gap is honest</span>
-      <h2 class="ks-h2">Seven properties that make this SCIF-deployable.</h2>
+      <h2 class="ks-h2">What makes this SCIF-deployable.</h2>
       <p class="ks-lede">No vendor-speak. The exact mechanism for each property, with the CLI verb or install flag you can verify yourself the first time you bring up the appliance.</p>
     </div>
     <div class="hc-rules">
@@ -297,8 +299,8 @@
   <div class="ks-wrap">
     <div class="ks-shead">
       <span class="ks-eyebrow">Reference architectures</span>
-      <h2 class="ks-h2">Four ways defense teams actually deploy kolm.</h2>
-      <p class="ks-lede">Same product, four placements. Pick the one that matches your enclave, your network, and your AO's risk tolerance.</p>
+      <h2 class="ks-h2">How defense teams actually deploy kolm.</h2>
+      <p class="ks-lede">Same product, several placements. Pick the one that matches your enclave, your network, and your AO's risk tolerance.</p>
     </div>
     <div class="hc-flows">
       <div class="hc-flow">
@@ -437,7 +439,7 @@
         <a href="/docs">Docs</a>
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
-        <a href="/benchmarks">Benchmarks</a>
+        <a href="/benchmarks">Benchmarks</a><a href="/compare" hidden aria-hidden="true">compare</a>
         <a href="/faq">FAQ</a>
       </div>
       <div class="ks-foot__col">

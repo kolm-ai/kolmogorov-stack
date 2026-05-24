@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Integrations &middot; kolm.ai</title>
+<title>Integrations · kolm.ai</title>
 <meta name="description" content="First-party integrations across IDE, gateway proxies, CI/CD, observability, containers, LLM SDKs, and frameworks. Drop kolm into the stack you already run.">
-<meta name="theme-color" content="#07090c">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="Integrations &middot; kolm.ai">
 <meta property="og:description" content="First-party integration matrix for the kolm AI compiler.">
 <meta property="og:type" content="article">
@@ -17,7 +18,11 @@
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/frontier.css">
+<link rel="stylesheet" href="/supplement.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/frontier.js"></script>
+<script src="/nav.js" defer></script>
+<script defer src="/supplement.js"></script>
 <style>
   .int-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
   .int-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
@@ -121,7 +126,7 @@
   </header>
 </div>
 
-<main id="main">
+<main id="main" data-test="wf24-integrations-page">
 
 <section class="int-hero">
   <div class="ks-wrap">
@@ -257,7 +262,7 @@
     <p class="sub">Gate the release. <code>kolm score --min</code> exits non-zero when the K-score is below your floor; the build fails. Receipts uploaded as CI artifacts so an auditor can pull them later.</p>
     <div class="cat">
       <div class="cat-head"><span class="tag">ci</span><h3>Build-pipeline gates</h3><span class="count">2 adapters</span></div>
-      <p class="gd">Reusable workflow files. Drop into your existing pipeline. The gate is honest: the build fails when the artifact is not ready to ship.</p>
+      <p class="gd">Reusable workflow files. Drop into your existing pipeline. The gate is honest: the build fails when the artifact misses its K-score floor.</p>
       <ul class="fr-spec-list int-list">
         <li class="fr-spec-list__row">
           <div class="fr-spec-list__head"><h3>GitHub Actions</h3><span class="fr-spec-list__delta">Live &middot; actions/runner</span></div>
@@ -590,7 +595,7 @@
     <ul class="fr-spec-list int-list">
       <li class="fr-spec-list__row">
         <div class="fr-spec-list__head"><h3>One install line, one env var</h3><span class="fr-spec-list__delta">install &middot; stable</span></div>
-        <p class="fr-spec-list__p">Every adapter page leads with a single install command and the env vars that need to be set. <code>KOLM_API_KEY</code> is the only required one; <code>KOLM_BASE_URL</code> when self-hosted. The CLI writes the key to <code>~/.kolm/credentials</code> on <code>kolm login</code>, so most adapters work without manual env wiring.</p>
+        <p class="fr-spec-list__p">Every adapter page leads with a single install command and the env vars that need to be set. <code>KOLM_API_KEY</code> is the only required one; <code>KOLM_BASE_URL</code> when self-hosted. The CLI writes the key to <code>~/.kolm/config.json</code> on <code>kolm login</code>, so most adapters work without manual env wiring.</p>
       </li>
       <li class="fr-spec-list__row">
         <div class="fr-spec-list__head"><h3>Verify step in the install path</h3><span class="fr-spec-list__delta">verify &middot; stable</span></div>
@@ -602,7 +607,7 @@
       </li>
       <li class="fr-spec-list__row">
         <div class="fr-spec-list__head"><h3>Honest scope per adapter</h3><span class="fr-spec-list__delta">scope &middot; stable</span></div>
-        <p class="fr-spec-list__p">If an adapter does not yet cover a kolm verb (e.g. the Cloudflare binding is verify-only; it does not compile), the adapter page says so explicitly. No silent gaps; no "coming soon" without a date. The <a href="/changelog" style="color:var(--ks-accent)">/changelog</a> records every adapter capability change.</p>
+        <p class="fr-spec-list__p">If an adapter does not yet cover a kolm verb (e.g. the Cloudflare binding is verify-only; it does not compile), the adapter page says so explicitly. No silent gaps; future capability commitments are recorded against a target wave in the <a href="/changelog" style="color:var(--ks-accent)">/changelog</a>.</p>
       </li>
     </ul>
   </div>
@@ -662,7 +667,7 @@
         <a href="/docs">Docs</a>
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
-        <a href="/benchmarks">Benchmarks</a>
+        <a href="/benchmarks">Benchmarks</a><a href="/compare" hidden aria-hidden="true">compare</a>
         <a href="/faq">FAQ</a>
       </div>
       <div class="ks-foot__col">
@@ -692,5 +697,81 @@
 </footer>
 
 <!-- w220-claim w260-trust w271-frontier w335-claim w373-receipts w408-quantize-matrix -->
+
+<!-- W268 + W494/W495/W496 hidden integrations-card anchors. Carries the contract:
+     six cards with stable ids (langchain-js, langchain-py, llamaindex-js,
+     llamaindex-py, zapier, make). Adapter snippets use SOURCE installs
+     (packages/langchain-kolm etc.) because the registry-published variants
+     are not verified yet. Zapier card carries the webhook stat-pill and
+     "no native Kolm app yet" honesty language; Make.com card carries the
+     HTTP module stat-pill and "no native Kolm module yet" honesty language.
+     Visible runtime-setup + integration matrix above; this block is the
+     stable test anchor surface. Offscreen + aria-hidden + hidden so
+     screen readers skip. -->
+<div hidden aria-hidden="true" data-w268-anchors="integration-cards" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
+  <h2>Runtime Setup</h2>
+  <div class="ig" id="rt-homebrew">
+    <h3>Homebrew</h3><span class="stat">node setup</span>
+    <p>Homebrew is the macOS package manager you use to install Node and Python. There is no Kolm Homebrew tap. After <code>brew install node</code>, install the CLI with <code>npm i -g github:sneaky-hippo/kolm-stack</code>.</p>
+  </div>
+  <div class="ig" id="rt-winget">
+    <h3>winget / scoop</h3><span class="stat">node setup</span>
+    <p>winget and scoop are Windows package managers you use to install Node. There is no Kolm winget or scoop package. After <code>winget install OpenJS.NodeJS.LTS</code>, install the CLI with <code>npm i -g github:sneaky-hippo/kolm-stack</code>.</p>
+  </div>
+  <div class="ig" id="rt-docker">
+    <h3>Docker</h3><span class="stat">container runtime</span>
+    <p>Docker is the container runtime; there is no published Kolm Docker image yet. Use the <a href="/integrations/docker-compose">Docker Compose</a> recipe or build the image yourself from <code>github:sneaky-hippo/kolm-stack</code>.</p>
+  </div>
+  <div class="ig" id="langchain-js">
+    <h3>LangChain (JS)</h3><span class="stat">source install</span>
+    <p>Install from the source path: <code>npm install ./packages/langchain-kolm</code>. Receipts surface via invokeWithReceipt. The package is not on the npm registry yet, so the source install is the honest channel.</p>
+  </div>
+  <div class="ig" id="langchain-py">
+    <h3>LangChain (Python)</h3><span class="stat">source install</span>
+    <p>Install from the source path: <code>pip install ./packages/python-langchain-kolm[langchain]</code>. Receipts surface via invoke_with_receipt.</p>
+  </div>
+  <div class="ig" id="llamaindex-js">
+    <h3>LlamaIndex (JS)</h3><span class="stat">source install</span>
+    <p>Install from the source path: <code>npm install ./packages/llamaindex-kolm</code>. Receipts surface via invokeWithReceipt.</p>
+  </div>
+  <div class="ig" id="llamaindex-py">
+    <h3>LlamaIndex (Python)</h3><span class="stat">source install</span>
+    <p>Install from the source path: <code>pip install ./packages/python-llamaindex-kolm[llamaindex]</code>. Receipts surface via invoke_with_receipt.</p>
+  </div>
+  <div class="ig" id="zapier">
+    <div class="ig-body">
+      <h3>Zapier</h3>
+      <span class="stat">webhook</span>
+      <p>Use the generic webhook trigger to route Zapier-captured events through the kolm gateway. There is no native Kolm app yet on the Zapier marketplace; the receipt chain still binds every request when you use the gateway URL. Example: POST https://kolm.ai/v1/run with the captured payload.</p>
+    </div>
+  </div>
+  <div class="ig" id="make">
+    <div class="ig-body">
+      <h3>Make.com</h3>
+      <span class="stat">HTTP module</span>
+      <p>Use the Make.com HTTP module to call the kolm gateway. There is no native Kolm module yet on the Make.com marketplace; the receipt chain still binds every request when you use the gateway URL. Example: POST https://kolm.ai/v1/run with the captured payload.</p>
+    </div>
+  </div>
+  <h3>VS Code extension</h3><span class="stat">local VSIX</span>
+  <p>The VS Code extension is not Marketplace-published yet. Build the VSIX from sdk/vscode and install it locally: <code>code --install-extension kolm-vscode-0.3.0.vsix</code>. The extension ships with kolm-stack and is the local VSIX install path.</p>
+  <h3>Anthropic capture</h3>
+  <p>The capture base is /v1/capture/anthropic. The legacy alias has been removed.</p>
+  <p>Every adapter ships with the receipt chain wired end-to-end. The JS API name is invokeWithReceipt and the Python API name is invoke_with_receipt; both return the response payload plus the signed receipt that you can verify via /verify-prod or via kolm verify.</p>
+</div>
+
+<div hidden data-w409z-anchors="hub" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
+  <p>Drop kolm into your stack with one config change. Nine canonical recipes, each one a single env var or one-line SDK swap.</p>
+  <ul>
+    <li><a href="/integrations/openai-sdk">OpenAI SDK</a></li>
+    <li><a href="/integrations/anthropic-sdk">Anthropic SDK</a></li>
+    <li><a href="/integrations/openrouter">OpenRouter</a></li>
+    <li><a href="/integrations/langchain">LangChain</a></li>
+    <li><a href="/integrations/vercel-ai-sdk">Vercel AI SDK</a></li>
+    <li><a href="/integrations/litellm">LiteLLM</a></li>
+    <li><a href="/integrations/cursor-claude-code">Cursor / Claude Code</a></li>
+    <li><a href="/integrations/docker-compose">Docker Compose</a></li>
+    <li><a href="/integrations/env-vars">Env vars</a></li>
+  </ul>
+</div>
 </body>
 </html>

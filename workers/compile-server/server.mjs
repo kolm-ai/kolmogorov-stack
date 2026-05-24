@@ -73,9 +73,27 @@ async function storeModule() {
   return _storeModule;
 }
 
+// WC07 — inlined envSecret helper. This worker is intentionally self-contained
+// (no imports from src/) so it can ship in air-gapped operator VPCs without the
+// whole repo. Keep this helper in sync with src/env.js#envSecret.
+function envSecret(name) {
+  const v = process.env[name];
+  if (v === undefined || v === null) return null;
+  const s = String(v).trim();
+  return s.length > 0 ? s : null;
+}
+
 const VERSION   = '0.1.0-w264';
 const MODE      = 'self-hosted';
-const SECRET    = process.env.KOLM_SHARED_SECRET || '';
+// WC07 — SECRET is null when KOLM_SHARED_SECRET is unset OR set to an empty /
+// whitespace-only string. The previous `process.env.KOLM_SHARED_SECRET || ''`
+// pattern would collapse `KOLM_SHARED_SECRET=""` into the same `''` that an
+// omitted `x-kolm-shared-secret` header produces, so the constant-time
+// comparison at requireSecret() below would equate them and accidentally
+// authenticate anonymous callers. With null, the explicit `if (!SECRET) ...`
+// fail-closed branches in requireSecret() and the startup banner both fire
+// loud and reject every request until the operator wires a real secret.
+const SECRET    = envSecret('KOLM_SHARED_SECRET');
 const OFFLINE   = process.env.KOLM_OFFLINE === '1';
 const ART_DIR   = process.env.KOLM_ARTIFACT_DIR || '/data/artifacts';
 const TENANT_ID = process.env.KOLM_TENANT_ID || 'self-hosted';

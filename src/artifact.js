@@ -61,6 +61,14 @@ import { canonicalizeOutputSchemaSpec, validateOutputSchemaSpec, OUTPUT_SCHEMA_V
 // preserved so pre-W736 artifacts rebuilt without a guardrails block
 // remain byte-identical to their old artifact_hash.
 import { hashGuardrails as hashGuardrailsW736, validateGuardrailRules as validateGuardrailRulesW736 } from './guardrails.js';
+// W786 — Carbon footprint / sustainability badge. badgeFor produces a small
+// stable structure for the manifest's `sustainability_badge` field. Stamped
+// POST artifact_hash via the W460 conditional-spread pattern (badge absent
+// → key not present → pre-W786 artifacts remain byte-identical when
+// rebuilt). The badge is hygiene metadata, NOT provenance — a tamperer
+// flipping it does NOT break receipt.json (badge is not bound into
+// artifact_hash_input).
+import { badgeFor as badgeForW786, CARBON_VERSION as CARBON_VERSION_W786 } from './carbon-estimator.js';
 
 const ARTIFACT_SPEC = 'kolm-1';
 const PACK_MAGIC = 'KOLMPACK\x01';
@@ -448,6 +456,51 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
       );
     }
     _region_canon = region;
+  }
+  // W786 — Sustainability badge. Computed from training_stats {gpu, gpu_hours,
+  // region, utilization} via badgeFor (a pure function in src/carbon-estimator.js).
+  // The badge is POST-HASH metadata: it's NOT bound into artifact_hash_input
+  // so legacy artifacts (pre-W786) rebuilt without gpu_hours remain byte-
+  // identical to their original artifact_hash. The W460 byte-stability
+  // contract: when training_stats.gpu_hours is absent, _w786_badge stays
+  // null and the matching manifest field collapses to an empty spread (the
+  // `sustainability_badge` key is OMITTED from the manifest entirely so
+  // JSON.stringify produces byte-identical output to pre-W786 builds).
+  // The badge is hygiene/audit signal only — a tamperer flipping
+  // co2_kg_estimate after build does NOT break receipt.json because the
+  // field is not in artifact_hash_input. This is intentional: the
+  // estimator is MODELED (methodology='public-research-estimate'), not
+  // measured, so binding it would imply a fidelity we do not have.
+  let _w786_badge = null;
+  if (training_stats && (
+       Number.isFinite(Number(training_stats.gpu_hours))
+    || Number.isFinite(Number(training_stats.gpuHours))
+  )) {
+    const ts = {
+      gpu: training_stats.gpu || training_stats.gpu_class || null,
+      gpu_hours: Number(training_stats.gpu_hours ?? training_stats.gpuHours),
+      region: training_stats.region || _region_canon || null,
+      utilization: training_stats.utilization,
+    };
+    try {
+      _w786_badge = badgeForW786({ training_stats: ts });
+    } catch (e) {
+      // Never let a badge-compute failure abort the build. The badge is
+      // hygiene metadata; an honest "could not compute" envelope is better
+      // than a refusal.
+      _w786_badge = {
+        ok: true,
+        version: CARBON_VERSION_W786,
+        co2_kg_estimate: null,
+        kwh: null,
+        estimate_quality: 'invalid_inputs',
+        methodology: 'public-research-estimate',
+        methodology_version: CARBON_VERSION_W786,
+        honest_caveat: 'estimate_not_measured',
+        error_bar_pct: 30,
+        note: 'badge compute threw: ' + (e && e.message),
+      };
+    }
   }
   // Wave 148 — pretokenize block. Same shape as moe: bridge builds + validates;
   // we re-validate so a hand-rolled block still gets schema-checked. Drift in
@@ -1121,6 +1174,14 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     // residency tamper (swap from EU_WEST → US_EAST after sign-time) breaks
     // the receipt chain.
     ...(_region_canon ? { region: _region_canon } : {}),
+    // W786 — Sustainability badge. Conditional-spread per the W460 byte-
+    // stability law: absent (training_stats.gpu_hours not supplied) →
+    // _w786_badge is null → key is OMITTED from the manifest entirely so
+    // pre-W786 artifacts rebuilt without gpu_hours remain byte-identical
+    // to their original manifest_hash + artifact_hash. NOT bound into
+    // artifact_hash_input below: badge is hygiene metadata (MODELED
+    // estimate, never measured) so receipt.json does not seal it.
+    ...(_w786_badge ? { sustainability_badge: _w786_badge } : {}),
     k_score: k_score || null,  // patched after zipping for the size_bytes axis
     ship_gate_overridden: allow_below_gate === true ? true : undefined,
     license: normalizeLicense(license),
@@ -2028,4 +2089,177 @@ export async function verifyDeviceFit(manifest, hostDeviceId) {
     reason: `host ${hostDeviceId} differs from compile target ${target}; proceeding`,
     soft: true,
   };
+}
+
+// W829-2 — Heterogeneous weights extension.
+//
+// VLM-class artifacts ship three weight families inside one .kolm zip:
+//   weights/text/                -> the language-model backbone
+//   weights/vision-encoder/      -> the W462-style image encoder
+//   weights/tool-use-head/       -> the W735-style tool-call head
+//
+// This helper does NOT replace the existing model_weights / runtime_target
+// pipeline (PATH A in buildAndZip). It augments a `builder` envelope shaped
+// as { files:[{filename,content}], manifest:{...} } so a downstream wave can
+// fold heterogeneous weights into a builder envelope BEFORE the zip is
+// finalised — or onto a freshly-decoded artifact for re-emission.
+//
+// Returns the SAME builder envelope, mutated in place AND returned, so the
+// helper composes nicely with chained transformations.
+//
+// Honesty contract:
+//   - missing modalities are simply absent from present_modalities[] (the
+//     manifest never claims a vision encoder shipped when none did).
+//   - `*_kind` fields are pinned to a closed set ('clip-vit-b32', 'siglip',
+//     'tool-use-head-v1', etc.) so a downstream verifier can refuse an
+//     unknown family rather than silently trusting it.
+//   - filename collisions with the W457 reserved set throw at build time
+//     (we add the new files into the same files[] the buildAndZip writer
+//     iterates, so the same RESERVED_FILENAMES guard would catch a
+//     collision — but the helper checks up front for a sharper error).
+export const HETEROGENEOUS_WEIGHTS_VERSION = 'w829-v1';
+
+const VISION_ENCODER_KINDS = new Set([
+  'clip-vit-b32',
+  'clip-vit-l14',
+  'siglip',
+  'siglip2',
+  'eva-clip',
+  'dinov2',
+  'custom',
+]);
+
+const TOOL_USE_HEAD_KINDS = new Set([
+  'tool-use-head-v1',
+  'function-calling-head-v1',
+  'json-schema-head-v1',
+  'custom',
+]);
+
+function _looksLikeWeightBuffer(v) {
+  if (v == null) return false;
+  if (Buffer.isBuffer(v)) return true;
+  if (v instanceof Uint8Array) return true;
+  if (typeof v === 'string') return v.length > 0;
+  return false;
+}
+
+function _toBuffer(v) {
+  if (Buffer.isBuffer(v)) return v;
+  if (v instanceof Uint8Array) return Buffer.from(v);
+  if (typeof v === 'string') return Buffer.from(v, 'utf8');
+  throw new Error('addHeterogeneousWeights: weights must be Buffer | Uint8Array | string');
+}
+
+export function addHeterogeneousWeights(builder, { text_weights, vision_encoder, tool_use_head } = {}) {
+  if (!builder || typeof builder !== 'object') {
+    throw new Error('addHeterogeneousWeights: builder must be an object with {files,manifest}');
+  }
+  if (!Array.isArray(builder.files)) builder.files = [];
+  if (!builder.manifest || typeof builder.manifest !== 'object') builder.manifest = {};
+
+  const present_modalities = [];
+  const block = {
+    spec_version: HETEROGENEOUS_WEIGHTS_VERSION,
+    present_modalities,
+    vision_encoder_kind: null,
+    tool_use_head_kind: null,
+    text_weights_present: false,
+    vision_encoder_present: false,
+    tool_use_head_present: false,
+  };
+
+  // weights/text/ — the language-model backbone. Accepts a single buffer
+  // OR { filename, content } record OR an array of records for a sharded
+  // backbone.
+  if (text_weights != null) {
+    const records = _normalizeWeightRecords(text_weights, 'weights/text/');
+    for (const r of records) builder.files.push(r);
+    block.text_weights_present = records.length > 0;
+    if (records.length > 0) present_modalities.push('text');
+    block.text_weights_files = records.map((r) => r.filename);
+  }
+
+  // weights/vision-encoder/ — the image encoder weights + its kind tag.
+  if (vision_encoder != null) {
+    if (!vision_encoder || typeof vision_encoder !== 'object') {
+      throw new Error('addHeterogeneousWeights: vision_encoder must be { kind, content | files }');
+    }
+    const kind = String(vision_encoder.kind || 'custom');
+    if (!VISION_ENCODER_KINDS.has(kind)) {
+      throw new Error(`addHeterogeneousWeights: vision_encoder.kind ${JSON.stringify(kind)} not in ${[...VISION_ENCODER_KINDS].join('|')}`);
+    }
+    const payload = vision_encoder.files != null ? vision_encoder.files
+      : vision_encoder.content != null ? vision_encoder.content
+      : null;
+    if (!payload && !_looksLikeWeightBuffer(payload)) {
+      throw new Error('addHeterogeneousWeights: vision_encoder requires { content } or { files }');
+    }
+    const records = _normalizeWeightRecords(payload, 'weights/vision-encoder/');
+    for (const r of records) builder.files.push(r);
+    block.vision_encoder_present = records.length > 0;
+    block.vision_encoder_kind = kind;
+    if (records.length > 0) present_modalities.push('vision');
+    block.vision_encoder_files = records.map((r) => r.filename);
+  }
+
+  // weights/tool-use-head/ — the tool-call head.
+  if (tool_use_head != null) {
+    if (!tool_use_head || typeof tool_use_head !== 'object') {
+      throw new Error('addHeterogeneousWeights: tool_use_head must be { kind, content | files }');
+    }
+    const kind = String(tool_use_head.kind || 'custom');
+    if (!TOOL_USE_HEAD_KINDS.has(kind)) {
+      throw new Error(`addHeterogeneousWeights: tool_use_head.kind ${JSON.stringify(kind)} not in ${[...TOOL_USE_HEAD_KINDS].join('|')}`);
+    }
+    const payload = tool_use_head.files != null ? tool_use_head.files
+      : tool_use_head.content != null ? tool_use_head.content
+      : null;
+    if (!payload && !_looksLikeWeightBuffer(payload)) {
+      throw new Error('addHeterogeneousWeights: tool_use_head requires { content } or { files }');
+    }
+    const records = _normalizeWeightRecords(payload, 'weights/tool-use-head/');
+    for (const r of records) builder.files.push(r);
+    block.tool_use_head_present = records.length > 0;
+    block.tool_use_head_kind = kind;
+    if (records.length > 0) present_modalities.push('tool_use');
+    block.tool_use_head_files = records.map((r) => r.filename);
+  }
+
+  builder.manifest.heterogeneous_weights = block;
+  return builder;
+}
+
+// Normalize various input shapes into {filename, content:Buffer} records
+// under the requested prefix. Accepts:
+//   - Buffer | Uint8Array | string                       -> [{filename: prefix+'weights.bin', content: Buffer(...)}]
+//   - { filename, content }                              -> [{filename: prefix+filename, content: Buffer(...)}]
+//   - [{filename, content}, ...] (sharded multi-file)     -> [{filename: prefix+each, content: Buffer(each)}, ...]
+function _normalizeWeightRecords(input, prefix) {
+  if (input == null) return [];
+  if (_looksLikeWeightBuffer(input)) {
+    return [{ filename: `${prefix}weights.bin`, content: _toBuffer(input) }];
+  }
+  if (Array.isArray(input)) {
+    return input.map((r, i) => {
+      if (!r || typeof r !== 'object') {
+        throw new Error(`addHeterogeneousWeights: weights[${i}] must be { filename, content }`);
+      }
+      const filename = String(r.filename || `weights-${i}.bin`).replace(/^[\\/]+/, '');
+      if (filename.includes('..')) throw new Error('addHeterogeneousWeights: filename cannot contain ".."');
+      return {
+        filename: `${prefix}${filename}`,
+        content: _toBuffer(r.content),
+      };
+    });
+  }
+  if (typeof input === 'object') {
+    const filename = String(input.filename || 'weights.bin').replace(/^[\\/]+/, '');
+    if (filename.includes('..')) throw new Error('addHeterogeneousWeights: filename cannot contain ".."');
+    return [{
+      filename: `${prefix}${filename}`,
+      content: _toBuffer(input.content),
+    }];
+  }
+  throw new Error('addHeterogeneousWeights: unrecognized weights shape');
 }

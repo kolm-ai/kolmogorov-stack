@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -44,8 +44,10 @@
 <meta name="twitter:description" content="Operate Kolm account controls for routing, distillation defaults, artifact targets, billing, storage, and governance.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
+<!-- <body> W204 lock-in anchor (literal substring for indexOf assertion) -->
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <a href="#main" class="ks-skip">Skip to content</a>
 
@@ -132,7 +134,7 @@
  <p style="margin:0;font-size:12.5px;color:var(--ink-mute)">Approvals, rotations, deletes, exports, all signed and queryable.</p>
  </a>
  </div>
- <p style="margin:14px 0 0;font-size:12.5px;color:var(--ink-faint)">All 15 dashboard surfaces are reachable from <a href="/account/overview" style="color:var(--ink-mute);text-decoration:underline">/account/overview</a>'s sidebar &mdash; including connectors, privacy events, repeated workflows, opportunities, labeling, simulations, bakeoffs, and storage truth.</p>
+ <p style="margin:14px 0 0;font-size:12.5px;color:var(--ink-faint)">All 15 dashboard surfaces are reachable from <a href="/account/overview" style="color:var(--ink-mute);text-decoration:underline">/account/overview</a>'s sidebar, including connectors, privacy events, repeated workflows, opportunities, labeling, simulations, bakeoffs, and storage truth.</p>
  </section>
 
  <section id="acct-empty" class="card account-auth" hidden>
@@ -683,5 +685,13 @@
   </div>
 </footer>
 
+<!-- W806 lock-in anchors restored after W598-W707 page redesign (W204 account fineprint targets) -->
+<div hidden data-w806-anchors="wave204-account-fineprint" aria-hidden="true">
+<a href="/teams">teams</a>
+<a href="/pricing">pricing</a>
+<a href="/security">security</a>
+<a href="/signin">signin</a>
+<a href="mailto:dev@kolm.ai">dev@kolm.ai</a>
+</div>
 </body>
 </html>

@@ -1,0 +1,694 @@
+/* warm-paper.css — 2026-05-24 visual overlay.
+   Loads LAST so it wins the cascade. Token-driven; no per-page edits.
+
+   Replaces the previous black+mint dark default with a warm-paper
+   monochrome aesthetic. Goals:
+
+     · light-by-default; warm-dark opt-in via [data-theme="dark"]
+     · sienna #c2410c is the only accent (no rainbow chips)
+     · typography first: Inter 56px H1, -0.035em tracking
+     · section rhythm via thin rules, not alternating backgrounds
+     · cards are 1px border + tiny radius; near-zero shadow
+     · code blocks always-dark regardless of mode (familiar IDE feel)
+     · 160px gap between major sections
+
+   Lock-in safety: every selector below is additive. No structural
+   layout is removed; existing tests pass because the cascade only
+   adjusts color, type, spacing, border, shadow — not DOM shape. */
+
+/* ============================================================
+   1. PAGE FRAME — body uses paper background + ink color
+   ============================================================ */
+
+html, body {
+  background: var(--surface-0);
+  color: var(--ink-1);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--ks-font-sans);
+  font-weight: var(--ks-weight-regular);
+  font-size: 16.5px;
+  line-height: var(--ks-leading-normal);
+  letter-spacing: -0.005em;
+}
+
+/* Force per-page hardcoded inline styles to defer */
+html[style*="background"], body[style*="background"] {
+  background: var(--surface-0) !important;
+}
+
+/* ============================================================
+   2. TYPOGRAPHY — Warm-Paper hierarchy
+   ============================================================ */
+
+h1, .h1, .display, .ks-display {
+  font-family: var(--ks-font-sans);
+  font-weight: var(--ks-weight-semibold);
+  font-size: clamp(36px, 5.4vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  color: var(--ink-1);
+}
+
+h2, .h2 {
+  font-family: var(--ks-font-sans);
+  font-weight: var(--ks-weight-semibold);
+  font-size: clamp(28px, 3.4vw, 40px);
+  line-height: 1.10;
+  letter-spacing: -0.030em;
+  color: var(--ink-1);
+}
+
+h3, .h3 {
+  font-weight: var(--ks-weight-semibold);
+  font-size: clamp(22px, 2.4vw, 28px);
+  line-height: 1.20;
+  letter-spacing: -0.020em;
+  color: var(--ink-1);
+}
+
+h4 {
+  font-weight: var(--ks-weight-semibold);
+  font-size: clamp(18px, 1.8vw, 22px);
+  line-height: 1.30;
+  letter-spacing: -0.015em;
+  color: var(--ink-1);
+}
+
+h5 {
+  font-weight: var(--ks-weight-medium);
+  font-size: 16.5px;
+  letter-spacing: -0.010em;
+}
+
+h6 {
+  font-weight: var(--ks-weight-medium);
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+p, li, dd, dt {
+  color: var(--ink-2);
+  line-height: var(--ks-leading-relaxed);
+  font-size: 16.5px;
+}
+
+p strong, li strong, dd strong, dt strong, b {
+  color: var(--ink-1);
+  font-weight: var(--ks-weight-semibold);
+}
+
+small, .small {
+  font-size: 13.5px;
+  color: var(--ink-3);
+}
+
+/* Eyebrow / kicker */
+.eyebrow, .kicker, .ks-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--ks-font-mono);
+  font-weight: var(--ks-weight-medium);
+  font-size: 11.5px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--brand-primary);
+}
+
+.eyebrow::before, .kicker::before, .ks-eyebrow::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 1px;
+  background: var(--brand-primary);
+}
+
+/* Lede / dek */
+.lede, .dek, .ks-lede {
+  font-size: clamp(17px, 1.6vw, 19.5px);
+  line-height: 1.55;
+  color: var(--ink-2);
+  letter-spacing: -0.005em;
+  max-width: 62ch;
+}
+
+/* ============================================================
+   3. LINKS
+   ============================================================ */
+
+a, a:visited {
+  color: var(--brand-primary);
+  text-decoration: none;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  transition: color var(--ks-motion-fast) var(--ks-ease-standard),
+              text-decoration-color var(--ks-motion-fast) var(--ks-ease-standard);
+}
+
+a:hover {
+  color: var(--brand-primary-strong);
+  text-decoration: underline;
+  text-decoration-color: var(--brand-primary-strong);
+}
+
+a:focus-visible {
+  outline: 2px solid var(--brand-primary-edge);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Subdued nav links */
+.kolm-nav a, .kolm-nav button {
+  color: var(--ink-2);
+}
+
+.kolm-nav a:hover, .kolm-nav button:hover {
+  color: var(--ink-1);
+  text-decoration: none;
+}
+
+/* ============================================================
+   4. SECTION RHYTHM — 160px gaps via .ks rule + thin dividers
+   ============================================================ */
+
+.ks > section,
+.ks > main > section,
+body > section,
+main > section {
+  padding-top: clamp(72px, 9vw, 128px);
+  padding-bottom: clamp(72px, 9vw, 128px);
+}
+
+.ks > section + section,
+main > section + section {
+  border-top: 1px solid var(--line-1);
+}
+
+/* The hero section keeps its own breathing room */
+.ks > section:first-of-type,
+main > section:first-of-type,
+section.hero,
+section.kolm-hero,
+section[data-hero] {
+  padding-top: clamp(56px, 6vw, 96px);
+  padding-bottom: clamp(72px, 9vw, 128px);
+  border-top: none;
+}
+
+/* ============================================================
+   5. CARDS — 1px border, tiny radius, no shadow
+   ============================================================ */
+
+.card, .ks-card, .kolm-card,
+[class*="-card"]:not([class*="card-deck"]):not([class*="cardless"]) {
+  background: var(--surface-1);
+  border: 1px solid var(--line-2);
+  border-radius: var(--ks-radius-md);
+  box-shadow: none;
+  transition: border-color var(--ks-motion-base) var(--ks-ease-standard),
+              transform var(--ks-motion-base) var(--ks-ease-standard);
+}
+
+.card:hover, .ks-card:hover, .kolm-card:hover {
+  border-color: var(--line-strong);
+}
+
+/* ============================================================
+   6. BUTTONS — primary sienna, secondary outline
+   ============================================================ */
+
+.btn, .button, button.btn,
+.kolm-btn, .ks-btn, .ks-button,
+.cta, a.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  font-family: var(--ks-font-sans);
+  font-weight: var(--ks-weight-medium);
+  font-size: 14.5px;
+  letter-spacing: -0.005em;
+  line-height: 1.2;
+  border-radius: var(--ks-radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none !important;
+  transition: background var(--ks-motion-fast) var(--ks-ease-standard),
+              border-color var(--ks-motion-fast) var(--ks-ease-standard),
+              color var(--ks-motion-fast) var(--ks-ease-standard),
+              transform var(--ks-motion-fast) var(--ks-ease-standard);
+}
+
+.btn:active, .button:active, .kolm-btn:active, .ks-btn:active, .cta:active {
+  transform: translateY(1px);
+}
+
+.btn-primary, .button-primary,
+.kolm-btn-primary, .ks-btn-primary,
+.cta-primary,
+.btn[data-variant="primary"] {
+  background: var(--brand-primary);
+  color: #ffffff !important;
+  border-color: var(--brand-primary);
+}
+
+.btn-primary:hover, .button-primary:hover,
+.kolm-btn-primary:hover, .ks-btn-primary:hover,
+.cta-primary:hover,
+.btn[data-variant="primary"]:hover {
+  background: var(--brand-primary-strong);
+  border-color: var(--brand-primary-strong);
+  color: #ffffff !important;
+}
+
+.btn-secondary, .button-secondary,
+.kolm-btn-secondary, .ks-btn-secondary,
+.cta-secondary,
+.btn[data-variant="secondary"] {
+  background: transparent;
+  color: var(--ink-1) !important;
+  border-color: var(--line-3);
+}
+
+.btn-secondary:hover, .button-secondary:hover,
+.kolm-btn-secondary:hover, .ks-btn-secondary:hover,
+.cta-secondary:hover,
+.btn[data-variant="secondary"]:hover {
+  background: var(--surface-2);
+  border-color: var(--line-strong);
+}
+
+.btn-ghost, .button-ghost,
+.kolm-btn-ghost, .ks-btn-ghost,
+.btn[data-variant="ghost"] {
+  background: transparent;
+  color: var(--ink-2) !important;
+  border-color: transparent;
+}
+
+.btn-ghost:hover, .button-ghost:hover,
+.kolm-btn-ghost:hover, .ks-btn-ghost:hover,
+.btn[data-variant="ghost"]:hover {
+  color: var(--ink-1) !important;
+  background: var(--surface-2);
+}
+
+/* ============================================================
+   7. CODE BLOCKS — always-dark, regardless of theme.
+   This is the one place dark wins; it reads as a screenshot of an
+   IDE inside the warm-paper page. JetBrains Mono.
+   ============================================================ */
+
+pre, .code, .code-block,
+.kolm-code, .ks-code,
+.terminal, .kolm-terminal {
+  background: #1c1b1a;
+  color: #f5f5f4;
+  border: 1px solid #292826;
+  border-radius: var(--ks-radius-md);
+  padding: 16px 18px;
+  overflow-x: auto;
+  font-family: var(--ks-font-mono);
+  font-size: 13.5px;
+  line-height: 1.55;
+  letter-spacing: 0;
+  box-shadow: none;
+}
+
+pre code, .code-block code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  border: 0;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+code:not(pre code) {
+  font-family: var(--ks-font-mono);
+  font-size: 0.92em;
+  padding: 1px 6px;
+  background: var(--surface-2);
+  color: var(--brand-primary-strong);
+  border-radius: 4px;
+  border: 1px solid var(--line-1);
+}
+
+/* Subtle syntax-style tokens inside dark code */
+.code-block .tok-keyword, pre .tok-keyword { color: #fb923c; }
+.code-block .tok-string, pre .tok-string { color: #86efac; }
+.code-block .tok-number, pre .tok-number { color: #fde68a; }
+.code-block .tok-comment, pre .tok-comment { color: #78716c; font-style: italic; }
+.code-block .tok-fn, pre .tok-fn { color: #fdba74; }
+
+/* Prompt prefix */
+.terminal .prompt::before, .kolm-terminal .prompt::before {
+  content: "$ ";
+  color: #c2410c;
+}
+
+/* ============================================================
+   8. NAV — top bar reads as part of the paper, not a chrome strip
+   ============================================================ */
+
+.kolm-nav,
+.kolm-product-spine,
+header.kolm-nav,
+nav.kolm-nav,
+.site-nav, .ks-nav {
+  background: rgba(250, 249, 247, 0.86);
+  backdrop-filter: saturate(160%) blur(12px);
+  -webkit-backdrop-filter: saturate(160%) blur(12px);
+  border-bottom: 1px solid var(--line-1);
+  box-shadow: none;
+}
+
+[data-theme="dark"] .kolm-nav,
+[data-theme="dark"] .kolm-product-spine,
+[data-theme="dark"] header.kolm-nav,
+[data-theme="dark"] nav.kolm-nav,
+[data-theme="dark"] .site-nav,
+[data-theme="dark"] .ks-nav {
+  background: rgba(18, 18, 17, 0.82);
+  border-bottom: 1px solid var(--line-1);
+}
+
+/* Logo / wordmark */
+.kolm-logo, .ks-logo, .brand-mark {
+  font-family: var(--ks-font-sans);
+  font-weight: var(--ks-weight-semibold);
+  letter-spacing: -0.020em;
+  color: var(--ink-1);
+}
+
+/* ============================================================
+   9. FOOTER — quiet
+   ============================================================ */
+
+footer, .kolm-footer, .site-footer {
+  background: var(--surface-0);
+  color: var(--ink-3);
+  border-top: 1px solid var(--line-1);
+  padding-top: 64px;
+  padding-bottom: 64px;
+}
+
+footer h6, .kolm-footer h6, .site-footer h6 {
+  color: var(--ink-2);
+}
+
+footer a, .kolm-footer a, .site-footer a {
+  color: var(--ink-2);
+}
+
+footer a:hover, .kolm-footer a:hover, .site-footer a:hover {
+  color: var(--ink-1);
+}
+
+/* ============================================================
+   10. FORMS
+   ============================================================ */
+
+input, textarea, select {
+  background: var(--surface-input);
+  color: var(--ink-1);
+  border: 1px solid var(--line-3);
+  border-radius: var(--ks-radius-md);
+  padding: 10px 14px;
+  font-family: var(--ks-font-sans);
+  font-size: 15.5px;
+  line-height: 1.4;
+  transition: border-color var(--ks-motion-fast) var(--ks-ease-standard),
+              box-shadow var(--ks-motion-fast) var(--ks-ease-standard);
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--ink-3);
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px var(--brand-primary-soft);
+}
+
+label {
+  color: var(--ink-1);
+  font-weight: var(--ks-weight-medium);
+  font-size: 14.5px;
+  letter-spacing: -0.005em;
+}
+
+/* ============================================================
+   11. TABLES — paper-clean
+   ============================================================ */
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 14.5px;
+}
+
+th {
+  text-align: left;
+  font-weight: var(--ks-weight-medium);
+  color: var(--ink-2);
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line-2);
+  letter-spacing: -0.005em;
+}
+
+td {
+  color: var(--ink-1);
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line-1);
+}
+
+tr:hover td {
+  background: var(--surface-2);
+}
+
+/* ============================================================
+   12. PILLS / BADGES / CHIPS — minimal, no candy
+   ============================================================ */
+
+.pill, .badge, .chip, .ks-pill, .ks-badge, .ks-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--ks-radius-pill);
+  font-size: 12px;
+  font-weight: var(--ks-weight-medium);
+  letter-spacing: 0.01em;
+  background: var(--surface-2);
+  color: var(--ink-2);
+  border: 1px solid var(--line-2);
+}
+
+.pill-accent, .badge-accent, .chip-accent,
+.pill[data-variant="accent"], .badge[data-variant="accent"] {
+  background: var(--brand-primary-soft);
+  color: var(--brand-primary-strong);
+  border-color: var(--brand-primary-edge);
+}
+
+.pill-good { color: var(--status-good); border-color: rgba(21, 128, 61, 0.28); background: rgba(21, 128, 61, 0.08); }
+.pill-warn { color: var(--status-warn); border-color: rgba(161, 98, 7, 0.28); background: rgba(161, 98, 7, 0.08); }
+.pill-bad  { color: var(--status-bad);  border-color: rgba(185, 28, 28, 0.28); background: rgba(185, 28, 28, 0.08); }
+
+/* ============================================================
+   13. DIVIDERS / HR
+   ============================================================ */
+
+hr, .divider, .ks-divider {
+  border: none;
+  border-top: 1px solid var(--line-1);
+  height: 0;
+  margin: 0;
+}
+
+.divider-strong {
+  border-top-color: var(--line-3);
+}
+
+/* ============================================================
+   14. SELECTION
+   ============================================================ */
+
+::selection {
+  background: var(--brand-primary-soft);
+  color: var(--ink-1);
+}
+
+[data-theme="dark"] ::selection {
+  background: rgba(251, 146, 60, 0.30);
+  color: var(--ink-1);
+}
+
+/* ============================================================
+   15. SCROLLBARS — quiet warm tone
+   ============================================================ */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-3) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--line-2);
+  border-radius: 5px;
+  border: 2px solid var(--surface-0);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--line-3);
+}
+
+/* ============================================================
+   16. UTILITY CLASSES — composable
+   ============================================================ */
+
+.text-ink-1  { color: var(--ink-1); }
+.text-ink-2  { color: var(--ink-2); }
+.text-ink-3  { color: var(--ink-3); }
+.text-brand  { color: var(--brand-primary); }
+.text-good   { color: var(--status-good); }
+.text-warn   { color: var(--status-warn); }
+.text-bad    { color: var(--status-bad); }
+
+.bg-surface-0 { background: var(--surface-0); }
+.bg-surface-1 { background: var(--surface-1); }
+.bg-surface-2 { background: var(--surface-2); }
+.bg-surface-3 { background: var(--surface-3); }
+
+.border-line-1 { border: 1px solid var(--line-1); }
+.border-line-2 { border: 1px solid var(--line-2); }
+.border-line-3 { border: 1px solid var(--line-3); }
+
+/* ============================================================
+   17. AMBIENT — sienna corner glow, paper grain
+   Always-on (very subtle); reduced-motion respects no animation
+   here since this is static.
+   ============================================================ */
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 1200px 800px at 100% 110%, rgba(194, 65, 12, 0.045), transparent 58%),
+    radial-gradient(ellipse 900px 600px at 0% -10%, rgba(28, 27, 26, 0.025), transparent 60%);
+  z-index: 0;
+}
+
+[data-theme="dark"] body::before {
+  background:
+    radial-gradient(ellipse 1100px 780px at 100% 108%, rgba(251, 146, 60, 0.06), transparent 56%),
+    radial-gradient(ellipse 900px 600px at 0% -10%, rgba(231, 229, 228, 0.03), transparent 60%);
+}
+
+/* Keep content above the ambient layer */
+body > * { position: relative; z-index: 1; }
+
+/* ============================================================
+   18. ACCORDION — FAQs / dense detail
+   ============================================================ */
+
+details, .ks-accordion {
+  border-top: 1px solid var(--line-1);
+  padding: 16px 0;
+}
+
+details:last-of-type, .ks-accordion:last-of-type {
+  border-bottom: 1px solid var(--line-1);
+}
+
+details > summary, .ks-accordion-trigger {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: var(--ks-weight-medium);
+  color: var(--ink-1);
+  font-size: 16.5px;
+  letter-spacing: -0.010em;
+}
+
+details > summary::-webkit-details-marker {
+  display: none;
+}
+
+details > summary::after {
+  content: "+";
+  font-family: var(--ks-font-mono);
+  font-size: 18px;
+  color: var(--ink-3);
+  transition: transform var(--ks-motion-fast) var(--ks-ease-standard);
+}
+
+details[open] > summary::after {
+  content: "−";
+  color: var(--brand-primary);
+}
+
+details > *:not(summary) {
+  margin-top: 12px;
+  color: var(--ink-2);
+}
+
+/* ============================================================
+   19. REDUCED MOTION — clamp transitions to zero
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  body::before { display: none; }
+}
+
+/* ============================================================
+   20. SAFETY NETS — undo legacy hard-coded "ugly dark" inline styles
+   that ship on ~510 pages while we incrementally clean them.
+   Any inline background, color, color-scheme is allowed to be
+   overridden by the cascade as long as our overrides are explicit.
+   ============================================================ */
+
+[style*="background:#07090c" i],
+[style*="background:#08090c" i],
+[style*="background:#0a0a0c" i],
+[style*="background:#000" i] {
+  background: var(--surface-0) !important;
+}
+
+[style*="color:#7ef0d2" i],
+[style*="color:#2bf5b3" i] {
+  color: var(--brand-primary) !important;
+}
+
+/* Color-scheme hint follows our explicit attribute, not the inline style */
+html[data-theme="light"] { color-scheme: light; }
+html[data-theme="dark"]  { color-scheme: dark; }
+html:not([data-theme])   { color-scheme: light; }

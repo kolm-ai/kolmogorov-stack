@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Why now guide · kolm.ai</title>
-<meta name="description" content="Three trends converged in 2025-2026: frontier models stopped being a competitive advantage, per-token economics broke for high-volume teams, and regulators...">
+<title>Why now: the AI compiler window opened · kolm.ai</title>
+<meta name="description" content="Frontier capability commoditized. Per-token economics broke. Regulators started gating cloud-hosted inference. The AI compiler shows up where those lines cross.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="Why now guide · kolm.ai">
-<meta property="og:description" content="Three trends converged in 2025-2026: frontier models stopped being a competitive advantage, per-token economics broke for high-volume teams, and regulators...">
+<meta property="og:title" content="Why now: the AI compiler window opened · kolm.ai">
+<meta property="og:description" content="Frontier capability commoditized. Per-token economics broke. Regulators started gating cloud-hosted inference. The AI compiler shows up where those lines cross.">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Why now guide · kolm.ai">
-<meta name="twitter:description" content="Three trends converged in 2025-2026: frontier models stopped being a competitive advantage, per-token economics broke for high-volume teams, and regulators...">
+<meta name="twitter:title" content="Why now: the AI compiler window opened · kolm.ai">
+<meta name="twitter:description" content="Frontier capability commoditized. Per-token economics broke. Regulators started gating cloud-hosted inference.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/why-now">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -92,7 +92,7 @@
  "applicationCategory": "DeveloperApplication",
  "operatingSystem": "Linux, macOS, Windows (WSL)",
  "url": "https://kolm.ai/why-now",
- "description": "Three trends converged in 2025-2026: frontier models stopped being a competitive advantage, per-token economics broke for high-volume teams, and regulators started gating cloud-hosted inference. The compile step shows up exactly where those lines cross.",
+ "description": "Frontier capability commoditized. Per-token economics broke for high-volume teams. Regulators started gating cloud-hosted inference. The compile step shows up exactly where those lines cross.",
  "offers": {
  "@type": "Offer",
  "price": "0",
@@ -106,6 +106,7 @@
 }
 </script>
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
@@ -139,8 +140,11 @@
 <section class="hero">
  <div class="wrap">
  <span class="pill">why now</span>
- <h1>Three lines crossed <span class="tone">at the same time.</span></h1>
- <p class="lede">A compiler for AI was inevitable; it became urgent in 2026 because the gap between frontier and open models closed, regulators started asking for provenance, and the per-token bill broke unit economics for high-volume teams. kolm is what happens when those three problems are the same problem.</p>
+ <h1>The lines crossed <span class="tone">at the same time.</span></h1>
+ <p class="lede">An AI compiler became urgent in 2026 because the gap between frontier and open models closed, regulators started asking for provenance, and the per-token bill broke unit economics. kolm is what happens when those problems are the same problem.</p>
+ <pre class="code" style="margin-top:22px;max-width:64ch"><span class="c"># compile the cheapest current frontier into a student you own</span>
+$ kolm compile spec.json --teacher claude-opus-4-7 --base qwen2.5-7b
+<span class="c"># &rarr; signed .kolm, K-score gate passed, $0 per-token from now on</span></pre>
  </div>
 </section>
 
@@ -148,13 +152,13 @@
  <div class="wrap">
 
  <div class="group">
- <h2>Three forces, one answer</h2>
+ <h2>The forces that converged</h2>
 
  <div class="num-pillar">
  <div class="num">01</div>
  <div>
  <h3>Frontier capability commoditized.</h3>
- <p>In late 2024 and through 2025, the gap between top frontier models (GPT-4 / Claude / Gemini / Mistral / Hermes) collapsed to within a few points on most benchmarks that matter. Open-weight 70B-class models reached parity with hosted frontier of 18 months prior. The "use the best frontier" pitch lost its edge: picking the right teacher is now a routing decision, not an exclusive purchase.</p>
+ <p>Through 2025, the gap between top frontier models (GPT-4 / Claude / Gemini / Mistral / Hermes) collapsed to within a few points on most benchmarks that matter. Open-weight 70B-class models reached parity with hosted frontier of 18 months prior. "Use the best frontier" stopped being a strategy. Picking the right teacher is now a routing decision, not an exclusive purchase.</p>
  </div>
  </div>
 
@@ -162,7 +166,7 @@
  <div class="num">02</div>
  <div>
  <h3>Per-token economics broke.</h3>
- <p>For agent workloads, code review, document classification, content generation at scale, the per-token bill at $5&hellip;15 per million tokens compounds into five- and six-figure monthly invoices. Companies that started in 2023 with frontier-everything are migrating tier-by-tier to local. The compile step is exactly that migration: pay the frontier <b>once</b>, run the student forever.</p>
+ <p>For agent workloads, code review, document classification, content generation at scale, $5 to $15 per million tokens compounds into five- and six-figure monthly invoices. Teams that started in 2023 with frontier-everything are migrating tier-by-tier to local. The compile step <i>is</i> that migration: pay the frontier <b>once</b>, run the student forever.</p>
  </div>
  </div>
 
@@ -170,7 +174,7 @@
  <div class="num">03</div>
  <div>
  <h3>Sovereignty got regulated.</h3>
- <p>EU AI Act enforcement starts in 2026 for general-purpose AI providers and 2027 for high-risk use. Article 50 demands provenance for AI-generated content. NIST AI RMF, ISO/IEC 42001, and the FTC's deceptive-pattern rulemaking all converge on the same requirement: <b>you must be able to prove what your AI did.</b> A signed receipt chain over a local artifact is the cleanest possible answer to that requirement.</p>
+ <p>EU AI Act enforcement starts in 2026 for general-purpose AI providers and 2027 for high-risk use. Article 50 demands provenance for AI-generated content. NIST AI RMF, ISO/IEC 42001, and the FTC's deceptive-pattern rulemaking all converge on the same requirement: <b>you must be able to prove what your AI did.</b> A signed receipt chain over a local artifact is the cleanest answer.</p>
  </div>
  </div>
 
@@ -178,24 +182,24 @@
 
  <div class="group">
  <h2>The compounding pressure</h2>
- <p>Each of the three forces alone justifies a niche product. Together they justify a primitive. A team that adopted a frontier API for a real workload in 2024 hits all three within 12 months: the model that was special is now one of five equivalent options; the bill that was small is now hard to justify; the auditor is now asking how the AI made that decision.</p>
- <p>The compile step solves all three with one operation. <b>Compile</b> takes whichever frontier is cheapest this quarter and uses it as a teacher. <b>Compile</b> turns the per-token bill into a one-time charge. <b>Compile</b> emits a signed manifest the auditor can verify.</p>
+ <p>Each force alone justifies a niche product. Together they justify a primitive. A team that adopted a frontier API for a real workload in 2024 hits all three within 12 months: the model that was special is now one of many equivalent options; the bill that was small is now hard to justify; the auditor is now asking how the AI made that decision.</p>
+ <p>The compile step answers all of them in one operation. <b>Compile</b> takes whichever frontier is cheapest this quarter and uses it as a teacher. <b>Compile</b> turns the per-token bill into a one-time charge. <b>Compile</b> emits a signed manifest the auditor can verify.</p>
 
  <blockquote class="q">
- "We have been moving from frontier APIs to local-first inference for our high-volume tasks not because frontier got worse, but because $40k/mo for token spend wasn't justifiable when an open-weight 8B model fine-tuned on our data hit 95% of the same quality."
- <span class="src">common pattern, 2025&hellip;026</span>
+ "We moved high-volume tasks from frontier APIs to local-first inference not because frontier got worse, but because $40k/mo for token spend wasn't justifiable when an 8B open-weight model fine-tuned on our data hit 95% of the same quality."
+ <span class="src">common pattern, 2025&ndash;2026</span>
  </blockquote>
  </div>
 
  <div class="group">
  <h2>Why "now" and not 2024</h2>
- <p>Three things had to be true for the compile model to work, and they all became true within 18 months of each other:</p>
+ <p>For the compile model to work, certain preconditions had to be true. They all became true within an 18-month window:</p>
 
  <div class="num-pillar">
  <div class="num">A</div>
  <div>
  <h3>Open-weight bases got good enough.</h3>
- <p>Qwen2.5, Llama-3, Hermes-3, Phi-3 (all released within an 18-month window) finally cleared the threshold where a LoRA-distilled student of a frontier teacher actually wins on the user's task. Pre-2024, the floor was too low. The compile step would have produced a sub-quality artifact.</p>
+ <p>Qwen2.5, Llama-3, Hermes-3, Phi-3 (all released within an 18-month window) cleared the threshold where a LoRA-distilled student of a frontier teacher actually wins on the user's task. Pre-2024, the floor was too low. Compile would have produced a sub-quality artifact.</p>
  </div>
  </div>
 
@@ -203,7 +207,7 @@
  <div class="num">B</div>
  <div>
  <h3>Phones became real inference targets.</h3>
- <p>iOS Neural Engine and Android NPUs in 2025 silicon (Apple A18, Snapdragon 8 Gen 4, Tensor G4) cleared the bar where a 3B-class INT4 model runs at usable speed for agentic workloads, not only chat. The deployment surface that "compile-and-run-anywhere" needs finally exists.</p>
+ <p>iOS Neural Engine and Android NPUs in 2025 silicon (Apple A18, Snapdragon 8 Gen 4, Tensor G4) cleared the bar where a 3B-class INT4 model runs at usable speed for agentic workloads, not just chat. The deployment surface "compile-and-run-anywhere" needs now exists.</p>
  </div>
  </div>
 
@@ -211,7 +215,7 @@
  <div class="num">C</div>
  <div>
  <h3>Cryptographic provenance reached general expectation.</h3>
- <p>Code-signing in CI/CD (Sigstore, SLSA), supply-chain attestation (in-toto), reproducible builds: every adjacent area of software shipped this in 2023&hellip;025. The pattern is now familiar enough that demanding the same for AI outputs is a question of when, not whether.</p>
+ <p>Code-signing in CI/CD (Sigstore, SLSA), supply-chain attestation (in-toto), reproducible builds: every adjacent area of software shipped this in 2023&ndash;2025. The pattern is familiar enough that demanding the same for AI outputs is a question of when, not whether.</p>
  </div>
  </div>
 
@@ -219,7 +223,7 @@
 
  <div class="group">
  <h2>What this means for you</h2>
- <p>If you are operating a real LLM workload today, you will hit at least one of those three forces in the next 12 months. The earliest movers are already migrating. The compile step is the route they take.</p>
+ <p>If you operate a real LLM workload today, you will hit at least one of these forces in the next 12 months. The earliest movers are already migrating. The compile step is the route they take.</p>
  <pre class="code"><span class="c"># the migration, in one command</span>
 kolm compile <span style="color:var(--accent-strong);">"$YOUR_TASK"</span> \
  --examples ./examples.jsonl \
@@ -227,9 +231,9 @@ kolm compile <span style="color:var(--accent-strong);">"$YOUR_TASK"</span> \
  --base qwen2.5-7b
 <span class="c">
 # what you get back:
-# - .kolm file, - GB
+# - .kolm artifact
 # - K-score over your held-out set
-# - Ed25519 artifact signature + per-call _kolm metadata
+# - Ed25519 signature + per-call _kolm metadata
 # - $0 per-token from this point on</span></pre>
  </div>
 

@@ -8,16 +8,17 @@
 <meta name="description" content="A real capture-distill-compile-deploy walkthrough that turns your closed-ticket corpus into a small support replier that sounds like your team and runs on your hardware without leaking customer data offsite.">
 <link rel="canonical" href="https://kolm.ai/docs/cookbook/support-bot">
 <meta property="og:title" content="Distill a support bot &middot; cookbook &middot; kolm.ai">
-<meta property="og:description" content="Compress a teacher support replier into a 3B INT4 model trained on your closed tickets.">
+<meta property="og:description" content="Compress a teacher support replier into a 32B INT4 model trained on your closed tickets.">
 <meta property="og:url" content="https://kolm.ai/docs/cookbook/support-bot">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Distill a support bot &middot; cookbook &middot; kolm.ai">
-<meta name="twitter:description" content="Compress a teacher support replier into a 3B INT4 model trained on your closed tickets.">
+<meta name="twitter:description" content="Compress a teacher support replier into a 32B INT4 model trained on your closed tickets.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/docs-shell.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/docs-shell.js"></script>
 <style>
 .step{padding:18px 22px;border:1px solid var(--line,rgba(236,231,220,0.08));border-radius:12px;background:var(--bg-elev,#101316);margin:14px 0}
@@ -60,12 +61,12 @@ pre{background:#06080a;color:#e9eef3;border:1px solid var(--line,rgba(236,231,22
 <header class="page-h">
  <p class="eyebrow">Open-source AI workbench</p>
  <h1>Distill a support bot.</h1>
- <p class="lede">Replay your closed-ticket corpus into a small replier that sounds like your team, never leaks customer data offsite, and answers in roughly the time your fastest agent takes to read the ticket. The recipe trades the cost and risk of sending tickets to a hosted frontier model for a 3B INT4 model you own end-to-end. Every step uses the standard kolm CLI.</p>
+ <p class="lede">Replay your closed-ticket corpus into a small replier that sounds like your team, never leaks customer data offsite, and answers in roughly the time your fastest agent takes to read the ticket. The recipe trades the cost and risk of sending tickets to a hosted frontier model for a 32B INT4 model you own end-to-end. Every step uses the standard kolm CLI.</p>
 </header>
 
 <section data-w789="build">
  <h2>What you will build</h2>
- <p>A 3B INT4 support replier compiled from your closed tickets and your team's review labels. The model handles tier-1 replies, classifies escalation paths, and drafts in your house voice. The example deployment is a single GPU box behind your support tool's webhook, returning a draft reply within the average agent read-time so the human reviews instead of writes.</p>
+ <p>A 32B INT4 support replier compiled from your closed tickets and your team's review labels. The model handles tier-1 replies, classifies escalation paths, and drafts in your house voice. The example deployment is a single GPU box behind your support tool's webhook, returning a draft reply within the average agent read-time so the human reviews instead of writes.</p>
  <p>In a representative team's run we have seen roughly 50x lower per-call cost than the frontier API the team was previously using, p95 latency around 180ms on an RTX 4090, and the privacy property that customer ticket text never leaves the team's network. Your numbers will differ &mdash; these are example values from one representative run.</p>
 </section>
 
@@ -75,7 +76,7 @@ pre{background:#06080a;color:#e9eef3;border:1px solid var(--line,rgba(236,231,22
    <li><b>kolm CLI</b> &mdash; <code>npm i -g @kolmogorov/cli</code> or the Python SDK install path from <a href="/docs/quickstart/python">the Python quickstart</a>.</li>
    <li><b>API key</b> &mdash; <code>kolm login</code> or sign up at <code>/signup</code>.</li>
    <li><b>Capture source</b> &mdash; an existing closed-ticket dataset (CSV, JSONL, or pulled live from Zendesk/Front/Help Scout via the kolm connector). You need roughly 2000 to 10000 ticket/reply pairs with at least a thumbs-up signal.</li>
-   <li><b>GPU for compile</b> &mdash; an RTX 4090 or better is enough for a 3B INT4 student. Compile takes around 90 minutes for a 5000-ticket corpus on a 5090.</li>
+   <li><b>GPU for compile</b> &mdash; an RTX 4090 or better is enough for a 32B INT4 student. Compile takes around 90 minutes for a 5000-ticket corpus on a 5090.</li>
    <li><b>PII redaction policy</b> &mdash; the recipe redacts emails, phone numbers, order IDs, and free-form addresses before any capture lands in the lake. Defaults are HIPAA-grade; customize via <code>kolm capture redact --policy ./policy.json</code>.</li>
  </ul>
 </section>

@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Lineage &middot; model lineage tracking &middot; kolm.ai</title>
-<meta name="description" content="Each .kolm references its parent artifact via the manifest parent_cid field. Walk the chain with `kolm lineage <cid>`. Diff two versions and roll back with `kolm diff <a.kolm> <b.kolm>`. Lineage tracking baked into the file format.">
+<meta name="description" content="Each .kolm references its parent artifact via the manifest parent_cid field. Walk the chain with `kolm lineage <cid>`. Diff two versions and roll back with `kolm diff <a.kolm> <b.kolm>`. Lineage tracking baked into the">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="Lineage &middot; model lineage tracking &middot; kolm.ai">
@@ -69,6 +69,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <link rel="stylesheet" href="/ks.css">
 <!-- ds-shell W619 -->
 <link rel="stylesheet" href="/docs-shell.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/docs-shell.js"></script>
 
 </head>
@@ -104,12 +105,12 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p class="lede">Every <code>.kolm</code> artifact carries a <code>parent_cid</code> pointer to the artifact it descended from. The chain is content-addressed, the hash is part of the receipt seal, and a tamperer cannot rewrite history without invalidating every downstream signature. Walk the chain with <code>kolm lineage &lt;cid&gt;</code>, compare two versions with <code>kolm diff</code>, and roll back from the same terminal you shipped from.</p>
 
 <h2 id="why">Why lineage ships inside the file</h2>
-<p>Most ML platforms record lineage in a separate metadata service: a database somewhere remembers that model v3.2.1 descended from v3.2.0. The footgun is obvious — when the metadata service goes down or the row gets corrupted, lineage is gone. kolm.ai bakes the parent pointer into the manifest itself, so the file IS the source of truth. The chain is verifiable offline; the chain is verifiable years after the metadata service was decommissioned; the chain is verifiable on an air-gapped reproducer who has never heard of your control plane.</p>
+<p>Most ML platforms record lineage in a separate metadata service: a database somewhere remembers that model v3.2.1 descended from v3.2.0. The footgun is obvious  -  when the metadata service goes down or the row gets corrupted, lineage is gone. kolm.ai bakes the parent pointer into the manifest itself, so the file IS the source of truth. The chain is verifiable offline; the chain is verifiable years after the metadata service was decommissioned; the chain is verifiable on an air-gapped reproducer who has never heard of your control plane.</p>
 
-<p>The W460 byte-stability law is preserved: artifacts that do not declare a parent (root / first-of-line) carry NO <code>parent_cid</code> key, so their bytes are byte-identical to pre-W739 artifacts rebuilt today. Only artifacts that explicitly descend from a parent carry the new field — and when they do, the parent_cid is folded into <code>artifact_hash_input</code> immediately adjacent to <code>guardrails_hash</code>, so swapping the pointer post-build breaks the receipt chain loudly.</p>
+<p>The W460 byte-stability law is preserved: artifacts that do not declare a parent (root / first-of-line) carry NO <code>parent_cid</code> key, so their bytes are byte-identical to pre-W739 artifacts rebuilt today. Only artifacts that explicitly descend from a parent carry the new field  -  and when they do, the parent_cid is folded into <code>artifact_hash_input</code> immediately adjacent to <code>guardrails_hash</code>, so swapping the pointer post-build breaks the receipt chain loudly.</p>
 
 <h2 id="parent_cid">The parent_cid field</h2>
-<p>The field is a string: 64 lowercase hex characters (a sha256 digest) or absent. There is no third option — a partial cid, an upper-case cid, or a non-hex string throws at build time so a malformed lineage pointer never reaches a deployed artifact. The validator lives in <code>src/artifact-lineage.js#setParentCid</code> and the build-time guard lives in <code>src/artifact.js#buildPayload</code>.</p>
+<p>The field is a string: 64 lowercase hex characters (a sha256 digest) or absent. There is no third option  -  a partial cid, an upper-case cid, or a non-hex string throws at build time so a malformed lineage pointer never reaches a deployed artifact. The validator lives in <code>src/artifact-lineage.js#setParentCid</code> and the build-time guard lives in <code>src/artifact.js#buildPayload</code>.</p>
 
 <table>
   <thead><tr><th>State</th><th>manifest.parent_cid</th><th>artifact_hash_input.parent_cid</th></tr></thead>
@@ -167,10 +168,10 @@ depth  cid           k_score  parent_cid    created_at
 recommendation: [promote]  no regression; safe to promote e9b07c…3b4c as the new production artifact
 </code></pre>
 
-<p>The envelope shape is identical when the same comparison is run server-side via <code>POST /v1/artifact/diff</code> with body <code>{a_cid, b_cid}</code> — the only difference is the route resolves cids through the tenant-fenced loader instead of file paths.</p>
+<p>The envelope shape is identical when the same comparison is run server-side via <code>POST /v1/artifact/diff</code> with body <code>{a_cid, b_cid}</code>  -  the only difference is the route resolves cids through the tenant-fenced loader instead of file paths.</p>
 
 <h2 id="rollback">Roll-back via kolm pin</h2>
-<p>When the recommendation pill is <code>roll_back</code>, the playbook is one command: pin the prior artifact's cid so the runtime serves it instead of the new build. <code>kolm pin &lt;cid&gt;</code> writes the chosen cid into the tenant's active-artifact pointer; the next inference request resolves through the pinned artifact instead of the latest publish. The original artifact bytes are still in the registry — nothing has been deleted — so re-pinning forward is also one command when the regression is fixed.</p>
+<p>When the recommendation pill is <code>roll_back</code>, the playbook is one command: pin the prior artifact's cid so the runtime serves it instead of the new build. <code>kolm pin &lt;cid&gt;</code> writes the chosen cid into the tenant's active-artifact pointer; the next inference request resolves through the pinned artifact instead of the latest publish. The original artifact bytes are still in the registry  -  nothing has been deleted  -  so re-pinning forward is also one command when the regression is fixed.</p>
 
 <pre><code># roll back to the parent artifact when the new version regresses
 $ kolm diff ~/.kolm/artifacts/v3.2.0.kolm ~/.kolm/artifacts/v3.2.1.kolm
@@ -180,10 +181,10 @@ $ kolm pin f1a2b3c4d5e6...
 pinned: f1a2b3c4d5e6...  (now active for tenant_id=...)
 </code></pre>
 
-<p>The roll-back has zero downtime because the pinned artifact is already in the registry — there is no rebuild, no redeploy, no compile job. Forward-fixing the regression follows the same loop: distill a new candidate, <code>kolm diff</code> against the pinned baseline, and <code>kolm pin</code> the new cid when the recommendation flips back to <code>promote</code>.</p>
+<p>The roll-back has zero downtime because the pinned artifact is already in the registry  -  there is no rebuild, no redeploy, no compile job. Forward-fixing the regression follows the same loop: distill a new candidate, <code>kolm diff</code> against the pinned baseline, and <code>kolm pin</code> the new cid when the recommendation flips back to <code>promote</code>.</p>
 
 <h2 id="ab">A/B testing</h2>
-<p>The W777 routing fabric wires <code>kolm pin</code> into a percentage-weighted A/B split: pin <code>{cid_a: 80, cid_b: 20}</code> and the runtime serves the new build to 20% of traffic. The lineage chain is what makes the A/B safe — both arms are content-addressed, both are signed, both descend from the same parent so a per-axis K-Score delta is the right measurement. For W739 the chain + diff land first; the routing fabric ships in W777.</p>
+<p>The W777 routing fabric wires <code>kolm pin</code> into a percentage-weighted A/B split: pin <code>{cid_a: 80, cid_b: 20}</code> and the runtime serves the new build to 20% of traffic. The lineage chain is what makes the A/B safe  -  both arms are content-addressed, both are signed, both descend from the same parent so a per-axis K-Score delta is the right measurement. For W739 the chain + diff land first; the routing fabric ships in W777.</p>
 
 <h2 id="api">API + CLI</h2>
 <table>

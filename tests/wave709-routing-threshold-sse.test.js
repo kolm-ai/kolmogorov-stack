@@ -1,3 +1,5 @@
+// @unauthed-test — /v1/route/chat/completions/stream uses __w411HostedAuthGate which stamps a
+// local-daemon sentinel tenant in non-hosted mode; tests intentionally run without a Bearer key.
 // W709-3 + W709-4 — routing-threshold knob + SSE streaming router.
 //
 // These tests assert observable behavior, NOT internal structure:

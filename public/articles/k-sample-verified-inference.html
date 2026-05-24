@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -193,6 +193,7 @@
 
 
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <a href="#main" class="ks-skip">Skip to content</a>
@@ -250,7 +251,7 @@
  <li><b>What was the exact prompt?</b> (Was it the system message your team approved, or one mutated by middleware?)</li>
  <li><b>Was the output stable, or a one-shot accident?</b> (Did anyone re-roll the same prompt before deciding to act on the answer?)</li>
  </ul>
- <p>Three questions, one missing object: a receipt. Software has been auditing itself with cryptographic logs since the 1980s. Frontier model output is the first widely deployed compute primitive that does not, by default, leave a trail.</p>
+ <p>One missing object behind all of them: a receipt. Software has been auditing itself with cryptographic logs since the 1980s. Frontier model output is the first widely deployed compute primitive that does not, by default, leave a trail.</p>
 
  <h2 id="zkml">Why zk-ML is not the answer (yet).</h2>
  <p>The cryptographer's reflex is to reach for zero-knowledge proofs. <b>Prove that some statement about a private witness - "this output came from this model on this prompt" --is true, without revealing the witness.</b> The math is elegant. The cost is brutal.</p>
@@ -284,7 +285,7 @@ function verified(client, prompt, k = 8, verifier) {
  <span class="kw">return</span> { output: winner, receipt };
 }</pre>
 
- <p>Three properties make this work.</p>
+ <p>The properties that make this work.</p>
  <p><b>Determinism.</b> The verifier is pure. Same input, same output, every time. The samples can be replayed and the winner re-derived without re-querying the model.</p>
  <p><b>Diversity.</b> k samples, different seeds (or different temperatures, or both). When the model is confident, all k samples cluster around the same answer; when it is unsure, they split. The verifier resolves the split.</p>
  <p><b>Anchoring.</b> The receipt is Ed25519-chained against the previous receipt. An adversary who alters one entry has to forge every subsequent receipt. The Enterprise tier extends the chain into Sigstore / Rekor for cross-organization audit; the default Pro chain is re-verifiable offline using the shared tenant receipt secret against the artifact bytes (public-key receipts ship alongside, via the sidecar).</p>
@@ -410,7 +411,7 @@ function score(input, output) {
  <a href="/k-score">
  <span class="lab">measure</span>
  <span class="v">The K-score, defined <span class="arrow">&rarr;</span></span>
- <p>The single number on the cover, derived from five.</p>
+ <p>The single number on the cover, and the inputs that derive it.</p>
  </a>
  <a href="/compile">
  <span class="lab">act</span>

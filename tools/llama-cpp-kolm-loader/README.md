@@ -34,6 +34,40 @@ A `.kolm` is a deterministic zip archive. The loader needs three things:
 3. Pass the verified `weights.bin` byte range to the existing GGUF path
    (which is already mmap-friendly).
 
+## .kolm zip layout (W818-1 reference)
+
+`kolm-loader.cpp` in this directory documents the canonical entries the
+loader reads. Mirrors `src/artifact.js` in the kolm.ai repo (`loadArtifact`
+in `src/artifact-runner.js` is the JS-side equivalent):
+
+| zip entry            | required? | purpose                                                          |
+| -------------------- | --------- | ---------------------------------------------------------------- |
+| `manifest.json`      | yes       | task descriptor, hashes, runtime_target, K-Score, tier           |
+| `recipes.json`       | yes       | deterministic recipe pack (executed in vm sandbox)               |
+| `signature.sig`      | yes       | HMAC chain OR Ed25519 signature over the canonical receipt body  |
+| `receipt.json`       | conditional | 5-step HMAC chain; mandatory for Ed25519-signed artifacts      |
+| `evals.json`         | optional  | eval cases bundled inside the artifact                           |
+| `weights/`           | optional  | sharded weights directory (kolm v1.1+, `shard_<rank>_of_<tp>.gguf`) |
+| `model.gguf`         | optional  | inner GGUF for the `distilled_model` class                       |
+| `lora.bin`           | optional  | KOLMPACK\x01 behaviour pack OR a real LoRA delta (LoRA tier)     |
+| `index.sqlite-vec`   | optional  | KOLMIDX\x01 lookup index OR a real sqlite-vec database           |
+| `runtime-policy.json`| optional  | W709 routing thresholds + W736 guardrails + W746 staleness gates |
+| `attestation.json`   | optional  | confidential-compute attestation report (PCCS / SNP / Nitro / NRAS) |
+
+The loader cracks open only the entries it needs to mmap weights. K-Score,
+drift gates, attestation enforcement, and routing decisions stay in
+`kolm-cli`; this loader is purely a load-time substitute for the explicit
+`kolm unpack` step.
+
+## Files in this directory
+
+- `README.md` (this file) — patch series overview and submission plan.
+- `kolm-loader.cpp` — annotated C++ skeleton documenting the zip layout
+  and the verify/load callbacks. Bodies are stubs pending upstream merge.
+- `patch.diff` — three-commit patch series stub against llama.cpp main
+  (detect_container refactor → kolm container with verify hook → integration
+  test fixture). Not yet sent upstream.
+
 The loader does NOT crack open any other manifest fields. K-Score, drift
 gates, attestation, and routing decisions stay in kolm CLI; this is purely
 a load-time substitute for the explicit `kolm unpack` step.

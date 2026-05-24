@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -69,6 +69,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <link rel="stylesheet" href="/ks.css">
 <!-- ds-shell W619 -->
 <link rel="stylesheet" href="/docs-shell.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/docs-shell.js"></script>
 
 </head>
@@ -149,7 +150,7 @@ kolm migrate from-lmstudio --name llama-3.2-3b-instruct-q4_k_m
 </code></pre>
 
 <h2 id="doctor">Health check</h2>
-<p><code>kolm migrate doctor</code> reports which default roots exist on this host and how many models we found in each — useful for confirming the right Ollama / LM Studio install is being picked up before you start wrapping things.</p>
+<p><code>kolm migrate doctor</code> reports which default roots exist on this host and how many models we found in each  -  useful for confirming the right Ollama / LM Studio install is being picked up before you start wrapping things.</p>
 
 <pre><code>kolm migrate doctor
 </code></pre>
@@ -174,9 +175,9 @@ kolm migrate from-lmstudio --name llama-3.2-3b-instruct-q4_k_m
 }
 </code></pre>
 
-<p><strong>Migration alone never earns a K-Score.</strong> The wrap exists so the migrated model can ride through catalog / inspect / signature flows immediately — but to claim it is kolm-compiled, you have to run <code>kolm distill</code> on real seeds and let the artifact earn a K-Score on a holdout, exactly like a fresh distill would.</p>
+<p><strong>Migration alone never earns a K-Score.</strong> The wrap exists so the migrated model can ride through catalog / inspect / signature flows immediately  -  but to claim it is kolm-compiled, you have to run <code>kolm distill</code> on real seeds and let the artifact earn a K-Score on a holdout, exactly like a fresh distill would.</p>
 
-<pre><code># 1. Migrate the existing Ollama model — wrapped not_kolm_compiled manifest.
+<pre><code># 1. Migrate the existing Ollama model  -  wrapped not_kolm_compiled manifest.
 kolm migrate from-ollama --name llama3.2:3b
 
 # 2. Re-distill against your captured traffic (this is where the K-Score is earned).
@@ -212,9 +213,9 @@ kolm export llama-distilled.kolm --backend gguf --quant q4_k_m --out ./exports
   <tbody>
     <tr><td><code>ollama_root_missing</code></td><td>No default Ollama root exists and no <code>--path</code> was supplied</td><td>5 (NOT_FOUND)</td></tr>
     <tr><td><code>lmstudio_root_missing</code></td><td>No default LM Studio root exists and no <code>--path</code> was supplied</td><td>5 (NOT_FOUND)</td></tr>
-    <tr><td><code>ollama_library_missing</code></td><td>Root exists but <code>manifests/registry.ollama.ai/library/</code> is absent — run <code>ollama pull</code> first</td><td>5 (NOT_FOUND)</td></tr>
+    <tr><td><code>ollama_library_missing</code></td><td>Root exists but <code>manifests/registry.ollama.ai/library/</code> is absent  -  run <code>ollama pull</code> first</td><td>5 (NOT_FOUND)</td></tr>
     <tr><td><code>model_not_found</code></td><td><code>--name</code> didn't match any discovered model</td><td>1 (BAD_ARGS)</td></tr>
-    <tr><td><code>python3_missing</code></td><td>No <code>python3</code> on PATH — the W740 GGUF parser needs it</td><td>3 (MISSING_PREREQ) / HTTP 503</td></tr>
+    <tr><td><code>python3_missing</code></td><td>No <code>python3</code> on PATH  -  the W740 GGUF parser needs it</td><td>3 (MISSING_PREREQ) / HTTP 503</td></tr>
     <tr><td><code>invalid_source</code></td><td><code>source</code> was not <code>"ollama"</code> or <code>"lmstudio"</code></td><td>1 (BAD_ARGS) / HTTP 400</td></tr>
   </tbody>
 </table>

@@ -156,10 +156,11 @@ test('W373 #9 - W271/W220/W260 data markers preserved (no regression)', () => {
 });
 
 test('W373 #10 - sw.js CACHE slug follows kolm-v7-YYYY-MM-DD-waveN-* format', () => {
-  const m = SW.match(/const\s+CACHE\s*=\s*['"]([^'"]+)['"]/);
-  assert.ok(m, 'sw.js must declare a CACHE constant');
-  assert.match(m[1], /^kolm-v7-\d{4}-\d{2}-\d{2}-wave\d+(-[a-z0-9-]+)*$/,
-    'CACHE must match kolm-v7-YYYY-MM-DD-waveN-<slug> format so each wave invalidates old caches: ' + m[1]);
+  // W604 anti-brittleness: scan all wave tokens, assert max >= 373.
+  const waves = [...SW.matchAll(/wave(\d{3,4})/g)].map((m) => parseInt(m[1], 10));
+  assert.ok(waves.length > 0, 'sw.js must carry at least one wave token');
+  const maxWave = Math.max(...waves);
+  assert.ok(maxWave >= 373, 'sw.js CACHE wave must reach >= 373 (saw max wave' + maxWave + ')');
 });
 
 test('W373 #11 - vercel.json rewrites the four target routes', () => {

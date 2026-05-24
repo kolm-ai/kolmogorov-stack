@@ -1,0 +1,26 @@
+{{- /*
+W824-1 — ClusterIP Service exposing the kolm runtime to in-cluster
+consumers. Default port is 3000 (matches the dev-default for `kolm tunnel`
+and the SDKs). Operators that need external traffic should layer an Ingress
+or LoadBalancer in front; the chart deliberately stays ClusterIP-only so
+we never accidentally expose an unauth'd dev deploy.
+*/ -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "kolm.fullname" . }}
+  labels:
+    {{- include "kolm.labels" . | nindent 4 }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "kolm.selectorLabels" . | nindent 4 }}

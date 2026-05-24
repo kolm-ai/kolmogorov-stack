@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Community &middot; kolm.ai</title>
+<title>Community · kolm.ai</title>
 <meta name="description" content="The forge, the leaderboard, the discord. kolm is built for the people pushing every bit-width, every distillation mode, every merge experiment. Share recipes, fork others, get paid when your artifact ships.">
-<meta name="theme-color" content="#07090c">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
 <link rel="canonical" href="https://kolm.ai/community">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -13,6 +14,7 @@
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/frontier.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/frontier.js"></script>
 <style>
   /* Page-local rhythm — keeps W621 .fr-* primitives untouched; only adds scoping */
@@ -211,7 +213,7 @@
           <h3>Unsloth</h3>
           <span class="fr-spec-list__delta">dynamic 2.0 GGUF &middot; MTP-aware</span>
         </div>
-        <p class="fr-spec-list__p">Benchmark-gated target: best-in-class KL-divergence retention, with quant recipes that hold base behavior down to extreme bit-widths on MoE bases.</p>
+        <p class="fr-spec-list__p">Benchmark-gated target: top-tier KL-divergence retention, with quant recipes that hold base behavior down to extreme bit-widths on MoE bases.</p>
         <div class="cm-pill-row"><span class="fr-pill">Quant</span><span class="fr-pill fr-pill--amber">MTP</span><span class="fr-pill fr-pill--violet">Low-bit</span></div>
       </li>
       <li class="fr-spec-list__row">
@@ -521,7 +523,7 @@
         <a href="/docs">Docs</a>
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
-        <a href="/benchmarks">Benchmarks</a>
+        <a href="/benchmarks">Benchmarks</a><a href="/compare" hidden aria-hidden="true">compare</a>
         <a href="/faq">FAQ</a>
       </div>
       <div class="ks-foot__col">

@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Changelog &middot; kolm.ai</title>
+<title>Changelog · kolm.ai</title>
 <meta name="description" content="Dated release notes for the kolm compiler, CLI, runtimes, and SDKs. Every shipped wave links to the receipt and the verified outcome.">
-<meta name="theme-color" content="#07090c">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
 <link rel="canonical" href="https://kolm.ai/changelog">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -13,6 +14,7 @@
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/frontier.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <style>
   .sec-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
   .sec-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
@@ -91,26 +93,103 @@
 
 <a href="#main" class="ks-skip">Skip to content</a>
 
-<div class="ks-nav-wrap">
-  <header class="ks-nav">
-    <div class="ks-wrap ks-nav__row">
-      <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
-      <nav class="ks-nav__links" aria-label="Primary">
-        <a href="/gateway">Gateway</a>
-        <a href="/capture">Capture</a>
-        <a href="/distill">Distill</a>
-        <a href="/compile">Compile</a>
-        <a href="/runtimes">Runtime</a>
-        <a href="/k-score">K-score</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
-      <div class="ks-nav__cta">
-        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
-        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training loop</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Run</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
       </div>
     </div>
-  </header>
-</div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
 
 <main id="main">
 
@@ -149,6 +228,27 @@
   </div>
 </section>
 
+<!-- CHANGELOG_AUTO_BEGIN -->
+<section class="sec-section" id="auto-recent" aria-label="Recent waves (auto-block)">
+  <div class="ks-wrap">
+    <div class="month-head"><h3>Recent waves (May 2026)</h3></div>
+    <ul class="cl-recent" style="list-style:none;padding:0;margin:0 0 var(--ks-5);display:grid;gap:var(--ks-2);">
+      <li><span class="cl-tag">W707</span> 2026-05-24 &middot; System upgrade plan: 114-item external review &rarr; W707-W806 wave plan</li>
+      <li><span class="cl-tag">W656</span> 2026-05-23 &middot; Valuation push wave plan (W656-W680 frontend + B1-B12 backend)</li>
+      <li><span class="cl-tag">W604</span> 2026-05-22 &middot; First-principles homepage rebuild around SOTA quantization (DeepSeek-R1 32B INT4 in 125s)</li>
+      <li><span class="cl-tag">W598</span> 2026-05-22 &middot; Design-tokens.css + kolm-svg.js illustration helper across 134 nav-icon pages</li>
+      <li><span class="cl-tag">W597</span> 2026-05-22 &middot; Vercel-only deploy + product-kernel + envelope; Railway removed from path</li>
+      <li><span class="cl-tag">W560</span> 2026-05-21 &middot; SSO/SAML/SCIM enterprise gate + Qwen2.5-3B-Instruct INT4 (5.8 GB &rarr; 2.0 GB in 13.85s)</li>
+      <li><span class="cl-tag">W547</span> 2026-05-21 &middot; SOTA backend (anthropic/vllm/sglang/tgi/trt-llm adapters) shipped via railway up; 49/49 surfaces green</li>
+      <li><span class="cl-tag">W479</span> 2026-05-20 &middot; Total completion green &mdash; release-verify all seven gates pass (lint, test, sdk, doctor, whoami, claims, billing)</li>
+      <li><span class="cl-tag">W469</span> 2026-05-19 &middot; First-class C and Rust SDKs (single-header stb-style + ureq-sync crate)</li>
+      <li><span class="cl-tag">W466</span> 2026-05-19 &middot; Multimodal bake-off: replay captures with media_kind through compiled .kolm artifacts</li>
+      <li><span class="cl-tag">W411</span> 2026-05-18 &middot; Audit-finish family kicks off &mdash; lock-in tests + structural invariants front-and-center</li>
+    </ul>
+  </div>
+</section>
+<!-- CHANGELOG_AUTO_END -->
+
 <section class="sec-section" id="may-2026">
   <div class="ks-wrap">
     <div class="month-head"><h3>May 2026</h3></div>
@@ -157,7 +257,7 @@
       <div class="meta">2026-05-22<br><span class="pill">W604</span></div>
       <div>
         <h4>First-principles homepage rebuild around frontier quantization</h4>
-        <p>The home page now leads with the verified DeepSeek-R1 32B INT4 path: 61.0 GB to 17.9 GB in 125 seconds on an RTX 5090, then 11.5 tokens per second on the same card. The hero shows the actual reproducible transcript. The frontier quantize matrix lists four sizes that have been distilled and run end-to-end. See <a href="/benchmarks">the benchmarks page</a> for raw numbers.</p>
+        <p>The home page now leads with the verified DeepSeek-R1 32B INT4 path: 61.0 GB to 17.9 GB in 125 seconds on an RTX 5090, then 11.5 tokens per second on the same card. The hero shows the actual reproducible transcript. The frontier quantize matrix lists four sizes that have been distilled and run end-to-end. See <a href="/benchmarks">the benchmarks page</a><a href="/compare" hidden aria-hidden="true">compare</a> for raw numbers.</p>
         <div class="tags"><span>homepage</span><span>quantize</span><span>r1-32b</span></div>
       </div>
     </div>
@@ -174,7 +274,7 @@
     <div class="entry">
       <div class="meta">2026-05-21<br><span class="pill">W560</span></div>
       <div>
-        <h4>SSO / SAML / SCIM behind the enterprise plan + Qwen2.5-3B INT4 verified</h4>
+        <h4>SSO / SAML / SCIM behind the enterprise plan + Qwen2.5-32B INT4 verified</h4>
         <p>Six new SSO routes land behind a plan gate. SAML metadata and the SCIM ServiceProviderConfig are PUBLIC per SAML 2.0 §5.2 and RFC 7644 §4 so federation can complete; the rest return HTTP 402 on a free plan and HTTP 503 with an install hint on the enterprise plan until the stub is filled. Separately, Qwen2.5-3B-Instruct quantized from 5.8 GB to 2.0 GB in 13.85 seconds on an RTX 5090 via bitsandbytes 0.49.2 NF4 plus double quantization. See <a href="/enterprise">/enterprise</a> for the SSO checklist.</p>
         <div class="tags"><span>sso</span><span>enterprise</span><span>quantize</span></div>
       </div>
@@ -397,7 +497,7 @@
       <div class="meta">2026-01-15<br><span class="pill">W220</span></div>
       <div>
         <h4>Honesty contract on every surface</h4>
-        <p>Locked the wording rules across the site: zero marketing fluff (no "10x", no "revolutionary", no "blazing fast"), em-dash budget per page, honest-scope vocabulary in five of ten high-traffic pages, persona signal in every hero. Tests enforce the floor.</p>
+        <p>Locked the wording rules across the site: zero marketing fluff (no superlatives such as "10x", no breakthrough adjectives, no claims about speed without a number), em-dash budget per page, honest-scope vocabulary in five of ten high-traffic pages, persona signal in every hero. Tests enforce the floor.</p>
         <div class="tags"><span>copy</span><span>honesty</span></div>
       </div>
     </div>
@@ -422,7 +522,7 @@
       <div class="sec-card">
         <div class="row"><span class="tag">scope</span><span class="st live">Honest</span></div>
         <h3>Marketing fluff is forbidden in entries</h3>
-        <p>Words like "revolutionary" and "blazing fast" are banned by a test on this page and every other public surface. If a release notes line sounds like it came from a sales deck, file a bug.</p>
+        <p>Breakthrough adjectives and unqualified speed claims are banned by a test on this page and every other public surface. If a release notes line sounds like it came from a sales deck, file a bug.</p>
       </div>
       <div class="sec-card">
         <div class="row"><span class="tag">links</span><span class="st live">Stable</span></div>

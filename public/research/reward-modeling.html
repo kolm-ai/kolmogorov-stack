@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -113,6 +113,7 @@
 
 
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <a href="#main" class="ks-skip">Skip to content</a>
@@ -157,7 +158,7 @@
 
  <pre>L(&theta;) = -log &sigma;( &beta; &middot; ( r&theta;(p, c) - r&theta;(p, r) ) )</pre>
 
- <p>where &sigma; is the sigmoid and &beta; is a temperature. The whole RLHF reward pipeline is this loss, batched and averaged. There is no expected-future-reward to estimate, no value head, no separate inference policy. Two forward passes (the chosen and the rejected), a subtraction, a logsigmoid, a backward pass.</p>
+ <p>where &sigma; is the sigmoid and &beta; is a temperature. The whole RLHF reward pipeline is this loss, batched and averaged. There is no expected-future-reward to estimate, no value head, no separate inference policy. A forward pass for the chosen and another for the rejected, a subtraction, a logsigmoid, a backward pass.</p>
 
  <h2>What the model actually is</h2>
 
@@ -177,7 +178,7 @@
 
  <p>That is the entirety of the algorithmic surface. Everything else (LoRA application, gradient checkpointing, bf16 autocast, eval-time pair-accuracy) is standard transformers boilerplate.</p>
 
- <h2>Three places the trained reward model is used</h2>
+ <h2>Where the trained reward model is used</h2>
 
  <table class="table">
  <thead><tr><th>Stage</th><th>Role of the reward model</th><th>Where it sits in the loop</th></tr></thead>
@@ -197,7 +198,7 @@
 
  <h2>Why the reward model gets its own artifact</h2>
 
- <p>It would be cheaper to bake the RM into the policy artifact. We deliberately do not. Three reasons:</p>
+ <p>It would be cheaper to bake the RM into the policy artifact. We deliberately do not:</p>
 
  <ul>
  <li><strong>Independent verification.</strong> A reviewer can re-run the RM against a fresh held-out preference set without touching the policy. If the RM agrees with humans 75% of the time on the buyer's eval set, that number ships on the artifact's manifest.</li>

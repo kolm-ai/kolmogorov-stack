@@ -1,0 +1,88 @@
+# tools/alerts/datadog-kolm.yaml
+#
+# W823-3 — Datadog monitor definitions for kolm.ai runtime.
+#
+# Thresholds (canonical W823-3 spec — also reflected in honeycomb-kolm.yaml
+# and grafana-kolm.yaml so all three platforms agree on what 'bad' means):
+#
+#   - kscore_drift          > 0.05 over 1h
+#   - fallback_rate         > 0.15 over 15min
+#   - p95_latency_increase  > 25 percent vs 24h baseline
+#
+# Import:
+#   datadog-ci synthetics import --files tools/alerts/datadog-kolm.yaml
+#   OR via the Datadog Terraform provider:
+#     resource "datadog_monitor" "kolm_kscore_drift" { ... }
+#
+# Replace ${KOLM_NAMESPACE} / ${KOLM_TENANT_HASH} placeholders in your
+# Terraform layer before applying.
+
+version: 1
+namespace: kolm
+monitors:
+
+  - name: "kolm.ai — K-Score drift > 0.05 (1h)"
+    type: metric alert
+    message: |
+      K-Score has drifted more than 0.05 points away from the 24h baseline
+      over the last hour. This usually means either (a) the input
+      distribution has shifted and the artifact needs re-calibration, or
+      (b) the local model has begun producing systematically different
+      outputs (silent regression).
+      Runbook: https://kolm.ai/docs/runbook/kscore-drift
+      Notify: @slack-kolm-oncall
+    query: "avg(last_1h):abs(avg:kolm.kscore.drift{namespace:${KOLM_NAMESPACE}}) > 0.05"
+    tags:
+      - "service:kolm"
+      - "wave:w823"
+      - "severity:warn"
+    thresholds:
+      critical: 0.05
+      warning: 0.03
+    options:
+      notify_no_data: false
+      evaluation_delay: 60
+      renotify_interval: 60
+      include_tags: true
+
+  - name: "kolm.ai — Fallback rate spike > 0.15 (15min)"
+    type: metric alert
+    message: |
+      Local-model fallback-to-teacher rate has exceeded 15% over the last
+      15 minutes. Above this rate the unit economics break — the buyer is
+      paying teacher prices for traffic that should be routed locally.
+      Runbook: https://kolm.ai/docs/runbook/fallback-spike
+      Notify: @slack-kolm-oncall
+    query: "avg(last_15m):sum:kolm.routing.decision.count{routing_decision:teacher,namespace:${KOLM_NAMESPACE}}.as_rate() / sum:kolm.routing.decision.count{namespace:${KOLM_NAMESPACE}}.as_rate() > 0.15"
+    tags:
+      - "service:kolm"
+      - "wave:w823"
+      - "severity:warn"
+    thresholds:
+      critical: 0.15
+      warning: 0.10
+    options:
+      notify_no_data: false
+      evaluation_delay: 60
+      include_tags: true
+
+  - name: "kolm.ai — p95 latency regression > 25% vs 24h baseline"
+    type: metric alert
+    message: |
+      Inference p95 latency has increased more than 25% relative to the
+      24h baseline. Investigate teacher backend latency, GPU contention,
+      and queue depth (kolm.inference.queue span).
+      Runbook: https://kolm.ai/docs/runbook/latency-regression
+      Notify: @slack-kolm-oncall
+    query: "avg(last_15m):(avg:kolm.inference.latency.p95{namespace:${KOLM_NAMESPACE}} / avg:kolm.inference.latency.p95{namespace:${KOLM_NAMESPACE}}.rollup(avg, 86400).timeshift(-86400)) > 1.25"
+    tags:
+      - "service:kolm"
+      - "wave:w823"
+      - "severity:warn"
+    thresholds:
+      critical: 1.25
+      warning: 1.15
+    options:
+      notify_no_data: false
+      evaluation_delay: 60
+      include_tags: true

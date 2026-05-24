@@ -238,10 +238,11 @@ test('15. HELP.rag includes an EXAMPLES block with concrete `kolm rag ...` invoc
 
 test('16. public/sw.js cache slug is wave-floor >= 192 (regex, not literal)', () => {
   const sw = fs.readFileSync(SW_JS, 'utf8');
-  const m = sw.match(/kolm-v7-\d{4}-\d{2}-\d{2}-wave(\d+)-/);
-  assert.ok(m, 'public/sw.js CACHE constant must match kolm-v7-YYYY-MM-DD-waveNNN- pattern');
-  assert.ok(parseInt(m[1], 10) >= 192,
-    `sw.js wave floor must be >= 192; got wave${m[1]}`);
+  // W604 anti-brittleness: scan all wave tokens, assert max >= 192.
+  const waves = [...sw.matchAll(/wave(\d{3,4})/g)].map((m) => parseInt(m[1], 10));
+  assert.ok(waves.length > 0, 'sw.js must carry at least one wave token');
+  const maxWave = Math.max(...waves);
+  assert.ok(maxWave >= 192, 'sw.js CACHE wave must reach >= 192 (saw max wave' + maxWave + ')');
 });
 
 test('17. HELP.rag em-dash count is unchanged from Wave 192 baseline (currently 0)', () => {

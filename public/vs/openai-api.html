@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -22,6 +22,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <style>
  :root {
  --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
@@ -101,7 +102,7 @@
  <div class="one-line">
  <div class="col">
  <h3>OpenAI API</h3>
- <p>A <b>hosted frontier model service</b>. Best-in-class general capability, OpenAI-managed runtime, billed per input + output token forever. Your prompts and traffic shape only the bill, never a deliverable you own.</p>
+ <p>A <b>hosted frontier model service</b>. Top-tier general capability, OpenAI-managed runtime, billed per input + output token forever. Your prompts and traffic shape only the bill, never a deliverable you own.</p>
  </div>
  <div class="arrow">vs</div>
  <div class="col">
@@ -125,7 +126,7 @@
  <h2>When kolm wins</h2>
  <ul>
  <li><b>High-volume narrow tasks.</b> The cost curve crosses OpenAI fast when the same task fires thousands of times per day. A flat compile + own hardware doesn't scale with traffic.</li>
- <li><b>Data residency and PHI.</b> The compiled artifact runs entirely inside your VPC or on-device. No prompts cross a vendor boundary at inference time.</li>
+ <li><b>Data residency and PHI.</b> The compiled artifact runs entirely inside your own infrastructure or on-device. No prompts cross a vendor boundary at inference time.</li>
  <li><b>Vendor independence.</b> The <code>.kolm</code> file you compiled keeps running if OpenAI changes pricing, deprecates an endpoint, or rate-limits your account.</li>
  </ul>
  </div>
@@ -150,7 +151,7 @@
  <tr><td class="row-h">Output you keep</td><td data-l="OpenAI">Per-call response</td><td data-l="kolm">A <code>.kolm</code> file you own</td></tr>
  <tr><td class="row-h">Inference cost model</td><td data-l="OpenAI">Per input + output token, forever</td><td data-l="kolm">Flat compile + your hardware ($0 marginal teacher)</td></tr>
  <tr><td class="row-h">Best at</td><td data-l="OpenAI">Open-ended frontier reasoning</td><td data-l="kolm">Narrow tasks captured from production</td></tr>
- <tr><td class="row-h">Data residency</td><td data-l="OpenAI">Prompts cross OpenAI's boundary at inference time</td><td data-l="kolm">Inference inside your VPC / on-device</td></tr>
+ <tr><td class="row-h">Data residency</td><td data-l="OpenAI">Prompts cross OpenAI's boundary at inference time</td><td data-l="kolm">Inference inside your own infrastructure / on-device</td></tr>
  <tr><td class="row-h">Open source</td><td data-l="OpenAI"><span class="no">no</span></td><td data-l="kolm"><span class="ok">yes</span> - Apache-2.0</td></tr>
  <tr><td class="row-h">Vendor risk</td><td data-l="OpenAI">Pricing + endpoint stability is OpenAI's call</td><td data-l="kolm">File runs forever on your hardware</td></tr>
  <tr><td class="row-h">Setup cost</td><td data-l="OpenAI">One API key</td><td data-l="kolm">Capture + compile pipeline; minutes per task once captures exist</td></tr>

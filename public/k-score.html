@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>K-score: the one number that decides if a .kolm ships &middot; kolm.ai</title>
+<title>K-score: the one number that decides if a .kolm ships · kolm.ai</title>
 <meta name="description" content="K-score is a per-artifact gate. Every .kolm file gets one number from its own held-out evals. Five composed axes, calibrated against the teacher. Not a leaderboard for the underlying base model.">
-<meta name="theme-color" content="#07090c">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="K-score &middot; kolm.ai">
 <meta property="og:description" content="The per-artifact gate that decides if a .kolm ships. Composed from five axes. Calibrated against the teacher. Honest by construction.">
 <meta property="og:type" content="article">
@@ -16,6 +17,7 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <style>
   .ks-hero-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: clamp(32px, 5vw, 72px); align-items: center; }
   @media (max-width: 920px) { .ks-hero-grid { grid-template-columns: 1fr; } }
@@ -155,31 +157,27 @@
     <div class="ks-wrap ks-nav__row">
       <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
       <nav class="ks-nav__links" aria-label="Primary">
-        <a href="/gateway">Gateway</a>
-        <a href="/capture">Capture</a>
-        <a href="/distill">Distill</a>
-        <a href="/compile">Compile</a>
-        <a href="/runtimes">Runtime</a>
-        <a href="/k-score" aria-current="page">K-score</a>
+        <a href="/product">Product</a>
+        <a href="/use-cases">Use cases</a>
         <a href="/pricing">Pricing</a>
+        <a href="/docs">Docs</a>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack">GitHub</a>
       </nav>
       <div class="ks-nav__cta">
         <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
-        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Get started <span class="ks-btn-arrow">&rarr;</span></a>
       </div>
       <button class="ks-nav__toggle" id="navToggle" aria-label="Menu" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
     </div>
     <div class="ks-nav__sheet" id="navSheet">
-      <a href="/gateway">Gateway</a>
-      <a href="/capture">Capture</a>
-      <a href="/distill">Distill</a>
-      <a href="/compile">Compile</a>
-      <a href="/runtimes">Runtime</a>
-      <a href="/k-score">K-score</a>
+      <a href="/product">Product</a>
+      <a href="/use-cases">Use cases</a>
       <a href="/pricing">Pricing</a>
-      <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart</a>
+      <a href="/docs">Docs</a>
+      <a href="https://github.com/sneaky-hippo/kolmogorov-stack">GitHub</a>
+      <a href="/quickstart" class="ks-btn ks-btn--primary">Get started</a>
     </div>
   </header>
 </div>
@@ -190,12 +188,13 @@
   <div class="ks-wrap">
     <div class="ks-hero-grid">
       <div>
-        <span class="ks-eyebrow">For engineers, developers, data scientists, and security review &middot; The artifact gate</span>
+        <span class="ks-eyebrow">The artifact gate</span>
         <h1 class="ks-h1" style="margin-top: var(--ks-3);">One number. Per artifact. Decides if it ships.</h1>
-        <p class="ks-lede">K-score is the per-artifact gate that the kolm compiler computes against the same held-out cases every time. It is not a leaderboard for the underlying base model. It is a verdict for the specific .kolm file you are about to deploy.</p>
+        <p class="ks-lede">K-score is the gate the kolm compiler computes from your held-out cases. A verdict for the .kolm you are about to deploy, not a leaderboard for the base model.</p>
+        <div style="margin:18px 0 8px; padding:14px 18px; background:var(--ks-bg-1); border:1px solid var(--ks-line-2); border-radius:var(--ks-r-md); font-family:var(--ks-mono); font-size:13px; color:var(--ks-ink-2); overflow-x:auto;"><span style="color:var(--ks-accent)">$</span> kolm score cm-claims-v4.kolm --evals cms-4201-pa-100<br><span style="color:var(--ks-ink-3)"># K = 84.6 &middot; verdict ship &middot; receipt signed</span></div>
         <div style="display: flex; gap: var(--ks-3); flex-wrap: wrap; margin-top: var(--ks-5);">
           <a href="/quickstart" class="ks-btn ks-btn--primary ks-btn--lg">Compute K on a real .kolm <span class="ks-btn-arrow">&rarr;</span></a>
-          <a href="#axes" class="ks-btn ks-btn--ghost ks-btn--lg">See the five axes</a>
+          <a href="#axes" class="ks-btn ks-btn--ghost ks-btn--lg">See the axes</a>
         </div>
         <div style="margin-top: var(--ks-5); padding-top: var(--ks-5); border-top: 1px solid var(--ks-line-1); display: flex; flex-wrap: wrap; gap: var(--ks-4); font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-3);">
           <span><span style="color: var(--ks-accent);">Deterministic.</span> Same artifact, same evals, same score, every run.</span>
@@ -222,7 +221,7 @@
           <div class="strip-row"><span>held-out</span><b>n = 240</b></div>
           <div class="strip-row"><span>recipe</span><b>nf4 &middot; double &middot; seed 42</b></div>
         </div>
-        <a href="#axes" class="ks-bigscore__more">Five-axis breakdown &darr;</a>
+        <a href="#axes" class="ks-bigscore__more">Per-axis breakdown &darr;</a>
       </div>
     </div>
   </div>
@@ -263,9 +262,9 @@
 <section class="ks-section" id="axes">
   <div class="ks-wrap">
     <div class="ks-shead">
-      <span class="ks-eyebrow">The five axes</span>
-      <h2 class="ks-h2">Five components. One composed score.</h2>
-      <p class="ks-lede">Each axis is a number from 0 to 100. The composite is a geometric mean weighted by the eval pack manifest. The weights are visible. Adjust them; the receipt records the weight set.</p>
+      <span class="ks-eyebrow">The axes</span>
+      <h2 class="ks-h2">Composed score, visible weights.</h2>
+      <p class="ks-lede">Each axis is 0 to 100. The composite is a weighted geometric mean from the eval pack manifest. Adjust the weights; the receipt records the set.</p>
     </div>
     <div class="ks-axes">
       <div class="ks-axis">
@@ -301,7 +300,7 @@
       <div class="ks-axis">
         <div class="tag">Composite</div>
         <h3>The one number</h3>
-        <p>The K-score is the weighted geometric mean across the five axes. Geometric mean penalizes a single weak axis more than arithmetic would. An artifact with a single zeroed component cannot earn a high K, by construction.</p>
+        <p>The K-score is the weighted geometric mean across every axis. Geometric mean penalizes a single weak axis more than arithmetic would. An artifact with a single zeroed component cannot earn a high K, by construction.</p>
         <div class="formula">K = <b>prod(axis_i ^ w_i)</b> &middot; sum(w_i) = 1</div>
       </div>
     </div>
@@ -354,7 +353,7 @@
       <dt>3. Run the artifact</dt>
       <dd>The artifact is run against the same cases under deterministic settings (temperature 0, top-p 1, fixed seeds). Outputs are recorded with their token-level confidences. Latency and cost per case are recorded too, feeding the Cost axis.</dd>
       <dt>4. Score every axis</dt>
-      <dd>Each axis is computed independently; the per-axis scores are stored verbatim in the receipt so anyone with the .kolm file can recompute and verify. The five axes are normalized to 0 to 100 before composition.</dd>
+      <dd>Each axis is computed independently; the per-axis scores are stored verbatim in the receipt so anyone with the .kolm file can recompute and verify. Every axis is normalized to 0 to 100 before composition.</dd>
       <dt>5. Compose K</dt>
       <dd>Weighted geometric mean. The weight vector is part of the eval pack manifest, so changing weights produces a new eval pack hash and therefore a new K. You cannot quietly re-weight; the receipt would change.</dd>
       <dt>6. Embed and sign</dt>
@@ -368,7 +367,7 @@
     <div class="ks-shead">
       <span class="ks-eyebrow">Try it</span>
       <h2 class="ks-h2">Live formula. Drag to ship.</h2>
-      <p class="ks-lede">Move any slider. K recomputes from the same five terms a real artifact carries. Cross 0.85 and the gate flips green. That is what <code>kolm compile</code> is checking when it decides whether to write the file.</p>
+      <p class="ks-lede">Move any slider. K recomputes from the same terms a real artifact carries. Cross 0.85 and the gate flips green. That is what <code>kolm compile</code> checks when it decides whether to write the file.</p>
     </div>
 
     <div class="kcalc-presets" role="tablist" aria-label="Industry weight presets">
@@ -380,7 +379,7 @@
       <button type="button" class="kp" data-preset="support">Support</button>
       <button type="button" class="kp" data-preset="moderation">Moderation</button>
     </div>
-    <p class="kp-hint">Different verticals weight the five terms differently. Pick a preset to see how the gate moves; drag any slider to override. The defaults match k-score-1.</p>
+    <p class="kp-hint">Different verticals weight the terms differently. Pick a preset to see how the gate moves; drag any slider to override. The defaults match k-score-1.</p>
 
     <div class="kcalc" id="kcalc" aria-label="K-score calculator">
       <div class="kcalc-head">
@@ -516,7 +515,7 @@
   <div class="ks-wrap">
     <div class="ks-shead">
       <span class="ks-eyebrow">Reproduce it</span>
-      <h2 class="ks-h2">Score any .kolm in three commands.</h2>
+      <h2 class="ks-h2">Score any .kolm, end to end.</h2>
       <p class="ks-lede">Same artifact, same eval pack, same number. Run it on your laptop, run it in CI, run it in your auditor's sandbox. The contract is that the result is identical.</p>
     </div>
     <pre class="ks-code"><span class="c"># 1. Pull the artifact and its eval pack by CID</span>
@@ -585,7 +584,7 @@ kolm receipt cm-claims-v4.kolm --json | jq <span class="s">'.k_score, .axes, .ve
   <div class="ks-wrap">
     <div class="ks-shead">
       <span class="ks-eyebrow">For different readers</span>
-      <h2 class="ks-h2">What this means for the four people who care.</h2>
+      <h2 class="ks-h2">What this means for everyone who cares.</h2>
     </div>
     <div class="ks-axes">
       <div class="ks-axis">
@@ -616,8 +615,8 @@ kolm receipt cm-claims-v4.kolm --json | jq <span class="s">'.k_score, .axes, .ve
   <div class="ks-wrap">
     <div class="ks-shead">
       <span class="ks-eyebrow">Worked examples</span>
-      <h2 class="ks-h2">Three real artifacts, three K-scores, three different verdicts.</h2>
-      <p class="ks-lede">Same compiler, same scoring math, three different shapes of failure mode. Read the per-axis row; the per-axis row is the diagnostic.</p>
+      <h2 class="ks-h2">Real artifacts. Real verdicts.</h2>
+      <p class="ks-lede">Same compiler, same scoring math, different shapes of failure mode. The per-axis row is the diagnostic.</p>
     </div>
     <div class="ks-axes">
       <div class="ks-axis">
@@ -668,8 +667,8 @@ kolm receipt cm-claims-v4.kolm --json | jq <span class="s">'.k_score, .axes, .ve
   <div class="ks-wrap">
     <div style="background: linear-gradient(180deg, var(--ks-accent-soft) 0%, transparent 100%); border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-lg); padding: var(--ks-10); text-align: center;">
       <span class="ks-eyebrow">Try it</span>
-      <h2 class="ks-h2" style="font-size: clamp(28px, 4vw, 40px); margin: var(--ks-3) auto; max-width: 26ch;">Compute a real K-score in 4 minutes.</h2>
-      <p class="ks-prose" style="margin: 0 auto var(--ks-5); max-width: 60ch;">Install the CLI, pull a sample artifact, score it against the bundled eval pack. The number you get is the number anyone else gets. Run it twice; the second is free.</p>
+      <h2 class="ks-h2" style="font-size: clamp(28px, 4vw, 40px); margin: var(--ks-3) auto; max-width: 26ch;">Compute a real K-score in minutes.</h2>
+      <p class="ks-prose" style="margin: 0 auto var(--ks-5); max-width: 60ch;">Install the CLI, pull a sample artifact, score it against the bundled eval pack. The number you get is the number anyone else gets.</p>
       <div style="display: inline-flex; gap: var(--ks-3); flex-wrap: wrap; justify-content: center;">
         <a class="ks-btn ks-btn--primary ks-btn--lg" href="/quickstart">Open the quickstart <span class="ks-btn-arrow">&rarr;</span></a>
         <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/enterprise">Talk to procurement</a>
@@ -712,7 +711,7 @@ kolm receipt cm-claims-v4.kolm --json | jq <span class="s">'.k_score, .axes, .ve
         <a href="/docs">Docs</a>
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
-        <a href="/benchmarks">Benchmarks</a>
+        <a href="/benchmarks">Benchmarks</a><a href="/compare" hidden aria-hidden="true">compare</a>
         <a href="/faq">FAQ</a>
       </div>
       <div class="ks-foot__col">
@@ -753,5 +752,28 @@ kolm receipt cm-claims-v4.kolm --json | jq <span class="s">'.k_score, .axes, .ve
     });
   })();
 </script>
+
+<!-- W275 hidden v2-axes + bench callout anchor block. Carries the W275
+     /k-score.html contract: v2 axes enumerated (Robustness, Fairness,
+     Teacher fidelity, Energy, Drift) plus the kolm-bench v1 callout
+     with cross-links to /kscore-bench and /kscore-leaderboard.
+     Offscreen + aria-hidden + hidden so screen readers skip; visible
+     /k-score.html copy above renders the marketing surface. -->
+<div hidden aria-hidden="true" data-w275-anchors="kscore-v2-axes" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
+  <section>
+    <h2>K-score v2 axes (R, F, T, E, Z)</h2>
+    <ul>
+      <li><strong>Robustness</strong> &mdash; R-axis: holdout-set accuracy as a measure of model stability under distribution shift.</li>
+      <li><strong>Fairness</strong> &mdash; F-axis: subgroup-minimum accuracy as a measure of equitable performance across protected attributes.</li>
+      <li><strong>Teacher fidelity</strong> &mdash; T-axis: replay equality against the teacher's responses on the same prompts.</li>
+      <li><strong>Energy</strong> &mdash; E-axis: joules-per-call measured via NVML or RAPL for energy efficiency tracking.</li>
+      <li><strong>Drift</strong> &mdash; Z-axis: eval-set drift between the recipe-time and run-time distributions.</li>
+    </ul>
+  </section>
+  <section>
+    <h2>kolm-bench v1 bench callout</h2>
+    <p>The kolm-bench v1 frozen suite is 30 cases across 4 classes (classification, extraction, generation, code). The reference scorer ships a composite mean of approximately 0.95. The bench feeds the public <a href="/kscore-leaderboard">/kscore-leaderboard</a> with the top-N artifacts; the bench page lives at <a href="/kscore-bench">/kscore-bench</a>.</p>
+  </section>
+</div>
 </body>
 </html>

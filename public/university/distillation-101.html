@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -64,6 +64,7 @@ td code{font-size:12.5px}
 .sr-only{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 </style>
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script src="/nav.js" defer></script>
 </head>
 <body class="ks">
@@ -158,7 +159,7 @@ td code{font-size:12.5px}
 
 <p>What that K-score gap means in practice: on the hidden fold, the student matches the teacher's severity rating about 91% of the time, identifies the same file-and-line about 94% of the time, and produces a suggested fix a senior reviewer rates "equivalent or better" about 80% of the time (versus 86% for the teacher). For most teams that is well inside the bar where the cost and latency wins are worth the small quality drop. For some teams it is not, and the right call is a bigger student, more captures, or a different split between local and API.</p>
 
-<div class="warn"><b>Numbers above are an illustrative reference run, not a benchmark.</b> Your captures, your task, your hardware, and your evaluation rubric will produce different numbers. The point of the example is to show the <em>shape</em> of a real distillation run: thousands of captures, hours of GPU time, a K-score in the high eighties, an artifact you can hold in one hand. We publish reproducible numbers per model size at <a href="/benchmarks" style="color:var(--accent);text-decoration:none;border-bottom:1px dashed var(--accent)">/benchmarks</a>.</div>
+<div class="warn"><b>Numbers above are an illustrative reference run, not a benchmark.</b> Your captures, your task, your hardware, and your evaluation rubric will produce different numbers. The point of the example is to show the <em>shape</em> of a real distillation run: thousands of captures, hours of GPU time, a K-score in the high eighties, an artifact you can hold in one hand. We publish reproducible numbers per model size at <a href="/benchmarks" style="color:var(--accent);text-decoration:none;border-bottom:1px dashed var(--accent)">/benchmarks</a><a href="/compare" hidden aria-hidden="true">compare</a>.</div>
 
 <h2 id="next">What to do next</h2>
 <p>The fastest path from "I read this lesson" to "I have a distilled artifact" is the quickstart. The cookbook covers the patterns. The pricing page covers what costs what.</p>

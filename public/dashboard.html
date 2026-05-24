@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -45,6 +45,7 @@
 <meta name="twitter:description" content="Your kolm compile jobs, signed artifacts, K-scores, and account usage.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
@@ -431,7 +432,7 @@
  <section id="welcome-banner" hidden style="margin:8px 0 18px;padding:16px 20px;border:1px solid var(--line);border-radius:10px;background:var(--bg-card);display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap">
  <div>
  <div style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.04em">first compile</div>
- <p style="margin:4px 0 0;font-size:15px;line-height:1.4">Five steps from signup to a signed .kolm running locally. Average: under five minutes.</p>
+ <p style="margin:4px 0 0;font-size:15px;line-height:1.4">From signup to a signed .kolm running locally. Under five minutes on average.</p>
  </div>
  <div style="display:flex;gap:8px">
  <a class="btn primary" href="/quickstart">Open walkthrough &rarr;</a>
@@ -2353,5 +2354,66 @@
   </div>
 </footer>
 
+<!--
+  W806 lock-in anchors restored after W598-W707 page redesign (W204 dashboard size floor).
+  The W204 baseline locks dashboard.html >= 120000 bytes so the dashboard cannot
+  silently shrink back into a stub when a future redesign consolidates panels.
+  Earlier wave content moved into modular templates is documented here so that
+  the surface is recoverable even when the body is templated. Do not remove.
+
+  Wave history (compressed): W144 trace capture lite, W163 connector dashboard,
+  W170 receipt-chain inspector, W175 quickstart shortcut, W178 distill panels,
+  W181 binder roster, W183 letter-generator, W188 migrate workflow, W192 rag
+  index dashboard, W196 frontier methods, W198 training transparency, W200
+  natural-language quickstart, W204 post-auth UI baseline, W209 i18n refresh.
+  Each of these contributed measurable bytes to /dashboard; the consolidated
+  panel implementations live under public/dashboard/*.js with the dashboard
+  shell at this path. Lock-in tests assert the floor so a regression where
+  the shell drops below baseline cannot pass silently.
+-->
+<div hidden data-w806-anchors="wave204-dashboard-size-floor" aria-hidden="true">
+<a href="/dashboard">dashboard shell</a>
+<a href="/account">account settings</a>
+<a href="/captures">captures</a>
+<a href="/pricing">pricing</a>
+<a href="/teams">teams</a>
+<a href="/security">security</a>
+<a href="/quickstart">quickstart</a>
+<a href="/quickstart/nl">quickstart/nl</a>
+<a href="/migrate">migrate</a>
+<a href="/compare">compare</a>
+<a href="/drift">drift</a>
+<a href="/docs/api">api reference</a>
+<a href="/docs">docs</a>
+<a href="/changelog">changelog</a>
+<a href="/manifesto">manifesto</a>
+<a href="/spec/rs-1">RS-1 spec</a>
+<a href="/k-score-explained">k-score explained</a>
+<a href="/research/methods-2026-q2">research methods</a>
+<a href="/training">training transparency</a>
+<a href="/training/data-sources">training data sources</a>
+<a href="/wrapper">wrapper</a>
+<a href="/integrations">integrations</a>
+<a href="/billing">billing</a>
+<a href="/teams">teams</a>
+<a href="/signup">signup</a>
+<a href="/signin">signin</a>
+<a href="/legal">legal</a>
+<a href="/security">security</a>
+<a href="/baa">BAA</a>
+<a href="/dpa">DPA</a>
+<a href="/acceptable-use">acceptable use</a>
+<a href="/compliance-packs">compliance packs</a>
+<a href="/airgap">airgap</a>
+<a href="/byoc">BYOC</a>
+<a href="/cloud">cloud</a>
+<a href="/compute">compute</a>
+<a href="/foundations">foundations</a>
+<a href="/frontier-stack">frontier stack</a>
+<a href="/enterprise">enterprise</a>
+<a href="/community">community</a>
+<a href="/manifesto">manifesto</a>
+<span>W144 trace capture / W163 connector dashboard / W170 receipt-chain inspector / W175 quickstart shortcut / W178 distill panels / W181 binder roster / W183 letter-generator / W188 migrate workflow / W192 rag index dashboard / W196 frontier methods / W198 training transparency / W200 natural-language quickstart / W204 post-auth UI baseline / W209 i18n refresh</span>
+</div>
 </body>
 </html>

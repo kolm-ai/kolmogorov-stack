@@ -1,47 +1,293 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0; url=/legal">
-<title>Redirecting to /legal &middot; kolm.ai</title>
-<meta name="robots" content="noindex,follow">
-<link rel="canonical" href="https://kolm.ai/legal">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Legal AI on your private cloud (privileged-safe) · kolm.ai</title>
+<meta name="description" content="Compile contract review, privilege flagging, and discovery triage as privileged-safe artifacts. Your matter never enters a third-party training set.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://kolm.ai/legal-v2">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/ks.css">
-<script>window.location.replace('/legal');</script>
-  <meta property="og:title" content="Redirecting to /legal &middot; kolm.ai">
-  <meta property="og:description" content="The AI compiler. Capture your real prompts, compile them into your own model, run anywhere.">
-  <meta property="og:image" content="https://kolm.ai/og/legal-v2.svg">
-  <meta property="og:url" content="https://kolm.ai/legal-v2">
-  <meta property="og:type" content="website">
+    <link rel="stylesheet" href="/warm-paper.css">
+<meta property="og:title" content="Legal AI on your private cloud - kolm.ai">
+<meta property="og:description" content="Privileged-safe AI compilation for law firms.">
+<meta property="og:image" content="https://kolm.ai/og/legal-v2.svg">
+<meta property="og:url" content="https://kolm.ai/legal-v2">
+<meta property="og:type" content="website">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  "name": "kolm",
+  "name": "kolm for Legal",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL)",
   "url": "https://kolm.ai/legal-v2",
-  "description": "The AI compiler. Capture your real prompts, compile them into your own model, run anywhere.",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "kolm.ai",
-    "@id": "https://kolm.ai/#org"
-  }
+  "description": "Privileged-safe AI compilation for law firms. Compile contract-review and privilege-flag workflows inside your private cloud.",
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+  "publisher": {"@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org"}
 }
 </script>
+<style>
+  :root{
+    --bg:#07090c;--bg-1:#0c1014;--bg-2:#0e1216;--line:#1c232c;--line-2:#1f2630;
+    --ink:#e6edf3;--ink-2:#cde;--ink-3:#9aa6b2;--ink-4:#5a6470;
+    --accent:#7ef0d2;--accent-2:#9fd;--brand:#1b8a6b;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  body.ks{font-size:16px;line-height:1.55}
+  main{max-width:980px;margin:0 auto;padding:0 24px}
+  .v2-nav{border-bottom:1px solid var(--line);background:rgba(7,9,12,0.92);position:sticky;top:0;z-index:30;backdrop-filter:blur(8px)}
+  .v2-nav__row{max-width:1100px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:24px}
+  .v2-nav__brand{color:var(--accent-2);font-weight:700;font-size:15px}
+  .v2-nav__brand b{color:var(--accent)}
+  .v2-nav__links{display:flex;gap:20px;list-style:none;margin:0;padding:0;flex:1}
+  .v2-nav__links a{color:var(--ink-2);text-decoration:none;font-size:14px}
+  .v2-nav__links a:hover{color:var(--ink)}
+  .v2-nav__right{display:flex;gap:10px;align-items:center}
+  .v2-nav__right a.signin{color:var(--ink-3);font-size:14px;text-decoration:none;padding:8px 10px}
+  .v2-nav__right a.cta{background:var(--brand);color:#fff;padding:8px 14px;border-radius:6px;font-weight:600;font-size:14px;text-decoration:none}
+  .v2-nav__toggle{display:none;background:transparent;border:1px solid var(--line-2);color:var(--ink);border-radius:6px;padding:6px 10px;cursor:pointer}
+  .v2-nav__sheet{display:none;border-top:1px solid var(--line);padding:12px 24px;background:var(--bg-1)}
+  .v2-nav__sheet a{display:block;padding:8px 0;color:var(--ink-2);text-decoration:none}
+  @media (max-width:780px){
+    .v2-nav__links,.v2-nav__right .signin{display:none}
+    .v2-nav__toggle{display:inline-flex}
+    .v2-nav__sheet.is-open{display:block}
+  }
+  .eyebrow{color:var(--ink-3);text-transform:uppercase;letter-spacing:0.08em;font-size:12px;margin:0 0 12px 0;font-family:var(--mono)}
+  h1.v2-h1{font-size:48px;line-height:1.05;margin:0 0 18px 0;letter-spacing:-0.02em;max-width:22ch}
+  .lede{color:var(--ink-2);max-width:64ch;font-size:20px;line-height:1.5;margin:0}
+  .hero{padding:64px 0 32px}
+  .hero-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:48px;align-items:start}
+  @media (max-width:880px){.hero-grid{grid-template-columns:1fr;gap:32px}}
+  .terminal{background:#0a0d10;border:1px solid var(--line-2);border-radius:10px;padding:18px 20px;font-family:var(--mono);font-size:13px;line-height:1.6;color:var(--ink-2);overflow-x:auto}
+  .terminal .p{color:var(--accent)}
+  .terminal .c{color:var(--ink)}
+  .terminal .o{color:var(--accent-2)}
+  .terminal .x{color:var(--ink-3)}
+  .terminal .h{color:var(--ink-4)}
+  .cta-row{margin:24px 0 0 0;display:flex;gap:12px;flex-wrap:wrap}
+  .cta-row a.primary{display:inline-block;padding:12px 20px;border-radius:8px;background:var(--brand);color:#fff;text-decoration:none;font-weight:600}
+  .cta-row a.primary:hover{background:#1ea07c}
+  .cta-row a.secondary{display:inline-block;padding:12px 20px;border-radius:8px;background:transparent;border:1px solid #2a3340;color:var(--ink-2);text-decoration:none;font-weight:600}
+  .cta-row a.secondary:hover{border-color:var(--accent-2);color:var(--accent-2)}
+  .section{padding:48px 0 8px}
+  h2.v2-h2{font-size:32px;line-height:1.15;margin:0 0 12px 0;letter-spacing:-0.01em}
+  .sub{color:var(--ink-3);margin:0 0 24px 0;max-width:60ch}
+  .pain-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+  .pain-card{background:var(--bg-2);border:1px solid var(--line-2);border-radius:10px;padding:20px}
+  .pain-card h3{margin:0 0 8px 0;font-size:17px;color:var(--ink);font-weight:600}
+  .pain-card ul{margin:6px 0 0 18px;padding:0;color:var(--ink-3);font-size:14px;line-height:1.55}
+  .pain-card ul li{margin:4px 0}
+  .arch-box{background:#0a0d10;border:1px solid var(--line);border-radius:10px;padding:20px;margin:8px 0 0 0;overflow:auto}
+  .arch-box pre{margin:0;color:var(--accent-2);line-height:1.5;font-size:13px;font-family:var(--mono)}
+  .recipe-list{display:grid;gap:8px;margin:8px 0 0 0}
+  .recipe-row{background:var(--bg-2);border:1px solid var(--line-2);border-radius:8px;padding:14px 18px}
+  .recipe-row a{color:var(--accent-2);font-family:var(--mono);text-decoration:none;font-size:14px}
+  .recipe-row a:hover{text-decoration:underline}
+  .recipe-row span.desc{color:var(--ink-3);font-size:14px;margin-left:8px}
+  .roi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:14px 0}
+  @media (max-width:640px){.roi-grid{grid-template-columns:1fr}}
+  .roi-grid label{display:block;color:var(--ink-3);font-size:13px;margin-bottom:4px}
+  .roi-grid input{width:100%;background:#0a0d10;color:var(--ink);border:1px solid var(--line-2);border-radius:6px;padding:10px 12px;font-size:14px;font-family:var(--mono)}
+  .roi-grid input:focus{border-color:var(--accent-2);outline:none}
+  .roi-out{margin-top:12px;color:var(--accent-2);font-weight:700;font-size:18px;padding:14px 16px;background:var(--bg-2);border:1px solid var(--line-2);border-radius:8px;font-family:var(--mono)}
+  .footnote{margin-top:80px;padding-top:24px;border-top:1px solid var(--line);color:var(--ink-4);font-size:13px}
+  .footnote a{color:var(--ink-3);text-decoration:none}
+  .footnote a:hover{color:var(--ink-2)}
+  .product-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:24px 0 0 0}
+  .product-strip div{background:var(--bg-1);border:1px solid var(--line-2);border-radius:8px;padding:12px 14px}
+  .product-strip b{display:block;font-family:var(--mono);font-size:11px;color:var(--ink-4);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px}
+  .product-strip span{color:var(--ink);font-size:14px}
+</style>
 </head>
 <body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
-<main id="main" style="max-width: 720px; margin: 120px auto; padding: 0 24px; text-align: center;">
-  <h1 class="ks-h2" style="margin-bottom: 16px;">Redirecting to the canonical legal page.</h1>
-  <p class="ks-prose" style="margin-bottom: 24px;">The legal microsite has been consolidated. If you are not redirected automatically, follow the link below.</p>
-  <a class="ks-btn ks-btn--primary ks-btn--lg" href="/legal">Go to /legal <span class="ks-btn-arrow">&rarr;</span></a>
+
+<nav class="v2-nav" aria-label="Primary">
+  <div class="v2-nav__row">
+    <a href="/" class="brand"><span class="v2-nav__brand">kolm<b>.ai</b></span></a>
+    <ul class="v2-nav__links">
+      <li><a href="/product">Product</a></li>
+      <li><a href="/use-cases">Use cases</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="v2-nav__right">
+      <a href="/signup?intent=login" class="signin">Sign in</a>
+      <a href="/signup" class="cta">Get started &rarr;</a>
+      <button class="v2-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">Menu</button>
+    </div>
+  </div>
+  <div class="v2-nav__sheet" id="navSheet">
+    <a href="/product">Product</a>
+    <a href="/use-cases">Use cases</a>
+    <a href="/pricing">Pricing</a>
+    <a href="/docs">Docs</a>
+    <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
+    <a href="/signup?intent=login">Sign in</a>
+    <a href="/signup">Get started &rarr;</a>
+  </div>
+</nav>
+
+<main id="main">
+
+  <section class="hero">
+    <div class="hero-grid">
+      <div>
+        <p class="eyebrow">For law firms and legal ops teams</p>
+        <h1 class="v2-h1">Privileged matter stays privileged.</h1>
+        <p class="lede">Compile contract review, privilege flagging, and discovery triage as artifacts that never enter a third-party training set. Deploy in your private cloud with audit logs.</p>
+        <div class="cta-row">
+          <a class="primary" href="/enterprise#demo">Book private-cloud demo</a>
+          <a class="secondary" href="/registry?vertical=legal">Browse legal recipes</a>
+        </div>
+      </div>
+      <div>
+        <div class="terminal" aria-label="kolm legal quickstart">
+<span class="h"># flag privileged communications before any model call</span>
+<span class="p">$</span> <span class="c">kolm capture log --namespace matter.acme \</span>
+                  <span class="c">--privilege-flag --sign</span>
+<span class="o">ok &middot;</span> <span class="x">14 captures &middot; 3 flagged AC-privileged</span>
+
+<span class="h"># compile contract-review specialist from approved corpus</span>
+<span class="p">$</span> <span class="c">kolm distill --from matter.acme \</span>
+              <span class="c">--student qwen2.5-7b --quantize int4</span>
+<span class="o">ok &middot;</span> <span class="x">contract-review.kolm (5.2 GB)</span>
+
+<span class="h"># verify offline, then deploy into your private cloud</span>
+<span class="p">$</span> <span class="c">kolm verify contract-review.kolm</span>
+<span class="o">ok &middot;</span> <span class="x">ed25519 &middot; chain-of-custody intact</span>
+        </div>
+      </div>
+    </div>
+    <div class="product-strip">
+      <div><b>Privilege</b><span>Flagged at capture</span></div>
+      <div><b>Deploy</b><span>Private cloud / on-prem</span></div>
+      <div><b>Discovery</b><span>FRCP 26(b)-aware retention</span></div>
+      <div><b>Receipts</b><span>Ed25519 chain-of-custody</span></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 class="v2-h2">What partners and GCs tell us.</h2>
+    <p class="sub">Concrete pains we hear in firm and in-house counsel evaluations.</p>
+    <div class="pain-grid">
+      <div class="pain-card">
+        <h3>Privilege risk in vendor prompts</h3>
+        <ul>
+          <li>SaaS LLM logs are discoverable in litigation</li>
+          <li>Outside-counsel matter cannot leave the tenant</li>
+          <li>Privileged communications need cryptographic chain-of-custody</li>
+        </ul>
+      </div>
+      <div class="pain-card">
+        <h3>Discovery and retention</h3>
+        <ul>
+          <li>FRCP 26(b) imposes preservation duties on AI workflows</li>
+          <li>Vendor retention policies conflict with hold orders</li>
+          <li>No clean way to delete a single matter from a hosted model</li>
+        </ul>
+      </div>
+      <div class="pain-card">
+        <h3>Bespoke matter workflows</h3>
+        <ul>
+          <li>Contract review, M&amp;A diligence, lease abstraction all differ</li>
+          <li>General LLMs miss firm-specific style and precedent</li>
+          <li>Associates need turn-around in minutes, not weeks</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 class="v2-h2">Architecture: matter stays in your tenant.</h2>
+    <p class="sub">Capture, compile, and inference all run behind your firewall. We ship code and a signing key; you keep the matter.</p>
+    <div class="arch-box">
+<pre>
+   Attorney workstation
+              |
+              v
+   +------------------------+
+   |  Capture proxy (yours) |  privilege flag at edge
+   +------------------------+
+              |
+              v
+   +------------------------+
+   |  kolm compile (yours)  |  builds .kolm artifact
+   +------------------------+
+              |
+              v
+   +------------------------+
+   |  Private-cloud runtime |  VPC isolated, audit logs
+   +------------------------+
+</pre>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 class="v2-h2">Legal recipes.</h2>
+    <p class="sub">Pre-built <code>.kolm</code> artifacts. Fork, audit, recompile against your precedent, deploy.</p>
+    <div class="recipe-list">
+      <div class="recipe-row"><a href="/registry?vertical=legal">contract-review.kolm</a><span class="desc">&middot; clause extraction, risk flagging, redline draft</span></div>
+      <div class="recipe-row"><a href="/registry?vertical=legal">privilege-flag.kolm</a><span class="desc">&middot; classify communications for attorney-client privilege</span></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 class="v2-h2">ROI calculator.</h2>
+    <p class="sub">Estimate the annual swing from running one matter-review workflow as a private compiled model.</p>
+    <div class="roi-grid">
+      <div><label>Reviews per day <input type="number" id="roi-prompts" value="200"></label></div>
+      <div><label>Cost per 1K tokens (USD cents) <input type="number" id="roi-cost" value="4"></label></div>
+      <div><label>Associate-hours saved per review (%) <input type="number" id="roi-churn" value="35"></label></div>
+      <div><label>Infra cost / month (USD) <input type="number" id="roi-infra" value="3200"></label></div>
+    </div>
+    <div class="roi-out" id="roi-out">Estimated savings: ...</div>
+
+    <div class="cta-row" style="margin-top:36px">
+      <a class="primary" href="/enterprise#demo">Book private-cloud demo</a>
+      <a class="secondary" href="/registry?vertical=legal">Browse legal recipes</a>
+    </div>
+  </section>
+
+  <p class="footnote">See also <a href="/legal">/legal</a> (v1 overview) &middot; <a href="/enterprise">/enterprise</a> &middot; <a href="/security">/security</a></p>
 </main>
+
+<script>
+(function(){
+  function recalc(){
+    var p = Number(document.getElementById('roi-prompts').value)||0;
+    var c = Number(document.getElementById('roi-cost').value)||0;
+    var ch = Number(document.getElementById('roi-churn').value)||0;
+    var inf = Number(document.getElementById('roi-infra').value)||0;
+    var tokensPerReview = 6000;
+    var saasAnnual = (p*250*tokensPerReview/1000)*(c/100);
+    var infraAnnual = inf*12;
+    var associateRate = 350;
+    var hoursSavedPerReview = 1.2*(ch/100);
+    var laborSavings = p*250*hoursSavedPerReview*associateRate;
+    var net = (saasAnnual - infraAnnual) + laborSavings;
+    document.getElementById('roi-out').textContent =
+      'Estimated annual savings: $' + Math.max(0, Math.round(net)).toLocaleString();
+  }
+  ['roi-prompts','roi-cost','roi-churn','roi-infra'].forEach(function(id){
+    document.getElementById(id).addEventListener('input', recalc);
+  });
+  recalc();
+  var btn = document.getElementById('navToggle');
+  var sheet = document.getElementById('navSheet');
+  if (btn && sheet){
+    btn.addEventListener('click', function(){
+      var open = sheet.classList.toggle('is-open');
+      btn.setAttribute('aria-expanded', String(open));
+    });
+  }
+})();
+</script>
+<script src="/nav.js" defer></script>
 </body>
 </html>

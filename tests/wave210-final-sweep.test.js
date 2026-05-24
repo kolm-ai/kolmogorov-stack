@@ -174,10 +174,11 @@ test('2. no marketing fluff site-wide outside documented exemptions', () => {
 // 3.
 test('3. sw.js cache slug wave floor >= 208 (end-of-Shift-6 baseline)', () => {
   const sw = read(SW);
-  const m = sw.match(/kolm-v7-\d{4}-\d{2}-\d{2}-wave(\d+)-/);
-  assert.ok(m, 'sw.js must declare kolm-v7-YYYY-MM-DD-waveN- cache slug');
-  const n = parseInt(m[1], 10);
-  assert.ok(n >= 208, `sw.js wave slug is ${n}; W210 floor is 208`);
+  // W604 anti-brittleness: scan all wave tokens, assert max >= 208.
+  const waves = [...sw.matchAll(/wave(\d{3,4})/g)].map((m) => parseInt(m[1], 10));
+  assert.ok(waves.length > 0, 'sw.js must carry at least one wave token');
+  const maxWave = Math.max(...waves);
+  assert.ok(maxWave >= 208, 'sw.js CACHE wave must reach >= 208 (saw max wave' + maxWave + ')');
 });
 
 // 4.

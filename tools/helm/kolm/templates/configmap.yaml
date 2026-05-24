@@ -1,0 +1,18 @@
+{{- /*
+W824-1 — ConfigMap holding KOLM_DATA_DIR + KOLM_ARTIFACT_ID env vars.
+The deployment's `envFrom` block merges every key here into the main
+container's environment. Operators add extra runtime config via
+.Values.extraEnv on the deployment, not here, so this stays static.
+*/ -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "kolm.fullname" . }}-env
+  labels:
+    {{- include "kolm.labels" . | nindent 4 }}
+data:
+  KOLM_DATA_DIR: {{ .Values.persistence.mountPath | quote }}
+  KOLM_ARTIFACT_ID: {{ .Values.artifactRegistry.artifactId | quote }}
+  KOLM_ARTIFACT_PATH: "/artifacts"
+  KOLM_RUNTIME_PORT: {{ .Values.service.targetPort | quote }}
+  KOLM_ENV: "production"

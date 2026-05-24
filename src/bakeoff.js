@@ -33,6 +33,17 @@ import os from 'node:os';
 
 import { callLLM, isConfigured, describeConfig } from './llm-call.js';
 import { runArtifact } from './artifact-runner.js';
+// W784 — Eval-metric plugin discovery. bakeoffMetricPlugins() returns plugins
+// of kind "eval-metric" so the bakeoff loop can fold third-party metrics
+// alongside K-Score / parse-failure / context-faithfulness. Discovery only
+// at this layer — the plugin's entry script does the actual scoring per row.
+// See src/plugins.js + /docs/plugins.html.
+import { bakeoffMetricPlugins as _w784BakeoffMetricPlugins } from './plugins.js';
+export function listW784MetricPlugins() {
+  try { return _w784BakeoffMetricPlugins(); } catch (_) {
+    return { ok: true, kind: 'eval-metric', total: 0, plugins: [], errors: [] };
+  }
+}
 // W809-3 — parse_failure_rate track. parseOutputAgainstSpec returns
 // {ok,parsed,error} so the bakeoff summary can count parse failures alongside
 // pass_rate (never substituted for K-Score).

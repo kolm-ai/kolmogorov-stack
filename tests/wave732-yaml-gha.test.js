@@ -334,21 +334,21 @@ test('W732 #9 — POST /v1/yaml/validate returns 400 with a snake_case error on 
 // 10) diffArtifacts returns honest w739_not_shipped envelope
 // =============================================================================
 
-test('W732 #10 — diffArtifacts returns honest w739_not_shipped placeholder envelope', () => {
+test('W732 #10 — diffArtifacts is wired (W739 shipped: returns versioned envelope, ok:false for missing files)', async () => {
   freshDir();
-  const result = diffArtifacts('/tmp/a.kolm', '/tmp/b.kolm');
+  // W739 has shipped, so diffArtifacts is a real implementation rather than
+  // the old w732 placeholder stub. For two non-existent paths it must still
+  // return ok:false with a versioned envelope so CI / dashboards can branch on
+  // the error without re-implementing the file-read logic.
+  const result = await diffArtifacts('/tmp/a.kolm', '/tmp/b.kolm');
   assert.equal(typeof result, 'object', 'diffArtifacts must return an object');
-  assert.equal(result.ok, false, 'diffArtifacts stub must return ok:false');
-  assert.equal(result.error, 'w739_not_shipped',
-    `diffArtifacts stub error must be 'w739_not_shipped'; got ${JSON.stringify(result.error)}`);
-  assert.equal(typeof result.hint, 'string', 'diffArtifacts stub must include a hint');
-  assert.ok(/w739|inspect/i.test(result.hint),
-    `hint should reference W739 or the inspect workaround; got ${JSON.stringify(result.hint)}`);
-  // Version stamp must be present so a CI that snapshots this envelope can
-  // detect the W739 hand-off when it lands.
+  assert.equal(result.ok, false, 'diffArtifacts must return ok:false for missing files');
+  assert.equal(typeof result.error, 'string', 'diffArtifacts must include a string error code');
+  assert.equal(typeof result.version, 'string', 'diffArtifacts must include a version stamp');
+  // Version stamp must be present and carry a recognisable wave prefix.
   assert.equal(typeof KOLM_DIFF_VERSION, 'string', 'KOLM_DIFF_VERSION must be exported');
-  assert.match(KOLM_DIFF_VERSION, /^w732-/,
-    `KOLM_DIFF_VERSION must carry the w732- prefix until W739; got ${JSON.stringify(KOLM_DIFF_VERSION)}`);
+  assert.match(KOLM_DIFF_VERSION, /^w7(32|39)-/,
+    `KOLM_DIFF_VERSION must carry the w732- or w739- prefix; got ${JSON.stringify(KOLM_DIFF_VERSION)}`);
 });
 
 // =============================================================================

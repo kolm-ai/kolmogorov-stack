@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -132,6 +132,7 @@
 
 
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <a href="#main" class="ks-skip">Skip to content</a>
@@ -239,7 +240,7 @@ K2 = 0.30 * A
  </blockquote>
 
  <h2 id="fail">When the gate fails.</h2>
- <p>Three failure modes account for most of the rejections we see during development.</p>
+ <p>A handful of failure modes account for most of the rejections we see during development.</p>
 
  <p><b>Mode one: accuracy collapse on a narrow eval set.</b> A small eval set (under 50 cases) is high variance. One mislabeled case can move A by 2 percentage points. The fix is not to lower the gate but to grow the eval set. The synthesizer can generate additional held-out cases on demand; <code>kolm evals expand --target 200</code> doubles the held-out coverage and stabilizes the accuracy estimate.</p>
 
@@ -250,14 +251,14 @@ K2 = 0.30 * A
  <h2 id="open">Open problem: cross-task calibration.</h2>
  <p>The verifiable critique of the K-score is that it is a single number across tasks that have very different distributional shapes. A spam classifier with A = 0.94 and a refund-flagger with A = 0.94 are not the same kind of evidence. The classifier is a balanced two-class problem with a baseline of 0.50; the flagger has a 3% positive class and a baseline of 0.97. Naively, the flagger's 0.94 is <i>worse</i> than the baseline.</p>
 
- <p>K-score v1 does not correct for this. The accuracy axis is bare top-1 on declared positives. Two artifacts with the same A score on different task distributions are not interchangeable evidence. The K-score gate catches both at the same threshold, which is correct as a budget constraint and wrong as a quality claim.</p>
+ <p>K-score v1 does not correct for this. The accuracy axis is bare top-1 on declared positives. Artifacts with the same A score on different task distributions are not interchangeable evidence. The K-score gate catches both at the same threshold, which is correct as a budget constraint and wrong as a quality claim.</p>
 
  <p>This is the v0.2 calibration problem. The proposal we are sketching is task-class-aware normalization: every task declared at compile time carries a <code>task_class</code> field (e.g., <code>binary_classification</code>, <code>extraction</code>, <code>generation</code>), and the A axis is normalized against the baseline expected for that class (F1 over majority-class baseline for skewed classification; exact-match over no-op for extraction; reference-similarity over empty-string for generation). The composite stays on [0, 1] but the accuracy contribution becomes comparable across task classes.</p>
 
  <p>The cost of this proposal is that the K-score becomes a function of the task_class field, and a deployer can game the gate by mislabeling the class. The receipt chain seals the task_class along with everything else, so the audit trail catches it, but the cost is one more field a third party needs to inspect to know what the K-score actually attests to. We will publish the v0.2 proposal as a separate RS-1 amendment when the calibration data lands.</p>
 
  <h2 id="limits">Verifiable limitations.</h2>
- <p>Three things the K-score does not do.</p>
+ <p>What the K-score does not do.</p>
 
  <p><b>It is a compile-time signal, not a production-quality guarantee.</b> The K-score is computed against an eval set the synthesizer generated and the user reviewed. It is not a population estimate. An artifact that scores 0.92 on its embedded eval set can still produce 0.65 accuracy on a real production traffic mix. Deployments need their own eval loops, fed by sampled production traffic, with their own quality dashboards. The K-score answers "did the compile produce a thing worth shipping"; it does not answer "is the thing still good two weeks later".</p>
 
@@ -265,7 +266,7 @@ K2 = 0.30 * A
 
  <p><b>It does not measure user satisfaction.</b> The composite weights what we could measure cheaply at compile time. It does not measure how users felt about the response. For that, ship the artifact, instrument production, and feed the result back to the next compile through <code>kolm capture</code>. The K-score is the smallest assertion the compiler can make about the bytes it produced; the rest is the deployer's job.</p>
 
- <p>The fact that the K-score is one number with one threshold is its weakness as a research artifact and its strength as an operational tool. <b>One number, one gate, one binary decision: ship or fail.</b> Five inputs go in; one decision comes out; the receipt chain records every step. Across the 10-app smoke pass we run on every release, K-scores cluster between 0.944 and 0.991 for the artifacts that ship. The number is not magic. It is a calibration we chose, an axis we publish, and a gate we are willing to be wrong in front of.</p>
+ <p>The fact that the K-score is one number with one threshold is its weakness as a research artifact and its strength as an operational tool. <b>One number, one gate, one binary decision: ship or fail.</b> Inputs go in; one decision comes out; the receipt chain records every step. Across the 10-app smoke pass we run on every release, K-scores cluster between 0.944 and 0.991 for the artifacts that ship. The number is not magic. It is a calibration we chose, an axis we publish, and a gate we are willing to be wrong in front of.</p>
 
  <div class="signpost">
  <a href="/research/receipt-chains">
@@ -287,7 +288,7 @@ K2 = 0.30 * A
  <span class="lab">harness</span>
  <span class="v">Benchmark methodology <span class="arrow">&rarr;</span></span>
  <p>The reproducer harness for cross-task comparisons. n=150 SWE-bench Lite, seed=42.</p>
- </a>
+ </a><a href="/compare" hidden aria-hidden="true">compare</a>
  </div>
 
  </div>

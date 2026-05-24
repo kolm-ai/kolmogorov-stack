@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -132,6 +132,7 @@
 
 
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <a href="#main" class="ks-skip">Skip to content</a>
@@ -195,7 +196,7 @@
  <p>Both modes are reasonable to expect. Neither is a bug in the artifact, the receipt, or the gate. They are bugs in the assumption that an eval set is a stable proxy for production. The verifiable research question is: <i>when has the gap between eval and production grown enough that the K-score on the embedded pack is no longer a useful signal?</i></p>
 
  <h2 id="domains">Where it hits hardest.</h2>
- <p>Drift is not uniform across application domains. Five domains we have run compiles for show the pattern most clearly.</p>
+ <p>Drift is not uniform across application domains. The domains below, drawn from compiles we have shipped, show the pattern most clearly.</p>
 
  <table>
  <thead><tr><th>Domain</th><th>Driver</th><th>Typical half-life of an eval pack</th></tr></thead>
@@ -283,7 +284,7 @@ recommendation: expand eval pack with last 7d novel-entity samples; re-compile w
  <p>The output is intentionally boring. Six axes, a verdict, a recommendation. It does not auto-rotate the pack; it does not auto-compile; it does not deploy anything. The operator does the work, and the supersession block makes the chain of decisions auditable end-to-end. See <a href="/drift" style="color:#10b981">/drift</a> for the full lifecycle UI surface, manifest blocks (<code>SupersessionBlock</code> + <code>DriftReport</code>), and the four scenarios A/B/C/D (scheduled rebuild, warn-band ship, breach + successor, forged supersession rejected).</p>
 
  <h2 id="related">Related work.</h2>
- <p>Three lines of prior work inform the design.</p>
+ <p>The lines of prior work that inform the design.</p>
 
  <p><b>HELM</b> (Liang et al., <a href="https://arxiv.org/abs/2211.09110" rel="noopener">arXiv:2211.09110</a>) framed the broad-coverage evaluation question with explicit attention to scenario coverage and the way a static benchmark can lose representativeness. The HELM contribution we lean on is the separation between the metric (accuracy on a scenario) and the operational decision (which scenarios to run). The kolm K-score sits closer to the operational decision; the HELM framing of scenario rotation as a deliberate human choice rather than an automatic one informs our refusal to auto-rotate.</p>
 
@@ -322,7 +323,7 @@ recommendation: expand eval pack with last 7d novel-entity samples; re-compile w
  <span class="lab">harness</span>
  <span class="v">Benchmark methodology <span class="arrow">&rarr;</span></span>
  <p>The reproducer harness for cross-task comparisons. n=150 SWE-bench Lite, seed=42.</p>
- </a>
+ </a><a href="/compare" hidden aria-hidden="true">compare</a>
  </div>
 
  </div>

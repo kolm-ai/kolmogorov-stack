@@ -14,6 +14,17 @@
 // produced by distill ships to the customer; no copy is retained.
 
 import crypto from 'node:crypto';
+// W784 — Capture-processor plugin discovery. captureProcessorPlugins() returns
+// plugins of kind "capture-processor" so the gateway can fold third-party
+// transformers (e.g. domain-specific PII redactors) into the capture pipeline.
+// Discovery only at this layer — the plugin's entry script does the actual
+// transform per row. See src/plugins.js + /docs/plugins.html.
+import { captureProcessorPlugins as _w784CaptureProcessorPlugins } from './plugins.js';
+export function listW784CaptureProcessorPlugins() {
+  try { return _w784CaptureProcessorPlugins(); } catch (_) {
+    return { ok: true, kind: 'capture-processor', total: 0, plugins: [], errors: [] };
+  }
+}
 
 const ANTHROPIC_DEFAULT = 'https://api.anthropic.com/v1/messages';
 const OPENAI_DEFAULT = 'https://api.openai.com/v1/chat/completions';
@@ -304,4 +315,116 @@ function _extractGenericReasoning(response) {
     ],
     total_thinking_chars: parsed.thinking.length,
   };
+}
+
+// W828-1 — AUTO-DETECT reasoning capability from response shape.
+//
+// W713 required the caller to pass provider:'anthropic'|'openai'|'generic'.
+// W828 sniffs the response shape itself so the capture path doesn't need
+// per-call config to know which extractor to run.
+//
+// Detection rules (additive, never throws):
+//   * Anthropic extended-thinking: response.content[*].type === 'thinking'
+//     → { has_traces:true, format:'anthropic_thinking', provider:'anthropic' }
+//   * OpenAI o1/o3: response.usage.completion_tokens_details.reasoning_tokens
+//     > 0 OR (legacy) response.usage.reasoning_tokens > 0
+//     → { has_traces:true, format:'openai_reasoning_tokens', provider:'openai' }
+//   * DeepSeek-R1 OpenAI-compatible: response.choices[0].message.reasoning_content
+//     → { has_traces:true, format:'deepseek_reasoning', provider:'deepseek' }
+//   * Gemini thinking: response.candidates[0].content.parts[*].thinking
+//     → { has_traces:true, format:'gemini_thinking', provider:'gemini' }
+//   * else → { has_traces:false }
+//
+// Honesty contract: never throws on malformed input; missing/null/non-object →
+// { has_traces:false } (NOT null — callers branch on has_traces directly).
+// Order: Anthropic shape first (richest signal), then OpenAI reasoning_tokens,
+// then DeepSeek reasoning_content (shares OpenAI choices[] shape but field is
+// distinct), then Gemini. A response cannot be more than one of these in
+// practice; first match wins.
+export function autoDetectReasoningCapability(response) {
+  if (!response || typeof response !== 'object') {
+    return { has_traces: false };
+  }
+  try {
+    // Anthropic extended-thinking — content[].type === 'thinking'.
+    if (Array.isArray(response.content)) {
+      for (const block of response.content) {
+        if (block && typeof block === 'object' && block.type === 'thinking') {
+          return {
+            has_traces: true,
+            format: 'anthropic_thinking',
+            provider: 'anthropic',
+          };
+        }
+      }
+    }
+    // OpenAI o-series reasoning tokens — usage.completion_tokens_details.reasoning_tokens
+    // (current shape) or usage.reasoning_tokens (early preview / spec stub).
+    const usage = response.usage;
+    if (usage && typeof usage === 'object') {
+      const ctd = usage.completion_tokens_details;
+      const ctdTokens = ctd && typeof ctd === 'object'
+        ? Number(ctd.reasoning_tokens) || 0
+        : 0;
+      const flatTokens = Number(usage.reasoning_tokens) || 0;
+      if (ctdTokens > 0 || flatTokens > 0) {
+        return {
+          has_traces: true,
+          format: 'openai_reasoning_tokens',
+          provider: 'openai',
+        };
+      }
+    }
+    // DeepSeek-R1 OpenAI-compatible adapter — message.reasoning_content.
+    if (Array.isArray(response.choices) && response.choices[0]) {
+      const msg = response.choices[0].message;
+      if (msg && typeof msg === 'object' && typeof msg.reasoning_content === 'string'
+          && msg.reasoning_content.length > 0) {
+        return {
+          has_traces: true,
+          format: 'deepseek_reasoning',
+          provider: 'deepseek',
+        };
+      }
+    }
+    // Gemini thinking — candidates[0].content.parts[*].thinking.
+    if (Array.isArray(response.candidates) && response.candidates[0]) {
+      const cand = response.candidates[0];
+      const content = cand && cand.content;
+      const parts = content && Array.isArray(content.parts) ? content.parts : null;
+      if (parts) {
+        for (const p of parts) {
+          if (p && typeof p === 'object' && p.thinking) {
+            return {
+              has_traces: true,
+              format: 'gemini_thinking',
+              provider: 'gemini',
+            };
+          }
+        }
+      }
+    }
+  } catch (_) {
+    // Defense-in-depth — malformed shapes should never throw.
+    return { has_traces: false };
+  }
+  return { has_traces: false };
+}
+
+// W828-1 — autoExtractReasoningTrace: thin wrapper around extractReasoningTrace
+// that uses autoDetectReasoningCapability to pick the provider so callers in
+// the capture path (src/router.js, src/vision-capture.js) don't have to
+// hardcode the provider when the response shape already tells the story.
+//
+// When auto-detect returns has_traces:false, we still try the caller-supplied
+// hint (if any) as a fallback so existing call sites that DO pass provider:
+// keep working unchanged (W713 lock-in tests expect that).
+export function autoExtractReasoningTrace(response, hintProvider) {
+  const cap = autoDetectReasoningCapability(response);
+  if (cap.has_traces) {
+    return extractReasoningTrace(response, cap.provider);
+  }
+  // Fallback: honour the caller's explicit hint (W713 contract preservation).
+  if (hintProvider) return extractReasoningTrace(response, hintProvider);
+  return null;
 }

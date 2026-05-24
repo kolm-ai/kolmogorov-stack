@@ -1,0 +1,17 @@
+# W818-3 — proposed .gitattributes for Hugging Face Hub repos that ship .kolm
+# artifacts. Copy into the root of a Hub repo when the kolm Python SDK is
+# installed locally; otherwise the smudge filter is a no-op and the LFS
+# entry behaves like any binary file.
+
+# Treat .kolm as a binary, large-file model artifact. The LFS filter holds
+# the committed bytes; the kolm-extract filter pair gives working-copy
+# users an extracted manifest sibling without disturbing the blob.
+
+*.kolm filter=kolm-extract diff=binary -text
+*.kolm filter=lfs diff=lfs merge=lfs -text
+
+# Standard LFS lines for tokenizers, evals, and any shard sidecars the
+# artifact directory holds when the .kolm is composited from parts.
+*.gguf      filter=lfs diff=lfs merge=lfs -text
+*.safetensors filter=lfs diff=lfs merge=lfs -text
+*.bin       filter=lfs diff=lfs merge=lfs -text

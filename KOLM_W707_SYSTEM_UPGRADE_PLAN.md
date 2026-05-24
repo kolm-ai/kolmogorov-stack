@@ -1047,23 +1047,25 @@ Start the standard moat.
 - **[W817-4]** Test vectors: 5 known-good artifacts checked into `tests/fixtures/format-v1/*.kolm` with sha256 manifest. Agent: `spec-6`.
 - **[W817-5]** RFC-style change process doc `docs/spec/CHANGE_PROCESS.md`. Agent: `spec-7`.
 
-### W818 — [T2] .KOLM LOADERS FOR ECOSYSTEM TOOLS
+### W818 — [T2] .KOLM LOADERS FOR ECOSYSTEM TOOLS  ✅ SHIPPED 2026-05-24
 
-- **[W818-1]** llama.cpp loader PR: prepare `tools/llama-cpp-kolm-loader/` patch series. Agent: `eco-1`.
-- **[W818-2]** Ollama loader / plugin in `tools/ollama-kolm/`. Agent: `eco-2`.
-- **[W818-3]** Hugging Face Hub format-option PR draft. Agent: `eco-3`.
-- **[W818-4]** vLLM model loader in `tools/vllm-kolm/`. Agent: `eco-4`.
-- **[W818-5]** LM Studio import-wizard spec doc. Agent: `eco-5`.
+- **[W818-1]** ✅ llama.cpp loader PR scaffold: `tools/llama-cpp-kolm-loader/` README + patch.diff + kolm-loader.cpp documenting the .kolm zip layout (manifest/weights/runtime-policy/attestation). Agent: `eco-1`.
+- **[W818-2]** ✅ Ollama loader: `tools/ollama-kolm/cli.js` Modelfile generator that reuses `src/artifact-runner.js#loadArtifact`. Agent: `eco-2`.
+- **[W818-3]** ✅ Hugging Face Hub format-option PR draft: `tools/hf-hub-kolm/HF_HUB_PR_DRAFT.md` + `.gitattributes` + `huggingface_hub.kolm.py` loader stub. Agent: `eco-3`.
+- **[W818-4]** ✅ vLLM model loader: `tools/vllm-kolm/vllm_kolm_loader.py` (KolmArtifactLoader + kolm:// scheme handler) + README.md. Agent: `eco-4`.
+- **[W818-5]** ✅ LM Studio import-wizard spec: `tools/lm-studio-kolm/IMPORT_WIZARD_SPEC.md` (UI flow + LM Studio local model directory contract + .kolm import semantics). Agent: `eco-5`.
+- ✅ Tests: `tests/wave818-ecosystem-loaders.test.js` (10 atomic tests).
+- ✅ sw.js cache bumped: `kolm-v68-...-wave818-ecosystem-loaders`.
 
-### W819 — [T2] VS CODE EXTENSION
+### W819 — [T2] VS CODE EXTENSION  *(SHIPPED 2026-05-24)*
 
 (Partial: `packages/vscode-kolm-rag/` exists. Upgrade to full passive-monitor + distill workflow.)
 
-- **[W819-1]** Passive monitor: hook Copilot/Cursor/Claude-Code suggestion-acceptance events. Agent: `vscode-1`.
-- **[W819-2]** Pattern detection: surface "boilerplate", "tests", "docstrings" repetition clusters. Agent: `vscode-2`.
-- **[W819-3]** Status bar: capture count + "ready to distill" CTA. Agent: `vscode-3`.
-- **[W819-4]** Post-distill routing: route matching completions to local student via in-process runtime. Agent: `vscode-4`.
-- **[W819-5]** Settings panel: threshold, teacher preference, namespace. Agent: `vscode-5`.
+- **[W819-1]** Passive monitor: hook Copilot/Cursor/Claude-Code suggestion-acceptance events. Agent: `vscode-1`. SHIPPED 2026-05-24 — `packages/vscode-kolm-rag/src/passive-monitor.ts` + `capture-queue.ts`.
+- **[W819-2]** Pattern detection: surface "boilerplate", "tests", "docstrings" repetition clusters. Agent: `vscode-2`. SHIPPED 2026-05-24 — `packages/vscode-kolm-rag/src/pattern-detect.ts` (cosine + Jaccard, pure TS).
+- **[W819-3]** Status bar: capture count + "ready to distill" CTA. Agent: `vscode-3`. SHIPPED 2026-05-24 — `packages/vscode-kolm-rag/src/status-bar.ts`.
+- **[W819-4]** Post-distill routing: route matching completions to local student via in-process runtime. Agent: `vscode-4`. SHIPPED 2026-05-24 — `packages/vscode-kolm-rag/src/routing.ts` + `local-runtime.ts` (CLI shell-out with Jaccard fingerprint match).
+- **[W819-5]** Settings panel: threshold, teacher preference, namespace. Agent: `vscode-5`. SHIPPED 2026-05-24 — `kolm.cluster.threshold` / `kolm.teacher.preference` / `kolm.namespace` (+ `routing.enabled`, `routing.jaccardThreshold`, `passiveMonitor.*`) in `packages/vscode-kolm-rag/package.json`. Tests: `tests/wave819-vscode-extension.test.js` (14/14 green).
 
 ### W820 — [T2] GITHUB ACTIONS INTEGRATION
 
@@ -1080,52 +1082,77 @@ Start the standard moat.
 - **[W821-3]** Pipeline-level K-Score (weighted by route frequency). Agent: `pipe-3`.
 - **[W821-4]** Flow-diagram visualization on `/account/pipelines/:id.html`. Agent: `pipe-4`.
 
-### W822 — [T2] A/B TESTING INFRASTRUCTURE
+### W822 — [T2] A/B TESTING INFRASTRUCTURE — SHIPPED 2026-05-24
 
-- **[W822-1]** Traffic splitter: per-tenant config `{version_a:ART, version_b:ART, split:0.5}`. Agent: `abtest-1`.
-- **[W822-2]** Per-version metrics: K-Score, latency, fallback rate, user feedback aggregation. Agent: `abtest-2`.
-- **[W822-3]** Significance: chi-squared OR bootstrap (pure-JS in `src/significance.js`). Agent: `abtest-3`.
-- **[W822-4]** Auto-promote / auto-rollback based on significance + delta gates. Agent: `abtest-4`.
-- **[W822-5]** Wire-into-W720: A/B comparison data feeds self-improvement. Agent: `abtest-5`.
+- **[W822-1]** Traffic splitter: per-tenant config `{version_a:ART, version_b:ART, split:0.5}`. Agent: `abtest-1`. SHIPPED 2026-05-24 — appended W822 surface to `src/ab-router.js` (`setSplit`/`getSplit`/`pickVariant`/`listSplits` + `W822_AB_VERSION`); jsonl persistence at `~/.kolm/ab-tests/<namespace>.jsonl` with sanitized namespace + idempotency_key short-circuit; stable variant hashing on `fnv1a(tenant|namespace|request_id)`; existing W777 surface untouched (22/22 W777 tests still green).
+- **[W822-2]** Per-version metrics: K-Score, latency, fallback rate, user feedback aggregation. Agent: `abtest-2`. SHIPPED 2026-05-24 — new `src/ab-metrics.js` (`aggregate`/`deltas` + `AB_FEEDBACK_WORKFLOW`/`AB_OUTCOME_WORKFLOW`); reads canonical event-store via `listEvents`; tenant + namespace defense-in-depth fence; W777 compat path so `w777_ab_outcome` payloads still roll up; p50/p95 latency from `_percentile`.
+- **[W822-3]** Significance: chi-squared OR bootstrap (pure-JS in `src/significance.js`). Agent: `abtest-3`. SHIPPED 2026-05-24 — new `src/significance.js` with `chiSquared(observed, expected)` (Wilson-Hilferty p-value approx, closed-form df=1, honest zero-cell envelope) + `bootstrap({arr_a, arr_b, n_iters, statistic, alpha, seed})` (percentile CI + permutation p-value, deterministic via splitmix32 RNG); NO external deps; 2x2 closed-form chi2 verified within 0.01.
+- **[W822-4]** Auto-promote / auto-rollback based on significance + delta gates. Agent: `abtest-4`. SHIPPED 2026-05-24 — new `src/ab-promote.js` (`decide` pure + `evaluate` glue); promotes when `p < 0.05 AND k_score_delta > +0.02`; rolls back on `fallback_rate_delta > +0.05 OR latency_p95_pct_delta > +25%`; emits `ab.promoted`/`ab.rolled_back` via `tryAppendAudit` (audit failure surfaces as `audit_emit_failed`, decision is never swallowed).
+- **[W822-5]** Wire-into-W720: A/B comparison data feeds self-improvement. Agent: `abtest-5`. SHIPPED 2026-05-24 — new `src/ab-routes.js` (`registerAbRoutes(router, deps)`) registers 5 routes: `POST /v1/ab/configure`, `GET /v1/ab/status`, `POST /v1/ab/feedback`, `POST /v1/ab/promote`, `GET /v1/ab/metrics`; feedback fans to `deps.selfImprovement.enqueue` when wired (W720 queue) AND tags the event-store row with `kind:'w822_ab_feedback'+variant` so the detector loop picks it up regardless; router.js diff = 2 lines (import + `__registerAbRoutes_w822(r, { authMiddleware })`) — zero merge surface with WC07/WC14. Tests: `tests/wave822-ab-testing.test.js` 20/20 pass (stable variant picking, split persistence, chi-squared math, bootstrap CI shape, promote/rollback logic, route auth gate, self-improvement queue fan). sw.js bumped with `-wave822-ab-testing`.
 
-### W823 — [T2] OPENTELEMETRY INTEGRATION (UPGRADE)
+### W823 — [T2] OPENTELEMETRY INTEGRATION (UPGRADE) — SHIPPED 2026-05-24
 
 (A18 partial — existing OTLP. Add new attrs + dashboard template.)
 
-- **[W823-1]** New span attrs: artifact_id, routing_decision, token_confidence_p50/p95, kscore_drift. Agent: `otel-1`.
-- **[W823-2]** Grafana dashboard template `tools/grafana/kolm-dashboard.json`. Agent: `otel-2`.
-- **[W823-3]** Alert templates for Datadog/Honeycomb/Grafana (K-Score drift, fallback spike, latency regression). Agent: `otel-3`.
+- **[W823-1]** New span attrs: artifact_id, routing_decision, token_confidence_p50/p95, kscore_drift. Agent: `otel-1`. SHIPPED 2026-05-24 — extended `src/otel.js` KOLM_OTEL_ATTRS with ARTIFACT_ID/TOKEN_CONFIDENCE_P50/TOKEN_CONFIDENCE_P95/KSCORE_DRIFT + new `src/otel-attrs.js` exporting `kolmSpanAttrs(input)` envelope helper.
+- **[W823-2]** Grafana dashboard template `tools/grafana/kolm-dashboard.json`. Agent: `otel-2`. SHIPPED 2026-05-24 — extended from 4 to 6 panels (K-Score over time, K-Score drift gauge, p95 latency by artifact, fallback rate stacked area, token confidence histogram, routing-decision pie). schemaVersion 38.
+- **[W823-3]** Alert templates for Datadog/Honeycomb/Grafana (K-Score drift, fallback spike, latency regression). Agent: `otel-3`. SHIPPED 2026-05-24 — `tools/alerts/{datadog,honeycomb,grafana}-kolm.yaml` all share canonical thresholds (drift>0.05/1h, fallback>0.15/15min, latency>+25%/24h baseline).
 
-### W824 — [T2] KUBERNETES-NATIVE DEPLOYMENT
+### W824 — [T2] KUBERNETES-NATIVE DEPLOYMENT — SHIPPED 2026-05-24
 
-- **[W824-1]** Helm chart `tools/helm/kolm/` with values.yaml. Agent: `k8s-1`.
-- **[W824-2]** /ready endpoint upgrade: 200 only when artifact loaded + warmed. Agent: `k8s-2`.
-- **[W824-3]** /metrics Prometheus exporter. Agent: `k8s-3`.
-- **[W824-4]** HPA spec keyed on inference-queue depth (custom metric). Agent: `k8s-4`.
-- **[W824-5]** Init container to pull .kolm from registry. Agent: `k8s-5`.
-- **[W824-6]** Rolling-update support for zero-downtime model swaps. Agent: `k8s-6`.
+- **[W824-1]** Helm chart `tools/helm/kolm/` with values.yaml. Agent: `k8s-1`. SHIPPED 2026-05-24 — Chart.yaml (apiVersion v2, version 0.1.0, appVersion 1.0.0), values.yaml (image, replicaCount=2, resources, persistence size=10Gi, artifactRegistry.url/secretRef), templates/{deployment,service,configmap,hpa}.yaml + _helpers.tpl + README.md + .helmignore.
+- **[W824-2]** /ready endpoint upgrade: 200 only when artifact loaded + warmed. Agent: `k8s-2`. SHIPPED 2026-05-24 — new `src/k8s-readiness.js` (setArtifactLoaded/isArtifactLoaded + KOLM_ARTIFACT_LOADED env support) + `GET /ready/deep` in `src/k8s-routes.js`. Distinct from W730 `/ready` to avoid merge conflicts with concurrent agents.
+- **[W824-3]** /metrics Prometheus exporter. Agent: `k8s-3`. SHIPPED 2026-05-24 — `GET /metrics/extended` aggregates event-store rows into kolm_inferences_total (counter), kolm_latency_seconds (histogram), kolm_fallback_rate (gauge), kolm_inference_queue_depth (gauge for HPA). Distinct from W730 `/metrics`.
+- **[W824-4]** HPA spec keyed on inference-queue depth (custom metric). Agent: `k8s-4`. SHIPPED 2026-05-24 — `templates/hpa.yaml` uses External metric type with selector matchLabels:{app:kolm} and target AverageValue=50.
+- **[W824-5]** Init container to pull .kolm from registry. Agent: `k8s-5`. SHIPPED 2026-05-24 — `templates/deployment.yaml` initContainer runs `sh -c "kolm pull $KOLM_ARTIFACT_ID --to /artifacts/"` before main container, with KOLM_ARTIFACT_REGISTRY_URL + secretKeyRef-resolved token.
+- **[W824-6]** Rolling-update support for zero-downtime model swaps. Agent: `k8s-6`. SHIPPED 2026-05-24 — strategy RollingUpdate maxSurge=1 maxUnavailable=0 + preStop hook `sleep ${drainSeconds} && kill -TERM 1` + terminationGracePeriodSeconds=60 + artifactId pod annotation triggers rolling restart on artifact swap.
+
+Tests: `tests/wave824-k8s.test.js` (22 tests covering chart files, route handlers, version stamps, env-var readiness path, queue-depth gauge round-trip, sw.js wave-token regex). Router diff = 2 lines (import + call to `__registerK8sRoutes_w824(r)`) to avoid conflicts with WC07/WC14/W822.
 
 ---
 
-### W825 — [T3] ARTIFACT MARKETPLACE MVP
+### W825 — [T3] ARTIFACT MARKETPLACE MVP [SHIPPED 2026-05-24]
 
-(Existing pages at `public/marketplace/` are static. Upgrade to dynamic listings + downloads.)
+(Existing pages at `public/marketplace/` are static. W825 upgrades to dynamic listings + signed uploads + paid downloads + anti-gaming rating + 70/30 revenue share. W737 already shipped the curated catalog + reviews + computeRoyalty in `src/marketplace.js`; W825 is the publisher-driven MVP that sits alongside W737 under the same `/v1/marketplace/*` namespace, distinguished by route + storage. Single-call mount via `src/marketplace-routes.js` registerMarketplaceRoutes(r) keeps the router.js diff to two lines, avoiding collisions with parallel WC07/WC14/W822/W824 agents.)
 
-- **[W825-1]** Browse + filter UI: vertical, task type, K-Score, hardware, teacher. Agent: `mkt-1`.
-- **[W825-2]** Upload flow with metadata + signature verify. Agent: `mkt-2`.
-- **[W825-3]** Download + run one-click via SDK. Agent: `mkt-3`.
-- **[W825-4]** Transfer-learning fine-tune from marketplace artifact (wires W720 + W718). Agent: `mkt-4`.
-- **[W825-5]** Rating + review system with anti-gaming (req. account history). Agent: `mkt-5`.
-- **[W825-6]** Revenue share (70% publisher) on paid downloads. Agent: `mkt-6`.
+- **[W825-1]** Browse + filter UI: vertical, task type, K-Score, hardware, teacher. Agent: `mkt-1`. **SHIPPED 2026-05-24** — `src/marketplace-w825.js` `listListings({vertical, task_type, k_score_min, hardware, teacher, paid, sort_by, page, limit})` over `~/.kolm/marketplace/listings.jsonl` (later-line-wins upsert); `W825_VERTICALS`/`W825_TASK_TYPES`/`W825_HARDWARE_TARGETS`/`W825_SORT_MODES` frozen enums. `public/marketplace/index.html` rebuilt as a live JS fetcher (`/v1/marketplace/facets` populates sidebar selects, `/v1/marketplace/listings` renders the grid). Brand lock preserved byte-for-byte: eyebrow "Open-source AI workbench" + H1 "Frontier AI on your own infrastructure."
+- **[W825-2]** Upload flow with metadata + signature verify. Agent: `mkt-2`. **SHIPPED 2026-05-24** — `POST /v1/marketplace/upload` auth-gated; body `{id, title, vertical, task_type, hardware_targets[], k_score, teacher_model, artifact_uri, manifest_sha256, signature_b64, public_key_pem, paid, price_micro_usd}`. Routes calls `_verifyManifestSignature()` → `src/ed25519.js verify(public_key_pem, manifest_sha256, sigB64Url)`; HTTP **400 signature_invalid** on bad sig (`reason ∈ {missing_signature, missing_public_key, invalid, verify_threw}`). `publisher_tenant_id` is FORCED from `req.tenant_record.id` (W411 tenant fence) so a tenant cannot register under another publisher's name. Honest envelope on success: `201 {ok:true, listing}`. Audit row via `tryAppendAudit({op:'marketplace.upload'})` best-effort.
+- **[W825-3]** Download + run one-click via SDK. Agent: `mkt-3`. **SHIPPED 2026-05-24** — `GET /v1/marketplace/download/:id` auth-gated; streams `listing.artifact_uri` bytes when local. **402 payment_required** when `listing.paid=true` AND `_tenantHasEntitlement(tenant, listing)===false` (self-publisher always entitled; non-paid always entitled; plan != 'free' && != 'anon' entitled; explicit `tenant.entitlements[listing.id]===true` entitled). Increments `listing.downloads` via `recordDownload()` AND emits per-tenant `recordDownloadEvent()` (consumed by the anti-gaming rate gate). Paid downloads emit a `kolm_marketplace_revenue` event row (`recordRevenue`) for the payout cycle. Response headers `X-Kolm-Manifest-Sha256`, `X-Kolm-Listing-Id`, `X-Kolm-Marketplace-Version`.
+- **[W825-4]** Transfer-learning fine-tune from marketplace artifact (wires W720 + W718). Agent: `mkt-4`. **SHIPPED 2026-05-24** — `src/marketplace-finetune.js` `finetuneFromMarketplace({artifact_id, tenant_id, captures_namespace, k_target, max_steps})`. Validates the listing exists (404 `unknown_artifact_id` envelope on miss), copies `listing.artifact_uri` → `~/.kolm/artifacts/<artifact_id>.kolm` (skips remote URIs honestly with `copy_skipped_reason`), then **queues** a `kolm_marketplace_finetune_queued` event for the W381 distill worker to pick up on its next cycle. Returns `{ok:true, run_id, base_artifact_id, status:'queued', copied_to, pipeline_module:'./distill-pipeline.js', base_artifact_flag:'--base-artifact-id'}`. Honesty contract: status is `'queued'` (NEVER 'running'/'completed') because the real LoRA fine-tune is a long-running worker, not an inline call. `POST /v1/marketplace/finetune` returns `202`.
+- **[W825-5]** Rating + review system with anti-gaming (req. account history). Agent: `mkt-5`. **SHIPPED 2026-05-24** — `src/marketplace-ratings.js` `rate({tenant, listing_id, stars, review_text})` writes to `~/.kolm/marketplace/ratings.jsonl` (later-row-wins per `(listing_id, tenant_id)`). **Two anti-gaming gates** (both throw `Error.code='RATING_FORBIDDEN'`, HTTP 403): (1) `_accountAgeDays(tenant) >= MIN_ACCOUNT_AGE_DAYS (=7)` blocks brand-new accounts spinning up fake reviews; (2) `tenantHasDownloaded({listing_id, tenant_id}) === true` blocks "review without using it" gaming. Pre-W411 tenants with no `created_at` are treated as old (age=Infinity) rather than blocked forever. `getRatings(listing_id)` dedupes by tenant and recomputes `{rating_avg, rating_count, ratings}`. `rate()` calls `updateRatingAggregate()` so the listing row stays consistent. Routes: `POST /v1/marketplace/rate`, `GET /v1/marketplace/ratings/:id` (public read).
+- **[W825-6]** Revenue share (70% publisher) on paid downloads. Agent: `mkt-6`. **SHIPPED 2026-05-24** — `src/marketplace-payouts.js` hard-codes `PUBLISHER_SHARE = 0.70` + `PLATFORM_SHARE = 0.30` (NEVER read from runtime config — same contract W737 pins via `W737_PUBLISHER_SHARE`). `calcPayout(listing, total_revenue_micro_usd)` floor-rounds publisher = `floor(0.70 * rev)` and assigns platform = `rev - publisher` so `publisher_micro + platform_micro = revenue_micro` EXACTLY (no rounding leak). `payoutCycle(period)` aggregates `provider='kolm_marketplace_revenue'` event rows filtered by YYYY-MM, emits one per-listing audit row (`op='marketplace.payout'` via `tryAppendAudit`), and returns `{ok:true, period, dispatched:false, rows[]}`. **NO STRIPE PAYOUT WIRED** — honestly labelled as a forecast surface (`dispatched:false` + `forecast_note` in envelope) so a CI gate can confirm no real money moved. `POST /v1/marketplace/payout-cycle` returns the cycle envelope.
 
-### W826 — [T3] MEMORY-AWARE RUNTIME SCHEDULING
+**Files:**
+- `src/marketplace-w825.js` (data layer — listings.jsonl + filter/sort/upsert)
+- `src/marketplace-ratings.js` (rate + anti-gaming gates + ratings aggregate)
+- `src/marketplace-payouts.js` (calcPayout + payoutCycle 70/30 split)
+- `src/marketplace-finetune.js` (transfer-learning queue → distill-pipeline)
+- `src/marketplace-routes.js` (registerMarketplaceRoutes — 8 routes)
+- `src/router.js` (+1 import line, +1 call line)
+- `public/marketplace/index.html` (live JS fetcher, brand lock preserved)
+- `tests/wave825-marketplace.test.js` (17 tests covering CRUD, filter, sort, sig-fail, paid 402, free stream, anti-gaming 403, payout split, queued finetune, router wiring, sw.js wave token, HTML brand+anchors)
+- `public/sw.js` cache token bumped `-wave825-marketplace-mvp`
 
-- **[W826-1]** Memory hierarchy detector: `src/runtime-placement.js` — probes GPU VRAM, system RAM, NVMe bandwidth. Agent: `mem-1`.
-- **[W826-2]** Placement decision tree: VRAM-fit → full-GPU; VRAM+RAM → hybrid auto-split; overflow → NVMe-mmap. Agent: `mem-1`.
-- **[W826-3]** Pre-load heuristic: analyze inference patterns → preload likely-next artifact. Agent: `mem-2`.
-- **[W826-4]** Performance estimate before load: "~25 tok/s on your hardware". Agent: `mem-3`.
+Routes added (all under `/v1/marketplace/*`, distinct verbs/paths from W737):
+- `GET  /v1/marketplace/listings` (public browse)
+- `GET  /v1/marketplace/facets` (public enum set)
+- `POST /v1/marketplace/upload` (auth + signed)
+- `GET  /v1/marketplace/download/:id` (auth, 402 on paid+no-entitlement)
+- `POST /v1/marketplace/finetune` (auth, returns queued envelope)
+- `POST /v1/marketplace/rate` (auth, 403 on anti-gaming gate)
+- `GET  /v1/marketplace/ratings/:id` (public)
+- `POST /v1/marketplace/payout-cycle` (auth, forecast-only, dispatched:false)
 
-### W827 — [T3] CONTRASTIVE DISTILLATION v2: TOKEN-LEVEL DPO [RENAMED 2026-05-24]
+### W826 — [T3] MEMORY-AWARE RUNTIME SCHEDULING [SHIPPED 2026-05-24]
+
+- **[W826-1]** Memory hierarchy detector: `src/runtime-placement.js` — probes GPU VRAM, system RAM, NVMe bandwidth. Agent: `mem-1`. SHIPPED 2026-05-24 — `detectMemoryHierarchy()` via `src/devices.js` + `node:os` + 100MB write/read benchmark; `KOLM_NO_DISK_PROBE=1` skips the probe.
+- **[W826-2]** Placement decision tree: VRAM-fit → full-GPU; VRAM+RAM → hybrid auto-split; overflow → NVMe-mmap. Agent: `mem-1`. SHIPPED 2026-05-24 — `placementDecision({artifact_size_gb, hierarchy})` with 4-branch tree (`full_gpu`/`hybrid`/`nvme_mmap`/`cpu_only`); 0.9 VRAM headroom, 0.5 RAM half-budget; hybrid emits `split_ratio = vram_free/artifact_size`.
+- **[W826-3]** Pre-load heuristic: analyze inference patterns → preload likely-next artifact. Agent: `mem-2`. SHIPPED 2026-05-24 — `src/runtime-preload.js` `analyzeInferencePatterns({tenant, namespace, window_hours})` builds Markov transition matrix from event-store, returns top-3 + confidence (0..1 ramp from 5 to 50 transitions); `preloadDecision({current_artifact_id, hierarchy, top_artifacts})` → `[{action: warm_to_vram|mmap_only|skip}]`.
+- **[W826-4]** Performance estimate before load: "~25 tok/s on your hardware". Agent: `mem-3`. SHIPPED 2026-05-24 — `src/runtime-perf-estimate.js` `estimatePerformance({artifact_id, placement, hierarchy})` → `{tok_per_sec_estimate, ttft_ms_estimate, source: curve_fit|cached_run|fallback}`; `tok/s ≈ K_quant/sqrt(params_b) × placement_penalty` (1.0/0.4/0.1/0.05); `params_b` from `src/models.js` MODELS registry.
+
+**Files:** `src/runtime-placement.js`, `src/runtime-preload.js`, `src/runtime-perf-estimate.js`, `tests/wave826-runtime-placement.test.js` (17 tests). `public/sw.js` cache bumped `-wave826-runtime-placement`. **Pure library code** — no new routes; TODO wire-up points marked in each file pointing to `src/runtime.js getCompiled()` for the future runtime integration.
+
+### W827 — [T3] CONTRASTIVE DISTILLATION v2: TOKEN-LEVEL DPO [SHIPPED 2026-05-24]
 
 **Renamed per user mandate 2026-05-24.** W714 already shipped response-level contrastive
 distillation (negative-variant generator + response-level DPO loss + `--contrastive` flag).
@@ -1136,11 +1163,13 @@ infrastructure already exists in W714.
 
 - ~~**[W827-1]** Negative-variant generator~~ → SHIPPED in W714-1.
 - ~~**[W827-2]** Response-level DPO loss~~ → SHIPPED in W714-2.
-- **[W827-3]** TOKEN-LEVEL DPO extension: per-token positive-vs-negative logit attribution in `apps/trainer/contrastive_distill.py` (extends, does not replace, W714-2). Agent: `contrast-tlv-1`.
-- **[W827-4]** New flag `--contrastive-token-level` (additive to existing `--contrastive`). Agent: `contrast-tlv-1`.
-- **[W827-5]** Benchmark: token-level vs response-level K-Score delta on shared eval (must show > 1% improvement to ship — honest gate). Agent: `contrast-tlv-2`.
+- **[W827-3]** TOKEN-LEVEL DPO extension: per-token positive-vs-negative logit attribution in `apps/trainer/contrastive_distill.py` (extends, does not replace, W714-2). Agent: `contrast-tlv-1`. **SHIPPED 2026-05-24** — `token_level_dpo_loss(logits_pos, logits_neg, target_ids, attention_mask, beta=0.1)` added; trainer loop branches on `contrastive_token_level`; run-meta records `contrastive_token_level_version=w827-v1`.
+- **[W827-4]** New flag `--contrastive-token-level` (additive to existing `--contrastive`). Agent: `contrast-tlv-1`. **SHIPPED 2026-05-24** — argparse arg + `--dpo-beta`; CLI `kolm distill --contrastive --contrastive-token-level` plumbs `KOLM_CONTRASTIVE_TOKEN_LEVEL=1` env + argv to Python worker.
+- **[W827-5]** Benchmark: token-level vs response-level K-Score delta on shared eval (must show > 1% improvement to ship — honest gate). Agent: `contrast-tlv-2`. **SHIPPED 2026-05-24** — `apps/trainer/bench_contrastive_token.py` emits `{response_level_kscore, token_level_kscore, delta, ship_decision: 'SHIP'|'NO_SHIP', threshold: 0.01}` single-line; without `--data` prints `BENCH_STUB_REQUIRES_REAL_DATA` banner + zeros + forced NO_SHIP.
 
-### W828 — [T3] REASONING TRACE DISTILLATION v2: AUTO-DETECT + TRACE-AWARE LOSS [RENAMED 2026-05-24]
+**Lock-in: `tests/wave827-token-dpo.test.js` (≥10 tests).**
+
+### W828 — [T3] REASONING TRACE DISTILLATION v2: AUTO-DETECT + TRACE-AWARE LOSS [RENAMED 2026-05-24] — SHIPPED 2026-05-24
 
 **Renamed per user mandate 2026-05-24.** W713 already shipped reasoning-trace distillation
 (Anthropic thinking blocks + o1 reasoning_tokens capture + `<think>...</think>` training rows +
@@ -1148,38 +1177,62 @@ infrastructure already exists in W714.
 trace-aware loss W713 doesn't have. Scope reduced to ONLY the new pieces — infrastructure
 already exists in W713.
 
-- ~~**[W828-1]** Reasoning-model detector + extended-thinking API capture~~ → PARTIALLY SHIPPED in W713-1 (manual config). W828 adds: AUTO-DETECT — sniff response shape to identify reasoning model without explicit per-call config. Agent: `reason-v2-1`.
+- ~~**[W828-1]** Reasoning-model detector + extended-thinking API capture~~ → PARTIALLY SHIPPED in W713-1 (manual config). W828 adds: AUTO-DETECT — sniff response shape to identify reasoning model without explicit per-call config. Agent: `reason-v2-1`. **SHIPPED** — `autoDetectReasoningCapability(response)` + `autoExtractReasoningTrace(response, hintProvider)` in `src/capture.js`; sniffs Anthropic `content[].type === 'thinking'`, OpenAI `usage.completion_tokens_details.reasoning_tokens > 0`, DeepSeek `choices[0].message.reasoning_content`, Gemini `candidates[0].content.parts[*].thinking`; wired into both capture paths in `src/router.js`.
 - ~~**[W828-2]** Trace format `<think>...</think>`~~ → SHIPPED in W713-2 + W713-3.
-- **[W828-3]** TRACE-AWARE LOSS extension in `apps/trainer/distill.py` — weighted loss term over the trace tokens separate from the answer tokens (forces student to actually learn reasoning structure, not just final answer). Agent: `reason-v2-2`.
-- **[W828-4]** New flag `--reasoning-trace-loss-weight 0.0..1.0` (additive to existing `--with-reasoning-traces`). Agent: `reason-v2-2`.
-- **[W828-5]** Benchmark: trace-aware vs answer-only K-Score delta on reasoning-heavy eval (MMLU-Pro / GSM8K / MATH) — must show > 2% improvement to ship. Agent: `reason-v2-3`.
+- **[W828-3]** TRACE-AWARE LOSS extension in `apps/trainer/distill.py` — weighted loss term over the trace tokens separate from the answer tokens (forces student to actually learn reasoning structure, not just final answer). Agent: `reason-v2-2`. **SHIPPED** — `trace_aware_loss(logits, target_ids, trace_mask, attention_mask, w=0.5)` returns `(1-w)*answer_loss + w*trace_loss`; `_build_trace_mask_from_text` tags `<think>..</think>` spans on dataset rows; trainer's `compute_loss` branches on `rt_loss_w > 0` so weight=0.0 is byte-identical to the W713 baseline.
+- **[W828-4]** New flag `--reasoning-trace-loss-weight 0.0..1.0` (additive to existing `--with-reasoning-traces`). Agent: `reason-v2-2`. **SHIPPED** — `cli/kolm.js` parses `--reasoning-trace-loss-weight`, clamps to [0,1], plumbs into worker via `KOLM_REASONING_TRACE_LOSS_WEIGHT` env, AND echoes into POST body as `reasoning_trace_loss_weight` for run-meta provenance. `distill.py` argparser reads the env when the flag is omitted.
+- **[W828-5]** Benchmark: trace-aware vs answer-only K-Score delta on reasoning-heavy eval (MMLU-Pro / GSM8K / MATH) — must show > 2% improvement to ship. Agent: `reason-v2-3`. **SHIPPED** — `apps/trainer/bench_trace_aware.py` scaffold, threshold 0.02, prints `BENCH_STUB_REQUIRES_REAL_DATA` banner without `--data`, deterministic provenance-bound stub kscores otherwise.
 
-### W829 — [T3] MULTIMODAL CAPTURE PIPELINE (UPGRADE)
+### W829 — [T3] MULTIMODAL CAPTURE PIPELINE (UPGRADE) — SHIPPED 2026-05-24
 
 (W454 transcript + W462 image + W464 audio redactors exist; integrate into capture lake.)
 
-- **[W829-1]** Capture-lake extension: store image/audio/tool-use/multi-turn alongside text in `src/captures.js`. Agent: `mm-1`.
-- **[W829-2]** .kolm format heterogeneous weights: text + vision-encoder + tool-use-head. Extend `src/artifact.js`. Agent: `mm-2`.
-- **[W829-3]** VLM distillation support: GPT-4V → smaller VLM. Agent: `mm-3`.
-- **[W829-4]** Multi-turn conversation history capture (not just single-turn). Agent: `mm-4`.
+- **[W829-1] SHIPPED 2026-05-24** Capture-lake extension: `src/captures.js` (new module) — `recordMultimodalCapture` + `recordMultiTurnCapture` writing JSONL under `~/.kolm/captures/<namespace>/multimodal/<kind>/<hash>.jsonl` and `~/.kolm/captures/<namespace>/multi-turn/<conversation_id>.jsonl`; `KOLM_NO_RAW_MULTIMODAL=1` strips `data_uri` while preserving hash binding. Agent: `mm-1`.
+- **[W829-2] SHIPPED 2026-05-24** `.kolm` format heterogeneous weights: `addHeterogeneousWeights(builder, {text_weights, vision_encoder, tool_use_head})` extends `src/artifact.js` to write `weights/text/`, `weights/vision-encoder/`, `weights/tool-use-head/` subdirs + `manifest.heterogeneous_weights = {present_modalities, vision_encoder_kind, tool_use_head_kind, ...}` block (closed-set kind validation). Agent: `mm-2`.
+- **[W829-3] SHIPPED 2026-05-24** VLM distillation support: `src/vlm-distill.js` `vlmDistillRun({teacher,student_model,dataset_captures})` enqueues jobs at `~/.kolm/vlm-distill/<run_id>.json`. Honest envelope when `KOLM_VLM_TEACHER_API_KEY` is unset → `{ok:true, status:'queued', real_run:false, missing_env:'KOLM_VLM_TEACHER_API_KEY'}`. Teachers: gpt-4v / claude-3-vision / gemini-vision. Agent: `mm-3`.
+- **[W829-4] SHIPPED 2026-05-24** Multi-turn conversation history capture: `recordMultiTurnCapture({tenant,namespace,conversation,conversation_id,parent_message_id?})` — append-only JSONL, supports full-snapshot or incremental write patterns. Agent: `mm-4`.
 
-### W830 — [T3] FEDERATED DISTILLATION (INTEGRATE)
+Routes (mounted via `src/multimodal-pipeline-routes.js` → `registerMultimodalPipelineRoutes(app)` — one import + one call in `src/router.js` to avoid merge conflicts with concurrent agents):
+- `POST /v1/captures/multimodal`
+- `POST /v1/captures/multi-turn`
+- `POST /v1/vlm-distill/run`
+- `GET /v1/vlm-distill/runs`
+
+Tests: `tests/wave829-multimodal-pipeline.test.js` (12 atomic tests covering path layout, raw-strip toggle, multi-turn append, heterogeneous-weights manifest block, honest VLM envelope, route registration + auth gate, sw.js wave-token regex, backward-compat of existing capture modules).
+
+### W830 — [T3] FEDERATED DISTILLATION (INTEGRATE) — SHIPPED 2026-05-24
 
 (A9 + W461 exist; integrate consortium management + verifiable DP claims.)
 
-- **[W830-1]** Consortium management UI `/account/federated/consortium.html`: opt-in, privacy budget, members. Agent: `fed-1`.
-- **[W830-2]** Membership-inference attack resistance verifier in `src/federated-mia.js`. Agent: `fed-2`.
-- **[W830-3]** End-to-end consortium walkthrough doc (this IS user-requested — `docs/federated/CONSORTIUM_GUIDE.md`). Agent: `fed-3`.
+- **[W830-1] SHIPPED 2026-05-24** Consortium management UI `/account/federated/consortium.html`: opt-in card + privacy budget panel (epsilon spent vs allocated bar) + member list (contribution_count + last_share_at) + active aggregations table. Vanilla JS + fetch; reuses `/account` design tokens; brand-lock H1 "Frontier AI on your own infrastructure." with "Open-source AI workbench" eyebrow. Agent: `fed-1`.
+- **[W830-2] SHIPPED 2026-05-24** Membership-inference attack resistance verifier `src/federated-mia.js` — `calibrateMIA({shadow_models, train_set, holdout_set})` returns honest `{ok:false, error:'mia_requires_shadow_models', install_hint}` when shadow_models < 3; `verifyArtifactMIAResistance({artifact_id, test_inputs, p_threshold})` returns `{ok, attack_auc, verdict:'passing'|'leaking', ...}`; `dpEpsilonAudit({artifact_manifest})` reads `manifest.privacy.dp_epsilon` and recomputes via Gaussian-mechanism formula `epsilon = sensitivity * sqrt(2*ln(1.25/delta)) / sigma` — claim envelope carries `{claimed_epsilon, recomputed_epsilon, verified, audit_method, audit_digest}`. Agent: `fed-2`.
+- **[W830-3] SHIPPED 2026-05-24** End-to-end consortium walkthrough doc `docs/federated/CONSORTIUM_GUIDE.md` updated with route table + cURL examples for all 4 base routes (opt-in, opt-out, members, budget, aggregations); covers prereqs / opt-in flow / sharing approvals (cross-link to W461) / aggregation cadence / privacy budget math / audit trail / opting out. Agent: `fed-3`.
 
-### W831 — [T3] OFFLINE / AIR-GAPPED MODE (INTEGRATE)
+Routes (mounted via `src/federated-consortium-routes.js` → `registerFederatedConsortiumRoutes(app)` — one import + one call in `src/router.js` to avoid merge conflicts with concurrent WC07/WC14/W825/W829 agents):
+- `POST /v1/federated/consortium/opt-in`
+- `POST /v1/federated/consortium/opt-out`
+- `GET  /v1/federated/consortium/members`
+- `GET  /v1/federated/consortium/budget`
+- `GET  /v1/federated/consortium/aggregations`
+- `POST /v1/federated/consortium/verify-mia`
+
+All routes tenant-fenced via `req.tenant_record.id`. Persistence: `~/.kolm/federated-consortium/<consortium_id>.json` (single-tenant view) + `~/.kolm/federated-consortium/_aggregations.jsonl` (system-wide). Tests: `tests/wave830-federated-consortium.test.js` (13 atomic tests covering mia exports, honest-stub paths, dpEpsilonAudit Gaussian recompute, opt-in JSON shape, budget math, route registration + auth gating on all 6 routes, brand-lock H1, cURL example count, vercel rewrite, sw.js regex+threshold). sw.js slug: `wave830-federated-consortium`.
+
+### W831 — [T3] OFFLINE / AIR-GAPPED MODE (INTEGRATE) — SHIPPED 2026-05-24
 
 (A33 partial — local backends exist; integrate full offline-distill + sneakernet.)
 
-- **[W831-1]** Fully offline distillation: user-provided training data, no API captures. Agent: `airgap-1`.
-- **[W831-2]** Local-only teacher via Ollama/vLLM with mandatory air-gap verification. Agent: `airgap-2`.
-- **[W831-3]** Sneakernet deploy: USB transfer with Ed25519 signature verify. Agent: `airgap-3`.
-- **[W831-4]** Air-gapped bakeoff harness (no-network mode). Agent: `airgap-4`.
-- **[W831-5]** Deployment guide `docs/airgap/CLASSIFIED_DEPLOYMENT.md`. Agent: `airgap-5`.
+- **[W831-1]** Fully offline distillation: user-provided training data, no API captures. Agent: `airgap-1`. SHIPPED 2026-05-24 — `src/airgap-distill.js` (`offlineDistill` + `getOfflineDistillStatus`). Three guards in order: (a) `KOLM_TEACHER_API_KEY` env absent, (b) all paths absolute + local + existent, (c) `fetch('https://example.com', {signal:AbortSignal.timeout(50)})` MUST fail. Returns `{ok, run_id, status:'queued', airgap_verified:true, verification_method:'no_network_dial'}`; persists run spec atomically to `~/.kolm/airgap-distill-runs/<run_id>.json`.
+- **[W831-2]** Local-only teacher via Ollama/vLLM with mandatory air-gap verification. Agent: `airgap-2`. SHIPPED 2026-05-24 — `src/airgap-teacher.js` (`verifyTeacherIsLocal` + `PolicyBlockError` + `isTeacherLocal`). Allow-list: 127.0.0.1 / localhost / ::1 / 0.0.0.0 / 127.* range / `unix:` / `file:`. Anything else throws `PolicyBlockError{code:'teacher_not_local'}`. Tighter than W779's wrapFetch because air-gap mode does NOT trust `KOLM_LOCAL_TEACHER_URL` as an override.
+- **[W831-3]** Sneakernet deploy: USB transfer with Ed25519 signature verify. Agent: `airgap-3`. SHIPPED 2026-05-24 — `src/airgap-sneakernet.js` (`createSneakernetBundle` + `verifySneakernetBundle` + `generateEd25519Keypair`). Tar layout: `artifact.kolm` + `manifest.json` + `signature.bin` (raw 64-byte Ed25519 sig) + `kolm-airgap-receipt.json`. Detached signature over `(artifact_bytes || 0x00 || canonical(manifest))`; verify returns `{ok, artifact_path, signature_ok, recipient_ok, trustworthy, manifest, signer_fpr, recipient_fpr}`. Uses `crypto.sign/verify(null, ..., 'ed25519')` from node:crypto — no third-party deps.
+- **[W831-4]** Air-gapped bakeoff harness (no-network mode). Agent: `airgap-4`. SHIPPED 2026-05-24 — `src/airgap-bakeoff.js` (`airgapBakeoff`). Same dial-failure guard as W831-1; loads jsonl dataset (`{input, expected_output}`); per-artifact loop invokes a caller-supplied `invokeFn` (defaults to a deterministic stub); ranks by Jaccard token-overlap mean score with stable tie-break. Aborts BEFORE any artifact invocation when network is reachable.
+- **[W831-5]** Deployment guide `docs/airgap/CLASSIFIED_DEPLOYMENT.md`. Agent: `airgap-5`. SHIPPED 2026-05-24 — covers threat model, hardware requirements (no NIC / firewall-blocked), provisioning workflow (sneakernet only), key rotation, audit chain, decommissioning; references real W831 commands (`kolm sneakernet pack/verify/extract`, `kolm doctor airgap`, `kolm audit verify`).
+
+**W831 integration surface (modular mount)**:
+- `src/airgap-routes.js` (`registerAirgapRoutes` / `mountAirgapRoutes`) — 6 routes all auth-gated + tenant-fenced: `POST /v1/airgap/distill/run`, `GET /v1/airgap/distill/status/:id`, `POST /v1/airgap/sneakernet/bundle`, `POST /v1/airgap/sneakernet/verify`, `POST /v1/airgap/bakeoff`, `GET /v1/airgap/doctor` (returns `{ok, network_reachable, teacher_local, signing_key_present, ...}`).
+- `src/router.js` diff = 2 lines (import + one-line `__registerAirgapRoutes_w831(r)` call). No merge conflict with parallel W830/W832 agents.
+- `public/sw.js` cache bumped with `-wave831-airgap` suffix.
+- Tests: `tests/wave831-airgap.test.js` (14 tests; covers all 12 spec pins + 2 bonus route-shape tests). W604 regex check on all four W831 module version stamps (`/^w831-/`, never explicit equality).
 
 ---
 
@@ -1192,21 +1245,40 @@ The data moat made real.
 - **[W832-3]** Weekly retrain cron. Agent: `meta-3`.
 - **[W832-4]** Replace W716 TAAS rule ladder with kolm-meta inference when n>=1000 training rows; fall back to rules otherwise (honest envelope `meta_insufficient_data`). Agent: `meta-4`.
 
-### W833 — [T4] CROSS-LINGUAL DISTILLATION
+### W833 — [T4] CROSS-LINGUAL DISTILLATION — SHIPPED 2026-05-24
 
-- **[W833-1]** Language distribution detector. Agent: `lingual-1`.
-- **[W833-2]** Synthetic translation via teacher for underrepresented languages (stamped `synthetic_translation:true`). Agent: `lingual-2`.
-- **[W833-3]** Multilingual mixture training. Agent: `lingual-3`.
-- **[W833-4]** Per-language K-Score reporting in artifact manifest. Agent: `lingual-4`.
+(Foundation enhancements on top of W774's cross-lingual eval / bakeoff /
+balanced sampler. W774 owns selection + scoring; W833 owns detection
+distribution + synthesis + mixture iterator + per-language manifest
+annotation.)
 
-### W834 — [T4] REGULATORY COMPLIANCE TOOLKIT
+- **[W833-1]** Language distribution detector. Agent: `lingual-1`. SHIPPED 2026-05-24 — `src/lingual-detect.js` (`detectLanguage(text)` returns `{lang:'en'|'es'|'zh'|'ja'|'ko'|'fr'|'de'|'pt'|'ru'|'ar'|'hi'|'unknown', confidence:0..1, source:'char_ngram'|'script_only'}` via Unicode script-class first then baked-in top-15-trigram-per-Latin-lang scorer; `distributionByLang(captures)` returns `{by_lang, total, underrepresented:[{lang, ratio, target_ratio:0.05}]}`). `SUPPORTED_LANGS_W833` Object.freeze()-d 11-entry contract.
+- **[W833-2]** Synthetic translation via teacher for underrepresented languages (stamped `synthetic_translation:true`). Agent: `lingual-2`. SHIPPED 2026-05-24 — `src/lingual-synthesize.js` (`synthesizeForUnderrepresented({tenant, namespace, target_lang, count, teacher:'anthropic'|'openai'|'local'})`). Honest envelope `{ok:false, error:'no_teacher_configured', install_hint:'Set KOLM_TEACHER_API_KEY or use teacher:local', requested_count, generated_count:0}` when teacher env missing. Every generated row stamped `synthetic_translation:true` + source_lang + target_lang + synth_provider + synth_model + synth_at. `local` teacher is deterministic [target_lang]-prefixed echo for CI/test.
+- **[W833-3]** Multilingual mixture training. Agent: `lingual-3`. SHIPPED 2026-05-24 — `src/lingual-mixture.js` (`buildMixture({captures, lang_weights:{en:0.5, es:0.2, zh:0.3}})` returns stateful per-call iterator drawing rows by weighted random pick with live-weight renormalization on exhaustion; `with_replacement` option for infinite stream; `autoBalanceWeights(distributionByLang_output)` floors underrepresented langs at 0.05 each, deflates over-floor langs proportionally, renormalizes to sum 1.0).
+- **[W833-4]** Per-language K-Score reporting in artifact manifest. Agent: `lingual-4`. SHIPPED 2026-05-24 — `src/lingual-manifest.js` (`annotateManifest({manifest, per_lang_kscores:{en:0.78, es:0.65}, overall_lang_distribution?, gated_at_n:30})` returns NEW manifest with `per_lang_kscore` block (copy-on-write, never mutates input) + `overall_lang_distribution` snapshot block; sanitizes non-finite/out-of-range scores into `dropped_lang_keys`; honest `no_per_lang_scores:true` sentinel when nothing valid survived. `readPerLangKScores(manifest)` returns `{ok:true, by_lang, languages_reported, gated_at_n, ...}` or honest `{ok:false, error:'no_per_lang_kscore_block'|'manifest_required'}`).
 
-- **[W834-1]** EU AI Act technical-docs auto-generator from artifact manifest. Agent: `reg-1`.
-- **[W834-2]** Risk classification per task category (high-risk/limited-risk/minimal-risk). Agent: `reg-2`.
-- **[W834-3]** Human-in-the-loop config: per-namespace `mandatory_human_review_threshold`. Agent: `reg-3`.
-- **[W834-4]** Data governance reports: capture sources, PII handling, consent tracking. Agent: `reg-4`.
-- **[W834-5]** Auto-generated model cards (HF standard). Agent: `reg-5`.
-- **[W834-6]** GRC export connectors: OneTrust, ServiceNow, IBM OpenPages. Agent: `reg-6`.
+**W833 integration surface (modular mount)**:
+- `src/lingual-routes.js` (`registerLingualRoutes` / `mountLingualRoutes`) — 4 routes all auth-gated + W411 tenant-fenced (defense-in-depth `listEvents` re-filter): `GET /v1/lingual/distribution?namespace=X`, `POST /v1/lingual/synthesize {target_lang, count, teacher}`, `POST /v1/lingual/mixture/auto-balance`, `GET /v1/lingual/manifest/:artifact_id`. Synthesize route defaults `write:false` so hosted calls return rows without auto-persisting — the operator explicitly POSTs to `/v1/capture/log` to commit.
+- `src/router.js` diff = 2 lines (import + one-line `__registerLingualRoutes_w833(r)` call). No merge conflict with parallel W830/W832/W834/W835 agents.
+- `cli/kolm.js` — `cmdW833Lingual` dispatcher wires `kolm lingual {detect <text>|distribution --namespace X|synthesize --target es --count N|mixture --weights en=0.5,es=0.3,zh=0.2}`; case statement + `COMPLETION_VERBS.push('lingual')` + `COMPLETION_SUBS.lingual = ['detect','distribution','synthesize','mixture']` all shipped.
+- `public/sw.js` cache bumped with `-wave833-cross-lingual-v2` suffix.
+- Tests: `tests/wave833-cross-lingual.test.js` — 19 tests passing (18 spec pins + 1 bonus version-stamp consistency check). All 4 routes verified 401-without-auth + 200-with-auth via in-process `buildRouter()` mount. W604 family regex (`wave(\d{3,4})`) + threshold check, never explicit sibling array.
+
+### W834 — [T4] REGULATORY COMPLIANCE TOOLKIT — SHIPPED 2026-05-24
+
+- **[W834-1]** EU AI Act technical-docs auto-generator from artifact manifest. Agent: `reg-1`. SHIPPED 2026-05-24 — `src/reg-eu-aiact-docs.js` (`generateTechnicalDocs` emits markdown/HTML across 6 Annex IV sections; missing fields surface as `<!-- MISSING: <field> — <action> -->` HTML comments greppable in rendered output).
+- **[W834-2]** Risk classification per task category (high-risk/limited-risk/minimal-risk). Agent: `reg-2`. SHIPPED 2026-05-24 — `src/reg-risk-classify.js` (`classifyArtifactRisk` over `INTENDED_USE_CATALOG` covering 26 intended-use enumerators across {prohibited, high_risk, limited_risk, minimal_risk}; each tier cites Article 5 / Annex III / Article 50 / Recital 27 basis + emits gates_required).
+- **[W834-3]** Human-in-the-loop config: per-namespace `mandatory_human_review_threshold`. Agent: `reg-3`. SHIPPED 2026-05-24 — `src/reg-hil.js` (`setMandatoryHumanReviewThreshold` / `getHilConfig` / `shouldEscalate`; threshold is CONFIDENCE PROBABILITY in [0,1] not nats, distinct from W766's `kolm_human_review_threshold` provider tag; uses `kolm_reg_hil_confidence_threshold` event-store provider).
+- **[W834-4]** Data governance reports: capture sources, PII handling, consent tracking. Agent: `reg-4`. SHIPPED 2026-05-24 — `src/reg-data-governance.js` (`capturesProvenanceReport` buckets rows by source enum `[gateway, manual, connector, unknown_source]` + `generateGovernanceReport` emits markdown with missing-attachment HTML comments; calendar-month period filter via YYYY-MM string).
+- **[W834-5]** Auto-generated model cards (HF standard). Agent: `reg-5`. SHIPPED 2026-05-24 — `src/reg-model-card-extended.js` extends W768's `buildModelCard` with three regulator-facing extension blocks: `per_language_kscore` (W760 Wilson-floor n>=30), `per_risk_category_gate_status` (8-gate readiness attestation), and `teacher_attribution` (HF derivative-model convention).
+- **[W834-6]** GRC export connectors: OneTrust, ServiceNow, IBM OpenPages. Agent: `reg-6`. SHIPPED 2026-05-24 — `src/reg-grc-connectors.js` (`exportToOneTrust` / `exportToServiceNow` / `exportToIBMOpenPages` / `exportByVendor` dispatcher; honest creds-check returns `{ok:false, error:'no_grc_creds', install_hint, export_payload}` when `KOLM_GRC_<VENDOR>_API_KEY` is missing — payload STILL computed for manual upload).
+
+**W834 integration surface (modular mount per W83x concurrent-edit standing directive)**:
+- `src/reg-routes.js` (`registerRegRoutes`) mounts 7 auth-gated tenant-fenced routes: `POST /v1/reg/eu-aiact-docs`, `POST /v1/reg/classify-risk`, `POST /v1/reg/hil/threshold` (requires `confirm:true`), `GET /v1/reg/hil/threshold?namespace=X`, `GET /v1/reg/data-governance?namespace=X&period=YYYY-MM`, `POST /v1/reg/model-card`, `POST /v1/reg/grc-export`.
+- `src/router.js` diff = 2 lines (one import + one-line `__registerRegRoutes_w834(r)` call). No merge conflict with parallel W83x agents.
+- `public/sw.js` cache bumped with `-wave834-regulatory` suffix; W604 regex+threshold (`wave(\d{3,4})` ≥ 834), not explicit array.
+- Tests: `tests/wave834-regulatory.test.js` — 14+ tests covering all 6 sub-items + route registration + W604 regex check + sw.js bump.
+- Version stamp `w834-v1` across all six modules — W604 regex pattern `/^w834-/` plus literal pins.
 
 ### W835 — [T4] SAVINGS-BASED PRICING
 
@@ -1251,6 +1323,7 @@ The data moat made real.
 |------|-------|-------|----------|
 | SHIPPED 2026-05-24 (W707-originals) | W720-W722 | 3 | done |
 | SHIPPED 2026-05-24 (Tier 0) | W807-W810 | 4 | done |
+| SHIPPED 2026-05-24 (Tier 2) | W819 (VS Code passive-monitor + distill) | 1 | done |
 | W707-original tail (minus dups) | W723-W806 (less W744, W750, W776) | 81 | after T0 |
 | Tier 1 | W811-W816 | 6 | interleave |
 | Tier 2 | W817-W824 | 8 | interleave |

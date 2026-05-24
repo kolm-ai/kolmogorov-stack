@@ -39,6 +39,19 @@ import { spawnSync } from 'node:child_process';
 import { DEVICES, info as deviceInfo, detectLocal } from './devices.js';
 import { info as modelInfo, fitsOn, trainOn } from './models.js';
 
+// WC14 — leading-`-` guard mirrored from src/device-install.js#_assertSafeFlag.
+// Local copy (not import) to avoid a circular dep with device-install.js, which
+// already imports from this file. Any device-profile value that flows into a
+// CLI argv position must run through this so a profile cannot smuggle an
+// option like `-oProxyCommand=evil` past ssh's argv parser.
+function _assertSafeFlag(value, fieldName) {
+  const s = String(value || '');
+  if (s.startsWith('-')) {
+    throw new Error(`${fieldName} must not start with '-' (flag injection guard)`);
+  }
+  return s;
+}
+
 export const CAPABILITY_VERSION = 'device-cap-v1';
 
 // All known runtimes the registry understands. Adding a runtime here without
@@ -446,7 +459,7 @@ export async function testDevice(deviceId) {
       const user = d.ssh.user ? `${d.ssh.user}@` : '';
       const args = ['-o', 'StrictHostKeyChecking=accept-new', '-o', 'ConnectTimeout=5'];
       if (d.ssh.port) args.push('-p', String(Number(d.ssh.port)));
-      if (d.ssh.identity_file) args.push('-i', String(d.ssh.identity_file));
+      if (d.ssh.identity_file) args.push('-i', _assertSafeFlag(d.ssh.identity_file, 'identity_file'));
       args.push('--', `${user}${host}`, 'echo kolm-ping');
       const r = spawnSync('ssh', args, { encoding: 'utf8', timeout: 10_000 });
       return {

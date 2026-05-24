@@ -68,21 +68,36 @@ export function errorEnvelope({
   next_actions = [],
   status = null,
   details = {},
+  install_hint = null,
+  installHint = null,
+  hint = null,
 } = {}) {
   const known = FAILURE_BY_CODE.get(code);
   const normalizedReadiness = normalizeReadiness(readiness);
-  return {
+  const resolvedMessage = message || (known ? known.next : code);
+  const resolvedSeverity = known ? known.severity : 'error';
+  const resolvedRetryable = known ? known.retryable : false;
+  // Resolve hint: explicit install_hint wins; then camelCase installHint; then legacy hint.
+  const resolvedInstallHint = install_hint || installHint || null;
+  const resolvedHint = hint || resolvedInstallHint || null;
+  const envelope = {
     ok: false,
     surface,
     journey,
     readiness: normalizedReadiness,
     tenant: normalizeTenant(tenant),
     evidence: normalizeEvidence(evidence),
-    error: {
+    // FLAT shape — matches the ~478 legacy call sites that read `error` as a string
+    // and `detail` as a human message. Do not change this without a coordinated migration.
+    error: code,
+    detail: resolvedMessage,
+    // RICH nested shape — W707 standardizer contract; preserved for new clients that
+    // need severity/retryable/status/details without re-deriving them.
+    error_detail: {
       code,
-      message: message || (known ? known.next : code),
-      severity: known ? known.severity : 'error',
-      retryable: known ? known.retryable : false,
+      message: resolvedMessage,
+      severity: resolvedSeverity,
+      retryable: resolvedRetryable,
       status,
       details,
     },
@@ -95,6 +110,11 @@ export function errorEnvelope({
       priority: 'P0',
     }] : []),
   };
+  // Emit BOTH `install_hint` (canonical) and `hint` (legacy alias) so existing
+  // call sites that read either name keep working. Only emit if a hint exists.
+  if (resolvedInstallHint) envelope.install_hint = resolvedInstallHint;
+  if (resolvedHint) envelope.hint = resolvedHint;
+  return envelope;
 }
 
 export function readinessEnvelope({

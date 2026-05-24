@@ -41,7 +41,7 @@ export async function run({ image, command = [], env = {}, timeoutMs = 30 * 60 *
   return await new Promise((resolve) => {
     const child = spawn(bin, args, {
       env: { ...process.env, ...env },
-      shell: process.platform === 'win32',
+      shell: false,
     });
     const outChunks = []; const errChunks = [];
     child.stdout.on('data', (c) => outChunks.push(c));

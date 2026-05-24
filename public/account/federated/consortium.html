@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Federated consortium &middot; Open-source AI workbench &middot; kolm.ai</title>
+<meta name="description" content="Opt into a federated consortium, track privacy budget, see member contribution counts, and watch aggregation runs in flight. Hash-only sharing with Laplace-noised aggregates.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Federated consortium &middot; Open-source AI workbench &middot; kolm.ai">
+<meta property="og:description" content="Opt-in, budget, members, aggregations. Hash-only sharing with Laplace-noised aggregates.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/account/federated/consortium">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/account/federated/consortium">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
+<script src="/nav.js" defer></script>
+<style>
+:root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--accent-soft:rgba(16,185,129,0.10);--warn:#d97706;--bad:#ef4444;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+main{padding:36px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 14px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.brand-eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+h1{font-size:30px;line-height:1.1;font-weight:500;letter-spacing:-0.01em;margin:0 0 8px}
+.lede{font-size:15.5px;color:var(--ink-mute);max-width:780px;margin:0 0 24px}
+h2{font-size:18px;font-weight:500;margin:32px 0 10px}
+.kpanel{padding:18px 20px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);margin:14px 0 18px}
+.kpanel h2{margin:0 0 8px;font-size:15.5px}
+.kpanel .pdesc{color:var(--ink-mute);font-size:13.5px;margin:0 0 14px;line-height:1.55}
+.form-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.form-row label{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.07em;min-width:140px}
+.form-row input{flex:1;background:var(--bg);border:1px solid var(--line);color:var(--ink);padding:8px 12px;border-radius:6px;font-family:var(--mono);font-size:13px;min-width:180px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:6px;border:1px solid var(--accent);background:var(--accent-soft);color:var(--ink);font-family:var(--mono);font-size:12.5px;cursor:pointer;text-decoration:none}
+.btn:hover{filter:brightness(1.1)}
+.btn.secondary{border-color:var(--line);background:transparent;color:var(--ink-mute)}
+.budget-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:14px 0}
+@media(max-width:780px){.budget-grid{grid-template-columns:1fr}}
+.metric{padding:14px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.metric .label{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px}
+.metric .value{font-family:var(--mono);font-size:22px;color:var(--ink);font-weight:500}
+.metric .sub{font-family:var(--mono);font-size:11.5px;color:var(--ink-mute);margin-top:3px}
+.budget-bar{height:8px;background:var(--bg);border-radius:99px;overflow:hidden;border:1px solid var(--line);margin:10px 0 4px}
+.budget-bar > div{height:100%;background:var(--accent);transition:width .3s ease}
+.budget-bar.warn > div{background:var(--warn)}
+.budget-bar.bad > div{background:var(--bad)}
+table.kt{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12.5px;margin:8px 0}
+table.kt th{text-align:left;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.06em;font-size:10.5px;padding:8px 10px;border-bottom:1px solid var(--line);font-weight:600}
+table.kt td{padding:9px 10px;border-bottom:1px solid var(--line);color:var(--ink)}
+table.kt td .pill{display:inline-block;padding:1px 7px;border-radius:99px;font-size:10px;letter-spacing:0.06em;text-transform:uppercase;border:1px solid currentColor}
+.pill.ok{color:var(--accent)}.pill.warn{color:var(--warn)}.pill.bad{color:var(--bad)}.pill.mute{color:var(--ink-faint)}
+.empty-note{padding:14px 18px;border:1px dashed var(--line);border-radius:10px;background:var(--bg);color:var(--ink-mute);font-size:13px;margin:14px 0}
+.status{font-family:var(--mono);font-size:12px;color:var(--ink-mute);min-height:18px;margin-top:8px}
+.status.ok{color:var(--accent)}
+.status.bad{color:var(--bad)}
+footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
+footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.brand-disambig{position:absolute;left:-9999px}
+code{background:var(--bg);padding:1px 5px;border-radius:3px;font-size:12.5px;color:var(--accent)}
+</style>
+</head>
+<body class="ks" data-w830-consortium="true">
+<span class="brand-anchor" data-w775="h1" aria-hidden="true">Frontier AI on your own infrastructure.</span>
+<span class="brand-disambig" aria-hidden="true">Not Kolm therapeutics, Kolm band, or other unrelated organizations using similar names.</span>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/marketplace">Marketplace</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">-&gt;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/account">account</a> / federated / consortium</div>
+<p class="brand-eyebrow" data-w775="brand-eyebrow">Open-source AI workbench</p>
+<h1>Frontier AI on your own infrastructure.</h1>
+<p class="lede">Opt into a federated consortium so your distilled artifact gets the benefit of approvals + DP-noised gradients from peer tenants without ever sharing raw input/output text. Only hashed approval rows and DP-noised contribution counts cross the wire. See <a href="/docs/federated/CONSORTIUM_GUIDE.md">CONSORTIUM_GUIDE.md</a> for the full walkthrough.</p>
+
+<!-- 1. OPT-IN CARD -->
+<section class="kpanel" id="optin-card" aria-labelledby="optin-h">
+  <h2 id="optin-h">1. Opt in to a consortium</h2>
+  <p class="pdesc">Pick the consortium id your team has agreed on out-of-band. Scope is a comma-separated list of namespaces. Default privacy budget is &epsilon;=10.0 across the consortium lifetime.</p>
+  <div class="form-row">
+    <label for="optin-consortium-id">Consortium id</label>
+    <input type="text" id="optin-consortium-id" value="default-consortium" autocomplete="off">
+  </div>
+  <div class="form-row">
+    <label for="optin-scope">Scope (namespaces)</label>
+    <input type="text" id="optin-scope" placeholder="finance, support" autocomplete="off">
+  </div>
+  <div class="form-row">
+    <label for="optin-eps">&epsilon; allocated</label>
+    <input type="text" id="optin-eps" value="10.0" autocomplete="off">
+  </div>
+  <div class="form-row" style="margin-top:12px">
+    <button class="btn" id="optin-btn">Opt in &rarr;</button>
+    <button class="btn secondary" id="optout-btn">Opt out</button>
+    <button class="btn secondary" id="refresh-btn">Refresh data</button>
+  </div>
+  <div class="status" id="optin-status" aria-live="polite"></div>
+</section>
+
+<!-- 2. PRIVACY BUDGET PANEL -->
+<section class="kpanel" id="budget-card" aria-labelledby="budget-h">
+  <h2 id="budget-h">2. Privacy budget (&epsilon; spent / &epsilon; allocated)</h2>
+  <p class="pdesc">Pulled live from <code>GET /v1/federated/consortium/budget</code>. Bar turns warn at 80%, bad at 95%. Per-tenant <code>epsilon_spent_by_self</code> is the share this tenant contributed.</p>
+  <div class="budget-grid">
+    <div class="metric"><div class="label">&epsilon; allocated</div><div class="value" id="budget-allocated">--</div><div class="sub">consortium lifetime</div></div>
+    <div class="metric"><div class="label">&epsilon; spent</div><div class="value" id="budget-spent">--</div><div class="sub" id="budget-pct">--</div></div>
+    <div class="metric"><div class="label">&epsilon; spent (this tenant)</div><div class="value" id="budget-self">--</div><div class="sub" id="budget-aggs">-- aggregations</div></div>
+  </div>
+  <div class="budget-bar" id="budget-bar"><div style="width:0%"></div></div>
+  <div class="status" id="budget-status" aria-live="polite"></div>
+</section>
+
+<!-- 3. MEMBER LIST -->
+<section class="kpanel" id="members-card" aria-labelledby="members-h">
+  <h2 id="members-h">3. Members</h2>
+  <p class="pdesc">Each row is a tenant that has opted in. <code>contribution_count</code> = number of rounds they have contributed deltas to; <code>last_share_at</code> = most recent hash-only approval share.</p>
+  <table class="kt" id="members-table">
+    <thead><tr><th>Tenant</th><th>Scope</th><th>Opted in</th><th>Contributions</th><th>Last share</th><th></th></tr></thead>
+    <tbody id="members-tbody">
+      <tr><td colspan="6"><span class="pill mute">empty</span> &mdash; opt in to populate.</td></tr>
+    </tbody>
+  </table>
+  <div class="status" id="members-status" aria-live="polite"></div>
+</section>
+
+<!-- 4. ACTIVE AGGREGATIONS TABLE -->
+<section class="kpanel" id="aggregations-card" aria-labelledby="aggs-h">
+  <h2 id="aggs-h">4. Active aggregations</h2>
+  <p class="pdesc">Recent federated rounds + DP-noised aggregations. Status maps: <span class="pill ok">completed</span> <span class="pill warn">running</span> <span class="pill bad">failed</span> <span class="pill mute">queued</span>. Pulled from <code>GET /v1/federated/consortium/aggregations</code>.</p>
+  <table class="kt" id="aggs-table">
+    <thead><tr><th>Aggregation</th><th>Round</th><th>Status</th><th>Started</th><th>Completed</th><th>&epsilon; spent</th><th>Participants</th></tr></thead>
+    <tbody id="aggs-tbody">
+      <tr><td colspan="7"><span class="pill mute">no aggregations yet</span> &mdash; the next federated round will appear here.</td></tr>
+    </tbody>
+  </table>
+  <div class="status" id="aggs-status" aria-live="polite"></div>
+</section>
+
+</div></main>
+
+<footer><div class="wrap">
+  <p>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm &middot; <a href="mailto:rodneyyesep@gmail.com">rodneyyesep@gmail.com</a></p>
+</div></footer>
+
+<script>
+// W830 — vanilla JS, no framework. fetch the 4 endpoints + render.
+(function(){
+  function $(id){ return document.getElementById(id); }
+  function setStatus(el, msg, kind){
+    if (!el) return;
+    el.textContent = msg || '';
+    el.className = 'status' + (kind ? (' ' + kind) : '');
+  }
+  function getConsortiumId(){
+    return ($('optin-consortium-id') && $('optin-consortium-id').value || 'default-consortium').trim();
+  }
+  function getAuthHeader(){
+    // Hosted-auth cookies set tenant_record. SDK callers can override via
+    // localStorage('kolm_api_key'); fallback to cookie-only.
+    try {
+      var k = localStorage.getItem('kolm_api_key');
+      if (k) return { 'Authorization': 'Bearer ' + k };
+    } catch(e) {}
+    return {};
+  }
+
+  async function callJSON(method, url, body){
+    var opts = { method: method, headers: Object.assign({'Accept':'application/json'}, getAuthHeader()), credentials: 'include' };
+    if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
+    var r = await fetch(url, opts);
+    var data = null;
+    try { data = await r.json(); } catch(e){ data = { ok:false, error:'invalid_json', http_status: r.status }; }
+    if (!data.ok && !data.error) data.error = 'http_' + r.status;
+    return data;
+  }
+
+  async function optIn(){
+    var cid = getConsortiumId();
+    var scope = $('optin-scope').value.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+    var eps = parseFloat($('optin-eps').value);
+    setStatus($('optin-status'), 'Opting in...', '');
+    var d = await callJSON('POST', '/v1/federated/consortium/opt-in', { consortium_id: cid, scope: scope, epsilon_allocated: (isFinite(eps) ? eps : null) });
+    if (d.ok) {
+      setStatus($('optin-status'), 'Opted in to ' + cid + ' (eps allocated = ' + d.epsilon_allocated + ')', 'ok');
+      await refreshAll();
+    } else {
+      setStatus($('optin-status'), 'Opt-in failed: ' + (d.error || 'unknown') + (d.hint ? ' (' + d.hint + ')' : ''), 'bad');
+    }
+  }
+
+  async function optOut(){
+    var cid = getConsortiumId();
+    if (!confirm('Opt out of consortium "' + cid + '"? This stops your tenant contributing to future rounds.')) return;
+    setStatus($('optin-status'), 'Opting out...', '');
+    var d = await callJSON('POST', '/v1/federated/consortium/opt-out', { consortium_id: cid, reason: 'user_initiated_from_ui' });
+    if (d.ok) {
+      setStatus($('optin-status'), 'Opted out of ' + cid + '.', 'ok');
+      await refreshAll();
+    } else {
+      setStatus($('optin-status'), 'Opt-out failed: ' + (d.error || 'unknown'), 'bad');
+    }
+  }
+
+  async function refreshBudget(){
+    var cid = getConsortiumId();
+    setStatus($('budget-status'), 'Loading budget...', '');
+    var d = await callJSON('GET', '/v1/federated/consortium/budget?consortium_id=' + encodeURIComponent(cid));
+    if (!d.ok) { setStatus($('budget-status'), 'Budget error: ' + (d.error || 'unknown'), 'bad'); return; }
+    $('budget-allocated').textContent = (d.epsilon_allocated != null ? d.epsilon_allocated.toFixed(2) : '--');
+    $('budget-spent').textContent = (d.epsilon_spent != null ? d.epsilon_spent.toFixed(3) : '0.000');
+    $('budget-self').textContent = (d.epsilon_spent_by_self != null ? d.epsilon_spent_by_self.toFixed(3) : '0.000');
+    var pct = (d.pct_spent != null) ? (d.pct_spent * 100) : 0;
+    $('budget-pct').textContent = pct.toFixed(1) + '% of allocation';
+    $('budget-aggs').textContent = (d.n_aggregations || 0) + ' aggregations';
+    var bar = $('budget-bar');
+    bar.className = 'budget-bar' + (pct >= 95 ? ' bad' : (pct >= 80 ? ' warn' : ''));
+    bar.firstElementChild.style.width = Math.min(100, Math.max(0, pct)) + '%';
+    setStatus($('budget-status'), 'Updated.', 'ok');
+  }
+
+  async function refreshMembers(){
+    var cid = getConsortiumId();
+    setStatus($('members-status'), 'Loading members...', '');
+    var d = await callJSON('GET', '/v1/federated/consortium/members?consortium_id=' + encodeURIComponent(cid));
+    if (!d.ok) { setStatus($('members-status'), 'Members error: ' + (d.error || 'unknown'), 'bad'); return; }
+    var tbody = $('members-tbody');
+    if (!d.members || d.members.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6"><span class="pill mute">empty</span> &mdash; opt in to populate.</td></tr>';
+    } else {
+      var rows = d.members.map(function(m){
+        var scope = (m.scope && m.scope.length) ? m.scope.join(', ') : '<span class="pill mute">all</span>';
+        var self = m.is_self ? ' <span class="pill ok">you</span>' : '';
+        var last = m.last_share_at ? new Date(m.last_share_at).toLocaleString() : '<span class="pill mute">never</span>';
+        return '<tr><td>' + escapeHTML(m.tenant_id) + self + '</td><td>' + scope + '</td><td>' + new Date(m.opted_in_at).toLocaleString() + '</td><td>' + (m.contribution_count || 0) + '</td><td>' + last + '</td><td></td></tr>';
+      }).join('');
+      tbody.innerHTML = rows;
+    }
+    setStatus($('members-status'), d.total + ' member(s).', 'ok');
+  }
+
+  async function refreshAggregations(){
+    var cid = getConsortiumId();
+    setStatus($('aggs-status'), 'Loading aggregations...', '');
+    var d = await callJSON('GET', '/v1/federated/consortium/aggregations?consortium_id=' + encodeURIComponent(cid));
+    if (!d.ok) { setStatus($('aggs-status'), 'Aggregations error: ' + (d.error || 'unknown'), 'bad'); return; }
+    var tbody = $('aggs-tbody');
+    if (!d.aggregations || d.aggregations.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7"><span class="pill mute">no aggregations yet</span> &mdash; the next federated round will appear here.</td></tr>';
+    } else {
+      var rows = d.aggregations.map(function(a){
+        var statusPill = '<span class="pill ' + statusKind(a.status) + '">' + escapeHTML(a.status || 'completed') + '</span>';
+        return '<tr><td>' + escapeHTML(a.aggregation_id || '--') + '</td><td>' + escapeHTML(a.round_id || '--') + '</td><td>' + statusPill + '</td><td>' + fmtTs(a.started_at) + '</td><td>' + fmtTs(a.completed_at) + '</td><td>' + (a.epsilon_spent != null ? Number(a.epsilon_spent).toFixed(3) : '--') + '</td><td>' + (a.n_participants || 0) + (a.participant_in_round ? ' <span class="pill ok">in</span>' : '') + '</td></tr>';
+      }).join('');
+      tbody.innerHTML = rows;
+    }
+    setStatus($('aggs-status'), d.total + ' aggregation(s).', 'ok');
+  }
+
+  function statusKind(s){
+    if (s === 'completed') return 'ok';
+    if (s === 'running') return 'warn';
+    if (s === 'failed') return 'bad';
+    return 'mute';
+  }
+  function fmtTs(t){ return t ? new Date(t).toLocaleString() : '<span class="pill mute">--</span>'; }
+  function escapeHTML(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+
+  async function refreshAll(){
+    await Promise.all([ refreshBudget(), refreshMembers(), refreshAggregations() ]);
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    $('optin-btn').addEventListener('click', optIn);
+    $('optout-btn').addEventListener('click', optOut);
+    $('refresh-btn').addEventListener('click', refreshAll);
+    refreshAll().catch(function(e){ console.error('W830 initial refresh failed', e); });
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,17 @@
+# kolm artifact format v1.0 — fixture manifest
+#
+# sha256(file)  filename
+#
+# Each row is the sha256 of the bytes-on-disk of the corresponding fixture.
+# Regenerate with:
+#   node -e "const fs=require('fs');const c=require('crypto');for(const f of ['small','medium','signed','attested','multimodal']){const n=f+'.manifest.json';console.log(c.createHash('sha256').update(fs.readFileSync(n)).digest('hex')+'  '+n);}"
+#
+# Tracked by tests/wave817-format-v1.test.js — any drift on the fixture
+# bytes MUST be reflected here in the same commit, otherwise the format
+# conformance test fails.
+
+4090ea542c8aad479ae6f6f9a586cf562db2db4429f04e1946aaa9f446090011  small.manifest.json
+c234b38d2d1229660f1f1df801af44151c536af305ada1e86798680a5b73a84f  medium.manifest.json
+e8856b6806d1369161a8e3b653c51d86d5674f67fdf943093fc424e87f3d2d8a  signed.manifest.json
+bb1b9219d58fa400a00370b72f81839b3c9ae6d2d482e92c6f692f29c4049ae6  attested.manifest.json
+f3b09a9f55db3fa7068c2abb2a8f5c6ec72b9efe362ab1c1501e8e6828668e41  multimodal.manifest.json

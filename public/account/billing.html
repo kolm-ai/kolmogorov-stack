@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f7f4ec";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Billing - Account - kolm.ai</title>
+<title>Billing · Account · kolm.ai</title>
 <meta name="description" content="Billing meters on kolm.ai: captured AI calls, privacy work, cloud sync, hosted artifact jobs, GPU minutes, evals, artifact installs, seats, and device targets.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
@@ -61,6 +61,7 @@
 
 </style>
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <a href="#main" class="ks-skip">Skip to content</a>
@@ -120,6 +121,54 @@
 <div id="empty-state" class="empty" hidden data-empty-state>
   <strong>No billing data yet.</strong> Sign in to a paid plan to see per-meter usage. Free tier shows the captured / redacted / install meters only.
 </div>
+
+<!-- W835 - Savings tracker (savings-based pricing) -->
+<h2 id="w835-savings">Savings tracker (W835)</h2>
+<p class="pdesc" style="color:var(--ink-mute);font-size:13.5px;margin:6px 0 14px;max-width:64ch">
+  Tracks teacher API spend during a baseline window and compares it to spend after
+  you deploy a kolm-compiled model. kolm.ai charges 12.5% of net savings; nothing
+  if there are no savings (regressions are free).
+</p>
+
+<div class="kpanel" id="w835-card">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px">
+    <div>
+      <span id="w835-status-pill" class="pill mute" style="font-size:11px">loading...</span>
+      <span id="w835-baseline-meta" style="font-family:var(--mono);font-size:12px;color:var(--ink-mute);margin-left:8px">-</span>
+    </div>
+    <div class="toolbar" style="margin:0">
+      <button class="btn primary" id="w835-start-btn">Start baseline</button>
+    </div>
+  </div>
+
+  <div class="metric-grid" id="w835-metric-grid" style="grid-template-columns:repeat(3,1fr)">
+    <div class="metric-card">
+      <div class="label">kolm saved you</div>
+      <div class="value" id="w835-saved-value">$0.00</div>
+      <div class="delta" id="w835-saved-delta">-</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">fee (12.5% of savings)</div>
+      <div class="value" id="w835-fee-value">$0.00</div>
+      <div class="delta" id="w835-fee-delta">12.5% of saved</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">net savings (you keep)</div>
+      <div class="value" id="w835-net-value">$0.00</div>
+      <div class="delta" id="w835-net-delta">-</div>
+    </div>
+  </div>
+
+  <div id="w835-message" class="empty" hidden></div>
+
+  <p style="font-size:12px;color:var(--ink-faint);margin:14px 0 0;line-height:1.6">
+    <strong>Methodology:</strong> Savings calculated by comparing recorded teacher API
+    spend during the baseline period to spend after kolm deployment. Rates from public
+    rate cards as of 2025-Q4. <code style="background:var(--bg-elev);padding:1px 6px;border-radius:3px;font-size:11.5px">GET /v1/savings/summary</code>
+    for the raw envelope; <code style="background:var(--bg-elev);padding:1px 6px;border-radius:3px;font-size:11.5px">kolm savings summary</code> from the CLI.
+  </p>
+</div>
+
 </section>
 </div>
 </main>
@@ -160,6 +209,71 @@ window.kfetch("/v1/billing/usage").catch(function(){
   });
   if(!any){document.getElementById("empty-state").hidden=false;}
 });
+
+// W835 - Savings tracker UI (saved $ / fee $ / net $)
+(function(){
+  var pill=document.getElementById("w835-status-pill");
+  var meta=document.getElementById("w835-baseline-meta");
+  var msg =document.getElementById("w835-message");
+  var btn =document.getElementById("w835-start-btn");
+  var savedV=document.getElementById("w835-saved-value");
+  var savedD=document.getElementById("w835-saved-delta");
+  var feeV=document.getElementById("w835-fee-value");
+  var netV=document.getElementById("w835-net-value");
+  var netD=document.getElementById("w835-net-delta");
+  function fmt(n){ if(n==null||isNaN(n))return "$0.00"; return "$"+Number(n).toFixed(2); }
+  function setPill(label,kind){ pill.className="pill "+(kind||"mute"); pill.textContent=label; }
+  function showMessage(html){ msg.innerHTML=html; msg.hidden=false; }
+  function clearMessage(){ msg.hidden=true; msg.innerHTML=""; }
+  function refresh(){
+    window.kfetch("/v1/savings/summary?period_days=30").then(function(d){
+      if(!d||d.ok!==true){ setPill("error","bad"); return; }
+      clearMessage();
+      if(d.status==="no_baseline_started"){
+        setPill("no baseline","warn");
+        meta.textContent="Start a baseline window to track savings.";
+        savedV.textContent="$0.00"; feeV.textContent="$0.00"; netV.textContent="$0.00";
+        savedD.textContent="-"; netD.textContent="-";
+        return;
+      }
+      if(d.status==="insufficient_baseline"){
+        setPill("warming up","warn");
+        meta.textContent="Baseline started "+(d.baseline_start||"")+" - "+(d.elapsed_days||0)+"/"+(d.min_baseline_days||7)+" days.";
+        showMessage("<strong>Honesty check:</strong> "+window.kesc(d.message||"")+" We refuse to claim phony savings on thin data.");
+        savedV.textContent="$0.00"; feeV.textContent="$0.00"; netV.textContent="$0.00";
+        savedD.textContent="-"; netD.textContent="-";
+        return;
+      }
+      if(d.status==="ok"){
+        if(d.regression){
+          setPill("regression","bad");
+          meta.textContent="Post-kolm spend exceeded baseline. Fee waived.";
+          savedD.textContent="loss vs baseline";
+          netD.textContent="no fee on regressions";
+        }else{
+          setPill("tracking","ok");
+          meta.textContent="Baseline "+(d.baseline_start||"")+" - "+(d.period_days||30)+" day window.";
+          savedD.textContent=(d.baseline_captures||0)+" baseline calls, "+(d.post_captures||0)+" post-kolm";
+          netD.textContent="after "+(Math.round((d.fee_rate||0)*1000)/10)+"% fee";
+        }
+        savedV.textContent=fmt(d.saved_usd);
+        feeV.textContent=fmt(d.fee_usd);
+        netV.textContent=fmt(d.net_savings_usd);
+      }
+    }).catch(function(e){
+      setPill("error","bad");
+      meta.textContent="GET /v1/savings/summary failed: "+(e&&e.message||e);
+    });
+  }
+  btn.addEventListener("click",function(){
+    btn.disabled=true; btn.textContent="Starting...";
+    fetch("/v1/savings/baseline",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},window.KOLM_AUTH),body:JSON.stringify({namespace:"default"})})
+      .then(function(r){return r.json();})
+      .then(function(){ btn.textContent="Start baseline"; btn.disabled=false; refresh(); })
+      .catch(function(){ btn.textContent="Start baseline"; btn.disabled=false; });
+  });
+  refresh();
+})();
 </script>
 
 <footer class="ks-footer">
@@ -188,5 +302,104 @@ window.kfetch("/v1/billing/usage").catch(function(){
   </div>
 </footer>
 
+<div hidden data-w221-anchors="account" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training loop</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Run</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+</div>
 </body>
 </html>

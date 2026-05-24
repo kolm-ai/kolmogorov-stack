@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Staleness &middot; capture decay, TTL, teacher-version drift &middot; kolm.ai</title>
-<meta name="description" content="Recent captures should weigh more than ancient ones; teacher upgrades silently shift the conditional distribution your student is learning. Staleness gives you the timeline, the TTL knob, and the per-teacher version split — so the training mix is something you choose, not something you inherit.">
+<meta name="description" content="Recent captures should weigh more than ancient ones; teacher upgrades silently shift the conditional distribution your student is learning. Staleness gives you the timeline, the TTL knob, and the per-teacher version">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="Staleness &middot; capture decay, TTL, teacher-version drift &middot; kolm.ai">
@@ -20,7 +20,7 @@
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/docs/staleness">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Staleness: capture decay, TTL, teacher-version drift","description":"Recency weights, TTL eviction, and teacher_version tagging — the W746 staleness primitives.","url":"https://kolm.ai/docs/staleness","datePublished":"2026-05-24","dateModified":"2026-05-24","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Staleness: capture decay, TTL, teacher-version drift","description":"Recency weights, TTL eviction, and teacher_version tagging  -  the W746 staleness primitives.","url":"https://kolm.ai/docs/staleness","datePublished":"2026-05-24","dateModified":"2026-05-24","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
 <link rel="stylesheet" href="/design-tokens.css">
 <style>
 :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--accent-soft:rgba(16,185,129,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
@@ -70,6 +70,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/docs-shell.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/docs-shell.js"></script>
 
 </head>
@@ -109,7 +110,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <p>The fix is two-sided. First, <strong>down-weight</strong> older rows in the sampler so recent behavior dominates the loss. Second, <strong>tag</strong> each row with the teacher that produced it, so you can audit "what fraction of the loss is being computed against an obsolete teacher" before you ship.</p>
 
-<h2 id="recency">Recency weighting — exponential decay</h2>
+<h2 id="recency">Recency weighting  -  exponential decay</h2>
 <p>The recency weight is a pure exponential decay in age (days), parameterised by a half-life. Same-day captures get weight <code>1.0</code>. After one half-life of age, weight is <code>0.5</code>. After two half-lives, <code>0.25</code>. Etc. Future-dated captures (clock skew, replay-from-archive) are clamped to <code>1.0</code> so a skewed client never inflates a row above present-day mass.</p>
 
 <pre><code>weight = 0.5 ** (age_days / half_life_days)

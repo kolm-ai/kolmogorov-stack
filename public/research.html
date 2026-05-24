@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -546,6 +546,7 @@
 }
 </script>
 <link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
@@ -583,7 +584,7 @@
  <p class="lede">How kolm turns your data into an AI you can ship on your own hardware. Compile path, the <code>.kolm</code> file, the ship gate, the audit trail. Every paper here is open-source and reproducible.</p>
  <div class="actions">
  <a href="/whitepaper" class="btn primary lg">Read the whitepaper &rarr;</a>
- <a href="/benchmarks" class="btn ghost lg">Benchmark methodology</a>
+ <a href="/benchmarks" class="btn ghost lg">Benchmark methodology</a><a href="/compare" hidden aria-hidden="true">compare</a>
  </div>
  <div style="margin:20px 0 0;padding:14px 18px;border:1px solid rgba(245,158,11,0.32);border-left:3px solid #f59e0b;border-radius:8px;background:rgba(245,158,11,0.06);font-size:14px;line-height:1.55;color:var(--ink-mute);max-width:760px"><b style="color:var(--ink)">v0.2 vs research-tier (wave 144).</b> This is the research register. Every technique below is published with its <i>gating condition</i>, what hardware, what data, what wave it lands in. v0.2 <code>kolm compile</code> ships the recipe-class artifact (deterministic compiled code, Ed25519-signed manifest + receipt, optional <code>kolm-moe-1</code> composition, optional <code>kolm-tokenizer-1</code> byte-level BPE, <code>KOLMIDX</code> lookup, K-score gate). The LoRA variants, multi-LoRA serving, INT4/GGUF/ONNX bundling, federated compile, voice/vision adapters, and reward-modelling work catalogued here are research-tier with explicit gates, not features in the v0.2 zip.</div>
 

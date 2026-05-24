@@ -21,6 +21,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 
+import { envSecret } from './env.js';
+
 const STRIPE_PRICE_ENVS = {
   pro:        'KOLM_STRIPE_PRICE_PRO',
   team:       'KOLM_STRIPE_PRICE_TEAM',
@@ -99,10 +101,19 @@ export async function resolveUpgradeUrl({ plan, tenantId, email, existingLinkFn 
   }
 
   // Path 2: Stripe Checkout Session via plain fetch.
-  const stripeKey = process.env.KOLM_STRIPE_KEY || process.env.STRIPE_SECRET_KEY || '';
+  // WC07 — envSecret returns null when the env is unset, empty, OR whitespace.
+  // The previous `|| ''` collapsed all three into the same empty-string falsy
+  // value, but the resulting flow was identical to "no Stripe configured" so
+  // there's no observable behaviour change here — we just gain honest null
+  // semantics so callers don't accidentally trust `KOLM_STRIPE_KEY=""` as
+  // configured. KOLM_STRIPE_BASE_URL is also an envSecret (an empty base URL
+  // would resolve to "https://api.stripe.com" by default in the inner helper,
+  // but passing `undefined` explicitly is cleaner than passing '').
+  const stripeKey = envSecret('KOLM_STRIPE_KEY') || envSecret('STRIPE_SECRET_KEY');
+  const stripeBaseUrl = envSecret('KOLM_STRIPE_BASE_URL');
   const priceEnvName = STRIPE_PRICE_ENVS[planId];
   const fallbackPriceEnvNames = LEGACY_STRIPE_PRICE_ENVS[planId] || [];
-  const priceId = [priceEnvName].concat(fallbackPriceEnvNames).filter(Boolean).map(name => process.env[name]).find(Boolean) || '';
+  const priceId = [priceEnvName].concat(fallbackPriceEnvNames).filter(Boolean).map(name => envSecret(name)).find(Boolean) || '';
   if (stripeKey && priceId) {
     try {
       const url = await createStripeCheckoutSession({
@@ -112,7 +123,7 @@ export async function resolveUpgradeUrl({ plan, tenantId, email, existingLinkFn 
         successUrl: `${publicBase}/account?upgrade=success&plan=${encodeURIComponent(planId)}`,
         cancelUrl:  `${publicBase}/pricing?upgrade=cancelled&plan=${encodeURIComponent(planId)}`,
         apiKey: stripeKey,
-        baseUrl: process.env.KOLM_STRIPE_BASE_URL || undefined,
+        baseUrl: stripeBaseUrl || undefined,
       });
       return { checkout_url: url, source: 'stripe_checkout_api' };
     } catch (_) {

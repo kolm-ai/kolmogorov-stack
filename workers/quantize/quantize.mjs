@@ -50,6 +50,30 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
 
 const VALID_METHODS = ['int4', 'int8', 'gptq', 'awq', 'aqlm', 'quip', 'exl2', 'exl3', 'hqq', 'qat'];
+
+// W784 — third-party quant-method plugin discovery hook. Returns the array of
+// extra method names contributed by ~/.kolm/plugins/<name>/ with kind
+// "quantization". Caller treats them as opaque (the plugin's entry script is
+// responsible for the actual quantization). Best-effort: failure to load
+// plugins is logged via env KOLM_PLUGIN_DEBUG only — never blocks core methods.
+async function w784QuantPluginMethods() {
+  try {
+    const mod = await import('../../src/plugins.js');
+    const env = mod.forgeQuantizationPlugins();
+    if (!env || !env.ok) return [];
+    return (env.plugins || []).map((p) => p.name);
+  } catch (e) {
+    if (process.env.KOLM_PLUGIN_DEBUG) {
+      console.error('[w784-quant-plugin-discovery] ' + (e && e.message ? e.message : e));
+    }
+    return [];
+  }
+}
+// Eager discovery at boot — surfaces the count via env for downstream
+// observability; the actual dispatch path runs in scripts/quantize.py.
+w784QuantPluginMethods().then((m) => {
+  if (m.length) process.env.KOLM_PLUGIN_QUANT_METHODS = m.join(',');
+});
 const WORKER_NAME    = 'kolm-quantize-worker';
 const WORKER_VERSION = '0.1.0';
 

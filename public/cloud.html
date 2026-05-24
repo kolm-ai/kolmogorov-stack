@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Cloud distill · kolm.ai</title>
+<meta name="description" content="Bring your captures. Get your .kolm artifact. Skip the GPUs. kolm cloud distill runs the training pass on managed infra, returns a quantized artifact, and meters per GPU-hour (separate from inference $/1k-tokens).">
+<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://kolm.ai/cloud">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/frontier.css">
+    <link rel="stylesheet" href="/warm-paper.css">
+<style>
+  .sec-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
+  .sec-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
+  .sec-hero h1 { margin: 0 0 var(--ks-4); font-size: clamp(36px, 5vw, 56px); font-weight: 560; letter-spacing: -0.02em; line-height: 1.05; color: var(--ks-ink); }
+  .sec-hero h1 b { color: var(--ks-accent); font-weight: 560; }
+  .sec-hero p.lede { margin: 0 0 var(--ks-6); font-size: 18px; line-height: 1.55; color: var(--ks-ink-2); max-width: 64ch; }
+  .sec-hero .cta-row { display: flex; flex-wrap: wrap; gap: var(--ks-3); }
+
+  .sec-section { padding: var(--ks-9) 0; border-bottom: 1px solid var(--ks-line-1); }
+  .sec-section h2 { margin: 0 0 var(--ks-2); font-size: clamp(24px, 3vw, 32px); font-weight: 560; letter-spacing: -0.015em; color: var(--ks-ink); }
+  .sec-section .sub { margin: 0 0 var(--ks-6); font-size: 15px; color: var(--ks-ink-3); max-width: 64ch; line-height: 1.6; }
+
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--ks-4); }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--ks-4); }
+  @media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  .sec-card { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); }
+  .sec-card .row { display: flex; justify-content: space-between; align-items: baseline; gap: var(--ks-3); margin-bottom: var(--ks-3); }
+  .sec-card .tag { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-ink-3); }
+  .sec-card .st { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--ks-line-2); }
+  .sec-card .st.live { color: var(--ks-accent); border-color: var(--ks-accent-edge); }
+  .sec-card .st.wip { color: #d6a65a; border-color: rgba(214,166,90,0.35); }
+  .sec-card h3 { margin: 0 0 var(--ks-2); font-size: 16px; font-weight: 540; color: var(--ks-ink); letter-spacing: -0.005em; }
+  .sec-card p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink-2); }
+  .sec-card p + p { margin-top: var(--ks-2); }
+  .sec-card code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); }
+  .sec-card a { color: var(--ks-accent); }
+
+  .terminal { background: #050607; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); margin-top: var(--ks-4); overflow-x: auto; }
+  .terminal pre { margin: 0; font-family: var(--ks-mono); font-size: 12.5px; line-height: 1.65; color: var(--ks-ink); }
+  .terminal .c { color: var(--ks-ink-3); }
+  .terminal .k { color: var(--ks-accent); }
+  .terminal .s { color: #b5bdb1; }
+  .terminal .n { color: #d6a65a; }
+  .terminal .prompt { color: var(--ks-accent); user-select: none; }
+
+  .lk { width: 100%; border-collapse: collapse; margin-top: var(--ks-4); font-size: 14px; }
+  .lk th, .lk td { padding: var(--ks-3) var(--ks-4); text-align: left; border-bottom: 1px solid var(--ks-line-1); color: var(--ks-ink-2); vertical-align: top; }
+  .lk th { background: var(--ks-bg-1); color: var(--ks-ink); font-weight: 540; font-size: 13px; letter-spacing: 0.02em; }
+  .lk td:first-child { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); white-space: nowrap; }
+
+  .pipe { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--ks-3); margin-top: var(--ks-4); }
+  @media (max-width: 900px) { .pipe { grid-template-columns: 1fr; } }
+  .pipe-step { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-4); }
+  .pipe-step .n { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-accent); letter-spacing: 0.06em; margin-bottom: var(--ks-2); display: block; }
+  .pipe-step h4 { margin: 0 0 var(--ks-1); font-size: 14px; font-weight: 540; color: var(--ks-ink); }
+  .pipe-step p { margin: 0; font-size: 13px; color: var(--ks-ink-2); line-height: 1.6; }
+
+  .honesty { background: rgba(214,166,90,0.06); border: 1px solid rgba(214,166,90,0.35); border-radius: var(--ks-r-md); padding: var(--ks-4); margin-top: var(--ks-4); }
+  .honesty h4 { margin: 0 0 var(--ks-2); font-size: 14px; font-weight: 540; color: #d6a65a; letter-spacing: 0.02em; }
+  .honesty p { margin: 0; font-size: 13.5px; color: var(--ks-ink-2); line-height: 1.6; }
+  .honesty code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); }
+</style>
+<meta property="og:title" content="Cloud distill &middot; kolm.ai">
+<meta property="og:description" content="Bring your captures. Get your .kolm artifact. Skip the GPUs.">
+<meta property="og:url" content="https://kolm.ai/cloud">
+<meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm cloud distill",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/cloud",
+  "description": "Managed-distill: upload captures, distill on Kolm-hosted infra, download .kolm. Pay per GPU-hour, separate ledger from inference.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD",
+    "description": "Free tier for the local CLI; managed pool meters per GPU-hour."
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
+  <meta property="og:image" content="https://kolm.ai/og/cloud.svg">
+</head>
+<body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/k-score">K-score</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
+      </div>
+    </div>
+  </header>
+</div>
+
+<main id="main">
+
+<section class="sec-hero fr-reveal">
+  <div class="ks-wrap fr-container">
+    <span class="fr-eyebrow">Cloud distill &middot; W785 &middot; managed training, local inference</span>
+    <h1>Bring your captures. Get your <b>.kolm artifact.</b> Skip the GPUs.</h1>
+    <p class="lede fr-lede">You already have inference hardware. You do <em>not</em> have a rack of H100s for the LoRA pass. <code>kolm cloud distill submit</code> uploads a captured namespace, runs the distill on a managed pool, and returns a quantized <code>.kolm</code> you can verify, sign, and serve from your own runtime. Training meters per GPU-hour; inference stays on its own meter at $/1k-tokens.</p>
+    <div class="cta-row">
+      <a href="/quickstart" class="ks-btn ks-btn--primary fr-btn fr-btn--mint">Install the CLI <span class="ks-btn-arrow">&rarr;</span></a>
+      <a href="/distill" class="ks-btn ks-btn--ghost fr-btn fr-btn--ghost">How distillation works</a>
+      <a href="/pricing" class="ks-btn ks-btn--ghost fr-btn fr-btn--ghost">Pricing &amp; rates</a>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="who">
+  <div class="ks-wrap">
+    <h2>Who this is for</h2>
+    <p class="sub">If your operator can deploy a quantized model but cannot rationalize provisioning an H100 cluster for a one-time training pass, cloud distill removes the only step that needs the rack.</p>
+    <div class="grid-3">
+      <div class="sec-card">
+        <h3>Edge &amp; on-device shops</h3>
+        <p>You ship inference on a customer's Mac Studio, RTX 4090 workstation, or a Cloudflare Worker. Training a 7B student on prem is overkill; one cloud distill run, then everything else stays local.</p>
+      </div>
+      <div class="sec-card">
+        <h3>Regulated workloads with inference-only infra</h3>
+        <p>Your inference runs inside the customer's VPC. Distillation happens against the captured-redacted namespace on managed infra; the resulting <code>.kolm</code> ships back signed for inference inside the VPC.</p>
+      </div>
+      <div class="sec-card">
+        <h3>Solo operators</h3>
+        <p>You have a serving box and a corpus. You don't have a training cluster. <code>kolm cloud distill submit</code> hands the GPU-bursty piece to managed infra and returns a deployable artifact.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="oneliner">
+  <div class="ks-wrap">
+    <h2>Export, submit, download.</h2>
+    <p class="sub">Export the captured namespace, submit the distill job, download the .kolm. Your local CLI never touches a training GPU; the managed pool never sees your inference traffic.</p>
+    <div class="terminal">
+<pre><span class="c"># 1. Export the captured rows you want to distill against</span>
+<span class="prompt">$</span> <span class="k">kolm capture export support-triage --since 7d --out support-triage.jsonl</span>
+<span class="c">  wrote 4812 rows &middot; sha256 a3c1...</span>
+
+<span class="c"># 2. Submit the managed distill run</span>
+<span class="prompt">$</span> <span class="k">kolm cloud distill submit \
+    --namespace support-triage \
+    --capture-window 7d \
+    --recipe support-distill-v1 \
+    --gpu-sku H100-80GB \
+    --vram-tier 1x</span>
+
+job_id:                cdj_<span class="s">a8f2...</span>
+state:                 <span class="k">queued</span>
+cloud_backend_status:  <span class="n">reachable</span>
+gpu_sku:               H100-80GB
+vram_tier:             1x
+rate_per_gpu_hour_usd: $<span class="s">1.9900</span>
+capture_window:        7d
+
+<span class="c"># 3. Poll status, then download the .kolm when state=succeeded</span>
+<span class="prompt">$</span> <span class="k">kolm cloud distill status cdj_a8f2...</span>
+state:                 <span class="k">succeeded</span>
+artifact_url:          https://artifacts.kolm.ai/cdj_a8f2.../support-triage.kolm
+finished_at:           2026-05-24T17:42:11Z
+
+<span class="prompt">$</span> <span class="k">kolm cloud distill meter cdj_a8f2...</span>
+ledger:              <span class="k">training</span>   (separate from inference $/1k-tokens)
+total_gpu_seconds:   <span class="s">2614</span>
+total_cost_usd:      $<span class="s">1.4453</span>
+rows:                3</pre>
+    </div>
+    <div class="honesty">
+      <h4>Honesty &middot; queued vs running</h4>
+      <p>When no managed pool is provisioned, <code>cloud_backend_status</code> returns <code>no_pool_configured</code> and the job sits in <code>queued</code> until an operator sets <code>KOLM_CLOUD_DISTILL_ENDPOINT</code>. We never simulate a finished run when no backend exists; <code>kolm cloud distill status</code> reports the truth. This is the same honesty contract as <a href="/distill#self-host">self-hosted distill</a> and <a href="/k-score">K-score reporting</a>.</p>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="pricing">
+  <div class="ks-wrap">
+    <h2>Pricing &middot; training meter only</h2>
+    <p class="sub">Cloud distill bills per GPU-hour. Inference traffic against the resulting <code>.kolm</code> is on the standard <a href="/pricing">$/1k-token meter</a> &mdash; the two ledgers never mix, so finance can split CapEx-ish training spend from OpEx inference spend without re-categorizing.</p>
+    <table class="lk">
+      <thead>
+        <tr><th>GPU SKU</th><th>Rate ($/gpu-hr)</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>RTX-4090</td><td>$0.40</td><td>good for 0.5B-3B students; spot-priced</td></tr>
+        <tr><td>RTX-5090</td><td>$0.55</td><td>7B students; same workstation envelope you'd run locally</td></tr>
+        <tr><td>L40S-48GB</td><td>$1.10</td><td>13B students with LoRA r=32</td></tr>
+        <tr><td>A100-40GB</td><td>$1.10</td><td>budget-tier 7B-13B</td></tr>
+        <tr><td>A100-80GB</td><td>$1.65</td><td>34B students; long context; KV-cache headroom</td></tr>
+        <tr><td>H100-80GB</td><td>$1.99</td><td>standard 70B distill; matches mid-market rentals</td></tr>
+        <tr><td>H100-80GB-NVL</td><td>$2.40</td><td>NVLink pair; required for 70B with batch &gt; 4</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:var(--ks-4);font-size:13px;color:var(--ks-ink-3)">VRAM tier multipliers: <code>1x</code> 1.00&times;, <code>2x</code> 1.85&times;, <code>4x</code> 3.50&times;, <code>8x</code> 6.80&times;. Multi-GPU pricing is sub-linear because two cards share PCIe + scheduler overhead.</p>
+  </div>
+</section>
+
+<section class="sec-section" id="lifecycle">
+  <div class="ks-wrap">
+    <h2>Job lifecycle</h2>
+    <p class="sub">Terminal states (succeeded, failed, cancelled) cannot be re-entered; <code>kolm cloud distill cancel</code> is a no-op on terminal rows and returns <code>invalid_transition</code>.</p>
+    <div class="pipe">
+      <div class="pipe-step"><span class="n">QUEUED</span><h4>Submitted, awaiting GPU</h4><p>Job persisted to <code>~/.kolm/cloud-distill-jobs.jsonl</code>. Meter row reserved at $0.</p></div>
+      <div class="pipe-step"><span class="n">RUNNING</span><h4>Backend has picked it up</h4><p>Training loop streaming. Cancellable.</p></div>
+      <div class="pipe-step"><span class="n">SUCCEEDED</span><h4>.kolm available</h4><p><code>artifact_url</code> populated. Meter row finalized. Terminal.</p></div>
+      <div class="pipe-step"><span class="n">FAILED</span><h4>Training did not converge</h4><p><code>error</code> field populated with the gate reason. Meter row carries gpu_seconds spent. Terminal.</p></div>
+      <div class="pipe-step"><span class="n">CANCELLED</span><h4>Operator cancelled</h4><p>Either explicit <code>cloud distill cancel</code> or backend-initiated. Meter row carries partial gpu_seconds. Terminal.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="trust">
+  <div class="ks-wrap">
+    <h2>What stays local, what crosses the boundary</h2>
+    <p class="sub">Captures cross the boundary going up; weights cross going down. Both are signed and verifiable. Inference NEVER crosses &mdash; the artifact runs on your runtime.</p>
+    <div class="grid-2">
+      <div class="sec-card">
+        <h3>Goes to managed infra</h3>
+        <p>Captured rows for the specified namespace + capture window, redacted by your local <a href="/capture">privacy membrane</a> before upload. The recipe id (training recipe to apply). Billing token (not persisted on the worker).</p>
+      </div>
+      <div class="sec-card">
+        <h3>Stays on your runtime</h3>
+        <p>All inference traffic against the resulting <code>.kolm</code>. The artifact is signed Ed25519; you verify it with <code>kolm verify &lt;file&gt;.kolm</code> before serving. No phone-home at inference time.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="cli">
+  <div class="ks-wrap">
+    <h2>Full CLI reference</h2>
+    <p class="sub">Every verb is local-equivalent under <code>kolm distill</code>; <code>kolm cloud distill</code> just routes the GPU-bursty step off-box.</p>
+    <div class="terminal">
+<pre><span class="prompt">$</span> <span class="k">kolm cloud distill submit  [--namespace ns] [--capture-window 7d] \
+                            [--recipe id] [--gpu-sku H100-80GB] [--vram-tier 1x]</span>
+<span class="prompt">$</span> <span class="k">kolm cloud distill status  &lt;job_id&gt;</span>
+<span class="prompt">$</span> <span class="k">kolm cloud distill list    [--status queued|running|succeeded|failed|cancelled] \
+                            [--namespace ns] [--limit N]</span>
+<span class="prompt">$</span> <span class="k">kolm cloud distill cancel  &lt;job_id&gt; [--reason "text"]</span>
+<span class="prompt">$</span> <span class="k">kolm cloud distill meter   &lt;job_id&gt;</span></pre>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <p>&copy; 2026 kolm.ai &middot; <a href="/distill">Distill</a> &middot; <a href="/compile">Compile</a> &middot; <a href="/pricing">Pricing</a> &middot; <a href="/legal">Legal</a></p>
+  </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+</body>
+</html>

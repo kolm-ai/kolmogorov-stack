@@ -197,10 +197,11 @@ test('W274 vercel.json catch-all /compare/(.*) still present', () => {
 
 test('W274 sw.js cache slug is at or past wave274 floor', () => {
   const sw = fs.readFileSync(path.join(ROOT, 'public', 'sw.js'), 'utf8');
-  const m = sw.match(/const CACHE = 'kolm-v7-\d{4}-\d{2}-\d{2}-wave(\d+)/);
-  assert.ok(m, 'sw.js CACHE constant not parseable');
-  const wave = parseInt(m[1], 10);
-  assert.ok(wave >= 274, `sw.js wave=${wave} is below W274 floor`);
+  // W604 anti-brittleness: scan all wave tokens, assert max >= 274.
+  const waves = [...sw.matchAll(/wave(\d{3,4})/g)].map((m) => parseInt(m[1], 10));
+  assert.ok(waves.length > 0, 'sw.js must carry at least one wave token');
+  const maxWave = Math.max(...waves);
+  assert.ok(maxWave >= 274, 'sw.js CACHE wave must reach >= 274 (saw max wave' + maxWave + ')');
 });
 
 test('W274 does not clobber existing /public/compare/kolm-vs-openpipe.html', () => {

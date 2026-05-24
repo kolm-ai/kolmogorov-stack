@@ -1,8 +1,26 @@
 // Recipe service worker: keeps the registry available offline.
-const CACHE = 'kolm-v60-2026-05-24-wave707-supplement-bundle-cmdk-announce-cookie-sticky-mega-plus-wf21-wf28-wf29-pages';
+// W835 wave slug added (savings-based pricing tracker). Tests assert the
+// wave token via regex+threshold (`wave(\d{3,4})` ≥ 835), NOT an explicit
+// array, so future waves don't require touching the test.
+// W827 token-level DPO upgrade slug appended 2026-05-24.
+// W819 VS Code passive-monitor + distill workflow slug appended 2026-05-24.
+// W824 Kubernetes-native deployment (Helm chart + /ready/deep + /metrics/extended) slug appended 2026-05-24.
+// W822 A/B testing infrastructure (traffic splitter + chi-sq/bootstrap + auto-promote/rollback + /v1/ab/*) slug appended 2026-05-24.
+// W829 multimodal capture pipeline (image/audio/tool_use/multi_turn captures + VLM-distill + heterogeneous weights) slug appended 2026-05-24.
+// W828 reasoning-trace distillation v2 (auto-detect across Anthropic/OpenAI/DeepSeek/Gemini + trace-aware loss) slug appended 2026-05-24.
+// W826 memory-aware runtime placement (detectMemoryHierarchy + placementDecision + analyzeInferencePatterns + preloadDecision + estimatePerformance) slug appended 2026-05-24.
+// W821 artifact-composition pipeline orchestrator (classifier + specialists + weighted K-Score + flow diagram) slug appended 2026-05-24.
+// W831 offline / air-gapped integration (offlineDistill + verifyTeacherIsLocal + Ed25519 sneakernet + airgap bakeoff + /v1/airgap/* routes + CLASSIFIED_DEPLOYMENT.md) slug appended 2026-05-24.
+// W830 federated consortium integration (consortium routes + MIA verifier + dpEpsilonAudit + CONSORTIUM_GUIDE.md + /account/federated/consortium UI) slug appended 2026-05-24.
+// W833 cross-lingual foundation v2 (lingual-detect distribution detector + lingual-synthesize teacher synth + lingual-mixture iterator + lingual-manifest per-language K-Score block + 4 /v1/lingual/* routes + kolm lingual CLI subverb) slug appended 2026-05-24.
+// W834 regulatory compliance toolkit (reg-eu-aiact-docs Annex IV generator + reg-risk-classify INTENDED_USE_CATALOG gates + reg-hil mandatory_human_review_threshold + reg-data-governance captures provenance + reg-model-card-extended HF model card + reg-grc-connectors OneTrust/ServiceNow/IBM-OpenPages + 7 /v1/reg/* routes) slug appended 2026-05-24.
+// W825 artifact marketplace MVP (listings.jsonl data layer + signed upload + paid 402 + anti-gaming rate + 70/30 payouts + finetune queue + 8 /v1/marketplace/* routes) slug appended 2026-05-24.
+// W836 Warm Paper redesign (sienna-on-paper monochrome light default + warm-dark opt-in + design-tokens.css + ks.css palette swap + warm-paper.css overlay across 719 pages) slug appended 2026-05-24.
+const CACHE = 'kolm-v73-2026-05-24-frontend-v807-wave707-supplement-v2-wf03-mobile-nav-wf06-breadcrumbs-wf22-trust-bar-wf23-compare-wf24-integrations-wave784-plugins-wave785-cloud-distill-wave835-savings-tracker-wave823-otel-upgrade-wave788-sla-persistent-dashboard-wave827-token-dpo-wave819-vscode-extension-wave824-k8s-wave822-ab-testing-wave829-multimodal-pipeline-wave818-ecosystem-loaders-wave828-reasoning-v2-wave826-runtime-placement-wave821-pipeline-orchestrator-wave831-airgap-wave830-federated-consortium-wave833-cross-lingual-v2-wave834-regulatory-wave825-marketplace-mvp-wave836-warm-paper-redesign';
 const PRECACHE = [
  '/device',
  '/design-tokens.css',
+ '/warm-paper.css',
  '/styles.css',
  '/brand-refresh.css',
  '/home-refresh.css',

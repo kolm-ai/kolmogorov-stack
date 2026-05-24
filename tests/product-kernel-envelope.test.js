@@ -103,9 +103,12 @@ test('error envelope maps known failure codes to severity, retryability, and nex
     message: 'No GPU or hosted compute provider is configured.',
   });
   assert.equal(env.ok, false);
-  assert.equal(env.error.code, 'compute_missing');
-  assert.equal(env.error.severity, 'blocker');
-  assert.equal(env.error.retryable, true);
+  // WC05: `error` is now a flat string for legacy-client BC; the rich nested
+  // W707 object moved to `error_detail`.
+  assert.equal(env.error, 'compute_missing');
+  assert.equal(env.error_detail.code, 'compute_missing');
+  assert.equal(env.error_detail.severity, 'blocker');
+  assert.equal(env.error_detail.retryable, true);
   assert.equal(env.next_actions.length, 1);
 });
 
