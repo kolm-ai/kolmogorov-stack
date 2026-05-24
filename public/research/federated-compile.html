@@ -162,7 +162,7 @@
 
  <p>LoRA factorizes the per-layer weight update as <code>&Delta;W = B &middot; A</code> where <code>A</code> is r-by-d and <code>B</code> is d-by-r. For a 7B base with <code>r=16</code> and the standard attention-projection target set, the adapter is roughly 50 MB. The base model is loaded once on each client from a public mirror and never moves. The round-trip is now <strong>50 MB up, 50 MB down</strong>, not 7 GB. On a 100-Mbps clinic uplink that is four seconds per round instead of nine minutes.</p>
 
- <p>Two structural properties of LoRA make it well-suited to federation that the original LoRA paper did not call out:</p>
+ <p>Structural properties of LoRA that make it well-suited to federation, beyond what the original paper called out:</p>
 
  <ul>
  <li><strong>Linear in the deltas.</strong> The federated average over <code>A</code> and <code>B</code> tensors is exactly the average over <code>&Delta;W = B &middot; A</code> at each layer. No coordinate-mismatch issues like you get when averaging full-precision weights after stochastic quantization.</li>

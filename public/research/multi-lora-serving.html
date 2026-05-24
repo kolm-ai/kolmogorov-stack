@@ -143,7 +143,7 @@ pool.serve(request, adapter_cid="cidv1:sha256:...")</code></pre>
  <p><code>max_active_adapters</code> caps how many sit in GPU memory at once. <code>eviction="lru"</code> drops the least-recently-used when a new one comes in. Cold misses pay the adapter load time (~50 ms for an 80 MB LoRA on PCIe Gen4), not the base warm-up (~3 s).</p>
 
  <h2>How adapters are addressed</h2>
- <p>An artifact's identity is its CID: <code>cidv1:sha256:&lt;hex&gt;</code> over the canonical-JSON of its manifest. The pool keys on CID, not on tenant slug. Two different tenants who happen to have identical artifacts share the same in-memory copy. This rarely happens with private adapters but matters for distill-from-base templates that ship pinned.</p>
+ <p>An artifact's identity is its CID: <code>cidv1:sha256:&lt;hex&gt;</code> over the canonical-JSON of its manifest. The pool keys on CID, not on tenant slug. Distinct tenants who happen to have identical artifacts share the same in-memory copy. This rarely happens with private adapters but matters for distill-from-base templates that ship pinned.</p>
 
  <h2>What the receipt records</h2>
  <pre><code>{

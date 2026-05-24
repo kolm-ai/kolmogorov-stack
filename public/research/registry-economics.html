@@ -192,7 +192,7 @@
  <p>The split between catalog and storage is the whole architectural premise. A publisher who wants to publish does not have to host bytes on kolm.ai. A downloader who wants to fetch does not have to trust kolm.ai's availability. The catalog and the storage are decoupled, and the verification chain works without either.</p>
 
  <h2 id="cost">Cost structure.</h2>
- <p>Three separable kinds of cost are present in a registry transaction. Each is paid by a different party.</p>
+ <p>Separable kinds of cost are present in a registry transaction. Each is paid by a different party.</p>
 
  <table>
  <thead><tr><th>Cost</th><th>What it covers</th><th>Who pays</th></tr></thead>
@@ -209,7 +209,7 @@
  <p><b>Artifact bytes storage</b> can be free or paid depending on the publisher's choice. A small artifact hosted on a personal GitHub release costs the publisher nothing in additional fees. A 3.8 GB artifact pulled by thousands of downloaders a month from a personal S3 bucket can be expensive; the publisher might point the registry record at a paid mirror (tenant-controlled object storage, Backblaze B2, IPFS pinning service) and pay the marginal storage cost there. The registry record is agnostic; it carries one or more URLs and the downloader picks the first one that resolves.</p>
 
  <h2 id="why">Why this split.</h2>
- <p>The split between metadata and bytes is deliberate. It avoids three categories of failure that have plagued centralized package registries.</p>
+ <p>The split between metadata and bytes is deliberate. It avoids categories of failure that have plagued centralized package registries.</p>
 
  <p><b>Failure category one: the left-pad pattern.</b> In March 2016, an npm package author removed a single 11-line package from the npm registry over a naming dispute. The unpublish broke thousands of downstream builds across the JavaScript ecosystem. The root cause was that npm at the time held both the only canonical mapping from name to package <i>and</i> the only canonical copy of the bytes. Pulling the bytes from one place pulled them from everywhere. <a href="https://www.theregister.com/2016/03/23/npm_left_pad_chaos/" rel="noopener">The Register's report</a> and <a href="https://en.wikipedia.org/wiki/Npm_left-pad_incident" rel="noopener">the subsequent post-mortems</a> documented the cascade. The architectural fix was unpublish-prohibition rules and, eventually, the npm package mirror network.</p>
 
@@ -226,7 +226,7 @@
  <h2 id="verify">Verification without uptime.</h2>
  <p>The verifiable reason this works is that verification does not require kolm.ai to be reachable at the moment of download. The receipt chain plus the CID plus the optional TEE attestation are self-contained inside the <code>.kolm</code> file. A downloader who already has the bytes can verify them offline.</p>
 
- <p>Four checks are performed at verify time.</p>
+ <p>Checks performed at verify time.</p>
 
  <ul>
  <li><b>Manifest hash match.</b> The downloader hashes each payload slot (base model pointer, LoRA adapter, recall index, eval pack, recipe pack) and confirms the SHA-256 matches the manifest's declared hashes.</li>
@@ -246,7 +246,7 @@
 verification: passed</pre>
 
  <h2 id="limits">Documented limits.</h2>
- <p>The split between catalog and storage has three verifiable costs the design does not paper over.</p>
+ <p>The split between catalog and storage has verifiable costs the design does not paper over.</p>
 
  <p><b>Limit one: kolm.ai is not a CDN.</b> If a publisher's storage URL is slow or rate-limited, the download is slow or rate-limited. We do not provide a fallback download path for arbitrary public artifacts. Publishers who want fast, reliable downloads pay for fast, reliable storage; the registry record reflects whichever URLs they registered.</p>
 
@@ -255,7 +255,7 @@ verification: passed</pre>
  <p><b>Limit three: kolm.ai's metadata uptime still matters for discovery.</b> If kolm.ai is down, you cannot search the catalog. The artifacts you already have continue to verify locally; new artifacts cannot be discovered until the catalog is reachable again. We treat catalog uptime as a hard SLO and operate accordingly, but we are also clear about the failure shape: an outage of the catalog is a discovery outage, not a verification outage.</p>
 
  <h2 id="sustain">Sustainability.</h2>
- <p>The registry is free to use. The infrastructure is not free to run. The bill is paid by three revenue lines, none of which is registry-transactional.</p>
+ <p>The registry is free to use. The infrastructure is not free to run. The bill is paid by revenue lines, none of which is registry-transactional.</p>
 
  <p><b>Paid Pro and Business tiers</b> subsidize the catalog and verification surface for free users. The same machines that host the catalog metadata also host the customer-facing compile API, the receipt signing service, and the captures inbox. The marginal cost of the registry on those machines is small relative to the cost of the customer-facing service; the paid tiers cover both.</p>
 
@@ -266,7 +266,7 @@ verification: passed</pre>
  <p>The trade-off this creates is that the registry's scale is bounded by what the paid product can subsidize. If the catalog grew faster than the paid tiers grew, we would have to either reduce metadata services we offer or charge for some subset of registry features. We are explicit about that trade-off in the terms of service, and our current plan is to keep the catalog free for as long as the paid product can carry it.</p>
 
  <h2 id="prior">Prior art: npm, pip, conda-forge.</h2>
- <p>Every public-package decision sits on top of decades of prior art. Three reference points inform the design.</p>
+ <p>Every public-package decision sits on top of decades of prior art. Reference points that inform the design.</p>
 
  <p><b>npm</b> (Node Package Manager) hosts both metadata and bytes on a centralized service. It is fast, it works, and it has weathered both the left-pad incident and several subsequent supply-chain attacks. The npm operational model is the strongest existence proof that a centralized package registry can serve a vast ecosystem reliably. The cost is that npm Inc. (now GitHub) carries the storage and egress for every package ever published, and supply-chain attacks have a single point of compromise.</p>
 

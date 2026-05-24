@@ -165,7 +165,7 @@
  <div class="wrap">
  <span class="pill"><span class="dot"></span>Research &middot; Frontier &middot; 2026-05-14 &middot; 13 min read</span>
  <h1>Multi-token-per-step prediction <span class="tone">&middot; pre-training and serving.</span></h1>
- <p class="lede">Two recent papers speed pre-training by predicting many tokens per step: <b>Nous Token-Superposition Training</b> (2.5x at 10B) and <b>ICLR 2025 Patch-Level Training</b> (0.5x cost at 370M-2.7B). kolm does not pre-train, so neither method ships in the trainer. The <b>inference-side dual is speculative decoding</b>, and the serving runtime ships it today.</p>
+ <p class="lede">Recent papers speed pre-training by predicting many tokens per step: <b>Nous Token-Superposition Training</b> (2.5x at 10B) and <b>ICLR 2025 Patch-Level Training</b> (0.5x cost at 370M-2.7B). kolm does not pre-train, so neither method ships in the trainer. The <b>inference-side dual is speculative decoding</b>, and the serving runtime ships it today.</p>
  <div class="meta"><span><b>By</b>&nbsp;kolm</span><span><b>Tag</b>&nbsp;throughput &middot; speculative &middot; vllm &middot; frontier</span></div>
  </div>
 </section>
@@ -188,7 +188,7 @@
  </div>
 
  <h2 id="problem">One token per step is the slowest cell on the spreadsheet.</h2>
- <p>Transformer training and serving both treat the autoregressive sequence as the unit of work. Pre-training reads one batch of length <code>L</code> and computes <code>L</code> losses; serving emits one new token per forward pass. <b>The hardware utilizes the same matrix multiplies either way, but the unit of useful output is a single token.</b> Doubling the tokens emitted per step doubles the effective throughput at constant arithmetic cost. The literature has converged on this insight from two directions.</p>
+ <p>Transformer training and serving both treat the autoregressive sequence as the unit of work. Pre-training reads one batch of length <code>L</code> and computes <code>L</code> losses; serving emits one new token per forward pass. <b>The hardware utilizes the same matrix multiplies either way, but the unit of useful output is a single token.</b> Doubling the tokens emitted per step doubles the effective throughput at constant arithmetic cost. The literature has converged on this insight from multiple directions.</p>
 
  <h2 id="tst">TST: token superposition in pre-training.</h2>
  <p><a class="cite" href="https://huggingface.co/papers/2605.06546" rel="noopener">Token-Superposition Training</a> (Nous Research, Peng, Gigant, Quesnelle, May 2026) collapses contiguous tokens into a single embedding "bag" during a superposition phase, then trains the model to predict the next bag with a multi-hot cross-entropy objective. A recovery phase reverts to standard next-token prediction for the final fraction of the schedule, recovering the inference-time shape.</p>
@@ -198,7 +198,7 @@
  <h2 id="plt">PLT: patch-level training.</h2>
  <p><a class="cite" href="https://arxiv.org/abs/2407.12665" rel="noopener">Beyond Next Token Prediction: Patch-Level Training for Large Language Models</a> (Shao, Meng, Zhou; ICLR 2025 Spotlight) aggregates contiguous tokens into "patches" and trains the model to predict whole patches during the early phase. The remaining schedule switches back to token-level prediction so the inference graph stays unchanged. Reported result: <b>0.5x training cost</b> across 370M to 2.7B parameter scales with no quality regression.</p>
 
- <p>The two papers converge on the same physical insight: <b>the dense matrix multiply does not care whether the supervision target is one token or k tokens; the optimizer signal can carry more bits per step.</b> Nous acknowledges PLT as the prior art for the framing.</p>
+ <p>Both papers converge on the same physical insight: <b>the dense matrix multiply does not care whether the supervision target is one token or k tokens; the optimizer signal can carry more bits per step.</b> Nous acknowledges PLT as the prior art for the framing.</p>
 
  <h2 id="equiv">Why neither directly applies to LoRA distill.</h2>
  <p>kolm does not pre-train. A <code>.kolm</code> artifact is a LoRA adapter over a frozen base model, distilled from captures and synthesized recipes. The trainer reads on the order of a few hundred to a few thousand examples and runs a handful of epochs. The pre-training-side techniques live at a different point on the schedule.</p>
@@ -276,7 +276,7 @@ llm = LLM(**llm_kwargs)</pre>
  </blockquote>
 
  <h2 id="open">Open work.</h2>
- <p>Three threads we are watching.</p>
+ <p>Threads we are watching.</p>
 
  <ul>
  <li><b>Medusa-style multi-head decoding.</b> Train k decoding heads on top of the base, predict k tokens per step without a separate draft model. Lands on the same axis as TST but at the serving side. Practical wrinkle: the head training would have to fit inside the LoRA distill schedule, which constrains the parameter count of the heads.</li>

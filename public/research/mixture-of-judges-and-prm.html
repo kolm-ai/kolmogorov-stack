@@ -5,17 +5,17 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Mixture of judges and process reward models · · kolm.ai</title>
-<meta name="description" content="Two evaluation upgrades that ship together: a panel of small judges instead of one big one, and a step-by-step PRM instead of an end-only scorer.">
+<meta name="description" content="Evaluation upgrades that ship together: a panel of small judges instead of one big one, and a step-by-step PRM instead of an end-only scorer.">
 <link rel="canonical" href="https://kolm.ai/research/mixture-of-judges-and-prm">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Mixture of judges and process reward models · · kolm.ai">
-<meta property="og:description" content="Two evaluation upgrades that ship together: a panel of small judges instead of one big one, and a step-by-step PRM instead of an end-only scorer.">
+<meta property="og:description" content="Evaluation upgrades that ship together: a panel of small judges instead of one big one, and a step-by-step PRM instead of an end-only scorer.">
 <meta property="og:url" content="https://kolm.ai/research/mixture-of-judges-and-prm">
 <script type="application/ld+json">{
  "@context": "https://schema.org",
  "@type": "TechArticle",
  "headline": "Mixture of judges and process reward models",
- "description": "Two evaluation upgrades that ship together: a panel of small judges instead of one big one, and a step-by-step PRM instead of an end-only scorer.",
+ "description": "Evaluation upgrades that ship together: a panel of small judges instead of one big one, and a step-by-step PRM instead of an end-only scorer.",
  "datePublished": "2026-05-14",
  "author": { "@type": "Organization", "name": "kolm" },
  "publisher": { "@type": "Organization", "name": "kolm", "url": "https://kolm.ai" },
@@ -71,7 +71,7 @@
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Mixture of judges and process reward models · · kolm.ai">
-<meta name="twitter:description" content="Two evaluation upgrades that ship together: a panel of small judges instead of one big one, and a step-by-step PRM instead of an end-only scorer.">
+<meta name="twitter:description" content="Evaluation upgrades that ship together: a panel of small judges instead of one big one, and a step-by-step PRM instead of an end-only scorer.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="stylesheet" href="/ks.css">
     <link rel="stylesheet" href="/warm-paper.css">
@@ -102,7 +102,7 @@
 <main id="main">
  <p class="hero-eyebrow">Research / Evaluation</p>
  <h1>Mixture of judges and process reward models</h1>
- <p class="lede">Two evaluation upgrades that ship together. A panel of small judges replaces one expensive frontier judge. A step-by-step process reward model replaces a single end-of-answer scorer. Both make the K-score gate harder to fool.</p>
+ <p class="lede">Evaluation upgrades that ship together. A panel of small judges replaces one expensive frontier judge. A step-by-step process reward model replaces a single end-of-answer scorer. Both make the K-score gate harder to fool.</p>
  <div class="meta-line">
  <span>2026-05-14 · kolm research</span>
  <span>7 min read</span>
@@ -184,9 +184,9 @@ trainer.train(captures="math/step_preferences.jsonl")</code></pre>
  <p>Every number a regulator might ask about is in the receipt. If the K-score is 0.91, you can reconstruct exactly which judges voted what, which step in which chain scored the lowest, and what bias correction was applied.</p>
 
  <h2>Edge cases</h2>
- <p><strong>Judge collusion.</strong> If all three judges are trained on overlapping data (e.g., all use RLHF datasets from the same vendor), they fail in correlated ways. Mitigation: pick judges from genuinely different families, and audit judge agreement quarterly.</p>
+ <p><strong>Judge collusion.</strong> If the panel is trained on overlapping data (e.g., all use RLHF datasets from the same vendor), they fail in correlated ways. Mitigation: pick judges from genuinely different families, and audit judge agreement quarterly.</p>
  <p><strong>PRM staleness.</strong> A PRM trained on 2024 math data may underweight novel notation. K-score the PRM itself on a held-out current set; refresh when its accuracy drops below 0.85.</p>
- <p><strong>Cost.</strong> Three Haiku-class judges per item is roughly 3? cheaper than one Opus-class judge, with better agreement and traceability. We log <code>judge_cost_usd</code> on every eval so buyers see the spend.</p>
+ <p><strong>Cost.</strong> A panel of Haiku-class judges per item is roughly 3? cheaper than one Opus-class judge, with better agreement and traceability. We log <code>judge_cost_usd</code> on every eval so buyers see the spend.</p>
  <p><strong>Pairwise vs pointwise.</strong> Pointwise (score from 1-10) has higher variance and worse agreement than pairwise (A vs B). Default to pairwise; fall back to pointwise only when no comparison set exists.</p>
 
  <h2>Citations</h2>

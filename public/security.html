@@ -349,7 +349,7 @@
         <p class="fr-spec-list__p">Hosted control plane (api.kolm.ai), hosted registry (verifies CIDs and serves the public index), compiler-as-a-service workers (the path that runs distill on Kolm-managed GPUs when a customer opts in). Excludes: customer-resident compiler workers, customer-managed signing keys, captures that never leave the customer VPC.</p>
       </li>
       <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>What the report does NOT cover (and why that is the right scope)</h3><span class="fr-spec-list__delta">SCOPE &middot; honest</span></div>
+        <div class="fr-spec-list__head"><h3>Out of scope (and why that's the right scope)</h3><span class="fr-spec-list__delta">SCOPE &middot; honest</span></div>
         <p class="fr-spec-list__p">Customer VPC deployments are not in the SOC 2 scope because Kolm has no operational access to them &mdash; the right control framework there is the customer&rsquo;s own (often their own SOC 2 or ISO 27001). The same logic applies to on-prem and air-gapped: zero Kolm-side operational footprint means zero Kolm-side audit footprint. Our job is to give your auditor a verifiable artifact chain; their job is to certify your environment.</p>
       </li>
       <li class="fr-spec-list__row">

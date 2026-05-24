@@ -82,13 +82,13 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/research">research</a> / judges</div>
 <h1>LLM-as-judge</h1>
-<p class="lede">LLM judges are a cheap proxy for human review, but they are biased toward position, length, and their own model family. kolm mitigates with three independent judges and a median score.</p>
+<p class="lede">LLM judges are a cheap proxy for human review, but they are biased toward position, length, and their own model family. kolm mitigates with a panel of independent judges and a median score.</p>
 
 <h2 id="what">What it is</h2>
 <p>Zheng et al. (2023) formalized LLM-as-judge with MT-Bench: GPT-4 reads two model responses and picks one or declares a tie, with chain-of-thought reasoning before the verdict. The same paper documented position bias (the model prefers the first listed response by ~10 points), verbosity bias (longer responses win), and self-enhancement bias (a judge model rates its own family higher). Follow-up work on dedicated judge models tries to remove the API cost and the bias: PandaLM (Wang et al., 2024) and JudgeLM (Zhu et al., 2024) train smaller open-weight judges via SFT on GPT-4 preferences. Prometheus (Kim et al., 2024) trains a fine-grained rubric-following judge that can score on a 1 to 5 Likert scale with explicit criteria. G-Eval (Liu et al., 2023) uses chain-of-thought with form-filling to reduce variance. None of them eliminate the underlying biases; the published recipe is randomized position, length normalization, and a panel of multiple judges with disagreement reporting.</p>
 
 <h2 id="how">How kolm uses it</h2>
-<p>The K-score gate in v0.2.6 runs a panel of three judges per holdout row when the task is open-ended (no verifiable reward function). The judges are configurable; the default panel rotates across two frontier models from different families plus one open-weight Prometheus-style scorer to break ties. Each row's three scores are reduced to a median; the standard deviation is recorded in the receipt as a disagreement signal. Position is randomized per pair. Length-normalization is applied for tasks where verbosity is not desired. Self-enhancement is mitigated by never including the student's own family as a judge. Dedicated open-weight judge training (PandaLM, JudgeLM) ships as a v0.3 marketplace recipe class.</p>
+<p>The K-score gate in v0.2.6 runs a judge panel per holdout row when the task is open-ended (no verifiable reward function). The judges are configurable; the default panel rotates across frontier models from different families plus an open-weight Prometheus-style scorer to break ties. Each row's panel scores are reduced to a median; the standard deviation is recorded in the receipt as a disagreement signal. Position is randomized per pair. Length-normalization is applied for tasks where verbosity is not desired. Self-enhancement is mitigated by never including the student's own family as a judge. Dedicated open-weight judge training (PandaLM, JudgeLM) ships as a v0.3 marketplace recipe class.</p>
 
 <h2 id="refs">References</h2>
 <div class="refs">

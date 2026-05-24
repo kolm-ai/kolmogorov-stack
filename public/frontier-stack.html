@@ -218,7 +218,7 @@
  </div>
  <div class="tech-grid">
  <div class="tech on"><h4>K-score <span class="tag">default</span></h4><p>Composite quality score in [0,1]. Mix of pairwise judge wins, output-spec conformance, and OOD generalization. Per-artifact, never global.</p><a class="ref" href="/k-score">/k-score</a></div>
- <div class="tech on"><h4>Mixture of judges <span class="tag">default</span></h4><p>Three frontier judges score every eval sample. We use median to filter judge bias; tied votes go to a fourth.</p><a class="ref" href="/research/judges">/research/judges</a></div>
+ <div class="tech on"><h4>Mixture of judges <span class="tag">default</span></h4><p>A panel of frontier judges scores every eval sample. We use median to filter judge bias; tied votes route to a tiebreaker.</p><a class="ref" href="/research/judges">/research/judges</a></div>
  <div class="tech on"><h4>Held-out task split <span class="tag">default</span></h4><p>A fraction of the seed prompts is held back from distillation and used only at gate time. Replenished at every compile.</p><a class="ref" href="/research/holdout">/research/holdout</a></div>
  <div class="tech on"><h4>Eval-set drift <span class="tag">default</span></h4><p>If the holdout starts looking too much like the corpus, the gate refuses to grade and asks for fresh seeds.</p><a class="ref" href="/research/eval-drift">/research/eval-drift</a></div>
  <div class="tech"><h4>Process reward model <span class="tag">opt-in</span></h4><p>For multi-step reasoning we train a per-step reward and score sequences, not endpoints. Adds compile time, catches silent partial credit.</p><a class="ref" href="/research/prm">/research/prm</a></div>

@@ -163,7 +163,7 @@
  <div class="wrap">
  <span class="pill"><span class="dot"></span>Research &middot; Methods &middot; 2026-05-14 &middot; 11 min read</span>
  <h1>Synthesis-then-distillation: <span class="tone">building task corpora without seed data.</span></h1>
- <p class="lede">The user has a task description and zero captured pairs. <b>The compile loop synthesizes a corpus from the spec, distills from a teacher, rejects malformed pairs with a deterministic verifier, and K-selects for diversity.</b> Two passes, four guard rails, one verifiable cap on quality.</p>
+ <p class="lede">The user has a task description and zero captured pairs. <b>The compile loop synthesizes a corpus from the spec, distills from a teacher, rejects malformed pairs with a deterministic verifier, and K-selects for diversity.</b> Synthesize then distill, with guard rails at every pass, against one verifiable cap on quality.</p>
  <div class="meta"><span><b>By</b>&nbsp;kolm</span><span><b>Tag</b>&nbsp;synthesis &middot; distillation &middot; data</span></div>
  </div>
 </section>
@@ -175,10 +175,10 @@
  <h5>Contents</h5>
  <ol>
  <li><a href="#cold">The cold-start problem</a></li>
- <li><a href="#two-pass">Two passes: synthesize, then distill</a></li>
+ <li><a href="#two-pass">Synthesize, then distill</a></li>
  <li><a href="#verifier">The verifier gate</a></li>
  <li><a href="#k-select">K-selection for diversity</a></li>
- <li><a href="#failures">Three failure modes and their tells</a></li>
+ <li><a href="#failures">Failure modes and their tells</a></li>
  <li><a href="#ceiling">The synthetic-only ceiling</a></li>
  </ol>
  </div>
@@ -198,10 +198,10 @@
 <span class="arg">[distill]</span> teacher rollout on 180 pairs &rarr; LoRA training set
 <span class="arg">[K-score]</span> 0.887 (ships at 0.85 gate)</pre>
 
- <h2 id="two-pass">Two passes: synthesize, then distill.</h2>
- <p>The pipeline runs in two named passes with different inputs and different teachers. They look like one step from the CLI; they are two steps internally.</p>
+ <h2 id="two-pass">Synthesize, then distill.</h2>
+ <p>The pipeline runs in named passes with different inputs and different teachers. They look like one step from the CLI; they are sequential steps internally.</p>
  <p><b>Pass one: synthesize the spec slice.</b> The compiler decomposes the task description into a small number of spec slices: input shape, output shape, edge cases, negation cases, near-miss cases. For a refund classifier, the slices are roughly <em>clear refund request</em>, <em>refund-adjacent question</em>, <em>policy clarification</em>, <em>angry-but-not-asking</em>, <em>not refund-related</em>. The teacher is prompted N times per slice with a temperature high enough to surface lexical variation (typically T=1.0, top_p=0.92). The output is an unfiltered set of N candidate inputs per slice, plus a teacher-generated rationale that explains why each candidate fits the slice.</p>
- <p>This pass is the one most likely to be done badly. Three failure modes (mode collapse, lexical regression, label distribution skew) all live here. The cure is structural: each slice has a verifier-side schema, the teacher temperature stays high, and the candidates land in a pool that is later K-sampled, not consumed in order.</p>
+ <p>This pass is the one most likely to be done badly. The failure modes (mode collapse, lexical regression, label distribution skew) all live here. The cure is structural: each slice has a verifier-side schema, the teacher temperature stays high, and the candidates land in a pool that is later K-sampled, not consumed in order.</p>
  <p><b>Pass two: distill the labels.</b> Once the inputs are in the pool and verified, the teacher is prompted again, this time at low temperature (T=0.2), to produce the canonical label for each input. The temperature flip is intentional. <em>Diverse inputs, deterministic labels.</em> This is the pattern that makes synthetic training data work; the inverse (low-temperature inputs, high-temperature labels) collapses the distribution and teaches the student to babble.</p>
  <p>Pass two writes a jsonl that looks like every other captured corpus. The downstream trainer (<code>kolm distill</code>) does not know or care whether the pairs came from a real session or a synthesis run. The receipt chain marks the provenance: <code>seeds.source = "synth"</code> in the canonical-JSON envelope.</p>
 
@@ -224,7 +224,7 @@
 
  <h2 id="k-select">K-selection for diversity.</h2>
  <p>The teacher returns N candidates per spec slice. Even after the verifier drops the malformed ones, the remaining pool is correlated: candidates from the same slice tend to use similar vocabulary, similar sentence structure, similar named entities. Training on the full pool teaches the student to memorize the teacher's surface patterns, not the underlying task.</p>
- <p>The cure is K-selection. From the verified pool of M candidates per slice, the compiler keeps the K most-diverse and most-aligned-with-spec, where K is a fraction of M (typically 1/3 to 1/2). The selection is the smaller of two scoring loops:</p>
+ <p>The cure is K-selection. From the verified pool of M candidates per slice, the compiler keeps the K most-diverse and most-aligned-with-spec, where K is a fraction of M (typically 1/3 to 1/2). The selection is the smaller of the scoring loops below:</p>
  <ul>
  <li><b>Embedding clustering.</b> Each candidate is embedded with a small open model; pairwise cosine distance partitions the pool into clusters; one candidate is drawn from each cluster until K is reached.</li>
  <li><b>Verifier-score ranking.</b> Each candidate has a verifier score in [0, 1] capturing how cleanly it fits the slice schema. Inside each cluster, the highest-scored candidate wins.</li>
@@ -246,8 +246,8 @@
  candidates: 48 verified: 40 clusters: 12 selected: 20
 <span class="arg">TOTAL</span> 240 candidates &rarr; 187 verified &rarr; 80 K-selected pairs</pre>
 
- <h2 id="failures">Three failure modes and their tells.</h2>
- <p>The pipeline is built around three pathologies that synthesis is known to produce. Each has a tell the compiler logs and a mitigation the compiler applies.</p>
+ <h2 id="failures">Failure modes and their tells.</h2>
+ <p>The pipeline is built around the pathologies synthesis is known to produce. Each has a tell the compiler logs and a mitigation the compiler applies.</p>
 
  <p><b>Mode collapse.</b> The teacher locks onto a narrow lexical pattern and produces fifty variants of the same sentence. The tell is the embedding cluster count: if N=12 candidates per slice produce one or two clusters, the pool is collapsed. The mitigation is a temperature bump on pass one and, if that fails twice, a switch to a different teacher model. The compiler logs <code>collapse_detected: true</code> and the K-score gate refuses to ship the artifact below 0.85.</p>
 
@@ -256,7 +256,7 @@
  <p><b>Label distribution skew.</b> The teacher's prior over labels diverges from the spec. A refund-classifier specced to be 50/50 refund-vs-not lands at 80/20 in the synthesized set, because the teacher's training data is biased toward refund-shaped requests. The tell is the post-pass-two label histogram. The mitigation is stratified resampling: the compiler downsamples the over-represented class until the label distribution matches the spec within 5 percentage points.</p>
 
  <blockquote>
- <p>The three failure modes are not exotic. They are the default behavior of a high-temperature teacher with no constraints. The verifier, the K-selection, and the stratified resample are the three guard rails that keep them from showing up inside a shipped artifact.</p>
+ <p>These failure modes are not exotic. They are the default behavior of a high-temperature teacher with no constraints. The verifier, the K-selection, and the stratified resample are the guard rails that keep them from showing up inside a shipped artifact.</p>
  </blockquote>
 
  <h2 id="ceiling">The synthetic-only ceiling.</h2>

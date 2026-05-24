@@ -208,11 +208,11 @@
  selected.append(members[0])
  <span class="kw">return</span> selected</pre>
 
- <p>The embedding function is a small open model; the cluster count is the target K passed in by the caller; the score function is whichever of three signals is available:</p>
+ <p>The embedding function is a small open model; the cluster count is the target K passed in by the caller; the score function is whichever signal is available:</p>
  <ul>
  <li><b>Reward signal.</b> If a task has a learned reward model (rare for our compile pipelines, but present for some RLHF-style tasks), the reward is the ranking score.</li>
  <li><b>Verifier score.</b> The default. The verifier in <code>src/verifier.js</code> returns an accuracy score in [0, 1] per candidate against the spec; this is the ranking score for synthesis-time selection.</li>
- <li><b>Teacher log-prob.</b> Fallback. If no verifier is available for the task, the teacher's own log-probability of the candidate (when exposed by the API) is the ranking score. This is the weakest of the three, because it correlates with confidence rather than correctness, but it beats random.</li>
+ <li><b>Teacher log-prob.</b> Fallback. If no verifier is available for the task, the teacher's own log-probability of the candidate (when exposed by the API) is the ranking score. This is the weakest of the set, because it correlates with confidence rather than correctness, but it beats random.</li>
  </ul>
 
  <p>The agglomerative-cluster step is the load-bearing one. It is what turns N correlated candidates into K representative ones. The cluster count is the user-facing knob: smaller K means more aggressive deduplication; larger K means more raw data with more redundancy. The trainer defaults to K = N/3 for synthesis-time, K = N/2 for distillation-time, and exposes both as overrides in the recipe pack.</p>

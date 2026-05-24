@@ -202,7 +202,7 @@
 
  <h2>Routing granularity</h2>
 
- <p>Two choices: route at sequence level (one expert per input prompt) or token level (one expert per generated token). The kolm default is sequence; token-level is supported through the runtime adapter pool but adds two surfaces:</p>
+ <p>Route at sequence level (one expert per input prompt) or token level (one expert per generated token). The kolm default is sequence; token-level is supported through the runtime adapter pool but adds these surfaces:</p>
 
  <ul>
  <li>Per-token forward passes through the base while sampling, so the router can re-decide between tokens. The <a href="/research/multi-lora-serving">multi-LoRA serving runtime</a> already handles concurrent adapters; per-token routing is the logical extension.</li>

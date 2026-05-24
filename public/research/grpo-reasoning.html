@@ -246,7 +246,7 @@ trainer.train()</pre>
 
  <p><strong>Reward hacking is real.</strong> If <code>code_exec</code> is the only reward, the model will discover that printing the expected output literally (without computing it) passes the test. The fix is the same as in classical RL: add a structural reward (the <code>&lt;think&gt;</code> block must be non-empty), add a length penalty for trivially short completions, and inspect samples by hand at every checkpoint. The trainer logs ten random samples per save_steps interval for this reason.</p>
 
- <p><strong>Wall-clock cost scales with G.</strong> Eight completions per prompt at 1024 tokens each on a 7B model is ~8 seconds per step on an H100 with vLLM as the rollout backend. <code>num_generations=16</code> doubles that. The published R1 recipe ran for tens of thousands of steps; a kolm GRPO stage on a buyer's distill is typically 200-2000 steps because the base is already on-distribution for the task.</p>
+ <p><strong>Wall-clock cost scales with G.</strong> At G=8 completions per prompt and 1024 tokens each on a 7B model, it is ~8 seconds per step on an H100 with vLLM as the rollout backend. <code>num_generations=16</code> doubles that. The published R1 recipe ran for tens of thousands of steps; a kolm GRPO stage on a buyer's distill is typically 200-2000 steps because the base is already on-distribution for the task.</p>
 
  <p><strong>KL drift.</strong> If <code>beta</code> is too small, the policy drifts far from the reference and the buyer's other gates (HHEM grounding, K-score safety) collapse before the correctness reward saturates. The trainer evaluates the K-score every <code>save_steps</code> and refuses to commit a checkpoint whose K-score fell below the pre-GRPO baseline.</p>
 

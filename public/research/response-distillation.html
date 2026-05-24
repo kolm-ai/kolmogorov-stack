@@ -164,7 +164,7 @@
 
  <p>The standard recipe is <code>&alpha; = 0.9</code>, <code>T = 2.0</code>. The temperature has two roles. First it dampens the teacher's argmax so the student sees the second and third-most-likely tokens at every position; that is what Hinton called the &quot;dark knowledge&quot; the student would never see from sampled labels alone. Second it shapes the gradient magnitude; <code>T<sup>2</sup></code> is the chain-rule correction.</p>
 
- <h2>Three objectives, three failure modes</h2>
+ <h2>Objectives and their failure modes</h2>
 
  <table class="table">
  <thead><tr><th>Objective</th><th>What it minimizes</th><th>When it fails</th></tr></thead>

@@ -62,7 +62,9 @@
     "ui:audit:all:themes": "node scripts/ui-surface-audit.cjs --all --themes=dark,light",
     "test": "node --test --test-concurrency=1 tests/*.test.js",
     "test:parallel": "node --test tests/*.test.js",
-    "release:verify": "node scripts/release-verify.cjs"
+    "release:verify": "node scripts/release-verify.cjs",
+    "lint": "eslint src cli scripts tests workers",
+    "lint:fix": "eslint --fix src cli scripts tests workers"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.32.1",
@@ -94,6 +96,8 @@
   ],
   "devDependencies": {
     "@playwright/test": "1.60.0",
+    "eslint": "^9.39.4",
+    "globals": "^17.6.0",
     "playwright": "1.60.0"
   }
 }

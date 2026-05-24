@@ -5,20 +5,20 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Long-context training YaRN, NTK-aware, and Linear PI | · kolm.ai</title>
-<meta name="description" content="Three RoPE extension methods, one config knob. YaRN for 4-32x at low perplexity, NTK-aware for cheap 2-4x, Linear PI when the base model">
+<meta name="description" content="RoPE extension methods with one config knob. YaRN for 4-32x at low perplexity, NTK-aware for cheap 2-4x, Linear PI when the base model">
 <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="Long-context training YaRN, NTK-aware, and Linear PI | · kolm.ai">
-<meta property="og:description" content="Three RoPE extension methods, one config knob. YaRN for 4-32x at low perplexity, NTK-aware for cheap 2-4x, Linear PI when the base model">
+<meta property="og:description" content="RoPE extension methods with one config knob. YaRN for 4-32x at low perplexity, NTK-aware for cheap 2-4x, Linear PI when the base model">
 <meta property="og:type" content="website">
 <meta property="article:published_time" content="2026-05-14">
 <meta property="article:author" content="Kolm">
 <meta property="article:section" content="methods">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Long-context training YaRN, NTK-aware, and Linear PI | · kolm.ai">
-<meta name="twitter:description" content="Three RoPE extension methods, one config knob. YaRN for 4-32x at low perplexity, NTK-aware for cheap 2-4x, Linear PI when the base model">
+<meta name="twitter:description" content="RoPE extension methods with one config knob. YaRN for 4-32x at low perplexity, NTK-aware for cheap 2-4x, Linear PI when the base model">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/research/long-context-training">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -32,7 +32,7 @@
  {
  "@type": "TechArticle",
  "headline": "Long-context training: YaRN, NTK-aware, and Linear PI",
- "description": "Three RoPE extension methods written down with their gating conditions.",
+ "description": "RoPE extension methods written down with their gating conditions.",
  "url": "https://kolm.ai/research/long-context-training",
  "author": {"@type": "Organization", "name": "Kolm"},
  "publisher": {"@type": "Organization", "name": "Kolm", "url": "https://kolm.ai"},
@@ -150,7 +150,7 @@
  <div class="wrap">
  <div class="hero-eyebrow"><span class="he-dot"></span>research . methods . 11 min read</div>
  <h1>Long context, one config knob.</h1>
- <p class="lede">RoPE extension is the cheapest way to take a 4k or 8k base model to 32k or 128k. Three published methods, three perplexity profiles, one trainer config. The boring part is making sure the patch lands on both the top-level config and the nested text_config when the model is a VLM.</p>
+ <p class="lede">RoPE extension is the cheapest way to take a 4k or 8k base model to 32k or 128k. Published methods, distinct perplexity profiles, one trainer config. The boring part is making sure the patch lands on both the top-level config and the nested text_config when the model is a VLM.</p>
 
  <div class="meta-line">
  <span>May 14, 2026</span>

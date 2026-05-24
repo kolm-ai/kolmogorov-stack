@@ -163,7 +163,7 @@
  <li><strong>Swap.</strong> Save the new adapter. The runtime hot-reloads via the same symlink-and-HUP path described in <a href="/research/continual-learning-loop">the continual learning loop</a>.</li>
  </ol>
 
- <p>Four rounds is the kolm default; published recipes cite diminishing returns past five. Each round's adapter has its own CID and its own receipt; the chain across rounds is the audit story.</p>
+ <p>The kolm default is a short round chain; published recipes cite diminishing returns past five. Each round's adapter has its own CID and its own receipt; the chain across rounds is the audit story.</p>
 
  <h2>Why the reference shifts each round</h2>
 
@@ -175,7 +175,8 @@
 
  <p>This bounds the KL of each update. Without it, after a few rounds the policy can drift arbitrarily far from the original SFT model and the DPO loss starts measuring the gap to a now-irrelevant reference. With the shifting reference, each round is a small step from a known-good policy; the policy can move further over many rounds without any single step being unbounded.</p>
 
- <h2>Four judges, four tradeoffs</h2>
+ <h2>Judges and their tradeoffs</h2>
+
 
  <table class="table">
  <thead><tr><th>Judge</th><th>Cost</th><th>Signal-to-noise</th><th>When to use</th></tr></thead>
@@ -191,7 +192,7 @@
 
  <h2>Pair filtering: why drop low-margin and low-diversity pairs</h2>
 
- <p>Two filters apply before each DPO pass:</p>
+ <p>Filters applied before each DPO pass:</p>
 
  <ul>
  <li><strong>Margin floor.</strong> If the judge scored the top and bottom candidate within <code>pair_filter_margin</code>, the pair carries little signal. The DPO loss is roughly proportional to the margin, so a near-zero-margin pair contributes near-zero gradient anyway, but it costs forward passes and dilutes the load-average. Default 0.0 (keep all pairs); raise when the judge is noisy.</li>
@@ -202,7 +203,7 @@
 
  <h2>The provenance contract</h2>
 
- <p>Iterative DPO has a known failure mode: the policy and the judge can collude. A learned reward model rewards what it was trained on; a policy trained against that RM learns to maximize the RM's idiosyncrasies, not the user's preferences. Three guardrails:</p>
+ <p>Iterative DPO has a known failure mode: the policy and the judge can collude. A learned reward model rewards what it was trained on; a policy trained against that RM learns to maximize the RM's idiosyncrasies, not the user's preferences. The guardrails:</p>
 
  <ul>
  <li><strong>Independent eval pack.</strong> The K-score gate runs against a held-out pack the judge never sees. If the policy is gaining ground on the judge but losing ground on the pack, the gate fails the round and the swap does not happen.</li>
