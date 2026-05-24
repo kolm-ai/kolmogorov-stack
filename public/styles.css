@@ -35,12 +35,12 @@
  --accent: #e8e3d6;
  --accent-soft: rgba(236,231,220, 0.13);
  --accent-strong:#c9c2b2;
- --accent-cyan: #7d96c0;
+ --accent-cyan: #e8e3d6;
  --accent-amber: #d6a65a;
  --accent-violet:#8d96a8;
- --good: #7d96c0;
- --good-soft: rgba(125, 150, 192, 0.14);
- --good-faint: rgba(125, 150, 192, 0.06);
+ --good: #e8e3d6;
+ --good-soft: rgba(232, 227, 214, 0.14);
+ --good-faint: rgba(232, 227, 214, 0.06);
  --bad: #ff6f8f;
  --warn: #d6a65a;
  --mono: "Geist Mono", ui-monospace, "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace;
@@ -240,7 +240,7 @@ footer .brand { font-size: 14px; }
  align-items: center;
  justify-content: center;
 }
-.nav-toggle:hover { border-color: rgba(125, 150, 192,0.30); }
+.nav-toggle:hover { border-color: rgba(232, 227, 214,0.30); }
 .nav-toggle span {
  display: block;
  width: 16px;
@@ -320,8 +320,8 @@ body.nav-open { overflow: hidden; }
 }
 .hero .eyebrow .pulse {
  width: 7px; height: 7px; border-radius: 50%;
- background: var(--good, #7d96c0);
- box-shadow: 0 0 14px rgba(125, 150, 192, 0.55);
+ background: var(--good, #e8e3d6);
+ box-shadow: 0 0 14px rgba(232, 227, 214, 0.55);
  animation: eyebrow-pulse 2.6s ease-in-out infinite;
 }
 .hero h1 {
@@ -398,7 +398,7 @@ p code, li code {
  border: 1px solid rgba(236,231,220,0.13);
  background:
  linear-gradient(135deg, rgba(236,231,220, 0.12), transparent 34%),
- linear-gradient(315deg, rgba(125, 150, 192,0.08), transparent 33%),
+ linear-gradient(315deg, rgba(232, 227, 214,0.08), transparent 33%),
  rgba(236,231,220,0.018);
  transform: translate3d(0,0,0);
 }
@@ -410,7 +410,7 @@ p code, li code {
  --line: rgba(236,231,220,0.14);
  --line-strong: rgba(236,231,220,0.24);
  --line-stronger: rgba(236,231,220,0.34);
- --accent: #7d96c0;
+ --accent: #e8e3d6;
  --accent-strong: #a7ffe9;
  --surface-warm: #fff6df;
  --surface-2: #d7cbb6;
@@ -430,7 +430,7 @@ p code, li code {
  pointer-events: none;
  background:
  linear-gradient(120deg, transparent 0 52%, rgba(236,231,220, 0.08) 52% 52.3%, transparent 52.3%),
- linear-gradient(90deg, transparent 0%, rgba(125, 150, 192,0.08) 58%, transparent 82%);
+ linear-gradient(90deg, transparent 0%, rgba(232, 227, 214,0.08) 58%, transparent 82%);
 }
 .proof-toolbar {
  display: flex;
@@ -739,11 +739,11 @@ p code, li code {
  min-height: 238px;
 }
 .artifact-card-mini {
- border-color: rgba(125, 150, 192,0.16);
- background: linear-gradient(180deg, rgba(125, 150, 192,0.025), rgba(11,13,16,0.78));
- box-shadow: inset 0 0 0 1px rgba(125, 150, 192,0.04), 0 0 24px -8px rgba(125, 150, 192,0.10);
+ border-color: rgba(232, 227, 214,0.16);
+ background: linear-gradient(180deg, rgba(232, 227, 214,0.025), rgba(11,13,16,0.78));
+ box-shadow: inset 0 0 0 1px rgba(232, 227, 214,0.04), 0 0 24px -8px rgba(232, 227, 214,0.10);
 }
-.artifact-card-mini .panel-label { color: #7d96c0; }
+.artifact-card-mini .panel-label { color: #e8e3d6; }
 .panel-label,
 .map-column span {
  display: block;
@@ -783,7 +783,7 @@ p code, li code {
  content: "";
  position: absolute;
  height: 1px;
- background: linear-gradient(90deg, transparent, rgba(125, 150, 192,0.42), transparent);
+ background: linear-gradient(90deg, transparent, rgba(232, 227, 214,0.42), transparent);
  pointer-events: none;
 }
 .compile-core::before { top: 50%; left: -22px; width: 28px; transform: translateY(-1px); }
@@ -795,14 +795,14 @@ p code, li code {
  border-radius: 50%;
  border: 1px solid rgba(236,231,220, 0.18);
  box-shadow:
- inset 0 0 0 1px rgba(125, 150, 192,0.06),
- 0 0 28px rgba(125, 150, 192,0.12);
- background: radial-gradient(circle at 50% 50%, rgba(125, 150, 192,0.06), transparent 70%);
+ inset 0 0 0 1px rgba(232, 227, 214,0.06),
+ 0 0 28px rgba(232, 227, 214,0.12);
+ background: radial-gradient(circle at 50% 50%, rgba(232, 227, 214,0.06), transparent 70%);
  animation: core-pulse 4.2s ease-in-out infinite;
 }
 @keyframes core-pulse {
- 0%, 100% { box-shadow: inset 0 0 0 1px rgba(125, 150, 192,0.06), 0 0 24px rgba(125, 150, 192,0.10); }
- 50% { box-shadow: inset 0 0 0 1px rgba(125, 150, 192,0.18), 0 0 38px rgba(125, 150, 192,0.22); }
+ 0%, 100% { box-shadow: inset 0 0 0 1px rgba(232, 227, 214,0.06), 0 0 24px rgba(232, 227, 214,0.10); }
+ 50% { box-shadow: inset 0 0 0 1px rgba(232, 227, 214,0.18), 0 0 38px rgba(232, 227, 214,0.22); }
 }
 @media (prefers-reduced-motion: reduce) {
  .core-ring { animation: none; }
@@ -879,8 +879,8 @@ p code, li code {
  overflow: hidden;
  touch-action: pan-y;
 }
-.lab-terminal .prompt { color: var(--good, #7d96c0); }
-.lab-terminal .ok { color: var(--good, #7d96c0); font-weight: 500; }
+.lab-terminal .prompt { color: var(--good, #e8e3d6); }
+.lab-terminal .ok { color: var(--good, #e8e3d6); font-weight: 500; }
 .lab-terminal .arg { color: #c1f5e3; }
 
 .system-map {
@@ -1021,8 +1021,8 @@ p code, li code {
 .btn.primary:hover { background: #f6f0e4; color: #0b0d10; }
 .btn.ghost { background: rgba(236,231,220,0.04); color: var(--ink); border-color: var(--line-strong); }
 .btn.ghost:hover { background: rgba(236,231,220,0.08); border-color: var(--line-stronger); }
-.btn.accent { background: rgba(125, 150, 192, 0.07); color: #c1f5e3; border-color: rgba(125, 150, 192, 0.32); }
-.btn.accent:hover { background: rgba(125, 150, 192, 0.14); color: #d6f8e8; border-color: rgba(125, 150, 192, 0.5); box-shadow: 0 0 0 1px rgba(125, 150, 192, 0.10); }
+.btn.accent { background: rgba(232, 227, 214, 0.07); color: #c1f5e3; border-color: rgba(232, 227, 214, 0.32); }
+.btn.accent:hover { background: rgba(232, 227, 214, 0.14); color: #d6f8e8; border-color: rgba(232, 227, 214, 0.5); box-shadow: 0 0 0 1px rgba(232, 227, 214, 0.10); }
 /* SOTA focus-visible rings: keyboard-only, never mouse. */
 .btn:focus-visible,
 a:focus-visible,
@@ -1082,7 +1082,7 @@ textarea:focus-visible,
  position: relative;
  white-space: pre; overflow-x: auto;
 }
-.install-cmd .prompt { color: var(--good, #7d96c0); user-select: none; margin-right: 8px; }
+.install-cmd .prompt { color: var(--good, #e8e3d6); user-select: none; margin-right: 8px; }
 .install-cmd .copy {
  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
  background: rgba(21,23,18,0.96); border: 1px solid var(--line);
@@ -1092,7 +1092,7 @@ textarea:focus-visible,
  transition: color 120ms, border-color 120ms;
 }
 .install-cmd .copy:hover { color: var(--ink); border-color: var(--line-strong); }
-.install-cmd .copy.copied { color: var(--good); border-color: rgba(125, 150, 192,0.35); }
+.install-cmd .copy.copied { color: var(--good); border-color: rgba(232, 227, 214,0.35); }
 
 .install-row {
  display: flex;
@@ -1187,7 +1187,7 @@ textarea:focus-visible,
  pointer-events: none;
  background:
  linear-gradient(180deg, transparent 0%, rgba(11,13,16,0.10) 48%, rgba(11,13,16,0.82) 100%),
- linear-gradient(90deg, rgba(236,231,220, 0.10), transparent 38%, rgba(125, 150, 192,0.08));
+ linear-gradient(90deg, rgba(236,231,220, 0.10), transparent 38%, rgba(232, 227, 214,0.08));
 }
 .media-frame picture,
 .media-frame img {
@@ -1409,8 +1409,8 @@ a.card:hover { border-color: var(--line-strong); }
  border-radius: var(--r-sm);
  letter-spacing: 0;
 }
-.chip.accent { color: var(--accent); border-color: rgba(125, 150, 192,0.32); background: rgba(125, 150, 192,0.08); }
-.chip.good { color: var(--good); border-color: rgba(125, 150, 192,0.32); background: rgba(125, 150, 192,0.08); }
+.chip.accent { color: var(--accent); border-color: rgba(232, 227, 214,0.32); background: rgba(232, 227, 214,0.08); }
+.chip.good { color: var(--good); border-color: rgba(232, 227, 214,0.32); background: rgba(232, 227, 214,0.08); }
 
 /* ============================================================
  Inline forms.
@@ -1704,7 +1704,7 @@ footer.site .footer-tag a:hover { color: var(--ink); }
 .split { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 @media (max-width: 880px) { .split { grid-template-columns: 1fr; } }
 .banner { background: var(--bg-elev); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 16px; font-size: 13px; color: var(--ink); }
-.banner.success { border-color: rgba(125, 150, 192,0.28); background: rgba(125, 150, 192,0.05); }
+.banner.success { border-color: rgba(232, 227, 214,0.28); background: rgba(232, 227, 214,0.05); }
 .banner.warn { border-color: rgba(255,180,95,0.28); background: rgba(255,180,95,0.05); }
 .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 24px 0; }
 @media (max-width: 880px) { .steps { grid-template-columns: 1fr; } }
@@ -1747,11 +1747,11 @@ footer.site .footer-tag a:hover { color: var(--ink); }
  display: inline-block; padding: 2px 8px; border-radius: var(--r-sm); font-size: 11px;
  border: 1px solid var(--line-strong); color: var(--ink-mute); font-family: var(--mono);
 }
-.pill.good { color: var(--good); border-color: rgba(125, 150, 192,0.32); }
+.pill.good { color: var(--good); border-color: rgba(232, 227, 214,0.32); }
 .pill.bad { color: var(--bad); border-color: rgba(255,107,145,0.32); }
 .pill.warn { color: var(--warn); border-color: rgba(255,180,95,0.32); }
-.pill.accent { color: var(--accent); border-color: rgba(125, 150, 192,0.32); }
-.pill.violet { color: var(--accent); border-color: rgba(125, 150, 192,0.32); }
+.pill.accent { color: var(--accent); border-color: rgba(232, 227, 214,0.32); }
+.pill.violet { color: var(--accent); border-color: rgba(232, 227, 214,0.32); }
 .aurora, .aurora-chip, .grad { color: var(--ink); -webkit-text-fill-color: var(--ink); background: none; }
 .btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--line-strong); padding: 10px 16px; border-radius: var(--r); font-family: var(--sans); font-size: 13.5px; cursor: pointer; }
 .btn-ghost:hover { background: rgba(255,255,255,0.04); }
@@ -1871,13 +1871,13 @@ textarea {
  width: 7px;
  height: 7px;
  border-radius: 50%;
- background: var(--good, #7d96c0);
- box-shadow: 0 0 14px rgba(125, 150, 192, 0.55);
+ background: var(--good, #e8e3d6);
+ box-shadow: 0 0 14px rgba(232, 227, 214, 0.55);
  animation: eyebrow-pulse 2.6s ease-in-out infinite;
 }
 @keyframes eyebrow-pulse {
- 0%, 100% { box-shadow: 0 0 12px rgba(125, 150, 192, 0.45); }
- 50% { box-shadow: 0 0 18px rgba(125, 150, 192, 0.75); }
+ 0%, 100% { box-shadow: 0 0 12px rgba(232, 227, 214, 0.45); }
+ 50% { box-shadow: 0 0 18px rgba(232, 227, 214, 0.75); }
 }
 @media (prefers-reduced-motion: reduce) {
  .eyebrow .pulse { animation: none; }
@@ -2639,9 +2639,9 @@ textarea {
  "compile", "distill", or ".kolm". Single source of truth so future copy
  updates land in one place. The HTML markup is duplicated per page but the
  classes here own the visual contract. */
-.tax-strip { max-width: 1180px; margin: 36px auto; padding: 22px 28px; border: 1px solid rgba(125, 150, 192,0.18); background: rgba(125, 150, 192,0.04); border-radius: 12px; display: flex; flex-direction: column; gap: 14px; }
+.tax-strip { max-width: 1180px; margin: 36px auto; padding: 22px 28px; border: 1px solid rgba(232, 227, 214,0.18); background: rgba(232, 227, 214,0.04); border-radius: 12px; display: flex; flex-direction: column; gap: 14px; }
 .tax-strip-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-.tax-strip-eyebrow { font-family: var(--mono); font-size: 11.5px; color: #7d96c0; letter-spacing: 0.04em; text-transform: lowercase; padding: 3px 8px; border-radius: 4px; background: rgba(125, 150, 192,0.08); }
+.tax-strip-eyebrow { font-family: var(--mono); font-size: 11.5px; color: #e8e3d6; letter-spacing: 0.04em; text-transform: lowercase; padding: 3px 8px; border-radius: 4px; background: rgba(232, 227, 214,0.08); }
 .tax-strip-h { font-size: 16.5px; font-weight: 500; margin: 0; color: var(--ink, #e8e3d6); }
 .tax-chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .tax-chip { font-family: var(--mono); font-size: 12px; padding: 4px 9px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.10); }
@@ -2650,7 +2650,7 @@ textarea {
 .tax-chip.compiled { color: #86efac; border-color: rgba(34,197,94,0.30); background: rgba(34,197,94,0.06); }
 .tax-chip.distill { color: #fcd34d; border-color: rgba(245,158,11,0.30); background: rgba(245,158,11,0.06); }
 .tax-strip-body { font-size: 14px; color: var(--ink-mute, #b5bdb1); line-height: 1.55; margin: 0; }
-.tax-strip-body a { color: #7d96c0; }
+.tax-strip-body a { color: #e8e3d6; }
 [data-theme=light] .tax-strip { background: rgba(10,136,98,0.06); border-color: rgba(10,136,98,0.22); }
 [data-theme=light] .tax-strip-eyebrow { color: #059669; background: rgba(10,136,98,0.10); }
 [data-theme=light] .tax-strip-body { color: #4b5158; }

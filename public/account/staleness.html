@@ -8,7 +8,7 @@
 <title>Staleness - Account - kolm.ai</title>
 <meta name="description" content="Freshness distribution timeline + per-teacher-version breakdown + TTL controls for a capture namespace. Built by src/capture-staleness.js + src/teacher-version.js (W746).">
 <meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f4f0e8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <link rel="canonical" href="https://kolm.ai/account/staleness">
 <meta property="og:title" content="Staleness &middot; Account &middot; kolm.ai" />
 <meta property="og:description" content="Capture freshness timeline + teacher-version breakdown + TTL controls." />
@@ -45,7 +45,7 @@
 .ktable td{padding:8px 8px;border-bottom:1px solid var(--line-soft,rgba(255,255,255,0.04));color:var(--ink)}
 .ktable tr:hover td{background:var(--bg-elev)}
 .pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor}
-.pill.ok{color:var(--good,#1d2d44)}.pill.warn{color:var(--warn,#8b6914)}.pill.bad{color:var(--bad,#dc2626)}.pill.mute{color:var(--ink-faint)}
+.pill.ok{color:var(--good,#111111)}.pill.warn{color:var(--warn,#6b6b66)}.pill.bad{color:var(--bad,#dc2626)}.pill.mute{color:var(--ink-faint)}
 .btn{display:inline-block;padding:6px 12px;border-radius:5px;border:1px solid var(--line-strong);background:transparent;color:var(--ink);font-family:var(--mono);font-size:12px;cursor:pointer;text-decoration:none}
 .btn:hover{border-color:var(--accent);color:var(--accent)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:#0b0d10}
@@ -60,19 +60,19 @@
 .timeline-viz{margin:14px 0 8px}
 .timeline-bar{display:flex;width:100%;height:36px;border-radius:6px;overflow:hidden;border:1px solid var(--line);background:var(--bg-elev)}
 .timeline-seg{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;color:#0b0d10;text-align:center;overflow:hidden;white-space:nowrap;transition:width .3s ease}
-.timeline-seg.bucket-1{background:#1d2d44}
+.timeline-seg.bucket-1{background:#111111}
 .timeline-seg.bucket-2{background:#34d399}
 .timeline-seg.bucket-3{background:#fbbf24}
-.timeline-seg.bucket-4{background:#fb923c}
+.timeline-seg.bucket-4{background:#3a3a38}
 .timeline-seg.bucket-5{background:#f87171}
 .timeline-seg.bucket-6{background:#7c2d12;color:#fde2cc}
 .timeline-legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:8px;font-family:var(--mono);font-size:11.5px;color:var(--ink-mute)}
 .timeline-legend .lg{display:flex;align-items:center;gap:6px}
 .timeline-legend .swatch{width:10px;height:10px;border-radius:2px;display:inline-block}
-.swatch.bucket-1{background:#1d2d44}
+.swatch.bucket-1{background:#111111}
 .swatch.bucket-2{background:#34d399}
 .swatch.bucket-3{background:#fbbf24}
-.swatch.bucket-4{background:#fb923c}
+.swatch.bucket-4{background:#3a3a38}
 .swatch.bucket-5{background:#f87171}
 .swatch.bucket-6{background:#7c2d12}
 /* Confirmation modal */

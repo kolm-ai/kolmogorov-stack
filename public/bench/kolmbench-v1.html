@@ -8,7 +8,7 @@
 <title>KolmBench v1 &mdash; open benchmark for compiled models &middot; kolm.ai</title>
 <meta name="description" content="KolmBench v1: open-source benchmark for compiled models. Public spec, leaderboard, submission CI workflow. Open-source AI workbench.">
 <meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f4f0e8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="KolmBench v1 &middot; open benchmark for compiled models &middot; kolm.ai">
 <meta property="og:description" content="Axis-by-axis K-Score over reasoning, coding, writing, analysis, support, math, tool_use. CC-BY-4.0. Reference entry pending external submissions.">
 <meta property="og:type" content="website">
@@ -18,7 +18,7 @@
 <link rel="stylesheet" href="/design-tokens.css">
     <link rel="stylesheet" href="/warm-paper.css">
 <style>
-:root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#1d2d44;--accent-soft:rgba(29, 45, 68,0.10);--pending:#8b6914;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+:root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#111111;--accent-soft:rgba(17, 17, 17,0.10);--pending:#6b6b66;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
 [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10);--pending:#b45309}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
@@ -61,7 +61,7 @@ footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:1
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 .status-pill{display:inline-flex;align-items:center;gap:6px;color:var(--pending);font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor;padding:3px 9px;border-radius:999px;margin-right:8px}
 .status-pill::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor}
-.pill-good{color:#1d2d44;font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor;padding:1px 7px;border-radius:999px}
+.pill-good{color:#111111;font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor;padding:1px 7px;border-radius:999px}
 .spec-row{display:grid;grid-template-columns:160px 1fr;gap:8px 18px;font-family:var(--mono);font-size:13.5px;max-width:780px;margin:10px 0 24px}
 .spec-row dt{color:var(--ink-faint);font-size:11.5px;text-transform:uppercase;letter-spacing:0.08em;padding-top:2px}
 .spec-row dd{margin:0;color:var(--ink)}

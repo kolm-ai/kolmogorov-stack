@@ -7,7 +7,7 @@
 <title>ROI calculator · kolm.ai</title>
 <meta name="description" content="Plug in your monthly call volume, token mix, and frontier price. Get the cloud-vs-kolm number with teacher cost verifiable. The compiler-cache math, no...">
 <meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f4f0e8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="ROI calculator · kolm.ai">
@@ -27,7 +27,7 @@
  --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
  --ink: #e8e3d6; --ink-mute: #b5bdb1; --ink-faint: #737c73;
  --accent: #e8e3d6; --accent-strong: #c9c2b2;
- --good: #7d96c0; --warn: #ffb86b;
+ --good: #e8e3d6; --warn: #ffb86b;
  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
  }
@@ -101,7 +101,7 @@
  .res-bar-track { height: 16px; border-radius: 4px; background: var(--bg-card); border: 1px solid var(--line); overflow: hidden; }
  .res-bar-fill { height: 100%; transition: width 220ms ease-out; }
  .res-bar-fill.cloud { background: linear-gradient(90deg, rgba(255,184,107,0.85), rgba(255,184,107,0.45)); }
- .res-bar-fill.kolm { background: linear-gradient(90deg, rgba(125, 150, 192,0.85), rgba(125, 150, 192,0.45)); }
+ .res-bar-fill.kolm { background: linear-gradient(90deg, rgba(232, 227, 214,0.85), rgba(232, 227, 214,0.45)); }
  .res-bar-val { font-family: var(--mono); font-size: 13px; color: var(--ink); text-align: right; font-weight: 500; }
  .res-bar-cap { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); margin: 4px 0 0; padding-left: 68px; }
 
@@ -121,8 +121,8 @@
  .res-detail { padding: 16px 0 0; border-top: 1px solid var(--line); }
 
  .share { margin: 16px 0 0; }
- .share-btn { display: inline-flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 12.5px; color: var(--good); border: 1px solid rgba(125, 150, 192, 0.32); border-radius: 7px; padding: 8px 14px; background: rgba(125, 150, 192, 0.05); transition: background 120ms, transform 120ms; }
- .share-btn:hover { background: rgba(125, 150, 192, 0.10); transform: translateY(-1px); }
+ .share-btn { display: inline-flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 12.5px; color: var(--good); border: 1px solid rgba(232, 227, 214, 0.32); border-radius: 7px; padding: 8px 14px; background: rgba(232, 227, 214, 0.05); transition: background 120ms, transform 120ms; }
+ .share-btn:hover { background: rgba(232, 227, 214, 0.10); transform: translateY(-1px); }
 
  .verifiable { margin: 38px 0 0; padding: 22px 26px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-elev); }
  .verifiable h3 { margin: 0 0 8px; font-size: 14px; font-weight: 500; color: var(--ink); font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.04em; }

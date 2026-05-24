@@ -8,7 +8,7 @@
 <title>Drift alert - Account - kolm.ai</title>
 <meta name="description" content="Open-source AI workbench. Live KL/JSD divergence between your training capture distribution and today's production traffic. Webhook on shift + W709 routing tie-in.">
 <meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f4f0e8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <link rel="canonical" href="https://kolm.ai/account/drift-alert">
 <meta property="og:title" content="Drift alert &middot; Account &middot; kolm.ai" />
 <meta property="og:description" content="Live KL/JSD divergence between training capture distribution and production traffic. Webhook + W709 routing tie-in." />
@@ -44,11 +44,11 @@
 .ktable td{padding:8px 8px;border-bottom:1px solid var(--line-soft,rgba(255,255,255,0.04));color:var(--ink)}
 .ktable tr:hover td{background:var(--bg-elev)}
 .jsd-pill{display:inline-block;padding:4px 12px;border-radius:999px;font-size:13px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.08em;border:1.5px solid currentColor;font-weight:600}
-.jsd-pill.green{color:#1d2d44}
-.jsd-pill.yellow{color:#8b6914}
+.jsd-pill.green{color:#111111}
+.jsd-pill.yellow{color:#6b6b66}
 .jsd-pill.red{color:#dc2626}
 .pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor}
-.pill.ok{color:#1d2d44}.pill.warn{color:#8b6914}.pill.bad{color:#dc2626}.pill.mute{color:var(--ink-faint)}
+.pill.ok{color:#111111}.pill.warn{color:#6b6b66}.pill.bad{color:#dc2626}.pill.mute{color:var(--ink-faint)}
 .btn{display:inline-block;padding:6px 12px;border-radius:5px;border:1px solid var(--line-strong);background:transparent;color:var(--ink);font-family:var(--mono);font-size:12px;cursor:pointer;text-decoration:none}
 .btn:hover{border-color:var(--accent);color:var(--accent)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:#0b0d10}
@@ -58,7 +58,7 @@
 .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center}
 .toolbar input[type=search],.toolbar select,.toolbar input[type=text],.toolbar input[type=url],.toolbar input[type=number]{background:var(--bg-elev);border:1px solid var(--line);color:var(--ink);padding:6px 10px;border-radius:4px;font-family:var(--mono);font-size:12px}
 .sugcard{background:var(--bg-card);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:6px;padding:12px 14px;margin:8px 0;font-size:13.5px;line-height:1.5;color:var(--ink)}
-.sugcard.priority{border-left-color:#8b6914}
+.sugcard.priority{border-left-color:#6b6b66}
 .sugcard .verb{font-family:var(--mono);font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;display:block}
 .brand-eyebrow{color:var(--ink-faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.14em;margin:0 0 6px}
 @media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}.metric-grid{grid-template-columns:repeat(2,1fr)}}
@@ -300,8 +300,8 @@ function registerWebhook(){
     st.hidden = false;
     if(env && env.ok){
       st.textContent = "Webhook registered: "+url+" (threshold "+(env.webhook&&env.webhook.jsd_threshold!=null?env.webhook.jsd_threshold:"default")+").";
-      st.style.borderColor = "#1d2d44";
-      st.style.color = "#1d2d44";
+      st.style.borderColor = "#111111";
+      st.style.color = "#111111";
     } else {
       st.textContent = "Failed to register: "+(env&&(env.hint||env.error)||"unknown error");
       st.style.borderColor = "#dc2626";

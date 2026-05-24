@@ -22,7 +22,7 @@
 :root {
   /* Canvas — "Warm Paper" identity (2026-05-24 redesign).
      Default light/warm; dark mode is an opt-in via [data-theme="dark"]. */
-  --ks-bg:          #f4f0e8;
+  --ks-bg:          #f7f4ec;
   --ks-bg-1:        #ffffff;
   --ks-bg-2:        #e8e3d6;
   --ks-bg-3:        #d8d2c1;
@@ -31,7 +31,7 @@
   --ks-line-3:      rgba(28,27,26,0.16);
 
   /* Ink — warm near-black, not pure */
-  --ks-ink:         #161513;
+  --ks-ink:         #111111;
   --ks-ink-2:       #4a4641;
   --ks-ink-3:       #8a8276;
   --ks-ink-4:       #bdb3a1;
@@ -45,17 +45,17 @@
        --ks-accent-edge  : 28% for hairline rules, focus rings.
        --ks-accent-glow  : 18% radial for atmosphere only.
        --ks-accent-warm  : alias retained — same family, used for numerals. */
-  --ks-accent:      #1d2d44;
-  --ks-accent-2:    #2a3e5c;
-  --ks-accent-soft: rgba(29,45,68,0.05);
-  --ks-accent-edge: rgba(29,45,68,0.20);
-  --ks-accent-glow: rgba(29,45,68,0.14);
-  --ks-accent-warm: #1d2d44;
-  --ks-accent-warm-soft: rgba(29,45,68,0.08);
+  --ks-accent:      #111111;
+  --ks-accent-2:    #000000;
+  --ks-accent-soft: rgba(17, 17, 17,0.05);
+  --ks-accent-edge: rgba(17, 17, 17,0.20);
+  --ks-accent-glow: rgba(17, 17, 17,0.14);
+  --ks-accent-warm: #111111;
+  --ks-accent-warm-soft: rgba(17, 17, 17,0.08);
 
   /* Status — used only in product / dashboards, not marketing */
   --ks-pos:         #2d6a48;
-  --ks-warn:        #8b6914;
+  --ks-warn:        #6b6b66;
   --ks-err:         #8b2828;
 
   /* Type */
@@ -123,23 +123,23 @@
    only so existing toggle UI that sets [data-theme="light"] continues to
    work without flicker. The Warm Paper palette is the canonical state. */
 [data-theme="light"] {
-  --ks-bg:          #f4f0e8;
+  --ks-bg:          #f7f4ec;
   --ks-bg-1:        #ffffff;
   --ks-bg-2:        #e8e3d6;
   --ks-bg-3:        #d8d2c1;
   --ks-line-1:      rgba(28,27,26,0.06);
   --ks-line-2:      rgba(28,27,26,0.10);
   --ks-line-3:      rgba(28,27,26,0.16);
-  --ks-ink:         #161513;
+  --ks-ink:         #111111;
   --ks-ink-2:       #4a4641;
   --ks-ink-3:       #8a8276;
   --ks-ink-4:       #bdb3a1;
-  --ks-accent:      #1d2d44;
-  --ks-accent-2:    #2a3e5c;
-  --ks-accent-soft: rgba(29,45,68,0.05);
-  --ks-accent-edge: rgba(29,45,68,0.20);
-  --ks-accent-glow: rgba(29,45,68,0.14);
-  --ks-accent-warm: #1d2d44;
+  --ks-accent:      #111111;
+  --ks-accent-2:    #000000;
+  --ks-accent-soft: rgba(17, 17, 17,0.05);
+  --ks-accent-edge: rgba(17, 17, 17,0.20);
+  --ks-accent-glow: rgba(17, 17, 17,0.14);
+  --ks-accent-warm: #111111;
 }
 
 /* Dark mode = warm darks (candlelit lab), NOT cold blue-gray. Used when the
@@ -147,8 +147,8 @@
    orange so it reads against the dark canvas at WCAG AA. */
 [data-theme="dark"] {
   --ks-bg:          #0e1014;
-  --ks-bg-1:        #161513;
-  --ks-bg-2:        #22262e;
+  --ks-bg-1:        #111111;
+  --ks-bg-2:        #1f1f24;
   --ks-bg-3:        #2d323c;
   --ks-line-1:      rgba(231,229,228,0.06);
   --ks-line-2:      rgba(231,229,228,0.10);
@@ -157,14 +157,14 @@
   --ks-ink-2:       #a8a298;
   --ks-ink-3:       #787268;
   --ks-ink-4:       #48433d;
-  --ks-accent:      #7d96c0;
-  --ks-accent-2:    #9eb4d8;
-  --ks-accent-soft: rgba(125,150,192,0.10);
-  --ks-accent-edge: rgba(125,150,192,0.30);
-  --ks-accent-glow: rgba(125,150,192,0.18);
-  --ks-accent-warm: #7d96c0;
+  --ks-accent:      #e8e3d6;
+  --ks-accent-2:    #ffffff;
+  --ks-accent-soft: rgba(232, 227, 214,0.10);
+  --ks-accent-edge: rgba(232, 227, 214,0.30);
+  --ks-accent-glow: rgba(232, 227, 214,0.18);
+  --ks-accent-warm: #e8e3d6;
   --ks-pos:         #6fbf85;
-  --ks-warn:        #d4a040;
+  --ks-warn:        #c0bcb3;
   --ks-err:         #c97070;
 }
 
@@ -998,7 +998,7 @@ body { position: relative; }
 .ks-trust-ribbon {
   border-top: 1px solid var(--ks-line-1);
   border-bottom: 1px solid var(--ks-line-1);
-  background: linear-gradient(180deg, transparent 0%, rgba(125, 150, 192, 0.018) 100%), var(--ks-bg);
+  background: linear-gradient(180deg, transparent 0%, rgba(232, 227, 214, 0.018) 100%), var(--ks-bg);
   padding: 14px 0;
 }
 .ks-trust-ribbon__inner {
@@ -1266,7 +1266,7 @@ body { position: relative; }
 }
 [data-theme="light"] .ks-nav__mark {
   background: #0c111a !important;
-  color: #f4f0e8 !important;
+  color: #f7f4ec !important;
 }
 /* Wordmark: drop the mint accent on the .ai — keep the whole wordmark in ink. */
 .ks-nav__brand b,

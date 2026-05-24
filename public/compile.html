@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Compile · kolm.ai</title>
 <meta name="description" content="The compiler step. Spec in, .kolm artifact out, Ed25519-signed receipt over a JCS-canonical SHA-256 hash. The artifact_cid binds weights, K-score, eval pack, and teacher trace into one verifiable object an auditor can">
-<meta name="theme-color" content="#f4f0e8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
 <link rel="canonical" href="https://kolm.ai/compile">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -76,7 +76,7 @@
   .panel dl { margin: 0; display: grid; grid-template-columns: 220px 1fr; gap: var(--ks-3) var(--ks-5); }
   .panel dt { font-family: var(--ks-mono); font-size: 12px; letter-spacing: 0.04em; color: var(--ks-ink-3); text-transform: uppercase; padding-top: 2px; }
   .panel dd { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink); }
-  .panel dd code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); background: rgba(125, 150, 192,0.06); padding: 1px 5px; border-radius: 3px; }
+  .panel dd code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); background: rgba(232, 227, 214,0.06); padding: 1px 5px; border-radius: 3px; }
   @media (max-width: 900px) { .panel dl { grid-template-columns: 1fr; } }
 
   .pipe { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--ks-3); margin-top: var(--ks-4); }
@@ -125,7 +125,7 @@
   .dx-card .ico { width: 30px; height: 30px; border-radius: 7px; display: flex; align-items: center; justify-content: center; background: var(--ks-accent-soft); border: 1px solid var(--ks-accent-edge); color: var(--ks-accent); margin-bottom: var(--ks-2); }
   .dx-card h3 { margin: 0; font-size: 15.5px; font-weight: 540; color: var(--ks-ink); letter-spacing: -0.005em; }
   .dx-card p { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ks-ink-2); }
-  .dx-card code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); background: rgba(125, 150, 192,0.06); padding: 1px 5px; border-radius: 3px; }
+  .dx-card code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); background: rgba(232, 227, 214,0.06); padding: 1px 5px; border-radius: 3px; }
 </style>
   <meta property="og:title" content="Compile &middot; kolm.ai">
   <meta property="og:description" content="The compiler step. Spec in, .kolm artifact out, Ed25519-signed receipt over a JCS-canonical SHA-256 hash. The artifact_cid binds weights, K-score, eval pack, and teacher trace into one verifiable object an auditor can validate offline.">
@@ -164,13 +164,11 @@
     <div class="ks-wrap ks-nav__row">
       <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
       <nav class="ks-nav__links" aria-label="Primary">
-        <a href="/gateway">Gateway</a>
-        <a href="/capture">Capture</a>
-        <a href="/distill">Distill</a>
-        <a href="/compile">Compile</a>
-        <a href="/runtimes">Runtime</a>
-        <a href="/k-score">K-score</a>
+        <a href="/wrapper">Wrapper</a>
+        <a href="/studio">Studio</a>
         <a href="/pricing">Pricing</a>
+        <a href="/docs">Docs</a>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
       </nav>
       <div class="ks-nav__cta">
         <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>

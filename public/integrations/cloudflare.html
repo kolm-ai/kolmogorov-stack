@@ -7,11 +7,11 @@
 <title>Verify a .kolm at the edge with Cloudflare Workers · kolm.ai</title>
 <meta name="description" content="Drop the kolm verifier into a Cloudflare Worker. Sub-millisecond receipt checks at the edge, no origin round trip.">
 <meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f4f0e8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <link rel="canonical" href="https://kolm.ai/integrations/cloudflare">
 <style>
- :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#1d2d44;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#111111;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
  [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
  body{background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,Inter,system-ui,sans-serif;margin:0}
  .wrap{max-width:760px;margin:0 auto;padding:0 24px}
@@ -35,7 +35,7 @@
  pre .c{color:var(--ink-faint)}
  pre .g{color:var(--accent)}
  pre .k{color:#ec7373}
- .checkpoint{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border:1px dashed rgba(29, 45, 68,0.32);border-radius:8px;background:rgba(29, 45, 68,0.05);font-size:13.5px;color:var(--ink-mute);margin:0 0 8px}
+ .checkpoint{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border:1px dashed rgba(17, 17, 17,0.32);border-radius:8px;background:rgba(17, 17, 17,0.05);font-size:13.5px;color:var(--ink-mute);margin:0 0 8px}
  .checkpoint b{color:var(--accent);font-weight:500;font-family:var(--mono);font-size:11.5px;letter-spacing:0.04em;text-transform:uppercase}
  .actions{display:flex;gap:12px;margin:24px 0 0;flex-wrap:wrap}
  .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:8px;font-family:var(--mono);font-size:13px;text-decoration:none;border:1px solid var(--line);color:var(--ink);transition:all 160ms}

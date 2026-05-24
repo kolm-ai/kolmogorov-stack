@@ -7,7 +7,7 @@
 <title>Captures · kolm.ai</title>
 <meta name="description" content="Every inference your agents make, captured and triaged. Keep / discard / promote each observation. When a namespace hits 1,000 pairs, distill it into a...">
 <meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f4f0e8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="Captures · kolm.ai">
@@ -26,7 +26,7 @@
  --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
  --ink: #e8e3d6; --ink-mute: #b5bdb1; --ink-faint: #737c73;
  --accent: #e8e3d6; --accent-strong: #c9c2b2;
- --good: #7d96c0; --warn: #ffd07a; --bad: #ff6b91;
+ --good: #e8e3d6; --warn: #ffd07a; --bad: #ff6b91;
  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
  }
@@ -69,7 +69,7 @@
  .stat .k { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-faint); }
  .stat .v { margin-top: 4px; font-size: 28px; font-weight: 500; color: var(--ink); font-family: var(--mono); line-height: 1; }
  .stat .v small { font-size: 13px; color: var(--ink-mute); margin-left: 8px; font-weight: 400; }
- .stat.ready { border-color: rgba(125, 150, 192,0.25); }
+ .stat.ready { border-color: rgba(232, 227, 214,0.25); }
  .stat.ready .v { color: var(--good); }
 
  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
@@ -98,7 +98,7 @@
  table.tbl td.excerpt { font-family: var(--mono); font-size: 12px; color: var(--ink); }
  table.tbl td.actions { white-space: nowrap; }
  table.tbl tr.discarded td { opacity: 0.4; text-decoration: line-through; }
- table.tbl tr.kept td { background: rgba(125, 150, 192,0.04); }
+ table.tbl tr.kept td { background: rgba(232, 227, 214,0.04); }
 
  .act { display: inline-flex; gap: 4px; }
  .act button, .act a { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 5px; border: 1px solid var(--line-strong); background: var(--bg-elev); color: var(--ink-mute); cursor: pointer; line-height: 1.4; }
@@ -172,7 +172,7 @@
   </div>
 </div>
 
-<a class="skip" href="#main" style="position:absolute;left:-9999px;background:#1d2d44;color:#fff;padding:8px 14px;z-index:1000">Skip to content</a>
+<a class="skip" href="#main" style="position:absolute;left:-9999px;background:#111111;color:#fff;padding:8px 14px;z-index:1000">Skip to content</a>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 
@@ -184,7 +184,7 @@
  <h1>Your <span class="tone">captures inbox.</span></h1>
  <p class="lede"><b>Point your provider client at kolm. Every prompt &amp; response lands here.</b> Keep what matters, discard the noise, promote a winner into a recipe. At 1,000 pairs the inbox hands the namespace to the distill bridge, which returns a signed <code>.kolm</code> Specialist you can run on your own hardware.</p>
 
- <div id="signedout" class="panel" style="border-color:var(--accent-strong);background:rgba(125, 150, 192,0.04)">
+ <div id="signedout" class="panel" style="border-color:var(--accent-strong);background:rgba(232, 227, 214,0.04)">
  <h3 style="margin:0 0 8px;color:var(--ink)">Sign in or create an account to see your captures stream live</h3>
  <p style="margin:0 0 16px">The captures inbox is per-tenant and gated by your API key. Once you sign in, calls to <code>kolm.ai/v1/capture/openai</code>, <code>kolm.ai/v1/capture/anthropic</code>, or <code>kolm.ai/v1/capture/openrouter</code> land here, namespaced and triage-ready.</p>
  <div style="display:flex;gap:10px;flex-wrap:wrap">

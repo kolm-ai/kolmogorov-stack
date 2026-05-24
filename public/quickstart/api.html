@@ -8,7 +8,7 @@
 <title>HTTP API quickstart: the AI compiler over REST · kolm.ai</title>
 <meta name="description" content="Five curl commands. Sign up, capture, compile, replay, verify. Every kolm.ai surface is reachable as REST over Bearer-keyed HTTP. JSON in, JSON out, signed...">
 <meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f4f0e8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="HTTP API quickstart: the AI compiler over REST · kolm.ai">
 <meta property="og:description" content="Five curl commands. Sign up, capture, compile, replay, verify. Every kolm.ai surface is reachable as REST over Bearer-keyed HTTP. JSON in, JSON out, signed...">
 <meta property="og:type" content="website">
@@ -22,7 +22,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"HTTP API quickstart · kolm.ai · the AI compiler over REST","description":"Five curl commands. From signup to a signed .kolm artifact replayable over HTTP.","url":"https://kolm.ai/quickstart/api","publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
 <style>
-:root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#1d2d44;--accent-soft:rgba(29, 45, 68,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+:root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#111111;--accent-soft:rgba(17, 17, 17,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
 [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
@@ -48,7 +48,7 @@ pre.terminal b{color:var(--accent);font-weight:400}
 pre.terminal .mute{color:var(--ink-faint)}
 .step{padding:24px 26px;border:1px solid var(--line);border-radius:12px;background:var(--bg-elev);display:flex;flex-direction:column;gap:14px;margin-bottom:18px}
 .step .step-head{display:flex;gap:14px;align-items:baseline;flex-wrap:wrap}
-.step .step-num{font-family:var(--mono);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:4px 10px;border-radius:4px;border:1px solid rgba(29, 45, 68,0.30)}
+.step .step-num{font-family:var(--mono);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:4px 10px;border-radius:4px;border:1px solid rgba(17, 17, 17,0.30)}
 .step .step-name{font-size:18px;font-weight:500;color:var(--ink);letter-spacing:-0.012em}
 .step .step-cli{font-family:var(--mono);font-size:11.5px;color:var(--ink-mute);background:var(--bg);padding:2px 8px;border-radius:3px;border:1px solid var(--line);letter-spacing:0.02em}
 .step p{margin:0;font-size:13.5px;line-height:1.55;color:var(--ink-mute)}

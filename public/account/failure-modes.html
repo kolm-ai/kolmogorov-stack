@@ -8,7 +8,7 @@
 <title>Failure modes - Account - kolm.ai</title>
 <meta name="description" content="W812 failure-mode visualization: cluster captures by topic+shape, surface where the student diverges most from the teacher, and feed regression signals back into W720 self-improvement.">
 <meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f4f0e8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <link rel="canonical" href="https://kolm.ai/account/failure-modes">
 <meta property="og:title" content="Failure modes &middot; Account &middot; kolm.ai">
 <meta property="og:description" content="W812 failure-mode visualization: cluster captures by topic+shape, surface where the student diverges most from the teacher.">
@@ -104,7 +104,7 @@
 <p class="lede">Two complementary lenses on where the student diverges most from the teacher. W812 (below) buckets your tenant-wide capture stream by topic + length + vendor class. W745 (artifact-keyed panel) takes an <code>artifact_cid</code>, runs the bakeoff rows through a heuristic keyword cluster, and links every regression directly to <a href="/docs/diagnose">/docs/diagnose</a>. See <a href="/docs/failure-modes">/docs/failure-modes</a> for the W745 envelope spec.</p>
 
 <!-- W745 — Artifact-keyed cluster dashboard (bridges to W741 diagnostic) -->
-<div class="kpanel" id="w745-panel" style="border-color:rgba(29, 45, 68,0.25)">
+<div class="kpanel" id="w745-panel" style="border-color:rgba(17, 17, 17,0.25)">
   <h2>Artifact-keyed clusters <span style="font-family:var(--mono);font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.08em;margin-left:8px">W745</span></h2>
   <p class="pdesc">Paste an <code>artifact_cid</code> below. We call <code>/v1/failure-modes/&lt;cid&gt;</code> and render the top-regression panel plus the per-cluster K-Score table. Clustering is <code>heuristic_keyword_v1</code> &mdash; honest about the W757 fingerprinting placeholder. Each row links to the W741 diagnostic envelope at <code>/account/diagnose?cid=&lt;cid&gt;</code>.</p>
   <div class="toolbar">

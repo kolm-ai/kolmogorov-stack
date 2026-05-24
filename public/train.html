@@ -11,11 +11,11 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/train">
 <meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f4f0e8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <meta name="robots" content="noindex">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>
- :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#1d2d44;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#111111;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
  [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#5b5853;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
  body{background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,Inter,system-ui,sans-serif;margin:0}
  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
@@ -42,13 +42,13 @@
  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
  @media(max-width:560px){.row2{grid-template-columns:1fr}}
  .drop{border:1px dashed var(--line);border-radius:8px;padding:22px;text-align:center;color:var(--ink-mute);font-size:13px;cursor:pointer;background:var(--bg);transition:border-color 120ms,background 120ms}
- .drop:hover,.drop.over{border-color:var(--accent);background:rgba(29, 45, 68,0.04)}
+ .drop:hover,.drop.over{border-color:var(--accent);background:rgba(17, 17, 17,0.04)}
  .drop input{display:none}
  .drop .pri{color:var(--ink);font-size:14px;margin:0 0 4px}
  .picks{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:8px 0 0}
  @media(max-width:680px){.picks{grid-template-columns:1fr}}
  .pick{padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:var(--bg);cursor:pointer;text-align:left;color:inherit;font:inherit}
- .pick.sel{border-color:var(--accent);background:rgba(29, 45, 68,0.04)}
+ .pick.sel{border-color:var(--accent);background:rgba(17, 17, 17,0.04)}
  .pick .n{font-size:13.5px;color:var(--ink);font-weight:500;margin:0 0 3px}
  .pick .d{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin:0}
  .pick .p{font-family:var(--mono);font-size:11px;color:var(--accent);margin:6px 0 0}
@@ -141,7 +141,7 @@
 <div class="wrap"><div class="gridmain">
  <div>
 
- <div class="panel" style="border-color:rgba(125, 150, 192,0.28)">
+ <div class="panel" style="border-color:rgba(232, 227, 214,0.28)">
  <h3><span class="step">Quick</span>One sentence. We pick the rest.</h3>
  <p>Describe what you want your AI to do. We pick a base, distill from Claude / GPT / Gemini, and set the K-score gate. You can still customize below.</p>
  <textarea id="quick-desc" placeholder="Example: classify support emails as billing / technical / refund / other, return JSON" style="min-height:60px"></textarea>

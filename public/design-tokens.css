@@ -1,23 +1,26 @@
 /* design-tokens.css — WF01 (W707 sprint) design-system v1.
    Loads FIRST so every subsequent stylesheet cascades on top.
 
-   2026-05-24 REDESIGN v2: "Ink & Linen" — replaces the burnt-sienna
-   bleed with restrained midnight-navy ink on a cool linen ground.
-   Sienna read as developer-orange, not editorial. Navy reads as a
-   typeset book. Token NAMES preserved per wavewf01-design-system
-   test #2-#9 (presence-only). Token VALUES swapped site-wide;
-   all pages cascade from this file + ks.css without per-page rewrite.
+   2026-05-24 REDESIGN v3 Monochrome: gutted both burnt-sienna (W836)
+   and ink-navy (W837). The product is a compiler; the page should
+   read as a typeset book, not a brand exercise. Pure monochrome:
+   one ink, one paper, hairline rules, no chromatic accent.
+
+   Token NAMES preserved per wavewf01-design-system test #2-#9
+   (presence-only). Token VALUES swapped site-wide; all pages
+   cascade from this file + ks.css without per-page rewrite.
 
    Palette anchors:
-     · linen       #f4f0e8   cool linen, the color of a quality page
-     · ink         #161513   sharp ink, near-black with the faintest warmth
-     · navy        #1d2d44   deep midnight, used VERY sparingly
-     · navy-2      #2a3e5c   hover
-     · silver-navy #7d96c0   warm-dark mode accent (opt-in only)
+     . paper      #f7f4ec   cool warm paper
+     . card       #ffffff   pure card on paper
+     . ink        #111111   near-black, imperceptible warmth
+     . mute       #6b6b66   secondary text
+     . hairline   rgba(17,17,17, 0.10)
+     . status     muted forest / sepia-gray / oxblood (near-monochrome)
 
-   Accent discipline: navy appears ONLY on primary CTA fill, focus
-   rings, the K-Score numeral, and selection state. Everything else
-   is monochrome ink. No bleed.
+   Accent discipline: there is no chromatic accent. Emphasis comes
+   from weight, scale, and hairline rules. The "brand color" tokens
+   resolve to ink itself.
 
    Mode default: LIGHT. [data-theme="dark"] is opt-in.
 
@@ -28,41 +31,41 @@
      LEGACY TOKENS — DO NOT REMOVE (consumed by ~20 HTML pages)
      ============================================================ */
 
-  /* Brand color — burnt sienna is the new wax-seal accent */
-  --brand-primary: #1d2d44;
-  --brand-primary-strong: #2a3e5c;
-  --brand-primary-soft: rgba(29, 45, 68, 0.05);
-  --brand-primary-edge: rgba(29, 45, 68, 0.20);
+  /* Brand color resolves to ink. No chromatic brand. */
+  --brand-primary: #111111;
+  --brand-primary-strong: #000000;
+  --brand-primary-soft: rgba(17, 17, 17, 0.05);
+  --brand-primary-edge: rgba(17, 17, 17, 0.18);
 
-  /* Paper/clay — was warm cream; now reads as deep ink on light */
-  --brand-paper: #161513;
-  --brand-paper-strong: #0a0907;
-  --brand-paper-dim: #4a4641;
+  /* Paper / ink */
+  --brand-paper: #111111;
+  --brand-paper-strong: #000000;
+  --brand-paper-dim: #3a3a38;
 
-  /* Semantic surface system — Warm Paper light defaults */
-  --surface-0: #f4f0e8;
+  /* Semantic surface system - monochrome warm-paper light defaults */
+  --surface-0: #f7f4ec;
   --surface-1: #ffffff;
-  --surface-2: #e8e3d6;
-  --surface-3: #d8d2c1;
+  --surface-2: #efece4;
+  --surface-3: #e6e3db;
   --surface-input: #ffffff;
 
-  /* Ink scale — text on warm paper */
-  --ink-1: #161513;
-  --ink-2: #4a4641;
-  --ink-3: #8a8276;
-  --ink-4: #bdb3a1;
+  /* Ink scale - text on warm paper */
+  --ink-1: #111111;
+  --ink-2: #3a3a38;
+  --ink-3: #6b6b66;
+  --ink-4: #b0b0a8;
 
-  /* Line scale — borders and dividers (alpha on dark ink) */
-  --line-1: rgba(28, 27, 26, 0.06);
-  --line-2: rgba(28, 27, 26, 0.10);
-  --line-3: rgba(28, 27, 26, 0.16);
-  --line-strong: rgba(28, 27, 26, 0.40);
+  /* Line scale - hairline borders and dividers */
+  --line-1: rgba(17, 17, 17, 0.06);
+  --line-2: rgba(17, 17, 17, 0.10);
+  --line-3: rgba(17, 17, 17, 0.18);
+  --line-strong: rgba(17, 17, 17, 0.36);
 
-  /* Status semantics */
-  --status-good: #2d6a48;
-  --status-warn: #8b6914;
-  --status-bad: #8b2828;
-  --status-info: #1d2d44;
+  /* Status semantics - near-monochrome muted forest / gray / oxblood */
+  --status-good: #2d5a37;
+  --status-warn: #6b6b66;
+  --status-bad: #7f2121;
+  --status-info: #111111;
 
   /* 4 / 8 spacing scale */
   --space-0: 0;
@@ -84,12 +87,12 @@
   --radius-xl: 20px;
   --radius-pill: 999px;
 
-  /* Shadow scale — Warm Paper uses near-zero shadows (1px borders carry the load) */
-  --shadow-sm: 0 1px 2px rgba(28, 24, 16, 0.04);
-  --shadow-md: 0 4px 10px rgba(28, 24, 16, 0.06), 0 1px 2px rgba(28, 24, 16, 0.04);
-  --shadow-lg: 0 12px 28px rgba(28, 24, 16, 0.08), 0 4px 8px rgba(28, 24, 16, 0.05);
-  --shadow-xl: 0 24px 56px rgba(28, 24, 16, 0.10), 0 8px 16px rgba(28, 24, 16, 0.06);
-  --shadow-glow-brand: 0 0 0 1px var(--brand-primary-edge), 0 8px 24px rgba(29, 45, 68, 0.10);
+  /* Shadow scale - near-zero, hairlines carry the load */
+  --shadow-sm: 0 1px 2px rgba(17, 17, 17, 0.04);
+  --shadow-md: 0 4px 10px rgba(17, 17, 17, 0.05), 0 1px 2px rgba(17, 17, 17, 0.03);
+  --shadow-lg: 0 12px 28px rgba(17, 17, 17, 0.07), 0 4px 8px rgba(17, 17, 17, 0.04);
+  --shadow-xl: 0 24px 56px rgba(17, 17, 17, 0.09), 0 8px 16px rgba(17, 17, 17, 0.05);
+  --shadow-glow-brand: 0 0 0 1px var(--brand-primary-edge), 0 8px 24px rgba(17, 17, 17, 0.08);
 
   /* Motion tokens — durations + easings */
   --duration-instant: 80ms;
@@ -141,55 +144,55 @@
      New canonical names. Component CSS uses these exclusively.
      ============================================================ */
 
-  /* --- Color: brand ---------------------------------------- */
-  --ks-color-brand-primary: #1d2d44;
-  --ks-color-brand-primary-hover: #2a3e5c;
-  --ks-color-brand-primary-active: #0f1a2e;
-  --ks-color-brand-secondary: #161513;
-  --ks-color-brand-secondary-hover: #22262e;
-  --ks-color-brand-secondary-active: #0a0907;
+  /* --- Color: brand (monochrome — ink as brand) ----------- */
+  --ks-color-brand-primary: #111111;
+  --ks-color-brand-primary-hover: #000000;
+  --ks-color-brand-primary-active: #000000;
+  --ks-color-brand-secondary: #3a3a38;
+  --ks-color-brand-secondary-hover: #111111;
+  --ks-color-brand-secondary-active: #000000;
   --ks-color-brand-on-primary: #ffffff;
   --ks-color-brand-on-secondary: #ffffff;
 
-  /* --- Color: surface (4 levels) --------------------------- */
-  --ks-color-surface-0: #f4f0e8;
+  /* --- Color: surface (4 levels) - monochrome warm paper -- */
+  --ks-color-surface-0: #f7f4ec;
   --ks-color-surface-1: #ffffff;
-  --ks-color-surface-2: #e8e3d6;
-  --ks-color-surface-3: #d8d2c1;
+  --ks-color-surface-2: #efece4;
+  --ks-color-surface-3: #e6e3db;
 
   /* --- Color: text (4 levels) ------------------------------ */
-  --ks-color-text-1: #161513;
-  --ks-color-text-2: #4a4641;
-  --ks-color-text-3: #8a8276;
-  --ks-color-text-4: #bdb3a1;
+  --ks-color-text-1: #111111;
+  --ks-color-text-2: #3a3a38;
+  --ks-color-text-3: #6b6b66;
+  --ks-color-text-4: #b0b0a8;
 
   /* --- Color: border (3 levels) ---------------------------- */
-  --ks-color-border-1: rgba(28, 27, 26, 0.06);
-  --ks-color-border-2: rgba(28, 27, 26, 0.10);
-  --ks-color-border-3: rgba(28, 27, 26, 0.16);
+  --ks-color-border-1: rgba(17, 17, 17, 0.06);
+  --ks-color-border-2: rgba(17, 17, 17, 0.10);
+  --ks-color-border-3: rgba(17, 17, 17, 0.18);
 
-  /* --- Color: state success (3 levels) --------------------- */
-  --ks-color-success-1: rgba(45, 106, 72, 0.07);
-  --ks-color-success-2: rgba(45, 106, 72, 0.24);
-  --ks-color-success-3: #2d6a48;
+  /* --- Color: state success - muted forest ----------------- */
+  --ks-color-success-1: rgba(45, 90, 55, 0.06);
+  --ks-color-success-2: rgba(45, 90, 55, 0.22);
+  --ks-color-success-3: #2d5a37;
 
-  /* --- Color: state warning (3 levels) --------------------- */
-  --ks-color-warning-1: rgba(139, 105, 20, 0.07);
-  --ks-color-warning-2: rgba(139, 105, 20, 0.24);
-  --ks-color-warning-3: #8b6914;
+  /* --- Color: state warning - monochrome gray (no orange) -- */
+  --ks-color-warning-1: rgba(17, 17, 17, 0.05);
+  --ks-color-warning-2: rgba(17, 17, 17, 0.18);
+  --ks-color-warning-3: #6b6b66;
 
-  /* --- Color: state error (3 levels) ----------------------- */
-  --ks-color-error-1: rgba(139, 40, 40, 0.07);
-  --ks-color-error-2: rgba(139, 40, 40, 0.24);
-  --ks-color-error-3: #8b2828;
+  /* --- Color: state error - muted oxblood ------------------ */
+  --ks-color-error-1: rgba(127, 33, 33, 0.06);
+  --ks-color-error-2: rgba(127, 33, 33, 0.22);
+  --ks-color-error-3: #7f2121;
 
-  /* --- Color: state info (3 levels) ------------------------ */
-  --ks-color-info-1: rgba(29, 45, 68, 0.07);
-  --ks-color-info-2: rgba(29, 45, 68, 0.24);
-  --ks-color-info-3: #1d2d44;
+  /* --- Color: state info - resolves to ink ----------------- */
+  --ks-color-info-1: rgba(17, 17, 17, 0.05);
+  --ks-color-info-2: rgba(17, 17, 17, 0.18);
+  --ks-color-info-3: #111111;
 
   /* --- Color: focus ring ----------------------------------- */
-  --ks-color-focus-ring: rgba(29, 45, 68, 0.38);
+  --ks-color-focus-ring: rgba(17, 17, 17, 0.36);
 
   /* --- Space (4 / 8 / 12 / 16 / 24 / 32 / 48 / 64 / 96) ---- */
   --ks-space-4: 4px;
@@ -290,84 +293,84 @@
    ============================================================ */
 
 [data-theme="light"] {
-  /* legacy */
-  --brand-primary: #1d2d44;
-  --brand-primary-strong: #2a3e5c;
-  --brand-primary-soft: rgba(29, 45, 68, 0.05);
-  --brand-primary-edge: rgba(29, 45, 68, 0.20);
+  /* legacy - monochrome */
+  --brand-primary: #111111;
+  --brand-primary-strong: #000000;
+  --brand-primary-soft: rgba(17, 17, 17, 0.05);
+  --brand-primary-edge: rgba(17, 17, 17, 0.18);
 
-  --brand-paper: #161513;
-  --brand-paper-strong: #0a0907;
-  --brand-paper-dim: #4a4641;
+  --brand-paper: #111111;
+  --brand-paper-strong: #000000;
+  --brand-paper-dim: #3a3a38;
 
-  --surface-0: #f4f0e8;
+  --surface-0: #f7f4ec;
   --surface-1: #ffffff;
-  --surface-2: #e8e3d6;
-  --surface-3: #d8d2c1;
+  --surface-2: #efece4;
+  --surface-3: #e6e3db;
   --surface-input: #ffffff;
 
-  --ink-1: #161513;
-  --ink-2: #4a4641;
-  --ink-3: #8a8276;
-  --ink-4: #bdb3a1;
+  --ink-1: #111111;
+  --ink-2: #3a3a38;
+  --ink-3: #6b6b66;
+  --ink-4: #b0b0a8;
 
-  --line-1: rgba(28, 27, 26, 0.06);
-  --line-2: rgba(28, 27, 26, 0.10);
-  --line-3: rgba(28, 27, 26, 0.16);
-  --line-strong: rgba(28, 27, 26, 0.40);
+  --line-1: rgba(17, 17, 17, 0.06);
+  --line-2: rgba(17, 17, 17, 0.10);
+  --line-3: rgba(17, 17, 17, 0.18);
+  --line-strong: rgba(17, 17, 17, 0.36);
 
-  --status-good: #2d6a48;
-  --status-warn: #8b6914;
-  --status-bad: #8b2828;
-  --status-info: #1d2d44;
+  --status-good: #2d5a37;
+  --status-warn: #6b6b66;
+  --status-bad: #7f2121;
+  --status-info: #111111;
 
-  --shadow-sm: 0 1px 2px rgba(28, 24, 16, 0.04);
-  --shadow-md: 0 4px 10px rgba(28, 24, 16, 0.06), 0 1px 2px rgba(28, 24, 16, 0.04);
-  --shadow-lg: 0 12px 28px rgba(28, 24, 16, 0.08), 0 4px 8px rgba(28, 24, 16, 0.05);
-  --shadow-xl: 0 24px 56px rgba(28, 24, 16, 0.10), 0 8px 16px rgba(28, 24, 16, 0.06);
-  --shadow-glow-brand: 0 0 0 1px var(--brand-primary-edge), 0 8px 24px rgba(29, 45, 68, 0.10);
+  --shadow-sm: 0 1px 2px rgba(17, 17, 17, 0.04);
+  --shadow-md: 0 4px 10px rgba(17, 17, 17, 0.05), 0 1px 2px rgba(17, 17, 17, 0.03);
+  --shadow-lg: 0 12px 28px rgba(17, 17, 17, 0.07), 0 4px 8px rgba(17, 17, 17, 0.04);
+  --shadow-xl: 0 24px 56px rgba(17, 17, 17, 0.09), 0 8px 16px rgba(17, 17, 17, 0.05);
+  --shadow-glow-brand: 0 0 0 1px var(--brand-primary-edge), 0 8px 24px rgba(17, 17, 17, 0.08);
 
   /* WF01 */
-  --ks-color-brand-primary: #1d2d44;
-  --ks-color-brand-primary-hover: #2a3e5c;
-  --ks-color-brand-primary-active: #0f1a2e;
-  --ks-color-brand-secondary: #161513;
-  --ks-color-brand-secondary-hover: #22262e;
-  --ks-color-brand-secondary-active: #0a0907;
+  --ks-color-brand-primary: #111111;
+  --ks-color-brand-primary-hover: #000000;
+  --ks-color-brand-primary-active: #000000;
+  --ks-color-brand-secondary: #3a3a38;
+  --ks-color-brand-secondary-hover: #111111;
+  --ks-color-brand-secondary-active: #000000;
   --ks-color-brand-on-primary: #ffffff;
   --ks-color-brand-on-secondary: #ffffff;
 
-  --ks-color-surface-0: #f4f0e8;
+  --ks-color-surface-0: #f7f4ec;
   --ks-color-surface-1: #ffffff;
-  --ks-color-surface-2: #e8e3d6;
-  --ks-color-surface-3: #d8d2c1;
+  --ks-color-surface-2: #efece4;
+  --ks-color-surface-3: #e6e3db;
 
-  --ks-color-text-1: #161513;
-  --ks-color-text-2: #4a4641;
-  --ks-color-text-3: #8a8276;
-  --ks-color-text-4: #bdb3a1;
+  --ks-color-text-1: #111111;
+  --ks-color-text-2: #3a3a38;
+  --ks-color-text-3: #6b6b66;
+  --ks-color-text-4: #b0b0a8;
 
-  --ks-color-border-1: rgba(28, 27, 26, 0.06);
-  --ks-color-border-2: rgba(28, 27, 26, 0.10);
-  --ks-color-border-3: rgba(28, 27, 26, 0.16);
+  --ks-color-border-1: rgba(17, 17, 17, 0.06);
+  --ks-color-border-2: rgba(17, 17, 17, 0.10);
+  --ks-color-border-3: rgba(17, 17, 17, 0.18);
 
-  --ks-color-success-1: rgba(45, 106, 72, 0.07);
-  --ks-color-success-2: rgba(45, 106, 72, 0.24);
-  --ks-color-success-3: #2d6a48;
+  --ks-color-success-1: rgba(45, 90, 55, 0.06);
+  --ks-color-success-2: rgba(45, 90, 55, 0.22);
+  --ks-color-success-3: #2d5a37;
 
-  --ks-color-warning-1: rgba(139, 105, 20, 0.07);
-  --ks-color-warning-2: rgba(139, 105, 20, 0.24);
-  --ks-color-warning-3: #8b6914;
+  --ks-color-warning-1: rgba(17, 17, 17, 0.05);
+  --ks-color-warning-2: rgba(17, 17, 17, 0.18);
+  --ks-color-warning-3: #6b6b66;
 
-  --ks-color-error-1: rgba(139, 40, 40, 0.07);
-  --ks-color-error-2: rgba(139, 40, 40, 0.24);
-  --ks-color-error-3: #8b2828;
+  --ks-color-error-1: rgba(127, 33, 33, 0.06);
+  --ks-color-error-2: rgba(127, 33, 33, 0.22);
+  --ks-color-error-3: #7f2121;
 
-  --ks-color-info-1: rgba(29, 45, 68, 0.07);
-  --ks-color-info-2: rgba(29, 45, 68, 0.24);
-  --ks-color-info-3: #1d2d44;
+  --ks-color-info-1: rgba(17, 17, 17, 0.05);
+  --ks-color-info-2: rgba(17, 17, 17, 0.18);
+  --ks-color-info-3: #111111;
 
-  --ks-color-focus-ring: rgba(29, 45, 68, 0.38);
+  --ks-color-focus-ring: rgba(17, 17, 17, 0.36);
 
   --ks-shadow-sm: 0 1px 2px rgba(28, 24, 16, 0.04);
   --ks-shadow-md: 0 4px 10px rgba(28, 24, 16, 0.06), 0 1px 2px rgba(28, 24, 16, 0.04);
@@ -383,84 +386,84 @@
    ============================================================ */
 
 [data-theme="dark"] {
-  /* legacy */
-  --brand-primary: #7d96c0;
-  --brand-primary-strong: #9eb4d8;
-  --brand-primary-soft: rgba(125, 150, 192, 0.10);
-  --brand-primary-edge: rgba(125, 150, 192, 0.30);
+  /* legacy - monochrome dark */
+  --brand-primary: #e8e3d6;
+  --brand-primary-strong: #ffffff;
+  --brand-primary-soft: rgba(232, 227, 214, 0.10);
+  --brand-primary-edge: rgba(232, 227, 214, 0.28);
 
   --brand-paper: #e8e3d6;
-  --brand-paper-strong: #f4f0e8;
-  --brand-paper-dim: #a8a298;
+  --brand-paper-strong: #ffffff;
+  --brand-paper-dim: #888378;
 
-  --surface-0: #0e1014;
-  --surface-1: #161513;
-  --surface-2: #22262e;
-  --surface-3: #2d323c;
-  --surface-input: #161513;
+  --surface-0: #0b0b0d;
+  --surface-1: #16161a;
+  --surface-2: #1f1f24;
+  --surface-3: #2a2a30;
+  --surface-input: #16161a;
 
   --ink-1: #e8e3d6;
-  --ink-2: #a8a298;
-  --ink-3: #787268;
-  --ink-4: #48433d;
+  --ink-2: #c0bcb3;
+  --ink-3: #888378;
+  --ink-4: #4a4842;
 
-  --line-1: rgba(231, 229, 228, 0.06);
-  --line-2: rgba(231, 229, 228, 0.10);
-  --line-3: rgba(231, 229, 228, 0.16);
-  --line-strong: rgba(231, 229, 228, 0.40);
+  --line-1: rgba(232, 227, 214, 0.06);
+  --line-2: rgba(232, 227, 214, 0.10);
+  --line-3: rgba(232, 227, 214, 0.20);
+  --line-strong: rgba(232, 227, 214, 0.38);
 
-  --status-good: #6fbf85;
-  --status-warn: #d4a040;
-  --status-bad: #c97070;
-  --status-info: #7d96c0;
+  --status-good: #8da992;
+  --status-warn: #c0bcb3;
+  --status-bad: #c08585;
+  --status-info: #e8e3d6;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.30);
   --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.40), 0 2px 4px rgba(0, 0, 0, 0.24);
   --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.50), 0 6px 12px rgba(0, 0, 0, 0.30);
   --shadow-xl: 0 32px 80px rgba(0, 0, 0, 0.60), 0 12px 24px rgba(0, 0, 0, 0.36);
-  --shadow-glow-brand: 0 0 0 1px var(--brand-primary-edge), 0 12px 36px rgba(125, 150, 192, 0.18);
+  --shadow-glow-brand: 0 0 0 1px var(--brand-primary-edge), 0 12px 36px rgba(232, 227, 214, 0.10);
 
   /* WF01 */
-  --ks-color-brand-primary: #7d96c0;
-  --ks-color-brand-primary-hover: #9eb4d8;
-  --ks-color-brand-primary-active: #5f7aa5;
-  --ks-color-brand-secondary: #e8e3d6;
-  --ks-color-brand-secondary-hover: #f4f0e8;
-  --ks-color-brand-secondary-active: #c8c2b3;
-  --ks-color-brand-on-primary: #0e1014;
-  --ks-color-brand-on-secondary: #0e1014;
+  --ks-color-brand-primary: #e8e3d6;
+  --ks-color-brand-primary-hover: #ffffff;
+  --ks-color-brand-primary-active: #c0bcb3;
+  --ks-color-brand-secondary: #c0bcb3;
+  --ks-color-brand-secondary-hover: #e8e3d6;
+  --ks-color-brand-secondary-active: #888378;
+  --ks-color-brand-on-primary: #0b0b0d;
+  --ks-color-brand-on-secondary: #0b0b0d;
 
-  --ks-color-surface-0: #0e1014;
-  --ks-color-surface-1: #161513;
-  --ks-color-surface-2: #22262e;
-  --ks-color-surface-3: #2d323c;
+  --ks-color-surface-0: #0b0b0d;
+  --ks-color-surface-1: #16161a;
+  --ks-color-surface-2: #1f1f24;
+  --ks-color-surface-3: #2a2a30;
 
   --ks-color-text-1: #e8e3d6;
-  --ks-color-text-2: #a8a298;
-  --ks-color-text-3: #787268;
-  --ks-color-text-4: #48433d;
+  --ks-color-text-2: #c0bcb3;
+  --ks-color-text-3: #888378;
+  --ks-color-text-4: #4a4842;
 
-  --ks-color-border-1: rgba(231, 229, 228, 0.06);
-  --ks-color-border-2: rgba(231, 229, 228, 0.10);
-  --ks-color-border-3: rgba(231, 229, 228, 0.16);
+  --ks-color-border-1: rgba(232, 227, 214, 0.06);
+  --ks-color-border-2: rgba(232, 227, 214, 0.10);
+  --ks-color-border-3: rgba(232, 227, 214, 0.20);
 
-  --ks-color-success-1: rgba(111, 191, 133, 0.10);
-  --ks-color-success-2: rgba(111, 191, 133, 0.30);
-  --ks-color-success-3: #6fbf85;
+  --ks-color-success-1: rgba(141, 169, 146, 0.10);
+  --ks-color-success-2: rgba(141, 169, 146, 0.28);
+  --ks-color-success-3: #8da992;
 
-  --ks-color-warning-1: rgba(212, 160, 64, 0.10);
-  --ks-color-warning-2: rgba(212, 160, 64, 0.30);
-  --ks-color-warning-3: #d4a040;
+  --ks-color-warning-1: rgba(232, 227, 214, 0.06);
+  --ks-color-warning-2: rgba(232, 227, 214, 0.20);
+  --ks-color-warning-3: #c0bcb3;
 
-  --ks-color-error-1: rgba(201, 112, 112, 0.10);
-  --ks-color-error-2: rgba(201, 112, 112, 0.30);
-  --ks-color-error-3: #c97070;
+  --ks-color-error-1: rgba(192, 133, 133, 0.10);
+  --ks-color-error-2: rgba(192, 133, 133, 0.28);
+  --ks-color-error-3: #c08585;
 
-  --ks-color-info-1: rgba(125, 150, 192, 0.10);
-  --ks-color-info-2: rgba(125, 150, 192, 0.30);
-  --ks-color-info-3: #7d96c0;
+  --ks-color-info-1: rgba(232, 227, 214, 0.08);
+  --ks-color-info-2: rgba(232, 227, 214, 0.22);
+  --ks-color-info-3: #e8e3d6;
 
-  --ks-color-focus-ring: rgba(125, 150, 192, 0.48);
+  --ks-color-focus-ring: rgba(232, 227, 214, 0.42);
 
   --ks-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.30);
   --ks-shadow-md: 0 6px 16px rgba(0, 0, 0, 0.40), 0 2px 4px rgba(0, 0, 0, 0.24);

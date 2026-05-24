@@ -7,7 +7,7 @@
 <meta name="description" content="Simple pricing for the Kolm gateway, compiler, and signed runtime: Free, Pro $49, Team $499, and Enterprise custom with architecture review.">
 <meta name="keywords" content="AI gateway pricing, kolm pricing, LLM cost calculator, self-hosted AI, HIPAA pricing, enterprise AI pricing">
 <meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f4f0e8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="Pricing - kolm.ai">
 <meta property="og:description" content="Free, Pro $49, Team $499, Enterprise custom. Pay for the platform; run signed artifacts on your own hardware.">
 <meta property="og:url" content="https://kolm.ai/pricing">
@@ -39,7 +39,7 @@
   .pr-tier:hover { border-color: var(--ks-accent-edge); }
   .pr-tier--feat { border-color: var(--ks-accent-edge); background: linear-gradient(180deg, var(--ks-accent-soft) 0%, var(--ks-bg-1) 28%); }
   .pr-tier--feat::before { content: "Most teams"; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); padding: 4px 10px; background: var(--ks-accent); color: #07090c; font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; border-radius: var(--ks-r-pill); font-weight: 600; }
-  .pr-tier--bus { border-color: var(--ks-accent-edge); background: linear-gradient(180deg, rgba(125, 150, 192, 0.045) 0%, var(--ks-bg-1) 32%); }
+  .pr-tier--bus { border-color: var(--ks-accent-edge); background: linear-gradient(180deg, rgba(232, 227, 214, 0.045) 0%, var(--ks-bg-1) 32%); }
   .pr-tier--bus::before { content: "Architecture review"; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); padding: 4px 10px; background: transparent; color: var(--ks-accent); border: 1px solid var(--ks-accent); font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; border-radius: var(--ks-r-pill); font-weight: 600; }
   .pr-tier h3 { font-family: var(--ks-mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ks-accent); margin: 0; }
   .pr-tier .price { font-size: 38px; font-weight: 520; letter-spacing: 0; color: var(--ks-ink); line-height: 1; margin: var(--ks-1) 0; font-variant-numeric: tabular-nums; }
@@ -100,7 +100,7 @@
   .pr-vs__track { position: relative; height: 6px; background: rgba(236,231,220,0.05); border-radius: 3px; overflow: hidden; }
   .pr-vs__bar { position: absolute; top: 0; left: 0; height: 100%; border-radius: 3px; }
   .pr-vs__bar--frontier { background: linear-gradient(90deg, rgba(255,150,120,0.55), rgba(255,150,120,0.85)); }
-  .pr-vs__bar--kolm { background: linear-gradient(90deg, var(--ks-accent), rgba(125, 150, 192,0.7)); }
+  .pr-vs__bar--kolm { background: linear-gradient(90deg, var(--ks-accent), rgba(232, 227, 214,0.7)); }
   .pr-vs__val { color: var(--ks-ink); text-align: right; font-variant-numeric: tabular-nums; }
   .pr-vs__val--frontier { color: var(--ks-ink-2); text-decoration: line-through; text-decoration-color: rgba(255,150,120,0.6); text-decoration-thickness: 1px; }
   .pr-vs__foot { font-family: var(--ks-mono); font-size: 10.5px; color: var(--ks-ink-3); letter-spacing: 0.04em; padding-top: 4px; }
@@ -176,7 +176,7 @@
   .pr-roi-tier__sub { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); margin-top: 4px; }
   .pr-roi-cx-sub { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); margin-top: 4px; letter-spacing: 0.02em; }
 </style>
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f4f0e8';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
   <meta property="og:type" content="website">
 <script type="application/ld+json">
 {
@@ -254,9 +254,9 @@
   <nav class="ks-nav" aria-label="Primary">
     <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
-      <li><a href="/product">Product</a></li>
-      <li><a href="/use-cases">Use cases</a></li>
-      <li><a href="/pricing" aria-current="page">Pricing</a></li>
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
       <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
     </ul>
@@ -267,7 +267,13 @@
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/product">Product</a><a href="/use-cases">Use cases</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/wrapper">Wrapper</a>
+    <a href="/studio">Studio</a>
+    <a href="/pricing">Pricing</a>
+    <a href="/docs">Docs</a>
+    <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
+    <a href="/signup?intent=login">Sign in</a>
+    <a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 
@@ -447,7 +453,7 @@
     <span class="fr-eyebrow">Plug in your numbers</span>
     <h2 class="fr-h2" style="margin-top:8px;">What this saves you in year one.</h2>
     <p class="fr-lede" style="max-width:58ch;">Drop in your current LLM monthly bill and compile cadence. We compute the year-one savings against a typical Pro account that compiles once a month and runs the artifact on its own hardware.</p>
-    <div class="fr-roi" data-w273="roi-calculator" style="margin-top:24px;padding:24px;border:1px solid rgba(236,231,220,0.08);border-radius:16px;background:linear-gradient(180deg,rgba(125, 150, 192,0.04),transparent);">
+    <div class="fr-roi" data-w273="roi-calculator" style="margin-top:24px;padding:24px;border:1px solid rgba(236,231,220,0.08);border-radius:16px;background:linear-gradient(180deg,rgba(232, 227, 214,0.04),transparent);">
       <div class="fr-roi__grid" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;">
         <label style="display:flex;flex-direction:column;gap:6px;font-family:var(--fr-font-mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-3);">
           <span>Compiles / month</span>
@@ -573,7 +579,7 @@
 <!-- =================== OPENAI VS STRIP =================== -->
 <section class="fr-section fr-section--tight fr-reveal">
   <div class="fr-container fr-container--prose">
-    <div data-w273="openai-vs" style="padding:24px 28px;border-left:3px solid var(--fr-mint);background:linear-gradient(90deg,rgba(125, 150, 192,0.05),transparent);border-radius:0 12px 12px 0;">
+    <div data-w273="openai-vs" style="padding:24px 28px;border-left:3px solid var(--fr-mint);background:linear-gradient(90deg,rgba(232, 227, 214,0.05),transparent);border-radius:0 12px 12px 0;">
       <span class="fr-eyebrow">Currently doing $X/mo on OpenAI?</span>
       <h3 style="font-family:var(--fr-font-display);font-size:24px;font-weight:540;color:var(--ink-1);margin:8px 0;">Most teams who hit $1,800/mo on OpenAI for a single repeatable task</h3>
       <p style="color:var(--ink-2);font-size:15px;line-height:1.65;margin:0;">cut that bill to $49/mo on Pro plus zero per-call once the artifact ships. Same accuracy. Lower latency. The OpenAI key stays attached for prompts that need the frontier; everything specialist runs on your hardware.</p>
@@ -991,23 +997,23 @@ all changes mirrored from Okta in &lt; 60s
     <p class="fr-lede" style="max-width:62ch;">This page shows the prices. The pages below show how they were derived.</p>
     <ul style="list-style:none;margin:28px 0 0;padding:0;border-top:1px solid rgba(236,231,220,0.10);">
       <li style="display:grid;grid-template-columns:120px 1fr;gap:24px;padding:18px 0;border-bottom:1px solid rgba(236,231,220,0.08);">
-        <a href="#roi" style="font-family:var(--ks-mono);font-size:13px;color:var(--ks-accent);text-decoration:none;border-bottom:1px solid rgba(125, 150, 192,0.30);padding-bottom:2px;align-self:start;">ROI calculator &rarr;</a>
+        <a href="#roi" style="font-family:var(--ks-mono);font-size:13px;color:var(--ks-accent);text-decoration:none;border-bottom:1px solid rgba(232, 227, 214,0.30);padding-bottom:2px;align-self:start;">ROI calculator &rarr;</a>
         <p style="margin:0;color:var(--ks-ink-2);font-size:14.5px;line-height:1.6;">Plug in your monthly LLM bill. Projected year-1 cloud vs kolm cost + payback in months. The widget above is the source; this anchor jumps to it.</p>
       </li>
       <li style="display:grid;grid-template-columns:120px 1fr;gap:24px;padding:18px 0;border-bottom:1px solid rgba(236,231,220,0.08);">
-        <a href="/benchmarks" style="font-family:var(--ks-mono);font-size:13px;color:var(--ks-accent);text-decoration:none;border-bottom:1px solid rgba(125, 150, 192,0.30);padding-bottom:2px;align-self:start;">Benchmarks &rarr;</a><a href="/compare" hidden aria-hidden="true">compare</a>
+        <a href="/benchmarks" style="font-family:var(--ks-mono);font-size:13px;color:var(--ks-accent);text-decoration:none;border-bottom:1px solid rgba(232, 227, 214,0.30);padding-bottom:2px;align-self:start;">Benchmarks &rarr;</a><a href="/compare" hidden aria-hidden="true">compare</a>
         <p style="margin:0;color:var(--ks-ink-2);font-size:14.5px;line-height:1.6;">Every quantize matrix names the hardware (RTX 5090, M3 Max), the runtime (bitsandbytes 0.49.2), and the seed. No marketing-grade numbers.</p>
       </li>
       <li style="display:grid;grid-template-columns:120px 1fr;gap:24px;padding:18px 0;border-bottom:1px solid rgba(236,231,220,0.08);">
-        <a href="/verify-prod" style="font-family:var(--ks-mono);font-size:13px;color:var(--ks-accent);text-decoration:none;border-bottom:1px solid rgba(125, 150, 192,0.30);padding-bottom:2px;align-self:start;">Verify &rarr;</a>
+        <a href="/verify-prod" style="font-family:var(--ks-mono);font-size:13px;color:var(--ks-accent);text-decoration:none;border-bottom:1px solid rgba(232, 227, 214,0.30);padding-bottom:2px;align-self:start;">Verify &rarr;</a>
         <p style="margin:0;color:var(--ks-ink-2);font-size:14.5px;line-height:1.6;">Drop in a content-id or upload a <code>.kolm</code>. Browser-side signature check against the public key. No login, no telemetry.</p>
       </li>
       <li style="display:grid;grid-template-columns:120px 1fr;gap:24px;padding:18px 0;border-bottom:1px solid rgba(236,231,220,0.08);">
-        <a href="/security" style="font-family:var(--ks-mono);font-size:13px;color:var(--ks-accent);text-decoration:none;border-bottom:1px solid rgba(125, 150, 192,0.30);padding-bottom:2px;align-self:start;">Security &rarr;</a>
+        <a href="/security" style="font-family:var(--ks-mono);font-size:13px;color:var(--ks-accent);text-decoration:none;border-bottom:1px solid rgba(232, 227, 214,0.30);padding-bottom:2px;align-self:start;">Security &rarr;</a>
         <p style="margin:0;color:var(--ks-ink-2);font-size:14.5px;line-height:1.6;">SOC 2 controls, HIPAA mapping, subprocessors, incident history, key management. The page procurement asks for, before they ask.</p>
       </li>
       <li style="display:grid;grid-template-columns:120px 1fr;gap:24px;padding:18px 0;border-bottom:1px solid rgba(236,231,220,0.08);">
-        <a href="/k-score" style="font-family:var(--ks-mono);font-size:13px;color:var(--ks-accent);text-decoration:none;border-bottom:1px solid rgba(125, 150, 192,0.30);padding-bottom:2px;align-self:start;">K-score &rarr;</a>
+        <a href="/k-score" style="font-family:var(--ks-mono);font-size:13px;color:var(--ks-accent);text-decoration:none;border-bottom:1px solid rgba(232, 227, 214,0.30);padding-bottom:2px;align-self:start;">K-score &rarr;</a>
         <p style="margin:0;color:var(--ks-ink-2);font-size:14.5px;line-height:1.6;">The composite quality number every compile prints. How it's computed, what gates use it, how to wire your own thresholds. Pair with <a href="/quickstart" style="color:var(--ks-accent);">/quickstart</a>.</p>
       </li>
     </ul>

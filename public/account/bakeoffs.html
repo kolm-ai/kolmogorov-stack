@@ -8,7 +8,7 @@
 <title>Bakeoffs · Account · kolm.ai</title>
 <meta name="description" content="Bakeoff results on kolm.ai: contestants matrix, score-per-dollar, recommended highlighted. Built by src/bakeoff.js.">
 <meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f4f0e8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <link rel="canonical" href="https://kolm.ai/account/bakeoffs">
 <meta property="og:title" content="Bakeoffs &middot; Account &middot; kolm.ai" />
 <meta property="og:description" content="Bakeoff results on kolm.ai: contestants matrix, score-per-dollar, recommended highlighted. Built by src/bakeoff.js." />
@@ -132,7 +132,7 @@ function paint(result){
   document.getElementById("empty-state").hidden=true;
   var rec=result.recommended||(contestants[0]&&contestants[0].id);
   rows.innerHTML=contestants.map(function(c){
-    var win=(c.id===rec||c.name===rec)?" style=\"background:rgba(125, 150, 192,0.06)\"":"";
+    var win=(c.id===rec||c.name===rec)?" style=\"background:rgba(232, 227, 214,0.06)\"":"";
     var verdict=(c.id===rec||c.name===rec)?"<span class=\"pill ok\">recommended</span>":"<span class=\"pill mute\">-</span>";
     return "<tr"+win+">"+
       "<td><b>"+window.kesc(c.name||c.id||"-")+"</b></td>"+

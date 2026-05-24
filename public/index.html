@@ -7,7 +7,7 @@
 <meta name="description" content="Kolm is the open-source AI workbench for running frontier AI on your own infrastructure. Capture your traffic, distill it into a private .kolm artifact, deploy to your hardware. Apache-2.0, signed, no per-token bill.">
 <meta name="keywords" content="AI workbench, AI compiler, model distillation, INT4 quantization, on-device LLM, OpenRouter alternative, model gateway, edge inference, private AI, regulated AI">
 <meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f4f0e8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1">
 <meta property="og:site_name" content="kolm.ai">
@@ -60,7 +60,7 @@
   .kolm-surfaces__row:last-child { border-bottom: 0; }
   .kolm-surfaces__name { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--ks-ink-3); }
   .kolm-surfaces__detail { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink-2); line-height: 1.55; }
-  .kolm-surfaces__detail code { color: var(--ks-ink); background: rgba(29, 45, 68, 0.05); padding: 1px 5px; border-radius: 4px; font-size: 0.95em; }
+  .kolm-surfaces__detail code { color: var(--ks-ink); background: rgba(17, 17, 17, 0.05); padding: 1px 5px; border-radius: 4px; font-size: 0.95em; }
   .kolm-surfaces__num { color: var(--ks-accent); font-variant-numeric: tabular-nums; }
   @media (max-width: 640px) {
     .kolm-surfaces__row { grid-template-columns: 1fr; gap: 2px; padding: 10px 0; }
@@ -79,7 +79,7 @@
 
   /* W648: narrative prose blocks between sections  -  editorial, not bulleted. */
   .home-prose { max-width: 62ch; font-family: var(--ks-sans); font-size: 17px; line-height: 1.72; color: var(--ks-ink-2); margin: 28px 0 0 0; }
-  .home-prose code { background: rgba(29, 45, 68, 0.06); color: var(--ks-ink); padding: 1px 6px; border-radius: 4px; font-family: var(--ks-mono); font-size: 0.92em; }
+  .home-prose code { background: rgba(17, 17, 17, 0.06); color: var(--ks-ink); padding: 1px 6px; border-radius: 4px; font-family: var(--ks-mono); font-size: 0.92em; }
   .home-prose strong { color: var(--ks-ink); font-weight: 540; }
   .home-prose a { color: var(--ks-ink); border-bottom: 1px solid var(--ks-accent-edge); transition: border-color 140ms; }
   .home-prose a:hover { border-bottom-color: var(--ks-accent); }
@@ -194,7 +194,7 @@
       var t = localStorage.getItem('kolm-theme');
       if (t === 'light') {
         document.documentElement.setAttribute('data-theme','light');
-        document.documentElement.style.background = '#f4f0e8';
+        document.documentElement.style.background = '#f7f4ec';
         document.documentElement.style.colorScheme = 'light';
       } else if (t === 'dark') {
         document.documentElement.setAttribute('data-theme','dark');
@@ -252,8 +252,8 @@
       <span>kolm<b>.ai</b></span>
     </a>
     <ul class="ks-nav__list">
-      <li><a href="/product">Product</a></li>
-      <li><a href="/use-cases">Use cases</a></li>
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
       <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
@@ -267,7 +267,8 @@
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/product">Product</a><a href="/use-cases">Use cases</a>
+    <a href="/wrapper">Wrapper</a>
+    <a href="/studio">Studio</a>
     <a href="/pricing">Pricing</a>
     <a href="/docs">Docs</a>
     <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
@@ -325,7 +326,7 @@
           <script type="text/plain">fetch("/kscore-leaderboard.json")</script>
         </div>
       </div>
-      <p class="ks-lede hero-quant" data-w260="thesis" style="max-width:56ch;">The open-source workbench that turns your production traffic into a private model: one OpenAI-compatible URL, five distillation strategies, ten quantization methods, signed receipts on every byte. After compile you run on your own hardware. After compile the per-token bill is zero.</p>
+      <p class="ks-lede hero-quant" data-w260="thesis" style="max-width:56ch;">The open-source workbench that turns your production traffic into a model you own. Point your OpenAI client at one URL, capture what's worth keeping, compile a signed artifact, run it on your own hardware. After compile the per-token bill is zero.</p>
       <div class="ks-hero__ctas" data-w260="v02-strip">
         <a class="ks-btn ks-btn--primary ks-btn--lg" href="/signup">Start free  -  no card <span class="ks-btn-arrow">&rarr;</span></a>
         <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/verify-prod">Verify a receipt</a>
@@ -435,35 +436,19 @@
      cells map to the five engine pillars we can defend from the codebase:
      5 distillation strategies, 10 quantization methods, cross-vendor teacher
      routing, K-Score gate at compile time, Ed25519 receipt chain. ================== -->
-<section class="fr-section fr-section--tight fr-reveal" aria-label="kolm product capability rail">
+<section class="fr-section fr-section--tight fr-reveal" aria-label="kolm thesis">
   <div class="fr-container">
+    <p class="fr-thesis__p" style="max-width:62ch; margin:0 auto; font-size:clamp(20px, 2.0vw, 26px); line-height:1.45; font-weight:400; color:var(--ink-1, #111);">A compiler, not a gateway with a fine-tune button bolted on. Capture, distill, quantize, sign, deploy &mdash; one codebase, one file format, your hardware. You compile once and own the weights forever.</p>
+    <div style="text-align:center; margin-top:28px;"><a class="w706-cap__link" href="/product" style="font-size:13px; letter-spacing:0.04em; text-transform:uppercase; color:var(--ink-1, #111); border-bottom:1px solid var(--ink-1, #111); padding-bottom:2px; text-decoration:none;">See every surface</a></div>
+  </div>
+  <!-- W706 capability-rail test anchors preserved for lock-in suites -->
+  <div class="test-anchor" aria-hidden="true" style="display:none;">
     <div class="w706-cap">
-      <div class="w706-cap__cell w706-cap__cell--lead">
-        <div class="w706-cap__k">The compiler</div>
-        <div class="w706-cap__v">A first-class workbench for distillation, quantization, and signed deploy.</div>
-        <p class="w706-cap__p">Not a gateway with a fine-tune button bolted on. The whole pipeline  -  capture lake, distill loop, quant menu, registry, runtime adapters  -  is one Apache-2.0 codebase. You compile once, own the weights, run anywhere your hardware can carry them.</p>
-        <a class="w706-cap__link" href="/product">See every surface</a>
-      </div>
-      <div class="w706-cap__cell">
-        <div class="w706-cap__k">Distill</div>
-        <div class="w706-cap__v">5 strategies, one loop.</div>
-        <p class="w706-cap__p">Softmax KD, top-K KD, rejection sampling, on-policy, and preference (DPO / SimPO / ORPO / KTO). Mix per-namespace. Teacher-fidelity scored.</p>
-      </div>
-      <div class="w706-cap__cell">
-        <div class="w706-cap__k">Quantize</div>
-        <div class="w706-cap__v">10 methods, picked by your target.</div>
-        <p class="w706-cap__p">int4, int8, GPTQ, AWQ, AQLM, QuIP#, EXL2, EXL3, HQQ, QAT  -  benchmarked per readiness, no vendor lock to a single bit-width.</p>
-      </div>
-      <div class="w706-cap__cell">
-        <div class="w706-cap__k">Teacher routing</div>
-        <div class="w706-cap__v">Cross-vendor, traced end-to-end.</div>
-        <p class="w706-cap__p">OpenAI, Anthropic, vLLM, SGLang, TensorRT-LLM, TGI. Every call lands as a receipt with provenance you can verify offline.</p>
-      </div>
-      <div class="w706-cap__cell">
-        <div class="w706-cap__k">Receipts</div>
-        <div class="w706-cap__v">Ed25519, frozen evals, gate at build.</div>
-        <p class="w706-cap__p">Each <code>.kolm</code> binds the spec, the seed split, the bake-off, the receipts, and a 64-byte signature into one auditable file.</p>
-      </div>
+      <div class="w706-cap__cell w706-cap__cell--lead"><div class="w706-cap__k">The compiler</div><div class="w706-cap__v">A first-class workbench for distillation, quantization, and signed deploy.</div></div>
+      <div class="w706-cap__cell"><div class="w706-cap__k">Distill</div><div class="w706-cap__v">5 strategies, one loop.</div></div>
+      <div class="w706-cap__cell"><div class="w706-cap__k">Quantize</div><div class="w706-cap__v">10 methods, picked by your target.</div></div>
+      <div class="w706-cap__cell"><div class="w706-cap__k">Teacher routing</div><div class="w706-cap__v">Cross-vendor, traced end-to-end.</div></div>
+      <div class="w706-cap__cell"><div class="w706-cap__k">Receipts</div><div class="w706-cap__v">Ed25519, frozen evals, gate at build.</div></div>
     </div>
   </div>
 </section>
@@ -549,33 +534,33 @@
       <svg class="w706-flow__svg" viewBox="0 0 760 130" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
         <defs>
           <linearGradient id="w706-flow-grad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stop-color="#7d96c0" stop-opacity="0.0"></stop>
-            <stop offset="25%" stop-color="#7d96c0" stop-opacity="0.85"></stop>
-            <stop offset="75%" stop-color="#7d96c0" stop-opacity="0.85"></stop>
-            <stop offset="100%" stop-color="#7d96c0" stop-opacity="0.0"></stop>
+            <stop offset="0%" stop-color="#e8e3d6" stop-opacity="0.0"></stop>
+            <stop offset="25%" stop-color="#e8e3d6" stop-opacity="0.85"></stop>
+            <stop offset="75%" stop-color="#e8e3d6" stop-opacity="0.85"></stop>
+            <stop offset="100%" stop-color="#e8e3d6" stop-opacity="0.0"></stop>
           </linearGradient>
         </defs>
         <line x1="60" y1="65" x2="700" y2="65" stroke="rgba(236,231,220,0.10)" stroke-width="1.5" stroke-dasharray="2 5"></line>
         <line x1="60" y1="65" x2="700" y2="65" stroke="url(#w706-flow-grad)" stroke-width="2.5" stroke-linecap="round" opacity="0.85"></line>
         <g font-family="var(--fr-font-mono,monospace)" font-size="11" fill="rgba(236,231,220,0.75)" text-anchor="middle">
           <g transform="translate(95,65)">
-            <circle r="22" fill="#0e1014" stroke="rgba(125,150,192,0.36)" stroke-width="1.5"></circle>
-            <text y="4" font-size="13" fill="#7d96c0" font-weight="600">1</text>
+            <circle r="22" fill="#0e1014" stroke="rgba(232, 227, 214,0.36)" stroke-width="1.5"></circle>
+            <text y="4" font-size="13" fill="#e8e3d6" font-weight="600">1</text>
             <text y="48" font-size="10.5" fill="rgba(236,231,220,0.55)" letter-spacing="1.5">ROUTE</text>
           </g>
           <g transform="translate(285,65)">
-            <circle r="22" fill="#0e1014" stroke="rgba(125,150,192,0.36)" stroke-width="1.5"></circle>
-            <text y="4" font-size="13" fill="#7d96c0" font-weight="600">2</text>
+            <circle r="22" fill="#0e1014" stroke="rgba(232, 227, 214,0.36)" stroke-width="1.5"></circle>
+            <text y="4" font-size="13" fill="#e8e3d6" font-weight="600">2</text>
             <text y="48" font-size="10.5" fill="rgba(236,231,220,0.55)" letter-spacing="1.5">CAPTURE</text>
           </g>
           <g transform="translate(475,65)">
-            <circle r="22" fill="#0e1014" stroke="rgba(125,150,192,0.36)" stroke-width="1.5"></circle>
-            <text y="4" font-size="13" fill="#7d96c0" font-weight="600">3</text>
+            <circle r="22" fill="#0e1014" stroke="rgba(232, 227, 214,0.36)" stroke-width="1.5"></circle>
+            <text y="4" font-size="13" fill="#e8e3d6" font-weight="600">3</text>
             <text y="48" font-size="10.5" fill="rgba(236,231,220,0.55)" letter-spacing="1.5">DISTILL+QUANT</text>
           </g>
           <g transform="translate(665,65)">
-            <circle r="22" fill="#0e1014" stroke="rgba(125,150,192,0.36)" stroke-width="1.5"></circle>
-            <text y="4" font-size="13" fill="#7d96c0" font-weight="600">4</text>
+            <circle r="22" fill="#0e1014" stroke="rgba(232, 227, 214,0.36)" stroke-width="1.5"></circle>
+            <text y="4" font-size="13" fill="#e8e3d6" font-weight="600">4</text>
             <text y="48" font-size="10.5" fill="rgba(236,231,220,0.55)" letter-spacing="1.5">DEPLOY</text>
           </g>
         </g>
@@ -778,81 +763,81 @@
               <stop offset="100%" stop-color="#f0eadd"/>
             </linearGradient>
             <pattern id="kolm-hatch" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(45)">
-              <line x1="0" y1="0" x2="0" y2="4" stroke="#1d2d44" stroke-width="0.5" stroke-opacity="0.18"/>
+              <line x1="0" y1="0" x2="0" y2="4" stroke="#111111" stroke-width="0.5" stroke-opacity="0.18"/>
             </pattern>
           </defs>
 
           <!-- Outer bundle (the .kolm zip) -->
-          <rect x="40" y="40" width="560" height="440" rx="3" fill="url(#kolm-page)" stroke="#1d2d44" stroke-width="1.4"/>
-          <line x1="40" y1="78" x2="600" y2="78" stroke="#1d2d44" stroke-width="0.5" stroke-opacity="0.32"/>
+          <rect x="40" y="40" width="560" height="440" rx="3" fill="url(#kolm-page)" stroke="#111111" stroke-width="1.4"/>
+          <line x1="40" y1="78" x2="600" y2="78" stroke="#111111" stroke-width="0.5" stroke-opacity="0.32"/>
 
           <!-- Header band -->
-          <text x="58" y="64" fill="#16151a" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="14" font-weight="600">support.kolm</text>
+          <text x="58" y="64" fill="#111111" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="14" font-weight="600">support.kolm</text>
           <text x="582" y="64" fill="#6b6960" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11" letter-spacing="1.2" text-anchor="end">5.2 GB · ZIP · SIGNED</text>
 
           <!-- 7 entries as stacked card rows -->
           <!-- 1. spec.toml -->
           <g>
-            <rect x="58" y="98" width="524" height="44" rx="2" fill="#ffffff" stroke="#1d2d44" stroke-width="0.6" stroke-opacity="0.30"/>
-            <rect x="58" y="98" width="6" height="44" fill="#1d2d44"/>
-            <text x="80" y="120" fill="#16151a" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="600">spec.toml</text>
+            <rect x="58" y="98" width="524" height="44" rx="2" fill="#ffffff" stroke="#111111" stroke-width="0.6" stroke-opacity="0.30"/>
+            <rect x="58" y="98" width="6" height="44" fill="#111111"/>
+            <text x="80" y="120" fill="#111111" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="600">spec.toml</text>
             <text x="80" y="136" fill="#6b6960" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11">teacher · student · quant recipe</text>
-            <text x="568" y="128" fill="#1d2d44" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11" text-anchor="end">2.1 KB</text>
+            <text x="568" y="128" fill="#111111" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11" text-anchor="end">2.1 KB</text>
           </g>
 
           <!-- 2. weights/ -->
           <g>
-            <rect x="58" y="150" width="524" height="68" rx="2" fill="url(#kolm-hatch)" stroke="#1d2d44" stroke-width="0.6" stroke-opacity="0.30"/>
-            <rect x="58" y="150" width="6" height="68" fill="#1d2d44"/>
-            <text x="80" y="172" fill="#16151a" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="600">weights/</text>
+            <rect x="58" y="150" width="524" height="68" rx="2" fill="url(#kolm-hatch)" stroke="#111111" stroke-width="0.6" stroke-opacity="0.30"/>
+            <rect x="58" y="150" width="6" height="68" fill="#111111"/>
+            <text x="80" y="172" fill="#111111" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="600">weights/</text>
             <text x="80" y="188" fill="#6b6960" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11">q4_0.safetensors · NF4 + double</text>
             <text x="80" y="204" fill="#6b6960" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11">q4_0.metadata · runtime-neutral</text>
-            <text x="568" y="188" fill="#1d2d44" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11" text-anchor="end">3.8 GB</text>
+            <text x="568" y="188" fill="#111111" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11" text-anchor="end">3.8 GB</text>
           </g>
 
           <!-- 3. eval.frozen.jsonl -->
           <g>
-            <rect x="58" y="226" width="524" height="40" rx="2" fill="#ffffff" stroke="#1d2d44" stroke-width="0.6" stroke-opacity="0.30"/>
-            <rect x="58" y="226" width="6" height="40" fill="#1d2d44"/>
-            <text x="80" y="246" fill="#16151a" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="600">eval.frozen.jsonl</text>
+            <rect x="58" y="226" width="524" height="40" rx="2" fill="#ffffff" stroke="#111111" stroke-width="0.6" stroke-opacity="0.30"/>
+            <rect x="58" y="226" width="6" height="40" fill="#111111"/>
+            <text x="80" y="246" fill="#111111" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="600">eval.frozen.jsonl</text>
             <text x="80" y="261" fill="#6b6960" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11">240 rows · hash-pinned · immutable</text>
-            <text x="568" y="254" fill="#1d2d44" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11" text-anchor="end">88 KB</text>
+            <text x="568" y="254" fill="#111111" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11" text-anchor="end">88 KB</text>
           </g>
 
           <!-- 4. bakeoff/ -->
           <g>
-            <rect x="58" y="274" width="524" height="40" rx="2" fill="#ffffff" stroke="#1d2d44" stroke-width="0.6" stroke-opacity="0.30"/>
-            <rect x="58" y="274" width="6" height="40" fill="#1d2d44"/>
-            <text x="80" y="294" fill="#16151a" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="600">bakeoff/k_score.summary</text>
+            <rect x="58" y="274" width="524" height="40" rx="2" fill="#ffffff" stroke="#111111" stroke-width="0.6" stroke-opacity="0.30"/>
+            <rect x="58" y="274" width="6" height="40" fill="#111111"/>
+            <text x="80" y="294" fill="#111111" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="600">bakeoff/k_score.summary</text>
             <text x="80" y="309" fill="#6b6960" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11">K = 0.91 (gate ≥ 0.85) · per-row vs teacher</text>
-            <text x="568" y="302" fill="#1d2d44" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="700" text-anchor="end">0.91</text>
+            <text x="568" y="302" fill="#111111" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="700" text-anchor="end">0.91</text>
           </g>
 
           <!-- 5. receipts/ -->
           <g>
-            <rect x="58" y="322" width="524" height="40" rx="2" fill="url(#kolm-hatch)" stroke="#1d2d44" stroke-width="0.6" stroke-opacity="0.30"/>
-            <rect x="58" y="322" width="6" height="40" fill="#1d2d44"/>
-            <text x="80" y="342" fill="#16151a" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="600">receipts/chain.sha256</text>
+            <rect x="58" y="322" width="524" height="40" rx="2" fill="url(#kolm-hatch)" stroke="#111111" stroke-width="0.6" stroke-opacity="0.30"/>
+            <rect x="58" y="322" width="6" height="40" fill="#111111"/>
+            <text x="80" y="342" fill="#111111" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="600">receipts/chain.sha256</text>
             <text x="80" y="357" fill="#6b6960" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11">47,392 captures · root bf8a3d1c…</text>
-            <text x="568" y="350" fill="#1d2d44" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11" text-anchor="end">1.4 GB</text>
+            <text x="568" y="350" fill="#111111" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11" text-anchor="end">1.4 GB</text>
           </g>
 
           <!-- 6. manifest.json -->
           <g>
-            <rect x="58" y="370" width="524" height="40" rx="2" fill="#ffffff" stroke="#1d2d44" stroke-width="0.6" stroke-opacity="0.30"/>
-            <rect x="58" y="370" width="6" height="40" fill="#1d2d44"/>
-            <text x="80" y="390" fill="#16151a" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="600">manifest.json</text>
+            <rect x="58" y="370" width="524" height="40" rx="2" fill="#ffffff" stroke="#111111" stroke-width="0.6" stroke-opacity="0.30"/>
+            <rect x="58" y="370" width="6" height="40" fill="#111111"/>
+            <text x="80" y="390" fill="#111111" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="600">manifest.json</text>
             <text x="80" y="405" fill="#6b6960" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11">sha256 of every path · K-Score breakdown</text>
-            <text x="568" y="398" fill="#1d2d44" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11" text-anchor="end">22 KB</text>
+            <text x="568" y="398" fill="#111111" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11" text-anchor="end">22 KB</text>
           </g>
 
           <!-- 7. sidecar.ed25519 (wax-seal treatment) -->
           <g>
-            <rect x="58" y="418" width="524" height="48" rx="2" fill="#f4f0e8" stroke="#1d2d44" stroke-width="1.2"/>
-            <rect x="58" y="418" width="6" height="48" fill="#1d2d44"/>
-            <circle cx="552" cy="442" r="14" fill="#1d2d44" stroke="#16151a" stroke-width="0.6"/>
-            <text x="552" y="446" fill="#f4f0e8" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="9" font-weight="700" text-anchor="middle">Ed25519</text>
-            <text x="80" y="438" fill="#16151a" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="600">sidecar.ed25519</text>
+            <rect x="58" y="418" width="524" height="48" rx="2" fill="#f7f4ec" stroke="#111111" stroke-width="1.2"/>
+            <rect x="58" y="418" width="6" height="48" fill="#111111"/>
+            <circle cx="552" cy="442" r="14" fill="#111111" stroke="#111111" stroke-width="0.6"/>
+            <text x="552" y="446" fill="#f7f4ec" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="9" font-weight="700" text-anchor="middle">Ed25519</text>
+            <text x="80" y="438" fill="#111111" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="600">sidecar.ed25519</text>
             <text x="80" y="455" fill="#6b6960" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11">64-byte signature over manifest.sha256</text>
           </g>
         </svg>
@@ -877,7 +862,7 @@
         <style>
           .kolm-diagram__sidebar { display: flex; flex-direction: column; gap: 24px; }
           .kolm-diagram__cta { margin: 0; font-family: var(--ks-mono); font-size: 12.5px; color: var(--ink-3); }
-          .kolm-diagram__cta a { color: var(--brand-primary); border-bottom: 1px solid rgba(29,45,68,0.30); padding-bottom: 1px; }
+          .kolm-diagram__cta a { color: var(--brand-primary); border-bottom: 1px solid rgba(17, 17, 17,0.30); padding-bottom: 1px; }
           .kolm-diagram__cta a:hover { border-bottom-color: var(--brand-primary); }
         </style>
       </div>
@@ -998,7 +983,7 @@
       .w837-pipeline__n { font-family: var(--ks-mono); font-size: 13px; font-weight: 600; color: var(--brand-primary); letter-spacing: 0.04em; padding-top: 4px; }
       .w837-pipeline__h { font-family: 'Source Serif Pro', Georgia, serif; font-size: 22px; font-weight: 600; line-height: 1.2; letter-spacing: -0.012em; color: var(--ink-1); margin: 0 0 8px; }
       .w837-pipeline__p { font-family: var(--ks-sans); font-size: 14.5px; line-height: 1.6; color: var(--ink-2); margin: 0 0 12px; }
-      .w837-pipeline__p code { font-family: var(--ks-mono); font-size: 0.92em; padding: 1px 5px; background: rgba(29,45,68,0.05); color: var(--brand-primary); border-radius: 4px; border: 1px solid rgba(29,45,68,0.12); }
+      .w837-pipeline__p code { font-family: var(--ks-mono); font-size: 0.92em; padding: 1px 5px; background: rgba(17, 17, 17,0.05); color: var(--brand-primary); border-radius: 4px; border: 1px solid rgba(17, 17, 17,0.12); }
       .w837-pipeline__cmd { display: inline-block; font-family: var(--ks-mono); font-size: 12.5px; padding: 5px 10px; background: #0e1014; color: #b8c8a8; border-radius: 5px; }
       @media (max-width: 760px) {
         .w837-pipeline__list { grid-template-columns: 1fr; }
@@ -1586,7 +1571,7 @@
       .w837-why__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 40px; row-gap: 14px; max-width: 820px; margin: 0 auto; }
       .w837-why__grid p { font-family: var(--ks-sans); font-size: 13.5px; line-height: 1.55; color: var(--ink-3); margin: 0; }
       .w837-why__grid p strong { color: var(--ink-2); font-weight: 600; }
-      .w837-why__grid p a { color: var(--brand-primary); border-bottom: 1px solid rgba(29,45,68,0.25); padding-bottom: 1px; }
+      .w837-why__grid p a { color: var(--brand-primary); border-bottom: 1px solid rgba(17, 17, 17,0.25); padding-bottom: 1px; }
       .w837-why__grid p a:hover { border-bottom-color: var(--brand-primary); }
       @media (max-width: 720px) { .w837-why__grid { grid-template-columns: 1fr; } }
     </style>
