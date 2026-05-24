@@ -22,19 +22,19 @@
 :root {
   /* Canvas — "Warm Paper" identity (2026-05-24 redesign).
      Default light/warm; dark mode is an opt-in via [data-theme="dark"]. */
-  --ks-bg:          #faf9f7;
+  --ks-bg:          #f4f0e8;
   --ks-bg-1:        #ffffff;
-  --ks-bg-2:        #f4f3f0;
-  --ks-bg-3:        #eae8e4;
+  --ks-bg-2:        #e8e3d6;
+  --ks-bg-3:        #d8d2c1;
   --ks-line-1:      rgba(28,27,26,0.06);
   --ks-line-2:      rgba(28,27,26,0.10);
   --ks-line-3:      rgba(28,27,26,0.16);
 
   /* Ink — warm near-black, not pure */
-  --ks-ink:         #1c1b1a;
-  --ks-ink-2:       #57534e;
-  --ks-ink-3:       #8c8a85;
-  --ks-ink-4:       #c8c6c2;
+  --ks-ink:         #161513;
+  --ks-ink-2:       #4a4641;
+  --ks-ink-3:       #8a8276;
+  --ks-ink-4:       #bdb3a1;
 
   /* Accent — burnt sienna (the "wax-seal" mark). Single chroma; everything
      else is grayscale. Reserved for primary CTAs, K-Score numerals, active
@@ -45,18 +45,18 @@
        --ks-accent-edge  : 28% for hairline rules, focus rings.
        --ks-accent-glow  : 18% radial for atmosphere only.
        --ks-accent-warm  : alias retained — same family, used for numerals. */
-  --ks-accent:      #c2410c;
-  --ks-accent-2:    #9a3412;
-  --ks-accent-soft: rgba(194,65,12,0.08);
-  --ks-accent-edge: rgba(194,65,12,0.28);
-  --ks-accent-glow: rgba(194,65,12,0.18);
-  --ks-accent-warm: #c2410c;
-  --ks-accent-warm-soft: rgba(194,65,12,0.10);
+  --ks-accent:      #1d2d44;
+  --ks-accent-2:    #2a3e5c;
+  --ks-accent-soft: rgba(29,45,68,0.05);
+  --ks-accent-edge: rgba(29,45,68,0.20);
+  --ks-accent-glow: rgba(29,45,68,0.14);
+  --ks-accent-warm: #1d2d44;
+  --ks-accent-warm-soft: rgba(29,45,68,0.08);
 
   /* Status — used only in product / dashboards, not marketing */
-  --ks-pos:         #15803d;
-  --ks-warn:        #a16207;
-  --ks-err:         #b91c1c;
+  --ks-pos:         #2d6a48;
+  --ks-warn:        #8b6914;
+  --ks-err:         #8b2828;
 
   /* Type */
   --ks-sans: "Geist", "Inter", system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
@@ -123,49 +123,49 @@
    only so existing toggle UI that sets [data-theme="light"] continues to
    work without flicker. The Warm Paper palette is the canonical state. */
 [data-theme="light"] {
-  --ks-bg:          #faf9f7;
+  --ks-bg:          #f4f0e8;
   --ks-bg-1:        #ffffff;
-  --ks-bg-2:        #f4f3f0;
-  --ks-bg-3:        #eae8e4;
+  --ks-bg-2:        #e8e3d6;
+  --ks-bg-3:        #d8d2c1;
   --ks-line-1:      rgba(28,27,26,0.06);
   --ks-line-2:      rgba(28,27,26,0.10);
   --ks-line-3:      rgba(28,27,26,0.16);
-  --ks-ink:         #1c1b1a;
-  --ks-ink-2:       #57534e;
-  --ks-ink-3:       #8c8a85;
-  --ks-ink-4:       #c8c6c2;
-  --ks-accent:      #c2410c;
-  --ks-accent-2:    #9a3412;
-  --ks-accent-soft: rgba(194,65,12,0.08);
-  --ks-accent-edge: rgba(194,65,12,0.28);
-  --ks-accent-glow: rgba(194,65,12,0.18);
-  --ks-accent-warm: #c2410c;
+  --ks-ink:         #161513;
+  --ks-ink-2:       #4a4641;
+  --ks-ink-3:       #8a8276;
+  --ks-ink-4:       #bdb3a1;
+  --ks-accent:      #1d2d44;
+  --ks-accent-2:    #2a3e5c;
+  --ks-accent-soft: rgba(29,45,68,0.05);
+  --ks-accent-edge: rgba(29,45,68,0.20);
+  --ks-accent-glow: rgba(29,45,68,0.14);
+  --ks-accent-warm: #1d2d44;
 }
 
 /* Dark mode = warm darks (candlelit lab), NOT cold blue-gray. Used when the
    user explicitly opts in via the theme toggle. Accent shifts to a brighter
    orange so it reads against the dark canvas at WCAG AA. */
 [data-theme="dark"] {
-  --ks-bg:          #121211;
-  --ks-bg-1:        #1c1b1a;
-  --ks-bg-2:        #292826;
-  --ks-bg-3:        #3a3836;
+  --ks-bg:          #0e1014;
+  --ks-bg-1:        #161513;
+  --ks-bg-2:        #22262e;
+  --ks-bg-3:        #2d323c;
   --ks-line-1:      rgba(231,229,228,0.06);
   --ks-line-2:      rgba(231,229,228,0.10);
   --ks-line-3:      rgba(231,229,228,0.16);
-  --ks-ink:         #e7e5e4;
-  --ks-ink-2:       #a8a29e;
-  --ks-ink-3:       #78716c;
-  --ks-ink-4:       #44403c;
-  --ks-accent:      #fb923c;
-  --ks-accent-2:    #fdba74;
-  --ks-accent-soft: rgba(251,146,60,0.10);
-  --ks-accent-edge: rgba(251,146,60,0.32);
-  --ks-accent-glow: rgba(251,146,60,0.20);
-  --ks-accent-warm: #fb923c;
-  --ks-pos:         #4ade80;
-  --ks-warn:        #fbbf24;
-  --ks-err:         #f87171;
+  --ks-ink:         #e8e3d6;
+  --ks-ink-2:       #a8a298;
+  --ks-ink-3:       #787268;
+  --ks-ink-4:       #48433d;
+  --ks-accent:      #7d96c0;
+  --ks-accent-2:    #9eb4d8;
+  --ks-accent-soft: rgba(125,150,192,0.10);
+  --ks-accent-edge: rgba(125,150,192,0.30);
+  --ks-accent-glow: rgba(125,150,192,0.18);
+  --ks-accent-warm: #7d96c0;
+  --ks-pos:         #6fbf85;
+  --ks-warn:        #d4a040;
+  --ks-err:         #c97070;
 }
 
 /* ----- 2. Base reset, scoped to .ks --------------------------------------- */

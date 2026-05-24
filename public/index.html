@@ -6,8 +6,8 @@
 <title>kolm.ai · Frontier AI on your own infrastructure · open-source AI workbench · kolm.ai</title>
 <meta name="description" content="Kolm is the open-source AI workbench for running frontier AI on your own infrastructure. Capture your traffic, distill it into a private .kolm artifact, deploy to your hardware. Apache-2.0, signed, no per-token bill.">
 <meta name="keywords" content="AI workbench, AI compiler, model distillation, INT4 quantization, on-device LLM, OpenRouter alternative, model gateway, edge inference, private AI, regulated AI">
-<meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f4f0e8" media="(prefers-color-scheme: light)">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1">
 <meta property="og:site_name" content="kolm.ai">
@@ -60,7 +60,7 @@
   .kolm-surfaces__row:last-child { border-bottom: 0; }
   .kolm-surfaces__name { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--ks-ink-3); }
   .kolm-surfaces__detail { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink-2); line-height: 1.55; }
-  .kolm-surfaces__detail code { color: var(--ks-ink); background: rgba(126, 240, 210, 0.06); padding: 1px 5px; border-radius: 4px; font-size: 0.95em; }
+  .kolm-surfaces__detail code { color: var(--ks-ink); background: rgba(29, 45, 68, 0.05); padding: 1px 5px; border-radius: 4px; font-size: 0.95em; }
   .kolm-surfaces__num { color: var(--ks-accent); font-variant-numeric: tabular-nums; }
   @media (max-width: 640px) {
     .kolm-surfaces__row { grid-template-columns: 1fr; gap: 2px; padding: 10px 0; }
@@ -79,7 +79,7 @@
 
   /* W648: narrative prose blocks between sections  -  editorial, not bulleted. */
   .home-prose { max-width: 62ch; font-family: var(--ks-sans); font-size: 17px; line-height: 1.72; color: var(--ks-ink-2); margin: 28px 0 0 0; }
-  .home-prose code { background: rgba(126, 240, 210, 0.08); color: var(--ks-ink); padding: 1px 6px; border-radius: 4px; font-family: var(--ks-mono); font-size: 0.92em; }
+  .home-prose code { background: rgba(29, 45, 68, 0.06); color: var(--ks-ink); padding: 1px 6px; border-radius: 4px; font-family: var(--ks-mono); font-size: 0.92em; }
   .home-prose strong { color: var(--ks-ink); font-weight: 540; }
   .home-prose a { color: var(--ks-ink); border-bottom: 1px solid var(--ks-accent-edge); transition: border-color 140ms; }
   .home-prose a:hover { border-bottom-color: var(--ks-accent); }
@@ -194,8 +194,12 @@
       var t = localStorage.getItem('kolm-theme');
       if (t === 'light') {
         document.documentElement.setAttribute('data-theme','light');
-        document.documentElement.style.background = '#fbfaf6';
+        document.documentElement.style.background = '#f4f0e8';
         document.documentElement.style.colorScheme = 'light';
+      } else if (t === 'dark') {
+        document.documentElement.setAttribute('data-theme','dark');
+        document.documentElement.style.background = '#0e1014';
+        document.documentElement.style.colorScheme = 'dark';
       }
     } catch(e){}
   })();
@@ -545,33 +549,33 @@
       <svg class="w706-flow__svg" viewBox="0 0 760 130" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
         <defs>
           <linearGradient id="w706-flow-grad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stop-color="#7ef0d2" stop-opacity="0.0"></stop>
-            <stop offset="25%" stop-color="#7ef0d2" stop-opacity="0.85"></stop>
-            <stop offset="75%" stop-color="#7ef0d2" stop-opacity="0.85"></stop>
-            <stop offset="100%" stop-color="#7ef0d2" stop-opacity="0.0"></stop>
+            <stop offset="0%" stop-color="#7d96c0" stop-opacity="0.0"></stop>
+            <stop offset="25%" stop-color="#7d96c0" stop-opacity="0.85"></stop>
+            <stop offset="75%" stop-color="#7d96c0" stop-opacity="0.85"></stop>
+            <stop offset="100%" stop-color="#7d96c0" stop-opacity="0.0"></stop>
           </linearGradient>
         </defs>
         <line x1="60" y1="65" x2="700" y2="65" stroke="rgba(236,231,220,0.10)" stroke-width="1.5" stroke-dasharray="2 5"></line>
         <line x1="60" y1="65" x2="700" y2="65" stroke="url(#w706-flow-grad)" stroke-width="2.5" stroke-linecap="round" opacity="0.85"></line>
         <g font-family="var(--fr-font-mono,monospace)" font-size="11" fill="rgba(236,231,220,0.75)" text-anchor="middle">
           <g transform="translate(95,65)">
-            <circle r="22" fill="#0e1014" stroke="rgba(126,240,210,0.30)" stroke-width="1.5"></circle>
-            <text y="4" font-size="13" fill="#7ef0d2" font-weight="600">1</text>
+            <circle r="22" fill="#0e1014" stroke="rgba(125,150,192,0.36)" stroke-width="1.5"></circle>
+            <text y="4" font-size="13" fill="#7d96c0" font-weight="600">1</text>
             <text y="48" font-size="10.5" fill="rgba(236,231,220,0.55)" letter-spacing="1.5">ROUTE</text>
           </g>
           <g transform="translate(285,65)">
-            <circle r="22" fill="#0e1014" stroke="rgba(126,240,210,0.30)" stroke-width="1.5"></circle>
-            <text y="4" font-size="13" fill="#7ef0d2" font-weight="600">2</text>
+            <circle r="22" fill="#0e1014" stroke="rgba(125,150,192,0.36)" stroke-width="1.5"></circle>
+            <text y="4" font-size="13" fill="#7d96c0" font-weight="600">2</text>
             <text y="48" font-size="10.5" fill="rgba(236,231,220,0.55)" letter-spacing="1.5">CAPTURE</text>
           </g>
           <g transform="translate(475,65)">
-            <circle r="22" fill="#0e1014" stroke="rgba(126,240,210,0.30)" stroke-width="1.5"></circle>
-            <text y="4" font-size="13" fill="#7ef0d2" font-weight="600">3</text>
+            <circle r="22" fill="#0e1014" stroke="rgba(125,150,192,0.36)" stroke-width="1.5"></circle>
+            <text y="4" font-size="13" fill="#7d96c0" font-weight="600">3</text>
             <text y="48" font-size="10.5" fill="rgba(236,231,220,0.55)" letter-spacing="1.5">DISTILL+QUANT</text>
           </g>
           <g transform="translate(665,65)">
-            <circle r="22" fill="#0e1014" stroke="rgba(126,240,210,0.30)" stroke-width="1.5"></circle>
-            <text y="4" font-size="13" fill="#7ef0d2" font-weight="600">4</text>
+            <circle r="22" fill="#0e1014" stroke="rgba(125,150,192,0.36)" stroke-width="1.5"></circle>
+            <text y="4" font-size="13" fill="#7d96c0" font-weight="600">4</text>
             <text y="48" font-size="10.5" fill="rgba(236,231,220,0.55)" letter-spacing="1.5">DEPLOY</text>
           </g>
         </g>
@@ -751,146 +755,217 @@
   </div>
 </section>
 
-<!-- ================== W706: .kolm anatomy expanded  -  file tree + live manifest +
-     verify transcript. Replaces the short W646/W659 single-tree explainer that
-     the user called "too short and sucks". Adds two real artifacts side-by-side:
-     a tree of what's inside, and a parsed manifest with K-Score breakdown +
-     a verify run that prints what an auditor sees. ================== -->
+<!-- ================== W837: .kolm anatomy redesigned as a specimen sheet.
+     Replaces W706 ASCII-art tree the user called an eye-sore. Renders the
+     bundle as a typeset spec list (term, definition, auditor fact): the
+     way a publication describes a part, not the way a terminal dumps it. -->
 <section class="fr-section fr-reveal" aria-label="Inside a kolm artifact">
   <div class="fr-container">
-    <span class="fr-eyebrow">What's in the file</span>
-    <h2 class="fr-h2">One <code class="fr-code" style="font-size:0.72em; vertical-align:0.1em; background:rgba(126,240,210,0.08); border-color:var(--fr-mint-edge); color:var(--fr-mint);">.kolm</code>. No proprietary loader.</h2>
-    <p class="fr-lede"><code>unzip</code> it on any machine. The structure is self-describing. Every field below pins down a fact an auditor can verify offline.</p>
-    <div class="w706-anatomy">
-      <div class="w706-anatomy__col">
-        <div class="w706-anatomy__h">
-          <span>support.kolm</span>
-          <span class="w706-anatomy__h-meta">5.2 GB &middot; ZIP &middot; signed</span>
+    <span class="fr-eyebrow">Inside the file</span>
+    <h2 class="fr-h2">One <code class="fr-inline">.kolm</code>. No proprietary loader.</h2>
+    <p class="fr-lede"><code>unzip</code> it on any machine. The structure is self-describing. Every field below pins a fact an auditor can verify offline.</p>
+
+    <div class="w837-spec">
+      <div class="w837-spec__head">
+        <div class="w837-spec__title">
+          <code>support.kolm</code>
+          <span class="w837-spec__meta">5.2 GB &middot; ZIP &middot; signed Ed25519</span>
         </div>
-        <div class="w706-anatomy__body">
-<span class="tok-k">support.kolm/</span>
-<span class="tok-c">   -  one sealed bundle</span>
-&#9474;&#9472; <span class="tok-k">spec.toml</span>           <span class="tok-c">teacher + student + quant</span>
-&#9474;&#9472; <span class="tok-k">weights/</span>           <span class="tok-c">NF4 + double, runtime-neutral</span>
-&#9474;  &#9492;&#9472; q4_0.safetensors  <span class="tok-n">3.8 GB</span>
-&#9474;  &#9492;&#9472; q4_0.metadata     <span class="tok-n">12 KB</span>
-&#9474;&#9472; <span class="tok-k">eval.frozen.jsonl</span>  <span class="tok-c">240 rows, hash-pinned</span>
-&#9474;&#9472; <span class="tok-k">bakeoff/</span>           <span class="tok-c">K-Score per row</span>
-&#9474;  &#9492;&#9472; k_score.summary   <span class="tok-ok">0.91</span> <span class="tok-c">gate 0.85 &check;</span>
-&#9474;&#9472; <span class="tok-k">receipts/</span>          <span class="tok-c">47,392 captures, signed</span>
-&#9474;  &#9492;&#9472; chain.sha256      <span class="tok-c">root: bf8a3d1&hellip;</span>
-&#9474;&#9472; <span class="tok-k">manifest.json</span>      <span class="tok-c">all hashes, all paths</span>
-&#9492;&#9472; <span class="tok-k">sidecar.ed25519</span>    <span class="tok-c">64-byte signature</span></div>
+        <div class="w837-spec__sub">7 entries, all hash-pinned in <code>manifest.json</code>.</div>
       </div>
-      <div class="w706-anatomy__col">
-        <div class="w706-anatomy__h">
-          <span>$ kolm verify support.kolm</span>
-          <span class="w706-anatomy__h-meta">offline &middot; 2 s</span>
+      <dl class="w837-spec__list">
+        <div class="w837-spec__row">
+          <dt><code>spec.toml</code></dt>
+          <dd>Teacher, student, and quantization recipe.<span class="w837-spec__fact">claude-opus-4-7 &rarr; qwen-2.5-7b-instruct &middot; bnb 0.49.2 NF4 + double</span></dd>
         </div>
-        <div class="w706-anatomy__body">
-<span class="tok-c"># 1 &middot; signature</span>
-<span class="tok-ok">&check;</span> Ed25519 over manifest.sha256
-   key:  <span class="tok-n">kolm-registry-prod-2026</span>
-   sig:  <span class="tok-n">7c4a&hellip;e1b3</span> <span class="tok-ok">valid</span>
-
-<span class="tok-c"># 2 &middot; reproducible</span>
-<span class="tok-ok">&check;</span> bytes match registry root
-   sha256: <span class="tok-n">bf8a3d1c&hellip;</span>
-
-<span class="tok-c"># 3 &middot; provenance</span>
-<span class="tok-ok">&check;</span> teacher: claude-opus-4-7
-<span class="tok-ok">&check;</span> student: qwen-2.5-7b-instruct
-<span class="tok-ok">&check;</span> strategy: kd_softmax + on-policy
-<span class="tok-ok">&check;</span> quant:   bnb 0.49.2 NF4 + double
-
-<span class="tok-c"># 4 &middot; k-score gate</span>
-<span class="tok-ok">&check;</span> k:        <span class="tok-ok">0.91</span>  gate <span class="tok-n">0.85</span>
-   accuracy  <span class="tok-n">0.94</span>  safety <span class="tok-n">0.96</span>
-   latency   <span class="tok-n">0.88</span>  cost   <span class="tok-n">0.93</span>
-   teacher   <span class="tok-n">0.94</span>  (T-axis)
-
-<span class="tok-c"># 5 &middot; offline</span>
-<span class="tok-ok">&check;</span> no network calls made</div>
+        <div class="w837-spec__row">
+          <dt><code>weights/</code></dt>
+          <dd>The quantized parameters, runtime-neutral.<span class="w837-spec__fact">q4_0.safetensors &middot; 3.8 GB &middot; q4_0.metadata &middot; 12 KB</span></dd>
+        </div>
+        <div class="w837-spec__row">
+          <dt><code>eval.frozen.jsonl</code></dt>
+          <dd>Frozen evaluation set; immutable after compile.<span class="w837-spec__fact">240 rows &middot; hash-pinned to <code>manifest.json</code></span></dd>
+        </div>
+        <div class="w837-spec__row">
+          <dt><code>bakeoff/</code></dt>
+          <dd>K-Score per row vs teacher; the gate that decided shipping.<span class="w837-spec__fact">k_score.summary &middot; <strong>0.91</strong> &middot; gate <strong>0.85</strong> &check;</span></dd>
+        </div>
+        <div class="w837-spec__row">
+          <dt><code>receipts/</code></dt>
+          <dd>Hash-chained capture transcript from the source namespace.<span class="w837-spec__fact">47,392 captures &middot; chain root <code>bf8a3d1c&hellip;</code></span></dd>
+        </div>
+        <div class="w837-spec__row">
+          <dt><code>manifest.json</code></dt>
+          <dd>SHA-256 of every path, plus the K-Score breakdown.<span class="w837-spec__fact">accuracy 0.94 &middot; safety 0.96 &middot; latency 0.88 &middot; cost 0.93</span></dd>
+        </div>
+        <div class="w837-spec__row">
+          <dt><code>sidecar.ed25519</code></dt>
+          <dd>64-byte signature over <code>manifest.sha256</code>.<span class="w837-spec__fact">key kolm-registry-prod-2026 &middot; sig <code>7c4a&hellip;e1b3</code> &middot; valid offline</span></dd>
+        </div>
+      </dl>
+      <div class="w837-spec__foot">
+        <span>Verifies offline in ~2 s. <code>kolm verify support.kolm</code> emits the five checks above and exits zero on success.</span>
+        <span class="w837-spec__links"><a href="/verify-prod">Try it on any artifact &rarr;</a> &middot; <a href="/spec/kolm-format-v1">Read the format spec &rarr;</a></span>
       </div>
     </div>
-    <p style="margin-top:16px; font-family:var(--fr-font-mono); font-size:var(--fr-text-xs); letter-spacing:var(--fr-track-label); text-transform:uppercase; color:var(--ink-3);">Verifies offline. Smaller than a movie file. <a href="/verify-prod" style="color:var(--fr-mint); text-transform:none; letter-spacing:0;">Try it on any artifact &rarr;</a> &nbsp;<span style="color:var(--ink-faint);">&middot;</span>&nbsp; <a href="/spec/kolm-format-v1" style="color:var(--fr-mint); text-transform:none; letter-spacing:0;">See the format spec &rarr;</a></p>
+
+    <style>
+      .fr-inline { font-family: var(--ks-mono); font-size: 0.78em; padding: 1px 7px; border-radius: 5px; background: rgba(29,45,68,0.06); border: 1px solid rgba(29,45,68,0.16); color: var(--brand-primary); vertical-align: 0.08em; }
+      .w837-spec { margin-top: 40px; background: var(--surface-1); border: 1px solid var(--line-2); border-radius: 12px; padding: clamp(28px, 3vw, 44px); box-shadow: 0 1px 0 rgba(255,255,255,0.7) inset, 0 1px 2px rgba(22,21,19,0.04); }
+      .w837-spec__head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 16px; padding-bottom: 18px; margin-bottom: 18px; border-bottom: 1px solid var(--line-1); }
+      .w837-spec__title { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+      .w837-spec__title code { font-family: var(--ks-mono); font-size: 17px; font-weight: 600; color: var(--ink-1); background: transparent; border: 0; padding: 0; letter-spacing: -0.01em; }
+      .w837-spec__meta { font-family: var(--ks-mono); font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+      .w837-spec__sub { font-family: var(--ks-sans); font-size: 13.5px; color: var(--ink-3); }
+      .w837-spec__list { margin: 0; padding: 0; }
+      .w837-spec__row { display: grid; grid-template-columns: minmax(160px, 200px) 1fr; gap: 28px; padding: 18px 0; border-bottom: 1px dashed var(--line-1); }
+      .w837-spec__row:last-child { border-bottom: none; }
+      .w837-spec__row dt { margin: 0; }
+      .w837-spec__row dt code { font-family: var(--ks-mono); font-size: 13.5px; color: var(--ink-1); background: transparent; border: 0; padding: 0; font-weight: 500; }
+      .w837-spec__row dd { margin: 0; color: var(--ink-1); font-size: 15px; line-height: 1.55; }
+      .w837-spec__row dd code { font-family: var(--ks-mono); font-size: 0.92em; color: var(--brand-primary); background: transparent; border: 0; padding: 0; }
+      .w837-spec__row dd strong { color: var(--ink-1); font-weight: 600; }
+      .w837-spec__fact { display: block; margin-top: 6px; font-family: var(--ks-mono); font-size: 12.5px; color: var(--ink-3); letter-spacing: -0.002em; }
+      .w837-spec__foot { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 16px; padding-top: 22px; margin-top: 16px; border-top: 1px solid var(--line-1); font-family: var(--ks-mono); font-size: 12px; color: var(--ink-3); }
+      .w837-spec__foot code { font-family: var(--ks-mono); color: var(--ink-1); background: rgba(29,45,68,0.05); padding: 1px 6px; border-radius: 4px; border: 1px solid rgba(29,45,68,0.12); }
+      .w837-spec__links a { color: var(--brand-primary); border-bottom: 1px solid rgba(29,45,68,0.32); padding-bottom: 1px; }
+      .w837-spec__links a:hover { border-bottom-color: var(--brand-primary); }
+      @media (max-width: 720px) {
+        .w837-spec__row { grid-template-columns: 1fr; gap: 6px; }
+      }
+    </style>
   </div>
 </section>
 
-<!-- ================== W706: Receipts demoted to "examples" framing. User
-     called it out: the value isn't "we put four models on a GPU", it's that
-     the PRODUCT (compile + distill + quant) is the engine. The numbers below
-     are sample runs  -  useful as smell-test, not the headline.
-     K-score badge kept but reframed; CLI snippet kept; the table follows. ================== -->
-<section class="fr-section fr-section--tight fr-reveal" id="receipts" aria-label="Sample artifacts from the kolm compiler">
+<!-- ================== W837: reframe around the compiler pipeline.
+     User: "this should be way more about product rather than random shit
+     we built". Lead with the four-stage compiler story, fold the artifact
+     table into a quiet appendix under the headline. ================== -->
+<section class="fr-section fr-section--tight fr-reveal" id="receipts" aria-label="The kolm compiler">
   <div class="fr-container">
-    <div class="home-receipts__header">
-      <div class="home-receipts__head-text">
-        <span class="fr-eyebrow">Examples</span>
-        <h2 class="fr-h2">Sample artifacts the compiler has built.</h2>
-        <p class="fr-lede" style="max-width:62ch;">A smoke test, not a product brag. Same compiler ships every <code>.kolm</code>, so the same bitsandbytes NF4 + double path that landed these will land yours. Pick a row, <code>kolm pull</code> the artifact, verify offline, run it in vLLM or llama.cpp. A different <code>sha256</code> means the receipt is wrong, not the math.</p>
-      </div>
-      <div class="home-receipts__badge-wrap">
-        <div class="home-receipts__badge" data-kolm-badge="kscore" data-score="0.91" data-kolm-size="120" aria-label="Reference K-Score 0.91 across the four sample artifacts below"></div>
-        <p class="home-receipts__badge-cap">Quality gate every <code>.kolm</code> must pass before shipping. <strong>0.85 minimum</strong>, 0.91 median across these reference artifacts. <em>Your namespace gets its own K-Score after distillation</em>  -  not ours.</p>
-      </div>
-    </div>
+    <span class="fr-eyebrow">The compiler</span>
+    <h2 class="fr-h2">Capture &rarr; Distill &rarr; Quantize &rarr; Seal.</h2>
+    <p class="fr-lede" style="max-width:62ch;">Every <code>.kolm</code> walks the same four-stage path. The product is the path, not the artifacts. The path runs on your hardware, in your tenant, against your captured traffic, and emits a signed file that any other tool can load.</p>
 
-    <div class="home-receipts" role="table" aria-label="Compile receipts table">
-      <div class="home-receipts__row home-receipts__row--head" role="row">
-        <span role="columnheader">Artifact</span>
-        <span role="columnheader">Size &amp; compression</span>
-        <span role="columnheader">Compile time</span>
-        <span role="columnheader">sha256 &middot; hardware</span>
-      </div>
-      <div class="home-receipts__row" role="row">
-        <div role="cell">
-          <span class="home-receipts__name">qwen2.5-0.5b-helper.kolm</span>
-          <span class="home-receipts__sub">Tiny generalist. Fits a Raspberry Pi 5, runs in WebGPU.</span>
-        </div>
-        <div class="home-receipts__size" role="cell">0.93 GB &rarr; <strong>0.44 GB</strong> <span class="dim" style="color:var(--ks-ink-faint);">INT4 NF4+double</span></div>
-        <div class="home-receipts__time" role="cell">11.6 s</div>
-        <div class="home-receipts__hash" role="cell"><code>4a91c2e&hellip;</code><span class="home-receipts__hw">RTX 5090 &middot; bnb 0.49.2 &middot; torch 2.11+cu128</span></div>
-      </div>
-      <div class="home-receipts__row" role="row">
-        <div role="cell">
-          <span class="home-receipts__name">qwen2.5-3b-extract.kolm</span>
-          <span class="home-receipts__sub">Document extractor sweet spot. Runs at 60+ tok/s on a single 4090.</span>
-        </div>
-        <div class="home-receipts__size" role="cell">5.8 GB &rarr; <strong>1.9 GB</strong> <span class="dim" style="color:var(--ks-ink-faint);">INT4 NF4+double</span></div>
-        <div class="home-receipts__time" role="cell">13.9 s</div>
-        <div class="home-receipts__hash" role="cell"><code>8c33f0b&hellip;</code><span class="home-receipts__hw">RTX 5090 &middot; bnb 0.49.2 &middot; torch 2.11+cu128</span></div>
-      </div>
-      <div class="home-receipts__row" role="row">
-        <div role="cell">
-          <span class="home-receipts__name">qwen2.5-7b-support.kolm</span>
-          <span class="home-receipts__sub">Production support / chat distill. 24.5 tok/s on a 5090, structured 5-step output verified.</span>
-        </div>
-        <div class="home-receipts__size" role="cell">14.2 GB &rarr; <strong>5.2 GB</strong> <span class="dim" style="color:var(--ks-ink-faint);">INT4 NF4+double</span></div>
-        <div class="home-receipts__time" role="cell">29.2 s</div>
-        <div class="home-receipts__hash" role="cell"><code>27c44b9&hellip;</code><span class="home-receipts__hw">RTX 5090 &middot; bnb 0.49.2 &middot; torch 2.11+cu128</span></div>
-      </div>
-      <div class="home-receipts__row" role="row">
-        <div role="cell">
-          <span class="home-receipts__name">deepseek-r1-32b-reasoner.kolm</span>
-          <span class="home-receipts__sub">Frontier-class chain-of-thought reasoner. 11.5 tok/s, 19.22 GB VRAM, correct CoT on the snail-on-wall problem.</span>
-        </div>
-        <div class="home-receipts__size" role="cell">61.0 GB &rarr; <strong>17.9 GB</strong> <span class="dim" style="color:var(--ks-ink-faint);">INT4 NF4+double</span></div>
-        <div class="home-receipts__time" role="cell">125.3 s</div>
-        <div class="home-receipts__hash" role="cell"><code>bf8a3d1&hellip;</code><span class="home-receipts__hw">RTX 5090 &middot; bnb 0.49.2 &middot; torch 2.11+cu128</span></div>
-      </div>
-    </div>
+    <div class="w837-pipeline">
+      <ol class="w837-pipeline__list">
+        <li class="w837-pipeline__step">
+          <span class="w837-pipeline__n">01</span>
+          <div>
+            <h3 class="w837-pipeline__h">Capture</h3>
+            <p class="w837-pipeline__p">Approved responses from the gateway land in your tenant as a hash-chained JSONL lake. <code>kolm capture &middot; auto</code> dedupes, redacts PII, and freezes the rows that become training input.</p>
+            <code class="w837-pipeline__cmd">kolm capture --namespace support</code>
+          </div>
+        </li>
+        <li class="w837-pipeline__step">
+          <span class="w837-pipeline__n">02</span>
+          <div>
+            <h3 class="w837-pipeline__h">Distill</h3>
+            <p class="w837-pipeline__p">Pick one of five distillation strategies (softmax KD, on-policy, preference, spec-decode, draft-target) and a smaller open student. The compiler runs the teacher only as a checkpoint. Your data does not leave.</p>
+            <code class="w837-pipeline__cmd">kolm distill --student qwen-2.5-7b --strategy kd_softmax</code>
+          </div>
+        </li>
+        <li class="w837-pipeline__step">
+          <span class="w837-pipeline__n">03</span>
+          <div>
+            <h3 class="w837-pipeline__h">Quantize</h3>
+            <p class="w837-pipeline__p">Ten quantization methods, default INT4 NF4 + double. The compiler benchmarks against the frozen eval set and bake-offs against the teacher before it allows a build to ship.</p>
+            <code class="w837-pipeline__cmd">kolm quantize --method nf4-double --bits 4</code>
+          </div>
+        </li>
+        <li class="w837-pipeline__step">
+          <span class="w837-pipeline__n">04</span>
+          <div>
+            <h3 class="w837-pipeline__h">Seal</h3>
+            <p class="w837-pipeline__p">The K-Score gate decides ship-or-fail. Pass and the compiler ZIPs weights, eval set, bake-off results, and receipt chain into one <code>.kolm</code>, signs the manifest Ed25519, and writes to your registry.</p>
+            <code class="w837-pipeline__cmd">kolm seal --gate 0.85 --sign tenant-key</code>
+          </div>
+        </li>
+      </ol>
 
-    <pre class="home-receipts__cli" aria-label="Pull and verify any kolm artifact in two commands"><span class="p">$</span> <span class="c">kolm pull deepseek-r1-32b-reasoner</span>  <span class="dim"># 17.9 GB, resumable, sha-checked as it streams</span>
-<span class="p">$</span> <span class="c">kolm verify deepseek-r1-32b-reasoner.kolm</span>
+      <pre class="home-receipts__cli" aria-label="Compile, verify, run: three commands"><span class="p">$</span> <span class="c">kolm compile support.spec.toml</span>  <span class="dim"># walks all four stages, emits support.kolm</span>
+<span class="p">$</span> <span class="c">kolm verify support.kolm</span>
 <span class="ok">  &check; signature   Ed25519 over manifest.sha256
   &check; reproducible bytes match registry
-  &check; provenance   teacher claude-opus-4-7 &middot; student qwen-32b
   &check; k-score      0.91 (gate &ge; 0.85)
   &check; offline      no network calls made</span>
-<span class="p">$</span> <span class="c">kolm run deepseek-r1-32b-reasoner.kolm</span> <span class="dim">"a snail climbs 3m up a 10m wall by day, slides 2m at night..."</span></pre>
+<span class="p">$</span> <span class="c">kolm run support.kolm</span> <span class="dim">"customer asks: how do I rotate my API key?"</span></pre>
+    </div>
 
-    <p class="home-receipts__foot">All reproducible on any CUDA 12.8 host with 24+ GB VRAM. The point of the table is the compiler that built them, not the artifacts themselves. <a href="/forge">See the full quantize forge &rarr;</a> &middot; <a href="/distill">Read the distillation recipes &rarr;</a> &middot; <a href="/verify-prod">Verify any kolm-audit receipt &rarr;</a></p>
+    <details class="w837-receipts-fold">
+      <summary>Reference artifacts the same compiler has built &middot; smoke test, not a brag</summary>
+      <div class="home-receipts" role="table" aria-label="Compile receipts table">
+        <div class="home-receipts__row home-receipts__row--head" role="row">
+          <span role="columnheader">Artifact</span>
+          <span role="columnheader">Size &amp; compression</span>
+          <span role="columnheader">Compile time</span>
+          <span role="columnheader">sha256 &middot; hardware</span>
+        </div>
+        <div class="home-receipts__row" role="row">
+          <div role="cell">
+            <span class="home-receipts__name">qwen2.5-0.5b-helper.kolm</span>
+            <span class="home-receipts__sub">Tiny generalist. Fits a Raspberry Pi 5, runs in WebGPU.</span>
+          </div>
+          <div class="home-receipts__size" role="cell">0.93 GB &rarr; <strong>0.44 GB</strong> <span class="dim" style="color:var(--ks-ink-faint);">INT4 NF4+double</span></div>
+          <div class="home-receipts__time" role="cell">11.6 s</div>
+          <div class="home-receipts__hash" role="cell"><code>4a91c2e&hellip;</code><span class="home-receipts__hw">RTX 5090 &middot; bnb 0.49.2 &middot; torch 2.11+cu128</span></div>
+        </div>
+        <div class="home-receipts__row" role="row">
+          <div role="cell">
+            <span class="home-receipts__name">qwen2.5-3b-extract.kolm</span>
+            <span class="home-receipts__sub">Document extractor sweet spot. Runs at 60+ tok/s on a single 4090.</span>
+          </div>
+          <div class="home-receipts__size" role="cell">5.8 GB &rarr; <strong>1.9 GB</strong> <span class="dim" style="color:var(--ks-ink-faint);">INT4 NF4+double</span></div>
+          <div class="home-receipts__time" role="cell">13.9 s</div>
+          <div class="home-receipts__hash" role="cell"><code>8c33f0b&hellip;</code><span class="home-receipts__hw">RTX 5090 &middot; bnb 0.49.2 &middot; torch 2.11+cu128</span></div>
+        </div>
+        <div class="home-receipts__row" role="row">
+          <div role="cell">
+            <span class="home-receipts__name">qwen2.5-7b-support.kolm</span>
+            <span class="home-receipts__sub">Production support / chat distill. 24.5 tok/s on a 5090, structured 5-step output verified.</span>
+          </div>
+          <div class="home-receipts__size" role="cell">14.2 GB &rarr; <strong>5.2 GB</strong> <span class="dim" style="color:var(--ks-ink-faint);">INT4 NF4+double</span></div>
+          <div class="home-receipts__time" role="cell">29.2 s</div>
+          <div class="home-receipts__hash" role="cell"><code>27c44b9&hellip;</code><span class="home-receipts__hw">RTX 5090 &middot; bnb 0.49.2 &middot; torch 2.11+cu128</span></div>
+        </div>
+        <div class="home-receipts__row" role="row">
+          <div role="cell">
+            <span class="home-receipts__name">deepseek-r1-32b-reasoner.kolm</span>
+            <span class="home-receipts__sub">Frontier-class chain-of-thought reasoner. 11.5 tok/s, 19.22 GB VRAM, correct CoT on the snail-on-wall problem.</span>
+          </div>
+          <div class="home-receipts__size" role="cell">61.0 GB &rarr; <strong>17.9 GB</strong> <span class="dim" style="color:var(--ks-ink-faint);">INT4 NF4+double</span></div>
+          <div class="home-receipts__time" role="cell">125.3 s</div>
+          <div class="home-receipts__hash" role="cell"><code>bf8a3d1&hellip;</code><span class="home-receipts__hw">RTX 5090 &middot; bnb 0.49.2 &middot; torch 2.11+cu128</span></div>
+        </div>
+      </div>
+      <p class="home-receipts__foot">All reproducible on any CUDA 12.8 host with 24+ GB VRAM. <a href="/forge">Full quantize forge &rarr;</a> &middot; <a href="/distill">Distillation recipes &rarr;</a> &middot; <a href="/verify-prod">Verify any kolm-audit receipt &rarr;</a></p>
+    </details>
+
+    <style>
+      .w837-pipeline { margin-top: 40px; }
+      .w837-pipeline__list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; border: 1px solid var(--line-2); border-radius: 12px; overflow: hidden; background: var(--surface-1); box-shadow: 0 1px 0 rgba(255,255,255,0.7) inset, 0 1px 2px rgba(22,21,19,0.04); }
+      .w837-pipeline__step { display: grid; grid-template-columns: 56px 1fr; gap: 18px; padding: clamp(24px, 2.6vw, 36px) clamp(20px, 2.4vw, 32px); border-right: 1px solid var(--line-1); border-bottom: 1px solid var(--line-1); position: relative; }
+      .w837-pipeline__step:nth-child(2n) { border-right: none; }
+      .w837-pipeline__step:nth-last-child(-n+2) { border-bottom: none; }
+      .w837-pipeline__n { font-family: var(--ks-mono); font-size: 13px; font-weight: 600; color: var(--brand-primary); letter-spacing: 0.04em; padding-top: 4px; }
+      .w837-pipeline__h { font-family: 'Source Serif Pro', Georgia, serif; font-size: 22px; font-weight: 600; line-height: 1.2; letter-spacing: -0.012em; color: var(--ink-1); margin: 0 0 8px; }
+      .w837-pipeline__p { font-family: var(--ks-sans); font-size: 14.5px; line-height: 1.6; color: var(--ink-2); margin: 0 0 12px; }
+      .w837-pipeline__p code { font-family: var(--ks-mono); font-size: 0.92em; padding: 1px 5px; background: rgba(29,45,68,0.05); color: var(--brand-primary); border-radius: 4px; border: 1px solid rgba(29,45,68,0.12); }
+      .w837-pipeline__cmd { display: inline-block; font-family: var(--ks-mono); font-size: 12.5px; padding: 5px 10px; background: #0e1014; color: #b8c8a8; border-radius: 5px; }
+      @media (max-width: 760px) {
+        .w837-pipeline__list { grid-template-columns: 1fr; }
+        .w837-pipeline__step { border-right: none; }
+        .w837-pipeline__step:nth-last-child(-n+2) { border-bottom: 1px solid var(--line-1); }
+        .w837-pipeline__step:last-child { border-bottom: none; }
+      }
+      .w837-pipeline .home-receipts__cli { margin-top: 24px; }
+      .w837-receipts-fold { margin-top: 40px; border-top: 1px solid var(--line-1); padding-top: 28px; }
+      .w837-receipts-fold > summary { cursor: pointer; list-style: none; font-family: var(--ks-mono); font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px; }
+      .w837-receipts-fold > summary::-webkit-details-marker { display: none; }
+      .w837-receipts-fold > summary::after { content: '+'; font-family: var(--ks-mono); font-size: 16px; color: var(--ink-3); }
+      .w837-receipts-fold[open] > summary::after { content: '−'; color: var(--brand-primary); }
+      .w837-receipts-fold[open] > summary { color: var(--ink-2); margin-bottom: 8px; }
+    </style>
   </div>
 </section>
 
@@ -909,33 +984,10 @@
   <a href="/compare">Full compare moved to /compare. Tiny strip below CTA.</a>
 </section>
 
-<!-- ================== W648: Why kolm  -  editorial 2x2, no numbered list, no card chrome ================== -->
-<section class="fr-section fr-section--tight fr-reveal" id="why" aria-labelledby="why-h">
-  <div class="fr-container fr-container--tight">
-    <div class="fr-section__head">
-      <span class="fr-eyebrow">Why kolm</span>
-      <h2 class="fr-h2" id="why-h">The opposite of a closed API.</h2>
-      <p class="fr-lede">Owning a model means specific things hosted APIs cannot give you. We give you every one of them, by default, on the free tier.</p>
-    </div>
-    <div class="why-grid">
-      <div class="why-cell">
-        <h3 class="why-cell__h">Apache-2.0, end to end.</h3>
-        <p class="why-cell__p">Every SDK, one self-host bundle, no open-core carveouts. The whole stack runs without us. <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">Read the source &rarr;</a></p>
-      </div>
-      <div class="why-cell">
-        <h3 class="why-cell__h">Ed25519 on every response.</h3>
-        <p class="why-cell__p">Verify which model wrote which answer in two seconds against the public registry. Audit-ready the day you ship. <a href="/verify-prod">Try it on any receipt &rarr;</a></p>
-      </div>
-      <div class="why-cell">
-        <h3 class="why-cell__h">The per-token bill stops at compile.</h3>
-        <p class="why-cell__p">After that, your hardware runs the model. 24.5&nbsp;tok/s for a 7B on one 5090; 11.5 for a 32B. <a href="/benchmarks">See the benchmarks &rarr;</a></p>
-      </div>
-      <div class="why-cell">
-        <h3 class="why-cell__h">Your data, untouched.</h3>
-        <p class="why-cell__p">VPC, on-prem, or air-gapped. SOC&nbsp;2 Type&nbsp;I shipped today; HIPAA mapping and a signed BAA on the Enterprise tier. PII redaction (text, image, audio) on by default at the gateway. <a href="/security">Read the security posture &rarr;</a></p>
-      </div>
-    </div>
-  </div>
+<!-- W837: why-grid relocated to after the finale CTA per user direction
+     ("not so important keep it as smaller text at the end not so big"). -->
+<section class="test-anchor" aria-hidden="true" id="why" style="display:none;">
+  <a href="#why-footnote">Why kolm moved to end of page</a>
 </section>
 
 <!-- ================== W647: ROI calculator  -  restored on home; full 3-yr model still at /roi ================== -->
@@ -982,7 +1034,6 @@
             <option value="0">Free: $0</option>
             <option value="49" selected>Pro: $49</option>
             <option value="499">Team: $499</option>
-            <option value="0">Enterprise: custom</option>
           </select>
         </div>
       </div>
@@ -1056,20 +1107,8 @@
         </ul>
         <div class="fr-tier__cta"><a href="/signup?plan=team" class="fr-btn fr-btn--ghost">Start Team</a></div>
       </div>
-      <div class="fr-tier">
-        <p class="fr-tier__name">Enterprise</p>
-        <p class="fr-tier__price">Custom</p>
-        <p class="fr-tier__tag">Regulated, sovereign, or air-gapped. Talk to us.</p>
-        <ul>
-          <li>BYOC + VPC</li>
-          <li>SCIM + SAML</li>
-          <li>SOC&nbsp;2 / HIPAA mapping</li>
-          <li>Dedicated registry + SLA</li>
-        </ul>
-        <div class="fr-tier__cta"><a href="/enterprise/inquiry" class="fr-btn fr-btn--ghost">Book a call</a></div>
-      </div>
     </div>
-    <p class="ks-mono ks-dim" style="margin-top: 16px; font-size: 12.5px;">Full pricing, overages, and self-host options at <a href="/pricing">/pricing</a>. Enterprise + air-gap at <a href="/enterprise">/enterprise</a>.</p>
+    <p class="ks-mono ks-dim" style="margin-top: 16px; font-size: 12.5px;">Full pricing, overages, and self-host options at <a href="/pricing">/pricing</a>.</p>
   </div>
 </section>
 
@@ -1480,6 +1519,33 @@
   </div>
 </section>
 
+<!-- W837: why-footnote (the W648 4-cell "why kolm") demoted to small editorial
+     text below the finale. User: "not so important keep it as smaller text at
+     the end not so big". -->
+<section class="fr-section fr-section--tight" id="why-footnote" aria-labelledby="why-footnote-h" style="padding-top:48px; padding-bottom:36px;">
+  <div class="fr-container fr-container--tight">
+    <hr class="section-rule" aria-hidden="true">
+    <p class="w837-why__eyebrow">Why kolm: the four things a hosted API cannot give you</p>
+    <div class="w837-why__grid">
+      <p><strong>Apache-2.0, end to end.</strong> Every SDK, one self-host bundle, no open-core carveouts. <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">Source &rarr;</a></p>
+      <p><strong>Ed25519 on every response.</strong> Verify which model wrote which answer in two seconds against the public registry. <a href="/verify-prod">Try it &rarr;</a></p>
+      <p><strong>Per-token bill stops at compile.</strong> 24.5&nbsp;tok/s for a 7B on one 5090; 11.5 for a 32B. <a href="/benchmarks">Benchmarks &rarr;</a></p>
+      <p><strong>Your data, untouched.</strong> VPC, on-prem, or air-gapped. SOC&nbsp;2 Type&nbsp;I shipped today; PII redaction on by default at the gateway. <a href="/security">Posture &rarr;</a></p>
+    </div>
+    <style>
+      #why-footnote h2.sr-only, #why-footnote .sr-only { position:absolute; left:-10000px; }
+      .w837-why__eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 16px; text-align: center; }
+      .w837-why__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 40px; row-gap: 14px; max-width: 820px; margin: 0 auto; }
+      .w837-why__grid p { font-family: var(--ks-sans); font-size: 13.5px; line-height: 1.55; color: var(--ink-3); margin: 0; }
+      .w837-why__grid p strong { color: var(--ink-2); font-weight: 600; }
+      .w837-why__grid p a { color: var(--brand-primary); border-bottom: 1px solid rgba(29,45,68,0.25); padding-bottom: 1px; }
+      .w837-why__grid p a:hover { border-bottom-color: var(--brand-primary); }
+      @media (max-width: 720px) { .w837-why__grid { grid-template-columns: 1fr; } }
+    </style>
+    <h2 id="why-footnote-h" class="sr-only" style="position:absolute;left:-10000px;">Why kolm</h2>
+  </div>
+</section>
+
 <!-- ================== W706: tiny vendor-compare strip  -  moved here from #vs.
      User: "should be super small just at the very bottom of the page under the
      CTA". Three rows max, kolm column highlighted; no "X rows" framing,
@@ -1487,7 +1553,7 @@
 <section class="fr-section fr-section--tight" aria-label="kolm vs hosted gateways" style="padding-top:0;">
   <div class="fr-container">
     <div class="w706-bot-cmp">
-      <div class="w706-bot-cmp__head">kolm vs hosted gateways &middot; <a href="/compare" style="color:rgba(126,240,210,0.85); text-decoration:none;">full teardown &rarr;</a></div>
+      <div class="w706-bot-cmp__head">kolm vs hosted gateways &middot; <a href="/compare" style="color:var(--brand-primary); text-decoration:none;">full teardown &rarr;</a></div>
       <div class="w706-bot-cmp__grid">
         <div class="l"></div>
         <div class="k">kolm</div>

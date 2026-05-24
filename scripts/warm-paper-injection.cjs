@@ -84,24 +84,24 @@ function transform(html) {
    */
   out = out.replace(/<meta\s+name=["']theme-color["'][^>]*>/gi, (tag) => {
     if (/media=/i.test(tag)) {
-      /* Paired tag — just normalize the hex. */
+      /* Paired tag — normalize hex to W837 Ink & Linen palette. */
       if (/prefers-color-scheme:\s*light/i.test(tag)) {
-        const normalized = tag.replace(/content=(["'])#[0-9a-f]{3,8}\1/i, 'content="#faf9f7"');
+        const normalized = tag.replace(/content=(["'])#[0-9a-f]{3,8}\1/i, 'content="#f4f0e8"');
         if (normalized !== tag) changed = true;
         return normalized;
       }
       if (/prefers-color-scheme:\s*dark/i.test(tag)) {
-        const normalized = tag.replace(/content=(["'])#[0-9a-f]{3,8}\1/i, 'content="#121211"');
+        const normalized = tag.replace(/content=(["'])#[0-9a-f]{3,8}\1/i, 'content="#0e1014"');
         if (normalized !== tag) changed = true;
         return normalized;
       }
       return tag;
     }
-    /* Replace single tag with light+dark pair. */
+    /* Replace single tag with light+dark pair (W837 Ink & Linen). */
     changed = true;
     return (
-      '<meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)">\n'
-      + '    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">'
+      '<meta name="theme-color" content="#f4f0e8" media="(prefers-color-scheme: light)">\n'
+      + '    <meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">'
     );
   });
 

@@ -1,20 +1,23 @@
-/* warm-paper.css — 2026-05-24 visual overlay.
+/* warm-paper.css — Ink & Linen v2 (2026-05-24 retune).
    Loads LAST so it wins the cascade. Token-driven; no per-page edits.
 
-   Replaces the previous black+mint dark default with a warm-paper
-   monochrome aesthetic. Goals:
+   Supersedes the orange "Warm Paper" pass. Palette is now:
 
-     · light-by-default; warm-dark opt-in via [data-theme="dark"]
-     · sienna #c2410c is the only accent (no rainbow chips)
-     · typography first: Inter 56px H1, -0.035em tracking
-     · section rhythm via thin rules, not alternating backgrounds
-     · cards are 1px border + tiny radius; near-zero shadow
-     · code blocks always-dark regardless of mode (familiar IDE feel)
-     · 160px gap between major sections
+     · cool linen #f4f0e8 page · pure white card · deep midnight navy
+       #1d2d44 as the only accent · monochromatic status colors
+       (forest / sepia / oxblood) so nothing screams
+     · light by default; ink-dark opt-in via [data-theme="dark"]
+     · typography lift: Source Serif Pro display for H1/H2,
+       Inter for body, JetBrains Mono for terminals
+     · section rhythm via engraved rules + intensified paper grain
+     · cards 1px border + small radius + earned hover lift
+     · code blocks always-dark regardless of mode (IDE feel)
 
    Lock-in safety: every selector below is additive. No structural
    layout is removed; existing tests pass because the cascade only
    adjusts color, type, spacing, border, shadow — not DOM shape. */
+
+@import url('https://fonts.bunny.net/css?family=source-serif-pro:400,600,700&display=swap');
 
 /* ============================================================
    1. PAGE FRAME — body uses paper background + ink color
@@ -46,20 +49,20 @@ html[style*="background"], body[style*="background"] {
    ============================================================ */
 
 h1, .h1, .display, .ks-display {
-  font-family: var(--ks-font-sans);
-  font-weight: var(--ks-weight-semibold);
-  font-size: clamp(36px, 5.4vw, 56px);
-  line-height: 1.05;
-  letter-spacing: -0.035em;
+  font-family: 'Source Serif Pro', 'Source Serif 4', Georgia, 'Times New Roman', var(--ks-font-sans);
+  font-weight: 600;
+  font-size: clamp(40px, 6.0vw, 64px);
+  line-height: 1.02;
+  letter-spacing: -0.028em;
   color: var(--ink-1);
 }
 
 h2, .h2 {
-  font-family: var(--ks-font-sans);
-  font-weight: var(--ks-weight-semibold);
-  font-size: clamp(28px, 3.4vw, 40px);
+  font-family: 'Source Serif Pro', 'Source Serif 4', Georgia, 'Times New Roman', var(--ks-font-sans);
+  font-weight: 600;
+  font-size: clamp(30px, 3.8vw, 44px);
   line-height: 1.10;
-  letter-spacing: -0.030em;
+  letter-spacing: -0.022em;
   color: var(--ink-1);
 }
 
@@ -182,13 +185,53 @@ a:focus-visible {
 .ks > main > section,
 body > section,
 main > section {
-  padding-top: clamp(72px, 9vw, 128px);
-  padding-bottom: clamp(72px, 9vw, 128px);
+  padding-top: clamp(88px, 10vw, 144px);
+  padding-bottom: clamp(88px, 10vw, 144px);
+  position: relative;
 }
 
+/* Engraved rule between sections — paper that has been pressed,
+   not painted. Top line is 1px ink, immediately below it a 1px
+   highlight catches the simulated light. */
 .ks > section + section,
 main > section + section {
-  border-top: 1px solid var(--line-1);
+  border-top: 1px solid var(--line-2);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+[data-theme="dark"] .ks > section + section,
+[data-theme="dark"] main > section + section {
+  border-top-color: var(--line-2);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* Standalone engraved divider, drop anywhere */
+.section-rule {
+  display: block;
+  height: 0;
+  margin: clamp(48px, 6vw, 80px) auto;
+  width: min(100%, 220px);
+  border: 0;
+  border-top: 1px solid var(--line-2);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+  position: relative;
+}
+
+.section-rule::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 5px;
+  background: var(--brand-primary);
+  border-radius: 50%;
+  opacity: 0.65;
+}
+
+[data-theme="dark"] .section-rule {
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 /* The hero section keeps its own breathing room */
@@ -197,9 +240,10 @@ main > section:first-of-type,
 section.hero,
 section.kolm-hero,
 section[data-hero] {
-  padding-top: clamp(56px, 6vw, 96px);
-  padding-bottom: clamp(72px, 9vw, 128px);
+  padding-top: clamp(72px, 7vw, 112px);
+  padding-bottom: clamp(88px, 10vw, 144px);
   border-top: none;
+  box-shadow: none;
 }
 
 /* ============================================================
@@ -211,13 +255,39 @@ section[data-hero] {
   background: var(--surface-1);
   border: 1px solid var(--line-2);
   border-radius: var(--ks-radius-md);
-  box-shadow: none;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 1px 2px rgba(22, 21, 19, 0.04);
   transition: border-color var(--ks-motion-base) var(--ks-ease-standard),
-              transform var(--ks-motion-base) var(--ks-ease-standard);
+              transform var(--ks-motion-base) var(--ks-ease-standard),
+              box-shadow var(--ks-motion-base) var(--ks-ease-standard);
 }
 
 .card:hover, .ks-card:hover, .kolm-card:hover {
   border-color: var(--line-strong);
+  transform: translateY(-1px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 8px 24px -12px rgba(22, 21, 19, 0.18),
+    0 2px 4px rgba(22, 21, 19, 0.06);
+}
+
+[data-theme="dark"] .card,
+[data-theme="dark"] .ks-card,
+[data-theme="dark"] .kolm-card,
+[data-theme="dark"] [class*="-card"]:not([class*="card-deck"]):not([class*="cardless"]) {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.03) inset,
+    0 1px 2px rgba(0, 0, 0, 0.32);
+}
+
+[data-theme="dark"] .card:hover,
+[data-theme="dark"] .ks-card:hover,
+[data-theme="dark"] .kolm-card:hover {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 10px 28px -14px rgba(0, 0, 0, 0.6),
+    0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 /* ============================================================
@@ -258,6 +328,10 @@ section[data-hero] {
   background: var(--brand-primary);
   color: #ffffff !important;
   border-color: var(--brand-primary);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.18) inset,
+    0 1px 2px rgba(29, 45, 68, 0.30),
+    0 4px 14px -8px rgba(29, 45, 68, 0.40);
 }
 
 .btn-primary:hover, .button-primary:hover,
@@ -267,6 +341,11 @@ section[data-hero] {
   background: var(--brand-primary-strong);
   border-color: var(--brand-primary-strong);
   color: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.18) inset,
+    0 2px 4px rgba(29, 45, 68, 0.34),
+    0 10px 22px -10px rgba(29, 45, 68, 0.45);
 }
 
 .btn-secondary, .button-secondary,
@@ -310,17 +389,19 @@ section[data-hero] {
 pre, .code, .code-block,
 .kolm-code, .ks-code,
 .terminal, .kolm-terminal {
-  background: #1c1b1a;
-  color: #f5f5f4;
-  border: 1px solid #292826;
+  background: #0e1014;
+  color: #e8e3d6;
+  border: 1px solid #22262e;
   border-radius: var(--ks-radius-md);
-  padding: 16px 18px;
+  padding: 18px 20px;
   overflow-x: auto;
   font-family: var(--ks-font-mono);
   font-size: 13.5px;
-  line-height: 1.55;
+  line-height: 1.58;
   letter-spacing: 0;
-  box-shadow: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 1px 0 rgba(22, 21, 19, 0.04);
 }
 
 pre code, .code-block code {
@@ -342,17 +423,17 @@ code:not(pre code) {
   border: 1px solid var(--line-1);
 }
 
-/* Subtle syntax-style tokens inside dark code */
-.code-block .tok-keyword, pre .tok-keyword { color: #fb923c; }
-.code-block .tok-string, pre .tok-string { color: #86efac; }
-.code-block .tok-number, pre .tok-number { color: #fde68a; }
-.code-block .tok-comment, pre .tok-comment { color: #78716c; font-style: italic; }
-.code-block .tok-fn, pre .tok-fn { color: #fdba74; }
+/* Subtle syntax-style tokens inside dark code — restrained palette */
+.code-block .tok-keyword, pre .tok-keyword { color: #7d96c0; }
+.code-block .tok-string, pre .tok-string   { color: #b8c8a8; }
+.code-block .tok-number, pre .tok-number   { color: #d4c89e; }
+.code-block .tok-comment, pre .tok-comment { color: #787268; font-style: italic; }
+.code-block .tok-fn, pre .tok-fn           { color: #c4a988; }
 
-/* Prompt prefix */
+/* Prompt prefix — silvery navy on dark code */
 .terminal .prompt::before, .kolm-terminal .prompt::before {
   content: "$ ";
-  color: #c2410c;
+  color: #7d96c0;
 }
 
 /* ============================================================
@@ -364,9 +445,9 @@ code:not(pre code) {
 header.kolm-nav,
 nav.kolm-nav,
 .site-nav, .ks-nav {
-  background: rgba(250, 249, 247, 0.86);
-  backdrop-filter: saturate(160%) blur(12px);
-  -webkit-backdrop-filter: saturate(160%) blur(12px);
+  background: rgba(244, 240, 232, 0.88);
+  backdrop-filter: saturate(160%) blur(14px);
+  -webkit-backdrop-filter: saturate(160%) blur(14px);
   border-bottom: 1px solid var(--line-1);
   box-shadow: none;
 }
@@ -377,7 +458,7 @@ nav.kolm-nav,
 [data-theme="dark"] nav.kolm-nav,
 [data-theme="dark"] .site-nav,
 [data-theme="dark"] .ks-nav {
-  background: rgba(18, 18, 17, 0.82);
+  background: rgba(14, 16, 20, 0.85);
   border-bottom: 1px solid var(--line-1);
 }
 
@@ -501,9 +582,9 @@ tr:hover td {
   border-color: var(--brand-primary-edge);
 }
 
-.pill-good { color: var(--status-good); border-color: rgba(21, 128, 61, 0.28); background: rgba(21, 128, 61, 0.08); }
-.pill-warn { color: var(--status-warn); border-color: rgba(161, 98, 7, 0.28); background: rgba(161, 98, 7, 0.08); }
-.pill-bad  { color: var(--status-bad);  border-color: rgba(185, 28, 28, 0.28); background: rgba(185, 28, 28, 0.08); }
+.pill-good { color: var(--status-good); border-color: rgba(45, 106, 72, 0.30);  background: rgba(45, 106, 72, 0.07); }
+.pill-warn { color: var(--status-warn); border-color: rgba(139, 105, 20, 0.30); background: rgba(139, 105, 20, 0.07); }
+.pill-bad  { color: var(--status-bad);  border-color: rgba(139, 40, 40, 0.30);  background: rgba(139, 40, 40, 0.07); }
 
 /* ============================================================
    13. DIVIDERS / HR
@@ -530,7 +611,7 @@ hr, .divider, .ks-divider {
 }
 
 [data-theme="dark"] ::selection {
-  background: rgba(251, 146, 60, 0.30);
+  background: rgba(125, 150, 192, 0.30);
   color: var(--ink-1);
 }
 
@@ -595,15 +676,33 @@ body::before {
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 1200px 800px at 100% 110%, rgba(194, 65, 12, 0.045), transparent 58%),
-    radial-gradient(ellipse 900px 600px at 0% -10%, rgba(28, 27, 26, 0.025), transparent 60%);
+    radial-gradient(ellipse 1300px 850px at 100% 108%, rgba(29, 45, 68, 0.055), transparent 58%),
+    radial-gradient(ellipse 900px 620px at 0% -8%,   rgba(22, 21, 19, 0.030), transparent 62%);
+  z-index: 0;
+}
+
+/* Paper grain — SVG fractal noise, multiplied onto the linen */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.085 0'/></filter><rect width='220' height='220' filter='url(%23n)'/></svg>");
+  background-size: 220px 220px;
+  mix-blend-mode: multiply;
+  opacity: 0.55;
   z-index: 0;
 }
 
 [data-theme="dark"] body::before {
   background:
-    radial-gradient(ellipse 1100px 780px at 100% 108%, rgba(251, 146, 60, 0.06), transparent 56%),
-    radial-gradient(ellipse 900px 600px at 0% -10%, rgba(231, 229, 228, 0.03), transparent 60%);
+    radial-gradient(ellipse 1200px 820px at 100% 108%, rgba(125, 150, 192, 0.06), transparent 56%),
+    radial-gradient(ellipse 900px 620px at 0% -8%,   rgba(232, 227, 214, 0.025), transparent 62%);
+}
+
+[data-theme="dark"] body::after {
+  mix-blend-mode: overlay;
+  opacity: 0.18;
 }
 
 /* Keep content above the ambient layer */
@@ -684,8 +783,28 @@ details > *:not(summary) {
 }
 
 [style*="color:#7ef0d2" i],
-[style*="color:#2bf5b3" i] {
+[style*="color:#2bf5b3" i],
+[style*="color:#c2410c" i],
+[style*="color:#9a3412" i],
+[style*="color:#fb923c" i],
+[style*="color:#fdba74" i] {
   color: var(--brand-primary) !important;
+}
+
+[style*="background:#c2410c" i],
+[style*="background:#9a3412" i],
+[style*="background:#fb923c" i],
+[style*="background:#fdba74" i],
+[style*="background-color:#c2410c" i],
+[style*="background-color:#fb923c" i] {
+  background: var(--brand-primary) !important;
+}
+
+[style*="border-color:#c2410c" i],
+[style*="border-color:#fb923c" i],
+[style*="border:1px solid #c2410c" i],
+[style*="border:1px solid #fb923c" i] {
+  border-color: var(--brand-primary) !important;
 }
 
 /* Color-scheme hint follows our explicit attribute, not the inline style */
