@@ -1,5 +1,5 @@
 // Recipe service worker: keeps the registry available offline.
-const CACHE = 'kolm-v55-2026-05-24-w766-w767-w768-w769-w770-eu-ai-act-soc2-iso27001-modelcard-residency-auditexport';
+const CACHE = 'kolm-v56-2026-05-24-w771-w772-w773-w774-w813-vlm-audio-video-xlang-drift';
 const PRECACHE = [
  '/device',
  '/design-tokens.css',

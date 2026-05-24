@@ -218,6 +218,80 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   <a href="/docs/failure-modes"><b>Failure modes &rarr;</b><span>Keyword-cluster K-Score &mdash; another axis split with Wilson CI.</span></a>
 </div>
 
+<!-- ====================================================================
+     W774 — Cross-lingual distillation (English teacher, multilingual student)
+     [W774-3] Doc: /docs/multilingual.html (extends the W760 doc page,
+     same /docs/multilingual rewrite, distinct data-w774 anchors).
+     ==================================================================== -->
+<section data-w774="section-root" style="margin-top:64px;border-top:1px solid var(--line);padding-top:48px">
+<p class="brand-eyebrow" data-w774="brand-eyebrow">Open-source AI workbench</p>
+<h1 data-w774="h1" style="font-size:36px;margin-bottom:14px">Cross-lingual distillation &mdash; English teacher, multilingual student.</h1>
+<p class="lede" data-w774="lede">A language-balanced sampler picks captures by detected lang under one of four strategies. Per-language eval gates every score at Wilson n&ge;30 &mdash; never a number-shaped lie.</p>
+
+<h2 id="w774-target-langs" data-w774="target-langs-header">Default target languages</h2>
+<p>W774 ships with twelve default target languages &mdash; a 12-language subset of W760&#39;s 22 SUPPORTED_LANGS, covering every script class the W760 detector handles (Latin, CJK kanji, CJK kana, Cyrillic, Arabic, Devanagari, Hangul). Twelve is well above the W774 spec floor of ten.</p>
+<div class="lang-table" data-w774="default-target-langs-grid">
+  <div class="lang-pill"><b>en</b><span>English</span></div>
+  <div class="lang-pill"><b>es</b><span>Spanish</span></div>
+  <div class="lang-pill"><b>fr</b><span>French</span></div>
+  <div class="lang-pill"><b>de</b><span>German</span></div>
+  <div class="lang-pill"><b>ja</b><span>Japanese</span></div>
+  <div class="lang-pill"><b>zh</b><span>Chinese</span></div>
+  <div class="lang-pill"><b>pt</b><span>Portuguese</span></div>
+  <div class="lang-pill"><b>ru</b><span>Russian</span></div>
+  <div class="lang-pill"><b>ar</b><span>Arabic</span></div>
+  <div class="lang-pill"><b>hi</b><span>Hindi</span></div>
+  <div class="lang-pill"><b>ko</b><span>Korean</span></div>
+  <div class="lang-pill"><b>it</b><span>Italian</span></div>
+</div>
+
+<h2 id="w774-strategies" data-w774="balance-strategies-header">Balance strategies</h2>
+<p>Four frozen strategies determine how the sampler re-weights captures across target languages. Pick by intent &mdash; <code>uniform</code> if downstream eval weights every language equally; <code>traffic_weighted</code> if you want the sample to mirror production language mix; <code>sqrt_inverse</code> for the canonical NMT balance; <code>log_inverse</code> for an even softer rare-language tilt.</p>
+<table data-w774="balance-strategies-table">
+  <thead><tr><th>Strategy</th><th>Weight rule</th><th>Best for</th></tr></thead>
+  <tbody>
+    <tr><td><code>uniform</code></td><td>1.0 per target lang</td><td>Per-language K-Score parity</td></tr>
+    <tr><td><code>sqrt_inverse</code></td><td>1 / &radic;traffic</td><td>NMT canonical balance (Arivazhagan et al, 2019)</td></tr>
+    <tr><td><code>log_inverse</code></td><td>1 / log(1+traffic)</td><td>Soft tail-language tilt</td></tr>
+    <tr><td><code>traffic_weighted</code></td><td>traffic count</td><td>Production-mirror sampling</td></tr>
+  </tbody>
+</table>
+
+<h2 id="w774-per-lang-eval" data-w774="per-lang-eval-header">Per-language eval (Wilson 95% CI gated at n&ge;30)</h2>
+<p data-w774="per-lang-eval-body">Every per-language score is gated at the same Wilson n&ge;30 floor as <a href="#w774-target-langs">W760</a>&#39;s per-language K-Score. Below the floor the language is moved into <code>languages_skipped_below_n30:[]</code> &mdash; never reported with a CI. <code>compareLanguageDelta()</code> diffs two eval outputs and flags significant per-language deltas; the heuristic is conservative (delta wider than either CI band).</p>
+<pre data-w774="per-lang-eval-shape"><code>{
+  "ok": true,
+  "version": "w774-v1",
+  "by_lang": {
+    "en": { "n": 124, "score": 0.91, "ci95_low": 0.86, "ci95_high": 0.95 },
+    "es": { "n": 42,  "score": 0.62, "ci95_low": 0.47, "ci95_high": 0.75 }
+  },
+  "gated_at_n": 30,
+  "languages_skipped_below_n30": [{ "lang": "ko", "n": 14 }]
+}</code></pre>
+
+<h2 id="w774-bakeoff" data-w774="bakeoff-header">Multilingual bake-off</h2>
+<p data-w774="bakeoff-body">Head-to-head compare two artifacts on multilingual captures. <code>runXlangBakeoff()</code> partitions captures by detected language, judges both outputs per row, then emits a per-language winner plus a <code>multilingual_consistency_score</code> (0..1) reflecting how uniformly the overall winner wins across languages. Requires &ge;2 distinct detected languages &mdash; otherwise returns <code>no_multilingual_captures</code> (honest envelope; use <a href="/docs/api">/v1/bakeoff</a> for single-language head-to-head).</p>
+
+<h2 id="w774-cli" data-w774="cli-header">CLI usage</h2>
+<table data-w774="cli-table">
+  <thead><tr><th>Surface</th><th>Invocation</th></tr></thead>
+  <tbody>
+    <tr><td>CLI (coverage)</td><td><code>kolm xlang coverage --namespace &lt;ns&gt;</code></td></tr>
+    <tr><td>CLI (sample)</td><td><code>kolm xlang sample --strategy uniform --max 100 --langs en,es,fr,de,ja,zh,pt,ru,ar,hi,ko,it</code></td></tr>
+    <tr><td>CLI (per-language eval)</td><td><code>kolm xlang per-language-eval &lt;artifact_path&gt; --confirm</code></td></tr>
+    <tr><td>CLI (bakeoff)</td><td><code>kolm xlang bakeoff &lt;artifact_a&gt; &lt;artifact_b&gt; --confirm</code></td></tr>
+    <tr><td>API (coverage)</td><td><code>GET /v1/xlang/language-coverage?namespace=&lt;ns&gt;</code></td></tr>
+    <tr><td>API (sample)</td><td><code>POST /v1/xlang/balanced-sample</code> body <code>{namespace, strategy, target_langs, max_n}</code></td></tr>
+    <tr><td>API (per-language eval)</td><td><code>POST /v1/xlang/per-language-eval</code> body <code>{namespace, artifact_path, confirm:true}</code></td></tr>
+    <tr><td>API (bakeoff)</td><td><code>POST /v1/xlang/bakeoff</code> body <code>{namespace, artifact_a, artifact_b, confirm:true}</code></td></tr>
+    <tr><td>Trainer</td><td><code>python apps/trainer/xlang_distill.py --captures captures.jsonl --out artifacts/ --dry-run</code></td></tr>
+  </tbody>
+</table>
+
+<div class="honesty" data-w774="honesty-block">Honest by default: <code>evaluatePerLanguage()</code> never reports a CI for n&lt;30; <code>assessLanguageCoverage()</code> returns <code>coverage_score:0</code> on empty captures (never silent 1.0); <code>runXlangBakeoff()</code> requires &ge;2 distinct languages or surfaces <code>no_multilingual_captures</code>; <code>xlang_distill.py --dry-run</code> stamps <code>trainer_not_invoked:true</code> &mdash; we never fabricate training results. Module stamp: <code>w774-v1</code>.</div>
+</section>
+
 </div></main>
 
 <footer class="ks-footer">

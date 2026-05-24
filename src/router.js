@@ -17628,5 +17628,819 @@ res.json({
     }
   });
 
+  // =====================================================================
+  // W771 — Vision-language capture detector + bake-off routes.
+  //
+  //   POST /v1/vision/capture-detect
+  //     body: { message }
+  //     Pure detector — returns {is_vision, image_url_blocks, base64_blocks,
+  //     total_images} for the passed chat message. No persistence. Auth-gated
+  //     so an unauthenticated probe cannot use this as a free image-detect
+  //     service.
+  //
+  //   POST /v1/vision/bakeoff
+  //     body: { namespace?, artifact_path?, max_n?, confirm:true }
+  //     Replays vision captures through the named .kolm artifact + scores via
+  //     the heuristic Jaccard judge (DI seam ready for callable judge later).
+  //     `confirm:true` is REQUIRED — pattern from W411 spend-protection.
+  //
+  //   GET /v1/vision/captures?namespace=<ns>&limit=<N>
+  //     Lists vision captures (W411 defense-in-depth tenant fence). Returns
+  //     {ok, count, captures[]} envelope.
+  //
+  // All three are tenant-fenced via req.tenant_record.id (W411). Honest
+  // envelopes on bad input — no silent passthrough.
+  // =====================================================================
+  r.post('/v1/vision/capture-detect', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./vision-capture.js');
+      const message = (req.body && typeof req.body === 'object') ? req.body.message : null;
+      if (!message || typeof message !== 'object') {
+        return res.status(400).json({
+          ok: false,
+          error: 'message_required',
+          hint: 'POST body must be {message: {role, content}}',
+          version: mod.VISION_CAPTURE_VERSION,
+        });
+      }
+      const det = mod.detectVisionCapture(message);
+      return res.json({
+        ok: true,
+        ...det,
+        version: mod.VISION_CAPTURE_VERSION,
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'vision_capture_detect_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  r.post('/v1/vision/bakeoff', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./vlm-bakeoff.js');
+      const body = (req.body && typeof req.body === 'object') ? req.body : {};
+      // W411 spend-protection pattern: confirm:true REQUIRED. Otherwise a
+      // misclick (or a stray curl) could fire the replay against every
+      // captured row without operator intent.
+      if (body.confirm !== true) {
+        return res.status(400).json({
+          ok: false,
+          error: 'confirm_required',
+          hint: 'pass {confirm: true} in body. Bake-off replays every vision row through the artifact.',
+          version: mod.VLM_BAKEOFF_VERSION,
+        });
+      }
+      const tenant_id = req.tenant_record.id;
+      const namespace = (typeof body.namespace === 'string') ? body.namespace : null;
+      const artifact_path = (typeof body.artifact_path === 'string') ? body.artifact_path : null;
+      const max_n = Number.isFinite(Number(body.max_n)) ? Number(body.max_n) : 100;
+      // Lazy-load capture-store to back the real persistence-side storeMod.
+      // Tests pass their own opts.storeMod in-process via the module API,
+      // not via this HTTP path.
+      const storeMod = await import('./store.js');
+      const result = await mod.runVlmBakeoff({
+        tenant_id,
+        namespace,
+        artifact_path,
+        max_n,
+        opts: { storeMod },
+      });
+      if (!result.ok) return res.status(400).json(result);
+      return res.json(result);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'vision_bakeoff_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  r.get('/v1/vision/captures', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./vision-capture.js');
+      const storeMod = await import('./store.js');
+      const tenant_id = req.tenant_record.id;
+      const namespace = (typeof req.query.namespace === 'string') ? req.query.namespace : null;
+      const limit = Number.isFinite(Number(req.query.limit)) ? Number(req.query.limit) : 100;
+      const result = mod.listVisionCaptures({
+        tenant_id,
+        namespace,
+        limit,
+        opts: { storeMod },
+      });
+      if (!result.ok) return res.status(400).json(result);
+      return res.json(result);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'vision_captures_list_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // =====================================================================
+  // W772 — Audio capture detector + audio bake-off routes (transcript + intent).
+  //
+  //   POST /v1/audio/capture-detect
+  //     body: { message }
+  //     Pure detector — returns {is_audio, audio_blocks, transcript_present,
+  //     total_audio} for the passed chat message. No persistence. Auth-gated
+  //     so an unauthenticated probe cannot use this as a free audio-detect
+  //     service.
+  //
+  //   POST /v1/audio/bakeoff
+  //     body: { namespace?, artifact_path?, max_n?, confirm:true }
+  //     Replays audio captures (whisper transcript -> candidate response)
+  //     through the named .kolm artifact + scores via the heuristic Jaccard
+  //     judge (DI seam ready for callable judge later). `confirm:true` is
+  //     REQUIRED — same spend-protection pattern as the W771 vlm bakeoff.
+  //
+  //   GET /v1/audio/captures?namespace=<ns>&limit=<N>
+  //     Lists audio captures (W411 defense-in-depth tenant fence). Returns
+  //     {ok, count, captures[]} envelope. Each capture row carries the
+  //     audio_block_count + transcript_chars + audio_urls_hashed[] field
+  //     stamped by captureAudioMessage (NEVER the raw audio bytes).
+  //
+  // All three are tenant-fenced via req.tenant_record.id (W411). Honest
+  // envelopes on bad input — no silent passthrough.
+  // =====================================================================
+  r.post('/v1/audio/capture-detect', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./audio-capture.js');
+      const message = (req.body && typeof req.body === 'object') ? req.body.message : null;
+      if (!message || typeof message !== 'object') {
+        return res.status(400).json({
+          ok: false,
+          error: 'message_required',
+          hint: 'POST body must be {message: {role, content}}',
+          version: mod.AUDIO_CAPTURE_VERSION,
+        });
+      }
+      const det = mod.detectAudioCapture(message);
+      return res.json({
+        ok: true,
+        ...det,
+        version: mod.AUDIO_CAPTURE_VERSION,
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'audio_capture_detect_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  r.post('/v1/audio/bakeoff', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./audio-bakeoff.js');
+      const body = (req.body && typeof req.body === 'object') ? req.body : {};
+      // W411 spend-protection pattern: confirm:true REQUIRED. Otherwise a
+      // misclick (or a stray curl) could fire the replay against every
+      // captured audio row without operator intent.
+      if (body.confirm !== true) {
+        return res.status(400).json({
+          ok: false,
+          error: 'confirm_required',
+          hint: 'pass {confirm: true} in body. Audio bake-off replays every audio capture through the artifact.',
+          version: mod.AUDIO_BAKEOFF_VERSION,
+        });
+      }
+      const tenant_id = req.tenant_record.id;
+      const namespace = (typeof body.namespace === 'string') ? body.namespace : null;
+      const artifact_path = (typeof body.artifact_path === 'string') ? body.artifact_path : null;
+      const max_n = Number.isFinite(Number(body.max_n)) ? Number(body.max_n) : 50;
+      const result = await mod.runAudioBakeoff({
+        tenant_id,
+        namespace,
+        artifact_path,
+        max_n,
+        opts: {},
+      });
+      if (!result.ok) return res.status(400).json(result);
+      return res.json(result);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'audio_bakeoff_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  r.get('/v1/audio/captures', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const eventStore = await import('./event-store.js');
+      const audioMod = await import('./audio-capture.js');
+      const tenant_id = req.tenant_record.id;
+      const namespace = (typeof req.query.namespace === 'string') ? req.query.namespace : null;
+      const limit = Number.isFinite(Number(req.query.limit)) ? Number(req.query.limit) : 100;
+      const cap = Math.max(1, Math.min(500, limit));
+      const events = await eventStore.listEvents({
+        tenant_id,
+        namespace: namespace || undefined,
+        media_kind: 'audio',
+        limit: cap,
+      });
+      // W411 defense-in-depth: per-row tenant_id check even though listEvents
+      // already filtered. Pure inspection — privacy-safe fields only (NEVER
+      // raw audio bytes, only the URL hash + transcript head).
+      const rows = events
+        .filter((ev) => ev && ev.tenant_id === tenant_id && ev.media_kind === 'audio')
+        .map((ev) => ({
+          event_id: ev.event_id,
+          tenant_id: ev.tenant_id,
+          namespace: ev.namespace,
+          created_at: ev.created_at,
+          media_kind: ev.media_kind,
+          media_mime: ev.media_mime || null,
+          media_bytes: ev.media_bytes || 0,
+          media_hash: ev.media_hash || null,
+          audio_block_count: ev.audio_block_count || 0,
+          transcript_chars: ev.transcript_chars || 0,
+          transcript_present: !!ev.transcript_present,
+          transcript_truncated: !!ev.transcript_truncated,
+          audio_urls_hashed: Array.isArray(ev.audio_urls_hashed) ? ev.audio_urls_hashed : [],
+          transcript_head: typeof ev.prompt_head === 'string' ? ev.prompt_head.slice(0, 200) : '',
+        }));
+      return res.json({
+        ok: true,
+        tenant_id,
+        namespace: namespace || null,
+        count: rows.length,
+        captures: rows,
+        version: audioMod.AUDIO_CAPTURE_VERSION,
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'audio_captures_list_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // =====================================================================
+  // W773 - Video distill module (frame sampling + caption pipeline).
+  //
+  // Three auth-gated routes:
+  //
+  //   POST /v1/video/capture-detect      body: { message }
+  //     Detects video blocks in an inbound message and returns the
+  //     normalized shape envelope. RAW VIDEO BYTES are NEVER persisted
+  //     or echoed back. Pure shape inspection.
+  //
+  //   POST /v1/video/bakeoff             body: { namespace, artifact_path, max_n, confirm:true }
+  //     Runs the W773 video bakeoff (per-content-kind score breakdown).
+  //     confirm:true is REQUIRED because the bakeoff can be expensive on
+  //     a large capture pool. Returns honest envelope on no captures.
+  //
+  //   GET  /v1/video/captures?namespace=<ns>&limit=<n>
+  //     Lists this tenant's captured video events (media_kind=video).
+  //     Tenant-fenced via req.tenant_record.id with W411 defense-in-depth
+  //     (per-row filter on the listEvents read AND inside bakeoff).
+  //
+  // Distinct paths from W771 vision-capture (/v1/vision/*) and W772 audio
+  // capture (/v1/audio/*) so the three parallel wave agents do not collide.
+  // =====================================================================
+  r.post('/v1/video/capture-detect', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./video-capture.js');
+      const message = req.body && req.body.message;
+      const det = mod.detectVideoCapture(message);
+      // Normalize each block so the caller gets the canonical envelope
+      // and not the raw shape (which varies across providers).
+      const normalized = det.video_blocks.map(b => mod.normalizeVideoBlock(b));
+      return res.status(200).json({
+        ok: true,
+        version: mod.VIDEO_CAPTURE_VERSION,
+        is_video: det.is_video,
+        total_videos: det.total_videos,
+        normalized,
+        supported_mimes: mod.SUPPORTED_VIDEO_MIMES,
+      });
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'video_capture_detect_error',
+        detail: String(e && e.message || e),
+        version: 'w773-v1',
+      });
+    }
+  });
+
+  r.post('/v1/video/bakeoff', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const body = req.body || {};
+    // confirm REQUIRED so a fat-fingered curl does not kick off a massive
+    // bakeoff. Honest envelope on missing confirm.
+    if (body.confirm !== true) {
+      return res.status(400).json({
+        ok: false,
+        error: 'confirm_required',
+        hint: 'pass {confirm: true} to acknowledge the bakeoff scope',
+        version: 'w773-v1',
+      });
+    }
+    try {
+      const mod = await import('./video-bakeoff.js');
+      const env = await mod.runVideoBakeoff({
+        tenant_id: req.tenant_record.id,
+        namespace: typeof body.namespace === 'string' ? body.namespace : null,
+        artifact_path: typeof body.artifact_path === 'string' ? body.artifact_path : null,
+        max_n: Number.isFinite(Number(body.max_n)) ? Number(body.max_n) : 50,
+      });
+      return res.status(env.ok ? 200 : 400).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'video_bakeoff_error',
+        detail: String(e && e.message || e),
+        version: 'w773-v1',
+      });
+    }
+  });
+
+  r.get('/v1/video/captures', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const { listEvents } = await import('./event-store.js');
+      const tenant_id = req.tenant_record.id;
+      const namespace = typeof req.query.namespace === 'string' ? req.query.namespace : undefined;
+      const limitRaw = req.query.limit;
+      const limit = (limitRaw != null && Number.isFinite(Number(limitRaw)))
+        ? Math.max(1, Math.min(500, Number(limitRaw)))
+        : 50;
+      const rawRows = await listEvents({
+        tenant_id,
+        namespace,
+        media_kind: 'video',
+        limit,
+      });
+      // W411 defense-in-depth per-row filter even though listEvents already
+      // filtered. NEVER trust the indexed read alone for tenant fence.
+      const rows = rawRows.filter(r => r && r.tenant_id === tenant_id && r.media_kind === 'video');
+      return res.status(200).json({
+        ok: true,
+        version: 'w773-v1',
+        tenant_id,
+        namespace: namespace || null,
+        limit,
+        count: rows.length,
+        captures: rows.map(r => ({
+          event_id: r.event_id,
+          created_at: r.created_at,
+          namespace: r.namespace,
+          media_uri: r.media_uri,
+          media_mime: r.media_mime,
+          media_bytes: r.media_bytes,
+          media_extraction_status: r.media_extraction_status,
+          w773: r.w773 || null,
+        })),
+      });
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'video_captures_error',
+        detail: String(e && e.message || e),
+        version: 'w773-v1',
+      });
+    }
+  });
+
+  // ============== W774 — Cross-lingual distillation (English teacher → multilingual student) ==============
+  // POST /v1/xlang/balanced-sample        — body:{namespace, strategy, target_langs, max_n}
+  // POST /v1/xlang/per-language-eval      — body:{namespace, artifact_path, confirm:true}
+  // POST /v1/xlang/bakeoff                — body:{namespace, artifact_a, artifact_b, confirm:true}
+  // GET  /v1/xlang/language-coverage?namespace=<ns>
+  //
+  // Honesty contract:
+  //   * Wilson 95% CI gated at n>=30 PER LANGUAGE (mirrors W760).
+  //   * per-language-eval + bakeoff are confirm-gated because both dispatch
+  //     a per-capture run loop against an artifact (cost + latency).
+  //   * Hosted route has NO runOnArtifact/judge wired by default —
+  //     production injects via req.app.locals._w774_run_on_artifact +
+  //     ._w774_judge. The honest envelope on missing wiring is the
+  //     contract, not a 500.
+  //   * All four routes are W411 tenant-fenced.
+  r.post('/v1/xlang/balanced-sample', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const { sampleBalanced, DEFAULT_TARGET_LANGS } =
+        await import('./lang-balanced-sampler.js');
+      const es = await import('./event-store.js');
+      const body = req.body || {};
+      const namespace = String(body.namespace || 'default').slice(0, 128);
+      const strategy = typeof body.strategy === 'string' ? body.strategy : 'uniform';
+      const target_langs = Array.isArray(body.target_langs) && body.target_langs.length > 0
+        ? body.target_langs.slice(0, 40)
+        : DEFAULT_TARGET_LANGS.slice();
+      const max_n = Number.isFinite(Number(body.max_n))
+        ? Math.max(1, Math.min(10000, Math.trunc(Number(body.max_n))))
+        : 100;
+
+      // W411 defense-in-depth — pull tenant_id from req.tenant_record AND
+      // re-filter every row returned by listEvents.
+      let rows = [];
+      try {
+        rows = await es.listEvents({
+          tenant_id: req.tenant_record.id,
+          namespace,
+          limit: 5000,
+          order: 'desc',
+        });
+      } catch (_) { rows = []; }
+      rows = (rows || []).filter((rr) => rr && rr.tenant_id === req.tenant_record.id);
+      const captures = rows.map((rr) => ({
+        cid: rr.event_id || rr.cid,
+        input: rr.prompt_redacted || rr.prompt || rr.input || '',
+        output: rr.response_redacted || rr.response || rr.output || '',
+      }));
+
+      const env = await sampleBalanced({
+        captures,
+        strategy,
+        target_langs,
+        max_n,
+      });
+      return res.status(200).json({ namespace, ...env });
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'xlang_balanced_sample_error',
+        detail: String(e && e.message || e),
+        version: 'w774-v1',
+      });
+    }
+  });
+
+  r.post('/v1/xlang/per-language-eval', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const body = req.body || {};
+      if (body.confirm !== true) {
+        return res.status(400).json({
+          ok: false,
+          error: 'confirm_required',
+          hint: 'pass {confirm:true} — per-language-eval dispatches a per-capture artifact run loop',
+          version: 'w774-v1',
+        });
+      }
+      const { evaluatePerLanguage } = await import('./cross-lingual-eval.js');
+      const namespace = String(body.namespace || 'default').slice(0, 128);
+      const artifact_path = typeof body.artifact_path === 'string' ? body.artifact_path : '';
+      if (!artifact_path) {
+        return res.status(400).json({
+          ok: false,
+          error: 'artifact_path_required',
+          hint: 'pass {artifact_path:"path/to/student.kolm"}',
+          version: 'w774-v1',
+        });
+      }
+      // Hosted route has NO runOnArtifact wired by default — honest
+      // envelope. Production wires both via req.app.locals.
+      let runOnArtifact = null;
+      let judge = null;
+      try {
+        runOnArtifact = req.app && req.app.locals && req.app.locals._w774_run_on_artifact;
+        judge = req.app && req.app.locals && req.app.locals._w774_judge;
+      } catch (_) { /* fall through */ }
+
+      const env = await evaluatePerLanguage({
+        tenant_id: req.tenant_record.id,
+        namespace,
+        artifact_path,
+        opts: { runOnArtifact, judge },
+      });
+      return res.status(200).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'xlang_per_language_eval_error',
+        detail: String(e && e.message || e),
+        version: 'w774-v1',
+      });
+    }
+  });
+
+  r.post('/v1/xlang/bakeoff', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const body = req.body || {};
+      if (body.confirm !== true) {
+        return res.status(400).json({
+          ok: false,
+          error: 'confirm_required',
+          hint: 'pass {confirm:true} — bakeoff dispatches a per-capture run loop against BOTH artifacts',
+          version: 'w774-v1',
+        });
+      }
+      const { runXlangBakeoff } = await import('./xlang-bakeoff.js');
+      const namespace = String(body.namespace || 'default').slice(0, 128);
+      const artifact_a = typeof body.artifact_a === 'string' ? body.artifact_a : '';
+      const artifact_b = typeof body.artifact_b === 'string' ? body.artifact_b : '';
+      if (!artifact_a || !artifact_b) {
+        return res.status(400).json({
+          ok: false,
+          error: 'artifact_paths_required',
+          hint: 'pass {artifact_a:"...", artifact_b:"..."}',
+          version: 'w774-v1',
+        });
+      }
+      let runOnArtifact = null;
+      let judge = null;
+      try {
+        runOnArtifact = req.app && req.app.locals && req.app.locals._w774_run_on_artifact;
+        judge = req.app && req.app.locals && req.app.locals._w774_judge;
+      } catch (_) { /* fall through */ }
+
+      const env = await runXlangBakeoff({
+        tenant_id: req.tenant_record.id,
+        namespace,
+        artifact_a,
+        artifact_b,
+        opts: { runOnArtifact, judge },
+      });
+      return res.status(200).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'xlang_bakeoff_error',
+        detail: String(e && e.message || e),
+        version: 'w774-v1',
+      });
+    }
+  });
+
+  r.get('/v1/xlang/language-coverage', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const { assessLanguageCoverage } = await import('./lang-balanced-sampler.js');
+      const es = await import('./event-store.js');
+      const namespace = String((req.query && req.query.namespace) || 'default').slice(0, 128);
+      let rows = [];
+      try {
+        rows = await es.listEvents({
+          tenant_id: req.tenant_record.id,
+          namespace,
+          limit: 5000,
+          order: 'desc',
+        });
+      } catch (_) { rows = []; }
+      rows = (rows || []).filter((rr) => rr && rr.tenant_id === req.tenant_record.id);
+      const captures = rows.map((rr) => ({
+        cid: rr.event_id || rr.cid,
+        input: rr.prompt_redacted || rr.prompt || rr.input || '',
+        output: rr.response_redacted || rr.response || rr.output || '',
+      }));
+      // Optional target_langs override via query string (comma-separated).
+      const tlRaw = req.query && req.query.target_langs;
+      const target_langs = (typeof tlRaw === 'string' && tlRaw.length > 0)
+        ? tlRaw.split(',').map((s) => s.trim()).filter(Boolean)
+        : undefined;
+      const env = await assessLanguageCoverage({
+        captures,
+        target_langs,
+      });
+      return res.status(200).json({ namespace, ...env });
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'xlang_language_coverage_error',
+        detail: String(e && e.message || e),
+        version: 'w774-v1',
+      });
+    }
+  });
+
+  // =====================================================================
+  // W813 — Drift Detection + Alerting (embedding-distribution comparator).
+  //
+  // Five auth-gated routes — distinct from W167 supersession
+  // (drift-supersession.js), distinct from W747 distribution-shift alerter
+  // (/v1/drift-alert/*), distinct from W813 capture-distribution detector
+  // (/v1/drift-detector). These routes expose the W813 embedding-distribution
+  // + fallback-rate comparator built on src/drift-detect.js +
+  // src/drift-alert-w813.js + src/drift-config.js:
+  //
+  //   POST /v1/drift/scan             body:{namespace, live_embeddings,
+  //                                         training_embeddings, confirm:true}
+  //     Runs compareDistributions(); emits a drift_detected alert via
+  //     emitDriftAlert when drift_detected is true. confirm:true REQUIRED
+  //     because embedding histograms are non-trivially expensive at scale.
+  //
+  //   GET  /v1/drift/status?namespace=<ns>
+  //     Returns the latest persisted drift result for a namespace.
+  //
+  //   POST /v1/drift/configure        body:{namespace, kl_threshold,
+  //                                         fallback_rate_lift,
+  //                                         auto_remediate_drift, confirm:true}
+  //     Persists a per-namespace config override (W813-2).
+  //
+  //   GET  /v1/drift/alerts?namespace=<ns>&limit=<N>
+  //     Lists recent drift_detected alerts (W813-3). Tenant-fenced read.
+  //
+  //   POST /v1/drift/auto-remediate   body:{namespace, dry_run:true}
+  //     W813-5 silent-trigger guard: NEVER fires W720 orchestrateImprovement
+  //     unless config.auto_remediate_drift === true AND body.dry_run !== true.
+  //     dry_run defaults to TRUE so a misclick cannot kick off a re-distill.
+  //
+  // All five are tenant-fenced via req.tenant_record.id (W411 law).
+  // =====================================================================
+  r.post('/v1/drift/scan', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const body = req.body || {};
+      if (body.confirm !== true) {
+        return res.status(400).json({
+          ok: false,
+          error: 'confirm_required',
+          hint: 'drift scan computes histograms over the full embedding sets; pass confirm:true to acknowledge the compute cost',
+          version: 'w813-v1',
+        });
+      }
+      const namespace = (typeof body.namespace === 'string' && body.namespace) ? body.namespace : 'default';
+      const detect = await import('./drift-detect.js');
+      const alertMod = await import('./drift-alert-w813.js');
+      const cfgMod = await import('./drift-config.js');
+      const tenant_id = req.tenant_record.id;
+
+      const cfgEnv = await cfgMod.getNamespaceConfig({ tenant_id, namespace });
+      const cfg = (cfgEnv && cfgEnv.config) || cfgMod.DRIFT_CONFIG_DEFAULTS;
+
+      const compareEnv = detect.compareDistributions({
+        live_embeddings: body.live_embeddings,
+        training_embeddings: body.training_embeddings,
+        opts: {
+          bins: body.bins,
+          kl_threshold: cfg.kl_threshold,
+          fallback_rate_lift: cfg.fallback_rate_lift,
+          live_fallback_rate: body.live_fallback_rate,
+          training_fallback_rate: body.training_fallback_rate,
+        },
+      });
+      if (!compareEnv.ok) return res.status(400).json(compareEnv);
+
+      let alertEnv = null;
+      if (compareEnv.drift_detected) {
+        alertEnv = await alertMod.emitDriftAlert({
+          tenant_id,
+          namespace,
+          drift_result: compareEnv,
+        });
+      }
+      return res.status(200).json({
+        ok: true,
+        version: 'w813-v1',
+        namespace,
+        tenant_id,
+        drift_result: compareEnv,
+        alert: alertEnv,
+        config_source: cfgEnv && cfgEnv.source,
+      });
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'drift_scan_error',
+        detail: String(e && e.message || e),
+        version: 'w813-v1',
+      });
+    }
+  });
+
+  r.get('/v1/drift/status', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const tenant_id = req.tenant_record.id;
+      const namespace = typeof req.query.namespace === 'string' ? req.query.namespace : null;
+      const alertMod = await import('./drift-alert-w813.js');
+      const cfgMod = await import('./drift-config.js');
+      const list = await alertMod.listRecentAlerts({ tenant_id, namespace, limit: 1 });
+      const latest = (list && list.ok && list.alerts && list.alerts[0]) || null;
+      const cfgEnv = namespace
+        ? await cfgMod.getNamespaceConfig({ tenant_id, namespace })
+        : null;
+      return res.status(200).json({
+        ok: true,
+        version: 'w813-v1',
+        tenant_id,
+        namespace: namespace || null,
+        latest_alert: latest,
+        config: cfgEnv && cfgEnv.config ? cfgEnv.config : null,
+      });
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'drift_status_error',
+        detail: String(e && e.message || e),
+        version: 'w813-v1',
+      });
+    }
+  });
+
+  r.post('/v1/drift/configure', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const body = req.body || {};
+      if (body.confirm !== true) {
+        return res.status(400).json({
+          ok: false,
+          error: 'confirm_required',
+          hint: 'persisting a drift config override is durable; pass confirm:true to acknowledge',
+          version: 'w813-v1',
+        });
+      }
+      const cfgMod = await import('./drift-config.js');
+      const env = await cfgMod.setNamespaceConfig({
+        tenant_id: req.tenant_record.id,
+        namespace: body.namespace,
+        kl_threshold: body.kl_threshold,
+        fallback_rate_lift: body.fallback_rate_lift,
+        auto_remediate_drift: body.auto_remediate_drift,
+        confirm: true,
+      });
+      return res.status(env && env.ok ? 200 : 400).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'drift_configure_error',
+        detail: String(e && e.message || e),
+        version: 'w813-v1',
+      });
+    }
+  });
+
+  r.get('/v1/drift/alerts', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const tenant_id = req.tenant_record.id;
+      const namespace = typeof req.query.namespace === 'string' ? req.query.namespace : null;
+      const limitRaw = req.query.limit;
+      const limit = (limitRaw != null && Number.isFinite(Number(limitRaw)))
+        ? Number(limitRaw)
+        : 50;
+      const alertMod = await import('./drift-alert-w813.js');
+      const env = await alertMod.listRecentAlerts({ tenant_id, namespace, limit });
+      return res.status(env && env.ok ? 200 : 400).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'drift_alerts_error',
+        detail: String(e && e.message || e),
+        version: 'w813-v1',
+      });
+    }
+  });
+
+  r.post('/v1/drift/auto-remediate', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const body = req.body || {};
+      const namespace = (typeof body.namespace === 'string' && body.namespace) ? body.namespace : 'default';
+      // W813-5 silent-trigger guard: dry_run defaults to TRUE. Operator must
+      // explicitly opt-in to a live trigger via {dry_run:false}.
+      const dry_run = (body.dry_run === false) ? false : true;
+      const tenant_id = req.tenant_record.id;
+
+      const cfgMod = await import('./drift-config.js');
+      const cfgEnv = await cfgMod.getNamespaceConfig({ tenant_id, namespace });
+      const cfg = (cfgEnv && cfgEnv.config) || cfgMod.DRIFT_CONFIG_DEFAULTS;
+      // W813-5 invariant — would_trigger reflects ONLY the namespace flag.
+      const would_trigger = !!cfg.auto_remediate_drift;
+
+      let triggered = false;
+      let w720_envelope = null;
+      let w720_error = null;
+      if (!dry_run && would_trigger) {
+        try {
+          const orch = await import('./improvement-orchestrator.js');
+          if (typeof orch.orchestrateImprovement === 'function') {
+            // We do not have detected candidates here; surface the honest
+            // orchestrator envelope. A future wave can wire
+            // detectUnderperformingCaptures -> orchestrateImprovement. For
+            // W813 we honor the contract (NEVER auto-trigger unless config
+            // + explicit live flag) and return the orchestrator's bare
+            // envelope without inventing candidates.
+            w720_envelope = await orch.orchestrateImprovement({
+              tenant_id, namespace, candidates: [],
+            });
+            triggered = !!(w720_envelope && (w720_envelope.ok === true));
+          } else {
+            w720_error = 'orchestrate_improvement_missing';
+          }
+        } catch (e) {
+          w720_error = String((e && e.message) || e);
+        }
+      }
+      return res.status(200).json({
+        ok: true,
+        version: 'w813-v1',
+        tenant_id,
+        namespace,
+        dry_run,
+        would_trigger,
+        triggered,
+        w720_envelope,
+        w720_error,
+        config_source: cfgEnv && cfgEnv.source,
+      });
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'drift_auto_remediate_error',
+        detail: String(e && e.message || e),
+        version: 'w813-v1',
+      });
+    }
+  });
+
   return r;
 }

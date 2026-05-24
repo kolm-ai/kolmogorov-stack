@@ -13690,31 +13690,24 @@ async function cmdDrift(args) {
   const sub = args[0];
   const rest = args.slice(1);
   if (!sub) {
-    console.error('usage: kolm drift <detect|cron|verify|alerts> [...]');
+    console.error('usage: kolm drift <detect|cron|verify> [...]');
     console.error('  kolm drift detect <current.kolm> --baseline <baseline.kolm> [--out report.json]');
-    console.error('  kolm drift detect --namespace <ns> [--tenant <id>] [--json]   (W813 traffic drift)');
-    console.error('  kolm drift alerts [--namespace <ns>] [--tenant <id>] [--limit N] [--json]');
     console.error('  kolm drift cron --baseline <path> --current <path> --cadence "<cron-expr>"');
     console.error('  kolm drift verify <report.json>');
+    console.error('  (W813 namespace mode: kolm drift scan|status|configure|alerts|auto-remediate)');
     process.exit(EXIT.BAD_ARGS);
   }
   if (sub === 'detect') return cmdDriftDetect(rest);
   if (sub === 'cron')   return cmdDriftCron(rest);
   if (sub === 'verify') return cmdDriftVerify(rest);
-  if (sub === 'alerts' || sub === 'alert') return cmdDriftAlerts(rest);
   console.error(`unknown subcommand: kolm drift ${sub}`);
-  console.error('try: kolm drift detect | cron | verify | alerts');
+  console.error('try: kolm drift detect | cron | verify (or W813: scan/status/configure/alerts/auto-remediate)');
   process.exit(EXIT.BAD_ARGS);
 }
 
 async function cmdDriftDetect(args) {
-  // W813 — traffic-distribution + K-Score drift, scoped per-namespace, run
-  // against the live event-store rather than two artifact snapshots. Triggered
-  // when --namespace is present (with no positional artifact path).
-  const namespaceFlag = pickFlag(args, '--namespace') || pickFlag(args, '-n');
-  if (namespaceFlag && !args.find(a => !a.startsWith('-') && /\.kolm$/i.test(a))) {
-    return await cmdDriftDetectNamespace(args, namespaceFlag);
-  }
+  // W167 legacy: artifact-pair drift detection. W813 namespace mode lives in
+  // cmdW813Drift (sub === 'scan'); this function stays artifact-pair only.
   const {
     snapshotFromManifest, detectDrift, buildDriftReport, writeDriftReport,
     DEFAULT_TOLERANCES,
@@ -13777,116 +13770,6 @@ async function cmdDriftDetect(args) {
   }
   if (report.verdict === 'breach') {
     process.exit(EXIT.GATE_FAIL);
-  }
-}
-
-// W813 — traffic-distribution + K-Score drift, scoped per-namespace, evaluated
-// against the live event-store rather than two artifact snapshots. This is the
-// detector half of the W775-unblock contract: writes alerts to the alerts
-// table + event-store via runDetectAndAlert, exit non-zero if drift fires.
-async function cmdDriftDetectNamespace(args, namespace) {
-  const tenantId =
-    pickFlag(args, '--tenant')
-    || pickFlag(args, '--tenant-id')
-    || process.env.KOLM_TENANT_ID
-    || 'local-tenant';
-  const wantJson = args.includes('--json');
-  const noPersist = args.includes('--dry-run') || args.includes('--no-persist');
-  const drift = await import('../src/drift-detector.js');
-  let result;
-  try {
-    result = await drift.runDetectAndAlert({
-      tenant_id: tenantId,
-      namespace,
-      persist: !noPersist,
-    });
-  } catch (e) {
-    if (wantJson) {
-      console.log(JSON.stringify({ ok: false, error: 'detector_failed', message: e && e.message || String(e) }, null, 2));
-    } else {
-      console.error('drift detector failed: ' + (e && e.message || String(e)));
-    }
-    process.exit(EXIT.EXECUTION);
-  }
-  if (wantJson) {
-    console.log(JSON.stringify(result, null, 2));
-  } else {
-    const sig = result && result.signal || {};
-    const res = result && result.results || {};
-    console.log('W813 drift detect');
-    console.log('  tenant      : ' + tenantId);
-    console.log('  namespace   : ' + namespace);
-    console.log('  has_drift   : ' + String(!!sig.has_drift));
-    console.log('  magnitude   : ' + (typeof sig.magnitude === 'number' ? sig.magnitude.toFixed(4) : '-'));
-    if (sig.drift_kind) console.log('  worst kind  : ' + sig.drift_kind);
-    if (sig.threshold != null) console.log('  threshold   : ' + sig.threshold);
-    if (sig.error) console.log('  status      : ' + sig.error + (sig.hint ? (' (' + sig.hint + ')') : ''));
-    if (res.distribution) {
-      console.log('  --- capture_distribution_js ---');
-      console.log('    has_drift : ' + String(!!res.distribution.has_drift));
-      console.log('    magnitude : ' + (typeof res.distribution.magnitude === 'number' ? res.distribution.magnitude.toFixed(4) : '-'));
-      if (res.distribution.error) console.log('    status    : ' + res.distribution.error);
-    }
-    if (res.kscore) {
-      console.log('  --- kscore_drop ---');
-      console.log('    has_drift : ' + String(!!res.kscore.has_drift));
-      console.log('    magnitude : ' + (typeof res.kscore.magnitude === 'number' ? res.kscore.magnitude.toFixed(4) : '-'));
-      if (res.kscore.error) console.log('    status    : ' + res.kscore.error);
-    }
-    const alerts = (result && result.alerts) || [];
-    console.log('  alerts     : ' + alerts.length + (noPersist ? ' (dry-run, not persisted)' : ' (persisted)'));
-  }
-  // Non-zero exit when drift fired, so cron / CI can pick it up.
-  if (result && result.signal && result.signal.has_drift) {
-    process.exit(EXIT.GATE_FAIL || 5);
-  }
-}
-
-// W813 — `kolm drift alerts` lists the persisted alerts for a tenant
-// (optionally filtered by namespace). Honest-by-default: empty list is empty,
-// never silent-success.
-async function cmdDriftAlerts(args) {
-  if (maybeHelp('drift alerts', args)) return;
-  const tenantId =
-    pickFlag(args, '--tenant')
-    || pickFlag(args, '--tenant-id')
-    || process.env.KOLM_TENANT_ID
-    || 'local-tenant';
-  const namespace = pickFlag(args, '--namespace') || pickFlag(args, '-n') || null;
-  const limitRaw = pickFlag(args, '--limit');
-  const limit = limitRaw && /^\d+$/.test(limitRaw) ? Number(limitRaw) : 50;
-  const wantJson = args.includes('--json');
-  const drift = await import('../src/drift-detector.js');
-  let alerts;
-  try {
-    alerts = await drift.listAlerts({ tenant_id: tenantId, namespace, limit });
-  } catch (e) {
-    if (wantJson) {
-      console.log(JSON.stringify({ ok: false, error: 'list_alerts_failed', message: e && e.message || String(e) }, null, 2));
-    } else {
-      console.error('list alerts failed: ' + (e && e.message || String(e)));
-    }
-    process.exit(EXIT.EXECUTION);
-  }
-  if (wantJson) {
-    console.log(JSON.stringify({ ok: true, tenant_id: tenantId, namespace: namespace, alerts: alerts }, null, 2));
-    return;
-  }
-  console.log('W813 drift alerts');
-  console.log('  tenant     : ' + tenantId);
-  console.log('  namespace  : ' + (namespace || '(all)'));
-  console.log('  count      : ' + alerts.length);
-  if (alerts.length === 0) {
-    console.log('  (no alerts — either no drift has been detected for this tenant or detector has not run)');
-    return;
-  }
-  for (const a of alerts.slice(0, limit)) {
-    const ts = a.created_at || '';
-    const ns = a.namespace || 'default';
-    const kind = a.drift_kind || a.kind || '?';
-    const mag = (typeof a.magnitude === 'number') ? a.magnitude.toFixed(4) : '-';
-    const thr = (typeof a.threshold === 'number') ? a.threshold.toFixed(4) : '-';
-    console.log(`  [${ts}] ns=${ns} kind=${kind} magnitude=${mag} threshold=${thr}`);
   }
 }
 
@@ -23193,6 +23076,14 @@ COMPLETION_SUBS.sbom = ['emit', 'repo', 'verify'];
 COMPLETION_VERBS.push('residency', 'region');
 COMPLETION_SUBS.residency = ['regions', 'tag', 'get', 'configure-namespace', 'enforce'];
 COMPLETION_SUBS.region    = ['regions', 'tag', 'get', 'configure-namespace', 'enforce'];
+
+// W774 — Cross-lingual distillation. `kolm xlang <coverage|sample|per-language-eval|
+// bakeoff>` and the `multilingual` alias. Distinct-named dispatcher
+// cmdW774Xlang so parallel W771/W772/W773/W813 wave agents cannot collide
+// on this symbol.
+COMPLETION_VERBS.push('xlang', 'multilingual');
+COMPLETION_SUBS.xlang        = ['coverage', 'sample', 'per-language-eval', 'bakeoff'];
+COMPLETION_SUBS.multilingual = ['coverage', 'sample', 'per-language-eval', 'bakeoff'];
 
 function emitBashCompletion() {
     const verbs = COMPLETION_VERBS.join(' ');
@@ -34955,6 +34846,24 @@ async function main() {
       // is the short alias dispatched from the same case arm.
       case 'audit-export':
       case 'ae':       await withErrorContext('audit-export', () => cmdW770AuditExport(rest)); break;
+      // W771 — `kolm vlm <detect|bakeoff|captures>` (alias `vision`) is the
+      // vision-language capture + bake-off dispatcher. Distinct-named
+      // (cmdW771Vlm) so parallel W772 audio / W773 video / W774 xlang wave
+      // agents cannot collide on the dispatcher symbol.
+      case 'vlm':
+      case 'vision':   await withErrorContext('vlm', () => cmdW771Vlm(rest)); break;
+      // W772 — `kolm audio <detect|bakeoff|captures>` is the audio capture
+      // (whisper transcript -> teacher response) + bake-off dispatcher.
+      // Distinct-named (cmdW772Audio) so parallel W771 vision / W773 video /
+      // W774 xlang / W813 drift wave agents cannot collide on the dispatcher
+      // symbol.
+      case 'audio':    await withErrorContext('audio',   () => cmdW772Audio(rest)); break;
+      // W773 — `kolm video <detect|bakeoff|captures|sampling-spec>` is the
+      // video capture + frame-sampling spec + bakeoff dispatcher. Distinct-
+      // named (cmdW773Video) so parallel W771 vision / W772 audio / W774
+      // xlang / W813 drift wave agents cannot collide on the dispatcher
+      // symbol.
+      case 'video':    await withErrorContext('video',   () => cmdW773Video(rest)); break;
       // W450 — `kolm settings` is the per-tenant settings CLI mirror of
       // /account/settings.html + the TUI settings view (key F).
       case 'settings': await withErrorContext('settings', () => cmdSettings(rest)); break;
@@ -35088,7 +34997,7 @@ async function main() {
       case 'replay':   await withErrorContext('replay',   () => cmdReplay(rest)); break;
       case 'sync':     await withErrorContext('sync',     () => cmdSync(rest)); break;
       case 'profile':  await withErrorContext('profile',  () => cmdProfile(rest)); break;
-      case 'drift':    await withErrorContext('drift',    () => cmdDrift(rest)); break;
+      case 'drift':    await withErrorContext('drift',    () => cmdW813Drift(rest)); break;
       case 'install':  await withErrorContext('install',  () => cmdInstall(rest)); break;
       case 'tune':     await withErrorContext('tune',     () => cmdTune(rest)); break;
       case 'rag':      await withErrorContext('rag',      () => cmdRag(rest)); break;
@@ -35276,6 +35185,13 @@ async function main() {
       // dispatched from the same arm.
       case 'residency':
       case 'region':   await withErrorContext('residency', () => cmdW769Residency(rest)); break;
+      // W774 — `kolm xlang <coverage|sample|per-language-eval|bakeoff>` routes
+      // the cross-lingual distillation dispatcher (English teacher → multilingual
+      // student). Distinct-named (cmdW774Xlang) so parallel W771/W772/W773/W813
+      // wave agents cannot collide on this symbol. `multilingual` is the long
+      // alias dispatched from the same arm.
+      case 'xlang':
+      case 'multilingual': await withErrorContext('xlang', () => cmdW774Xlang(rest)); break;
       case 'agents':     await withErrorContext('agents',     () => cmdAgents(rest)); break;
       case 'shell-init': await withErrorContext('shell-init', () => cmdShellInit(rest)); break;
       case '--version':
@@ -38624,6 +38540,1054 @@ async function cmdW769Residency(args) {
   }
 
   console.error('usage: kolm residency <regions|tag|get|configure-namespace|enforce> [args]');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// W771 — COMPLETION entries appended post-literal so parallel sibling agents
+// (W772 audio / W773 video / W774 xlang) can land their edits without
+// merge-conflicting on the COMPLETION_VERBS literal array.
+COMPLETION_VERBS.push('vlm', 'vision');
+COMPLETION_SUBS.vlm    = ['detect', 'bakeoff', 'captures'];
+COMPLETION_SUBS.vision = ['detect', 'bakeoff', 'captures'];
+
+// =============================================================================
+// W771 — Vision-language capture + bake-off dispatcher.
+//
+// Distinct-named (cmdW771Vlm) so parallel W772 cmdW772Audio / W773 cmdW773Video
+// / W774 cmdW774Xlang / W813 cmdW813Drift wave agents cannot collide on this
+// symbol. Wired from main() via two case arms: `case 'vlm':` (canonical)
+// and `case 'vision':` (alias).
+//
+// Subcommands:
+//
+//   detect [--stdin]
+//     Reads a chat-message JSON from stdin and POSTs to
+//     /v1/vision/capture-detect. Prints the {is_vision, total_images, ...}
+//     envelope.
+//
+//   bakeoff <artifact_path> [--namespace ns] [--max N] [--confirm]
+//     POSTs to /v1/vision/bakeoff. The --confirm flag is REQUIRED — the
+//     route returns 400 confirm_required otherwise.
+//
+//   captures [--namespace ns] [--limit N]
+//     GETs /v1/vision/captures. Returns list envelope.
+//
+// All three rely on KOLM_API_KEY for auth. version stamp matches /^w771-/.
+// =============================================================================
+async function cmdW771Vlm(args) {
+  const sub = (args && args[0]) || '';
+
+  function _envApiKey() {
+    return process.env.KOLM_API_KEY || process.env.KOLM_KEY || '';
+  }
+  function _envBase() {
+    return (process.env.KOLM_BASE_URL || process.env.KOLM_URL || 'https://kolm.ai').replace(/\/$/, '');
+  }
+  function _flag(rest, name) {
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--' + name && i + 1 < rest.length) return rest[i + 1];
+      if (typeof rest[i] === 'string' && rest[i].startsWith('--' + name + '=')) {
+        return rest[i].slice(name.length + 3);
+      }
+    }
+    return null;
+  }
+  function _hasFlag(rest, name) {
+    return Array.isArray(rest) && rest.includes('--' + name);
+  }
+  function _print(envelope) {
+    console.log(JSON.stringify(envelope, null, 2));
+  }
+  function _fail(envelope, code = EXIT.EXECUTION) {
+    _print(envelope);
+    process.exit(code);
+  }
+  function _requireKey() {
+    const key = _envApiKey();
+    if (!key) {
+      _fail({
+        ok: false,
+        error: 'auth_required',
+        hint: 'set KOLM_API_KEY (kolm signup / kolm login)',
+        version: 'w771-v1',
+      }, EXIT.MISSING_PREREQ);
+    }
+    return key;
+  }
+
+  if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
+    console.error('usage: kolm vlm <detect|bakeoff|captures> [args]');
+    console.error('         (alias: kolm vision ...)');
+    console.error('  detect                                    # reads chat-message JSON from stdin');
+    console.error('  bakeoff <artifact_path> [--namespace ns] [--max N] --confirm');
+    console.error('  captures [--namespace ns] [--limit N]');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+
+  // ──────────────────────── subcommand: detect ───────────────────────────────
+  if (sub === 'detect') {
+    const key = _requireKey();
+    // Read stdin until EOF, treat as JSON of {role, content}.
+    let raw = '';
+    try {
+      raw = await new Promise((resolve) => {
+        if (process.stdin.isTTY) return resolve('');
+        let buf = '';
+        process.stdin.setEncoding('utf8');
+        process.stdin.on('data', (c) => { buf += c; });
+        process.stdin.on('end', () => resolve(buf));
+        process.stdin.on('error', () => resolve(buf));
+      });
+    } catch (_) {
+      raw = '';
+    }
+    let message;
+    try {
+      message = JSON.parse(raw || '{}');
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'invalid_json_on_stdin',
+        detail: String(e && e.message || e),
+        hint: 'pipe a JSON chat message into stdin: echo \'{"role":"user","content":[...]}\' | kolm vlm detect',
+        version: 'w771-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/vision/capture-detect', {
+        method: 'POST',
+        headers: {
+          'authorization': 'Bearer ' + key,
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({ message }),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w771-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: bakeoff ──────────────────────────────
+  if (sub === 'bakeoff') {
+    const rest = args.slice(1);
+    const artifact_path = (rest[0] && !rest[0].startsWith('--')) ? rest[0] : _flag(rest, 'artifact');
+    const namespace = _flag(rest, 'namespace');
+    const max = _flag(rest, 'max');
+    const confirm = _hasFlag(rest, 'confirm');
+    const key = _requireKey();
+    if (!confirm) {
+      _fail({
+        ok: false,
+        error: 'confirm_required',
+        hint: 'pass --confirm. Bake-off replays every vision capture row through the artifact.',
+        version: 'w771-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    const body = {
+      artifact_path: artifact_path || null,
+      namespace: namespace || null,
+      max_n: max ? Number(max) : 100,
+      confirm: true,
+    };
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/vision/bakeoff', {
+        method: 'POST',
+        headers: {
+          'authorization': 'Bearer ' + key,
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w771-v1' });
+      return;
+    }
+    const respBody = await resp.json().catch(() => ({}));
+    _print(respBody);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: captures ─────────────────────────────
+  if (sub === 'captures') {
+    const rest = args.slice(1);
+    const namespace = _flag(rest, 'namespace');
+    const limit = _flag(rest, 'limit');
+    const key = _requireKey();
+    const qs = new URLSearchParams();
+    if (namespace) qs.set('namespace', String(namespace));
+    if (limit) qs.set('limit', String(limit));
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/vision/captures' + (qs.toString() ? '?' + qs.toString() : ''), {
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w771-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  console.error('usage: kolm vlm <detect|bakeoff|captures> [args]');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// W772 — COMPLETION entries appended post-literal so a parallel agent on the
+// same revision can land their COMPLETION edit independently without a merge
+// conflict on the literal array. `audio` is the only top-level verb the W772
+// wave ships.
+COMPLETION_VERBS.push('audio');
+COMPLETION_SUBS.audio = ['detect', 'bakeoff', 'captures'];
+
+// =============================================================================
+// W772 — Audio capture + audio bake-off dispatcher (transcript + intent).
+//
+// Distinct-named (cmdW772Audio) so parallel W771 cmdW771Vlm / W773 cmdW773Video
+// / W774 cmdW774Xlang / W813 cmdW813Drift wave agents cannot collide on this
+// symbol. Wired from main() via the single `case 'audio':` arm above.
+//
+// Subcommands:
+//
+//   detect [--stdin]
+//     Reads a chat-message JSON from stdin and POSTs to
+//     /v1/audio/capture-detect. Prints the {is_audio, total_audio,
+//     transcript_present, ...} envelope.
+//
+//   bakeoff <artifact_path> [--namespace ns] [--max N] --confirm
+//     POSTs to /v1/audio/bakeoff. The --confirm flag is REQUIRED — the
+//     route returns 400 confirm_required otherwise.
+//
+//   captures [--namespace ns] [--limit N]
+//     GETs /v1/audio/captures. Returns list envelope. Each entry carries
+//     audio_block_count + transcript_chars + audio_urls_hashed[]; the
+//     raw audio bytes are NEVER returned (privacy P0).
+//
+// All three rely on KOLM_API_KEY for auth. version stamp matches /^w772-/.
+// =============================================================================
+async function cmdW772Audio(args) {
+  const sub = (args && args[0]) || '';
+
+  function _envApiKey() {
+    return process.env.KOLM_API_KEY || process.env.KOLM_KEY || '';
+  }
+  function _envBase() {
+    return (process.env.KOLM_BASE_URL || process.env.KOLM_URL || 'https://kolm.ai').replace(/\/$/, '');
+  }
+  function _flag(rest, name) {
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--' + name && i + 1 < rest.length) return rest[i + 1];
+      if (typeof rest[i] === 'string' && rest[i].startsWith('--' + name + '=')) {
+        return rest[i].slice(name.length + 3);
+      }
+    }
+    return null;
+  }
+  function _hasFlag(rest, name) {
+    return Array.isArray(rest) && rest.includes('--' + name);
+  }
+  function _print(envelope) {
+    console.log(JSON.stringify(envelope, null, 2));
+  }
+  function _fail(envelope, code = EXIT.EXECUTION) {
+    _print(envelope);
+    process.exit(code);
+  }
+  function _requireKey() {
+    const key = _envApiKey();
+    if (!key) {
+      _fail({
+        ok: false,
+        error: 'auth_required',
+        hint: 'set KOLM_API_KEY (kolm signup / kolm login)',
+        version: 'w772-v1',
+      }, EXIT.MISSING_PREREQ);
+    }
+    return key;
+  }
+
+  if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
+    console.error('usage: kolm audio <detect|bakeoff|captures> [args]');
+    console.error('  detect                                    # reads chat-message JSON from stdin');
+    console.error('  bakeoff <artifact_path> [--namespace ns] [--max N] --confirm');
+    console.error('  captures [--namespace ns] [--limit N]');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+
+  // ──────────────────────── subcommand: detect ───────────────────────────────
+  if (sub === 'detect') {
+    const key = _requireKey();
+    let raw = '';
+    try {
+      raw = await new Promise((resolve) => {
+        if (process.stdin.isTTY) return resolve('');
+        let buf = '';
+        process.stdin.setEncoding('utf8');
+        process.stdin.on('data', (c) => { buf += c; });
+        process.stdin.on('end', () => resolve(buf));
+        process.stdin.on('error', () => resolve(buf));
+      });
+    } catch (_) {
+      raw = '';
+    }
+    let message;
+    try {
+      message = JSON.parse(raw || '{}');
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'invalid_json_on_stdin',
+        detail: String(e && e.message || e),
+        hint: 'pipe a JSON chat message into stdin: echo \'{"role":"user","content":[...]}\' | kolm audio detect',
+        version: 'w772-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/audio/capture-detect', {
+        method: 'POST',
+        headers: {
+          'authorization': 'Bearer ' + key,
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({ message }),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w772-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: bakeoff ──────────────────────────────
+  if (sub === 'bakeoff') {
+    const rest = args.slice(1);
+    const artifact_path = (rest[0] && !rest[0].startsWith('--')) ? rest[0] : _flag(rest, 'artifact');
+    const namespace = _flag(rest, 'namespace');
+    const max = _flag(rest, 'max');
+    const confirm = _hasFlag(rest, 'confirm');
+    const key = _requireKey();
+    if (!confirm) {
+      _fail({
+        ok: false,
+        error: 'confirm_required',
+        hint: 'pass --confirm. Audio bake-off replays every audio capture row through the artifact.',
+        version: 'w772-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    const body = {
+      artifact_path: artifact_path || null,
+      namespace: namespace || null,
+      max_n: max ? Number(max) : 50,
+      confirm: true,
+    };
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/audio/bakeoff', {
+        method: 'POST',
+        headers: {
+          'authorization': 'Bearer ' + key,
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w772-v1' });
+      return;
+    }
+    const respBody = await resp.json().catch(() => ({}));
+    _print(respBody);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: captures ─────────────────────────────
+  if (sub === 'captures') {
+    const rest = args.slice(1);
+    const namespace = _flag(rest, 'namespace');
+    const limit = _flag(rest, 'limit');
+    const key = _requireKey();
+    const qs = new URLSearchParams();
+    if (namespace) qs.set('namespace', String(namespace));
+    if (limit) qs.set('limit', String(limit));
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/audio/captures' + (qs.toString() ? '?' + qs.toString() : ''), {
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w772-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  console.error('usage: kolm audio <detect|bakeoff|captures> [args]');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// =============================================================================
+// W774 — `kolm xlang <coverage|sample|per-language-eval|bakeoff>` dispatcher.
+//
+// Distinct-named (cmdW774Xlang) per the W724/.../W773 precedent so parallel
+// wave agents on W771/W772/W773/W813 cannot collide on this symbol. The
+// long alias `multilingual` is dispatched from the same case arm in main().
+//
+// Subcommands:
+//   coverage [--namespace ns] [--target-langs en,es,...]
+//       Hits GET /v1/xlang/language-coverage?namespace=...; surfaces present/
+//       missing target languages + the coverage_score (0..1).
+//
+//   sample [--namespace ns] [--strategy uniform|sqrt_inverse|log_inverse|
+//                                       traffic_weighted]
+//          [--max N] [--langs en,es,...]
+//       Hits POST /v1/xlang/balanced-sample; returns the selected sample
+//       envelope with per-language counts + coverage_pct.
+//
+//   per-language-eval <artifact_path> [--namespace ns] --confirm
+//       Hits POST /v1/xlang/per-language-eval; --confirm is REQUIRED because
+//       the server dispatches a per-capture run loop. Without confirm the
+//       server returns 400 confirm_required (we surface that envelope).
+//
+//   bakeoff <artifact_a> <artifact_b> [--namespace ns] --confirm
+//       Hits POST /v1/xlang/bakeoff; --confirm is REQUIRED.
+//
+// Every subcommand prints a JSON envelope to stdout so CI loops parse
+// without screen-scraping. Honest fallback envelopes everywhere.
+// =============================================================================
+async function cmdW774Xlang(args) {
+  const sub = (args && args[0]) || '';
+
+  function _envApiKey() {
+    return process.env.KOLM_API_KEY || '';
+  }
+  function _envBase() {
+    return (process.env.KOLM_BASE_URL || 'https://kolm.ai').replace(/\/$/, '');
+  }
+  function _flag(rest, name) {
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--' + name && i + 1 < rest.length) return rest[i + 1];
+      if (typeof rest[i] === 'string' && rest[i].startsWith('--' + name + '=')) {
+        return rest[i].slice(name.length + 3);
+      }
+    }
+    return null;
+  }
+  function _hasFlag(rest, name) {
+    return (rest || []).some((a) => a === '--' + name);
+  }
+  function _print(envelope) {
+    console.log(JSON.stringify(envelope, null, 2));
+  }
+  function _fail(envelope, code = EXIT.EXECUTION) {
+    _print(envelope);
+    process.exit(code);
+  }
+
+  if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
+    console.error('usage: kolm xlang <coverage|sample|per-language-eval|bakeoff> [args]');
+    console.error('  coverage [--namespace ns] [--target-langs en,es,...]');
+    console.error('  sample [--namespace ns] [--strategy uniform|sqrt_inverse|log_inverse|traffic_weighted]');
+    console.error('         [--max N] [--langs en,es,...]');
+    console.error('  per-language-eval <artifact_path> [--namespace ns] --confirm');
+    console.error('  bakeoff <artifact_a> <artifact_b> [--namespace ns] --confirm');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+
+  // ──────────────────────── subcommand: coverage ─────────────────────────────
+  if (sub === 'coverage') {
+    const rest = args.slice(1);
+    const namespace = _flag(rest, 'namespace') || 'default';
+    const targetLangs = _flag(rest, 'target-langs');
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w774-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    const qs = ['namespace=' + encodeURIComponent(namespace)];
+    if (targetLangs) qs.push('target_langs=' + encodeURIComponent(targetLangs));
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/xlang/language-coverage?' + qs.join('&'), {
+        method: 'GET',
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w774-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: sample ───────────────────────────────
+  if (sub === 'sample') {
+    const rest = args.slice(1);
+    const namespace = _flag(rest, 'namespace') || 'default';
+    const strategy = _flag(rest, 'strategy') || 'uniform';
+    const maxN = Number(_flag(rest, 'max') || 100);
+    const langsRaw = _flag(rest, 'langs');
+    const target_langs = (langsRaw && typeof langsRaw === 'string')
+      ? langsRaw.split(',').map((s) => s.trim()).filter(Boolean)
+      : undefined;
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w774-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    const bodyObj = { namespace, strategy, max_n: maxN };
+    if (target_langs) bodyObj.target_langs = target_langs;
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/xlang/balanced-sample', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify(bodyObj),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w774-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: per-language-eval ────────────────────
+  if (sub === 'per-language-eval') {
+    const rest = args.slice(1);
+    const artifact_path = (rest[0] && !rest[0].startsWith('--')) ? rest[0] : _flag(rest, 'artifact');
+    const namespace = _flag(rest, 'namespace') || 'default';
+    const confirm = _hasFlag(rest, 'confirm');
+    if (!artifact_path) {
+      _fail({ ok: false, error: 'artifact_path_required', hint: 'pass <artifact_path> as the first positional arg', version: 'w774-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w774-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    const bodyObj = { namespace, artifact_path };
+    if (confirm) bodyObj.confirm = true;
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/xlang/per-language-eval', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify(bodyObj),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w774-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: bakeoff ──────────────────────────────
+  if (sub === 'bakeoff') {
+    const rest = args.slice(1);
+    const positional = rest.filter((a) => !a.startsWith('--'));
+    const artifact_a = positional[0] || _flag(rest, 'artifact-a');
+    const artifact_b = positional[1] || _flag(rest, 'artifact-b');
+    const namespace = _flag(rest, 'namespace') || 'default';
+    const confirm = _hasFlag(rest, 'confirm');
+    if (!artifact_a || !artifact_b) {
+      _fail({ ok: false, error: 'artifact_paths_required', hint: 'pass <artifact_a> <artifact_b> as the first two positional args', version: 'w774-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w774-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    const bodyObj = { namespace, artifact_a, artifact_b };
+    if (confirm) bodyObj.confirm = true;
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/xlang/bakeoff', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify(bodyObj),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w774-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  console.error('usage: kolm xlang <coverage|sample|per-language-eval|bakeoff> [args]');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// =============================================================================
+// W813 — Drift Detection + Alerting dispatcher.
+//
+// Distinct-named (cmdW813Drift) so parallel W771/W772/W773/W774 wave agents
+// cannot collide on this symbol. Wired from main() via `case 'drift':` (replaces
+// the previous direct call to cmdDrift).
+//
+// W813-owned subverbs (NEW):
+//   scan          --namespace <ns> [--live <path.json>] [--training <path.json>]
+//                 [--live-fallback-rate N] [--training-fallback-rate N] --confirm
+//   status        [--namespace <ns>] [--json]
+//   configure     [--namespace <ns>] [--kl-threshold N] [--fallback-rate-lift N]
+//                 [--auto-remediate true|false] --confirm
+//   alerts        [--namespace <ns>] [--limit N] [--json]
+//   auto-remediate [--namespace <ns>] [--dry-run|--live]
+//
+// Legacy W167 subverbs (detect|cron|verify) fall through to cmdDrift so the
+// existing kolm-drift-cron pipelines keep working.
+// =============================================================================
+async function cmdW813Drift(args) {
+  const sub = (args && args[0]) || '';
+  const rest = (args && args.slice(1)) || [];
+
+  // ------ legacy passthrough: W167 supersession verbs stay on cmdDrift -----
+  // Older `kolm drift detect/cron/verify/alerts` flags resolve through the
+  // W167 module. The W813 dispatcher claims `scan`, `status`, `configure`,
+  // `auto-remediate`, and re-routes `alerts` to the W813 implementation
+  // when a W813 flag (--namespace) is given; otherwise it stays on cmdDrift.
+  if (sub === 'detect' || sub === 'cron' || sub === 'verify') {
+    return cmdDrift(args);
+  }
+  if (sub === 'help' || sub === '--help' || sub === '-h' || sub === '') {
+    console.error('usage: kolm drift <scan|status|configure|alerts|auto-remediate|detect|cron|verify> [args]');
+    console.error('  scan           --namespace <ns> --live <file.json> --training <file.json> --confirm');
+    console.error('  status         [--namespace <ns>] [--json]');
+    console.error('  configure      --namespace <ns> [--kl-threshold N] [--fallback-rate-lift N] [--auto-remediate true|false] --confirm');
+    console.error('  alerts         [--namespace <ns>] [--limit N] [--json]');
+    console.error('  auto-remediate --namespace <ns> [--dry-run|--live]');
+    console.error('  (legacy W167)  detect | cron | verify');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+
+  function _envApiKey() {
+    return process.env.KOLM_API_KEY || process.env.KOLM_KEY || '';
+  }
+  function _envBase() {
+    return (process.env.KOLM_BASE_URL || process.env.KOLM_URL || 'https://kolm.ai').replace(/\/$/, '');
+  }
+  function _requireKey() {
+    const key = _envApiKey();
+    if (!key) {
+      console.log(JSON.stringify({
+        ok: false,
+        error: 'auth_required',
+        hint: 'set KOLM_API_KEY (kolm signup / kolm login)',
+        version: 'w813-v1',
+      }, null, 2));
+      process.exit(EXIT.MISSING_PREREQ);
+    }
+    return key;
+  }
+  function _print(env) {
+    console.log(JSON.stringify(env, null, 2));
+  }
+  function _readJsonFile(path) {
+    try {
+      const fs = require('node:fs');
+      return JSON.parse(fs.readFileSync(path, 'utf8'));
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // ────────────────────────── subcommand: scan ────────────────────────────
+  if (sub === 'scan') {
+    const namespace = pickFlag(rest, '--namespace') || 'default';
+    const livePath = pickFlag(rest, '--live');
+    const trainingPath = pickFlag(rest, '--training');
+    const liveFb = pickFlag(rest, '--live-fallback-rate');
+    const trainFb = pickFlag(rest, '--training-fallback-rate');
+    const confirm = rest.includes('--confirm');
+    if (!confirm) {
+      _print({ ok: false, error: 'confirm_required', hint: 'pass --confirm to acknowledge compute cost', version: 'w813-v1' });
+      process.exit(EXIT.BAD_ARGS);
+      return;
+    }
+    if (!livePath || !trainingPath) {
+      _print({ ok: false, error: 'embeddings_required', hint: 'pass --live <path.json> and --training <path.json> (each file = number[][] of embeddings)', version: 'w813-v1' });
+      process.exit(EXIT.BAD_ARGS);
+      return;
+    }
+    const live = _readJsonFile(livePath);
+    const training = _readJsonFile(trainingPath);
+    if (!Array.isArray(live) || !Array.isArray(training)) {
+      _print({ ok: false, error: 'bad_embeddings_file', hint: 'embeddings file must be JSON-encoded number[][]', version: 'w813-v1' });
+      process.exit(EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _requireKey();
+    const body = {
+      namespace,
+      live_embeddings: live,
+      training_embeddings: training,
+      confirm: true,
+    };
+    if (liveFb && /^-?\d*(?:\.\d+)?$/.test(liveFb)) body.live_fallback_rate = Number(liveFb);
+    if (trainFb && /^-?\d*(?:\.\d+)?$/.test(trainFb)) body.training_fallback_rate = Number(trainFb);
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/drift/scan', {
+        method: 'POST',
+        headers: { 'authorization': 'Bearer ' + key, 'content-type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+    } catch (e) {
+      _print({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w813-v1' });
+      process.exit(EXIT.EXECUTION);
+      return;
+    }
+    const env = await resp.json().catch(() => ({}));
+    _print(env);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ────────────────────────── subcommand: status ──────────────────────────
+  if (sub === 'status') {
+    const namespace = pickFlag(rest, '--namespace');
+    const key = _requireKey();
+    const qs = namespace ? ('?namespace=' + encodeURIComponent(namespace)) : '';
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/drift/status' + qs, {
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _print({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w813-v1' });
+      process.exit(EXIT.EXECUTION);
+      return;
+    }
+    const env = await resp.json().catch(() => ({}));
+    _print(env);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: configure ─────────────────────────
+  if (sub === 'configure') {
+    const namespace = pickFlag(rest, '--namespace') || 'default';
+    const klThreshold = pickFlag(rest, '--kl-threshold');
+    const fallbackLift = pickFlag(rest, '--fallback-rate-lift');
+    const autoRemediate = pickFlag(rest, '--auto-remediate');
+    const confirm = rest.includes('--confirm');
+    if (!confirm) {
+      _print({ ok: false, error: 'confirm_required', hint: 'pass --confirm to acknowledge durable persist', version: 'w813-v1' });
+      process.exit(EXIT.BAD_ARGS);
+      return;
+    }
+    const body = { namespace, confirm: true };
+    if (klThreshold != null) body.kl_threshold = Number(klThreshold);
+    if (fallbackLift != null) body.fallback_rate_lift = Number(fallbackLift);
+    if (autoRemediate != null) {
+      body.auto_remediate_drift = (autoRemediate === 'true' || autoRemediate === '1');
+    }
+    const key = _requireKey();
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/drift/configure', {
+        method: 'POST',
+        headers: { 'authorization': 'Bearer ' + key, 'content-type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+    } catch (e) {
+      _print({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w813-v1' });
+      process.exit(EXIT.EXECUTION);
+      return;
+    }
+    const env = await resp.json().catch(() => ({}));
+    _print(env);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ────────────────────────── subcommand: alerts ──────────────────────────
+  if (sub === 'alerts' || sub === 'alert') {
+    const namespace = pickFlag(rest, '--namespace');
+    const limit = pickFlag(rest, '--limit');
+    // Backwards-compat: if the legacy --tenant flag is present (cmdDriftAlerts
+    // signature), delegate to cmdDrift so the local-tenant flow keeps working.
+    if (pickFlag(rest, '--tenant') || pickFlag(rest, '--tenant-id')) {
+      return cmdDrift(args);
+    }
+    const key = _requireKey();
+    const qs = [];
+    if (namespace) qs.push('namespace=' + encodeURIComponent(namespace));
+    if (limit != null && /^\d+$/.test(String(limit))) qs.push('limit=' + encodeURIComponent(limit));
+    const url = _envBase() + '/v1/drift/alerts' + (qs.length ? ('?' + qs.join('&')) : '');
+    let resp;
+    try {
+      resp = await fetch(url, { headers: { 'authorization': 'Bearer ' + key } });
+    } catch (e) {
+      _print({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w813-v1' });
+      process.exit(EXIT.EXECUTION);
+      return;
+    }
+    const env = await resp.json().catch(() => ({}));
+    _print(env);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ─────────────────────── subcommand: auto-remediate ─────────────────────
+  if (sub === 'auto-remediate') {
+    const namespace = pickFlag(rest, '--namespace') || 'default';
+    const live = rest.includes('--live');
+    const dryRun = rest.includes('--dry-run') || !live;
+    const key = _requireKey();
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/drift/auto-remediate', {
+        method: 'POST',
+        headers: { 'authorization': 'Bearer ' + key, 'content-type': 'application/json' },
+        body: JSON.stringify({ namespace, dry_run: dryRun }),
+      });
+    } catch (e) {
+      _print({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w813-v1' });
+      process.exit(EXIT.EXECUTION);
+      return;
+    }
+    const env = await resp.json().catch(() => ({}));
+    _print(env);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // Unknown subverb. Delegate to legacy cmdDrift so anything wired there
+  // (e.g. future W167 subverbs) still resolves.
+  return cmdDrift(args);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// W773 — Video Distill Module (frame sampling + caption pipeline)
+//
+// Subverbs:
+//   kolm video detect           --message-file <path>     (POST /v1/video/capture-detect)
+//   kolm video captures         [--namespace NS] [--limit N]   (GET /v1/video/captures)
+//   kolm video bakeoff          --artifact-path <path> [--namespace NS] [--max-n N] --confirm
+//                                                         (POST /v1/video/bakeoff)
+//   kolm video sampling-spec    --duration-s N [--strategy uniform|keyframe|scene_change|adaptive]
+//                               [--fps-target N] [--max-frames N]
+//                               (LOCAL — uses src/frame-sampler.js, no network)
+//
+// Distinct dispatcher name (cmdW773Video) so parallel W771 cmdW771Vlm /
+// W772 cmdW772Audio / W774 cmdW774Xlang waves do not symbol-collide.
+// ────────────────────────────────────────────────────────────────────────────
+
+// W773 — COMPLETION entries appended post-literal so the W773 edit lands
+// independently of W771/W772/W774 sibling waves. Mirror of the W772 pattern.
+COMPLETION_VERBS.push('video');
+COMPLETION_SUBS.video = ['detect', 'captures', 'bakeoff', 'sampling-spec'];
+
+async function cmdW773Video(args) {
+  const rawArgs = Array.isArray(args) ? args : [];
+  const [sub, ...rest] = rawArgs;
+
+  // Inline helpers (each W7xx dispatcher inlines these so a refactor of the
+  // shared helpers can't silently change behaviour for this verb).
+  function _envApiKey() { return process.env.KOLM_API_KEY || ''; }
+  function _envBase()   { return (process.env.KOLM_BASE_URL || 'https://kolm.ai').replace(/\/$/, ''); }
+  function _print(env)  { console.log(JSON.stringify(env, null, 2)); }
+  function _requireKey() {
+    const k = _envApiKey();
+    if (!k) {
+      _print({ ok: false, error: 'api_key_required', hint: 'set KOLM_API_KEY or run `kolm login` first', version: 'w773-v1' });
+      process.exit(EXIT.EXECUTION);
+    }
+    return k;
+  }
+  function _pick(flag) {
+    const i = rest.indexOf(flag);
+    if (i >= 0 && i + 1 < rest.length) return rest[i + 1];
+    return null;
+  }
+  function _has(flag) { return rest.includes(flag); }
+
+  if (!sub || sub === '--help' || sub === '-h' || sub === 'help') {
+    console.error('usage: kolm video <detect|captures|bakeoff|sampling-spec> [args]');
+    console.error('  detect          --message-file <path>');
+    console.error('  captures        [--namespace NS] [--limit N]');
+    console.error('  bakeoff         --artifact-path <path> [--namespace NS] [--max-n N] --confirm');
+    console.error('  sampling-spec   --duration-s N [--strategy uniform|keyframe|scene_change|adaptive]');
+    console.error('                  [--fps-target N] [--max-frames N]');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+
+  // ─────────────────────────── subverb: sampling-spec ───────────────────────
+  // Local — pure JS, no network, no auth. Useful for trainers + smoke tests.
+  if (sub === 'sampling-spec') {
+    const durationS = _pick('--duration-s');
+    const strategy = _pick('--strategy') || 'uniform';
+    const fpsTarget = _pick('--fps-target');
+    const maxFrames = _pick('--max-frames');
+    if (durationS == null) {
+      _print({ ok: false, error: 'bad_args', hint: '--duration-s required', version: 'w773-v1' });
+      process.exit(EXIT.BAD_ARGS);
+      return;
+    }
+    let mod;
+    try {
+      const urlMod = await import('node:url');
+      const pathMod = await import('node:path');
+      const here = pathMod.dirname(urlMod.fileURLToPath(import.meta.url));
+      const samplerUrl = urlMod.pathToFileURL(
+        pathMod.resolve(here, '..', 'src', 'frame-sampler.js'),
+      ).href;
+      mod = await import(samplerUrl);
+    } catch (e) {
+      _print({ ok: false, error: 'frame_sampler_load_failed', detail: String(e && e.message || e), version: 'w773-v1' });
+      process.exit(EXIT.EXECUTION);
+      return;
+    }
+    const specOpts = {
+      video_duration_s: Number(durationS),
+      strategy,
+    };
+    if (fpsTarget != null) specOpts.fps_target = Number(fpsTarget);
+    if (maxFrames != null) specOpts.max_frames = Number(maxFrames);
+    const spec = mod.buildSamplingSpec(specOpts);
+    _print(spec);
+    if (!spec.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ────────────────────────────── subverb: detect ───────────────────────────
+  if (sub === 'detect') {
+    const messageFile = _pick('--message-file');
+    if (!messageFile) {
+      _print({ ok: false, error: 'bad_args', hint: '--message-file <path> required', version: 'w773-v1' });
+      process.exit(EXIT.BAD_ARGS);
+      return;
+    }
+    let message;
+    try {
+      const fsMod = await import('node:fs');
+      message = JSON.parse(fsMod.readFileSync(messageFile, 'utf-8'));
+    } catch (e) {
+      _print({ ok: false, error: 'message_file_read_failed', detail: String(e && e.message || e), version: 'w773-v1' });
+      process.exit(EXIT.EXECUTION);
+      return;
+    }
+    const key = _requireKey();
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/video/capture-detect', {
+        method: 'POST',
+        headers: { 'authorization': 'Bearer ' + key, 'content-type': 'application/json' },
+        body: JSON.stringify({ message }),
+      });
+    } catch (e) {
+      _print({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w773-v1' });
+      process.exit(EXIT.EXECUTION);
+      return;
+    }
+    const env = await resp.json().catch(() => ({}));
+    _print(env);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ────────────────────────────── subverb: captures ─────────────────────────
+  if (sub === 'captures') {
+    const namespace = _pick('--namespace');
+    const limit = _pick('--limit');
+    const key = _requireKey();
+    const qs = [];
+    if (namespace) qs.push('namespace=' + encodeURIComponent(namespace));
+    if (limit != null && /^\d+$/.test(String(limit))) qs.push('limit=' + encodeURIComponent(limit));
+    const url = _envBase() + '/v1/video/captures' + (qs.length ? ('?' + qs.join('&')) : '');
+    let resp;
+    try {
+      resp = await fetch(url, { headers: { 'authorization': 'Bearer ' + key } });
+    } catch (e) {
+      _print({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w773-v1' });
+      process.exit(EXIT.EXECUTION);
+      return;
+    }
+    const env = await resp.json().catch(() => ({}));
+    _print(env);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ────────────────────────────── subverb: bakeoff ──────────────────────────
+  // Body shape mirrors POST /v1/video/bakeoff:
+  //   { confirm:true, namespace?, artifact_path, max_n? }
+  if (sub === 'bakeoff') {
+    const artifactPath = _pick('--artifact-path');
+    const namespace = _pick('--namespace');
+    const maxN = _pick('--max-n');
+    const confirm = _has('--confirm');
+    if (!confirm) {
+      _print({ ok: false, error: 'confirm_required', hint: 'pass --confirm to acknowledge bakeoff scope', version: 'w773-v1' });
+      process.exit(EXIT.BAD_ARGS);
+      return;
+    }
+    if (!artifactPath) {
+      _print({ ok: false, error: 'bad_args', hint: '--artifact-path <path> required', version: 'w773-v1' });
+      process.exit(EXIT.BAD_ARGS);
+      return;
+    }
+    const body = { confirm: true, artifact_path: artifactPath };
+    if (namespace) body.namespace = namespace;
+    if (maxN != null && /^\d+$/.test(String(maxN))) body.max_n = Number(maxN);
+    const key = _requireKey();
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/video/bakeoff', {
+        method: 'POST',
+        headers: { 'authorization': 'Bearer ' + key, 'content-type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+    } catch (e) {
+      _print({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w773-v1' });
+      process.exit(EXIT.EXECUTION);
+      return;
+    }
+    const env = await resp.json().catch(() => ({}));
+    _print(env);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  console.error('usage: kolm video <detect|captures|bakeoff|sampling-spec> [args]');
   process.exit(EXIT.BAD_ARGS);
 }
 
