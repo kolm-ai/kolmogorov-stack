@@ -36,9 +36,11 @@
 <link rel="stylesheet" href="/frontier.css">
 <link rel="stylesheet" href="/w687.css">
 <link rel="stylesheet" href="/w706.css">
+<link rel="stylesheet" href="/supplement.css">
 <script defer src="/frontier.js"></script>
 <script defer src="/nav.js"></script>
 <script defer src="/w687.js"></script>
+<script defer src="/supplement.js"></script>
 <style>
   /* W626: scalpel-cut dead CSS — kept only what visible sections still use. */
   .kolm-media-caption { margin-top: var(--ks-3); padding: 10px 12px; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); background: var(--ks-bg-1); color: var(--ks-ink-2); font-family: var(--ks-mono); font-size: 11.5px; line-height: 1.55; }
@@ -130,11 +132,16 @@
   /* W658: receipts section head — flex with K-score badge to the right. */
   .home-receipts__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 32px; margin-bottom: 24px; }
   .home-receipts__head-text { flex: 1 1 auto; min-width: 0; }
-  .home-receipts__badge { flex: 0 0 120px; color: var(--ks-ink-2); margin-top: 6px; }
+  .home-receipts__badge-wrap { flex: 0 0 220px; display: flex; flex-direction: column; gap: 10px; align-items: center; margin-top: 6px; }
+  .home-receipts__badge { width: 120px; color: var(--ks-ink-2); }
   .home-receipts__badge svg { display: block; }
+  .home-receipts__badge-cap { margin: 0; font-size: 11.5px; line-height: 1.5; color: var(--ks-ink-2); text-align: center; max-width: 220px; }
+  .home-receipts__badge-cap code { font-size: 0.95em; padding: 0 4px; }
+  .home-receipts__badge-cap em { font-style: normal; color: var(--ks-ink-1); }
   @media (max-width: 720px) {
     .home-receipts__header { flex-direction: column-reverse; gap: 18px; align-items: center; }
     .home-receipts__head-text { text-align: left; }
+    .home-receipts__badge-wrap { flex: initial; }
   }
   /* W659: .kolm anatomy 2-column split — illustration left, annotated file tree right.
      Same illustration that renders on /hub via data-kolm-illustration="artifact-anatomy". */
@@ -760,7 +767,10 @@
         <h2 class="fr-h2">Four sample artifacts the compiler has built.</h2>
         <p class="fr-lede" style="max-width:62ch;">Not a product brag &mdash; a smoke test. Same compiler ships every <code>.kolm</code>, so the same bitsandbytes 0.49.2 NF4&nbsp;+&nbsp;double path that landed these four will land yours. Pick any row, <code>kolm pull</code> the artifact, verify the signature offline, run it in vLLM or llama.cpp. If you reach a different <code>sha256</code> on your host, the receipt is wrong, not the math.</p>
       </div>
-      <div class="home-receipts__badge" data-kolm-badge="kscore" data-score="0.91" data-kolm-size="120" aria-label="Sample K-Score 0.91 across the four artifacts below"></div>
+      <div class="home-receipts__badge-wrap">
+        <div class="home-receipts__badge" data-kolm-badge="kscore" data-score="0.91" data-kolm-size="120" aria-label="Reference K-Score 0.91 across the four sample artifacts below"></div>
+        <p class="home-receipts__badge-cap">Quality gate every <code>.kolm</code> must pass before shipping. <strong>0.85 minimum</strong>, 0.91 median across these reference artifacts. <em>Your namespace gets its own K-Score after distillation</em> &mdash; not ours.</p>
+      </div>
     </div>
 
     <div class="home-receipts" role="table" aria-label="Compile receipts table">

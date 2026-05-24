@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Data Processing Agreement &middot; kolm.ai</title>
+<meta name="description" content="kolm.ai's Data Processing Agreement (DPA) for enterprise customers. GDPR-aligned terms covering processing scope, sub-processors, breach notification, and SCCs.">
+<link rel="canonical" href="https://kolm.ai/dpa">
+<meta property="og:title" content="Data Processing Agreement &middot; kolm.ai">
+<meta property="og:description" content="GDPR-aligned DPA for enterprise customers.">
+<meta property="og:url" content="https://kolm.ai/dpa">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/supplement.css">
+<script defer src="/supplement.js"></script>
+<style>
+  .legal-page { max-width: 820px; margin: 0 auto; padding: 48px 24px 96px; }
+  .legal-page h2 { font-size: 17px; color: var(--ks-ink-1); margin: 36px 0 10px; padding-top: 12px; border-top: 1px solid var(--ks-line); }
+  .legal-page h2:first-of-type { border-top: 0; padding-top: 0; }
+  .legal-page h3 { font-size: 14px; color: var(--ks-ink-1); margin: 22px 0 6px; }
+  .legal-page p, .legal-page li { color: var(--ks-ink-2); font-size: 14px; line-height: 1.6; }
+  .legal-page ul, .legal-page ol { padding-left: 22px; }
+  .legal-page details { padding: 10px 14px; border: 1px solid var(--ks-line); border-radius: 8px; margin: 8px 0; background: var(--ks-bg-2); }
+  .legal-page details summary { font-weight: 600; cursor: pointer; color: var(--ks-ink-1); font-size: 13.5px; }
+  .legal-page details[open] { background: var(--ks-bg-3); }
+  .legal-page .tldr { padding: 14px 18px; border: 1px solid var(--ks-line); border-radius: 10px; background: var(--ks-bg-2); margin: 12px 0 20px; }
+  .legal-page .tldr strong { color: var(--ks-ink-1); display: block; margin-bottom: 4px; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .legal-page .meta { color: var(--ks-ink-2); font-size: 12.5px; margin: 0 0 24px; }
+  .legal-page table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 13px; }
+  .legal-page td, .legal-page th { border: 1px solid var(--ks-line); padding: 8px 12px; text-align: left; vertical-align: top; }
+  .legal-page th { background: var(--ks-bg-2); color: var(--ks-ink-1); }
+</style>
+</head>
+<body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    </div>
+  </nav>
+  <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+  </div>
+</div>
+
+<main id="main" class="legal-page" data-test="wf28-dpa-page" data-w401g="dpa">
+
+<header style="margin-bottom:14px;">
+  <p class="eyebrow">kolm.ai &middot; legal</p>
+  <h1 style="margin:8px 0 6px;">Data Processing Agreement</h1>
+  <p class="meta">Effective version: 2026-05. Aligned with GDPR Art. 28 and the EU Standard Contractual Clauses 2021/914.</p>
+</header>
+
+<div class="tldr"><strong>Plain-language TLDR</strong>Kolm.ai processes only the data you send through the gateway/capture surfaces. We are a processor; you are the controller. Captures and artifacts stay tenant-isolated. We notify you in writing within 72 hours of any confirmed breach. Sub-processors are listed below and we give 30 days' written notice before adding any new one.</div>
+
+<h2>1. Definitions</h2>
+<details><summary>Read full definitions</summary>
+<p><strong>Controller</strong>, <strong>Processor</strong>, <strong>Data Subject</strong>, <strong>Personal Data</strong>, and <strong>Processing</strong> have the meanings given in Regulation (EU) 2016/679 ("GDPR").</p>
+<p><strong>Customer Data</strong> means all data, including Personal Data, that Customer or its end users submit to the kolm.ai services.</p>
+<p><strong>Services</strong> means the kolm.ai gateway, capture, distill, compile, registry, and runtime control-plane services made available at kolm.ai.</p>
+</details>
+
+<h2>2. Scope and roles</h2>
+<p>Customer acts as Controller. Kolm.ai acts as Processor. Kolm.ai will process Customer Data only on Customer's documented instructions, including with regard to transfers, unless required by Union or Member State law.</p>
+
+<h2>3. Subject matter and duration</h2>
+<p>Processing is for the duration of the Master Services Agreement (MSA) or successor contract, plus a wind-down period not exceeding 30 days.</p>
+
+<h2>4. Nature and purpose of processing</h2>
+<ul>
+  <li>Routing API calls through the gateway to the model the Customer selects.</li>
+  <li>Storing, hashing, and serving captured request/response rows that the Customer explicitly approves.</li>
+  <li>Distilling and compiling artifacts from approved captures.</li>
+  <li>Operating the signed-artifact registry and providing offline verification receipts.</li>
+</ul>
+
+<h2>5. Categories of data subjects and data</h2>
+<table>
+  <thead><tr><th>Category</th><th>Examples</th></tr></thead>
+  <tbody>
+    <tr><td>Customer employees and agents</td><td>API keys, account email, tenant identifiers.</td></tr>
+    <tr><td>End users of Customer's product</td><td>Prompts, completions, attached files (only when Customer routes them through the gateway).</td></tr>
+  </tbody>
+</table>
+
+<h2>6. Sub-processors</h2>
+<p>Kolm.ai uses the sub-processors listed below. Customer hereby authorises these. Kolm.ai will give Customer at least <strong>30 days' written notice</strong> before adding any new sub-processor and Customer may object on reasonable data-protection grounds.</p>
+<table>
+  <thead><tr><th>Sub-processor</th><th>Purpose</th><th>Region</th></tr></thead>
+  <tbody>
+    <tr><td>Vercel Inc.</td><td>Edge serving for kolm.ai marketing and docs.</td><td>US, EU, global edge.</td></tr>
+    <tr><td>Railway Corp.</td><td>Control-plane compute hosting.</td><td>US-East.</td></tr>
+    <tr><td>Anthropic, OpenAI (only when Customer routes calls to them)</td><td>Teacher-model inference where Customer selects that route.</td><td>Per provider's published regions.</td></tr>
+    <tr><td>Stripe Inc. (billing only)</td><td>Payment processing for paid plans.</td><td>US, EU.</td></tr>
+  </tbody>
+</table>
+
+<h2>7. Security measures</h2>
+<ul>
+  <li>TLS 1.3 in transit; AES-256 at rest for capture rows and artifacts.</li>
+  <li>Tenant isolation: every row is fenced by <code>tenant_id</code> and a defense-in-depth filter is applied at every store boundary.</li>
+  <li>Signed-artifact chain: Ed25519 over <code>manifest.sha256</code> for every <code>.kolm</code> emitted by the compile surface.</li>
+  <li>Least-privilege RBAC, MFA-required admin access, audited via the AUDIT_OPS pipeline.</li>
+  <li>See <a href="/security">/security</a> for the full posture and the <a href="/security/threat-model">threat model</a>.</li>
+</ul>
+
+<h2>8. International transfers</h2>
+<p>Where Personal Data is transferred outside the EEA, Kolm.ai relies on the EU Standard Contractual Clauses 2021/914 Module 2 (Controller-to-Processor). The clauses are incorporated by reference and govern in the event of conflict.</p>
+
+<h2>9. Data subject rights</h2>
+<p>Kolm.ai will assist Customer in responding to data-subject requests (access, rectification, erasure, restriction, portability, objection) within 10 business days. Use <code>kolm export --tenant &lt;id&gt;</code> or the <a href="/v1/data-export">/v1/data-export</a> route for self-serve exports.</p>
+
+<h2>10. Breach notification</h2>
+<p>Kolm.ai will notify Customer in writing without undue delay and in any event within <strong>72 hours</strong> of becoming aware of any confirmed Personal Data breach. Notice will include facts, likely consequences, and remediation steps. Send disclosure reports to <a href="mailto:security@kolm.ai">security@kolm.ai</a>.</p>
+
+<h2>11. Return or deletion</h2>
+<p>On termination of the MSA, Kolm.ai will, at Customer's option, return or delete all Customer Data (including captures and built artifacts) within 30 days, save for backups that will be purged on the next backup-rotation cycle (which does not exceed 90 days).</p>
+
+<h2>12. Audit rights</h2>
+<p>Customer may audit Kolm.ai's compliance with this DPA once per calendar year, with at least 30 days' written notice, conducted remotely and at Customer's expense. The annual SOC 2 Type I report (and any successor SOC 2 Type II report once issued) satisfies Customer's audit rights when made available under NDA.</p>
+
+<h2>13. Liability</h2>
+<p>The liability of each party under this DPA is subject to the limits set out in the MSA.</p>
+
+<h2>14. Governing law</h2>
+<p>This DPA is governed by the law specified in the MSA. If no choice is made, the law of Delaware, USA applies, without prejudice to mandatory data-protection law of the data subject's home jurisdiction.</p>
+
+<details>
+  <summary>Download or counter-sign</summary>
+  <p>Mail <a href="mailto:legal@kolm.ai">legal@kolm.ai</a> with your entity name and we will send a fully-executable PDF that mirrors this page. We are happy to redline reasonable amendments &mdash; we have done so for healthcare, finance, and EU public-sector customers.</p>
+</details>
+
+<p class="meta" style="margin-top:32px;">See also: <a href="/terms">Terms</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/sla">SLA</a> &middot; <a href="/acceptable-use">Acceptable use</a> &middot; <a href="/security">Security posture</a>.</p>
+
+</main>
+
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/integrations">Integrations</a></li><li><a href="/docs/api">API reference</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a> &middot; <a href="/status">Status</a></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){var t=document.getElementById('navToggle');var s=document.getElementById('navSheet');if(t&&s){t.addEventListener('click',function(){var open=s.classList.toggle('open');t.setAttribute('aria-expanded',open?'true':'false');});}})();
+</script>
+
+</body>
+</html>

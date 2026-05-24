@@ -1,5 +1,5 @@
 // Recipe service worker: keeps the registry available offline.
-const CACHE = 'kolm-v59-2026-05-24-wave775-wave816-mega-batch-autopilot-spec-fail-loop-airgap-multi-region-ab-statsig-trio-long-context-approval-chargeback';
+const CACHE = 'kolm-v60-2026-05-24-wave707-supplement-bundle-cmdk-announce-cookie-sticky-mega-plus-wf21-wf28-wf29-pages';
 const PRECACHE = [
  '/device',
  '/design-tokens.css',

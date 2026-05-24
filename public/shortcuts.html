@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Keyboard shortcuts &middot; kolm.ai</title>
+<meta name="description" content="Every keyboard shortcut across kolm.ai web, CLI, VS Code extension, and TUI. Cmd+K opens the command palette anywhere.">
+<link rel="canonical" href="https://kolm.ai/shortcuts">
+<meta property="og:title" content="Keyboard shortcuts &middot; kolm.ai">
+<meta property="og:description" content="Every keyboard shortcut across kolm.ai web, CLI, VS Code extension, and TUI.">
+<meta property="og:url" content="https://kolm.ai/shortcuts">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/supplement.css">
+<script defer src="/supplement.js"></script>
+<style>
+  .sc-page { max-width: 900px; margin: 0 auto; padding: 48px 24px 96px; }
+  .sc-group { margin-bottom: 36px; }
+  .sc-group h2 { font-size: 16px; margin: 0 0 12px; color: var(--ks-ink-1); padding-bottom: 8px; border-bottom: 1px solid var(--ks-line); }
+  .sc-group h2 small { font-weight: 400; color: var(--ks-ink-2); margin-left: 8px; font-size: 12.5px; }
+  .sc-row { display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: center; padding: 10px 0; border-bottom: 1px solid color-mix(in srgb, var(--ks-line) 50%, transparent); }
+  .sc-row:last-child { border-bottom: 0; }
+  .sc-row__label { font-size: 14px; color: var(--ks-ink-1); }
+  .sc-row__label small { display: block; color: var(--ks-ink-2); font-size: 12px; margin-top: 2px; }
+  .sc-keys { display: flex; gap: 4px; align-items: center; }
+  .sc-key { display: inline-block; padding: 2px 8px; min-width: 22px; text-align: center; border: 1px solid var(--ks-line); border-radius: 6px; background: var(--ks-bg-2); font-family: var(--ks-mono, monospace); font-size: 12px; color: var(--ks-ink-1); box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--ks-line) 70%, transparent); }
+  .sc-plus { color: var(--ks-ink-2); font-size: 12px; }
+  .sc-cta { padding: 18px 22px; margin: 36px 0; border: 1px solid var(--ks-line); border-radius: 12px; background: var(--ks-bg-2); }
+  .sc-cta strong { color: var(--ks-ink-1); }
+  @media (max-width: 540px){ .sc-row { grid-template-columns: 1fr; align-items:flex-start; } .sc-keys { margin-top: 6px; } }
+</style>
+</head>
+<body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    </div>
+  </nav>
+  <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+  </div>
+</div>
+
+<main id="main" class="sc-page" data-test="wf29-shortcuts-page" data-w401g="shortcuts">
+
+<header style="margin-bottom:24px;">
+  <p class="eyebrow">kolm.ai &middot; keyboard shortcuts</p>
+  <h1 style="margin:8px 0 6px;">Every shortcut, one page.</h1>
+  <p style="color:var(--ks-ink-2);">Web, CLI, VS Code, TUI. Press <kbd class="sc-key">Cmd</kbd>+<kbd class="sc-key">K</kbd> anywhere on kolm.ai to open the command palette &mdash; it includes every action below as a fuzzy search.</p>
+</header>
+
+<section class="sc-group" aria-labelledby="sc-web-h">
+  <h2 id="sc-web-h">Web &middot; kolm.ai <small>any page</small></h2>
+  <div class="sc-row"><div class="sc-row__label">Open command palette<small>Fuzzy-search pages, docs, and actions</small></div><div class="sc-keys"><span class="sc-key">Cmd</span><span class="sc-plus">+</span><span class="sc-key">K</span></div></div>
+  <div class="sc-row"><div class="sc-row__label">Open command palette (Windows / Linux)<small>Same palette, different prefix</small></div><div class="sc-keys"><span class="sc-key">Ctrl</span><span class="sc-plus">+</span><span class="sc-key">K</span></div></div>
+  <div class="sc-row"><div class="sc-row__label">Close palette / modal<small>Universal escape</small></div><div class="sc-keys"><span class="sc-key">Esc</span></div></div>
+  <div class="sc-row"><div class="sc-row__label">Toggle dark mode<small>Per-browser, stored in localStorage</small></div><div class="sc-keys"><span class="sc-key">Cmd</span><span class="sc-plus">+</span><span class="sc-key">Shift</span><span class="sc-plus">+</span><span class="sc-key">D</span></div></div>
+  <div class="sc-row"><div class="sc-row__label">Open nav drawer (mobile)<small>Hamburger button equivalent</small></div><div class="sc-keys"><span class="sc-key">M</span></div></div>
+  <div class="sc-row"><div class="sc-row__label">Focus search field<small>Where present</small></div><div class="sc-keys"><span class="sc-key">/</span></div></div>
+  <div class="sc-row"><div class="sc-row__label">Jump to docs<small>Opens /docs index</small></div><div class="sc-keys"><span class="sc-key">G</span><span class="sc-plus"></span><span class="sc-key">D</span></div></div>
+  <div class="sc-row"><div class="sc-row__label">Jump to status<small>Opens /status</small></div><div class="sc-keys"><span class="sc-key">G</span><span class="sc-plus"></span><span class="sc-key">S</span></div></div>
+</section>
+
+<section class="sc-group" aria-labelledby="sc-cli-h">
+  <h2 id="sc-cli-h">CLI &middot; <code>kolm</code> <small>terminal</small></h2>
+  <div class="sc-row"><div class="sc-row__label">Cancel running command<small>Standard POSIX interrupt</small></div><div class="sc-keys"><span class="sc-key">Ctrl</span><span class="sc-plus">+</span><span class="sc-key">C</span></div></div>
+  <div class="sc-row"><div class="sc-row__label">Toggle verbose log<small>Sticky across the session</small></div><div class="sc-keys"><span class="sc-key">kolm</span><span class="sc-plus"></span><span class="sc-key">--verbose</span></div></div>
+  <div class="sc-row"><div class="sc-row__label">Print exit code rubric<small>0=ok, 2=usage, 3=doctor failure, 64=usage hint</small></div><div class="sc-keys"><span class="sc-key">kolm doctor --explain-exits</span></div></div>
+</section>
+
+<section class="sc-group" aria-labelledby="sc-tui-h">
+  <h2 id="sc-tui-h">TUI &middot; <code>kolm tui</code> <small>full-screen terminal UI</small></h2>
+  <div class="sc-row"><div class="sc-row__label">Quit<small>Save no state</small></div><div class="sc-keys"><span class="sc-key">q</span></div></div>
+  <div class="sc-row"><div class="sc-row__label">Help<small>Per-view shortcuts</small></div><div class="sc-keys"><span class="sc-key">?</span></div></div>
+  <div class="sc-row"><div class="sc-row__label">Switch view: dashboard<small>System overview</small></div><div class="sc-keys"><span class="sc-key">d</span></div></div>
+  <div class="sc-row"><div class="sc-row__label">Switch view: captures<small>Approval queue</small></div><div class="sc-keys"><span class="sc-key">c</span></div></div>
+  <div class="sc-row"><div class="sc-row__label">Switch view: artifacts<small>Local .kolm files</small></div><div class="sc-keys"><span class="sc-key">a</span></div></div>
+  <div class="sc-row"><div class="sc-row__label">Switch view: bakeoff<small>Multi-artifact comparison</small></div><div class="sc-keys"><span class="sc-key">b</span></div></div>
+  <div class="sc-row"><div class="sc-row__label">Switch view: multimodal bakeoff<small>W466 image/audio/video/pdf</small></div><div class="sc-keys"><span class="sc-key">M</span></div></div>
+  <div class="sc-row"><div class="sc-row__label">Switch view: billing breakdown<small>W465 per-namespace cost</small></div><div class="sc-keys"><span class="sc-key">J</span></div></div>
+  <div class="sc-row"><div class="sc-row__label">Refresh active view<small>Force re-fetch</small></div><div class="sc-keys"><span class="sc-key">r</span></div></div>
+</section>
+
+<section class="sc-group" aria-labelledby="sc-vscode-h">
+  <h2 id="sc-vscode-h">VS Code &middot; kolm extension <small>install via Marketplace</small></h2>
+  <div class="sc-row"><div class="sc-row__label">Open kolm capture monitor<small>Shows pending approval queue</small></div><div class="sc-keys"><span class="sc-key">Cmd</span><span class="sc-plus">+</span><span class="sc-key">Shift</span><span class="sc-plus">+</span><span class="sc-key">K</span></div></div>
+  <div class="sc-row"><div class="sc-row__label">Compile current selection<small>Pipes selection through kolm capture</small></div><div class="sc-keys"><span class="sc-key">Cmd</span><span class="sc-plus">+</span><span class="sc-key">K</span><span class="sc-plus"></span><span class="sc-key">C</span></div></div>
+  <div class="sc-row"><div class="sc-row__label">Verify .kolm artifact in active editor<small>Runs signature + sha check</small></div><div class="sc-keys"><span class="sc-key">Cmd</span><span class="sc-plus">+</span><span class="sc-key">K</span><span class="sc-plus"></span><span class="sc-key">V</span></div></div>
+</section>
+
+<div class="sc-cta">
+  <strong>Suggest a shortcut.</strong> Mail <a href="mailto:product@kolm.ai">product@kolm.ai</a> with a verb, the surface (web/CLI/TUI/VS Code), and your suggested binding. We accept the ones that don't collide with existing platform shortcuts.
+</div>
+
+</main>
+
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/integrations">Integrations</a></li><li><a href="/docs/api">API reference</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a> &middot; <a href="/status">Status</a></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){var t=document.getElementById('navToggle');var s=document.getElementById('navSheet');if(t&&s){t.addEventListener('click',function(){var open=s.classList.toggle('open');t.setAttribute('aria-expanded',open?'true':'false');});}})();
+</script>
+
+</body>
+</html>
