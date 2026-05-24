@@ -6,8 +6,8 @@
 <title>Marketplace: signed .kolm artifacts · kolm.ai</title>
 <meta name="description" content="A curated, signed marketplace of compiled .kolm artifacts. Each entry ships sha256-pinned with a verified K-score, license, and compliance badges. Install with `kolm pull &lt;slug&gt;` — verify offline with `kolm">
 <meta name="keywords" content="kolm marketplace, AI artifact registry, signed AI artifacts, HIPAA AI compiler, .kolm artifact catalog, compile your own AI">
-<meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
@@ -15,11 +15,11 @@
 <meta property="og:description" content="A curated, signed marketplace of compiled .kolm artifacts. Each entry ships sha256-pinned with a verified K-score, license, and compliance badges.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/marketplace">
-<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Marketplace: signed .kolm artifacts &middot; kolm.ai">
 <meta name="twitter:description" content="A curated, signed marketplace of compiled .kolm artifacts. Each entry ships sha256-pinned with a verified K-score, license, and compliance badges.">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/marketplace">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -91,9 +91,9 @@
 
   /* Table — same dna as .home-receipts from index.html.
      Columns: name+sub+badges (2.4fr) | k-score (1fr) | size+license (1fr) | kolm pull CLI (1.6fr) */
-  .mk-table { margin-top: 4px; border-top: 1px solid rgba(236,231,220,0.10); }
-  .mk-row { display: grid; grid-template-columns: minmax(0, 2.4fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.6fr); column-gap: var(--ks-5); align-items: baseline; padding: 18px 0; border-bottom: 1px solid rgba(236,231,220,0.08); }
-  .mk-row--head { padding: 10px 0; border-bottom: 1px solid rgba(236,231,220,0.10); }
+  .mk-table { margin-top: 4px; border-top: 1px solid rgba(230, 233, 238,0.10); }
+  .mk-row { display: grid; grid-template-columns: minmax(0, 2.4fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.6fr); column-gap: var(--ks-5); align-items: baseline; padding: 18px 0; border-bottom: 1px solid rgba(230, 233, 238,0.08); }
+  .mk-row--head { padding: 10px 0; border-bottom: 1px solid rgba(230, 233, 238,0.10); }
   .mk-row--head span { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--ks-ink-3); }
   .mk-row[hidden] { display: none; }
   .mk-row__name { font-family: var(--ks-mono); font-size: 13.5px; color: var(--ks-ink); font-weight: 540; }
@@ -102,9 +102,9 @@
   .mk-row__sub { display: block; font-family: var(--ks-sans); font-size: 12.5px; color: var(--ks-ink-3); margin-top: 4px; line-height: 1.5; font-weight: 400; }
   .mk-row__badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
   .mk-row__badge { display: inline-block; font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--ks-line-2); color: var(--ks-ink-3); }
-  .mk-row__badge--avail { color: var(--ks-accent); border-color: var(--ks-accent-edge); background: rgba(232, 227, 214, 0.05); }
+  .mk-row__badge--avail { color: var(--ks-accent); border-color: var(--ks-accent-edge); background: rgba(230, 233, 238, 0.05); }
   .mk-row__badge--preview { color: #d6a65a; border-color: rgba(214,166,90,0.40); }
-  .mk-row__badge--verified { color: var(--ks-accent); border-color: var(--ks-accent); background: rgba(232, 227, 214, 0.10); }
+  .mk-row__badge--verified { color: var(--ks-accent); border-color: var(--ks-accent); background: rgba(230, 233, 238, 0.10); }
   .mk-row__k { font-family: var(--ks-mono); font-size: 18px; color: var(--ks-accent); font-weight: 540; font-variant-numeric: tabular-nums; line-height: 1.2; }
   .mk-row__k-sub { display: block; font-family: var(--ks-mono); font-size: 10.5px; color: var(--ks-ink-faint); margin-top: 4px; letter-spacing: 0.04em; }
   .mk-row__size { font-family: var(--ks-mono); font-size: 13px; color: var(--ks-ink-2); font-variant-numeric: tabular-nums; }
@@ -160,7 +160,6 @@
 </style>
 </head>
 <body class="ks">
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
@@ -544,14 +543,14 @@ $ curl -s https://kolm.ai/v1/marketplace/catalog.json | jq .signature_algo
      when /v1/marketplace/search is unreachable (empty state below). -->
 <section id="w737-faceted" aria-labelledby="w737-faceted-title" style="margin:48px auto 0;max-width:1200px;padding:32px 24px 0;border-top:1px solid rgba(255,255,255,0.06)">
   <header style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px">
-    <h2 id="w737-faceted-title" style="font-size:22px;font-weight:500;letter-spacing:-0.018em;margin:0;color:#e8e3d6">Browse publisher submissions</h2>
+    <h2 id="w737-faceted-title" style="font-size:22px;font-weight:500;letter-spacing:-0.018em;margin:0;color:#e6e9ee">Browse publisher submissions</h2>
     <a href="/docs/marketplace/publish" style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;color:#9aa3a8;text-decoration:none;border-bottom:1px dashed rgba(255,255,255,0.12)">Publish your .kolm &rarr;</a>
   </header>
   <p style="color:#9aa3a8;font-size:14px;margin:0 0 18px;max-width:760px">Faceted search by the W737-1 axes &mdash; vertical, task type, K-Score, and hardware target. The 70/30 publisher/platform revenue split is locked in the <a href="/docs/marketplace/publish#revenue-split" style="color:#111111">publisher TOS</a>. Empty results below means no publisher listings have been registered yet &mdash; <a href="/docs/marketplace/publish" style="color:#111111">be the first to publish?</a></p>
   <div style="display:grid;grid-template-columns:220px 1fr;gap:24px;align-items:start" id="w737-grid">
     <aside aria-label="W737 facet filters" style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12.5px;color:#cfd6d8">
       <fieldset style="border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px 14px;margin:0 0 14px">
-        <legend style="padding:0 6px;color:#e8e3d6;font-size:11.5px;letter-spacing:0.12em;text-transform:uppercase">Vertical</legend>
+        <legend style="padding:0 6px;color:#e6e9ee;font-size:11.5px;letter-spacing:0.12em;text-transform:uppercase">Vertical</legend>
         <label style="display:block;margin:4px 0"><input type="radio" name="w737-vertical" value="" checked> any</label>
         <label style="display:block;margin:4px 0"><input type="radio" name="w737-vertical" value="medical"> medical</label>
         <label style="display:block;margin:4px 0"><input type="radio" name="w737-vertical" value="legal"> legal</label>
@@ -561,7 +560,7 @@ $ curl -s https://kolm.ai/v1/marketplace/catalog.json | jq .signature_algo
         <label style="display:block;margin:4px 0"><input type="radio" name="w737-vertical" value="general"> general</label>
       </fieldset>
       <fieldset style="border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px 14px;margin:0 0 14px">
-        <legend style="padding:0 6px;color:#e8e3d6;font-size:11.5px;letter-spacing:0.12em;text-transform:uppercase">Task type</legend>
+        <legend style="padding:0 6px;color:#e6e9ee;font-size:11.5px;letter-spacing:0.12em;text-transform:uppercase">Task type</legend>
         <label style="display:block;margin:4px 0"><input type="radio" name="w737-task" value="" checked> any</label>
         <label style="display:block;margin:4px 0"><input type="radio" name="w737-task" value="extraction"> extraction</label>
         <label style="display:block;margin:4px 0"><input type="radio" name="w737-task" value="generation"> generation</label>
@@ -569,7 +568,7 @@ $ curl -s https://kolm.ai/v1/marketplace/catalog.json | jq .signature_algo
         <label style="display:block;margin:4px 0"><input type="radio" name="w737-task" value="support"> support</label>
       </fieldset>
       <fieldset style="border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px 14px;margin:0 0 14px">
-        <legend style="padding:0 6px;color:#e8e3d6;font-size:11.5px;letter-spacing:0.12em;text-transform:uppercase">Hardware target</legend>
+        <legend style="padding:0 6px;color:#e6e9ee;font-size:11.5px;letter-spacing:0.12em;text-transform:uppercase">Hardware target</legend>
         <label style="display:block;margin:4px 0"><input type="radio" name="w737-hw" value="" checked> any</label>
         <label style="display:block;margin:4px 0"><input type="radio" name="w737-hw" value="m-series"> M-series</label>
         <label style="display:block;margin:4px 0"><input type="radio" name="w737-hw" value="rtx"> RTX</label>
@@ -577,7 +576,7 @@ $ curl -s https://kolm.ai/v1/marketplace/catalog.json | jq .signature_algo
         <label style="display:block;margin:4px 0"><input type="radio" name="w737-hw" value="cpu"> CPU</label>
       </fieldset>
       <fieldset style="border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px 14px;margin:0 0 14px">
-        <legend style="padding:0 6px;color:#e8e3d6;font-size:11.5px;letter-spacing:0.12em;text-transform:uppercase">K-Score</legend>
+        <legend style="padding:0 6px;color:#e6e9ee;font-size:11.5px;letter-spacing:0.12em;text-transform:uppercase">K-Score</legend>
         <label style="display:block;margin:4px 0">min: <input type="range" id="w737-min-kscore" min="0" max="1" step="0.05" value="0" style="width:100%"></label>
         <output id="w737-min-kscore-out" style="display:block;color:#9aa3a8;font-size:11.5px;margin-top:2px">0.00</output>
       </fieldset>
@@ -627,7 +626,7 @@ $ curl -s https://kolm.ai/v1/marketplace/catalog.json | jq .signature_algo
       var k = (r.k_score != null) ? Number(r.k_score).toFixed(3) : '—';
       html += '<article data-test="w737-card" style="border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px 16px;background:#0f1216">' +
         '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px">' +
-          '<strong style="font-size:14px;color:#e8e3d6">' + escapeHtml(r.name || r.cid) + '</strong>' +
+          '<strong style="font-size:14px;color:#e6e9ee">' + escapeHtml(r.name || r.cid) + '</strong>' +
           '<span style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:11.5px;color:#111111">' + escapeHtml(k) + '</span>' +
         '</div>' +
         '<div style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:11.5px;color:#9aa3a8;letter-spacing:0.04em">' +

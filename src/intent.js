@@ -435,6 +435,13 @@ function normalize(text) {
   if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
     s = s.slice(1, -1).trim();
   }
+  // W850 — strip leading shell prompt (`$ `, `> `, `% `, `# `) and an
+  // optional `kolm ` brand prefix so users who paste a command verbatim
+  // ("$ kolm distill captures") get the same classification as a goal
+  // phrasing. Without this the literal `$` muddies substring matching
+  // and the classifier degrades to fallback.
+  s = s.replace(/^\s*[$>%#]\s+/, '');
+  s = s.replace(/^\s*kolm\s+/i, '');
   s = s.toLowerCase();
   s = s.replace(/[\s\n\t]+/g, ' ');
   s = s.replace(/[.?!,;]+$/g, '');
@@ -1614,9 +1621,14 @@ export function expandToWorkflow(intent, originalQuestion) {
     cmd: safeHint ? s.cmd.replace(/<name>/g, safeHint).replace(/<artifact>/g, safeHint) : s.cmd,
     why: s.why,
   }));
+  // W850 — only surface namespace_hint when at least one step actually
+  // substituted the placeholder. `quickstart` steps are literal subcommands
+  // (kolm quickstart wrapper / studio) with no <name>, so a hint extraction
+  // ("wrapper") would mislead the user into thinking they should rename it.
+  const placeholderUsed = wf.steps.some(s => /<name>|<artifact>/.test(s.cmd));
   return {
     summary: wf.summary,
-    namespace_hint: safeHint,
+    namespace_hint: (safeHint && placeholderUsed) ? safeHint : null,
     steps,
   };
 }

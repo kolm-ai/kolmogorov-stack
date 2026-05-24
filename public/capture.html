@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Capture · kolm.ai</title>
 <meta name="description" content="Drop-in OpenAI-compatible proxy that lands every prompt, completion, and tool call into a tenant-scoped event lake on your own disk. The starting point for distill, compile, and verify.">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <link rel="canonical" href="https://kolm.ai/capture">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -49,7 +49,7 @@
   .terminal pre { margin: 0; font-family: var(--ks-mono); font-size: 12.5px; line-height: 1.65; color: var(--ks-ink); }
   .terminal .c { color: var(--ks-ink-3); }
   .terminal .k { color: var(--ks-accent); }
-  .terminal .s { color: #b5bdb1; }
+  .terminal .s { color: #aab0b8; }
   .terminal .n { color: #d6a65a; }
   .terminal .prompt { color: var(--ks-accent); user-select: none; }
 
@@ -70,7 +70,7 @@
   .panel dl { margin: 0; display: grid; grid-template-columns: 220px 1fr; gap: var(--ks-3) var(--ks-5); }
   .panel dt { font-family: var(--ks-mono); font-size: 12px; letter-spacing: 0.04em; color: var(--ks-ink-3); text-transform: uppercase; padding-top: 2px; }
   .panel dd { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink); }
-  .panel dd code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); background: rgba(232, 227, 214,0.06); padding: 1px 5px; border-radius: 3px; }
+  .panel dd code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); background: rgba(230, 233, 238,0.06); padding: 1px 5px; border-radius: 3px; }
   @media (max-width: 900px) { .panel dl { grid-template-columns: 1fr; } }
 
   /* W645: editorial spec-list helpers for #why + #reach. */
@@ -78,8 +78,8 @@
   .cap-list .fr-spec-list__head { align-items: baseline; }
   .cap-list .fr-spec-list__p code,
   .cap-list .fr-spec-list__p a { font-family: inherit; }
-  .cap-list .fr-spec-list__p code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ink-1); background: rgba(232, 227, 214,0.06); padding: 1px 5px; border-radius: 3px; }
-  .cap-list .fr-spec-list__p a { color: var(--fr-mint); text-decoration: none; border-bottom: 1px solid rgba(232, 227, 214,0.32); }
+  .cap-list .fr-spec-list__p code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ink-1); background: rgba(230, 233, 238,0.06); padding: 1px 5px; border-radius: 3px; }
+  .cap-list .fr-spec-list__p a { color: var(--fr-mint); text-decoration: none; border-bottom: 1px solid rgba(230, 233, 238,0.32); }
   .cap-list .fr-spec-list__p a:hover { border-bottom-color: var(--fr-mint); }
   .cap-why-list .fr-spec-list__row .fr-spec-list__delta { color: var(--fr-mint); }
   .cap-why-list .fr-spec-list__row.--verify .fr-spec-list__delta { color: #b693ff; }
@@ -117,8 +117,6 @@
 </script>
 </head>
 <body class="ks">
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
-
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">

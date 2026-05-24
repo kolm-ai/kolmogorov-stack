@@ -6,24 +6,24 @@
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 <title>Distillation 101 &middot; kolm university &middot; kolm.ai</title>
 <meta name="description" content="What knowledge distillation is, why you would do it, and how kolm turns 5,000 captured prompt-response pairs into a 7B specialist that runs on a single RTX 5090. Open-source AI workbench.">
-<meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="Distillation 101 &middot; kolm university &middot; kolm.ai">
 <meta property="og:description" content="Teacher-student distillation explained, with a worked example: Claude 4 -&gt; Qwen 7B on a coding task, K-score ~0.87 in ~3 hours on an RTX 5090.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/university/distillation-101">
-<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Distillation 101 &middot; kolm university &middot; kolm.ai">
 <meta name="twitter:description" content="Teacher-student distillation explained. Worked example with honest numbers.">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/university/distillation-101">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Distillation 101","learningResourceType":"Lesson","educationalLevel":"introductory","teaches":"knowledge distillation","url":"https://kolm.ai/university/distillation-101","isPartOf":{"@type":"EducationalOrganization","name":"kolm university","url":"https://kolm.ai/university"},"publisher":{"@type":"Organization","name":"kolm.ai"},"datePublished":"2026-05-24","dateModified":"2026-05-24"}</script>
 <link rel="stylesheet" href="/design-tokens.css">
 <style>
-:root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#111111;--accent-soft:rgba(17, 17, 17,0.10);--warn:#6b6b66;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
+:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230, 233, 238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#111111;--accent-soft:rgba(17, 17, 17,0.10);--warn:#6b6b66;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
 .skip-link{position:absolute;left:-9999px}
@@ -52,7 +52,7 @@ th{color:var(--ink);font-weight:500;font-family:var(--mono);font-size:11.5px;let
 td code{font-size:12.5px}
 .callout{border:1px solid var(--accent);border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.6;max-width:780px}
 .callout b{color:var(--ink);font-weight:500}
-.warn{border:1px solid var(--warn);border-left:4px solid var(--warn);background:rgba(217,119,6,0.07);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.6;max-width:780px}
+.warn{border:1px solid var(--warn);border-left:4px solid var(--warn);background:rgba(82, 90, 100,0.07);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.6;max-width:780px}
 .next{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0 0;max-width:920px}
 @media(max-width:820px){.next{grid-template-columns:1fr}}
 .next a{display:block;padding:18px 20px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);text-decoration:none;color:inherit;transition:border-color 160ms}
@@ -68,8 +68,6 @@ td code{font-size:12.5px}
 </head>
 <body class="ks">
 <a href="#main" class="ks-skip">Skip to content</a>
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - Open-source AI workbench. Frontier AI on your own infrastructure. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
-
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
     <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
@@ -97,8 +95,6 @@ td code{font-size:12.5px}
 <p class="brand-eyebrow" data-w220="category-claim">Open-source AI workbench</p>
 <h1>Distillation 101.</h1>
 <p class="lede">Frontier AI on your own infrastructure starts here. This lesson explains what knowledge distillation is, why you would do it, how the kolm pipeline works, and walks through one fully worked example so you can see the real numbers.</p>
-<p class="sr-only">Not Kolm therapeutics. This lesson is part of kolm.ai, the open-source AI workbench.</p>
-
 <div class="meta">
   <span><b>Level:</b> Introductory</span>
   <span><b>Read time:</b> ~15 min</span>

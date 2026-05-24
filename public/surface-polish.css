@@ -11,9 +11,9 @@
  --kolm-code-bg: rgba(255, 255, 255, 0.055);
  --kolm-code-border: rgba(255, 255, 255, 0.14);
  --kolm-line: rgba(255, 255, 255, 0.14);
- --kolm-ink: #e8e3d6;
- --kolm-muted: #b5bdb1;
- --kolm-faint: #737c73;
+ --kolm-ink: #e6e9ee;
+ --kolm-muted: #aab0b8;
+ --kolm-faint: #6a727c;
  --kolm-panel: rgba(255, 255, 255, 0.035);
  --kolm-panel-hover: rgba(255, 255, 255, 0.055);
  --kolm-ease: cubic-bezier(.2, .8, .2, 1);
@@ -239,7 +239,7 @@ body {
 }
 
 [data-theme="light"] {
- --kolm-bg-deep: #f7f4ec;
+ --kolm-bg-deep: #f3f5f7;
  --kolm-bg-soft: #ffffff;
  --kolm-ink-strong: #111418;
  --kolm-ink-soft: #323a3f;
@@ -613,9 +613,9 @@ body:has(#acct-loaded) {
  border: 1px solid var(--line, rgba(255, 255, 255, 0.14));
  border-radius: 12px;
  background:
-  linear-gradient(135deg, rgba(232, 227, 214, 0.08), transparent 48%),
+  linear-gradient(135deg, rgba(230, 233, 238, 0.08), transparent 48%),
   var(--bg-elev, rgba(255, 255, 255, 0.04));
- color: var(--ink, #e8e3d6);
+ color: var(--ink, #e6e9ee);
 }
 
 .docs-cli-page .kolm-surface-media .media-terminal,
@@ -634,17 +634,17 @@ body:has(#acct-loaded) {
  font-size: 10.5px;
  letter-spacing: 0.08em;
  text-transform: uppercase;
- color: var(--ink-faint, #737c73);
+ color: var(--ink-faint, #6a727c);
 }
 
 .docs-cli-page .kolm-surface-media b,
 .docs-cli-page .kolm-surface-media code {
- color: var(--ink, #e8e3d6);
+ color: var(--ink, #e6e9ee);
 }
 
 .docs-cli-page .kolm-surface-media p {
  margin: 0;
- color: var(--ink-mute, #b5bdb1);
+ color: var(--ink-mute, #aab0b8);
  font-size: 13px;
  line-height: 1.55;
 }
@@ -654,7 +654,7 @@ body:has(#acct-loaded) {
  margin: 5px 0;
  font-family: var(--mono, ui-monospace, monospace);
  font-size: 12px;
- color: var(--ink, #e8e3d6);
+ color: var(--ink, #e6e9ee);
  overflow-wrap: anywhere;
 }
 
@@ -672,7 +672,7 @@ body:has(#acct-loaded) {
 
 [data-theme="light"] .docs-cli-page .kolm-surface-media .media-terminal,
 [data-theme="light"] .docs-cli-page .kolm-surface-media .media-proof {
- background: #f7f4ec;
+ background: #f3f5f7;
  border-color: rgba(24, 23, 26, 0.1);
 }
 
@@ -761,7 +761,7 @@ body:has(#acct-loaded) {
  --kolm-ink-3: #727b76;
  --kolm-rule-1: rgba(255, 247, 232, 0.10);
  --kolm-rule-2: rgba(255, 247, 232, 0.18);
- --kolm-green: #e8e3d6;
+ --kolm-green: #e6e9ee;
  --kolm-green-2: #111111;
  --kolm-page-max: 1180px;
  --kolm-page-pad: 32px;
@@ -864,7 +864,7 @@ body > .site-nav {
  .site-nav .nav-item > a.active,
  .site-nav .nav-item > a[aria-current="page"]) {
   color: var(--kolm-ink-0) !important;
-  border-bottom-color: rgba(232, 227, 214,0.62) !important;
+  border-bottom-color: rgba(230, 233, 238,0.62) !important;
   text-decoration: none !important;
  }
 
@@ -943,7 +943,7 @@ body > .site-nav {
 
  :where(.site-nav .mega-menu a:hover, .site-nav .mega-menu a:focus-visible) {
  color: var(--kolm-green) !important;
- background: rgba(232, 227, 214,0.07) !important;
+ background: rgba(230, 233, 238,0.07) !important;
  }
 }
 
@@ -1127,7 +1127,7 @@ body > .site-nav {
  /* W683: single-hue mint atmosphere. Golden second stop removed to stop
     cross-page color bleed; per-route variants below are also unified. */
  background:
- linear-gradient(90deg, rgba(232, 227, 214,0.04), transparent 60%),
+ linear-gradient(90deg, rgba(230, 233, 238,0.04), transparent 60%),
  rgba(8, 9, 12, 0.28);
 }
 
@@ -1238,7 +1238,7 @@ body > .site-nav {
 
 .ksm-dot:nth-child(1) { background: #ff6b91; }
 .ksm-dot:nth-child(2) { background: #ffce7d; }
-.ksm-dot:nth-child(3) { background: #e8e3d6; }
+.ksm-dot:nth-child(3) { background: #e6e9ee; }
 
 .ksm-flow {
  display: grid;
@@ -1298,7 +1298,7 @@ body > .site-nav {
  flex-direction: column;
  gap: 4px;
  color: var(--kolm-ink-3);
- background: rgba(232, 227, 214,0.045);
+ background: rgba(230, 233, 238,0.045);
  font: 600 10.5px/1.2 var(--kolm-mono, ui-monospace, monospace);
  letter-spacing: 0.04em;
  text-transform: uppercase;
@@ -1315,16 +1315,16 @@ body > .site-nav {
    Pre-W683 they were cyan / golden / pink which read as three different
    sites. Single hue tightens the brand and stops cross-page bleeding. */
 .kolm-surface-media--training .ksm-step span,
-.kolm-surface-media--training .ksm-kicker { color: var(--ks-accent, #e8e3d6) !important; }
-.kolm-surface-media--training .ksm-stats span { background: rgba(232, 227, 214,0.045); }
+.kolm-surface-media--training .ksm-kicker { color: var(--ks-accent, #e6e9ee) !important; }
+.kolm-surface-media--training .ksm-stats span { background: rgba(230, 233, 238,0.045); }
 
 .kolm-surface-media--distill .ksm-step span,
-.kolm-surface-media--distill .ksm-kicker { color: var(--ks-accent, #e8e3d6) !important; }
-.kolm-surface-media--distill .ksm-stats span { background: rgba(232, 227, 214,0.045); }
+.kolm-surface-media--distill .ksm-kicker { color: var(--ks-accent, #e6e9ee) !important; }
+.kolm-surface-media--distill .ksm-stats span { background: rgba(230, 233, 238,0.045); }
 
 .kolm-surface-media--enterprise .ksm-step span,
-.kolm-surface-media--enterprise .ksm-kicker { color: var(--ks-accent, #e8e3d6) !important; }
-.kolm-surface-media--enterprise .ksm-stats span { background: rgba(232, 227, 214,0.045); }
+.kolm-surface-media--enterprise .ksm-kicker { color: var(--ks-accent, #e6e9ee) !important; }
+.kolm-surface-media--enterprise .ksm-stats span { background: rgba(230, 233, 238,0.045); }
 
 [data-theme="light"] .kolm-surface-media {
  background:
@@ -1781,7 +1781,7 @@ h6:not(#kolm-noop) {
  align-items: center !important;
  justify-content: center !important;
  border-radius: 7px !important;
- background: rgba(232, 227, 214,0.10) !important;
+ background: rgba(230, 233, 238,0.10) !important;
  color: var(--kolm-green) !important;
  letter-spacing: 0 !important;
 }
@@ -1803,10 +1803,10 @@ h6:not(#kolm-noop) {
 .kolm-product-spine a[aria-current="page"],
 .kolm-product-spine a:hover,
 .kolm-product-spine a:focus-visible {
- border-color: rgba(232, 227, 214,0.38) !important;
+ border-color: rgba(230, 233, 238,0.38) !important;
  /* W683: single mint gradient — golden second stop removed. */
  background:
-  linear-gradient(135deg, rgba(232, 227, 214,0.13), rgba(232, 227, 214,0.04)),
+  linear-gradient(135deg, rgba(230, 233, 238,0.13), rgba(230, 233, 238,0.04)),
   rgba(255,255,255,0.045) !important;
 }
 
@@ -1838,7 +1838,7 @@ body.kolm-account-surface {
  background:
   linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px),
   linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px),
-  radial-gradient(circle at 16% 0%, rgba(232, 227, 214,0.09), transparent 30%),
+  radial-gradient(circle at 16% 0%, rgba(230, 233, 238,0.09), transparent 30%),
   #08090c !important;
  background-size: 116px 116px, 116px 116px, auto, auto !important;
 }
@@ -1963,7 +1963,7 @@ body.kolm-account-surface {
 
 .kac-matrix a:hover,
 .kac-matrix a:focus-visible {
- background: rgba(232, 227, 214,0.08) !important;
+ background: rgba(230, 233, 238,0.08) !important;
  color: var(--kolm-ink-0) !important;
 }
 
@@ -1980,7 +1980,7 @@ body.kolm-account-surface {
 
 .kac-steps a:hover,
 .kac-steps a:focus-visible {
- background: rgba(232, 227, 214,0.08) !important;
+ background: rgba(230, 233, 238,0.08) !important;
  color: var(--kolm-ink-0) !important;
 }
 
@@ -2058,8 +2058,8 @@ body.kolm-account-surface #account-sidebar a {
 body.kolm-account-surface #account-sidebar a:hover,
 body.kolm-account-surface #account-sidebar a:focus-visible,
 body.kolm-account-surface #account-sidebar a[aria-current="page"] {
- border-color: rgba(232, 227, 214,0.22) !important;
- background: rgba(232, 227, 214,0.07) !important;
+ border-color: rgba(230, 233, 238,0.22) !important;
+ background: rgba(230, 233, 238,0.07) !important;
  color: var(--kolm-ink-0) !important;
 }
 
@@ -2258,7 +2258,7 @@ body.kolm-account-surface .ktable th {
 
 .object-provider-head b {
  display: block;
- color: var(--ink, #e8e3d6);
+ color: var(--ink, #e6e9ee);
  font-size: 13px;
  line-height: 1.3;
 }
@@ -2316,7 +2316,7 @@ body.kolm-account-surface .ktable th {
 }
 
 .object-readiness-notes strong {
- color: var(--ink, #e8e3d6);
+ color: var(--ink, #e6e9ee);
 }
 
 [data-theme="light"] body.kolm-account-surface {
@@ -2517,15 +2517,15 @@ body.kolm-account-surface .ktable th {
 
 .site-nav .nav-item > .nav-top:hover,
 .site-nav .nav-item > .nav-top:focus-visible {
- background: rgba(232, 227, 214,0.08) !important;
- border-color: rgba(232, 227, 214,0.18) !important;
- color: var(--kolm-ink-0, #e8e3d6) !important;
+ background: rgba(230, 233, 238,0.08) !important;
+ border-color: rgba(230, 233, 238,0.18) !important;
+ color: var(--kolm-ink-0, #e6e9ee) !important;
 }
 
 .site-nav .nav-item > .nav-top[aria-current="page"] {
- background: rgba(232, 227, 214,0.10) !important;
- border-color: rgba(232, 227, 214,0.24) !important;
- color: var(--kolm-green, #e8e3d6) !important;
+ background: rgba(230, 233, 238,0.10) !important;
+ border-color: rgba(230, 233, 238,0.24) !important;
+ color: var(--kolm-green, #e6e9ee) !important;
 }
 
 .mega-menu {
@@ -2547,8 +2547,8 @@ body.kolm-account-surface .ktable th {
 
 .mega-menu a:hover,
 .mega-menu a:focus-visible {
- background: rgba(232, 227, 214,0.08) !important;
- color: var(--kolm-ink-0, #e8e3d6) !important;
+ background: rgba(230, 233, 238,0.08) !important;
+ color: var(--kolm-ink-0, #e6e9ee) !important;
 }
 
 body.kolm-account-surface .page-main > .page-head {
@@ -2708,7 +2708,7 @@ body.kolm-account-surface .acct-shell {
  [data-theme="light"] .site-header .site-nav.is-open,
  [data-theme="light"] header.site .site-nav.is-open,
  [data-theme="light"] header.site nav.is-open {
-  background: #f7f4ec !important;
+  background: #f3f5f7 !important;
   border-bottom-color: rgba(17,19,21,0.12) !important;
   box-shadow: 0 28px 80px rgba(17,19,21,0.16) !important;
  }
@@ -2892,13 +2892,13 @@ body:has(.w373-pricing-block) .plans-header .sec-lede {
 :root {
  --kolm-page-max: 1180px;
  --kolm-radius: 8px;
- --kolm-green: #e8e3d6;
+ --kolm-green: #e6e9ee;
  --kolm-dark: #08090c;
  --kolm-panel-strong: #0b0f12;
  --kolm-ink-0: #fff7e8;
  --kolm-ink-1: #d8dfd5;
  --kolm-ink-2: #aeb8ae;
- --kolm-ink-3: #737c73;
+ --kolm-ink-3: #6a727c;
  --kolm-border: rgba(255, 247, 232, 0.10);
  --kolm-border-strong: rgba(255, 247, 232, 0.16);
 }
@@ -2948,8 +2948,8 @@ html.kolm-sota-ui-v560 :where(.site-nav .nav-item > .nav-top::after, .site-nav >
 
 html.kolm-sota-ui-v560 :where(.site-nav .nav-item > .nav-top:hover, .site-nav .nav-item > .nav-top:focus-visible, .site-nav .nav-item > .nav-top.active, .site-nav .nav-item > .nav-top[aria-current="page"], .site-nav > a:hover, .site-nav > a.active, header.site nav a:hover, header.site nav a.active, header.site nav a[aria-current="page"]) {
  color: var(--kolm-ink-0) !important;
- background: rgba(232, 227, 214, 0.08) !important;
- border-color: rgba(232, 227, 214, 0.18) !important;
+ background: rgba(230, 233, 238, 0.08) !important;
+ border-color: rgba(230, 233, 238, 0.18) !important;
 }
 
 html.kolm-sota-ui-v560 :where(.site-nav .mega-menu) {
@@ -3041,7 +3041,7 @@ html.kolm-sota-ui-v560 :where(.kolm-product-spine a) {
 }
 
 html.kolm-sota-ui-v560 :where(.kolm-product-spine a[aria-current="page"]) {
- background: rgba(232, 227, 214, 0.09) !important;
+ background: rgba(230, 233, 238, 0.09) !important;
 }
 
 html.kolm-sota-ui-v560 :where(.kolm-product-spine a span) {
@@ -3167,7 +3167,7 @@ html.kolm-sota-ui-v560 :where(body.kolm-account-surface #account-sidebar a) {
 }
 
 html.kolm-sota-ui-v560 :where(body.kolm-account-surface #account-sidebar a[aria-current="page"]) {
- background: rgba(232, 227, 214, 0.10) !important;
+ background: rgba(230, 233, 238, 0.10) !important;
  color: var(--kolm-green) !important;
  border-left: 0 !important;
  padding-left: 10px !important;
@@ -3281,7 +3281,7 @@ html.kolm-sota-ui-v560 main > .kolm-surface-media[aria-label="kolm CLI command p
 
 html.kolm-sota-ui-v560 main.docs-cli-page > .kolm-surface-media .media-line .ok,
 html.kolm-sota-ui-v560 main > .kolm-surface-media[aria-label="kolm CLI command product surface"] .media-line .ok {
- color: #e8e3d6 !important;
+ color: #e6e9ee !important;
  opacity: 1 !important;
 }
 
@@ -3332,12 +3332,12 @@ html.kolm-sota-ui-v560 main:has(> .kolm-surface-media[aria-label="kolm CLI comma
 }
 
 [data-theme="light"].kolm-sota-ui-v560 body {
- background: #f7f4ec !important;
+ background: #f3f5f7 !important;
  color: #111418 !important;
 }
 
 [data-theme="light"].kolm-sota-ui-v560 :where(.site-header, header.site, nav.top) {
- background: rgba(247, 244, 236, 0.96) !important;
+ background: rgba(243, 245, 247, 0.96) !important;
  border-bottom-color: rgba(16, 24, 32, 0.12) !important;
 }
 
@@ -3425,7 +3425,7 @@ html.kolm-sota-ui-v560 {
  --kolm-panel-bg: rgba(14, 18, 22, 0.84);
  --kolm-panel-bg-2: rgba(18, 23, 28, 0.92);
  --kolm-panel-border: rgba(255, 247, 232, 0.13);
- --kolm-focus: rgba(232, 227, 214, 0.36);
+ --kolm-focus: rgba(230, 233, 238, 0.36);
 }
 
 [data-theme="light"].kolm-sota-ui-v560 {
@@ -3449,15 +3449,15 @@ html.kolm-sota-ui-v560 :where(.site-nav .nav-item > .nav-top, .site-nav > a, hea
 }
 
 html.kolm-sota-ui-v560 :where(.site-nav .nav-item > .nav-top.active, .site-nav .nav-item > .nav-top[aria-current="page"], .site-nav > a.active, .site-nav > a[aria-current="page"], header.site nav a.active, header.site nav a[aria-current="page"]) {
- background: rgba(232, 227, 214, 0.11) !important;
- border-color: rgba(232, 227, 214, 0.26) !important;
- color: var(--kolm-ink-0, #e8e3d6) !important;
+ background: rgba(230, 233, 238, 0.11) !important;
+ border-color: rgba(230, 233, 238, 0.26) !important;
+ color: var(--kolm-ink-0, #e6e9ee) !important;
 }
 
 html.kolm-sota-ui-v560 :where(.site-nav .nav-item > .nav-top:hover, .site-nav .nav-item > .nav-top:focus-visible, .site-nav > a:hover, .site-nav > a:focus-visible, header.site nav a:hover, header.site nav a:focus-visible) {
  background: rgba(255, 247, 232, 0.055) !important;
  border-color: rgba(255, 247, 232, 0.14) !important;
- color: var(--kolm-ink-0, #e8e3d6) !important;
+ color: var(--kolm-ink-0, #e6e9ee) !important;
 }
 
 html.kolm-sota-ui-v560 :where(.site-nav .nav-item > .nav-top:focus-visible, .site-nav > a:focus-visible, header.site nav a:focus-visible, .site-actions a:focus-visible, .site-actions button:focus-visible, .btn:focus-visible, button:focus-visible) {
@@ -3496,9 +3496,9 @@ html.kolm-sota-ui-v560 :where(.site-nav .mega-menu a) {
 }
 
 html.kolm-sota-ui-v560 :where(.site-nav .mega-menu a:hover, .site-nav .mega-menu a:focus-visible) {
- background: rgba(232, 227, 214, 0.08) !important;
- border-color: rgba(232, 227, 214, 0.16) !important;
- color: var(--kolm-ink-0, #e8e3d6) !important;
+ background: rgba(230, 233, 238, 0.08) !important;
+ border-color: rgba(230, 233, 238, 0.16) !important;
+ color: var(--kolm-ink-0, #e6e9ee) !important;
 }
 
 html.kolm-sota-ui-v560 :where(.btn, .site-actions .cta, header.site .right .cta, .tier a.cta, .w395-cta, .closer-cta) {
@@ -3513,7 +3513,7 @@ html.kolm-sota-ui-v560 :where(.btn, .site-actions .cta, header.site .right .cta,
 
 html.kolm-sota-ui-v560 :where(.home-hero-centered, .home-hero-split, .hero, main > .hero.wrap) {
  background-image:
-  radial-gradient(circle at 82% 18%, rgba(232, 227, 214, 0.06), transparent 32%),
+  radial-gradient(circle at 82% 18%, rgba(230, 233, 238, 0.06), transparent 32%),
   linear-gradient(rgba(255, 247, 232, 0.035) 1px, transparent 1px),
   linear-gradient(90deg, rgba(255, 247, 232, 0.035) 1px, transparent 1px) !important;
  background-size: auto, 112px 112px, 112px 112px !important;
@@ -3665,7 +3665,7 @@ html.kolm-sota-ui-v560 body.kolm-account-surface :where(.kolm-account-command) {
 html.kolm-sota-ui-v560 body.kolm-account-surface :where(.kac-copy) {
  padding: 20px !important;
  min-height: 240px !important;
- background: linear-gradient(145deg, rgba(255, 247, 232, 0.045), rgba(232, 227, 214, 0.025)) !important;
+ background: linear-gradient(145deg, rgba(255, 247, 232, 0.045), rgba(230, 233, 238, 0.025)) !important;
 }
 
 html.kolm-sota-ui-v560 body.kolm-account-surface :where(.kac-copy h1) {
@@ -3727,9 +3727,9 @@ html.kolm-sota-ui-v560 body.kolm-account-surface :where(#account-sidebar) {
 html.kolm-sota-ui-v560 body.kolm-account-surface :where(#account-sidebar a[aria-current="page"]) {
  border-left: 0 !important;
  padding-left: 10px !important;
- background: rgba(232, 227, 214, 0.10) !important;
- color: var(--kolm-ink-0, #e8e3d6) !important;
- box-shadow: inset 0 0 0 1px rgba(232, 227, 214, 0.22) !important;
+ background: rgba(230, 233, 238, 0.10) !important;
+ color: var(--kolm-ink-0, #e6e9ee) !important;
+ box-shadow: inset 0 0 0 1px rgba(230, 233, 238, 0.22) !important;
 }
 
 [data-theme="light"].kolm-sota-ui-v560 :where(.site-nav .nav-item > .nav-top.active, .site-nav .nav-item > .nav-top[aria-current="page"], .site-nav > a.active, .site-nav > a[aria-current="page"], header.site nav a.active, header.site nav a[aria-current="page"]) {
@@ -3745,7 +3745,7 @@ html.kolm-sota-ui-v560 body.kolm-account-surface :where(#account-sidebar a[aria-
 }
 
 [data-theme="light"].kolm-sota-ui-v560 :where(.site-nav .mega-menu) {
- background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 244, 236, 0.98)) !important;
+ background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(243, 245, 247, 0.98)) !important;
  box-shadow: 0 24px 72px rgba(17, 24, 39, 0.13), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
 }
 
@@ -3973,15 +3973,15 @@ html.kolm-sota-ui-v565 :where(.site-nav .nav-item > .nav-top, .site-nav > a, hea
 }
 
 html.kolm-sota-ui-v565 :where(.site-nav .nav-item > .nav-top.active, .site-nav .nav-item > .nav-top[aria-current="page"], .site-nav > a.active, .site-nav > a[aria-current="page"], header.site nav a.active, header.site nav a[aria-current="page"]) {
- background: rgba(232, 227, 214, 0.12) !important;
- border-color: rgba(232, 227, 214, 0.25) !important;
- color: var(--kolm-ink-0, #e8e3d6) !important;
+ background: rgba(230, 233, 238, 0.12) !important;
+ border-color: rgba(230, 233, 238, 0.25) !important;
+ color: var(--kolm-ink-0, #e6e9ee) !important;
 }
 
 html.kolm-sota-ui-v565 :where(.site-nav .nav-item > .nav-top:hover, .site-nav .nav-item > .nav-top:focus-visible, .site-nav > a:hover, .site-nav > a:focus-visible, header.site nav a:hover, header.site nav a:focus-visible) {
  background: rgba(255, 247, 232, 0.055) !important;
  border-color: rgba(255, 247, 232, 0.16) !important;
- color: var(--kolm-ink-0, #e8e3d6) !important;
+ color: var(--kolm-ink-0, #e6e9ee) !important;
 }
 
 html.kolm-sota-ui-v565 :where(.site-nav .mega-menu a) {
@@ -3993,17 +3993,17 @@ html.kolm-sota-ui-v565 :where(.site-nav .mega-menu a) {
 }
 
 html.kolm-sota-ui-v565 :where(.site-nav .mega-menu a.active, .site-nav .mega-menu a[aria-current="page"]) {
- background: rgba(232, 227, 214, 0.10) !important;
- border-color: rgba(232, 227, 214, 0.20) !important;
- color: var(--kolm-ink-0, #e8e3d6) !important;
+ background: rgba(230, 233, 238, 0.10) !important;
+ border-color: rgba(230, 233, 238, 0.20) !important;
+ color: var(--kolm-ink-0, #e6e9ee) !important;
 }
 
 html.kolm-sota-ui-v565 .site-nav .mega-menu a.active,
 html.kolm-sota-ui-v565 .site-nav .mega-menu a[aria-current="page"] {
- border-top-color: rgba(232, 227, 214, 0.20) !important;
- border-right-color: rgba(232, 227, 214, 0.20) !important;
- border-bottom-color: rgba(232, 227, 214, 0.20) !important;
- border-left-color: rgba(232, 227, 214, 0.20) !important;
+ border-top-color: rgba(230, 233, 238, 0.20) !important;
+ border-right-color: rgba(230, 233, 238, 0.20) !important;
+ border-bottom-color: rgba(230, 233, 238, 0.20) !important;
+ border-left-color: rgba(230, 233, 238, 0.20) !important;
  text-decoration: none !important;
 }
 
@@ -4119,7 +4119,7 @@ html.kolm-sota-ui-v567 :where(.kolm-surface-media .ksm-stats) {
 }
 
 [data-theme="light"].kolm-sota-ui-v567 :where(.term .body) {
- color: #f7f4ec !important;
+ color: #f3f5f7 !important;
 }
 
 [data-theme="light"].kolm-sota-ui-v567 :where(.term .body .com, .term .body .dim, .term .head .file) {
@@ -4127,7 +4127,7 @@ html.kolm-sota-ui-v567 :where(.kolm-surface-media .ksm-stats) {
 }
 
 [data-theme="light"].kolm-sota-ui-v567 :where(.term .body .arg) {
- color: #e8e3d6 !important;
+ color: #e6e9ee !important;
 }
 
 [data-theme="light"].kolm-sota-ui-v567 :where(.term .body .ok) {
@@ -4196,7 +4196,7 @@ html.kolm-sota-ui-v565 body.kolm-home-sota .home-hero-left .hero-platforms span 
 
 /* V578: proof media is intentionally a dark product surface in both themes. */
 .hero-proof .proof-shell {
- color: #e8e3d6 !important;
+ color: #e6e9ee !important;
 }
 
 .hero-proof .proof-toolbar,
@@ -4210,7 +4210,7 @@ html.kolm-sota-ui-v565 body.kolm-home-sota .home-hero-left .hero-platforms span 
 .hero-proof .artifact-copy strong,
 .hero-proof .flow-step strong,
 .hero-proof .proof-tags span {
- color: #e8e3d6 !important;
+ color: #e6e9ee !important;
 }
 
 .hero-proof .proof-status,
@@ -4277,14 +4277,14 @@ html.kolm-sota-ui-v597 :where(.kolm-product-spine a span) {
  align-items: center !important;
  justify-content: center !important;
  border-radius: 7px !important;
- background: rgba(232, 227, 214,0.11) !important;
- color: var(--kolm-green, #e8e3d6) !important;
+ background: rgba(230, 233, 238,0.11) !important;
+ color: var(--kolm-green, #e6e9ee) !important;
  font: 700 10px/1 ui-monospace, "SF Mono", Menlo, Consolas, monospace !important;
  letter-spacing: 0 !important;
 }
 
 html.kolm-sota-ui-v597 :where(.kolm-product-spine a b) {
- color: var(--kolm-ink-0, #e8e3d6) !important;
+ color: var(--kolm-ink-0, #e6e9ee) !important;
  font-size: 13px !important;
  line-height: 1.12 !important;
  font-weight: 720 !important;
@@ -4305,12 +4305,12 @@ html.kolm-sota-ui-v597 :where(.kolm-product-spine a em) {
 html.kolm-sota-ui-v597 :where(.kolm-product-spine a[aria-current="page"],
 .kolm-product-spine a:hover,
 .kolm-product-spine a:focus-visible) {
- border-color: rgba(232, 227, 214,0.34) !important;
+ border-color: rgba(230, 233, 238,0.34) !important;
  /* W683: single mint gradient — golden second stop removed. */
  background:
-  linear-gradient(135deg, rgba(232, 227, 214,0.13), rgba(232, 227, 214,0.04)),
+  linear-gradient(135deg, rgba(230, 233, 238,0.13), rgba(230, 233, 238,0.04)),
   rgba(255,255,255,0.045) !important;
- color: var(--kolm-ink-0, #e8e3d6) !important;
+ color: var(--kolm-ink-0, #e6e9ee) !important;
  text-decoration: none !important;
 }
 
@@ -4321,7 +4321,7 @@ html.kolm-sota-ui-v597 :where(.kolm-product-spine a[aria-current="page"] em,
 }
 
 [data-theme="light"].kolm-sota-ui-v597 :where(.kolm-product-spine) {
- background: rgba(247,244,236,0.94) !important;
+ background: rgba(243, 245, 247,0.94) !important;
  border-color: rgba(17,19,21,0.10) !important;
 }
 

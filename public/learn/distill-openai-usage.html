@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Distill your OpenAI usage into a .kolm · kolm.ai</title>
 <meta name="description" content="Capture prompt-response pairs from live OpenAI calls, distill them into a seed set, and compile a specialist .kolm that costs 10-100x less and runs...">
-<meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 <link rel="canonical" href="https://kolm.ai/learn/distill-openai-usage">
 <meta property="og:title" content="Distill your OpenAI usage into a .kolm · kolm.ai">
 <meta property="og:description" content="Capture prompt-response pairs from live OpenAI calls, distill them into a seed set, and compile a specialist .kolm that costs 10-100x less and runs...">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/learn/distill-openai-usage">
-<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Distill your OpenAI usage into a .kolm · kolm.ai">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">
 {
@@ -37,8 +37,8 @@
 }
 </script>
 <style>
- :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#111111;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
- [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
+ :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230, 233, 238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#111111;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669}
  body{background:var(--bg);color:var(--ink);font:16.5px/1.7 -apple-system,Inter,system-ui,sans-serif;margin:0}
  .wrap{max-width:760px;margin:0 auto;padding:0 24px}
  header.site{padding:18px 0;border-bottom:1px solid var(--line)}
@@ -134,7 +134,7 @@
 <b>What you will have.</b> One <code>.kolm</code> trained on your actual prompts. K-score &ge; 0.85 against held-out cases from your own usage. Replaces a single OpenAI use-case at roughly 10-100&times; lower cost per call and zero data egress. Works on the same hardware you already own.
 </div>
 
-<div style="margin:24px 0;padding:16px 18px;border:1px solid rgba(245,158,11,0.32);border-left:3px solid #f59e0b;border-radius:8px;background:rgba(245,158,11,0.06);font-size:14px;line-height:1.55;color:var(--ink-mute)"><b style="color:var(--ink)">v0.2 provenance (wave 144).</b> The v0.2 path captures your live traffic, splits train / holdout, and compiles a <i>recipe-class</i> artifact: deterministic compiled code, Ed25519-signed manifest + receipt, optional <code>kolm-moe-1</code> composition block across N expert recipes, optional bundled <code>kolm-tokenizer-1</code> byte-level BPE, a <code>KOLMIDX</code> deterministic lookup container, and the K-score gate against your held-out pairs. Teacher&rarr;student LoRA distillation onto a quantized base (INT4 / GGUF / ONNX) ships through the runtime bridge; the cost / latency numbers below describe a runtime-bridge compile and are what a v0.2 recipe-class artifact is engineered to approach for narrow tasks where the recipe shape already fits.</div>
+<div style="margin:24px 0;padding:16px 18px;border:1px solid rgba(150, 158, 170,0.32);border-left:3px solid #56606c;border-radius:8px;background:rgba(150, 158, 170,0.06);font-size:14px;line-height:1.55;color:var(--ink-mute)"><b style="color:var(--ink)">v0.2 provenance (wave 144).</b> The v0.2 path captures your live traffic, splits train / holdout, and compiles a <i>recipe-class</i> artifact: deterministic compiled code, Ed25519-signed manifest + receipt, optional <code>kolm-moe-1</code> composition block across N expert recipes, optional bundled <code>kolm-tokenizer-1</code> byte-level BPE, a <code>KOLMIDX</code> deterministic lookup container, and the K-score gate against your held-out pairs. Teacher&rarr;student LoRA distillation onto a quantized base (INT4 / GGUF / ONNX) ships through the runtime bridge; the cost / latency numbers below describe a runtime-bridge compile and are what a v0.2 recipe-class artifact is engineered to approach for narrow tasks where the recipe shape already fits.</div>
 
 <h2>Why this works</h2>
 <p>You are already paying GPT-4 for narrow tasks like "summarize this support ticket" or "classify this email by intent." Each call is small, the answer space is narrow, and the prompts repeat. That is the exact shape kolm is built to compress. <b>Capture your real usage. Distill it. Compile.</b> The resulting <code>.kolm</code> handles the same task at a fraction of the cost.</p>

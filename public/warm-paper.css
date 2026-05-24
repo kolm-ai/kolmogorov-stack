@@ -11,7 +11,7 @@
    Palette ground rules:
      . one ink   #111111  near-black with imperceptible warmth
      . one mute  #6b6b66
-     . one paper #f7f4ec  cool warm paper
+     . one paper #f3f5f7  cool warm paper
      . one card  #ffffff  pure card on paper
      . one rule  rgba(17,17,17, 0.10)
      . status colors are muted, near-monochrome
@@ -134,7 +134,7 @@ small, .small {
   font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #5a5a55;
+  color: #56606c;
 }
 
 .eyebrow::before, .kicker::before, .ks-eyebrow::before {
@@ -393,8 +393,8 @@ section[data-hero] {
 [data-theme="dark"] .kolm-btn-ghost,
 [data-theme="dark"] .ks-btn-ghost,
 [data-theme="dark"] .btn[data-variant="ghost"] {
-  color: #e8e3d6 !important;
-  border-color: rgba(232,227,214,0.28);
+  color: #e6e9ee !important;
+  border-color: rgba(230, 233, 238,0.28);
 }
 
 /* Status button variants - monochrome - no orange, no sepia */
@@ -430,7 +430,7 @@ pre, .code, .code-block,
 .kolm-code, .ks-code,
 .terminal, .kolm-terminal {
   background: #0b0b0d;
-  color: #e8e3d6;
+  color: #e6e9ee;
   border: 1px solid #1c1c20;
   border-radius: var(--ks-radius-md);
   padding: 18px 20px;
@@ -485,7 +485,7 @@ code:not(pre code) {
 header.kolm-nav,
 nav.kolm-nav,
 .site-nav {
-  background: rgba(247, 244, 236, 0.88);
+  background: rgba(243, 245, 247, 0.88);
   backdrop-filter: saturate(110%) blur(14px);
   -webkit-backdrop-filter: saturate(110%) blur(14px);
   border-bottom: 1px solid var(--line-1);
@@ -665,7 +665,7 @@ hr, .divider, .ks-divider {
 }
 
 [data-theme="dark"] ::selection {
-  background: rgba(232, 227, 214, 0.18);
+  background: rgba(230, 233, 238, 0.18);
   color: var(--ink-1);
 }
 
@@ -748,8 +748,8 @@ body::after {
 
 [data-theme="dark"] body::before {
   background:
-    radial-gradient(ellipse 1200px 820px at 100% 108%, rgba(232, 227, 214, 0.040), transparent 56%),
-    radial-gradient(ellipse 900px 620px at 0% -8%,   rgba(232, 227, 214, 0.020), transparent 62%);
+    radial-gradient(ellipse 1200px 820px at 100% 108%, rgba(230, 233, 238, 0.040), transparent 56%),
+    radial-gradient(ellipse 900px 620px at 0% -8%,   rgba(230, 233, 238, 0.020), transparent 62%);
 }
 
 [data-theme="dark"] body::after {
@@ -836,7 +836,7 @@ details:not(.fr-faq__row) > *:not(summary) {
   background: var(--surface-0) !important;
 }
 
-[style*="color:#e8e3d6" i],
+[style*="color:#e6e9ee" i],
 [style*="color:#2bf5b3" i],
 [style*="color:#111111" i],
 [style*="color:#000000" i],
@@ -920,7 +920,7 @@ html:not([data-theme])   { color-scheme: light; }
 
 [data-theme="dark"] .fr-h1--hero em::after,
 [data-theme="dark"] .fr-h1--hero i::after {
-  background: rgba(232, 227, 214, 0.16);
+  background: rgba(230, 233, 238, 0.16);
 }
 
 section.hero .fr-h1--hero,
@@ -1200,7 +1200,7 @@ main > section:first-of-type .fr-h1--hero {
   font-size: 11.5px;
   font-weight: 500;
   letter-spacing: -0.005em;
-  fill: #c2410c;
+  fill: #1f2937;
 }
 [data-theme="dark"] .kolm-arch__surf { fill: #ff6a3d; }
 
@@ -1787,17 +1787,17 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
 }
 
 /* W845: chat box background MUST be an explicit dark hex (not var(--ink-1)).
-   --ink-1 is a SEMANTIC INK TOKEN — #111 in light theme, but #e8e3d6 (cream)
+   --ink-1 is a SEMANTIC INK TOKEN — #111 in light theme, but #e6e9ee (cream)
    in dark theme. Using it as a SURFACE color flipped the terminal to white
    in dark mode (user: "this completely bleeds"). The chat box is a terminal;
    it stays dark in both themes. */
 .ks-cli-chat__box {
-  background: #14110d;
-  border: 1px solid #2a241b;
+  background: #0e1116;
+  border: 1px solid #1c2128;
   border-radius: var(--ks-radius-lg, 12px);
   overflow: hidden;
   box-shadow: 0 24px 64px -28px rgba(17, 17, 17, 0.22);
-  color: #f5efe2;
+  color: #e6e9ee;
   font-family: var(--ks-font-mono);
   display: grid;
   grid-template-rows: auto 1fr auto;
@@ -1812,21 +1812,21 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   font-size: 12px;
   letter-spacing: 0.04em;
-  color: rgba(245, 239, 226, 0.65);
+  color: rgba(230, 233, 238, 0.65);
 }
 .ks-cli-chat__head .dots { display: inline-flex; gap: 6px; margin-right: 10px; }
 .ks-cli-chat__head .dots span {
   width: 10px; height: 10px; border-radius: 50%;
   background: rgba(255, 255, 255, 0.18);
 }
-.ks-cli-chat__head .dots span:first-child { background: rgba(245, 239, 226, 0.35); }
-.ks-cli-chat__head b { color: rgba(245, 239, 226, 0.85); font-weight: 500; }
+.ks-cli-chat__head .dots span:first-child { background: rgba(230, 233, 238, 0.35); }
+.ks-cli-chat__head b { color: rgba(230, 233, 238, 0.85); font-weight: 500; }
 .ks-cli-chat__head .head-tag {
   margin-left: auto;
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(245, 239, 226, 0.55);
+  color: rgba(230, 233, 238, 0.55);
 }
 .ks-cli-chat__log {
   padding: 18px 22px;
@@ -1842,15 +1842,15 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   font-size: 10.5px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(245, 239, 226, 0.5);
+  color: rgba(230, 233, 238, 0.5);
 }
 .ks-cli-chat__msg--user .who { color: rgba(168, 215, 188, 0.75); }
 .ks-cli-chat__msg .body {
-  color: rgba(245, 239, 226, 0.92);
+  color: rgba(230, 233, 238, 0.92);
   white-space: pre-wrap;
 }
-.ks-cli-chat__msg--user .body { color: rgba(245, 239, 226, 1); font-weight: 500; }
-.ks-cli-chat__msg--kolm .body { color: rgba(245, 239, 226, 0.85); }
+.ks-cli-chat__msg--user .body { color: rgba(230, 233, 238, 1); font-weight: 500; }
+.ks-cli-chat__msg--kolm .body { color: rgba(230, 233, 238, 0.85); }
 .ks-cli-chat__msg--kolm .body code {
   background: rgba(255, 255, 255, 0.08);
   padding: 1px 6px;
@@ -1871,14 +1871,14 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: 8px;
   padding: 12px 14px;
-  color: #f5efe2;
+  color: #e6e9ee;
   font-family: var(--ks-font-mono);
   font-size: 13.5px;
   outline: none;
 }
-.ks-cli-chat__form input:focus { border-color: rgba(245, 239, 226, 0.35); }
+.ks-cli-chat__form input:focus { border-color: rgba(230, 233, 238, 0.35); }
 .ks-cli-chat__form button {
-  background: #f5efe2;
+  background: #e6e9ee;
   color: #111;
   border: 0;
   border-radius: 8px;
@@ -1896,8 +1896,216 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   font-family: var(--ks-font-mono);
   font-size: 11px;
   letter-spacing: 0.06em;
-  color: rgba(245, 239, 226, 0.45);
+  color: rgba(230, 233, 238, 0.45);
   margin: 8px 22px 16px;
+}
+
+/* W850 — "verify it yourself" curl block under the copy column.
+   Sits in the light cool-slate column (NOT the dark chat box). */
+.ks-cli-chat__verify {
+  margin: 20px 0 8px;
+  border-top: 1px solid rgba(20, 30, 45, 0.08);
+  padding-top: 14px;
+}
+.ks-cli-chat__verify > summary {
+  cursor: pointer;
+  font-family: var(--ks-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: #44494f;
+  list-style: none;
+  padding: 4px 0;
+  user-select: none;
+}
+.ks-cli-chat__verify > summary::-webkit-details-marker { display: none; }
+.ks-cli-chat__verify > summary::before {
+  content: '+ ';
+  color: #828892;
+  font-weight: 600;
+}
+.ks-cli-chat__verify[open] > summary::before { content: '- '; }
+.ks-cli-chat__verify-pre {
+  margin: 10px 0 8px;
+  padding: 12px 14px;
+  background: #0e1116;
+  color: #e6e9ee;
+  border: 1px solid #1c2128;
+  border-radius: 8px;
+  font-family: var(--ks-font-mono);
+  font-size: 12px;
+  line-height: 1.55;
+  overflow-x: auto;
+  white-space: pre;
+}
+.ks-cli-chat__verify-pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  font-family: inherit;
+}
+.ks-cli-chat__verify-why {
+  margin: 8px 0 0;
+  font-size: 12.5px;
+  color: #525a64;
+  line-height: 1.55;
+}
+.ks-cli-chat__verify-why code {
+  font-family: var(--ks-font-mono);
+  font-size: 11.5px;
+  background: rgba(20, 30, 45, 0.06);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+/* W850 — three-surface section (Route & Capture / Distill & Compile /
+   Run & Govern). Magazine-spread three-column layout, no card chrome
+   beyond a thin top rule + a single accent on the middle (feature)
+   column. Cool slate only. */
+.ks-three-surface {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+  margin: 36px 0 18px;
+}
+@media (max-width: 980px) {
+  .ks-three-surface { grid-template-columns: 1fr; gap: 32px; }
+}
+.ks-three-surface__col {
+  padding: 28px 26px 26px;
+  border-top: 1px solid rgba(20, 30, 45, 0.18);
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+.ks-three-surface__col--feat {
+  border-top: 2px solid #1f2937;
+  background: rgba(20, 30, 45, 0.02);
+}
+.ks-three-surface__col header {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+.ks-three-surface__step {
+  font-family: var(--ks-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: #828892;
+  font-weight: 500;
+}
+.ks-three-surface__col h3 {
+  font-family: var(--ks-font-display, ui-sans-serif, system-ui);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: #1c2128;
+  margin: 0;
+  line-height: 1.2;
+}
+.ks-three-surface__col p {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: #44494f;
+  margin: 0;
+}
+.ks-three-surface__col ul {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ks-three-surface__col ul li {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: #44494f;
+  padding-left: 14px;
+  position: relative;
+}
+.ks-three-surface__col ul li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 6px;
+  height: 1px;
+  background: #828892;
+}
+.ks-three-surface__col ul li b {
+  color: #1c2128;
+  font-weight: 600;
+}
+.ks-three-surface__col code {
+  font-family: var(--ks-font-mono);
+  font-size: 12.5px;
+  background: rgba(20, 30, 45, 0.06);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: #1c2128;
+}
+.ks-three-surface__link {
+  margin-top: auto;
+  font-family: var(--ks-font-mono);
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  color: #1c2128;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(20, 30, 45, 0.18);
+  padding-bottom: 3px;
+  align-self: flex-start;
+  transition: border-color 120ms ease;
+}
+.ks-three-surface__link:hover,
+.ks-three-surface__link:focus-visible {
+  border-bottom-color: #1c2128;
+}
+.ks-three-surface__foot {
+  margin-top: 26px;
+  font-size: 12.5px;
+  color: #525a64;
+  max-width: 70ch;
+}
+.ks-three-surface__foot code {
+  font-family: var(--ks-font-mono);
+  font-size: 12px;
+  background: rgba(20, 30, 45, 0.06);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+/* Dark-mode adjustments — keep cool slate, swap text to ink */
+[data-theme="dark"] .ks-three-surface__col {
+  border-top-color: rgba(230, 233, 238, 0.18);
+}
+[data-theme="dark"] .ks-three-surface__col--feat {
+  border-top-color: rgba(230, 233, 238, 0.55);
+  background: rgba(230, 233, 238, 0.03);
+}
+[data-theme="dark"] .ks-three-surface__step { color: #828892; }
+[data-theme="dark"] .ks-three-surface__col h3 { color: #e6e9ee; }
+[data-theme="dark"] .ks-three-surface__col p,
+[data-theme="dark"] .ks-three-surface__col ul li { color: #c1c7cf; }
+[data-theme="dark"] .ks-three-surface__col ul li b { color: #e6e9ee; }
+[data-theme="dark"] .ks-three-surface__col code {
+  background: rgba(230, 233, 238, 0.08);
+  color: #e6e9ee;
+}
+[data-theme="dark"] .ks-three-surface__col ul li::before { background: #828892; }
+[data-theme="dark"] .ks-three-surface__link {
+  color: #e6e9ee;
+  border-bottom-color: rgba(230, 233, 238, 0.25);
+}
+[data-theme="dark"] .ks-three-surface__link:hover,
+[data-theme="dark"] .ks-three-surface__link:focus-visible {
+  border-bottom-color: #e6e9ee;
+}
+[data-theme="dark"] .ks-three-surface__foot { color: #c1c7cf; }
+[data-theme="dark"] .ks-three-surface__foot code {
+  background: rgba(230, 233, 238, 0.08);
+  color: #e6e9ee;
 }
 
 /* W845: explicit overrides for both themes — defense-in-depth.
@@ -1907,9 +2115,9 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
 [data-theme="light"] .ks-cli-chat__box,
 :root:not([data-theme="dark"]) .ks-cli-chat__box,
 [data-theme="dark"] .ks-cli-chat__box {
-  background: #14110d;
-  color: #f5efe2;
-  border-color: #2a241b;
+  background: #0e1116;
+  color: #e6e9ee;
+  border-color: #1c2128;
 }
 
 /* example chips inside the chat — render once on first paint, removed on first send */
@@ -1921,7 +2129,7 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
 }
 .ks-cli-chat__chip {
   background: rgba(255, 255, 255, 0.05);
-  color: rgba(245, 239, 226, 0.78);
+  color: rgba(230, 233, 238, 0.78);
   border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: 999px;
   padding: 6px 11px;
@@ -1933,7 +2141,7 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
 }
 .ks-cli-chat__chip:hover {
   background: rgba(255, 255, 255, 0.10);
-  color: #f5efe2;
+  color: #e6e9ee;
   border-color: rgba(255, 255, 255, 0.22);
 }
 
@@ -1949,18 +2157,18 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   padding: 10px 12px;
   font-family: var(--ks-font-mono);
   font-size: 13.5px;
-  color: #f5efe2;
+  color: #e6e9ee;
   white-space: pre-wrap;
   margin: 0;
   overflow-x: auto;
 }
 .ks-cli-chat__why {
   font-size: 12.5px;
-  color: rgba(245, 239, 226, 0.78);
+  color: rgba(230, 233, 238, 0.78);
   margin: 0;
   line-height: 1.5;
 }
-.ks-cli-chat__why b { color: #f5efe2; font-weight: 600; }
+.ks-cli-chat__why b { color: #e6e9ee; font-weight: 600; }
 .ks-cli-chat__why .conf { color: rgba(168, 215, 188, 0.78); font-family: var(--ks-font-mono); }
 .ks-cli-chat__alts {
   display: flex;
@@ -1971,7 +2179,7 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
 }
 .ks-cli-chat__alts .alts-label {
   font-family: var(--ks-font-mono);
-  color: rgba(245, 239, 226, 0.55);
+  color: rgba(230, 233, 238, 0.55);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -1982,13 +2190,13 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   padding: 3px 6px;
   font-family: var(--ks-font-mono);
   font-size: 11.5px;
-  color: rgba(245, 239, 226, 0.85);
+  color: rgba(230, 233, 238, 0.85);
 }
 .ks-cli-chat__cta {
   display: inline-flex;
   align-self: start;
   align-items: center;
-  background: #f5efe2;
+  background: #e6e9ee;
   color: #111;
   border-radius: 6px;
   padding: 8px 14px;
@@ -2003,11 +2211,11 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
 .ks-cli-chat__resp--err .ks-cli-chat__cmd { display: none; }
 .ks-cli-chat__resp--err p {
   font-size: 13px;
-  color: rgba(245, 239, 226, 0.78);
+  color: rgba(230, 233, 238, 0.78);
   margin: 0;
 }
 .ks-cli-chat__thinking {
-  color: rgba(245, 239, 226, 0.45);
+  color: rgba(230, 233, 238, 0.45);
   font-style: normal;
 }
 /* W847 — multi-step workflow recipe (returned when the user describes a goal
@@ -2015,7 +2223,7 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
    $ command + a one-line why. */
 .ks-cli-chat__wf-summary {
   font-size: 13px;
-  color: rgba(245, 239, 226, 0.88);
+  color: rgba(230, 233, 238, 0.88);
   margin: 0 0 4px;
   line-height: 1.55;
 }
@@ -2045,7 +2253,7 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: rgba(194, 65, 12, 0.85);
+  background: rgba(31, 41, 55, 0.85);
   color: #faf6ec;
   font-family: var(--ks-font-mono);
   font-size: 11px;
@@ -2060,11 +2268,11 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   border: 0;
   padding: 0;
   margin: 0;
-  color: #f5efe2;
+  color: #e6e9ee;
 }
 .ks-cli-chat__wf-why {
   font-size: 11.5px;
-  color: rgba(245, 239, 226, 0.6);
+  color: rgba(230, 233, 238, 0.6);
   line-height: 1.5;
   font-family: var(--ks-font-sans);
 }
@@ -2086,7 +2294,7 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   font-size: 11.5px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #c2410c;
+  color: #1f2937;
   margin: 0 0 18px;
   font-weight: 500;
 }
@@ -2112,15 +2320,15 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   font-size: 0.92em;
   padding: 1px 6px;
   border-radius: 4px;
-  background: rgba(194, 65, 12, 0.08);
-  color: #c2410c;
+  background: rgba(31, 41, 55, 0.08);
+  color: #1f2937;
   font-weight: 500;
 }
 .kolm-whatis__sub {
   font-family: var(--ks-font-sans);
   font-size: 14.5px;
   line-height: 1.6;
-  color: #5a5a55;
+  color: #56606c;
   margin: 0;
   max-width: 70ch;
 }
@@ -2146,14 +2354,14 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   padding: clamp(18px, 2vw, 26px) 0 4px;
   transition: border-color 140ms ease;
 }
-.kolm-whatis__surface:hover { border-top-color: #c2410c; }
+.kolm-whatis__surface:hover { border-top-color: #1f2937; }
 .kolm-whatis__surface-tag {
   display: inline-block;
   font-family: var(--ks-font-mono, ui-monospace, "JetBrains Mono", monospace);
   font-size: 10.5px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #c2410c;
+  color: #1f2937;
   font-weight: 500;
   margin: 0 0 12px;
 }
@@ -2178,15 +2386,15 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   font-size: 12.5px;
   padding: 1px 6px;
   border-radius: 4px;
-  background: rgba(194, 65, 12, 0.07);
+  background: rgba(31, 41, 55, 0.07);
   color: #111111;
 }
-[data-theme="dark"] .kolm-whatis__surface { border-top-color: rgba(232,227,214,0.10); }
+[data-theme="dark"] .kolm-whatis__surface { border-top-color: rgba(230, 233, 238,0.10); }
 [data-theme="dark"] .kolm-whatis__surface:hover { border-top-color: #ff6a3d; }
 [data-theme="dark"] .kolm-whatis__surface-tag { color: #ff6a3d; }
-[data-theme="dark"] .kolm-whatis__surface-h { color: #e8e3d6; }
+[data-theme="dark"] .kolm-whatis__surface-h { color: #e6e9ee; }
 [data-theme="dark"] .kolm-whatis__surface-p { color: #b6b0a5; }
-[data-theme="dark"] .kolm-whatis__surface-p code { background: rgba(255,106,61,0.10); color: #e8e3d6; }
+[data-theme="dark"] .kolm-whatis__surface-p code { background: rgba(255,106,61,0.10); color: #e6e9ee; }
 
 /* W844 post-auth account chat band — mirrors the homepage chat layout */
 .kolm-account-chat {
@@ -2254,14 +2462,14 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   flex-direction: column;
   gap: 14px;
   padding: 26px 28px 24px;
-  background: var(--paper-1, #faf9f7);
+  background: var(--paper-1, #f3f5f7);
   border: 1px solid var(--rule-1, #e5e0d4);
   border-radius: 10px;
   box-shadow: 0 1px 0 rgba(33, 28, 21, 0.02), 0 12px 28px -22px rgba(33, 28, 21, 0.18);
   transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease;
 }
 .kolm-deep__card:hover {
-  border-color: var(--accent-1, #c2410c);
+  border-color: var(--accent-1, #1f2937);
   transform: translateY(-1px);
   box-shadow: 0 1px 0 rgba(33, 28, 21, 0.03), 0 18px 34px -22px rgba(33, 28, 21, 0.24);
 }
@@ -2277,7 +2485,7 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   font-size: 11px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--accent-1, #c2410c);
+  color: var(--accent-1, #1f2937);
 }
 .kolm-deep__title {
   font-family: var(--ks-font-sans);
@@ -2301,7 +2509,7 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   font-size: 12.5px;
   padding: 1px 5px;
   border-radius: 4px;
-  background: rgba(194, 65, 12, 0.07);
+  background: rgba(31, 41, 55, 0.07);
   color: var(--ink-1);
 }
 .kolm-deep__facts {
@@ -2342,7 +2550,7 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   color: var(--ink-1);
   background: var(--paper-2, #f3eee0);
   border: 1px solid var(--rule-2, #ece6d6);
-  border-left: 2px solid var(--accent-1, #c2410c);
+  border-left: 2px solid var(--accent-1, #1f2937);
   border-radius: 6px;
   padding: 10px 14px;
   overflow-x: auto;
@@ -2353,8 +2561,8 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
    --------------------------------------------------- */
 :root[data-theme="dark"] .kolm-deep__card,
 html[data-theme="dark"] .kolm-deep__card {
-  background: rgba(245, 239, 226, 0.03);
-  border-color: rgba(245, 239, 226, 0.10);
+  background: rgba(230, 233, 238, 0.03);
+  border-color: rgba(230, 233, 238, 0.10);
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25), 0 18px 34px -24px rgba(0, 0, 0, 0.45);
 }
 :root[data-theme="dark"] .kolm-deep__card:hover,
@@ -2362,33 +2570,33 @@ html[data-theme="dark"] .kolm-deep__card:hover {
   border-color: rgba(168, 215, 188, 0.45);
 }
 :root[data-theme="dark"] .kolm-deep__head,
-html[data-theme="dark"] .kolm-deep__head { border-bottom-color: rgba(245, 239, 226, 0.10); }
+html[data-theme="dark"] .kolm-deep__head { border-bottom-color: rgba(230, 233, 238, 0.10); }
 :root[data-theme="dark"] .kolm-deep__stage,
 html[data-theme="dark"] .kolm-deep__stage { color: rgba(168, 215, 188, 0.9); }
 :root[data-theme="dark"] .kolm-deep__title,
-html[data-theme="dark"] .kolm-deep__title { color: rgba(245, 239, 226, 0.96); }
+html[data-theme="dark"] .kolm-deep__title { color: rgba(230, 233, 238, 0.96); }
 :root[data-theme="dark"] .kolm-deep__body,
-html[data-theme="dark"] .kolm-deep__body { color: rgba(245, 239, 226, 0.78); }
+html[data-theme="dark"] .kolm-deep__body { color: rgba(230, 233, 238, 0.78); }
 :root[data-theme="dark"] .kolm-deep__body code,
 html[data-theme="dark"] .kolm-deep__body code {
   background: rgba(168, 215, 188, 0.10);
-  color: rgba(245, 239, 226, 0.94);
+  color: rgba(230, 233, 238, 0.94);
 }
 :root[data-theme="dark"] .kolm-deep__facts li,
 html[data-theme="dark"] .kolm-deep__facts li {
-  color: rgba(245, 239, 226, 0.74);
-  border-top-color: rgba(245, 239, 226, 0.08);
+  color: rgba(230, 233, 238, 0.74);
+  border-top-color: rgba(230, 233, 238, 0.08);
 }
 :root[data-theme="dark"] .kolm-deep__facts li b,
-html[data-theme="dark"] .kolm-deep__facts li b { color: rgba(245, 239, 226, 0.96); }
+html[data-theme="dark"] .kolm-deep__facts li b { color: rgba(230, 233, 238, 0.96); }
 :root[data-theme="dark"] .kolm-deep__facts li code,
-html[data-theme="dark"] .kolm-deep__facts li code { color: rgba(245, 239, 226, 0.92); }
+html[data-theme="dark"] .kolm-deep__facts li code { color: rgba(230, 233, 238, 0.92); }
 :root[data-theme="dark"] .kolm-deep__cmd,
 html[data-theme="dark"] .kolm-deep__cmd {
   background: rgba(20, 18, 14, 0.55);
-  border-color: rgba(245, 239, 226, 0.12);
+  border-color: rgba(230, 233, 238, 0.12);
   border-left-color: rgba(168, 215, 188, 0.75);
-  color: rgba(245, 239, 226, 0.94);
+  color: rgba(230, 233, 238, 0.94);
 }
 
 /* =========================================================================
@@ -2418,12 +2626,11 @@ html[data-theme="dark"] .kolm-deep__cmd {
 }
 .fr-h1--hero .h1-claim { font-weight: inherit; }
 
-/* W848: hero backdrop reverted to plain warm paper per direct user mandate
-   ("i really hate this backdrop, go back to the prior one"). The FAL-
-   generated PNG render landed badly — the W846 minimal cream surface is
-   the right answer. No gradient, no dot-grid, no PNG. */
+/* W850: hero backdrop swapped from warm cream to cool slate paper per
+   direct user mandate ("i dont like the browns beiges oranges anywhere").
+   The html-level dot grid shows through; no gradient/PNG layer. */
 .ks-hero {
-  background: #f7f4ec;
+  background: var(--surface-0, #f3f5f7);
   position: relative;
 }
 .ks-hero::before { content: none; }
@@ -2474,9 +2681,9 @@ html[data-theme="dark"] .kolm-deep__cmd {
   border-color: rgba(33, 28, 21, 0.08);
 }
 [data-theme="dark"] .ks-theme-toggle:hover {
-  background: rgba(245, 239, 226, 0.06);
-  color: var(--ink-1, #e8e3d6);
-  border-color: rgba(245, 239, 226, 0.10);
+  background: rgba(230, 233, 238, 0.06);
+  color: var(--ink-1, #e6e9ee);
+  border-color: rgba(230, 233, 238, 0.10);
 }
 .ks-theme-toggle svg { display: block; pointer-events: none; }
 .ks-theme-toggle .theme-icon--sun  { display: none; }
@@ -2485,7 +2692,7 @@ html[data-theme="dark"] .kolm-deep__cmd {
 [data-theme="dark"] .ks-theme-toggle .theme-icon--moon { display: none; }
 
 /* W845: deep-dive cards — kill the var(--paper-1) reference (undefined token
-   was falling back to #faf9f7 in light mode, but defense-in-depth here). */
+   was falling back to #f3f5f7 in light mode, but defense-in-depth here). */
 .kolm-deep__card {
   background: #fbfaf6;
   border-color: #e8e2d3;
@@ -2508,7 +2715,7 @@ section.fr-section + section.fr-section { padding-top: 0; }
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--accent-1, #c2410c);
+  color: var(--accent-1, #1f2937);
   font-family: var(--ks-font-mono, ui-monospace, monospace);
 }
 .fr-h2 {
@@ -2588,12 +2795,12 @@ h3.fr-h3, .fr-h3, h3.ks-h3, .ks-h3 {
   transform: translateY(-1px);
   box-shadow: none;
 }
-[data-theme="dark"] .kolm-deep__card { background: #14110d; border-color: rgba(245,239,226,0.10); }
-[data-theme="dark"] .kolm-deep__card:hover { border-color: rgba(245,239,226,0.20); }
-[data-theme="dark"] .kolm-deep__card .kolm-deep__cmd { background: #1a1612; border-color: rgba(245,239,226,0.10); color: #e8e3d6; }
-[data-theme="dark"] .kolm-deep__card .kolm-deep__title { color: #e8e3d6; }
-[data-theme="dark"] .kolm-deep__card .kolm-deep__body { color: #cbc4b5; }
-[data-theme="dark"] .kolm-deep__card .kolm-deep__head { border-bottom-color: rgba(245,239,226,0.08); }
+[data-theme="dark"] .kolm-deep__card { background: #161a20; border-color: rgba(230,233,238,0.10); }
+[data-theme="dark"] .kolm-deep__card:hover { border-color: rgba(230,233,238,0.20); }
+[data-theme="dark"] .kolm-deep__card .kolm-deep__cmd { background: #1c2128; border-color: rgba(230,233,238,0.10); color: #e6e9ee; }
+[data-theme="dark"] .kolm-deep__card .kolm-deep__title { color: #e6e9ee; }
+[data-theme="dark"] .kolm-deep__card .kolm-deep__body { color: #c1c7cf; }
+[data-theme="dark"] .kolm-deep__card .kolm-deep__head { border-bottom-color: rgba(230,233,238,0.08); }
 
 /* W846: receipt JSON inline strip — give devs a real artifact preview
    above the next scroll fold, not just a file-list visual. */
@@ -2610,9 +2817,9 @@ h3.fr-h3, .fr-h3, h3.ks-h3, .ks-h3 {
 .kolm-receipt-strip pre {
   margin: 0;
   padding: 18px 22px;
-  background: #14110d;
-  color: #e8e3d6;
-  border: 1px solid #2a241b;
+  background: #0e1116;
+  color: #e6e9ee;
+  border: 1px solid #1c2128;
   border-radius: 8px;
   font-family: var(--ks-font-mono, ui-monospace, "JetBrains Mono", monospace);
   font-size: 12.5px;
@@ -2644,8 +2851,8 @@ h3.fr-h3, .fr-h3, h3.ks-h3, .ks-h3 {
 .kolm-receipt-strip .receipt-line-key { color: #b8a5e8; }
 .kolm-receipt-strip .receipt-line-str { color: #f2c97d; }
 .kolm-receipt-strip .receipt-line-comment { color: #6b6b66; font-style: normal; }
-[data-theme="dark"] .kolm-receipt-strip h4 { color: #e8e3d6; }
-[data-theme="dark"] .kolm-receipt-strip p { color: #cbc4b5; }
+[data-theme="dark"] .kolm-receipt-strip h4 { color: #e6e9ee; }
+[data-theme="dark"] .kolm-receipt-strip p { color: #c1c7cf; }
 
 /* W846: signpost banner — pinned reassurance band that sits between hero
    and arch-band. One line. "Open source. Self-host or use kolm.ai cloud.
@@ -2668,17 +2875,18 @@ h3.fr-h3, .fr-h3, h3.ks-h3, .ks-h3 {
   color: var(--ink-3, #6b6b66);
 }
 .ks-signpost b { color: var(--ink-1, #111111); font-weight: 600; }
-.ks-signpost .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent-1, #c2410c); display: inline-block; }
-[data-theme="dark"] .ks-signpost { border-color: rgba(245,239,226,0.10); color: var(--ink-3, #9e978b); }
-[data-theme="dark"] .ks-signpost b { color: var(--ink-1, #e8e3d6); }
+.ks-signpost .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent-1, #1f2937); display: inline-block; }
+[data-theme="dark"] .ks-signpost { border-color: rgba(238, 241, 245,0.10); color: var(--ink-3, #9e978b); }
+[data-theme="dark"] .ks-signpost b { color: var(--ink-1, #e6e9ee); }
 
 /* ============================================================
-   W849 WARM BACKDROP — subtle grain + corner vignette.
-   No PNG, no extra HTTP request. SVG noise as data URI + radial
-   gradients. Both light and dark variants. Pure decoration: kept
-   under html so it can never intercept pointer events.
-   Respects prefers-reduced-motion (already static, but explicit
-   contain hint helps the compositor).
+   W850 GRID BACKDROP — restored cool-slate dot grid per user
+   mandate "i like the color scheme we had before edits with the
+   greys and the grid background". No PNG, no extra HTTP request.
+   ::before paints surface + faint corner vignette; ::after paints
+   the dot grid via CSS radial-gradient (no SVG noise). Both light
+   and dark. Pure decoration under html so it can never intercept
+   pointer events. Respects prefers-reduced-transparency.
    ============================================================ */
 
 html {
@@ -2692,11 +2900,10 @@ html::before {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background-image:
-    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(194, 65, 12, 0.045), transparent 70%),
-    radial-gradient(ellipse 70% 50% at 100% 100%, rgba(120, 80, 40, 0.035), transparent 65%),
-    radial-gradient(ellipse 70% 50% at 0% 100%, rgba(80, 60, 30, 0.025), transparent 65%);
   background-color: var(--surface-0);
+  background-image:
+    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(31, 41, 55, 0.025), transparent 70%),
+    radial-gradient(ellipse 70% 50% at 100% 100%, rgba(31, 41, 55, 0.020), transparent 65%);
   background-attachment: fixed;
   contain: strict;
 }
@@ -2707,27 +2914,28 @@ html::after {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  opacity: 0.35;
-  mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.36  0 0 0 0 0.30  0 0 0 0 0.22  0 0 0 0.08 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-  background-size: 180px 180px;
+  opacity: 0.55;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(31, 41, 55, 0.18) 1px, transparent 1.5px);
+  background-size: 24px 24px;
+  background-position: 0 0;
   contain: strict;
 }
 
 [data-theme="dark"] html::before,
 html[data-theme="dark"]::before {
-  background-image:
-    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(212, 168, 87, 0.055), transparent 70%),
-    radial-gradient(ellipse 70% 50% at 100% 100%, rgba(120, 80, 40, 0.045), transparent 65%),
-    radial-gradient(ellipse 70% 50% at 0% 100%, rgba(60, 40, 20, 0.05), transparent 65%);
   background-color: var(--surface-0);
+  background-image:
+    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(230, 233, 238, 0.035), transparent 70%),
+    radial-gradient(ellipse 70% 50% at 100% 100%, rgba(127, 161, 196, 0.025), transparent 65%);
 }
 
 [data-theme="dark"] html::after,
 html[data-theme="dark"]::after {
-  opacity: 0.45;
-  mix-blend-mode: screen;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.92  0 0 0 0 0.85  0 0 0 0 0.72  0 0 0 0.04 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  opacity: 0.40;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(230, 233, 238, 0.16) 1px, transparent 1.5px);
+  background-size: 24px 24px;
 }
 
 /* Keep body transparent over the html backdrop. */
@@ -2737,5 +2945,9 @@ body {
 
 @media (prefers-reduced-transparency: reduce) {
   html::after { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html::before, html::after { background-attachment: scroll; }
 }
 

@@ -7231,7 +7231,21 @@ export function buildRouter() {
       // W847 — when the classifier resolves a "terminal" verb but the user
       // described a goal (no args extracted), return a multi-step recipe so
       // the chat surface can render something they can actually run.
-      const workflow = intent.expandToWorkflow ? intent.expandToWorkflow(cls, question) : null;
+      let workflow = intent.expandToWorkflow ? intent.expandToWorkflow(cls, question) : null;
+      // W850 — synthesize a single-step workflow whenever expandToWorkflow
+      // returns null but the classifier produced a usable command. This
+      // guarantees the response carries a `workflow.steps[]` that the
+      // client persists as `lastWorkflow`, so the next-turn followup
+      // pre-pass ("yes" / "ok do it") in classifyIntent can fire. Without
+      // this, any verb the W848 enrichment populated with args (e.g.
+      // `distill --from-captures`) suppresses the workflow and the user's
+      // affirmative reply degenerates to a 20% fallback.
+      if (!workflow && cls && cls.verb && cls.verb !== 'what' && (cls.confidence == null || cls.confidence >= 0.5)) {
+        workflow = {
+          summary: cls.matchedPhrase ? ('matched: ' + cls.matchedPhrase) : (cls.source || 'classifier') + ' result',
+          steps: [{ cmd: cmd, why: 'kolm ' + cls.verb + ' (single-step)' }],
+        };
+      }
       const remainingHeader = res.getHeader('RateLimit-Remaining');
       const remaining = (remainingHeader == null) ? null : Number(remainingHeader);
       res.json({
@@ -7279,7 +7293,15 @@ export function buildRouter() {
       const cmd = 'kolm ' + cls.verb + (cls.args && cls.args.length ? ' ' + cls.args.map(a => /\s/.test(String(a)) ? JSON.stringify(a) : a).join(' ') : '');
       // W847 — same multi-step recipe expansion as /v1/free/chat so the
       // post-auth console renders runnable workflows, not bare verbs.
-      const workflow = intent.expandToWorkflow ? intent.expandToWorkflow(cls, question) : null;
+      // W850 — same synthetic-workflow fallback as /v1/free/chat so the
+      // post-auth lastWorkflow chain matches the public chat contract.
+      let workflow = intent.expandToWorkflow ? intent.expandToWorkflow(cls, question) : null;
+      if (!workflow && cls && cls.verb && cls.verb !== 'what' && (cls.confidence == null || cls.confidence >= 0.5)) {
+        workflow = {
+          summary: cls.matchedPhrase ? ('matched: ' + cls.matchedPhrase) : (cls.source || 'classifier') + ' result',
+          steps: [{ cmd: cmd, why: 'kolm ' + cls.verb + ' (single-step)' }],
+        };
+      }
       const alts = (cls.alternatives || []).slice(0, 3).map(a => ({
         verb: a.verb,
         command: 'kolm ' + a.verb + (a.args && a.args.length ? ' ' + a.args.join(' ') : ''),

@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f7f4ec";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>Staleness - Account - kolm.ai</title>
 <meta name="description" content="Freshness distribution timeline + per-teacher-version breakdown + TTL controls for a capture namespace. Built by src/capture-staleness.js + src/teacher-version.js (W746).">
-<meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <link rel="canonical" href="https://kolm.ai/account/staleness">
 <meta property="og:title" content="Staleness &middot; Account &middot; kolm.ai" />
 <meta property="og:description" content="Capture freshness timeline + teacher-version breakdown + TTL controls." />
-<meta property="og:image" content="https://kolm.ai/og-card.svg" />
+<meta property="og:image" content="https://kolm.ai/brand-hero.png" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://kolm.ai/account/staleness" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -29,7 +29,7 @@
 .acct-content h2{font-size:16px;margin:22px 0 10px}
 .acct-content h3{font-size:14px;margin:16px 0 8px}
 .acct-content .lede{color:var(--ink-mute);font-size:14.5px;margin:0 0 20px;max-width:64ch}
-.skip-link{position:absolute;left:-9999px;top:0;background:var(--ink,#e8e3d6);color:var(--bg,#08090c);padding:8px 12px;font-family:var(--mono);font-size:12px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--ink,#e6e9ee);color:var(--bg,#08090c);padding:8px 12px;font-family:var(--mono);font-size:12px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
 .skip-link:focus{left:0}
 .metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
 .metric-card{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px}
@@ -61,19 +61,19 @@
 .timeline-seg{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;color:#0b0d10;text-align:center;overflow:hidden;white-space:nowrap;transition:width .3s ease}
 .timeline-seg.bucket-1{background:#111111}
 .timeline-seg.bucket-2{background:#34d399}
-.timeline-seg.bucket-3{background:#fbbf24}
+.timeline-seg.bucket-3{background:#9aa6b8}
 .timeline-seg.bucket-4{background:#3a3a38}
 .timeline-seg.bucket-5{background:#f87171}
-.timeline-seg.bucket-6{background:#7c2d12;color:#fde2cc}
+.timeline-seg.bucket-6{background:#1f2937;color:#fde2cc}
 .timeline-legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:8px;font-family:var(--mono);font-size:11.5px;color:var(--ink-mute)}
 .timeline-legend .lg{display:flex;align-items:center;gap:6px}
 .timeline-legend .swatch{width:10px;height:10px;border-radius:2px;display:inline-block}
 .swatch.bucket-1{background:#111111}
 .swatch.bucket-2{background:#34d399}
-.swatch.bucket-3{background:#fbbf24}
+.swatch.bucket-3{background:#9aa6b8}
 .swatch.bucket-4{background:#3a3a38}
 .swatch.bucket-5{background:#f87171}
-.swatch.bucket-6{background:#7c2d12}
+.swatch.bucket-6{background:#1f2937}
 /* Confirmation modal */
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:1000}
 .modal{background:var(--bg-card);border:1px solid var(--line);border-radius:10px;padding:22px 24px;max-width:520px;width:90%;color:var(--ink)}
@@ -110,7 +110,6 @@
   </div>
 </div>
 
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the Open-source AI workbench. Frontier AI on your own infrastructure. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <a href="#main" class="skip-link">Skip to content</a>
 
 <main id="main">

@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Deploy a .kolm to a phone · kolm.ai</title>
 <meta name="description" content="Export a signed .kolm artifact to iPhone (CoreML), Android (ONNX Mobile), or Apple Silicon (MLX). Forecast size, latency, and fit before shipping. Five...">
-<meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 <link rel="canonical" href="https://kolm.ai/learn/deploy-to-phone">
 <meta property="og:title" content="Deploy a .kolm to a phone · kolm.ai">
 <meta property="og:description" content="Export a signed .kolm artifact to iPhone (CoreML), Android (ONNX Mobile), or Apple Silicon (MLX). Forecast size, latency, and fit before shipping. Five...">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/learn/deploy-to-phone">
-<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Deploy a .kolm to a phone · kolm.ai">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">
 {
@@ -35,8 +35,8 @@
 }
 </script>
 <style>
- :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#111111;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
- [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
+ :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230, 233, 238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#111111;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669}
  body{background:var(--bg);color:var(--ink);font:16.5px/1.7 -apple-system,Inter,system-ui,sans-serif;margin:0}
  .wrap{max-width:760px;margin:0 auto;padding:0 24px}
  header.site{padding:18px 0;border-bottom:1px solid var(--line)}
@@ -132,7 +132,7 @@
 <b>What you will have.</b> A device-native model file ready to drop into your iOS / Android / Mac app. CoreML <code>.mlpackage</code> for iPhone, ONNX <code>.onnx</code> for Android, MLX bundle for M-series Macs. Predicted size and latency on your target device. Same task, same K-score, no cloud round-trip.
 </div>
 
-<div style="margin:24px 0;padding:16px 18px;border:1px solid rgba(245,158,11,0.32);border-left:3px solid #f59e0b;border-radius:8px;background:rgba(245,158,11,0.06);font-size:14px;line-height:1.55;color:var(--ink-mute)"><b style="color:var(--ink)">v0.2 provenance (wave 144).</b> The v0.2 path ships a recipe-class <code>.kolm</code> that runs on any host with a JS runtime (Node, browser, edge), including iOS / Android / Mac via web view. The native CoreML <code>.mlpackage</code>, ONNX <code>.onnx</code>, and MLX bundle exports described below, with INT4 base quantization and the LoRA adapter applied at convert time, ship through the runtime bridge. <code>kolm export --preview</code> for fit forecasting runs on the recipe-class artifact today; the actual native conversion ships through the runtime bridge.</div>
+<div style="margin:24px 0;padding:16px 18px;border:1px solid rgba(150, 158, 170,0.32);border-left:3px solid #56606c;border-radius:8px;background:rgba(150, 158, 170,0.06);font-size:14px;line-height:1.55;color:var(--ink-mute)"><b style="color:var(--ink)">v0.2 provenance (wave 144).</b> The v0.2 path ships a recipe-class <code>.kolm</code> that runs on any host with a JS runtime (Node, browser, edge), including iOS / Android / Mac via web view. The native CoreML <code>.mlpackage</code>, ONNX <code>.onnx</code>, and MLX bundle exports described below, with INT4 base quantization and the LoRA adapter applied at convert time, ship through the runtime bridge. <code>kolm export --preview</code> for fit forecasting runs on the recipe-class artifact today; the actual native conversion ships through the runtime bridge.</div>
 
 <h2>Targets supported</h2>
 <div class="tbl-wrap">

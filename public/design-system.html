@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Design system · kolm.ai</title>
 <meta name="description" content="The kolm.ai design system v1. Tokens, components, accessibility, and copy-paste-ready snippets. Built for the same bar as Linear, Vercel, Anthropic, Stripe, Resend, and Raycast.">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <link rel="canonical" href="https://kolm.ai/design-system">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/design-tokens.css">
@@ -234,8 +234,6 @@
 </script>
 </head>
 <body class="ks">
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
-
 <button type="button"
         class="ks-btn ks-btn--outline ks-btn--sm ds-theme-toggle"
         id="ds-theme-toggle"
@@ -327,16 +325,16 @@
   <table class="ds-contrast" aria-label="Token pair contrast ratios">
     <thead><tr><th>Foreground</th><th>Background</th><th>Ratio</th><th>Status</th></tr></thead>
     <tbody>
-      <tr><td>text-1 (#e8e3d6)</td><td>surface-0 (#08090c)</td><td>15.3:1</td><td class="ok">AAA</td></tr>
-      <tr><td>text-1 (#e8e3d6)</td><td>surface-1 (#0e1014)</td><td>14.6:1</td><td class="ok">AAA</td></tr>
-      <tr><td>text-2 (#c9c2b2)</td><td>surface-1 (#0e1014)</td><td>10.2:1</td><td class="ok">AAA</td></tr>
-      <tr><td>text-3 (#797466)</td><td>surface-1 (#0e1014)</td><td>4.7:1</td><td class="ok">AA</td></tr>
-      <tr><td>brand-primary (#e8e3d6)</td><td>surface-0 (#08090c)</td><td>12.8:1</td><td class="ok">AAA</td></tr>
-      <tr><td>brand-on-primary (#08090c)</td><td>brand-primary (#e8e3d6)</td><td>12.8:1</td><td class="ok">AAA</td></tr>
-      <tr><td>success-3 (#e8e3d6)</td><td>surface-1 (#0e1014)</td><td>12.4:1</td><td class="ok">AAA</td></tr>
-      <tr><td>warning-3 (#f0c77a)</td><td>surface-1 (#0e1014)</td><td>10.9:1</td><td class="ok">AAA</td></tr>
-      <tr><td>error-3 (#ff8a8a)</td><td>surface-1 (#0e1014)</td><td>7.8:1</td><td class="ok">AAA</td></tr>
-      <tr><td>info-3 (#80cfff)</td><td>surface-1 (#0e1014)</td><td>9.6:1</td><td class="ok">AAA</td></tr>
+      <tr><td>text-1 (#e6e9ee)</td><td>surface-0 (#08090c)</td><td>15.3:1</td><td class="ok">AAA</td></tr>
+      <tr><td>text-1 (#e6e9ee)</td><td>surface-1 (#0e1116)</td><td>14.6:1</td><td class="ok">AAA</td></tr>
+      <tr><td>text-2 (#c9c2b2)</td><td>surface-1 (#0e1116)</td><td>10.2:1</td><td class="ok">AAA</td></tr>
+      <tr><td>text-3 (#797466)</td><td>surface-1 (#0e1116)</td><td>4.7:1</td><td class="ok">AA</td></tr>
+      <tr><td>brand-primary (#e6e9ee)</td><td>surface-0 (#08090c)</td><td>12.8:1</td><td class="ok">AAA</td></tr>
+      <tr><td>brand-on-primary (#08090c)</td><td>brand-primary (#e6e9ee)</td><td>12.8:1</td><td class="ok">AAA</td></tr>
+      <tr><td>success-3 (#e6e9ee)</td><td>surface-1 (#0e1116)</td><td>12.4:1</td><td class="ok">AAA</td></tr>
+      <tr><td>warning-3 (#f0c77a)</td><td>surface-1 (#0e1116)</td><td>10.9:1</td><td class="ok">AAA</td></tr>
+      <tr><td>error-3 (#ff8a8a)</td><td>surface-1 (#0e1116)</td><td>7.8:1</td><td class="ok">AAA</td></tr>
+      <tr><td>info-3 (#80cfff)</td><td>surface-1 (#0e1116)</td><td>9.6:1</td><td class="ok">AAA</td></tr>
     </tbody>
   </table>
 </section>
@@ -755,7 +753,7 @@
       var cur = root.getAttribute('data-theme') || 'dark';
       var next = cur === 'dark' ? 'light' : 'dark';
       root.setAttribute('data-theme', next);
-      root.style.background = next === 'light' ? '#f7f4ec' : '#08090c';
+      root.style.background = next === 'light' ? '#f3f5f7' : '#08090c';
       root.style.colorScheme = next;
     });
   })();

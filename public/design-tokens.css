@@ -11,7 +11,7 @@
    cascade from this file + ks.css without per-page rewrite.
 
    Palette anchors:
-     . paper      #f7f4ec   cool warm paper
+     . paper      #f3f5f7   cool warm paper
      . card       #ffffff   pure card on paper
      . ink        #111111   near-black, imperceptible warmth
      . mute       #6b6b66   secondary text
@@ -42,11 +42,13 @@
   --brand-paper-strong: #000000;
   --brand-paper-dim: #3a3a38;
 
-  /* Semantic surface system - monochrome warm-paper light defaults */
-  --surface-0: #f7f4ec;
+  /* Semantic surface system - W850 cool slate paper (was warm cream).
+     User mandate: kill browns/beiges anywhere. Surface is now neutral
+     cool gray with grid backdrop carrying the visual interest. */
+  --surface-0: #f3f5f7;
   --surface-1: #ffffff;
-  --surface-2: #efece4;
-  --surface-3: #e6e3db;
+  --surface-2: #e8ebef;
+  --surface-3: #dde1e7;
   --surface-input: #ffffff;
 
   /* Ink scale - text on warm paper */
@@ -155,10 +157,10 @@
   --ks-color-brand-on-secondary: #ffffff;
 
   /* --- Color: surface (4 levels) - monochrome warm paper -- */
-  --ks-color-surface-0: #f7f4ec;
+  --ks-color-surface-0: #f3f5f7;
   --ks-color-surface-1: #ffffff;
-  --ks-color-surface-2: #efece4;
-  --ks-color-surface-3: #e6e3db;
+  --ks-color-surface-2: #e8ebef;
+  --ks-color-surface-3: #dde1e7;
 
   /* --- Color: text (4 levels) ------------------------------ */
   --ks-color-text-1: #111111;
@@ -303,10 +305,10 @@
   --brand-paper-strong: #000000;
   --brand-paper-dim: #3a3a38;
 
-  --surface-0: #f7f4ec;
+  --surface-0: #f3f5f7;
   --surface-1: #ffffff;
-  --surface-2: #efece4;
-  --surface-3: #e6e3db;
+  --surface-2: #e8ebef;
+  --surface-3: #dde1e7;
   --surface-input: #ffffff;
 
   --ink-1: #111111;
@@ -340,10 +342,10 @@
   --ks-color-brand-on-primary: #ffffff;
   --ks-color-brand-on-secondary: #ffffff;
 
-  --ks-color-surface-0: #f7f4ec;
+  --ks-color-surface-0: #f3f5f7;
   --ks-color-surface-1: #ffffff;
-  --ks-color-surface-2: #efece4;
-  --ks-color-surface-3: #e6e3db;
+  --ks-color-surface-2: #e8ebef;
+  --ks-color-surface-3: #dde1e7;
 
   --ks-color-text-1: #111111;
   --ks-color-text-2: #3a3a38;
@@ -386,85 +388,86 @@
    ============================================================ */
 
 [data-theme="dark"] {
-  /* WARM DARK — espresso + candlelit parchment.
-     R > G > B mirrors the warm-cream light palette inverted; no cold neutrals. */
-  --brand-primary: #ead8b8;
-  --brand-primary-strong: #f7e8c8;
-  --brand-primary-soft: rgba(234, 216, 184, 0.10);
-  --brand-primary-edge: rgba(234, 216, 184, 0.28);
+  /* COOL SLATE DARK (W850) — reverted from W849 warm-espresso per direct
+     user mandate: "i dont like the browns beiges oranges anywhere".
+     Cool neutral slate. R = G slightly < B. No warm chroma. */
+  --brand-primary: #e6e9ee;
+  --brand-primary-strong: #f3f5f8;
+  --brand-primary-soft: rgba(230, 233, 238, 0.08);
+  --brand-primary-edge: rgba(230, 233, 238, 0.26);
 
-  --brand-paper: #ead8b8;
-  --brand-paper-strong: #f7e8c8;
-  --brand-paper-dim: #8a7b6a;
+  --brand-paper: #e6e9ee;
+  --brand-paper-strong: #f3f5f8;
+  --brand-paper-dim: #8a929c;
 
-  --surface-0: #1a1612;
-  --surface-1: #221c17;
-  --surface-2: #2a221c;
-  --surface-3: #322820;
-  --surface-input: #221c17;
+  --surface-0: #0e1116;
+  --surface-1: #161a20;
+  --surface-2: #1c2128;
+  --surface-3: #242a32;
+  --surface-input: #161a20;
 
-  --ink-1: #ead8b8;
-  --ink-2: #c4b395;
-  --ink-3: #8a7b6a;
-  --ink-4: #524539;
+  --ink-1: #e6e9ee;
+  --ink-2: #c1c7cf;
+  --ink-3: #8a929c;
+  --ink-4: #525a64;
 
-  --line-1: rgba(234, 216, 184, 0.06);
-  --line-2: rgba(234, 216, 184, 0.10);
-  --line-3: rgba(234, 216, 184, 0.20);
-  --line-strong: rgba(234, 216, 184, 0.38);
+  --line-1: rgba(230, 233, 238, 0.06);
+  --line-2: rgba(230, 233, 238, 0.10);
+  --line-3: rgba(230, 233, 238, 0.20);
+  --line-strong: rgba(230, 233, 238, 0.36);
 
-  --status-good: #9bb38c;
-  --status-warn: #d4a857;
-  --status-bad: #d08a72;
-  --status-info: #b8c8d0;
+  --status-good: #7fb38a;
+  --status-warn: #b8b094;
+  --status-bad: #b86a72;
+  --status-info: #7fa1c4;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.40);
   --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.50), 0 2px 4px rgba(0, 0, 0, 0.30);
   --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.62), 0 6px 12px rgba(0, 0, 0, 0.38);
   --shadow-xl: 0 32px 80px rgba(0, 0, 0, 0.72), 0 12px 24px rgba(0, 0, 0, 0.44);
-  --shadow-glow-brand: 0 0 0 1px var(--brand-primary-edge), 0 12px 36px rgba(234, 216, 184, 0.10);
+  --shadow-glow-brand: 0 0 0 1px var(--brand-primary-edge), 0 12px 36px rgba(230, 233, 238, 0.08);
 
   /* WF01 */
-  --ks-color-brand-primary: #ead8b8;
-  --ks-color-brand-primary-hover: #f7e8c8;
-  --ks-color-brand-primary-active: #c4b395;
-  --ks-color-brand-secondary: #c4b395;
-  --ks-color-brand-secondary-hover: #ead8b8;
-  --ks-color-brand-secondary-active: #8a7b6a;
-  --ks-color-brand-on-primary: #1a1612;
-  --ks-color-brand-on-secondary: #1a1612;
+  --ks-color-brand-primary: #e6e9ee;
+  --ks-color-brand-primary-hover: #f3f5f8;
+  --ks-color-brand-primary-active: #c1c7cf;
+  --ks-color-brand-secondary: #c1c7cf;
+  --ks-color-brand-secondary-hover: #e6e9ee;
+  --ks-color-brand-secondary-active: #8a929c;
+  --ks-color-brand-on-primary: #0e1116;
+  --ks-color-brand-on-secondary: #0e1116;
 
-  --ks-color-surface-0: #1a1612;
-  --ks-color-surface-1: #221c17;
-  --ks-color-surface-2: #2a221c;
-  --ks-color-surface-3: #322820;
+  --ks-color-surface-0: #0e1116;
+  --ks-color-surface-1: #161a20;
+  --ks-color-surface-2: #1c2128;
+  --ks-color-surface-3: #242a32;
 
-  --ks-color-text-1: #ead8b8;
-  --ks-color-text-2: #c4b395;
-  --ks-color-text-3: #8a7b6a;
-  --ks-color-text-4: #524539;
+  --ks-color-text-1: #e6e9ee;
+  --ks-color-text-2: #c1c7cf;
+  --ks-color-text-3: #8a929c;
+  --ks-color-text-4: #525a64;
 
-  --ks-color-border-1: rgba(234, 216, 184, 0.06);
-  --ks-color-border-2: rgba(234, 216, 184, 0.10);
-  --ks-color-border-3: rgba(234, 216, 184, 0.20);
+  --ks-color-border-1: rgba(230, 233, 238, 0.06);
+  --ks-color-border-2: rgba(230, 233, 238, 0.10);
+  --ks-color-border-3: rgba(230, 233, 238, 0.20);
 
-  --ks-color-success-1: rgba(155, 179, 140, 0.10);
-  --ks-color-success-2: rgba(155, 179, 140, 0.28);
-  --ks-color-success-3: #9bb38c;
+  --ks-color-success-1: rgba(127, 179, 138, 0.10);
+  --ks-color-success-2: rgba(127, 179, 138, 0.28);
+  --ks-color-success-3: #7fb38a;
 
-  --ks-color-warning-1: rgba(212, 168, 87, 0.08);
-  --ks-color-warning-2: rgba(212, 168, 87, 0.24);
-  --ks-color-warning-3: #d4a857;
+  --ks-color-warning-1: rgba(184, 176, 148, 0.08);
+  --ks-color-warning-2: rgba(184, 176, 148, 0.22);
+  --ks-color-warning-3: #b8b094;
 
-  --ks-color-error-1: rgba(208, 138, 114, 0.10);
-  --ks-color-error-2: rgba(208, 138, 114, 0.28);
-  --ks-color-error-3: #d08a72;
+  --ks-color-error-1: rgba(184, 106, 114, 0.10);
+  --ks-color-error-2: rgba(184, 106, 114, 0.28);
+  --ks-color-error-3: #b86a72;
 
-  --ks-color-info-1: rgba(184, 200, 208, 0.08);
-  --ks-color-info-2: rgba(184, 200, 208, 0.22);
-  --ks-color-info-3: #b8c8d0;
+  --ks-color-info-1: rgba(127, 161, 196, 0.08);
+  --ks-color-info-2: rgba(127, 161, 196, 0.22);
+  --ks-color-info-3: #7fa1c4;
 
-  --ks-color-focus-ring: rgba(234, 216, 184, 0.42);
+  --ks-color-focus-ring: rgba(230, 233, 238, 0.40);
 
   --ks-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.40);
   --ks-shadow-md: 0 6px 16px rgba(0, 0, 0, 0.50), 0 2px 4px rgba(0, 0, 0, 0.30);

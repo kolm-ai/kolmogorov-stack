@@ -20,31 +20,27 @@
 
 /* ----- 1. Tokens ---------------------------------------------------------- */
 :root {
-  /* Canvas — "Warm Paper" identity (2026-05-24 redesign).
-     Default light/warm; dark mode is an opt-in via [data-theme="dark"]. */
-  --ks-bg:          #f7f4ec;
+  /* Canvas — W850 cool slate (2026-05-25). Reverted from Warm Paper:
+     user rejected cream/beige/brown/sienna anywhere. Light is the
+     default; dark mode opts in via [data-theme="dark"]. */
+  --ks-bg:          #f3f5f7;
   --ks-bg-1:        #ffffff;
-  --ks-bg-2:        #e8e3d6;
-  --ks-bg-3:        #d8d2c1;
-  --ks-line-1:      rgba(28,27,26,0.06);
-  --ks-line-2:      rgba(28,27,26,0.10);
-  --ks-line-3:      rgba(28,27,26,0.16);
+  --ks-bg-2:        #e8ebef;
+  --ks-bg-3:        #dde1e7;
+  --ks-line-1:      rgba(28,30,34,0.06);
+  --ks-line-2:      rgba(28,30,34,0.10);
+  --ks-line-3:      rgba(28,30,34,0.16);
 
-  /* Ink — warm near-black, not pure */
+  /* Ink — cool near-black */
   --ks-ink:         #111111;
-  --ks-ink-2:       #4a4641;
-  --ks-ink-3:       #8a8276;
-  --ks-ink-4:       #bdb3a1;
+  --ks-ink-2:       #44494f;
+  --ks-ink-3:       #828892;
+  --ks-ink-4:       #b6bcc4;
 
-  /* Accent — burnt sienna (the "wax-seal" mark). Single chroma; everything
-     else is grayscale. Reserved for primary CTAs, K-Score numerals, active
-     state, and editorial accents (delta arrows, hover underlines).
-       --ks-accent       : primary action / CTA fill.
-       --ks-accent-2     : darker on hover.
-       --ks-accent-soft  : 8% tint for badges, callouts.
-       --ks-accent-edge  : 28% for hairline rules, focus rings.
-       --ks-accent-glow  : 18% radial for atmosphere only.
-       --ks-accent-warm  : alias retained — same family, used for numerals. */
+  /* Accent — W850 reverted to near-ink (no chromatic accent). User
+     mandate kills all warm hues. Variables retained so consuming pages
+     keep their selectors; values resolve to ink, so emphasis comes
+     from weight + scale + hairline rules. */
   --ks-accent:      #111111;
   --ks-accent-2:    #000000;
   --ks-accent-soft: rgba(17, 17, 17,0.05);
@@ -123,17 +119,17 @@
    only so existing toggle UI that sets [data-theme="light"] continues to
    work without flicker. The Warm Paper palette is the canonical state. */
 [data-theme="light"] {
-  --ks-bg:          #f7f4ec;
+  --ks-bg:          #f3f5f7;
   --ks-bg-1:        #ffffff;
-  --ks-bg-2:        #e8e3d6;
-  --ks-bg-3:        #d8d2c1;
-  --ks-line-1:      rgba(28,27,26,0.06);
-  --ks-line-2:      rgba(28,27,26,0.10);
-  --ks-line-3:      rgba(28,27,26,0.16);
+  --ks-bg-2:        #e8ebef;
+  --ks-bg-3:        #dde1e7;
+  --ks-line-1:      rgba(28,30,34,0.06);
+  --ks-line-2:      rgba(28,30,34,0.10);
+  --ks-line-3:      rgba(28,30,34,0.16);
   --ks-ink:         #111111;
-  --ks-ink-2:       #4a4641;
-  --ks-ink-3:       #8a8276;
-  --ks-ink-4:       #bdb3a1;
+  --ks-ink-2:       #44494f;
+  --ks-ink-3:       #828892;
+  --ks-ink-4:       #b6bcc4;
   --ks-accent:      #111111;
   --ks-accent-2:    #000000;
   --ks-accent-soft: rgba(17, 17, 17,0.05);
@@ -142,30 +138,30 @@
   --ks-accent-warm: #111111;
 }
 
-/* Dark mode = warm darks (candlelit lab), NOT cold blue-gray. Used when the
-   user explicitly opts in via the theme toggle. Accent shifts to a brighter
-   orange so it reads against the dark canvas at WCAG AA. */
+/* Dark mode = cool slate (W850, 2026-05-25). Reverted from warm
+   candlelit / espresso palette per explicit user mandate. Reads as
+   paper-on-desk in dim light, no chromatic accent. */
 [data-theme="dark"] {
-  --ks-bg:          #0e1014;
-  --ks-bg-1:        #111111;
-  --ks-bg-2:        #1f1f24;
-  --ks-bg-3:        #2d323c;
-  --ks-line-1:      rgba(231,229,228,0.06);
-  --ks-line-2:      rgba(231,229,228,0.10);
-  --ks-line-3:      rgba(231,229,228,0.16);
-  --ks-ink:         #e8e3d6;
-  --ks-ink-2:       #a8a298;
-  --ks-ink-3:       #787268;
-  --ks-ink-4:       #48433d;
-  --ks-accent:      #e8e3d6;
+  --ks-bg:          #0e1116;
+  --ks-bg-1:        #161a20;
+  --ks-bg-2:        #1c2128;
+  --ks-bg-3:        #242a32;
+  --ks-line-1:      rgba(230,233,238,0.06);
+  --ks-line-2:      rgba(230,233,238,0.10);
+  --ks-line-3:      rgba(230,233,238,0.16);
+  --ks-ink:         #e6e9ee;
+  --ks-ink-2:       #c1c7cf;
+  --ks-ink-3:       #8a929c;
+  --ks-ink-4:       #525a64;
+  --ks-accent:      #e6e9ee;
   --ks-accent-2:    #ffffff;
-  --ks-accent-soft: rgba(232, 227, 214,0.10);
-  --ks-accent-edge: rgba(232, 227, 214,0.30);
-  --ks-accent-glow: rgba(232, 227, 214,0.18);
-  --ks-accent-warm: #e8e3d6;
-  --ks-pos:         #6fbf85;
-  --ks-warn:        #c0bcb3;
-  --ks-err:         #c97070;
+  --ks-accent-soft: rgba(230, 233, 238,0.10);
+  --ks-accent-edge: rgba(230, 233, 238,0.30);
+  --ks-accent-glow: rgba(230, 233, 238,0.18);
+  --ks-accent-warm: #e6e9ee;
+  --ks-pos:         #7fb38a;
+  --ks-warn:        #b8b094;
+  --ks-err:         #b86a72;
 }
 
 /* ----- 2. Base reset, scoped to .ks --------------------------------------- */
@@ -205,11 +201,10 @@ body { position: relative; }
   z-index: 0;
 }
 .ks::before {
-  /* Warm Paper atmosphere: a single faint sienna pin in the bottom-right,
-     reading as ink-bleed on paper rather than glow on a screen. Subtle —
-     the paper, not the radiance, carries the canvas. */
+  /* W850 atmosphere: subtle cool slate vignette. Reads as
+     paper-on-desk, not glow. No warm chroma. */
   background:
-    radial-gradient(ellipse 1100px 820px at 100% 108%, rgba(194, 65, 12, 0.035), transparent 56%);
+    radial-gradient(ellipse 1100px 820px at 100% 108%, rgba(31, 41, 55, 0.030), transparent 56%);
 }
 .ks::after {
   /* Subtle paper grain. In light mode we MULTIPLY so the noise reads as
@@ -220,9 +215,9 @@ body { position: relative; }
 }
 .ks > *, .ks .ks-nav, .ks .ks-footer, .ks main { position: relative; z-index: 1; }
 :root[data-theme='dark'] .ks::before {
-  /* Dark-mode atmosphere: same hue, warmer, slightly brighter. */
+  /* Dark-mode atmosphere: cool slate, slightly brighter. */
   background:
-    radial-gradient(ellipse 1000px 780px at 100% 105%, rgba(251, 146, 60, 0.05), transparent 52%);
+    radial-gradient(ellipse 1000px 780px at 100% 105%, rgba(127, 161, 196, 0.04), transparent 52%);
 }
 :root[data-theme='dark'] .ks::after { opacity: 0.025; mix-blend-mode: overlay; }
 @media (prefers-reduced-data: reduce) {
@@ -262,7 +257,7 @@ body { position: relative; }
   font-size: 12px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #5a5a55;
+  color: #56606c;
   display: inline-flex;
   align-items: center;
   gap: var(--ks-2);
@@ -378,7 +373,7 @@ body { position: relative; }
    on dark button in light mode, dark on cream button in dark mode. */
 .ks-btn--primary {
   background: var(--ks-accent);
-  color: var(--surface-0, #f7f4ec);
+  color: var(--surface-0, #f3f5f7);
   border-color: var(--ks-accent);
   box-shadow: 0 0 0 0 var(--ks-accent-glow);
 }
@@ -386,7 +381,7 @@ body { position: relative; }
   background: var(--ks-accent-2);
   border-color: var(--ks-accent-2);
   box-shadow: 0 0 24px var(--ks-accent-glow);
-  color: var(--surface-0, #f7f4ec);
+  color: var(--surface-0, #f3f5f7);
 }
 
 .ks-btn--ghost {
@@ -1002,7 +997,7 @@ body { position: relative; }
 .ks-trust-ribbon {
   border-top: 1px solid var(--ks-line-1);
   border-bottom: 1px solid var(--ks-line-1);
-  background: linear-gradient(180deg, transparent 0%, rgba(232, 227, 214, 0.018) 100%), var(--ks-bg);
+  background: linear-gradient(180deg, transparent 0%, rgba(230, 233, 238, 0.018) 100%), var(--ks-bg);
   padding: 14px 0;
 }
 .ks-trust-ribbon__inner {
@@ -1267,7 +1262,7 @@ body { position: relative; }
 .ks-nav__mark svg { width: 26px; height: 26px; display: block; }
 .ks-nav__mark svg rect { fill: currentColor; }
 [data-theme="light"] .ks-nav__mark { color: #111111 !important; }
-[data-theme="dark"]  .ks-nav__mark { color: #e8e3d6 !important; }
+[data-theme="dark"]  .ks-nav__mark { color: #e6e9ee !important; }
 .ks-nav__brand {
   font-family: var(--ks-mono);
   letter-spacing: -0.01em;

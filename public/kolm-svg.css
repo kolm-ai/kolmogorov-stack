@@ -19,7 +19,7 @@ button:hover > .kolm-icon { transform: translateX(1px); }
   width: 100%;
   max-width: 100%;
   height: auto;
-  color: var(--ink-1, #e8e3d6);
+  color: var(--ink-1, #e6e9ee);
   contain: paint;
 }
 
@@ -31,7 +31,7 @@ button:hover > .kolm-icon { transform: translateX(1px); }
 .kolm-ill-node:hover { opacity: 1; transform: translate(0, -1px); }
 
 /* Pulses ride along SMIL paths — we just want them visibly tinted */
-.kolm-ill-pulse { filter: drop-shadow(0 0 4px var(--brand-primary, #e8e3d6)); }
+.kolm-ill-pulse { filter: drop-shadow(0 0 4px var(--brand-primary, #e6e9ee)); }
 
 /* === Capture rows pulse subtly to imply "stream of events" === */
 .kolm-ill-row { animation: kolm-row-pulse 3.6s ease-in-out infinite; }
@@ -48,7 +48,7 @@ button:hover > .kolm-icon { transform: translateX(1px); }
 .kolm-ill-stage {
   transition: filter var(--duration-base, 220ms) var(--ease-out, ease-out);
 }
-.kolm-ill-stage:hover { filter: drop-shadow(0 0 8px var(--brand-primary-soft, rgba(232, 227, 214,.12))); }
+.kolm-ill-stage:hover { filter: drop-shadow(0 0 8px var(--brand-primary-soft, rgba(230, 233, 238,.12))); }
 
 /* === Device sequence — cycle highlight bar moves across 6 slots === */
 /* Slots are 64w + 11 gap = 75 stride, starting at x=20. 6 slots = 6 frames. */
@@ -124,7 +124,7 @@ button:hover > .kolm-icon { transform: translateX(1px); }
 
 /* === Standalone helpers for inline copy === */
 .kolm-icon-row { display: inline-flex; align-items: center; gap: 8px; }
-.kolm-icon-row .kolm-icon { color: var(--brand-primary, #e8e3d6); }
+.kolm-icon-row .kolm-icon { color: var(--brand-primary, #e6e9ee); }
 
 /* === Reduced motion — kill the eye candy === */
 @media (prefers-reduced-motion: reduce) {

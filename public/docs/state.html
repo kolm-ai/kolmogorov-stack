@@ -3,21 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#050607;color:#e8e3d6}html{color-scheme:dark}</style>
+<style>html,body{background:#050607;color:#e6e9ee}html{color-scheme:dark}</style>
 <title>State and sync · kolm.ai</title>
 <meta name="description" content="kolm.ai state + sync docs. The .kolm-state directory, kolm checkpoint, kolm import-chat, kolm merge, kolm sync, and kolm jobs / watch. How a kolm workspace...">
-<meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 
 <meta property="og:title" content="State and sync · kolm.ai">
 <meta property="og:description" content="kolm.ai state + sync docs. The .kolm-state directory, kolm checkpoint, kolm import-chat, kolm merge, kolm sync, and kolm jobs / watch. How a kolm workspace...">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/state">
-<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:title" content="State and sync · kolm.ai">
 <meta name="twitter:description" content="kolm.ai state + sync docs. The .kolm-state directory, kolm checkpoint, kolm import-chat, kolm merge, kolm sync, and kolm jobs / watch. How a kolm workspace...">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://kolm.ai/docs/state">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -26,9 +26,9 @@
  :root {
  --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
  --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
- --ink: #e8e3d6; --ink-mute: #b5bdb1; --ink-faint: #737c73;
- --accent: #e8e3d6; --accent-strong: #c9c2b2;
- --good: #e8e3d6; --warn: #d6a65a; --stop: #d77;
+ --ink: #e6e9ee; --ink-mute: #aab0b8; --ink-faint: #6a727c;
+ --accent: #e6e9ee; --accent-strong: #c9c2b2;
+ --good: #e6e9ee; --warn: #d6a65a; --stop: #d77;
  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
  }
  .st-wrap{max-width:1100px;margin:0 auto;padding:48px 28px 96px}
@@ -57,17 +57,17 @@
  .st-related h2{margin:0 0 12px;font-size:14px;font-family:var(--mono);letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-faint);font-weight:500}
  .st-related ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px 18px}
  .st-related ul li a{font-size:13.5px;color:var(--accent);border-bottom:1px solid var(--line-strong);text-decoration:none}
- [data-theme=light] .st-wrap{color:#0c0e10}
- [data-theme=light] .st-wrap .crumbs{color:#737c73}
+ [data-theme=light] .st-wrap{color:#0c0f14}
+ [data-theme=light] .st-wrap .crumbs{color:#6a727c}
  [data-theme=light] .st-wrap .crumbs a{color:#4b5158}
- [data-theme=light] .st-wrap h1,[data-theme=light] .st-wrap h2{color:#0c0e10}
- [data-theme=light] .st-wrap h3{color:#737c73}
+ [data-theme=light] .st-wrap h1,[data-theme=light] .st-wrap h2{color:#0c0f14}
+ [data-theme=light] .st-wrap h3{color:#6a727c}
  [data-theme=light] .st-wrap p{color:#4b5158}
- [data-theme=light] .st-wrap code{background:#f4f5f3;border-color:rgba(12,14,16,0.08);color:#0c0e10}
- [data-theme=light] .st-wrap pre{background:#f4f5f3;border-color:rgba(12,14,16,0.08);color:#0c0e10}
- [data-theme=light] .st-wrap a{color:#0c0e10;border-bottom-color:rgba(12,14,16,0.16)}
+ [data-theme=light] .st-wrap code{background:#f4f5f3;border-color:rgba(12,14,16,0.08);color:#0c0f14}
+ [data-theme=light] .st-wrap pre{background:#f4f5f3;border-color:rgba(12,14,16,0.08);color:#0c0f14}
+ [data-theme=light] .st-wrap a{color:#0c0f14;border-bottom-color:rgba(12,14,16,0.16)}
  [data-theme=light] .st-wrap a:hover{color:#0a8862}
- [data-theme=light] .st-wrap th{color:#737c73;border-bottom-color:rgba(12,14,16,0.08)}
+ [data-theme=light] .st-wrap th{color:#6a727c;border-bottom-color:rgba(12,14,16,0.08)}
  [data-theme=light] .st-wrap td{color:#4b5158;border-bottom-color:rgba(12,14,16,0.06)}
  [data-theme=light] .st-verb{background:#ffffff;border-color:rgba(12,14,16,0.08)}
  [data-theme=light] .st-callout{background:#ffffff;border-color:rgba(12,14,16,0.08);border-left-color:#0a8862;color:#4b5158}

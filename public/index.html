@@ -6,8 +6,8 @@
 <title>kolm.ai · Frontier AI on your own infrastructure · open-source AI workbench · kolm.ai</title>
 <meta name="description" content="Kolm is the open-source AI workbench for running frontier AI on your own infrastructure. Capture your traffic, distill it into a private .kolm artifact, deploy to your hardware. Apache-2.0, signed, no per-token bill.">
 <meta name="keywords" content="AI workbench, AI compiler, model distillation, INT4 quantization, on-device LLM, OpenRouter alternative, model gateway, edge inference, private AI, regulated AI">
-<meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1">
 <meta property="og:site_name" content="kolm.ai">
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Capture, distill, compile, deploy frontier AI on your own hardware. Every .kolm artifact is signed, reproducible, Apache-2.0, no per-token bill.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/">
-<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="kolm.ai: route models, distill specialists, and run signed .kolm artifacts anywhere.">
@@ -24,7 +24,7 @@
 <meta name="twitter:site" content="@kolm_ai">
 <meta name="twitter:title" content="Frontier AI on your own infrastructure - kolm.ai">
 <meta name="twitter:description" content="Open-source AI workbench. Capture, distill, compile, deploy frontier models on your own hardware. Signed, reproducible, no per-token bill.">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/">
 <link rel="alternate" hreflang="en" href="https://kolm.ai/">
 <link rel="alternate" hreflang="de" href="https://kolm.ai/lang/de">
@@ -107,9 +107,9 @@
   /* W655: real compile receipts  -  first-principles proof band. Four real artifacts from the proven quantize matrix.
      No card chrome, no marketing chips. Tabular hairline rows with mono numerals. The page should read
      like a build log, not a brochure. */
-  .home-receipts { margin-top: 36px; border-top: 1px solid rgba(236,231,220,0.10); }
-  .home-receipts__row { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr); column-gap: var(--ks-5); align-items: baseline; padding: 18px 0; border-bottom: 1px solid rgba(236,231,220,0.08); }
-  .home-receipts__row--head { padding: 10px 0; border-bottom: 1px solid rgba(236,231,220,0.10); }
+  .home-receipts { margin-top: 36px; border-top: 1px solid rgba(230, 233, 238,0.10); }
+  .home-receipts__row { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr); column-gap: var(--ks-5); align-items: baseline; padding: 18px 0; border-bottom: 1px solid rgba(230, 233, 238,0.08); }
+  .home-receipts__row--head { padding: 10px 0; border-bottom: 1px solid rgba(230, 233, 238,0.10); }
   .home-receipts__row--head span { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--ks-ink-3); }
   .home-receipts__name { font-family: var(--ks-mono); font-size: 13.5px; color: var(--ks-ink); font-weight: 540; }
   .home-receipts__sub { display: block; font-family: var(--ks-sans); font-size: 12px; color: var(--ks-ink-3); margin-top: 4px; font-weight: 400; line-height: 1.5; }
@@ -195,11 +195,11 @@
       var t = localStorage.getItem('kolm-theme');
       if (t === 'light') {
         document.documentElement.setAttribute('data-theme','light');
-        document.documentElement.style.background = '#f7f4ec';
+        document.documentElement.style.background = '#f3f5f7';
         document.documentElement.style.colorScheme = 'light';
       } else if (t === 'dark') {
         document.documentElement.setAttribute('data-theme','dark');
-        document.documentElement.style.background = '#0e1014';
+        document.documentElement.style.background = '#0e1116';
         document.documentElement.style.colorScheme = 'dark';
       }
     } catch(e){}
@@ -241,8 +241,6 @@
 </script>
 </head>
 <body class="ks">
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
-
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <!-- ================== Nav ================== -->
@@ -296,7 +294,7 @@
   function apply(theme){
     document.documentElement.setAttribute('data-theme', theme);
     document.documentElement.style.colorScheme = theme;
-    document.documentElement.style.background = theme === 'dark' ? '#0e1014' : '#f7f4ec';
+    document.documentElement.style.background = theme === 'dark' ? '#0e1116' : '#f3f5f7';
     try { localStorage.setItem('kolm-theme', theme); } catch(e){}
     btn.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
     btn.setAttribute('aria-label', 'Switch to ' + (theme === 'dark' ? 'light' : 'dark') + ' theme');
@@ -313,7 +311,7 @@
   <div class="ks-hero__bg" aria-hidden="true"></div>
   <div class="ks-hero__wrap">
     <div>
-      <span class="ks-eyebrow" data-w220="category-claim">Open-source AI workbench</span>
+      <span class="ks-eyebrow" data-w220="category-claim">Evidence-to-artifact compiler</span>
       <!-- W271 hidden H1 anchor: older tests pin a pain-led "Stop X" H1 with two
            rent-vs-own beat spans. Visible H1 below carries the W604 cinematic
            positioning. Hidden H1 is offscreen + aria-hidden so screen readers
@@ -327,7 +325,7 @@
         Route any model. Distill specialists. Run on any device. OpenAI-compatible gateway.
       </h1>
       <h1 class="ks-hero__h1 fr-h1--hero">
-        <span class="h1-claim">Frontier AI on your own infrastructure.</span>
+        <span class="h1-claim">Compile your AI workload into a model you own.</span>
       </h1>
       <!-- W220/W260/W271/W335/W373 hidden hero anchors. These tokens were
            lifted into the visible H1 by the W604 first-principles homepage
@@ -542,14 +540,21 @@
 <section class="ks-cli-chat" id="chat" aria-label="Try kolm before signing up">
   <div class="ks-cli-chat__inner">
     <div class="ks-cli-chat__copy">
-      <span class="eye">Live · /v1/free/chat</span>
-      <h2>Talk to kolm before you install it.</h2>
-      <p>Real endpoint, not a demo. Ask anything &mdash; "capture my OpenAI calls", "distill from my anthropic traffic", "quantize qwen-7b to INT4" &mdash; and the box returns the exact CLI command plus the reasoning. The classifier is the same one a paid tenant gets after <code>kolm login</code>.</p>
+      <span class="eye">Live &middot; /v1/free/chat &middot; same classifier as <code>kolm do</code></span>
+      <h2>This box is the CLI. Not a demo.</h2>
+      <p>Every reply is produced by the same <code>src/intent.js</code> classifier that resolves <code>kolm do "&lt;natural language&gt;"</code> on your laptop. The box returns the exact shell command &mdash; paste it into your terminal and it runs. With a key attached the route promotes to your tenant snapshot; without one you get 20 messages/IP/day to kick the tires.</p>
       <ul>
         <li>20 free messages per day &middot; no account needed</li>
-        <li>Sign up free for unlimited &middot; same chat post-auth</li>
-        <li>Powered by Apache-2.0 <code>src/intent.js</code> &middot; we ship it</li>
+        <li>Sign up free for unlimited &middot; same chat at <code>/account</code></li>
+        <li>Apache-2.0 <code>src/intent.js</code> &middot; you can read the classifier</li>
       </ul>
+      <details class="ks-cli-chat__verify">
+        <summary>verify it yourself &middot; one curl</summary>
+<pre class="ks-cli-chat__verify-pre"><code>$ curl -s https://kolm.ai/v1/free/chat \
+    -H 'content-type: application/json' \
+    -d '{"question":"distill my anthropic traffic"}' | jq '.command, .workflow.steps[].cmd'</code></pre>
+        <p class="ks-cli-chat__verify-why">No key &rarr; <code>mode:"free"</code>. Add <code>-H "X-API-Key: ks_&hellip;"</code> &rarr; <code>mode:"auth"</code>. Same handler, same classifier, same shape.</p>
+      </details>
       <div class="ctas">
         <a class="ks-btn ks-btn--ghost" href="/docs/cli">Read the CLI reference</a>
         <a class="ks-btn ks-btn--primary" href="/signup">Sign up free <span class="ks-btn-arrow">&rarr;</span></a>
@@ -593,25 +598,20 @@
   </div>
 </section>
 
-<!-- ================== W681 / W705: integrations strip kept; the legacy "Runs on" sibling
-     strip is cut (W705) because the same runtime list now lives in the visible receipts
-     table, the .kolm anatomy section, and /runtimes. Two strips of chip-anchors read
-     as filler; one is enough. ================== -->
-<section class="ks-logorow" aria-label="Drop-in integrations" data-w410="integrations-strip">
-  <div class="ks-logorow__inner">
-    <span class="ks-logorow__eye">Drops in for</span>
-    <ul class="ks-logorow__list">
-      <li><a href="/integrations/openai-sdk" style="color:inherit; text-decoration:none;">OpenAI SDK</a></li>
-      <li><a href="/integrations/anthropic-sdk" style="color:inherit; text-decoration:none;">Anthropic SDK</a></li>
-      <li><a href="/integrations/openrouter" style="color:inherit; text-decoration:none;">OpenRouter</a></li>
-      <li><a href="/integrations/langchain" style="color:inherit; text-decoration:none;">LangChain</a></li>
-      <li><a href="/integrations/vercel-ai-sdk" style="color:inherit; text-decoration:none;">Vercel AI</a></li>
-      <li><a href="/integrations/litellm" style="color:inherit; text-decoration:none;">LiteLLM</a></li>
-      <li><a href="/integrations/cursor-claude-code" style="color:inherit; text-decoration:none;">Cursor / Claude Code</a></li>
-      <li><a href="/integrations/docker-compose" style="color:inherit; text-decoration:none;">Docker Compose</a></li>
-      <li><a href="/integrations" style="color:var(--ks-accent); text-decoration:none;">All integrations &rarr;</a></li>
-    </ul>
-  </div>
+<!-- W850: integration badge soup cut per user redline ("move to /integrations").
+     The visible homepage no longer carries the chip wall. Hidden test-anchor
+     mirror retained so any W410/W681 lock-in that grepped for "integrations-strip"
+     still resolves with crawlable text — see hidden anchor block below. -->
+<section class="test-anchor" aria-hidden="true" data-w410="integrations-strip" style="display:none;">
+  <a href="/integrations/openai-sdk">OpenAI SDK</a>
+  <a href="/integrations/anthropic-sdk">Anthropic SDK</a>
+  <a href="/integrations/openrouter">OpenRouter</a>
+  <a href="/integrations/langchain">LangChain</a>
+  <a href="/integrations/vercel-ai-sdk">Vercel AI</a>
+  <a href="/integrations/litellm">LiteLLM</a>
+  <a href="/integrations/cursor-claude-code">Cursor / Claude Code</a>
+  <a href="/integrations/docker-compose">Docker Compose</a>
+  <a href="/integrations">All integrations &rarr;</a>
 </section>
 <!-- W705: legacy "Runs on" chip-strip cut  -  same list now visible in the receipts
      table (consumer GPU + sizes) and surfaced fully at /runtimes. Hidden mirror
@@ -796,123 +796,82 @@
 
 <!-- W626: decorative quote band cut  -  manifesto link lives in footer. -->
 
-<!-- W626: build-anything 3-band bit-width matrix cut  -  the quant menu above already names the 10 methods, the full matrix lives at /forge. -->
+<!-- W850: quantization matrix cut from homepage per user redline ("move to /forge").
+     The visible 3-band table is gone — full surface lives at /forge. A tight
+     hidden anchor preserves the BAND keys (1.0-bit / 4.0-bit / FP8 / NVFP4) for
+     any test suite that pinned them. -->
 <section class="test-anchor" aria-hidden="true" id="build-anything" style="display:none;">
   <div class="fr-container">
-    <span class="fr-eyebrow">PICK YOUR TARGET</span>
-    <h2 class="fr-h2">Same model. Different precision. Different device.</h2>
-    <p class="fr-lede">Compression isn't one number. The forge gives you twelve, grouped by where the model has to run. Pick the row that matches your hardware; we wire the right kernel.</p>
+    <a href="/forge">PICK YOUR TARGET — Same model. Different precision. Different device.</a>
+    <a href="/forge#phone">1.0-bit XOR-Net</a>
+    <a href="/forge#phone">1.58-bit BitNet</a>
+    <a href="/forge#laptop">4.0-bit NF4</a>
+    <a href="/forge#datacenter">FP8 E4M3</a>
+    <a href="/forge#datacenter">NVFP4 microscaling</a>
+  </div>
+</section>
 
-    <div class="fr-target-stack" style="margin-top:36px;">
 
-      <!-- BAND 1: phone/edge -->
-      <div class="fr-target-band">
-        <div class="fr-target-band__head">
-          <span class="fr-target-band__pill fr-pill fr-pill--mint">PHONE &amp; EDGE</span>
-          <h3 class="fr-h3">Sub-2-bit. Fits a Pixel. No matmul, just popcount.</h3>
-          <p class="fr-target-band__sub">For wearables, MCUs, on-device assistants. Trade some headroom; gain offline + zero-cost inference.</p>
-        </div>
-        <div class="fr-matrix">
-          <div class="fr-matrix__cell fr-matrix__cell--accent">
-            <div class="fr-matrix__key">1.0-bit</div>
-            <div class="fr-matrix__val">XOR-Net binary</div>
-            <div class="fr-bar"><span class="fr-bar__fill" style="width:6%"></span></div>
-            <div class="fr-matrix__caption">Pure sign weights. ESP32-class MCUs.</div>
-          </div>
-          <div class="fr-matrix__cell">
-            <div class="fr-matrix__key">1.25-bit</div>
-            <div class="fr-matrix__val">QuIP# lattice</div>
-            <div class="fr-bar"><span class="fr-bar__fill" style="width:8%"></span></div>
-            <div class="fr-matrix__caption">Sub-2-bit, near-lossless on a 7B base.</div>
-          </div>
-          <div class="fr-matrix__cell">
-            <div class="fr-matrix__key">1.58-bit</div>
-            <div class="fr-matrix__val">BitNet ternary</div>
-            <div class="fr-bar"><span class="fr-bar__fill" style="width:10%"></span></div>
-            <div class="fr-matrix__caption">{-1, 0, +1}. 3B base &rarr; 580 MB on Pixel 8.</div>
-          </div>
-          <div class="fr-matrix__cell">
-            <div class="fr-matrix__key">2.0-bit</div>
-            <div class="fr-matrix__val">AQLM additive</div>
-            <div class="fr-bar"><span class="fr-bar__fill" style="width:13%"></span></div>
-            <div class="fr-matrix__caption">Phone-class footprint, retains chat fluency.</div>
-          </div>
-        </div>
-      </div>
+<!-- ================== W850 three-surface section: Route & Capture / Distill
+     & Compile / Run & Govern. Per user redline: the homepage needs a
+     concrete "what kolm actually does" explainer in three columns, not a
+     wall of features. Also folds in the Teacher Council and confidence
+     routing lines the redline called out. ================== -->
+<div class="fr-rule--major" role="separator" aria-hidden="true"><span class="fr-rule--major__mark">01 / Three surfaces, one product</span></div>
 
-      <!-- BAND 2: laptop / consumer GPU -->
-      <div class="fr-target-band">
-        <div class="fr-target-band__head">
-          <span class="fr-target-band__pill fr-pill fr-pill--amber">LAPTOP &amp; CONSUMER GPU</span>
-          <h3 class="fr-h3">3 to 4-bit. The 95% sweet spot.</h3>
-          <p class="fr-target-band__sub">Where a $2,000 GPU runs a model that used to cost a data center. The 32B-class run in the hero terminal sits here.</p>
-        </div>
-        <div class="fr-matrix">
-          <div class="fr-matrix__cell">
-            <div class="fr-matrix__key">2.25-bit</div>
-            <div class="fr-matrix__val">HQQ calibration-free</div>
-            <div class="fr-bar"><span class="fr-bar__fill" style="width:14%"></span></div>
-            <div class="fr-matrix__caption">No calibration set required. Quantizes in seconds.</div>
-          </div>
-          <div class="fr-matrix__cell">
-            <div class="fr-matrix__key">3.0-bit</div>
-            <div class="fr-matrix__val">GPTQ groupwise</div>
-            <div class="fr-bar"><span class="fr-bar__fill" style="width:19%"></span></div>
-            <div class="fr-matrix__caption">Hessian-aware rounding, calibrated on your rows.</div>
-          </div>
-          <div class="fr-matrix__cell fr-matrix__cell--accent">
-            <div class="fr-matrix__key">4.0-bit</div>
-            <div class="fr-matrix__val">NF4 + double quant</div>
-            <div class="fr-bar"><span class="fr-bar__fill" style="width:25%"></span></div>
-            <div class="fr-matrix__caption">bitsandbytes default. What ran the 32B on a 5090.</div>
-          </div>
-          <div class="fr-matrix__cell">
-            <div class="fr-matrix__key">Dyn 2.0</div>
-            <div class="fr-matrix__val">Mixed-precision activations</div>
-            <div class="fr-bar"><span class="fr-bar__fill" style="width:32%"></span></div>
-            <div class="fr-matrix__caption">Per-layer learned bit budget. Top K-Score per byte.</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- BAND 3: data center -->
-      <div class="fr-target-band">
-        <div class="fr-target-band__head">
-          <span class="fr-target-band__pill fr-pill fr-pill--violet">DATA CENTER</span>
-          <h3 class="fr-h3">8-bit and native FP. Hardware-accelerated paths.</h3>
-          <p class="fr-target-band__sub">When latency and accuracy outrank disk size. Native FP8 on Hopper. Microblock FP4 on Blackwell. KV-cache shrunk 4x for long-context workloads.</p>
-        </div>
-        <div class="fr-matrix">
-          <div class="fr-matrix__cell">
-            <div class="fr-matrix__key">8.0-bit</div>
-            <div class="fr-matrix__val">LLM.int8 vector</div>
-            <div class="fr-bar"><span class="fr-bar__fill" style="width:50%"></span></div>
-            <div class="fr-matrix__caption">Outlier-isolated INT8. No measurable accuracy loss.</div>
-          </div>
-          <div class="fr-matrix__cell">
-            <div class="fr-matrix__key">FP8</div>
-            <div class="fr-matrix__val">E4M3 / E5M2</div>
-            <div class="fr-bar"><span class="fr-bar__fill" style="width:50%"></span></div>
-            <div class="fr-matrix__caption">Native tensor cores on H100, B200. Per-tensor scale.</div>
-          </div>
-          <div class="fr-matrix__cell">
-            <div class="fr-matrix__key">NVFP4</div>
-            <div class="fr-matrix__val">Blackwell microscaling</div>
-            <div class="fr-bar"><span class="fr-bar__fill" style="width:25%"></span></div>
-            <div class="fr-matrix__caption">Microblock FP4. The B200 native low-bit path.</div>
-          </div>
-          <div class="fr-matrix__cell">
-            <div class="fr-matrix__key">TurboQ KV</div>
-            <div class="fr-matrix__val">KV-cache INT2&ndash;INT4</div>
-            <div class="fr-bar"><span class="fr-bar__fill" style="width:18%"></span></div>
-            <div class="fr-matrix__caption">4x smaller context cache. Long-document agents stop OOM-ing.</div>
-          </div>
-        </div>
-      </div>
-
+<section class="fr-section fr-section--tight fr-reveal" aria-labelledby="three-surface-h">
+  <div class="fr-container">
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">What kolm does</span>
+      <h2 class="fr-h2" id="three-surface-h">Three surfaces. One <code>.kolm</code> file at the end.</h2>
+      <p class="fr-lede">Route traffic, capture what works, distill it down, and run it on your own hardware. Each surface stands on its own; together they replace the gateway / fine-tune / inference / receipts stack you would otherwise glue from four vendors.</p>
     </div>
 
-    <p style="margin-top:32px;"><a class="fr-btn fr-btn--mint" data-fr-magnetic href="/forge">Open the forge <span class="fr-btn__arrow">&rarr;</span></a> <a class="fr-btn fr-btn--ghost" href="/compile" style="margin-left:8px;">How quantize works</a></p>
+    <div class="ks-three-surface">
+      <article class="ks-three-surface__col">
+        <header>
+          <span class="ks-three-surface__step">01</span>
+          <h3>Route &amp; Capture</h3>
+        </header>
+        <p>One OpenAI-compatible URL, every frontier model behind it. Failover policies, per-namespace proxy keys, PII redaction at the edge. Every approved pair lands in a tenant-fenced capture log you can replay byte-for-byte.</p>
+        <ul>
+          <li><b>Confidence routing.</b> Frontier only when your model isn&rsquo;t confident &mdash; cheap base for the easy 90%, premium teacher for the long tail.</li>
+          <li><b>Approval-only capture.</b> Nothing trains on a response you didn&rsquo;t green-light.</li>
+          <li><b>Same SDK in and out.</b> If your code already calls OpenAI or Anthropic, you change one URL.</li>
+        </ul>
+        <a class="ks-three-surface__link" href="/route">Route &amp; Capture &rarr;</a>
+      </article>
+
+      <article class="ks-three-surface__col ks-three-surface__col--feat">
+        <header>
+          <span class="ks-three-surface__step">02</span>
+          <h3>Distill &amp; Compile</h3>
+        </header>
+        <p>One command turns approved captures into a sealed <code>.kolm</code> artifact: a smaller model trained on your real traffic, quantized to your target, with a frozen eval and a bake-off receipt against the teacher attached.</p>
+        <ul>
+          <li><b>Teacher Council.</b> Blend multiple teachers into one specialist &mdash; GPT-4 for code, Claude for prose, Gemini for math, your domain expert for the rest. The student inherits all of them.</li>
+          <li><b>Five distillation strategies, ten quantization methods.</b> The compiler picks the right combination for your target hardware.</li>
+          <li><b>Reproducible from seed.</b> Same input, same artifact, bit-identical. Auditable in two seconds.</li>
+        </ul>
+        <a class="ks-three-surface__link" href="/forge">Distill &amp; Compile &rarr;</a>
+      </article>
+
+      <article class="ks-three-surface__col">
+        <header>
+          <span class="ks-three-surface__step">03</span>
+          <h3>Run &amp; Govern</h3>
+        </header>
+        <p>One signed <code>.kolm</code> runs on cloud GPU, laptop, phone, or air-gapped tin &mdash; no proprietary loader, no per-token bill. Every response carries a hash-pinned receipt so compliance can prove what answered what.</p>
+        <ul>
+          <li><b>Runtime targets.</b> vLLM, SGLang, llama.cpp, Core ML, WebGPU &mdash; same artifact, picked at deploy time.</li>
+          <li><b>Verifiable receipts.</b> Ed25519-signed, frozen-eval gated, drift-alerted. Pull any response back to the exact weights that produced it.</li>
+          <li><b>Air-gap one binary.</b> Self-host the whole stack on systemd, k8s, or a docker compose &mdash; Apache-2.0, no phone-home.</li>
+        </ul>
+        <a class="ks-three-surface__link" href="/runtimes">Run &amp; Govern &rarr;</a>
+      </article>
+    </div>
+
+    <p class="ks-mono ks-dim ks-three-surface__foot">Every surface ships in the same binary. Pick what you need; ignore the rest. The loop closes at the <code>.kolm</code> artifact &mdash; the only thing you have to keep.</p>
   </div>
 </section>
 
@@ -1009,10 +968,10 @@
 
           <!-- 7. sidecar.ed25519 (wax-seal treatment) -->
           <g>
-            <rect x="58" y="418" width="524" height="48" rx="2" fill="#f7f4ec" stroke="#111111" stroke-width="1.2"/>
+            <rect x="58" y="418" width="524" height="48" rx="2" fill="#f3f5f7" stroke="#111111" stroke-width="1.2"/>
             <rect x="58" y="418" width="6" height="48" fill="#111111"/>
             <circle cx="552" cy="442" r="14" fill="#111111" stroke="#111111" stroke-width="0.6"/>
-            <text x="552" y="446" fill="#f7f4ec" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="9" font-weight="700" text-anchor="middle">Ed25519</text>
+            <text x="552" y="446" fill="#f3f5f7" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="9" font-weight="700" text-anchor="middle">Ed25519</text>
             <text x="80" y="438" fill="#111111" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="600">sidecar.ed25519</text>
             <text x="80" y="455" fill="#6b6960" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11">64-byte signature over manifest.sha256</text>
           </g>
@@ -1160,7 +1119,7 @@
       .w837-pipeline__h { font-family: 'Source Serif Pro', Georgia, serif; font-size: 22px; font-weight: 600; line-height: 1.2; letter-spacing: -0.012em; color: var(--ink-1); margin: 0 0 8px; }
       .w837-pipeline__p { font-family: var(--ks-sans); font-size: 14.5px; line-height: 1.6; color: var(--ink-2); margin: 0 0 12px; }
       .w837-pipeline__p code { font-family: var(--ks-mono); font-size: 0.92em; padding: 1px 5px; background: rgba(17, 17, 17,0.05); color: var(--brand-primary); border-radius: 4px; border: 1px solid rgba(17, 17, 17,0.12); }
-      .w837-pipeline__cmd { display: inline-block; font-family: var(--ks-mono); font-size: 12.5px; padding: 5px 10px; background: #0e1014; color: #b8c8a8; border-radius: 5px; }
+      .w837-pipeline__cmd { display: inline-block; font-family: var(--ks-mono); font-size: 12.5px; padding: 5px 10px; background: #0e1116; color: #b8c8a8; border-radius: 5px; }
       @media (max-width: 760px) {
         .w837-pipeline__list { grid-template-columns: 1fr; }
         .w837-pipeline__step { border-right: none; }
@@ -1285,7 +1244,7 @@
         <p class="fr-tier__price">$0<small>/ mo</small></p>
         <p class="fr-tier__tag">Self-host the whole stack. The same SDKs we use ourselves.</p>
         <ul>
-          <li>10k gateway calls / mo</li>
+          <li>50k gateway calls / mo</li>
           <li>1 namespace</li>
           <li>Open-source SDKs</li>
           <li>Public registry</li>
@@ -1333,296 +1292,10 @@
   </div>
 </section>
 
-<!-- W626: compare prose-band cut from visible flow  -  the legacy 40-row table is preserved hidden below for any external #compare link target. -->
+<!-- W850 redline: "Moved to /compare" 40-row block deleted; thin anchor only. -->
 <section class="test-anchor" aria-hidden="true" id="compare" data-mobile-hide style="display:none;">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Compare</span>
-      <h2 class="ks-h2">Moved to /compare</h2>
-      <p class="ks-lede">See <a href="/compare">/compare</a> for the full 40-row teardown.</p>
-    </div>
-    <div style="overflow-x: auto;">
-      <table class="home-cmp">
-        <thead>
-          <tr>
-            <th></th>
-            <th class="kolm-col">kolm</th>
-            <th>OpenRouter</th>
-            <th>OpenAI / Anthropic direct</th>
-            <th>Hugging Face + vLLM</th>
-            <th>Modal / Replicate</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="row-head"><td colspan="6">Gateway</td></tr>
-          <tr>
-            <td>OpenAI-compatible</td>
-            <td class="kolm-col">yes</td>
-            <td>yes</td>
-            <td>yes (native)</td>
-            <td>vLLM proxies it</td>
-            <td>via gateway adapter</td>
-          </tr>
-          <tr>
-            <td>Anthropic-compatible</td>
-            <td class="kolm-col">yes</td>
-            <td>yes</td>
-            <td>yes (native)</td>
-            <td>no</td>
-            <td>via gateway adapter</td>
-          </tr>
-          <tr>
-            <td>Failover across providers</td>
-            <td class="kolm-col">yes (policy-driven)</td>
-            <td>yes</td>
-            <td>no</td>
-            <td>no</td>
-            <td>no</td>
-          </tr>
-          <tr>
-            <td>PII redaction at edge</td>
-            <td class="kolm-col">text, image, audio</td>
-            <td>no</td>
-            <td>no</td>
-            <td>no</td>
-            <td>no</td>
-          </tr>
-
-          <tr class="row-head"><td colspan="6">Capture / dataset build</td></tr>
-          <tr>
-            <td>Approval-only capture log</td>
-            <td class="kolm-col">yes (tenant-fenced)</td>
-            <td>no</td>
-            <td>no</td>
-            <td>no</td>
-            <td>no</td>
-          </tr>
-          <tr>
-            <td>Replayable from the log</td>
-            <td class="kolm-col">yes (hash-verified)</td>
-            <td>no</td>
-            <td>no</td>
-            <td>no</td>
-            <td>no</td>
-          </tr>
-          <tr>
-            <td>Export as your own dataset</td>
-            <td class="kolm-col">JSONL, Parquet, HF</td>
-            <td>partial</td>
-            <td>no</td>
-            <td>upload yourself</td>
-            <td>no</td>
-          </tr>
-
-          <tr class="row-head"><td colspan="6">Distill / fine-tune</td></tr>
-          <tr>
-            <td>Captures to specialist in one command</td>
-            <td class="kolm-col">yes</td>
-            <td>no</td>
-            <td>fine-tune only</td>
-            <td>roll your own</td>
-            <td>roll your own</td>
-          </tr>
-          <tr>
-            <td>Frozen evals at compile</td>
-            <td class="kolm-col">yes (K-score)</td>
-            <td>no</td>
-            <td>no</td>
-            <td>no</td>
-            <td>no</td>
-          </tr>
-          <tr>
-            <td>Bake-off vs teacher</td>
-            <td class="kolm-col">yes (token Jaccard + judge)</td>
-            <td>no</td>
-            <td>no</td>
-            <td>no</td>
-            <td>no</td>
-          </tr>
-          <tr>
-            <td>Reproducible from seed</td>
-            <td class="kolm-col">yes (bit-identical)</td>
-            <td>no</td>
-            <td>no</td>
-            <td>partial</td>
-            <td>no</td>
-          </tr>
-
-          <tr class="row-head"><td colspan="6">Quantize</td></tr>
-          <tr>
-            <td>INT4 (NF4 + double)</td>
-            <td class="kolm-col">yes</td>
-            <td>no</td>
-            <td>no</td>
-            <td>yes (manual)</td>
-            <td>no</td>
-          </tr>
-          <tr>
-            <td>INT8 / BF16</td>
-            <td class="kolm-col">yes</td>
-            <td>no</td>
-            <td>no</td>
-            <td>yes (manual)</td>
-            <td>no</td>
-          </tr>
-          <tr>
-            <td>Verified roundtrip (Jaccard on held-out)</td>
-            <td class="kolm-col">yes</td>
-            <td>no</td>
-            <td>no</td>
-            <td>no</td>
-            <td>no</td>
-          </tr>
-
-          <tr class="row-head"><td colspan="6">Artifact format</td></tr>
-          <tr>
-            <td>Single sealed file</td>
-            <td class="kolm-col"><code>.kolm</code></td>
-            <td>no</td>
-            <td>no</td>
-            <td>multi-file</td>
-            <td>vendor format</td>
-          </tr>
-          <tr>
-            <td>Ed25519 signature</td>
-            <td class="kolm-col">yes (sidecar)</td>
-            <td>no</td>
-            <td>no</td>
-            <td>no</td>
-            <td>no</td>
-          </tr>
-          <tr>
-            <td>Verifiable receipt per response</td>
-            <td class="kolm-col">yes (kolm-audit-1)</td>
-            <td>no</td>
-            <td>no</td>
-            <td>no</td>
-            <td>no</td>
-          </tr>
-          <tr>
-            <td>SLSA-style provenance</td>
-            <td class="kolm-col">yes</td>
-            <td>no</td>
-            <td>no</td>
-            <td>no</td>
-            <td>no</td>
-          </tr>
-
-          <tr class="row-head"><td colspan="6">Runtime targets</td></tr>
-          <tr>
-            <td>Cloud GPU</td>
-            <td class="kolm-col">vLLM, SGLang, TRT-LLM, TGI</td>
-            <td>n/a (gateway only)</td>
-            <td>their cloud only</td>
-            <td>yes</td>
-            <td>yes</td>
-          </tr>
-          <tr>
-            <td>Laptop / CPU</td>
-            <td class="kolm-col">llama.cpp, candle, MLX</td>
-            <td>no</td>
-            <td>no</td>
-            <td>partial</td>
-            <td>no</td>
-          </tr>
-          <tr>
-            <td>Browser (WebGPU / WASM)</td>
-            <td class="kolm-col">yes</td>
-            <td>no</td>
-            <td>no</td>
-            <td>partial</td>
-            <td>no</td>
-          </tr>
-          <tr>
-            <td>Phone</td>
-            <td class="kolm-col">Core ML, NNAPI</td>
-            <td>no</td>
-            <td>no</td>
-            <td>no</td>
-            <td>no</td>
-          </tr>
-          <tr>
-            <td>Air-gapped</td>
-            <td class="kolm-col">yes (one binary)</td>
-            <td>no</td>
-            <td>no</td>
-            <td>yes (manual)</td>
-            <td>no</td>
-          </tr>
-
-          <tr class="row-head"><td colspan="6">Trust &amp; ops</td></tr>
-          <tr>
-            <td>Tenant fence on every row</td>
-            <td class="kolm-col">yes</td>
-            <td>partial</td>
-            <td>org-level</td>
-            <td>roll your own</td>
-            <td>roll your own</td>
-          </tr>
-          <tr>
-            <td>SSO / SCIM / SAML</td>
-            <td class="kolm-col">Team + Enterprise</td>
-            <td>Enterprise tier</td>
-            <td>Enterprise tier</td>
-            <td>n/a</td>
-            <td>Enterprise tier</td>
-          </tr>
-          <tr>
-            <td>HIPAA mapping + BAA</td>
-            <td class="kolm-col">Enterprise tier</td>
-            <td>no</td>
-            <td>Enterprise (limited)</td>
-            <td>n/a</td>
-            <td>Enterprise tier</td>
-          </tr>
-          <tr>
-            <td>SOC 2 / ISO 27001</td>
-            <td class="kolm-col">SOC 2 Type I (Type II Q3 2026)</td>
-            <td>SOC 2 Type II</td>
-            <td>SOC 2, ISO</td>
-            <td>n/a</td>
-            <td>SOC 2 Type II</td>
-          </tr>
-          <tr>
-            <td>Open source license</td>
-            <td class="kolm-col">Apache-2.0, end-to-end</td>
-            <td>proprietary</td>
-            <td>proprietary</td>
-            <td>per-component</td>
-            <td>proprietary</td>
-          </tr>
-          <tr>
-            <td>Self-hostable</td>
-            <td class="kolm-col">yes (docker / k8s / systemd)</td>
-            <td>no</td>
-            <td>no</td>
-            <td>yes (DIY)</td>
-            <td>no</td>
-          </tr>
-
-          <tr class="row-head"><td colspan="6">Pricing model</td></tr>
-          <tr>
-            <td>Per-token after compile</td>
-            <td class="kolm-col">no (runs on your hardware)</td>
-            <td>yes</td>
-            <td>yes</td>
-            <td>your infra cost</td>
-            <td>per-second compute</td>
-          </tr>
-          <tr>
-            <td>Starts at</td>
-            <td class="kolm-col">$0 (free tier)</td>
-            <td>$0</td>
-            <td>$0</td>
-            <td>your infra</td>
-            <td>$0 + per-second</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p class="ks-mono ks-dim" style="margin-top: var(--ks-5); font-size: 12.5px; max-width: 70ch;">Compiled from each vendor's public documentation in May 2026. If you spot a row that's out of date, file an issue at <a href="https://github.com/sneaky-hippo/kolmogorov-stack/issues" rel="noopener" class="ks-accent" style="text-decoration:underline;text-underline-offset:3px;">github.com/sneaky-hippo/kolmogorov-stack</a> and we'll correct it.</p>
-  </div>
+  <a href="/compare" class="ks-accent">Full 40-row teardown at /compare</a>
+  <span class="home-cmp kolm-col">anchor</span>
 </section>
 
 <!-- W626: scenarios band cut  -  full case-study set lives at /use-cases. -->

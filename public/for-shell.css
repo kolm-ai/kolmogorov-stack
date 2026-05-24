@@ -44,13 +44,13 @@
 .for-recipe__cmd .o { color: var(--ks-ink-3); }
 
 /* ---------- cost-vs-frontier bar (mirrors W653 .pr-vs but lives sitewide here) ---------- */
-.for-vs { margin-top: 8px; padding: 14px 0 4px; border-top: 1px dashed rgba(236,231,220,0.10); display: flex; flex-direction: column; gap: 8px; max-width: 640px; }
+.for-vs { margin-top: 8px; padding: 14px 0 4px; border-top: 1px dashed rgba(230, 233, 238,0.10); display: flex; flex-direction: column; gap: 8px; max-width: 640px; }
 .for-vs__row { display: grid; grid-template-columns: 92px 1fr 100px; align-items: center; gap: 12px; font-family: var(--ks-mono); font-size: 11px; line-height: 1.2; }
 .for-vs__label { color: var(--ks-ink-3); letter-spacing: 0.04em; text-transform: uppercase; }
-.for-vs__track { position: relative; height: 7px; background: rgba(236,231,220,0.05); border-radius: 4px; overflow: hidden; }
+.for-vs__track { position: relative; height: 7px; background: rgba(230, 233, 238,0.05); border-radius: 4px; overflow: hidden; }
 .for-vs__bar { position: absolute; top: 0; left: 0; height: 100%; border-radius: 4px; }
 .for-vs__bar--frontier { background: linear-gradient(90deg, rgba(255,150,120,0.55), rgba(255,150,120,0.85)); }
-.for-vs__bar--kolm { background: linear-gradient(90deg, var(--ks-accent), rgba(232, 227, 214,0.7)); }
+.for-vs__bar--kolm { background: linear-gradient(90deg, var(--ks-accent), rgba(230, 233, 238,0.7)); }
 .for-vs__val { color: var(--ks-ink); text-align: right; font-variant-numeric: tabular-nums; }
 .for-vs__val--frontier { color: var(--ks-ink-2); text-decoration: line-through; text-decoration-color: rgba(255,150,120,0.6); text-decoration-thickness: 1px; }
 .for-vs__foot { font-family: var(--ks-mono); font-size: 10.5px; color: var(--ks-ink-3); letter-spacing: 0.04em; padding-top: 4px; }
@@ -72,7 +72,7 @@
 /* ---------- compliance pills ---------- */
 .for-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
 .for-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: 999px; font-family: var(--ks-mono); font-size: 11.5px; color: var(--ks-ink-2); letter-spacing: 0.04em; }
-.for-pill--avail { border-color: rgba(232, 227, 214,0.4); color: var(--ks-accent); }
+.for-pill--avail { border-color: rgba(230, 233, 238,0.4); color: var(--ks-accent); }
 .for-pill--avail::before { content: "✓"; color: var(--ks-accent); margin-right: 2px; }
 .for-pill--progress { color: var(--ks-ink-3); }
 .for-pill--progress::before { content: "·"; color: var(--ks-ink-faint); margin-right: 2px; }

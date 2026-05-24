@@ -6,13 +6,13 @@
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 <title>Bakeoff results &middot; Open-source AI workbench &middot; kolm.ai</title>
 <meta name="description" content="Bakeoff results UI shell. Per-artifact K-Score delta, winners, and rerun controls. Hydrates from /v1/bakeoff/results and /v1/multimodal/bakeoff.">
-<meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="Bakeoff results &middot; Open-source AI workbench &middot; kolm.ai">
 <meta property="og:description" content="Per-artifact K-Score delta and winners across bakeoff runs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/account/bakeoff">
-<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/account/bakeoff">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/design-tokens.css">
@@ -20,8 +20,8 @@
     <link rel="stylesheet" href="/warm-paper.css">
 <script src="/nav.js" defer></script>
 <style>
-:root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#111111;--accent-soft:rgba(17, 17, 17,0.10);--warn:#6b6b66;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
+:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230, 233, 238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#111111;--accent-soft:rgba(17, 17, 17,0.10);--warn:#6b6b66;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
 .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
@@ -40,7 +40,7 @@ p{color:var(--ink-mute);font-size:14.5px;line-height:1.6;max-width:780px}
 .card .winner{font-size:15.5px;color:var(--ink);font-weight:500}
 .card .delta{font-family:var(--mono);font-size:13px;color:var(--accent)}
 .card .delta.negative{color:var(--warn)}
-.placeholder-pill{display:inline-block;font-family:var(--mono);font-size:10.5px;color:var(--warn);background:rgba(217,119,6,0.10);border:1px solid var(--warn);padding:2px 7px;border-radius:99px;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px}
+.placeholder-pill{display:inline-block;font-family:var(--mono);font-size:10.5px;color:var(--warn);background:rgba(82, 90, 100,0.10);border:1px solid var(--warn);padding:2px 7px;border-radius:99px;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px}
 .cta-row{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0 0}
 .cta-primary{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border:1px solid var(--accent);border-radius:10px;background:var(--accent-soft);color:var(--ink);text-decoration:none;font-size:14px;font-weight:500}
 .cta-secondary{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border:1px solid var(--line);border-radius:10px;background:transparent;color:var(--ink-mute);text-decoration:none;font-size:14px}
@@ -53,7 +53,6 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </head>
 <body class="ks" data-w812-bakeoff-list="true">
 <span class="brand-anchor" data-w775="h1" aria-hidden="true">Frontier AI on your own infrastructure.</span>
-<span class="brand-disambig" aria-hidden="true">Not Kolm therapeutics, Kolm band, or other unrelated organizations using similar names.</span>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">

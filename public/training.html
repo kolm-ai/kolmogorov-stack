@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#050607;color:#e8e3d6}html{color-scheme:dark}</style>
+<style>html,body{background:#050607;color:#e6e9ee}html{color-scheme:dark}</style>
 <title>Train and distill top models into signed artifacts · kolm.ai</title>
 <meta name="description" content="Kolm turns approved examples, teacher traces, synthetic data, LoRA/QLoRA runs, and eval gates into signed .kolm artifacts for cloud, edge, browser, and device.">
 <meta name="keywords" content="training, distillation, LoRA, QLoRA, quantization, INT4, GGUF, ONNX, cross-vendor, teacher, student, MoE, K-score, .kolm">
@@ -11,12 +11,12 @@
 <meta property="og:description" content="Turn approved examples, teacher traces, synthetic data, LoRA/QLoRA runs, and eval gates into signed .kolm artifacts for cloud, edge, browser, and device.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/training">
-<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Train and distill top models into signed artifacts | kolm.ai">
 <meta name="twitter:description" content="Turn approved examples, teacher traces, synthetic data, LoRA/QLoRA runs, and eval gates into signed .kolm artifacts for cloud, edge, browser, and device.">
-<meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="canonical" href="https://kolm.ai/training">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
@@ -25,13 +25,13 @@
  :root {
  --bg: #050607; --bg-elev: #0b0f10; --bg-card: #0e1314; --bg-card-2: #131918;
  --line: rgba(255,255,255,0.06); --line-2: rgba(255,255,255,0.12); --line-strong: rgba(255,255,255,0.22);
- --ink: #e8e3d6; --ink-mute: #b5bdb1; --ink-faint: #737c73;
- --good: #e8e3d6; --warm: #f3b15a; --cool: #7cbcf1; --violet: #b89cf7; --rose: #f29bbb;
+ --ink: #e6e9ee; --ink-mute: #aab0b8; --ink-faint: #6a727c;
+ --good: #e6e9ee; --warm: #f3b15a; --cool: #7cbcf1; --violet: #b89cf7; --rose: #f29bbb;
  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
  }
  [data-theme=light] {
- --bg: #f7f4ec; --bg-elev: #efeadc; --bg-card: #ffffff; --bg-card-2: #f3eedf;
+ --bg: #f3f5f7; --bg-elev: #efeadc; --bg-card: #ffffff; --bg-card-2: #f3eedf;
  --line: rgba(0,0,0,0.08); --line-2: rgba(0,0,0,0.14); --line-strong: rgba(0,0,0,0.24);
  --ink: #1c1f1d; --ink-mute: #4a4e4c; --ink-faint: #777c79;
  }
@@ -47,7 +47,7 @@
  .lede { font-size: 18.5px; line-height: 1.5; color: var(--ink-mute); max-width: 760px; margin: 0 0 28px; }
  .hero { padding: 72px 0 36px; border-bottom: 1px solid var(--line); position: relative; overflow: hidden; }
  .hero::before { content: ''; position: absolute; inset: -30% -10% 50% 50%; background: radial-gradient(50% 50% at 50% 50%, rgba(184, 156, 247, 0.12) 0%, transparent 70%); pointer-events: none; }
- .hero::after { content: ''; position: absolute; inset: 50% 50% -30% -10%; background: radial-gradient(50% 50% at 50% 50%, rgba(232, 227, 214, 0.10) 0%, transparent 70%); pointer-events: none; }
+ .hero::after { content: ''; position: absolute; inset: 50% 50% -30% -10%; background: radial-gradient(50% 50% at 50% 50%, rgba(230, 233, 238, 0.10) 0%, transparent 70%); pointer-events: none; }
  .hero .wrap { position: relative; }
  .pcap { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 14px; }
  .hero-meta { display: flex; gap: 18px; font-family: var(--mono); font-size: 12px; color: var(--ink-mute); margin: 22px 0 0; flex-wrap: wrap; }
@@ -78,7 +78,7 @@
  .tier-body pre { font-family: var(--mono); font-size: 12.5px; padding: 16px 18px; background: rgba(0,0,0,0.34); border: 1px solid var(--line); border-radius: 10px; overflow-x: auto; line-height: 1.6; color: var(--ink); margin: 12px 0; }
  [data-theme=light] .tier-body pre { background: rgba(0,0,0,0.04); color: var(--ink); }
  .tier-callout { display: inline-block; padding: 4px 9px; font-family: var(--mono); font-size: 11px; border-radius: 4px; margin-right: 6px; }
- .tier-callout.rule { background: rgba(232, 227, 214,0.14); color: var(--good); }
+ .tier-callout.rule { background: rgba(230, 233, 238,0.14); color: var(--good); }
  .tier-callout.synth { background: rgba(184,156,247,0.16); color: var(--violet); }
  .tier-callout.distill { background: rgba(243,177,90,0.16); color: var(--warm); }
  .tier-callout.moe { background: rgba(242,155,187,0.18); color: var(--rose); }
@@ -115,7 +115,7 @@
  .vg-cell.t { font-weight: 500; color: var(--ink); }
  .vg-cell.dot { display: flex; justify-content: center; align-items: center; }
  .vg-dot { width: 9px; height: 9px; border-radius: 50%; }
- .vg-dot.ok { background: var(--good); box-shadow: 0 0 8px rgba(232, 227, 214,0.55); }
+ .vg-dot.ok { background: var(--good); box-shadow: 0 0 8px rgba(230, 233, 238,0.55); }
  .vg-dot.warn { background: var(--warm); box-shadow: 0 0 6px rgba(243,177,90,0.42); }
  .vg-dot.no { background: rgba(255,255,255,0.10); }
  .vg-cap { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); margin-top: 16px; }
@@ -145,7 +145,7 @@
  .frontier td a { color: inherit; border-bottom: 1px dashed var(--line-2); }
  .frontier td a:hover { border-bottom-color: var(--line-strong); }
  .status-pill { display: inline-block; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 9px; border-radius: 999px; vertical-align: middle; }
- .status-pill.shipped { color: var(--good); background: rgba(232, 227, 214,0.10); border: 1px solid rgba(232, 227, 214,0.30); }
+ .status-pill.shipped { color: var(--good); background: rgba(230, 233, 238,0.10); border: 1px solid rgba(230, 233, 238,0.30); }
  .status-pill.roadmap { color: var(--warm); background: rgba(243,177,90,0.10); border: 1px solid rgba(243,177,90,0.30); }
  .frontier-foot { font-family: var(--mono); font-size: 12px; color: var(--ink-faint); margin: 18px 0 0; }
  .frontier-foot a { color: var(--ink-mute); border-bottom: 1px dashed var(--line-2); }
@@ -203,12 +203,11 @@
  }
 }
 </script>
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="stylesheet" href="/ks.css">
     <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
@@ -231,10 +230,6 @@
     <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
-
-
-
 <main id="main">
 <section class="hero">
  <div class="wrap">
@@ -265,14 +260,14 @@
  <svg class="ladder-svg" viewBox="0 0 1000 460" role="img" aria-label="Training ladder from rule recipe to MoE bundle">
  <defs>
  <linearGradient id="lad-grad" x1="0" y1="0" x2="1" y2="0">
- <stop offset="0%" stop-color="#e8e3d6"/>
+ <stop offset="0%" stop-color="#e6e9ee"/>
  <stop offset="33%" stop-color="#b89cf7"/>
  <stop offset="66%" stop-color="#f3b15a"/>
  <stop offset="100%" stop-color="#f29bbb"/>
  </linearGradient>
  <radialGradient id="lad-glow" cx="0.5" cy="0.5" r="0.5">
- <stop offset="0%" stop-color="rgba(232, 227, 214,0.55)"/>
- <stop offset="100%" stop-color="rgba(232, 227, 214,0)"/>
+ <stop offset="0%" stop-color="rgba(230, 233, 238,0.55)"/>
+ <stop offset="100%" stop-color="rgba(230, 233, 238,0)"/>
  </radialGradient>
  <filter id="lad-soft" x="-20%" y="-20%" width="140%" height="140%">
  <feGaussianBlur stdDeviation="2"/>
@@ -283,54 +278,54 @@
  <line x1="80" y1="380" x2="80" y2="60" stroke="rgba(255,255,255,0.10)" stroke-width="1"/>
 
  <!-- y-axis tick labels -->
- <text x="62" y="380" text-anchor="end" font-family="ui-monospace, monospace" font-size="10" fill="#737c73">0%</text>
- <text x="62" y="282" text-anchor="end" font-family="ui-monospace, monospace" font-size="10" fill="#737c73">0.85</text>
- <text x="62" y="200" text-anchor="end" font-family="ui-monospace, monospace" font-size="10" fill="#737c73">0.90</text>
- <text x="62" y="120" text-anchor="end" font-family="ui-monospace, monospace" font-size="10" fill="#737c73">0.95</text>
- <text x="62" y="65" text-anchor="end" font-family="ui-monospace, monospace" font-size="10" fill="#737c73">A/T</text>
+ <text x="62" y="380" text-anchor="end" font-family="ui-monospace, monospace" font-size="10" fill="#6a727c">0%</text>
+ <text x="62" y="282" text-anchor="end" font-family="ui-monospace, monospace" font-size="10" fill="#6a727c">0.85</text>
+ <text x="62" y="200" text-anchor="end" font-family="ui-monospace, monospace" font-size="10" fill="#6a727c">0.90</text>
+ <text x="62" y="120" text-anchor="end" font-family="ui-monospace, monospace" font-size="10" fill="#6a727c">0.95</text>
+ <text x="62" y="65" text-anchor="end" font-family="ui-monospace, monospace" font-size="10" fill="#6a727c">A/T</text>
 
  <!-- ladder rungs -->
  <g>
  <!-- tier 0 -->
- <circle cx="160" cy="340" r="28" fill="rgba(232, 227, 214,0.08)" stroke="#e8e3d6" stroke-width="1.5"/>
- <text x="160" y="345" text-anchor="middle" font-family="ui-monospace, monospace" font-size="13" fill="#e8e3d6">0</text>
- <text x="160" y="408" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#b5bdb1">5 ex.</text>
- <text x="160" y="424" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#737c73">rule</text>
- <text x="160" y="320" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#e8e3d6">A=0.72</text>
+ <circle cx="160" cy="340" r="28" fill="rgba(230, 233, 238,0.08)" stroke="#e6e9ee" stroke-width="1.5"/>
+ <text x="160" y="345" text-anchor="middle" font-family="ui-monospace, monospace" font-size="13" fill="#e6e9ee">0</text>
+ <text x="160" y="408" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#aab0b8">5 ex.</text>
+ <text x="160" y="424" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#6a727c">rule</text>
+ <text x="160" y="320" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#e6e9ee">A=0.72</text>
 
  <!-- tier 1 -->
  <circle cx="300" cy="298" r="28" fill="rgba(184,156,247,0.10)" stroke="#b89cf7" stroke-width="1.5"/>
  <text x="300" y="303" text-anchor="middle" font-family="ui-monospace, monospace" font-size="13" fill="#b89cf7">1</text>
- <text x="300" y="408" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#b5bdb1">50 ex.</text>
- <text x="300" y="424" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#737c73">synth-rule</text>
+ <text x="300" y="408" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#aab0b8">50 ex.</text>
+ <text x="300" y="424" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#6a727c">synth-rule</text>
  <text x="300" y="278" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#b89cf7">A=0.86</text>
 
  <!-- tier 2 -->
  <circle cx="440" cy="240" r="30" fill="rgba(243,177,90,0.10)" stroke="#f3b15a" stroke-width="1.5"/>
  <text x="440" y="246" text-anchor="middle" font-family="ui-monospace, monospace" font-size="13" fill="#f3b15a">2</text>
- <text x="440" y="408" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#b5bdb1">500 ex.</text>
- <text x="440" y="424" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#737c73">distill 0.5B</text>
+ <text x="440" y="408" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#aab0b8">500 ex.</text>
+ <text x="440" y="424" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#6a727c">distill 0.5B</text>
  <text x="440" y="218" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#f3b15a">A=0.90 A/T=0.92</text>
 
  <!-- tier 3 -->
  <circle cx="580" cy="184" r="32" fill="rgba(243,177,90,0.12)" stroke="#f3b15a" stroke-width="1.5"/>
  <text x="580" y="190" text-anchor="middle" font-family="ui-monospace, monospace" font-size="13" fill="#f3b15a">3</text>
- <text x="580" y="408" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#b5bdb1">5,000 ex.</text>
- <text x="580" y="424" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#737c73">distill 1B</text>
+ <text x="580" y="408" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#aab0b8">5,000 ex.</text>
+ <text x="580" y="424" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#6a727c">distill 1B</text>
  <text x="580" y="160" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#f3b15a">A=0.94 A/T=0.96</text>
 
  <!-- tier 4 -->
  <circle cx="720" cy="128" r="34" fill="rgba(243,177,90,0.14)" stroke="#f3b15a" stroke-width="1.5"/>
  <text x="720" y="134" text-anchor="middle" font-family="ui-monospace, monospace" font-size="13" fill="#f3b15a">4</text>
- <text x="720" y="408" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#b5bdb1">50,000 ex.</text>
- <text x="720" y="424" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#737c73">distill 7B</text>
+ <text x="720" y="408" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#aab0b8">50,000 ex.</text>
+ <text x="720" y="424" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#6a727c">distill 7B</text>
  <text x="720" y="100" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#f3b15a">A=0.96 A/T=0.98</text>
 
  <!-- tier 5 (MoE) -->
  <circle cx="860" cy="82" r="36" fill="rgba(242,155,187,0.14)" stroke="#f29bbb" stroke-width="1.5"/>
  <text x="860" y="88" text-anchor="middle" font-family="ui-monospace, monospace" font-size="13" fill="#f29bbb">5</text>
- <text x="860" y="408" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#b5bdb1">4 experts</text>
- <text x="860" y="424" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#737c73">MoE bundle</text>
+ <text x="860" y="408" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#aab0b8">4 experts</text>
+ <text x="860" y="424" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#6a727c">MoE bundle</text>
  <text x="860" y="52" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#f29bbb">composite</text>
 
  <!-- connecting curve through rungs -->
@@ -338,7 +333,7 @@
  </g>
 
  <!-- axis label -->
- <text x="500" y="450" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#737c73">data size &rarr; recipe class &rarr; calibrated holdout accuracy</text>
+ <text x="500" y="450" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#6a727c">data size &rarr; recipe class &rarr; calibrated holdout accuracy</text>
  </svg>
  <p class="ladder-cap">K-score figures are typical holdout outcomes after Q+2 train/holdout gating, not promises. Your seeds set the ceiling.</p>
  </div>
@@ -650,90 +645,90 @@ kolm verify dist/denial-code-classifier.kolm
  <stop offset="100%" stop-color="#f3b15a" stop-opacity="0.05"/>
  </linearGradient>
  <linearGradient id="pl-grad-ship" x1="0" y1="0" x2="1" y2="1">
- <stop offset="0%" stop-color="#e8e3d6" stop-opacity="0.22"/>
- <stop offset="100%" stop-color="#e8e3d6" stop-opacity="0.05"/>
+ <stop offset="0%" stop-color="#e6e9ee" stop-opacity="0.22"/>
+ <stop offset="100%" stop-color="#e6e9ee" stop-opacity="0.05"/>
  </linearGradient>
  <marker id="pl-arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="strokeWidth">
- <path d="M0,0 L0,9 L9,4.5 z" fill="#737c73"/>
+ <path d="M0,0 L0,9 L9,4.5 z" fill="#6a727c"/>
  </marker>
  </defs>
 
  <!-- step 1: seeds -->
  <g transform="translate(20, 70)">
  <rect x="0" y="0" width="150" height="220" rx="14" fill="#0e1314" stroke="rgba(255,255,255,0.10)"/>
- <text x="75" y="28" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#737c73">STEP 1</text>
- <text x="75" y="52" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="14" fill="#e8e3d6" font-weight="500">seeds.jsonl</text>
- <text x="75" y="78" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#b5bdb1">your captured I/O</text>
+ <text x="75" y="28" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#6a727c">STEP 1</text>
+ <text x="75" y="52" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="14" fill="#e6e9ee" font-weight="500">seeds.jsonl</text>
+ <text x="75" y="78" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#aab0b8">your captured I/O</text>
  <line x1="20" y1="100" x2="130" y2="100" stroke="rgba(255,255,255,0.08)"/>
- <text x="75" y="124" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#e8e3d6">80% train</text>
+ <text x="75" y="124" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#e6e9ee">80% train</text>
  <text x="75" y="146" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#b89cf7">20% holdout</text>
- <text x="75" y="174" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9.5" fill="#737c73">split by row hash</text>
- <text x="75" y="190" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9.5" fill="#737c73">train &cap; holdout = &empty;</text>
+ <text x="75" y="174" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9.5" fill="#6a727c">split by row hash</text>
+ <text x="75" y="190" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9.5" fill="#6a727c">train &cap; holdout = &empty;</text>
  </g>
- <line x1="180" y1="180" x2="218" y2="180" stroke="#737c73" stroke-width="1.5" marker-end="url(#pl-arrow)"/>
+ <line x1="180" y1="180" x2="218" y2="180" stroke="#6a727c" stroke-width="1.5" marker-end="url(#pl-arrow)"/>
 
  <!-- step 2: redactor + teacher -->
  <g transform="translate(228, 70)">
  <rect x="0" y="0" width="200" height="220" rx="14" fill="url(#pl-grad-teacher)" stroke="#b89cf7" stroke-opacity="0.4"/>
- <text x="100" y="28" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#737c73">STEP 2</text>
- <text x="100" y="52" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="14" fill="#e8e3d6" font-weight="500">redact &rarr; teacher</text>
- <text x="100" y="78" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#b5bdb1">PHI tokens out</text>
+ <text x="100" y="28" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#6a727c">STEP 2</text>
+ <text x="100" y="52" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="14" fill="#e6e9ee" font-weight="500">redact &rarr; teacher</text>
+ <text x="100" y="78" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#aab0b8">PHI tokens out</text>
  <line x1="20" y1="100" x2="180" y2="100" stroke="rgba(255,255,255,0.08)"/>
  <text x="100" y="124" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#b89cf7">claude opus / sonnet</text>
  <text x="100" y="142" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#b89cf7">gpt-5 / o3</text>
  <text x="100" y="160" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#b89cf7">gemini 2.5 pro/flash</text>
  <text x="100" y="178" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#b89cf7">grok-3 / local</text>
- <text x="100" y="206" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9.5" fill="#737c73">reinject after call</text>
+ <text x="100" y="206" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9.5" fill="#6a727c">reinject after call</text>
  </g>
- <line x1="438" y1="180" x2="476" y2="180" stroke="#737c73" stroke-width="1.5" marker-end="url(#pl-arrow)"/>
+ <line x1="438" y1="180" x2="476" y2="180" stroke="#6a727c" stroke-width="1.5" marker-end="url(#pl-arrow)"/>
 
  <!-- step 3: student train -->
  <g transform="translate(486, 70)">
  <rect x="0" y="0" width="200" height="220" rx="14" fill="url(#pl-grad-student)" stroke="#f3b15a" stroke-opacity="0.42"/>
- <text x="100" y="28" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#737c73">STEP 3</text>
- <text x="100" y="52" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="14" fill="#e8e3d6" font-weight="500">LoRA / QLoRA</text>
- <text x="100" y="78" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#b5bdb1">small open-weight base</text>
+ <text x="100" y="28" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#6a727c">STEP 3</text>
+ <text x="100" y="52" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="14" fill="#e6e9ee" font-weight="500">LoRA / QLoRA</text>
+ <text x="100" y="78" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#aab0b8">small open-weight base</text>
  <line x1="20" y1="100" x2="180" y2="100" stroke="rgba(255,255,255,0.08)"/>
  <text x="100" y="124" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#f3b15a">smollm2 / qwen2.5</text>
  <text x="100" y="142" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#f3b15a">llama-3.2 / phi-3.5</text>
  <text x="100" y="160" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#f3b15a">gemma-2 / mistral-7b</text>
  <text x="100" y="178" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#f3b15a">deepseek / glm-4 / yi</text>
- <text x="100" y="206" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9.5" fill="#737c73">adapter weights only</text>
+ <text x="100" y="206" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9.5" fill="#6a727c">adapter weights only</text>
  </g>
- <line x1="696" y1="180" x2="734" y2="180" stroke="#737c73" stroke-width="1.5" marker-end="url(#pl-arrow)"/>
+ <line x1="696" y1="180" x2="734" y2="180" stroke="#6a727c" stroke-width="1.5" marker-end="url(#pl-arrow)"/>
 
  <!-- step 4: quantize -->
  <g transform="translate(744, 70)">
  <rect x="0" y="0" width="160" height="220" rx="14" fill="#0e1314" stroke="rgba(255,255,255,0.10)"/>
- <text x="80" y="28" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#737c73">STEP 4</text>
- <text x="80" y="52" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="14" fill="#e8e3d6" font-weight="500">quantize</text>
- <text x="80" y="78" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#b5bdb1">INT4 / INT8</text>
+ <text x="80" y="28" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#6a727c">STEP 4</text>
+ <text x="80" y="52" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="14" fill="#e6e9ee" font-weight="500">quantize</text>
+ <text x="80" y="78" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#aab0b8">INT4 / INT8</text>
  <line x1="20" y1="100" x2="140" y2="100" stroke="rgba(255,255,255,0.08)"/>
  <text x="80" y="124" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#cccccc">GPTQ</text>
  <text x="80" y="146" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#cccccc">AWQ</text>
  <text x="80" y="168" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#cccccc">bitsandbytes</text>
- <text x="80" y="200" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9.5" fill="#737c73">GGUF / ONNX export</text>
+ <text x="80" y="200" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9.5" fill="#6a727c">GGUF / ONNX export</text>
  </g>
- <line x1="914" y1="180" x2="952" y2="180" stroke="#737c73" stroke-width="1.5" marker-end="url(#pl-arrow)"/>
+ <line x1="914" y1="180" x2="952" y2="180" stroke="#6a727c" stroke-width="1.5" marker-end="url(#pl-arrow)"/>
 
  <!-- step 5: ship -->
  <g transform="translate(962, 70)">
- <rect x="0" y="0" width="140" height="220" rx="14" fill="url(#pl-grad-ship)" stroke="#e8e3d6" stroke-opacity="0.44"/>
- <text x="70" y="28" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#737c73">STEP 5</text>
- <text x="70" y="52" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="14" fill="#e8e3d6" font-weight="500">.kolm</text>
- <text x="70" y="78" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#b5bdb1">one signed file</text>
+ <rect x="0" y="0" width="140" height="220" rx="14" fill="url(#pl-grad-ship)" stroke="#e6e9ee" stroke-opacity="0.44"/>
+ <text x="70" y="28" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#6a727c">STEP 5</text>
+ <text x="70" y="52" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="14" fill="#e6e9ee" font-weight="500">.kolm</text>
+ <text x="70" y="78" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#aab0b8">one signed file</text>
  <line x1="20" y1="100" x2="120" y2="100" stroke="rgba(255,255,255,0.08)"/>
- <text x="70" y="124" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#e8e3d6">manifest</text>
- <text x="70" y="142" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#e8e3d6">model.gguf</text>
- <text x="70" y="160" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#e8e3d6">receipt chain</text>
- <text x="70" y="178" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#e8e3d6">Ed25519 sig</text>
- <text x="70" y="206" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9.5" fill="#737c73">15 verifier checks</text>
+ <text x="70" y="124" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#e6e9ee">manifest</text>
+ <text x="70" y="142" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#e6e9ee">model.gguf</text>
+ <text x="70" y="160" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#e6e9ee">receipt chain</text>
+ <text x="70" y="178" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#e6e9ee">Ed25519 sig</text>
+ <text x="70" y="206" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9.5" fill="#6a727c">15 verifier checks</text>
  </g>
 
  <!-- footer band -->
  <g transform="translate(20, 310)">
- <rect x="0" y="0" width="1080" height="32" rx="6" fill="rgba(232, 227, 214,0.06)" stroke="rgba(232, 227, 214,0.20)"/>
- <text x="20" y="20" font-family="ui-monospace, monospace" font-size="11" fill="#e8e3d6">receipt chain extends across every step: seeds_hash &rarr; split_seed &rarr; redaction_map_hash &rarr; teacher_call_log_hash &rarr; reinjection_log_hash &rarr; train_hash &rarr; recipe_hash &rarr; binary_hash &rarr; eval_result_hash &rarr; signature</text>
+ <rect x="0" y="0" width="1080" height="32" rx="6" fill="rgba(230, 233, 238,0.06)" stroke="rgba(230, 233, 238,0.20)"/>
+ <text x="20" y="20" font-family="ui-monospace, monospace" font-size="11" fill="#e6e9ee">receipt chain extends across every step: seeds_hash &rarr; split_seed &rarr; redaction_map_hash &rarr; teacher_call_log_hash &rarr; reinjection_log_hash &rarr; train_hash &rarr; recipe_hash &rarr; binary_hash &rarr; eval_result_hash &rarr; signature</text>
  </g>
  </svg>
  </div>
@@ -753,98 +748,98 @@ kolm verify dist/denial-code-classifier.kolm
  <div class="vg-cell h">xai</div>
  <div class="vg-cell h">local (vLLM/TGI)</div>
 
- <div class="vg-cell t">smollm2-360m <span style="color:#737c73">Apache-2.0</span></div>
+ <div class="vg-cell t">smollm2-360m <span style="color:#6a727c">Apache-2.0</span></div>
  <div class="vg-cell dot"><span class="vg-dot ok" title="recommended"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
 
- <div class="vg-cell t">smollm2-1.7b <span style="color:#737c73">Apache-2.0</span></div>
+ <div class="vg-cell t">smollm2-1.7b <span style="color:#6a727c">Apache-2.0</span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
 
- <div class="vg-cell t">llama-3.2-1b <span style="color:#737c73">Meta Llama</span></div>
+ <div class="vg-cell t">llama-3.2-1b <span style="color:#6a727c">Meta Llama</span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
 
- <div class="vg-cell t">llama-3.2-3b <span style="color:#737c73">Meta Llama</span></div>
+ <div class="vg-cell t">llama-3.2-3b <span style="color:#6a727c">Meta Llama</span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
 
- <div class="vg-cell t">phi-3.5-mini <span style="color:#737c73">MIT</span></div>
+ <div class="vg-cell t">phi-3.5-mini <span style="color:#6a727c">MIT</span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
 
- <div class="vg-cell t">gemma-2-2b <span style="color:#737c73">Gemma ToU</span></div>
+ <div class="vg-cell t">gemma-2-2b <span style="color:#6a727c">Gemma ToU</span></div>
  <div class="vg-cell dot"><span class="vg-dot warn" title="verify license"></span></div>
  <div class="vg-cell dot"><span class="vg-dot warn"></span></div>
  <div class="vg-cell dot"><span class="vg-dot warn"></span></div>
  <div class="vg-cell dot"><span class="vg-dot warn"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
 
- <div class="vg-cell t">mistral-7b-v0.3 <span style="color:#737c73">Apache-2.0</span></div>
+ <div class="vg-cell t">mistral-7b-v0.3 <span style="color:#6a727c">Apache-2.0</span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
 
- <div class="vg-cell t">qwen2.5-0.5b <span style="color:#737c73">Apache-2.0</span></div>
+ <div class="vg-cell t">qwen2.5-0.5b <span style="color:#6a727c">Apache-2.0</span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
 
- <div class="vg-cell t">qwen2.5-1.5b <span style="color:#737c73">Apache-2.0</span></div>
+ <div class="vg-cell t">qwen2.5-1.5b <span style="color:#6a727c">Apache-2.0</span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
 
- <div class="vg-cell t">qwen2.5-3b <span style="color:#737c73">Qwen Research</span></div>
+ <div class="vg-cell t">qwen2.5-3b <span style="color:#6a727c">Qwen Research</span></div>
  <div class="vg-cell dot"><span class="vg-dot warn"></span></div>
  <div class="vg-cell dot"><span class="vg-dot warn"></span></div>
  <div class="vg-cell dot"><span class="vg-dot warn"></span></div>
  <div class="vg-cell dot"><span class="vg-dot warn"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
 
- <div class="vg-cell t">qwen2.5-7b <span style="color:#737c73">Apache-2.0</span></div>
+ <div class="vg-cell t">qwen2.5-7b <span style="color:#6a727c">Apache-2.0</span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
 
- <div class="vg-cell t">deepseek-v3-distill-1.5b <span style="color:#737c73">verify</span></div>
+ <div class="vg-cell t">deepseek-v3-distill-1.5b <span style="color:#6a727c">verify</span></div>
  <div class="vg-cell dot"><span class="vg-dot warn"></span></div>
  <div class="vg-cell dot"><span class="vg-dot warn"></span></div>
  <div class="vg-cell dot"><span class="vg-dot warn"></span></div>
  <div class="vg-cell dot"><span class="vg-dot warn"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
 
- <div class="vg-cell t">glm-4-9b <span style="color:#737c73">verify</span></div>
+ <div class="vg-cell t">glm-4-9b <span style="color:#6a727c">verify</span></div>
  <div class="vg-cell dot"><span class="vg-dot warn"></span></div>
  <div class="vg-cell dot"><span class="vg-dot warn"></span></div>
  <div class="vg-cell dot"><span class="vg-dot warn"></span></div>
  <div class="vg-cell dot"><span class="vg-dot warn"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
 
- <div class="vg-cell t">yi-1.5-6b <span style="color:#737c73">Apache-2.0</span></div>
+ <div class="vg-cell t">yi-1.5-6b <span style="color:#6a727c">Apache-2.0</span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
  <div class="vg-cell dot"><span class="vg-dot ok"></span></div>
@@ -864,52 +859,52 @@ kolm verify dist/denial-code-classifier.kolm
  <svg viewBox="0 0 1080 240" role="img" aria-label="Receipt chain diagram">
  <defs>
  <marker id="rc-arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="strokeWidth">
- <path d="M0,0 L0,9 L9,4.5 z" fill="#e8e3d6"/>
+ <path d="M0,0 L0,9 L9,4.5 z" fill="#e6e9ee"/>
  </marker>
  </defs>
- <g font-family="ui-monospace, monospace" font-size="11.5" fill="#e8e3d6">
- <rect x="20" y="40" width="130" height="80" rx="10" fill="#0e1314" stroke="rgba(232, 227, 214,0.4)"/>
+ <g font-family="ui-monospace, monospace" font-size="11.5" fill="#e6e9ee">
+ <rect x="20" y="40" width="130" height="80" rx="10" fill="#0e1314" stroke="rgba(230, 233, 238,0.4)"/>
  <text x="85" y="68" text-anchor="middle">seeds_hash</text>
- <text x="85" y="88" text-anchor="middle" font-size="10" fill="#737c73">sha256(seeds.jsonl)</text>
- <text x="85" y="106" text-anchor="middle" font-size="10" fill="#737c73">+ split_seed</text>
+ <text x="85" y="88" text-anchor="middle" font-size="10" fill="#6a727c">sha256(seeds.jsonl)</text>
+ <text x="85" y="106" text-anchor="middle" font-size="10" fill="#6a727c">+ split_seed</text>
 
- <line x1="155" y1="80" x2="195" y2="80" stroke="#e8e3d6" stroke-width="1.4" marker-end="url(#rc-arrow)"/>
+ <line x1="155" y1="80" x2="195" y2="80" stroke="#e6e9ee" stroke-width="1.4" marker-end="url(#rc-arrow)"/>
 
  <rect x="200" y="40" width="130" height="80" rx="10" fill="#0e1314" stroke="rgba(184,156,247,0.4)"/>
  <text x="265" y="68" text-anchor="middle">redaction_map</text>
- <text x="265" y="88" text-anchor="middle" font-size="10" fill="#737c73">+ teacher_call_log</text>
- <text x="265" y="106" text-anchor="middle" font-size="10" fill="#737c73">+ reinjection_log</text>
+ <text x="265" y="88" text-anchor="middle" font-size="10" fill="#6a727c">+ teacher_call_log</text>
+ <text x="265" y="106" text-anchor="middle" font-size="10" fill="#6a727c">+ reinjection_log</text>
 
- <line x1="335" y1="80" x2="375" y2="80" stroke="#e8e3d6" stroke-width="1.4" marker-end="url(#rc-arrow)"/>
+ <line x1="335" y1="80" x2="375" y2="80" stroke="#e6e9ee" stroke-width="1.4" marker-end="url(#rc-arrow)"/>
 
  <rect x="380" y="40" width="130" height="80" rx="10" fill="#0e1314" stroke="rgba(243,177,90,0.4)"/>
  <text x="445" y="68" text-anchor="middle">train_hash</text>
- <text x="445" y="88" text-anchor="middle" font-size="10" fill="#737c73">+ holdout_hash</text>
- <text x="445" y="106" text-anchor="middle" font-size="10" fill="#737c73">disjoint check</text>
+ <text x="445" y="88" text-anchor="middle" font-size="10" fill="#6a727c">+ holdout_hash</text>
+ <text x="445" y="106" text-anchor="middle" font-size="10" fill="#6a727c">disjoint check</text>
 
- <line x1="515" y1="80" x2="555" y2="80" stroke="#e8e3d6" stroke-width="1.4" marker-end="url(#rc-arrow)"/>
+ <line x1="515" y1="80" x2="555" y2="80" stroke="#e6e9ee" stroke-width="1.4" marker-end="url(#rc-arrow)"/>
 
  <rect x="560" y="40" width="130" height="80" rx="10" fill="#0e1314" stroke="rgba(243,177,90,0.4)"/>
  <text x="625" y="68" text-anchor="middle">recipe_hash</text>
- <text x="625" y="88" text-anchor="middle" font-size="10" fill="#737c73">trained on train only</text>
+ <text x="625" y="88" text-anchor="middle" font-size="10" fill="#6a727c">trained on train only</text>
 
- <line x1="695" y1="80" x2="735" y2="80" stroke="#e8e3d6" stroke-width="1.4" marker-end="url(#rc-arrow)"/>
+ <line x1="695" y1="80" x2="735" y2="80" stroke="#e6e9ee" stroke-width="1.4" marker-end="url(#rc-arrow)"/>
 
  <rect x="740" y="40" width="130" height="80" rx="10" fill="#0e1314" stroke="rgba(243,177,90,0.4)"/>
  <text x="805" y="68" text-anchor="middle">binary_hash</text>
- <text x="805" y="88" text-anchor="middle" font-size="10" fill="#737c73">+ toolchain pin</text>
- <text x="805" y="106" text-anchor="middle" font-size="10" fill="#737c73">+ source_kind</text>
+ <text x="805" y="88" text-anchor="middle" font-size="10" fill="#6a727c">+ toolchain pin</text>
+ <text x="805" y="106" text-anchor="middle" font-size="10" fill="#6a727c">+ source_kind</text>
 
- <line x1="875" y1="80" x2="915" y2="80" stroke="#e8e3d6" stroke-width="1.4" marker-end="url(#rc-arrow)"/>
+ <line x1="875" y1="80" x2="915" y2="80" stroke="#e6e9ee" stroke-width="1.4" marker-end="url(#rc-arrow)"/>
 
- <rect x="920" y="40" width="130" height="80" rx="10" fill="#0e1314" stroke="rgba(232, 227, 214,0.4)"/>
+ <rect x="920" y="40" width="130" height="80" rx="10" fill="#0e1314" stroke="rgba(230, 233, 238,0.4)"/>
  <text x="985" y="68" text-anchor="middle">eval_result</text>
- <text x="985" y="88" text-anchor="middle" font-size="10" fill="#737c73">+ K-score axes</text>
- <text x="985" y="106" text-anchor="middle" font-size="10" fill="#737c73">+ A/T ratio</text>
+ <text x="985" y="88" text-anchor="middle" font-size="10" fill="#6a727c">+ K-score axes</text>
+ <text x="985" y="106" text-anchor="middle" font-size="10" fill="#6a727c">+ A/T ratio</text>
 
  <!-- bottom signed band -->
- <rect x="20" y="170" width="1030" height="44" rx="8" fill="rgba(232, 227, 214,0.06)" stroke="rgba(232, 227, 214,0.30)"/>
- <text x="535" y="198" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="13" fill="#e8e3d6">all hashes Ed25519-signed by tenant key &middot; sigstore transparency entry optional</text>
+ <rect x="20" y="170" width="1030" height="44" rx="8" fill="rgba(230, 233, 238,0.06)" stroke="rgba(230, 233, 238,0.30)"/>
+ <text x="535" y="198" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="13" fill="#e6e9ee">all hashes Ed25519-signed by tenant key &middot; sigstore transparency entry optional</text>
  </g>
  </svg>
  </div>

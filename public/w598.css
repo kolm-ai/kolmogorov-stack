@@ -9,7 +9,7 @@
   gap: clamp(28px, 5vw, 64px);
   align-items: center;
   padding: clamp(40px, 6vw, 80px) 0 clamp(28px, 4vw, 48px);
-  border-bottom: 1px solid var(--line-1, rgba(236, 231, 220, 0.08));
+  border-bottom: 1px solid var(--line-1, rgba(230, 233, 238, 0.08));
   margin-bottom: clamp(28px, 4vw, 48px);
 }
 .kolm-hero__copy { min-width: 0; }
@@ -22,14 +22,14 @@
   font-weight: 600;
   letter-spacing: 1.4px;
   text-transform: uppercase;
-  color: var(--brand-primary, #e8e3d6);
+  color: var(--brand-primary, #e6e9ee);
   padding: 6px 12px;
-  border: 1px solid var(--brand-primary-edge, rgba(232, 227, 214, 0.28));
+  border: 1px solid var(--brand-primary-edge, rgba(230, 233, 238, 0.28));
   border-radius: var(--radius-pill, 999px);
-  background: var(--brand-primary-soft, rgba(232, 227, 214, 0.06));
+  background: var(--brand-primary-soft, rgba(230, 233, 238, 0.06));
   margin-bottom: 18px;
 }
-.kolm-hero__eyebrow .kolm-icon { color: var(--brand-primary, #e8e3d6); }
+.kolm-hero__eyebrow .kolm-icon { color: var(--brand-primary, #e6e9ee); }
 
 .kolm-hero h1,
 .kolm-hero__h1 {
@@ -37,7 +37,7 @@
   line-height: 1.04 !important;
   letter-spacing: -0.025em !important;
   font-weight: 680 !important;
-  color: var(--brand-paper, #e8e3d6) !important;
+  color: var(--brand-paper, #e6e9ee) !important;
   margin: 0 0 18px !important;
   max-width: 16ch;
 }
@@ -47,7 +47,7 @@
 .kolm-hero__lede {
   font-size: clamp(17px, 1.4vw, 20px);
   line-height: 1.55;
-  color: var(--ink-2, #b5bdb1);
+  color: var(--ink-2, #aab0b8);
   margin: 0 0 28px;
   max-width: 52ch;
 }
@@ -76,24 +76,24 @@
   cursor: pointer;
 }
 .kolm-cta--primary {
-  background: var(--brand-primary, #e8e3d6);
+  background: var(--brand-primary, #e6e9ee);
   color: #08090c;
-  border: 1px solid var(--brand-primary, #e8e3d6);
+  border: 1px solid var(--brand-primary, #e6e9ee);
 }
 .kolm-cta--primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(232, 227, 214, 0.28);
+  box-shadow: 0 10px 24px rgba(230, 233, 238, 0.28);
 }
 .kolm-cta--ghost {
   background: transparent;
-  color: var(--ink-1, #e8e3d6);
-  border: 1px solid var(--line-2, rgba(236, 231, 220, 0.16));
+  color: var(--ink-1, #e6e9ee);
+  border: 1px solid var(--line-2, rgba(230, 233, 238, 0.16));
 }
 .kolm-cta--ghost:hover {
-  border-color: var(--brand-primary, #e8e3d6);
-  color: var(--brand-primary, #e8e3d6);
+  border-color: var(--brand-primary, #e6e9ee);
+  color: var(--brand-primary, #e6e9ee);
 }
-[data-theme="light"] .kolm-cta--primary { color: #e8e3d6; }
+[data-theme="light"] .kolm-cta--primary { color: #e6e9ee; }
 [data-theme="light"] .kolm-cta--ghost  { color: var(--ink-1, #18171a); }
 
 .kolm-hero__meta {
@@ -104,11 +104,11 @@
   font-size: 12px;
   color: var(--ink-3, #797466);
 }
-.kolm-hero__meta .kolm-icon { color: var(--brand-primary, #e8e3d6); margin-right: 4px; }
+.kolm-hero__meta .kolm-icon { color: var(--brand-primary, #e6e9ee); margin-right: 4px; }
 
 .kolm-hero__visual {
-  background: var(--surface-1, #0e1014);
-  border: 1px solid var(--line-1, rgba(236, 231, 220, 0.08));
+  background: var(--surface-1, #0e1116);
+  border: 1px solid var(--line-1, rgba(230, 233, 238, 0.08));
   border-radius: var(--radius-lg, 14px);
   padding: clamp(20px, 3vw, 36px);
   position: relative;
@@ -122,7 +122,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 70% 20%, var(--brand-primary-soft, rgba(232, 227, 214,.10)), transparent 60%);
+  background: radial-gradient(circle at 70% 20%, var(--brand-primary-soft, rgba(230, 233, 238,.10)), transparent 60%);
   pointer-events: none;
 }
 .kolm-hero__visual > svg { position: relative; z-index: 1; max-height: 320px; }
@@ -141,8 +141,8 @@
   width: 32px;
   height: 32px;
   border-radius: var(--radius-sm, 6px);
-  background: var(--brand-primary-soft, rgba(232, 227, 214, 0.10));
-  color: var(--brand-primary, #e8e3d6);
+  background: var(--brand-primary-soft, rgba(230, 233, 238, 0.10));
+  color: var(--brand-primary, #e6e9ee);
   margin-bottom: 10px;
 }
 .home-surface-wrap > a > span.k-rail-icon .kolm-icon {
@@ -154,8 +154,8 @@
 .kolm-anatomy {
   padding: clamp(48px, 8vw, 88px) 24px;
   background:
-    linear-gradient(180deg, transparent, var(--surface-1, #0e1014) 24%, var(--surface-1, #0e1014) 76%, transparent),
-    radial-gradient(ellipse at center, var(--brand-primary-soft, rgba(232, 227, 214,.06)), transparent 65%);
+    linear-gradient(180deg, transparent, var(--surface-1, #0e1116) 24%, var(--surface-1, #0e1116) 76%, transparent),
+    radial-gradient(ellipse at center, var(--brand-primary-soft, rgba(230, 233, 238,.06)), transparent 65%);
 }
 .kolm-anatomy__wrap {
   max-width: 1180px;
@@ -170,7 +170,7 @@
   line-height: 1.1;
   letter-spacing: -0.02em;
   font-weight: 680;
-  color: var(--brand-paper, #e8e3d6);
+  color: var(--brand-paper, #e6e9ee);
   margin: 0 0 16px;
 }
 [data-theme="light"] .kolm-anatomy__h2 { color: var(--ink-1, #18171a); }
@@ -178,7 +178,7 @@
 .kolm-anatomy__lede {
   font-size: 17px;
   line-height: 1.6;
-  color: var(--ink-2, #b5bdb1);
+  color: var(--ink-2, #aab0b8);
   margin: 0 0 24px;
   max-width: 52ch;
 }
@@ -195,15 +195,15 @@
   gap: 12px;
   font-size: 14.5px;
   line-height: 1.5;
-  color: var(--ink-2, #b5bdb1);
+  color: var(--ink-2, #aab0b8);
 }
 .kolm-anatomy__list li .kolm-icon {
-  color: var(--brand-primary, #e8e3d6);
+  color: var(--brand-primary, #e6e9ee);
   flex: 0 0 auto;
   margin-top: 2px;
 }
 .kolm-anatomy__list li b {
-  color: var(--ink-1, #e8e3d6);
+  color: var(--ink-1, #e6e9ee);
   font-weight: 600;
 }
 [data-theme="light"] .kolm-anatomy__list li b { color: var(--ink-1, #18171a); }
@@ -220,7 +220,7 @@
   font-weight: 600;
   letter-spacing: 1.6px;
   text-transform: uppercase;
-  color: var(--brand-primary, #e8e3d6);
+  color: var(--brand-primary, #e6e9ee);
   margin-bottom: 8px;
 }
 
@@ -230,7 +230,7 @@
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 16px;
   padding: clamp(28px, 4vw, 48px) 0;
-  border-top: 1px solid var(--line-1, rgba(236, 231, 220, 0.08));
+  border-top: 1px solid var(--line-1, rgba(230, 233, 238, 0.08));
   margin-top: clamp(40px, 6vw, 64px);
 }
 .kolm-footer-pillars > div {
@@ -241,13 +241,13 @@
   color: var(--ink-3, #797466);
 }
 .kolm-footer-pillars > div .kolm-icon {
-  color: var(--brand-primary, #e8e3d6);
+  color: var(--brand-primary, #e6e9ee);
   flex: 0 0 auto;
   margin-top: 2px;
 }
 .kolm-footer-pillars > div b {
   display: block;
-  color: var(--ink-1, #e8e3d6);
+  color: var(--ink-1, #e6e9ee);
   font-weight: 600;
   margin-bottom: 2px;
   font-size: 14px;

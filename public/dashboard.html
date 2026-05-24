@@ -5,15 +5,15 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Dashboard · kolm.ai</title>
 <meta name="description" content="Your kolm compile jobs, signed artifacts, K-scores, and account usage.">
-<meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 
 <link rel="canonical" href="https://kolm.ai/dashboard">
 <meta name="robots" content="noindex,follow">
 <meta property="og:title" content="Dashboard · kolm.ai">
 <meta property="og:description" content="Your kolm compile jobs, signed artifacts, K-scores, and account usage.">
-<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -42,12 +42,11 @@
 </script>
 <meta name="twitter:title" content="Dashboard · kolm.ai">
 <meta name="twitter:description" content="Your kolm compile jobs, signed artifacts, K-scores, and account usage.">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="stylesheet" href="/ks.css">
     <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
@@ -70,9 +69,6 @@
     <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
-
-
 <main id="main" class="page-main">
  <section class="page-head">
  <div>
@@ -164,11 +160,11 @@
  <div class="to-spark-wrap" id="to-spark-wrap" hidden>
  <div class="to-spark-head"><span>Latency &middot; last 60 runs</span><span id="to-spark-peak">peak: ,</span></div>
  <svg viewBox="0 0 600 60" preserveAspectRatio="none" style="width:100%;height:60px;display:block">
- <polyline id="to-spark-fill" fill="rgba(232, 227, 214,0.10)" stroke="none" points=""></polyline>
- <polyline id="to-spark-line" fill="none" stroke="#e8e3d6" stroke-width="1.4" stroke-linejoin="round" points=""></polyline>
+ <polyline id="to-spark-fill" fill="rgba(230, 233, 238,0.10)" stroke="none" points=""></polyline>
+ <polyline id="to-spark-line" fill="none" stroke="#e6e9ee" stroke-width="1.4" stroke-linejoin="round" points=""></polyline>
  </svg>
  </div>
- <div class="to-empty" id="to-empty" hidden>No runs yet. <a href="#dash-compile" style="color:var(--kolm-accent, #e8e3d6)">Start a compile</a> to see live latency here.</div>
+ <div class="to-empty" id="to-empty" hidden>No runs yet. <a href="#dash-compile" style="color:var(--kolm-accent, #e6e9ee)">Start a compile</a> to see live latency here.</div>
  </section>
 
  <!-- v1 wave 121 . Artifact lab. Drag a .kolm to inspect / test / serve.
@@ -290,13 +286,13 @@
  overflow: hidden;
  }
  .al-drop:hover, .al-drop:focus-visible {
- border-color: rgba(232, 227, 214,0.55);
- background: linear-gradient(180deg, rgba(232, 227, 214,0.045), rgba(232, 227, 214,0.005));
+ border-color: rgba(230, 233, 238,0.55);
+ background: linear-gradient(180deg, rgba(230, 233, 238,0.045), rgba(230, 233, 238,0.005));
  outline: none;
  }
  .al-drop.al-active {
  border-color: var(--good);
- background: linear-gradient(180deg, rgba(232, 227, 214,0.08), rgba(232, 227, 214,0.015));
+ background: linear-gradient(180deg, rgba(230, 233, 238,0.08), rgba(230, 233, 238,0.015));
  transform: scale(1.005);
  }
  .al-drop.al-active .al-drop-glow {
@@ -304,7 +300,7 @@
  }
  .al-drop-glow {
  position: absolute; inset: -40%;
- background: radial-gradient(circle at 50% 50%, rgba(232, 227, 214,0.18), transparent 60%);
+ background: radial-gradient(circle at 50% 50%, rgba(230, 233, 238,0.18), transparent 60%);
  filter: blur(40px);
  opacity: 0; pointer-events: none;
  transition: opacity 200ms ease;
@@ -316,7 +312,7 @@
  transform: translateY(-2px);
  }
  .al-drop-text { margin: 4px 0 0; font-size: 15px; color: var(--ink); font-weight: 500 }
- .al-drop-text code { font-family: var(--mono); font-size: 13px; padding: 1px 6px; border-radius: 4px; background: rgba(232, 227, 214,0.08); color: var(--good); border: 1px solid rgba(232, 227, 214,0.18) }
+ .al-drop-text code { font-family: var(--mono); font-size: 13px; padding: 1px 6px; border-radius: 4px; background: rgba(230, 233, 238,0.08); color: var(--good); border: 1px solid rgba(230, 233, 238,0.18) }
  .al-drop-sub { margin: 0; font-size: 12.5px; color: var(--ink-faint); font-family: var(--mono) }
  .al-link-btn {
  appearance: none; background: transparent; border: none; padding: 0;
@@ -531,7 +527,7 @@
  .dash-chat-card a{color:var(--accent);border-bottom:1px dashed var(--line-strong)}
  .dash-chat-stages{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
  .dash-chat-pill{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:0.04em;padding:2px 7px;border-radius:999px;border:1px solid var(--line-strong);color:var(--ink-mute);background:var(--bg)}
- .dash-chat-pill.ok{color:var(--accent-cyan,#e8e3d6);border-color:rgba(127,222,255,0.30)}
+ .dash-chat-pill.ok{color:var(--accent-cyan,#e6e9ee);border-color:rgba(127,222,255,0.30)}
  .dash-chat-pill.err{color:var(--bad,#ff6b91);border-color:rgba(255,107,145,0.30)}
  .dash-chat-gate{margin:8px 0 0;padding:10px 12px;border:1px dashed var(--line-strong);border-radius:6px;font-family:var(--mono);font-size:12px;color:var(--ink-mute)}
  .dash-chat-gate a{color:var(--accent);border-bottom:1px dashed var(--line-strong)}
@@ -1177,19 +1173,19 @@
  .dc-train-tabs { display: flex; gap: 4px }
  .dc-tt { appearance: none; background: transparent; border: 1px solid var(--line); padding: 6px 10px; border-radius: 6px; cursor: pointer; font-family: var(--mono); font-size: 11.5px; color: var(--ink-mute); transition: border-color 120ms, color 120ms }
  .dc-tt:hover { color: var(--ink); border-color: var(--ink-mute) }
- .dc-tt.active { color: var(--ink); border-color: var(--good); background: rgba(232, 227, 214,0.04) }
+ .dc-tt.active { color: var(--ink); border-color: var(--good); background: rgba(230, 233, 238,0.04) }
  .dc-data-drop { padding: 16px; border: 1.5px dashed var(--line-strong); border-radius: 8px; text-align: center; cursor: pointer; transition: border-color 200ms, background 200ms }
- .dc-data-drop:hover, .dc-data-drop:focus-visible { border-color: var(--good); background: rgba(232, 227, 214,0.025); outline: none }
- .dc-data-drop.al-active { border-color: var(--good); background: rgba(232, 227, 214,0.05) }
+ .dc-data-drop:hover, .dc-data-drop:focus-visible { border-color: var(--good); background: rgba(230, 233, 238,0.025); outline: none }
+ .dc-data-drop.al-active { border-color: var(--good); background: rgba(230, 233, 238,0.05) }
  .dc-data-drop p { margin: 0; font-size: 13px; color: var(--ink-mute) }
  .dc-data-hint { margin-top: 6px !important; font-size: 11.5px; color: var(--ink-faint); font-family: var(--mono) }
- .dc-data-drop code { font-family: var(--mono); font-size: 11.5px; color: var(--good); background: rgba(232, 227, 214,0.06); padding: 0 4px; border-radius: 3px }
+ .dc-data-drop code { font-family: var(--mono); font-size: 11.5px; color: var(--good); background: rgba(230, 233, 238,0.06); padding: 0 4px; border-radius: 3px }
  .dc-data-paste { width: 100%; background: var(--bg); color: var(--ink); border: 1px solid var(--line-strong); border-radius: 6px; padding: 10px 12px; font-family: var(--mono); font-size: 12.5px; resize: vertical }
  .dc-data-paste-btn { margin-top: 8px }
  .dc-tmpl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px }
  @media (max-width: 720px) { .dc-tmpl-grid { grid-template-columns: 1fr } }
  .dc-tmpl { padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); cursor: pointer; color: var(--ink); font-family: var(--mono); font-size: 12px; text-align: left; transition: border-color 120ms, background 120ms }
- .dc-tmpl:hover { border-color: var(--good); background: rgba(232, 227, 214,0.04) }
+ .dc-tmpl:hover { border-color: var(--good); background: rgba(230, 233, 238,0.04) }
  .dc-tmpl em { display: block; margin-top: 4px; font-style: normal; color: var(--ink-faint); font-size: 11px }
  .dc-data-preview summary { cursor: pointer; font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); padding: 6px 0; user-select: none }
  </style>

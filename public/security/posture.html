@@ -6,24 +6,24 @@
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 <title>Security posture &middot; Open-source AI workbench &middot; kolm.ai</title>
 <meta name="description" content="Honest security posture for the kolm.ai Open-source AI workbench. What we do, what we don't yet do, what we promise. Architecture diagram, auth, tenant fence, encryption, audit log, SBOM, supply-chain pinning, and">
-<meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="Security posture &middot; Open-source AI workbench &middot; kolm.ai">
 <meta property="og:description" content="Honest security posture for kolm.ai. What we do, what we don't yet do, what we promise. Architecture diagram, tenant fence, audit log, SBOM, and compliance status.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/security/posture">
-<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Security posture &middot; Open-source AI workbench &middot; kolm.ai">
 <meta name="twitter:description" content="Honest security posture. What we do, what we don't yet do, what we promise.">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/security/posture">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Security posture","description":"Honest security posture for the kolm.ai Open-source AI workbench. What we do, what we don't yet do, what we promise.","url":"https://kolm.ai/security/posture","datePublished":"2026-05-24","dateModified":"2026-05-24","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
 <link rel="stylesheet" href="/design-tokens.css">
 <style>
-:root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#111111;--accent-soft:rgba(17, 17, 17,0.10);--warn:#d6a65a;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10);--warn:#a06b1a}
+:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230, 233, 238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#111111;--accent-soft:rgba(17, 17, 17,0.10);--warn:#d6a65a;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10);--warn:#a06b1a}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
 .skip-link{position:absolute;left:-9999px}
@@ -49,7 +49,7 @@ table{border-collapse:collapse;width:100%;max-width:920px;margin:14px 0;font-siz
 th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
 th{color:var(--ink);font-weight:500}
 td code{font-size:12px}
-.warn{border:1px solid var(--warn);border-left:4px solid var(--warn);background:rgba(217,119,6,0.07);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
+.warn{border:1px solid var(--warn);border-left:4px solid var(--warn);background:rgba(82, 90, 100,0.07);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
 .honesty{border:1px solid var(--accent);border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
 .do-list,.dont-list{list-style:none;padding:0;margin:14px 0 18px;max-width:920px}
 .do-list li,.dont-list li{padding:14px 18px;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;background:var(--bg-elev);margin:8px 0;color:var(--ink-mute);font-size:14.5px;line-height:1.6}
@@ -81,7 +81,6 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 </head>
 <body class="ks">
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - Open-source AI workbench. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <div role="heading" aria-level="2" class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">Frontier AI on your own infrastructure.</div>
 <a href="#main" class="ks-skip">Skip to content</a>
 
@@ -121,11 +120,11 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   <defs>
     <style>
       .plane-bg { fill: #101316; stroke: #1f2429; stroke-width: 1.5; }
-      .plane-label { fill: #ece7dc; font: 500 12px ui-monospace,Menlo,monospace; letter-spacing: 0.10em; text-transform: uppercase; }
+      .plane-label { fill: #e6e9ee; font: 500 12px ui-monospace,Menlo,monospace; letter-spacing: 0.10em; text-transform: uppercase; }
       .box { fill: #06080a; stroke: #2a3138; stroke-width: 1.2; rx: 6; }
       .box-accent { fill: #06080a; stroke: #111111; stroke-width: 1.5; rx: 6; }
-      .box-label { fill: #ece7dc; font: 500 11px -apple-system,Inter,sans-serif; }
-      .box-sub { fill: #737c73; font: 400 9.5px ui-monospace,Menlo,monospace; letter-spacing: 0.04em; }
+      .box-label { fill: #e6e9ee; font: 500 11px -apple-system,Inter,sans-serif; }
+      .box-sub { fill: #6a727c; font: 400 9.5px ui-monospace,Menlo,monospace; letter-spacing: 0.04em; }
       .flow { stroke: #4b5158; stroke-width: 1.2; fill: none; }
       .flow-accent { stroke: #111111; stroke-width: 1.4; fill: none; stroke-dasharray: 4 3; }
       .fence { stroke: #d6a65a; stroke-width: 1.4; fill: none; stroke-dasharray: 6 4; }

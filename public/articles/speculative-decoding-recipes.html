@@ -6,8 +6,8 @@
 <title>Speculative Decoding With Deterministic Drafts · kolm.ai</title>
 <meta name="description" content="Draft models are the standard for speculative decoding. A deterministic recipe pack is faster, smaller, and free at runtime. Here is how to cut your local...">
 <meta name="keywords" content="speculative decoding, deterministic drafts, recipe-driven decoding, free LLM inference, speculative decoding without draft model, RSD, recipe speculative decoding, llama.cpp speculative">
-<meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 
 <meta name="author" content="Kolm">
@@ -17,11 +17,11 @@
 <meta property="og:description" content="Draft models are the standard for speculative decoding. A deterministic recipe pack is faster, smaller, and free at runtime. Here is how to cut your local...">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/articles/speculative-decoding-recipes">
-<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Speculative Decoding With Deterministic Drafts · kolm.ai">
 <meta name="twitter:description" content="Draft models are the standard for speculative decoding. A deterministic recipe pack is faster, smaller, and free at runtime. Here is how to cut your local...">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/articles/speculative-decoding-recipes">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">
@@ -36,7 +36,7 @@
  "datePublished": "2026-05-07",
  "dateModified": "2026-05-07",
  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://kolm.ai/articles/speculative-decoding-recipes" },
- "image": "https://kolm.ai/og-card.svg",
+ "image": "https://kolm.ai/brand-hero.png",
  "keywords": "speculative decoding, deterministic drafts, RSD, free inference, llama.cpp",
  "articleSection": "Engineering",
  "wordCount": 2200
@@ -56,9 +56,9 @@
  :root {
  --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
  --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
- --ink: #e8e3d6; --ink-mute: #b5bdb1; --ink-faint: #737c73;
- --accent: #e8e3d6; --accent-soft: rgba(236,231,220, 0.10); --accent-strong: #c9c2b2;
- --good: #e8e3d6; --bad: #ff6b91;
+ --ink: #e6e9ee; --ink-mute: #aab0b8; --ink-faint: #6a727c;
+ --accent: #e6e9ee; --accent-soft: rgba(230, 233, 238, 0.10); --accent-strong: #c9c2b2;
+ --good: #e6e9ee; --bad: #ff6b91;
  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
  }
@@ -89,7 +89,7 @@
  @media (max-width: 720px) { header.site nav { display: none; } }
 
  section.hero { padding: 80px 0 36px; position: relative; overflow: hidden; }
- section.hero::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 900px 460px at 22% 12%, rgba(236,231,220, 0.10), transparent 60%); }
+ section.hero::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 900px 460px at 22% 12%, rgba(230, 233, 238, 0.10), transparent 60%); }
  section.hero .wrap { position: relative; }
  .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
  .pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
@@ -130,7 +130,7 @@
  .signpost { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 36px 0 0; }
  @media (max-width: 720px) { .signpost { grid-template-columns: 1fr; } }
  .signpost a { display: flex; flex-direction: column; gap: 8px; padding: 22px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 8px; transition: transform 220ms cubic-bezier(.2,.6,.2,1), border-color 220ms, box-shadow 220ms; box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset, 0 18px 40px -22px rgba(0,0,0,0.55); }
- .signpost a:hover { transform: translateY(-2px); border-color: var(--line-strong); box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset, 0 24px 50px -22px rgba(0,0,0,0.65), 0 8px 22px -8px rgba(236,231,220, 0.10); }
+ .signpost a:hover { transform: translateY(-2px); border-color: var(--line-strong); box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset, 0 24px 50px -22px rgba(0,0,0,0.65), 0 8px 22px -8px rgba(230, 233, 238, 0.10); }
  .signpost a .lab { font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); }
  .signpost a .v { color: var(--ink); font-weight: 500; font-size: 16px; letter-spacing: 0; }
  .signpost a .v .arrow { color: var(--accent); margin-left: 6px; }
@@ -164,12 +164,12 @@
  .plate{position:relative;margin:32px 0 0;border:1px solid var(--line-strong);border-radius:14px;overflow:hidden;background:#050607;isolation:isolate}
  .plate .img{position:relative;aspect-ratio:16/9;background-position:center;background-size:cover;background-repeat:no-repeat}
  .plate .img::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,transparent 50%,rgba(8,8,10,0.78) 100%),linear-gradient(90deg,rgba(8,8,10,0.55) 0%,transparent 30%,transparent 70%,rgba(8,8,10,0.55) 100%)}
- .plate .img::before{content:"";position:absolute;left:12%;right:12%;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(236,231,220, 0.5),transparent);pointer-events:none;z-index:2}
- .plate .stamp{position:absolute;top:18px;left:20px;z-index:3;display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;letter-spacing: 0;text-transform:uppercase;color:var(--ink-mute);border:1px solid rgba(236,231,220, 0.22);background:rgba(8,9,8,0.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:5px 11px;border-radius:4px}
- .plate .stamp .dot{width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px rgba(236,231,220, 0.85)}
+ .plate .img::before{content:"";position:absolute;left:12%;right:12%;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(230, 233, 238, 0.5),transparent);pointer-events:none;z-index:2}
+ .plate .stamp{position:absolute;top:18px;left:20px;z-index:3;display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;letter-spacing: 0;text-transform:uppercase;color:var(--ink-mute);border:1px solid rgba(230, 233, 238, 0.22);background:rgba(8,9,8,0.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:5px 11px;border-radius:4px}
+ .plate .stamp .dot{width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px rgba(230, 233, 238, 0.85)}
  .plate .cap{position:absolute;left:24px;right:24px;bottom:20px;z-index:3;display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
  .plate .cap .title{font-family:var(--sans);font-size:clamp(17px,1.8vw,22px);font-weight: 500;letter-spacing: 0;line-height:1.18;color:var(--ink);max-width:62%;text-shadow:0 1px 2px rgba(0,0,0,0.55)}
- .plate .cap .title .tone{background:linear-gradient(170deg,#e8e3d6 0%,#c9c2b2 50%,#e8e3d6 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+ .plate .cap .title .tone{background:linear-gradient(170deg,#e6e9ee 0%,#c9c2b2 50%,#e6e9ee 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
  .plate .cap .meta{font-family:var(--mono);font-size:10.5px;color:var(--ink-mute);letter-spacing: 0;text-align:right;line-height:1.7}
  .plate .cap .meta b{color:var(--ink);font-weight: 500}
  @media(max-width:720px){.plate .cap{left:14px;right:14px;bottom:12px;flex-direction:column;align-items:flex-start;gap:8px}.plate .cap .title{font-size:14px;max-width:100%}.plate .cap .meta{text-align:left;font-size:10px}.plate .stamp{top:12px;left:12px;font-size:9px;padding:4px 9px}}
