@@ -1,8 +1,8 @@
 :root {
  --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
  --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
- --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
- --accent: #faf2e1; --accent-strong: #faf2e1; --good: #7ef0d2; --bad: #ff6b91;
+ --ink: #e8e3d6; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+ --accent: #e8e3d6; --accent-strong: #e8e3d6; --good: #7d96c0; --bad: #ff6b91;
  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
 }
@@ -63,7 +63,7 @@ pre.code .bad { color: var(--bad); }
 .lat-grid .cell .v { font-family: var(--mono); font-size: 17px; color: var(--ink); font-weight: 500; }
 .lat-grid .cell .u { font-family: var(--mono); font-size: 11px; color: var(--ink-mute); margin-left: 4px; }
 
-.k-bar { display: flex; align-items: center; gap: 14px; margin: 14px 0 0; padding: 16px 18px; border: 1px solid var(--line-strong); border-radius: 10px; background: linear-gradient(90deg, rgba(126,240,210,0.05), rgba(126,240,210,0.01)); }
+.k-bar { display: flex; align-items: center; gap: 14px; margin: 14px 0 0; padding: 16px 18px; border: 1px solid var(--line-strong); border-radius: 10px; background: linear-gradient(90deg, rgba(125, 150, 192,0.05), rgba(125, 150, 192,0.01)); }
 .k-bar .k-label { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.05em; }
 .k-bar .k-value { font-family: var(--mono); font-size: 22px; color: var(--good); font-weight: 500; }
 .k-bar .k-detail { font-size: 13px; color: var(--ink-mute); margin-left: auto; }

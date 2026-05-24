@@ -197,18 +197,18 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(90deg,
-    rgba(255, 177, 85, 0.85) 0%,
-    rgba(255, 177, 85, 0.85) 100%);
+    rgba(139, 105, 20, 0.85) 0%,
+    rgba(139, 105, 20, 0.85) 100%);
   border-radius: 4px;
   transform-origin: left;
   animation: w706-shrink 6s ease-in-out infinite;
 }
 @keyframes w706-shrink {
-  0%   { transform: scaleX(1);    background: linear-gradient(90deg, rgba(255,177,85,0.85), rgba(255,177,85,0.85)); }
-  20%  { transform: scaleX(1);    background: linear-gradient(90deg, rgba(255,177,85,0.85), rgba(255,177,85,0.85)); }
+  0%   { transform: scaleX(1);    background: linear-gradient(90deg, rgba(139, 105, 20,0.85), rgba(139, 105, 20,0.85)); }
+  20%  { transform: scaleX(1);    background: linear-gradient(90deg, rgba(139, 105, 20,0.85), rgba(139, 105, 20,0.85)); }
   55%  { transform: scaleX(0.29); background: linear-gradient(90deg, rgba(125,150,192,0.85), rgba(125,150,192,0.85)); }
   85%  { transform: scaleX(0.29); background: linear-gradient(90deg, rgba(125,150,192,0.85), rgba(125,150,192,0.85)); }
-  100% { transform: scaleX(1);    background: linear-gradient(90deg, rgba(255,177,85,0.85), rgba(255,177,85,0.85)); }
+  100% { transform: scaleX(1);    background: linear-gradient(90deg, rgba(139, 105, 20,0.85), rgba(139, 105, 20,0.85)); }
 }
 .w706-bar__ticks {
   display: flex;
@@ -310,7 +310,7 @@
 .w706-cap__v {
   font-family: var(--fr-font-display, 'Inter', sans-serif);
   font-size: 22px;
-  color: var(--ink-1, #faf2e1);
+  color: var(--ink-1, #e8e3d6);
   line-height: 1.18;
   font-weight: 540;
   margin-bottom: 6px;
@@ -398,7 +398,7 @@
 .w706-flow__step-h {
   font-family: var(--fr-font-display);
   font-size: 16px;
-  color: var(--ink-1, #faf2e1);
+  color: var(--ink-1, #e8e3d6);
   font-weight: 560;
   margin: 0 0 6px;
   line-height: 1.25;
@@ -469,7 +469,7 @@
   font-family: var(--fr-font-mono);
   font-size: 12.5px;
   line-height: 1.7;
-  color: var(--ink-1, #faf2e1);
+  color: var(--ink-1, #e8e3d6);
   overflow-x: auto;
 }
 .w706-anatomy__body .tok-k { color: var(--fr-mint, #1d2d44); }
@@ -539,7 +539,7 @@ body:has(.w706-demo) .fr-section::before {
 body:has(.w706-demo) .fr-section--aurora-amber::before {
   opacity: 0.4;
   background:
-    radial-gradient(1200px 200px at 50% 0%, rgba(255, 177, 85, 0.035) 0%, transparent 80%);
+    radial-gradient(1200px 200px at 50% 0%, rgba(139, 105, 20, 0.035) 0%, transparent 80%);
 }
 /* Tone .fr-card backdrop-filter on the homepage — frosted glass on dark
    sections reads as inconsistent halos when stacked. Keep the edge ring
@@ -563,7 +563,7 @@ body:has(.w706-demo) .fr-card {
   font-size: clamp(22px, 2.4vw, 30px);
   line-height: 1.18;
   font-weight: 540;
-  color: var(--ink-1, #faf2e1);
+  color: var(--ink-1, #e8e3d6);
   margin: 0;
   letter-spacing: -0.01em;
 }

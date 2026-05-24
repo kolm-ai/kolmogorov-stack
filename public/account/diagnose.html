@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f7f4ec";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
-<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<style>html,body{background:#08090c;color:#e8e3d6}html{color-scheme:dark}</style>
 <title>Diagnose - Account - kolm.ai</title>
 <meta name="description" content="Diagnostic envelope for an artifact: per-category K-Score breakdown + recommendations. Built by src/diagnostic.js (W741).">
 <meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
@@ -29,7 +29,7 @@
 .acct-content h2{font-size:16px;margin:22px 0 10px}
 .acct-content h3{font-size:14px;margin:16px 0 8px}
 .acct-content .lede{color:var(--ink-mute);font-size:14.5px;margin:0 0 20px;max-width:64ch}
-.skip-link{position:absolute;left:-9999px;top:0;background:var(--ink,#faf2e1);color:var(--bg,#08090c);padding:8px 12px;font-family:var(--mono);font-size:12px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--ink,#e8e3d6);color:var(--bg,#08090c);padding:8px 12px;font-family:var(--mono);font-size:12px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
 .skip-link:focus{left:0}
 .metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
 .metric-card{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px}
@@ -44,7 +44,7 @@
 .ktable td{padding:8px 8px;border-bottom:1px solid var(--line-soft,rgba(255,255,255,0.04));color:var(--ink)}
 .ktable tr:hover td{background:var(--bg-elev)}
 .pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor}
-.pill.ok{color:var(--good,#10b981)}.pill.warn{color:var(--warn,#d97706)}.pill.bad{color:var(--bad,#dc2626)}.pill.mute{color:var(--ink-faint)}
+.pill.ok{color:var(--good,#1d2d44)}.pill.warn{color:var(--warn,#8b6914)}.pill.bad{color:var(--bad,#dc2626)}.pill.mute{color:var(--ink-faint)}
 .btn{display:inline-block;padding:6px 12px;border-radius:5px;border:1px solid var(--line-strong);background:transparent;color:var(--ink);font-family:var(--mono);font-size:12px;cursor:pointer;text-decoration:none}
 .btn:hover{border-color:var(--accent);color:var(--accent)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:#0b0d10}
@@ -57,13 +57,13 @@
 .kbar .kbar-track{flex:1;height:10px;background:var(--bg-elev);border:1px solid var(--line);border-radius:5px;overflow:hidden;min-width:120px}
 .kbar .kbar-fill{height:100%;background:var(--accent);border-radius:4px;transition:width .3s ease}
 .kbar .kbar-fill.bad{background:#dc2626}
-.kbar .kbar-fill.warn{background:#d97706}
-.kbar .kbar-fill.ok{background:#10b981}
+.kbar .kbar-fill.warn{background:#8b6914}
+.kbar .kbar-fill.ok{background:#1d2d44}
 .kbar .kbar-label{font-family:var(--mono);font-size:11.5px;color:var(--ink-mute);min-width:60px;text-align:right}
 .reccard{background:var(--bg-card);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:6px;padding:12px 14px;margin:8px 0}
 .reccard.high{border-left-color:#dc2626}
-.reccard.medium{border-left-color:#d97706}
-.reccard.info{border-left-color:#10b981}
+.reccard.medium{border-left-color:#8b6914}
+.reccard.info{border-left-color:#1d2d44}
 .reccard .rec-action{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px}
 .reccard .rec-reason{font-size:12.5px;color:var(--ink-mute);line-height:1.5}
 .reccard .rec-meta{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-top:6px}

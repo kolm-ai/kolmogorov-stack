@@ -1,40 +1,73 @@
 /*
  * Shared brand refresh for older standalone pages with inline CSS.
  * Loaded after page-local styles so the site reads as one product.
+ *
+ * 2026-05-24 W837-bleed-fix: gutted the W836 dark-default canvas +
+ * burnt-cream foreground.  Now Ink & Linen, light-by-default, with
+ * [data-theme="dark"] opt-in.  Without this, page-local stylesheets
+ * inherited --bg:#08090b !important on every route, which bled the
+ * orange aesthetic through warm-paper.css despite the overlay.
  */
 :root {
- --bg: #08090b !important;
- --bg-2: #0e1014 !important;
- --bg-3: #14171c !important;
- --surface: #0e1014 !important;
- --surface-2: #14171c !important;
- --line: rgba(236,231,220,0.09) !important;
- --line-2: rgba(236,231,220,0.18) !important;
- --line-3: rgba(236,231,220,0.32) !important;
- --fg: #faf2e1 !important;
+ /* Light (default) — Ink on Linen */
+ --bg: #f4f0e8 !important;
+ --bg-2: #ece6d8 !important;
+ --bg-3: #e3dcca !important;
+ --surface: #faf6ec !important;
+ --surface-2: #f0eadd !important;
+ --line: rgba(29, 30, 35, 0.10) !important;
+ --line-2: rgba(29, 30, 35, 0.18) !important;
+ --line-3: rgba(29, 30, 35, 0.32) !important;
+ --fg: #16151a !important;
+ --fg-2: #3a3935 !important;
+ --fg-3: #6b6960 !important;
+ --muted: #8a8780 !important;
+ --dim: #a8a59c !important;
+ --violet: #1d2d44 !important;
+ --violet-2: #29405f !important;
+ --accent: #1d2d44 !important;
+ --accent-2: #29405f !important;
+ --periwinkle: #5a6b85 !important;
+ --cyan: #2f4d72 !important;
+ --emerald: #3d5a3a !important;
+ --amber: #8b6914 !important;
+ --ink: #16151a !important;
+ --ink-mute: #5a584f !important;
+ --ink-faint: #8a8780 !important;
+ --kolm-accent: #1d2d44 !important;
+ --kolm-accent-soft: rgba(29, 45, 68, 0.10) !important;
+ --kolm-accent-faint: rgba(29, 45, 68, 0.05) !important;
+}
+
+/* Dark opt-in via [data-theme="dark"] on <html>.  Mirrors warm-paper.css. */
+[data-theme="dark"] {
+ --bg: #0e1014 !important;
+ --bg-2: #14171c !important;
+ --bg-3: #1a1e26 !important;
+ --surface: #14171c !important;
+ --surface-2: #1a1e26 !important;
+ --line: rgba(232, 227, 214, 0.10) !important;
+ --line-2: rgba(232, 227, 214, 0.18) !important;
+ --line-3: rgba(232, 227, 214, 0.32) !important;
+ --fg: #e8e3d6 !important;
  --fg-2: #c9c2b2 !important;
  --fg-3: #8c918e !important;
  --muted: #6b7079 !important;
  --dim: #4f545a !important;
- --violet: #faf2e1 !important;
- --violet-2: #faf2e1 !important;
- --accent: #faf2e1 !important;
- --accent-2: #faf2e1 !important;
- --periwinkle: #faf2e1 !important;
- --cyan: #7ef0d2 !important;
- --emerald: #7ef0d2 !important;
- --amber: #d97706 !important;
- /* --ink-* aliases keep nav/text colors identical on cookbook and app pages
- * that don't define them locally. Without these, var(--ink-mute) fell
- * back to a slightly warmer #a39e90 on those pages, producing a
- * visible "menu colors change" jump between routes. */
- --ink: #faf2e1 !important;
+ --violet: #7d96c0 !important;
+ --violet-2: #5a6b85 !important;
+ --accent: #7d96c0 !important;
+ --accent-2: #5a6b85 !important;
+ --periwinkle: #7d96c0 !important;
+ --cyan: #7d96c0 !important;
+ --emerald: #8da992 !important;
+ --amber: #b8a26b !important;
+ --ink: #e8e3d6 !important;
  --ink-mute: #b5bdb1 !important;
  --ink-faint: #737c73 !important;
- /* v7.19 . single warm clay accent. Highlight only, never bg. */
- --kolm-accent: #10b981 !important;
- --kolm-accent-soft: rgba(16,185,129,0.14) !important;
- --kolm-accent-faint: rgba(16,185,129,0.06) !important;
+ --kolm-accent: #7d96c0 !important;
+ --kolm-accent-soft: rgba(125, 150, 192, 0.14) !important;
+ --kolm-accent-faint: rgba(125, 150, 192, 0.06) !important;
 }
 
 /* V572 final chrome system: active nav is a stable pill, not an underline.
@@ -77,10 +110,10 @@
  header.site nav a.active,
  .site-header .site-nav a[aria-current="page"],
  .site-header .site-nav a.active) {
- background: rgba(126, 240, 210, 0.12) !important;
- border-color: rgba(126, 240, 210, 0.28) !important;
- color: var(--ink, #faf2e1) !important;
- box-shadow: inset 0 0 0 1px rgba(126, 240, 210, 0.05) !important;
+ background: rgba(125, 150, 192, 0.12) !important;
+ border-color: rgba(125, 150, 192, 0.28) !important;
+ color: var(--ink, #e8e3d6) !important;
+ box-shadow: inset 0 0 0 1px rgba(125, 150, 192, 0.05) !important;
 }
 
 :where(.site-nav .nav-item > .nav-top:hover,
@@ -93,7 +126,7 @@
  .site-header .site-nav a:focus-visible) {
  background: rgba(255, 247, 232, 0.06) !important;
  border-color: rgba(255, 247, 232, 0.18) !important;
- color: var(--ink, #faf2e1) !important;
+ color: var(--ink, #e8e3d6) !important;
  outline-offset: 3px !important;
 }
 
@@ -140,9 +173,9 @@
 }
 
 :where(#account-sidebar a[aria-current="page"], .account-sidebar a[aria-current="page"], #account-sidebar a.active, .account-sidebar a.active) {
- background: rgba(126, 240, 210, 0.12) !important;
- border-color: rgba(126, 240, 210, 0.24) !important;
- color: var(--ink, #faf2e1) !important;
+ background: rgba(125, 150, 192, 0.12) !important;
+ border-color: rgba(125, 150, 192, 0.24) !important;
+ color: var(--ink, #e8e3d6) !important;
 }
 
 [data-theme="light"] :where(.site-nav .nav-item > .nav-top[aria-current="page"],
@@ -464,7 +497,7 @@ header.site .brand .brand-dot,
 }
 .gh-star svg { opacity: 0.85; }
 .gh-star:hover {
- color: var(--ink, #faf2e1);
+ color: var(--ink, #e8e3d6);
  border-color: rgba(255,255,255,0.12);
 }
 .gh-star:hover svg { opacity: 1; }
@@ -477,7 +510,7 @@ li code {
  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace !important;
  font-size: 0.86em !important;
  background: rgba(255,255,255,0.04) !important;
- color: #faf2e1 !important;
+ color: #e8e3d6 !important;
  padding: 1px 5px !important;
  border-radius: 4px !important;
  letter-spacing: 0 !important;
@@ -506,7 +539,7 @@ h1 code,
  padding: 2px 8px !important;
  background: rgba(236,231,220,0.10) !important;
  border-radius: 6px !important;
- color: #faf2e1 !important;
+ color: #e8e3d6 !important;
  font-weight: 500 !important;
  vertical-align: 2px !important;
  word-break: keep-all !important;
@@ -544,15 +577,15 @@ header.site nav a:hover,
 .site-header .site-nav a:hover,
 nav.top .site-nav a:hover,
 nav.top .nav-links a:hover {
- color: var(--ink, #faf2e1) !important;
+ color: var(--ink, #e8e3d6) !important;
 }
 header.site nav a.active,
 .site-header .site-nav a.active,
 nav.top .site-nav a.active,
 nav.top .nav-links a.active {
- color: var(--ink, #faf2e1) !important;
- border-color: rgba(126,240,210,0.22) !important;
- background: rgba(126,240,210,0.08) !important;
+ color: var(--ink, #e8e3d6) !important;
+ border-color: rgba(125, 150, 192,0.22) !important;
+ background: rgba(125, 150, 192,0.08) !important;
 }
 
 /* Right-side actions - sign-in + CTA tighter and consistently sized.
@@ -632,7 +665,7 @@ button.primary {
 .contract::before,
 .code-block::before {
  background:
- linear-gradient(120deg, rgba(126,240,210,.07), transparent 45%),
+ linear-gradient(120deg, rgba(125, 150, 192,.07), transparent 45%),
  linear-gradient(300deg, rgba(236,231,220,.08), transparent 48%) !important;
 }
 
@@ -715,10 +748,10 @@ button {
  -webkit-text-fill-color: var(--violet-2) !important;
 }
 
-svg [fill="#faf2e1"],
-svg [stroke="#faf2e1"] {
- fill: #faf2e1 !important;
- stroke: #faf2e1 !important;
+svg [fill="#e8e3d6"],
+svg [stroke="#e8e3d6"] {
+ fill: #e8e3d6 !important;
+ stroke: #e8e3d6 !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -922,7 +955,7 @@ footer.modern::before {
  color: #b5bdb1;
  text-align: center;
 }
-.diag-fanout .node b { display:block; color:#faf2e1; font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; font-size: 13px; margin-bottom: 4px; letter-spacing: 0; }
+.diag-fanout .node b { display:block; color:#e8e3d6; font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; font-size: 13px; margin-bottom: 4px; letter-spacing: 0; }
 .diag-fanout .node span,
 .diag-fanout .center span { display:block; font-size: 10.5px; color:#737c73; }
 .diag-fanout .center {
@@ -930,10 +963,10 @@ footer.modern::before {
  border: 1px solid rgba(236,231,220,0.32);
  background: linear-gradient(180deg, rgba(236,231,220,0.10), rgba(236,231,220,0.02));
  padding: 18px 20px; border-radius: 10px;
- text-align: center; font-size: 12px; color:#faf2e1;
+ text-align: center; font-size: 12px; color:#e8e3d6;
  margin-bottom: 8px;
 }
-.diag-fanout .center b { color:#faf2e1; font-size: 14px; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; font-weight: 500; }
+.diag-fanout .center b { color:#e8e3d6; font-size: 14px; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; font-weight: 500; }
 @media (max-width: 720px) {
  .diag-fanout { grid-template-columns: repeat(2, 1fr); }
  .diag-fanout .center { grid-column: 1 / -1; }
@@ -950,8 +983,8 @@ footer.modern::before {
  color: #b5bdb1;
  line-height: 1.95;
 }
-.diag-tree .root { color:#faf2e1; font-weight: 500; }
-.diag-tree .seg { color:#faf2e1; }
+.diag-tree .root { color:#e8e3d6; font-weight: 500; }
+.diag-tree .seg { color:#e8e3d6; }
 .diag-tree .desc { color:#737c73; padding-left: 8px; }
 @media (max-width: 720px) {
  .diag-tree { font-size: 11px; padding: 16px 18px; line-height: 1.75; }
@@ -975,10 +1008,10 @@ footer.modern::before {
  display: block; font-size: 9px; color:#737c73;
  letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 3px;
 }
-.diag-pipeline .stage b { display:block; color:#faf2e1; font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; font-weight: 500; margin-bottom: 2px; letter-spacing: 0; }
+.diag-pipeline .stage b { display:block; color:#e8e3d6; font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; font-weight: 500; margin-bottom: 2px; letter-spacing: 0; }
 .diag-pipeline .stage span:not(.n) { display:block; color:#737c73; font-size: 9.5px; letter-spacing: 0.02em; }
-.diag-pipeline .stage.acc { border-color: rgba(236,231,220,0.32); background: rgba(236,231,220,0.05); color:#faf2e1; }
-.diag-pipeline .stage.acc b { color:#faf2e1; }
+.diag-pipeline .stage.acc { border-color: rgba(236,231,220,0.32); background: rgba(236,231,220,0.05); color:#e8e3d6; }
+.diag-pipeline .stage.acc b { color:#e8e3d6; }
 @media (max-width: 720px) {
  .diag-pipeline { grid-template-columns: repeat(2, 1fr); }
 }
@@ -998,8 +1031,8 @@ footer.modern::before {
  padding: 11px 16px;
 }
 .diag-chain .ring .lbl { color:#737c73; text-transform: uppercase; font-size: 9.5px; letter-spacing: 0.04em; }
-.diag-chain .ring .hash { color:#faf2e1; font-size: 11px; }
-.diag-chain .ring .ok { color:#7ef0d2; font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; }
+.diag-chain .ring .hash { color:#e8e3d6; font-size: 11px; }
+.diag-chain .ring .ok { color:#7d96c0; font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; }
 @media (max-width: 720px) {
  .diag-chain .ring { grid-template-columns: 80px 1fr auto; gap: 10px; padding: 9px 12px; }
  .diag-chain .ring .hash { font-size: 10px; }
@@ -1012,13 +1045,13 @@ footer.modern::before {
  gap: 18px;
 }
 .diag-gauge .formula {
- font-size: 14px; color:#faf2e1; letter-spacing: 0;
+ font-size: 14px; color:#e8e3d6; letter-spacing: 0;
  background: rgba(0,0,0,0.30);
  border: 1px solid rgba(255,255,255,0.06);
  border-radius: 8px;
  padding: 12px 18px;
 }
-.diag-gauge .formula .var { color:#faf2e1; }
+.diag-gauge .formula .var { color:#e8e3d6; }
 .diag-gauge .formula .w { color:#737c73; }
 .diag-gauge .bar {
  width: 100%; height: 6px;
@@ -1029,15 +1062,15 @@ footer.modern::before {
 .diag-gauge .bar .fill {
  position: absolute; inset: 0;
  width: 92%;
- background: linear-gradient(90deg, rgba(236,231,220,0.45), rgba(126,240,210,0.85));
+ background: linear-gradient(90deg, rgba(236,231,220,0.45), rgba(125, 150, 192,0.85));
 }
 .diag-gauge .legend {
  display: flex; justify-content: space-between; width: 100%;
  font-size: 10px; color:#737c73; letter-spacing: 0.03em;
  flex-wrap: wrap; gap: 6px 12px;
 }
-.diag-gauge .legend b { color:#faf2e1; font-family: ui-monospace, monospace; font-weight: 500; margin-right: 4px; }
-.diag-gauge .legend .ok { color:#7ef0d2; }
+.diag-gauge .legend b { color:#e8e3d6; font-family: ui-monospace, monospace; font-weight: 500; margin-right: 4px; }
+.diag-gauge .legend .ok { color:#7d96c0; }
 
 /* Tier ladder (pricing) */
 .diag-ladder {
@@ -1056,12 +1089,12 @@ footer.modern::before {
 }
 .diag-ladder .step:nth-child(1) { padding-top: 24px; }
 .diag-ladder .step:nth-child(2) { padding-top: 32px; }
-.diag-ladder .step:nth-child(3) { padding-top: 42px; border-color: rgba(236,231,220,0.30); background: rgba(236,231,220,0.04); color:#faf2e1; }
+.diag-ladder .step:nth-child(3) { padding-top: 42px; border-color: rgba(236,231,220,0.30); background: rgba(236,231,220,0.04); color:#e8e3d6; }
 .diag-ladder .step:nth-child(4) { padding-top: 50px; }
 .diag-ladder .step:nth-child(5) { padding-top: 58px; }
 .diag-ladder .step:nth-child(6) { padding-top: 68px; }
-.diag-ladder .step b { display:block; color:#faf2e1; font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; font-weight: 500; margin-bottom:2px; }
-.diag-ladder .step span { display:block; color:#faf2e1; font-size: 11px; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+.diag-ladder .step b { display:block; color:#e8e3d6; font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; font-weight: 500; margin-bottom:2px; }
+.diag-ladder .step span { display:block; color:#e8e3d6; font-size: 11px; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
 .diag-ladder .step .d { color:#737c73; font-size: 9px; margin-top: 2px; letter-spacing: 0.02em; }
 @media (max-width: 720px) {
  .diag-ladder { grid-template-columns: repeat(3, 1fr); gap: 4px; }
@@ -1083,12 +1116,12 @@ footer.modern::before {
  color: #b5bdb1;
 }
 .diag-device .tgt b {
- display: block; color:#faf2e1; font-size: 13px;
+ display: block; color:#e8e3d6; font-size: 13px;
  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif;
  font-weight: 500; margin-bottom: 5px;
 }
 .diag-device .tgt .lat,
-.diag-device .tgt i { color:#faf2e1; font-size: 11px; margin-top: 4px; display: block; font-style: normal; }
+.diag-device .tgt i { color:#e8e3d6; font-size: 11px; margin-top: 4px; display: block; font-style: normal; }
 .diag-device .tgt span { display: block; font-size: 10px; color:#737c73; }
 @media (max-width: 720px) {
  .diag-device { grid-template-columns: repeat(2, 1fr); }
@@ -1110,14 +1143,14 @@ footer.modern::before {
 }
 .diag-spec .col .lbl { font-size: 10px; color:#737c73; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px; }
 .diag-spec .col ul { margin: 0; padding: 0; list-style: none; font-size: 12px; color:#b5bdb1; line-height: 1.8; }
-.diag-spec .col ul b { color:#faf2e1; font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; }
+.diag-spec .col ul b { color:#e8e3d6; font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; }
 .diag-spec .card b {
- display: block; color:#faf2e1; font-size: 11px;
+ display: block; color:#e8e3d6; font-size: 11px;
  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
  letter-spacing: 0.04em; margin-bottom: 6px;
 }
 .diag-spec .card span {
- display: block; color:#faf2e1; font-size: 13px;
+ display: block; color:#e8e3d6; font-size: 13px;
  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif;
  font-weight: 500; line-height: 1.35; margin-bottom: 8px;
 }
@@ -1129,8 +1162,8 @@ footer.modern::before {
  border-color: rgba(236,231,220,0.32);
  background: rgba(236,231,220,0.05);
 }
-.diag-spec .card.acc b { color:#faf2e1; }
-.diag-spec .card.acc span { color:#faf2e1; }
+.diag-spec .card.acc b { color:#e8e3d6; }
+.diag-spec .card.acc span { color:#e8e3d6; }
 @media (max-width: 720px) {
  .diag-spec { grid-template-columns: 1fr 1fr; gap: 8px; }
  .diag-spec .card { padding: 11px 12px; }
@@ -1146,14 +1179,14 @@ footer.modern::before {
 .tag.good,
 .status-ok,
 .dot-ok {
- color: #7ef0d2 !important;
+ color: #7d96c0 !important;
 }
 .toc a:hover {
- color: #7ef0d2 !important;
- border-color: rgba(126,240,210,0.32) !important;
+ color: #7d96c0 !important;
+ border-color: rgba(125, 150, 192,0.32) !important;
 }
 .toc a:focus-visible {
- outline: 2px solid rgba(126,240,210,0.55);
+ outline: 2px solid rgba(125, 150, 192,0.55);
  outline-offset: 2px;
  border-radius: 999px;
 }
@@ -1162,9 +1195,9 @@ footer.modern::before {
 .badge.signed,
 .badge-verified,
 .verified-pill {
- color: #7ef0d2 !important;
- border-color: rgba(126,240,210,0.32) !important;
- background: rgba(126,240,210,0.06) !important;
+ color: #7d96c0 !important;
+ border-color: rgba(125, 150, 192,0.32) !important;
+ background: rgba(125, 150, 192,0.06) !important;
 }
 
 /* ============================================================
@@ -1381,8 +1414,8 @@ footer.modern::before {
  flex: 0 0 34px;
 }
 .theme-toggle:hover {
- color: #7ef0d2;
- border-color: rgba(126,240,210,0.32);
+ color: #7d96c0;
+ border-color: rgba(125, 150, 192,0.32);
 }
 .theme-toggle svg {
  width: 16px;
@@ -1516,7 +1549,7 @@ footer.modern::before {
 [data-theme="light"] .compile-core .core-ring {
  border-color: rgba(16,153,115,0.40) !important;
 }
-[data-theme="light"] .compile-core .core-mark rect[fill="#faf2e1"] { fill: #0c0e10 !important; }
+[data-theme="light"] .compile-core .core-mark rect[fill="#e8e3d6"] { fill: #0c0e10 !important; }
 
 /* Brand anchor (.kolm badge in H1s) */
 [data-theme="light"] .brand-anchor-inner {
@@ -1625,7 +1658,7 @@ footer.modern::before {
 .he-ver { display: none !important; }
 .eyebrow { letter-spacing: 0.16em; }
 
-/* Header brand mark - swap SVG fill from ivory (#faf2e1) to ink (#0c0e10) in light mode */
+/* Header brand mark - swap SVG fill from ivory (#e8e3d6) to ink (#0c0e10) in light mode */
 [data-theme="light"] nav.top .brand::before,
 [data-theme="light"] header.site .brand::before,
 [data-theme="light"] .site-header .brand::before,
@@ -1705,8 +1738,8 @@ footer.modern::before {
  border-color: rgba(12,14,16,0.10) !important;
  color: #0c0e10 !important;
 }
-[data-theme="light"] .rp-term { background: #0c0e10 !important; color: #faf2e1 !important; }
-[data-theme="light"] .rp-term code { color: #faf2e1 !important; }
+[data-theme="light"] .rp-term { background: #0c0e10 !important; color: #e8e3d6 !important; }
+[data-theme="light"] .rp-term code { color: #e8e3d6 !important; }
 
 /* Tighten secondary text on hardcoded-color cards */
 [data-theme="light"] .icp-card,
@@ -1718,11 +1751,11 @@ footer.modern::before {
 [data-theme="light"] .vr-card { color: #1f2429 !important; }
 
 /* SVG icon strokes/fills that hardcoded ivory ink need to invert */
-[data-theme="light"] svg[stroke="#faf2e1"],
-[data-theme="light"] svg [stroke="#faf2e1"] { stroke: #0c0e10 !important; }
-[data-theme="light"] svg [fill="#faf2e1"] { fill: #0c0e10 !important; }
-[data-theme="light"] svg [fill="#7ef0d2"] { fill: #0a8862 !important; }
-[data-theme="light"] svg [stroke="#7ef0d2"] { stroke: #0a8862 !important; }
+[data-theme="light"] svg[stroke="#e8e3d6"],
+[data-theme="light"] svg [stroke="#e8e3d6"] { stroke: #0c0e10 !important; }
+[data-theme="light"] svg [fill="#e8e3d6"] { fill: #0c0e10 !important; }
+[data-theme="light"] svg [fill="#7d96c0"] { fill: #0a8862 !important; }
+[data-theme="light"] svg [stroke="#7d96c0"] { stroke: #0a8862 !important; }
 
 /* Inline <code> on /healthcare, /finance, etc - many use color:#e2e8f0; on light bg = bleed */
 [data-theme="light"] code { color: #0c0e10 !important; }
@@ -1779,12 +1812,12 @@ footer.modern::before {
  align-items: center;
  justify-content: center;
 }
-.nav-toggle:hover { border-color: rgba(126,240,210,0.30); }
+.nav-toggle:hover { border-color: rgba(125, 150, 192,0.30); }
 .nav-toggle span {
  display: block;
  width: 16px;
  height: 1.5px;
- background: var(--ink, #faf2e1);
+ background: var(--ink, #e8e3d6);
  position: absolute;
  left: 11px;
  transition: transform 200ms, opacity 200ms;
@@ -1817,7 +1850,7 @@ footer.modern::before {
  font-size: 14px;
  padding: 12px 4px;
  border-bottom: 1px solid rgba(255,255,255,0.04);
- color: var(--ink, #faf2e1);
+ color: var(--ink, #e8e3d6);
  }
  .site-nav.is-open a:last-child { border-bottom: 0; }
  [data-theme="light"] .site-nav.is-open a {
@@ -1828,7 +1861,7 @@ footer.modern::before {
 
 /* =========================================================================
  * v7.8.8 - readability sweep. Many pages hardcode cream text colors
- * (rgba(236,231,220,*) / #faf2e1 / #ece7dc) that pre-date the theme system.
+ * (rgba(236,231,220,*) / #e8e3d6 / #ece7dc) that pre-date the theme system.
  * In light mode these render as nearly invisible on the paper-white surface.
  * Force-flip them all to high-contrast dark.
  * ========================================================================= */
@@ -1887,11 +1920,11 @@ footer.modern::before {
  color: #1f2429 !important;
 }
 
-/* Force-flip any inline style="color:#faf2e1" or similar by re-asserting
+/* Force-flip any inline style="color:#e8e3d6" or similar by re-asserting
  * via attribute selector. inline-style:color wins normally, but `!important`
  * in a stylesheet beats non-important inline styles. */
-[data-theme="light"] [style*="color:#faf2e1"],
-[data-theme="light"] [style*="color: #faf2e1"],
+[data-theme="light"] [style*="color:#e8e3d6"],
+[data-theme="light"] [style*="color: #e8e3d6"],
 [data-theme="light"] [style*="color:#ece7dc"],
 [data-theme="light"] [style*="color: #ece7dc"],
 [data-theme="light"] [style*="color:rgba(236,231,220"],
@@ -2049,7 +2082,7 @@ header.site-header .brand {
  display: inline-flex !important;
  align-items: center !important;
  gap: 9px !important;
- color: var(--ink, #faf2e1) !important;
+ color: var(--ink, #e8e3d6) !important;
  font-size: 16px !important;
  font-weight: 500 !important;
  letter-spacing: 0 !important;
@@ -2091,13 +2124,13 @@ header.site-header .site-nav a:hover,
 header.site .left nav a.active,
 header.site nav a.active,
 header.site-header .site-nav a.active {
- color: var(--ink, #faf2e1) !important;
+ color: var(--ink, #e8e3d6) !important;
 }
 header.site .left nav a.active,
 header.site nav a.active,
 header.site-header .site-nav a.active {
- border-color: rgba(126, 240, 210, 0.28) !important;
- background: rgba(126, 240, 210, 0.12) !important;
+ border-color: rgba(125, 150, 192, 0.28) !important;
+ background: rgba(125, 150, 192, 0.12) !important;
 }
 header.site .right,
 header.site-header .site-actions {
@@ -2112,7 +2145,7 @@ header.site-header .site-actions a {
 }
 header.site .right a:hover,
 header.site-header .site-actions a:hover {
- color: var(--ink, #faf2e1) !important;
+ color: var(--ink, #e8e3d6) !important;
 }
 header.site .right .ghost,
 header.site-header .site-actions .ghost {
@@ -2124,7 +2157,7 @@ header.site-header .site-actions .cta {
  display: inline-flex !important;
  align-items: center !important;
  color: #0b0d10 !important;
- background: var(--surface-warm, #faf2e1) !important;
+ background: var(--surface-warm, #e8e3d6) !important;
  padding: 6px 11px !important;
  border-radius: 6px !important;
  font-size: 12px !important;
@@ -2200,21 +2233,21 @@ header.site-header .site-actions .theme-toggle {
  font-weight: 500 !important;
  letter-spacing: 0.02em !important;
  text-decoration: none !important;
- background: rgba(126, 240, 210, 0.10) !important;
- border: 1px solid rgba(126, 240, 210, 0.32) !important;
- color: #7ef0d2 !important;
+ background: rgba(125, 150, 192, 0.10) !important;
+ border: 1px solid rgba(125, 150, 192, 0.32) !important;
+ color: #7d96c0 !important;
  transition: background 140ms, border-color 140ms !important;
 }
 .kolm-auth-pill:hover {
- background: rgba(126, 240, 210, 0.16) !important;
- border-color: rgba(126, 240, 210, 0.55) !important;
+ background: rgba(125, 150, 192, 0.16) !important;
+ border-color: rgba(125, 150, 192, 0.55) !important;
 }
 .kolm-auth-pill .dot {
  width: 7px !important;
  height: 7px !important;
  border-radius: 50% !important;
- background: #7ef0d2 !important;
- box-shadow: 0 0 0 2px rgba(126, 240, 210, 0.18) !important;
+ background: #7d96c0 !important;
+ box-shadow: 0 0 0 2px rgba(125, 150, 192, 0.18) !important;
  animation: kolm-auth-pulse 2.2s ease-in-out infinite;
 }
 @keyframes kolm-auth-pulse {
@@ -2263,7 +2296,7 @@ textarea:focus-visible,
 select:focus-visible,
 button:focus-visible,
 a:focus-visible {
- outline: 2px solid var(--accent, #7ef0d2) !important;
+ outline: 2px solid var(--accent, #7d96c0) !important;
  outline-offset: 2px !important;
 }
 [data-theme="light"] :focus-visible,
@@ -2301,7 +2334,7 @@ a.skip-link {
  pointer-events: none !important;
  padding: 9px 12px !important;
  border-radius: 8px !important;
- background: var(--ink, #faf2e1) !important;
+ background: var(--ink, #e8e3d6) !important;
  color: var(--bg, #08090c) !important;
  border: 1px solid var(--line-strong, rgba(236,231,220,0.18)) !important;
  font: 600 13px/1.2 var(--sans, system-ui, sans-serif) !important;
@@ -2432,7 +2465,7 @@ a.skip-link:focus {
  color: #ece1c4 !important;
 }
 [data-theme="light"] .proof-terminal .prompt,
-[data-theme="light"] .proof-terminal .ok { color: #7ef0d2 !important; }
+[data-theme="light"] .proof-terminal .ok { color: #7d96c0 !important; }
 [data-theme="light"] .step .demo {
  background: #0c0e10 !important;
  color: #ece1c4 !important;
@@ -2787,8 +2820,8 @@ button.primary,
 .ca-eyebrow .pulse,
 .ac-eyebrow .pulse,
 .hf-eyebrow .pulse {
- background: #7ef0d2 !important;
- box-shadow: 0 0 8px rgba(126,240,210,0.65) !important;
+ background: #7d96c0 !important;
+ box-shadow: 0 0 8px rgba(125, 150, 192,0.65) !important;
 }
 [data-theme="light"] .eyebrow .pulse,
 [data-theme="light"] .ca-eyebrow .pulse,
@@ -2803,7 +2836,7 @@ button.primary,
 .uc-card:hover h3,
 .ac-card:hover h3,
 .ca-step:hover h3 {
- color: #7ef0d2 !important;
+ color: #7d96c0 !important;
  transition: color 160ms;
 }
 [data-theme="light"] .card:hover h3,
@@ -2816,8 +2849,8 @@ button.primary,
 /* Active tab in switchable strips (uc-tab.is-on) - emerald
  * underline rule already existed but was too quiet. Boost. */
 .uc-strip .uc-tab.is-on {
- color: #7ef0d2 !important;
- border-bottom-color: #7ef0d2 !important;
+ color: #7d96c0 !important;
+ border-bottom-color: #7d96c0 !important;
 }
 [data-theme="light"] .uc-strip .uc-tab.is-on {
  color: #0a8862 !important;
@@ -2856,7 +2889,7 @@ button.primary,
 [data-theme="light"] pre,
 [data-theme="light"] .codeblock {
  background: #0c0e10 !important;
- color: #faf2e1 !important;
+ color: #e8e3d6 !important;
 }
 [data-theme="light"] footer,
 [data-theme="light"] footer.site,
@@ -3151,7 +3184,7 @@ section.vr-calc-only { padding-top: var(--sp-section-tight) !important; padding-
  padding: 8px 14px;
  border: 1px solid var(--line);
  border-radius: 999px;
- background: rgba(126,240,210,0.04);
+ background: rgba(125, 150, 192,0.04);
 }
 
 [data-theme="light"] .compile-anatomy .ca-foot .ca-os {
@@ -3232,7 +3265,7 @@ section.vr-calc-only { padding-top: var(--sp-section-tight) !important; padding-
 /* Alternating section tint - subtle, breaks the boxy uniformity */
 section.after-compile {
  background:
- linear-gradient(180deg, rgba(126,240,210,0.012), rgba(126,240,210,0.022)),
+ linear-gradient(180deg, rgba(125, 150, 192,0.012), rgba(125, 150, 192,0.022)),
  var(--bg, transparent);
 }
 
@@ -3251,8 +3284,8 @@ section.vr-calc-only {
 }
 
 /* Per-card accent on after-compile - each card reads with identity */
-.after-compile .ac-card:nth-child(1) { border-color: rgba(126,240,210,0.14); }
-.after-compile .ac-card:nth-child(2) { border-color: rgba(126,240,210,0.20); background: linear-gradient(180deg, rgba(126,240,210,0.025), transparent); }
+.after-compile .ac-card:nth-child(1) { border-color: rgba(125, 150, 192,0.14); }
+.after-compile .ac-card:nth-child(2) { border-color: rgba(125, 150, 192,0.20); background: linear-gradient(180deg, rgba(125, 150, 192,0.025), transparent); }
 .after-compile .ac-card:nth-child(3) { border-color: rgba(255,200,120,0.14); }
 
 [data-theme="light"] .after-compile .ac-card:nth-child(1) { border-color: rgba(10,136,98,0.10) !important; }
@@ -3272,7 +3305,7 @@ section.vr-calc-only {
  font-weight: 500 !important;
  letter-spacing: 0 !important;
  line-height: 1 !important;
- color: #7ef0d2 !important;
+ color: #7d96c0 !important;
 }
 
 [data-theme="light"] .vr-calc-solo .vc-result-x {
@@ -3306,9 +3339,9 @@ section.compile-anatomy { border-top: 1px solid rgba(255,255,255,0.04); }
 :root {
  /* v7.19 . electric tokens now resolve to warm clay accent. Carries the
  existing "frontier" callout styling but in the new highlight color. */
- --electric: #10b981;
- --electric-soft: rgba(16,185,129, 0.14);
- --electric-glow: rgba(16,185,129, 0.45);
+ --electric: #1d2d44;
+ --electric-soft: rgba(29, 45, 68, 0.14);
+ --electric-glow: rgba(29, 45, 68, 0.45);
 }
 :root[data-theme="light"] {
  --electric: #059669 !important;
@@ -3324,13 +3357,13 @@ input:focus-visible,
 textarea:focus-visible,
 select:focus-visible,
 [role="button"]:focus-visible {
- outline: 2px solid var(--kolm-accent, #10b981) !important;
+ outline: 2px solid var(--kolm-accent, #1d2d44) !important;
  outline-offset: 2px !important;
 }
 .lede a:hover,
 .prose a:hover,
 p a:hover,
-li a:hover { color: var(--kolm-accent, #10b981) !important; }
+li a:hover { color: var(--kolm-accent, #1d2d44) !important; }
 [data-theme="light"] .lede a:hover,
 [data-theme="light"] .prose a:hover,
 [data-theme="light"] p a:hover,
@@ -3348,7 +3381,7 @@ li a:hover { color: var(--kolm-accent, #10b981) !important; }
 }
 .hero-eyebrow .he-dot {
  width: 6px; height: 6px; border-radius: 50%;
- background: var(--ink, #faf2e1); box-shadow: none;
+ background: var(--ink, #e8e3d6); box-shadow: none;
  opacity: 0.55;
  animation: pulse-soft 3.4s ease-in-out infinite;
 }
@@ -3372,7 +3405,7 @@ li a:hover { color: var(--kolm-accent, #10b981) !important; }
  stop is the matching forest teal #0a8862 (matches .closer-cta
  light theme accent in pricing.html). */
 h1 .tone {
- background: linear-gradient(170deg, #faf2e1 0%, #7ef0d2 50%, #faf2e1 100%);
+ background: linear-gradient(170deg, #e8e3d6 0%, #7d96c0 50%, #e8e3d6 100%);
  -webkit-background-clip: text; background-clip: text;
  -webkit-text-fill-color: transparent;
 }
@@ -3385,12 +3418,12 @@ h1 .tone {
 /* Electric CTA - primary frontier action button.
  wave 101: aligned with .btn-electric monochrome pattern on /index
  (cream-on-ink reads as the inverse of the page). The sky-blue
- gradient clashed with the warm neo-lab palette (--ink #faf2e1,
- --good #7ef0d2). Monochrome high-contrast IS the emphasis. */
+ gradient clashed with the warm neo-lab palette (--ink #e8e3d6,
+ --good #7d96c0). Monochrome high-contrast IS the emphasis. */
 .btn.electric, a.btn.electric, button.btn.electric {
- background: var(--ink, #faf2e1) !important;
+ background: var(--ink, #e8e3d6) !important;
  color: #0a0a0d !important;
- border-color: var(--ink, #faf2e1) !important;
+ border-color: var(--ink, #e8e3d6) !important;
  box-shadow: none !important;
  font-weight: 500 !important;
  transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease !important;
@@ -3703,7 +3736,7 @@ section.provider-strip .ps-cell {
  font-weight: 400 !important;
  transition: color 200ms ease;
 }
-section.provider-strip .ps-cell:hover { color: var(--ink, #faf2e1) !important; }
+section.provider-strip .ps-cell:hover { color: var(--ink, #e8e3d6) !important; }
 [data-theme=light] section.provider-strip .ps-cell { color: rgba(31,36,41,0.56) !important; }
 [data-theme=light] section.provider-strip .ps-cell:hover { color: #0c0e10 !important; }
 
@@ -3874,7 +3907,7 @@ footer.site-footer .links a {
  border-bottom: 0 !important;
  transition: color 160ms ease;
 }
-footer.site-footer .links a:hover { color: var(--ink, #faf2e1) !important; }
+footer.site-footer .links a:hover { color: var(--ink, #e8e3d6) !important; }
 [data-theme=light] footer.site-footer .links a { color: #4b5158 !important; }
 [data-theme=light] footer.site-footer .links a:hover { color: #18171a !important; }
 
@@ -4361,7 +4394,7 @@ code,
  line-height: 1 !important;
 }
 .home-hero-left .hero-promise .hp-claim b {
- color: var(--ink, #faf2e1) !important;
+ color: var(--ink, #e8e3d6) !important;
  font-weight: 500 !important;
 }
 [data-theme=light] .home-hero-left .hero-promise { color: #4b5158 !important; }
@@ -4414,9 +4447,9 @@ code,
  line-height: 1 !important;
 }
 .home-hero-left .hero-moat .hm-cell:last-child .hm-mono {
- color: var(--kolm-accent, #10b981) !important;
- border-color: rgba(16,185,129,0.40) !important;
- background: rgba(16,185,129,0.05) !important;
+ color: var(--kolm-accent, #1d2d44) !important;
+ border-color: rgba(29, 45, 68,0.40) !important;
+ background: rgba(29, 45, 68,0.05) !important;
 }
 [data-theme=light] .home-hero-left .hero-moat { color: #4b5158 !important; }
 [data-theme=light] .home-hero-left .hero-moat .hm-mono {
@@ -4460,7 +4493,7 @@ code,
  transition: color 160ms, border-color 160ms !important;
 }
 .home-hero-left .hero-stack .hs-cell:hover {
- color: var(--ink, #faf2e1) !important;
+ color: var(--ink, #e8e3d6) !important;
  border-bottom-color: rgba(236,231,220,0.30) !important;
 }
 .home-hero-left .hero-stack .hs-lab {
@@ -4592,7 +4625,7 @@ section.home-faq + section.bottom-cta {
  without reintroducing underline chrome. */
 .site-header .site-nav a[aria-current="page"],
 header.site nav a[aria-current="page"] {
- color: var(--cyan, #7ef0d2) !important;
+ color: var(--cyan, #7d96c0) !important;
  position: relative;
 }
 .site-header .site-nav a[aria-current="page"]::after,
@@ -4606,11 +4639,11 @@ header.site nav a[aria-current="page"]::after {
  header.site nav a[aria-current="page"],
  .site-header .site-nav a.active,
  header.site nav a.active) {
- color: var(--ink, #faf2e1) !important;
- border: 1px solid rgba(126, 240, 210, 0.28) !important;
+ color: var(--ink, #e8e3d6) !important;
+ border: 1px solid rgba(125, 150, 192, 0.28) !important;
  border-radius: 8px !important;
- background: rgba(126, 240, 210, 0.12) !important;
- box-shadow: inset 0 0 0 1px rgba(126, 240, 210, 0.05) !important;
+ background: rgba(125, 150, 192, 0.12) !important;
+ box-shadow: inset 0 0 0 1px rgba(125, 150, 192, 0.05) !important;
 }
 
 :where(.site-header .site-nav a[aria-current="page"]::after,
@@ -4668,12 +4701,12 @@ nav.top .site-nav a.active,
 nav.top .nav-links a[aria-current="page"],
 nav.top .nav-links a.active {
  text-decoration: none !important;
- color: var(--ink, #faf2e1) !important;
- border: 1px solid rgba(126, 240, 210, 0.28) !important;
- border-bottom-color: rgba(126, 240, 210, 0.28) !important;
+ color: var(--ink, #e8e3d6) !important;
+ border: 1px solid rgba(125, 150, 192, 0.28) !important;
+ border-bottom-color: rgba(125, 150, 192, 0.28) !important;
  border-radius: 8px !important;
- background: rgba(126, 240, 210, 0.12) !important;
- box-shadow: inset 0 0 0 1px rgba(126, 240, 210, 0.05) !important;
+ background: rgba(125, 150, 192, 0.12) !important;
+ box-shadow: inset 0 0 0 1px rgba(125, 150, 192, 0.05) !important;
 }
 
 .site-header .site-nav a[aria-current="page"]::after,

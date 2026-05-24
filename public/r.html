@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#050607;color:#faf2e1}html{color-scheme:dark}</style>
+<style>html,body{background:#050607;color:#e8e3d6}html{color-scheme:dark}</style>
 <title>Receipt verification · kolm.ai</title>
 <meta name="description" content="Public verification for any kolm receipt. Paste or share a hash and anyone can confirm the Ed25519 receipt chain is intact, when the receipt was signed, and...">
 <meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
@@ -20,8 +20,8 @@
  :root{
  --bg:#050607; --bg-elev:#0b0f10; --bg-card:#101514;
  --line:rgba(255,255,255,0.06); --line-strong:rgba(255,255,255,0.12);
- --ink:#faf2e1; --ink-mute:#b5bdb1; --ink-faint:#737c73;
- --accent:#faf2e1; --good:#7ef0d2; --warn:#d6a65a; --bad:#e87878;
+ --ink:#e8e3d6; --ink-mute:#b5bdb1; --ink-faint:#737c73;
+ --accent:#e8e3d6; --good:#7d96c0; --warn:#d6a65a; --bad:#e87878;
  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
  --sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;
  }
@@ -54,8 +54,8 @@
  .badge-row{display:flex;align-items:center;gap:14px;margin:6px 0 22px;flex-wrap:wrap}
  .badge{display:inline-flex;align-items:center;gap:10px;padding:10px 18px;border-radius:99px;font-family:var(--mono);font-size:13px;letter-spacing:0.04em;border:1px solid var(--line-strong);background:var(--bg-elev)}
  .badge .dot{width:9px;height:9px;border-radius:50%;background:var(--ink-faint)}
- .badge.ok{color:var(--good);border-color:rgba(126,240,210,0.35)}
- .badge.ok .dot{background:var(--good);box-shadow:0 0 0 4px rgba(126,240,210,0.10)}
+ .badge.ok{color:var(--good);border-color:rgba(125, 150, 192,0.35)}
+ .badge.ok .dot{background:var(--good);box-shadow:0 0 0 4px rgba(125, 150, 192,0.10)}
  .badge.bad{color:var(--bad);border-color:rgba(232,120,120,0.35)}
  .badge.bad .dot{background:var(--bad);box-shadow:0 0 0 4px rgba(232,120,120,0.10)}
  .badge.warn{color:var(--warn);border-color:rgba(214,166,90,0.35)}
@@ -205,12 +205,12 @@
  <text y="78" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.45">sign(prev, eval_result)</text>
  </g>
  <g transform="translate(680,100)">
- <circle r="56" fill="none" stroke="#10b981" stroke-width="1.8" opacity="0.95"/>
- <text y="-72" text-anchor="middle" font-size="10" letter-spacing="0.14em" fill="#10b981" opacity="0.85">RING 04</text>
- <text y="4" text-anchor="middle" font-size="14" fill="#10b981" font-weight="600">seal</text>
- <text y="22" text-anchor="middle" font-size="9.5" fill="#10b981" opacity="0.7">signature &middot; CID</text>
- <text y="78" text-anchor="middle" font-size="9" fill="#10b981" opacity="0.6">sign(prev, tenant_key)</text>
- <circle r="3" cy="-46" cx="40" fill="#10b981"/>
+ <circle r="56" fill="none" stroke="#1d2d44" stroke-width="1.8" opacity="0.95"/>
+ <text y="-72" text-anchor="middle" font-size="10" letter-spacing="0.14em" fill="#1d2d44" opacity="0.85">RING 04</text>
+ <text y="4" text-anchor="middle" font-size="14" fill="#1d2d44" font-weight="600">seal</text>
+ <text y="22" text-anchor="middle" font-size="9.5" fill="#1d2d44" opacity="0.7">signature &middot; CID</text>
+ <text y="78" text-anchor="middle" font-size="9" fill="#1d2d44" opacity="0.6">sign(prev, tenant_key)</text>
+ <circle r="3" cy="-46" cx="40" fill="#1d2d44"/>
  </g>
  </g>
  <g class="rg-arrows" style="color:currentColor;opacity:0.45">

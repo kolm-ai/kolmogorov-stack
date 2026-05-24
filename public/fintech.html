@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<style>html,body{background:#08090c;color:#e8e3d6}html{color-scheme:dark}</style>
 <title>Fintech guide · kolm.ai</title>
 <meta name="description" content="Compliance-grade AI for moving money. kolm compiles approved fintech tasks into signed local artifacts aligned with GLBA-SAR retention, PCI scope reduction,...">
 <meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
@@ -26,9 +26,9 @@
  :root {
  --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
  --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
- --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
- --accent: #faf2e1; --accent-soft: rgba(236,231,220, 0.10); --accent-strong: #c9c2b2;
- --good: #7ef0d2; --bad: #ff6b91;
+ --ink: #e8e3d6; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+ --accent: #e8e3d6; --accent-soft: rgba(236,231,220, 0.10); --accent-strong: #c9c2b2;
+ --good: #7d96c0; --bad: #ff6b91;
  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
  }
@@ -39,12 +39,12 @@
  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
  @media (max-width: 720px) { .wrap { padding: 0 20px; } }
  section.hero { padding: 96px 0 56px; position: relative; overflow: hidden; }
- section.hero::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 1100px 540px at 22% 10%, rgba(126,240,210, 0.06), transparent 60%); }
+ section.hero::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 1100px 540px at 22% 10%, rgba(125, 150, 192, 0.06), transparent 60%); }
  section.hero .wrap { position: relative; z-index: 2; }
  .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 6px 14px; background: rgba(8,9,8,0.62); }
- .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 10px #7ef0d2; }
+ .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: #7d96c0; box-shadow: 0 0 10px #7d96c0; }
  h1 { margin: 26px 0 22px; font-size: clamp(40px, 6vw, 76px); line-height: 0.98; font-weight: 500; letter-spacing: -0.03em; max-width: 18ch; }
- h1 .tone { background: linear-gradient(170deg, #faf2e1 0%, #7ef0d2 50%, #faf2e1 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+ h1 .tone { background: linear-gradient(170deg, #e8e3d6 0%, #7d96c0 50%, #e8e3d6 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
  p.lede { margin: 0 0 32px; font-size: clamp(16px, 1.3vw, 18.5px); line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
  p.lede b { color: var(--ink); font-weight: 500; }
  p.lede code { font-family: var(--mono); font-size: 0.9em; background: var(--bg-card); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; color: var(--ink); }
@@ -85,7 +85,7 @@
  .artifact .nm { font-family: var(--mono); font-size: 17px; color: var(--ink); }
  .artifact .badge { font-family: var(--mono); font-size: 11px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line-strong); color: var(--ink-mute); background: rgba(0,0,0,0.25); }
  .artifact .badge.dev { color: #ffd07a; border-color: rgba(255,208,122,0.4); }
- .artifact .badge.k { color: var(--good); border-color: rgba(126,240,210,0.4); }
+ .artifact .badge.k { color: var(--good); border-color: rgba(125, 150, 192,0.4); }
  .artifact p { margin: 0; font-size: 14px; color: var(--ink-mute); max-width: 56ch; }
  .arch { background: var(--bg-elev); border: 1px solid var(--line); border-radius: 10px; padding: 26px; font-family: var(--mono); font-size: 13px; color: var(--ink-mute); white-space: pre; overflow-x: auto; line-height: 1.5; }
  .closing { padding: 92px 0; }

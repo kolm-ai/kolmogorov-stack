@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<style>html,body{background:#08090c;color:#e8e3d6}html{color-scheme:dark}</style>
 <title>HIPAA-Aligned AI on a Laptop: Keep PHI Local by Design · kolm.ai</title>
 <meta name="description" content="A practical architecture playbook for keeping protected health information local when evaluating AI assistants for healthcare workflows.">
 <meta name="keywords" content="HIPAA AI, on-device AI healthcare, local PHI architecture, clinical AI assistant, HIPAA-aligned LLM architecture, edge AI healthcare, .kolm clinical, BAA AI vendor, kolm">
@@ -57,9 +57,9 @@
  :root {
  --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
  --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
- --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
- --accent: #faf2e1; --accent-soft: rgba(236,231,220, 0.10); --accent-strong: #c9c2b2;
- --good: #7ef0d2; --bad: #ff6b91;
+ --ink: #e8e3d6; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+ --accent: #e8e3d6; --accent-soft: rgba(236,231,220, 0.10); --accent-strong: #c9c2b2;
+ --good: #7d96c0; --bad: #ff6b91;
  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
  }
@@ -171,7 +171,7 @@
  .plate .stamp .dot{width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px rgba(236,231,220, 0.85)}
  .plate .cap{position:absolute;left:24px;right:24px;bottom:20px;z-index:3;display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
  .plate .cap .title{font-family:var(--sans);font-size:clamp(17px,1.8vw,22px);font-weight: 500;letter-spacing: 0;line-height:1.18;color:var(--ink);max-width:62%;text-shadow:0 1px 2px rgba(0,0,0,0.55)}
- .plate .cap .title .tone{background:linear-gradient(170deg,#faf2e1 0%,#c9c2b2 50%,#faf2e1 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+ .plate .cap .title .tone{background:linear-gradient(170deg,#e8e3d6 0%,#c9c2b2 50%,#e8e3d6 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
  .plate .cap .meta{font-family:var(--mono);font-size:10.5px;color:var(--ink-mute);letter-spacing: 0;text-align:right;line-height:1.7}
  .plate .cap .meta b{color:var(--ink);font-weight: 500}
  @media(max-width:720px){.plate .cap{left:14px;right:14px;bottom:12px;flex-direction:column;align-items:flex-start;gap:8px}.plate .cap .title{font-size:14px;max-width:100%}.plate .cap .meta{text-align:left;font-size:10px}.plate .stamp{top:12px;left:12px;font-size:9px;padding:4px 9px}}

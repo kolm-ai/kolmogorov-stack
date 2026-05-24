@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<style>html,body{background:#08090c;color:#e8e3d6}html{color-scheme:dark}</style>
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <title>Account MFA policy - Account - kolm.ai</title>
 <meta name="description" content="kolm.ai account MFA policy, API-key controls, recovery paths, and audit evidence for hosted and enterprise tenants.">
@@ -29,7 +29,7 @@
 .acct-content h1{margin:0 0 4px;font-size:28px}
 .acct-content h2{font-size:16px;margin:22px 0 10px}
 .acct-content .lede{color:var(--ink-mute);font-size:14.5px;margin:0 0 20px;max-width:64ch}
-.skip-link{position:absolute;left:-9999px;top:0;background:var(--ink,#faf2e1);color:var(--bg,#08090c);padding:8px 12px;font-family:var(--mono);font-size:12px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--ink,#e8e3d6);color:var(--bg,#08090c);padding:8px 12px;font-family:var(--mono);font-size:12px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
 .skip-link:focus{left:0}
 .kpanel{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:18px;margin-bottom:16px}
 .kpanel h2{margin:0 0 12px;font-size:15px}
@@ -53,7 +53,7 @@
 .code-snippet .c{color:var(--ink-faint)}
 .help{font-size:12px;color:var(--ink-faint);margin:6px 0 0;line-height:1.55}
 .pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor}
-.pill.ok{color:#7ef0d2}.pill.warn{color:#d6a65a}.pill.mute{color:var(--ink-faint)}
+.pill.ok{color:#7d96c0}.pill.warn{color:#d6a65a}.pill.mute{color:var(--ink-faint)}
 .unauth{background:var(--bg-card);border:1px dashed var(--line);border-radius:8px;padding:24px;color:var(--ink-mute);font-size:14px;line-height:1.6;text-align:center}
 .unauth a{color:var(--accent)}
 @media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}.two-col{grid-template-columns:1fr}.qr-box{width:100%;max-width:240px;margin:0 auto}}
@@ -186,7 +186,7 @@ kolm audit --format json
  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});}
  function headers(){var h={"Accept":"application/json","Content-Type":"application/json"};if(key)h["Authorization"]="Bearer "+key;return h;}
  function setPill(id,state,text){var el=document.getElementById(id);if(!el)return;el.className="pill "+state;el.textContent=text;}
- function setStatus(id,msg,ok){var el=document.getElementById(id);if(!el)return;el.textContent=msg||"";el.style.color=ok?"#7ef0d2":(msg?"#ff6b91":"var(--ink-faint)");if(msg)setTimeout(function(){if(el.textContent===msg)el.textContent="";},4200);}
+ function setStatus(id,msg,ok){var el=document.getElementById(id);if(!el)return;el.textContent=msg||"";el.style.color=ok?"#7d96c0":(msg?"#ff6b91":"var(--ink-faint)");if(msg)setTimeout(function(){if(el.textContent===msg)el.textContent="";},4200);}
 
  if(!key){auth.hidden=true;unauth.hidden=false;return;}
 

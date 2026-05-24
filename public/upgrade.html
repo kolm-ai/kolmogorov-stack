@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<style>html,body{background:#08090c;color:#e8e3d6}html{color-scheme:dark}</style>
 <title>Upgrade Team and Enterprise · kolm.ai</title>
 <meta name="description" content="Upgrade to Team self-serve or request Enterprise architecture review. Pick the right plan, activate registry, SSO, receipts, and deployment controls.">
 <meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
@@ -21,9 +21,9 @@
  :root {
  --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
  --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
- --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
- --accent: #faf2e1; --accent-strong: #c9c2b2;
- --good: #7ef0d2; --amber: #d6a65a;
+ --ink: #e8e3d6; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+ --accent: #e8e3d6; --accent-strong: #c9c2b2;
+ --good: #7d96c0; --amber: #d6a65a;
  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
  }
@@ -70,8 +70,8 @@
  display: inline-flex; align-items: center; gap: 8px;
  font-family: var(--mono); font-size: 11px; letter-spacing: 0;
  text-transform: uppercase; color: var(--good);
- border: 1px solid rgba(126,240,210,0.22); border-radius: 999px;
- padding: 5px 12px; background: rgba(126,240,210,0.06); margin-bottom: 18px;
+ border: 1px solid rgba(125, 150, 192,0.22); border-radius: 999px;
+ padding: 5px 12px; background: rgba(125, 150, 192,0.06); margin-bottom: 18px;
  }
  .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--good); box-shadow: 0 0 8px var(--good); }
  h1 { margin: 0 0 18px; font-size: clamp(34px, 4.8vw, 52px); line-height: 1.05; font-weight: 500; letter-spacing: -0.01em; }
@@ -93,7 +93,7 @@
  border-radius: 12px; padding: 28px 28px 24px;
  display: flex; flex-direction: column;
  }
- .plan.recommended { border-color: rgba(126,240,210,0.32); box-shadow: 0 0 0 1px rgba(126,240,210,0.10); }
+ .plan.recommended { border-color: rgba(125, 150, 192,0.32); box-shadow: 0 0 0 1px rgba(125, 150, 192,0.10); }
  .plan .tag { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
  .plan.recommended .tag { color: var(--good); }
  .plan .name { font-size: 22px; font-weight: 500; color: var(--ink); margin: 0 0 8px; }
@@ -145,7 +145,7 @@
  .faq h3 { margin: 0 0 8px; font-size: 17px; font-weight: 500; color: var(--ink); }
  .faq p { margin: 0 0 18px; font-size: 14px; color: var(--ink-mute); line-height: 1.6; }
  .faq p:last-child { margin: 0; }
- .faq p a { color: var(--good); border-bottom: 1px dashed rgba(126,240,210,0.32); }
+ .faq p a { color: var(--good); border-bottom: 1px dashed rgba(125, 150, 192,0.32); }
 
  footer.site { padding: 48px 0 32px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 12px; color: var(--ink-faint); }
  footer.site .row { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
@@ -268,7 +268,7 @@
  <div class="step">
  <div class="n">03</div>
  <h3>Sign BAA + DPA</h3>
- <p>BAA and DPA templates are ready for legal review. Enterprise gets the PHI Schedule when the deployment touches regulated health data. <a href="/baa" style="color:var(--good);border-bottom:1px dashed rgba(126,240,210,0.32)">View template &rarr;</a></p>
+ <p>BAA and DPA templates are ready for legal review. Enterprise gets the PHI Schedule when the deployment touches regulated health data. <a href="/baa" style="color:var(--good);border-bottom:1px dashed rgba(125, 150, 192,0.32)">View template &rarr;</a></p>
  </div>
  <div class="step">
  <div class="n">04</div>
@@ -314,7 +314,7 @@
  <div class="auto-card">
  <div class="hd"><span class="check">+</span><span class="nm">Enterprise</span></div>
  <h4>PHI Schedule on BAA</h4>
- <p>10 numbered clauses covering Permitted Uses, Safeguards, Breach Notification (10 business days), Audit Rights, Return/Destruction. <a href="/baa" style="color:var(--good);border-bottom:1px dashed rgba(126,240,210,0.32)">Read &rarr;</a></p>
+ <p>10 numbered clauses covering Permitted Uses, Safeguards, Breach Notification (10 business days), Audit Rights, Return/Destruction. <a href="/baa" style="color:var(--good);border-bottom:1px dashed rgba(125, 150, 192,0.32)">Read &rarr;</a></p>
  </div>
  <div class="auto-card">
  <div class="hd"><span class="check">+</span><span class="nm">Enterprise</span></div>
@@ -324,7 +324,7 @@
  <div class="auto-card">
  <div class="hd"><span class="check">+</span><span class="nm">Enterprise</span></div>
  <h4>HIPAA Security Rule mapping</h4>
- <p>22 CFR citations mapped to live controls at <a href="/security#hipaa-mapping" style="color:var(--good);border-bottom:1px dashed rgba(126,240,210,0.32)">/security#hipaa-mapping</a>. Cite in your risk analysis under &#167;164.308(a)(1)(ii)(A).</p>
+ <p>22 CFR citations mapped to live controls at <a href="/security#hipaa-mapping" style="color:var(--good);border-bottom:1px dashed rgba(125, 150, 192,0.32)">/security#hipaa-mapping</a>. Cite in your risk analysis under &#167;164.308(a)(1)(ii)(A).</p>
  </div>
  <div class="auto-card">
  <div class="hd"><span class="check">+</span><span class="nm">Enterprise</span></div>

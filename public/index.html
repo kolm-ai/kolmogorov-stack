@@ -296,7 +296,7 @@
         The AI compiler. Compile your own AI. you own forever. Own the AI loop. owned AI.
         Route any model. Distill specialists. Run on any device. OpenAI-compatible gateway.
       </h1>
-      <h1 class="ks-hero__h1" style="font-family:var(--ks-sans); font-style:normal;">
+      <h1 class="ks-hero__h1 fr-h1--hero">
         <span class="h1-claim">Frontier AI on your own infrastructure.</span>
       </h1>
       <!-- W220/W260/W271/W335/W373 hidden hero anchors. These tokens were
@@ -755,85 +755,133 @@
   </div>
 </section>
 
-<!-- ================== W837: .kolm anatomy redesigned as a specimen sheet.
-     Replaces W706 ASCII-art tree the user called an eye-sore. Renders the
-     bundle as a typeset spec list (term, definition, auditor fact): the
-     way a publication describes a part, not the way a terminal dumps it. -->
-<section class="fr-section fr-reveal" aria-label="Inside a kolm artifact">
-  <div class="fr-container">
-    <span class="fr-eyebrow">Inside the file</span>
-    <h2 class="fr-h2">One <code class="fr-inline">.kolm</code>. No proprietary loader.</h2>
-    <p class="fr-lede"><code>unzip</code> it on any machine. The structure is self-describing. Every field below pins a fact an auditor can verify offline.</p>
+<!-- ================== W837-lift: .kolm anatomy as an architectural diagram.
+     Replaces the W837 text-only specimen-sheet (which replaced the W706
+     ASCII tree). Now a hand-drawn SVG section drawing of the bundle paired
+     with a spec-sheet sidebar. Editorial quality, not a typeset list. -->
+<div class="fr-rule--major" role="separator" aria-hidden="true"><span class="fr-rule--major__mark">02 / Inside the file</span></div>
 
-    <div class="w837-spec">
-      <div class="w837-spec__head">
-        <div class="w837-spec__title">
-          <code>support.kolm</code>
-          <span class="w837-spec__meta">5.2 GB &middot; ZIP &middot; signed Ed25519</span>
-        </div>
-        <div class="w837-spec__sub">7 entries, all hash-pinned in <code>manifest.json</code>.</div>
-      </div>
-      <dl class="w837-spec__list">
-        <div class="w837-spec__row">
-          <dt><code>spec.toml</code></dt>
-          <dd>Teacher, student, and quantization recipe.<span class="w837-spec__fact">claude-opus-4-7 &rarr; qwen-2.5-7b-instruct &middot; bnb 0.49.2 NF4 + double</span></dd>
-        </div>
-        <div class="w837-spec__row">
-          <dt><code>weights/</code></dt>
-          <dd>The quantized parameters, runtime-neutral.<span class="w837-spec__fact">q4_0.safetensors &middot; 3.8 GB &middot; q4_0.metadata &middot; 12 KB</span></dd>
-        </div>
-        <div class="w837-spec__row">
-          <dt><code>eval.frozen.jsonl</code></dt>
-          <dd>Frozen evaluation set; immutable after compile.<span class="w837-spec__fact">240 rows &middot; hash-pinned to <code>manifest.json</code></span></dd>
-        </div>
-        <div class="w837-spec__row">
-          <dt><code>bakeoff/</code></dt>
-          <dd>K-Score per row vs teacher; the gate that decided shipping.<span class="w837-spec__fact">k_score.summary &middot; <strong>0.91</strong> &middot; gate <strong>0.85</strong> &check;</span></dd>
-        </div>
-        <div class="w837-spec__row">
-          <dt><code>receipts/</code></dt>
-          <dd>Hash-chained capture transcript from the source namespace.<span class="w837-spec__fact">47,392 captures &middot; chain root <code>bf8a3d1c&hellip;</code></span></dd>
-        </div>
-        <div class="w837-spec__row">
-          <dt><code>manifest.json</code></dt>
-          <dd>SHA-256 of every path, plus the K-Score breakdown.<span class="w837-spec__fact">accuracy 0.94 &middot; safety 0.96 &middot; latency 0.88 &middot; cost 0.93</span></dd>
-        </div>
-        <div class="w837-spec__row">
-          <dt><code>sidecar.ed25519</code></dt>
-          <dd>64-byte signature over <code>manifest.sha256</code>.<span class="w837-spec__fact">key kolm-registry-prod-2026 &middot; sig <code>7c4a&hellip;e1b3</code> &middot; valid offline</span></dd>
-        </div>
-      </dl>
-      <div class="w837-spec__foot">
-        <span>Verifies offline in ~2 s. <code>kolm verify support.kolm</code> emits the five checks above and exits zero on success.</span>
-        <span class="w837-spec__links"><a href="/verify-prod">Try it on any artifact &rarr;</a> &middot; <a href="/spec/kolm-format-v1">Read the format spec &rarr;</a></span>
+<section class="fr-section fr-section--cinema fr-reveal" aria-label="Inside a kolm artifact">
+  <div class="fr-container">
+    <span class="fr-eyebrow">The .kolm bundle</span>
+    <h2 class="fr-h2">One file. No proprietary loader.</h2>
+    <p class="fr-lede"><code>unzip</code> it on any machine. The structure is self-describing, every field hash-pinned, every claim verifiable offline in two seconds.</p>
+
+    <div class="kolm-diagram">
+      <figure class="kolm-diagram__schematic" aria-label="Architectural diagram of the .kolm artifact bundle">
+        <svg viewBox="0 0 640 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="kolm-diagram-title kolm-diagram-desc">
+          <title id="kolm-diagram-title">Architectural diagram of support.kolm</title>
+          <desc id="kolm-diagram-desc">A 5.2 GB signed ZIP containing spec.toml, weights, frozen eval, K-Score bakeoff, hash-chained receipts, manifest, and Ed25519 sidecar.</desc>
+          <defs>
+            <linearGradient id="kolm-page" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#faf6ec"/>
+              <stop offset="100%" stop-color="#f0eadd"/>
+            </linearGradient>
+            <pattern id="kolm-hatch" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(45)">
+              <line x1="0" y1="0" x2="0" y2="4" stroke="#1d2d44" stroke-width="0.5" stroke-opacity="0.18"/>
+            </pattern>
+          </defs>
+
+          <!-- Outer bundle (the .kolm zip) -->
+          <rect x="40" y="40" width="560" height="440" rx="3" fill="url(#kolm-page)" stroke="#1d2d44" stroke-width="1.4"/>
+          <line x1="40" y1="78" x2="600" y2="78" stroke="#1d2d44" stroke-width="0.5" stroke-opacity="0.32"/>
+
+          <!-- Header band -->
+          <text x="58" y="64" fill="#16151a" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="14" font-weight="600">support.kolm</text>
+          <text x="582" y="64" fill="#6b6960" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11" letter-spacing="1.2" text-anchor="end">5.2 GB · ZIP · SIGNED</text>
+
+          <!-- 7 entries as stacked card rows -->
+          <!-- 1. spec.toml -->
+          <g>
+            <rect x="58" y="98" width="524" height="44" rx="2" fill="#ffffff" stroke="#1d2d44" stroke-width="0.6" stroke-opacity="0.30"/>
+            <rect x="58" y="98" width="6" height="44" fill="#1d2d44"/>
+            <text x="80" y="120" fill="#16151a" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="600">spec.toml</text>
+            <text x="80" y="136" fill="#6b6960" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11">teacher · student · quant recipe</text>
+            <text x="568" y="128" fill="#1d2d44" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11" text-anchor="end">2.1 KB</text>
+          </g>
+
+          <!-- 2. weights/ -->
+          <g>
+            <rect x="58" y="150" width="524" height="68" rx="2" fill="url(#kolm-hatch)" stroke="#1d2d44" stroke-width="0.6" stroke-opacity="0.30"/>
+            <rect x="58" y="150" width="6" height="68" fill="#1d2d44"/>
+            <text x="80" y="172" fill="#16151a" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="600">weights/</text>
+            <text x="80" y="188" fill="#6b6960" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11">q4_0.safetensors · NF4 + double</text>
+            <text x="80" y="204" fill="#6b6960" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11">q4_0.metadata · runtime-neutral</text>
+            <text x="568" y="188" fill="#1d2d44" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11" text-anchor="end">3.8 GB</text>
+          </g>
+
+          <!-- 3. eval.frozen.jsonl -->
+          <g>
+            <rect x="58" y="226" width="524" height="40" rx="2" fill="#ffffff" stroke="#1d2d44" stroke-width="0.6" stroke-opacity="0.30"/>
+            <rect x="58" y="226" width="6" height="40" fill="#1d2d44"/>
+            <text x="80" y="246" fill="#16151a" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="600">eval.frozen.jsonl</text>
+            <text x="80" y="261" fill="#6b6960" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11">240 rows · hash-pinned · immutable</text>
+            <text x="568" y="254" fill="#1d2d44" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11" text-anchor="end">88 KB</text>
+          </g>
+
+          <!-- 4. bakeoff/ -->
+          <g>
+            <rect x="58" y="274" width="524" height="40" rx="2" fill="#ffffff" stroke="#1d2d44" stroke-width="0.6" stroke-opacity="0.30"/>
+            <rect x="58" y="274" width="6" height="40" fill="#1d2d44"/>
+            <text x="80" y="294" fill="#16151a" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="600">bakeoff/k_score.summary</text>
+            <text x="80" y="309" fill="#6b6960" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11">K = 0.91 (gate ≥ 0.85) · per-row vs teacher</text>
+            <text x="568" y="302" fill="#1d2d44" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="700" text-anchor="end">0.91</text>
+          </g>
+
+          <!-- 5. receipts/ -->
+          <g>
+            <rect x="58" y="322" width="524" height="40" rx="2" fill="url(#kolm-hatch)" stroke="#1d2d44" stroke-width="0.6" stroke-opacity="0.30"/>
+            <rect x="58" y="322" width="6" height="40" fill="#1d2d44"/>
+            <text x="80" y="342" fill="#16151a" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="600">receipts/chain.sha256</text>
+            <text x="80" y="357" fill="#6b6960" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11">47,392 captures · root bf8a3d1c…</text>
+            <text x="568" y="350" fill="#1d2d44" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11" text-anchor="end">1.4 GB</text>
+          </g>
+
+          <!-- 6. manifest.json -->
+          <g>
+            <rect x="58" y="370" width="524" height="40" rx="2" fill="#ffffff" stroke="#1d2d44" stroke-width="0.6" stroke-opacity="0.30"/>
+            <rect x="58" y="370" width="6" height="40" fill="#1d2d44"/>
+            <text x="80" y="390" fill="#16151a" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="600">manifest.json</text>
+            <text x="80" y="405" fill="#6b6960" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11">sha256 of every path · K-Score breakdown</text>
+            <text x="568" y="398" fill="#1d2d44" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11" text-anchor="end">22 KB</text>
+          </g>
+
+          <!-- 7. sidecar.ed25519 (wax-seal treatment) -->
+          <g>
+            <rect x="58" y="418" width="524" height="48" rx="2" fill="#f4f0e8" stroke="#1d2d44" stroke-width="1.2"/>
+            <rect x="58" y="418" width="6" height="48" fill="#1d2d44"/>
+            <circle cx="552" cy="442" r="14" fill="#1d2d44" stroke="#16151a" stroke-width="0.6"/>
+            <text x="552" y="446" fill="#f4f0e8" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="9" font-weight="700" text-anchor="middle">Ed25519</text>
+            <text x="80" y="438" fill="#16151a" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="600">sidecar.ed25519</text>
+            <text x="80" y="455" fill="#6b6960" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11">64-byte signature over manifest.sha256</text>
+          </g>
+        </svg>
+        <figcaption class="kolm-diagram__caption">
+          <strong>support.kolm</strong> &middot; 5.2 GB &middot; 7 entries, all hash-pinned in <code>manifest.json</code>
+        </figcaption>
+      </figure>
+
+      <div class="kolm-diagram__sidebar">
+        <dl class="spec-sheet">
+          <div class="spec-sheet__row"><dt class="spec-sheet__label">spec</dt><dd class="spec-sheet__value">Teacher, student, quant recipe.<em>claude-opus-4-7 &rarr; qwen-2.5-7b-instruct, bnb 0.49.2 NF4 + double</em></dd></div>
+          <div class="spec-sheet__row"><dt class="spec-sheet__label">weights</dt><dd class="spec-sheet__value">Quantized parameters, runtime-neutral.<em>q4_0.safetensors (3.8 GB), q4_0.metadata (12 KB)</em></dd></div>
+          <div class="spec-sheet__row"><dt class="spec-sheet__label">eval</dt><dd class="spec-sheet__value">Frozen evaluation set, immutable after compile.<em>240 rows, hash-pinned to manifest.json</em></dd></div>
+          <div class="spec-sheet__row"><dt class="spec-sheet__label">bakeoff</dt><dd class="spec-sheet__value">K-Score per row vs teacher; the gate that decided shipping.<em>K = 0.91, gate 0.85 &check;, accuracy 0.94, safety 0.96, latency 0.88, cost 0.93</em></dd></div>
+          <div class="spec-sheet__row"><dt class="spec-sheet__label">receipts</dt><dd class="spec-sheet__value">Hash-chained capture transcript from the source namespace.<em>47,392 captures, root <code>bf8a3d1c…</code></em></dd></div>
+          <div class="spec-sheet__row"><dt class="spec-sheet__label">manifest</dt><dd class="spec-sheet__value">SHA-256 of every path, plus the K-Score breakdown.<em>22 KB, hashes match every byte on disk</em></dd></div>
+          <div class="spec-sheet__row"><dt class="spec-sheet__label">sidecar</dt><dd class="spec-sheet__value">Ed25519 signature over <code>manifest.sha256</code>.<em>key kolm-registry-prod-2026, sig <code>7c4a…e1b3</code>, valid offline</em></dd></div>
+        </dl>
+        <p class="kolm-diagram__cta">
+          Verifies offline in ~2 s. <a href="/verify-prod">Try it on any artifact &rarr;</a> &middot; <a href="/spec/kolm-format-v1">Read the format spec &rarr;</a>
+        </p>
+        <style>
+          .kolm-diagram__sidebar { display: flex; flex-direction: column; gap: 24px; }
+          .kolm-diagram__cta { margin: 0; font-family: var(--ks-mono); font-size: 12.5px; color: var(--ink-3); }
+          .kolm-diagram__cta a { color: var(--brand-primary); border-bottom: 1px solid rgba(29,45,68,0.30); padding-bottom: 1px; }
+          .kolm-diagram__cta a:hover { border-bottom-color: var(--brand-primary); }
+        </style>
       </div>
     </div>
-
-    <style>
-      .fr-inline { font-family: var(--ks-mono); font-size: 0.78em; padding: 1px 7px; border-radius: 5px; background: rgba(29,45,68,0.06); border: 1px solid rgba(29,45,68,0.16); color: var(--brand-primary); vertical-align: 0.08em; }
-      .w837-spec { margin-top: 40px; background: var(--surface-1); border: 1px solid var(--line-2); border-radius: 12px; padding: clamp(28px, 3vw, 44px); box-shadow: 0 1px 0 rgba(255,255,255,0.7) inset, 0 1px 2px rgba(22,21,19,0.04); }
-      .w837-spec__head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 16px; padding-bottom: 18px; margin-bottom: 18px; border-bottom: 1px solid var(--line-1); }
-      .w837-spec__title { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
-      .w837-spec__title code { font-family: var(--ks-mono); font-size: 17px; font-weight: 600; color: var(--ink-1); background: transparent; border: 0; padding: 0; letter-spacing: -0.01em; }
-      .w837-spec__meta { font-family: var(--ks-mono); font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
-      .w837-spec__sub { font-family: var(--ks-sans); font-size: 13.5px; color: var(--ink-3); }
-      .w837-spec__list { margin: 0; padding: 0; }
-      .w837-spec__row { display: grid; grid-template-columns: minmax(160px, 200px) 1fr; gap: 28px; padding: 18px 0; border-bottom: 1px dashed var(--line-1); }
-      .w837-spec__row:last-child { border-bottom: none; }
-      .w837-spec__row dt { margin: 0; }
-      .w837-spec__row dt code { font-family: var(--ks-mono); font-size: 13.5px; color: var(--ink-1); background: transparent; border: 0; padding: 0; font-weight: 500; }
-      .w837-spec__row dd { margin: 0; color: var(--ink-1); font-size: 15px; line-height: 1.55; }
-      .w837-spec__row dd code { font-family: var(--ks-mono); font-size: 0.92em; color: var(--brand-primary); background: transparent; border: 0; padding: 0; }
-      .w837-spec__row dd strong { color: var(--ink-1); font-weight: 600; }
-      .w837-spec__fact { display: block; margin-top: 6px; font-family: var(--ks-mono); font-size: 12.5px; color: var(--ink-3); letter-spacing: -0.002em; }
-      .w837-spec__foot { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 16px; padding-top: 22px; margin-top: 16px; border-top: 1px solid var(--line-1); font-family: var(--ks-mono); font-size: 12px; color: var(--ink-3); }
-      .w837-spec__foot code { font-family: var(--ks-mono); color: var(--ink-1); background: rgba(29,45,68,0.05); padding: 1px 6px; border-radius: 4px; border: 1px solid rgba(29,45,68,0.12); }
-      .w837-spec__links a { color: var(--brand-primary); border-bottom: 1px solid rgba(29,45,68,0.32); padding-bottom: 1px; }
-      .w837-spec__links a:hover { border-bottom-color: var(--brand-primary); }
-      @media (max-width: 720px) {
-        .w837-spec__row { grid-template-columns: 1fr; gap: 6px; }
-      }
-    </style>
   </div>
 </section>
 

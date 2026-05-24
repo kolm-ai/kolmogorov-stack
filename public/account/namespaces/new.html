@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<style>html,body{background:#08090c;color:#e8e3d6}html{color-scheme:dark}</style>
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <title>New namespace - Account - kolm.ai</title>
 <meta name="description" content="Create a kolm.ai namespace. Optional fingerprint sharing (anonymized term-bag hashes only, opt-in by default OFF) lets new namespaces in your vertical bootstrap from sibling warm-starts.">
@@ -46,7 +46,7 @@ label.field>span.help{display:block;color:var(--ink-faint);font-size:11.5px;marg
 .consent .small{display:block;color:var(--ink-faint);font-size:11.5px;margin-top:6px;margin-left:24px;font-family:var(--mono)}
 .consent .badge{display:inline-block;background:var(--bg-card);color:var(--ink-faint);font-family:var(--mono);font-size:10.5px;padding:2px 6px;border-radius:3px;margin-left:6px;border:1px solid var(--line)}
 #create-status{font-size:12px;color:var(--ink-mute);margin-left:10px}
-.skip-link{position:absolute;left:-9999px;top:0;background:var(--ink,#faf2e1);color:var(--bg,#08090c);padding:8px 12px;font-family:var(--mono);font-size:12px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--ink,#e8e3d6);color:var(--bg,#08090c);padding:8px 12px;font-family:var(--mono);font-size:12px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
 .skip-link:focus{left:0}
 @media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}}
 </style>
@@ -170,7 +170,7 @@ kolm namespace warm-start-suggest --namespace my-support-bot
 
   function setStatus(msg, ok){
     status.textContent=msg||'';
-    status.style.color=ok===true?'#7ef0d2':(ok===false?'#ff6b91':'var(--ink-faint)');
+    status.style.color=ok===true?'#7d96c0':(ok===false?'#ff6b91':'var(--ink-faint)');
   }
 
   // Hard-default: checkbox always starts unchecked. We assert here too in
