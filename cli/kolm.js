@@ -8735,6 +8735,13 @@ async function cmdVerify(args) {
   // manifest's output_schema block + (optional) `--sample <text|@file>` for
   // a parse round-trip. Surfaces the result alongside the verify verdict.
   const validateSchemaFlag = args.includes('--validate-schema');
+  // W736 — `--guardrails` replays the manifest.guardrails block against the
+  // artifact's example_traces (or any analogous fixture array carrying
+  // .output strings) and surfaces violations alongside the verify verdict.
+  // The verdict downgrades to "fail" when any block-rule fires; warn-rules
+  // are surfaced but do not flip the verdict (a warn is observational by
+  // design). Absent manifest.guardrails → skipped:'no_guardrails_defined'.
+  const validateGuardrailsFlag = args.includes('--guardrails');
   let sampleSchemaText = null;
   const sampleIdx = args.indexOf('--sample');
   if (sampleIdx >= 0 && args[sampleIdx + 1] && !args[sampleIdx + 1].startsWith('--')) {
@@ -8760,6 +8767,27 @@ async function cmdVerify(args) {
   const schemaCheck = validateSchemaFlag
     ? await _w809VerifyOutputSchema(result.manifest, sampleSchemaText)
     : null;
+  // W736 — run the guardrail replay only when --guardrails is set. We grab
+  // example_traces from the manifest (the canonical fixture-set slot) and
+  // fall back to manifest.evals.cases when the artifact only ships eval
+  // cases. The W736 module surfaces a skipped:'no_example_traces' verdict
+  // when neither source carries a string output, which the CLI prints as
+  // a yellow warning rather than a fail.
+  let guardrailsCheck = null;
+  if (validateGuardrailsFlag) {
+    try {
+      const w736 = await import('../src/guardrails.js');
+      const rules = (result.manifest && result.manifest.guardrails) || null;
+      const traces = (result.manifest && Array.isArray(result.manifest.example_traces))
+        ? result.manifest.example_traces
+        : ((result.manifest && result.manifest.evals && Array.isArray(result.manifest.evals.cases))
+            ? result.manifest.evals.cases.map(c => ({ output: c.output || c.expected || c.response }))
+            : []);
+      guardrailsCheck = w736.verifyGuardrailsAgainstTraces(rules, traces);
+    } catch (e) {
+      guardrailsCheck = { ok: false, error: 'guardrails_module_unavailable', detail: String((e && e.message) || e), version: 'w736-v1' };
+    }
+  }
   // W339 — single source-of-truth gate. The binder still runs its full set
   // of checks (signature, receipt chain, exports, holdouts, attestations);
   // productionReady() collapses the four "is this safe to ship" gates the
@@ -8777,7 +8805,12 @@ async function cmdVerify(args) {
   const schemaFail = !!(schemaCheck && schemaCheck.present
     && (!schemaCheck.ok
         || (schemaCheck.sample_parse && !schemaCheck.sample_parse.ok)));
-  const combinedFail = result.verdict === 'fail' || !prodVerdict.ok || schemaFail;
+  // W736 — block-rule violations downgrade the verdict to fail. Warn-only
+  // violations are surfaced but do NOT flip the verdict (warn is
+  // observational by design — useful for sampling rules / pre-launch tuning).
+  const guardrailsFail = !!(guardrailsCheck && Array.isArray(guardrailsCheck.violations)
+    && guardrailsCheck.violations.some(v => v && v.action === 'block'));
+  const combinedFail = result.verdict === 'fail' || !prodVerdict.ok || schemaFail || guardrailsFail;
   if (jsonFlag) {
     console.log(JSON.stringify({
       ok: !combinedFail,
@@ -8790,6 +8823,7 @@ async function cmdVerify(args) {
       gates: prodVerdict.gates,
       confidential_compute: showAttestation ? ccBlock : undefined,
       output_schema_check: schemaCheck || undefined,
+      guardrails_check: guardrailsCheck || undefined,
     }, null, 2));
   } else {
     console.log(`verdict: ${combinedFail ? 'fail' : result.verdict}`);
@@ -8838,6 +8872,25 @@ async function cmdVerify(args) {
       }
       if (schemaCheck.sample_parse) {
         console.log(`  sample:   ${schemaCheck.sample_parse.ok ? 'pass' : 'fail (' + (schemaCheck.sample_parse.error || 'unknown') + ')'}`);
+      }
+    }
+    // W736 — guardrails replay pretty-print.
+    if (guardrailsCheck) {
+      console.log('');
+      console.log('guardrails:');
+      if (guardrailsCheck.skipped) {
+        console.log(`  skipped:  ${guardrailsCheck.skipped}`);
+      } else {
+        console.log(`  ok:       ${guardrailsCheck.ok}`);
+        console.log(`  total:    ${guardrailsCheck.total}`);
+        const violations = guardrailsCheck.violations || [];
+        console.log(`  violations: ${violations.length}`);
+        for (const v of violations.slice(0, 10)) {
+          console.log(`    - rule=${v.rule_name || '(none)'} action=${v.action} trace_idx=${v.trace_idx}`);
+        }
+        if (violations.length > 10) {
+          console.log(`    ... and ${violations.length - 10} more`);
+        }
       }
     }
     console.log('');
@@ -31443,6 +31496,945 @@ async function cmdW734RagCapture(args) {
   process.exit(EXIT.BAD_ARGS);
 }
 
+// W735 — Agent / tool-use capture CLI dispatcher.
+//
+// Distinct-named (cmdW735ToolPatterns) per the W724/W726/W727/W728/W729/W730/
+// W731/W732/W733/W734 precedent so parallel W735-sibling agents (W736 guardrail,
+// W737 marketplace, W738 ...) cannot collide on this symbol.
+//
+// Subcommands:
+//   `kolm tool patterns   --namespace <ns> [--top-n N]`
+//                       — extractToolPatterns over local capture rows;
+//                         returns JSON top-N most-called tools per namespace.
+//   `kolm tool acceptance --namespace <ns>`
+//                       — accumulateAcceptanceMetrics over local capture
+//                         rows; returns local_handling_rate + Wilson CI when
+//                         sample_size >= 100; honest null otherwise.
+//   `kolm tool status`  — emit TOOL_USE_VERSION + TOOL_RUNTIME_VERSION and
+//                         the local capture-row count with tool_calls present.
+//
+// Honest fallbacks:
+//   * src/tool-use-capture.js missing       → EXIT.MISSING_PREREQ + envelope
+//   * KOLM_DATA_DIR unreadable              → EXIT.NOT_FOUND + envelope
+//   * no captures with tool_calls present   → EXIT.OK + envelope
+//                                              { ok:false, error:
+//                                              'no_captures_with_tools',
+//                                              hint:'capture some calls with
+//                                              tool_calls first' }
+//   * Unknown subcommand                    → EXIT.BAD_ARGS + usage line
+//
+// Privacy: prints tool NAMES + COUNTS, never raw tool arguments or tool
+// results. The persisted capture row carries the arguments (it IS training
+// data); the CLI surface stays at the aggregate level.
+async function cmdW735ToolPatterns(args) {
+  const sub = (args && args[0]) || '';
+  const fsMod = await import('node:fs');
+  const pathMod = await import('node:path');
+
+  // Common: load the two W735 modules. Bail with an honest envelope when
+  // either is missing (which would mean a broken install).
+  async function loadModules() {
+    try {
+      const tu = await import('../src/tool-use-capture.js');
+      const tr = await import('../src/tool-runtime.js');
+      return { ok: true, tu, tr };
+    } catch (e) {
+      const envelope = {
+        ok: false,
+        error: 'tool_use_modules_missing',
+        detail: (e && e.message) || String(e),
+        hint: 'src/tool-use-capture.js + src/tool-runtime.js must be importable; reinstall the kolm CLI',
+        version: 'w735-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.MISSING_PREREQ);
+      return { ok: false };
+    }
+  }
+
+  // Common: read the local observations.jsonl into a captures array. Returns
+  // {ok:true, captures} OR {ok:false, error} envelope on the data dir.
+  function readLocalCaptures() {
+    const dataDir = process.env.KOLM_DATA_DIR
+      || (process.env.HOME && pathMod.join(process.env.HOME, '.kolm'))
+      || (process.env.USERPROFILE && pathMod.join(process.env.USERPROFILE, '.kolm'))
+      || null;
+    if (!dataDir || !fsMod.existsSync(dataDir)) {
+      return { ok: false, error: 'no_local_data_dir',
+        hint: 'set KOLM_DATA_DIR or sign up so kolm has a place to look for captures' };
+    }
+    const obsPath = pathMod.join(dataDir, 'observations.jsonl');
+    if (!fsMod.existsSync(obsPath)) {
+      return { ok: true, captures: [] };
+    }
+    const captures = [];
+    try {
+      const lines = fsMod.readFileSync(obsPath, 'utf8').split('\n').filter(Boolean);
+      for (const line of lines) {
+        try { captures.push(JSON.parse(line)); }
+        catch (_e) { /* skip malformed rows — they don't tell us anything about tool use */ }
+      }
+    } catch (e) {
+      return { ok: false, error: 'observations_read_failed',
+        hint: (e && e.message) || String(e) };
+    }
+    return { ok: true, captures };
+  }
+
+  // ---- subcommand: status ----
+  if (sub === 'status') {
+    const m = await loadModules();
+    if (!m.ok) return;
+    const local = readLocalCaptures();
+    const withTools = (local.ok ? local.captures : [])
+      .filter((c) => c && Array.isArray(c.tool_calls) && c.tool_calls.length > 0).length;
+    const out = {
+      ok: true,
+      tool_use_version: m.tu.TOOL_USE_VERSION,
+      tool_runtime_version: m.tr.TOOL_RUNTIME_VERSION,
+      local_captures_with_tools: local.ok ? withTools : null,
+      hint: local.ok
+        ? `${withTools} local capture rows carry tool_calls`
+        : 'no local KOLM_DATA_DIR observations.jsonl readable; remote-only mode',
+    };
+    console.log(JSON.stringify(out, null, 2));
+    return;
+  }
+
+  // ---- subcommand: patterns ----
+  if (sub === 'patterns') {
+    const m = await loadModules();
+    if (!m.ok) return;
+    // Parse the flags inline — keeps the dispatcher self-contained for the
+    // parallel-wave merge (same precedent as cmdW734RagCapture).
+    const rest = args.slice(1);
+    const flags = {};
+    for (let i = 0; i < rest.length; i++) {
+      const a = rest[i];
+      if (a === '--namespace')      flags.namespace = rest[++i];
+      else if (a === '--top-n')     flags.top_n = Number(rest[++i]);
+      else if (typeof a === 'string' && a.startsWith('--namespace=')) flags.namespace = a.slice(12);
+      else if (typeof a === 'string' && a.startsWith('--top-n='))     flags.top_n = Number(a.slice(8));
+    }
+    const local = readLocalCaptures();
+    if (!local.ok) {
+      const envelope = {
+        ok: false,
+        error: local.error,
+        hint: local.hint,
+        version: 'w735-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.NOT_FOUND);
+      return;
+    }
+    const patterns = m.tu.extractToolPatterns(local.captures, {
+      namespace: flags.namespace || null,
+      top_n: Number.isFinite(flags.top_n) && flags.top_n > 0 ? flags.top_n : 20,
+    });
+    if (patterns.captures_with_tools === 0) {
+      const envelope = {
+        ok: false,
+        error: 'no_captures_with_tools',
+        hint: 'capture some calls with tool_calls first (the wrapper proxy auto-parses Anthropic/OpenAI/generic shapes)',
+        namespace: flags.namespace || null,
+        scanned_captures: patterns.total_captures,
+        version: 'w735-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      return;
+    }
+    const out = {
+      ok: true,
+      namespace: patterns.namespace,
+      total_captures: patterns.total_captures,
+      captures_with_tools: patterns.captures_with_tools,
+      unique_tool_count: patterns.unique_tool_count,
+      top: patterns.top,
+      version: 'w735-v1',
+    };
+    console.log(JSON.stringify(out, null, 2));
+    return;
+  }
+
+  // ---- subcommand: acceptance ----
+  if (sub === 'acceptance') {
+    const m = await loadModules();
+    if (!m.ok) return;
+    const rest = args.slice(1);
+    const flags = {};
+    for (let i = 0; i < rest.length; i++) {
+      const a = rest[i];
+      if (a === '--namespace')      flags.namespace = rest[++i];
+      else if (typeof a === 'string' && a.startsWith('--namespace=')) flags.namespace = a.slice(12);
+    }
+    const local = readLocalCaptures();
+    if (!local.ok) {
+      const envelope = {
+        ok: false,
+        error: local.error,
+        hint: local.hint,
+        version: 'w735-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.NOT_FOUND);
+      return;
+    }
+    // Filter to namespace + tool_calls-bearing captures. The honest
+    // contract: a capture row with no tool_calls is NOT a "tool call the
+    // student handled locally" — it's a non-agent turn that doesn't
+    // belong in the denominator.
+    const captures = local.captures.filter((c) => {
+      if (!c || typeof c !== 'object') return false;
+      if (flags.namespace && (c.corpus_namespace || c.namespace) !== flags.namespace) return false;
+      return Array.isArray(c.tool_calls) && c.tool_calls.length > 0;
+    });
+    // Count handled-locally vs escalated. The capture row carries
+    // tool_parse_source — when set to 'preparsed' the wrapper proxy
+    // observed the student handle it; anything else (anthropic/openai/
+    // generic) means the teacher LLM produced the tool_calls. This is
+    // the honest split.
+    let handledLocally = 0;
+    let escalated = 0;
+    for (const c of captures) {
+      const src = c.tool_parse_source || c.parse_source || 'none';
+      if (src === 'preparsed' || src === 'local' || src === 'student') handledLocally += 1;
+      else escalated += 1;
+    }
+    const metrics = m.tr.accumulateAcceptanceMetrics({
+      captures,
+      sample_size: captures.length,
+      n_handled_locally: handledLocally,
+      n_escalated_to_teacher: escalated,
+    });
+    if (captures.length === 0) {
+      const envelope = {
+        ok: false,
+        error: 'no_captures_with_tools',
+        hint: 'capture some calls with tool_calls first (the wrapper proxy auto-parses Anthropic/OpenAI/generic shapes)',
+        namespace: flags.namespace || null,
+        version: 'w735-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      return;
+    }
+    const out = {
+      ok: true,
+      namespace: flags.namespace || null,
+      version: 'w735-v1',
+      ...metrics,
+    };
+    console.log(JSON.stringify(out, null, 2));
+    return;
+  }
+
+  // ---- unknown subcommand ----
+  console.error('usage: kolm tool <patterns|acceptance|status>');
+  console.error('  patterns    — JSON top-N most-called tools per namespace');
+  console.error('  acceptance  — local_handling_rate + Wilson CI (honest null when sample_size <100)');
+  console.error('  status      — TOOL_USE_VERSION + TOOL_RUNTIME_VERSION + local capture-row count');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// =============================================================================
+// W737 — Artifact Marketplace Expansion CLI dispatcher.
+//
+// Distinct-named (cmdW737Marketplace) per the W724/W726/W727/W728/W729/W730/
+// W731/W732/W733/W734/W735 precedent so parallel-wave agents on W735/W736/W738
+// cannot collide on this symbol when this file merges. Placed BELOW W735 +
+// ABOVE W738 (the future W736 dispatcher will slot in just before this one).
+//
+// IMPORTANT: legacy `cmdMarketplace` (line ~9744) owns `kolm marketplace
+// search|list|ls|install|inspect`. W737 introduces THREE NEW subcommands
+// (W737 search w/ vertical/task/hardware/min-kscore facets, publish, review)
+// that pivot around the W737 faceted-search + publisher submission surface.
+// The `case 'marketplace'` arm in main() pre-routes to W737 ONLY when the
+// caller passed --vertical / --task / --hardware / --min-kscore OR the
+// subcommand is 'publish' / 'review'; otherwise the legacy cmdMarketplace
+// handles search/list/install/inspect as before.
+//
+// Honest fallbacks:
+//   * src/marketplace.js missing       → MISSING_PREREQ + envelope
+//   * Search w/ no listings registered → ok:false + error:'marketplace_empty'
+//                                        + hint:'no artifacts registered yet'
+//   * publish/review missing API key   → MISSING_PREREQ + missing_api_key
+//   * Unknown subcommand               → BAD_ARGS + usage line
+//
+// Wire format: emits JSON envelopes on stdout so callers (tests, the docs
+// page snippet, automation) can pipe into jq.
+//
+// Privacy: review TEXT is sent raw to the server (it's the reviewer's
+// authored content). The CLI does NOT echo the raw text back to stdout —
+// only the persisted review row's metadata (rating, submitted_at).
+async function cmdW737Marketplace(args) {
+  const sub = (args && args[0]) || '';
+  const rest = args.slice(1);
+  const get = (flag) => { const i = rest.indexOf(flag); return i >= 0 ? rest[i + 1] : null; };
+  const BASE = (process.env.KOLM_BASE_URL || process.env.KOLM_BASE || 'https://kolm.ai').replace(/\/$/, '');
+  const API_KEY = process.env.KOLM_API_KEY || process.env.KOLM_KEY || '';
+
+  // Load the W737 module up-front; bail with an honest envelope when missing.
+  async function loadModule() {
+    try {
+      return await import('../src/marketplace.js');
+    } catch (e) {
+      const envelope = {
+        ok: false,
+        error: 'marketplace_module_missing',
+        detail: (e && e.message) || String(e),
+        hint: 'src/marketplace.js must be importable; reinstall the kolm CLI',
+        version: 'w737-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.MISSING_PREREQ);
+      return null;
+    }
+  }
+
+  // ---- subcommand: search ----
+  if (sub === 'search') {
+    const vertical = get('--vertical');
+    const task = get('--task') || get('--task-type');
+    const hardware = get('--hardware') || get('--hardware-target');
+    const minKscoreRaw = get('--min-kscore') || get('--min-k');
+    const minKscore = minKscoreRaw != null ? Number(minKscoreRaw) : null;
+    // Build the search URL. Try HTTP first (so a live deploy is the source of
+    // truth); fall back to local-module if the network is unreachable.
+    const params = new URLSearchParams();
+    if (vertical) params.set('vertical', vertical);
+    if (task) params.set('task_type', task);
+    if (hardware) params.set('hardware_target', hardware);
+    if (minKscore != null && Number.isFinite(minKscore)) params.set('min_kscore', String(minKscore));
+    const qs = params.toString();
+    let envelope = null;
+    try {
+      const url = `${BASE}/v1/marketplace/search${qs ? '?' + qs : ''}`;
+      const r = await fetch(url, { headers: { accept: 'application/json' } });
+      envelope = await r.json();
+    } catch (_netErr) {
+      // Network unreachable — fall back to the local module so tests and
+      // air-gapped boxes still get a deterministic envelope.
+      const mod = await loadModule();
+      if (!mod) return;
+      try {
+        envelope = await mod.searchArtifacts({
+          vertical: vertical || undefined,
+          task_type: task || undefined,
+          hardware_target: hardware || undefined,
+          min_kscore: (minKscore != null && Number.isFinite(minKscore)) ? minKscore : undefined,
+        });
+        // Mirror the route's honest-empty envelope when nothing matches.
+        if (!envelope.results || envelope.results.length === 0) {
+          envelope = {
+            ok: false,
+            error: 'marketplace_empty',
+            hint: envelope.all_count === 0
+              ? 'no artifacts registered yet'
+              : 'no artifacts match the filter',
+            version: envelope.version,
+            results: [],
+            total: 0,
+            facets: envelope.facets,
+            all_count: envelope.all_count,
+          };
+        }
+      } catch (e) {
+        envelope = {
+          ok: false,
+          error: 'marketplace_search_failed',
+          detail: (e && e.message) || String(e),
+          version: 'w737-v1',
+        };
+      }
+    }
+    console.log(JSON.stringify(envelope, null, 2));
+    if (!envelope || envelope.ok === false) {
+      // marketplace_empty is NOT a hard error — exit 0 (the envelope speaks
+      // for itself; the CLI's job is to surface the truth, not crash on it).
+      if (envelope && envelope.error === 'marketplace_empty') return;
+      process.exit(EXIT.EXECUTION);
+    }
+    return;
+  }
+
+  // ---- subcommand: publish ----
+  if (sub === 'publish') {
+    const cid = get('--cid');
+    const vertical = get('--vertical');
+    const task = get('--task') || get('--task-type');
+    const hardware = get('--hardware') || get('--hardware-target');
+    const priceUsdRaw = get('--price');
+    const priceUsd = priceUsdRaw != null ? Number(priceUsdRaw) : 0;
+    const price_micro_usd_per_call = Number.isFinite(priceUsd)
+      ? Math.max(0, Math.round(priceUsd * 1e6))
+      : 0;
+    if (!cid || !vertical || !task || !hardware) {
+      console.error('usage: kolm marketplace publish --cid <cid> --vertical <v> --task <t> --hardware <h> [--price <usd>]');
+      console.error('  vertical:  medical | legal | code | finance | support | general');
+      console.error('  task:      extraction | generation | reasoning | support');
+      console.error('  hardware:  m-series | rtx | h100 | cpu');
+      console.error('  price:     USD per call; default 0 (free)');
+      process.exit(EXIT.BAD_ARGS);
+      return;
+    }
+    if (!API_KEY) {
+      const envelope = {
+        ok: false,
+        error: 'missing_api_key',
+        hint: 'set KOLM_API_KEY (or KOLM_KEY) and re-run; or run `kolm login`',
+        version: 'w737-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.MISSING_PREREQ);
+      return;
+    }
+    let envelope = null;
+    try {
+      const r = await fetch(`${BASE}/v1/marketplace/listings`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'authorization': `Bearer ${API_KEY}`,
+        },
+        body: JSON.stringify({
+          cid, vertical, task_type: task, hardware_target: hardware,
+          price_micro_usd_per_call,
+          manifest: { name: cid }, // minimal manifest; richer publish flows ride compile
+        }),
+      });
+      envelope = await r.json();
+      envelope.http_status = r.status;
+    } catch (e) {
+      envelope = {
+        ok: false,
+        error: 'marketplace_publish_failed',
+        detail: (e && e.message) || String(e),
+        hint: 'check KOLM_BASE_URL + network connectivity',
+        version: 'w737-v1',
+      };
+    }
+    console.log(JSON.stringify(envelope, null, 2));
+    if (!envelope || envelope.ok === false) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ---- subcommand: review ----
+  if (sub === 'review') {
+    const cid = get('--cid');
+    const starsRaw = get('--stars') || get('--rating');
+    const stars = starsRaw != null ? Number(starsRaw) : NaN;
+    const text = get('--text');
+    if (!cid || !Number.isFinite(stars) || !text) {
+      console.error('usage: kolm marketplace review --cid <cid> --stars <1-5> --text "<review text>"');
+      process.exit(EXIT.BAD_ARGS);
+      return;
+    }
+    if (!API_KEY) {
+      const envelope = {
+        ok: false,
+        error: 'missing_api_key',
+        hint: 'set KOLM_API_KEY (or KOLM_KEY) and re-run; or run `kolm login`',
+        version: 'w737-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.MISSING_PREREQ);
+      return;
+    }
+    let envelope = null;
+    try {
+      const r = await fetch(`${BASE}/v1/marketplace/reviews`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'authorization': `Bearer ${API_KEY}`,
+        },
+        body: JSON.stringify({ artifact_cid: cid, rating: stars, text }),
+      });
+      envelope = await r.json();
+      envelope.http_status = r.status;
+    } catch (e) {
+      envelope = {
+        ok: false,
+        error: 'marketplace_review_failed',
+        detail: (e && e.message) || String(e),
+        version: 'w737-v1',
+      };
+    }
+    console.log(JSON.stringify(envelope, null, 2));
+    if (!envelope || envelope.ok === false) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ---- unknown subcommand ----
+  console.error('usage: kolm marketplace <search|publish|review> [W737 sub-flags]');
+  console.error('  search   --vertical <v> --task <t> --hardware <h> --min-kscore <n>');
+  console.error('  publish  --cid <cid> --vertical <v> --task <t> --hardware <h> [--price <usd>]');
+  console.error('  review   --cid <cid> --stars <1-5> --text "<review text>"');
+  console.error('  (legacy: kolm marketplace search|list|install|inspect runs via cmdMarketplace)');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// =============================================================================
+// W736 — Guardrail Compilation CLI dispatcher.
+//
+// Distinct-named (cmdW736Guardrails) per the W724/W726/W727/W728/W729/W730/
+// W731/W732/W733/W734/W735/W737 precedent so parallel-wave agents on
+// W737/W738 cannot collide on this symbol when this file merges. Placed
+// between W737 and W738 so the dispatcher hierarchy stays in numeric order;
+// W738 above already documents "future W736 / W737 dispatchers slot in
+// naturally" intent.
+//
+// Subcommands:
+//   validate [--file kolm.yaml]
+//     - Reads kolm.yaml (or --file <path>), extracts the top-level
+//       `guardrails:` block, runs validateGuardrailRules, prints the W736
+//       envelope. Exit 0 on ok:true, non-zero on validation errors.
+//   test --response <text> --file kolm.yaml
+//     - Loads guardrails from kolm.yaml and runs enforceGuardrails locally
+//       so a tenant can dry-run a rule against a fixture string before
+//       re-baking the artifact. Block action → non-zero exit; warn/rewrite
+//       pass-throughs exit 0 with the enforcement envelope on stdout.
+//
+// Honest fallback envelopes (all carry version:'w736-v1'):
+//   {ok:false, error:'no_guardrails_defined', hint:'add guardrails: [...] to kolm.yaml'}
+//   {ok:false, error:'kolm_yaml_not_found',   hint:'pass --file <path> or run from a repo with kolm.yaml'}
+//   {ok:false, error:'guardrails_module_unavailable', detail:...}
+//   {ok:false, error:'kolm_yaml_module_unavailable',  detail:...}
+//   {ok:false, error:'yaml_parse_failed',     detail:..., line:N}
+// =============================================================================
+async function cmdW736Guardrails(args) {
+  const sub = (args && args[0]) || '';
+  const fsMod = await import('node:fs');
+  const pathMod = await import('node:path');
+
+  // Resolve --file <path> (or fall back to ./kolm.yaml in cwd).
+  const fileIdx = args.indexOf('--file');
+  const filePath = (fileIdx >= 0 && args[fileIdx + 1] && !args[fileIdx + 1].startsWith('--'))
+    ? args[fileIdx + 1]
+    : pathMod.join(process.cwd(), 'kolm.yaml');
+
+  // Lazy-load the W736 + W732 modules. Both are local to the repo; if either
+  // fails to import we surface the structured error rather than letting the
+  // node default crash leak through.
+  let w736, w732;
+  try { w736 = await import('../src/guardrails.js'); }
+  catch (e) {
+    console.log(JSON.stringify({
+      ok: false,
+      error: 'guardrails_module_unavailable',
+      detail: String((e && e.message) || e),
+      hint: 'src/guardrails.js must be importable; reinstall the kolm CLI',
+      version: 'w736-v1',
+    }, null, 2));
+    process.exit(EXIT.MISSING_PREREQ);
+    return;
+  }
+  try { w732 = await import('../src/kolm-yaml.js'); }
+  catch (e) {
+    console.log(JSON.stringify({
+      ok: false,
+      error: 'kolm_yaml_module_unavailable',
+      detail: String((e && e.message) || e),
+      version: 'w736-v1',
+    }, null, 2));
+    process.exit(EXIT.MISSING_PREREQ);
+    return;
+  }
+
+  // Shared loader — returns the guardrails array from kolm.yaml, or an
+  // {_err, _exit} sentinel when the file is missing / the block is absent.
+  function loadGuardrailsOrEnvelope() {
+    if (!fsMod.existsSync(filePath)) {
+      return { _err: {
+        ok: false,
+        error: 'kolm_yaml_not_found',
+        path: filePath,
+        hint: 'pass --file <path> or run from a repo with kolm.yaml',
+        version: 'w736-v1',
+      }, _exit: EXIT.NOT_FOUND };
+    }
+    let yamlText;
+    try { yamlText = fsMod.readFileSync(filePath, 'utf8'); }
+    catch (e) {
+      return { _err: {
+        ok: false,
+        error: 'kolm_yaml_unreadable',
+        detail: String((e && e.message) || e),
+        path: filePath,
+        version: 'w736-v1',
+      }, _exit: EXIT.EXECUTION };
+    }
+    let parsed;
+    try { parsed = w732.parseKolmYaml(yamlText); }
+    catch (e) {
+      return { _err: {
+        ok: false,
+        error: (e && e.code) || 'yaml_parse_failed',
+        detail: String((e && e.message) || e),
+        line: (e && typeof e.line === 'number') ? e.line : null,
+        path: filePath,
+        version: 'w736-v1',
+      }, _exit: EXIT.EXECUTION };
+    }
+    const rules = parsed && Array.isArray(parsed.guardrails) ? parsed.guardrails : null;
+    if (!rules || rules.length === 0) {
+      return { _err: {
+        ok: false,
+        error: 'no_guardrails_defined',
+        path: filePath,
+        hint: 'add guardrails: [...] to kolm.yaml',
+        version: 'w736-v1',
+      }, _exit: EXIT.EXECUTION };
+    }
+    return { rules };
+  }
+
+  // ---- subcommand: validate ----
+  if (sub === 'validate') {
+    const loaded = loadGuardrailsOrEnvelope();
+    if (loaded._err) {
+      console.log(JSON.stringify(loaded._err, null, 2));
+      process.exit(loaded._exit);
+      return;
+    }
+    const validation = w736.validateGuardrailRules(loaded.rules);
+    const out = {
+      ok: validation.ok,
+      version: w736.GUARDRAILS_VERSION,
+      path: filePath,
+      rule_count: loaded.rules.length,
+      errors: validation.errors || [],
+    };
+    console.log(JSON.stringify(out, null, 2));
+    process.exit(validation.ok ? 0 : EXIT.EXECUTION);
+    return;
+  }
+
+  // ---- subcommand: test ----
+  if (sub === 'test') {
+    const respIdx = args.indexOf('--response');
+    const responseText = (respIdx >= 0 && args[respIdx + 1] && !args[respIdx + 1].startsWith('--'))
+      ? args[respIdx + 1] : null;
+    if (responseText === null) {
+      console.error('usage: kolm guardrails test --response "<text>" [--file kolm.yaml]');
+      process.exit(EXIT.BAD_ARGS);
+      return;
+    }
+    const loaded = loadGuardrailsOrEnvelope();
+    if (loaded._err) {
+      console.log(JSON.stringify(loaded._err, null, 2));
+      process.exit(loaded._exit);
+      return;
+    }
+    const enforced = w736.enforceGuardrails(responseText, loaded.rules);
+    const out = {
+      ok: enforced.ok,
+      version: w736.GUARDRAILS_VERSION,
+      path: filePath,
+      rule_count: loaded.rules.length,
+      response: enforced.response || null,
+      enforcements: enforced.enforcements || null,
+      error: enforced.error || null,
+      rule_name: enforced.rule_name || null,
+      matched_at: enforced.matched_at !== undefined ? enforced.matched_at : null,
+      hint: enforced.hint || null,
+    };
+    console.log(JSON.stringify(out, null, 2));
+    process.exit(enforced.ok ? 0 : EXIT.EXECUTION);
+    return;
+  }
+
+  // ---- unknown subcommand ----
+  console.error('usage: kolm guardrails <validate|test>');
+  console.error('  validate [--file kolm.yaml]                      lint the guardrails block');
+  console.error('  test --response "<text>" [--file kolm.yaml]      dry-run enforceGuardrails');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// =============================================================================
+// W738 — kolm.pipeline.yaml validate + compile + run dispatcher.
+//
+// Distinct-named (cmdW738Pipeline) per the W724/W726/W727/W728/W729/W730/W731/
+// W732/W733/W734/W735 precedent so parallel-wave agents on W736/W737 cannot
+// collide on this symbol when this file merges. Placed below W735 so the
+// future W736 / W737 dispatchers slot in naturally without touching W738.
+//
+// IMPORTANT: legacy `cmdPipeline` (line ~23666) ALREADY owns
+// `kolm pipeline tokenize|distill|compile|full` — those are the original
+// kolm distill-pipeline subcommands. W738 introduces THREE NEW subcommands
+// (validate, run, and `compile --file <kolm.pipeline.yaml>`) that pivot
+// around a kolm.pipeline.yaml document. The dispatcher front-door routes
+// by subcommand:
+//
+//   `kolm pipeline validate --file <kolm.pipeline.yaml>` → W738
+//   `kolm pipeline run      --file <…> --input <text>`   → W738
+//   `kolm pipeline compile  --file <kolm.pipeline.yaml>` → W738 (W738 owns
+//       the case when --file is present; legacy `pipeline compile` runs when
+//       no --file is passed — see the dispatch arm in main()).
+//
+// Honest fallbacks:
+//   * src/pipeline-yaml.js missing  → MISSING_PREREQ + envelope
+//   * --file path not found         → NOT_FOUND + pipeline_yaml_not_found
+//   * Parse error                   → GATE_FAIL + .code from W732 parser
+//   * Schema validation error       → GATE_FAIL + validation block surfaced
+//   * Unknown subcommand            → BAD_ARGS + usage line
+//   * Missing API key (for `run`)   → MISSING_PREREQ + missing_api_key
+// =============================================================================
+async function cmdW738Pipeline(args) {
+  const sub = (args && args[0]) || '';
+
+  // Shared helper: load the pipeline-yaml module + fall through to an honest
+  // envelope when the module isn't importable.
+  async function _loadYamlMod() {
+    try {
+      return await import('../src/pipeline-yaml.js');
+    } catch (e) {
+      const envelope = {
+        ok: false,
+        error: 'pipeline_yaml_module_missing',
+        detail: (e && e.message) || String(e),
+        hint: 'src/pipeline-yaml.js must be importable; reinstall the kolm CLI',
+        version: 'w738-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.MISSING_PREREQ);
+      return null;
+    }
+  }
+
+  // Shared helper: read --file. Exits with NOT_FOUND on missing path.
+  function _readPipelineFile(flagsLikeArgs) {
+    let filePath = null;
+    for (let i = 0; i < flagsLikeArgs.length; i++) {
+      if (flagsLikeArgs[i] === '--file' && i + 1 < flagsLikeArgs.length) {
+        filePath = path.resolve(flagsLikeArgs[i + 1]);
+        i++;
+      } else if (typeof flagsLikeArgs[i] === 'string' && flagsLikeArgs[i].startsWith('--file=')) {
+        filePath = path.resolve(flagsLikeArgs[i].slice('--file='.length));
+      }
+    }
+    if (!filePath) {
+      console.error('error: --file <kolm.pipeline.yaml> is required');
+      process.exit(EXIT.BAD_ARGS);
+      return null;
+    }
+    if (!fs.existsSync(filePath)) {
+      const envelope = {
+        ok: false,
+        error: 'pipeline_yaml_not_found',
+        path: filePath,
+        hint: 'create the file first or pass an absolute path',
+        version: 'w738-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.NOT_FOUND);
+      return null;
+    }
+    let yamlText;
+    try {
+      yamlText = fs.readFileSync(filePath, 'utf8');
+    } catch (e) {
+      const envelope = {
+        ok: false,
+        error: 'pipeline_yaml_read_failed',
+        path: filePath,
+        detail: (e && e.message) || String(e),
+        version: 'w738-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.EXECUTION);
+      return null;
+    }
+    return { filePath, yamlText };
+  }
+
+  // ──────────────────────── subcommand: validate ─────────────────────────────
+  if (sub === 'validate') {
+    const mod = await _loadYamlMod();
+    if (!mod) return;
+    const read = _readPipelineFile(args.slice(1));
+    if (!read) return;
+    let parsed;
+    try {
+      parsed = mod.parsePipelineYaml(read.yamlText);
+    } catch (e) {
+      const envelope = {
+        ok: false,
+        error: e && e.code ? e.code : 'pipeline_yaml_parse_failed',
+        path: read.filePath,
+        detail: (e && e.message) || String(e),
+        line: (e && typeof e.line === 'number') ? e.line : null,
+        version: mod.PIPELINE_YAML_VERSION,
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.GATE_FAIL);
+      return;
+    }
+    const validation = mod.validatePipelineYaml(parsed);
+    const out = {
+      ok: validation.ok,
+      version: mod.PIPELINE_YAML_VERSION,
+      path: read.filePath,
+      parsed,
+      validation,
+    };
+    console.log(JSON.stringify(out, null, 2));
+    if (!validation.ok) process.exit(EXIT.GATE_FAIL);
+    return;
+  }
+
+  // ──────────────────────── subcommand: compile (W738 sense) ─────────────────
+  // Emits a .kolm.pipeline JSON sidecar (parent_cids array included). The
+  // sidecar is the W739 lineage chain's source-of-truth. Distinct from the
+  // legacy `pipeline compile` (distill a corpus) — main() routes here only
+  // when --file is present.
+  if (sub === 'compile') {
+    const mod = await _loadYamlMod();
+    if (!mod) return;
+    let runnerMod;
+    try {
+      runnerMod = await import('../src/pipeline-runner.js');
+    } catch (e) {
+      const envelope = {
+        ok: false,
+        error: 'pipeline_runner_module_missing',
+        detail: (e && e.message) || String(e),
+        version: 'w738-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.MISSING_PREREQ);
+      return;
+    }
+    const read = _readPipelineFile(args.slice(1));
+    if (!read) return;
+    // Optional --out <path>: write the sidecar JSON to disk in addition to
+    // stdout. Stdout always gets the envelope so CI loops can capture both.
+    let outPath = null;
+    for (let i = 1; i < args.length; i++) {
+      if (args[i] === '--out' && i + 1 < args.length) {
+        outPath = path.resolve(args[i + 1]);
+        i++;
+      } else if (typeof args[i] === 'string' && args[i].startsWith('--out=')) {
+        outPath = path.resolve(args[i].slice('--out='.length));
+      }
+    }
+    const result = await runnerMod.compilePipeline(read.yamlText, {});
+    if (outPath && result.ok && result.sidecar) {
+      try {
+        fs.writeFileSync(outPath, JSON.stringify(result.sidecar, null, 2), 'utf8');
+        result.written_to = outPath;
+      } catch (e) {
+        result.write_error = (e && e.message) || String(e);
+      }
+    }
+    console.log(JSON.stringify(result, null, 2));
+    if (!result.ok) process.exit(EXIT.GATE_FAIL);
+    return;
+  }
+
+  // ──────────────────────── subcommand: run ──────────────────────────────────
+  // POST /v1/pipeline/run with the file contents + the user input. Returns
+  // the server envelope verbatim (latency_ms_breakdown included).
+  if (sub === 'run') {
+    const mod = await _loadYamlMod();
+    if (!mod) return;
+    const rest = args.slice(1);
+    const flags = {};
+    for (let i = 0; i < rest.length; i++) {
+      const a = rest[i];
+      if (a === '--file' && i + 1 < rest.length) { flags.file = rest[++i]; }
+      else if (typeof a === 'string' && a.startsWith('--file=')) { flags.file = a.slice('--file='.length); }
+      else if (a === '--input' && i + 1 < rest.length) { flags.input = rest[++i]; }
+      else if (typeof a === 'string' && a.startsWith('--input=')) { flags.input = a.slice('--input='.length); }
+    }
+    if (typeof flags.file !== 'string' || !flags.file
+        || typeof flags.input !== 'string') {
+      console.error('usage: kolm pipeline run --file <kolm.pipeline.yaml> --input <text>');
+      process.exit(EXIT.BAD_ARGS);
+      return;
+    }
+    const filePath = path.resolve(flags.file);
+    if (!fs.existsSync(filePath)) {
+      const envelope = {
+        ok: false,
+        error: 'pipeline_yaml_not_found',
+        path: filePath,
+        version: 'w738-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.NOT_FOUND);
+      return;
+    }
+    let yamlText;
+    try { yamlText = fs.readFileSync(filePath, 'utf8'); }
+    catch (e) {
+      const envelope = {
+        ok: false,
+        error: 'pipeline_yaml_read_failed',
+        path: filePath,
+        detail: (e && e.message) || String(e),
+        version: 'w738-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.EXECUTION);
+      return;
+    }
+    const base = (process.env.KOLM_BASE_URL || process.env.KOLM_BASE || 'https://kolm.ai').replace(/\/$/, '');
+    const apiKey = process.env.KOLM_API_KEY || process.env.KOLM_KEY || '';
+    if (!apiKey) {
+      const envelope = {
+        ok: false,
+        error: 'missing_api_key',
+        hint: 'set KOLM_API_KEY (or KOLM_KEY) and re-run; or run `kolm login`',
+        version: 'w738-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.MISSING_PREREQ);
+      return;
+    }
+    let res;
+    try {
+      res = await fetch(base + '/v1/pipeline/run', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({ pipeline_yaml: yamlText, input: flags.input }),
+      });
+    } catch (e) {
+      const envelope = {
+        ok: false,
+        error: 'pipeline_run_request_failed',
+        detail: (e && e.message) || String(e),
+        version: 'w738-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.EXECUTION);
+      return;
+    }
+    const text = await res.text().catch(() => '');
+    let body = null;
+    try { body = text ? JSON.parse(text) : null; } catch (_) { body = text; }
+    const out = {
+      ok: res.ok,
+      status: res.status,
+      server: body,
+      version: 'w738-v1',
+    };
+    console.log(JSON.stringify(out, null, 2));
+    if (!res.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── unknown subcommand ───────────────────────────────
+  console.error('usage: kolm pipeline <validate|compile|run> --file <kolm.pipeline.yaml> [--input <text>] [--out <sidecar.json>]');
+  console.error('  validate — parse + schema-check the kolm.pipeline.yaml');
+  console.error('  compile  — emit a .kolm.pipeline JSON sidecar (parent_cids included)');
+  console.error('  run      — POST /v1/pipeline/run end-to-end (auth-gated)');
+  process.exit(EXIT.BAD_ARGS);
+}
+
 async function main() {
   ensureLocalReceiptSecretInEnv();
   const [, , cmd, ...rest] = process.argv;
@@ -31477,6 +32469,14 @@ async function main() {
       // dispatcher (distinct symbol cmdW734RagCapture so parallel W731/W732/
       // W733 wave agents don't collide on this case).
       case 'rag': await withErrorContext('rag', () => cmdW734RagCapture(rest)); break;
+      // W735 — `kolm tool patterns|acceptance|status` routes to the agent /
+      // tool-use distillation dispatcher (distinct symbol cmdW735ToolPatterns
+      // so parallel W736/W737/W738 wave agents don't collide on this case).
+      case 'tool': await withErrorContext('tool', () => cmdW735ToolPatterns(rest)); break;
+      // W736 — `kolm guardrails validate|test` routes to the guardrail
+      // compilation dispatcher (distinct symbol cmdW736Guardrails so
+      // parallel W735/W737/W738 wave agents don't collide on this case).
+      case 'guardrails': await withErrorContext('guardrails', () => cmdW736Guardrails(rest)); break;
       // W456 — `kolm changelog` (public wave history; no auth).
       case 'changelog': await withErrorContext('changelog', () => cmdChangelog(rest)); break;
       // W409i — `kolm billing` (usage|plan|tiers|invoices).
@@ -31545,7 +32545,31 @@ async function main() {
       case 'publish':  await withErrorContext('publish',  () => cmdPublish(rest)); break;
       case 'pull':     await withErrorContext('pull',     () => cmdPull(rest)); break;
       case 'hub':      await withErrorContext('hub',      () => cmdHub(rest)); break;
-      case 'marketplace': await withErrorContext('marketplace', () => cmdMarketplace(rest)); break;
+      case 'marketplace': {
+        // W737 — pre-route the W737-specific sub-verbs (publish-with-cid,
+        // review) and search-with-facets to cmdW737Marketplace; legacy
+        // `kolm marketplace search|list|install|inspect|publish <file.kolm>`
+        // continues to flow through cmdMarketplace. The split rule:
+        //   - 'review'        → always W737 (legacy never had this verb)
+        //   - 'publish' --cid → W737 (legacy publish takes a positional file)
+        //   - 'search' + any of (--vertical, --task, --task-type, --hardware,
+        //                        --hardware-target, --min-kscore) → W737
+        // Everything else → legacy cmdMarketplace.
+        const __mpSub = (rest && rest[0]) || '';
+        const __mpUsesW737Facets = __mpSub === 'search' && (
+          rest.includes('--vertical') ||
+          rest.includes('--task') || rest.includes('--task-type') ||
+          rest.includes('--hardware') || rest.includes('--hardware-target') ||
+          rest.includes('--min-kscore')
+        );
+        const __mpW737Publish = __mpSub === 'publish' && rest.includes('--cid');
+        if (__mpSub === 'review' || __mpW737Publish || __mpUsesW737Facets) {
+          await withErrorContext('marketplace', () => cmdW737Marketplace(rest));
+        } else {
+          await withErrorContext('marketplace', () => cmdMarketplace(rest));
+        }
+        break;
+      }
       // W481 P1-12 - `kolm sdk` introspects the six official SDK targets so
       // `kolm sdk --help` no longer falls through to root help.
       case 'sdk':      await withErrorContext('sdk',      () => cmdSdk(rest)); break;
@@ -31737,7 +32761,23 @@ async function main() {
       case 'install-device': await withErrorContext('install-device', () => cmdInstallDevice(rest)); break;
       // W384 CLI consolidator — privacy / pipeline / agents / shell-init.
       case 'privacy':    await withErrorContext('privacy',    () => cmdPrivacy(rest)); break;
-      case 'pipeline':   await withErrorContext('pipeline',   () => cmdPipeline(rest)); break;
+      // W738 — `kolm pipeline {validate|run|compile --file ...}` routes to the
+      // distinct W738 dispatcher (cmdW738Pipeline) for kolm.pipeline.yaml
+      // composition. Legacy `kolm pipeline {tokenize|distill|compile|full}` for
+      // the W347 distill-pipeline corpus loop falls through to cmdPipeline.
+      // The branch keys on (a) explicit W738 verb (validate/run) or (b)
+      // `compile` paired with the W738 hallmark flag `--file` — neither
+      // collides with the legacy `pipeline compile --namespace <ns>` shape.
+      case 'pipeline': {
+        const sub0 = (rest && rest[0]) || '';
+        const hasFileFlag = Array.isArray(rest) && rest.some(a => a === '--file' || (typeof a === 'string' && a.startsWith('--file=')));
+        if (sub0 === 'validate' || sub0 === 'run' || (sub0 === 'compile' && hasFileFlag)) {
+          await withErrorContext('pipeline', () => cmdW738Pipeline(rest));
+        } else {
+          await withErrorContext('pipeline', () => cmdPipeline(rest));
+        }
+        break;
+      }
       case 'agents':     await withErrorContext('agents',     () => cmdAgents(rest)); break;
       case 'shell-init': await withErrorContext('shell-init', () => cmdShellInit(rest)); break;
       case '--version':

@@ -1,5 +1,5 @@
 // Recipe service worker: keeps the registry available offline.
-const CACHE = 'kolm-v48-2026-05-24-w731-w732-w733-w734-vscode-yaml-otel-rag';
+const CACHE = 'kolm-v49-2026-05-24-w735-w736-w737-w738-tools-guardrails-marketplace-pipelines';
 const PRECACHE = [
  '/device',
  '/design-tokens.css',

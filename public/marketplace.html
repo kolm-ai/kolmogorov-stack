@@ -526,6 +526,142 @@ $ curl -s https://kolm.ai/v1/marketplace/catalog.json | jq .signature_algo
 })();
 </script>
 
+<!-- W737 — Artifact Marketplace Expansion: faceted search panel.
+     The existing W664 cards above remain the curated kolm.ai seed catalog.
+     The W737 panel below opens publisher submissions, faceted search by the
+     four W737-1 axes (vertical, task type, K-Score, hardware target), and a
+     deep-link into the publisher docs. The two surfaces co-exist by design:
+     curated seed catalog (above) + publisher-extensible scaffold (here).
+     Render is fetch + minimal inline JS so this surface degrades gracefully
+     when /v1/marketplace/search is unreachable (empty state below). -->
+<section id="w737-faceted" aria-labelledby="w737-faceted-title" style="margin:48px auto 0;max-width:1200px;padding:32px 24px 0;border-top:1px solid rgba(255,255,255,0.06)">
+  <header style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px">
+    <h2 id="w737-faceted-title" style="font-size:22px;font-weight:500;letter-spacing:-0.018em;margin:0;color:#faf2e1">Browse publisher submissions</h2>
+    <a href="/docs/marketplace/publish" style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;color:#9aa3a8;text-decoration:none;border-bottom:1px dashed rgba(255,255,255,0.12)">Publish your .kolm &rarr;</a>
+  </header>
+  <p style="color:#9aa3a8;font-size:14px;margin:0 0 18px;max-width:760px">Faceted search by the W737-1 axes &mdash; vertical, task type, K-Score, and hardware target. The 70/30 publisher/platform revenue split is locked in the <a href="/docs/marketplace/publish#revenue-split" style="color:#10b981">publisher TOS</a>. Empty results below means no publisher listings have been registered yet &mdash; <a href="/docs/marketplace/publish" style="color:#10b981">be the first to publish?</a></p>
+  <div style="display:grid;grid-template-columns:220px 1fr;gap:24px;align-items:start" id="w737-grid">
+    <aside aria-label="W737 facet filters" style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12.5px;color:#cfd6d8">
+      <fieldset style="border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px 14px;margin:0 0 14px">
+        <legend style="padding:0 6px;color:#faf2e1;font-size:11.5px;letter-spacing:0.12em;text-transform:uppercase">Vertical</legend>
+        <label style="display:block;margin:4px 0"><input type="radio" name="w737-vertical" value="" checked> any</label>
+        <label style="display:block;margin:4px 0"><input type="radio" name="w737-vertical" value="medical"> medical</label>
+        <label style="display:block;margin:4px 0"><input type="radio" name="w737-vertical" value="legal"> legal</label>
+        <label style="display:block;margin:4px 0"><input type="radio" name="w737-vertical" value="code"> code</label>
+        <label style="display:block;margin:4px 0"><input type="radio" name="w737-vertical" value="finance"> finance</label>
+        <label style="display:block;margin:4px 0"><input type="radio" name="w737-vertical" value="support"> support</label>
+        <label style="display:block;margin:4px 0"><input type="radio" name="w737-vertical" value="general"> general</label>
+      </fieldset>
+      <fieldset style="border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px 14px;margin:0 0 14px">
+        <legend style="padding:0 6px;color:#faf2e1;font-size:11.5px;letter-spacing:0.12em;text-transform:uppercase">Task type</legend>
+        <label style="display:block;margin:4px 0"><input type="radio" name="w737-task" value="" checked> any</label>
+        <label style="display:block;margin:4px 0"><input type="radio" name="w737-task" value="extraction"> extraction</label>
+        <label style="display:block;margin:4px 0"><input type="radio" name="w737-task" value="generation"> generation</label>
+        <label style="display:block;margin:4px 0"><input type="radio" name="w737-task" value="reasoning"> reasoning</label>
+        <label style="display:block;margin:4px 0"><input type="radio" name="w737-task" value="support"> support</label>
+      </fieldset>
+      <fieldset style="border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px 14px;margin:0 0 14px">
+        <legend style="padding:0 6px;color:#faf2e1;font-size:11.5px;letter-spacing:0.12em;text-transform:uppercase">Hardware target</legend>
+        <label style="display:block;margin:4px 0"><input type="radio" name="w737-hw" value="" checked> any</label>
+        <label style="display:block;margin:4px 0"><input type="radio" name="w737-hw" value="m-series"> M-series</label>
+        <label style="display:block;margin:4px 0"><input type="radio" name="w737-hw" value="rtx"> RTX</label>
+        <label style="display:block;margin:4px 0"><input type="radio" name="w737-hw" value="h100"> H100</label>
+        <label style="display:block;margin:4px 0"><input type="radio" name="w737-hw" value="cpu"> CPU</label>
+      </fieldset>
+      <fieldset style="border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px 14px;margin:0 0 14px">
+        <legend style="padding:0 6px;color:#faf2e1;font-size:11.5px;letter-spacing:0.12em;text-transform:uppercase">K-Score</legend>
+        <label style="display:block;margin:4px 0">min: <input type="range" id="w737-min-kscore" min="0" max="1" step="0.05" value="0" style="width:100%"></label>
+        <output id="w737-min-kscore-out" style="display:block;color:#9aa3a8;font-size:11.5px;margin-top:2px">0.00</output>
+      </fieldset>
+    </aside>
+    <div id="w737-results" role="region" aria-live="polite" style="min-height:200px">
+      <p style="color:#9aa3a8;font-size:14px;margin:0">Loading publisher listings&hellip;</p>
+    </div>
+  </div>
+</section>
+<script>
+// W737 — faceted search panel. Pure inline JS (no build step). Fetches
+// /v1/marketplace/search with the four facet axes; renders an artifact-card
+// grid OR the honest empty state when no listings have been registered.
+(function(){
+  var $ = function(s){ return document.querySelector(s); };
+  var grid  = $('#w737-results');
+  var ksOut = $('#w737-min-kscore-out');
+  var ksIn  = $('#w737-min-kscore');
+  if (!grid) return;
+  function getVal(name){
+    var els = document.getElementsByName(name);
+    for (var i=0;i<els.length;i++){ if (els[i].checked) return els[i].value; }
+    return '';
+  }
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+  function priceLabel(micro){
+    if (!micro || micro <= 0) return 'free';
+    var usd = micro / 1e6;
+    return '$' + usd.toFixed(usd < 1 ? 3 : 2) + '/call';
+  }
+  function render(envelope){
+    if (!envelope || envelope.ok === false || (envelope.results && envelope.results.length === 0)){
+      var hint = (envelope && envelope.hint) || 'No artifacts match these filters yet. Be the first to publish?';
+      grid.innerHTML = '<div data-test="w737-empty-state" style="padding:32px 24px;border:1px dashed rgba(255,255,255,0.12);border-radius:10px;color:#9aa3a8;font-size:14px;text-align:center">' +
+        escapeHtml(hint) +
+        ' <a href="/docs/marketplace/publish" style="color:#10b981;text-decoration:none">/docs/marketplace/publish &rarr;</a></div>';
+      return;
+    }
+    var results = envelope.results || [];
+    var html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px">';
+    for (var i=0;i<results.length;i++){
+      var r = results[i];
+      var k = (r.k_score != null) ? Number(r.k_score).toFixed(3) : '—';
+      html += '<article data-test="w737-card" style="border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px 16px;background:#0f1216">' +
+        '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px">' +
+          '<strong style="font-size:14px;color:#faf2e1">' + escapeHtml(r.name || r.cid) + '</strong>' +
+          '<span style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:11.5px;color:#10b981">' + escapeHtml(k) + '</span>' +
+        '</div>' +
+        '<div style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:11.5px;color:#9aa3a8;letter-spacing:0.04em">' +
+          escapeHtml(r.vertical || '—') + ' · ' + escapeHtml(r.task_type || '—') + ' · ' + escapeHtml(r.hardware_target || '—') +
+        '</div>' +
+        '<div style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:11.5px;color:#cfd6d8;margin-top:8px">' +
+          escapeHtml(priceLabel(r.price_micro_usd_per_call)) +
+        '</div>' +
+      '</article>';
+    }
+    html += '</div>';
+    grid.innerHTML = html;
+  }
+  function refresh(){
+    var v = getVal('w737-vertical');
+    var t = getVal('w737-task');
+    var hw = getVal('w737-hw');
+    var ks = ksIn ? ksIn.value : '';
+    var qs = [];
+    if (v) qs.push('vertical=' + encodeURIComponent(v));
+    if (t) qs.push('task_type=' + encodeURIComponent(t));
+    if (hw) qs.push('hardware_target=' + encodeURIComponent(hw));
+    if (ks && Number(ks) > 0) qs.push('min_kscore=' + encodeURIComponent(ks));
+    var url = '/v1/marketplace/search' + (qs.length ? '?' + qs.join('&') : '');
+    fetch(url, { credentials: 'omit', headers: { accept: 'application/json' } })
+      .then(function(r){ return r.json(); })
+      .then(render)
+      .catch(function(){
+        render({ ok:false, hint:'No artifacts match these filters yet. Be the first to publish?' });
+      });
+  }
+  var inputs = document.querySelectorAll('#w737-faceted input');
+  for (var i=0;i<inputs.length;i++){
+    inputs[i].addEventListener('change', refresh);
+    inputs[i].addEventListener('input', function(){
+      if (ksIn && ksOut) ksOut.textContent = Number(ksIn.value).toFixed(2);
+    });
+  }
+  refresh();
+})();
+</script>
+
 <!-- W664 test anchors: keep W260 brand-anchor (above), expose explicit attribute hooks
      for surface tests that scan for the marketplace receipts pattern. -->
 <div class="test-anchor" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden" aria-hidden="true">
@@ -533,6 +669,10 @@ $ curl -s https://kolm.ai/v1/marketplace/catalog.json | jq .signature_algo
   <span data-test="w664-marketplace-cli">kolm pull</span>
   <span data-test="w664-marketplace-filters">task size hardware license</span>
   <span data-test="w664-kscore-badge">median K-score 0.99</span>
+  <!-- W737 — faceted search axes + revenue split anchor. -->
+  <span data-test="w737-faceted-search">vertical task_type hardware_target min_kscore</span>
+  <span data-test="w737-revenue-split">70/30 publisher platform</span>
+  <span data-test="w737-empty-fallback">No artifacts match these filters yet. Be the first to publish?</span>
 </div>
 
 </body>

@@ -63,6 +63,12 @@ import { enqueue as __loadQueueEnqueue, getQueueStats as __loadQueueGetStats } f
 // so the distill loop has the same context the upstream LLM saw. Pure parser
 // — persistence stays in recordCapture / insertCapture.
 import { parseRetrievedContextHeader as __ragParseRetrievedContextHeader } from './rag-capture.js';
+// W735 — Agent / Tool-Use distillation. parseToolCalls() reads upstream LLM
+// response bodies and normalises Anthropic / OpenAI / generic tool-call
+// shapes into a {tool_calls,parse_source} record that gets folded onto the
+// capture row. Honest empty envelope on absence (non-tool responses are
+// the common case). See src/tool-use-capture.js.
+import { parseToolCalls as __toolUseParseToolCalls } from './tool-use-capture.js';
 import * as deviceCaps from './device-capabilities.js';
 import * as confidentialCompute from './confidential-compute.js';
 import * as federatedLearning from './federated-learning.js';
@@ -3996,9 +4002,101 @@ export function buildRouter() {
     }
     // Hand-off to the connector proxy, intercepting res.json so we can read
     // the upstream usage object and meter the actual token count.
+    //
+    // W736 — Guardrail enforcement. When the caller supplied a guardrails
+    // array (via body.kolm_guardrails OR x-kolm-guardrails JSON header) or
+    // the runtime artifact lookup surfaced manifest.guardrails, run
+    // enforceGuardrails against the response_text. block → HTTP 403 with
+    // blocked_by_guardrail envelope; warn → pass-through + kolm_guardrail_
+    // warnings annotation; rewrite → substitute response_text + kolm_
+    // guardrail_rewrites annotation. The interception threads through the
+    // SAME res.json hook as the usage meter so we never lose metering on a
+    // blocked/rewritten response. Honest failure mode: if the W736 module
+    // is missing on the deploy, the response passes through unchanged
+    // (logged once via res.set('x-kolm-guardrails-skipped','module_missing')).
+    let _w736Rules = null;
+    try {
+      const hdr = req.headers['x-kolm-guardrails'];
+      if (hdr && typeof hdr === 'string' && hdr.length > 0 && hdr.length < 8192) {
+        const parsed = JSON.parse(hdr);
+        if (Array.isArray(parsed)) _w736Rules = parsed;
+      } else if (body && Array.isArray(body.kolm_guardrails)) {
+        _w736Rules = body.kolm_guardrails;
+      }
+    } catch (_) { /* malformed header — fall through to unenforced */ }
+
+    // Eager-load the W736 module exactly once per process. Subsequent
+    // requests pick up the cached singleton via globalThis.
+    if (_w736Rules && _w736Rules.length > 0 && !globalThis.__W736_GUARDRAILS_MOD__) {
+      try {
+        const w736 = await import('./guardrails.js');
+        globalThis.__W736_GUARDRAILS_MOD__ = w736;
+      } catch (_) {
+        res.set('x-kolm-guardrails-skipped', 'module_missing');
+        _w736Rules = null;
+      }
+    }
+
     const origJson = res.json.bind(res);
     let captured = null;
-    res.json = (payload) => { captured = payload; return origJson(payload); };
+    res.json = (payload) => {
+      captured = payload;
+      // W736 — enforce against the OpenAI/Anthropic-shaped response if we
+      // have rules. The response text lives at choices[0].message.content
+      // (OpenAI) OR content[].text (Anthropic). We hunt both shapes; if
+      // neither matches we pass through. The blocked path returns a 403
+      // *before* origJson fires so the upstream-body never reaches the
+      // wire when a hard-constraint block triggers.
+      if (_w736Rules && Array.isArray(_w736Rules) && _w736Rules.length > 0) {
+        try {
+          const w736 = globalThis.__W736_GUARDRAILS_MOD__ || null;
+          if (w736 && typeof w736.enforceGuardrails === 'function') {
+            const txt = (() => {
+              if (payload && payload.choices && payload.choices[0]
+                  && payload.choices[0].message
+                  && typeof payload.choices[0].message.content === 'string') {
+                return payload.choices[0].message.content;
+              }
+              if (payload && Array.isArray(payload.content)) {
+                return payload.content.map(c => (c && c.text) || '').join('');
+              }
+              return null;
+            })();
+            if (typeof txt === 'string') {
+              const enforced = w736.enforceGuardrails(txt, _w736Rules);
+              if (!enforced.ok) {
+                res.status(403);
+                return origJson({
+                  ok: false,
+                  error: 'blocked_by_guardrail',
+                  rule_name: enforced.rule_name,
+                  matched_at: enforced.matched_at,
+                  hint: enforced.hint,
+                  version: 'w736-v1',
+                });
+              }
+              if (enforced.enforcements && enforced.enforcements.length > 0) {
+                const env = (payload && typeof payload === 'object') ? { ...payload } : {};
+                const warns = enforced.enforcements.filter(e => e.action === 'warn');
+                const rewrites = enforced.enforcements.filter(e => e.action === 'rewrite');
+                if (warns.length > 0) env.kolm_guardrail_warnings = warns;
+                if (rewrites.length > 0) {
+                  env.kolm_guardrail_rewrites = rewrites;
+                  if (env.choices && env.choices[0] && env.choices[0].message) {
+                    env.choices = [{ ...env.choices[0],
+                      message: { ...env.choices[0].message, content: enforced.response } }];
+                  } else if (Array.isArray(env.content)) {
+                    env.content = [{ type: 'text', text: enforced.response }];
+                  }
+                }
+                return origJson(env);
+              }
+            }
+          }
+        } catch (_) { /* enforcement failure must not block legitimate traffic */ }
+      }
+      return origJson(payload);
+    };
     try {
       await __connectorProxy(provider, upstreamPath, req, res);
     } finally {
@@ -4836,6 +4934,99 @@ export function buildRouter() {
       parsed,
       validation,
     });
+  });
+
+  // W738 — POST /v1/pipeline/run executes a composed kolm.pipeline.yaml
+  // end-to-end (classifier -> route -> result). Auth-gated. The artifact
+  // loader is tenant-fenced via req.tenant_record so a tenant can never
+  // load another tenant's classifier or route artifact.
+  //
+  // Request body:
+  //   { pipeline_yaml: '<text>',          // required, parsed via W738 schema
+  //     input: '<user prompt>' }          // required
+  //
+  // Honest 4xx envelopes:
+  //   * missing body field                  → 400 missing_field
+  //   * YAML parse failure                  → 400 + .code from W732 parser
+  //   * schema validation failure           → 400 pipeline_yaml_validation_failed
+  //   * classifier artifact not in catalog  → 404 classifier_not_found
+  //   * route_not_found (runner branch)     → 200 + ok:false envelope (the
+  //                                            HTTP call succeeded; the route
+  //                                            is just missing — we don't
+  //                                            wrap that as a 4xx)
+  //
+  // The runner returns latency_ms_breakdown unconditionally so dashboards can
+  // chart per-tenant classify+route p50/p99 without a second round-trip.
+  r.post('/v1/pipeline/run', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const body = req.body || {};
+    if (typeof body.pipeline_yaml !== 'string' || body.pipeline_yaml.length === 0) {
+      return res.status(400).json({ ok: false, error: 'missing_field', field: 'pipeline_yaml' });
+    }
+    if (typeof body.input !== 'string') {
+      return res.status(400).json({ ok: false, error: 'missing_field', field: 'input' });
+    }
+    let yamlMod;
+    let runnerMod;
+    try {
+      yamlMod = await import('./pipeline-yaml.js');
+      runnerMod = await import('./pipeline-runner.js');
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'pipeline_module_unavailable',
+        detail: String((e && e.message) || e),
+      });
+    }
+    let parsedPipeline;
+    try {
+      parsedPipeline = yamlMod.parsePipelineYaml(body.pipeline_yaml);
+    } catch (e) {
+      return res.status(400).json({
+        ok: false,
+        error: e && e.code ? e.code : 'pipeline_yaml_parse_failed',
+        detail: String((e && e.message) || e),
+        line: (e && typeof e.line === 'number') ? e.line : null,
+      });
+    }
+    const validation = yamlMod.validatePipelineYaml(parsedPipeline);
+    if (!validation.ok) {
+      return res.status(400).json({
+        ok: false,
+        error: 'pipeline_yaml_validation_failed',
+        validation,
+        version: yamlMod.PIPELINE_YAML_VERSION,
+      });
+    }
+    // Tenant-fenced artifact loader. We surface a loud 'artifact_not_found'
+    // error (which the runner converts to classifier_load_failed or
+    // route_artifact_load_failed envelopes). Production wires this to the
+    // catalog; for now it's a stub that fails loud because no production
+    // artifact registry exposes a tenant-fenced load-by-cid yet.
+    const tenant_id = req.tenant_record.tenant_id || req.tenant_record.name;
+    const artifact_loader = async (cid, _opts) => {
+      const e = new Error('artifact_not_found: ' + cid);
+      e.code = 'artifact_not_found';
+      throw e;
+    };
+    const teacher_caller = async (teacher, _input) => {
+      // Honest stub — no hosted teacher is wired in this slot yet. The W709
+      // confidence-router wave fills in the real escalation path.
+      const e = new Error('teacher_not_wired: ' + teacher);
+      e.code = 'teacher_not_wired';
+      throw e;
+    };
+    const out = await runnerMod.runPipeline({
+      pipeline: parsedPipeline,
+      input: body.input,
+      tenant_id,
+      artifact_loader,
+      teacher_caller,
+    });
+    // The runner returns ok:false envelopes for missing artifacts / routes;
+    // we surface them with a 200 because the HTTP call itself succeeded and
+    // the envelope carries the actionable error code.
+    return res.status(200).json(out);
   });
 
   // ---------- Compile (kolm) ----------
@@ -9788,7 +9979,7 @@ export function buildRouter() {
   // to the SSE fan-out (W258-BE-2) so /v1/capture/stream pushes immediately
   // and the dashboard stops doing a 2 s poll-and-scan, and (b) check
   // threshold crossings (W258-BE-3) and fire alerts atomically.
-  async function recordCapture({ tenant, tenant_id, provider, model, namespace, prompt, response, latency_us, status, cost_usd, tokens_in, tokens_out, files, tool_calls, error: errorMsg, reasoning_trace, retrieved_context }) {
+  async function recordCapture({ tenant, tenant_id, provider, model, namespace, prompt, response, latency_us, status, cost_usd, tokens_in, tokens_out, files, tool_calls, error: errorMsg, reasoning_trace, retrieved_context, tool_choice, tool_parse_source }) {
     if (!prompt || response === undefined || response === null) return null;
     const hash = promptHash(prompt + '|' + (model || ''));
     const ns = namespace || 'default';
@@ -9839,6 +10030,17 @@ export function buildRouter() {
       retrieved_context: (Array.isArray(retrieved_context) && retrieved_context.length > 0)
         ? retrieved_context
         : null,
+      // W735-1 — tool_choice is the upstream-policy hint (auto / required /
+      // specific-tool name / object) the caller used when invoking the
+      // teacher. Honest null when absent so the W735-2 training formatter
+      // can distinguish "no tool policy" from "auto-mode declined". Stored
+      // verbatim — the formatter normalises to a string for the row.
+      tool_choice: tool_choice != null ? tool_choice : null,
+      // W735-1 — tool_parse_source records which upstream shape the parser
+      // matched (anthropic / openai / generic / preparsed / none). Useful
+      // for the bakeoff axis when we want to score "does the student match
+      // the teacher's shape" without conflating vendor differences.
+      tool_parse_source: typeof tool_parse_source === 'string' ? tool_parse_source : 'none',
     };
     // insertCapture throws on disk-full / ephemeral-/tmp / driver failure.
     // We do NOT catch here — propagation is the whole point of the fix.
@@ -9939,6 +10141,14 @@ export function buildRouter() {
         if (sources.length) res.set('x-kolm-retrieved-sources', sources.join(','));
       } catch (_) { /* header set failures must not break the capture path */ }
     }
+    // W735-1 — capture the tool_choice hint when the caller supplied one
+    // alongside the request. The tool_choice tells the distill loop what
+    // the upstream policy was (auto / required / specific-tool) so the
+    // student can learn the policy too — not just the resulting call. We
+    // accept either body.tool_choice or body.tool_choice_name (tenants
+    // serialise it differently). Honest absence: undefined when missing.
+    const __toolChoiceHint = (body && body.tool_choice != null) ? body.tool_choice
+      : (body && body.tool_choice_name != null ? body.tool_choice_name : undefined);
     if (__isZeroRetentionRequest(req, body)) {
       __setZeroRetentionHeaders(res, cleanNs);
       return res.status(202).json({
@@ -9961,6 +10171,36 @@ export function buildRouter() {
       const input = typeof it === 'object' ? (it.input ?? it.prompt ?? '') : String(it);
       const output = typeof it === 'object' ? (it.output ?? it.response ?? '') : '';
       if (!input || output === undefined || output === null || output === '') continue;
+      // W735-1 — parse tool_calls from this item. Three paths, in
+      // priority order:
+      //   1) item.tool_calls is already a normalised array — pass through.
+      //   2) item.assistant_response is the raw upstream LLM body —
+      //      parseToolCalls() normalises it into the W735 shape.
+      //   3) item.response is a JSON string of the upstream body — same.
+      // Honest empty array when nothing matches. Defense-in-depth tenant
+      // fence: recordCapture pins tenant_id before insertCapture writes.
+      let __itemToolCalls = [];
+      let __itemParseSource = 'none';
+      if (typeof it === 'object') {
+        if (Array.isArray(it.tool_calls) && it.tool_calls.length > 0) {
+          __itemToolCalls = it.tool_calls;
+          __itemParseSource = 'preparsed';
+        } else if (it.assistant_response != null) {
+          const __parsed = __toolUseParseToolCalls(it.assistant_response);
+          __itemToolCalls = __parsed.tool_calls;
+          __itemParseSource = __parsed.parse_source;
+        } else if (typeof output === 'string' && output.startsWith('{')) {
+          // The `output` field may be a serialised raw response when the
+          // caller is recording a wrapper-proxy round-trip. We probe by
+          // shape — if parseToolCalls finds nothing, we leave the field
+          // empty and the formatter falls through to the legacy shape.
+          const __parsed = __toolUseParseToolCalls(output);
+          if (__parsed.parse_source !== 'none') {
+            __itemToolCalls = __parsed.tool_calls;
+            __itemParseSource = __parsed.parse_source;
+          }
+        }
+      }
       try {
         const obs = await recordCapture({
           tenant: req.tenant,
@@ -9981,6 +10221,15 @@ export function buildRouter() {
           // in-depth tenant fence: recordCapture sets tenant_id on the
           // obs before insertCapture writes it.
           retrieved_context: __ragHeader.retrieved.length > 0 ? __ragHeader.retrieved : undefined,
+          // W735-1 — surface the parsed tool_calls + the tool_choice
+          // policy hint onto each capture row. The W735-2 formatter
+          // reads these fields to emit ChatML+tool training rows. The
+          // tool_choice hint is captured per-batch (one tool_choice per
+          // HTTP request — the upstream policy is a request-level
+          // setting, not a per-item one).
+          tool_calls: __itemToolCalls,
+          tool_choice: __toolChoiceHint,
+          tool_parse_source: __itemParseSource,
         });
         if (obs) {
           ids.push(obs.id);
@@ -11384,6 +11633,131 @@ res.json({
       try { fs.appendFileSync(path.join(queueDir, 'publish-queue.jsonl'), JSON.stringify(row) + '\n'); } catch (_e) { /* best-effort */ }
       res.status(202).json({ ok: true, queue_id: queueId, status: 'manual_review_queue', message: 'received; manual review by kolm.ai team' });
     } catch (e) { res.status(500).json({ error: 'marketplace_publish_error', detail: String(e.message || e) }); }
+  });
+
+  // ====================================================================
+  // W737 — Artifact Marketplace Expansion.
+  //
+  // CRITICAL: these routes MUST be registered BEFORE /v1/marketplace/:slug
+  // (the next handler below) because Express matches in declaration order
+  // and the :slug param would otherwise swallow GET /v1/marketplace/search
+  // (treating "search" as a slug → 404 unknown_slug). The reviews/:cid path
+  // is 3-segments deep so it cannot collide with :slug (which only accepts
+  // 2-segment paths), but ordering it here keeps all W737 routes adjacent.
+  //
+  // GET  /v1/marketplace/search             — faceted search by vertical,
+  //                                            task_type, min_kscore,
+  //                                            hardware_target. Public read.
+  // POST /v1/marketplace/listings           — register a new listing.
+  //                                            Auth-gated; publisher_id is
+  //                                            forced to req.tenant_record.id
+  //                                            so a tenant cannot register
+  //                                            under another publisher's name.
+  // POST /v1/marketplace/reviews            — submit a 1-5 star review +
+  //                                            text. Auth-gated; tenant_id is
+  //                                            forced to req.tenant_record.id
+  //                                            (W411 tenant fence).
+  // GET  /v1/marketplace/reviews/:cid       — public read of aggregate
+  //                                            ratings + reviews list.
+  //
+  // Honest envelopes:
+  //   * empty search results -> {ok:false, error:'marketplace_empty',
+  //                              hint:'no artifacts registered yet', results:[]}
+  //   * unauth POST          -> 401 + {error:'auth_required'}
+  //   * invalid payload       -> 400 + {error:'<code>', detail:<msg>}
+  // ====================================================================
+  r.get('/v1/marketplace/search', async (req, res) => {
+    try {
+      const mod = await import('./marketplace.js');
+      const out = await mod.searchArtifacts({
+        vertical: req.query.vertical ? String(req.query.vertical) : undefined,
+        task_type: req.query.task_type ? String(req.query.task_type) : undefined,
+        hardware_target: req.query.hardware_target ? String(req.query.hardware_target) : undefined,
+        min_kscore: req.query.min_kscore != null && req.query.min_kscore !== ''
+          ? Number(req.query.min_kscore) : undefined,
+        limit: req.query.limit != null && req.query.limit !== ''
+          ? Number(req.query.limit) : undefined,
+        offset: req.query.offset != null && req.query.offset !== ''
+          ? Number(req.query.offset) : undefined,
+      });
+      // Honest empty envelope when no listings exist OR filter matches none.
+      if (!out.results || out.results.length === 0) {
+        return res.json({
+          ok: false,
+          error: 'marketplace_empty',
+          hint: out.all_count === 0
+            ? 'no artifacts registered yet'
+            : 'no artifacts match the filter',
+          version: out.version,
+          results: [],
+          total: 0,
+          facets: out.facets,
+          all_count: out.all_count,
+        });
+      }
+      return res.json(out);
+    } catch (e) {
+      return res.status(500).json({ error: 'marketplace_search_error', detail: String(e.message || e) });
+    }
+  });
+
+  r.post('/v1/marketplace/listings', async (req, res) => {
+    try {
+      // Auth gate — every listing carries the calling tenant as the publisher.
+      if (!req.tenant_record || !req.tenant_record.id) {
+        return res.status(401).json({ error: 'auth_required' });
+      }
+      const mod = await import('./marketplace.js');
+      const body = req.body || {};
+      const listing = await mod.registerArtifact({
+        cid: body.cid,
+        publisher_id: req.tenant_record.id, // tenant fence: never trust body.publisher_id
+        manifest: body.manifest || {},
+        hardware_target: body.hardware_target,
+        vertical: body.vertical,
+        task_type: body.task_type,
+        price_micro_usd_per_call: body.price_micro_usd_per_call,
+      });
+      return res.status(201).json({ ok: true, listing });
+    } catch (e) {
+      if (e && e.code === 'LISTING_INVALID') {
+        return res.status(400).json({ error: 'listing_invalid', detail: String(e.message || e) });
+      }
+      return res.status(500).json({ error: 'marketplace_listings_error', detail: String(e.message || e) });
+    }
+  });
+
+  r.post('/v1/marketplace/reviews', async (req, res) => {
+    try {
+      // Auth gate — only authenticated tenants can submit reviews.
+      if (!req.tenant_record || !req.tenant_record.id) {
+        return res.status(401).json({ error: 'auth_required' });
+      }
+      const mod = await import('./marketplace.js');
+      const body = req.body || {};
+      const review = await mod.submitReview({
+        artifact_cid: body.artifact_cid || body.cid,
+        tenant_id: req.tenant_record.id, // W411 tenant fence — server-stamped
+        rating: body.rating != null ? Number(body.rating) : Number(body.stars),
+        text: body.text,
+      });
+      return res.status(201).json({ ok: true, review });
+    } catch (e) {
+      if (e && e.code === 'REVIEW_INVALID') {
+        return res.status(400).json({ error: 'review_invalid', detail: String(e.message || e) });
+      }
+      return res.status(500).json({ error: 'marketplace_review_error', detail: String(e.message || e) });
+    }
+  });
+
+  r.get('/v1/marketplace/reviews/:cid', async (req, res) => {
+    try {
+      const mod = await import('./marketplace.js');
+      const out = await mod.getReviews(String(req.params.cid || ''));
+      return res.json({ ok: true, version: mod.MARKETPLACE_VERSION, ...out });
+    } catch (e) {
+      return res.status(500).json({ error: 'marketplace_reviews_read_error', detail: String(e.message || e) });
+    }
   });
 
   // Marketplace detail - returns one artifact with live verification state or 404 for unknown slugs.

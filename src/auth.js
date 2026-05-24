@@ -393,6 +393,13 @@ const PUBLIC_API = (p) =>
   p === '/v1/marketplace/list' ||
   p === '/v1/marketplace/catalog.json' ||
   p === '/v1/marketplace/publish-request' ||
+  // W737 — faceted search + public review-read are public; listing-register +
+  // review-submit stay auth-gated above. The reviews/:cid path uses a
+  // dedicated regex so /v1/marketplace/:slug/download (existing route below)
+  // is unambiguous — reviews/:cid only matches when the second segment is
+  // literal 'reviews'.
+  p === '/v1/marketplace/search' ||
+  /^\/v1\/marketplace\/reviews\/[A-Za-z0-9._:-]{1,128}$/.test(p) ||
   /^\/v1\/marketplace\/[A-Za-z0-9._-]+(?:\/download)?$/.test(p) ||
   // W436 — public artifact verification. /v1/verify/:cid surfaces the
   // recompute-cid-from-manifest-hashes verdict so an auditor can verify

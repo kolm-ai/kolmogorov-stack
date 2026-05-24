@@ -1119,3 +1119,22 @@ export async function compileSpec(spec, opts = {}) {
     auditor_attestation_provenance: auditorAttestationBlocks.length > 0 ? auditorAttestationBlocks : null,
   };
 }
+
+// =============================================================================
+// W738-3 — pipeline compile re-export
+// =============================================================================
+//
+// compilePipeline is the artifact-composition variant of compileSpec — it
+// takes a kolm.pipeline.yaml document instead of a recipe spec and produces
+// a .kolm.pipeline sidecar (JSON) instead of a .kolm zip. The implementation
+// lives in src/pipeline-runner.js so the test suite can import either
+// module path; spec-compile.js re-exports it here so build-side callers that
+// already import spec-compile.js for compileSpec can reach compilePipeline
+// from the same module without adding a second import.
+//
+// W707 plan note: the sidecar's parent_cids array is the load-bearing field
+// for the W739 lineage chain. Do NOT inline a copy of the compile logic here
+// — pipeline-runner.js owns the canonicalisation and the W739 wave will
+// extend that file (not this one) when lineage diffs ship.
+export { compilePipeline } from './pipeline-runner.js';
+

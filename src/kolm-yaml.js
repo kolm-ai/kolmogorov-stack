@@ -326,6 +326,43 @@ export function validateKolmYaml(parsed) {
       }
     }
   }
+  // W736 — guardrails: optional top-level array. Each entry must have
+  // { name, pattern, action }. Validation is delegated to the W736 module so
+  // the snake_case error codes stay aligned with the runtime fence. We DO
+  // NOT throw on a missing W736 module (older deploys) — the absence collapses
+  // to a no-op so a kolm.yaml with guardrails parses cleanly even when run
+  // against a stack that does not yet ship src/guardrails.js. The W736
+  // validator is loaded lazily to keep import side-effects predictable.
+  if ('guardrails' in parsed && parsed.guardrails !== null) {
+    if (!Array.isArray(parsed.guardrails)) {
+      _push(errors, 'guardrails', 'must_be_list');
+    } else {
+      // Per-entry shape check, kept local so older deploys parsing a newer
+      // kolm.yaml still get structural errors without needing W736 loaded.
+      for (let idx = 0; idx < parsed.guardrails.length; idx++) {
+        const g = parsed.guardrails[idx];
+        const base = `guardrails[${idx}]`;
+        if (g === null || typeof g !== 'object' || Array.isArray(g)) {
+          _push(errors, base, 'must_be_mapping');
+          continue;
+        }
+        if (!('name' in g)) _push(errors, `${base}.name`, 'required');
+        else if (typeof g.name !== 'string' || g.name.length === 0) {
+          _push(errors, `${base}.name`, 'must_be_non_empty_string');
+        }
+        if (!('pattern' in g)) _push(errors, `${base}.pattern`, 'required');
+        else if (typeof g.pattern !== 'string' || g.pattern.length === 0) {
+          _push(errors, `${base}.pattern`, 'must_be_non_empty_string');
+        }
+        if (!('action' in g)) _push(errors, `${base}.action`, 'required');
+        else if (typeof g.action !== 'string') {
+          _push(errors, `${base}.action`, 'must_be_string');
+        } else if (!(g.action === 'block' || g.action === 'warn' || g.action === 'rewrite')) {
+          _push(errors, `${base}.action`, 'must_be_block_or_warn_or_rewrite');
+        }
+      }
+    }
+  }
   // quality_gates: optional, but if present each known key has a typed shape.
   if ('quality_gates' in parsed && parsed.quality_gates !== null) {
     const qg = parsed.quality_gates;

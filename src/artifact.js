@@ -52,6 +52,15 @@ import { verifyAttestation, manifestBlock as ccManifestBlock, STATES as CC_STATE
 import { loadSignerKeyFromEnv as loadEd25519SignerFromEnv, loadOrCreateDefaultSigner as loadEd25519DefaultSigner, buildSignatureBlock as buildEd25519Block } from './ed25519.js';
 import { buildSigstoreBundle, isDisabled as isSigstoreDisabled, attestArtifactWithRekor, rekorUrl as sigstoreRekorUrl } from './sigstore.js';
 import { canonicalizeOutputSchemaSpec, validateOutputSchemaSpec, OUTPUT_SCHEMA_VERSION } from './output-schema.js';
+// W736 — Guardrail Compilation. Hard-constraint rules ride INSIDE the .kolm
+// manifest (NOT as training signal) so brand-safety policy survives every
+// runtime invocation + every re-distill. hashGuardrails feeds the
+// conditional `guardrails_hash` slot inside artifact_hash_input so any
+// post-build tamper of the rules breaks the receipt chain; the W460
+// byte-stability pattern (absent vs null vs []==null collapse) is
+// preserved so pre-W736 artifacts rebuilt without a guardrails block
+// remain byte-identical to their old artifact_hash.
+import { hashGuardrails as hashGuardrailsW736, validateGuardrailRules as validateGuardrailRulesW736 } from './guardrails.js';
 
 const ARTIFACT_SPEC = 'kolm-1';
 const PACK_MAGIC = 'KOLMPACK\x01';
@@ -300,7 +309,7 @@ function normalizeLicense(license) {
   };
 }
 
-export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, k_score, judge_id, eval_score, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, output_schema }) {
+export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, k_score, judge_id, eval_score, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, output_schema, guardrails }) {
   const secret = requireSignSecret();
   // W252 — K-score ship gate is load-bearing. If a K-score is supplied AND
   // it says ships=false, the builder must refuse unless the caller explicitly
@@ -366,6 +375,21 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
       throw new Error('invalid output_schema: ' + _osv.errors.join(','));
     }
     _output_schema_canon = canonicalizeOutputSchemaSpec(output_schema);
+  }
+  // W736 — guardrails are validated at build time so a bad rule is caught
+  // here instead of at the first runtime hit. Absent / null / [] all
+  // collapse to null via _guardrails_canon, mirroring the output_schema
+  // collapse rule one block above. The byte-stability contract: pre-W736
+  // artifacts rebuilt without a guardrails block MUST hash identically;
+  // the conditional slot in artifact_hash_input below keys ONLY when
+  // canon is non-null + non-empty, never unconditionally.
+  let _guardrails_canon = null;
+  if (Array.isArray(guardrails) && guardrails.length > 0) {
+    const _gv = validateGuardrailRulesW736(guardrails);
+    if (!_gv.ok) {
+      throw new Error('invalid guardrails: ' + _gv.errors.map(e => `${e.path}=${e.error}`).join(','));
+    }
+    _guardrails_canon = guardrails;
   }
   // Wave 148 — pretokenize block. Same shape as moe: bridge builds + validates;
   // we re-validate so a hand-rolled block still gets schema-checked. Drift in
@@ -974,6 +998,18 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     // rebuilt. Schema version stamp lets verifiers detect spec migrations.
     output_schema: _output_schema_canon,
     output_schema_spec_version: _output_schema_canon ? OUTPUT_SCHEMA_VERSION : undefined,
+    // W736 — Guardrail Compilation. Brand-safety rules bake into the manifest
+    // as HARD constraints (NOT training signal). Each entry is
+    // { name, pattern, action }; pattern accepts keyword:/glob:/raw regex,
+    // action is one of block|warn|rewrite. Runtime enforcement lives in
+    // src/router.js (the /v1/chat/completions wrapper calls enforceGuardrails
+    // against this exact array). Verify-time replay lives in
+    // verifyGuardrailsAgainstTraces. The W460 byte-stability rule: absent,
+    // null, and [] all collapse to null here so pre-W736 artifacts rebuilt
+    // without a guardrails block remain byte-identical to their original
+    // artifact_hash. _guardrails_canon is null in that path; the conditional
+    // slot in artifact_hash_input below is skipped to match.
+    guardrails: _guardrails_canon,
     k_score: k_score || null,  // patched after zipping for the size_bytes axis
     ship_gate_overridden: allow_below_gate === true ? true : undefined,
     license: normalizeLicense(license),
@@ -1189,6 +1225,21 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   // when rebuilt.
   if (_output_schema_canon !== null) {
     artifact_hash_input.output_schema_hash = sha256(canonicalJson(_output_schema_canon));
+  }
+  // W736 — bind the guardrails block into artifact_hash so any post-build
+  // mutation of a rule (added entry, dropped one, swapped action/pattern,
+  // edited name, replacement-string drift) breaks the receipt chain. Mirrors
+  // the W460 confidential_compute_hash + W721 sparsity_profile_hash + W722
+  // kv_profile_hash + W809 output_schema_hash conditional-slot pattern: the
+  // slot is keyed ONLY when the canonical block is non-null + non-empty,
+  // so pre-W736 artifacts (which never carried guardrails) rebuilt without
+  // a guardrails block remain byte-identical to their original artifact_hash.
+  // hashGuardrailsW736 returns null on empty input — we re-check Array.isArray
+  // + length here as defense-in-depth so a future caller passing {} or 0
+  // does not silently key the slot.
+  if (Array.isArray(_guardrails_canon) && _guardrails_canon.length > 0) {
+    const gh = hashGuardrailsW736(_guardrails_canon);
+    if (gh) artifact_hash_input.guardrails_hash = gh;
   }
   if (hashes.extra_files) {
     artifact_hash_input.extra_files_hash = sha256(canonicalJson(hashes.extra_files));
@@ -1563,7 +1614,7 @@ export function packageArtifact({ job_id, payload, outPath }) {
 // with the size-aware K-score patched into the manifest. The double-zip is
 // cheap (≤10ms for 5KB artifacts) and keeps the K-score honest — the size
 // axis includes the K-score bytes themselves.
-export async function buildAndZip({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, outDir, outPath: outPathOverride, judge_id, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile }) {
+export async function buildAndZip({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, outDir, outPath: outPathOverride, judge_id, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, guardrails }) {
   requireSignSecret();
   // W457b (build-honors-out) — when an explicit outPath is supplied, write
   // the .kolm directly at the user-requested filename. Otherwise fall back
@@ -1598,7 +1649,7 @@ export async function buildAndZip({ job_id, task, base_model, recipes, lora_poin
     confidential_compute = await verifyAttestation(kind, attestation_report);
   }
 
-  const sharedBlocks = { capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile };
+  const sharedBlocks = { capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, guardrails };
 
   // W350 — temp-file cleanup registry. The two-pass build writes a probe zip
   // to measure its size before the K-score is embedded; on success the probe

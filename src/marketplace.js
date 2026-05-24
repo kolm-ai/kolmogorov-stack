@@ -800,3 +800,211 @@ export const SPEC = Object.freeze({
   version: CATALOG_SPEC_VERSION,
   signature_algo: SIGNATURE_ALGO,
 });
+
+// ============================================================================
+// W737 — Artifact Marketplace Expansion
+// ============================================================================
+//
+// W737-1 ("Browse by vertical, task type, K-Score, hardware target") + W737-2
+// ("Rate and review") + W737-3 ("Publishers earn revenue (70/30 split)").
+// W737-4 ("Fine-tune on their own captures (transfer learning)") rides on the
+// W715 namespace-fingerprint primitive (already shipped) — the docs page at
+// /docs/marketplace/publish links it.
+//
+// Design decisions vs the W342/W263 seed catalog above:
+//   - The W342 catalog is the curated kolm.ai-published list; the W737 surface
+//     is the publisher-extensible scaffold layered on top via marketplace-
+//     store.js. Reads union the two so a buyer browsing the marketplace sees
+//     both kolm.ai's seed entries AND third-party listings.
+//   - 70/30 split is HARD-CODED here (not a runtime config) so the contract
+//     cannot drift between deploys. Payout integration is honestly NOT YET
+//     WIRED — the docs page says so explicitly and computeRoyalty() is a pure
+//     accounting function with no side effects (no Stripe write, no balance
+//     ledger). When payouts ship (post-W737), they will read computeRoyalty()
+//     as the source of truth and not invent their own math.
+//   - Reviews + ratings persist via the event-store (provider=
+//     'kolm_marketplace_review') so they share the same auditable row trail
+//     every other state-change goes through. Per-tenant defense-in-depth:
+//     listEvents() filters by tenant on read, and submitReview() carries the
+//     tenant_id on every write so a malicious tenant cannot spoof reviews
+//     under another tenant's name.
+//   - Privacy: review TEXT persists raw on the row (it's the reviewer's
+//     authored content), but never crosses tenant boundaries without
+//     aggregation. getReviews() reads ALL reviews for a cid because reviews
+//     are a public artifact attribute; that's the W737-2 design. Aggregate
+//     counts (ratings_avg, ratings_count) are computed on-read and not stored
+//     as a denormalised field — keeping the event-store the single source of
+//     truth.
+
+export const MARKETPLACE_VERSION = 'w737-v1';
+
+// W737-3 revenue split — HARD-CODED constants. Never read from runtime config.
+// Changing these requires a code change + a new W7xx wave; the docs page TOS
+// pins this contract for publishers.
+export const W737_PUBLISHER_SHARE = 0.70;
+export const W737_PLATFORM_SHARE  = 0.30;
+
+// W737-1 facet axes are re-exported here so the route handlers and tests can
+// import them from one canonical place. The valid sets live in
+// marketplace-store.js (where registerArtifact validates them) and are
+// mirrored here for callers that browse without registering.
+export {
+  W737_VERTICALS,
+  W737_TASK_TYPES,
+  W737_HARDWARE_TARGETS,
+  registerArtifact,
+  listArtifactsForBrowse,
+  getListingByCid,
+  _resetForTests as _resetMarketplaceStoreForTests,
+} from './marketplace-store.js';
+
+import { listArtifactsForBrowse as _listForBrowse } from './marketplace-store.js';
+import { appendEvent as _appendEvent, listEvents as _listEvents } from './event-store.js';
+
+// searchArtifacts({vertical, task_type, min_kscore, hardware_target, limit, offset})
+//
+// Returns {ok:true, results, total, facets:{...counts}}. Empty results are
+// represented as a normal envelope with results=[] and total=0 — NOT an error.
+// The route handler maps an empty result set to the honest envelope
+// {ok:false, error:'marketplace_empty', hint:'no artifacts registered yet'}.
+//
+// Faceted counts: for each axis we return a {label: count} map computed over
+// the FULL (unfiltered-by-that-axis) row set so the UI can show how many rows
+// each filter would expose, like every other faceted-search UI on the web.
+// For W737-v1 we compute facets over the post-filter rows (simpler;
+// deterministic; matches the test surface). Future revisions can layer the
+// "unfiltered-by-this-axis" counts on top without breaking the envelope.
+export async function searchArtifacts(opts = {}) {
+  const browse = await _listForBrowse({
+    vertical: opts.vertical,
+    task_type: opts.task_type,
+    hardware_target: opts.hardware_target,
+    min_kscore: opts.min_kscore,
+    limit: opts.limit,
+    offset: opts.offset,
+  });
+  const facets = { verticals: {}, tasks: {}, hardware: {} };
+  for (const row of browse.rows) {
+    if (row.vertical) facets.verticals[row.vertical] = (facets.verticals[row.vertical] || 0) + 1;
+    if (row.task_type) facets.tasks[row.task_type] = (facets.tasks[row.task_type] || 0) + 1;
+    if (row.hardware_target) facets.hardware[row.hardware_target] = (facets.hardware[row.hardware_target] || 0) + 1;
+  }
+  return {
+    ok: true,
+    version: MARKETPLACE_VERSION,
+    results: browse.rows,
+    total: browse.total,
+    all_count: browse.all_count,
+    facets,
+  };
+}
+
+// submitReview({artifact_cid, tenant_id, rating, text})
+//
+// Validates the rating is in [1,5] integer + text is non-empty + cid is set.
+// Persists via appendEvent (provider='kolm_marketplace_review'). Returns the
+// persisted review row.
+//
+// Throws on validation with err.code = 'REVIEW_INVALID' so the handler can
+// map to HTTP 400.
+export async function submitReview(opts = {}) {
+  const artifact_cid = String(opts.artifact_cid || '').trim();
+  const tenant_id = String(opts.tenant_id || '').trim();
+  const rating = Number(opts.rating);
+  const text = String(opts.text || '').trim();
+
+  if (!artifact_cid) {
+    const e = new Error('artifact_cid required'); e.code = 'REVIEW_INVALID'; throw e;
+  }
+  if (!tenant_id) {
+    const e = new Error('tenant_id required'); e.code = 'REVIEW_INVALID'; throw e;
+  }
+  if (!Number.isFinite(rating) || rating < 1 || rating > 5 || Math.trunc(rating) !== rating) {
+    const e = new Error('rating must be an integer in [1,5]'); e.code = 'REVIEW_INVALID'; throw e;
+  }
+  if (!text) {
+    const e = new Error('text required (non-empty)'); e.code = 'REVIEW_INVALID'; throw e;
+  }
+
+  const review = {
+    artifact_cid,
+    tenant_id,
+    rating,
+    text,
+    submitted_at: new Date().toISOString(),
+    version: MARKETPLACE_VERSION,
+  };
+  await _appendEvent({
+    tenant_id,
+    namespace: 'kolm_marketplace',
+    provider: 'kolm_marketplace_review',
+    status: 'ok',
+    // event-schema coerces `feedback` to a string (max 4096); JSON.stringify
+    // so the review payload roundtrips through canonicalize() cleanly. The
+    // 4096 cap is enforced by _str() upstream; long reviews are truncated at
+    // the storage layer (acceptable for v1; future revisions can off-load
+    // review bodies to a dedicated table once the volume justifies it).
+    feedback: JSON.stringify(review),
+  });
+  return review;
+}
+
+// getReviews(artifact_cid)
+//
+// Returns {ratings_avg, ratings_count, reviews:[]}. Read is public (reviews
+// are a public artifact attribute by W737-2 design) so we pull all rows for
+// the cid across tenants — but aggregation is on-the-fly here; the underlying
+// event-store rows still carry their tenant_id for any per-tenant audit.
+export async function getReviews(artifact_cid) {
+  if (!artifact_cid) {
+    return { ratings_avg: null, ratings_count: 0, reviews: [] };
+  }
+  const rows = await _listEvents({ provider: 'kolm_marketplace_review', limit: 0 });
+  const reviews = [];
+  for (const ev of rows) {
+    if (!ev || typeof ev.feedback !== 'string') continue;
+    let payload = null;
+    try { payload = JSON.parse(ev.feedback); } catch { continue; }
+    if (!payload || payload.artifact_cid !== artifact_cid) continue;
+    reviews.push({
+      tenant_id: payload.tenant_id,
+      rating: payload.rating,
+      text: payload.text,
+      submitted_at: payload.submitted_at,
+    });
+  }
+  if (reviews.length === 0) {
+    return { ratings_avg: null, ratings_count: 0, reviews: [] };
+  }
+  const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
+  return {
+    ratings_avg: sum / reviews.length,
+    ratings_count: reviews.length,
+    reviews,
+  };
+}
+
+// computeRoyalty({revenue_micro_usd, publisher_id})
+//
+// Pure accounting function. Returns the publisher and platform shares in
+// integer micro-USD. The 70/30 split is hard-coded above; this function
+// exists so callers (future payout integration, billing breakdown, etc) read
+// the canonical math from one place.
+//
+// Honest rounding: publisher gets the floor of 70%; platform gets the
+// remainder. That guarantees publisher + platform == revenue_micro_usd to the
+// last micro-cent (no money disappears in a rounding crack).
+export function computeRoyalty(opts = {}) {
+  const revenue_micro_usd = Math.max(0, Math.trunc(Number(opts.revenue_micro_usd) || 0));
+  const publisher_id = opts.publisher_id ? String(opts.publisher_id) : null;
+  const publisher_share_micro_usd = Math.floor(revenue_micro_usd * W737_PUBLISHER_SHARE);
+  const platform_share_micro_usd = revenue_micro_usd - publisher_share_micro_usd;
+  return {
+    revenue_micro_usd,
+    publisher_id,
+    publisher_share_micro_usd,
+    platform_share_micro_usd,
+    split: { publisher: W737_PUBLISHER_SHARE, platform: W737_PLATFORM_SHARE },
+    version: MARKETPLACE_VERSION,
+  };
+}
