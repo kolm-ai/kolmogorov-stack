@@ -93,9 +93,9 @@
 <nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview">Overview</a></li><li><a href="/account/connectors">Connectors</a></li><li><a href="/account/captured">Captured calls</a></li><li><a href="/account/privacy-events">Privacy events</a></li><li><a href="/account/repeated-workflows">Repeated workflows</a></li><li><a href="/account/opportunities">Opportunities</a></li><li><a href="/account/labeling">Labeling queue</a></li><li><a href="/account/datasets">Datasets</a></li><li><a href="/account/simulations">Simulations</a></li><li><a href="/account/bakeoffs">Bakeoffs</a></li><li><a href="/account/builds">Artifact jobs</a></li><li><a href="/account/artifacts">Artifacts</a></li><li><a href="/account/devices">Devices</a></li><li><a href="/account/storage">Storage truth</a></li><li><a href="/account/billing">Billing</a></li><li><a href="/account/routing">Routing decisions</a></li><li><a href="/account/active-learning" aria-current="page">Active learning</a></li></ul></nav>
 <section class="acct-content">
 
-<p class="eyebrow">Active learning queue (W710)</p>
+<p class="eyebrow">Active learning loop (W710 queue + W815 coverage gaps)</p>
 <h1>Active learning loop.</h1>
-<p class="lede">Captures the student couldn't handle locally become next round's training signal. The router escalates to the teacher, the row lands in this queue, and the next distill picks it up via <code>kolm distill --resume-from-active-queue</code>.</p>
+<p class="lede">Captures the student couldn't handle locally become next round's training signal. The router escalates to the teacher, the row lands in the queue below, and the next distill picks it up via <code>kolm distill --resume-from-active-queue</code>. Below the queue, the W815 coverage-gap heatmap surfaces topic clusters that are under-represented vs production traffic, so the next distill can fill the gap.</p>
 
 <div class="toolbar">
   <label for="ns-input" style="color:var(--ink-faint);font-family:var(--mono);font-size:11px">Namespace</label>
@@ -136,8 +136,33 @@
   </div>
 </div>
 
+<div class="kpanel" id="w815-coverage-gaps">
+  <h2>Coverage-gap heatmap (W815 active-learning loop)</h2>
+  <p class="pdesc">Topic clusters under-represented relative to the corpus median, ranked by <code>gap_score = shortfall × demand_proxy</code>. A red cell means the cluster is far below median; size encodes recommended capture count. Needs at least <code>30</code> captures in the namespace; below that we report an honest <code>insufficient_captures_for_coverage</code> envelope.</p>
+  <div class="sparkbox" id="w815-heatmap-box">
+    <svg id="w815-heatmap" viewBox="0 0 600 100" preserveAspectRatio="none" aria-label="Coverage gap heatmap"></svg>
+    <div class="legend">
+      <span><span class="dot" style="background:var(--bad,#cf4f3a)"></span>severe gap (score &gt; 0.6)</span>
+      <span><span class="dot" style="background:var(--warn,#d9a020)"></span>moderate (0.3 - 0.6)</span>
+      <span><span class="dot" style="background:var(--good,#7fbf3f)"></span>well covered</span>
+    </div>
+  </div>
+</div>
+
+<div class="kpanel" id="w815-recommendations">
+  <h2>Recommended next captures (W815)</h2>
+  <p class="pdesc">Top gap clusters, with a sample prompt from each so you can recognize the capture pattern. Feed them into the next distill cycle via <code>kolm active-learn --top 10 --json | kolm distill --resume-from-active-queue</code>.</p>
+  <table class="ktable">
+    <thead><tr><th>Topic cluster</th><th>Gap score</th><th>Current count</th><th>Recommended</th><th>Sample prompt</th></tr></thead>
+    <tbody id="w815-rec-rows"></tbody>
+  </table>
+  <div id="w815-rec-empty" class="empty" hidden>
+    <strong>No coverage gaps yet.</strong> Either every cluster is well covered, or the namespace has fewer than 30 captures. Send more traffic through the wrapper and gaps will surface here.
+  </div>
+</div>
+
 <div class="note">
-  <strong>Honesty note.</strong> Continuous distillation scaffold arrives in W775. Today: queue + manual <code>kolm distill --resume-from-active-queue</code>. The <code>kolm pipeline run --continuous</code> scaffold in this build runs a single foreground loop and emits one structured JSON line per iteration; it does NOT fork a background daemon.
+  <strong>Honesty note.</strong> Continuous distillation scaffold arrives in W775. Today: queue + manual <code>kolm distill --resume-from-active-queue</code>. The <code>kolm pipeline run --continuous</code> scaffold in this build runs a single foreground loop and emits one structured JSON line per iteration; it does NOT fork a background daemon. Active-learning gap detection (W815) is wired into the W720 self-improvement loop via <code>active_learning_gap:true</code> event-store rows.
 </div>
 
 </section>
@@ -261,7 +286,91 @@ function load(){
     paintSparkline([]);
     paintTable([]);
   });
+  loadW815Coverage(ns);
 }
+
+// --------------------------------------------------------------------------
+// W815 coverage-gap heatmap + recommended-captures table.
+// --------------------------------------------------------------------------
+function paintW815Heatmap(gaps){
+  var svg=document.getElementById("w815-heatmap");if(!svg)return;
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
+  var list=(gaps||[]).slice(0,30);
+  if(list.length===0){
+    var t=document.createElementNS("http://www.w3.org/2000/svg","text");
+    t.setAttribute("x","8");t.setAttribute("y","52");t.setAttribute("fill","#888");
+    t.setAttribute("font-family","monospace");t.setAttribute("font-size","12");
+    t.textContent="no coverage gaps detected (capture more traffic or wait for analysis)";
+    svg.appendChild(t);return;
+  }
+  var w=600,h=100,n=list.length,cw=Math.max(8,Math.floor(w/n)-2);
+  for(var i=0;i<n;i++){
+    var g=list[i];
+    var score=Number(g.gap_score||0);
+    var color="#7fbf3f";if(score>0.6)color="#cf4f3a";else if(score>0.3)color="#d9a020";
+    // Cell HEIGHT encodes recommended_count (1..5 → 20..100% of h-8).
+    var rec=Math.max(1,Math.min(20,Number(g.recommended_count||1)));
+    var ch=Math.max(20,Math.floor((h-8)*(rec/5)));
+    if(ch>h-8)ch=h-8;
+    var x=i*(w/n)+1;
+    var rect=document.createElementNS("http://www.w3.org/2000/svg","rect");
+    rect.setAttribute("x",x.toFixed(1));rect.setAttribute("y",(h-ch-4).toString());
+    rect.setAttribute("width",cw.toString());rect.setAttribute("height",ch.toString());
+    rect.setAttribute("fill",color);rect.setAttribute("rx","1");
+    var title=document.createElementNS("http://www.w3.org/2000/svg","title");
+    title.textContent=(g.topic_cluster||g.cluster_id||"?")+" gap_score="+score.toFixed(3)
+      +" recommended="+(g.recommended_count||1);
+    rect.appendChild(title);
+    svg.appendChild(rect);
+  }
+}
+
+function paintW815RecTable(recs){
+  var tbody=document.getElementById("w815-rec-rows");
+  var empty=document.getElementById("w815-rec-empty");
+  if(!tbody||!empty)return;
+  tbody.innerHTML="";
+  var list=(recs||[]).slice(0,20);
+  if(list.length===0){empty.hidden=false;return;}
+  empty.hidden=true;
+  for(var i=0;i<list.length;i++){
+    var r=list[i];
+    var tr=document.createElement("tr");
+    var sample=r.sample_synthetic_input||"-";
+    if(sample.length>72)sample=sample.slice(0,72)+"...";
+    var score=Number(r.gap_score||0);
+    var cls="prio-low";if(score>0.6)cls="prio-high";else if(score>0.3)cls="prio-medium";
+    tr.innerHTML="<td>"+window.kesc(r.topic_cluster||r.cluster_id||"-")+"</td>"
+      +"<td><span class=\"pill "+cls+"\">"+score.toFixed(3)+"</span></td>"
+      +"<td>"+window.kesc(String(r.current_count==null?"-":r.current_count))+"</td>"
+      +"<td>"+window.kesc(String(r.recommended_count||"-"))+"</td>"
+      +"<td>"+window.kesc(sample)+"</td>";
+    tbody.appendChild(tr);
+  }
+}
+
+function loadW815Coverage(ns){
+  var url="/v1/active-learning/coverage-gaps";
+  if(ns)url+="?namespace="+encodeURIComponent(ns);
+  window.kfetch(url).then(function(j){
+    if(j&&j.ok&&Array.isArray(j.recommendations)){
+      paintW815Heatmap(j.recommendations);
+      paintW815RecTable(j.recommendations);
+    }else if(j&&j.ok===false&&j.error==="insufficient_captures_for_coverage"){
+      paintW815Heatmap([]);
+      paintW815RecTable([]);
+    }else{
+      paintW815Heatmap([]);
+      paintW815RecTable([]);
+    }
+  }).catch(function(){
+    // Endpoint may not be wired yet (W775-style scaffold) — render empty
+    // panel so the page never blanks.
+    paintW815Heatmap([]);
+    paintW815RecTable([]);
+  });
+}
+
 document.getElementById("ns-apply").addEventListener("click",load);
 document.getElementById("ns-input").addEventListener("keydown",function(e){if(e.key==="Enter")load();});
 load();
