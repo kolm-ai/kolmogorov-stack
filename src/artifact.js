@@ -309,7 +309,7 @@ function normalizeLicense(license) {
   };
 }
 
-export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, k_score, judge_id, eval_score, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, output_schema, guardrails }) {
+export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, k_score, judge_id, eval_score, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, output_schema, guardrails, parent_cid }) {
   const secret = requireSignSecret();
   // W252 — K-score ship gate is load-bearing. If a K-score is supplied AND
   // it says ships=false, the builder must refuse unless the caller explicitly
@@ -390,6 +390,39 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
       throw new Error('invalid guardrails: ' + _gv.errors.map(e => `${e.path}=${e.error}`).join(','));
     }
     _guardrails_canon = guardrails;
+  }
+  // W739 — Model lineage tracking. parent_cid is OPTIONAL. Validated up
+  // front so a malformed pointer is caught at build time instead of at the
+  // first `kolm lineage <cid>` walk on a deployed artifact. The W460
+  // byte-stability law applies: absent / null / empty-string all collapse
+  // to null (the slot is omitted from artifact_hash_input below) so
+  // pre-W739 artifacts rebuilt without a parent_cid remain byte-identical
+  // to their original artifact_hash. A non-null parent_cid MUST be either
+  // bare sha256-hex (64 lowercase hex) OR the canonical `cidv1:sha256:<hex>`
+  // form emitted by our own manifest.cid field. We PRESERVE the caller's
+  // verbatim form in the manifest + the hash slot so `B.parent_cid` round-
+  // trips byte-identical to whatever cid the caller pinned (a downstream
+  // walker shouldn't have to know about both hex + cidv1 spellings to
+  // string-compare lineage rows).
+  let _parent_cid_canon = null;
+  if (parent_cid !== null && parent_cid !== undefined && parent_cid !== '') {
+    if (typeof parent_cid !== 'string') {
+      throw new Error(
+        'invalid parent_cid: must be a string (sha256-hex or cidv1:sha256:<hex>) or null; got ' +
+        JSON.stringify(parent_cid),
+      );
+    }
+    const _pcPrefix = 'cidv1:sha256:';
+    const _pcTail = parent_cid.startsWith(_pcPrefix)
+      ? parent_cid.slice(_pcPrefix.length)
+      : parent_cid;
+    if (!/^[0-9a-f]{64}$/.test(_pcTail)) {
+      throw new Error(
+        'invalid parent_cid: must be sha256-hex (64 lowercase hex chars) or cidv1:sha256:<hex>; got ' +
+        JSON.stringify(parent_cid),
+      );
+    }
+    _parent_cid_canon = parent_cid; // preserve verbatim form (bare hex or cidv1:sha256:<hex>)
   }
   // Wave 148 — pretokenize block. Same shape as moe: bridge builds + validates;
   // we re-validate so a hand-rolled block still gets schema-checked. Drift in
@@ -667,8 +700,38 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   // the zip (rule-class with no pack/index/model), the slot hash is the
   // sha256 of an empty buffer — an explicit "this slot intentionally has no
   // content" sentinel rather than a fake byte payload.
+  // W739 — fold parent_cid into the model_pointer hash WHEN PRESENT so the
+  // CID itself (not just the receipt chain) is sensitive to lineage. Absent
+  // parent_cid (null/undefined/'' all canonicalise to null in
+  // _parent_cid_canon above) leaves model_pointer hashing untouched — pre-
+  // W739 artifacts rebuilt without a parent_cid remain CID-byte-identical
+  // (W460 byte-stability law). The suffix is `\x00parent_cid:<cid>` (NUL
+  // separator + ASCII tag) so it cannot collide with any valid model_pointer
+  // payload, which is plain bytes by contract upstream. The matching
+  // artifact_hash_input.parent_cid slot below is preserved so a tamperer
+  // who rewrites manifest.parent_cid AND the model_pointer hash still has
+  // to break the receipt chain too — defense in depth, not redundancy.
+  let _modelPointerHash;
+  if (model_pointer) {
+    if (_parent_cid_canon) {
+      _modelPointerHash = sha256(Buffer.concat([
+        Buffer.from(model_pointer),
+        Buffer.from('\x00parent_cid:' + _parent_cid_canon, 'utf8'),
+      ]));
+    } else {
+      _modelPointerHash = sha256(Buffer.from(model_pointer));
+    }
+  } else if (_parent_cid_canon) {
+    // Edge case: no model_pointer, but parent_cid present. We MUST still bind
+    // parent_cid into the CID; the bare NUL+tag+cid buffer is unambiguous
+    // because legacy empty model_pointer used EMPTY_SHA (sha256 of zero
+    // bytes), which can never collide with a non-empty buffer's hash.
+    _modelPointerHash = sha256(Buffer.from('\x00parent_cid:' + _parent_cid_canon, 'utf8'));
+  } else {
+    _modelPointerHash = EMPTY_SHA;
+  }
   const hashes = {
-    model_pointer: model_pointer ? sha256(Buffer.from(model_pointer)) : EMPTY_SHA,
+    model_pointer: _modelPointerHash,
     recipes_json: sha256(Buffer.from(recipes_json)),
     lora_bin: has_pack ? sha256(lora_bin) : EMPTY_SHA,
     index_bin: has_index ? sha256(index_bin) : EMPTY_SHA,
@@ -1010,6 +1073,17 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     // artifact_hash. _guardrails_canon is null in that path; the conditional
     // slot in artifact_hash_input below is skipped to match.
     guardrails: _guardrails_canon,
+    // W739 — Model lineage tracking. Each .kolm references its parent artifact
+    // via this field. The W460 byte-stability law: when parent_cid is absent
+    // the manifest MUST not carry the key at all (so manifest_hash + cid stay
+    // byte-identical to pre-W739 artifacts). We use a conditional spread
+    // (...(value ? {key:value} : {})) instead of `parent_cid: null` so a
+    // JSON.stringify replayed against a pre-W739 artifact rebuilt without
+    // a parent_cid produces the exact same bytes the original did. Walked
+    // at runtime by walkLineage in src/artifact-lineage.js; diffed by
+    // diffArtifacts in src/kolm-diff.js. Tested by W739 #9 byte-stability
+    // lock-in.
+    ...(_parent_cid_canon ? { parent_cid: _parent_cid_canon } : {}),
     k_score: k_score || null,  // patched after zipping for the size_bytes axis
     ship_gate_overridden: allow_below_gate === true ? true : undefined,
     license: normalizeLicense(license),
@@ -1240,6 +1314,18 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   if (Array.isArray(_guardrails_canon) && _guardrails_canon.length > 0) {
     const gh = hashGuardrailsW736(_guardrails_canon);
     if (gh) artifact_hash_input.guardrails_hash = gh;
+  }
+  // W739 — bind parent_cid into artifact_hash so a tamperer cannot rewrite
+  // lineage history without invalidating every descendant's receipt chain.
+  // Mirrors the W460 confidential_compute_hash + W721 sparsity_profile_hash
+  // + W722 kv_profile_hash + W736 guardrails_hash conditional-slot pattern:
+  // keyed ONLY when _parent_cid_canon is a non-empty hex string so pre-W739
+  // artifacts (which never carried a parent_cid) rebuilt without one remain
+  // byte-identical to their original artifact_hash. The hash position is
+  // FIXED immediately after guardrails_hash per the W739 spec so the
+  // canonical key order in artifact_hash_input stays predictable.
+  if (_parent_cid_canon) {
+    artifact_hash_input.parent_cid = _parent_cid_canon;
   }
   if (hashes.extra_files) {
     artifact_hash_input.extra_files_hash = sha256(canonicalJson(hashes.extra_files));
@@ -1614,7 +1700,7 @@ export function packageArtifact({ job_id, payload, outPath }) {
 // with the size-aware K-score patched into the manifest. The double-zip is
 // cheap (≤10ms for 5KB artifacts) and keeps the K-score honest — the size
 // axis includes the K-score bytes themselves.
-export async function buildAndZip({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, outDir, outPath: outPathOverride, judge_id, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, guardrails }) {
+export async function buildAndZip({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, outDir, outPath: outPathOverride, judge_id, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, guardrails, parent_cid }) {
   requireSignSecret();
   // W457b (build-honors-out) — when an explicit outPath is supplied, write
   // the .kolm directly at the user-requested filename. Otherwise fall back
@@ -1649,7 +1735,7 @@ export async function buildAndZip({ job_id, task, base_model, recipes, lora_poin
     confidential_compute = await verifyAttestation(kind, attestation_report);
   }
 
-  const sharedBlocks = { capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, guardrails };
+  const sharedBlocks = { capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, guardrails, parent_cid };
 
   // W350 — temp-file cleanup registry. The two-pass build writes a probe zip
   // to measure its size before the K-score is embedded; on success the probe

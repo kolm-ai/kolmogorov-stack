@@ -1359,6 +1359,36 @@ EXAMPLES
   kolm export job_xy.kolm --preview --device m3-pro --quant int4
   kolm export --preview --device pi5-4 --quant int4 --base llama-3.2-3b
 `,
+  import: `kolm import - W740 symmetric counterpart to "kolm export". Wraps a
+runtime-native binary (GGUF / safetensors / ONNX) as a partial manifest tagged
+not_kolm_compiled:true so it can ride through catalog/inspect/signature flows
+without ever being silently treated as a kolm-compiled artifact.
+
+USAGE
+  kolm import inspect <file>                       parsed-metadata envelope
+  kolm import wrap    <file> [--out manifest.json] not_kolm_compiled manifest
+  kolm import doctor                               python3 + format check
+
+FORMATS
+  gguf         llama.cpp / Ollama / LM Studio  (magic "GGUF" header)
+  safetensors  HuggingFace weight format       (u64 header_size + JSON)
+  onnx         ONNX Runtime                    (protobuf; partial parse only)
+
+HONESTY CONTRACT
+  Imports are flagged not_kolm_compiled:true. There is no K-Score, no holdout,
+  no production-ready verdict on a wrapped artifact. To claim a model is
+  kolm-compiled, run it through "kolm distill" again.
+
+ROUND-TRIP (symmetric pair)
+  kolm import wrap model.gguf  ->  kolm distill ...  ->  kolm export <artifact.kolm> --backend gguf
+  Note: fidelity is teacher-quality-bound, NOT bit-exact. A round-trip is a
+  re-distillation, not a copy.
+
+EXAMPLES
+  kolm import inspect ./llama-3.2-3b-q4_k_m.gguf
+  kolm import wrap ./llama-3.2-3b-q4_k_m.gguf --out manifest.json
+  kolm import doctor
+`,
   verify: `kolm verify - run every offline check kolm makes about an artifact
 and (optionally) emit a printable HTML compliance binder a security reviewer
 signs off on before a deploy.
@@ -32435,6 +32465,678 @@ async function cmdW738Pipeline(args) {
   process.exit(EXIT.BAD_ARGS);
 }
 
+// =============================================================================
+// W740 — `kolm import {inspect|wrap|doctor}` dispatcher.
+//
+// Distinct-named (cmdW740Import) per the W724/W726/W727/W728/W729/W730/W731/
+// W732/W733/W734/W735/W736/W737/W738/W739 precedent so parallel wave agents
+// on W741+ cannot collide on this symbol when this file merges.
+//
+// Symmetric counterpart to the existing `kolm export <artifact.kolm> --backend
+// gguf` flow (apps/export/gguf.py, A26-era). Where export takes a compiled
+// .kolm and writes a runtime-native binary, W740 import takes a runtime-native
+// binary (GGUF / safetensors / ONNX) and emits a partial manifest tagged
+// `not_kolm_compiled: true` so it can ride through the rest of the stack
+// (catalog, inspect, signature) without ever being silently treated as a
+// kolm-compiled artifact.
+//
+// Subcommands:
+//   inspect <file>                    -> prints the parsed-metadata envelope
+//   wrap    <file> [--out path.json]  -> emits the wrapAsKolmManifest envelope
+//   doctor                            -> checks python3 + writes-back formats
+//
+// Honesty contract:
+//   * Missing python3            -> MISSING_PREREQ + python3_missing envelope
+//   * Missing file               -> NOT_FOUND     + file_not_found envelope
+//   * Unknown format             -> BAD_ARGS      + unknown_format envelope
+//   * Parser exit 3              -> GATE_FAIL     + envelope-from-parser
+//   * Unknown subcommand         -> BAD_ARGS      + usage line
+//
+// Round-trip hint: after `kolm import wrap` succeeds the dispatcher prints a
+// one-line hint pointing at `kolm export <artifact.kolm> --backend gguf` (the
+// existing export side) so the user can see the symmetric pair without us
+// renaming anything.
+// =============================================================================
+async function cmdW740Import(args) {
+  const sub = (args && args[0]) || '';
+
+  async function _loadImportMod() {
+    try {
+      return await import('../src/import.js');
+    } catch (e) {
+      const envelope = {
+        ok: false,
+        error: 'import_module_missing',
+        detail: (e && e.message) || String(e),
+        hint: 'src/import.js must be importable; reinstall the kolm CLI',
+        version: 'w740-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.MISSING_PREREQ);
+      return null;
+    }
+  }
+
+  function _flag(rest, name) {
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--' + name && i + 1 < rest.length) return rest[i + 1];
+      if (typeof rest[i] === 'string' && rest[i].startsWith('--' + name + '=')) {
+        return rest[i].slice(name.length + 3);
+      }
+    }
+    return null;
+  }
+
+  function _firstPositional(rest) {
+    for (const a of rest) {
+      if (typeof a !== 'string') continue;
+      if (a.startsWith('--')) continue;
+      return a;
+    }
+    return null;
+  }
+
+  function _printRoundTripHint() {
+    // Surface the existing `kolm export` command name as the symmetric pair
+    // (W740-3). The verb is `kolm export <artifact.kolm> --backend gguf`
+    // (existing, A26-era, see cmdExport above and apps/export/gguf.py).
+    console.error("hint: round-trip back with `kolm export <artifact.kolm> --backend gguf` after re-distilling.");
+  }
+
+  // ──────────────────────── subcommand: doctor ───────────────────────────────
+  if (sub === 'doctor') {
+    const mod = await _loadImportMod();
+    if (!mod) return;
+    const out = mod.describeFormats();
+    console.log(JSON.stringify({
+      ok: !!out.python,
+      ...out,
+    }, null, 2));
+    if (!out.python) {
+      console.error('hint: python3 not found on PATH. install Python 3.10+ then re-run.');
+      process.exit(EXIT.MISSING_PREREQ);
+    }
+    return;
+  }
+
+  // ──────────────────────── subcommand: inspect ──────────────────────────────
+  if (sub === 'inspect') {
+    const mod = await _loadImportMod();
+    if (!mod) return;
+    const rest = args.slice(1);
+    const filePath = _firstPositional(rest);
+    if (!filePath) {
+      console.error('usage: kolm import inspect <file>');
+      process.exit(EXIT.BAD_ARGS);
+      return;
+    }
+    const formatOverride = _flag(rest, 'format');
+    const envelope = await mod.parseImportMetadata(filePath, {
+      format: formatOverride || undefined,
+    });
+    console.log(JSON.stringify(envelope, null, 2));
+    if (envelope && envelope.ok === false) {
+      if (envelope.error === 'python3_missing') process.exit(EXIT.MISSING_PREREQ);
+      else if (envelope.error === 'file_not_found') process.exit(EXIT.NOT_FOUND);
+      else if (envelope.error === 'unknown_format') process.exit(EXIT.BAD_ARGS);
+      else process.exit(EXIT.GATE_FAIL);
+    }
+    return;
+  }
+
+  // ──────────────────────── subcommand: wrap ─────────────────────────────────
+  if (sub === 'wrap') {
+    const mod = await _loadImportMod();
+    if (!mod) return;
+    const rest = args.slice(1);
+    const filePath = _firstPositional(rest);
+    if (!filePath) {
+      console.error('usage: kolm import wrap <file> [--out manifest.json]');
+      process.exit(EXIT.BAD_ARGS);
+      return;
+    }
+    const outPath = _flag(rest, 'out');
+    const formatOverride = _flag(rest, 'format');
+    const metadata = await mod.parseImportMetadata(filePath, {
+      format: formatOverride || undefined,
+    });
+    // Hard-fail on the structural errors (python3 / file / format) so the
+    // CLI doesn't write a wrap manifest from nothing.
+    if (metadata && metadata.ok === false) {
+      console.log(JSON.stringify(metadata, null, 2));
+      if (metadata.error === 'python3_missing') process.exit(EXIT.MISSING_PREREQ);
+      else if (metadata.error === 'file_not_found') process.exit(EXIT.NOT_FOUND);
+      else if (metadata.error === 'unknown_format') process.exit(EXIT.BAD_ARGS);
+      else process.exit(EXIT.GATE_FAIL);
+      return;
+    }
+    const manifest = mod.wrapAsKolmManifest(metadata);
+    const envelope = {
+      ok: true,
+      manifest,
+      source_metadata: metadata,
+      version: mod.IMPORT_VERSION,
+    };
+    console.log(JSON.stringify(envelope, null, 2));
+    if (outPath) {
+      try {
+        fs.writeFileSync(path.resolve(outPath), JSON.stringify(manifest, null, 2), 'utf8');
+        console.error(`wrote manifest to ${outPath}`);
+      } catch (e) {
+        console.error('error: failed to write --out path:', e && e.message);
+        process.exit(EXIT.EXECUTION);
+        return;
+      }
+    }
+    _printRoundTripHint();
+    return;
+  }
+
+  // ──────────────────────── unknown subcommand ───────────────────────────────
+  console.error('usage: kolm import <inspect|wrap|doctor> [args]');
+  console.error('  inspect <file>                  - print parsed-metadata envelope (gguf|safetensors|onnx)');
+  console.error('  wrap    <file> [--out path]     - emit not_kolm_compiled manifest (W740-2 honesty lock)');
+  console.error('  doctor                          - check python3 + supported formats');
+  console.error('');
+  console.error('symmetric export: kolm export <artifact.kolm> --backend gguf|onnx|safetensors|coreml|mlx|executorch|tensorrt');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// =============================================================================
+// W739 — `kolm lineage <cid>` + `kolm diff <a.kolm> <b.kolm>` dispatchers.
+//
+// Distinct-named (cmdW739Lineage / cmdW739Diff) per the W724/.../W738 precedent
+// so parallel wave agents on W738/W740/W741 cannot collide on these symbols.
+//
+// `kolm lineage <cid>` — walks the parent_cid chain anchored at <cid> by
+// reading local artifacts (~/.kolm/artifacts/*.kolm); prints a table of
+// (depth, cid-short, k_score, parent_cid-short). Always exits 0 — the
+// envelope itself reports ok:false on leaf_not_found.
+//
+// `kolm diff <a.kolm> <b.kolm>` — replaces the W732 honest-stub wired at
+// `case 'diff'`. Calls diffArtifacts() and pretty-prints the envelope as a
+// table plus a recommendation pill (roll_back / promote / inconclusive)
+// written to stderr so a redirected stdout still captures the JSON envelope.
+// Always exits 0 (informational) so CI does not gate on a diff verdict.
+// =============================================================================
+async function cmdW739Lineage(args) {
+  const cid = args && args[0];
+  if (!cid || typeof cid !== 'string' || cid.startsWith('-')) {
+    console.error('usage: kolm lineage <cid> [--max-depth N] [--json]');
+    console.error('  Walks the parent_cid chain anchored at <cid> over local artifacts.');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+  let max_depth = 10;
+  let json = false;
+  for (let i = 1; i < args.length; i++) {
+    const a = args[i];
+    if (a === '--max-depth' && i + 1 < args.length) {
+      const v = Number(args[++i]);
+      if (Number.isFinite(v) && v > 0) max_depth = Math.min(100, Math.floor(v));
+    } else if (typeof a === 'string' && a.startsWith('--max-depth=')) {
+      const v = Number(a.slice('--max-depth='.length));
+      if (Number.isFinite(v) && v > 0) max_depth = Math.min(100, Math.floor(v));
+    } else if (a === '--json') {
+      json = true;
+    }
+  }
+  let lineageMod;
+  try {
+    lineageMod = await import('../src/artifact-lineage.js');
+  } catch (e) {
+    const envelope = {
+      ok: false,
+      error: 'lineage_module_missing',
+      detail: (e && e.message) || String(e),
+      hint: 'src/artifact-lineage.js must be importable; reinstall the kolm CLI',
+      version: 'w739-v1',
+    };
+    console.log(JSON.stringify(envelope, null, 2));
+    process.exit(EXIT.MISSING_PREREQ);
+    return;
+  }
+  // Build the local-artifacts loader. We scan ~/.kolm/artifacts/*.kolm for
+  // a manifest whose cid matches the requested cid; the same shape the
+  // server's /v1/artifact/lineage route uses.
+  let AdmZipMod;
+  try { AdmZipMod = (await import('adm-zip')).default; }
+  catch (e) {
+    const envelope = {
+      ok: false,
+      error: 'adm_zip_unavailable',
+      detail: (e && e.message) || String(e),
+      hint: 'npm install adm-zip',
+      version: 'w739-v1',
+    };
+    console.log(JSON.stringify(envelope, null, 2));
+    process.exit(EXIT.MISSING_PREREQ);
+    return;
+  }
+  const home = process.env.KOLM_DATA_DIR
+    ? path.resolve(process.env.KOLM_DATA_DIR)
+    : path.join(process.env.HOME || process.env.USERPROFILE || os.homedir(), '.kolm');
+  const artDir = path.join(home, 'artifacts');
+  async function loadByCid(target) {
+    if (!fs.existsSync(artDir)) return null;
+    const files = fs.readdirSync(artDir).filter(f => f.endsWith('.kolm'));
+    for (const fname of files) {
+      const fp = path.join(artDir, fname);
+      try {
+        const buf = fs.readFileSync(fp);
+        const zip = new AdmZipMod(buf);
+        const e = zip.getEntry('manifest.json');
+        if (!e) continue;
+        const m = JSON.parse(e.getData().toString('utf8'));
+        if (m && m.cid === target) {
+          const composite = (m.k_score && typeof m.k_score.composite === 'number')
+            ? m.k_score.composite : null;
+          return {
+            manifest: m,
+            k_score: composite,
+            created_at: m.created_at || null,
+            parent_cid: typeof m.parent_cid === 'string' ? m.parent_cid : null,
+          };
+        }
+      } catch { /* skip malformed entries */ }
+    }
+    return null;
+  }
+  const out = await lineageMod.walkLineage(loadByCid, cid, { max_depth });
+  if (json || !out.ok) {
+    console.log(JSON.stringify(out, null, 2));
+    return;
+  }
+  // Pretty table to stderr, machine-readable JSON to stdout? No — for the
+  // lineage walk, the chain IS the deliverable, so we pretty-print to stdout
+  // and a follow-on tool can opt into --json.
+  const short = (s) => (s ? String(s).slice(0, 12) + '…' : 'null');
+  const ks = (v) => (typeof v === 'number' ? v.toFixed(4) : 'null');
+  console.log(`lineage chain for ${cid}  (depth=${out.depth}, truncated=${out.truncated})`);
+  console.log('depth  cid           k_score  parent_cid    created_at');
+  for (let i = 0; i < out.chain.length; i++) {
+    const row = out.chain[i];
+    console.log(`${String(i).padStart(5)}  ${short(row.cid).padEnd(13)} ${ks(row.k_score).padEnd(8)} ${short(row.parent_cid).padEnd(13)} ${row.created_at || ''}`);
+  }
+}
+
+async function cmdW739Diff(args) {
+  const aPath = args && args[0];
+  const bPath = args && args[1];
+  if (!aPath || !bPath || (typeof aPath === 'string' && aPath.startsWith('-'))) {
+    console.error('usage: kolm diff <a.kolm> <b.kolm>');
+    console.error('  Compares two .kolm artifacts: lineage relation + per-axis performance delta + roll-back recommendation.');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+  let mod;
+  try {
+    mod = await import('../src/kolm-diff.js');
+  } catch (e) {
+    const envelope = {
+      ok: false,
+      error: 'kolm_diff_module_missing',
+      detail: (e && e.message) || String(e),
+      hint: 'src/kolm-diff.js must be importable; reinstall the kolm CLI',
+      version: 'w739-v1',
+    };
+    console.log(JSON.stringify(envelope, null, 2));
+    process.exit(EXIT.MISSING_PREREQ);
+    return;
+  }
+  const result = await mod.diffArtifacts(aPath, bPath);
+  console.log(JSON.stringify(result, null, 2));
+  // Print the recommendation pill to stderr so a stdout redirect captures
+  // the JSON envelope while the operator still sees the verdict in the
+  // terminal. Always exit 0 — the diff is informational (the operator
+  // decides whether to roll back).
+  if (result && result.ok) {
+    const pill = result.recommendation || 'inconclusive';
+    console.error(`recommendation: [${pill}]  ${result.roll_back_hint || ''}`);
+  } else if (result) {
+    console.error(`diff failed: ${result.error || 'unknown_error'}`);
+  }
+  // Honest exit code: 0 on a successful diff (even when recommendation is
+  // roll_back — that is the WHOLE POINT of the verdict, not an error). The
+  // operator wires their own CI gate around the recommendation string.
+  process.exit(EXIT.OK);
+}
+
+// =============================================================================
+// W741 — `kolm diagnose <cid>` dispatcher.
+//
+// Distinct-named (cmdW741Diagnose) per the W724/.../W738 precedent so parallel
+// wave agents on W739/W740/W742 cannot collide on this symbol.
+//
+// Prints the diagnostic envelope returned by GET /v1/diagnose/:cid as a
+// multi-section table:
+//
+//   1. Per-category K-Score breakdown (with Wilson 95% CI when n>=30)
+//   2. Top recommendations (sorted by priority)
+//
+// Color-coded pills (ANSI when stdout is a TTY, plain otherwise):
+//   green  — k_score >= 0.95
+//   yellow — k_score >= 0.85
+//   red    — k_score <  0.85
+//
+// Always exits 0 (informational). Exits 2 (EXIT.GATE_FAIL) when the envelope
+// itself reports ok:false so CI can branch on diagnose failure.
+// =============================================================================
+async function cmdW741Diagnose(args) {
+  const cid = args && args[0];
+  if (!cid || typeof cid !== 'string' || cid.startsWith('-')) {
+    console.error('usage: kolm diagnose <artifact_cid>');
+    console.error('  Prints a per-category K-Score breakdown + linked recommendations.');
+    console.error('  See https://kolm.ai/docs/diagnose for the envelope shape.');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+  const base = (process.env.KOLM_BASE_URL || process.env.KOLM_BASE || 'https://kolm.ai').replace(/\/$/, '');
+  const apiKey = process.env.KOLM_API_KEY || process.env.KOLM_KEY || '';
+  if (!apiKey) {
+    const envelope = {
+      ok: false,
+      error: 'missing_api_key',
+      hint: 'set KOLM_API_KEY (or KOLM_KEY) and re-run; or run `kolm login`',
+      diagnostic_version: 'w741-v1',
+    };
+    console.log(JSON.stringify(envelope, null, 2));
+    process.exit(EXIT.MISSING_PREREQ);
+    return;
+  }
+  let res;
+  try {
+    res = await fetch(base + '/v1/diagnose/' + encodeURIComponent(cid), {
+      method: 'GET',
+      headers: { 'authorization': `Bearer ${apiKey}`, 'accept': 'application/json' },
+    });
+  } catch (e) {
+    const envelope = {
+      ok: false,
+      error: 'diagnose_request_failed',
+      detail: (e && e.message) || String(e),
+      diagnostic_version: 'w741-v1',
+    };
+    console.log(JSON.stringify(envelope, null, 2));
+    process.exit(EXIT.EXECUTION);
+    return;
+  }
+  const text = await res.text().catch(() => '');
+  let envelope = null;
+  try { envelope = text ? JSON.parse(text) : null; } catch (_) { envelope = { _raw: text }; }
+  if (!envelope || typeof envelope !== 'object') {
+    console.error('diagnose: empty/invalid envelope (status ' + res.status + ')');
+    process.exit(EXIT.EXECUTION);
+    return;
+  }
+  // --json passthrough so CI scripts can capture the structured envelope.
+  if (args.includes('--json')) {
+    console.log(JSON.stringify(envelope, null, 2));
+    if (envelope.ok === false) process.exit(EXIT.GATE_FAIL);
+    return;
+  }
+  _renderW741Diagnostic(envelope);
+  if (envelope.ok === false) process.exit(EXIT.GATE_FAIL);
+}
+
+function _renderW741Diagnostic(envelope) {
+  const useColor = process.stdout && process.stdout.isTTY && !process.env.NO_COLOR;
+  const c = {
+    green:  (s) => useColor ? `\x1b[32m${s}\x1b[0m` : s,
+    yellow: (s) => useColor ? `\x1b[33m${s}\x1b[0m` : s,
+    red:    (s) => useColor ? `\x1b[31m${s}\x1b[0m` : s,
+    dim:    (s) => useColor ? `\x1b[2m${s}\x1b[0m` : s,
+    bold:   (s) => useColor ? `\x1b[1m${s}\x1b[0m` : s,
+  };
+  function pill(k) {
+    if (typeof k !== 'number') return c.dim('--');
+    if (k >= 0.95) return c.green('GOOD   ' + k.toFixed(3));
+    if (k >= 0.85) return c.yellow('OK     ' + k.toFixed(3));
+    return c.red('LOW    ' + k.toFixed(3));
+  }
+  console.log('');
+  console.log(c.bold('Diagnostic ') + c.dim('(' + (envelope.diagnostic_version || 'w741-v1') + ')'));
+  console.log('  artifact_cid:    ' + (envelope.artifact_cid || '(none)'));
+  if (envelope.ok === false) {
+    console.log('  ' + c.red('status:          ok=false  error=' + envelope.error));
+    if (envelope.hint) console.log('  ' + c.dim('hint:            ' + envelope.hint));
+    console.log('');
+    return;
+  }
+  console.log('  overall k_score: ' + pill(envelope.overall_k_score));
+  console.log('  generated_at:    ' + c.dim(envelope.generated_at || ''));
+  console.log('');
+  // Per-category breakdown
+  const cats = Array.isArray(envelope.per_category) ? envelope.per_category : [];
+  if (cats.length) {
+    console.log(c.bold('Per-category breakdown'));
+    console.log('  ' + 'category'.padEnd(20) + 'n'.padStart(6) + '   ' + 'k_score'.padEnd(14) + 'ci_95'.padEnd(20) + 'worst_samples');
+    for (const cat of cats) {
+      const name = String(cat.name || '?').padEnd(20);
+      const n = String(cat.n != null ? cat.n : '-').padStart(6);
+      const k = pill(cat.k_score).padEnd(14 + (useColor ? 9 : 0));
+      const ci = (cat.k_score_ci_lo != null && cat.k_score_ci_hi != null)
+        ? ('[' + cat.k_score_ci_lo.toFixed(3) + ', ' + cat.k_score_ci_hi.toFixed(3) + ']').padEnd(20)
+        : c.dim('n<30 (no CI)'.padEnd(20));
+      const worst = Array.isArray(cat.worst_sample_cids) && cat.worst_sample_cids.length
+        ? cat.worst_sample_cids.slice(0, 3).join(', ')
+        : c.dim('(none)');
+      console.log('  ' + name + n + '   ' + k + ci + worst);
+    }
+    console.log('');
+  }
+  // Top recommendations
+  const recs = Array.isArray(envelope.recommendations) ? envelope.recommendations : [];
+  if (recs.length) {
+    console.log(c.bold('Top recommendations'));
+    for (const rec of recs) {
+      const prio = (rec.priority === 'high') ? c.red('[HIGH  ]')
+                 : (rec.priority === 'medium') ? c.yellow('[MEDIUM]')
+                 : c.dim('[INFO  ]');
+      let actionLine = '  ' + prio + ' ' + c.bold(rec.action);
+      if (rec.category) actionLine += '  category=' + rec.category;
+      if (rec.target_count) actionLine += '  target_count=' + rec.target_count;
+      if (rec.from != null) actionLine += '  from=' + rec.from;
+      if (rec.to != null) actionLine += '  to=' + rec.to;
+      console.log(actionLine);
+      console.log('         ' + c.dim(rec.reason || ''));
+    }
+    console.log('');
+  } else {
+    console.log(c.dim('No recommendations — every per-category bucket is healthy.'));
+    console.log('');
+  }
+}
+
+// =============================================================================
+// W742 — `kolm gateway <status|set|test-call>` dispatcher.
+//
+// Distinct-named (cmdW742Gateway) per the W724/.../W741 precedent so parallel
+// wave agents on W740/W741/W743 cannot collide on this symbol.
+//
+// Subcommands:
+//   status         — print current mode + reachability + hint
+//   set <mode>     — print the `export KOLM_GATEWAY_MODE=<mode>` shell snippet
+//                    (we deliberately do NOT mutate the parent shell; that is
+//                    the parent's job — and the honesty contract is to say so)
+//   test-call --message "<text>" [--model <m>]
+//                  — call dispatchByMode with the current env mode and print
+//                    the response. Mock mode is free; local-* uses your GPU.
+//
+// Every subcommand returns a JSON envelope on stdout so CI loops can parse it
+// without screen-scraping.
+// =============================================================================
+async function cmdW742Gateway(args) {
+  const sub = (args && args[0]) || '';
+
+  async function _loadMod() {
+    try { return await import('../src/gateway-mode.js'); }
+    catch (e) {
+      const envelope = {
+        ok: false,
+        error: 'gateway_mode_module_missing',
+        detail: (e && e.message) || String(e),
+        hint: 'src/gateway-mode.js must be importable; reinstall the kolm CLI',
+        version: 'w742-v1',
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.MISSING_PREREQ);
+      return null;
+    }
+  }
+
+  // ──────────────────────── subcommand: status ───────────────────────────────
+  if (sub === 'status' || sub === '') {
+    const mod = await _loadMod();
+    if (!mod) return;
+    let mode;
+    try { mode = mod.currentMode(); }
+    catch (e) {
+      const envelope = {
+        ok: false,
+        error: 'unknown_gateway_mode',
+        detail: (e && e.message) || String(e),
+        allowed: mod.GATEWAY_MODES.slice(),
+        hint: 'unset KOLM_GATEWAY_MODE or set it to one of: ' + mod.GATEWAY_MODES.join(', '),
+        version: mod.GATEWAY_MODE_VERSION,
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.BAD_ARGS);
+      return;
+    }
+    const probe = await mod.probeReachability({});
+    const envelope = {
+      ok: true,
+      mode,
+      ollama_reachable: probe.ollama_reachable,
+      vllm_reachable: probe.vllm_reachable,
+      allowed: mod.GATEWAY_MODES.slice(),
+      hint:
+        mode === 'cloud' ? 'cloud-mode flows through __hostedInferenceWrapper (billed)'
+        : mode === 'mock' ? 'mock-mode is free and deterministic — no billing, no network'
+        : mode === 'local-ollama' ? (probe.ollama_reachable
+            ? 'ollama reachable at KOLM_OLLAMA_URL (or default localhost:11434)'
+            : "ollama NOT reachable; run 'ollama serve' or set KOLM_OLLAMA_URL")
+        : mode === 'local-vllm' ? (probe.vllm_reachable
+            ? 'vllm reachable at KOLM_VLLM_URL (or default localhost:8000)'
+            : "vllm NOT reachable; start the vllm openai server or set KOLM_VLLM_URL")
+        : null,
+      version: mod.GATEWAY_MODE_VERSION,
+    };
+    console.log(JSON.stringify(envelope, null, 2));
+    return;
+  }
+
+  // ──────────────────────── subcommand: set ──────────────────────────────────
+  if (sub === 'set') {
+    const mod = await _loadMod();
+    if (!mod) return;
+    const target = String((args && args[1]) || '');
+    if (target === '' || mod.GATEWAY_MODES.indexOf(target) < 0) {
+      const envelope = {
+        ok: false,
+        error: 'invalid_mode',
+        given: target || null,
+        allowed: mod.GATEWAY_MODES.slice(),
+        hint: 'usage: kolm gateway set <' + mod.GATEWAY_MODES.join('|') + '>',
+        version: mod.GATEWAY_MODE_VERSION,
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.BAD_ARGS);
+      return;
+    }
+    // Honest: we cannot mutate the parent shell's environment from a child
+    // process. Print the shell snippet so the user can source / eval / paste
+    // and document the constraint loudly.
+    const snippet = process.platform === 'win32'
+      ? `setx KOLM_GATEWAY_MODE ${target}`
+      : `export KOLM_GATEWAY_MODE=${target}`;
+    const envelope = {
+      ok: true,
+      mode_set_in_child: target,
+      shell_snippet: snippet,
+      note: 'child processes cannot mutate the parent shell environment; copy the snippet above to apply for your next command.',
+      version: mod.GATEWAY_MODE_VERSION,
+    };
+    console.log(JSON.stringify(envelope, null, 2));
+    console.log('');
+    console.log(snippet);
+    return;
+  }
+
+  // ──────────────────────── subcommand: test-call ───────────────────────────
+  if (sub === 'test-call') {
+    const mod = await _loadMod();
+    if (!mod) return;
+    const rest = args.slice(1);
+    const flags = {};
+    for (let i = 0; i < rest.length; i++) {
+      const a = rest[i];
+      if (a === '--message' && i + 1 < rest.length) { flags.message = rest[++i]; }
+      else if (typeof a === 'string' && a.startsWith('--message=')) { flags.message = a.slice('--message='.length); }
+      else if (a === '--model' && i + 1 < rest.length) { flags.model = rest[++i]; }
+      else if (typeof a === 'string' && a.startsWith('--model=')) { flags.model = a.slice('--model='.length); }
+      else if (a === '--mock-kind' && i + 1 < rest.length) { flags.mockKind = rest[++i]; }
+      else if (typeof a === 'string' && a.startsWith('--mock-kind=')) { flags.mockKind = a.slice('--mock-kind='.length); }
+    }
+    if (typeof flags.message !== 'string' || flags.message.length === 0) {
+      console.error('usage: kolm gateway test-call --message "<text>" [--model <m>] [--mock-kind echo|reverse|fixed]');
+      process.exit(EXIT.BAD_ARGS);
+      return;
+    }
+    let mode;
+    try { mode = mod.currentMode(); }
+    catch (e) {
+      const envelope = {
+        ok: false,
+        error: 'unknown_gateway_mode',
+        detail: (e && e.message) || String(e),
+        allowed: mod.GATEWAY_MODES.slice(),
+        version: mod.GATEWAY_MODE_VERSION,
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.BAD_ARGS);
+      return;
+    }
+    if (mode === 'cloud') {
+      // Refuse explicitly — `test-call` is a local-only smoke test. Asking
+      // for cloud-mode here would silently bill a real API key, and the
+      // user has a separate `kolm ask` / `kolm chat` for that.
+      const envelope = {
+        ok: false,
+        error: 'cloud_mode_not_supported_for_test_call',
+        hint: 'set KOLM_GATEWAY_MODE=mock (free) or local-ollama / local-vllm to use kolm gateway test-call',
+        version: mod.GATEWAY_MODE_VERSION,
+      };
+      console.log(JSON.stringify(envelope, null, 2));
+      process.exit(EXIT.BAD_ARGS);
+      return;
+    }
+    const out = await mod.dispatchByMode({
+      mode,
+      messages: [{ role: 'user', content: flags.message }],
+      model: flags.model || 'kolm-local',
+      mockKind: flags.mockKind,
+    });
+    const envelope = {
+      ok: !!out.ok,
+      mode,
+      response: out,
+      version: mod.GATEWAY_MODE_VERSION,
+    };
+    console.log(JSON.stringify(envelope, null, 2));
+    if (!out.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── unknown subcommand ───────────────────────────────
+  console.error('usage: kolm gateway <status|set|test-call> [args]');
+  console.error('  status                                    — print current mode + reachability');
+  console.error('  set <cloud|local-ollama|local-vllm|mock>  — print shell snippet (parent shell sets env)');
+  console.error('  test-call --message "<text>" [--model m]  — call dispatchByMode and print response');
+  process.exit(EXIT.BAD_ARGS);
+}
+
 async function main() {
   ensureLocalReceiptSecretInEnv();
   const [, , cmd, ...rest] = process.argv;
@@ -32534,7 +33236,15 @@ async function main() {
       case 'ls':       await withErrorContext('list',     () => cmdList(rest)); break;
       case 'inspect':  await withErrorContext('inspect',  () => cmdInspect(rest)); break;
       case 'eject':    await withErrorContext('eject',    () => cmdEject(rest)); break;
-      case 'diff':     await withErrorContext('diff',     () => cmdDiff(rest)); break;
+      // W739 — `kolm diff <a.kolm> <b.kolm>` (real implementation supersedes
+      // the legacy cmdDiff manifest-comparison path). Distinct dispatcher
+      // cmdW739Diff so parallel agents on W738/W740/W741 do not collide on
+      // this symbol. The W732 wire-up below this in the switch was already
+      // unreachable JS (duplicate case label) so removing it is byte-safe.
+      case 'diff':     await withErrorContext('diff',     () => cmdW739Diff(rest)); break;
+      // W739 — `kolm lineage <cid>` walks the parent_cid chain anchored at
+      // <cid> against local artifacts (~/.kolm/artifacts/*.kolm).
+      case 'lineage':  await withErrorContext('lineage',  () => cmdW739Lineage(rest)); break;
       case 'verify':   await withErrorContext('verify',   () => cmdVerify(rest)); break;
       case 'sigstore-attest':
       case 'attest':   await withErrorContext('sigstore-attest', () => cmdSigstoreAttest(rest)); break;
@@ -32605,10 +33315,12 @@ async function main() {
       // merge-conflict on the symbol. Honest envelopes on missing file +
       // parse error + already-exists.
       case 'yaml':     await withErrorContext('yaml',     () => cmdW732YamlSync(rest)); break;
-      // W732-4 — `kolm diff <a.kolm> <b.kolm>`. Honest `w739_not_shipped`
-      // envelope until W739 ships; the dispatcher slot stays stable so the
-      // W739 wave swaps src/kolm-diff.js without touching this file.
-      case 'diff':     await withErrorContext('diff',     () => cmdW732Diff(rest)); break;
+      // W732-4 — `kolm diff <a.kolm> <b.kolm>` was historically wired here as
+      // a duplicate case label below the active wire-up above; the W739 real
+      // implementation replaces the active site (line ~32537). This arm is
+      // unreachable JS (duplicate case label) but kept as a no-op pointer to
+      // cmdW732Diff for git-blame archaeology — the real wire-up is upstream.
+      case 'diff_w732_unreachable_duplicate': await withErrorContext('diff', () => cmdW732Diff(rest)); break;
       case 'hmac':     await withErrorContext('hmac',     () => cmdHmac(rest)); break;
       case 'keygen':   await withErrorContext('keygen',   () => cmdKeygen(rest)); break;
       case 'pubkey':   await withErrorContext('pubkey',   () => cmdPubkey(rest)); break;
@@ -32682,7 +33394,20 @@ async function main() {
       case 'rescue':   await withErrorContext('rescue',   () => cmdRescue(rest)); break;
       case 'sessions': await withErrorContext('sessions', () => cmdSessions(rest)); break;
       case 'checkpoint':  await withErrorContext('checkpoint',  () => cmdCheckpoint(rest)); break;
-      case 'import':
+      // W740 — `kolm import {inspect|wrap|doctor} <file>` routes to the
+      // distinct W740 dispatcher (cmdW740Import) for GGUF/safetensors/ONNX
+      // import. Legacy `kolm import` / `kolm import-chat` for chat-log import
+      // falls through to cmdImportChat. Branch keys on explicit W740 verb
+      // so chat-import users (no subcommand) keep their flow.
+      case 'import': {
+        const sub0Imp = (rest && rest[0]) || '';
+        if (sub0Imp === 'inspect' || sub0Imp === 'wrap' || sub0Imp === 'doctor') {
+          await withErrorContext('import', () => cmdW740Import(rest));
+        } else {
+          await withErrorContext('import-chat', () => cmdImportChat(rest));
+        }
+        break;
+      }
       case 'import-chat': await withErrorContext('import-chat', () => cmdImportChat(rest)); break;
       case 'merge':       await withErrorContext('merge',       () => cmdMerge(rest)); break;
       case 'agent':       await withErrorContext('agent',       () => cmdAgent(rest)); break;
@@ -32778,6 +33503,15 @@ async function main() {
         }
         break;
       }
+      // W741 — `kolm diagnose <cid>` prints a per-category K-Score breakdown
+      // + linked actionable recommendations. Distinct-named dispatcher
+      // (cmdW741Diagnose) so parallel wave agents on W739/W740/W742 cannot
+      // collide on this symbol.
+      case 'diagnose':   await withErrorContext('diagnose',   () => cmdW741Diagnose(rest)); break;
+      // W742 — `kolm gateway <status|set|test-call>` routes the gateway-mode
+      // dispatcher. Distinct-named (cmdW742Gateway) so parallel W740/W741/W743
+      // wave agents cannot collide on this case.
+      case 'gateway':    await withErrorContext('gateway',    () => cmdW742Gateway(rest)); break;
       case 'agents':     await withErrorContext('agents',     () => cmdAgents(rest)); break;
       case 'shell-init': await withErrorContext('shell-init', () => cmdShellInit(rest)); break;
       case '--version':

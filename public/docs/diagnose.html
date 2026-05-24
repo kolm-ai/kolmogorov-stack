@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Diagnose &middot; per-category K-Score breakdown &middot; kolm.ai</title>
+<meta name="description" content="Turn a single K-Score number into a structured diagnostic envelope: per-category breakdown (Wilson 95% CI when n>=30), worst-bucket sample cids, and deterministic fix recommendations linked to the next CLI step.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Diagnose &middot; per-category K-Score breakdown &middot; kolm.ai">
+<meta property="og:description" content="Per-category K-Score breakdown + deterministic fix recommendations. Wilson 95% CI when n>=30; honest null when n<30.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/docs/diagnose">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Diagnose &middot; per-category K-Score breakdown &middot; kolm.ai">
+<meta name="twitter:description" content="Per-category K-Score breakdown + deterministic fix recommendations.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/docs/diagnose">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Diagnose: per-category K-Score breakdown","description":"Turn a single K-Score number into a structured diagnostic envelope.","url":"https://kolm.ai/docs/diagnose","datePublished":"2026-05-24","dateModified":"2026-05-24","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<link rel="stylesheet" href="/design-tokens.css">
+<style>
+:root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--accent-soft:rgba(16,185,129,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.skip-link{position:absolute;left:-9999px}
+.skip-link:focus{position:static;background:var(--accent);color:#fff;padding:8px 14px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+header.site{padding:18px 0;border-bottom:1px solid var(--line)}
+header.site .wrap{display:flex;justify-content:space-between;align-items:center}
+header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px;flex-wrap:wrap}
+header.site nav a{color:inherit;text-decoration:none}
+header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 36px}
+h2{font-size:24px;font-weight:500;letter-spacing:-0.018em;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:28px 0 8px;max-width:780px}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px}
+pre code{background:none;border:none;padding:0;color:inherit;font:inherit}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
+li{margin:4px 0}
+table{border-collapse:collapse;width:100%;max-width:920px;margin:14px 0;font-size:13.5px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink);font-weight:500}
+td code{font-size:12px}
+.related{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+@media(max-width:820px){.related{grid-template-columns:1fr}}
+.related a{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:4px}
+.related a:hover{border-color:var(--accent-soft)}
+.related b{font-size:14px;color:var(--ink);font-weight:500}
+.related span{font-size:12.5px;color:var(--ink-mute);line-height:1.5}
+.metric-card{border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:14px 0;background:var(--bg-elev)}
+.metric-card h3{margin:0 0 6px}
+.metric-card .meta{font-family:var(--mono);font-size:11.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
+footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.pill-good{color:#10b981;font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor;padding:1px 7px;border-radius:999px}
+.pill-warn{color:#d97706;font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor;padding:1px 7px;border-radius:999px}
+.pill-bad{color:#dc2626;font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor;padding:1px 7px;border-radius:999px}
+</style>
+
+<link rel="stylesheet" href="/ks.css">
+<!-- ds-shell W619 -->
+<link rel="stylesheet" href="/docs-shell.css">
+<script defer src="/docs-shell.js"></script>
+
+</head>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    </div>
+  </nav>
+  <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+  </div>
+</div>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / diagnose</div>
+<h1>Diagnose: per-category K-Score breakdown</h1>
+<p class="lede">A single K-Score number ("0.72") tells you the artifact is below the production gate. It does not tell you <em>where</em> the regression sits or what to do next. <code>kolm diagnose &lt;cid&gt;</code> turns that one number into a structured envelope: per-category buckets (each with its own Wilson 95% CI when <code>n &gt;= 30</code>), the lowest-scoring sample cids, and a deterministic list of recommendations linked to the next CLI step. Brand-locked: kolm.ai &mdash; the AI workbench. Frontier AI on your own infrastructure.</p>
+
+<h2 id="why">Why a single K-Score is not enough</h2>
+<p>K-Score collapses accuracy, size, latency, cost, and coverage into one composite. That is exactly what you want when comparing two artifacts side by side &mdash; but it is also why "K-Score 0.72" is unhelpful when you need to ship next week. The headline number says "below gate" without saying which slice of traffic dragged it down. The diagnostic envelope un-collapses the composite along the axis that actually matters in production: <strong>which slice of the captured workload</strong> the artifact is failing on.</p>
+
+<p>The canonical failure mode looks like this. A model passes 0.92 on single-turn support tickets, 0.94 on billing lookups, 0.62 on multi-turn refund negotiations, and 0.95 on PDF redaction. Unweighted mean: 0.72. Headline: "below gate." Real story: "the artifact is shippable on three of four slices; multi-turn needs 100 more captures." The diagnostic envelope spells that story out and links it to <code>kolm capture --category multi-turn</code>.</p>
+
+<h2 id="envelope">Diagnostic envelope shape</h2>
+<p>The same envelope is returned by <code>POST /v1/diagnose</code>, <code>GET /v1/diagnose/:cid</code>, and the <code>kolm diagnose --json</code> CLI path. Field stability is part of the contract &mdash; downstream dashboards and CI gates can rely on it.</p>
+
+<pre><code>{
+  "ok": true,
+  "diagnostic_version": "w741-v1",
+  "artifact_cid": "bafkreigh2akiscaildc3xy7p4nntwvjp7m5kw5kbsmm5kkkkkkkkkkkkkk",
+  "overall_k_score": 0.7234,
+  "per_category": [
+    {
+      "name": "multi-turn",
+      "n": 47,
+      "k_score": 0.6204,
+      "k_score_ci_lo": 0.5117,
+      "k_score_ci_hi": 0.7224,
+      "k_score_stddev": 0.1834,
+      "worst_sample_cids": ["847", "1203", "1567"]
+    },
+    {
+      "name": "tool-use",
+      "n": 22,
+      "k_score": 0.8101,
+      "k_score_ci_lo": null,
+      "k_score_ci_hi": null,
+      "k_score_stddev": 0.0921,
+      "worst_sample_cids": ["1882", "2017", "2103"]
+    },
+    {
+      "name": "general",
+      "n": 312,
+      "k_score": 0.9412,
+      "k_score_ci_lo": 0.9118,
+      "k_score_ci_hi": 0.9613,
+      "k_score_stddev": 0.0612,
+      "worst_sample_cids": ["91", "204", "778"]
+    }
+  ],
+  "worst_categories": [
+    { "name": "multi-turn", "k_score": 0.6204, "n": 47 },
+    { "name": "tool-use",   "k_score": 0.8101, "n": 22 },
+    { "name": "general",    "k_score": 0.9412, "n": 312 }
+  ],
+  "recommendations": [
+    {
+      "action": "capture_more",
+      "category": "multi-turn",
+      "target_count": 153,
+      "priority": "high",
+      "reason": "k_score 0.6204 &lt; threshold 0.85"
+    },
+    {
+      "action": "capture_more",
+      "category": "tool-use",
+      "target_count": 178,
+      "priority": "high",
+      "reason": "k_score 0.8101 &lt; threshold 0.85"
+    },
+    {
+      "action": "adjust_temperature",
+      "category": "multi-turn",
+      "from": 0.7,
+      "to": 0.4,
+      "priority": "medium",
+      "reason": "high variance in multi-turn category (stddev 0.1834 &gt; 0.15)"
+    }
+  ],
+  "generated_at": "2026-05-24T18:42:11.503Z"
+}
+</code></pre>
+
+<h2 id="categorize">How captures get bucketed</h2>
+<p>Categorisation is a pure heuristic over fields already on the capture record &mdash; no LLM calls, no on-the-fly classifier. The rules below are checked in order; first match wins. Determinism is the load-bearing property: the same capture set always produces the same buckets, regardless of when the diagnostic ran.</p>
+
+<table>
+  <thead><tr><th>If the capture has...</th><th>Bucket</th></tr></thead>
+  <tbody>
+    <tr><td><code>turn_count &gt; 1</code> (or <code>messages.length &gt; 1</code>)</td><td><code>multi-turn</code></td></tr>
+    <tr><td><code>media_kind</code> in <code>{image,audio,video,pdf}</code></td><td>the media kind itself</td></tr>
+    <tr><td><code>tool_calls</code> array with len &gt; 0</td><td><code>tool-use</code></td></tr>
+    <tr><td>explicit <code>category</code> string</td><td>that string</td></tr>
+    <tr><td><code>namespace</code> string</td><td>the namespace itself</td></tr>
+    <tr><td>everything else</td><td><code>general</code></td></tr>
+  </tbody>
+</table>
+
+<h2 id="ci">Wilson 95% CI &mdash; and the honest null floor</h2>
+<p>When a category has <code>n &gt;= 30</code> rows we report a Wilson 95% confidence interval on the per-bucket mean. The Wilson interval is the right answer for proportions on small samples because it does not blow up at the endpoints &mdash; an unweighted bucket of 47 rows with a mean of 0.62 honestly maps to <code>[0.51, 0.72]</code>, not <code>[0.62, 0.62]</code>.</p>
+
+<p>When <code>n &lt; 30</code> we return <code>k_score_ci_lo: null</code> and <code>k_score_ci_hi: null</code>. We do not substitute a Bayesian prior, we do not fall back to the pooled estimate, we do not interpolate. The bucket is honestly under-sampled and the dashboard says so. This is the same honesty contract that drives W810 calibration's <code>insufficient_data</code> status and W258-ML-1's <code>MIN_HONEST_A_FOR_RATIO</code> floor &mdash; if the measurement is shaky, the envelope says shaky, not "0.6204 &plusmn; 0.0000."</p>
+
+<h2 id="recommendations">Recommendation rules</h2>
+<p>Recommendations are deterministic and lock-in tested. The four rules below are the entire surface &mdash; no LLM picks them, no human curates them. A capture set that hits the same rule on a re-run produces the same recommendation list, in the same priority order.</p>
+
+<table>
+  <thead><tr><th>Trigger</th><th>Action</th><th>Priority</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>per-category <code>k_score &lt; 0.85</code> AND <code>n &lt; 200</code></td>
+      <td><code>capture_more</code> with <code>target_count = max(100, 200 - n)</code></td>
+      <td><strong>high</strong></td>
+    </tr>
+    <tr>
+      <td>overall <code>k_score &lt; 0.85</code> AND every per-category bucket is <code>&gt;= 0.85</code></td>
+      <td><code>inspect_captures</code> (data-quality skew)</td>
+      <td>medium</td>
+    </tr>
+    <tr>
+      <td>per-category <code>k_score_stddev &gt; 0.15</code> AND <code>n &gt;= 30</code></td>
+      <td><code>adjust_temperature</code> from 0.7 to 0.4</td>
+      <td>medium</td>
+    </tr>
+    <tr>
+      <td>every per-category <code>k_score &gt;= 0.95</code></td>
+      <td><code>promote_to_production</code> (emitted alone)</td>
+      <td>info</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Single-issue mode:</strong> when the <code>promote_to_production</code> rule fires, it is the only recommendation in the envelope &mdash; we do not pad it with low-signal warnings. The CI dashboard either sees "promote" or sees a list of specific fixes; there is no third state where both appear.</p>
+
+<h2 id="api">API + CLI</h2>
+<p>The CLI shells out to the API &mdash; same envelope, same fields, no client-side computation.</p>
+
+<table>
+  <thead><tr><th>Surface</th><th>Invocation</th></tr></thead>
+  <tbody>
+    <tr><td>CLI (table)</td><td><code>kolm diagnose &lt;artifact_cid&gt;</code></td></tr>
+    <tr><td>CLI (json)</td><td><code>kolm diagnose &lt;artifact_cid&gt; --json</code></td></tr>
+    <tr><td>API (POST)</td><td><code>POST /v1/diagnose</code> body <code>{"artifact_cid": "&lt;cid&gt;"}</code></td></tr>
+    <tr><td>API (GET)</td><td><code>GET /v1/diagnose/:cid</code></td></tr>
+    <tr><td>In-app dashboard</td><td><a href="/account/diagnose">/account/diagnose?cid=&lt;cid&gt;</a></td></tr>
+  </tbody>
+</table>
+
+<h3 id="no-bakeoff">Honest absence: no_bakeoff_results_yet</h3>
+<p>The diagnostic depends on per-row bakeoff results. When no bakeoff has been run for the requested artifact, the route returns HTTP 200 with an honest <code>{ ok: false, error: "no_bakeoff_results_yet" }</code> envelope &mdash; not a 404. The HTTP call itself succeeded; the actionable hint tells the caller what to do next: <code>run `kolm bakeoff first` against this artifact_cid, then retry</code>.</p>
+
+<h2 id="next">Next steps</h2>
+<p>Run <code>kolm bakeoff</code> first to produce per-row K-Score rows, then <code>kolm diagnose &lt;cid&gt;</code> to bucket them. Read <a href="/docs/k-score-methodology">K-Score methodology</a> for the underlying composite and <a href="/docs/pipelines">pipelines</a> for how to compose specialists once you have shipped each per-category artifact.</p>
+
+<div class="related">
+  <a href="/docs/k-score-methodology"><b>K-Score &rarr;</b><span>The composite the diagnostic decomposes.</span></a>
+  <a href="/docs/pipelines"><b>Pipelines &rarr;</b><span>Compose specialists per category once each is shipped.</span></a>
+  <a href="/account/diagnose"><b>In-app diagnose &rarr;</b><span>Browse a diagnostic envelope visually.</span></a>
+</div>
+
+</div></main>
+
+<footer><div class="wrap">
+ kolm.ai &middot; the AI workbench &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
+</div></footer>
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Frontier AI on your own infrastructure.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/integrations">Integrations</a></li><li><a href="/docs/api">API reference</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

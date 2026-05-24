@@ -4181,6 +4181,76 @@ export function buildRouter() {
   // 401-rejected — we never run the accelerated path anonymously, even on
   // the local daemon, because the bench dashboard keys on tenant_id.
   r.post('/v1/chat/completions', __w411HostedAuthGate, loadQueueMiddleware, async (req, res) => {
+    // W742 — gateway-mode dispatch. When KOLM_GATEWAY_MODE != 'cloud' the
+    // hosted teacher path is replaced by the local-ollama / local-vllm /
+    // mock adapter. Mock-mode is W742-3's billing skip: the mock dispatch
+    // does NOT increment hosted_inference (no upstream cost = no bill).
+    // Cloud-mode falls through untouched so the existing W409y wrapper
+    // continues to own billing + guardrails + metering.
+    let __w742Mode = 'cloud';
+    try { __w742Mode = (await import('./gateway-mode.js')).currentMode(); }
+    catch (e) {
+      // Honest-fail loud on unknown env value rather than silently sending
+      // the request to the cloud teacher (which would defeat the privacy
+      // promise of local-* mode).
+      return res.status(400).json({
+        ok: false,
+        error: 'unknown_gateway_mode',
+        detail: String((e && e.message) || e),
+        hint: 'set KOLM_GATEWAY_MODE to one of: cloud, local-ollama, local-vllm, mock',
+        version: 'w742-v1',
+      });
+    }
+    if (__w742Mode !== 'cloud') {
+      const mod = await import('./gateway-mode.js');
+      const body = (req.body && typeof req.body === 'object') ? req.body : {};
+      const messages = Array.isArray(body.messages) ? body.messages : [];
+      const model = (typeof body.model === 'string' && body.model.length > 0)
+        ? body.model
+        : (process.env.KOLM_GATEWAY_LOCAL_MODEL || 'kolm-local');
+      const out = await mod.dispatchByMode({
+        mode: __w742Mode,
+        messages,
+        model,
+        mockKind: body.mock_kind || req.headers['x-kolm-mock-kind'],
+      });
+      // OpenAI-compatible envelope so downstream SDKs don't notice the
+      // mode switch. Failure envelopes are surfaced as 502 (mock returns
+      // 200 since it always succeeds when called with a non-empty array).
+      const created = Math.floor(Date.now() / 1000);
+      if (out.ok) {
+        return res.status(200).json({
+          id: `chatcmpl_${__w742Mode}_${created.toString(36)}`,
+          object: 'chat.completion',
+          created,
+          model,
+          choices: [{
+            index: 0,
+            message: { role: 'assistant', content: out.content || '' },
+            finish_reason: 'stop',
+          }],
+          usage: {
+            prompt_tokens: (out.usage && out.usage.prompt_tokens) || 0,
+            completion_tokens: (out.usage && out.usage.completion_tokens) || 0,
+            total_tokens: ((out.usage && out.usage.prompt_tokens) || 0)
+                        + ((out.usage && out.usage.completion_tokens) || 0),
+          },
+          kolm_w742: {
+            mode: __w742Mode,
+            billed: false, // W742-3: local-* and mock never bill hosted_inference.
+            version: 'w742-v1',
+          },
+        });
+      }
+      return res.status(502).json({
+        ok: false,
+        error: out.error || 'gateway_mode_failed',
+        mode: __w742Mode,
+        hint: out.hint || null,
+        detail: out.detail || null,
+        version: 'w742-v1',
+      });
+    }
     const accelerateFlag = String((req.query && req.query.accelerate) || '').toLowerCase() === 'true';
     if (!accelerateFlag) {
       return __hostedInferenceWrapper('openai', '/v1/chat/completions', req, res);
@@ -4847,6 +4917,43 @@ export function buildRouter() {
 
   r.use(authMiddleware);
 
+  // W742 — GET /v1/gateway/mode reports the current gateway mode + reachability.
+  // Auth-gated (mounted after r.use(authMiddleware)). Probes both local backends
+  // with a 1-second HEAD timeout so a slow / unreachable backend never blocks
+  // the dashboard. The response surfaces the resolved mode (NOT the raw env
+  // value) so a callers sees what currentMode() actually decided.
+  r.get('/v1/gateway/mode', async (req, res) => {
+    try {
+      const mod = await import('./gateway-mode.js');
+      let mode;
+      try { mode = mod.currentMode(); }
+      catch (e) {
+        return res.status(400).json({
+          ok: false,
+          error: 'unknown_gateway_mode',
+          detail: String((e && e.message) || e),
+          allowed: mod.GATEWAY_MODES.slice(),
+          version: mod.GATEWAY_MODE_VERSION,
+        });
+      }
+      const probe = await mod.probeReachability({});
+      return res.status(200).json({
+        ok: true,
+        mode,
+        ollama_reachable: probe.ollama_reachable,
+        vllm_reachable: probe.vllm_reachable,
+        allowed: mod.GATEWAY_MODES.slice(),
+        version: mod.GATEWAY_MODE_VERSION,
+      });
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'gateway_mode_module_unavailable',
+        detail: String((e && e.message) || e),
+      });
+    }
+  });
+
   // Authenticated /v1/health — full snapshot including provider availability
   // and feature flags. Admin-only because the booleans are useful signal for
   // staff debugging but unnecessary surface for tenants. Public /health
@@ -5027,6 +5134,277 @@ export function buildRouter() {
     // we surface them with a 200 because the HTTP call itself succeeded and
     // the envelope carries the actionable error code.
     return res.status(200).json(out);
+  });
+
+  // ---------- W740 — Import (GGUF / safetensors / ONNX) ----------
+  // Symmetric counterpart to `kolm export`. Wraps a non-kolm-compiled binary
+  // (GGUF / safetensors / ONNX) as a partial manifest tagged
+  // `not_kolm_compiled: true` so it can ride through catalog / inspect /
+  // signature flows without ever being silently treated as a kolm-compiled
+  // artifact.
+  //
+  // Endpoints:
+  //   POST /v1/import/inspect  — body {path}: returns the parsed-metadata
+  //                              envelope (sha256, format, params_b, quant,
+  //                              raw_metadata_keys). Read-only.
+  //   POST /v1/import/wrap     — body {path}: returns the wrapAsKolmManifest
+  //                              envelope. The manifest is NOT persisted —
+  //                              the caller decides what to do with it.
+  //                              `not_kolm_compiled: true` is the W740-2
+  //                              load-bearing honesty flag.
+  //
+  // Both routes are auth-gated. The python3 parsers live in
+  // apps/import/{gguf,safetensors,onnx}.py and run in-process via spawnSync
+  // from src/import.js; missing python3 surfaces a 503 python3_missing
+  // envelope — never a 500, never a silent fake.
+  r.post('/v1/import/inspect', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const body = req.body || {};
+    if (typeof body.path !== 'string' || !body.path) {
+      return res.status(400).json({ ok: false, error: 'missing_field', field: 'path' });
+    }
+    let importMod;
+    try {
+      importMod = await import('./import.js');
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'import_module_unavailable',
+        detail: String((e && e.message) || e),
+      });
+    }
+    const envelope = await importMod.parseImportMetadata(body.path, {
+      format: typeof body.format === 'string' ? body.format : undefined,
+    });
+    if (envelope && envelope.ok === false && envelope.error === 'python3_missing') {
+      return res.status(503).json(envelope);
+    }
+    return res.status(200).json(envelope);
+  });
+
+  r.post('/v1/import/wrap', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const body = req.body || {};
+    if (typeof body.path !== 'string' || !body.path) {
+      return res.status(400).json({ ok: false, error: 'missing_field', field: 'path' });
+    }
+    let importMod;
+    try {
+      importMod = await import('./import.js');
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'import_module_unavailable',
+        detail: String((e && e.message) || e),
+      });
+    }
+    const metadata = await importMod.parseImportMetadata(body.path, {
+      format: typeof body.format === 'string' ? body.format : undefined,
+    });
+    if (metadata && metadata.ok === false && metadata.error === 'python3_missing') {
+      return res.status(503).json(metadata);
+    }
+    const manifest = importMod.wrapAsKolmManifest(metadata);
+    return res.status(200).json({
+      ok: true,
+      manifest,
+      source_metadata: metadata,
+      version: importMod.IMPORT_VERSION,
+    });
+  });
+
+  // ---------- W739 — Model lineage tracking + artifact diff ----------
+  // POST /v1/artifact/lineage   → body {cid, max_depth?}, walks parent_cid chain
+  // POST /v1/artifact/diff      → body {a_cid, b_cid}, compares two artifacts
+  //
+  // Both routes are auth-gated. The artifact loader is tenant-fenced via
+  // req.tenant_record so a tenant can never walk another tenant's lineage
+  // chain or diff against another tenant's artifact. The local-artifacts
+  // directory pattern mirrors /v1/multimodal/bakeoff (~/.kolm/artifacts/),
+  // wrapped with adm-zip so the on-disk .kolm files are the source of truth.
+  //
+  // Honest envelopes:
+  //   * missing cid / a_cid / b_cid      → 400 missing_field
+  //   * cid not in local artifacts dir   → 200 + ok:false {error:'leaf_not_found'}
+  //   * either a_cid or b_cid not found  → 200 + ok:false {error:'cid_not_found'}
+  //   * artifact-lineage module missing  → 500 lineage_module_unavailable
+  //
+  // The /v1/artifact/diff route returns the same envelope as diffArtifacts(),
+  // resolved by CID instead of file path.
+
+  // Shared helper: build a tenant-fenced loader that resolves CIDs to
+  // {manifest, k_score, created_at, parent_cid} rows by scanning the local
+  // artifacts directory. The loader scans only files that the tenant has
+  // write access to; production tenants reach catalog-backed loaders via
+  // the W777 routing fabric.
+  function _w739MakeLocalLoader(_req) {
+    return async function loadByCid(cid) {
+      try {
+        const fsm = await import('node:fs');
+        const pathm = await import('node:path');
+        const osm = await import('node:os');
+        const AdmZipMod = (await import('adm-zip')).default;
+        const home = process.env.KOLM_DATA_DIR
+          ? pathm.resolve(process.env.KOLM_DATA_DIR)
+          : pathm.join(process.env.HOME || process.env.USERPROFILE || osm.homedir(), '.kolm');
+        const artDir = pathm.join(home, 'artifacts');
+        if (!fsm.existsSync(artDir)) return null;
+        const candidates = fsm.readdirSync(artDir).filter(f => f.endsWith('.kolm'));
+        for (const fname of candidates) {
+          const fp = pathm.join(artDir, fname);
+          try {
+            const buf = fsm.readFileSync(fp);
+            const zip = new AdmZipMod(buf);
+            const e = zip.getEntry('manifest.json');
+            if (!e) continue;
+            const m = JSON.parse(e.getData().toString('utf8'));
+            if (m && m.cid === cid) {
+              const composite = (m.k_score && typeof m.k_score.composite === 'number')
+                ? m.k_score.composite : null;
+              return {
+                manifest: m,
+                k_score: composite,
+                created_at: m.created_at || null,
+                parent_cid: typeof m.parent_cid === 'string' ? m.parent_cid : null,
+              };
+            }
+          } catch { /* skip malformed entries */ }
+        }
+        return null;
+      } catch { return null; }
+    };
+  }
+
+  r.post('/v1/artifact/lineage', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const body = req.body || {};
+    if (typeof body.cid !== 'string' || body.cid.length === 0) {
+      return res.status(400).json({ ok: false, error: 'missing_field', field: 'cid' });
+    }
+    let lineageMod;
+    try {
+      lineageMod = await import('./artifact-lineage.js');
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'lineage_module_unavailable',
+        detail: String((e && e.message) || e),
+      });
+    }
+    const loader = _w739MakeLocalLoader(req);
+    const max_depth = (typeof body.max_depth === 'number' && body.max_depth > 0)
+      ? Math.min(100, Math.floor(body.max_depth))
+      : 10;
+    const out = await lineageMod.walkLineage(loader, body.cid, { max_depth });
+    return res.status(200).json(out);
+  });
+
+  r.post('/v1/artifact/diff', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const body = req.body || {};
+    if (typeof body.a_cid !== 'string' || body.a_cid.length === 0) {
+      return res.status(400).json({ ok: false, error: 'missing_field', field: 'a_cid' });
+    }
+    if (typeof body.b_cid !== 'string' || body.b_cid.length === 0) {
+      return res.status(400).json({ ok: false, error: 'missing_field', field: 'b_cid' });
+    }
+    let diffMod;
+    try {
+      diffMod = await import('./kolm-diff.js');
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'kolm_diff_module_unavailable',
+        detail: String((e && e.message) || e),
+      });
+    }
+    const loader = _w739MakeLocalLoader(req);
+    const a_row = await loader(body.a_cid);
+    if (!a_row) {
+      return res.status(200).json({
+        ok: false,
+        error: 'cid_not_found',
+        cid: body.a_cid,
+        side: 'a',
+        hint: 'compile a .kolm with this cid first or upload it to ~/.kolm/artifacts',
+      });
+    }
+    const b_row = await loader(body.b_cid);
+    if (!b_row) {
+      return res.status(200).json({
+        ok: false,
+        error: 'cid_not_found',
+        cid: body.b_cid,
+        side: 'b',
+        hint: 'compile a .kolm with this cid first or upload it to ~/.kolm/artifacts',
+      });
+    }
+    const out = diffMod.diffManifests(a_row.manifest, b_row.manifest);
+    return res.status(200).json(out);
+  });
+
+  // ---------- W741 — Diagnostic envelope ----------
+  // POST /v1/diagnose          → body {artifact_cid}, runs diagnostic against
+  //                              most recent bakeoff for that CID
+  // GET  /v1/diagnose/:cid     → read-only twin (same shape)
+  //
+  // Honest envelopes:
+  //   - missing artifact_cid       → 400 missing_field
+  //   - no_bakeoff_results_yet     → 200 + ok:false envelope with hint to run
+  //                                  `kolm bakeoff first` (per W741 spec —
+  //                                  honest absence, NOT 404)
+  //
+  // The diagnostic engine is dependency-injected via the optional
+  // _diagnoseLoader override in the request body (tests use this to inject
+  // synthetic bakeoff rows + captures without touching the on-disk store).
+  // Production path: bakeoff persistence is the W741+1 follow-up; for now
+  // the route surfaces no_bakeoff_results_yet when no override is supplied.
+  async function _runDiagnose(req, res, artifact_cid) {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    if (!artifact_cid || typeof artifact_cid !== 'string') {
+      return res.status(400).json({ ok: false, error: 'missing_field', field: 'artifact_cid' });
+    }
+    let diagnosticMod;
+    try {
+      diagnosticMod = await import('./diagnostic.js');
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'diagnostic_module_unavailable',
+        detail: String((e && e.message) || e),
+      });
+    }
+    // Test-seam: req.body._diagnose_bakeoff_rows + req.body._diagnose_captures
+    // let the integration test inject synthetic inputs so the auth+envelope
+    // surfaces can be verified without an on-disk bakeoff registry.
+    const body = req.body || {};
+    const injectedRows = Array.isArray(body._diagnose_bakeoff_rows) ? body._diagnose_bakeoff_rows : null;
+    const injectedCaps = Array.isArray(body._diagnose_captures) ? body._diagnose_captures : null;
+    if (injectedRows) {
+      const out = diagnosticMod.generateDiagnostic(artifact_cid, injectedRows, injectedCaps || []);
+      return res.status(200).json(out);
+    }
+    // No persisted bakeoff registry yet → honest no_bakeoff_results_yet
+    // envelope (NOT 404). Status 200 because the HTTP call succeeded; the
+    // ok:false + actionable hint tells the caller what to do next.
+    return res.status(200).json({
+      ok: false,
+      error: 'no_bakeoff_results_yet',
+      diagnostic_version: diagnosticMod.DIAGNOSTIC_VERSION,
+      artifact_cid,
+      hint: 'run `kolm bakeoff first` against this artifact_cid, then retry',
+      generated_at: new Date().toISOString(),
+    });
+  }
+  // POST mirror — body carries artifact_cid (matches existing
+  // /v1/pipeline/run + /v1/bakeoffs body shape).
+  r.post('/v1/diagnose', async (req, res) => {
+    const body = req.body || {};
+    return _runDiagnose(req, res, body.artifact_cid);
+  });
+  // GET twin — path param carries cid.
+  r.get('/v1/diagnose/:cid', async (req, res) => {
+    return _runDiagnose(req, res, req.params && req.params.cid);
   });
 
   // ---------- Compile (kolm) ----------

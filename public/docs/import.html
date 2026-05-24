@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Import &middot; GGUF / safetensors / ONNX &middot; kolm.ai</title>
+<meta name="description" content="Wrap a non-kolm-compiled binary (GGUF, safetensors, or ONNX) as a partial manifest tagged not_kolm_compiled:true. Symmetric counterpart to kolm export. Honest contract: imports never gain a K-Score until they pass through kolm distill again.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Import &middot; GGUF / safetensors / ONNX &middot; kolm.ai">
+<meta property="og:description" content="Wrap a non-kolm-compiled binary as a not_kolm_compiled manifest. Symmetric counterpart to kolm export.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/docs/import">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Import &middot; GGUF / safetensors / ONNX &middot; kolm.ai">
+<meta name="twitter:description" content="Wrap a non-kolm-compiled binary as a not_kolm_compiled manifest. Symmetric counterpart to kolm export.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/docs/import">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Import GGUF, safetensors, and ONNX into kolm","description":"Wrap a non-kolm-compiled binary as a partial manifest tagged not_kolm_compiled:true. Symmetric counterpart to kolm export.","url":"https://kolm.ai/docs/import","datePublished":"2026-05-24","dateModified":"2026-05-24","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<link rel="stylesheet" href="/design-tokens.css">
+<style>
+:root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--accent-soft:rgba(16,185,129,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.skip-link{position:absolute;left:-9999px}
+.skip-link:focus{position:static;background:var(--accent);color:#fff;padding:8px 14px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+header.site{padding:18px 0;border-bottom:1px solid var(--line)}
+header.site .wrap{display:flex;justify-content:space-between;align-items:center}
+header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px;flex-wrap:wrap}
+header.site nav a{color:inherit;text-decoration:none}
+header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 36px}
+h2{font-size:24px;font-weight:500;letter-spacing:-0.018em;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:28px 0 8px;max-width:780px}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px}
+pre code{background:none;border:none;padding:0;color:inherit;font:inherit}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
+li{margin:4px 0}
+table{border-collapse:collapse;width:100%;max-width:920px;margin:14px 0;font-size:13.5px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink);font-weight:500}
+td code{font-size:12px}
+.related{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+@media(max-width:820px){.related{grid-template-columns:1fr}}
+.related a{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:4px}
+.related a:hover{border-color:var(--accent-soft)}
+.related b{font-size:14px;color:var(--ink);font-weight:500}
+.related span{font-size:12.5px;color:var(--ink-mute);line-height:1.5}
+.metric-card{border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:14px 0;background:var(--bg-elev)}
+.metric-card h3{margin:0 0 6px}
+.metric-card .meta{font-family:var(--mono);font-size:11.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
+footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+</style>
+
+<link rel="stylesheet" href="/ks.css">
+<!-- ds-shell W619 -->
+<link rel="stylesheet" href="/docs-shell.css">
+<script defer src="/docs-shell.js"></script>
+
+</head>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    </div>
+  </nav>
+  <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+  </div>
+</div>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / import</div>
+<p class="eyebrow">Open-source AI workbench</p>
+<h1>Frontier AI on your own infrastructure.</h1>
+<p class="lede">W740 is the symmetric counterpart to <code>kolm export</code>: it takes a runtime-native binary you already own (GGUF from llama.cpp, safetensors from HuggingFace, ONNX from any toolchain) and wraps it as a partial manifest tagged <code>not_kolm_compiled:true</code>. The model file is never modified, never silently re-tagged as a kolm-compiled artifact, and never gains a K-Score until it actually passes through <code>kolm distill</code> again.</p>
+
+<h2 id="formats">Three formats supported</h2>
+<p>Each format is parsed by a small stdlib-only Python script in <code>apps/import/</code>. Heavy parsers (the official <code>onnx</code> pip package, full gguf 1.0 tensor walking) are deliberately not added to the kolm dependency surface; the import path reads enough of the header to produce honest provenance and nothing more.</p>
+
+<table>
+  <thead><tr><th>Format</th><th>Magic / signature</th><th>What we parse</th></tr></thead>
+  <tbody>
+    <tr><td><code>gguf</code></td><td>ASCII <code>"GGUF"</code> at offset 0, then u32 LE version, u64 LE tensor_count, u64 LE kv_count</td><td>magic, version, tensor_count, kv_count; metadata KV keys (best-effort); <code>general.file_type</code> -> quant label; <code>general.parameter_count</code> -> params_b</td></tr>
+    <tr><td><code>safetensors</code></td><td>u64 LE header_size at offset 0, then header_size bytes of UTF-8 JSON, then raw tensor bytes</td><td>header_size; tensor names (sorted, capped at 256); shape-product -> total parameter count; dominant dtype -> quant label; <code>__metadata__</code> map</td></tr>
+    <tr><td><code>onnx</code></td><td>protobuf <code>ModelProto</code>; first byte is a wire-type tag (0x08 / 0x12 / 0x3a) because there is no fixed magic</td><td>best-effort sniff of the first 1 KiB; ir_version, producer_name, producer_version, domain; marked <code>partial:true</code> with hint <code>onnx_metadata_partial</code> when stdlib protobuf walk cannot reach <code>ir_version</code></td></tr>
+  </tbody>
+</table>
+
+<p>In every case we compute the sha256 of the whole file (streaming, so a 60 GiB model doesn't hold the whole binary in memory), record the size in bytes, and surface the raw metadata keys we recovered. That is enough provenance for the W740-2 wrap; no tensor data is ever read.</p>
+
+<h2 id="honesty">Honesty contract: not_kolm_compiled</h2>
+<p>Every wrapped manifest carries a single load-bearing field:</p>
+
+<pre><code>{
+  "ok": true,
+  "manifest_version": "w740-v1",
+  "manifest_id": "<sha256(source_sha + format + version)>",
+  "not_kolm_compiled": true,
+  "k_score": null,
+  "holdout": null,
+  "source_format": "gguf",
+  "source_sha256": "<64-hex>",
+  "source_path": "/abs/path/to/model.gguf",
+  "source_size_bytes": 1939525632,
+  "source_params_b": 3.21,
+  "source_quant": "q4_k_m",
+  "source_metadata_keys": ["general.architecture", "general.file_type", "..."],
+  "imported_at": "2026-05-24T12:34:56.789Z",
+  "version": "w740-v1"
+}
+</code></pre>
+
+<p>The <code>not_kolm_compiled:true</code> flag is the W740-2 honesty lock. Downstream tools (catalog, inspect, signature, K-Score gates) MUST treat a manifest with this flag set as a non-kolm-compiled artifact: no production-ready verdict, no automatic deploy, no aggregated K-Score. To claim the model is kolm-compiled you have to run it through <code>kolm distill</code> again on real seeds and let it earn a K-Score on a holdout the same way a fresh distill would.</p>
+
+<h2 id="round-trip">Round-trip: import -> distill -> export</h2>
+<p>The symmetric pair is intentional. A buyer who already has a GGUF model can land in kolm without losing the file, get the W740-2 honest manifest for the catalog, re-distill on their own seeds, and emit a new GGUF binary that is the kolm-compiled version of the same network.</p>
+
+<pre><code># 1. Import the existing GGUF — emits not_kolm_compiled manifest
+kolm import wrap ./llama-3.2-3b-q4_k_m.gguf --out imported.manifest.json
+
+# 2. Re-distill against your captured traffic (this is where the K-Score is earned)
+kolm distill --seeds ./seeds.jsonl --base ./llama-3.2-3b-q4_k_m.gguf --out new.kolm
+
+# 3. Export back to GGUF for llama.cpp / Ollama / LM Studio
+kolm export new.kolm --backend gguf --quant q4_k_m --out ./exports
+</code></pre>
+
+<p><strong>Fidelity is teacher-quality-bound, NOT bit-exact.</strong> The round-trip is a re-distillation, not a copy. The output GGUF will have different tensor weights from the input GGUF because <code>kolm distill</code> retrains against the teacher and the captured traffic; it does not preserve the exact numbers in the source binary. If you need bit-exact preservation, do not use kolm — copy the file. If you need a model that has actually passed through the kolm K-Score gate, this is the path.</p>
+
+<h2 id="api">API + CLI</h2>
+<p>The same parsers drive the CLI and the API.</p>
+
+<table>
+  <thead><tr><th>Surface</th><th>Invocation</th></tr></thead>
+  <tbody>
+    <tr><td>CLI inspect</td><td><code>kolm import inspect &lt;file&gt;</code></td></tr>
+    <tr><td>CLI wrap</td><td><code>kolm import wrap &lt;file&gt; [--out manifest.json]</code></td></tr>
+    <tr><td>CLI doctor</td><td><code>kolm import doctor</code></td></tr>
+    <tr><td>API inspect</td><td><code>POST /v1/import/inspect</code> body <code>{ path }</code> (auth-gated)</td></tr>
+    <tr><td>API wrap</td><td><code>POST /v1/import/wrap</code> body <code>{ path }</code> (auth-gated)</td></tr>
+  </tbody>
+</table>
+
+<h3 id="errors">Honest error envelopes</h3>
+<p>Every failure mode is a named error code with a one-line hint. No silent passthrough, no fake parses, no zero-byte manifests.</p>
+
+<table>
+  <thead><tr><th>Error</th><th>Cause</th><th>Exit code</th></tr></thead>
+  <tbody>
+    <tr><td><code>python3_missing</code></td><td>No <code>python3</code> (or <code>python</code>) on PATH</td><td>3 (MISSING_PREREQ) / HTTP 503</td></tr>
+    <tr><td><code>file_not_found</code></td><td>Path does not exist</td><td>5 (NOT_FOUND)</td></tr>
+    <tr><td><code>unknown_format</code></td><td>First 16 bytes match no known signature</td><td>1 (BAD_ARGS)</td></tr>
+    <tr><td><code>gguf_parse_failed</code></td><td>Magic mismatch, truncated header, or implausible kv_count</td><td>2 (GATE_FAIL) / HTTP 200 (envelope)</td></tr>
+    <tr><td><code>safetensors_parse_failed</code></td><td>Header size 0 or beyond EOF; non-JSON header; root not an object</td><td>2 (GATE_FAIL) / HTTP 200 (envelope)</td></tr>
+    <tr><td><code>onnx_parse_failed</code></td><td>First byte is not a valid ModelProto wire-type tag</td><td>2 (GATE_FAIL) / HTTP 200 (envelope)</td></tr>
+    <tr><td><code>onnx_metadata_partial</code></td><td>ONNX file looks valid but stdlib walk could not reach <code>ir_version</code> — install the <code>onnx</code> pip package for a full walk</td><td>0 (envelope still wraps with <code>partial:true</code>)</td></tr>
+  </tbody>
+</table>
+
+<h2 id="next">Next steps</h2>
+<p>Read <a href="/docs/distill">distill</a> for how an imported model becomes a kolm-compiled artifact, and <a href="/docs/k-score-methodology">K-Score</a> for what the production-ready gate actually checks. Read <a href="/docs/api">/docs/api</a> for the full <code>/v1/import/{inspect,wrap}</code> wire contract.</p>
+
+<div class="related">
+  <a href="/docs/distill"><b>Distill &rarr;</b><span>Turn an imported model into a kolm-compiled artifact.</span></a>
+  <a href="/docs/k-score-methodology"><b>K-Score &rarr;</b><span>What an artifact has to earn before it ships.</span></a>
+  <a href="/docs/api"><b>API reference &rarr;</b><span>POST /v1/import/inspect and /v1/import/wrap.</span></a>
+</div>
+
+</div></main>
+
+<footer><div class="wrap">
+ kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
+</div></footer>
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/integrations">Integrations</a></li><li><a href="/docs/api">API reference</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

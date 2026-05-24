@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Gateway mode &middot; capture from local Ollama / vLLM &middot; kolm.ai</title>
+<meta name="description" content="Open-source AI workbench. KOLM_GATEWAY_MODE switches the chat-completions hot-path between cloud teacher, local Ollama, local vLLM, and a deterministic mock. Mock is free, local-* never leaves your network.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Gateway mode &middot; capture from local Ollama / vLLM &middot; kolm.ai">
+<meta property="og:description" content="KOLM_GATEWAY_MODE switches the chat-completions hot-path between cloud, local-ollama, local-vllm, and mock. Mock is free; local-* never leaves your network.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/docs/gateway-mode">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Gateway mode &middot; capture from local Ollama / vLLM &middot; kolm.ai">
+<meta name="twitter:description" content="KOLM_GATEWAY_MODE switches the chat-completions hot-path between cloud, local-ollama, local-vllm, and mock.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/docs/gateway-mode">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Gateway mode: cloud, local-ollama, local-vllm, mock","description":"Open-source AI workbench. KOLM_GATEWAY_MODE switches the chat-completions hot-path between cloud teacher, local Ollama, local vLLM, and a deterministic mock.","url":"https://kolm.ai/docs/gateway-mode","datePublished":"2026-05-24","dateModified":"2026-05-24","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<link rel="stylesheet" href="/design-tokens.css">
+<style>
+:root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--accent-soft:rgba(16,185,129,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.skip-link{position:absolute;left:-9999px}
+.skip-link:focus{position:static;background:var(--accent);color:#fff;padding:8px 14px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+header.site{padding:18px 0;border-bottom:1px solid var(--line)}
+header.site .wrap{display:flex;justify-content:space-between;align-items:center}
+header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px;flex-wrap:wrap}
+header.site nav a{color:inherit;text-decoration:none}
+header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 36px}
+h2{font-size:24px;font-weight:500;letter-spacing:-0.018em;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:28px 0 8px;max-width:780px}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px}
+pre code{background:none;border:none;padding:0;color:inherit;font:inherit}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
+li{margin:4px 0}
+table{border-collapse:collapse;width:100%;max-width:920px;margin:14px 0;font-size:13.5px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink);font-weight:500}
+td code{font-size:12px}
+.related{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+@media(max-width:820px){.related{grid-template-columns:1fr}}
+.related a{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:4px}
+.related a:hover{border-color:var(--accent-soft)}
+.related b{font-size:14px;color:var(--ink);font-weight:500}
+.related span{font-size:12.5px;color:var(--ink-mute);line-height:1.5}
+.metric-card{border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:14px 0;background:var(--bg-elev)}
+.metric-card h3{margin:0 0 6px}
+.metric-card .meta{font-family:var(--mono);font-size:11.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+.privacy-note{border-left:3px solid var(--accent);background:var(--accent-soft);padding:14px 18px;margin:18px 0;border-radius:0 8px 8px 0;max-width:780px}
+.privacy-note strong{color:var(--ink)}
+footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
+footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+</style>
+
+<link rel="stylesheet" href="/ks.css">
+<!-- ds-shell W619 -->
+<link rel="stylesheet" href="/docs-shell.css">
+<script defer src="/docs-shell.js"></script>
+
+</head>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    </div>
+  </nav>
+  <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+  </div>
+</div>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / gateway-mode</div>
+<p class="eyebrow">Open-source AI workbench</p>
+<h1>Frontier AI on your own infrastructure.</h1>
+<p class="lede"><code>KOLM_GATEWAY_MODE</code> switches the <code>/v1/chat/completions</code> hot-path between four backends: the cloud teacher, a local Ollama instance, a local vLLM server, or a deterministic mock. Mock mode is free and never bills <code>hosted_inference</code>. <code>local-ollama</code> and <code>local-vllm</code> never send a byte of your prompt outside your network &mdash; the requests resolve to <code>localhost</code> (or your private GPU box) and the kolm cloud is not in the path.</p>
+
+<h2 id="why">Why a gateway-mode switch</h2>
+<p>The default cloud-teacher path is great for getting started, but it has three costs: dollars (per upstream call), latency (a round-trip to the provider), and exposure (your prompts cross the public internet). The gateway-mode switch lets you flip those costs off when you don't need them &mdash; for offline distillation against your own GPU, for testing CI loops without burning real API credits, or for an on-prem deployment where prompts must not leave the building.</p>
+
+<p>The switch is intentionally a single env var (<code>KOLM_GATEWAY_MODE</code>) rather than a header or a per-tenant flag. That makes it auditable: an operator sees the deployment's mode in one place, and a typo (<code>KOLM_GATEWAY_MODE=local-olama</code>) fails loud at the very first request rather than silently leaking to the cloud.</p>
+
+<h2 id="modes">The four modes</h2>
+
+<table>
+  <thead><tr><th>Mode</th><th>When to use</th><th>Env vars</th><th>Billing</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>cloud</code></td>
+      <td>Default. Production traffic where you want the hosted teacher and accept the per-call cost.</td>
+      <td><code>KOLM_GATEWAY_MODE</code> unset or <code>cloud</code>. Provider keys (<code>OPENAI_API_KEY</code>, <code>ANTHROPIC_API_KEY</code>) configured upstream.</td>
+      <td>Billed via <code>hosted_inference</code> meter. Soft + hard caps per plan.</td>
+    </tr>
+    <tr>
+      <td><code>local-ollama</code></td>
+      <td>Distillation against a local Ollama instance, on-prem capture, or offline dev. Captures land in your local lake exactly as if cloud were running.</td>
+      <td><code>KOLM_GATEWAY_MODE=local-ollama</code>. Optional: <code>KOLM_OLLAMA_URL</code> (default <code>http://localhost:11434</code>), <code>KOLM_GATEWAY_LOCAL_MODEL</code>.</td>
+      <td>No <code>hosted_inference</code> billing. Costs are your GPU + electricity.</td>
+    </tr>
+    <tr>
+      <td><code>local-vllm</code></td>
+      <td>Same as local-ollama but pointing at a vLLM OpenAI-compatible server. Higher throughput on multi-GPU boxes.</td>
+      <td><code>KOLM_GATEWAY_MODE=local-vllm</code>. Optional: <code>KOLM_VLLM_URL</code> (default <code>http://localhost:8000</code>), <code>KOLM_GATEWAY_LOCAL_MODEL</code>.</td>
+      <td>No <code>hosted_inference</code> billing. Costs are your GPU + electricity.</td>
+    </tr>
+    <tr>
+      <td><code>mock</code></td>
+      <td>CI loops, deterministic regression tests, smoke checks that must run without an API key. The mock never makes a network call.</td>
+      <td><code>KOLM_GATEWAY_MODE=mock</code>. Optional: <code>KOLM_MOCK_KIND</code> (<code>echo</code> | <code>reverse</code> | <code>fixed</code>), <code>KOLM_MOCK_RESPONSE</code> for the <code>fixed</code> kind.</td>
+      <td>Free. <strong>No billing of any kind.</strong> <code>kolm_w742.billed:false</code> is stamped on every response.</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="privacy-note">
+<strong>Privacy note.</strong> <code>local-ollama</code>, <code>local-vllm</code>, and <code>mock</code> never send your prompt outside your network. The dispatcher resolves <code>localhost</code> (or the URL you configured) and the kolm cloud is not in the path. Captures still land in your local lake so the rest of the workbench (datasets, evals, K-Score) works identically &mdash; you just keep the data.
+</div>
+
+<h2 id="snippets">Code snippets</h2>
+
+<h3>Cloud (default)</h3>
+<pre><code># Nothing to set — KOLM_GATEWAY_MODE defaults to 'cloud'.
+export OPENAI_API_KEY=sk-...
+export KOLM_API_KEY=ks_...
+
+curl https://kolm.ai/v1/chat/completions \
+  -H "authorization: Bearer $KOLM_API_KEY" \
+  -H "content-type: application/json" \
+  -d '{"model":"gpt-4o","messages":[{"role":"user","content":"hello"}]}'
+</code></pre>
+
+<h3>local-ollama</h3>
+<pre><code>ollama serve &amp;
+ollama pull qwen2.5:7b
+
+export KOLM_GATEWAY_MODE=local-ollama
+export KOLM_OLLAMA_URL=http://localhost:11434       # optional; default
+export KOLM_GATEWAY_LOCAL_MODEL=qwen2.5:7b          # optional; per-request model wins
+
+curl http://localhost:3000/v1/chat/completions \
+  -H "authorization: Bearer $KOLM_API_KEY" \
+  -H "content-type: application/json" \
+  -d '{"model":"qwen2.5:7b","messages":[{"role":"user","content":"hello"}]}'
+</code></pre>
+
+<h3>local-vllm</h3>
+<pre><code>python -m vllm.entrypoints.openai.api_server --model Qwen/Qwen2.5-7B-Instruct &amp;
+
+export KOLM_GATEWAY_MODE=local-vllm
+export KOLM_VLLM_URL=http://localhost:8000          # optional; default
+export KOLM_GATEWAY_LOCAL_MODEL=Qwen/Qwen2.5-7B-Instruct
+
+curl http://localhost:3000/v1/chat/completions \
+  -H "authorization: Bearer $KOLM_API_KEY" \
+  -H "content-type: application/json" \
+  -d '{"model":"Qwen/Qwen2.5-7B-Instruct","messages":[{"role":"user","content":"hello"}]}'
+</code></pre>
+
+<h3>mock</h3>
+<pre><code>export KOLM_GATEWAY_MODE=mock
+export KOLM_MOCK_KIND=echo                          # echo | reverse | fixed
+# (only for 'fixed') export KOLM_MOCK_RESPONSE='predictable test output'
+
+# Same call as above — but every response is deterministic and free.
+# The response carries kolm_w742.billed:false so a downstream meter
+# can assert that no hosted_inference token was charged.
+</code></pre>
+
+<h2 id="api">CLI + API surface</h2>
+<p>Every surface is auth-gated except the public <code>/health</code>. The CLI mirrors the API exactly so a deployment audit lands in one envelope.</p>
+
+<table>
+  <thead><tr><th>Surface</th><th>Invocation</th></tr></thead>
+  <tbody>
+    <tr><td>CLI status</td><td><code>kolm gateway status</code></td></tr>
+    <tr><td>CLI set (prints snippet)</td><td><code>kolm gateway set local-ollama</code></td></tr>
+    <tr><td>CLI test-call</td><td><code>kolm gateway test-call --message "hello"</code></td></tr>
+    <tr><td>API status</td><td><code>GET /v1/gateway/mode</code> (auth-gated; returns <code>{mode, ollama_reachable, vllm_reachable, allowed, version}</code>)</td></tr>
+    <tr><td>API dispatch</td><td><code>POST /v1/chat/completions</code> (auth-gated; reads <code>KOLM_GATEWAY_MODE</code> server-side and dispatches accordingly)</td></tr>
+  </tbody>
+</table>
+
+<h2 id="honest">Honest limits</h2>
+<ul>
+  <li><strong>Mock is deterministic on purpose.</strong> The token counts are <code>Math.floor(chars/4)</code> so the same input always produces the same usage. Do not use mock for any code path that needs a real model &mdash; it returns the echoed / reversed / fixed string only.</li>
+  <li><strong>Local backends are unauthenticated.</strong> The dispatcher assumes <code>localhost</code> (or your private network). If you expose Ollama / vLLM on a public address, that's on you &mdash; the kolm cloud will not act as a reverse proxy or auth gate for them.</li>
+  <li><strong>Unknown modes fail loud.</strong> A typo like <code>KOLM_GATEWAY_MODE=local-olama</code> returns HTTP 400 with <code>unknown_gateway_mode</code> on the very first request rather than silently falling back to <code>cloud</code>. The privacy promise depends on this.</li>
+  <li><strong>No retry.</strong> If Ollama is not running, you get <code>ollama_not_reachable</code> with the <code>start ollama with 'ollama serve'</code> hint &mdash; no silent retry, no silent cloud fallback. The operator decides what to do.</li>
+  <li><strong>Mock skips billing.</strong> The mock path stamps <code>kolm_w742.billed:false</code> and never calls <code>usageIncrementMeter('hosted_inference', ...)</code>. That is the W742-3 lock &mdash; pinned in a test so it cannot regress.</li>
+  <li><strong>Version stamp.</strong> Every gateway-mode response is stamped <code>version:"w742-v1"</code> so a downstream audit can pin the exact dispatcher revision.</li>
+</ul>
+
+<h2 id="next">Next steps</h2>
+<p>Read <a href="/docs/privacy">privacy</a> for the full local-only promise, <a href="/docs/distill">distill</a> for how the local-ollama path is used for offline distillation, and <a href="/docs/pipelines">pipelines</a> for composing local-mode artifacts into a routed pipeline.</p>
+
+<div class="related">
+  <a href="/docs/privacy"><b>Privacy &rarr;</b><span>Local-* never leaves your network.</span></a>
+  <a href="/docs/distill"><b>Distill &rarr;</b><span>Offline distillation against a local GPU.</span></a>
+  <a href="/docs/pipelines"><b>Pipelines &rarr;</b><span>Compose local-mode artifacts.</span></a>
+</div>
+
+</div></main>
+
+<footer><div class="wrap">
+ kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
+</div></footer>
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/integrations">Integrations</a></li><li><a href="/docs/api">API reference</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

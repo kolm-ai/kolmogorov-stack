@@ -291,3 +291,266 @@ export default {
   validateLineage,
   buildManifestBlocks,
 };
+
+// =============================================================================
+// W739 — Model Lineage Tracking: parent_cid chain + walk + perf comparison.
+//
+// W707-W835 plan items W739-1..W739-4:
+//
+//   W739-1  Each .kolm references its parent artifact via a manifest
+//           `parent_cid` field. The field is OPTIONAL (root / first-of-line
+//           artifacts carry parent_cid:null). The W460 byte-stability law
+//           applies: when parent_cid is null/absent the slot is OMITTED from
+//           artifact_hash_input so pre-W739 artifacts remain byte-identical.
+//
+//   W739-2  `kolm diff <a.kolm> <b.kolm>` shows performance delta + roll-back
+//           recommendation. See src/kolm-diff.js for the file-IO wrapper that
+//           calls compareArtifactPerformance below.
+//
+//   W739-3  A/B test versions in production. The lineage walk + diff give
+//           operators the data they need; the routing layer that uses it
+//           lands in W777. For W739 the chain + diff are the foundation.
+//
+//   W739-4  Model lineage tracking baked into the file format itself — the
+//           hash chain anchored at parent_cid means a tamperer cannot rewrite
+//           history without invalidating every descendant's receipt.
+//
+// Symbols below are namespaced to W739 so they cannot collide with the
+// older `buildLineage` / `validateLineage` schema-block helpers above.
+// =============================================================================
+
+export const LINEAGE_VERSION = 'w739-v1';
+
+const PARENT_CID_RE = /^[0-9a-f]{64}$/;
+
+// W739-1 — set a parent_cid on a manifest. The cid MUST be sha256-hex
+// (64 lowercase hex chars) OR explicitly null. Anything else throws so a
+// malformed lineage pointer is caught at build time, not at the first
+// `kolm lineage <cid>` walk on a deployed artifact.
+export function setParentCid(manifest, parent_cid) {
+  if (!manifest || typeof manifest !== 'object') {
+    throw new Error('setParentCid: manifest must be an object');
+  }
+  if (parent_cid === null || parent_cid === undefined) {
+    // The honest "no parent" case. Strip any stale key so byte-stability
+    // (W460) holds: the absent key MUST collapse identically to null.
+    const out = { ...manifest };
+    delete out.parent_cid;
+    return out;
+  }
+  if (typeof parent_cid !== 'string' || !PARENT_CID_RE.test(parent_cid)) {
+    throw new Error(
+      'setParentCid: parent_cid must be sha256-hex (64 lowercase hex chars) or null; got ' +
+      JSON.stringify(parent_cid),
+    );
+  }
+  return { ...manifest, parent_cid };
+}
+
+// W739-1 — read a parent_cid off a manifest. Returns null when absent or
+// when the manifest carries the explicit null sentinel.
+export function getParentCid(manifest) {
+  if (!manifest || typeof manifest !== 'object') return null;
+  const v = manifest.parent_cid;
+  if (v === null || v === undefined) return null;
+  if (typeof v !== 'string' || !PARENT_CID_RE.test(v)) return null;
+  return v;
+}
+
+// W739-1 / W739-4 — walk a lineage chain starting at `leafCid` by following
+// parent_cid pointers. The loader is dependency-injected so this module
+// stays pure (tests pass a mock; the router passes a tenant-fenced
+// loader; the CLI passes a local-artifacts loader). Cycle-safe via a
+// visited Set — a malicious or corrupted chain that loops back on
+// itself terminates with truncated:true instead of running forever.
+//
+// loadArtifact(cid) → { manifest, k_score, created_at, parent_cid }
+//   The loader returns null/undefined when the cid is unknown so a
+//   dangling pointer surfaces as the END of the chain rather than a
+//   thrown exception.
+//
+// Returns:
+//   { ok:true, chain:[{cid, parent_cid, k_score, created_at}], depth, truncated }
+//   { ok:false, error:'leaf_not_found' | 'load_failure', detail, hint }
+export async function walkLineage(loadArtifact, leafCid, opts = {}) {
+  if (typeof loadArtifact !== 'function') {
+    throw new Error('walkLineage: loadArtifact must be a function');
+  }
+  if (typeof leafCid !== 'string' || leafCid.length === 0) {
+    return {
+      ok: false,
+      error: 'leaf_cid_required',
+      hint: 'walkLineage requires a non-empty leaf cid string',
+      version: LINEAGE_VERSION,
+    };
+  }
+  const max_depth = (opts && Number.isFinite(opts.max_depth) && opts.max_depth > 0)
+    ? Math.min(1000, Math.floor(opts.max_depth))
+    : 10;
+  const chain = [];
+  const visited = new Set();
+  let cursor = leafCid;
+  let truncated = false;
+  for (let depth = 0; depth < max_depth; depth++) {
+    if (visited.has(cursor)) {
+      // Cycle detected — the chain folded back on itself. Stop walking
+      // and surface truncated:true so the operator sees the loop.
+      truncated = true;
+      break;
+    }
+    visited.add(cursor);
+    let row;
+    try {
+      row = await loadArtifact(cursor);
+    } catch (e) {
+      if (depth === 0) {
+        return {
+          ok: false,
+          error: 'load_failure',
+          detail: (e && e.message) || String(e),
+          cid: cursor,
+          hint: 'leaf artifact load failed; pass a valid cid known to the loader',
+          version: LINEAGE_VERSION,
+        };
+      }
+      // Mid-chain load failure: stop walking but surface what we have so
+      // an operator sees partial lineage rather than nothing.
+      truncated = true;
+      break;
+    }
+    if (!row || typeof row !== 'object') {
+      if (depth === 0) {
+        return {
+          ok: false,
+          error: 'leaf_not_found',
+          cid: cursor,
+          hint: 'loader returned null for leaf cid; the artifact may not exist locally',
+          version: LINEAGE_VERSION,
+        };
+      }
+      // Parent pointer dangled — record the gap and stop.
+      truncated = true;
+      break;
+    }
+    const parent_cid = (typeof row.parent_cid === 'string' && PARENT_CID_RE.test(row.parent_cid))
+      ? row.parent_cid
+      : null;
+    chain.push({
+      cid: cursor,
+      parent_cid,
+      k_score: (row.k_score === null || row.k_score === undefined) ? null : row.k_score,
+      created_at: row.created_at || null,
+    });
+    if (!parent_cid) break;
+    cursor = parent_cid;
+  }
+  // If we hit max_depth and the last row STILL had a parent_cid, the chain
+  // was longer than max_depth — flag truncated:true.
+  if (!truncated && chain.length === max_depth) {
+    const tail = chain[chain.length - 1];
+    if (tail && tail.parent_cid) truncated = true;
+  }
+  return {
+    ok: true,
+    chain,
+    depth: chain.length,
+    truncated,
+    version: LINEAGE_VERSION,
+  };
+}
+
+// W739-2 — compare two artifacts' performance metadata. Operators use this
+// to decide whether to roll back a freshly-shipped artifact.
+//
+// Inputs (both meta objects look like):
+//   { k_score: {composite, faithfulness, coverage, calibration, ...}, ... }
+//   The legacy shape (top-level numbers, no nested k_score) is also accepted.
+//
+// Thresholds:
+//   - ANY axis dropping by more than 0.02 between A → B  → 'roll_back'
+//   - ALL axes improving OR unchanged                    → 'promote'
+//   - Otherwise (mixed: some improve, some regress <=0.02)  → 'inconclusive'
+//
+// Returns:
+//   { ok:true, deltas:{...}, regression_summary, recommendation, version }
+//   where `deltas[axis] = b - a` (positive = improvement, negative = regression).
+export function compareArtifactPerformance(a_meta, b_meta) {
+  const REGRESSION_THRESHOLD = 0.02;
+  if (!a_meta || typeof a_meta !== 'object') {
+    return {
+      ok: false,
+      error: 'a_meta_required',
+      hint: 'compareArtifactPerformance: a_meta must be an object with k_score axes',
+      version: LINEAGE_VERSION,
+    };
+  }
+  if (!b_meta || typeof b_meta !== 'object') {
+    return {
+      ok: false,
+      error: 'b_meta_required',
+      hint: 'compareArtifactPerformance: b_meta must be an object with k_score axes',
+      version: LINEAGE_VERSION,
+    };
+  }
+  // Accept either {k_score:{...}} or {composite,faithfulness,...} at top level.
+  const a_axes = (a_meta.k_score && typeof a_meta.k_score === 'object') ? a_meta.k_score : a_meta;
+  const b_axes = (b_meta.k_score && typeof b_meta.k_score === 'object') ? b_meta.k_score : b_meta;
+  // Track every numeric axis that exists in BOTH inputs. Non-numeric or
+  // missing-on-either-side axes are silently dropped — we never invent a
+  // delta for a field we cannot measure.
+  const SHARED_AXES = new Set();
+  for (const k of Object.keys(a_axes || {})) {
+    if (typeof a_axes[k] === 'number' && typeof b_axes[k] === 'number') {
+      SHARED_AXES.add(k);
+    }
+  }
+  const deltas = {};
+  let bigDropAxes = [];       // delta < -threshold → roll_back
+  let smallDropAxes = [];     // -threshold <= delta < 0 → inconclusive (not a roll-back, but not a clean promote)
+  let improveAxes = [];        // delta > 0
+  let unchangedAxes = [];      // delta === 0
+  for (const axis of SHARED_AXES) {
+    const a_v = a_axes[axis];
+    const b_v = b_axes[axis];
+    const d = Number((b_v - a_v).toFixed(6));
+    deltas[axis] = d;
+    if (d < -REGRESSION_THRESHOLD) bigDropAxes.push({ axis, delta: d });
+    else if (d < 0) smallDropAxes.push({ axis, delta: d });
+    else if (d > 0) improveAxes.push({ axis, delta: d });
+    else unchangedAxes.push({ axis, delta: d });
+  }
+  let recommendation;
+  let regression_summary;
+  if (SHARED_AXES.size === 0) {
+    recommendation = 'inconclusive';
+    regression_summary = 'no shared numeric axes between a and b — cannot compare';
+  } else if (bigDropAxes.length > 0) {
+    recommendation = 'roll_back';
+    regression_summary = `regression on ${bigDropAxes.length} axis${bigDropAxes.length === 1 ? '' : 'es'}: ` +
+      bigDropAxes.map(r => `${r.axis}=${r.delta.toFixed(4)}`).join(', ');
+  } else if (smallDropAxes.length === 0 && improveAxes.length > 0) {
+    // No drop ANYWHERE + at least one axis improved = clean promote.
+    recommendation = 'promote';
+    regression_summary = `no regression; ${improveAxes.length} axis${improveAxes.length === 1 ? '' : 'es'} improved`;
+  } else if (smallDropAxes.length > 0) {
+    // Mixed — some axes worsened (but not past the regression threshold) and
+    // possibly others improved. Cannot cleanly promote; cannot demand
+    // roll-back either. Inconclusive: ship the comparison, let the operator
+    // decide.
+    recommendation = 'inconclusive';
+    regression_summary = `mixed: ${smallDropAxes.length} axis${smallDropAxes.length === 1 ? '' : 'es'} worsened by < ${REGRESSION_THRESHOLD}; ` +
+      `${improveAxes.length} improved, ${unchangedAxes.length} unchanged`;
+  } else {
+    // All unchanged.
+    recommendation = 'inconclusive';
+    regression_summary = `no measurable change across ${SHARED_AXES.size} axis${SHARED_AXES.size === 1 ? '' : 'es'}`;
+  }
+  return {
+    ok: true,
+    deltas,
+    regression_summary,
+    recommendation,
+    axes_compared: Array.from(SHARED_AXES).sort(),
+    version: LINEAGE_VERSION,
+  };
+}
