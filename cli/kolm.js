@@ -4126,14 +4126,47 @@ function maybeHelp(topic, args) {
   return false;
 }
 
+// W849 — state-of-the-art first-run greeting. ASCII art banner respects
+// accessibility flags: NO_COLOR + TERM=dumb + --no-color + --no-unicode +
+// --plain are all honored. Unicode block-style art when terminal supports it,
+// ASCII fallback otherwise.
+function termSupports() {
+  const argv = process.argv || [];
+  const noColor = !!process.env.NO_COLOR || argv.includes('--no-color') || argv.includes('--plain');
+  const noUnicode = process.env.LANG === 'C' || argv.includes('--no-unicode') || argv.includes('--plain');
+  const dumb = process.env.TERM === 'dumb' || !process.stdout.isTTY;
+  return { color: !noColor && !dumb, unicode: !noUnicode && !dumb };
+}
+function paintWelcomeBanner() {
+  const t = termSupports();
+  const dim   = t.color ? '\x1b[2m'  : '';
+  const reset = t.color ? '\x1b[0m'  : '';
+  const accent= t.color ? '\x1b[38;5;208m' : ''; // burnt sienna
+  const ink   = t.color ? '\x1b[38;5;250m' : '';
+  if (t.unicode) {
+    console.log('');
+    console.log(accent + '  █▄▀  ▄▀▄  █   █▄ ▄█' + reset + dim + '   ' + ink + 'the AI compiler' + reset);
+    console.log(accent + '  █ █  █ █  █▄▄ █ ▀ █' + reset + dim + '   ' + ink + 'distill · quantize · ship' + reset);
+    console.log(accent + '  ▀ ▀  ▀▀▀  ▀▀▀ ▀   ▀' + reset);
+  } else {
+    console.log('');
+    console.log('  kolm.ai     the AI compiler');
+    console.log('  -------     distill / quantize / ship');
+  }
+  console.log('');
+}
 function firstRunBannerIfNeeded() {
   if (fs.existsSync(CONFIG_PATH)) return;
   if (process.env.KOLM_API_KEY) return;
-  console.log('welcome to kolm. no config yet at ~/.kolm/config.json.');
+  paintWelcomeBanner();
+  console.log('  no config yet at ~/.kolm/config.json.');
   // W848 — surface the interactive wizard as the primary first-run path so
   // new users do not have to know which verb to run next.
   console.log('  guided setup:  kolm quickstart    (pick wrapper or studio)');
+  console.log('  pick a verb:   kolm menu          (interactive verb picker)');
   console.log('  manual setup:  https://kolm.ai/signin   ->   kolm login');
+  console.log('');
+  console.log('  accessibility: --no-color  --no-unicode  --plain  (or NO_COLOR=1)');
   console.log('');
 }
 
@@ -22612,6 +22645,233 @@ async function cmdQuickstart(args) {
   process.exit(EXIT.OK);
 }
 
+// =============================================================================
+// W849 — `kolm studio` first-class CLI verb. The Studio is the browser UI for
+// distill / quantize / sign loops, but it has REAL local correspondents the
+// CLI can read without spinning up a browser:
+//   - sessions  → reads ~/.kolm/studio/sessions/*.json   (last 10)
+//   - artifacts → reads ~/.kolm/artifacts/*.kolm         (Studio outputs)
+//   - jobs      → reads ~/.kolm/jobs/*.json              (in-flight)
+//   - open      → opens the browser surface (or prints URL if no DISPLAY)
+//
+// Triangle: CLI verb (this file), TUI view (key 'W'), web page (/studio).
+// All three read the same local files + the same /v1/artifacts route so the
+// Studio is the same surface regardless of where the operator looks.
+// =============================================================================
+async function cmdStudio(args) {
+  args = args || [];
+  if (args.indexOf('--help') >= 0 || args.indexOf('-h') >= 0) {
+    console.log([
+      'kolm studio [open|status|list|sessions|recipes] [--json]',
+      '',
+      '  open      open the Studio in your browser (or print the URL)',
+      '  status    show whether the Studio surface is reachable + local artifact count',
+      '  list      list recent Studio outputs (~/.kolm/artifacts/*.kolm)',
+      '  sessions  list recent Studio sessions (~/.kolm/studio/sessions/*.json)',
+      '  recipes   list spec templates the Studio can scaffold a session from',
+      '',
+      '  Same surface as the /studio page and the TUI Studio view (key W).',
+    ].join('\n'));
+    process.exit(EXIT.OK);
+  }
+  const c = loadConfig();
+  const jsonMode = args.includes('--json');
+  const sub = (args[0] && !args[0].startsWith('-')) ? args[0] : 'open';
+  const studioUrl = (c.base || 'https://kolm.ai').replace(/\/+$/, '') + '/studio';
+
+  const STUDIO_DIR = path.join(KOLM_DIR, 'studio');
+  const SESSIONS_DIR = path.join(STUDIO_DIR, 'sessions');
+  const JOBS_DIR = path.join(KOLM_DIR, 'jobs');
+
+  function listJsonDir(dir, limit) {
+    if (!fs.existsSync(dir)) return [];
+    return fs.readdirSync(dir)
+      .filter(f => f.endsWith('.json'))
+      .map(f => {
+        const p = path.join(dir, f);
+        const st = fs.statSync(p);
+        let data = null;
+        try { data = JSON.parse(fs.readFileSync(p, 'utf8')); } catch {}
+        return { name: f, mtime: st.mtime.toISOString(), size: st.size, data };
+      })
+      .sort((a, b) => b.mtime.localeCompare(a.mtime))
+      .slice(0, limit || 20);
+  }
+  function listArtifacts(limit) {
+    if (!fs.existsSync(ARTIFACTS_DIR)) return [];
+    return fs.readdirSync(ARTIFACTS_DIR)
+      .filter(f => f.endsWith('.kolm'))
+      .map(f => {
+        const p = path.join(ARTIFACTS_DIR, f);
+        const st = fs.statSync(p);
+        return { name: f, mtime: st.mtime.toISOString(), size: st.size };
+      })
+      .sort((a, b) => b.mtime.localeCompare(a.mtime))
+      .slice(0, limit || 20);
+  }
+
+  if (sub === 'open') {
+    // Honor common headless markers: print the URL instead of trying to launch.
+    const headless = !!(process.env.CI || process.env.KOLM_NO_BROWSER || (process.platform === 'linux' && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY));
+    if (jsonMode) {
+      process.stdout.write(JSON.stringify({ ok: true, url: studioUrl, opened: !headless }, null, 2) + '\n');
+      process.exit(EXIT.OK);
+    }
+    if (headless) {
+      console.log('kolm studio:');
+      console.log('  url: ' + studioUrl);
+      console.log('  (headless shell — open this URL in a browser on your workstation)');
+      process.exit(EXIT.OK);
+    }
+    const opener = process.platform === 'win32' ? ['cmd', ['/c', 'start', '""', studioUrl]]
+                 : process.platform === 'darwin' ? ['open', [studioUrl]]
+                 : ['xdg-open', [studioUrl]];
+    try {
+      const r = spawnSync(opener[0], opener[1], { stdio: 'ignore', shell: process.platform === 'win32' });
+      if (r.status === 0 || r.status === null) {
+        console.log('opening: ' + studioUrl);
+      } else {
+        console.log('could not launch a browser. visit: ' + studioUrl);
+      }
+    } catch {
+      console.log('could not launch a browser. visit: ' + studioUrl);
+    }
+    process.exit(EXIT.OK);
+  }
+
+  if (sub === 'status') {
+    const artifacts = listArtifacts(1000);
+    const sessions = listJsonDir(SESSIONS_DIR, 1000);
+    const jobs = listJsonDir(JOBS_DIR, 1000);
+    let reachable = null;
+    try {
+      const r = await api(c, 'GET', '/v1/health');
+      reachable = r.status === 200;
+    } catch { reachable = false; }
+    const out = {
+      ok: true,
+      studio_url: studioUrl,
+      reachable,
+      local_artifacts: artifacts.length,
+      local_sessions: sessions.length,
+      local_jobs: jobs.length,
+      last_artifact: artifacts[0] || null,
+      last_session: sessions[0] || null,
+    };
+    if (jsonMode) {
+      process.stdout.write(JSON.stringify(out, null, 2) + '\n');
+    } else {
+      console.log('kolm studio status');
+      console.log('  url:       ' + out.studio_url);
+      console.log('  reachable: ' + (out.reachable ? 'yes' : 'no'));
+      console.log('  artifacts: ' + out.local_artifacts + (out.last_artifact ? '  (newest: ' + out.last_artifact.name + ')' : ''));
+      console.log('  sessions:  ' + out.local_sessions + (out.last_session ? '  (newest: ' + out.last_session.name + ')' : ''));
+      console.log('  jobs:      ' + out.local_jobs);
+    }
+    process.exit(EXIT.OK);
+  }
+
+  if (sub === 'list' || sub === 'artifacts') {
+    const artifacts = listArtifacts(50);
+    if (jsonMode) {
+      process.stdout.write(JSON.stringify({ ok: true, artifacts }, null, 2) + '\n');
+    } else if (artifacts.length === 0) {
+      console.log('no local artifacts yet. compile one with: kolm compile <spec.json>');
+    } else {
+      console.log('local studio outputs:');
+      for (const a of artifacts) {
+        const mb = (a.size / (1024 * 1024)).toFixed(1);
+        console.log('  ' + a.mtime.slice(0, 19) + '  ' + mb.padStart(6) + ' MB  ' + a.name);
+      }
+    }
+    process.exit(EXIT.OK);
+  }
+
+  if (sub === 'sessions') {
+    const sessions = listJsonDir(SESSIONS_DIR, 50);
+    if (jsonMode) {
+      process.stdout.write(JSON.stringify({ ok: true, sessions }, null, 2) + '\n');
+    } else if (sessions.length === 0) {
+      console.log('no studio sessions yet. open the studio with: kolm studio open');
+    } else {
+      console.log('recent studio sessions:');
+      for (const s of sessions) {
+        const tag = (s.data && (s.data.task || s.data.recipe)) ? '  ' + (s.data.task || s.data.recipe) : '';
+        console.log('  ' + s.mtime.slice(0, 19) + '  ' + s.name + tag);
+      }
+    }
+    process.exit(EXIT.OK);
+  }
+
+  if (sub === 'recipes') {
+    const recipes = Object.keys(SPEC_TEMPLATES || {});
+    if (jsonMode) {
+      process.stdout.write(JSON.stringify({ ok: true, recipes }, null, 2) + '\n');
+    } else {
+      console.log('studio spec templates (scaffold a new session):');
+      for (const r of recipes) console.log('  ' + r);
+      console.log('');
+      console.log('use: kolm new ' + (recipes[0] || '<recipe>') + '   then: kolm compile <spec.json>');
+    }
+    process.exit(EXIT.OK);
+  }
+
+  console.error('unknown subcommand: ' + sub);
+  console.error('try: kolm studio --help');
+  process.exit(EXIT.USAGE);
+}
+
+// =============================================================================
+// W849 — `kolm menu` interactive verb picker. Numeric/substring/Enter so the
+// user does not have to know which verb to run. Same picker pattern as the
+// quickstart wizard. Discoverable from the first-run banner + no-args output.
+// =============================================================================
+async function cmdMenu(args) {
+  args = args || [];
+  if (args.indexOf('--help') >= 0 || args.indexOf('-h') >= 0) {
+    console.log('kolm menu\n\n  Interactive picker for the most common verbs.\n  Type a number, a substring, or Enter for the default.');
+    process.exit(EXIT.OK);
+  }
+  const groups = [
+    { label: 'setup',     items: [ ['quickstart', 'guided setup wizard'], ['login', 'paste an existing API key'], ['signup', 'create a free tenant'] ] },
+    { label: 'wrapper',   items: [ ['proxy start',     'start localhost OpenAI/Anthropic proxy'], ['capture',  'tail captured requests'],    ['redact',  'preview redactors over captures'] ] },
+    { label: 'studio',    items: [ ['studio open',     'open the studio in a browser'],          ['studio status', 'studio + local artifact summary'], ['distill', 'distill a teacher into a student'], ['compile', 'compile a spec into a .kolm'] ] },
+    { label: 'observe',   items: [ ['tui',  'full-screen terminal dashboard'],     ['chat', 'chat with your hosted model'],       ['whoami', 'show the active tenant/plan'] ] },
+    { label: 'inspect',   items: [ ['artifacts',       'list local .kolm files'],   ['hub list', 'browse the hub'],          ['next', 'next-actions recommender'] ] },
+  ];
+  console.log('');
+  console.log('  pick a verb (number / substring / Enter to cancel):');
+  console.log('');
+  const flat = [];
+  let n = 1;
+  for (const g of groups) {
+    console.log('  ' + g.label);
+    for (const [verb, hint] of g.items) {
+      console.log('    ' + String(n).padStart(2) + '  kolm ' + verb.padEnd(18) + '  ' + hint);
+      flat.push({ n, verb, hint });
+      n++;
+    }
+    console.log('');
+  }
+  const readline = await import('node:readline');
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  const raw = await new Promise(resolve => rl.question('  > ', resolve));
+  rl.close();
+  const trim = (raw || '').trim().toLowerCase();
+  if (!trim) { console.log('  (no selection)'); process.exit(EXIT.OK); }
+  let hit = null;
+  if (/^\d+$/.test(trim)) hit = flat.find(f => String(f.n) === trim);
+  if (!hit && trim.length >= 3) {
+    const matches = flat.filter(f => f.verb.toLowerCase().includes(trim));
+    if (matches.length === 1) hit = matches[0];
+  }
+  if (!hit) { console.error('  no match for: ' + raw); process.exit(EXIT.USAGE); }
+  console.log('  $ kolm ' + hit.verb);
+  const parts = hit.verb.split(/\s+/);
+  const r = spawnSync(process.execPath, [process.argv[1], ...parts], { stdio: 'inherit' });
+  process.exit(r.status == null ? 0 : r.status);
+}
+
 async function cmdChat(args) {
   args = args || [];
   if (args.indexOf('--help') >= 0 || args.indexOf('-h') >= 0) {
@@ -31223,6 +31483,12 @@ async function cmdTui(args) {
     // command-mode). Reads the savings summary so the operator can see net
     // $ saved by routing teacher traffic through the gateway.
     { id: 'savings-tracker',    key: null, endpoint: '/v1/savings',              kind: 'get',   label: 'savings (teacher cost vs net)' },
+    // W849 — Studio view. Closes the Studio triangle: web /studio page,
+    // `kolm studio` CLI verb, TUI view. The TUI view reads /v1/artifacts
+    // (the same surface the web Studio is reading) so the operator can see
+    // the latest .kolm outputs without leaving the terminal. Keybind 'W'
+    // mnemonically maps to "workshop" (studio = workshop in Italian).
+    { id: 'studio',             key: 'W', endpoint: '/v1/artifacts',             kind: 'get',   label: 'studio (recent .kolm outputs + sessions)' },
   ];
   // Also expose simulations under view 'simulations' (alias for one of the
   // workflow rows so the W384 14-view test grep finds the literal). We list
@@ -37090,7 +37356,12 @@ async function cmdW751Verticals(args) {
 
 async function main() {
   ensureLocalReceiptSecretInEnv();
-  const [, , cmd, ...rest] = process.argv;
+  // W849 — strip global accessibility flags so they are not parsed as verbs.
+  // The flags themselves are honored in termSupports() / paintWelcomeBanner()
+  // which read process.argv directly, so the side effect persists.
+  const A11Y_FLAGS = new Set(['--no-color', '--no-unicode', '--plain']);
+  const filtered = process.argv.filter(a => !A11Y_FLAGS.has(a));
+  const [, , cmd, ...rest] = filtered;
   try {
     switch (cmd) {
       case 'init':     await withErrorContext('init',     () => cmdInit(rest)); break;
@@ -37522,6 +37793,9 @@ async function main() {
       case 'quickstart':
       case 'wizard':
       case 'setup':    await withErrorContext('quickstart', () => cmdQuickstart(rest)); break;
+      // W849 — first-class Studio surface for CLI + TUI parity with the web UI.
+      case 'studio':   await withErrorContext('studio',     () => cmdStudio(rest)); break;
+      case 'menu':     await withErrorContext('menu',       () => cmdMenu(rest)); break;
       case 'chat-tui': await withErrorContext('chat-tui', () => cmdChatTui(rest)); break;
       case 'completion': await withErrorContext('completion', () => cmdCompletion(rest)); break;
       case 'upgrade':  await withErrorContext('upgrade',  () => cmdUpgrade(rest)); break;
