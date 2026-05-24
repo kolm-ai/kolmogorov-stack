@@ -7219,7 +7219,14 @@ export function buildRouter() {
       const intent = await import('./intent.js');
       const isAuth = !!req.tenant_record;
       const snap = await intent.snapshotContext(isAuth ? { tenant_id: req.tenant_record.id } : { tenant_id: null });
-      const cls = await intent.classifyIntent(question, snap);
+      // W848 — thread previous_workflow from client so the FOLLOWUP_AFFIRM
+      // pre-pass in classifyIntent can resolve "ok do it" / "run that" /
+      // "yes" against the last recipe the user saw. Without this, every
+      // turn is stateless and bare affirmatives degenerate into substring
+      // matches on the verb 'do'.
+      const prevWf = (req.body && req.body.previous_workflow) || null;
+      const ctx = prevWf ? Object.assign({}, snap, { previous_workflow: prevWf }) : snap;
+      const cls = await intent.classifyIntent(question, ctx);
       const cmd = 'kolm ' + cls.verb + (cls.args && cls.args.length ? ' ' + cls.args.map(a => /\s/.test(String(a)) ? JSON.stringify(a) : a).join(' ') : '');
       // W847 — when the classifier resolves a "terminal" verb but the user
       // described a goal (no args extracted), return a multi-step recipe so
@@ -7265,7 +7272,10 @@ export function buildRouter() {
       // W432 — tenant_id passed through so the snapshot_summary returned to
       // the ask-bar caller cannot leak cross-tenant counters.
       const snap = await intent.snapshotContext({ tenant_id: req.tenant_record.id });
-      const cls = await intent.classifyIntent(question, snap);
+      // W848 — see /v1/free/chat above. Same followup-context contract.
+      const prevWf = (req.body && req.body.previous_workflow) || null;
+      const ctx = prevWf ? Object.assign({}, snap, { previous_workflow: prevWf }) : snap;
+      const cls = await intent.classifyIntent(question, ctx);
       const cmd = 'kolm ' + cls.verb + (cls.args && cls.args.length ? ' ' + cls.args.map(a => /\s/.test(String(a)) ? JSON.stringify(a) : a).join(' ') : '');
       // W847 — same multi-step recipe expansion as /v1/free/chat so the
       // post-auth console renders runnable workflows, not bare verbs.

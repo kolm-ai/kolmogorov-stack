@@ -278,6 +278,12 @@
   /* Listens for clicks on nav items annotated with [data-kolm-mega] and renders a panel.
      Falls back gracefully if those triggers don't exist. */
   function installMegaMenu() {
+    // W848: KILLED — user reports duplicate dropdowns on the homepage nav.
+    // installMegaMenu used to inject .kolm-mega panels whenever a nav item
+    // had [data-kolm-mega]. Now stubbed because dropdowns duplicate the
+    // already-visible top-level nav links and add no information.
+    return;
+    /* eslint-disable no-unreachable */
     var triggers = $$('[data-kolm-mega]');
     if (!triggers.length) return;
     var panel = el('div', { class: 'kolm-mega', role: 'menu', 'aria-label': 'Product menu' });
@@ -430,6 +436,14 @@
     doc.documentElement.style.overflow = '';
   }
   function installMobileNav() {
+    // W848: KILLED — second dropdown user reported. The mobile-nav trigger
+    // was injecting a hamburger button onto every page (including desktop
+    // homepage), then opening a full-screen overlay menu that duplicated
+    // the static .ks-nav links already visible. On desktop, two stacked
+    // dropdowns appeared. The native nav is already responsive — no
+    // separate mobile chrome needed for the launch surfaces.
+    return;
+    /* eslint-disable no-unreachable */
     var triggers = $$('[data-kolm-mobile-nav]');
     if (!triggers.length) {
       var btn = el('button', {

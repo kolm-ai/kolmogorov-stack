@@ -372,9 +372,13 @@ body { position: relative; }
 }
 .ks-btn:active { transform: translateY(1px); }
 
+/* W848: --ks-accent flips dark/cream per theme, but `color: #07090c`
+   was hardcoded near-black — invisible in light mode where bg is
+   already #111111. Use var(--surface-0) so text auto-inverts: cream
+   on dark button in light mode, dark on cream button in dark mode. */
 .ks-btn--primary {
   background: var(--ks-accent);
-  color: #07090c;
+  color: var(--surface-0, #f7f4ec);
   border-color: var(--ks-accent);
   box-shadow: 0 0 0 0 var(--ks-accent-glow);
 }
@@ -382,7 +386,7 @@ body { position: relative; }
   background: var(--ks-accent-2);
   border-color: var(--ks-accent-2);
   box-shadow: 0 0 24px var(--ks-accent-glow);
-  color: #07090c;
+  color: var(--surface-0, #f7f4ec);
 }
 
 .ks-btn--ghost {

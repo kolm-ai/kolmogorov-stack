@@ -22,6 +22,7 @@
   // act on. Replaced with concrete user-pain prompts where the next CLI is
   // obviously valuable.
   var EXAMPLES = [
+    'where do I start?',
     'how do I cut my OpenAI bill in half?',
     'capture my anthropic traffic',
     'distill a 7B model from my support transcripts',
@@ -139,10 +140,29 @@
     host.appendChild(hint);
 
     var busy = false;
+    // W848 — last workflow returned from the server. POSTed back as
+    // previous_workflow on every subsequent turn so the classifier's
+    // FOLLOWUP_AFFIRM_RE pre-pass can resolve "ok do it" / "run that"
+    // against the recipe the user just saw. Cleared on low-confidence
+    // / ask-fallback turns so a stray "yes" doesn't latch onto stale
+    // context after the user has changed topic.
+    var lastWorkflow = null;
     function setBusy(b) { busy = b; btn.disabled = b; input.disabled = b; btn.textContent = b ? '…' : 'send'; }
 
     function renderResponse(data) {
       var wrap = el('div', { class: 'ks-cli-chat__resp' });
+      // W848 — if the classifier resolved via the affirmative-followup
+      // path, tell the user explicitly so they don't think we hallucinated
+      // a command out of "ok".
+      if (data.source === 'followup') {
+        wrap.appendChild(el('p', { class: 'ks-cli-chat__followup', html: '<b>got it.</b> running the previous recipe:' }));
+      }
+      // W848 — if the classifier fell through every layer and came back
+      // below the confidence floor, we route to 'ask' and surface a soft
+      // "i'm not sure" rather than pretending a substring match is real.
+      if (data.source === 'low_confidence') {
+        wrap.appendChild(el('p', { class: 'ks-cli-chat__softfail', html: '<b>i’m not sure what you meant.</b> closest guesses below; try rephrasing or pick one:' }));
+      }
       // W847 — if the server returned a workflow recipe (multi-step), render
       // that INSTEAD of a single bare command. This is what makes "compile a
       // model to blur porn" useful: 4 numbered steps the user can actually run.
@@ -222,7 +242,11 @@
       input.value = '';
       setBusy(true);
       var placeholder = addMsg('kolm', '<span class="ks-cli-chat__thinking">thinking…</span>');
-      var bodyJson = JSON.stringify({ question: q });
+      // W848 — thread the previous workflow back to the server so the
+      // classifier's followup pre-pass can resolve bare affirmatives.
+      var payload = { question: q };
+      if (lastWorkflow) payload.previous_workflow = lastWorkflow;
+      var bodyJson = JSON.stringify(payload);
       fetch('/v1/free/chat', {
         method: 'POST',
         credentials: 'include',
@@ -233,6 +257,15 @@
       }).then(function (out) {
         placeholder.parentNode.removeChild(placeholder);
         if (out.status >= 200 && out.status < 300 && out.data && out.data.ok) {
+          // W848 — retain the workflow for the next turn UNLESS the
+          // classifier itself flagged low confidence (in which case the
+          // user is probably changing topic and a stale "yes" should not
+          // re-fire the last recipe).
+          if (out.data.source === 'low_confidence') {
+            lastWorkflow = null;
+          } else if (out.data.workflow && out.data.workflow.steps && out.data.workflow.steps.length) {
+            lastWorkflow = out.data.workflow;
+          }
           addMsg('kolm', renderResponse(out.data));
         } else {
           addMsg('kolm', renderError(out.status, out.data));

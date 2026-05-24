@@ -385,6 +385,18 @@ section[data-hero] {
   background: var(--surface-2);
 }
 
+/* W848: dark-mode override — text was hardcoded #111111 (near-black)
+   above, which becomes invisible on a dark surface. Cream text in dark
+   mode; border tints to match. */
+[data-theme="dark"] .btn-ghost,
+[data-theme="dark"] .button-ghost,
+[data-theme="dark"] .kolm-btn-ghost,
+[data-theme="dark"] .ks-btn-ghost,
+[data-theme="dark"] .btn[data-variant="ghost"] {
+  color: #e8e3d6 !important;
+  border-color: rgba(232,227,214,0.28);
+}
+
 /* Status button variants - monochrome - no orange, no sepia */
 .btn.warn, .button.warn {
   background: transparent;
@@ -751,16 +763,23 @@ body > * { position: relative; z-index: 1; }
    18. ACCORDION
    ============================================================ */
 
-details, .ks-accordion {
+/* W848: exclude .fr-faq__row from the generic accordion shell so the
+   homepage Q&A row keeps its frontier.css grid layout + 22px padding.
+   User has asked four times to fix Q&A spacing — root cause is this
+   generic `details` rule winning the cascade because warm-paper.css
+   loads AFTER frontier.css. Surgical :not() exclusion preserves the
+   accordion treatment on docs / pricing / wrapper while letting the
+   homepage FAQ render with its dedicated 44px-summary grid. */
+details:not(.fr-faq__row), .ks-accordion {
   border-top: 1px solid var(--line-1);
   padding: 18px 0;
 }
 
-details:last-of-type, .ks-accordion:last-of-type {
+details:not(.fr-faq__row):last-of-type, .ks-accordion:last-of-type {
   border-bottom: 1px solid var(--line-1);
 }
 
-details > summary, .ks-accordion-trigger {
+details:not(.fr-faq__row) > summary, .ks-accordion-trigger {
   cursor: pointer;
   list-style: none;
   display: flex;
@@ -774,7 +793,7 @@ details > summary, .ks-accordion-trigger {
 
 details > summary::-webkit-details-marker { display: none; }
 
-details > summary::after {
+details:not(.fr-faq__row) > summary::after {
   content: "+";
   font-family: var(--ks-font-mono);
   font-size: 18px;
@@ -782,12 +801,12 @@ details > summary::after {
   transition: transform 150ms ease, color 150ms ease;
 }
 
-details[open] > summary::after {
+details:not(.fr-faq__row)[open] > summary::after {
   content: "-";
   color: var(--ink-1);
 }
 
-details > *:not(summary) {
+details:not(.fr-faq__row) > *:not(summary) {
   margin-top: 14px;
   color: var(--ink-2);
 }
@@ -1173,6 +1192,17 @@ main > section:first-of-type .fr-h1--hero {
   text-transform: uppercase;
   fill: var(--ink-3);
 }
+
+/* W848: surface-tag under each column header — names which product
+   surface owns each band (wrapper / CLI · studio / runtime). */
+.kolm-arch__surf {
+  font-family: var(--ks-font-sans);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  fill: #c2410c;
+}
+[data-theme="dark"] .kolm-arch__surf { fill: #ff6a3d; }
 
 /* hairline rules under column headers and inside artifact box */
 .kolm-arch__rule {
@@ -2095,6 +2125,69 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   max-width: 70ch;
 }
 
+/* W848: wrapper + studio mini-cards under .kolm-whatis. Two compact
+   anchor blocks naming the two surfaces that sit on top of the
+   compiler. Card layout is paper-on-paper — hairline rule + accent
+   eyebrow tag — no shadow, no fill, no border-radius gimmick. */
+.kolm-whatis__surfaces {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(18px, 2.4vw, 32px);
+  margin: clamp(32px, 4vw, 56px) 0 0;
+}
+@media (max-width: 720px) {
+  .kolm-whatis__surfaces { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+}
+.kolm-whatis__surface {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  border-top: 1px solid var(--rule-1, #e5e0d4);
+  padding: clamp(18px, 2vw, 26px) 0 4px;
+  transition: border-color 140ms ease;
+}
+.kolm-whatis__surface:hover { border-top-color: #c2410c; }
+.kolm-whatis__surface-tag {
+  display: inline-block;
+  font-family: var(--ks-font-mono, ui-monospace, "JetBrains Mono", monospace);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #c2410c;
+  font-weight: 500;
+  margin: 0 0 12px;
+}
+.kolm-whatis__surface-h {
+  font-family: var(--ks-font-sans);
+  font-weight: 340;
+  font-size: clamp(20px, 2.2vw, 26px);
+  line-height: 1.18;
+  letter-spacing: -0.022em;
+  color: #111111;
+  margin: 0 0 10px;
+}
+.kolm-whatis__surface-p {
+  font-family: var(--ks-font-sans);
+  font-size: 14.5px;
+  line-height: 1.62;
+  color: #3a3a38;
+  margin: 0;
+}
+.kolm-whatis__surface-p code {
+  font-family: var(--ks-font-mono, ui-monospace, "JetBrains Mono", monospace);
+  font-size: 12.5px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(194, 65, 12, 0.07);
+  color: #111111;
+}
+[data-theme="dark"] .kolm-whatis__surface { border-top-color: rgba(232,227,214,0.10); }
+[data-theme="dark"] .kolm-whatis__surface:hover { border-top-color: #ff6a3d; }
+[data-theme="dark"] .kolm-whatis__surface-tag { color: #ff6a3d; }
+[data-theme="dark"] .kolm-whatis__surface-h { color: #e8e3d6; }
+[data-theme="dark"] .kolm-whatis__surface-p { color: #b6b0a5; }
+[data-theme="dark"] .kolm-whatis__surface-p code { background: rgba(255,106,61,0.10); color: #e8e3d6; }
+
 /* W844 post-auth account chat band — mirrors the homepage chat layout */
 .kolm-account-chat {
   padding: clamp(36px, 4vw, 56px) clamp(20px, 3vw, 36px);
@@ -2325,34 +2418,20 @@ html[data-theme="dark"] .kolm-deep__cmd {
 }
 .fr-h1--hero .h1-claim { font-weight: inherit; }
 
-/* W847: hero backdrop — replaced the W846 radial wash with an editorial
-   paper render (flux-pro/v1.1-ultra, see scripts/fal-hero-gen.cjs). Warm
-   cream #f7f4ec with a faint architectural schematic upper-right and calm
-   negative space center-left where the H1 sits. background-size: cover so
-   it never tiles; #f7f4ec fallback keeps the band warm if the asset 404s. */
+/* W848: hero backdrop reverted to plain warm paper per direct user mandate
+   ("i really hate this backdrop, go back to the prior one"). The FAL-
+   generated PNG render landed badly — the W846 minimal cream surface is
+   the right answer. No gradient, no dot-grid, no PNG. */
 .ks-hero {
-  background:
-    url('/assets/hero-warm-paper-bg.png') center / cover no-repeat,
-    #f7f4ec;
+  background: #f7f4ec;
   position: relative;
 }
 .ks-hero::before { content: none; }
-/* Kill any inherited dot-grid / scanline overlays inside the hero. The user
-   called these the "ugly grid background" — they live in frontier.css as
-   .fr-blueprint and .fr-scan helpers that sometimes get composed onto hero
-   children. Explicit override here so the new paper render stays clean. */
 .ks-hero.fr-blueprint,
 .ks-hero .fr-blueprint { background-image: none !important; }
 .ks-hero.fr-scan::after,
 .ks-hero .fr-scan::after { background-image: none !important; }
-/* Dark mode: same render but veiled so cream paper doesn't blow out
-   against dark UI. */
-[data-theme="dark"] .ks-hero {
-  background:
-    linear-gradient(rgba(15, 13, 10, 0.62), rgba(15, 13, 10, 0.62)),
-    url('/assets/hero-warm-paper-bg.png') center / cover no-repeat,
-    #0f0d0a;
-}
+[data-theme="dark"] .ks-hero { background: #0f0d0a; }
 
 /* W845: hero now single-column. The right-column mini-card was a wedge the
    user called weak ("doesnt add much and doesnt take up the weight it
@@ -2450,72 +2529,13 @@ section.fr-section + section.fr-section { padding-top: 0; }
    visitor sees concrete numbers.
    ========================================================================= */
 
-/* W846: hero proof rail. Four stat cells under the CTA row so the value
-   prop has a number-grounded second-beat before the user scrolls. Each
-   cell carries a single big stat + a one-line caption. Lives inside
-   .ks-hero__wrap > div (column 1). */
-.ks-hero__proof {
-  list-style: none;
-  padding: 0;
-  margin: 36px 0 0 0;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 22px;
-  max-width: 720px;
-  border-top: 1px solid var(--rule-1, #e5e0d4);
-  padding-top: 22px;
-}
-@media (max-width: 720px) {
-  .ks-hero__proof {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px;
-  }
-}
-.ks-hero__proof li {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-}
-.ks-hero__proof b {
-  font-family: var(--ks-font-sans);
-  font-weight: 420;
-  font-size: clamp(22px, 2.4vw, 30px);
-  letter-spacing: -0.028em;
-  color: var(--ink-1, #111111);
-  line-height: 1.0;
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "ss01", "tnum", "kern";
-}
-.ks-hero__proof span {
-  font-family: var(--ks-font-sans);
-  font-size: 12.5px;
-  line-height: 1.45;
-  color: var(--ink-3, #6b6b66);
-  letter-spacing: 0;
-}
-[data-theme="dark"] .ks-hero__proof { border-top-color: rgba(245,239,226,0.10); }
-[data-theme="dark"] .ks-hero__proof b { color: var(--ink-1, #e8e3d6); }
-[data-theme="dark"] .ks-hero__proof span { color: var(--ink-3, #9e978b); }
-
-/* W846: sub-line under proof rail. Smaller, monospace, with a clear github
-   link. The previous version used JS-undefined --ks-mono / --ks-ink-3
-   tokens that fell back unreliably. */
-.ks-hero__sub {
-  margin: 22px 0 0 0;
-  font-family: var(--ks-font-mono, ui-monospace, "JetBrains Mono", monospace);
-  font-size: 11.5px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ink-3, #6b6b66);
-}
-.ks-hero__sub a {
-  color: var(--ink-2, #44423d);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-[data-theme="dark"] .ks-hero__sub { color: var(--ink-3, #9e978b); }
-[data-theme="dark"] .ks-hero__sub a { color: var(--ink-1, #e8e3d6); }
+/* W848: .ks-hero__proof rail and .ks-hero__sub line REMOVED per direct
+   user mandate ("remove this already $8K/mo ... 17.9 GB ... Apache-2.0
+   self-hostable runs air-gapped 6 SDKs github →"). Stat-cell rail was
+   stealing visual weight from the H1 and the "In plain English" section
+   below already conveys the same plain-prose answer. Hidden test-anchor
+   for any lock-in referencing .ks-hero__proof or .ks-hero__sub. */
+.ks-hero__proof, .ks-hero__sub { display: none !important; }
 
 /* W846: H2 weight harmonize across .fr-h2 / .ks-h2 — both thin & contemporary
    to match the hero. Linear / Vercel / Stripe Press editorial weight.

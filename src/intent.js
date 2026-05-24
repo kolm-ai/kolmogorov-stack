@@ -75,7 +75,13 @@ export const VERB_DESCRIPTIONS = [
     examples: ['kolm bench phi-redactor.kolm --runs 100'] },
   { verb: 'verify', desc: 'Verify a .kolm signature, K-score gate, and emit a compliance binder.',
     when: 'Audit / compliance / pre-deploy gate.',
-    phrasings: ['verify', 'check the signature', 'audit the artifact'],
+    phrasings: ['verify', 'check the signature', 'audit the artifact',
+      'prove to compliance', 'prove to auditors', 'prove the model did not change',
+      'prove the model didnt change', 'prove the model has not changed',
+      'show compliance', 'compliance proof', 'show auditors', 'reproducibility proof',
+      'prove reproducible', 'prove provenance', 'show provenance', 'check provenance',
+      'audit trail', 'show audit trail', 'cryptographic proof', 'signed receipt',
+      'verify integrity', 'integrity check'],
     examples: ['kolm verify phi-redactor.kolm --binder report.html'] },
   { verb: 'inspect', desc: 'Print the manifest, recipes, signature, and K-score of a .kolm.',
     when: 'You want to look inside an artifact.',
@@ -96,7 +102,12 @@ export const VERB_DESCRIPTIONS = [
     examples: ['kolm tail captures --namespace support'] },
   { verb: 'capture', desc: 'Configure the OpenAI/Anthropic proxy and view capture status.',
     when: 'You want to enable per-namespace capture (pairs → distill).',
-    phrasings: ['capture', 'capture status', 'capture config', 'enable capture'],
+    phrasings: ['capture', 'capture status', 'capture config', 'enable capture',
+      'cut my openai bill', 'cut my anthropic bill', 'cut my llm bill',
+      'reduce my openai bill', 'reduce my anthropic bill', 'reduce my api bill',
+      'lower my openai bill', 'shrink my openai bill', 'cut openai costs',
+      'cut llm costs', 'reduce llm costs', 'save on openai', 'save money on openai',
+      'cheaper than openai', 'replace openai', 'stop paying openai'],
     examples: ['kolm capture --provider openai --as ks_proxy'] },
   { verb: 'distill', desc: 'Auto-distill captured (input, output) pairs into a local LoRA.',
     when: 'You have hundreds of captures and want a specialist model.',
@@ -158,6 +169,17 @@ export const VERB_DESCRIPTIONS = [
     when: 'Bootstrap a new project directory.',
     phrasings: ['init', 'initialize', 'init project', 'new project', 'bootstrap project'],
     examples: ['kolm init --name my-app'] },
+  // W848 — guided setup wizard. Maps every "I am new, where do I start"
+  // shape to the interactive picker so the chat box surfaces a real CLI.
+  { verb: 'quickstart', desc: 'Guided setup wizard — pick wrapper or studio, walk through setup step by step.',
+    when: 'You are new to kolm and want the most direct path to a working install.',
+    phrasings: ['quickstart', 'quick start', 'wizard', 'setup', 'set up',
+      'set me up', 'guide me', 'walk me through', 'walk me through setup',
+      'get started', 'getting started', 'how do i start', 'how do i get started',
+      'where do i start', 'where do i begin', 'i am new', 'im new', 'first time',
+      'help me set up', 'help me setup', 'onboard me', 'onboarding',
+      'wrapper or studio', 'pick wrapper or studio'],
+    examples: ['kolm quickstart', 'kolm quickstart wrapper', 'kolm quickstart studio'] },
   { verb: 'init-agent', desc: 'Scaffold a script-first agent project.',
     when: 'You want a redactor / classifier / extractor template.',
     phrasings: ['init agent', 'new agent', 'scaffold agent', 'create agent project'],
@@ -233,7 +255,11 @@ export const VERB_DESCRIPTIONS = [
     examples: ['kolm export phi-redactor.kolm --to gguf'] },
   { verb: 'quantize', desc: 'Quantise an adapter via the isolated worker (int4/int8/gptq/awq).',
     when: 'You want a smaller, faster artifact for edge.',
-    phrasings: ['quantize', 'quantise', 'compress model', 'shrink model'],
+    phrasings: ['quantize', 'quantise', 'compress model', 'shrink model',
+      'fit on a single gpu', 'fit on one gpu', 'fit on a 5090', 'fit on one 5090',
+      'fit on a 4090', 'fit on a 3090', 'fit on a single rtx', 'fit on consumer hardware',
+      'shrink to int4', 'shrink to int8', 'compress to int4', 'compress to int8',
+      'make it fit on', 'run on a single gpu', 'run 32b on', 'fit 32b', 'fit 70b'],
     examples: ['kolm quantize int4 --in adapter.bin'] },
   { verb: 'runtime', desc: 'Runtime targets / doctor / build-from-source.',
     when: 'You need a runtime that does not ship by default.',
@@ -261,7 +287,12 @@ export const VERB_DESCRIPTIONS = [
     examples: ['kolm compute list'] },
   { verb: 'airgap', desc: 'Hard-offline mode (status / enable / disable / verify).',
     when: 'You need to certify that kolm makes no network calls.',
-    phrasings: ['airgap', 'offline mode', 'enable airgap'],
+    phrasings: ['airgap', 'offline mode', 'enable airgap',
+      'self host', 'self-host', 'self host this', 'self-host this',
+      'self host air-gapped', 'self host airgapped', 'host air gapped',
+      'run air gapped', 'run air-gapped', 'run airgapped', 'no network access',
+      'no internet', 'fully offline', 'on prem', 'on-prem', 'on premises',
+      'host on prem', 'deploy on prem'],
     examples: ['kolm airgap enable'] },
   { verb: 'rag', desc: 'Airgapped local lookup (index / query / attach / list).',
     when: 'You want BM25 over local files attached to a recipe.',
@@ -317,7 +348,11 @@ export const VERB_DESCRIPTIONS = [
     examples: ['kolm ask "what is my k score?"'] },
   { verb: 'do', desc: 'Natural-language dispatcher — classify and run any verb.',
     when: 'You do not remember the verb name; describe the task.',
-    phrasings: ['do', 'run command'],
+    // W848: bare 'do' was matching the word "do" in any input ("ok do it"
+    // → kolm do at 90% confidence). Drop the bare token + 'run command'
+    // (which also matched any "run X" input). Phrasings now require an
+    // explicit dispatch idiom that no natural sentence will trip on.
+    phrasings: ['kolm do', 'dispatch this', 'auto-dispatch'],
     examples: ['kolm do "show captures"'] },
   { verb: 'what', desc: 'Snapshot of the current kolm state (artifacts, captures, jobs).',
     when: 'You want a one-screen dashboard of where you are.',
@@ -420,6 +455,17 @@ function tokens(text) {
 //   "could you show captures"  → substring match (confidence 0.90)
 // ---------------------------------------------------------------------------
 
+// W848: short common English words must not be eligible for the substring
+// branch — they fire on any input containing the word ("ok do it", "run a
+// test", "show me", "make sense"). Phrases ≤ 4 chars OR single-token
+// phrases in this set never enter the substring sweep.
+const KEYWORD_SUBSTRING_STOP = new Set([
+  'do', 'run', 'show', 'list', 'make', 'next', 'what', 'build', 'log', 'tail',
+  'keys', 'seeds', 'tune', 'rag', 'lake', 'team', 'hub', 'new', 'jobs', 'logs',
+  'chat', 'ask', 'init', 'fix', 'watch', 'help', 'use', 'set', 'get', 'see',
+  'try', 'go', 'add', 'cut', 'pop', 'tag', 'top', 'one', 'two', 'all', 'any'
+]);
+
 function keywordMatch(normalizedText) {
   // exact
   if (PHRASING_INDEX.has(normalizedText)) {
@@ -435,9 +481,14 @@ function keywordMatch(normalizedText) {
   if (bestPrefix) {
     return { verb: bestPrefix.verb, confidence: 0.95, source: 'keyword', matchedPhrase: bestPrefix.phrase };
   }
-  // longest substring
+  // longest substring — W848: gated. A short stop-phrase like 'do' or
+  // 'run' must NOT be allowed to substring-match inside a larger sentence;
+  // it produces nonsense like `$ kolm do` for "ok do it". Require either
+  // (a) phrase length > 4 OR (b) multi-token phrase NOT in stop set.
   let bestSub = null;
   for (const [phrase, verb] of PHRASING_INDEX) {
+    const isMulti = phrase.includes(' ');
+    if (!isMulti && (phrase.length <= 4 || KEYWORD_SUBSTRING_STOP.has(phrase))) continue;
     if (normalizedText.includes(' ' + phrase + ' ') || normalizedText.endsWith(' ' + phrase) || normalizedText.startsWith(phrase + ' ')) {
       if (!bestSub || phrase.length > bestSub.phrase.length) bestSub = { phrase, verb };
     }
@@ -616,11 +667,17 @@ function regexMatch(normalizedText, original) {
 
 function overlapRank(normalizedText, k = 3) {
   const inputTokens = new Set(tokens(normalizedText));
-  // stop-word filter so "the", "a", "my" don't dominate the overlap signal.
+  // W848: stop-word filter expanded — "rate kolm /10" was overlap-matching
+  // 'airgap' because the brand word "kolm" appeared in every verb haystack.
+  // Conversational opener tokens (ok/sure/yes/no/thanks/good/bad/cool/wow/
+  // rate/rating/score) and the brand token itself must drop out.
   const STOP = new Set(['the', 'a', 'an', 'my', 'your', 'our', 'is', 'are', 'do', 'i', 'you',
     'to', 'for', 'of', 'in', 'on', 'at', 'with', 'from', 'and', 'or', 'please', 'help',
     'me', 'us', 'we', 'it', 'this', 'that', 'these', 'those', 'be', 'been', 'was', 'were',
-    'show', 'list', 'tell', 'give', 'make', 'want', 'need']);
+    'show', 'list', 'tell', 'give', 'make', 'want', 'need',
+    'kolm', 'rate', 'rating', 'score', 'ok', 'sure', 'yes', 'no', 'nope', 'yeah', 'yep',
+    'thanks', 'thank', 'good', 'bad', 'cool', 'nice', 'wow', 'great', 'cool', 'awesome',
+    'tho', 'though', 'btw', 'lol', 'hi', 'hey', 'hello', 'sup', 'plz']);
   for (const w of STOP) inputTokens.delete(w);
   if (inputTokens.size === 0) return [];
   const scored = [];
@@ -746,6 +803,23 @@ function llmConfig() {
 // PUBLIC: classifyIntent
 // ---------------------------------------------------------------------------
 
+// W848: regex for affirmative followups. If the previous turn returned a
+// workflow recipe and the user says "ok do it" / "run it" / "go" / "yes",
+// short-circuit to a run-previous result instead of re-classifying — which
+// produced absurd matches like `$ kolm do` (90% confidence on the word "do").
+//
+// The regex accepts three shapes:
+//   1. Bare affirmative:           "ok", "yes", "sure", "yep"
+//   2. Bare run-it verb:           "do it", "run that", "let's go", "ship it"
+//   3. Affirmative + run-it verb:  "ok do it", "yes run that", "sure go ahead"
+// All forms are case-insensitive and tolerate a trailing period.
+const _AFFIRM = "(?:ok|okay|sure|yes|yep|yeah|alright|aight|cool|nice|perfect|great|fine|sounds good)";
+const _RUNVERB = "(?:do it|do this|do that|run it|run that|ship it|go ahead|let'?s go|let'?s do it|please do|proceed|go for it|go)";
+const FOLLOWUP_AFFIRM_RE = new RegExp(
+  "^(?:" + _AFFIRM + "[,\\s]+)?" + _RUNVERB + "\\b\\.?$|^" + _AFFIRM + "\\.?$",
+  "i"
+);
+
 export async function classifyIntent(text, context = {}) {
   const original = text == null ? '' : String(text);
   const normalized = normalize(original);
@@ -764,6 +838,22 @@ export async function classifyIntent(text, context = {}) {
 
   if (empty) {
     return baseEnvelope({ verb: 'what', args: [], confidence: 0.5, source: 'empty' });
+  }
+
+  // W848: 0. AFFIRMATIVE FOLLOWUP — if caller passed previous_workflow in
+  // context, an "ok do it" style reply means "run the recipe you just gave
+  // me." Echo the previous workflow's first command back.
+  const prevWf = context && context.previous_workflow;
+  if (prevWf && Array.isArray(prevWf.steps) && prevWf.steps.length && FOLLOWUP_AFFIRM_RE.test(original.trim())) {
+    const firstCmd = prevWf.steps[0].cmd || '';
+    // Parse "kolm <verb> [args...]" out of the first step.
+    const m = firstCmd.match(/^\s*kolm\s+(\S+)(?:\s+(.+))?\s*$/);
+    const v = m ? m[1] : 'do';
+    const a = m && m[2] ? m[2].trim().split(/\s+/) : [];
+    return baseEnvelope({
+      verb: v, args: a, confidence: 0.97,
+      source: 'followup', matchedPhrase: original.trim()
+    });
   }
 
   // 1. KEYWORD FAST PATH
@@ -831,6 +921,17 @@ export async function classifyIntent(text, context = {}) {
     return baseEnvelope({ verb: 'ask', args: [original], confidence: 0.2, source: 'fallback' });
   }
   const [top, ...rest] = ranked;
+  // W848: confidence floor. Overlap caps at 0.65; anything < 0.55 is a
+  // weak guess and should NOT be emitted as `$ kolm <verb>` (it produces
+  // confidently-wrong answers like `$ kolm airgap` for "rate kolm /10").
+  // Route low-confidence misses to the conversational `ask` path with
+  // the rankings preserved as alternatives the UI can offer.
+  if (top.confidence < 0.55) {
+    return baseEnvelope({
+      verb: 'ask', args: [original], confidence: top.confidence,
+      source: 'low_confidence', matchedPhrase: null
+    }, ranked);
+  }
   return baseEnvelope(top, rest);
 }
 
@@ -1461,11 +1562,26 @@ const WORKFLOWS = {
       { cmd: 'kolm install claude-code --apply',                       why: 'Wire the running server into Claude Code config in one step.' },
     ],
   },
+  // W848 — quickstart wizard. When someone asks "where do i start" the chat
+  // surfaces the actual `kolm quickstart` command + the two paths so they can
+  // pick before running.
+  quickstart: {
+    summary: 'Pick wrapper or studio, then walk through setup step by step.',
+    steps: [
+      { cmd: 'kolm quickstart',                                        why: 'Interactive picker. Choose wrapper (gateway + capture) or studio (browser UI).' },
+      { cmd: 'kolm quickstart wrapper',                                why: 'Skip the picker — start the wrapper walk-through directly.' },
+      { cmd: 'kolm quickstart studio',                                 why: 'Skip the picker — start the studio walk-through directly.' },
+    ],
+  },
 };
 
 const VERB_NEEDS_ARGS = new Set([
   'compile', 'distill', 'run', 'bench', 'verify', 'replay', 'bakeoff',
   'dataset', 'quantize', 'export', 'capture', 'lake', 'fix', 'serve',
+  // W848 — quickstart never takes args from the chat; we always want the
+  // workflow expansion (which exposes the wrapper/studio sub-paths) instead
+  // of a bare `$ kolm quickstart` reply.
+  'quickstart',
 ]);
 
 export function expandToWorkflow(intent, originalQuestion) {

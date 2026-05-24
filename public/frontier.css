@@ -309,7 +309,9 @@
   will-change: transform;
 }
 .fr-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,0.32); }
-.fr-btn--mint { background: var(--fr-mint); color: #051512; }
+/* W848: --fr-mint flips per theme; hardcoded dark text was invisible
+   on light-mode (dark) mint button. var(--surface-0) flips correctly. */
+.fr-btn--mint { background: var(--fr-mint); color: var(--surface-0, #f7f4ec); }
 .fr-btn--mint:hover { box-shadow: var(--fr-depth-glow-mint); }
 .fr-btn--ghost {
   background: transparent;

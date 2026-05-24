@@ -336,6 +336,7 @@ USAGE
   kolm <command> --help            per-command help
 
 COMMANDS
+  quickstart [wrapper|studio]      guided setup wizard (start here)
   init [--name <slug>]             scaffold kolm.yaml + .kolm/ at cwd (project bootstrap)
   init-agent <name> [dir]          script-first agent project scaffolder (--template chatbot|redactor|classifier|extraction|agent, --git, --tmux)
   signup --email <addr>            provision a tenant + API key from the CLI
@@ -525,6 +526,37 @@ The server-side intent parser is deterministic and rule-based (never an LLM,
 never your data leaving) and returns a narration + concrete next steps.
 With --intent the response is preview-only: paste the printed command (or
 run kolm do "<question>") when you're ready to execute.
+`,
+  quickstart: `kolm quickstart - guided setup wizard.
+
+USAGE
+  kolm quickstart                  interactive picker (wrapper or studio)
+  kolm quickstart wrapper          jump straight into the wrapper path
+  kolm quickstart studio           jump straight into the studio path
+  kolm quickstart --yes            auto-confirm every step (CI / unattended)
+  kolm quickstart --json           also emit a JSON summary on exit
+
+PATHS
+  wrapper   point any OpenAI/Anthropic client at a local kolm gateway,
+            capture traffic, optionally enable redaction. Drop-in URL swap.
+            7-step walk-through ending with a verify step.
+
+  studio    open the browser studio UI for visual model browse, on-policy
+            training, and bake-offs. Good if you want to explore before
+            wiring anything into a real client. 6-step walk-through.
+
+STEPS
+  Each step is confirm-or-skip:
+    Enter / y / yes   run the suggested command
+    s / skip / n      skip this step and see the next
+    q / quit / exit   leave the wizard (you can resume any time)
+
+  Steps already done (have a config / have a key) are auto-skipped with a
+  note so you do not re-run them.
+
+ENVIRONMENT
+  KOLM_QUICKSTART_AUTO=1   same as --yes
+  KOLM_NO_INTERACTIVE=1    print the plan but do not prompt or execute
 `,
   chat: `kolm chat - interactive natural-language session that EXECUTES commands.
 
@@ -4098,8 +4130,10 @@ function firstRunBannerIfNeeded() {
   if (fs.existsSync(CONFIG_PATH)) return;
   if (process.env.KOLM_API_KEY) return;
   console.log('welcome to kolm. no config yet at ~/.kolm/config.json.');
-  console.log('  get a key:  https://kolm.ai/signin');
-  console.log('  then run:   kolm login');
+  // W848 — surface the interactive wizard as the primary first-run path so
+  // new users do not have to know which verb to run next.
+  console.log('  guided setup:  kolm quickstart    (pick wrapper or studio)');
+  console.log('  manual setup:  https://kolm.ai/signin   ->   kolm login');
   console.log('');
 }
 
@@ -22063,6 +22097,521 @@ async function cmdChatTui(args) {
   });
 }
 
+// =============================================================================
+// W848 — `kolm quickstart` — guided setup wizard.
+//
+// User mandate: "give the cli a quickstart function that it suggests on start
+// and allow the user to select wrapper or studio and then guide them through
+// setup step by step." + "give people numbered lists for all the options each
+// step or let them type natural language etc. and for training data where do
+// you get it? dont they have to select file path? fix it and ensure it all
+// works test it all"
+//
+// Two paths, picked at the first prompt. Every decision is a numbered menu
+// you can answer by typing a number (1-N), a substring of the option label,
+// or just Enter to take the default. File paths are validated against disk.
+//
+//   wrapper — start the localhost OpenAI/Anthropic-compatible proxy + a named
+//             capture profile so traffic from your existing client lands in
+//             the lake. Picks distill data source at the end (captures /
+//             JSONL on disk / scaffold from brief / starter template).
+//
+//   studio  — open the browser studio (hosted or local), pick a first
+//             activity (hub browse / bakeoff / whoami), confirm session.
+//
+// Real verbs only: `kolm proxy start`, `kolm capture --provider X --as task`,
+// `kolm proxy config --sdk=X --lang=env`, `kolm distill --local-worker
+// --seeds <file> --out <dir>` etc. No fake `kolm wrap --port` (wrap is the
+// spec emitter), no fake `kolm studio open` (studio is the web UI).
+//
+// Non-interactive shells (CI, piped stdin) take the printed defaults; setting
+// KOLM_QUICKSTART_FORCE_INTERACTIVE=1 unblocks piped-stdin tests.
+// =============================================================================
+async function cmdQuickstart(args) {
+  args = args || [];
+  if (args.indexOf('--help') >= 0 || args.indexOf('-h') >= 0) {
+    console.log(HELP.quickstart || 'kolm quickstart [wrapper|studio] [--yes] [--json]\n\n  Interactive setup wizard. Picks one of two paths:\n    wrapper  - localhost proxy + named capture profile (real verbs)\n    studio   - open the browser UI for browse / bake-off / whoami\n');
+    process.exit(EXIT.OK);
+  }
+  const jsonMode = args.includes('--json');
+  const autoYes = args.includes('--yes') || args.includes('-y') || process.env.KOLM_QUICKSTART_AUTO === '1';
+  const forceInteractive = process.env.KOLM_QUICKSTART_FORCE_INTERACTIVE === '1';
+  const nonInteractive = !forceInteractive && (!process.stdin.isTTY || !process.stdout.isTTY || process.env.KOLM_NO_INTERACTIVE === '1');
+
+  // First positional arg picks a path: wrapper | studio | (anything else -> ask).
+  // Renamed from `path` to avoid shadowing the top-level node:path import.
+  let pickedArg = null;
+  for (const a of args) {
+    if (a === 'wrapper' || a === 'studio') { pickedArg = a; break; }
+  }
+
+  // Resolve config + auth state once so the wizard can tell the user where
+  // they stand and only ask for what's actually missing.
+  const haveConfig = fs.existsSync(CONFIG_PATH);
+  const haveKey = !!process.env.KOLM_API_KEY || haveConfig;
+
+  // ---------- helpers ----------
+
+  // Line-queue reader instead of readline.question. The top-level `prompt()`
+  // (line 321) creates a new readline.createInterface() per call — that
+  // pattern works in interactive TTY mode but breaks under piped stdin
+  // (KOLM_QUICKSTART_FORCE_INTERACTIVE=1), and even a single shared readline
+  // misbehaves when stdin closes mid-flow. We buffer 'line' events into a
+  // queue and pop from it for every prompt. EOF resolves pending waiters with
+  // empty string so defaults kick in.
+  let wizardRl = null;
+  const lineQueue = [];
+  const lineWaiters = [];
+  let stdinClosed = false;
+  function deliver(line) {
+    if (lineWaiters.length) {
+      const w = lineWaiters.shift();
+      w(line);
+    } else {
+      lineQueue.push(line);
+    }
+  }
+  function flushOnClose() {
+    stdinClosed = true;
+    while (lineWaiters.length) {
+      const w = lineWaiters.shift();
+      w('');
+    }
+  }
+  if (!nonInteractive) {
+    wizardRl = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: false });
+    wizardRl.on('line', (l) => deliver(l));
+    wizardRl.on('close', () => flushOnClose());
+  }
+  function wizardClose() {
+    if (wizardRl) { try { wizardRl.close(); } catch {} }
+  }
+  function wizardAsk(line) {
+    process.stdout.write(line);
+    if (stdinClosed) return Promise.resolve('');
+    if (lineQueue.length) {
+      const next = lineQueue.shift();
+      process.stdout.write(next + '\n'); // echo so transcripts read right
+      return Promise.resolve(next);
+    }
+    return new Promise((resolve) => {
+      lineWaiters.push((ans) => { process.stdout.write((ans || '') + '\n'); resolve(ans); });
+    });
+  }
+
+  // Free-text input with default. Returns trimmed string (or the default).
+  async function ask(label, def) {
+    const tail = def != null && def !== '' ? ' (default: ' + def + ')' : '';
+    const line = '  ' + label + tail + ': ';
+    if (nonInteractive) {
+      process.stdout.write(line + (def != null ? def : '') + '\n');
+      return def != null ? String(def) : '';
+    }
+    let ans = await wizardAsk(line);
+    ans = (ans || '').trim();
+    return ans === '' && def != null ? String(def) : ans;
+  }
+
+  // Pick from a numbered menu. Accepts: number (1..N), unique substring of
+  // option.label or option.value, or Enter for the default index. Returns the
+  // selected option object ({ value, label, hint? }).
+  async function pickMenu(label, options, defaultIdx) {
+    const dIdx = defaultIdx || 0;
+    console.log('');
+    console.log('  ' + label);
+    console.log('');
+    for (let i = 0; i < options.length; i++) {
+      const opt = options[i];
+      const marker = (i === dIdx) ? '*' : ' ';
+      const hint = opt.hint ? '  - ' + opt.hint : '';
+      console.log('    [' + (i + 1) + ']' + marker + ' ' + opt.label + hint);
+    }
+    console.log('');
+    if (nonInteractive) {
+      console.log('  (non-interactive — picking [' + (dIdx + 1) + '] ' + options[dIdx].label + ')');
+      return options[dIdx];
+    }
+    const line = '  pick [1-' + options.length + '] or type a name (default ' + (dIdx + 1) + '): ';
+    const raw = (await wizardAsk(line)).trim().toLowerCase();
+    if (raw === '') return options[dIdx];
+    const asNum = parseInt(raw, 10);
+    if (!Number.isNaN(asNum) && asNum >= 1 && asNum <= options.length) return options[asNum - 1];
+    const exact = options.find(o => String(o.value || '').toLowerCase() === raw || String(o.label || '').toLowerCase() === raw);
+    if (exact) return exact;
+    // Substring fuzzy match requires >=3 chars so single-letter inputs like
+    // "n" (which would accidentally match labels like "jsonl on disk") fall
+    // through to the default instead of silently selecting the wrong option.
+    if (raw.length >= 3) {
+      const hits = options.filter(o => {
+        const lab = String(o.label || '').toLowerCase();
+        const val = String(o.value || '').toLowerCase();
+        return lab.includes(raw) || val.includes(raw);
+      });
+      if (hits.length === 1) return hits[0];
+      if (hits.length > 1) {
+        console.log('  ambiguous — matched: ' + hits.map(h => h.label).join(', ') + '. using default: ' + options[dIdx].label);
+        return options[dIdx];
+      }
+    }
+    console.log('  unrecognised — using default: ' + options[dIdx].label);
+    return options[dIdx];
+  }
+
+  async function yesNo(label, defaultYes) {
+    const def = defaultYes ? 'Y/n' : 'y/N';
+    const line = '  ' + label + ' [' + def + ']: ';
+    if (nonInteractive) {
+      process.stdout.write(line + (defaultYes ? 'y' : 'n') + '\n');
+      return !!defaultYes;
+    }
+    const ans = (await wizardAsk(line)).trim().toLowerCase();
+    if (ans === '') return !!defaultYes;
+    return ans === 'y' || ans === 'yes' || ans === 'yep' || ans === 'yeah' || ans === 'sure' || ans === 'ok';
+  }
+
+  // Prompt for a filesystem path and (optionally) require it to exist on disk.
+  // Loops on missing-file with an explicit retry/abort prompt so the user can
+  // either fix the path or move on without having to restart the wizard.
+  async function inputPath(label, mustExist) {
+    while (true) {
+      const ans = await ask(label, '');
+      if (!ans) return null;
+      const resolved = path.resolve(ans);
+      if (!mustExist) return resolved;
+      if (fs.existsSync(resolved)) return resolved;
+      console.log('  no file at: ' + resolved);
+      if (nonInteractive) return null;
+      const retry = await yesNo('  try a different path?', true);
+      if (!retry) return null;
+    }
+  }
+
+  async function runCmd(cmd) {
+    const parts = cmd.replace(/^\$\s*/, '').split(/\s+/);
+    const bin = parts.shift();
+    const cp = await import('node:child_process');
+    const r = cp.spawnSync(bin, parts, { stdio: 'inherit', shell: process.platform === 'win32' });
+    return r.status === 0;
+  }
+
+  // Print the command, ask the user if they want to run it, optionally execute
+  // it via spawnSync with inherited stdio. confirm=false runs immediately
+  // (used when we just printed the heading + intent). autoYes runs without
+  // asking. Returns { ran, ok, skipped? }.
+  async function maybeRun(cmd, opts) {
+    opts = opts || {};
+    console.log('');
+    console.log('  $ ' + cmd);
+    if (nonInteractive) {
+      console.log('  (non-interactive — printed but not executed)');
+      return { ran: false, ok: true, skipped: true };
+    }
+    let go = true;
+    if (!autoYes && opts.confirm !== false) {
+      go = await yesNo('  run it now?', true);
+    }
+    if (!go) {
+      console.log('  skipped.');
+      return { ran: false, ok: true, skipped: true };
+    }
+    const ok = await runCmd(cmd);
+    if (!ok) console.log('  command exited non-zero — you can re-run it manually any time.');
+    return { ran: true, ok };
+  }
+
+  function header() {
+    console.log('');
+    console.log('  kolm quickstart');
+    console.log('  -----------------------------------------------------------');
+    console.log('  guided setup. at each prompt you can:');
+    console.log('    - type a number      (e.g. "1")');
+    console.log('    - type a name        (e.g. "openai" or "anthropic")');
+    console.log('    - press Enter        (takes the default marked with *)');
+    console.log('  -----------------------------------------------------------');
+  }
+
+  async function pickPath() {
+    if (pickedArg) return pickedArg;
+    const opt = await pickMenu(
+      'which path?',
+      [
+        { value: 'wrapper', label: 'wrapper', hint: 'localhost proxy + named capture profile; drop-in URL swap for your existing client' },
+        { value: 'studio',  label: 'studio',  hint: 'open the browser UI for browse / bake-off / training' },
+      ],
+      0,
+    );
+    return opt.value;
+  }
+
+  // Shared auth step — only runs if the user does not already have a key.
+  async function authStep() {
+    if (haveKey) {
+      console.log('  already have a key in ~/.kolm/config.json or $KOLM_API_KEY — skipping auth.');
+      return { ok: true };
+    }
+    const choice = await pickMenu(
+      'sign in:',
+      [
+        { value: 'login',  label: 'login',     hint: 'paste an existing ks_... key (runs `kolm login`)' },
+        { value: 'signup', label: 'signup',    hint: 'create a free tenant by email (runs `kolm signup --email <you>`)' },
+        { value: 'anon',   label: 'anonymous', hint: 'skip auth — works for local-only verbs; hosted features 401' },
+      ],
+      1,
+    );
+    if (choice.value === 'login') return await maybeRun('kolm login', { confirm: false });
+    if (choice.value === 'signup') {
+      const email = await ask('email address', '');
+      if (!email) {
+        console.log('  no email — skipping. run `kolm signup --email <you>` later.');
+        return { ok: true };
+      }
+      return await maybeRun('kolm signup --email ' + email, { confirm: false });
+    }
+    console.log('  staying anonymous. some hosted features will be unavailable.');
+    return { ok: true };
+  }
+
+  // ---------- wrapper path ----------
+  async function runWrapperPath() {
+    console.log('');
+    console.log('  path: wrapper — localhost proxy + named capture profile');
+    console.log('  ----------------------------------------------------------');
+
+    console.log('');
+    console.log('  [1/8] check your environment');
+    console.log('        kolm doctor probes node/python/cc/rustc/git + your tenant key reachability.');
+    await maybeRun('kolm doctor');
+
+    console.log('');
+    console.log('  [2/8] sign in');
+    await authStep();
+
+    console.log('');
+    console.log('  [3/8] pick an upstream');
+    const provider = await pickMenu(
+      'which upstream do you want to proxy?',
+      [
+        { value: 'openai',     label: 'openai',     hint: 'GPT-5 / GPT-4o / o3-mini (api.openai.com)' },
+        { value: 'anthropic',  label: 'anthropic',  hint: 'Claude Opus/Sonnet/Haiku (api.anthropic.com)' },
+        { value: 'openrouter', label: 'openrouter', hint: '200+ models behind one URL (openrouter.ai)' },
+        { value: 'together',   label: 'together',   hint: 'open-weight inference (api.together.xyz)' },
+        { value: 'fireworks',  label: 'fireworks',  hint: 'open-weight inference (api.fireworks.ai)' },
+        { value: 'vllm',       label: 'vllm',       hint: 'self-hosted vLLM (you set --upstream)' },
+        { value: 'generic',    label: 'generic',    hint: 'any HTTP backend (you set --upstream)' },
+      ],
+      0,
+    );
+
+    console.log('');
+    console.log('  [4/8] pick a port');
+    const portRaw = await ask('proxy port', '7403');
+    const port = String(parseInt(portRaw, 10) || 7403);
+
+    console.log('');
+    console.log('  [5/8] pick a capture namespace');
+    console.log('        the namespace partitions captures so you can train per-team or per-task.');
+    const namespace = await ask('namespace slug (lowercase, hyphenated)', 'default');
+
+    console.log('');
+    console.log('  [6/8] name this capture profile');
+    console.log('        used as the filename under ~/.kolm/capture/<task>.json.');
+    const task = await ask('task name', provider.value + '-' + namespace);
+
+    console.log('');
+    console.log('  [7/8] start the proxy + register the capture profile');
+    console.log('        three commands:');
+    console.log('          a) spawn the proxy daemon');
+    console.log('          b) write the capture profile so SDK calls land in your namespace');
+    console.log('          c) print a paste-ready env snippet your client can source');
+    await maybeRun('kolm proxy start --port ' + port);
+    await maybeRun('kolm capture --provider ' + provider.value + ' --as ' + task + ' --namespace ' + namespace, { confirm: false });
+    await maybeRun('kolm proxy config --sdk=' + provider.value + ' --lang=env --port=' + port + ' --namespace=' + namespace, { confirm: false });
+    await maybeRun('kolm capture status --namespace ' + namespace, { confirm: false });
+
+    console.log('');
+    console.log('  [8/8] distill data source (for when you have captures ready to train on)');
+    console.log('        where will the training pairs come from?');
+    const dataSrc = await pickMenu(
+      'data source for `kolm distill`:',
+      [
+        { value: 'captures', label: 'captures',     hint: 'use the namespace we just set up — pairs flow in as your client makes calls' },
+        { value: 'jsonl',    label: 'jsonl on disk', hint: 'point at an existing seeds.jsonl file (we will validate the path)' },
+        { value: 'brief',    label: 'brief',         hint: 'scaffold candidate seeds from a free-text brief (runs `kolm seeds new "..."`)' },
+        { value: 'template', label: 'template',      hint: 'starter template (phi-redactor / ticket-classifier / invoice-extractor / generic)' },
+        { value: 'skip',     label: 'skip',          hint: 'print the command and exit — come back later' },
+      ],
+      0,
+    );
+
+    let distillCmd = null;
+    if (dataSrc.value === 'captures') {
+      distillCmd = 'kolm distill --namespace ' + namespace;
+      console.log('');
+      console.log('  run this once you have ~100 captures in `' + namespace + '`:');
+      console.log('  $ ' + distillCmd);
+    } else if (dataSrc.value === 'jsonl') {
+      console.log('');
+      console.log('  need: a seeds.jsonl file (one {"input":..., "output":...} per line)');
+      const seedsPath = await inputPath('path to seeds.jsonl (must exist)', true);
+      if (seedsPath) {
+        console.log('  optional: a spec.yaml describing the task — press Enter to skip');
+        const specPath = await inputPath('path to spec.yaml', false);
+        const outDir = await ask('output dir', './.kolm/distill-out');
+        const specPart = specPath ? ' --spec ' + specPath : '';
+        distillCmd = 'kolm distill --local-worker --seeds ' + seedsPath + specPart + ' --out ' + outDir;
+        await maybeRun(distillCmd);
+      } else {
+        console.log('  no path supplied — skipping. you can run `kolm distill --local-worker --help` later.');
+      }
+    } else if (dataSrc.value === 'brief') {
+      console.log('');
+      console.log('  scaffold candidate seeds from a free-text brief.');
+      const brief = await ask('describe the task in one sentence', 'classify support tickets into 5 buckets');
+      const count = await ask('how many candidate seeds?', '12');
+      const outPath = await ask('output JSONL path', './seeds.jsonl');
+      const safeBrief = brief.replace(/"/g, '\\"');
+      const seedCmd = 'kolm seeds new "' + safeBrief + '" --count ' + count + ' --out ' + outPath;
+      await maybeRun(seedCmd);
+      distillCmd = 'kolm distill --local-worker --seeds ' + outPath + ' --out ./.kolm/distill-out';
+      console.log('');
+      console.log('  then to train:');
+      console.log('  $ ' + distillCmd);
+    } else if (dataSrc.value === 'template') {
+      const tpl = await pickMenu(
+        'pick a starter template:',
+        [
+          { value: 'phi-redactor',      label: 'phi-redactor',      hint: 'HIPAA Safe Harbor PII scrubber' },
+          { value: 'ticket-classifier', label: 'ticket-classifier', hint: 'support ticket triage into N buckets' },
+          { value: 'invoice-extractor', label: 'invoice-extractor', hint: 'pull line items + totals from invoice PDFs' },
+          { value: 'generic',           label: 'generic',           hint: 'minimal scaffold to edit by hand' },
+        ],
+        0,
+      );
+      const outPath = await ask('output JSONL path', './seeds.jsonl');
+      await maybeRun('kolm seeds new ' + tpl.value + ' --out ' + outPath);
+      distillCmd = 'kolm distill --local-worker --seeds ' + outPath + ' --out ./.kolm/distill-out';
+      console.log('');
+      console.log('  then to train:');
+      console.log('  $ ' + distillCmd);
+    } else {
+      console.log('  skipped. run `kolm distill --help` any time to see the options.');
+    }
+
+    return { path: 'wrapper', provider: provider.value, port, namespace, task, dataSrc: dataSrc.value, distillCmd };
+  }
+
+  // ---------- studio path ----------
+  async function runStudioPath() {
+    console.log('');
+    console.log('  path: studio — browser UI for browse + train + bake-off');
+    console.log('  ----------------------------------------------------------');
+
+    console.log('');
+    console.log('  [1/5] check your environment');
+    await maybeRun('kolm doctor');
+
+    console.log('');
+    console.log('  [2/5] sign in');
+    await authStep();
+
+    console.log('');
+    console.log('  [3/5] open the studio');
+    const host = await pickMenu(
+      'which studio do you want to open?',
+      [
+        { value: 'https://kolm.ai/studio',        label: 'hosted',     hint: 'kolm.ai/studio (latest build, hosted)' },
+        { value: 'http://localhost:7401/studio',  label: 'local',      hint: 'localhost:7401/studio (requires `kolm serve` running)' },
+        { value: 'print',                         label: 'just print', hint: 'do not open a browser, just print the URL' },
+      ],
+      0,
+    );
+    if (host.value === 'print') {
+      console.log('');
+      console.log('  open this in your browser when ready:');
+      console.log('  https://kolm.ai/studio');
+    } else {
+      const url = host.value;
+      const opener = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open';
+      console.log('');
+      console.log('  $ ' + opener + ' ' + url);
+      const go = nonInteractive ? false : await yesNo('open ' + url + ' in your default browser?', true);
+      if (go) {
+        try {
+          const cp = await import('node:child_process');
+          if (process.platform === 'win32') {
+            cp.spawn('cmd', ['/c', 'start', '""', url], { detached: true, stdio: 'ignore' }).unref();
+          } else {
+            cp.spawn(opener, [url], { detached: true, stdio: 'ignore' }).unref();
+          }
+          console.log('  launched.');
+        } catch (e) {
+          console.log('  could not launch a browser: ' + (e && e.message || e));
+          console.log('  open this manually: ' + url);
+        }
+      }
+    }
+
+    console.log('');
+    console.log('  [4/5] pick a first activity');
+    const activity = await pickMenu(
+      'where to start?',
+      [
+        { value: 'hub',     label: 'browse the hub', hint: 'list curated + user-published artifacts (`kolm hub list --limit 8`)' },
+        { value: 'bakeoff', label: 'run a bake-off', hint: 'score multiple models on one dataset (`kolm bakeoff ... --stub-model`)' },
+        { value: 'whoami',  label: 'check tenant',   hint: 'echo tenant + plan + namespace (`kolm whoami`)' },
+      ],
+      0,
+    );
+    let activityCmd = null;
+    if (activity.value === 'hub') {
+      activityCmd = 'kolm hub list --limit 8';
+      await maybeRun(activityCmd, { confirm: false });
+    } else if (activity.value === 'bakeoff') {
+      const ds = await ask('dataset id or path to seeds.jsonl', 'ds_demo_summarize');
+      activityCmd = 'kolm bakeoff ' + ds + ' --stub-model';
+      await maybeRun(activityCmd, { confirm: false });
+    } else {
+      activityCmd = 'kolm whoami';
+      await maybeRun(activityCmd, { confirm: false });
+    }
+
+    console.log('');
+    console.log('  [5/5] confirm your studio session');
+    await maybeRun('kolm whoami', { confirm: false });
+
+    return { path: 'studio', host: host.value, activity: activity.value, activityCmd };
+  }
+
+  // ---------- main ----------
+  header();
+  const picked = await pickPath();
+  let summary;
+  if (picked === 'studio') summary = await runStudioPath();
+  else summary = await runWrapperPath();
+
+  console.log('');
+  console.log('  -----------------------------------------------------------');
+  console.log('  quickstart finished — path=' + picked);
+  if (picked === 'wrapper') {
+    console.log('  next:    kolm capture status        watch traffic flow');
+    console.log('           kolm distill --help        when captures are ready');
+    console.log('           kolm verify <artifact>     cryptographic receipt');
+    console.log('           kolm proxy stop            stop the local proxy');
+  } else {
+    console.log('  next:    kolm hub list              browse the catalog');
+    console.log('           kolm bakeoff --help        compare models');
+    console.log('           kolm chat-tui              terminal chat UI');
+  }
+  console.log('  docs:    https://kolm.ai/' + picked);
+  console.log('  -----------------------------------------------------------');
+
+  if (jsonMode) {
+    process.stdout.write(JSON.stringify({ ok: true, path: picked, summary }, null, 2) + '\n');
+  }
+  wizardClose();
+  process.exit(EXIT.OK);
+}
+
 async function cmdChat(args) {
   args = args || [];
   if (args.indexOf('--help') >= 0 || args.indexOf('-h') >= 0) {
@@ -24294,6 +24843,9 @@ const COMPLETION_VERBS = [
   'plugin',
   // W731/W733/W735/W736/W835/W739 — completion entries for verbs already in dispatch.
   'vscode', 'otel', 'tool', 'guardrails', 'savings', 'lineage',
+  // W848 — interactive setup wizard: `kolm quickstart` picks wrapper or studio
+  // and walks the user through the 4-5 setup steps with confirm-or-skip prompts.
+  'quickstart',
 ];
 const COMPLETION_SUBS = {
   auditor: ['keygen', 'sign', 'verify'],
@@ -24317,6 +24869,9 @@ const COMPLETION_SUBS = {
   bench: ['evidence', 'mmlu', 'humaneval', 'mtbench', 'speculative'],
   benchmark: ['evidence', 'mmlu', 'humaneval', 'mtbench', 'speculative'],
   packages: ['release-readiness', 'release', 'readiness'],
+  // W848 — `kolm quickstart` accepts a path picker so power users can skip
+  // the menu: `kolm quickstart wrapper` or `kolm quickstart studio`.
+  quickstart: ['wrapper', 'studio'],
   package: ['release-readiness', 'release', 'readiness'],
   namespace: ['fingerprint', 'warm-start-suggest', 'verticals'],
   ns: ['fingerprint', 'warm-start-suggest', 'verticals'],
@@ -36961,6 +37516,12 @@ async function main() {
       case 'ask':
       case 'intent':   await withErrorContext('ask',      () => cmdAsk(rest)); break;
       case 'chat':     await withErrorContext('chat',     () => cmdChat(rest)); break;
+      // W848 — guided setup wizard. Defaults to a wrapper/studio picker if no
+      // arg is given; `kolm quickstart wrapper` and `kolm quickstart studio`
+      // jump straight into the chosen path.
+      case 'quickstart':
+      case 'wizard':
+      case 'setup':    await withErrorContext('quickstart', () => cmdQuickstart(rest)); break;
       case 'chat-tui': await withErrorContext('chat-tui', () => cmdChatTui(rest)); break;
       case 'completion': await withErrorContext('completion', () => cmdCompletion(rest)); break;
       case 'upgrade':  await withErrorContext('upgrade',  () => cmdUpgrade(rest)); break;

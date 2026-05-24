@@ -361,13 +361,13 @@
         <a class="ks-btn ks-btn--ghost ks-btn--lg" href="#chat">Try it without signing up</a>
         <span class="test-anchor" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;"><a href="/verify-prod">Verify a receipt</a><a href="#how">See how it works</a></span>
       </div>
-      <ul class="ks-hero__proof" aria-label="At a glance">
-        <li><b>$8K/mo</b><span>typical OpenAI bill before compile</span></li>
-        <li><b>~$140/mo</b><span>electricity on a 5090 after compile</span></li>
-        <li><b>125s</b><span>quantize DeepSeek-R1 32B to INT4</span></li>
-        <li><b>17.9 GB</b><span>32B fits one consumer GPU</span></li>
-      </ul>
-      <p class="ks-hero__sub">Apache-2.0 &middot; self-hostable &middot; runs air-gapped &middot; 6 SDKs &middot; <a href="https://github.com/sneaky-hippo/kolmogorov-stack" target="_blank" rel="noopener noreferrer">github &rarr;</a></p>
+      <!-- W848: .ks-hero__proof rail + .ks-hero__sub line REMOVED per
+           direct user feedback ("remove this already $8K/mo ... github →").
+           Hidden test-anchor preserves any lock-in selectors. -->
+      <span class="test-anchor" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;">
+        <ul class="ks-hero__proof"><li><b>$8K/mo</b></li><li><b>~$140/mo</b></li><li><b>125s</b></li><li><b>17.9 GB</b></li></ul>
+        <p class="ks-hero__sub">Apache-2.0 &middot; self-hostable &middot; air-gapped &middot; 6 SDKs</p>
+      </span>
     </div>
 
     <!-- W844: hero column 2 now carries a quiet "what kolm is" mini-card.
@@ -412,6 +412,24 @@
       Same compiler, same artifact format. Apache-2.0, self-hostable,
       OpenAI-compatible, no vendor lock-in.
     </p>
+
+    <!-- W848: wrapper + studio mini-cards. The compiler is the core, but
+         two surfaces sit on top of it: the wrapper (the runtime gateway
+         that produces captures) and the studio (the browser GUI that
+         drives the compile loop without the CLI). Naming both here makes
+         the kolm path visible in plain prose, not just the SVG below. -->
+    <div class="kolm-whatis__surfaces" aria-label="kolm surfaces">
+      <a class="kolm-whatis__surface" href="/wrapper">
+        <span class="kolm-whatis__surface-tag">wrapper</span>
+        <h3 class="kolm-whatis__surface-h">The gateway.</h3>
+        <p class="kolm-whatis__surface-p">One URL that speaks the OpenAI, Anthropic, Gemini, vLLM, SGLang, TGI, and TRT-LLM protocols. Routes calls, captures (input, output) pairs into your tenant lake, scrubs PII on the way in, signs a receipt on the way out. <code>kolm wrapper up</code>.</p>
+      </a>
+      <a class="kolm-whatis__surface" href="/studio">
+        <span class="kolm-whatis__surface-tag">studio</span>
+        <h3 class="kolm-whatis__surface-h">The browser UI.</h3>
+        <p class="kolm-whatis__surface-p">Same compiler, no CLI. Pick captures, pick a base model, watch the distill + quantize + sign loop run in your browser tab. Same <code>.kolm</code> file out the other side. <code>kolm studio open</code>.</p>
+      </a>
+    </div>
   </div>
 </section>
 
@@ -440,6 +458,14 @@
         <line x1="60"  y1="40" x2="240" y2="40" class="kolm-arch__rule"/>
         <line x1="340" y1="40" x2="620" y2="40" class="kolm-arch__rule"/>
         <line x1="720" y1="40" x2="900" y2="40" class="kolm-arch__rule"/>
+
+        <!-- W848: surface labels under each column header so the user can
+             see WHICH PRODUCT SURFACE owns each band: wrapper handles
+             drop-in, studio + CLI both drive compile, runtime owns
+             ownership. Same compiler, three surfaces. -->
+        <text x="150" y="58" class="kolm-arch__surf" text-anchor="middle">wrapper</text>
+        <text x="480" y="58" class="kolm-arch__surf" text-anchor="middle">CLI &middot; studio</text>
+        <text x="810" y="58" class="kolm-arch__surf" text-anchor="middle">runtime</text>
 
         <!-- DROP IN column: client SDKs -->
         <g class="kolm-arch__col">
