@@ -16624,5 +16624,443 @@ res.json({
     }
   });
 
+  // W761 — Model Poisoning Anomaly Detection routes. Distinct-named handlers so
+  // parallel wave agents on W760 + W762..W765 do not collide on the suffix.
+  // Builds on W808 capture-anomaly + W750-followup copyright-detector + the
+  // W761-3 teacher-response HMAC primitive.
+  r.post('/v1/poisoning/bind-teacher', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const body = req.body || {};
+      if (body.confirm !== true) {
+        return res.status(400).json({
+          ok: false,
+          error: 'confirm_required',
+          hint: 'pass {confirm:true} to bind a teacher response — the binding is a load-bearing security artifact, opt-in by design',
+          version: 'w761-v1',
+        });
+      }
+      const { bindTeacherResponse } = await import('./teacher-response-hmac.js');
+      const env = bindTeacherResponse({
+        teacher_id: body.teacher_id,
+        request_hash: body.request_hash,
+        response_body: body.response_body,
+        response_headers: body.response_headers,
+        timestamp_ms: body.timestamp_ms,
+      });
+      // Honest envelopes for missing/short key — surface as 200 (the route
+      // itself succeeded; the operator gets the error tag in the body).
+      return res.status(200).json(env);
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: 'poisoning_bind_error', detail: e && e.message });
+    }
+  });
+
+  r.post('/v1/poisoning/verify-binding', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const body = req.body || {};
+      const { verifyTeacherResponse } = await import('./teacher-response-hmac.js');
+      const env = verifyTeacherResponse({
+        binding: body.binding,
+        response_body: body.response_body,
+      });
+      return res.status(200).json(env);
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: 'poisoning_verify_error', detail: e && e.message });
+    }
+  });
+
+  r.get('/v1/poisoning/namespace-risk/:namespace', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const { assessNamespacePoisoningRisk } = await import('./poisoning-orchestrator.js');
+      const namespace = String(req.params.namespace || 'default').slice(0, 128);
+      const sample_n = Math.max(1, Math.min(1000,
+        Math.trunc(Number((req.query && req.query.sample_n) || 100))));
+      const env = await assessNamespacePoisoningRisk({
+        tenant_id: req.tenant_record.id,
+        namespace,
+        sample_n,
+      });
+      return res.status(200).json(env);
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: 'poisoning_namespace_risk_error', detail: e && e.message });
+    }
+  });
+
+  r.post('/v1/poisoning/quarantine', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const body = req.body || {};
+      if (body.confirm !== true) {
+        return res.status(400).json({
+          ok: false,
+          error: 'confirm_required',
+          hint: 'pass {confirm:true} to record a quarantine — irreversible audit-trail mutation',
+          version: 'w761-v1',
+        });
+      }
+      const { quarantineCapture } = await import('./poisoning-orchestrator.js');
+      const env = await quarantineCapture({
+        tenant_id: req.tenant_record.id,
+        capture_id: body.capture_id,
+        reason: body.reason,
+        evidence: body.evidence,
+      });
+      return res.status(200).json(env);
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: 'poisoning_quarantine_error', detail: e && e.message });
+    }
+  });
+
+  // ============== W762 — Adversarial Red-Team Framework ==============
+  // POST /v1/redteam/classify          — heuristic classifier over body.text
+  // POST /v1/redteam/generate-corpus   — deterministic adversarial prompt corpus
+  // POST /v1/redteam/bakeoff           — adversarial robustness bake-off
+  // POST /v1/redteam/sanitize          — runtime sanitizer (block/redact/fallback/passthrough)
+  //
+  // Honesty contract:
+  //   * Heuristic-only classification is NEVER claimed as production-grade.
+  //   * /bakeoff runs honest envelope (`runtime_not_wired`) because the
+  //     hosted route has no DI seam — production wires runOnArtifact via
+  //     a separate worker; the public route returns the corpus shape so
+  //     operators can verify the contract.
+  //   * /sanitize with policy=fallback_to_teacher returns
+  //     `no_fallback_handler_configured` — the hosted route has no
+  //     teacher handler injected.
+  //   * generate-corpus + bakeoff are confirm-gated because they emit
+  //     attack-framing patterns + dispatch a multi-run loop respectively.
+  r.post('/v1/redteam/classify', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const { classifyPromptAdversarial } = await import('./adversarial-prompts.js');
+      const body = req.body || {};
+      const text = typeof body.text === 'string' ? body.text : '';
+      const env = classifyPromptAdversarial(text);
+      return res.status(200).json(env);
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: 'redteam_classify_error', detail: e && e.message });
+    }
+  });
+
+  r.post('/v1/redteam/generate-corpus', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const body = req.body || {};
+      if (body.confirm !== true) {
+        return res.status(400).json({
+          ok: false,
+          error: 'confirm_required',
+          hint: 'pass {confirm:true} — corpus emits attack-framing patterns intended for red-team use only',
+          version: 'w762-v1',
+        });
+      }
+      const { generateAdversarialPrompts, ADVERSARIAL_PROMPTS_VERSION } = await import('./adversarial-prompts.js');
+      const categories = Array.isArray(body.categories) ? body.categories : null;
+      const n_per_category = Number.isFinite(Number(body.n_per_category))
+        ? Math.max(1, Math.min(50, Math.trunc(Number(body.n_per_category))))
+        : 5;
+      const seed = body.seed == null ? null : body.seed;
+      const prompts = generateAdversarialPrompts({ categories, n_per_category, seed });
+      return res.status(200).json({
+        ok: true,
+        version: ADVERSARIAL_PROMPTS_VERSION,
+        n_total: prompts.length,
+        prompts,
+      });
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: 'redteam_generate_error', detail: e && e.message });
+    }
+  });
+
+  r.post('/v1/redteam/bakeoff', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const body = req.body || {};
+      if (body.confirm !== true) {
+        return res.status(400).json({
+          ok: false,
+          error: 'confirm_required',
+          hint: 'pass {confirm:true} — bake-off dispatches an N-per-category prompt loop',
+          version: 'w762-v1',
+        });
+      }
+      const { runAdversarialBakeoff, ADVERSARIAL_BAKEOFF_VERSION } = await import('./adversarial-bakeoff.js');
+      const n_per_category = Number.isFinite(Number(body.n_per_category))
+        ? Math.max(1, Math.min(50, Math.trunc(Number(body.n_per_category))))
+        : 5;
+      // Hosted route has NO runOnArtifact wired by default — honest
+      // envelope. Production wires runOnArtifact via req.app.locals
+      // (DI seam used by tests / self-hosted operators).
+      let runOnArtifact = null;
+      try { runOnArtifact = req.app && req.app.locals && req.app.locals._w762_run_on_artifact; } catch (_) {}
+      let judge = null;
+      try { judge = req.app && req.app.locals && req.app.locals._w762_judge; } catch (_) {}
+      const env = await runAdversarialBakeoff({
+        artifact_path: body.artifact_path,
+        n_per_category,
+        runOnArtifact,
+        judge,
+      });
+      return res.status(200).json({ ...env, bakeoff_version: ADVERSARIAL_BAKEOFF_VERSION });
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: 'redteam_bakeoff_error', detail: e && e.message });
+    }
+  });
+
+  r.post('/v1/redteam/sanitize', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const { sanitizeInput, SANITIZER_VERSION, DEFAULT_POLICY } = await import('./runtime-sanitizer.js');
+      const body = req.body || {};
+      const text = typeof body.text === 'string' ? body.text : '';
+      const policy = typeof body.policy === 'string' ? body.policy : DEFAULT_POLICY;
+      // Hosted route has NO fallback handler wired — honest envelope
+      // when policy is fallback_to_teacher.
+      let fallback_handler = null;
+      try { fallback_handler = req.app && req.app.locals && req.app.locals._w762_fallback_handler; } catch (_) {}
+      const env = await sanitizeInput({ text, policy, fallback_handler });
+      return res.status(200).json({ ...env, sanitizer_version: SANITIZER_VERSION });
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: 'redteam_sanitize_error', detail: e && e.message });
+    }
+  });
+
+  // ============== W765: prompt-extraction defense surface ============
+  // POST /v1/pextract/redact-prompt    — build-time system-prompt redaction
+  // POST /v1/pextract/detect-attempt   — pure detector, returns is_extraction_attempt
+  // POST /v1/pextract/guard-request    — detect + policy decision wrapper
+  //
+  // Defense layering with W762 is intentional. W762's
+  // classifyPromptAdversarial covers a broader red-team taxonomy;
+  // W765 is the system-prompt-extraction-specific guard. Overlapping
+  // matches (e.g. "ignore previous instructions") are correct, not a
+  // bug — defense in depth is the point.
+  r.post('/v1/pextract/redact-prompt', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const body = req.body || {};
+      if (body.confirm !== true) {
+        return res.status(400).json({
+          ok: false,
+          error: 'confirm_required',
+          hint: 'pass {confirm:true} to acknowledge the redaction modifies the prompt.',
+          version: 'w765-v1',
+        });
+      }
+      const { redactSystemPrompt } = await import('./prompt-redactor.js');
+      const env = redactSystemPrompt({
+        system_prompt: body.system_prompt,
+        strategy: body.strategy,
+        allow_list: body.allow_list,
+      });
+      return res.status(200).json(env);
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: 'pextract_redact_error', detail: e && e.message });
+    }
+  });
+
+  r.post('/v1/pextract/detect-attempt', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const body = req.body || {};
+      const text = typeof body.text === 'string' ? body.text : '';
+      const { detectExtractionAttempt } = await import('./extraction-guard.js');
+      return res.status(200).json(detectExtractionAttempt(text));
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: 'pextract_detect_error', detail: e && e.message });
+    }
+  });
+
+  r.post('/v1/pextract/guard-request', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const body = req.body || {};
+      const { guardRuntimeRequest } = await import('./extraction-guard.js');
+      const env = guardRuntimeRequest({
+        request_text: body.request_text,
+        policy: body.policy,
+      });
+      return res.status(200).json(env);
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: 'pextract_guard_error', detail: e && e.message });
+    }
+  });
+
+  // ============== W764 — Membership inference + PII scanning + capture forget ==============
+  //
+  // Four routes:
+  //   POST /v1/mit/run          — auth + confirm; honest runtime_not_wired
+  //                               envelope until W775 wires runOnArtifact.
+  //   POST /v1/mit/scan-pii     — auth; pure-text PII scan, no runtime needed.
+  //   POST /v1/captures/forget  — auth + confirm; writes durable audit-trailed
+  //                               forget marker; idempotent on (tenant,capture).
+  //   GET  /v1/captures/forgotten — auth; lists this tenant's forget markers
+  //                                 (optional ?namespace=ns).
+  //
+  // Honesty contract:
+  //   * The MIT route NEVER fabricates an extraction rate — it returns the
+  //     module's honest runtime_not_wired envelope so callers know exactly
+  //     which seam needs to be supplied.
+  //   * The forget route ALWAYS writes the audit event before returning ok.
+  //     Idempotency is checked inside src/capture-forget.js (existing marker
+  //     returns the original audit_event_id without writing a second row).
+  //   * Tenant fence everywhere: every read/write is keyed on
+  //     req.tenant_record.id; defense-in-depth lives inside capture-forget.js.
+  r.post('/v1/mit/run', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const body = req.body || {};
+    if (body.confirm !== true) {
+      return res.status(400).json({
+        ok: false,
+        error: 'confirm_required',
+        hint: 'send {"confirm": true} in body — a real MIT run is expensive (probe queries per capture).',
+      });
+    }
+    try {
+      const mod = await import('./membership-inference-test.js');
+      // No runtime adapter is wired yet (W775 territory). The route surfaces
+      // the harness's honest runtime_not_wired envelope verbatim — status
+      // stays 200 because the route succeeded; the FEATURE is what's not wired.
+      const result = await mod.runMembershipInferenceTest({
+        artifact_path: typeof body.artifact_path === 'string' ? body.artifact_path : null,
+        captures: Array.isArray(body.captures) ? body.captures : null,
+        attack_kinds: Array.isArray(body.attack_kinds) ? body.attack_kinds : null,
+        jaccard_threshold: Number.isFinite(Number(body.jaccard_threshold))
+          ? Number(body.jaccard_threshold)
+          : 0.85,
+        runOnArtifact: null,
+      });
+      res.json(result);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'mit_run_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  r.post('/v1/mit/scan-pii', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./pii-bakeoff-scan.js');
+      const body = req.body || {};
+      const text = typeof body.text === 'string' ? body.text : '';
+      const result = mod.scanForPII(text);
+      res.json(result);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'pii_scan_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  r.post('/v1/captures/forget', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const body = req.body || {};
+    if (body.confirm !== true) {
+      return res.status(400).json({
+        ok: false,
+        error: 'confirm_required',
+        hint: 'send {"confirm": true} in body — forgetting a capture writes a durable audit event and excludes the row from future distill builds.',
+      });
+    }
+    try {
+      const mod = await import('./capture-forget.js');
+      const tenant_id = req.tenant_record.id;
+      const requested_by = req.tenant_record.email || req.tenant_record.name || null;
+      const result = await mod.markCaptureForgotten({
+        tenant_id,
+        capture_id: typeof body.capture_id === 'string' ? body.capture_id : null,
+        reason: typeof body.reason === 'string' ? body.reason : null,
+        requested_by,
+        namespace: typeof body.namespace === 'string' ? body.namespace : null,
+      });
+      const status = result.ok ? 200 : 400;
+      res.status(status).json(result);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'capture_forget_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  r.get('/v1/captures/forgotten', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./capture-forget.js');
+      const tenant_id = req.tenant_record.id;
+      // Accept namespace via query string OR body (tests sometimes send body
+      // on GET; both shapes are accepted to keep the surface forgiving).
+      const queryNs = req.query && typeof req.query.namespace === 'string' ? req.query.namespace : null;
+      const bodyNs = req.body && typeof req.body.namespace === 'string' ? req.body.namespace : null;
+      const namespace = queryNs || bodyNs || null;
+      const result = await mod.listForgottenCaptures({ tenant_id, namespace });
+      res.json(result);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'captures_forgotten_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // =====================================================================
+  // W763 — SBOM + supply-chain pinning.
+  //
+  //   POST /v1/sbom/emit    AUTH+confirm  emit SBOM from a kolm manifest
+  //   GET  /v1/sbom/repo    AUTH          emit SBOM of the running install
+  //   POST /v1/sbom/verify  AUTH          static-shape validate an SBOM
+  //
+  // Honest envelopes everywhere. version stamp matches /^w763-/ — callers
+  // MUST regex-match (W604 anti-brittleness). The SBOM is a SIBLING export,
+  // not woven into artifact-hash (deliberately: an artifact-hash that
+  // included its SBOM would change every time we re-emit and break receipts).
+  //
+  // POST /v1/sbom/emit is confirm-gated to match the W411 spend-protection
+  // pattern (matches the W759 numeric/eval + W760 augment routes). The
+  // confirm flag is honored on emit only; repo + verify are read-only.
+  //
+  // The route imports lazily so the SBOM module isn't paid for on cold
+  // daemons that never call it.
+  // =====================================================================
+  r.post('/v1/sbom/emit', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const body = req.body || {};
+    if (body.confirm !== true) {
+      return res.status(400).json({
+        ok: false,
+        error: 'confirm_required',
+        hint: 'send {"confirm": true} alongside {manifest, format?} — SBOM emit reads files; explicit ack required.',
+      });
+    }
+    try {
+      const mod = await import('./sbom-emit.js');
+      const result = mod.emitSbomFromManifest({
+        manifest: body.manifest,
+        format: typeof body.format === 'string' ? body.format : undefined,
+      });
+      return res.json(result);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'sbom_emit_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  r.get('/v1/sbom/repo', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./sbom-emit.js');
+      const lockPath = path.join(process.cwd(), 'package-lock.json');
+      const format = typeof req.query.format === 'string' ? req.query.format : undefined;
+      const result = mod.emitSbomFromPackageLock({ lock_path: lockPath, format });
+      return res.json(result);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'sbom_repo_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  r.post('/v1/sbom/verify', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const body = req.body || {};
+      const mod = await import('./sbom-emit.js');
+      const result = mod.verifySbomShape(body.sbom);
+      return res.json(result);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'sbom_verify_error', detail: String(e && e.message || e) });
+    }
+  });
+
   return r;
 }

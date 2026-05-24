@@ -23158,6 +23158,34 @@ COMPLETION_VERBS.push('numeric', 'num');
 COMPLETION_SUBS.numeric = ['eval', 'calc', 'flag-namespace'];
 COMPLETION_SUBS.num     = ['eval', 'calc', 'flag-namespace'];
 
+// W761 — Model Poisoning Anomaly Detection. `kolm poison <bind|verify|
+// namespace-risk|quarantine>`. Distinct-named dispatcher cmdW761Poison so
+// parallel W762..W765 wave agents cannot collide on this symbol.
+COMPLETION_VERBS.push('poison');
+COMPLETION_SUBS.poison = ['bind', 'verify', 'namespace-risk', 'quarantine'];
+
+// W762 — Adversarial Red-Team Framework. `kolm redteam <classify|generate|
+// bakeoff|sanitize>` (short alias `rt`). Distinct-named dispatcher
+// cmdW762Redteam so parallel W761/W763/W764/W765 wave agents cannot
+// collide on this symbol.
+COMPLETION_VERBS.push('redteam', 'rt');
+COMPLETION_SUBS.redteam = ['classify', 'generate', 'bakeoff', 'sanitize'];
+COMPLETION_SUBS.rt      = ['classify', 'generate', 'bakeoff', 'sanitize'];
+
+// W765 — Prompt-Extraction Defense. `kolm pextract <redact|detect|guard>`
+// (short alias `px`). Distinct-named dispatcher cmdW765Pextract so
+// parallel W761/W762/W763/W764 wave agents cannot collide on this
+// symbol.
+COMPLETION_VERBS.push('pextract', 'px');
+COMPLETION_SUBS.pextract = ['redact', 'detect', 'guard'];
+COMPLETION_SUBS.px       = ['redact', 'detect', 'guard'];
+
+// W763 — SBOM + supply-chain pinning. `kolm sbom <emit|repo|verify>`.
+// Distinct-named dispatcher cmdW763Sbom so parallel W761/W762/W764/W765
+// wave agents cannot collide on this symbol.
+COMPLETION_VERBS.push('sbom');
+COMPLETION_SUBS.sbom = ['emit', 'repo', 'verify'];
+
 function emitBashCompletion() {
     const verbs = COMPLETION_VERBS.join(' ');
     const subLines = Object.entries(COMPLETION_SUBS)
@@ -35167,6 +35195,35 @@ async function main() {
       // Distinct-named (cmdW760Lang) so parallel W756/W757/W758/W759
       // wave agents cannot collide on this symbol.
       case 'lang':     await withErrorContext('lang',      () => cmdW760Lang(rest)); break;
+      // W761 — `kolm poison <bind|verify|namespace-risk|quarantine>` routes
+      // the model-poisoning orchestrator. Distinct-named (cmdW761Poison) so
+      // parallel W762..W765 wave agents cannot collide on this symbol.
+      case 'poison':   await withErrorContext('poison',    () => cmdW761Poison(rest)); break;
+      // W762 — `kolm redteam <classify|generate|bakeoff|sanitize>` routes the
+      // adversarial red-team framework. Distinct-named (cmdW762Redteam) so
+      // parallel W761/W763/W764/W765 wave agents cannot collide on this
+      // symbol. `rt` is the short alias dispatched from the same case arm.
+      case 'redteam':
+      case 'rt':       await withErrorContext('redteam',   () => cmdW762Redteam(rest)); break;
+      // W764 — `kolm forget <--capture-id ID|list>` AND `kolm mit <run|scan-pii>`
+      // route the membership-inference test harness + capture-forget mechanism.
+      // Distinct-named (cmdW764Mit) so parallel W761/W762/W763/W765 wave agents
+      // cannot collide on this symbol. Two top-level verbs share the same
+      // dispatcher: `forget` is the W764-3 right-to-erasure surface; `mit`
+      // is the W764-1 + W764-2 attack-harness/PII-scan surface.
+      case 'forget':
+      case 'mit':      await withErrorContext('mit',       () => cmdW764Mit([cmd, ...rest])); break;
+      // W765 — `kolm pextract <redact|detect|guard>` routes the
+      // prompt-extraction defense dispatcher. Distinct-named
+      // (cmdW765Pextract) so parallel W761/W762/W763/W764 wave agents
+      // cannot collide on this symbol. `px` is the short alias
+      // dispatched from the same case arm.
+      case 'pextract':
+      case 'px':       await withErrorContext('pextract',  () => cmdW765Pextract(rest)); break;
+      // W763 — `kolm sbom <emit|repo|verify>` routes the SBOM (CycloneDX +
+      // SPDX) emitter + verifier. Distinct-named (cmdW763Sbom) so parallel
+      // W761/W762/W764/W765 wave agents cannot collide on this symbol.
+      case 'sbom':     await withErrorContext('sbom',      () => cmdW763Sbom(rest)); break;
       case 'agents':     await withErrorContext('agents',     () => cmdAgents(rest)); break;
       case 'shell-init': await withErrorContext('shell-init', () => cmdShellInit(rest)); break;
       case '--version':
@@ -36190,5 +36247,1060 @@ async function cmdW760Lang(args) {
   console.error('  augment --namespace ns --target-langs es,fr,de [--confirm] [--dry-run]');
   process.exit(EXIT.BAD_ARGS);
 }
+
+// =============================================================================
+// W761 — Model Poisoning Anomaly Detection dispatcher.
+// =============================================================================
+//
+// `kolm poison <subcommand>` subcommands:
+//   bind          --teacher T --request-hash H --response-body B
+//                 --timestamp-ms TS --confirm
+//   verify        --binding-file F --response-body B
+//   namespace-risk --namespace ns [--sample-n 100]
+//   quarantine    --capture-id ID --reason R --confirm
+//
+// Distinct-named (cmdW761Poison) so parallel W762..W765 wave agents cannot
+// collide on this symbol. All honest envelopes flow through the same JSON
+// printer the W760 sibling uses.
+async function cmdW761Poison(args) {
+  const sub = (args && args[0]) || '';
+
+  function _envApiKey() {
+    return process.env.KOLM_API_KEY || '';
+  }
+  function _envBase() {
+    return (process.env.KOLM_BASE_URL || 'https://kolm.ai').replace(/\/$/, '');
+  }
+  function _flag(rest, name) {
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--' + name && i + 1 < rest.length) return rest[i + 1];
+      if (typeof rest[i] === 'string' && rest[i].startsWith('--' + name + '=')) {
+        return rest[i].slice(name.length + 3);
+      }
+    }
+    return null;
+  }
+  function _hasFlag(rest, name) {
+    return (rest || []).some((a) => a === '--' + name);
+  }
+  function _print(envelope) {
+    console.log(JSON.stringify(envelope, null, 2));
+  }
+  function _fail(envelope, code = EXIT.EXECUTION) {
+    _print(envelope);
+    process.exit(code);
+  }
+
+  if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
+    console.error('usage: kolm poison <bind|verify|namespace-risk|quarantine> [args]');
+    console.error('  bind           --teacher T --request-hash H --response-body B --timestamp-ms TS --confirm');
+    console.error('  verify         --binding-file F --response-body B');
+    console.error('  namespace-risk --namespace ns [--sample-n 100]');
+    console.error('  quarantine     --capture-id ID --reason R --confirm');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+
+  // -------------------------- subcommand: bind --------------------------------
+  if (sub === 'bind') {
+    const rest = args.slice(1);
+    const teacher_id = _flag(rest, 'teacher') || _flag(rest, 'teacher-id');
+    const request_hash = _flag(rest, 'request-hash');
+    const response_body = _flag(rest, 'response-body');
+    const timestamp_ms_raw = _flag(rest, 'timestamp-ms');
+    const confirm = _hasFlag(rest, 'confirm');
+    if (!teacher_id) {
+      _fail({ ok: false, error: 'missing_teacher', hint: 'pass --teacher <provider:model>', version: 'w761-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    if (!request_hash) {
+      _fail({ ok: false, error: 'missing_request_hash', hint: 'pass --request-hash <sha256-of-canonical-request>', version: 'w761-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    if (response_body == null) {
+      _fail({ ok: false, error: 'missing_response_body', hint: 'pass --response-body <raw body string>', version: 'w761-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    if (!confirm) {
+      _fail({ ok: false, error: 'confirm_required', hint: 'pass --confirm to opt-in to binding (the binding is a load-bearing security artifact)', version: 'w761-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w761-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    const timestamp_ms = timestamp_ms_raw != null ? Number(timestamp_ms_raw) : Date.now();
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/poisoning/bind-teacher', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({ teacher_id, request_hash, response_body, timestamp_ms, confirm: true }),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w761-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // -------------------------- subcommand: verify ------------------------------
+  if (sub === 'verify') {
+    const rest = args.slice(1);
+    const binding_file = _flag(rest, 'binding-file');
+    const response_body = _flag(rest, 'response-body');
+    if (!binding_file) {
+      _fail({ ok: false, error: 'missing_binding_file', hint: 'pass --binding-file <path-to-binding-json>', version: 'w761-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    if (response_body == null) {
+      _fail({ ok: false, error: 'missing_response_body', hint: 'pass --response-body <raw body string>', version: 'w761-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    let binding;
+    try {
+      const raw = fs.readFileSync(binding_file, 'utf8');
+      binding = JSON.parse(raw);
+    } catch (e) {
+      _fail({ ok: false, error: 'binding_file_read_failed', detail: String(e && e.message || e), version: 'w761-v1' });
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w761-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/poisoning/verify-binding', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({ binding, response_body }),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w761-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ----------------------- subcommand: namespace-risk -------------------------
+  if (sub === 'namespace-risk') {
+    const rest = args.slice(1);
+    const namespace = _flag(rest, 'namespace') || (rest[0] && !rest[0].startsWith('--') ? rest[0] : '');
+    const sample_n_raw = _flag(rest, 'sample-n');
+    if (!namespace) {
+      _fail({ ok: false, error: 'missing_namespace', hint: 'pass --namespace <ns>', version: 'w761-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w761-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    const qs = sample_n_raw != null ? ('?sample_n=' + encodeURIComponent(String(sample_n_raw))) : '';
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/poisoning/namespace-risk/' + encodeURIComponent(namespace) + qs, {
+        method: 'GET',
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w761-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // -------------------------- subcommand: quarantine --------------------------
+  if (sub === 'quarantine') {
+    const rest = args.slice(1);
+    const capture_id = _flag(rest, 'capture-id');
+    const reason = _flag(rest, 'reason');
+    const confirm = _hasFlag(rest, 'confirm');
+    if (!capture_id) {
+      _fail({ ok: false, error: 'missing_capture_id', hint: 'pass --capture-id <id>', version: 'w761-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    if (!reason) {
+      _fail({ ok: false, error: 'missing_reason', hint: 'pass --reason <short-tag>', version: 'w761-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    if (!confirm) {
+      _fail({ ok: false, error: 'confirm_required', hint: 'pass --confirm to record the quarantine (irreversible audit-trail mutation)', version: 'w761-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w761-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/poisoning/quarantine', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({ capture_id, reason, confirm: true }),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w761-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  console.error('usage: kolm poison <bind|verify|namespace-risk|quarantine> [args]');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// =============================================================================
+// W762 — `kolm redteam <classify|generate|bakeoff|sanitize>` dispatcher.
+//
+// Distinct-named (cmdW762Redteam) per the W724/.../W761 precedent so parallel
+// wave agents on W761/W763/W764/W765 cannot collide on this symbol. `rt` is
+// the short alias dispatched from the same case arm in main().
+//
+// Subcommands:
+//   classify  --text TEXT
+//   generate  --categories c1,c2 [--n 5] [--seed S]
+//   bakeoff   --artifact PATH [--n 5] --confirm
+//   sanitize  --text TEXT [--policy block|redact|fallback_to_teacher|passthrough]
+async function cmdW762Redteam(args) {
+  args = Array.isArray(args) ? args : [];
+  const sub = (args[0] || '').toLowerCase();
+  if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
+    console.error('usage: kolm redteam <classify|generate|bakeoff|sanitize> [args]');
+    console.error('  classify  --text TEXT                                              — heuristic adversarial classifier');
+    console.error('  generate  --categories c1,c2 [--n 5] [--seed S]                    — deterministic adversarial prompt corpus');
+    console.error('  bakeoff   --artifact PATH [--n 5] --confirm                        — adversarial robustness bake-off');
+    console.error('  sanitize  --text TEXT [--policy block|redact|fallback_to_teacher|passthrough]');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+
+  // ──────────────────────── subcommand: classify ─────────────────────────────
+  if (sub === 'classify') {
+    const rest = args.slice(1);
+    const text = _flag(rest, 'text');
+    if (text == null) {
+      _fail({ ok: false, error: 'text_required', hint: 'pass --text "your text here"', version: 'w762-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w762-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/redteam/classify', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({ text }),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w762-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: generate ─────────────────────────────
+  if (sub === 'generate') {
+    const rest = args.slice(1);
+    const catsRaw = _flag(rest, 'categories');
+    const nRaw = _flag(rest, 'n');
+    const seed = _flag(rest, 'seed');
+    const categories = catsRaw ? String(catsRaw).split(',').map((s) => s.trim()).filter(Boolean) : null;
+    const n_per_category = Number.isFinite(Number(nRaw)) ? Number(nRaw) : 5;
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w762-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/redteam/generate-corpus', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({ categories, n_per_category, seed, confirm: true }),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w762-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: bakeoff ──────────────────────────────
+  if (sub === 'bakeoff') {
+    const rest = args.slice(1);
+    const artifact_path = _flag(rest, 'artifact');
+    const nRaw = _flag(rest, 'n');
+    const confirm = _hasFlag(rest, 'confirm');
+    if (!artifact_path) {
+      _fail({ ok: false, error: 'artifact_required', hint: 'pass --artifact PATH', version: 'w762-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    if (!confirm) {
+      _fail({ ok: false, error: 'confirm_required', hint: 'pass --confirm to dispatch the prompt loop', version: 'w762-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const n_per_category = Number.isFinite(Number(nRaw)) ? Number(nRaw) : 5;
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w762-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/redteam/bakeoff', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({ artifact_path, n_per_category, confirm: true }),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w762-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (body && body.error === 'runtime_not_wired') {
+      _warnStderr('no artifact runtime wired on the hosted endpoint; self-hosted operators inject _w762_run_on_artifact via app.locals.');
+    }
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: sanitize ─────────────────────────────
+  if (sub === 'sanitize') {
+    const rest = args.slice(1);
+    const text = _flag(rest, 'text');
+    const policy = _flag(rest, 'policy') || 'fallback_to_teacher';
+    if (text == null) {
+      _fail({ ok: false, error: 'text_required', hint: 'pass --text "input text"', version: 'w762-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w762-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/redteam/sanitize', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({ text, policy }),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w762-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (body && body.error === 'no_fallback_handler_configured') {
+      _warnStderr('no fallback handler wired on the hosted endpoint; self-hosted operators inject _w762_fallback_handler via app.locals.');
+    }
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  console.error('usage: kolm redteam <classify|generate|bakeoff|sanitize> [args]');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// =============================================================================
+// W765 — Prompt Extraction Defense dispatcher.
+//
+// Distinct-named (cmdW765Pextract) so parallel W761/W762/W763/W764 wave
+// agents cannot collide on this symbol. Routed from main() under
+// `case 'pextract':` / `case 'px':` and from the COMPLETION tables.
+//
+// Subcommands:
+//   kolm pextract redact --system-prompt TEXT [--strategy <s>] --confirm
+//   kolm pextract detect --text TEXT
+//   kolm pextract guard  --text TEXT [--policy <p>]
+//
+// All three thinly wrap the hosted /v1/pextract/* routes so the CLI
+// honors the same auth + confirm contracts as the API surface. Defense
+// layering with W762 is intentional — W762's classifyPromptAdversarial
+// covers a broader red-team taxonomy; W765 is the system-prompt-
+// extraction-specific guard.
+// =============================================================================
+async function cmdW765Pextract(args) {
+  const sub = (args && args[0]) || '';
+
+  function _envApiKey() {
+    return process.env.KOLM_API_KEY || '';
+  }
+  function _envBase() {
+    return (process.env.KOLM_BASE_URL || 'https://kolm.ai').replace(/\/$/, '');
+  }
+  function _flag(rest, name) {
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--' + name && i + 1 < rest.length) return rest[i + 1];
+      if (typeof rest[i] === 'string' && rest[i].startsWith('--' + name + '=')) {
+        return rest[i].slice(name.length + 3);
+      }
+    }
+    return null;
+  }
+  function _hasFlag(rest, name) {
+    return (rest || []).some((a) => a === '--' + name);
+  }
+  function _print(envelope) {
+    console.log(JSON.stringify(envelope, null, 2));
+  }
+  function _fail(envelope, code = EXIT.EXECUTION) {
+    _print(envelope);
+    process.exit(code);
+  }
+
+  if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
+    console.error('usage: kolm pextract <redact|detect|guard> [args]');
+    console.error('  redact --system-prompt TEXT [--strategy placeholder|extract_behavior_only|remove_literal_constraints] --confirm');
+    console.error('  detect --text TEXT');
+    console.error('  guard  --text TEXT [--policy block|log_only|redirect_to_safe_response|log_and_block]');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+
+  // ──────────────────────── subcommand: redact ───────────────────────────────
+  if (sub === 'redact') {
+    const rest = args.slice(1);
+    const system_prompt = _flag(rest, 'system-prompt');
+    const strategy = _flag(rest, 'strategy') || 'extract_behavior_only';
+    const confirm = _hasFlag(rest, 'confirm');
+    if (system_prompt == null) {
+      _fail({
+        ok: false,
+        error: 'system_prompt_required',
+        hint: 'pass --system-prompt "<text>"',
+        version: 'w765-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    if (!confirm) {
+      _fail({
+        ok: false,
+        error: 'confirm_required',
+        hint: 'pass --confirm to acknowledge the redaction modifies the prompt',
+        version: 'w765-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({
+        ok: false,
+        error: 'auth_required',
+        hint: 'set KOLM_API_KEY (kolm signup / kolm login)',
+        version: 'w765-v1',
+      }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/pextract/redact-prompt', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({ system_prompt, strategy, confirm: true }),
+      });
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'network_error',
+        detail: String(e && e.message || e),
+        version: 'w765-v1',
+      });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: detect ───────────────────────────────
+  if (sub === 'detect') {
+    const rest = args.slice(1);
+    const text = _flag(rest, 'text');
+    if (text == null) {
+      _fail({
+        ok: false,
+        error: 'text_required',
+        hint: 'pass --text "<request text>"',
+        version: 'w765-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({
+        ok: false,
+        error: 'auth_required',
+        hint: 'set KOLM_API_KEY (kolm signup / kolm login)',
+        version: 'w765-v1',
+      }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/pextract/detect-attempt', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({ text }),
+      });
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'network_error',
+        detail: String(e && e.message || e),
+        version: 'w765-v1',
+      });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: guard ────────────────────────────────
+  if (sub === 'guard') {
+    const rest = args.slice(1);
+    const request_text = _flag(rest, 'text');
+    const policy = _flag(rest, 'policy') || 'log_and_block';
+    if (request_text == null) {
+      _fail({
+        ok: false,
+        error: 'text_required',
+        hint: 'pass --text "<request text>"',
+        version: 'w765-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({
+        ok: false,
+        error: 'auth_required',
+        hint: 'set KOLM_API_KEY (kolm signup / kolm login)',
+        version: 'w765-v1',
+      }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/pextract/guard-request', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({ request_text, policy }),
+      });
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'network_error',
+        detail: String(e && e.message || e),
+        version: 'w765-v1',
+      });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  console.error('usage: kolm pextract <redact|detect|guard> [args]');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// =============================================================================
+// W763 — SBOM + supply-chain pinning dispatcher.
+//
+//   kolm sbom emit --manifest PATH [--format cyclonedx-json|spdx-json] [--output PATH]
+//   kolm sbom repo [--format cyclonedx-json|spdx-json]
+//   kolm sbom verify --sbom PATH
+//
+// `emit` and `verify` are file-reading and pure-compute respectively;
+// `repo` calls the auth-gated GET /v1/sbom/repo so a CLI user gets the
+// SBOM of the running install. version stamp matches /^w763-/.
+// Distinct-named (cmdW763Sbom) so parallel W761/W762/W764/W765 wave
+// agents cannot collide on this symbol.
+// =============================================================================
+async function cmdW763Sbom(args) {
+  const sub = (args && args[0]) || '';
+
+  function _envApiKey() {
+    return process.env.KOLM_API_KEY || '';
+  }
+  function _envBase() {
+    return (process.env.KOLM_BASE_URL || 'https://kolm.ai').replace(/\/$/, '');
+  }
+  function _flag(rest, name) {
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--' + name && i + 1 < rest.length) return rest[i + 1];
+      if (typeof rest[i] === 'string' && rest[i].startsWith('--' + name + '=')) {
+        return rest[i].slice(name.length + 3);
+      }
+    }
+    return null;
+  }
+  function _print(envelope) {
+    console.log(JSON.stringify(envelope, null, 2));
+  }
+  function _fail(envelope, code) {
+    _print(envelope);
+    process.exit(code != null ? code : EXIT.EXECUTION);
+  }
+
+  if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
+    console.error('usage: kolm sbom <emit|repo|verify> [args]');
+    console.error('  emit    --manifest PATH [--format cyclonedx-json|spdx-json] [--output PATH]');
+    console.error('  repo    [--format cyclonedx-json|spdx-json]                  — SBOM of the running install');
+    console.error('  verify  --sbom PATH                                          — static-shape validate');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+
+  // ──────────────────────── subcommand: emit ────────────────────────────────
+  if (sub === 'emit') {
+    const rest = args.slice(1);
+    const manifestPath = _flag(rest, 'manifest');
+    const format = _flag(rest, 'format') || 'cyclonedx-json';
+    const output = _flag(rest, 'output');
+    if (!manifestPath) {
+      _fail({
+        ok: false,
+        error: 'manifest_required',
+        hint: 'pass --manifest <path-to-manifest.json>',
+        version: 'w763-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    let manifest;
+    try {
+      const fsMod = await import('node:fs');
+      const raw = fsMod.readFileSync(manifestPath, 'utf8');
+      manifest = JSON.parse(raw);
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'manifest_read_failed',
+        detail: String(e && e.message || e),
+        version: 'w763-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    // emit locally — does NOT require API key. Pure compute.
+    let mod;
+    try {
+      mod = await import(new URL('../src/sbom-emit.js', import.meta.url).href);
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'sbom_module_load_failed',
+        detail: String(e && e.message || e),
+        version: 'w763-v1',
+      });
+      return;
+    }
+    const result = mod.emitSbomFromManifest({ manifest, format });
+    if (output) {
+      try {
+        const fsMod = await import('node:fs');
+        fsMod.writeFileSync(output, JSON.stringify(result.sbom, null, 2) + '\n', 'utf8');
+        _print({
+          ok: result.ok,
+          version: result.version,
+          format: result.format,
+          component_count: result.component_count,
+          output,
+        });
+      } catch (e) {
+        _fail({
+          ok: false,
+          error: 'output_write_failed',
+          detail: String(e && e.message || e),
+          version: 'w763-v1',
+        });
+        return;
+      }
+    } else {
+      _print(result);
+    }
+    if (!result.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: repo ────────────────────────────────
+  if (sub === 'repo') {
+    const rest = args.slice(1);
+    const format = _flag(rest, 'format') || 'cyclonedx-json';
+    const key = _envApiKey();
+    if (!key) {
+      _fail({
+        ok: false,
+        error: 'auth_required',
+        hint: 'set KOLM_API_KEY (kolm signup / kolm login) — /v1/sbom/repo is auth-gated',
+        version: 'w763-v1',
+      }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/sbom/repo?format=' + encodeURIComponent(format), {
+        method: 'GET',
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'network_error',
+        detail: String(e && e.message || e),
+        version: 'w763-v1',
+      });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: verify ──────────────────────────────
+  if (sub === 'verify') {
+    const rest = args.slice(1);
+    const sbomPath = _flag(rest, 'sbom');
+    if (!sbomPath) {
+      _fail({
+        ok: false,
+        error: 'sbom_path_required',
+        hint: 'pass --sbom <path-to-sbom.json>',
+        version: 'w763-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    let sbomObj;
+    try {
+      const fsMod = await import('node:fs');
+      const raw = fsMod.readFileSync(sbomPath, 'utf8');
+      sbomObj = JSON.parse(raw);
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'sbom_read_failed',
+        detail: String(e && e.message || e),
+        version: 'w763-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    let mod;
+    try {
+      mod = await import(new URL('../src/sbom-emit.js', import.meta.url).href);
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'sbom_module_load_failed',
+        detail: String(e && e.message || e),
+        version: 'w763-v1',
+      });
+      return;
+    }
+    const result = mod.verifySbomShape(sbomObj);
+    _print(result);
+    if (!result.valid) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  console.error('usage: kolm sbom <emit|repo|verify> [args]');
+  console.error('  emit    --manifest PATH [--format cyclonedx-json|spdx-json] [--output PATH]');
+  console.error('  repo    [--format cyclonedx-json|spdx-json]                  — SBOM of the running install');
+  console.error('  verify  --sbom PATH                                          — static-shape validate');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// W764 — Membership inference test harness + capture forget mechanism.
+//
+// Two top-level verbs dispatch into this single function:
+//   `kolm forget`  — W764-3 GDPR right-to-erasure surface
+//   `kolm mit`     — W764-1 + W764-2 attack-harness + PII scan surface
+//
+// The case arm in main() passes the matched verb as args[0] so the dispatcher
+// can branch on it. Distinct-named (cmdW764Mit) per the W724/.../W762/W765
+// precedent so parallel wave agents on W761/W762/W763/W765 cannot collide.
+//
+// Subcommands:
+//   kolm forget --capture-id ID --reason R --confirm
+//   kolm forget list [--namespace ns]
+//   kolm mit run --artifact PATH [--namespace ns] [--n 100] [--threshold 0.85] --confirm
+//   kolm mit scan-pii --text TEXT
+//
+// Honest exit codes:
+//   0 — success (no leak detected / scan returned clean / forget marker written)
+//   1 — bad args
+//   3 — auth missing / no_captures_to_test / no API key in env
+//   4 — network failure / unexpected route error
+// ─────────────────────────────────────────────────────────────────────────────
+async function cmdW764Mit(args) {
+  const verb = (args && args[0]) || '';
+  const sub  = (args && args[1]) || '';
+
+  function _envApiKey() { return process.env.KOLM_API_KEY || ''; }
+  function _envBase()   { return (process.env.KOLM_BASE_URL || 'https://kolm.ai').replace(/\/$/, ''); }
+  function _print(envelope) { console.log(JSON.stringify(envelope, null, 2)); }
+  function _fail(envelope, code = EXIT.EXECUTION) { _print(envelope); process.exit(code); }
+  function _flagValue(flag) {
+    const i = args.indexOf(flag);
+    return i >= 0 ? args[i + 1] : undefined;
+  }
+  function _hasFlag(flag) { return args.indexOf(flag) >= 0; }
+
+  // ─── usage / help ───────────────────────────────────────────────────────
+  if (verb === '' || verb === 'help' || verb === '--help' || verb === '-h') {
+    console.error('usage:');
+    console.error('  kolm forget --capture-id ID --reason R --confirm');
+    console.error('  kolm forget list [--namespace ns]');
+    console.error('  kolm mit run --artifact PATH [--namespace ns] [--n 100] [--threshold 0.85] --confirm');
+    console.error('  kolm mit scan-pii --text TEXT');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+
+  // ═════════════════════════════════════════════════════════════════════════
+  // verb: forget — GDPR right-to-erasure
+  // ═════════════════════════════════════════════════════════════════════════
+  if (verb === 'forget') {
+    const key = _envApiKey();
+    if (!key) {
+      _fail({
+        ok: false, error: 'auth_required',
+        hint: 'set KOLM_API_KEY (kolm signup / kolm login)',
+        version: 'w764-v1',
+      }, EXIT.MISSING_PREREQ);
+      return;
+    }
+
+    // ─── forget list ────────────────────────────────────────────────────
+    if (sub === 'list') {
+      const namespace = _flagValue('--namespace');
+      const url = _envBase() + '/v1/captures/forgotten'
+        + (namespace ? '?namespace=' + encodeURIComponent(namespace) : '');
+      let resp;
+      try {
+        resp = await fetch(url, {
+          method: 'GET',
+          headers: { 'authorization': 'Bearer ' + key },
+        });
+      } catch (e) {
+        _fail({
+          ok: false, error: 'network_error',
+          detail: String(e && e.message || e),
+          version: 'w764-v1',
+        });
+        return;
+      }
+      const body = await resp.json().catch(() => ({}));
+      _print(body);
+      if (!resp.ok) process.exit(EXIT.EXECUTION);
+      return;
+    }
+
+    // ─── forget --capture-id ID --reason R --confirm ────────────────────
+    const captureId = _flagValue('--capture-id');
+    const reason    = _flagValue('--reason');
+    const namespace = _flagValue('--namespace');
+    const confirm   = _hasFlag('--confirm');
+    if (!captureId) {
+      _fail({
+        ok: false, error: 'missing_capture_id',
+        hint: 'usage: kolm forget --capture-id ID --reason R --confirm',
+        version: 'w764-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    if (!confirm) {
+      _fail({
+        ok: false, error: 'confirm_required',
+        hint: 'forgetting a capture writes a durable audit event; pass --confirm.',
+        version: 'w764-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    const body = { capture_id: captureId, confirm: true };
+    if (reason)    body.reason    = String(reason);
+    if (namespace) body.namespace = String(namespace);
+
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/captures/forget', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify(body),
+      });
+    } catch (e) {
+      _fail({
+        ok: false, error: 'network_error',
+        detail: String(e && e.message || e),
+        version: 'w764-v1',
+      });
+      return;
+    }
+    const json = await resp.json().catch(() => ({}));
+    _print(json);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ═════════════════════════════════════════════════════════════════════════
+  // verb: mit — membership inference + PII scan
+  // ═════════════════════════════════════════════════════════════════════════
+  if (verb === 'mit') {
+
+    // ─── mit scan-pii --text TEXT ───────────────────────────────────────
+    if (sub === 'scan-pii') {
+      const text = _flagValue('--text');
+      if (text == null) {
+        _fail({
+          ok: false, error: 'missing_text',
+          hint: 'usage: kolm mit scan-pii --text "string to scan"',
+          version: 'w764-v1',
+        }, EXIT.BAD_ARGS);
+        return;
+      }
+      const key = _envApiKey();
+      if (!key) {
+        _fail({
+          ok: false, error: 'auth_required',
+          hint: 'set KOLM_API_KEY (kolm signup / kolm login)',
+          version: 'w764-v1',
+        }, EXIT.MISSING_PREREQ);
+        return;
+      }
+      let resp;
+      try {
+        resp = await fetch(_envBase() + '/v1/mit/scan-pii', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+          body: JSON.stringify({ text: String(text) }),
+        });
+      } catch (e) {
+        _fail({
+          ok: false, error: 'network_error',
+          detail: String(e && e.message || e),
+          version: 'w764-v1',
+        });
+        return;
+      }
+      const json = await resp.json().catch(() => ({}));
+      _print(json);
+      if (!resp.ok) process.exit(EXIT.EXECUTION);
+      return;
+    }
+
+    // ─── mit run --artifact PATH [--namespace ns] [--n 100] [--threshold 0.85] --confirm
+    if (sub === 'run') {
+      const artifact  = _flagValue('--artifact');
+      const namespace = _flagValue('--namespace');
+      const nRaw      = _flagValue('--n');
+      const thRaw     = _flagValue('--threshold');
+      const confirm   = _hasFlag('--confirm');
+      if (!artifact) {
+        _fail({
+          ok: false, error: 'missing_artifact',
+          hint: 'usage: kolm mit run --artifact PATH [...] --confirm',
+          version: 'w764-v1',
+        }, EXIT.BAD_ARGS);
+        return;
+      }
+      if (!confirm) {
+        _fail({
+          ok: false, error: 'confirm_required',
+          hint: 'a real MIT run is expensive (probe queries per capture); pass --confirm.',
+          version: 'w764-v1',
+        }, EXIT.BAD_ARGS);
+        return;
+      }
+      const key = _envApiKey();
+      if (!key) {
+        _fail({
+          ok: false, error: 'auth_required',
+          hint: 'set KOLM_API_KEY (kolm signup / kolm login)',
+          version: 'w764-v1',
+        }, EXIT.MISSING_PREREQ);
+        return;
+      }
+      const body = { confirm: true, artifact_path: artifact };
+      if (namespace) body.namespace = String(namespace);
+      if (nRaw != null) {
+        const n = Number(nRaw);
+        if (Number.isFinite(n) && n > 0) body.n_samples = n;
+      }
+      if (thRaw != null) {
+        const th = Number(thRaw);
+        if (Number.isFinite(th)) body.jaccard_threshold = th;
+      }
+      let resp;
+      try {
+        resp = await fetch(_envBase() + '/v1/mit/run', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+          body: JSON.stringify(body),
+        });
+      } catch (e) {
+        _fail({
+          ok: false, error: 'network_error',
+          detail: String(e && e.message || e),
+          version: 'w764-v1',
+        });
+        return;
+      }
+      const json = await resp.json().catch(() => ({}));
+      _print(json);
+      if (!resp.ok) process.exit(EXIT.EXECUTION);
+      return;
+    }
+
+    console.error('usage:');
+    console.error('  kolm mit run --artifact PATH [opts] --confirm');
+    console.error('  kolm mit scan-pii --text TEXT');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+
+  // Unknown verb arrived here despite the main() case mapping.
+  console.error('unknown subcommand: ' + verb);
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// W764 — COMPLETION entries appended post-literal so a parallel agent on
+// the same revision can land their COMPLETION edit independently without a
+// merge conflict on the literal array. `forget` and `mit` are the top-level
+// verbs; both dispatch through cmdW764Mit in the main() case arm.
+COMPLETION_VERBS.push('forget', 'mit');
+COMPLETION_SUBS.forget = ['list'];
+COMPLETION_SUBS.mit    = ['run', 'scan-pii'];
 
 main();

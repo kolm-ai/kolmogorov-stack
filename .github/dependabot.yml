@@ -1,0 +1,44 @@
+# W763 — Dependabot for SBOM + supply-chain pinning.
+#
+# Companion to .github/workflows/sbom.yml and /security/sbom. Dependabot
+# raises a PR per outdated dep on its weekly schedule; the sbom.yml workflow
+# runs on every push to main and on release events so the SBOM is always
+# refreshed alongside the merge. Hash pinning of every transitive dep is a
+# sustained audit — see /security/sbom for the W763-followup roadmap.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "supply-chain"
+      - "w763"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    labels:
+      - "supply-chain"
+      - "w763"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+
+  - package-ecosystem: "pip"
+    directory: "/apps"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    labels:
+      - "supply-chain"
+      - "w763"
+    commit-message:
+      prefix: "deps-py"
+      include: "scope"

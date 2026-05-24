@@ -1,0 +1,97 @@
+name: sbom
+on:
+  push:
+    branches: [main]
+  release:
+    types: [published]
+  workflow_dispatch: {}
+
+# We DO NOT modify package-lock.json from CI. The SBOM job is read-only:
+# it generates a CycloneDX BOM, uploads it as a workflow artifact, and
+# opens a tracking issue on failure. Hash pinning of every transitive
+# dep is a sustained audit, not a single-PR ship (see /security/sbom).
+jobs:
+  sbom:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # Verify pinned versions resolve. --ignore-scripts blocks
+      # postinstall hooks; --omit=optional skips opt-in platform binaries
+      # so a Linux runner doesn't trip on darwin-only wheels.
+      - name: npm ci (verify lock resolves)
+        run: npm ci --omit=optional --ignore-scripts
+
+      # Generate CycloneDX SBOM via npx (no install in package.json).
+      # @cyclonedx/cyclonedx-npm is the official Node SBOM emitter.
+      - name: generate cyclonedx sbom (node deps)
+        run: |
+          npx -y -p @cyclonedx/cyclonedx-npm@latest cyclonedx-npm \
+            --output-format JSON \
+            --output-file kolm-stack.cdx.json \
+            --omit dev \
+            --validate
+        continue-on-error: true
+        id: cdx
+
+      # Always emit our own SBOM (apps/export/sbom.py) as a backstop so we
+      # have an SBOM even if @cyclonedx/cyclonedx-npm hits a parse edge.
+      - name: generate kolm sbom (python stdlib fallback)
+        run: |
+          python3 apps/export/sbom.py \
+            --package-lock package-lock.json \
+            --format cyclonedx-json \
+            --output kolm-stack-sbom.json
+          python3 apps/export/sbom.py \
+            --package-lock package-lock.json \
+            --format spdx-json \
+            --output kolm-stack-sbom.spdx.json
+
+      - name: upload sbom artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ github.sha }}
+          path: |
+            kolm-stack.cdx.json
+            kolm-stack-sbom.json
+            kolm-stack-sbom.spdx.json
+          retention-days: 90
+          if-no-files-found: warn
+
+      # If the CycloneDX step itself failed, open a tracking issue so the
+      # release isn't silently shipped without an SBOM. We do NOT open one
+      # for clean vuln-free runs (would spam the tracker).
+      - name: open tracking issue on sbom failure
+        if: steps.cdx.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = `SBOM emission failed on ${context.sha.slice(0,7)}`;
+            const body = [
+              `Run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              ``,
+              `\`cyclonedx-npm\` reported a non-zero exit on commit \`${context.sha}\`.`,
+              `The Python stdlib fallback (apps/export/sbom.py) still ran;`,
+              `the artifact is uploaded as kolm-stack-sbom.json. Investigate the`,
+              `cyclonedx-npm error in the workflow logs and either pin the`,
+              `bad dep or upgrade @cyclonedx/cyclonedx-npm.`,
+              ``,
+              `See: /security/sbom`,
+            ].join('\n');
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              labels: ['supply-chain', 'sbom', 'w763'],
+            });
