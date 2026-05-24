@@ -1,6 +1,6 @@
 // W431 — source comments must not contain mojibake (audit P2-1).
 //
-// The W415 audit flagged "Several comments contain ?? or encoding artifacts
+// The W415 audit flagged "Several comments contain question-mark encoding artifacts
 // near newer W411 sections" in src/router.js and src/agent-telemetry.js.
 // Investigation in the W431 fix wave showed the files were already clean
 // (the mojibake was cleaned in the W411 closer batch). This test is the
@@ -17,8 +17,13 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(__dirname, '..');
 
 const FILES = [
+  path.join(REPO, 'cli', 'kolm.js'),
   path.join(REPO, 'src', 'router.js'),
   path.join(REPO, 'src', 'agent-telemetry.js'),
+  path.join(REPO, 'src', 'package-release-readiness.js'),
+  path.join(REPO, 'scripts', 'package-release-readiness.mjs'),
+  path.join(REPO, 'scripts', 'verify-sdk-dist.mjs'),
+  path.join(REPO, 'scripts', 'build-browser-extension.mjs'),
 ];
 
 // Sentinel characters are constructed via String.fromCharCode so this test

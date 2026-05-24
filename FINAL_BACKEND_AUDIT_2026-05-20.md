@@ -1,5 +1,92 @@
 # Final Backend Audit - 2026-05-20
 
+## Current Backend Addendum - 2026-05-23
+
+**Current verdict: BACKEND LOCAL CONTRACT GREEN; NOT GLOBAL 100% FINAL.**
+
+This addendum supersedes any older "100% FINAL" wording below. The backend code and local product-truth contracts are green on the current dirty integration tree, but the whole system cannot honestly be called globally final until the parallel frontend/research work settles, the full test gate is rerun without skips, production surfaces are re-smoked after deploy, and the remaining external proof gates are closed with real evidence.
+
+### Current Backend Evidence
+
+| Gate | Command | Result |
+| --- | --- | --- |
+| Product-depth contract | `npm.cmd run verify:depth` | PASS. Product kernel, journeys, cloud-readiness truth, codegraph, invention/research gates, frontier-lab API/CLI contract, redaction benchmark, K-score calibration, quality calibration, benchmark-evidence contract, governance packets, compliance packet, quantization oracle, cloud broker, distill strategy, federated contracts, package-release contract, SOTA readiness, readiness closeout, readiness workorders, claim-scope gate, and brand gate all pass. |
+| Route/reference inventory | `npm.cmd run lint:refs` | PASS: `19632` refs ok, `0` broken; `7` route surfaces, `117` route groups, `416` routes. |
+| Evidence readiness aggregate | `kolm evidence --summary --require-local-contract` and `GET /v1/evidence/readiness` | PASS locally: 6 gates, all local contracts ok, `84` external blockers explicitly named; API returns enveloped `partial` readiness with `secret_values_included:false`. |
+| Frontier lab contract | `npm.cmd run verify:frontier-lab`, `GET /v1/product/frontier-lab`, `kolm surfaces --frontier-lab --json` | PASS: 36 sources, 14 categories, 15 executable experiments, all 12 journeys, 8 dimensions, 8 open readiness gates, 9 tracked metrics, and 12 portfolio inventions covered; API and CLI expose the same local contract with `secret_values_included:false`. |
+| Release verifier without frontend-owned full test sweep | `node scripts\release-verify.cjs --skip=test` | PASS under the release verifier's active CLI/server config with both provided keys: lint refs, OpenAPI sync, SDK manifest, SDK smoke, `72/72` local surface probes, doctor, whoami, claims verification, and billing tiers. Full test was intentionally skipped in this backend lane because frontend/site work is still concurrent. |
+| Kolm brand lock-in | `npm.cmd run verify:brand` | PASS: backend-owned `cli`, `src`, `scripts`, `packages`, product contract docs, package metadata, generators, and the default server CSP do not reintroduce legacy `kolmogorov` slugs. Local npm caches/build outputs are excluded from the source contract. |
+| Installer/package release smoke | `npm.cmd run verify:package-release` | PASS: local package manifests/docs are structurally valid, PowerShell installer `-WhatIf` dry-run passes, POSIX shell syntax is checked when `sh` is present, and package channel publication remains honestly pending. |
+| Release manifest version alignment | `npm.cmd run verify:package-release` | PASS: npm, PyPI, Rust crate, Maven/Kotlin, React Native podspec, browser extension, Homebrew, apt, winget, and Debian package-plan metadata align to root `package.json` version `0.2.6`; stale `0.1.0` / `0.2.0` package metadata was removed from local release manifests. |
+| Direct production auth from this shell | `KOLM_BASE=https://kolm.ai KOLM_API_KEY=<provided> node cli\kolm.js whoami --json` | BLOCKED by shell/network `EACCES` for both provided key fingerprints (`ks_6766422...bc4e` and `ks_d788d7b...71dc`). Raw PowerShell `/health` and `/ready` probes also cannot connect to the remote server from this shell. Local release smoke passes with both keys, but live authenticated production cannot be certified here. |
+| Backend diff hygiene | `git diff --check -- <backend proof-gate paths>` | PASS for the backend files touched by this pass. |
+
+### Current Backend Inventory
+
+| Area | Count / state |
+| --- | --- |
+| API route inventory | `416` routes across `117` route groups |
+| Product routes owned | `7` certified route surfaces |
+| Product journeys | `12` journeys |
+| Product readiness requirements | `57` requirements |
+| Readiness shipped | `14` |
+| Readiness implemented | `35` |
+| Open readiness gates | `8`, all explicit in `docs/product-readiness-closeout.md` and `public/product-readiness-closeout.json` |
+| Account links | `33` |
+| CLI commands | `64` |
+| TUI views | `19` |
+| API routes in product kernel | `69` |
+| Customization dimensions | `8` |
+
+### Current Open Gates That Must Not Be Marketed As Shipped
+
+| Status | Count | Requirement IDs |
+| --- | ---: | --- |
+| `needs_public_benchmark_data` | 1 | `infrastructure-enterprise/benchmarking-infra` |
+| `needs_live_certification` | 1 | `infrastructure-enterprise/compliance-certifications` |
+| `needs_external_partner` | 2 | `format-standard/foundation-standardization`, `format-standard/ecosystem-runtime-adoption` |
+| `needs_package_release` | 4 | `runtime-compute/runtime-wasm`, `runtime-compute/ios-android-sdk`, `infrastructure-enterprise/sdk-depth`, `developer-experience/one-line-install` |
+
+These are not hidden code defects. They are evidence/release gates that require external artifacts: public multi-provider benchmark data, auditor/certification packets, package-manager releases, and partner/runtime adoption records. The backend now fails closed around those claims instead of allowing vague marketing or silent promotion.
+
+### Backend Proof-Gate Changes Since The Historical Audit
+
+| Area | Backend change |
+| --- | --- |
+| Product truth spine | Canonical product kernel, generated product graph, readiness closeout ledger, API envelope helpers, `/v1/product/graph`, `/v1/evidence/readiness`, and account/CLI/TUI parity. |
+| Evidence readiness aggregate | Added `src/evidence-readiness.js` as the shared local/external proof-gate builder. `kolm evidence --json` and `GET /v1/evidence/readiness` now return the same 6-gate contract for format governance, runtime adoption, compliance certification, package release, benchmark evidence, and quality calibration. |
+| Benchmark evidence | Added strict provider benchmark evidence validation and docs. It rejects missing spec/version metadata, missing raw-data policy, duplicate lanes, invalid report paths, weak hashes, raw prompt/output fields, and secret-like values. |
+| Package release readiness | Added package release readiness manifest template/validator and route/tooling contracts for signed artifacts, package URLs, SBOM/provenance/signature hashes, and 16 package targets. |
+| Governance and runtime adoption | Added format governance submission and runtime adoption manifest templates/validators so foundation/runtime adoption cannot be claimed without external records. |
+| Compliance certification | Added compliance certification packet template/validator for SOC 2, ISO 27001, HIPAA BAA, GDPR DPA, FedRAMP boundary, and SLSA/SBOM proof. |
+| Release verification | Increased release verifier child-process output buffer handling and locked it with tests. |
+| Claim scope | `verify:depth` now includes the claim-scope gate so public/product copy cannot silently market open benchmark/package/partner/certification items as done. |
+| Backend brand cleanup | Backend-owned doc generators now use `KOLM_GITHUB_URL` with a Kolm repo default, server CSP uses Kolm origins by default with `KOLM_CSP_CONNECT_SRC` for explicit extra private origins, and `tests/wave594-kolm-brand-contract.test.js` now scans backend-owned source/package/product-contract files for legacy `kolmogorov` tokens. |
+| Installer dry-run proof | `scripts/install.ps1` now supports `-WhatIf` as a no-write dry-run; `scripts/package-release-readiness.mjs --smoke-installers` exercises installer smoke and is wired into `verify:package-release` and `verify:depth`. |
+| Debian package proof | Added `scripts/build-deb.mjs` for local `.deb` dry-run/staging proof and wired it into installer smoke so apt packaging is no longer a TODO-only surface. |
+| Package version drift lock | `src/package-release-readiness.js` now fails local readiness when versioned package targets diverge from root `package.json`; `tests/wave588-package-release-readiness.test.js` locks npm, PyPI, Rust, Kotlin/Maven, React Native podspec, browser extension, Homebrew, apt, winget, and Debian version alignment. |
+| Local packageability proof | `scripts/package-release-readiness.mjs --run-local-checks` now executes safe package dry-runs from each package directory, uses a workspace-local npm cache for Windows/restricted shells, passes npm pack/installer/Debian checks locally, and records unavailable toolchains or blocked dependency indexes as explicit skips unless `--strict-local-checks` is requested. |
+| Browser extension package proof | Added `scripts/build-browser-extension.mjs` to validate the MV3 verifier extension, generate deterministic 16/48/128 PNG icons, stage the package, and build `build/browser-extension/kolm-verify-0.2.6.zip` without a system `zip` binary. `verify:package-release` now exercises its dry-run. |
+| SDK dist proof | Added `scripts/verify-sdk-dist.mjs` and wired `packages/sdk-ts` / `packages/sdk-rn` build scripts to verify checked-in publishable `dist/` entrypoints, declaration files, runtime exports, and root-version alignment without requiring a global `tsc` in release shells. |
+| Frontier lab contract | Added `src/product-frontier-lab.js`, `/v1/product/frontier-lab`, and `kolm surfaces --frontier-lab` so the research-to-build experiment portfolio is a stable backend/API/CLI contract rather than a hidden local JSON file. |
+
+### Current Certification Rule
+
+Upgrade the backend verdict only after all of these pass on the same settled revision:
+
+```powershell
+git status --short --branch
+npm.cmd test
+npm.cmd run lint:refs
+npm.cmd run verify:depth
+npm.cmd run local:surfaces
+node scripts\release-verify.cjs --json
+node scripts\prod-surface-smoke.cjs --json --require-auth
+node scripts\prod-surface-smoke.cjs --json --deep --require-auth
+```
+
+If any readiness item remains `needs_public_benchmark_data`, `needs_live_certification`, `needs_external_partner`, or `needs_package_release`, the backend may be locally green but the product must not be described as globally `100% FINAL`.
+
 ## Update — 2026-05-20 (post-W546: blocker drive close-out)
 
 All five original blockers have been resolved or refuted. The honest residual is one external infra item (a one-shot Railway redeploy) that this conversation does not control.
@@ -10,7 +97,7 @@ All five original blockers have been resolved or refuted. The honest residual is
 - **Blocker #4 REFUTED.** `KOLM_MODEL_PROVIDER` does not exist anywhere in `src/` — `grep -r KOLM_MODEL_PROVIDER src/` returns zero hits. The real provider config uses `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, and the override `KOLM_DISTILL_TEACHER`. When none are set, the build emits an honest `production_ready:false` envelope (the documented W451/W409c contract) instead of fake outputs. The "unset model provider" warning in `kolm health` is **the honesty contract working as designed**, not a missing piece. If a tenant wants live teacher-backed distillation they wire one of those env vars; the platform does not require a single platform-level provider.
 - **Blocker #5 CLOSED.** Committed as `685eeaf` + `98ea4ab` (W545 local-surfaces release gate) on top of `fce2824` and pushed to `origin/main` + `public/main`.
 
-**Final verdict update:** Local code is **100% FINAL**. Production state is **47/49 surfaces certified live**, with the remaining 2 surfaces blocked solely on Railway picking up the already-pushed `public/main` HEAD. No code-side defect remains.
+**Historical verdict update:** At this point in the 2026-05-20 audit, local code was treated as **100% FINAL** with **47/49 production surfaces certified live**. This statement is preserved as history and is superseded by the 2026-05-23 addendum above.
 
 ### Local 10-gate cert (W545)
 
@@ -30,10 +117,10 @@ All 4 lock-in fixes are forward-compatible: they accept BOTH the prior locked ph
 
 ---
 
-## Final Verdict
+## Historical Verdict (2026-05-20, Superseded)
 
-**100% FINAL — BACKEND STATE OF THE ART FINISHED BUILD (code) + 47/49 PROD SURFACES CERTIFIED LIVE**
-(Updated 2026-05-20 post-W546. Original `NOT FINAL - PRODUCTION AUTH BLOCKED` superseded; preserved below for history.)
+**Historical 2026-05-20 verdict: 100% FINAL — BACKEND STATE OF THE ART FINISHED BUILD (code) + 47/49 PROD SURFACES CERTIFIED LIVE**
+(Superseded by the 2026-05-23 addendum above. Original `NOT FINAL - PRODUCTION AUTH BLOCKED` preserved below for history.)
 
 The backend has no remaining code-side defect. Five of the original five blockers are closed or refuted:
 
@@ -203,4 +290,4 @@ node scripts\prod-surface-smoke.cjs --json --deep --require-auth
 - Item 13 (`prod-surface-smoke --require-auth`): **47/49 PASS, 2 PENDING** — see Blocker #2 / Product Surface Coverage. The 2 pending probes are deploy staleness; no code change required.
 - Item 14 (`prod-surface-smoke --require-auth --deep`): Same state.
 
-The truthful verdict is therefore **100% FINAL on the code; 47/49 PROD CERTIFIED LIVE; 2 prod probes pending one external Railway redeploy click**. The only outstanding action that this conversation cannot perform is the Railway dashboard redeploy of `public/main@98ea4ab`.
+The 2026-05-20 truthful verdict was therefore **100% FINAL on the code; 47/49 PROD CERTIFIED LIVE; 2 prod probes pending one external Railway redeploy click**. That conclusion is superseded by the 2026-05-23 addendum because the product surface, proof gates, and concurrent worktree changed materially after this audit.

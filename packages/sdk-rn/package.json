@@ -1,12 +1,12 @@
 {
   "name": "kolm-rn",
-  "version": "0.1.0",
+  "version": "0.2.6",
   "description": "One-line embed for .kolm artifacts in React Native",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": ["dist", "ios", "android", "kolm-rn.podspec"],
+  "files": ["dist", "ios", "android", "kolm-rn.podspec", "react-native.config.js"],
   "scripts": {
-    "build": "tsc",
+    "build": "node ../../scripts/verify-sdk-dist.mjs sdk-rn",
     "test": "node --test"
   },
   "peerDependencies": {
@@ -22,6 +22,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/kolm-ai/kolm-sdk-rn"
+    "url": "https://github.com/sneaky-hippo/kolm-stack",
+    "directory": "packages/sdk-rn"
   }
 }

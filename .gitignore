@@ -31,6 +31,12 @@ public/img/_generations/
 *.swo
 .cache/
 dist/
+!packages/sdk-ts/dist/
+!packages/sdk-ts/dist/**
+!packages/sdk-rn/dist/
+!packages/sdk-rn/dist/**
+.npm-cache*/
+**/.npm-cache*/
 build/
 coverage/
 .nyc_output/
@@ -79,6 +85,7 @@ undefined/
 
 # W470 — Rust build outputs (Cargo.lock IS committed; target/ is not)
 sdk/rust/target/
+packages/runtime-rs/target/
 sdk/c/kolm-cli
 sdk/c/kolm-cli.exe
 sdk/c/*.o
@@ -97,7 +104,12 @@ eng.traineddata
 
 # W471 — release-verify and ad-hoc test scratch
 test-output.txt
+test-sweep*.txt
+*test-sweep*.txt
+**/AppData/Local/Temp/**
 
 # W547 — UI-surface audit output (timestamped runs, regenerable, multi-GB)
 reports/
 .ui-debug/
+.shots/
+.w605-body.html

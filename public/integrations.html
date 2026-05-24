@@ -62,9 +62,41 @@
   .int-code .k { color: var(--ks-accent); }
   .int-code .s { color: #f4c666; }
   .int-code .title { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: var(--ks-3); }
+
+  /* W641 de-rectangle: editorial integration lists */
+  .int-list { margin-top: var(--ks-4) !important; }
+  .int-list .fr-spec-list__head h3 { font-size: 17px; }
+  .int-list__meta { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); margin-top: 6px; }
+  .int-list__delta--wip { color: var(--fr-amber, #e0b46c) !important; }
+  .int-list__delta--open { color: var(--ks-ink-3) !important; }
+  .eco-list { margin-top: var(--ks-4) !important; }
+  .eco-list .fr-spec-list__head h3 { font-size: 16px; }
+  .eco-list__delta--coming { color: var(--fr-amber, #e0b46c) !important; }
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/integrations",
+  "description": "First-party integrations across IDE, gateway proxies, CI/CD, observability, containers, LLM SDKs, and frameworks. Drop kolm into the stack you already run.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
 </head>
 <body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <a href="#main" class="ks-skip">Skip to content</a>
 
@@ -160,44 +192,38 @@
     <div class="cat">
       <div class="cat-head"><span class="tag">ide</span><h3>Editors and AI-assisted IDEs</h3><span class="count">6 adapters</span></div>
       <p class="gd">If your editor has an extension surface, kolm has an adapter. The MCP server doubles as the AI-IDE backend for Claude-resident hosts.</p>
-      <div class="int-grid">
-        <a class="int-card" href="/integrations/vscode">
-          <span class="st live">Live</span>
-          <span class="name">VS Code</span>
-          <span class="desc">Status-bar K-score, inline distill commands, receipt explorer. Built on @kolm/node.</span>
-          <span class="meta">vscode &gt;= 1.90</span>
-        </a>
-        <a class="int-card" href="/integrations/jetbrains">
-          <span class="st live">Live</span>
-          <span class="name">JetBrains</span>
-          <span class="desc">IDEA, PyCharm, GoLand, WebStorm. Tool window for the active .kolm and the eval pack picker.</span>
-          <span class="meta">IDEA 2024.2+</span>
-        </a>
-        <a class="int-card" href="/integrations/cursor">
-          <span class="st live">Live</span>
-          <span class="name">Cursor</span>
-          <span class="desc">MCP-resident. Cursor's agent calls kolm verbs through the MCP server.</span>
-          <span class="meta">MCP transport</span>
-        </a>
-        <a class="int-card" href="/integrations/claude-code">
-          <span class="st live">Live</span>
-          <span class="name">Claude Code</span>
-          <span class="desc">Anthropic's IDE Claude. The MCP server exposes the kolm verbs as tools.</span>
-          <span class="meta">MCP server</span>
-        </a>
-        <a class="int-card" href="/integrations/continue">
-          <span class="st live">Live</span>
-          <span class="name">Continue</span>
-          <span class="desc">Open-source AI IDE plugin. kolm appears as a provider so a distilled artifact can serve completions.</span>
-          <span class="meta">continue.dev</span>
-        </a>
-        <a class="int-card" href="/integrations/zed">
-          <span class="st live">Live</span>
-          <span class="name">Zed</span>
-          <span class="desc">MCP-resident. Zed's agent invokes kolm verbs through the MCP server.</span>
-          <span class="meta">MCP transport</span>
-        </a>
-      </div>
+      <ul class="fr-spec-list int-list">
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>VS Code</h3><span class="fr-spec-list__delta">Live &middot; vscode &gt;= 1.90</span></div>
+          <p class="fr-spec-list__p">Status-bar K-score, inline distill commands, receipt explorer. Built on <code>@kolm/node</code>.</p>
+          <a class="fr-spec-list__cta" href="/integrations/vscode">Install the extension</a>
+        </li>
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>JetBrains</h3><span class="fr-spec-list__delta">Live &middot; IDEA 2024.2+</span></div>
+          <p class="fr-spec-list__p">IDEA, PyCharm, GoLand, WebStorm. Tool window for the active <code>.kolm</code> and the eval pack picker.</p>
+          <a class="fr-spec-list__cta" href="/integrations/jetbrains">Install the plugin</a>
+        </li>
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>Cursor</h3><span class="fr-spec-list__delta">Live &middot; MCP transport</span></div>
+          <p class="fr-spec-list__p">MCP-resident. Cursor's agent calls kolm verbs through the MCP server.</p>
+          <a class="fr-spec-list__cta" href="/integrations/cursor">Wire Cursor</a>
+        </li>
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>Claude Code</h3><span class="fr-spec-list__delta">Live &middot; MCP server</span></div>
+          <p class="fr-spec-list__p">Anthropic's IDE Claude. The MCP server exposes the kolm verbs as tools.</p>
+          <a class="fr-spec-list__cta" href="/integrations/claude-code">Wire Claude Code</a>
+        </li>
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>Continue</h3><span class="fr-spec-list__delta">Live &middot; continue.dev</span></div>
+          <p class="fr-spec-list__p">Open-source AI IDE plugin. kolm appears as a provider so a distilled artifact can serve completions.</p>
+          <a class="fr-spec-list__cta" href="/integrations/continue">Add the provider</a>
+        </li>
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>Zed</h3><span class="fr-spec-list__delta">Live &middot; MCP transport</span></div>
+          <p class="fr-spec-list__p">MCP-resident. Zed's agent invokes kolm verbs through the MCP server.</p>
+          <a class="fr-spec-list__cta" href="/integrations/zed">Wire Zed</a>
+        </li>
+      </ul>
     </div>
   </div>
 </section>
@@ -209,20 +235,18 @@
     <div class="cat">
       <div class="cat-head"><span class="tag">gateway</span><h3>Proxy adapters</h3><span class="count">2 adapters</span></div>
       <p class="gd">Drop-in proxies. Your application code does not change; the gateway routes every call through kolm so the prompt, the response, and the metadata land in the local capture store.</p>
-      <div class="int-grid">
-        <a class="int-card" href="/integrations/litellm">
-          <span class="st live">Live</span>
-          <span class="name">LiteLLM</span>
-          <span class="desc">Drop-in proxy. Works with the OpenAI Python and Node SDKs unchanged. Captures every call as a labeled row.</span>
-          <span class="meta">litellm.ai</span>
-        </a>
-        <a class="int-card" href="/integrations/openrouter">
-          <span class="st live">Live</span>
-          <span class="name">OpenRouter</span>
-          <span class="desc">Use OpenRouter as the teacher pool; kolm captures the responses and feeds them into distillation.</span>
-          <span class="meta">openrouter.ai</span>
-        </a>
-      </div>
+      <ul class="fr-spec-list int-list">
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>LiteLLM</h3><span class="fr-spec-list__delta">Live &middot; litellm.ai</span></div>
+          <p class="fr-spec-list__p">Drop-in proxy. Works with the OpenAI Python and Node SDKs unchanged. Captures every call as a labeled row.</p>
+          <a class="fr-spec-list__cta" href="/integrations/litellm">Configure LiteLLM</a>
+        </li>
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>OpenRouter</h3><span class="fr-spec-list__delta">Live &middot; openrouter.ai</span></div>
+          <p class="fr-spec-list__p">Use OpenRouter as the teacher pool; kolm captures the responses and feeds them into distillation.</p>
+          <a class="fr-spec-list__cta" href="/integrations/openrouter">Configure OpenRouter</a>
+        </li>
+      </ul>
     </div>
   </div>
 </section>
@@ -234,20 +258,18 @@
     <div class="cat">
       <div class="cat-head"><span class="tag">ci</span><h3>Build-pipeline gates</h3><span class="count">2 adapters</span></div>
       <p class="gd">Reusable workflow files. Drop into your existing pipeline. The gate is honest: the build fails when the artifact is not ready to ship.</p>
-      <div class="int-grid">
-        <a class="int-card" href="/integrations/github-actions">
-          <span class="st live">Live</span>
-          <span class="name">GitHub Actions</span>
-          <span class="desc">Drop-in workflow. Runs <code>kolm score --min</code> and uploads the receipt. Sample in the repo.</span>
-          <span class="meta">actions/runner</span>
-        </a>
-        <a class="int-card" href="/integrations/gitlab-ci">
-          <span class="st live">Live</span>
-          <span class="name">GitLab CI</span>
-          <span class="desc">Sample <code>.gitlab-ci.yml</code> that mirrors the GitHub action behavior. Same exit-code semantics.</span>
-          <span class="meta">gitlab-runner</span>
-        </a>
-      </div>
+      <ul class="fr-spec-list int-list">
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>GitHub Actions</h3><span class="fr-spec-list__delta">Live &middot; actions/runner</span></div>
+          <p class="fr-spec-list__p">Drop-in workflow. Runs <code>kolm score --min</code> and uploads the receipt. Sample in the repo.</p>
+          <a class="fr-spec-list__cta" href="/integrations/github-actions">Copy the workflow</a>
+        </li>
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>GitLab CI</h3><span class="fr-spec-list__delta">Live &middot; gitlab-runner</span></div>
+          <p class="fr-spec-list__p">Sample <code>.gitlab-ci.yml</code> that mirrors the GitHub action behavior. Same exit-code semantics.</p>
+          <a class="fr-spec-list__cta" href="/integrations/gitlab-ci">Copy the pipeline</a>
+        </li>
+      </ul>
     </div>
     <div class="int-code">
       <div class="title">.github/workflows/kolm-score.yml &middot; minimal gate</div>
@@ -279,20 +301,18 @@
     <div class="cat">
       <div class="cat-head"><span class="tag">observability</span><h3>Traces, metrics, audit log shipping</h3><span class="count">OTLP-native</span></div>
       <p class="gd">Set <code>KOLM_OTLP_ENDPOINT</code>; spans flow. The /v1/doctor route inspects the OTLP exporter and tells you if a span is failing to land. The CLI also writes a structured <code>~/.kolm/audit.log</code> you can tail into Splunk.</p>
-      <div class="int-grid">
-        <a class="int-card" href="/integrations/env-vars">
-          <span class="st live">Live</span>
-          <span class="name">Datadog (OTLP)</span>
-          <span class="desc">Point the OTLP endpoint at the Datadog agent. Spans appear under <code>kolm.distill</code>, <code>kolm.score</code>, <code>kolm.verify</code>.</span>
-          <span class="meta">datadoghq.com</span>
-        </a>
-        <a class="int-card" href="/integrations/env-vars">
-          <span class="st live">Live</span>
-          <span class="name">OpenTelemetry</span>
-          <span class="desc">Vanilla OTLP HTTP exporter. Send spans to Grafana Tempo, Honeycomb, Lightstep, or any compatible backend.</span>
-          <span class="meta">opentelemetry.io</span>
-        </a>
-      </div>
+      <ul class="fr-spec-list int-list">
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>Datadog (OTLP)</h3><span class="fr-spec-list__delta">Live &middot; datadoghq.com</span></div>
+          <p class="fr-spec-list__p">Point the OTLP endpoint at the Datadog agent. Spans appear under <code>kolm.distill</code>, <code>kolm.score</code>, <code>kolm.verify</code>.</p>
+          <a class="fr-spec-list__cta" href="/integrations/env-vars">Set the env vars</a>
+        </li>
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>OpenTelemetry</h3><span class="fr-spec-list__delta">Live &middot; opentelemetry.io</span></div>
+          <p class="fr-spec-list__p">Vanilla OTLP HTTP exporter. Send spans to Grafana Tempo, Honeycomb, Lightstep, or any compatible backend.</p>
+          <a class="fr-spec-list__cta" href="/integrations/env-vars">Set the env vars</a>
+        </li>
+      </ul>
     </div>
   </div>
 </section>
@@ -304,20 +324,18 @@
     <div class="cat">
       <div class="cat-head"><span class="tag">containers</span><h3>Self-host and edge</h3><span class="count">2 adapters</span></div>
       <p class="gd">A regulated or security-minded deployment runs the entire path inside the boundary. The Compose stack covers the in-VPC path; the Cloudflare binding covers the edge verifier without a cold start.</p>
-      <div class="int-grid">
-        <a class="int-card" href="/integrations/docker-compose">
-          <span class="st live">Live</span>
-          <span class="name">Docker Compose</span>
-          <span class="desc">Reference <code>docker-compose.yml</code> for gateway + capture store + verifier. Two-command local install.</span>
-          <span class="meta">compose &gt;= v2</span>
-        </a>
-        <a class="int-card" href="/integrations/cloudflare">
-          <span class="st live">Live</span>
-          <span class="name">Cloudflare Workers</span>
-          <span class="desc">Edge-resident verifier. Resolves a CID to a signed receipt without a round-trip to the origin.</span>
-          <span class="meta">workers.dev</span>
-        </a>
-      </div>
+      <ul class="fr-spec-list int-list">
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>Docker Compose</h3><span class="fr-spec-list__delta">Live &middot; compose &gt;= v2</span></div>
+          <p class="fr-spec-list__p">Reference <code>docker-compose.yml</code> for gateway + capture store + verifier. Two-command local install.</p>
+          <a class="fr-spec-list__cta" href="/integrations/docker-compose">Get the compose file</a>
+        </li>
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>Cloudflare Workers</h3><span class="fr-spec-list__delta">Live &middot; workers.dev</span></div>
+          <p class="fr-spec-list__p">Edge-resident verifier. Resolves a CID to a signed receipt without a round-trip to the origin.</p>
+          <a class="fr-spec-list__cta" href="/integrations/cloudflare">Deploy the worker</a>
+        </li>
+      </ul>
     </div>
   </div>
 </section>
@@ -329,26 +347,23 @@
     <div class="cat">
       <div class="cat-head"><span class="tag">llm-sdk</span><h3>The SDKs you already use</h3><span class="count">3 adapters</span></div>
       <p class="gd">Set <code>BASE_URL</code> on the SDK to the kolm gateway. The SDK's API surface does not change; every request is captured into the local store and ready to feed into distillation.</p>
-      <div class="int-grid">
-        <a class="int-card" href="/integrations/anthropic-sdk">
-          <span class="st live">Live</span>
-          <span class="name">Anthropic SDK</span>
-          <span class="desc">Point <code>anthropic.Anthropic(base_url=...)</code> at the kolm gateway. Claude calls captured as rows.</span>
-          <span class="meta">python + node</span>
-        </a>
-        <a class="int-card" href="/integrations/openai-sdk">
-          <span class="st live">Live</span>
-          <span class="name">OpenAI SDK</span>
-          <span class="desc">Point <code>openai.OpenAI(base_url=...)</code> at the kolm gateway. OpenAI calls captured as rows.</span>
-          <span class="meta">python + node</span>
-        </a>
-        <a class="int-card" href="/integrations/vercel-ai-sdk">
-          <span class="st live">Live</span>
-          <span class="name">Vercel AI SDK</span>
-          <span class="desc">Drop-in provider that routes through the kolm gateway. Streaming preserved.</span>
-          <span class="meta">ai-sdk.dev</span>
-        </a>
-      </div>
+      <ul class="fr-spec-list int-list">
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>Anthropic SDK</h3><span class="fr-spec-list__delta">Live &middot; python + node</span></div>
+          <p class="fr-spec-list__p">Point <code>anthropic.Anthropic(base_url=...)</code> at the kolm gateway. Claude calls captured as rows.</p>
+          <a class="fr-spec-list__cta" href="/integrations/anthropic-sdk">Wire the SDK</a>
+        </li>
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>OpenAI SDK</h3><span class="fr-spec-list__delta">Live &middot; python + node</span></div>
+          <p class="fr-spec-list__p">Point <code>openai.OpenAI(base_url=...)</code> at the kolm gateway. OpenAI calls captured as rows.</p>
+          <a class="fr-spec-list__cta" href="/integrations/openai-sdk">Wire the SDK</a>
+        </li>
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>Vercel AI SDK</h3><span class="fr-spec-list__delta">Live &middot; ai-sdk.dev</span></div>
+          <p class="fr-spec-list__p">Drop-in provider that routes through the kolm gateway. Streaming preserved.</p>
+          <a class="fr-spec-list__cta" href="/integrations/vercel-ai-sdk">Wire the provider</a>
+        </li>
+      </ul>
     </div>
   </div>
 </section>
@@ -360,14 +375,13 @@
     <div class="cat">
       <div class="cat-head"><span class="tag">framework</span><h3>Chain + agent frameworks</h3><span class="count">1 adapter, more open</span></div>
       <p class="gd">LangChain callbacks capture every chain step, including tool calls. The entire trace becomes a distillable row set. PRs for LlamaIndex, Haystack, and CrewAI are tracked in the issues.</p>
-      <div class="int-grid">
-        <a class="int-card" href="/integrations/langchain">
-          <span class="st live">Live</span>
-          <span class="name">LangChain</span>
-          <span class="desc">Callback handler that emits one kolm capture row per chain step. Works for both Python and JS chains.</span>
-          <span class="meta">langchain.com</span>
-        </a>
-      </div>
+      <ul class="fr-spec-list int-list">
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>LangChain</h3><span class="fr-spec-list__delta">Live &middot; langchain.com</span></div>
+          <p class="fr-spec-list__p">Callback handler that emits one kolm capture row per chain step. Works for both Python and JS chains.</p>
+          <a class="fr-spec-list__cta" href="/integrations/langchain">Add the callback</a>
+        </li>
+      </ul>
     </div>
   </div>
 </section>
@@ -381,139 +395,117 @@
     <div class="fr-reveal" style="margin-top: var(--ks-7)">
       <h3 class="fr-h3">Group A &middot; Distillation and quantization engines</h3>
       <p class="fr-lede" style="font-size:14px;color:var(--ks-ink-3);max-width:60ch">The compute substrate that does the actual work when you run <code>kolm compile</code>. kolm wires them together behind a single command.</p>
-      <div class="fr-grid-4" style="margin-top: var(--ks-4)">
-        <div class="fr-card fr-card--mint fr-card--feature">
-          <span class="fr-pill">FIRST-CLASS</span>
-          <span class="fr-h3" style="font-size:16px">Unsloth Dynamic 2.0</span>
-          <span class="fr-lede" style="font-size:13px">Default GGUF compile engine for K-score retention. Layer-by-layer dynamic quant in the compile path.</span>
-        </div>
-        <div class="fr-card fr-card--mint fr-card--feature">
-          <span class="fr-pill">FIRST-CLASS</span>
-          <span class="fr-h3" style="font-size:16px">bitsandbytes</span>
-          <span class="fr-lede" style="font-size:13px">NF4 / FP4 quantization backend. Proven across Qwen 0.5B through DeepSeek-R1 32B.</span>
-        </div>
-        <div class="fr-card fr-card--mint fr-card--feature">
-          <span class="fr-pill">FIRST-CLASS</span>
-          <span class="fr-h3" style="font-size:16px">llama.cpp imatrix</span>
-          <span class="fr-lede" style="font-size:13px">imatrix quantization passes for IQ variants. K-score gated before the artifact signs.</span>
-        </div>
-        <div class="fr-card fr-card--feature">
-          <span class="fr-pill fr-pill--amber">COMING</span>
-          <span class="fr-h3" style="font-size:16px">mergekit</span>
-          <span class="fr-lede" style="font-size:13px">TIES / DARE / SLERP merges before distillation. Layered into the compile recipe DAG.</span>
-        </div>
-      </div>
+      <ul class="fr-spec-list eco-list">
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>Unsloth Dynamic 2.0</h3><span class="fr-spec-list__delta">FIRST-CLASS</span></div>
+          <p class="fr-spec-list__p">Default GGUF compile engine for K-score retention. Layer-by-layer dynamic quant in the compile path.</p>
+        </li>
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>bitsandbytes</h3><span class="fr-spec-list__delta">FIRST-CLASS</span></div>
+          <p class="fr-spec-list__p">NF4 / FP4 quantization backend. Proven across Qwen 0.5B through DeepSeek-R1 32B.</p>
+        </li>
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>llama.cpp imatrix</h3><span class="fr-spec-list__delta">FIRST-CLASS</span></div>
+          <p class="fr-spec-list__p">imatrix quantization passes for IQ variants. K-score gated before the artifact signs.</p>
+        </li>
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>mergekit</h3><span class="fr-spec-list__delta eco-list__delta--coming">COMING</span></div>
+          <p class="fr-spec-list__p">TIES / DARE / SLERP merges before distillation. Layered into the compile recipe DAG.</p>
+        </li>
+      </ul>
     </div>
 
     <div class="fr-reveal" style="margin-top: var(--ks-7)">
       <h3 class="fr-h3">Group B &middot; Runtimes and inference</h3>
       <p class="fr-lede" style="font-size:14px;color:var(--ks-ink-3);max-width:60ch">Where the signed .kolm artifact actually serves tokens. Pick one or compile to several.</p>
-      <div class="fr-grid-3" style="margin-top: var(--ks-4)">
-        <div class="fr-card fr-card--mint fr-card--feature">
-          <span class="fr-pill">FIRST-CLASS</span>
-          <span class="fr-h3" style="font-size:16px">llama.cpp</span>
-          <span class="fr-lede" style="font-size:13px">GGUF + IQ runtime, CPU + Metal + CUDA. The portable on-prem default.</span>
-        </div>
-        <div class="fr-card fr-card--mint fr-card--feature">
-          <span class="fr-pill">FIRST-CLASS</span>
-          <span class="fr-h3" style="font-size:16px">vLLM</span>
-          <span class="fr-lede" style="font-size:13px">PagedAttention plus speculative decoding. The throughput-first server preset.</span>
-        </div>
-        <div class="fr-card fr-card--mint fr-card--feature">
-          <span class="fr-pill">FIRST-CLASS</span>
-          <span class="fr-h3" style="font-size:16px">TensorRT-LLM</span>
-          <span class="fr-lede" style="font-size:13px">NVIDIA FP8 / NVFP4 production preset. Compile target for Blackwell deployments.</span>
-        </div>
-        <div class="fr-card fr-card--mint fr-card--feature">
-          <span class="fr-pill">FIRST-CLASS</span>
-          <span class="fr-h3" style="font-size:16px">ONNX Runtime</span>
-          <span class="fr-lede" style="font-size:13px">Cross-platform reference runtime. The portable verifier substrate.</span>
-        </div>
-        <div class="fr-card fr-card--feature">
-          <span class="fr-pill fr-pill--amber">COMING</span>
-          <span class="fr-h3" style="font-size:16px">ExecuTorch</span>
-          <span class="fr-lede" style="font-size:13px">iOS and Android on-device. The mobile compile target on the W6xx roadmap.</span>
-        </div>
-        <div class="fr-card fr-card--feature">
-          <span class="fr-pill fr-pill--amber">COMING</span>
-          <span class="fr-h3" style="font-size:16px">MLX</span>
-          <span class="fr-lede" style="font-size:13px">Apple Silicon native. M-series unified-memory compile preset.</span>
-        </div>
-      </div>
+      <ul class="fr-spec-list eco-list">
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>llama.cpp</h3><span class="fr-spec-list__delta">FIRST-CLASS</span></div>
+          <p class="fr-spec-list__p">GGUF + IQ runtime, CPU + Metal + CUDA. The portable on-prem default.</p>
+        </li>
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>vLLM</h3><span class="fr-spec-list__delta">FIRST-CLASS</span></div>
+          <p class="fr-spec-list__p">PagedAttention plus speculative decoding. The throughput-first server preset.</p>
+        </li>
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>TensorRT-LLM</h3><span class="fr-spec-list__delta">FIRST-CLASS</span></div>
+          <p class="fr-spec-list__p">NVIDIA FP8 / NVFP4 production preset. Compile target for Blackwell deployments.</p>
+        </li>
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>ONNX Runtime</h3><span class="fr-spec-list__delta">FIRST-CLASS</span></div>
+          <p class="fr-spec-list__p">Cross-platform reference runtime. The portable verifier substrate.</p>
+        </li>
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>ExecuTorch</h3><span class="fr-spec-list__delta eco-list__delta--coming">COMING</span></div>
+          <p class="fr-spec-list__p">iOS and Android on-device. The mobile compile target on the W6xx roadmap.</p>
+        </li>
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>MLX</h3><span class="fr-spec-list__delta eco-list__delta--coming">COMING</span></div>
+          <p class="fr-spec-list__p">Apple Silicon native. M-series unified-memory compile preset.</p>
+        </li>
+      </ul>
     </div>
 
     <div class="fr-reveal" style="margin-top: var(--ks-7)">
       <h3 class="fr-h3">Group C &middot; Frameworks and agents</h3>
       <p class="fr-lede" style="font-size:14px;color:var(--ks-ink-3);max-width:60ch">The layers your application code already imports. Most are a single env var away.</p>
-      <div class="fr-grid-4" style="margin-top: var(--ks-4)">
-        <div class="fr-card fr-card--mint fr-card--feature">
-          <span class="fr-pill">FIRST-CLASS</span>
-          <span class="fr-h3" style="font-size:16px">LangChain</span>
-          <span class="fr-lede" style="font-size:13px">Drop-in via OPENAI_BASE_URL. Callback handler emits one capture row per chain step.</span>
-        </div>
-        <div class="fr-card fr-card--mint fr-card--feature">
-          <span class="fr-pill">FIRST-CLASS</span>
-          <span class="fr-h3" style="font-size:16px">LlamaIndex</span>
-          <span class="fr-lede" style="font-size:13px">Same drop-in path. Retrieval and synthesis steps land as captures.</span>
-        </div>
-        <div class="fr-card fr-card--mint fr-card--feature">
-          <span class="fr-pill">FIRST-CLASS</span>
-          <span class="fr-h3" style="font-size:16px">LangGraph</span>
-          <span class="fr-lede" style="font-size:13px">Agentic workflow capture. Every graph node becomes a distillable row.</span>
-        </div>
-        <div class="fr-card fr-card--feature">
-          <span class="fr-pill fr-pill--amber">COMING</span>
-          <span class="fr-h3" style="font-size:16px">CrewAI</span>
-          <span class="fr-lede" style="font-size:13px">Crew capture for agentic distillation. Tracks role and delegation per row.</span>
-        </div>
-        <div class="fr-card fr-card--feature">
-          <span class="fr-pill fr-pill--amber">COMING</span>
-          <span class="fr-h3" style="font-size:16px">AutoGen</span>
-          <span class="fr-lede" style="font-size:13px">Multi-agent capture. Conversation graph preserved through to compile.</span>
-        </div>
-        <div class="fr-card fr-card--mint fr-card--feature">
-          <span class="fr-pill">FIRST-CLASS</span>
-          <span class="fr-h3" style="font-size:16px">Vercel AI SDK</span>
-          <span class="fr-lede" style="font-size:13px">Frontend streaming compatibility. Token streams pass through unchanged.</span>
-        </div>
-        <div class="fr-card fr-card--feature">
-          <span class="fr-pill fr-pill--amber">COMING</span>
-          <span class="fr-h3" style="font-size:16px">Haystack</span>
-          <span class="fr-lede" style="font-size:13px">RAG and agent capture. Pipeline-aware row metadata.</span>
-        </div>
-      </div>
+      <ul class="fr-spec-list eco-list">
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>LangChain</h3><span class="fr-spec-list__delta">FIRST-CLASS</span></div>
+          <p class="fr-spec-list__p">Drop-in via <code>OPENAI_BASE_URL</code>. Callback handler emits one capture row per chain step.</p>
+        </li>
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>LlamaIndex</h3><span class="fr-spec-list__delta">FIRST-CLASS</span></div>
+          <p class="fr-spec-list__p">Same drop-in path. Retrieval and synthesis steps land as captures.</p>
+        </li>
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>LangGraph</h3><span class="fr-spec-list__delta">FIRST-CLASS</span></div>
+          <p class="fr-spec-list__p">Agentic workflow capture. Every graph node becomes a distillable row.</p>
+        </li>
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>Vercel AI SDK</h3><span class="fr-spec-list__delta">FIRST-CLASS</span></div>
+          <p class="fr-spec-list__p">Frontend streaming compatibility. Token streams pass through unchanged.</p>
+        </li>
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>CrewAI</h3><span class="fr-spec-list__delta eco-list__delta--coming">COMING</span></div>
+          <p class="fr-spec-list__p">Crew capture for agentic distillation. Tracks role and delegation per row.</p>
+        </li>
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>AutoGen</h3><span class="fr-spec-list__delta eco-list__delta--coming">COMING</span></div>
+          <p class="fr-spec-list__p">Multi-agent capture. Conversation graph preserved through to compile.</p>
+        </li>
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>Haystack</h3><span class="fr-spec-list__delta eco-list__delta--coming">COMING</span></div>
+          <p class="fr-spec-list__p">RAG and agent capture. Pipeline-aware row metadata.</p>
+        </li>
+      </ul>
     </div>
 
     <div class="fr-reveal" style="margin-top: var(--ks-7)">
       <h3 class="fr-h3">Group D &middot; Editors and IDEs</h3>
       <p class="fr-lede" style="font-size:14px;color:var(--ks-ink-3);max-width:60ch">Every developer surface where you write code. Wired in one command via the kolm CLI installer.</p>
-      <div class="fr-grid-4" style="margin-top: var(--ks-4)">
-        <div class="fr-card fr-card--mint fr-card--feature">
-          <span class="fr-pill">FIRST-CLASS</span>
-          <span class="fr-h3" style="font-size:16px">Cursor</span>
-          <span class="fr-lede" style="font-size:13px"><code>kolm install cursor</code> wires API key plus env. MCP-resident.</span>
-        </div>
-        <div class="fr-card fr-card--mint fr-card--feature">
-          <span class="fr-pill">FIRST-CLASS</span>
-          <span class="fr-h3" style="font-size:16px">Claude Code</span>
-          <span class="fr-lede" style="font-size:13px"><code>kolm install claude-code</code>. MCP server exposes the kolm verbs as tools.</span>
-        </div>
-        <div class="fr-card fr-card--mint fr-card--feature">
-          <span class="fr-pill">FIRST-CLASS</span>
-          <span class="fr-h3" style="font-size:16px">Aider</span>
-          <span class="fr-lede" style="font-size:13px"><code>kolm install aider</code>. Terminal-first AI pair programmer with kolm capture.</span>
-        </div>
-        <div class="fr-card fr-card--mint fr-card--feature">
-          <span class="fr-pill">FIRST-CLASS</span>
-          <span class="fr-h3" style="font-size:16px">VS Code</span>
-          <span class="fr-lede" style="font-size:13px">Official extension. Status-bar K-score on the active .kolm file.</span>
-        </div>
-        <div class="fr-card fr-card--feature">
-          <span class="fr-pill fr-pill--amber">COMING</span>
-          <span class="fr-h3" style="font-size:16px">Windsurf</span>
-          <span class="fr-lede" style="font-size:13px">Drop-in via OPENAI_BASE_URL. Codeium's editor with kolm gateway routing.</span>
-        </div>
-      </div>
+      <ul class="fr-spec-list eco-list">
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>Cursor</h3><span class="fr-spec-list__delta">FIRST-CLASS</span></div>
+          <p class="fr-spec-list__p"><code>kolm install cursor</code> wires API key plus env. MCP-resident.</p>
+        </li>
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>Claude Code</h3><span class="fr-spec-list__delta">FIRST-CLASS</span></div>
+          <p class="fr-spec-list__p"><code>kolm install claude-code</code>. MCP server exposes the kolm verbs as tools.</p>
+        </li>
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>Aider</h3><span class="fr-spec-list__delta">FIRST-CLASS</span></div>
+          <p class="fr-spec-list__p"><code>kolm install aider</code>. Terminal-first AI pair programmer with kolm capture.</p>
+        </li>
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>VS Code</h3><span class="fr-spec-list__delta">FIRST-CLASS</span></div>
+          <p class="fr-spec-list__p">Official extension. Status-bar K-score on the active <code>.kolm</code> file.</p>
+        </li>
+        <li class="fr-spec-list__row">
+          <div class="fr-spec-list__head"><h3>Windsurf</h3><span class="fr-spec-list__delta eco-list__delta--coming">COMING</span></div>
+          <p class="fr-spec-list__p">Drop-in via <code>OPENAI_BASE_URL</code>. Codeium's editor with kolm gateway routing.</p>
+        </li>
+      </ul>
     </div>
   </div>
 </section>
@@ -523,26 +515,24 @@
     <div class="fr-eyebrow">W621 &middot; Publish your artifact</div>
     <h2 class="fr-h2">Push to Hugging Face or GitHub.</h2>
     <p class="fr-lede">A signed .kolm is yours to share. Push the artifact and its receipt to the registry your team already uses; downstream consumers verify the signature against the public CID.</p>
-    <div class="fr-grid-2" style="margin-top: var(--ks-5)">
-      <div class="fr-card fr-card--feature">
-        <span class="fr-pill">FIRST-CLASS</span>
-        <span class="fr-h3" style="font-size:16px">Hugging Face</span>
-        <span class="fr-lede" style="font-size:13px">Push the GGUF and the receipt as a repo. Sets the model card up with the K-score, the verify CID, and the recipe hash.</span>
+    <ul class="fr-spec-list eco-list" style="margin-top: var(--ks-5)">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Hugging Face</h3><span class="fr-spec-list__delta">FIRST-CLASS</span></div>
+        <p class="fr-spec-list__p">Push the GGUF and the receipt as a repo. Sets the model card up with the K-score, the verify CID, and the recipe hash.</p>
         <div class="fr-cli" style="margin-top: var(--ks-3)">
           <span class="fr-cli__prompt">$</span> kolm push hf <span class="fr-cli__flag">&lt;artifact-cid&gt;</span>
           <span class="fr-cli__comment"># pushes to your-org/your-model on huggingface.co</span>
         </div>
-      </div>
-      <div class="fr-card fr-card--feature">
-        <span class="fr-pill">FIRST-CLASS</span>
-        <span class="fr-h3" style="font-size:16px">GitHub Releases</span>
-        <span class="fr-lede" style="font-size:13px">Push as a GitHub release asset. Receipt and recipe attached; downstream CI consumers verify the CID before pulling.</span>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>GitHub Releases</h3><span class="fr-spec-list__delta">FIRST-CLASS</span></div>
+        <p class="fr-spec-list__p">Push as a GitHub release asset. Receipt and recipe attached; downstream CI consumers verify the CID before pulling.</p>
         <div class="fr-cli" style="margin-top: var(--ks-3)">
           <span class="fr-cli__prompt">$</span> kolm push github <span class="fr-cli__flag">&lt;artifact-cid&gt;</span>
           <span class="fr-cli__comment"># attaches .kolm + receipt to the latest release</span>
         </div>
-      </div>
-    </div>
+      </li>
+    </ul>
     <div style="margin-top:var(--ks-5); display:flex; flex-wrap:wrap; gap:var(--ks-3)">
       <a href="/quickstart" class="fr-btn fr-btn--mint">Quickstart <span aria-hidden="true">&rarr;</span></a>
       <a href="/forge" class="fr-btn fr-btn--ghost">Forge recipes</a>
@@ -597,24 +587,24 @@
     <h2>The contract every adapter honors</h2>
     <p class="sub">Eighteen adapters, one contract. A developer or engineer who reads one integration page can predict the shape of every other one.</p>
     <div class="bm-grid" style="display:none"></div>
-    <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: var(--ks-4);" class="cgrid">
-      <div class="cat" style="margin:0">
-        <div class="cat-head"><span class="tag">install</span><h3>One install line, one env var</h3><span class="count">stable</span></div>
-        <p class="gd">Every adapter page leads with a single install command and the env vars that need to be set. <code>KOLM_API_KEY</code> is the only required one; <code>KOLM_BASE_URL</code> when self-hosted. The CLI writes the key to <code>~/.kolm/credentials</code> on <code>kolm login</code>, so most adapters work without manual env wiring.</p>
-      </div>
-      <div class="cat" style="margin:0">
-        <div class="cat-head"><span class="tag">verify</span><h3>Verify step in the install path</h3><span class="count">stable</span></div>
-        <p class="gd">Every adapter ships a verification step. For IDE plugins it is the status-bar reading the tenant. For CI it is a no-op <code>kolm whoami</code> in the pipeline. For gateway proxies it is a single captured row appearing in the local store. If the verify step does not pass, the install did not work.</p>
-      </div>
-      <div class="cat" style="margin:0">
-        <div class="cat-head"><span class="tag">envelope</span><h3>Honest envelope passes through</h3><span class="count">stable</span></div>
-        <p class="gd">Every adapter preserves the <code>{ok, code, error, data}</code> envelope. No adapter hides a 4xx behind a success message. The OpenAI and Anthropic SDK adapters surface kolm errors next to the upstream provider errors so a developer sees both layers.</p>
-      </div>
-      <div class="cat" style="margin:0">
-        <div class="cat-head"><span class="tag">scope</span><h3>Honest scope per adapter</h3><span class="count">stable</span></div>
-        <p class="gd">If an adapter does not yet cover a kolm verb (e.g. the Cloudflare binding is verify-only; it does not compile), the adapter page says so explicitly. No silent gaps; no "coming soon" without a date. The <a href="/changelog" style="color:var(--ks-accent)">/changelog</a> records every adapter capability change.</p>
-      </div>
-    </div>
+    <ul class="fr-spec-list int-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>One install line, one env var</h3><span class="fr-spec-list__delta">install &middot; stable</span></div>
+        <p class="fr-spec-list__p">Every adapter page leads with a single install command and the env vars that need to be set. <code>KOLM_API_KEY</code> is the only required one; <code>KOLM_BASE_URL</code> when self-hosted. The CLI writes the key to <code>~/.kolm/credentials</code> on <code>kolm login</code>, so most adapters work without manual env wiring.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Verify step in the install path</h3><span class="fr-spec-list__delta">verify &middot; stable</span></div>
+        <p class="fr-spec-list__p">Every adapter ships a verification step. For IDE plugins it is the status-bar reading the tenant. For CI it is a no-op <code>kolm whoami</code> in the pipeline. For gateway proxies it is a single captured row appearing in the local store. If the verify step does not pass, the install did not work.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Honest envelope passes through</h3><span class="fr-spec-list__delta">envelope &middot; stable</span></div>
+        <p class="fr-spec-list__p">Every adapter preserves the <code>{ok, code, error, data}</code> envelope. No adapter hides a 4xx behind a success message. The OpenAI and Anthropic SDK adapters surface kolm errors next to the upstream provider errors so a developer sees both layers.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Honest scope per adapter</h3><span class="fr-spec-list__delta">scope &middot; stable</span></div>
+        <p class="fr-spec-list__p">If an adapter does not yet cover a kolm verb (e.g. the Cloudflare binding is verify-only; it does not compile), the adapter page says so explicitly. No silent gaps; no "coming soon" without a date. The <a href="/changelog" style="color:var(--ks-accent)">/changelog</a> records every adapter capability change.</p>
+      </li>
+    </ul>
   </div>
 </section>
 
@@ -622,26 +612,23 @@
   <div class="ks-wrap">
     <h2>Missing an adapter? File a request.</h2>
     <p class="sub">Honest scope: the eighteen integrations above are the ones that ship and that we test on every release. If your stack uses something else, the fastest path is an issue with the use case described.</p>
-    <div class="int-grid">
-      <a class="int-card" href="https://github.com/sneaky-hippo/kolmogorov-stack/issues" rel="noopener">
-        <span class="st wip">Open</span>
-        <span class="name">Open a GitHub issue</span>
-        <span class="desc">Tag <code>integration-request</code>. Describe the stack, the use case, and the verb you would invoke.</span>
-        <span class="meta">github.com</span>
-      </a>
-      <a class="int-card" href="/sdks">
-        <span class="st live">Available</span>
-        <span class="name">Build your own with an SDK</span>
-        <span class="desc">The six SDKs all wrap the same /v1 surface. A 50-line integration is often a half-day's work.</span>
-        <span class="meta">/sdks</span>
-      </a>
-      <a class="int-card" href="/contact">
-        <span class="st live">Available</span>
-        <span class="name">Talk to a solutions engineer</span>
-        <span class="desc">For regulated or enterprise deployments where the integration needs review. <a href="/enterprise" style="color:var(--ks-accent)">/enterprise</a>.</span>
-        <span class="meta">/contact</span>
-      </a>
-    </div>
+    <ul class="fr-spec-list int-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Open a GitHub issue</h3><span class="fr-spec-list__delta int-list__delta--wip">OPEN &middot; github.com</span></div>
+        <p class="fr-spec-list__p">Tag <code>integration-request</code>. Describe the stack, the use case, and the verb you would invoke.</p>
+        <a class="fr-spec-list__cta" href="https://github.com/sneaky-hippo/kolmogorov-stack/issues" rel="noopener">File a request</a>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Build your own with an SDK</h3><span class="fr-spec-list__delta">AVAILABLE &middot; /sdks</span></div>
+        <p class="fr-spec-list__p">The six SDKs all wrap the same <code>/v1</code> surface. A 50-line integration is often a half-day's work.</p>
+        <a class="fr-spec-list__cta" href="/sdks">Browse SDKs</a>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Talk to a solutions engineer</h3><span class="fr-spec-list__delta">AVAILABLE &middot; /contact</span></div>
+        <p class="fr-spec-list__p">For regulated or enterprise deployments where the integration needs review. See <a href="/enterprise" style="color:var(--ks-accent)">/enterprise</a>.</p>
+        <a class="fr-spec-list__cta" href="/contact">Book a call</a>
+      </li>
+    </ul>
     <div style="margin-top:var(--ks-6); display:flex; flex-wrap:wrap; gap:var(--ks-3)">
       <a href="/quickstart" class="ks-btn ks-btn--primary">Install the CLI <span class="ks-btn-arrow">&rarr;</span></a>
       <a href="/sdks" class="ks-btn ks-btn--ghost">SDK bindings</a>

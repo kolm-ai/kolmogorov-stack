@@ -246,7 +246,9 @@
         "/pricing",
         "/teams",
         "/v1/account",
-        "/v1/billing/tiers"
+        "/v1/billing/tiers",
+        "/v1/account/sso/status",
+        "/v1/scim/v2/ServiceProviderConfig"
       ],
       "code_paths": [
         "src/auth.js",
@@ -345,6 +347,32 @@
           ]
         },
         {
+          "id": "account-sso-status-auth",
+          "method": "GET",
+          "path": "/v1/account/sso/status",
+          "auth": "required",
+          "mode": "safe",
+          "expect": [
+            200
+          ],
+          "checks": [
+            "json"
+          ]
+        },
+        {
+          "id": "scim-service-provider-config-public",
+          "method": "GET",
+          "path": "/v1/scim/v2/ServiceProviderConfig",
+          "auth": "none",
+          "mode": "safe",
+          "expect": [
+            200
+          ],
+          "checks": [
+            "json"
+          ]
+        },
+        {
           "id": "teams-auth",
           "method": "GET",
           "path": "/v1/teams",
@@ -388,7 +416,9 @@
         "spec-decode",
         "library",
         "recipes",
-        "registry"
+        "registry",
+        "packages",
+        "evidence"
       ],
       "primary_paths": [
         "/",
@@ -399,22 +429,53 @@
         "/sdk-current.json",
         "/v1/product/experience",
         "/v1/product/graph",
-        "/v1/spec"
+        "/v1/product/frontier-lab",
+        "/v1/product/frontier-contracts",
+        "/v1/product/operator-kernels",
+        "/v1/evidence/readiness",
+        "/v1/packages/release-readiness",
+        "/v1/packages/release-readiness/template",
+        "/v1/spec",
+        "/v1/spec/governance-packet",
+        "/v1/spec/governance-packet/template",
+        "/v1/spec/governance-packet/validate"
       ],
       "code_paths": [
         "server.js",
         "src/product-experience.js",
+        "src/evidence-readiness.js",
+        "src/product-frontier-lab.js",
+        "src/product-frontier-contracts.js",
+        "src/product-frontier-operator-kernels.js",
+        "src/package-release-readiness.js",
         "scripts/build-api-ref.cjs",
         "scripts/build-openapi.cjs",
+        "scripts/package-release-readiness.mjs",
+        "scripts/format-governance-packet.mjs",
+        "src/format-governance-packet.js",
         "scripts/build-readiness-closeout.cjs",
         "scripts/build-sdk-version.js",
-        "public/docs/api-routes.json"
+        "public/docs/api-routes.json",
+        "packages/sdk-ts/dist/index.js",
+        "packages/sdk-rn/dist/index.js",
+        "tests/wave591-package-local-build-contract.test.js"
       ],
       "doc_paths": [
         "docs/PRODUCT.md",
         "docs/product-journeys.json",
+        "docs/product-frontier-lab.json",
+        "docs/research/product-frontier-lab-2026-05-23.md",
+        "docs/product-frontier-implementation-contracts.json",
+        "docs/research/product-frontier-implementation-contracts-2026-05-23.md",
+        "docs/product-frontier-operator-kernels.json",
+        "docs/research/product-frontier-operator-kernels-2026-05-23.md",
+        "docs/package-release-readiness.md",
+        "docs/format-governance-packet.md",
         "docs/research/api-docs-contract-drift-audit-2026-05-12.md",
-        "docs/research/sdk-cli-integration-audit-2026-05-12.md"
+        "docs/research/sdk-cli-integration-audit-2026-05-12.md",
+        "packages/sdk-ts/README.md",
+        "packages/sdk-rn/README.md",
+        "packages/attestation/README.md"
       ],
       "competitor_refs": [
         "openai-finetune",
@@ -431,7 +492,13 @@
           "node scripts/local-surface-smoke.cjs --json --surface=public-docs-sdk",
           "node scripts/build-api-ref.cjs",
           "node scripts/build-openapi.cjs",
-          "npm run lint:refs"
+          "kolm evidence --summary --require-local-contract",
+          "npm run verify:governance-packets",
+          "npm run lint:refs",
+          "npm run verify:package-release",
+          "npm run verify:frontier-contracts",
+          "npm run verify:operator-kernels",
+          "node --test --test-concurrency=1 tests/wave591-package-local-build-contract.test.js"
         ],
         "prod_gates": [
           "GET https://kolm.ai/docs/api",
@@ -527,9 +594,74 @@
           ]
         },
         {
+          "id": "product-frontier-lab",
+          "method": "GET",
+          "path": "/v1/product/frontier-lab",
+          "auth": "none",
+          "mode": "safe",
+          "expect": [
+            200
+          ],
+          "checks": [
+            "json"
+          ]
+        },
+        {
+          "id": "product-frontier-contracts",
+          "method": "GET",
+          "path": "/v1/product/frontier-contracts",
+          "auth": "none",
+          "mode": "safe",
+          "expect": [
+            200
+          ],
+          "checks": [
+            "json"
+          ]
+        },
+        {
+          "id": "product-operator-kernels",
+          "method": "GET",
+          "path": "/v1/product/operator-kernels",
+          "auth": "none",
+          "mode": "safe",
+          "expect": [
+            200
+          ],
+          "checks": [
+            "json"
+          ]
+        },
+        {
+          "id": "evidence-readiness",
+          "method": "GET",
+          "path": "/v1/evidence/readiness",
+          "auth": "none",
+          "mode": "safe",
+          "expect": [
+            200
+          ],
+          "checks": [
+            "json"
+          ]
+        },
+        {
           "id": "product-readiness-closeout",
           "method": "GET",
           "path": "/product-readiness-closeout.json",
+          "auth": "none",
+          "mode": "safe",
+          "expect": [
+            200
+          ],
+          "checks": [
+            "json"
+          ]
+        },
+        {
+          "id": "package-release-template",
+          "method": "GET",
+          "path": "/v1/packages/release-readiness/template",
           "auth": "none",
           "mode": "safe",
           "expect": [
@@ -565,6 +697,46 @@
           "checks": [
             "json"
           ]
+        },
+        {
+          "id": "spec-governance-packet-public",
+          "method": "GET",
+          "path": "/v1/spec/governance-packet",
+          "auth": "none",
+          "mode": "safe",
+          "expect": [
+            200
+          ],
+          "checks": [
+            "json"
+          ]
+        },
+        {
+          "id": "spec-governance-template-public",
+          "method": "GET",
+          "path": "/v1/spec/governance-packet/template",
+          "auth": "none",
+          "mode": "safe",
+          "expect": [
+            200
+          ],
+          "checks": [
+            "json"
+          ]
+        },
+        {
+          "id": "spec-governance-validate-public",
+          "method": "POST",
+          "path": "/v1/spec/governance-packet/validate",
+          "auth": "none",
+          "mode": "safe",
+          "expect": [
+            422
+          ],
+          "checks": [
+            "json"
+          ],
+          "body": {}
         }
       ],
       "status": "certified"
@@ -578,6 +750,7 @@
         "builds",
         "builder",
         "compile",
+        "quantization",
         "jobs",
         "synthesize",
         "artifacts",
@@ -597,17 +770,22 @@
         "/run",
         "/registry",
         "/v1/compile",
+        "/v1/quantization/oracle",
         "/v1/artifacts",
         "/v1/verify"
       ],
       "code_paths": [
         "src/compile.js",
+        "src/quantization-oracle.js",
+        "src/build-strategy-brain.js",
         "src/artifact.js",
         "src/artifact-runner.js",
         "src/production-ready.js",
         "src/registry.js",
         "src/marketplace.js",
         "src/sigstore.js",
+        "scripts/quantization-oracle.mjs",
+        "scripts/build-strategy-brain.mjs",
         "cli/kolm.js"
       ],
       "doc_paths": [
@@ -626,11 +804,13 @@
         "Artifact manifests bind source, evals, K-score, provenance, runtime target, signature, CID, and optional transparency-log state.",
         "Every publish path enforces productionReady unless explicitly forced with an auditable reason.",
         "Registry and marketplace rows distinguish verified, yanked, deprecated, and manual-review states.",
+        "Build planning ranks collect, RAG, routing, train/distill, cloud compute, compile, quantization, and runtime paths before any expensive job starts.",
         "Cloud compile must be durable across restarts before enterprise-final claims."
       ],
       "certification": {
         "local_gates": [
           "node scripts/local-surface-smoke.cjs --json --surface=compile-artifact-verification",
+          "npm run verify:build-strategy",
           "node cli/kolm.js verify examples/claims-redactor/claims-redactor.kolm --json",
           "node scripts/release-verify.cjs --json --skip=doctor,whoami"
         ],
@@ -657,6 +837,26 @@
           "checks": [
             "json"
           ]
+        },
+        {
+          "id": "quantization-oracle-auth",
+          "method": "POST",
+          "path": "/v1/quantization/oracle",
+          "auth": "required",
+          "mode": "safe",
+          "expect": [
+            200
+          ],
+          "checks": [
+            "json"
+          ],
+          "body": {
+            "task": "extraction",
+            "device": "rtx-4090-24gb",
+            "params_b": 7,
+            "context_tokens": 8192,
+            "calibration_rows": 256
+          }
         },
         {
           "id": "artifact-list-auth",
@@ -724,6 +924,41 @@
           ]
         },
         {
+          "id": "build-strategy-catalog-auth",
+          "method": "GET",
+          "path": "/v1/build/strategy/catalog",
+          "auth": "required",
+          "mode": "safe",
+          "expect": [
+            200
+          ],
+          "checks": [
+            "json"
+          ]
+        },
+        {
+          "id": "build-strategy-plan-deep",
+          "method": "POST",
+          "path": "/v1/build/strategy",
+          "auth": "required",
+          "mode": "deep",
+          "expect": [
+            200
+          ],
+          "checks": [
+            "json"
+          ],
+          "body": {
+            "task": "generation",
+            "namespace": "surface-smoke",
+            "real_pairs": 1500,
+            "holdout_pairs": 300,
+            "no_local_gpu": true,
+            "params_b": 7,
+            "context_tokens": 8192
+          }
+        },
+        {
           "id": "compile-deep-auth",
           "method": "POST",
           "path": "/v1/compile",
@@ -789,7 +1024,10 @@
         "/integrations/anthropic-sdk",
         "/v1/chat/completions",
         "/v1/responses",
-        "/v1/models"
+        "/v1/models",
+        "/v1/runtime/adoption-packets",
+        "/v1/runtime/adoption-packets/template",
+        "/v1/runtime/adoption-packets/validate"
       ],
       "code_paths": [
         "src/runtime.js",
@@ -800,12 +1038,15 @@
         "src/assistant.js",
         "src/multimodal-bakeoff.js",
         "src/streaming-contract.js",
+        "src/runtime-adoption-packets.js",
+        "scripts/runtime-adoption-packets.mjs",
         "cli/kolm.js"
       ],
       "doc_paths": [
         "docs/research/runtime-sandbox-threat-audit-2026-05-13.md",
         "docs/research/sdk-cli-integration-audit-2026-05-12.md",
-        "docs/research/competitor-landscape-2026-05-12.md"
+        "docs/research/competitor-landscape-2026-05-12.md",
+        "docs/runtime-adoption-packets.md"
       ],
       "competitor_refs": [
         "openai-prompt-caching",
@@ -822,6 +1063,7 @@
       "certification": {
         "local_gates": [
           "node scripts/local-surface-smoke.cjs --json --surface=runtime-inference-connectors",
+          "npm run verify:governance-packets",
           "SDK smoke against local server",
           "runtime sandbox threat audit"
         ],
@@ -863,6 +1105,48 @@
           "checks": [
             "json"
           ]
+        },
+        {
+          "id": "runtime-adoption-packets-public",
+          "method": "GET",
+          "path": "/v1/runtime/adoption-packets",
+          "auth": "none",
+          "mode": "safe",
+          "expect": [
+            200
+          ],
+          "checks": [
+            "json"
+          ]
+        },
+        {
+          "id": "runtime-adoption-template-public",
+          "method": "GET",
+          "path": "/v1/runtime/adoption-packets/template",
+          "auth": "none",
+          "mode": "safe",
+          "expect": [
+            200
+          ],
+          "checks": [
+            "json"
+          ]
+        },
+        {
+          "id": "runtime-adoption-validate-public",
+          "method": "POST",
+          "path": "/v1/runtime/adoption-packets/validate",
+          "auth": "none",
+          "mode": "safe",
+          "expect": [
+            422
+          ],
+          "checks": [
+            "json"
+          ],
+          "body": {
+            "targets": []
+          }
         },
         {
           "id": "runtime-policy-auth",
@@ -1021,7 +1305,12 @@
         "/account/lake",
         "/v1/capture/log",
         "/v1/datasets",
-        "/v1/distill/from-captures"
+        "/v1/eval/k-score-calibration",
+        "/v1/eval/benchmark-evidence",
+        "/v1/eval/benchmark-evidence/template",
+        "/v1/eval/quality-calibration",
+        "/v1/distill/from-captures",
+        "/v1/distill/strategy"
       ],
       "code_paths": [
         "src/capture-store.js",
@@ -1030,6 +1319,14 @@
         "src/label-queue.js",
         "src/lake.js",
         "src/distill*.js",
+        "src/distill-strategy.js",
+        "src/kscore-bench.js",
+        "src/benchmark-evidence.js",
+        "src/quality-calibration.js",
+        "scripts/distill-strategy.mjs",
+        "scripts/benchmark-evidence.mjs",
+        "scripts/bench-quality-calibration.mjs",
+        "scripts/quality-calibration.mjs",
         "src/simulation.js",
         "src/training-planner.js",
         "src/workflow-ir.js",
@@ -1039,7 +1336,9 @@
       "doc_paths": [
         "docs/research/capture-distillation-governance-audit-2026-05-12.md",
         "docs/research/trace-eval-schema-spec-2026-05-13.md",
-        "docs/research/external-score-normalization-audit-2026-05-13.md"
+        "docs/research/external-score-normalization-audit-2026-05-13.md",
+        "docs/benchmark-evidence.md",
+        "docs/quality-calibration.md"
       ],
       "competitor_refs": [
         "langsmith-evals",
@@ -1057,6 +1356,9 @@
       "certification": {
         "local_gates": [
           "node scripts/local-surface-smoke.cjs --json --surface=capture-data-eval-training",
+          "npm run verify:kscore-calibration",
+          "npm run verify:benchmark-evidence",
+          "npm run verify:quality-calibration",
           "node cli/kolm.js doctor --loop --json",
           "trace/eval schema fixture checks"
         ],
@@ -1103,6 +1405,58 @@
           "method": "GET",
           "path": "/v1/datasets",
           "auth": "required",
+          "mode": "safe",
+          "expect": [
+            200
+          ],
+          "checks": [
+            "json"
+          ]
+        },
+        {
+          "id": "k-score-calibration-public",
+          "method": "GET",
+          "path": "/v1/eval/k-score-calibration",
+          "auth": "none",
+          "mode": "safe",
+          "expect": [
+            200
+          ],
+          "checks": [
+            "json"
+          ]
+        },
+        {
+          "id": "benchmark-evidence-public",
+          "method": "GET",
+          "path": "/v1/eval/benchmark-evidence",
+          "auth": "none",
+          "mode": "safe",
+          "expect": [
+            200
+          ],
+          "checks": [
+            "json"
+          ]
+        },
+        {
+          "id": "benchmark-evidence-template-public",
+          "method": "GET",
+          "path": "/v1/eval/benchmark-evidence/template",
+          "auth": "none",
+          "mode": "safe",
+          "expect": [
+            200
+          ],
+          "checks": [
+            "json"
+          ]
+        },
+        {
+          "id": "quality-calibration-public",
+          "method": "GET",
+          "path": "/v1/eval/quality-calibration",
+          "auth": "none",
           "mode": "safe",
           "expect": [
             200
@@ -1175,6 +1529,28 @@
           "checks": [
             "json"
           ]
+        },
+        {
+          "id": "distill-strategy-auth",
+          "method": "POST",
+          "path": "/v1/distill/strategy",
+          "auth": "required",
+          "mode": "safe",
+          "expect": [
+            200
+          ],
+          "checks": [
+            "json"
+          ],
+          "body": {
+            "task": "extraction",
+            "namespace": "surface-smoke",
+            "real_pairs": 600,
+            "holdout_pairs": 120,
+            "teachers": [
+              "local"
+            ]
+          }
         },
         {
           "id": "capture-log-deep-auth",
@@ -1251,7 +1627,8 @@
         "agents",
         "session",
         "lead",
-        "loop"
+        "loop",
+        "compliance"
       ],
       "primary_paths": [
         "/security",
@@ -1260,21 +1637,30 @@
         "/account/audit-log",
         "/v1/audit/log",
         "/v1/privacy/scan",
-        "/v1/trace/append"
+        "/v1/privacy/redaction-benchmark",
+        "/v1/trace/append",
+        "/v1/compliance/certification-packet",
+        "/v1/compliance/certification-packet/template",
+        "/v1/compliance/certification-packet/validate"
       ],
       "code_paths": [
         "src/audit.js",
         "src/privacy-membrane.js",
+        "src/redaction-benchmark.js",
         "src/notifications.js",
         "src/trace-capture.js",
         "src/artifact-lineage.js",
         "src/agent-telemetry.js",
-        "src/router.js"
+        "src/router.js",
+        "src/compliance-certification-packet.js",
+        "scripts/compliance-certification-packet.mjs",
+        "tests/wave592-compliance-certification-packet.test.js"
       ],
       "doc_paths": [
         "docs/research/compliance-security-posture-audit-2026-05-12.md",
         "docs/research/audit-observability-evidence-audit-2026-05-12.md",
-        "docs/research/tenant-data-lifecycle-audit-2026-05-12.md"
+        "docs/research/tenant-data-lifecycle-audit-2026-05-12.md",
+        "docs/compliance-certification-packet.md"
       ],
       "competitor_refs": [
         "langsmith-observability",
@@ -1291,15 +1677,20 @@
       "certification": {
         "local_gates": [
           "node scripts/local-surface-smoke.cjs --json --surface=governance-compliance-security",
+          "npm run verify:redaction-benchmark",
           "audit chain verifier",
           "privacy policy scan/redact behavior",
-          "route tenant-fence checks"
+          "route tenant-fence checks",
+          "npm run verify:compliance-packet",
+          "node --test --test-concurrency=1 tests/wave592-compliance-certification-packet.test.js"
         ],
         "prod_gates": [
           "authenticated compliance package export",
           "trace append/stats/export smoke",
           "audit log export smoke",
-          "privacy scan/redact smoke"
+          "privacy scan/redact smoke",
+          "GET https://kolm.ai/v1/compliance/certification-packet",
+          "GET https://kolm.ai/v1/compliance/certification-packet/template"
         ],
         "slo": "audit export and privacy policy routes must never expose cross-tenant data",
         "blockers": [],
@@ -1358,6 +1749,48 @@
           "checks": [
             "json"
           ]
+        },
+        {
+          "id": "privacy-redaction-benchmark-public",
+          "method": "GET",
+          "path": "/v1/privacy/redaction-benchmark",
+          "auth": "none",
+          "mode": "safe",
+          "expect": [
+            200
+          ],
+          "checks": [
+            "json"
+          ]
+        },
+        {
+          "id": "compliance-certification-template-public",
+          "method": "GET",
+          "path": "/v1/compliance/certification-packet/template",
+          "auth": "none",
+          "mode": "safe",
+          "expect": [
+            200
+          ],
+          "checks": [
+            "json"
+          ]
+        },
+        {
+          "id": "compliance-certification-validate-public",
+          "method": "POST",
+          "path": "/v1/compliance/certification-packet/validate",
+          "auth": "none",
+          "mode": "safe",
+          "expect": [
+            422
+          ],
+          "checks": [
+            "json"
+          ],
+          "body": {
+            "controls": []
+          }
         },
         {
           "id": "notifications-state-auth",
@@ -1519,7 +1952,8 @@
           "GET/POST /v1/devices/detect local smoke",
           "storage config smoke",
           "kolm cloud storage --provider local-artifacts --smoke --json",
-          "federated approval unit gates"
+          "federated approval unit gates",
+          "node --test --test-concurrency=1 tests/wave585-federated-robust-aggregation.test.js"
         ],
         "prod_gates": [
           "authenticated device list/register/test smoke",

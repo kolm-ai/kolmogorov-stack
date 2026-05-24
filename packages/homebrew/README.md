@@ -18,10 +18,10 @@ kolm --version
 
 ## Releasing a new version
 
-1. Tag a release on `sneaky-hippo/kolm-stack` (`v0.1.x`).
+1. Tag a release on `sneaky-hippo/kolm-stack` (`v0.2.x`).
 2. Compute the tarball SHA-256:
    ```sh
-   curl -fL https://github.com/sneaky-hippo/kolm-stack/archive/refs/tags/v0.1.0.tar.gz | shasum -a 256
+   curl -fL https://github.com/sneaky-hippo/kolm-stack/archive/refs/tags/v0.2.6.tar.gz | shasum -a 256
    ```
 3. Update `url` + `sha256` in `kolm.rb`.
 4. Open a PR against `homebrew/sneaky-hippo/kolm` (the tap repo).

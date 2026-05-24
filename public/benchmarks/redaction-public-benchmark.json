@@ -1,0 +1,204 @@
+{
+  "spec": "kolm-redaction-benchmark-1",
+  "ok": true,
+  "fixture": "test/fixtures/redaction-public-benchmark.json",
+  "generated_at": "2026-05-23T00:00:00.000Z",
+  "thresholds": {
+    "min_f1": 0.95,
+    "min_recall": 0.95,
+    "max_false_positives": 0
+  },
+  "totals": {
+    "tp": 9,
+    "fp": 0,
+    "fn": 0,
+    "precision": 1,
+    "recall": 1,
+    "f1": 1
+  },
+  "per_type": {
+    "ssn": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    },
+    "phone": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    },
+    "email": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    },
+    "dob": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    },
+    "npi": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    },
+    "mrn": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    },
+    "account_no": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    },
+    "address_fragment": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    },
+    "ssn_malformed": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    }
+  },
+  "cases": [
+    {
+      "id": "safe-harbor-common-contact",
+      "expected": 4,
+      "findings": 4,
+      "safe_to_send": true,
+      "per_type": {
+        "ssn": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        "phone": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        "email": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        "dob": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        }
+      },
+      "failures": []
+    },
+    {
+      "id": "provider-and-billing-identifiers",
+      "expected": 4,
+      "findings": 4,
+      "safe_to_send": true,
+      "per_type": {
+        "npi": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        "mrn": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        "account_no": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        "address_fragment": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        }
+      },
+      "failures": []
+    },
+    {
+      "id": "malformed-identifier-fails-closed",
+      "expected": 1,
+      "findings": 1,
+      "safe_to_send": false,
+      "per_type": {
+        "ssn_malformed": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        }
+      },
+      "failures": []
+    },
+    {
+      "id": "negative-control-no-identifiers",
+      "expected": 0,
+      "findings": 0,
+      "safe_to_send": true,
+      "per_type": {},
+      "failures": []
+    }
+  ],
+  "failures": [],
+  "note": "Synthetic public fixture benchmark only. It proves harness behavior and detector coverage on public examples; real-world or best-in-class claims require broader published benchmark data."
+}

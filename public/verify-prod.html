@@ -11,6 +11,8 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/frontier.css">
 <style>
   .sec-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
   .sec-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
@@ -82,8 +84,35 @@
   .pact dd code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-accent); }
   @media (max-width: 900px) { .pact dl { grid-template-columns: 1fr; gap: var(--ks-1) var(--ks-3); } .pact dt { padding-top: 0; } .pact dd { margin-bottom: var(--ks-3); } }
 </style>
+  <meta property="og:title" content="Verify a .kolm artifact &middot; kolm.ai">
+  <meta property="og:description" content="Drop a .kolm file in your browser. The page parses the manifest, recomputes the CID, checks the Ed25519 receipt chain, and reports the K-score gate result. Free, offline-capable, no signup.">
+  <meta property="og:image" content="https://kolm.ai/og/verify-prod.svg">
+  <meta property="og:url" content="https://kolm.ai/verify-prod">
+  <meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/verify-prod",
+  "description": "Drop a .kolm file in your browser. The page parses the manifest, recomputes the CID, checks the Ed25519 receipt chain, and reports the K-score gate result. Free, offline-capable, no signup.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
 </head>
 <body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <a href="#main" class="ks-skip">Skip to content</a>
 
@@ -155,40 +184,50 @@
   <div class="ks-wrap">
     <h2>What the verifier actually checks</h2>
     <p class="sub">Five steps, each one independently re-runnable from the CLI. A reviewer can reproduce every row in this report on a disconnected machine.</p>
-    <div class="grid-4" style="margin-bottom:var(--ks-4)">
-      <div class="step">
-        <div class="num">Step 1</div>
-        <h3>Parse the manifest</h3>
-        <p>Open the .kolm zip, read <code>manifest.json</code>, and confirm every required field is present: <code>artifact_cid</code>, <code>compiler_version</code>, <code>teacher</code>, <code>base_model</code>, <code>eval_pack</code>, <code>k_score</code>, <code>axes</code>, <code>signed_at</code>.</p>
-      </div>
-      <div class="step">
-        <div class="num">Step 2</div>
-        <h3>Recompute the CID</h3>
-        <p>Hash the canonical manifest payload with SHA-256 and check the result matches the <code>artifact_cid</code> in the manifest. A mismatch means the manifest was tampered with after signing.</p>
-      </div>
-      <div class="step">
-        <div class="num">Step 3</div>
-        <h3>Verify the signature chain</h3>
-        <p>For each signer in the chain, fetch the Ed25519 public key and verify the signature against the manifest hash. The chain ends at a kolm release key signed in CI on a tagged commit.</p>
-      </div>
-      <div class="step">
-        <div class="num">Step 4</div>
-        <h3>Replay the K-score gate</h3>
-        <p>Read the eval-pack name and the recorded score. Confirm the score meets the gate threshold that the eval pack declares. A failing K-score is reported as the verdict, not silently passed.</p>
-      </div>
-    </div>
-    <div class="grid-2">
-      <div class="step">
-        <div class="num">Step 5</div>
-        <h3>Cross-reference the registry</h3>
-        <p>If the artifact has a published CID, the page fetches the registry index entry and confirms the receipt CID matches. A mismatch points at a forked artifact that was not re-published, the verifier flags it as <code>cid-not-in-registry</code>.</p>
-      </div>
-      <div class="step">
-        <div class="num">Re-run</div>
-        <h3>Reproducible at the CLI</h3>
-        <p>The same five steps are exposed at <code>kolm verify ./model.kolm</code>. Same result, same exit code. Anything you see on this page can be re-run in CI or in an air-gapped environment.</p>
-      </div>
-    </div>
+    <ol class="fr-numbered-list vp-steps">
+      <li class="fr-numbered-list__row">
+        <span class="fr-numbered-list__k">01</span>
+        <div class="fr-numbered-list__body">
+          <h3 class="fr-numbered-list__h">Parse the manifest</h3>
+          <p class="fr-numbered-list__p">Open the .kolm zip, read <code>manifest.json</code>, and confirm every required field is present: <code>artifact_cid</code>, <code>compiler_version</code>, <code>teacher</code>, <code>base_model</code>, <code>eval_pack</code>, <code>k_score</code>, <code>axes</code>, <code>signed_at</code>.</p>
+        </div>
+      </li>
+      <li class="fr-numbered-list__row">
+        <span class="fr-numbered-list__k">02</span>
+        <div class="fr-numbered-list__body">
+          <h3 class="fr-numbered-list__h">Recompute the CID</h3>
+          <p class="fr-numbered-list__p">Hash the canonical manifest payload with SHA-256 and check the result matches the <code>artifact_cid</code> in the manifest. A mismatch means the manifest was tampered with after signing.</p>
+        </div>
+      </li>
+      <li class="fr-numbered-list__row">
+        <span class="fr-numbered-list__k">03</span>
+        <div class="fr-numbered-list__body">
+          <h3 class="fr-numbered-list__h">Verify the signature chain</h3>
+          <p class="fr-numbered-list__p">For each signer in the chain, fetch the Ed25519 public key and verify the signature against the manifest hash. The chain ends at a kolm release key signed in CI on a tagged commit.</p>
+        </div>
+      </li>
+      <li class="fr-numbered-list__row">
+        <span class="fr-numbered-list__k">04</span>
+        <div class="fr-numbered-list__body">
+          <h3 class="fr-numbered-list__h">Replay the K-score gate</h3>
+          <p class="fr-numbered-list__p">Read the eval-pack name and the recorded score. Confirm the score meets the gate threshold that the eval pack declares. A failing K-score is reported as the verdict, not silently passed.</p>
+        </div>
+      </li>
+      <li class="fr-numbered-list__row">
+        <span class="fr-numbered-list__k">05</span>
+        <div class="fr-numbered-list__body">
+          <h3 class="fr-numbered-list__h">Cross-reference the registry</h3>
+          <p class="fr-numbered-list__p">If the artifact has a published CID, the page fetches the registry index entry and confirms the receipt CID matches. A mismatch points at a forked artifact that was not re-published, the verifier flags it as <code>cid-not-in-registry</code>.</p>
+        </div>
+      </li>
+      <li class="fr-numbered-list__row">
+        <span class="fr-numbered-list__k">CLI</span>
+        <div class="fr-numbered-list__body">
+          <h3 class="fr-numbered-list__h">Reproducible at the CLI</h3>
+          <p class="fr-numbered-list__p">The same five steps are exposed at <code>kolm verify ./model.kolm</code>. Same result, same exit code. Anything you see on this page can be re-run in CI or in an air-gapped environment.</p>
+        </div>
+      </li>
+    </ol>
   </div>
 </section>
 
@@ -246,20 +285,20 @@
   <div class="ks-wrap">
     <h2>Why a receipt and not a vibes claim</h2>
     <p class="sub">The argument for the receipt format, written for the developer that owns the model in production.</p>
-    <div class="grid-3">
-      <div class="v-card">
-        <h3>The team that shipped it can prove it</h3>
-        <p>A claim that says "our distilled model is 92% as good as the teacher" can be made by anyone. A signed receipt says the named eval pack scored 0.842 on the named base model on the named compiler version. The reviewer can replay.</p>
-      </div>
-      <div class="v-card">
-        <h3>The procurement reviewer can audit it</h3>
-        <p>Receipts are content-addressed and signed. The reviewer does not need to trust the vendor that compiled the artifact. The verifier runs on a disconnected laptop and the exit code is the contract.</p>
-      </div>
-      <div class="v-card">
-        <h3>The regulator can replay it</h3>
-        <p>A receipt is reproducible. Give a regulator the .kolm, the eval pack, and the compiler version, and they get the same K-score. No proprietary harness, no black-box benchmark.</p>
-      </div>
-    </div>
+    <ul class="fr-spec-list vp-why-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>The team that shipped it can prove it</h3><span class="fr-spec-list__delta">VENDOR &middot; signs</span></div>
+        <p class="fr-spec-list__p">A claim that says "our distilled model is 92% as good as the teacher" can be made by anyone. A signed receipt says the named eval pack scored 0.842 on the named base model on the named compiler version. The reviewer can replay.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>The procurement reviewer can audit it</h3><span class="fr-spec-list__delta">REVIEWER &middot; verifies</span></div>
+        <p class="fr-spec-list__p">Receipts are content-addressed and signed. The reviewer does not need to trust the vendor that compiled the artifact. The verifier runs on a disconnected laptop and the exit code is the contract.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>The regulator can replay it</h3><span class="fr-spec-list__delta">REGULATOR &middot; replays</span></div>
+        <p class="fr-spec-list__p">A receipt is reproducible. Give a regulator the .kolm, the eval pack, and the compiler version, and they get the same K-score. No proprietary harness, no black-box benchmark.</p>
+      </li>
+    </ul>
   </div>
 </section>
 

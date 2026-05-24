@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>kolm vs Together AI &middot; Open-source AI workbench &middot; kolm.ai</title>
+<meta name="description" content="kolm vs Together AI. Together hosts fine-tuned models on its GPU pool and bills per token. kolm gives you a signed portable artifact you run on your own hardware. Honest side by side.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+
+<meta property="og:title" content="kolm vs Together AI &middot; Open-source AI workbench &middot; kolm.ai">
+<meta property="og:description" content="Together: hosted fine-tune endpoint. kolm: portable signed artifact you own. Honest side by side.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/vs/together">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="kolm vs Together AI &middot; Open-source AI workbench &middot; kolm.ai">
+<meta name="twitter:description" content="Together: hosted fine-tune endpoint. kolm: portable signed artifact you own.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/vs/together">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<style>
+ :root {
+ --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+ --accent: #faf2e1; --accent-strong: #c9c2b2; --good: #7ef0d2; --bad: #ff6b91;
+ --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+ --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+ }
+ * { box-sizing: border-box; }
+ html, body { margin: 0; padding: 0; }
+ body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+ a { color: inherit; text-decoration: none; }
+ .wrap { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
+ @media (max-width: 720px) { .wrap { padding: 0 20px; } }
+
+ section.hero { padding: 88px 0 32px; }
+ .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); letter-spacing: 0.04em; }
+ h1.cmp { margin: 22px 0 16px; font-size: clamp(36px, 5vw, 52px); line-height: 1.05; font-weight: 500; max-width: 22ch; }
+ h1.cmp .tone { color: var(--good); }
+ p.lede { margin: 0 0 24px; font-size: 17px; line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
+
+ .one-line { display: grid; grid-template-columns: 1fr 60px 1fr; gap: 14px; margin: 24px 0 0; align-items: stretch; }
+ @media (max-width: 720px) { .one-line { grid-template-columns: 1fr; } .one-line .arrow { display: none; } }
+ .one-line .col { padding: 22px 24px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-elev); }
+ .one-line .col h3 { margin: 0 0 8px; font-size: 15px; font-weight: 500; color: var(--ink); }
+ .one-line .col p { margin: 0; font-size: 14px; color: var(--ink-mute); line-height: 1.6; }
+ .one-line .arrow { display: flex; align-items: center; justify-content: center; color: var(--accent); font-family: var(--mono); font-size: 22px; }
+
+ .group { margin: 56px 0 0; padding-top: 32px; border-top: 1px solid var(--line); }
+ .group h2 { margin: 0 0 14px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 500; }
+ .group p { margin: 0 0 12px; color: var(--ink-mute); font-size: 15px; line-height: 1.65; max-width: 64ch; }
+ .group ul { margin: 0 0 12px; padding-left: 22px; color: var(--ink-mute); font-size: 15px; line-height: 1.7; max-width: 64ch; }
+ .group ul li b { color: var(--ink); font-weight: 500; }
+
+ table.tbl { width: 100%; border-collapse: collapse; font-size: 14.5px; margin: 14px 0 0; }
+ table.tbl th, table.tbl td { border-bottom: 1px solid var(--line); padding: 14px 14px; text-align: left; vertical-align: top; }
+ table.tbl th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; font-weight: 500; }
+ table.tbl td { color: var(--ink-mute); }
+ table.tbl td b { color: var(--ink); font-weight: 500; }
+ table.tbl td.row-h { color: var(--ink); font-weight: 500; font-family: var(--mono); font-size: 13px; text-transform: uppercase; letter-spacing: 0.02em; width: 26%; }
+ table.tbl td .ok { color: var(--good); font-family: var(--mono); font-size: 12px; text-transform: uppercase; }
+ table.tbl td .no { color: var(--bad); font-family: var(--mono); font-size: 12px; text-transform: uppercase; }
+ table.tbl td .partial { color: var(--ink-faint); font-family: var(--mono); font-size: 12px; text-transform: uppercase; }
+ @media (max-width: 720px) {
+ table.tbl, table.tbl tbody, table.tbl tr, table.tbl td { display: block; width: 100%; }
+ table.tbl thead { display: none; }
+ table.tbl tr { padding: 14px 0; border-bottom: 1px solid var(--line); }
+ table.tbl td { border: 0; padding: 4px 0; }
+ table.tbl td.row-h { font-size: 12px; margin-bottom: 6px; }
+ table.tbl td::before { display: block; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; margin-bottom: 2px; }
+ table.tbl td[data-l]::before { content: attr(data-l); }
+ }
+
+ .verdict { padding: 28px 32px; border: 1px solid var(--line-strong); border-radius: 12px; background: linear-gradient(180deg, rgba(236,231,220, 0.04), rgba(236,231,220, 0.01)); margin: 24px 0 0; }
+ .verdict h3 { margin: 0 0 8px; font-size: 18px; font-weight: 500; color: var(--ink); }
+ .verdict p { margin: 0 0 8px; font-size: 14.5px; color: var(--ink-mute); line-height: 1.6; }
+ .verdict p:last-child { margin-bottom: 0; }
+ .verdict b { color: var(--ink); font-weight: 500; }
+</style>
+</head>
+<body>
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - Open-source AI workbench. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">Frontier AI on your own infrastructure.</span>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<script src="/nav.js" defer></script>
+
+<main id="main">
+
+<section class="hero">
+ <div class="wrap">
+ <span class="eyebrow">Open-source AI workbench</span>
+ <h1 class="cmp">kolm vs Together AI. <span class="tone">Hosted GPU pool vs portable file.</span></h1>
+ <p class="lede">Together AI runs a polished GPU pool that hosts 200+ open-weight base models and lets you fine-tune any of them, billed per token. kolm runs the same training step and ships you the file. Same end state, two different deliverables.</p>
+
+ <div class="one-line">
+ <div class="col">
+ <h3>Together AI</h3>
+ <p>A <b>hosted inference + fine-tune service</b>. Bring pairs, fine-tune any of 200+ open models, serve from Together's GPU pool. Per-token billing on inference; deploy and runtime are theirs.</p>
+ </div>
+ <div class="arrow">vs</div>
+ <div class="col">
+ <h3>kolm</h3>
+ <p>A <b>capture -&gt; distill -&gt; compile workbench</b>. Same training step on a curated set of open bases. The deliverable is a signed <code>.kolm</code> file you run on your own hardware. Flat per compile, $0 marginal inference.</p>
+ </div>
+ </div>
+ </div>
+</section>
+
+<article>
+ <div class="wrap">
+
+ <div class="group">
+ <h2>Same training, different deployment</h2>
+ <p>Both products do supervised fine-tuning on open-weight bases (Llama, Qwen, Mistral, Phi). The training step itself is similar - LoRA or full-parameter, configurable rank and epochs, eval-gated. Where they diverge is what comes out.</p>
+ <p>Together returns a hosted model endpoint with a per-token rate sheet. kolm returns a <code>.kolm</code> file: weights, recipes, manifest, signature. From the moment you have the file, your inference cost is "what you pay your hardware vendor," not "what you pay Together per token."</p>
+ </div>
+
+ <div class="group">
+ <h2>When kolm wins</h2>
+ <ul>
+ <li><b>You want to own the file.</b> The deliverable is portable. Run it on your laptop, ship it to a customer, deploy it air-gapped, embed it in a phone app. None of that is possible when the model lives on Together's servers.</li>
+ <li><b>$0 marginal inference.</b> Per-token billing scales linearly with traffic; flat-compile + own-hardware doesn't. For high-volume tasks the curves cross fast.</li>
+ <li><b>Verifier-gated training + signed receipts.</b> Each compile runs captured pairs through a synthesized verifier and embeds a K-score. The artifact ships with an Ed25519 signature. Together has no equivalent.</li>
+ </ul>
+ </div>
+
+ <div class="group">
+ <h2>When Together AI wins</h2>
+ <ul>
+ <li><b>Excellent hosted inference.</b> If you don't want to operate inference servers, Together's GPU pool is mature - the autoscaling works, the rate-limiting is tight, the OpenAI-compatible API is one drop-in line of code.</li>
+ <li><b>Massive base-model breadth.</b> Together supports 200+ base models on the inference side. kolm targets a smaller curated set (Phi-3, Qwen2.5, Llama-3.2 in the MIT/Apache footprint) - the bases we have validated end-to-end through verifier and distillation.</li>
+ <li><b>Faster eval-and-redeploy loop.</b> Together's "tweak settings, redeploy" cycle is a few clicks. kolm asks you to re-compile, which is longer per cycle (though you get a fresh file out of it).</li>
+ </ul>
+ </div>
+
+ <div class="group">
+ <h2>Side-by-side</h2>
+ <table class="tbl">
+ <thead>
+ <tr><th></th><th>Together AI</th><th>kolm</th></tr>
+ </thead>
+ <tbody>
+ <tr><td class="row-h">What it is</td><td data-l="Together">Hosted training + inference service</td><td data-l="kolm">Capture, distill, compile to portable artifact</td></tr>
+ <tr><td class="row-h">Output</td><td data-l="Together">A model endpoint on Together's pool</td><td data-l="kolm">A <code>.kolm</code> file (~few GB)</td></tr>
+ <tr><td class="row-h">Where it runs</td><td data-l="Together">Together's GPU pool</td><td data-l="kolm">Anywhere - server, phone, air-gapped</td></tr>
+ <tr><td class="row-h">Inference cost</td><td data-l="Together">Per token (per-base rate sheet)</td><td data-l="kolm">$0 marginal (your hardware)</td></tr>
+ <tr><td class="row-h">Base model breadth</td><td data-l="Together"><span class="ok">200+ open bases</span></td><td data-l="kolm"><span class="partial">curated set</span> (Phi, Qwen, Llama)</td></tr>
+ <tr><td class="row-h">Verifier-gated training</td><td data-l="Together"><span class="no">no</span> - supervised fit only</td><td data-l="kolm"><span class="ok">yes</span> - synthesized verifier per task</td></tr>
+ <tr><td class="row-h">Eval / quality gate</td><td data-l="Together"><span class="partial">basic</span> - eval API + dashboards</td><td data-l="kolm"><span class="ok">K-score</span> embedded in artifact</td></tr>
+ <tr><td class="row-h">Receipts / signing</td><td data-l="Together"><span class="no">no</span></td><td data-l="kolm"><span class="ok">Ed25519</span> per artifact + per call</td></tr>
+ <tr><td class="row-h">Data residency</td><td data-l="Together">Pairs uploaded to Together</td><td data-l="kolm">Pairs stay on namespace; artifact yours</td></tr>
+ <tr><td class="row-h">Vendor lock</td><td data-l="Together"><span class="no">model dies if account dies</span></td><td data-l="kolm"><span class="ok">file is yours forever</span></td></tr>
+ </tbody>
+ </table>
+ </div>
+
+ <div class="group">
+ <h2>Can I use both?</h2>
+ <p>Yes. Together is a reasonable hosted-inference backend for the frontier-grade tier of your stack while you compile high-volume sub-tasks into <code>.kolm</code> files for the local tier. The kolm capture gateway preserves the upstream call, so the Together endpoint keeps doing its job until the local artifact is ready.</p>
+ </div>
+
+ <div class="verdict">
+ <h3>Bottom line</h3>
+ <p><b>Pick Together AI</b> if you don't want to operate inference and you need broad base-model coverage. The serving pool is excellent and the breadth is real.</p>
+ <p><b>Pick kolm</b> if you want the file, $0 marginal cost, on-device or air-gapped deploy, or a signed artifact a compliance officer can verify years later.</p>
+ <p>Many teams use both. <a href="/vs/" style="color:var(--good);">See all comparisons</a> &middot; <a href="/quickstart" style="color:var(--good);">Try kolm in 10 minutes</a></p>
+ </div>
+
+ </div>
+</article>
+
+</main>
+
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Open-source AI workbench. Frontier AI on your own infrastructure.</p>
+      </div>
+      <div>
+        <h4>Compare</h4>
+        <ul><li><a href="/vs/">All comparisons</a></li><li><a href="/vs/openai-api">vs OpenAI API</a></li><li><a href="/vs/ollama">vs Ollama</a></li><li><a href="/vs/lm-studio">vs LM Studio</a></li><li><a href="/vs/openrouter">vs OpenRouter</a></li><li><a href="/vs/together">vs Together AI</a></li></ul>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <ul><li><a href="/capture">Capture</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">K-score</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

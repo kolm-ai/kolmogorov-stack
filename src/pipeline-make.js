@@ -180,7 +180,8 @@ function redactorSpec(jobId, task) {
         '  var packPats = (lib.pack && lib.pack.default_patterns) || [];',
         "  for (var j=0;j<packPats.length;j++){ var p=packPats[j]; try { patterns.push({name:p.name,regex:new RegExp(p.regex,p.flags||'g'),replacement:p.replacement||('['+p.name+']')}); } catch(e){} }",
         '  var hits = {}, redacted = text;',
-        '  for (var n=0;n<patterns.length;n++){ var pat=patterns[n], count=0; redacted = redacted.replace(pat.regex, function(){ count++; return pat.replacement; }); if (count>0) hits[pat.name]=(hits[pat.name]||0)+count; }',
+        '  function applyReplacement(tpl,args){ return String(tpl).replace(/\\$(\\d+)/g,function(_,i){ return args[Number(i)] || ""; }); }',
+        '  for (var n=0;n<patterns.length;n++){ var pat=patterns[n], count=0; redacted = redacted.replace(pat.regex, function(){ count++; return applyReplacement(pat.replacement, arguments); }); if (count>0) hits[pat.name]=(hits[pat.name]||0)+count; }',
         '  var hitList = []; for (var key in hits) hitList.push({name:key,count:hits[key]});',
         '  hitList.sort(function(a,b){ return a.name<b.name?-1:a.name>b.name?1:0; });',
         '  return { redacted: redacted, hits: hitList };',
@@ -193,7 +194,10 @@ function redactorSpec(jobId, task) {
       spec: 'kolm-pack-1',
       description: 'starter identifier patterns',
       enabled_builtins: ['email', 'phone', 'url', 'ipv4', 'date'],
-      default_patterns: [{ name: 'SSN_LIKE', regex: '\\b\\d{3}-\\d{2}-\\d{4}\\b', replacement: '[SSN]' }],
+      default_patterns: [
+        { name: 'PHONE', regex: '\\b((?:call|phone|tel|mobile|fax|contact)\\b[^\\n\\r]{0,40}?)(\\d{3}[-.]\\d{4})\\b', flags: 'gi', replacement: '$1[PHONE]' },
+        { name: 'SSN_LIKE', regex: '\\b\\d{3}-\\d{2}-\\d{4}\\b', replacement: '[SSN]' },
+      ],
     },
     evals: { spec: 'rs-1-evals', cases: [], coverage: 1.0 },
   };

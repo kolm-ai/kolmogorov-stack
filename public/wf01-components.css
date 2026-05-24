@@ -1,0 +1,661 @@
+/* wf01-components.css — WF01 design-system v1 component primitives.
+   Loads AFTER design-tokens.css; consumes --ks-* tokens exclusively.
+   No raw hex / px values inside component rules (WF01-5 lock).
+
+   Components shipped (WF01-3):
+     Button   (5 variants × 3 sizes)   .ks-btn / .ks-btn--{primary,secondary,outline,ghost,danger} / .ks-btn--{sm,md,lg}
+     Input    (text/email/password)    .ks-input
+     Select                            .ks-select
+     Card                              .ks-card / .ks-card__header / .ks-card__body / .ks-card__footer
+     Badge    (5 tones)                .ks-badge / .ks-badge--{neutral,success,warning,error,info}
+     Toast    (4 tones)                .ks-toast / .ks-toast--{success,warning,error,info}
+     Modal                             .ks-modal-backdrop / .ks-modal / .ks-modal__header / .ks-modal__body / .ks-modal__footer
+     Drawer                            .ks-drawer-backdrop / .ks-drawer (slide-in from right by default)
+     Tooltip                           .ks-tooltip / .ks-tooltip__bubble
+     Tabs                              .ks-tabs / .ks-tabs__list / .ks-tabs__tab / .ks-tabs__panel
+     Accordion                         .ks-accordion / .ks-accordion__item / .ks-accordion__trigger / .ks-accordion__panel
+     Avatar   (3 sizes)                .ks-avatar / .ks-avatar--{sm,md,lg}
+
+   A11y posture (binding):
+     · Visible focus ring on EVERY interactive primitive via :focus-visible.
+     · prefers-reduced-motion collapses transitions to 1ms (token-level).
+     · No outline:none anywhere — only swap for shadow ring on focus-visible.
+*/
+
+/* ============================================================
+   1. Reset surface inside the design-system showcase + global
+   ============================================================ */
+
+.ks {
+  font-family: var(--ks-font-sans);
+  color: var(--ks-color-text-1);
+  font-size: var(--ks-type-16);
+  line-height: var(--ks-leading-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.ks-mono { font-family: var(--ks-font-mono); }
+
+/* ============================================================
+   2. BUTTON  (5 variants × 3 sizes)
+   ============================================================ */
+
+.ks-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ks-space-8);
+  font-family: var(--ks-font-sans);
+  font-weight: var(--ks-weight-medium);
+  letter-spacing: var(--ks-tracking-normal);
+  line-height: 1;
+  border: 1px solid transparent;
+  border-radius: var(--ks-radius-md);
+  cursor: pointer;
+  user-select: none;
+  text-decoration: none;
+  transition:
+    background-color var(--ks-motion-fast) var(--ks-ease-standard),
+    border-color var(--ks-motion-fast) var(--ks-ease-standard),
+    color var(--ks-motion-fast) var(--ks-ease-standard),
+    box-shadow var(--ks-motion-fast) var(--ks-ease-standard),
+    transform var(--ks-motion-fast) var(--ks-ease-standard);
+}
+.ks-btn:focus { outline: none; }
+.ks-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ks-shadow-focus);
+}
+.ks-btn:disabled,
+.ks-btn[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* sizes */
+.ks-btn--sm {
+  height: 28px;
+  padding: 0 var(--ks-space-12);
+  font-size: var(--ks-type-12);
+  border-radius: var(--ks-radius-sm);
+}
+.ks-btn--md {
+  height: 36px;
+  padding: 0 var(--ks-space-16);
+  font-size: var(--ks-type-14);
+}
+.ks-btn--lg {
+  height: 44px;
+  padding: 0 var(--ks-space-24);
+  font-size: var(--ks-type-16);
+}
+
+/* variant: primary */
+.ks-btn--primary {
+  background: var(--ks-color-brand-primary);
+  color: var(--ks-color-brand-on-primary);
+  border-color: var(--ks-color-brand-primary);
+}
+.ks-btn--primary:hover {
+  background: var(--ks-color-brand-primary-hover);
+  border-color: var(--ks-color-brand-primary-hover);
+}
+.ks-btn--primary:active {
+  background: var(--ks-color-brand-primary-active);
+  border-color: var(--ks-color-brand-primary-active);
+  transform: translateY(1px);
+}
+
+/* variant: secondary */
+.ks-btn--secondary {
+  background: var(--ks-color-surface-3);
+  color: var(--ks-color-text-1);
+  border-color: var(--ks-color-border-2);
+}
+.ks-btn--secondary:hover {
+  background: var(--ks-color-surface-2);
+  border-color: var(--ks-color-border-3);
+}
+.ks-btn--secondary:active { transform: translateY(1px); }
+
+/* variant: outline */
+.ks-btn--outline {
+  background: transparent;
+  color: var(--ks-color-text-1);
+  border-color: var(--ks-color-border-3);
+}
+.ks-btn--outline:hover {
+  background: var(--ks-color-surface-2);
+  border-color: var(--ks-color-text-3);
+}
+.ks-btn--outline:active { transform: translateY(1px); }
+
+/* variant: ghost */
+.ks-btn--ghost {
+  background: transparent;
+  color: var(--ks-color-text-2);
+  border-color: transparent;
+}
+.ks-btn--ghost:hover {
+  background: var(--ks-color-surface-2);
+  color: var(--ks-color-text-1);
+}
+.ks-btn--ghost:active { transform: translateY(1px); }
+
+/* variant: danger */
+.ks-btn--danger {
+  background: var(--ks-color-error-3);
+  color: var(--ks-color-brand-on-primary);
+  border-color: var(--ks-color-error-3);
+}
+.ks-btn--danger:hover { filter: brightness(1.08); }
+.ks-btn--danger:active { transform: translateY(1px); }
+
+/* ============================================================
+   3. INPUT + SELECT
+   ============================================================ */
+
+.ks-input,
+.ks-select {
+  display: block;
+  width: 100%;
+  height: 36px;
+  padding: 0 var(--ks-space-12);
+  font-family: var(--ks-font-sans);
+  font-size: var(--ks-type-14);
+  line-height: var(--ks-leading-snug);
+  color: var(--ks-color-text-1);
+  background: var(--ks-color-surface-1);
+  border: 1px solid var(--ks-color-border-2);
+  border-radius: var(--ks-radius-md);
+  transition:
+    border-color var(--ks-motion-fast) var(--ks-ease-standard),
+    box-shadow var(--ks-motion-fast) var(--ks-ease-standard),
+    background-color var(--ks-motion-fast) var(--ks-ease-standard);
+}
+.ks-input::placeholder { color: var(--ks-color-text-3); }
+.ks-input:hover,
+.ks-select:hover { border-color: var(--ks-color-border-3); }
+.ks-input:focus,
+.ks-select:focus { outline: none; }
+.ks-input:focus-visible,
+.ks-select:focus-visible {
+  outline: none;
+  border-color: var(--ks-color-brand-primary);
+  box-shadow: var(--ks-shadow-focus);
+}
+.ks-input:disabled,
+.ks-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.ks-input[aria-invalid="true"],
+.ks-select[aria-invalid="true"] {
+  border-color: var(--ks-color-error-3);
+}
+.ks-input[aria-invalid="true"]:focus-visible,
+.ks-select[aria-invalid="true"]:focus-visible {
+  box-shadow: 0 0 0 3px var(--ks-color-error-2);
+}
+
+/* select-specific affordance */
+.ks-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: var(--ks-space-32);
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--ks-color-text-2) 50%),
+    linear-gradient(135deg, var(--ks-color-text-2) 50%, transparent 50%);
+  background-position:
+    calc(100% - 16px) 16px,
+    calc(100% - 12px) 16px;
+  background-size: 4px 4px;
+  background-repeat: no-repeat;
+}
+
+/* ============================================================
+   4. CARD
+   ============================================================ */
+
+.ks-card {
+  background: var(--ks-color-surface-1);
+  border: 1px solid var(--ks-color-border-1);
+  border-radius: var(--ks-radius-lg);
+  box-shadow: var(--ks-shadow-sm);
+  overflow: hidden;
+  transition:
+    border-color var(--ks-motion-base) var(--ks-ease-standard),
+    box-shadow var(--ks-motion-base) var(--ks-ease-standard);
+}
+.ks-card--interactive { cursor: pointer; }
+.ks-card--interactive:hover {
+  border-color: var(--ks-color-border-2);
+  box-shadow: var(--ks-shadow-md);
+}
+.ks-card--interactive:focus-visible {
+  outline: none;
+  border-color: var(--ks-color-brand-primary);
+  box-shadow: var(--ks-shadow-focus);
+}
+.ks-card__header {
+  padding: var(--ks-space-16) var(--ks-space-24);
+  border-bottom: 1px solid var(--ks-color-border-1);
+  font-size: var(--ks-type-14);
+  font-weight: var(--ks-weight-semibold);
+  color: var(--ks-color-text-1);
+}
+.ks-card__body {
+  padding: var(--ks-space-24);
+  color: var(--ks-color-text-2);
+  font-size: var(--ks-type-14);
+  line-height: var(--ks-leading-relaxed);
+}
+.ks-card__footer {
+  padding: var(--ks-space-16) var(--ks-space-24);
+  border-top: 1px solid var(--ks-color-border-1);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--ks-space-8);
+  background: var(--ks-color-surface-2);
+}
+
+/* ============================================================
+   5. BADGE
+   ============================================================ */
+
+.ks-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ks-space-4);
+  padding: 0 var(--ks-space-8);
+  height: 22px;
+  font-family: var(--ks-font-sans);
+  font-size: var(--ks-type-12);
+  font-weight: var(--ks-weight-medium);
+  line-height: 1;
+  letter-spacing: var(--ks-tracking-wide);
+  border-radius: var(--ks-radius-pill);
+  border: 1px solid var(--ks-color-border-2);
+  background: var(--ks-color-surface-2);
+  color: var(--ks-color-text-2);
+}
+.ks-badge--neutral { /* base styles already neutral */ }
+.ks-badge--success {
+  background: var(--ks-color-success-1);
+  border-color: var(--ks-color-success-2);
+  color: var(--ks-color-success-3);
+}
+.ks-badge--warning {
+  background: var(--ks-color-warning-1);
+  border-color: var(--ks-color-warning-2);
+  color: var(--ks-color-warning-3);
+}
+.ks-badge--error {
+  background: var(--ks-color-error-1);
+  border-color: var(--ks-color-error-2);
+  color: var(--ks-color-error-3);
+}
+.ks-badge--info {
+  background: var(--ks-color-info-1);
+  border-color: var(--ks-color-info-2);
+  color: var(--ks-color-info-3);
+}
+
+/* ============================================================
+   6. TOAST
+   ============================================================ */
+
+.ks-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ks-space-12);
+  min-width: 280px;
+  max-width: 420px;
+  padding: var(--ks-space-12) var(--ks-space-16);
+  background: var(--ks-color-surface-2);
+  border: 1px solid var(--ks-color-border-2);
+  border-left: 3px solid var(--ks-color-text-3);
+  border-radius: var(--ks-radius-md);
+  box-shadow: var(--ks-shadow-lg);
+  font-size: var(--ks-type-14);
+  color: var(--ks-color-text-1);
+}
+.ks-toast__icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--ks-type-14);
+  line-height: 1;
+}
+.ks-toast__body { flex: 1; }
+.ks-toast__title {
+  font-weight: var(--ks-weight-semibold);
+  margin-bottom: var(--ks-space-4);
+}
+.ks-toast__desc {
+  color: var(--ks-color-text-2);
+  font-size: var(--ks-type-12);
+  line-height: var(--ks-leading-snug);
+}
+.ks-toast--success { border-left-color: var(--ks-color-success-3); }
+.ks-toast--success .ks-toast__icon { color: var(--ks-color-success-3); }
+.ks-toast--warning { border-left-color: var(--ks-color-warning-3); }
+.ks-toast--warning .ks-toast__icon { color: var(--ks-color-warning-3); }
+.ks-toast--error { border-left-color: var(--ks-color-error-3); }
+.ks-toast--error .ks-toast__icon { color: var(--ks-color-error-3); }
+.ks-toast--info { border-left-color: var(--ks-color-info-3); }
+.ks-toast--info .ks-toast__icon { color: var(--ks-color-info-3); }
+
+/* ============================================================
+   7. MODAL
+   ============================================================ */
+
+.ks-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: var(--ks-z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--ks-space-24);
+  animation: ksFadeIn var(--ks-motion-base) var(--ks-ease-standard);
+}
+[data-theme="light"] .ks-modal-backdrop { background: rgba(28, 24, 16, 0.35); }
+
+.ks-modal {
+  width: 100%;
+  max-width: 480px;
+  background: var(--ks-color-surface-1);
+  border: 1px solid var(--ks-color-border-2);
+  border-radius: var(--ks-radius-xl);
+  box-shadow: var(--ks-shadow-2xl);
+  overflow: hidden;
+  animation: ksScaleIn var(--ks-motion-base) var(--ks-ease-emphasized);
+}
+.ks-modal__header {
+  padding: var(--ks-space-24);
+  border-bottom: 1px solid var(--ks-color-border-1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--ks-type-18);
+  font-weight: var(--ks-weight-semibold);
+}
+.ks-modal__body {
+  padding: var(--ks-space-24);
+  color: var(--ks-color-text-2);
+  font-size: var(--ks-type-14);
+  line-height: var(--ks-leading-relaxed);
+}
+.ks-modal__footer {
+  padding: var(--ks-space-16) var(--ks-space-24);
+  border-top: 1px solid var(--ks-color-border-1);
+  background: var(--ks-color-surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--ks-space-8);
+}
+
+/* ============================================================
+   8. DRAWER  (slide-in panel)
+   ============================================================ */
+
+.ks-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: var(--ks-z-modal);
+  animation: ksFadeIn var(--ks-motion-base) var(--ks-ease-standard);
+}
+.ks-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  max-width: 420px;
+  background: var(--ks-color-surface-1);
+  border-left: 1px solid var(--ks-color-border-2);
+  box-shadow: var(--ks-shadow-2xl);
+  z-index: calc(var(--ks-z-modal) + 1);
+  display: flex;
+  flex-direction: column;
+  animation: ksSlideInRight var(--ks-motion-base) var(--ks-ease-emphasized);
+}
+.ks-drawer__header {
+  padding: var(--ks-space-24);
+  border-bottom: 1px solid var(--ks-color-border-1);
+  font-size: var(--ks-type-18);
+  font-weight: var(--ks-weight-semibold);
+}
+.ks-drawer__body {
+  padding: var(--ks-space-24);
+  overflow-y: auto;
+  flex: 1;
+  color: var(--ks-color-text-2);
+}
+.ks-drawer__footer {
+  padding: var(--ks-space-16) var(--ks-space-24);
+  border-top: 1px solid var(--ks-color-border-1);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--ks-space-8);
+}
+
+/* ============================================================
+   9. TOOLTIP
+   ============================================================ */
+
+.ks-tooltip {
+  position: relative;
+  display: inline-flex;
+}
+.ks-tooltip__bubble {
+  position: absolute;
+  bottom: calc(100% + var(--ks-space-8));
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--ks-space-4) var(--ks-space-8);
+  background: var(--ks-color-surface-3);
+  color: var(--ks-color-text-1);
+  font-size: var(--ks-type-12);
+  white-space: nowrap;
+  border: 1px solid var(--ks-color-border-2);
+  border-radius: var(--ks-radius-sm);
+  box-shadow: var(--ks-shadow-md);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity var(--ks-motion-fast) var(--ks-ease-standard),
+    transform var(--ks-motion-fast) var(--ks-ease-standard);
+  z-index: var(--ks-z-overlay);
+}
+.ks-tooltip:hover .ks-tooltip__bubble,
+.ks-tooltip:focus-within .ks-tooltip__bubble {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-2px);
+}
+
+/* ============================================================
+   10. TABS
+   ============================================================ */
+
+.ks-tabs__list {
+  display: flex;
+  gap: var(--ks-space-4);
+  border-bottom: 1px solid var(--ks-color-border-2);
+  padding: 0 var(--ks-space-4);
+}
+.ks-tabs__tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 var(--ks-space-16);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--ks-color-text-3);
+  font-family: var(--ks-font-sans);
+  font-size: var(--ks-type-14);
+  font-weight: var(--ks-weight-medium);
+  cursor: pointer;
+  transition:
+    color var(--ks-motion-fast) var(--ks-ease-standard),
+    border-color var(--ks-motion-fast) var(--ks-ease-standard);
+  margin-bottom: -1px;
+}
+.ks-tabs__tab:hover { color: var(--ks-color-text-1); }
+.ks-tabs__tab:focus { outline: none; }
+.ks-tabs__tab:focus-visible {
+  outline: none;
+  box-shadow: var(--ks-shadow-focus);
+  border-radius: var(--ks-radius-sm);
+}
+.ks-tabs__tab[aria-selected="true"] {
+  color: var(--ks-color-text-1);
+  border-bottom-color: var(--ks-color-brand-primary);
+}
+.ks-tabs__panel {
+  padding: var(--ks-space-24);
+  color: var(--ks-color-text-2);
+}
+
+/* ============================================================
+   11. ACCORDION
+   ============================================================ */
+
+.ks-accordion {
+  border: 1px solid var(--ks-color-border-2);
+  border-radius: var(--ks-radius-lg);
+  overflow: hidden;
+  background: var(--ks-color-surface-1);
+}
+.ks-accordion__item {
+  border-bottom: 1px solid var(--ks-color-border-1);
+}
+.ks-accordion__item:last-child { border-bottom: none; }
+.ks-accordion__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--ks-space-16) var(--ks-space-24);
+  background: transparent;
+  border: none;
+  color: var(--ks-color-text-1);
+  font-family: var(--ks-font-sans);
+  font-size: var(--ks-type-14);
+  font-weight: var(--ks-weight-medium);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--ks-motion-fast) var(--ks-ease-standard);
+}
+.ks-accordion__trigger:hover { background: var(--ks-color-surface-2); }
+.ks-accordion__trigger:focus { outline: none; }
+.ks-accordion__trigger:focus-visible {
+  outline: none;
+  box-shadow: var(--ks-shadow-focus);
+}
+.ks-accordion__trigger::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-right: 1.5px solid var(--ks-color-text-3);
+  border-bottom: 1.5px solid var(--ks-color-text-3);
+  transform: rotate(45deg);
+  transition: transform var(--ks-motion-base) var(--ks-ease-standard);
+}
+.ks-accordion__trigger[aria-expanded="true"]::after {
+  transform: rotate(-135deg);
+}
+.ks-accordion__panel {
+  padding: 0 var(--ks-space-24) var(--ks-space-16);
+  color: var(--ks-color-text-2);
+  font-size: var(--ks-type-14);
+  line-height: var(--ks-leading-relaxed);
+}
+.ks-accordion__panel[hidden] { display: none; }
+
+/* ============================================================
+   12. AVATAR
+   ============================================================ */
+
+.ks-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ks-radius-circle);
+  background: var(--ks-color-surface-3);
+  color: var(--ks-color-text-1);
+  font-family: var(--ks-font-sans);
+  font-weight: var(--ks-weight-semibold);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.ks-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.ks-avatar--sm {
+  width: 24px;
+  height: 24px;
+  font-size: var(--ks-type-12);
+}
+.ks-avatar--md {
+  width: 32px;
+  height: 32px;
+  font-size: var(--ks-type-14);
+}
+.ks-avatar--lg {
+  width: 48px;
+  height: 48px;
+  font-size: var(--ks-type-16);
+}
+
+/* ============================================================
+   13. ANIMATION KEYFRAMES
+   ============================================================ */
+
+@keyframes ksFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes ksScaleIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes ksSlideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ks-btn,
+  .ks-input,
+  .ks-select,
+  .ks-card,
+  .ks-tabs__tab,
+  .ks-accordion__trigger,
+  .ks-accordion__trigger::after,
+  .ks-tooltip__bubble {
+    transition: none !important;
+  }
+  .ks-modal-backdrop,
+  .ks-modal,
+  .ks-drawer-backdrop,
+  .ks-drawer {
+    animation: none !important;
+  }
+}

@@ -1,0 +1,234 @@
+{
+  "schema_version": "kolm-product-invention-portfolio-1",
+  "updated_at": "2026-05-23",
+  "purpose": "Machine-readable invention backlog for the backend/product architecture. Each invention must improve tracked metrics, cover product journeys, name implementation surfaces, and smoke-test against the current product graph.",
+  "metric_weights": {
+    "quality": 0.22,
+    "latency": 0.14,
+    "cost": 0.14,
+    "portability": 0.12,
+    "proof": 0.16,
+    "security": 0.1,
+    "enterprise": 0.06,
+    "dx": 0.04,
+    "conversion": 0.02
+  },
+  "baseline": {
+    "quality": 0.78,
+    "latency": 0.62,
+    "cost": 0.58,
+    "portability": 0.66,
+    "proof": 0.72,
+    "security": 0.74,
+    "enterprise": 0.6,
+    "dx": 0.68,
+    "conversion": 0.55
+  },
+  "implementation_rules": [
+    "Every invention must cover at least one product journey, customization dimension, readiness requirement, and tracked metric.",
+    "Every open readiness requirement must be covered by at least one invention until it is promoted to shipped or implemented.",
+    "Every product journey must be covered by at least two inventions so no surface depends on a single architectural bet.",
+    "Every metric class must have positive expected lift, but public claims still require real benchmark evidence before marketing.",
+    "Synthetic lift is only prioritization evidence; production promotion needs the tests, reports, or external proof named by each readiness closeout."
+  ],
+  "inventions": [
+    {
+      "id": "kolm-q-oracle",
+      "name": "Kolm-Q Oracle Quantizer",
+      "thesis": "Evidence-conditioned mixed precision beats fixed quantization recipes by choosing bits, rotations, cache policy, and runtime target from task loss sensitivity.",
+      "journeys": ["train-distill", "models-backbones", "compile-verify", "runtime-inference", "compute-cloud", "devices-fleet"],
+      "dimensions": ["compute-target", "artifact-runtime", "proof-mode"],
+      "readiness": ["export-quantize-targets", "runtime-local-artifact", "compute-openvino-qnn", "benchmarking-infra", "quality-scoring"],
+      "implementation_surfaces": ["src/quantization-oracle.js", "src/optimization.js", "src/export-provenance.js", "src/compute/registry.json", "scripts/quantization-oracle.mjs", "workers/quantize/README.md", "cli/kolm.js"],
+      "smoke_tests": ["node scripts/quantization-oracle.mjs --task extraction --device rtx-4090-24gb --params-b 7 --context 8192 --calibration-rows 256", "npm run verify:quant-oracle", "kolm quantize --doctor --json", "kolm export task.kolm --target gguf --preview", "npm run verify:compute"],
+      "metrics": {
+        "quality": 0.08,
+        "latency": 0.31,
+        "cost": 0.27,
+        "portability": 0.22,
+        "proof": 0.16
+      }
+    },
+    {
+      "id": "kolm-ir-autotarget",
+      "name": "KolmIR AutoTarget Compiler",
+      "thesis": "A phase-manifest compiler IR should lower the same build plan to GGUF, ONNX, CoreML, MLX, ExecuTorch, TensorRT-LLM, vLLM, SGLang, and browser bundles with proof parity.",
+      "journeys": ["compile-verify", "runtime-inference", "compute-cloud", "devices-fleet", "agents-registry"],
+      "dimensions": ["artifact-runtime", "deployment-mode", "compute-target", "proof-mode"],
+      "readiness": ["kolm-format-spec", "standalone-verify", "runtime-edge", "runtime-wasm", "ecosystem-runtime-adoption", "runtime-lts"],
+      "implementation_surfaces": ["src/compile-pipeline.js", "src/export-provenance.js", "src/runtime-policy.js", "docs/kolm-format-v1.md", "public/runtimes.html"],
+      "smoke_tests": ["kolm compile --spec spec.json --out task.kolm", "kolm verify task.kolm", "kolm export task.kolm --target onnx --preview"],
+      "metrics": {
+        "latency": 0.18,
+        "portability": 0.36,
+        "dx": 0.18,
+        "proof": 0.22
+      }
+    },
+    {
+      "id": "distill-forge",
+      "name": "Distill Forge",
+      "thesis": "Teacher traces, rationales, counterexamples, and preference pairs should be selected by expected K-score lift per dollar instead of by raw dataset size.",
+      "journeys": ["gateway-capture", "datasets-labeling", "train-distill", "models-backbones", "compile-verify"],
+      "dimensions": ["model-provider", "compute-target", "proof-mode", "privacy-mode"],
+      "readiness": ["k-score-calibration", "holdout-independence", "incremental-compile", "compile-failure-diagnostics", "distill-strategy-oracle", "async-compile-webhooks", "quality-scoring", "evals-ab"],
+      "implementation_surfaces": ["src/distill-strategy.js", "scripts/distill-strategy.mjs", "docs/distill-strategy.md", "src/distill-pipeline.js", "src/distill-onpolicy.js", "src/distill-preference.js", "src/spec-decode.js", "src/production-ready.js"],
+      "smoke_tests": ["node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready", "npm run verify:distill-strategy", "kolm train plan demo --strategy --json", "kolm distill --namespace demo --dry-run --json", "kolm dataset split demo", "npm run verify:compute"],
+      "metrics": {
+        "quality": 0.24,
+        "cost": 0.19,
+        "dx": 0.14,
+        "proof": 0.2
+      }
+    },
+    {
+      "id": "build-strategy-brain",
+      "name": "Build Strategy Brain",
+      "thesis": "The product should often recommend no-training: prompt cache, semantic cache, RAG, rules, redaction, or artifact runtime before launching a training job.",
+      "journeys": ["gateway-capture", "privacy-lake", "datasets-labeling", "train-distill", "runtime-inference", "enterprise-governance"],
+      "dimensions": ["model-provider", "privacy-mode", "deployment-mode", "governance-mode"],
+      "readiness": ["prompt-compression", "semantic-cache", "fallback-chains", "rag-artifact", "token-budget", "model-routing"],
+      "implementation_surfaces": ["src/runtime-policy.js", "src/optimization.js", "src/cache.js", "src/lake.js", "src/router.js"],
+      "smoke_tests": ["kolm compute pick --json", "kolm cloud readiness --json", "kolm runtime targets --json"],
+      "metrics": {
+        "quality": 0.1,
+        "latency": 0.22,
+        "cost": 0.34,
+        "security": 0.14,
+        "dx": 0.2
+      }
+    },
+    {
+      "id": "receipt-os",
+      "name": "ReceiptOS Evidence Fabric",
+      "thesis": "Every capture, split, build, quantization, run, fallback, policy decision, and governance export should share one signed receipt chain.",
+      "journeys": ["gateway-capture", "privacy-lake", "compile-verify", "runtime-inference", "compute-cloud", "enterprise-governance", "agents-registry"],
+      "dimensions": ["proof-mode", "governance-mode", "privacy-mode", "storage-plane"],
+      "readiness": ["artifact-signing-pipeline", "team-capture-rbac", "event-lake-schema", "opentelemetry", "webhooks-events", "secrets-management", "compliance-certifications"],
+      "implementation_surfaces": ["src/artifact.js", "src/event-schema.js", "src/audit.js", "src/otel.js", "src/router.js"],
+      "smoke_tests": ["kolm verify task.kolm", "kolm audit --json", "kolm compliance export --json"],
+      "metrics": {
+        "proof": 0.38,
+        "security": 0.31,
+        "enterprise": 0.22,
+        "dx": 0.08
+      }
+    },
+    {
+      "id": "privacy-membrane-max",
+      "name": "Privacy Membrane Max",
+      "thesis": "Hybrid deterministic, model-assisted, differential privacy, and policy-deny redaction should be optimized as a measurable control plane, not as a best-effort text filter.",
+      "journeys": ["gateway-capture", "privacy-lake", "multimodal-tokenization", "train-distill", "enterprise-governance"],
+      "dimensions": ["privacy-mode", "storage-plane", "governance-mode", "proof-mode"],
+      "readiness": ["zero-retention-mode", "capture-filtering", "redaction-quality", "differential-privacy", "secrets-management", "compliance-certifications"],
+      "implementation_surfaces": ["src/privacy-membrane.js", "src/phi-redactor.js", "src/lake.js", "src/router.js", "scripts/bench-redaction-fixtures.mjs", "public/account/privacy-events.html"],
+      "smoke_tests": ["kolm privacy scan --json", "kolm privacy report --json", "npm run verify:redaction-benchmark", "npm run verify:claims-scope"],
+      "metrics": {
+        "quality": 0.12,
+        "security": 0.36,
+        "enterprise": 0.2,
+        "proof": 0.18,
+        "cost": 0.05
+      }
+    },
+    {
+      "id": "cloud-compute-broker",
+      "name": "Cloud Compute Broker",
+      "thesis": "Users should choose constraints, not providers; Kolm should quote, launch, monitor, and import training or quantization results across local, SSH, BYOC, AWS, Modal, RunPod, Together, and object storage.",
+      "journeys": ["train-distill", "compute-cloud", "devices-fleet", "enterprise-governance"],
+      "dimensions": ["compute-target", "storage-plane", "deployment-mode", "governance-mode"],
+      "readiness": ["async-compile-webhooks", "deploy-buttons", "cloud-compute-broker", "private-registry", "cost-attribution", "webhooks-events", "sdk-depth", "one-line-install"],
+      "implementation_surfaces": ["src/cloud-compute-broker.js", "scripts/cloud-compute-broker.mjs", "docs/cloud-compute-broker.md", "src/remote-compute.js", "src/object-storage.js", "src/deployment-plans.js", "src/platform-capabilities.js", "scripts/cloud-readiness.mjs"],
+      "smoke_tests": ["kolm cloud broker --workload train --no-local-gpu --json", "node scripts/cloud-compute-broker.mjs --simulate runpod-r2 --workload train --params-b 7 --rows 2000 --no-local-gpu --summary --require-ready", "kolm cloud readiness --json", "kolm cloud storage --provider local-artifacts --smoke --json", "npm run verify:cloud-broker", "npm run verify:platform"],
+      "metrics": {
+        "latency": 0.14,
+        "cost": 0.21,
+        "dx": 0.27,
+        "enterprise": 0.16,
+        "portability": 0.13
+      }
+    },
+    {
+      "id": "adaptive-eval-lab",
+      "name": "Adaptive Eval Lab",
+      "thesis": "K-score must become a calibrated, attack-aware, task-typed statistical contract with public raw reports and confidence intervals.",
+      "journeys": ["datasets-labeling", "train-distill", "compile-verify", "runtime-inference", "enterprise-governance"],
+      "dimensions": ["proof-mode", "model-provider", "privacy-mode"],
+      "readiness": ["k-score-calibration", "redaction-quality", "benchmarking-infra", "quality-scoring", "shadow-mode", "evals-ab"],
+      "implementation_surfaces": ["src/production-ready.js", "src/artifact.js", "scripts/bench-compare.mjs", "scripts/bench-redaction-fixtures.mjs", "bench/README.md", "docs/benchmark-results-v0.1.0.md"],
+      "smoke_tests": ["node scripts/bench-compare.mjs --help", "npm run verify:redaction-benchmark", "kolm bakeoff multimodal --json", "npm run verify:sota"],
+      "metrics": {
+        "quality": 0.27,
+        "proof": 0.31,
+        "enterprise": 0.13,
+        "dx": 0.09
+      }
+    },
+    {
+      "id": "artifact-market-maker",
+      "name": "Artifact Market Maker",
+      "thesis": "The registry should rank artifacts by verified utility per task, runtime, license, device, cost, and evidence depth instead of downloads or stale K-score alone.",
+      "journeys": ["compile-verify", "runtime-inference", "compute-cloud", "agents-registry", "enterprise-governance"],
+      "dimensions": ["artifact-runtime", "storage-plane", "deployment-mode", "governance-mode", "proof-mode"],
+      "readiness": ["registry-search", "version-diff", "verified-publishers", "private-registry", "dependency-graphs", "foundation-standardization"],
+      "implementation_surfaces": ["src/artifact-dependency-graph.js", "src/publisher-verification.js", "src/router.js", "public/registry.html", "public/account/artifacts.html"],
+      "smoke_tests": ["kolm hub list --json", "kolm diff old.kolm new.kolm", "npm run verify:journeys"],
+      "metrics": {
+        "conversion": 0.2,
+        "dx": 0.18,
+        "proof": 0.22,
+        "enterprise": 0.18,
+        "portability": 0.12
+      }
+    },
+    {
+      "id": "agent-tool-compiler",
+      "name": "Agent Tool Compiler",
+      "thesis": "Kolm should compile repeated agent behavior into signed MCP/A2A tools with tool-permission receipts, not just expose an MCP server.",
+      "journeys": ["gateway-capture", "datasets-labeling", "compile-verify", "runtime-inference", "agents-registry"],
+      "dimensions": ["deployment-mode", "governance-mode", "proof-mode", "model-provider"],
+      "readiness": ["compile-as-mcp", "runtime-local-artifact", "streaming", "team-capture-rbac", "dependency-graphs", "sdk-depth"],
+      "implementation_surfaces": ["services/mcp/server.js", "services/mcp/README.md", "src/streaming-contract.js", "src/team-capture-rbac.js", "cli/kolm.js"],
+      "smoke_tests": ["kolm compile --as-mcp --spec spec.json", "kolm serve --mcp", "kolm install claude-code --apply"],
+      "metrics": {
+        "latency": 0.13,
+        "cost": 0.18,
+        "security": 0.18,
+        "dx": 0.28,
+        "proof": 0.18
+      }
+    },
+    {
+      "id": "device-fit-autopilot",
+      "name": "Device Fit Autopilot",
+      "thesis": "Every model/artifact choice should be scored against actual device memory, runtime support, expected latency, privacy mode, and fallback plan before export.",
+      "journeys": ["models-backbones", "multimodal-tokenization", "compile-verify", "runtime-inference", "devices-fleet"],
+      "dimensions": ["compute-target", "artifact-runtime", "deployment-mode", "proof-mode"],
+      "readiness": ["compute-openvino-qnn", "ios-android-sdk", "runtime-wasm", "runtime-edge", "runtime-telemetry-opt-in", "runtime-lts"],
+      "implementation_surfaces": ["src/device-capabilities.js", "src/models.js", "src/model-registry.js", "src/runtime-policy.js", "src/compute/registry.json"],
+      "smoke_tests": ["kolm devices detect --json", "kolm devices recommend --json", "kolm models recommend --json"],
+      "metrics": {
+        "latency": 0.2,
+        "portability": 0.3,
+        "dx": 0.15,
+        "quality": 0.07
+      }
+    },
+    {
+      "id": "codegraph-product-index",
+      "name": "CodeGraph Product Index",
+      "thesis": "A local semantic graph should bind source symbols, routes, docs, CLI verbs, tests, artifacts, and product promises so implementation agents stop rediscovering the codebase.",
+      "journeys": ["compile-verify", "compute-cloud", "enterprise-governance", "agents-registry"],
+      "dimensions": ["proof-mode", "governance-mode", "deployment-mode"],
+      "readiness": ["standalone-verify", "opentelemetry", "webhooks-events", "doctor-diagnostics", "cli-world-class", "sdk-depth"],
+      "implementation_surfaces": ["src/repo-codegraph.js", "scripts/build-codegraph.mjs", "src/product-experience.js", "docs/product-journeys.json", "docs/product-sota-readiness.json"],
+      "smoke_tests": ["npm run verify:codegraph", "node scripts/build-codegraph.mjs --check --json", "npm run verify:depth"],
+      "metrics": {
+        "dx": 0.36,
+        "proof": 0.14,
+        "security": 0.08,
+        "conversion": 0.09
+      }
+    }
+  ]
+}

@@ -14,7 +14,7 @@ println(out.text)  // "Patient [NAME], MRN [ID]."
 
 ```kotlin
 dependencies {
-    implementation("ai.kolm:kolm:0.1.0")
+    implementation("ai.kolm:kolm:0.2.6")
 }
 ```
 

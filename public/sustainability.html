@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sustainability &middot; Open-source AI workbench &middot; kolm.ai</title>
+<meta name="description" content="Sustainability and CO2 footprint for kolm distillations. Estimate model uses GPU TDP, run duration, and regional grid carbon intensity. Honest +/- 30 percent error bars. Never carbon-neutral without offset receipts.">
+<meta name="theme-color" content="#07090c">
+<link rel="canonical" href="https://kolm.ai/sustainability">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/frontier.css">
+<script defer src="/frontier.js"></script>
+<script src="/nav.js" defer></script>
+<style>
+  .sus-hero { padding-top: clamp(72px, 9vw, 128px); padding-bottom: clamp(56px, 7vw, 96px); border-bottom: 1px solid var(--line-1); position: relative; }
+  .sus-hero h1 {
+    font-family: var(--fr-font-display);
+    font-size: var(--fr-text-5xl);
+    letter-spacing: var(--fr-track-display);
+    line-height: 1.04;
+    font-weight: 580;
+    color: var(--ink-1);
+    margin: 14px 0 18px;
+    max-width: 22ch;
+  }
+  .sus-hero h1 b { color: var(--fr-mint); font-weight: 580; }
+  .sus-hero .cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+  .sus-hero .meta-row { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 28px; }
+
+  .sus-honesty { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-family: var(--fr-font-sans); font-size: 13px; color: var(--ink-2); line-height: 1.55; margin-top: 20px; }
+  .sus-honesty b { color: var(--ink-1); font-weight: 580; }
+
+  .sus-formula {
+    padding: 18px 20px;
+    border: 1px solid var(--line-1);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.015);
+    font-family: var(--fr-font-mono);
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.6;
+    margin-top: 12px;
+    overflow-x: auto;
+  }
+  .sus-formula b { color: var(--fr-mint); font-weight: 580; }
+
+  .sus-badge-demo {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(46, 191, 145, 0.10);
+    border: 1px solid rgba(46, 191, 145, 0.30);
+    font-family: var(--fr-font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--fr-mint);
+    margin-top: 8px;
+  }
+
+  .sus-crosslink { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+</style>
+<meta property="og:title" content="Sustainability &middot; Open-source AI workbench &middot; kolm.ai">
+<meta property="og:description" content="CO2 footprint for kolm distillations. Estimate uses GPU TDP, run duration, regional grid carbon intensity. Honest +/- 30 percent error bars.">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/sustainability">
+<meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/sustainability",
+  "description": "Sustainability and CO2 footprint for kolm distillations. Estimate model uses GPU TDP, run duration, and regional grid carbon intensity. Honest +/- 30 percent error bars. Never carbon-neutral without offset receipts.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
+</head>
+<body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<span class="brand-anchor" data-w775="h1" aria-hidden="true">Frontier AI on your own infrastructure.</span>
+<span class="brand-disambig" aria-hidden="true">Not Kolm therapeutics, Kolm band, or other unrelated organizations using similar names.</span>
+
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/k-score">K-score</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">-&gt;</span></a>
+      </div>
+    </div>
+  </header>
+</div>
+
+<main id="main">
+
+<!-- 1. HERO -->
+<section class="sus-hero fr-section">
+  <div class="fr-container">
+    <p class="brand-eyebrow" data-w775="brand-eyebrow">Open-source AI workbench</p>
+    <h1>Sustainability and CO2 footprint.</h1>
+    <p class="fr-lede">Every distillation has a carbon cost. We measure it, stamp it into the artifact manifest, and let viewers render an honest "Saved X kg CO2 vs cloud inference" pill. No carbon-neutral marketing, no offset hand-waving -- just GPU TDP, run duration, and regional grid intensity with +/- 30 percent error bars.</p>
+    <div class="cta-row">
+      <a href="/account/sustainability" class="fr-btn fr-btn--mint">View your CO2 dashboard</a>
+      <a href="#estimate-model" class="fr-btn fr-btn--ghost">See the estimate model</a>
+    </div>
+    <div class="meta-row">
+      <span class="fr-status"><span class="fr-status__dot"></span>Estimates in manifest as co2_kg_estimate</span>
+      <span class="fr-status fr-status--info"><span class="fr-status__dot"></span>Sources: ElectricityMap public data, vendor TDP datasheets</span>
+      <span class="fr-status fr-status--warn"><span class="fr-status__dot"></span>+/- 30 percent error bars on every estimate</span>
+    </div>
+  </div>
+</section>
+
+<!-- 2. WHY WE MEASURE -->
+<section class="fr-section" id="why-measure">
+  <div class="fr-container">
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">Why we measure</span>
+      <h2 class="fr-h2">Every distillation has a carbon cost.</h2>
+      <p class="fr-lede">Training a student model on a teacher's traces uses real electricity. Running a model in the cloud uses more. Running a compiled .kolm on your own GPU avoids the cloud-inference round-trips, which is usually the larger lifetime emission. We want both numbers visible so the comparison is honest.</p>
+    </div>
+    <ul class="fr-spec-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>Training emissions</h3>
+          <span class="fr-spec-list__delta">one-time, capped at compile</span>
+        </div>
+        <p class="fr-spec-list__p">One distill loop, one number. GPU TDP times wallclock duration times regional grid carbon intensity. Stamped into the artifact at compile time so the receipt does not drift later.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>Cloud-inference round-trips</h3>
+          <span class="fr-spec-list__delta">recurring per call</span>
+        </div>
+        <p class="fr-spec-list__p">Every API call to a hosted frontier model is a transit and a datacenter inference. Multiply by your call rate and the recurring cost dominates within weeks. Running locally cuts this cost to your own GPU draw plus zero network.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>Local inference draw</h3>
+          <span class="fr-spec-list__delta">your hardware, your grid</span>
+        </div>
+        <p class="fr-spec-list__p">A 5090 at full draw is roughly 575 watts. The "saved CO2" pill compares your local draw against the cloud equivalent. We do not subtract the embodied carbon of the GPU itself -- that is a separate accounting we do not claim to capture.</p>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- 3. CO2 ESTIMATE MODEL -->
+<section class="fr-section" id="estimate-model">
+  <div class="fr-container">
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">CO2 estimate model</span>
+      <h2 class="fr-h2">GPU TDP times duration times grid intensity.</h2>
+      <p class="fr-lede">Plain inputs, plain math, plain output. We do not lifecycle-assess your datacenter. We do not factor PUE because we do not know your facility. The estimate is intentionally simple so it is auditable line-by-line.</p>
+    </div>
+    <div class="sus-formula">
+co2_kg_estimate = <b>(gpu_tdp_watts</b> * <b>duration_seconds</b> / 3600 / 1000<b>)</b> * <b>grid_kg_co2_per_kwh</b>
+
+# example: RTX 5090 distill of Qwen2.5-3B-Instruct for 13.85 seconds on US-West grid
+# = (575 * 13.85 / 3600 / 1000) * 0.290
+# = 0.000642 kg CO2
+# = 0.642 grams CO2 (+/- 30 percent)
+    </div>
+    <ul class="fr-spec-list" style="margin-top:18px">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>gpu_tdp_watts</h3>
+          <span class="fr-spec-list__delta">vendor datasheet</span>
+        </div>
+        <p class="fr-spec-list__p">NVIDIA, AMD, and Intel publish max TDP per SKU. We use the published nameplate, not measured draw, because measured draw varies with utilization and we want a conservative upper bound.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>duration_seconds</h3>
+          <span class="fr-spec-list__delta">wallclock from your run</span>
+        </div>
+        <p class="fr-spec-list__p">Captured by the kolm CLI at the start and end of distill, quantize, and compile. No probabilistic estimates. The exact seconds you waited.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>grid_kg_co2_per_kwh</h3>
+          <span class="fr-spec-list__delta">ElectricityMap public data</span>
+        </div>
+        <p class="fr-spec-list__p">Regional carbon intensity from ElectricityMap's open dataset. We snapshot the hourly value at the start of your run. If your tenant lacks a region setting, we fall back to the global average and flag estimate_quality:low in the manifest.</p>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- 4. SUSTAINABILITY BADGE SPEC -->
+<section class="fr-section" id="badge-spec">
+  <div class="fr-container">
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">Sustainability badge spec</span>
+      <h2 class="fr-h2">co2_kg_estimate in the manifest, pill in the viewer.</h2>
+      <p class="fr-lede">Every compiled .kolm carries the field. Any viewer that knows the field can render the pill. The pill text is computed from the artifact, not hard-coded server-side.</p>
+    </div>
+    <div class="sus-formula">
+{
+  "artifact_id": "art_qwen3b_distill_v4",
+  "co2_kg_estimate": 0.000642,
+  "co2_estimate_quality": "high",
+  "co2_grid_region": "US-WEST",
+  "co2_grid_kg_per_kwh": 0.290,
+  "co2_method": "tdp_times_duration_v1",
+  "co2_error_bar_pct": 30
+}
+    </div>
+    <p>Viewers render the pill from these six fields. No server lookup, no opaque scoring.</p>
+    <span class="sus-badge-demo">Saved 14.2 kg CO2 vs cloud inference</span>
+    <p style="margin-top:14px">The "saved vs cloud" pill multiplies your call rate by the cloud-inference baseline minus the local draw. Cloud baseline is a regional median; if we cannot determine it, the pill is suppressed and replaced with "CO2 estimate unavailable for this region".</p>
+  </div>
+</section>
+
+<!-- 5. HONEST CONTRACT -->
+<section class="fr-section" id="honesty">
+  <div class="fr-container">
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">Honest contract</span>
+      <h2 class="fr-h2">+/- 30 percent error bars. No "carbon-neutral" without receipts.</h2>
+      <p class="fr-lede">Energy accounting is hard. The honest move is to publish error bars and refuse to claim offsets we cannot prove. We will not stamp "carbon-neutral" on any artifact unless the tenant has uploaded matching offset receipts that we have hash-bound to the artifact manifest.</p>
+    </div>
+    <ul class="fr-spec-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>What we claim</h3>
+          <span class="fr-spec-list__delta">conservative upper bounds</span>
+        </div>
+        <p class="fr-spec-list__p">Conservative upper-bound estimates of training and local-inference emissions, error-barred at +/- 30 percent, sourced from public TDP datasheets and ElectricityMap public data. We claim the math is auditable line-by-line.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>What we never claim</h3>
+          <span class="fr-spec-list__delta">no carbon-neutral without proof</span>
+        </div>
+        <p class="fr-spec-list__p">We never stamp "carbon-neutral" on any artifact without matching offset receipts. We never claim PUE multipliers we cannot verify. We never subtract embodied carbon of GPUs or datacenters. We never use marketing-grade rounding that hides the error bar.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>If we cannot estimate</h3>
+          <span class="fr-spec-list__delta">empty-state, never a guess</span>
+        </div>
+        <p class="fr-spec-list__p">If grid_region is unknown and the global-average fallback also fails, the manifest field is set to null and the viewer renders "CO2 estimate unavailable". We do not invent a number to fill space.</p>
+      </li>
+    </ul>
+    <div class="sus-honesty">
+      <b>Honest framing.</b> CO2 estimates have a +/- 30 percent error bar by design. They are not a lifecycle assessment. They do not include embodied GPU or datacenter carbon. We will not call a model "carbon-neutral" without uploaded offset receipts that hash-bind to the artifact manifest.
+    </div>
+    <div class="sus-crosslink">
+      <a href="/account/sustainability" class="fr-btn fr-btn--mint">View your CO2 dashboard</a>
+      <a href="/k-score" class="fr-btn fr-btn--ghost">Read about K-Score</a>
+      <a href="/security" class="fr-btn fr-btn--ghost">Security and receipts</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI workbench. Capture, distill, quantize, and run signed models on your own hardware.</p>
+        <p class="ks-foot__tag" style="margin-top:8px">Contact: rodneyyesep@gmail.com</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/faq">FAQ</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/sustainability">Sustainability</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Community</h4>
+        <a href="/community">Community</a>
+        <a href="/recipes">Recipes</a>
+        <a href="/forge">Forge</a>
+        <a href="/leaderboard">Leaderboard</a>
+        <a href="/labs">Labs</a>
+        <a href="/pricing">Pricing</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- w786-sustainability -->
+</body>
+</html>

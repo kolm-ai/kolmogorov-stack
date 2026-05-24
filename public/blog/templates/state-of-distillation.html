@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>State of Distillation template &middot; kolm blog &middot; kolm.ai</title>
+<meta name="description" content="Monthly State of Distillation report template. Top numbers, what shipped, community work, what is next. Designed for month-over-month comparability with no fabricated figures.">
+<meta name="theme-color" content="#07090c">
+<link rel="canonical" href="https://kolm.ai/blog/templates/state-of-distillation">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/frontier.css">
+<script defer src="/frontier.js"></script>
+<script src="/nav.js" defer></script>
+<style>
+  .tp-hero { padding-top: clamp(72px, 9vw, 128px); padding-bottom: clamp(40px, 5vw, 64px); border-bottom: 1px solid var(--line-1); }
+  .tp-hero h1 { font-family: var(--fr-font-display); font-size: var(--fr-text-5xl); letter-spacing: var(--fr-track-display); line-height: 1.04; font-weight: 580; color: var(--ink-1); margin: 14px 0 18px; max-width: 22ch; }
+  .tp-hero h1 b { color: var(--fr-mint); font-weight: 580; }
+  .tp-byline { font-family: var(--fr-font-mono); font-size: 12px; color: var(--ink-3); letter-spacing: 0.05em; margin-top: 18px; display: flex; flex-wrap: wrap; gap: 18px; }
+  .tp-byline span b { color: var(--ink-1); font-weight: 540; }
+
+  .tp-article { padding: clamp(48px, 6vw, 80px) 0; }
+  .tp-article h2 { font-family: var(--fr-font-display); font-size: clamp(22px, 2.4vw, 28px); font-weight: 540; color: var(--ink-1); letter-spacing: -0.01em; margin: 0 0 14px; }
+  .tp-article h3 { font-family: var(--fr-font-display); font-size: 18px; font-weight: 540; color: var(--ink-1); margin: 24px 0 10px; }
+  .tp-article p { font-family: var(--fr-font-sans); font-size: 15.5px; color: var(--ink-2); line-height: 1.7; margin: 0 0 14px; }
+  .tp-article ul { padding-left: 22px; margin: 0 0 18px; }
+  .tp-article li { font-family: var(--fr-font-sans); font-size: 15px; color: var(--ink-2); line-height: 1.7; margin-bottom: 8px; }
+  .tp-article li b { color: var(--ink-1); font-weight: 540; }
+  .tp-section { margin-bottom: clamp(36px, 4vw, 56px); }
+
+  .tp-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+  .tp-table th, .tp-table td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line-1); font-family: var(--fr-font-sans); font-size: 14px; color: var(--ink-2); vertical-align: top; }
+  .tp-table th { font-family: var(--fr-font-mono); font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--ink-3); border-bottom: 1px solid var(--line-2); }
+  .tp-table td b { color: var(--ink-1); font-weight: 580; }
+  .tp-table td.tp-tbd { font-family: var(--fr-font-mono); color: var(--fr-amber); font-size: 12.5px; }
+
+  .tp-callout { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-family: var(--fr-font-sans); font-size: 13px; color: var(--ink-2); line-height: 1.6; margin: 28px 0; }
+  .tp-callout b { color: var(--ink-1); font-weight: 580; }
+
+  .tp-meta { font-family: var(--fr-font-mono); font-size: 11.5px; color: var(--ink-3); padding: 14px 16px; border: 1px solid var(--line-1); border-radius: 8px; background: rgba(255,255,255,0.015); margin-top: 28px; }
+  .tp-meta b { color: var(--ink-1); font-weight: 540; }
+
+  .tp-crosslink { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+</style>
+<meta property="og:title" content="State of Distillation template &middot; kolm blog &middot; kolm.ai">
+<meta property="og:description" content="Monthly State of Distillation report template. Top numbers, what shipped, community work, what is next.">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/blog/templates/state-of-distillation">
+<meta property="og:type" content="article">
+</head>
+<body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - Open-source AI workbench. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm. Frontier AI on your own infrastructure.</span>
+
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/k-score">K-score</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
+      </div>
+    </div>
+  </header>
+</div>
+
+<main id="main">
+
+<!-- 1. HERO / BYLINE -->
+<section class="tp-hero fr-section">
+  <div class="fr-container">
+    <span class="fr-eyebrow">Monthly &middot; State of Distillation template</span>
+    <h1>State of Distillation: <b>[Month YYYY]</b>.</h1>
+    <p class="fr-lede">A single page that summarizes what shipped, what the community shipped, and what the production telemetry actually said about distillation this month. Numbers are sourced from signed receipts. Empty cells are marked TBD, never invented.</p>
+    <div class="tp-byline">
+      <span>Author: <b>[author handle]</b></span>
+      <span>Published: <b>[YYYY-MM-DD]</b></span>
+      <span>Cadence: <b>Monthly</b></span>
+      <span>Receipt CID: <b>[bafy...]</b></span>
+    </div>
+  </div>
+</section>
+
+<!-- 2. ARTICLE -->
+<article class="tp-article">
+  <div class="fr-container" style="max-width: 880px;">
+
+    <!-- TOP NUMBERS -->
+    <section class="tp-section" id="top-numbers">
+      <h2>Top numbers this month</h2>
+      <p>The first paragraph of every monthly report opens with the four headline numbers in this table. The narrative below the table should explain the delta against the prior month, the most likely driver, and the most surprising signal. If a row is empty, mark it TBD with the reason; never round-trip a fabricated value.</p>
+      <table class="tp-table" aria-label="Top numbers this month">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>This month</th>
+            <th>Prior month</th>
+            <th>Delta</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>Distillation count</b></td>
+            <td class="tp-tbd">TBD</td>
+            <td class="tp-tbd">TBD</td>
+            <td class="tp-tbd">TBD</td>
+          </tr>
+          <tr>
+            <td><b>Top teacher saved</b> (model name &middot; gigabytes)</td>
+            <td class="tp-tbd">TBD</td>
+            <td class="tp-tbd">TBD</td>
+            <td class="tp-tbd">TBD</td>
+          </tr>
+          <tr>
+            <td><b>Top student deployed</b> (model name &middot; runtime)</td>
+            <td class="tp-tbd">TBD</td>
+            <td class="tp-tbd">TBD</td>
+            <td class="tp-tbd">TBD</td>
+          </tr>
+          <tr>
+            <td><b>K-Score median</b> (eval pack)</td>
+            <td class="tp-tbd">TBD</td>
+            <td class="tp-tbd">TBD</td>
+            <td class="tp-tbd">TBD</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- WHAT WE SHIPPED -->
+    <section class="tp-section" id="what-we-shipped">
+      <h2>What we shipped</h2>
+      <p>List the kolm waves that landed in the month with a one-line description and the user-visible impact. Each bullet should link to a commit, a wave file, or a release note. If the wave changed a public surface (route, CLI command, frontend page), the bullet should call that out so readers can verify the change themselves.</p>
+      <ul>
+        <li><b>[Wave number]</b> &mdash; [one-line description]. Surfaces touched: [routes / CLI / pages]. Commit: [SHA].</li>
+        <li><b>[Wave number]</b> &mdash; [one-line description]. Surfaces touched: [routes / CLI / pages]. Commit: [SHA].</li>
+        <li><b>[Wave number]</b> &mdash; [one-line description]. Surfaces touched: [routes / CLI / pages]. Commit: [SHA].</li>
+        <li><b>[Wave number]</b> &mdash; [one-line description]. Surfaces touched: [routes / CLI / pages]. Commit: [SHA].</li>
+      </ul>
+      <p>The author should also call out anything that was promised but slipped. The cadence depends on honest reporting on misses, not just hits. A missed wave with a one-line reason is far more useful than silence.</p>
+    </section>
+
+    <!-- WHAT THE COMMUNITY SHIPPED -->
+    <section class="tp-section" id="community">
+      <h2>What the community shipped</h2>
+      <p>Highlight artifacts that contributors uploaded to the registry, recipes that were promoted to the canonical recipe book, benchmark runs that beat prior records, and external papers that cite the kolm artifact format. The goal is to make the community feel seen, not to advertise kolm.</p>
+      <ul>
+        <li><b>[Contributor handle]</b> &mdash; [artifact / recipe / benchmark]. Why it matters: [one line]. Link: [CID or URL].</li>
+        <li><b>[Contributor handle]</b> &mdash; [artifact / recipe / benchmark]. Why it matters: [one line]. Link: [CID or URL].</li>
+        <li><b>[Contributor handle]</b> &mdash; [artifact / recipe / benchmark]. Why it matters: [one line]. Link: [CID or URL].</li>
+        <li><b>[Paper title]</b> by [authors] &mdash; [one-line summary of how it touches the distillation stack]. Link: [arXiv ID].</li>
+      </ul>
+    </section>
+
+    <!-- WHAT IS NEXT -->
+    <section class="tp-section" id="next">
+      <h2>What is next</h2>
+      <p>One short paragraph naming the two or three waves planned for the following month. The narrative should connect those waves back to the top-numbers table: if K-Score median dipped this month, the next-month plan should call out the eval pack work that aims to recover it. If distillation count slumped, the plan should name the recipe coverage gap that caused the slump. Predictions should be specific enough that the next month's report can grade them honestly.</p>
+    </section>
+
+    <!-- HONESTY CALLOUT -->
+    <div class="tp-callout">
+      <b>This is a TEMPLATE.</b> Real reports launch with real numbers from production. We will never fabricate numbers to fill a slot. If a metric is unavailable, the cell stays marked TBD with the reason, and the narrative names the gap. The blog cadence is only valuable if every figure in it can be traced back to a signed receipt or a public artifact.
+    </div>
+
+    <!-- META FOOTER -->
+    <div class="tp-meta">
+      <b>Template version:</b> v1 &middot; <b>Owner:</b> kolm blog editor &middot; <b>Review path:</b> editorial review then receipts verification &middot; <b>Source:</b> /blog/templates/state-of-distillation
+    </div>
+
+    <!-- CROSSLINKS -->
+    <div class="tp-crosslink">
+      <a href="/blog" class="fr-btn fr-btn--mint">Back to blog</a>
+      <a href="/blog/templates/cost-of-ai" class="fr-btn fr-btn--ghost">Cost of AI template</a>
+      <a href="/benchmarks" class="fr-btn fr-btn--ghost">Benchmarks</a>
+      <a href="/verify-prod" class="fr-btn fr-btn--ghost">Verify a .kolm</a>
+    </div>
+
+  </div>
+</article>
+
+</main>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI workbench. Capture, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/faq">FAQ</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Community</h4>
+        <a href="/community">Community</a>
+        <a href="/recipes">Recipes</a>
+        <a href="/forge">Forge</a>
+        <a href="/leaderboard">Leaderboard</a>
+        <a href="/labs">Labs</a>
+        <a href="/blog">Blog</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- w802-state-of-distillation-template -->
+</body>
+</html>

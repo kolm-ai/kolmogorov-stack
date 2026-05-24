@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>kolm labs &middot; Open-source AI workbench &middot; kolm.ai</title>
+<meta name="description" content="kolm labs research grants fund work on efficient distillation, novel quantization, multimodal distill, and on-device inference benchmarks. Compute credits, GPU hours, no equity, no IP claim. Applications reviewed monthly. We aim to respond within 30 days.">
+<meta name="theme-color" content="#07090c">
+<link rel="canonical" href="https://kolm.ai/labs">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/frontier.css">
+<script defer src="/frontier.js"></script>
+<script src="/nav.js" defer></script>
+<style>
+  /* Page-local rhythm (mirrors community.html scoping) */
+  .lb-hero { padding-top: clamp(72px, 9vw, 128px); padding-bottom: clamp(56px, 7vw, 96px); border-bottom: 1px solid var(--line-1); position: relative; }
+  .lb-hero h1 {
+    font-family: var(--fr-font-display);
+    font-size: var(--fr-text-5xl);
+    letter-spacing: var(--fr-track-display);
+    line-height: 1.04;
+    font-weight: 580;
+    color: var(--ink-1);
+    margin: 14px 0 18px;
+    max-width: 22ch;
+  }
+  .lb-hero h1 b { color: var(--fr-mint); font-weight: 580; }
+  .lb-hero .cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+  .lb-hero .meta-row { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 28px; }
+
+  .lb-card-pad { padding: 22px 22px 20px; display: flex; flex-direction: column; gap: 10px; }
+  .lb-card-pad p { margin: 0; font-family: var(--fr-font-sans); font-size: 13.5px; color: var(--ink-2); line-height: 1.6; }
+
+  .lb-form { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 24px; }
+  .lb-form .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 720px) { .lb-form .row { grid-template-columns: 1fr; } }
+  .lb-form label { display: block; font-family: var(--fr-font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 6px; }
+  .lb-form input[type=text],
+  .lb-form input[type=email],
+  .lb-form textarea,
+  .lb-form select {
+    width: 100%;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--line-1);
+    border-radius: 6px;
+    padding: 11px 13px;
+    font-family: var(--fr-font-sans);
+    font-size: 14px;
+    color: var(--ink-1);
+    box-sizing: border-box;
+    outline: none;
+  }
+  .lb-form textarea { min-height: 140px; resize: vertical; font-family: var(--fr-font-sans); line-height: 1.55; }
+  .lb-form input:focus, .lb-form textarea:focus, .lb-form select:focus { border-color: var(--fr-mint); }
+  .lb-form .hint { font-family: var(--fr-font-sans); font-size: 12.5px; color: var(--ink-3); margin-top: 4px; }
+  .lb-form .submit-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 8px; }
+
+  .lb-honesty { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-family: var(--fr-font-sans); font-size: 13px; color: var(--ink-2); line-height: 1.55; margin-top: 20px; }
+  .lb-honesty b { color: var(--ink-1); font-weight: 580; }
+
+  .lb-past-empty { padding: 24px; border: 1px solid var(--line-1); border-radius: 10px; background: rgba(255,255,255,0.015); }
+  .lb-past-empty .badge { font-family: var(--fr-font-mono); font-size: 10.5px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--fr-amber); margin-bottom: 8px; display: inline-block; }
+  .lb-past-empty h3 { margin: 0 0 8px; font-family: var(--fr-font-display); font-size: 22px; font-weight: 540; color: var(--ink-1); letter-spacing: -0.01em; }
+  .lb-past-empty p { margin: 0; font-family: var(--fr-font-sans); font-size: 14px; color: var(--ink-2); line-height: 1.6; }
+
+  .lb-crosslink { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+</style>
+<meta property="og:title" content="kolm labs &middot; Open-source AI workbench &middot; kolm.ai">
+<meta property="og:description" content="kolm labs research grants fund work on efficient distillation, novel quantization, multimodal distill, and on-device inference benchmarks. Compute credits, GPU hours, no equity, no IP claim.">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/labs">
+<meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/labs",
+  "description": "kolm labs research grants fund work on efficient distillation, novel quantization, multimodal distill, and on-device inference benchmarks.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
+</head>
+<body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - Open-source AI workbench. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/k-score">K-score</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
+      </div>
+    </div>
+  </header>
+</div>
+
+<main id="main">
+
+<!-- 1. HERO -->
+<section class="lb-hero fr-section">
+  <div class="fr-container">
+    <span class="fr-eyebrow">Open-source AI workbench</span>
+    <h1>kolm labs <b>research grants</b>.</h1>
+    <p class="fr-lede">We fund open work on efficient distillation, novel quantization, multimodal distill, and on-device inference benchmarks. Compute credits and GPU hours, no equity, no IP claim. Your work stays your work.</p>
+    <div class="cta-row">
+      <a href="#apply" class="fr-btn fr-btn--mint">Apply for a grant</a>
+      <a href="#themes" class="fr-btn fr-btn--ghost">See research themes</a>
+    </div>
+    <div class="meta-row">
+      <span class="fr-status"><span class="fr-status__dot"></span>Applications reviewed monthly</span>
+      <span class="fr-status fr-status--info"><span class="fr-status__dot"></span>We aim to respond within 30 days</span>
+      <span class="fr-status fr-status--warn"><span class="fr-status__dot"></span>First grant cycle Q3 2026</span>
+    </div>
+  </div>
+</section>
+
+<!-- 2. WHAT KOLM LABS FUNDS -->
+<section class="fr-section" id="themes">
+  <div class="fr-container">
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">What kolm labs funds</span>
+      <h2 class="fr-h2">Four research themes.</h2>
+      <p class="fr-lede">Concrete, reproducible work on the efficiency stack. If it ships as code, weights, a paper, or a public benchmark, we want to see it.</p>
+    </div>
+    <ul class="fr-spec-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>Efficient distillation methods</h3>
+          <span class="fr-spec-list__delta">teacher-student, on-policy, preference</span>
+        </div>
+        <p class="fr-spec-list__p">Novel student-architectures, smarter teacher trace selection, on-policy distill loops, distill-from-preference. Anything that pushes the compute-cost-vs-quality frontier on a published eval pack.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>Novel quantization</h3>
+          <span class="fr-spec-list__delta">sub-4-bit, MoE-aware, calibration</span>
+        </div>
+        <p class="fr-spec-list__p">Sub-4-bit schemes, MoE-aware quantization, smarter calibration sets, mixed-precision discovery. We care about KL-divergence retention against the BF16 base, not headline bit counts.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>Multimodal distill</h3>
+          <span class="fr-spec-list__delta">vision, audio, video, sensor</span>
+        </div>
+        <p class="fr-spec-list__p">Distill vision-language, speech, and time-series teachers down to artifacts a phone or an embedded board can actually run. Bonus points for honest empty-state handling when modality coverage is incomplete.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>On-device inference benchmarks</h3>
+          <span class="fr-spec-list__delta">phones, laptops, edge, embedded</span>
+        </div>
+        <p class="fr-spec-list__p">Reproducible, signed benchmarks on real consumer and edge hardware. Pixel, iPhone, M-series Mac, Jetson, Raspberry Pi, microcontrollers. We will publish your runs alongside their receipts.</p>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- 3. WHAT WE OFFER -->
+<section class="fr-section" id="offer">
+  <div class="fr-container">
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">What we offer</span>
+      <h2 class="fr-h2">Compute, hours, credit. No equity. No IP claim.</h2>
+      <p class="fr-lede">A grant is meant to unblock real work. The terms reflect that. You keep your code, your weights, your paper, and your name on the work.</p>
+    </div>
+    <ul class="fr-spec-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>Compute credits</h3>
+          <span class="fr-spec-list__delta">$1,000 - $10,000 per project</span>
+        </div>
+        <p class="fr-spec-list__p">Teacher-API budget on the kolm Gateway. Use it to run captures, distill loops, and bake-offs against frontier teachers without spending your own balance.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>kolm Cloud GPU hours</h3>
+          <span class="fr-spec-list__delta">H100 / B200 / 5090-class</span>
+        </div>
+        <p class="fr-spec-list__p">Scheduled time on kolm Cloud GPUs for distill, quantize, and inference benchmarking. Hours scale with the scope you propose in your application.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>Co-authorship on outcomes</h3>
+          <span class="fr-spec-list__delta">if relevant</span>
+        </div>
+        <p class="fr-spec-list__p">If the work becomes a published paper or kolm blog post and you want us listed, we will. If you would rather we stay off the author line, that is fine too. Your call.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>No equity, no IP claim</h3>
+          <span class="fr-spec-list__delta">author keeps their work</span>
+        </div>
+        <p class="fr-spec-list__p">We do not take equity in your lab or company. We do not claim IP over what you build with the grant. License your output however you like; we only ask that the receipts you generate on kolm stay verifiable.</p>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- 4. HOW TO APPLY -->
+<section class="fr-section" id="apply">
+  <div class="fr-container">
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">How to apply</span>
+      <h2 class="fr-h2">A short form. A human reads it.</h2>
+      <p class="fr-lede">Tell us what you want to build, what it would take, and how long you think it will run. This form opens your mail client and sends to grants@kolm.ai. Applications are reviewed monthly. We aim to respond within 30 days.</p>
+    </div>
+
+    <form class="lb-form" action="mailto:grants@kolm.ai" method="post" enctype="text/plain">
+      <div class="row">
+        <div>
+          <label for="g-name">Name</label>
+          <input type="text" id="g-name" name="name" required autocomplete="name" placeholder="Your full name">
+        </div>
+        <div>
+          <label for="g-institution">Institution / affiliation</label>
+          <input type="text" id="g-institution" name="institution" required placeholder="University, lab, company, or independent">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="g-area">Research area</label>
+          <select id="g-area" name="research_area" required>
+            <option value="">Choose a theme</option>
+            <option value="efficient-distillation">Efficient distillation methods</option>
+            <option value="novel-quantization">Novel quantization</option>
+            <option value="multimodal-distill">Multimodal distill</option>
+            <option value="on-device-benchmarks">On-device inference benchmarks</option>
+            <option value="other">Other (describe in summary)</option>
+          </select>
+        </div>
+        <div>
+          <label for="g-budget">Budget request (USD)</label>
+          <input type="text" id="g-budget" name="budget_request" required placeholder="e.g. $5,000 compute + 80 H100 hours">
+        </div>
+      </div>
+
+      <div>
+        <label for="g-summary">Project summary</label>
+        <textarea id="g-summary" name="project_summary" required placeholder="What are you building? What is the open question? What signal would convince a skeptic the approach works? Plain prose is fine. 200-500 words is plenty."></textarea>
+        <p class="hint">Plain prose. Include the eval pack or benchmark you would score against, if known.</p>
+      </div>
+
+      <div>
+        <label for="g-timeline">Timeline</label>
+        <input type="text" id="g-timeline" name="timeline" required placeholder="e.g. 8 weeks, with a public artifact by week 6">
+      </div>
+
+      <div class="submit-row">
+        <button type="submit" class="fr-btn fr-btn--mint">Send application</button>
+        <a href="mailto:grants@kolm.ai" class="fr-btn fr-btn--ghost">Or email grants@kolm.ai directly</a>
+      </div>
+
+      <div class="lb-honesty">
+        <b>Honest framing.</b> This form opens your local mail client and pre-fills a message to grants@kolm.ai. There is no backend collecting submissions in this wave; a human reads each email. Applications are reviewed monthly. We aim to respond within 30 days, sooner when we can.
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- 5. PAST GRANTS (PLANNED) -->
+<section class="fr-section" id="past">
+  <div class="fr-container">
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">Past grants (planned)</span>
+      <h2 class="fr-h2">First grant cycle Q3 2026.</h2>
+      <p class="fr-lede">We will not invent past grantees. The honest answer is that the program is launching.</p>
+    </div>
+    <div class="lb-past-empty">
+      <span class="badge">No grantees yet</span>
+      <h3>Be the first.</h3>
+      <p>The first kolm labs cycle opens Q3 2026. We will list every funded project here with a short summary, the artifact (if applicable), and any receipts the work produced. No fabricated history; only what actually shipped.</p>
+    </div>
+    <div class="lb-crosslink">
+      <a href="#apply" class="fr-btn fr-btn--mint">Apply now</a>
+      <a href="/community" class="fr-btn fr-btn--ghost">See community challenges</a>
+      <a href="/benchmarks" class="fr-btn fr-btn--ghost">Browse benchmarks</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI workbench. Capture, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/faq">FAQ</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Community</h4>
+        <a href="/community">Community</a>
+        <a href="/recipes">Recipes</a>
+        <a href="/forge">Forge</a>
+        <a href="/leaderboard">Leaderboard</a>
+        <a href="/labs">Labs</a>
+        <a href="/pricing">Pricing</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- w804-labs-research-grants -->
+</body>
+</html>

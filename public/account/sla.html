@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Service-level metrics &middot; Open-source AI workbench &middot; kolm.ai</title>
+<meta name="description" content="Service-level metrics for kolm surfaces: gateway, inference, capture, federated. 30-day and 90-day uptime, p50/p95/p99 latency, error budget burn, incident timeline. Numbers sourced from the SLA series route -- no marketing fiction.">
+<meta name="theme-color" content="#07090c">
+<link rel="canonical" href="https://kolm.ai/account/sla">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/frontier.css">
+<script defer src="/frontier.js"></script>
+<script src="/nav.js" defer></script>
+<style>
+  .sla-hero { padding-top: clamp(72px, 9vw, 128px); padding-bottom: clamp(56px, 7vw, 96px); border-bottom: 1px solid var(--line-1); position: relative; }
+  .sla-hero h1 {
+    font-family: var(--fr-font-display);
+    font-size: var(--fr-text-5xl);
+    letter-spacing: var(--fr-track-display);
+    line-height: 1.04;
+    font-weight: 580;
+    color: var(--ink-1);
+    margin: 14px 0 18px;
+    max-width: 22ch;
+  }
+  .sla-hero h1 b { color: var(--fr-mint); font-weight: 580; }
+  .sla-hero .meta-row { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 28px; }
+
+  .sla-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-family: var(--fr-font-mono); font-size: 13px; }
+  .sla-table th, .sla-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--line-1); color: var(--ink-2); }
+  .sla-table th { color: var(--ink-3); font-weight: 580; letter-spacing: 0.04em; text-transform: uppercase; font-size: 11px; }
+  .sla-table td.surface { color: var(--ink-1); font-weight: 580; }
+  .sla-table td.num { color: var(--fr-mint); }
+
+  .sla-gauge {
+    margin-top: 16px;
+    padding: 18px 20px;
+    border: 1px solid var(--line-1);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.015);
+  }
+  .sla-gauge-track { width: 100%; height: 14px; background: rgba(255,255,255,0.04); border-radius: 7px; overflow: hidden; margin-top: 12px; }
+  .sla-gauge-fill { height: 100%; background: linear-gradient(90deg, var(--fr-mint), var(--fr-amber) 75%, #e25a5a); width: 28%; border-radius: 7px; }
+  .sla-gauge-label { display: flex; justify-content: space-between; margin-top: 8px; font-family: var(--fr-font-mono); font-size: 11.5px; color: var(--ink-3); }
+
+  .sla-spark {
+    width: 100%;
+    height: 80px;
+    border: 1px solid var(--line-1);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.015);
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--fr-font-mono);
+    font-size: 12px;
+    color: var(--ink-3);
+  }
+
+  .sla-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(229, 167, 39, 0.10);
+    border: 1px solid rgba(229, 167, 39, 0.30);
+    font-family: var(--fr-font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--fr-amber);
+    margin: 6px 0;
+  }
+
+  .sla-honesty { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-family: var(--fr-font-sans); font-size: 13px; color: var(--ink-2); line-height: 1.55; margin-top: 20px; }
+  .sla-honesty b { color: var(--ink-1); font-weight: 580; }
+
+  .sla-crosslink { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+</style>
+<meta property="og:title" content="Service-level metrics &middot; Open-source AI workbench &middot; kolm.ai">
+<meta property="og:description" content="Per-surface uptime, latency percentiles, error-budget burn, incident timeline. Numbers come from /v1/sla/series.">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/account/sla">
+<meta property="og:type" content="website">
+</head>
+<body class="ks">
+<span class="brand-anchor" data-w775="h1" aria-hidden="true">Frontier AI on your own infrastructure.</span>
+<span class="brand-disambig" aria-hidden="true">Not Kolm therapeutics, Kolm band, or other unrelated organizations using similar names.</span>
+
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/k-score">K-score</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">-&gt;</span></a>
+      </div>
+    </div>
+  </header>
+</div>
+
+<main id="main">
+
+<!-- 1. HERO -->
+<section class="sla-hero fr-section">
+  <div class="fr-container">
+    <p class="brand-eyebrow" data-w775="brand-eyebrow">Open-source AI workbench</p>
+    <h1>Service-level metrics.</h1>
+    <p class="fr-lede">Per-surface uptime over 30 and 90 days, latency percentiles by surface, error-budget burn, and an incident timeline. Numbers come from the <code>/v1/sla/series</code> route -- when the backend is unreachable, we render a clear "Connecting..." pill instead of stale digits.</p>
+    <div class="meta-row">
+      <span class="fr-status"><span class="fr-status__dot"></span>Sourced from /v1/sla/series</span>
+      <span class="fr-status fr-status--info"><span class="fr-status__dot"></span>30-day and 90-day rolling windows</span>
+      <span class="fr-status fr-status--warn"><span class="fr-status__dot"></span>Placeholder rows until live wiring lands</span>
+    </div>
+    <p style="margin-top:18px"><span class="sla-pill">Connecting... backend not yet wired</span></p>
+  </div>
+</section>
+
+<!-- 2. PER-SURFACE UPTIME -->
+<section class="fr-section" id="uptime">
+  <div class="fr-container">
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">Per-surface uptime</span>
+      <h2 class="fr-h2">30-day and 90-day rolling.</h2>
+      <p class="fr-lede">Each surface is measured independently. The aggregate "kolm.ai uptime" is the worst-of-surfaces, not an average. That is the honest read for a tenant whose workload depends on a single surface being up.</p>
+    </div>
+    <table class="sla-table" aria-label="Per-surface uptime over last 30 and 90 days">
+      <thead>
+        <tr>
+          <th>Surface</th>
+          <th>Uptime (30d)</th>
+          <th>Uptime (90d)</th>
+          <th>Tier commitment</th>
+          <th>Source</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="surface">gateway</td>
+          <td class="num">--</td>
+          <td class="num">--</td>
+          <td>Pro 99.5 / Business 99.9 / Enterprise 99.95</td>
+          <td>/v1/sla/series?surface=gateway</td>
+        </tr>
+        <tr>
+          <td class="surface">inference</td>
+          <td class="num">--</td>
+          <td class="num">--</td>
+          <td>Pro 99.5 / Business 99.9 / Enterprise 99.95</td>
+          <td>/v1/sla/series?surface=inference</td>
+        </tr>
+        <tr>
+          <td class="surface">capture</td>
+          <td class="num">--</td>
+          <td class="num">--</td>
+          <td>Pro 99.5 / Business 99.9 / Enterprise 99.95</td>
+          <td>/v1/sla/series?surface=capture</td>
+        </tr>
+        <tr>
+          <td class="surface">federated</td>
+          <td class="num">--</td>
+          <td class="num">--</td>
+          <td>Business 99.9 / Enterprise 99.95</td>
+          <td>/v1/sla/series?surface=federated</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 3. LATENCY PERCENTILES -->
+<section class="fr-section" id="latency">
+  <div class="fr-container">
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">Latency percentiles</span>
+      <h2 class="fr-h2">p50, p95, p99 by surface.</h2>
+      <p class="fr-lede">p50 is the typical experience. p95 is the bad tenth-of-a-percent your customers will remember. p99 is what your incident review chases. All three matter; we publish all three.</p>
+    </div>
+    <table class="sla-table" aria-label="Latency percentiles by surface">
+      <thead>
+        <tr>
+          <th>Surface</th>
+          <th>p50 (ms)</th>
+          <th>p95 (ms)</th>
+          <th>p99 (ms)</th>
+          <th>Window</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="surface">gateway</td>
+          <td class="num">--</td>
+          <td class="num">--</td>
+          <td class="num">--</td>
+          <td>last 30 days</td>
+        </tr>
+        <tr>
+          <td class="surface">inference</td>
+          <td class="num">--</td>
+          <td class="num">--</td>
+          <td class="num">--</td>
+          <td>last 30 days</td>
+        </tr>
+        <tr>
+          <td class="surface">capture</td>
+          <td class="num">--</td>
+          <td class="num">--</td>
+          <td class="num">--</td>
+          <td>last 30 days</td>
+        </tr>
+        <tr>
+          <td class="surface">federated</td>
+          <td class="num">--</td>
+          <td class="num">--</td>
+          <td class="num">--</td>
+          <td>last 30 days</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 4. ERROR BUDGET BURN -->
+<section class="fr-section" id="error-budget">
+  <div class="fr-container">
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">Error budget burn</span>
+      <h2 class="fr-h2">Where the 30-day budget is being spent.</h2>
+      <p class="fr-lede">Error budget = (1 - tier_commitment) * window_seconds. A 99.9 percent commitment over 30 days is a 43.2 minute budget. The gauge below shows the burned fraction across all surfaces. If your tier ships SLA credits, they trigger at 100 percent burn.</p>
+    </div>
+    <div class="sla-gauge" aria-label="Error budget gauge placeholder">
+      <div style="display:flex;justify-content:space-between;font-family:var(--fr-font-mono);font-size:12px;color:var(--ink-3)">
+        <span>Tier: Business (99.9 percent over 30 days)</span>
+        <span>Burned: -- of -- minutes</span>
+      </div>
+      <div class="sla-gauge-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="sla-gauge-fill"></div>
+      </div>
+      <div class="sla-gauge-label">
+        <span>0 percent</span>
+        <span>50 percent</span>
+        <span>100 percent (credits trigger)</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. INCIDENT TIMELINE -->
+<section class="fr-section" id="incidents">
+  <div class="fr-container">
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">Incident timeline</span>
+      <h2 class="fr-h2">Last 90 days of declared incidents.</h2>
+      <p class="fr-lede">Each tick is a declared incident. Hovering a tick (when wired) shows surface, severity, declared-at and resolved-at timestamps, and a link to the post-incident review. We never silently retro-resolve.</p>
+    </div>
+    <div class="sla-spark" aria-label="Incident timeline sparkline placeholder">
+      Sparkline placeholder -- live data binds when /v1/sla/series ships
+    </div>
+  </div>
+</section>
+
+<!-- 6. SLA TIER MAPPING -->
+<section class="fr-section" id="tier-mapping">
+  <div class="fr-container">
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">SLA tier mapping</span>
+      <h2 class="fr-h2">Which tiers carry which commitments.</h2>
+      <p class="fr-lede">Free is best-effort by design -- it is a sandbox tier and we will not promise nines we cannot keep on a sandbox. Paid tiers carry contractual commitments with credit mechanics.</p>
+    </div>
+    <table class="sla-table" aria-label="SLA tier mapping">
+      <thead>
+        <tr>
+          <th>Tier</th>
+          <th>Uptime commitment</th>
+          <th>Latency commitment</th>
+          <th>Credit mechanic</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="surface">Free</td>
+          <td>best-effort</td>
+          <td>none</td>
+          <td>none</td>
+        </tr>
+        <tr>
+          <td class="surface">Pro</td>
+          <td>99.5 percent</td>
+          <td>p95 documented</td>
+          <td>service credit at 99.0 percent breach</td>
+        </tr>
+        <tr>
+          <td class="surface">Business</td>
+          <td>99.9 percent</td>
+          <td>p95 and p99 documented</td>
+          <td>service credit at 99.5 percent breach</td>
+        </tr>
+        <tr>
+          <td class="surface">Enterprise</td>
+          <td>99.95 percent</td>
+          <td>p95, p99, p99.9 documented</td>
+          <td>contractual credits at 99.9 percent breach</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="sla-honesty">
+      <b>Honest contract.</b> Numbers on this page are sourced live from the <code>/v1/sla/series</code> route. Until the backend is wired, every field renders as <code>--</code> with a "Connecting..." pill. We do not seed the page with marketing-grade rounding while waiting for real data. If you need contractual SLA evidence today, email rodneyyesep@gmail.com and we will ship a signed report from the underlying event store.
+    </div>
+    <div class="sla-crosslink">
+      <a href="/pricing" class="fr-btn fr-btn--mint">See plans</a>
+      <a href="/security" class="fr-btn fr-btn--ghost">Security and receipts</a>
+      <a href="/soc2" class="fr-btn fr-btn--ghost">SOC 2</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI workbench. Capture, distill, quantize, and run signed models on your own hardware.</p>
+        <p class="ks-foot__tag" style="margin-top:8px">Contact: rodneyyesep@gmail.com</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/faq">FAQ</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/account/sla">SLA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Community</h4>
+        <a href="/community">Community</a>
+        <a href="/recipes">Recipes</a>
+        <a href="/forge">Forge</a>
+        <a href="/leaderboard">Leaderboard</a>
+        <a href="/labs">Labs</a>
+        <a href="/pricing">Pricing</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- w788-3-sla -->
+</body>
+</html>

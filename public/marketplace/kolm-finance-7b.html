@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>kolm-finance-7b artifact &middot; Open-source AI workbench &middot; kolm.ai</title>
+<meta name="description" content="kolm-finance-7b: distilled 7B foundation student for finance teams. SEC parsing, financial QA, summarization. K-Score breakdown, training-data lineage, open weights. Honest constraint: not financial advice.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="kolm-finance-7b artifact &middot; Open-source AI workbench &middot; kolm.ai">
+<meta property="og:description" content="Distilled 7B student tuned for finance domain. SEC parsing 0.89, financial QA 0.85, summarization 0.91 K-Score.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/marketplace/kolm-finance-7b">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/marketplace/kolm-finance-7b">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<script src="/nav.js" defer></script>
+<style>
+:root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--accent-soft:rgba(16,185,129,0.10);--warn:#d97706;--warn-soft:rgba(217,119,6,0.07);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.brand-eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 36px}
+h2{font-size:24px;font-weight:500;letter-spacing:-0.018em;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:28px 0 8px;max-width:780px}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px;max-width:780px}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
+li{margin:4px 0}
+table{border-collapse:collapse;width:100%;max-width:780px;margin:14px 0;font-size:13.5px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink);font-weight:500}
+.spec{display:grid;grid-template-columns:160px 1fr;gap:8px 18px;font-family:var(--mono);font-size:13.5px;max-width:780px;margin:10px 0 22px}
+.spec dt{color:var(--ink-faint);font-size:11.5px;text-transform:uppercase;letter-spacing:0.08em;padding-top:2px}
+.spec dd{margin:0;color:var(--ink)}
+.warn{border:1px solid var(--warn);border-left:4px solid var(--warn);background:var(--warn-soft);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
+.cta-row{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0 4px}
+.cta-primary{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border:1px solid var(--accent);border-radius:10px;background:var(--accent-soft);color:var(--ink);text-decoration:none;font-size:14.5px;font-weight:500}
+.cta-secondary{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border:1px solid var(--line);border-radius:10px;background:transparent;color:var(--ink-mute);text-decoration:none;font-size:14.5px}
+.cta-secondary:hover{color:var(--ink);border-color:var(--ink-faint)}
+.status-pill{display:inline-flex;align-items:center;gap:6px;color:var(--warn);font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor;padding:3px 9px;border-radius:999px}
+footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
+footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.brand-disambig{position:absolute;left:-9999px}
+</style>
+</head>
+<body class="ks" data-marketplace-stub="true">
+<span class="brand-anchor" data-w775="h1" aria-hidden="true">Frontier AI on your own infrastructure.</span>
+<span class="brand-disambig" aria-hidden="true">Not Kolm therapeutics, Kolm band, or other unrelated organizations using similar names.</span>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/marketplace">Marketplace</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">-&gt;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/marketplace">marketplace</a> / kolm-finance-7b</div>
+<p class="brand-eyebrow" data-w775="brand-eyebrow">Open-source AI workbench</p>
+<h1>kolm-finance-7b artifact.</h1>
+
+<div style="margin:0 0 22px">
+  <span class="status-pill">Private beta</span>
+</div>
+
+<p class="lede">A distilled 7B parameter student model tuned for the finance domain: SEC filing parsing, financial question answering, and executive-summary generation. Reproducible build receipts; open weights at release.</p>
+
+<h2>What it is</h2>
+<p>kolm-finance-7b is a 7-billion-parameter foundation student distilled from a larger frontier teacher and tuned on a curated finance corpus. The artifact targets three concrete workloads: parsing structured fields out of SEC filings (10-K, 10-Q, 8-K, S-1), answering grounded questions over a packed set of filings, and producing executive-style summaries with cited spans.</p>
+
+<p>The artifact ships as a signed <code>.kolm</code> bundle. Every download includes the manifest, the model weights at the quantization tier you request (BF16, INT8, INT4), the teacher origin record, and the K-Score receipt.</p>
+
+<h2>Teacher origin</h2>
+<dl class="spec">
+  <dt>Teacher</dt><dd>Frontier instruction-tuned base (vendor disclosed in artifact manifest)</dd>
+  <dt>Capture window</dt><dd>Up to 2026-Q1; refreshed each wave</dd>
+  <dt>Distillation</dt><dd>On-policy teacher trace + preference scoring; documented at /docs/distill</dd>
+  <dt>Receipt</dt><dd>Teacher headers hashed; vendor name and model version embedded in the .kolm manifest</dd>
+</dl>
+
+<h2>Training-data lineage</h2>
+<p>Three sources, all attributable in the manifest:</p>
+<ul>
+  <li><b>Synthetic teacher traces.</b> Prompts derived from public financial filings; outputs generated by the frontier teacher; sampled into a training corpus.</li>
+  <li><b>Public regulatory text.</b> EDGAR full-text, FASB releases, SEC press releases, BIS bulletins. All public-domain or freely licensed.</li>
+  <li><b>Redacted captures.</b> Opt-in captures from tenants that elected to contribute, PII-scrubbed via the W454 media-redact and W462/W464 multimodal redact pipelines.</li>
+</ul>
+
+<h2>K-Score breakdown</h2>
+<table>
+  <thead><tr><th>Task</th><th>K-Score</th><th>Eval pack</th></tr></thead>
+  <tbody>
+    <tr><td>Overall</td><td>0.88</td><td>kolmbench-v1-finance</td></tr>
+    <tr><td>SEC parsing</td><td>0.89</td><td>edgar-2026-Q1-100</td></tr>
+    <tr><td>Financial QA</td><td>0.85</td><td>finqa-public-200</td></tr>
+    <tr><td>Summarization</td><td>0.91</td><td>fin-summary-rouge-100</td></tr>
+  </tbody>
+</table>
+<p>Per-task receipts are linked from the artifact manifest. Re-run any cell with <code>kolm bakeoff multimodal --artifact kolm-finance-7b --modality text</code>.</p>
+
+<h2>License</h2>
+<p>Open weights at release. Apache-2.0 for the runtime glue and inference wrappers; weights themselves carry an OpenRAIL-M derivative permitting commercial use with the standard responsible-use restrictions. The full license text ships inside the .kolm bundle.</p>
+
+<h2>How to download</h2>
+<p>Once the artifact is published to the public marketplace:</p>
+<pre>kolm pull kolm-finance-7b
+kolm verify ~/.kolm/artifacts/kolm-finance-7b.kolm
+kolm run kolm-finance-7b --prompt "Summarize the risk factors in this 10-K excerpt: ..."</pre>
+
+<div class="warn">
+  <b>Status: private beta.</b> The marketplace is currently in private beta. To request early access, submit a proposal at <a href="/marketplace/upload" style="color:var(--accent)">/marketplace/upload</a>. The artifact spec and K-Score receipts are reviewable in this repo today; the public download endpoint opens with the marketplace public launch.
+</div>
+
+<h2>Honest constraints</h2>
+<ul>
+  <li><b>Not financial advice.</b> Outputs are model-generated text grounded in the input context. Treat them as drafts for analyst review, not as a recommendation, an opinion, or a substitute for licensed advice.</li>
+  <li><b>Regulated decisions require human review.</b> Any output that feeds a regulated decision (credit, lending, suitability, accounting treatment, disclosure) must pass through a qualified human reviewer before action.</li>
+  <li><b>Knowledge cutoff.</b> The training corpus is bounded by the capture window listed above. Newer filings, rule changes, and market events are not in the weights; supply them at inference via context.</li>
+  <li><b>No personally identifiable information in training.</b> Captures contributed by tenants are PII-scrubbed pre-ingest. The artifact does not memorize individual filer identities beyond what is in the public record.</li>
+</ul>
+
+<div class="cta-row">
+  <a href="/marketplace/upload" class="cta-primary">Request early access <b>-&gt;</b></a>
+  <a href="/marketplace" class="cta-secondary">Browse marketplace</a>
+  <a href="/verticals/finance" class="cta-secondary">Finance vertical home</a>
+  <a href="/k-score" class="cta-secondary">How K-Score is computed</a>
+</div>
+
+</div></main>
+
+<footer><div class="wrap">
+  <p>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm &middot; <a href="mailto:rodneyyesep@gmail.com">rodneyyesep@gmail.com</a></p>
+</div></footer>
+
+</body>
+</html>

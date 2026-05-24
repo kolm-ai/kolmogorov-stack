@@ -13,7 +13,7 @@
 class Kolm < Formula
   desc "Compile, sign, and verify .kolm artifacts. Receipts for every inference."
   homepage "https://kolm.ai"
-  url "https://github.com/sneaky-hippo/kolm-stack/archive/refs/tags/v0.1.0.tar.gz"
+  url "https://github.com/sneaky-hippo/kolm-stack/archive/refs/tags/v0.2.6.tar.gz"
   sha256 "0000000000000000000000000000000000000000000000000000000000000000"
   license "Apache-2.0"
   head "https://github.com/sneaky-hippo/kolm-stack.git", branch: "main"

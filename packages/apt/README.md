@@ -21,19 +21,21 @@ kolm --version
 
 ## Building the .deb
 
-The build script lives at `scripts/build-deb.sh` (TODO &mdash; not yet
-checked in; see issue tracker for the release-tooling workstream). The
-shape:
+The local package builder lives at `scripts/build-deb.mjs`.
+
+Dry-run the package plan without writing files:
 
 ```sh
-fakeroot \
-  dpkg-deb --build \
-    -Zxz \
-    -z9 \
-    build/kolm_0.1.0_all
+node scripts/build-deb.mjs --dry-run --json
 ```
 
-Where `build/kolm_0.1.0_all/` contains:
+Build or stage the package layout:
+
+```sh
+node scripts/build-deb.mjs --out=build/deb
+```
+
+Where `build/kolm_0.2.6_all/` contains:
 
 ```
 DEBIAN/control     (this file)
@@ -41,6 +43,11 @@ usr/lib/kolm/cli/  (the Node entry point and src/)
 usr/bin/kolm       (shim: exec node /usr/lib/kolm/cli/kolm.js "$@")
 usr/share/doc/kolm/  (LICENSE, README, changelog.Debian.gz)
 ```
+
+If `dpkg-deb` is available, the builder also emits
+`build/deb/kolm_<version>_all.deb`. If it is not available, the staged
+layout is still produced so CI or a Debian-capable release host can package
+the exact same tree.
 
 ## Why we keep this minimal
 

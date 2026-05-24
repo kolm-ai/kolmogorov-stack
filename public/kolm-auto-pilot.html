@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f7f4ec";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Auto pilot &middot; Open-source AI workbench &middot; kolm.ai</title>
+<meta name="description" content="Continuous background distill. Opt in once. The autopilot daemon polls coverage gaps, gates on drift, and silently re-distills when local quality can replace teacher calls. W775.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Auto pilot &middot; Open-source AI workbench &middot; kolm.ai">
+<meta property="og:description" content="Continuous background distill. Opt in once; the autopilot does the rest. Honest envelopes, drift-gated, never silent.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/kolm-auto-pilot">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/kolm-auto-pilot">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Auto pilot - kolm.ai","description":"Continuous background distill. Opt in once. The autopilot daemon polls coverage gaps, gates on drift, and silently re-distills when local quality can replace teacher calls.","url":"https://kolm.ai/kolm-auto-pilot"}</script>
+<link rel="stylesheet" href="/design-tokens.css">
+<style>
+:root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--accent-soft:rgba(16,185,129,0.10);--warn:#d97706;--bad:#dc2626;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--accent);color:#fff;padding:8px 14px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
+.skip-link:focus{left:0}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+header.site{padding:18px 0;border-bottom:1px solid var(--line)}
+header.site .wrap{display:flex;justify-content:space-between;align-items:center}
+main{padding:40px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.brand-eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+h1{font-size:38px;line-height:1.1;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:17px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 32px}
+h2{font-size:22px;font-weight:500;letter-spacing:-0.018em;margin:40px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:15px;font-weight:500;letter-spacing:-0.01em;margin:24px 0 8px;max-width:780px}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
+li{margin:4px 0}
+table{border-collapse:collapse;width:100%;max-width:920px;margin:14px 0;font-size:13.5px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink);font-weight:500}
+td code{font-size:12px}
+.kpanel{background:var(--bg-elev);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:14px 0 18px;max-width:920px}
+.kpanel h2{margin:0 0 8px;font-size:18px}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-family:var(--mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;border:1px solid var(--line);background:var(--bg)}
+.pill-on{color:var(--accent);border-color:rgba(16,185,129,0.4)}
+.pill-off{color:var(--ink-faint)}
+.pill-hold{color:#d97706;border-color:rgba(217,119,6,0.4)}
+.pill-redistilled{color:var(--accent);border-color:rgba(16,185,129,0.4)}
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0 20px;max-width:920px}
+@media(max-width:820px){.metric-grid{grid-template-columns:1fr 1fr}}
+.metric-card{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:14px}
+.metric-card .label{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin-bottom:6px}
+.metric-card .value{font-size:22px;font-weight:600;font-family:var(--mono);color:var(--ink)}
+.metric-card .delta{font-size:11.5px;color:var(--ink-mute);margin-top:4px}
+.honest-note{font-size:12.5px;color:var(--ink-faint);font-style:italic;border-left:2px solid var(--accent);padding:4px 10px;margin:14px 0;max-width:780px}
+.cta-row{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0}
+.btn{display:inline-block;padding:9px 18px;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--ink);font-family:var(--mono);font-size:13px;cursor:pointer;text-decoration:none;line-height:1}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn-primary{background:var(--accent);color:#06251c;border-color:var(--accent)}
+.btn-primary:hover{background:#0ea672;color:#06251c}
+.btn-danger{color:var(--bad);border-color:rgba(220,38,38,0.4)}
+.btn-danger:hover{border-color:var(--bad);color:#fff;background:var(--bad)}
+.sparkbox{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:12px;margin-top:8px;max-width:920px}
+.sparkbox svg{display:block;width:100%;height:60px}
+.sparkbox .legend{font-family:var(--mono);font-size:11px;color:var(--ink-mute);margin-top:8px;display:flex;gap:14px;flex-wrap:wrap}
+.flow-card{background:var(--bg-elev);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:14px 0 18px;max-width:920px}
+.flow-step{display:flex;gap:14px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.flow-step:last-child{border-bottom:0}
+.flow-step .n{font-family:var(--mono);color:var(--accent);font-size:13px;width:26px;flex-shrink:0}
+.flow-step .body{flex:1}
+.flow-step .body h4{margin:0 0 4px;font-size:14px;color:var(--ink);font-weight:500}
+.flow-step .body p{margin:0;font-size:13px;color:var(--ink-mute);max-width:none}
+.auth-note{font-size:12.5px;color:var(--ink-mute);padding:10px 14px;background:var(--bg-elev);border-left:2px solid var(--warn);margin-top:14px;border-radius:0 6px 6px 0;max-width:780px}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - Open-source AI workbench. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+
+<header class="site">
+<div class="wrap">
+<div><a href="/" style="font-family:var(--mono);font-size:13px;color:var(--ink);text-decoration:none">kolm</a></div>
+<nav style="font-family:var(--mono);font-size:12px;color:var(--ink-mute)">
+<a href="/docs" style="color:inherit;text-decoration:none;margin-right:16px">docs</a>
+<a href="/account/drift" style="color:inherit;text-decoration:none;margin-right:16px">drift</a>
+<a href="/kolm-auto-pilot" style="color:var(--accent);text-decoration:none">autopilot</a>
+</nav>
+</div>
+</header>
+
+<main id="main">
+<div class="wrap">
+<p class="crumbs"><a href="/">kolm.ai</a> &rsaquo; auto pilot</p>
+<p class="brand-eyebrow" data-w775="brand-eyebrow">Open-source AI workbench</p>
+<h1 data-w775="h1">Frontier AI on your own infrastructure.</h1>
+<p class="lede" data-w775="lede">Auto pilot is the continuous-background-distill daemon. Opt in once; it polls W815 coverage gaps, gates on W813 drift, and silently re-distills when local quality can replace teacher calls. Every decision lands as a durable ledger row &mdash; the daemon never silently retrains on bad data.</p>
+
+<div class="honest-note" data-w775="honest-note">
+W775 honesty contract: <code>action:'redistilled'</code> is never emitted unless W815 returns ok AND the W813 drift gate is green AND the top gap_score crosses the <code>REDISTILL_THRESHOLD</code> (0.25). When any gate trips, the daemon writes a <code>holding_pattern</code> row with the reason so the operator can see WHY the autopilot held. Stamped <code>w775-v1</code>.
+</div>
+
+<section data-w775="opt-in">
+<h2>Opt in to auto pilot</h2>
+<p>Opt-in is explicit and per-namespace. Toggle below to enable the daemon for the namespace you select. The toggle writes a durable <code>autopilot:enabled</code> row and returns a stable <code>autopilot_id</code>.</p>
+<div class="kpanel">
+<label for="autopilot-ns" style="display:block;font-family:var(--mono);font-size:12px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">Namespace</label>
+<input type="text" id="autopilot-ns" data-w775="ns-input" value="default" placeholder="default" style="background:var(--bg-elev);border:1px solid var(--line);color:var(--ink);padding:8px 12px;border-radius:4px;font-family:var(--mono);font-size:13px;width:300px;max-width:100%">
+<div class="cta-row">
+<button class="btn btn-primary" data-w775="enable-btn" id="autopilot-enable-btn">Enable auto pilot</button>
+<button class="btn btn-danger" data-w775="disable-btn" id="autopilot-disable-btn">Disable</button>
+<button class="btn" data-w775="refresh-btn" id="autopilot-refresh-btn">Refresh status</button>
+</div>
+<div class="auth-note" data-w775="auth-note">Requires a logged-in API key. The opt-in call is auth-gated &mdash; sign in or run <code>kolm autopilot start --namespace default</code> from the CLI.</div>
+<pre data-w775="enable-result" id="autopilot-enable-result" style="display:none;max-height:200px;overflow-y:auto"></pre>
+</div>
+</section>
+
+<section data-w775="status">
+<h2>Live daemon status</h2>
+<p>Snapshot of the most recent tick decision for this namespace. The page polls <code>GET /v1/autopilot/status</code> every 30 seconds.</p>
+<div class="metric-grid">
+  <div class="metric-card"><div class="label">Daemon state</div><div class="value" data-w775="state-value" id="m-state-value"><span class="pill pill-off">unknown</span></div><div class="delta">enabled / disabled / unconfigured</div></div>
+  <div class="metric-card"><div class="label">Last tick action</div><div class="value" data-w775="action-value" id="m-action-value">&mdash;</div><div class="delta">redistilled / holding / no_op / disabled</div></div>
+  <div class="metric-card"><div class="label">Holding reason</div><div class="value" data-w775="reason-value" id="m-reason-value" style="font-size:14px">&mdash;</div><div class="delta">why the daemon last held</div></div>
+  <div class="metric-card"><div class="label">Last tick at</div><div class="value" data-w775="tick-at" id="m-tick-at" style="font-size:13px">&mdash;</div><div class="delta">UTC timestamp</div></div>
+</div>
+<pre data-w775="status-result" id="autopilot-status-result" style="display:none;max-height:260px;overflow-y:auto"></pre>
+</section>
+
+<section data-w775="savings">
+<h2>Savings telemetry</h2>
+<p>Conservative dollar savings &mdash; sums teacher cost AVOIDED on every routing decision where the W807 router stayed local. Baseline is what the workload would have cost at the teacher rate observed during the window.</p>
+<div class="metric-grid">
+  <div class="metric-card"><div class="label">Saved (window)</div><div class="value" data-w775="saved-value" id="m-saved-value">$0.00</div><div class="delta">teacher cost avoided</div></div>
+  <div class="metric-card"><div class="label">Baseline (window)</div><div class="value" data-w775="baseline-value" id="m-baseline-value">$0.00</div><div class="delta">what teacher-only would have cost</div></div>
+  <div class="metric-card"><div class="label">Routing decisions</div><div class="value" data-w775="n-value" id="m-n-value">0</div><div class="delta">routed rows in window</div></div>
+  <div class="metric-card"><div class="label">Window</div><div class="value" data-w775="window-value" id="m-window-value">30 d</div><div class="delta">rolling days</div></div>
+</div>
+<div class="sparkbox" data-w775="savings-spark">
+  <svg viewBox="0 0 600 60" preserveAspectRatio="none" aria-label="Daily savings sparkline">
+    <polyline id="savings-poly" fill="none" stroke="var(--accent)" stroke-width="1.5" points=""></polyline>
+  </svg>
+  <div class="legend"><span><span style="display:inline-block;width:10px;height:2px;background:var(--accent);margin-right:6px"></span>saved per day (linear)</span></div>
+</div>
+<pre data-w775="savings-result" id="autopilot-savings-result" style="display:none;max-height:260px;overflow-y:auto"></pre>
+</section>
+
+<section data-w775="how-it-works">
+<h2>How the tick decides</h2>
+<p>One tick = one pass through the gate sequence. The daemon writes EXACTLY one ledger row per tick (or zero if disabled).</p>
+<div class="flow-card">
+<div class="flow-step"><div class="n">1.</div><div class="body"><h4>Disabled gate</h4><p>If the latest disabled-row newer than the latest enabled-row, returns <code>action:'disabled'</code>. No event written.</p></div></div>
+<div class="flow-step"><div class="n">2.</div><div class="body"><h4>W815 readiness check</h4><p>Calls <code>getCoverageGapsForNamespace(namespace, {tenant_id})</code>. If the helper returns <code>error:'insufficient_captures_for_coverage'</code>, the daemon writes <code>autopilot:holding</code> with reason <code>insufficient_captures</code>.</p></div></div>
+<div class="flow-step"><div class="n">3.</div><div class="body"><h4>W813 drift gate</h4><p>Reads <code>listRecentAlerts({tenant_id, namespace, limit:1})</code>. If the latest alert is <code>drift_detected:true</code> with severity in {moderate, severe}, the daemon holds with <code>reason:'drift_red'</code>.</p></div></div>
+<div class="flow-step"><div class="n">4.</div><div class="body"><h4>Gain threshold</h4><p>If the top gap_score &lt; <code>REDISTILL_THRESHOLD</code> (0.25), the daemon emits <code>action:'no_op'</code>. The cost + risk of swapping artifacts doesn't clear the bar.</p></div></div>
+<div class="flow-step"><div class="n">5.</div><div class="body"><h4>Orchestrate</h4><p>Calls <code>orchestrateImprovement({tenant_id, namespace, candidates, opts:{skip_spawn:true}})</code>, writes <code>autopilot:redistilled</code> with the orchestrate envelope. Worker spawn is left to the W720 daemon &mdash; the tick never blocks on training.</p></div></div>
+</div>
+</section>
+
+<section data-w775="ledger">
+<h2>Ledger query</h2>
+<p>Every tick decision is a durable row in the event-store. Query for one namespace via:</p>
+<pre>kolm autopilot status --namespace default
+kolm autopilot status --namespace default --json | jq '.holding_pattern_reason'</pre>
+<p>HTTP equivalent (auth-required):</p>
+<pre>curl -H "Authorization: Bearer $KOLM_API_KEY" \
+     "$KOLM_BASE_URL/v1/autopilot/status?namespace=default"</pre>
+</section>
+
+<section data-w775="cli">
+<h2>CLI</h2>
+<p>The CLI dispatcher is <code>cmdW775Autopilot</code>. Subverbs:</p>
+<table>
+<thead><tr><th>verb</th><th>action</th><th>notes</th></tr></thead>
+<tbody>
+<tr><td><code>kolm autopilot start --namespace NS</code></td><td>POST /v1/autopilot/enable</td><td>writes opt-in row, returns autopilot_id</td></tr>
+<tr><td><code>kolm autopilot stop --namespace NS</code></td><td>POST /v1/autopilot/disable</td><td>writes opt-out row; subsequent ticks no-op</td></tr>
+<tr><td><code>kolm autopilot status --namespace NS</code></td><td>GET /v1/autopilot/status</td><td>shows current state, last tick action, holding reason</td></tr>
+<tr><td><code>kolm autopilot tick --namespace NS</code></td><td>GET /v1/autopilot/tick</td><td>force one tick now (cron normally drives this)</td></tr>
+<tr><td><code>kolm autopilot savings --namespace NS</code></td><td>GET /v1/autopilot/savings</td><td>cost saved + baseline, last 30 days</td></tr>
+<tr><td><code>kolm autopilot disable</code></td><td>alias for <code>stop</code></td><td>full kill switch</td></tr>
+</tbody>
+</table>
+<p style="color:var(--ink-faint);font-size:13px;margin-top:14px"><b>Honest disclosure:</b> system-tray integration (taskbar widget, OS-level start-on-boot) is on the roadmap but not yet shipped. The current daemon is cron-driven via <code>/v1/autopilot/tick</code>; the CLI <code>tick</code> verb is the manual-trigger equivalent.</p>
+</section>
+
+<script>
+(function(){
+  // Per-page localStorage key resolution. Matches the pattern used in
+  // public/account/active-learning.html so signed-in users carry their key
+  // across surfaces without re-typing. If no key is present, the buttons
+  // still render but POST/GET calls will surface a 401 envelope rather than
+  // a silent failure.
+  function getApiKey(){
+    try{ return localStorage.getItem('kolm-api-key') || ''; }catch(_){ return ''; }
+  }
+  function getBaseUrl(){
+    try{ return localStorage.getItem('kolm-base-url') || (location.origin); }catch(_){ return location.origin; }
+  }
+  function authHeaders(){
+    var k = getApiKey();
+    var h = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+    if(k) h['Authorization'] = 'Bearer ' + k;
+    return h;
+  }
+  function nsValue(){
+    var el = document.getElementById('autopilot-ns');
+    return (el && el.value ? el.value.trim() : 'default') || 'default';
+  }
+  function showJson(id, obj){
+    var el = document.getElementById(id);
+    if(!el) return;
+    el.style.display = 'block';
+    try{ el.textContent = JSON.stringify(obj, null, 2); }
+    catch(_){ el.textContent = String(obj); }
+  }
+  function fmtUsd(micro){
+    var n = Number(micro) || 0;
+    var usd = n / 1000000;
+    if(usd >= 100) return '$' + usd.toFixed(0);
+    if(usd >= 1) return '$' + usd.toFixed(2);
+    return '$' + usd.toFixed(4);
+  }
+
+  async function callEnable(){
+    var url = getBaseUrl() + '/v1/autopilot/enable';
+    try{
+      var r = await fetch(url, { method:'POST', headers: authHeaders(),
+        body: JSON.stringify({ namespace: nsValue() }) });
+      var j = await r.json();
+      showJson('autopilot-enable-result', j);
+      await refreshStatus();
+    }catch(e){
+      showJson('autopilot-enable-result', { ok:false, error:'network_error', detail: String(e) });
+    }
+  }
+  async function callDisable(){
+    var url = getBaseUrl() + '/v1/autopilot/disable';
+    try{
+      var r = await fetch(url, { method:'POST', headers: authHeaders(),
+        body: JSON.stringify({ namespace: nsValue() }) });
+      var j = await r.json();
+      showJson('autopilot-enable-result', j);
+      await refreshStatus();
+    }catch(e){
+      showJson('autopilot-enable-result', { ok:false, error:'network_error', detail: String(e) });
+    }
+  }
+  async function refreshStatus(){
+    var url = getBaseUrl() + '/v1/autopilot/status?namespace=' + encodeURIComponent(nsValue());
+    try{
+      var r = await fetch(url, { headers: authHeaders() });
+      var j = await r.json();
+      showJson('autopilot-status-result', j);
+      var statusEl = document.getElementById('m-state-value');
+      var actionEl = document.getElementById('m-action-value');
+      var reasonEl = document.getElementById('m-reason-value');
+      var tickAtEl = document.getElementById('m-tick-at');
+      if(statusEl){
+        if(!j.ok){
+          statusEl.innerHTML = '<span class="pill pill-off">' + (j.error || 'error') + '</span>';
+        }else if(j.enabled){
+          statusEl.innerHTML = '<span class="pill pill-on">enabled</span>';
+        }else{
+          statusEl.innerHTML = '<span class="pill pill-off">disabled</span>';
+        }
+      }
+      if(actionEl){
+        var act = (j && j.last_tick_action) || '';
+        if(act){
+          var cls = 'pill ';
+          if(act.indexOf('redistilled') >= 0) cls += 'pill-redistilled';
+          else if(act.indexOf('holding') >= 0) cls += 'pill-hold';
+          else cls += 'pill-off';
+          actionEl.innerHTML = '<span class="' + cls + '">' + act.replace('autopilot:', '') + '</span>';
+        }else{
+          actionEl.textContent = '—';
+        }
+      }
+      if(reasonEl){ reasonEl.textContent = (j && j.holding_pattern_reason) || '—'; }
+      if(tickAtEl){ tickAtEl.textContent = (j && j.last_tick_at) || '—'; }
+    }catch(_){
+      // network error - leave panel as-is
+    }
+  }
+  async function refreshSavings(){
+    var url = getBaseUrl() + '/v1/autopilot/savings?namespace=' + encodeURIComponent(nsValue()) + '&window_days=30';
+    try{
+      var r = await fetch(url, { headers: authHeaders() });
+      var j = await r.json();
+      showJson('autopilot-savings-result', j);
+      var saved = document.getElementById('m-saved-value');
+      var baseline = document.getElementById('m-baseline-value');
+      var n = document.getElementById('m-n-value');
+      var window = document.getElementById('m-window-value');
+      if(j && j.ok){
+        if(saved) saved.textContent = fmtUsd(j.total_saved_micro_usd);
+        if(baseline) baseline.textContent = fmtUsd(j.baseline_micro_usd);
+        if(n) n.textContent = String(j.n || 0);
+        if(window) window.textContent = (j.window_days || 30) + ' d';
+        // Sparkline
+        var pl = document.getElementById('savings-poly');
+        if(pl && Array.isArray(j.breakdown_by_day) && j.breakdown_by_day.length > 0){
+          var max = 1;
+          for(var i = 0; i < j.breakdown_by_day.length; i++){
+            var d = j.breakdown_by_day[i];
+            if(d.saved_micro_usd > max) max = d.saved_micro_usd;
+          }
+          var pts = j.breakdown_by_day.map(function(d, idx){
+            var x = (idx / Math.max(1, j.breakdown_by_day.length - 1)) * 600;
+            var y = 60 - ((d.saved_micro_usd || 0) / max) * 50 - 5;
+            return x.toFixed(1) + ',' + y.toFixed(1);
+          }).join(' ');
+          pl.setAttribute('points', pts);
+        }
+      }
+    }catch(_){
+      // network error - leave panel as-is
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    var enableBtn = document.getElementById('autopilot-enable-btn');
+    var disableBtn = document.getElementById('autopilot-disable-btn');
+    var refreshBtn = document.getElementById('autopilot-refresh-btn');
+    if(enableBtn) enableBtn.addEventListener('click', callEnable);
+    if(disableBtn) disableBtn.addEventListener('click', callDisable);
+    if(refreshBtn) refreshBtn.addEventListener('click', function(){
+      refreshStatus(); refreshSavings();
+    });
+    refreshStatus();
+    refreshSavings();
+    // Poll every 30s
+    setInterval(function(){ refreshStatus(); refreshSavings(); }, 30000);
+  });
+})();
+</script>
+</div>
+</main>
+</body>
+</html>

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>kolm-meta &middot; Open-source AI workbench &middot; kolm.ai</title>
+<meta name="description" content="kolm-meta is the meta-distillation model: given capture stats and a chosen architecture, it predicts K-Score, compile time, and likely failure modes. XGBoost-style gradient boosting, falls back to TAAS rule ladder under 1000 training rows. Tenant-scoped aggregates only.">
+<meta name="theme-color" content="#07090c">
+<link rel="canonical" href="https://kolm.ai/research/kolm-meta">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/frontier.css">
+<script defer src="/frontier.js"></script>
+<script src="/nav.js" defer></script>
+<style>
+  .km-hero { padding-top: clamp(72px, 9vw, 128px); padding-bottom: clamp(56px, 7vw, 96px); border-bottom: 1px solid var(--line-1); position: relative; }
+  .km-hero h1 {
+    font-family: var(--fr-font-display);
+    font-size: var(--fr-text-5xl);
+    letter-spacing: var(--fr-track-display);
+    line-height: 1.04;
+    font-weight: 580;
+    color: var(--ink-1);
+    margin: 14px 0 18px;
+    max-width: 22ch;
+  }
+  .km-hero h1 b { color: var(--fr-mint); font-weight: 580; }
+  .km-hero .meta-row { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 28px; }
+
+  .km-code {
+    padding: 18px 20px;
+    border: 1px solid var(--line-1);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.015);
+    font-family: var(--fr-font-mono);
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.6;
+    margin-top: 12px;
+    overflow-x: auto;
+  }
+  .km-code b { color: var(--fr-mint); font-weight: 580; }
+
+  .km-honesty { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-family: var(--fr-font-sans); font-size: 13px; color: var(--ink-2); line-height: 1.55; margin-top: 20px; }
+  .km-honesty b { color: var(--ink-1); font-weight: 580; }
+
+  .km-crosslink { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+</style>
+<meta property="og:title" content="kolm-meta &middot; Open-source AI workbench &middot; kolm.ai">
+<meta property="og:description" content="The meta-distillation model: predicts K-Score, compile time, and failure modes from capture stats and chosen architecture.">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/research/kolm-meta">
+<meta property="og:type" content="website">
+</head>
+<body class="ks">
+<span class="brand-anchor" data-w775="h1" aria-hidden="true">Frontier AI on your own infrastructure.</span>
+<span class="brand-disambig" aria-hidden="true">Not Kolm therapeutics, Kolm band, or other unrelated organizations using similar names.</span>
+
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/k-score">K-score</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">-&gt;</span></a>
+      </div>
+    </div>
+  </header>
+</div>
+
+<main id="main">
+
+<!-- 1. HERO -->
+<section class="km-hero fr-section">
+  <div class="fr-container">
+    <p class="brand-eyebrow" data-w775="brand-eyebrow">Open-source AI workbench</p>
+    <h1>kolm-meta -- the meta-distillation model.</h1>
+    <p class="fr-lede">Given your capture statistics and a chosen student architecture, kolm-meta predicts the K-Score you should expect, the compile time, and the failure modes most likely to bite you. XGBoost-style gradient boosting trained on aggregated run telemetry. Below 1000 training rows we fall back to the TAAS rule ladder with an honest envelope.</p>
+    <div class="meta-row">
+      <span class="fr-status"><span class="fr-status__dot"></span>Predicts K-Score + compile time + failure modes</span>
+      <span class="fr-status fr-status--info"><span class="fr-status__dot"></span>Tenant-scoped aggregates only, never raw text</span>
+      <span class="fr-status fr-status--warn"><span class="fr-status__dot"></span>Falls back to TAAS ladder under n=1000</span>
+    </div>
+  </div>
+</section>
+
+<!-- 2. WHAT IT PREDICTS -->
+<section class="fr-section" id="predicts">
+  <div class="fr-container">
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">What kolm-meta predicts</span>
+      <h2 class="fr-h2">Three numbers, before you spend the GPU hours.</h2>
+      <p class="fr-lede">The use case is "should I distill this corpus into this architecture, or do I need more captures first?" The model answers that without you paying the compile cost.</p>
+    </div>
+    <ul class="fr-spec-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>Predicted K-Score</h3>
+          <span class="fr-spec-list__delta">scalar in 0..1 + 80% CI</span>
+        </div>
+        <p class="fr-spec-list__p">A scalar prediction with an 80 percent confidence interval. Tight CIs indicate kolm-meta has seen runs like yours before; wide CIs are the honest "we do not know" signal.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>Predicted compile time</h3>
+          <span class="fr-spec-list__delta">seconds at chosen hardware</span>
+        </div>
+        <p class="fr-spec-list__p">Predicted wallclock seconds at the hardware you select (5090, H100, B200, M-series Mac). Used to estimate cost before you start.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>Likely failure modes</h3>
+          <span class="fr-spec-list__delta">ranked by probability</span>
+        </div>
+        <p class="fr-spec-list__p">Ranked list of failure modes seen on runs with similar fingerprints. Examples: distribution-shift on long-tail intents, overfit on under-represented language, judge-disagreement on edge cases.</p>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- 3. TRAINING DATA SPEC -->
+<section class="fr-section" id="training-data">
+  <div class="fr-container">
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">Training data spec</span>
+      <h2 class="fr-h2">One row per completed distill run.</h2>
+      <p class="fr-lede">Each row carries the run's capture-corpus statistics, the chosen architecture, and the observed outcome. No raw capture text is ever included; only aggregate statistics that cannot reconstruct the underlying captures.</p>
+    </div>
+    <div class="km-code">
+{
+  "<b>capture_stats</b>": {
+    "n_captures": 14200,
+    "avg_input_tokens": 187,
+    "avg_output_tokens": 95,
+    "intent_entropy": 2.34,
+    "language_dist_top3": ["en", "es", "fr"],
+    "tool_call_pct": 0.18
+  },
+  "<b>chosen_arch</b>": "qwen2.5-3b-int4",
+  "<b>observed_kscore</b>": 0.91,
+  "<b>compile_time</b>": 13.85,
+  "<b>observed_failure_modes</b>": ["long_tail_intent_shift", "low_confidence_on_es"]
+}
+    </div>
+  </div>
+</section>
+
+<!-- 4. ARCHITECTURE -->
+<section class="fr-section" id="architecture">
+  <div class="fr-container">
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">Architecture</span>
+      <h2 class="fr-h2">XGBoost-style gradient boosting (initial v0).</h2>
+      <p class="fr-lede">For v0 we chose gradient-boosted trees because the feature space is small (10s, not 1000s), the target is well-behaved scalars, and the model is interpretable -- you can read the splits and know why kolm-meta predicted what it did.</p>
+    </div>
+    <ul class="fr-spec-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>Three separate models</h3>
+          <span class="fr-spec-list__delta">K-Score, time, failure-mode classifier</span>
+        </div>
+        <p class="fr-spec-list__p">One regression model per scalar target (K-Score and compile time) and a multi-label classifier for failure modes. Three models lets each tune independently and lets the failure classifier carry per-mode calibration.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>Interpretable splits</h3>
+          <span class="fr-spec-list__delta">SHAP attributions per prediction</span>
+        </div>
+        <p class="fr-spec-list__p">Each prediction ships with SHAP attributions so you can see which capture-stat features pushed the predicted K-Score up or down. No black box; the answer comes with its receipts.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>v1 candidates</h3>
+          <span class="fr-spec-list__delta">tab-transformer, simple MLP</span>
+        </div>
+        <p class="fr-spec-list__p">v1 will compare gradient-boosted trees against a tab-transformer and a vanilla MLP on the same training rows. We will publish the head-to-head with K-S divergence on held-out runs.</p>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- 5. FALLBACK + PRIVACY -->
+<section class="fr-section" id="fallback">
+  <div class="fr-container">
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">Fallback and privacy</span>
+      <h2 class="fr-h2">Under n=1000 we use the TAAS rule ladder.</h2>
+      <p class="fr-lede">When the per-tenant or per-vertical training set is below 1000 rows, kolm-meta refuses to predict and falls back to the W716 TAAS rule ladder. The response envelope carries <code>meta_insufficient_data</code> so the caller never confuses a heuristic with a learned prediction.</p>
+    </div>
+    <div class="km-code">
+{
+  "<b>predicted_kscore</b>": null,
+  "<b>predicted_compile_time_s</b>": null,
+  "<b>predicted_failure_modes</b>": null,
+  "<b>fallback_used</b>": "taas_rule_ladder_v716",
+  "<b>fallback_predicted_kscore_range</b>": [0.82, 0.94],
+  "<b>envelope</b>": "meta_insufficient_data",
+  "<b>training_rows_seen</b>": 412
+}
+    </div>
+    <ul class="fr-spec-list" style="margin-top:18px">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>Tenant-scoped aggregates only</h3>
+          <span class="fr-spec-list__delta">never raw capture text</span>
+        </div>
+        <p class="fr-spec-list__p">Training rows are aggregate capture statistics keyed by tenant and vertical. We never ship raw capture text or model outputs into the kolm-meta training set. Statistics chosen so a single capture cannot be reconstructed.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>Opt-in</h3>
+          <span class="fr-spec-list__delta">per tenant, per namespace</span>
+        </div>
+        <p class="fr-spec-list__p">Tenants opt in per namespace. Without opt-in we still produce TAAS-ladder predictions but the tenant's runs do not contribute to kolm-meta training. Symmetric: contributors and non-contributors get the same predictions.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>Federation-friendly</h3>
+          <span class="fr-spec-list__delta">aggregates cross tenant boundary</span>
+        </div>
+        <p class="fr-spec-list__p">Because rows are aggregates by design, kolm-meta is compatible with the W461 federated approval-row sharing model: only hashed, noise-protected fingerprints cross the tenant boundary.</p>
+      </li>
+    </ul>
+    <div class="km-honesty">
+      <b>Honest envelope.</b> When kolm-meta cannot predict, the response is <code>meta_insufficient_data</code> with a clear count of training rows seen so far. We do not silently emit a heuristic prediction styled as a learned one. Every kolm-meta prediction ships with its SHAP attributions, the per-target confidence interval, and a pointer to the training-row cohort it generalized from.
+    </div>
+    <div class="km-crosslink">
+      <a href="/k-score" class="fr-btn fr-btn--mint">What is a K-Score</a>
+      <a href="/research/cross-lingual" class="fr-btn fr-btn--ghost">Cross-lingual distillation</a>
+      <a href="/labs" class="fr-btn fr-btn--ghost">kolm labs grants</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI workbench. Capture, distill, quantize, and run signed models on your own hardware.</p>
+        <p class="ks-foot__tag" style="margin-top:8px">Contact: rodneyyesep@gmail.com</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/faq">FAQ</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/research/kolm-meta">kolm-meta</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Community</h4>
+        <a href="/community">Community</a>
+        <a href="/recipes">Recipes</a>
+        <a href="/forge">Forge</a>
+        <a href="/leaderboard">Leaderboard</a>
+        <a href="/labs">Labs</a>
+        <a href="/pricing">Pricing</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- w832-kolm-meta-landing -->
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f7f4ec";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Your pipelines &middot; Open-source AI workbench &middot; kolm.ai</title>
+<meta name="description" content="List of artifact pipelines installed under your account: classifier + specialist count + latest K-Score. New pipeline CTA. W821-4.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Your pipelines &middot; Open-source AI workbench &middot; kolm.ai">
+<meta property="og:description" content="List of artifact pipelines installed under your account.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/account/pipelines">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/account/pipelines">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<script src="/nav.js" defer></script>
+<style>
+:root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--accent-soft:rgba(16,185,129,0.10);--warn:#d97706;--bad:#dc2626;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--accent);color:#fff;padding:8px 14px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
+.skip-link:focus{left:0}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+main{padding:40px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.brand-eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+.brand-disambig{display:block;font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-top:8px;padding:8px 0;max-width:780px}
+h1{font-size:38px;line-height:1.1;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:17px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 32px}
+h2{font-size:22px;font-weight:500;letter-spacing:-0.018em;margin:40px 0 12px;max-width:780px;scroll-margin-top:80px}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+.btn{display:inline-block;padding:9px 18px;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--ink);font-family:var(--mono);font-size:13px;cursor:pointer;text-decoration:none;line-height:1}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn-primary{background:var(--accent);color:#06251c;border-color:var(--accent)}
+.btn-primary:hover{background:#0ea672;color:#06251c}
+.cta-row{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0}
+.pipeline-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin:24px 0;max-width:920px}
+.pipeline-card{background:var(--bg-elev);border:1px solid var(--line);border-radius:10px;padding:18px 20px;display:flex;flex-direction:column;gap:8px}
+.pipeline-card .name{font-family:var(--mono);font-size:14px;color:var(--ink);font-weight:500}
+.pipeline-card .hash{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);word-break:break-all}
+.pipeline-card .row{display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink-mute)}
+.pipeline-card .row b{color:var(--ink);font-weight:500;font-family:var(--mono)}
+.pipeline-card .actions{display:flex;gap:8px;margin-top:6px}
+.pipeline-card .actions a{font-family:var(--mono);font-size:11.5px;color:var(--accent);text-decoration:none;border-bottom:1px dashed var(--accent)}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;border:1px solid var(--line);background:var(--bg)}
+.pill-good{color:var(--accent);border-color:rgba(16,185,129,0.4)}
+.pill-warn{color:var(--warn);border-color:rgba(217,119,6,0.4)}
+.honest-note{font-size:12.5px;color:var(--ink-faint);font-style:italic;border-left:2px solid var(--accent);padding:4px 10px;margin:14px 0;max-width:780px}
+footer.page{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line);margin-top:32px}
+footer.page a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<span class="brand-anchor" data-w775="h1" aria-hidden="true">Frontier AI on your own infrastructure.</span>
+
+<main id="main">
+<div class="wrap">
+<p class="crumbs"><a href="/">kolm.ai</a> &rsaquo; <a href="/account/overview">account</a> &rsaquo; pipelines</p>
+<p class="brand-eyebrow" data-w775="brand-eyebrow">Open-source AI workbench</p>
+<h1>Your pipelines.</h1>
+<span class="brand-disambig" aria-hidden="true">Not Kolm therapeutics, Kolm band, or other unrelated organizations using similar names.</span>
+<p class="lede">Each pipeline composes one classifier artifact with one specialist artifact per routed class. The K-Score below is the route-frequency-weighted pipeline score from the last gate run.</p>
+
+<div class="honest-note">
+The cards below are placeholder rows that mirror the live data shape. They hydrate from <code>GET /v1/pipelines</code> when the page is signed in and the W821 surface lands; until then, the list is illustrative.
+</div>
+
+<div class="cta-row">
+<a href="/docs/pipelines" class="btn">Read the pipeline guide</a>
+<a href="/builder?kind=pipeline" class="btn btn-primary">New pipeline</a>
+</div>
+
+<section data-w821="pipeline-list">
+<h2>Installed pipelines</h2>
+<div class="pipeline-grid" data-w821-pipeline-list="true">
+
+<div class="pipeline-card" data-w821-card="cs-pipeline-v1">
+<div class="name">cs-pipeline-v1</div>
+<div class="hash">classifier: kolm://sha256-cls123abc...</div>
+<div class="row"><span>Specialists</span><b>3</b></div>
+<div class="row"><span>Latest K-Score</span><b>0.91 <span class="pill pill-good">pass</span></b></div>
+<div class="row"><span>Last gate run</span><b>2026-05-24 12:14 UTC</b></div>
+<div class="row"><span>Namespace</span><b>support</b></div>
+<div class="actions">
+<a href="/account/routing?pipeline=cs-pipeline-v1">View routing</a>
+<a href="/account/builds?pipeline=cs-pipeline-v1">View builds</a>
+</div>
+</div>
+
+<div class="pipeline-card" data-w821-card="docs-search-pipeline">
+<div class="name">docs-search-pipeline</div>
+<div class="hash">classifier: kolm://sha256-cls456def...</div>
+<div class="row"><span>Specialists</span><b>4</b></div>
+<div class="row"><span>Latest K-Score</span><b>0.87 <span class="pill pill-good">pass</span></b></div>
+<div class="row"><span>Last gate run</span><b>2026-05-24 09:51 UTC</b></div>
+<div class="row"><span>Namespace</span><b>docs</b></div>
+<div class="actions">
+<a href="/account/routing?pipeline=docs-search-pipeline">View routing</a>
+<a href="/account/builds?pipeline=docs-search-pipeline">View builds</a>
+</div>
+</div>
+
+<div class="pipeline-card" data-w821-card="ticket-triage-pipeline">
+<div class="name">ticket-triage-pipeline</div>
+<div class="hash">classifier: kolm://sha256-cls789ghi...</div>
+<div class="row"><span>Specialists</span><b>2</b></div>
+<div class="row"><span>Latest K-Score</span><b>0.82 <span class="pill pill-warn">below gate</span></b></div>
+<div class="row"><span>Last gate run</span><b>2026-05-24 06:32 UTC</b></div>
+<div class="row"><span>Namespace</span><b>triage</b></div>
+<div class="actions">
+<a href="/account/routing?pipeline=ticket-triage-pipeline">View routing</a>
+<a href="/account/builds?pipeline=ticket-triage-pipeline">View builds</a>
+</div>
+</div>
+
+</div>
+</section>
+
+<section>
+<h2>Need help?</h2>
+<p>See <a href="/docs/pipelines" style="color:var(--accent)">/docs/pipelines</a> for the <code>kolm.pipeline.yaml</code> schema, runtime semantics, and the pipeline-level K-Score formula. The <a href="/builder?kind=pipeline" style="color:var(--accent)">pipeline builder</a> wraps the YAML in a guided UI; for everything else there is the CLI:</p>
+<pre style="background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px">kolm pipeline list
+kolm pipeline inspect cs-pipeline-v1
+kolm pipeline compile ./my-pipeline.yaml --out ./out.kolm</pre>
+</section>
+
+<footer class="page">
+<div>&copy; 2026 kolm.ai &middot; <a href="mailto:rodneyyesep@gmail.com">rodneyyesep@gmail.com</a> &middot; Pipelines compose; they do not hide</div>
+</footer>
+</div>
+</main>
+</body>
+</html>

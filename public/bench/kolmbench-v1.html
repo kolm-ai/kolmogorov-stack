@@ -104,7 +104,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <div class="cta-row">
   <a href="#leaderboard" class="cta cta--primary">See the leaderboard &rarr;</a>
   <a href="#submit" class="cta cta--ghost">How to submit</a>
-  <a href="/docs/k-score" class="cta cta--ghost">K-Score methodology</a>
+  <a href="/k-score" class="cta cta--ghost">K-Score methodology</a>
 </div>
 
 <h2 id="measures">1. What KolmBench measures</h2>
@@ -138,7 +138,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </ul>
 
 <h2 id="scoring">2. Scoring method</h2>
-<p>K-Score per axis is computed against the reference pack&apos;s ground truth. The composite K-Score is the harmonic mean across the three axes (so a model that wins on Efficiency but tanks on Faithfulness cannot game a high composite). Full algorithm in <a href="/docs/k-score">/docs/k-score</a>.</p>
+<p>K-Score per axis is computed against the reference pack&apos;s ground truth. The composite K-Score is the harmonic mean across the three axes (so a model that wins on Efficiency but tanks on Faithfulness cannot game a high composite). Full algorithm in <a href="/k-score">/k-score</a>.</p>
 <p>Per-category scores roll up by averaging the composite over each category&apos;s tasks, then projecting the seven category scores back through the same harmonic-mean composite to give a single number you can rank against. Sortable on every column in the leaderboard table below.</p>
 
 <h2 id="submit">3. How to submit</h2>

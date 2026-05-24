@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f7f4ec";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>GitHub Actions integration &middot; Open-source AI workbench &middot; kolm.ai</title>
+<meta name="description" content="Wire kolm into your CI: K-Score gate on push, auto re-distill on regression, publish .kolm to GitHub Releases, diff quality between versions. W820.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="GitHub Actions integration &middot; Open-source AI workbench &middot; kolm.ai">
+<meta property="og:description" content="K-Score gate on push, auto re-distill on regression, publish .kolm to GitHub Releases.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/docs/github-actions">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/docs/github-actions">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<script src="/nav.js" defer></script>
+<style>
+:root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--accent-soft:rgba(16,185,129,0.10);--warn:#d97706;--bad:#dc2626;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--accent);color:#fff;padding:8px 14px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
+.skip-link:focus{left:0}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+main{padding:40px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.brand-eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+.brand-disambig{display:block;font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-top:8px;padding:8px 0;max-width:780px}
+h1{font-size:38px;line-height:1.1;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:17px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 32px}
+h2{font-size:22px;font-weight:500;letter-spacing:-0.018em;margin:40px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:15px;font-weight:500;letter-spacing:-0.01em;margin:24px 0 8px;max-width:780px}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
+li{margin:4px 0}
+table{border-collapse:collapse;width:100%;max-width:920px;margin:14px 0;font-size:13.5px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink);font-weight:500}
+td code{font-size:12px}
+.kpanel{background:var(--bg-elev);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:14px 0 18px;max-width:920px}
+.honest-note{font-size:12.5px;color:var(--ink-faint);font-style:italic;border-left:2px solid var(--accent);padding:4px 10px;margin:14px 0;max-width:780px}
+footer.page{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line);margin-top:32px}
+footer.page a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<span class="brand-anchor" data-w775="h1" aria-hidden="true">Frontier AI on your own infrastructure.</span>
+
+<main id="main">
+<div class="wrap">
+<p class="crumbs"><a href="/">kolm.ai</a> &rsaquo; <a href="/docs">docs</a> &rsaquo; GitHub Actions</p>
+<p class="brand-eyebrow" data-w775="brand-eyebrow">Open-source AI workbench</p>
+<h1>GitHub Actions integration.</h1>
+<span class="brand-disambig" aria-hidden="true">Not Kolm therapeutics, Kolm band, or other unrelated organizations using similar names.</span>
+<p class="lede">Drop a <code>.github/workflows/kolm.yml</code> in your repo. Every push runs the K-Score gate against your latest artifact, auto re-distills if quality drops below the threshold you set, and publishes the new <code>.kolm</code> to GitHub Releases for downstream consumers to pin.</p>
+
+<div class="honest-note">
+Honesty contract: the action only runs when the <code>KOLM_API_KEY</code> secret is configured. A fork without the secret sees the workflow skip cleanly; no red X on every commit. Stamped <code>w820-v1</code>.
+</div>
+
+<section id="template">
+<h2>Template</h2>
+<p>A reference-only template ships in the kolm repo at <a href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/.github/workflows/kolm.yml" style="color:var(--accent)"><code>.github/workflows/kolm.yml</code></a>. It is intentionally guarded with <code>if: false</code> on the distill job so the file does not run unintended CI minutes. Flip the guard and configure the secret to enable it.</p>
+<p>Copy the template into your repo and commit. The template is self-documented with comments explaining each section.</p>
+</section>
+
+<section id="schema">
+<h2>kolm.yaml schema</h2>
+<p>The workflow expects a <code>kolm.yaml</code> at the repo root. Minimum shape:</p>
+<table>
+<thead><tr><th>Key</th><th>Type</th><th>Required</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>artifact</code></td><td>string</td><td>yes</td><td>The .kolm artifact name or hash this workflow gates against.</td></tr>
+<tr><td><code>kscore_threshold</code></td><td>float 0..1</td><td>yes</td><td>Below this, the gate fails and re-distill triggers.</td></tr>
+<tr><td><code>teacher_id</code></td><td>string</td><td>yes</td><td>e.g. <code>claude-sonnet-4-7</code>, <code>gpt-4o</code>, <code>local:qwen-2.5-72b</code>.</td></tr>
+<tr><td><code>namespace</code></td><td>string</td><td>yes</td><td>The kolm namespace whose captures feed re-distill.</td></tr>
+<tr><td><code>paths</code></td><td>list of strings</td><td>no</td><td>Glob patterns; the workflow only triggers when files matching these change. Defaults to <code>**</code>.</td></tr>
+<tr><td><code>publish_release</code></td><td>boolean</td><td>no</td><td>If true, the post-distill <code>.kolm</code> lands in GitHub Releases for this commit SHA. Default false.</td></tr>
+<tr><td><code>quality_gates</code></td><td>map</td><td>no</td><td>Per-namespace overrides for <code>min_kscore</code>, <code>max_latency_ms</code>, etc.</td></tr>
+</tbody>
+</table>
+</section>
+
+<section id="action">
+<h2>The action: kolm/distill-action@v1</h2>
+<p>One Action, two phases. On every push:</p>
+<ol>
+<li>Reads <code>kolm.yaml</code>, replays recent captures through the active artifact, scores them.</li>
+<li>If the K-Score falls below <code>kscore_threshold</code>, runs <code>kolm distill --from-yaml</code> to produce a new artifact and gates the merge until it passes.</li>
+</ol>
+<p>The action sets two output variables:</p>
+<table>
+<thead><tr><th>Output</th><th>Type</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>kscore</code></td><td>float</td><td>The measured K-Score for this run.</td></tr>
+<tr><td><code>kscore_passed</code></td><td>boolean</td><td><code>true</code> if K-Score &gt;= <code>kscore_threshold</code>.</td></tr>
+<tr><td><code>artifact_path</code></td><td>string</td><td>Local path to the produced <code>.kolm</code>, present only when a re-distill ran.</td></tr>
+<tr><td><code>artifact_hash</code></td><td>string</td><td>sha256 of the produced <code>.kolm</code>.</td></tr>
+</tbody>
+</table>
+<p>Downstream steps can branch on <code>kscore_passed</code> to gate the merge: a simple <code>if: steps.kolm.outputs.kscore_passed == 'true'</code> on a "Mark mergeable" step is enough.</p>
+</section>
+
+<section id="auto-redistill">
+<h2>Auto re-distill on K-Score regression</h2>
+<p>When the gate fails, the action runs <code>kolm distill --from-yaml --out ./dist</code>. The new artifact replaces the previous one if and only if:</p>
+<ul>
+<li>It passes the same <code>kscore_threshold</code> on the gate dataset.</li>
+<li>It does not regress on any of the per-namespace gates declared in <code>quality_gates</code>.</li>
+<li>Its drift gate is green (kolm autopilot rules apply if the workflow was launched by autopilot).</li>
+</ul>
+<p>If any of those conditions fail, the new artifact lands in <code>./dist</code> but is NOT promoted; the action emits a <code>distill_failed</code> annotation on the commit and the operator decides what to do. Silent promotion of a bad artifact is the failure mode the workflow refuses to allow.</p>
+</section>
+
+<section id="publish-releases">
+<h2>Publish .kolm to GitHub Releases</h2>
+<p>With <code>publish_release: true</code>, the action attaches the produced <code>.kolm</code> to a release tagged <code>kolm-distill-&lt;commit-sha&gt;</code>. Downstream consumers can pin to a specific commit:</p>
+<pre>kolm pull github://sneaky-hippo/kolmogorov-stack@abc1234</pre>
+<p>The release body includes the K-Score, the teacher used, the namespace, and the commit range that changed since the last release. The artifact is also pushed to the kolm hosted registry so the same <code>kolm://sha256-...</code> URI resolves regardless of GitHub's availability.</p>
+</section>
+
+<section id="diff">
+<h2>kolm diff between versions</h2>
+<p>Once two artifacts exist, compare their quality on the same eval pack:</p>
+<pre>kolm diff v1.2.kolm v1.3.kolm</pre>
+<p>Output reports the K-Score delta, latency delta, size delta, and a per-namespace breakdown. Use this in a release-note generator to document the quality change without hand-editing.</p>
+<p>For the CI version that posts the diff as a PR comment:</p>
+<pre>npx kolm diff dist/old.kolm dist/new.kolm --comment-on-pr</pre>
+<p>The PR comment is idempotent (each run rewrites the same comment) so the PR thread doesn't accumulate stale numbers.</p>
+</section>
+
+<section id="example-yaml">
+<h2>Example minimal workflow</h2>
+<p>The smallest workflow that does something useful:</p>
+<pre>name: kolm
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  kolm-gate:
+    runs-on: ubuntu-latest
+    if: ${{ secrets.KOLM_API_KEY != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: kolm/distill-action@v1
+        id: kolm
+        with:
+          kscore_threshold: 0.85
+        env:
+          KOLM_API_KEY: ${{ secrets.KOLM_API_KEY }}
+      - name: Fail merge on K-Score regression
+        if: steps.kolm.outputs.kscore_passed != 'true'
+        run: exit 1</pre>
+<p>For the full annotated reference, see <a href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/.github/workflows/kolm.yml" style="color:var(--accent)"><code>.github/workflows/kolm.yml</code></a> in the repo and the <a href="https://github.com/sneaky-hippo/kolmogorov-stack/tree/main/tools/github-actions-kolm" style="color:var(--accent)">tools/github-actions-kolm/README.md</a> for the Action's input / output reference.</p>
+</section>
+
+<footer class="page">
+<div>&copy; 2026 kolm.ai &middot; <a href="mailto:rodneyyesep@gmail.com">rodneyyesep@gmail.com</a> &middot; CI gates that fail loud</div>
+</footer>
+</div>
+</main>
+</body>
+</html>

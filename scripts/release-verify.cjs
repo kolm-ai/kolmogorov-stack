@@ -71,6 +71,10 @@ const testShardsFlag = args.find((a) => a.startsWith('--test-shards='));
 const TEST_TIMEOUT_MS = parseInt((testTimeoutFlag && testTimeoutFlag.slice('--test-timeout-ms='.length)) || process.env.KOLM_RELEASE_VERIFY_TEST_TIMEOUT_MS || '1800000', 10);
 const TEST_SHARDS = Math.max(1, parseInt((testShardsFlag && testShardsFlag.slice('--test-shards='.length)) || process.env.KOLM_RELEASE_VERIFY_TEST_SHARDS || '1', 10) || 1);
 const WALL_TIMEOUT_MS = parseInt((timeoutFlag && timeoutFlag.slice('--timeout-ms='.length)) || process.env.KOLM_RELEASE_VERIFY_TIMEOUT_MS || String(Math.max(600000, TEST_TIMEOUT_MS + 300000)), 10);
+const SPAWN_MAX_BUFFER_BYTES = Math.max(
+  16 * 1024 * 1024,
+  parseInt(process.env.KOLM_RELEASE_VERIFY_MAX_BUFFER || String(256 * 1024 * 1024), 10) || 0,
+);
 
 const isWin = process.platform === 'win32';
 const npmBin = isWin ? 'npm.cmd' : 'npm';
@@ -106,6 +110,7 @@ function runSync(cmd, argv, opts = {}) {
     encoding: 'utf8',
     shell: needsShell,
     timeout: opts.timeoutMs || 1_800_000,
+    maxBuffer: opts.maxBuffer || SPAWN_MAX_BUFFER_BYTES,
   });
   return { status: r.status, signal: r.signal, stdout: r.stdout || '', stderr: r.stderr || '', error: r.error ? { code: r.error.code, message: r.error.message } : null };
 }

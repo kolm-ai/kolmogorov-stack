@@ -89,9 +89,9 @@
       "surface": "train-distill",
       "user_story": "As a user without perfect local hardware, I can train or distill via local compute, remote SSH GPU, managed GPU, Together, OpenAI/Claude teachers, or BYOC.",
       "happy_path": ["choose dataset", "choose teacher", "choose student", "choose compute", "run eval-gated build"],
-      "proof_commands": ["kolm cloud readiness --json", "kolm train plan <dataset>", "kolm distill runs --json"],
+      "proof_commands": ["kolm build plan --task generation --rows 1500 --holdout-pairs 300 --no-local-gpu --json", "kolm cloud readiness --json", "kolm cloud broker --json", "kolm train plan <dataset> --strategy", "kolm distill strategy --json", "kolm bench evidence --summary", "kolm distill runs --json"],
       "cloud_or_customization": ["model-provider", "compute-target", "artifact-runtime", "proof-mode"],
-      "evidence_paths": ["src/distill-pipeline.js", "src/remote-compute.js", "src/compute/registry.json", "public/account/builds.html"]
+      "evidence_paths": ["src/build-strategy-brain.js", "scripts/build-strategy-brain.mjs", "src/distill-pipeline.js", "src/distill-strategy.js", "src/benchmark-evidence.js", "scripts/benchmark-evidence.mjs", "src/remote-compute.js", "src/compute/registry.json", "public/account/builds.html"]
     },
     {
       "id": "models-backbones",
@@ -116,27 +116,27 @@
       "surface": "compile-verify",
       "user_story": "As an operator, I can compile a task into a signed .kolm artifact, verify it offline, diff versions, and export runtime-specific assets.",
       "happy_path": ["compile", "verify", "inspect", "diff", "export target"],
-      "proof_commands": ["kolm compile --spec spec.json --out task.kolm", "kolm verify task.kolm", "kolm export task.kolm --target gguf --preview"],
+      "proof_commands": ["kolm compile --spec spec.json --out task.kolm", "kolm quantize oracle --json", "kolm verify task.kolm", "kolm export task.kolm --target gguf --preview", "kolm evidence format-governance --summary"],
       "cloud_or_customization": ["artifact-runtime", "proof-mode", "storage-plane"],
-      "evidence_paths": ["src/compile-pipeline.js", "src/artifact.js", "docs/kolm-format-v1.md", "public/account/artifacts.html"]
+      "evidence_paths": ["src/compile-pipeline.js", "src/quantization-oracle.js", "src/artifact.js", "src/format-governance-packet.js", "scripts/format-governance-packet.mjs", "docs/kolm-format-v1.md", "public/account/artifacts.html"]
     },
     {
       "id": "runtime-inference",
       "surface": "runtime-inference",
       "user_story": "As an app developer, I can run a compiled artifact locally, in the browser, on edge/server runtimes, or behind OpenAI-compatible fallback chains.",
       "happy_path": ["select model", "select runtime", "run request", "stream result", "log receipt"],
-      "proof_commands": ["kolm run task.kolm \"input\"", "kolm serve --mcp --http", "kolm tui --views --json"],
+      "proof_commands": ["kolm run task.kolm \"input\"", "kolm serve --mcp --http", "kolm tui --views --json", "kolm packages release-readiness --summary", "kolm evidence runtime-adoption --summary"],
       "cloud_or_customization": ["model-provider", "artifact-runtime", "deployment-mode", "compute-target"],
-      "evidence_paths": ["src/completions-api.js", "src/runtime-policy.js", "public/sdk.js", "public/tui.html"]
+      "evidence_paths": ["src/completions-api.js", "src/runtime-policy.js", "src/package-release-readiness.js", "src/runtime-adoption-packets.js", "scripts/package-release-readiness.mjs", "scripts/runtime-adoption-packets.mjs", "public/sdk.js", "public/tui.html"]
     },
     {
       "id": "compute-cloud",
       "surface": "compute-cloud",
       "user_story": "As a team with no GPU, I can configure R2-compatible object storage, S3-compatible storage, AWS, Supabase, Modal, RunPod, Lambda, Together, or remote SSH and still build artifacts.",
       "happy_path": ["run readiness", "pick storage", "pick GPU/train backend", "deploy BYOC", "verify attestation"],
-      "proof_commands": ["kolm cloud readiness --json", "kolm cloud storage --json", "kolm cloud storage --provider local-artifacts --smoke --json", "kolm cloud readiness --remote --json", "GET /v1/cloud/readiness", "GET /v1/storage/object-readiness", "kolm cloud doctor", "kolm compute list --json", "kolm remote recommend --json"],
+      "proof_commands": ["kolm cloud broker --json", "kolm cloud readiness --json", "kolm cloud storage --json", "kolm cloud storage --provider local-artifacts --smoke --json", "kolm cloud readiness --remote --json", "GET /v1/cloud/readiness", "GET /v1/storage/object-readiness", "GET /v1/cloud/broker/catalog", "POST /v1/cloud/broker", "kolm cloud doctor", "kolm compute list --json", "kolm remote recommend --json"],
       "cloud_or_customization": ["compute-target", "storage-plane", "deployment-mode", "governance-mode"],
-      "evidence_paths": ["src/platform-capabilities.js", "src/object-storage.js", "src/remote-compute.js", "docs/cloud-product-readiness.md", "scripts/cloud-readiness.mjs"]
+      "evidence_paths": ["src/platform-capabilities.js", "src/object-storage.js", "src/cloud-compute-broker.js", "src/remote-compute.js", "docs/cloud-product-readiness.md", "scripts/cloud-readiness.mjs", "scripts/cloud-compute-broker.mjs"]
     },
     {
       "id": "devices-fleet",
@@ -152,9 +152,9 @@
       "surface": "enterprise-governance",
       "user_story": "As an enterprise admin, I can control tenants, scoped keys, approvals, audit logs, billing, privacy, compliance export, and SSO/SCIM-ready identity.",
       "happy_path": ["verify tenant", "scope keys", "review audit", "set billing plan", "export compliance pack"],
-      "proof_commands": ["kolm whoami --json", "kolm audit --json", "kolm billing usage --json", "kolm keys list --json"],
+      "proof_commands": ["kolm whoami --json", "kolm audit --json", "kolm billing usage --json", "kolm keys list --json", "kolm evidence compliance-certification --summary"],
       "cloud_or_customization": ["governance-mode", "privacy-mode", "storage-plane", "proof-mode"],
-      "evidence_paths": ["src/auth.js", "src/keys.js", "src/audit.js", "public/account/api-keys.html", "public/account/audit-log.html"]
+      "evidence_paths": ["src/auth.js", "src/keys.js", "src/audit.js", "src/compliance-certification-packet.js", "scripts/compliance-certification-packet.mjs", "public/account/api-keys.html", "public/account/audit-log.html"]
     },
     {
       "id": "agents-registry",

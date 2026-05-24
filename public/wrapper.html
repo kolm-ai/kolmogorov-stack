@@ -41,8 +41,31 @@
   .test-anchor { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 </style>
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#fbfaf6';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+  <meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/wrapper",
+  "description": "One env var. Your app keeps the OpenAI SDK. Behind it: PII redaction, retries, failover, capture log, signed receipts. The kolm wrapper, for developers and infra.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
 </head>
 <body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <a href="#main" class="ks-skip">Skip to content</a>
 
@@ -270,7 +293,7 @@ cap_3b08e...   k 0.82   gpt-5-mini      201ms   parse this ...
         <p>Node, Python, C, Rust, MCP, and a VSCode extension. Every SDK ships <code>whoami</code>, <code>health</code>, <code>verify</code>, <code>changelog</code>, <code>intent.ask</code>, and <code>capture.log</code>. C and Rust are single-file, no async runtime, no JSON parser bundled. Pair them with cJSON or serde_json on the caller side. The honesty contract: raw status, raw body, no <code>is_success()</code> sugar hiding a 4xx.</p>
         <div class="wrap-clientgrid">
           <div><b>Node</b><span>npm i @kolm/sdk</span></div>
-          <div><b>Python</b><span>pip install kolm-sdk</span></div>
+          <div><b>Python</b><span>package pending: pip install kolm-sdk</span></div>
           <div><b>C</b><span>stb-style single header</span></div>
           <div><b>Rust</b><span>cargo add kolm</span></div>
           <div><b>MCP</b><span>npx -y @kolm/mcp</span></div>

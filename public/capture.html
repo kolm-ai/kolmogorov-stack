@@ -11,6 +11,8 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/frontier.css">
 <style>
   .sec-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
   .sec-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
@@ -67,9 +69,52 @@
   .panel dd { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink); }
   .panel dd code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); background: rgba(126,240,210,0.06); padding: 1px 5px; border-radius: 3px; }
   @media (max-width: 900px) { .panel dl { grid-template-columns: 1fr; } }
+
+  /* W645: editorial spec-list helpers for #why + #reach. */
+  .cap-list { margin-top: var(--ks-2); }
+  .cap-list .fr-spec-list__head { align-items: baseline; }
+  .cap-list .fr-spec-list__p code,
+  .cap-list .fr-spec-list__p a { font-family: inherit; }
+  .cap-list .fr-spec-list__p code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ink-1); background: rgba(126,240,210,0.06); padding: 1px 5px; border-radius: 3px; }
+  .cap-list .fr-spec-list__p a { color: var(--fr-mint); text-decoration: none; border-bottom: 1px solid rgba(126,240,210,0.32); }
+  .cap-list .fr-spec-list__p a:hover { border-bottom-color: var(--fr-mint); }
+  .cap-why-list .fr-spec-list__row .fr-spec-list__delta { color: var(--fr-mint); }
+  .cap-why-list .fr-spec-list__row.--verify .fr-spec-list__delta { color: #b693ff; }
+  .cap-why-list .fr-spec-list__row.--cost .fr-spec-list__delta { color: #7ad4ff; }
+  .cap-why-list .fr-spec-list__row.--drift .fr-spec-list__delta { color: #d6a65a; }
+  .cap-reach-list .fr-spec-list__row .fr-spec-list__delta { color: var(--fr-mint); }
+  .cap-reach-list .fr-spec-list__row.--sdk .fr-spec-list__delta { color: #b693ff; }
+  .cap-reach-list .fr-spec-list__row.--boundary .fr-spec-list__delta { color: #d6a65a; }
 </style>
+  <meta property="og:title" content="Capture &middot; kolm.ai">
+  <meta property="og:description" content="Drop-in OpenAI-compatible proxy that lands every prompt, completion, and tool call into a tenant-scoped event lake on your own disk. The starting point for distill, compile, and verify.">
+  <meta property="og:image" content="https://kolm.ai/og/capture.svg">
+  <meta property="og:url" content="https://kolm.ai/capture">
+  <meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/capture",
+  "description": "Drop-in OpenAI-compatible proxy that lands every prompt, completion, and tool call into a tenant-scoped event lake on your own disk. The starting point for distill, compile, and verify.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
 </head>
 <body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <a href="#main" class="ks-skip">Skip to content</a>
 
@@ -144,30 +189,38 @@ ts                    method  model            ns       latency  tokens
 
 <section class="sec-section" id="why">
   <div class="ks-wrap">
-    <h2>Why capture before you distill</h2>
+    <h2 class="fr-h2">Why capture before you distill</h2>
     <p class="sub">A distilled specialist is only as good as the rows it was trained on. Capture is how you turn real production traffic into training rows you trust; the rows that came from real users, real prompts, real tool outputs, real edge cases.</p>
-    <div class="grid-2">
-      <div class="sec-card">
-        <div class="row"><span class="tag">honest evidence</span><span class="st live">Live</span></div>
-        <h3>Real prompts beat synthetic prompts</h3>
-        <p>Synthetic data covers what an engineer imagined; capture covers what a user actually typed. The distill step picks the rows that matter; capture is what makes those rows exist in the first place.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">verify chain</span><span class="st live">Live</span></div>
-        <h3>Every row gets a receipt</h3>
-        <p>Each captured row writes a content-addressed event with a row hash. The hash flows into the distilled dataset, the dataset hash flows into the artifact receipt, and the artifact receipt is Ed25519-signed. The whole chain is verifiable offline.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">cost lens</span><span class="st live">Live</span></div>
-        <h3>You learn what is actually expensive</h3>
-        <p>Capture writes the model, the token count, and the latency on every row. Before you pay an engineer to optimize, you can see which prompt families cost the most and which a distilled model could cover.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">drift watch</span><span class="st live">Live</span></div>
-        <h3>You catch upstream drift early</h3>
-        <p>When OpenAI swaps the silent default behind <code>gpt-4o</code>, your latency and K-score numbers move. Capture is the source of truth for that detection; the drift dashboard reads from the event store, not from a vendor status page.</p>
-      </div>
-    </div>
+    <ul class="fr-spec-list cap-list cap-why-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__h">Real prompts beat synthetic prompts</h3>
+          <span class="fr-spec-list__delta">HONEST EVIDENCE &middot; from your traffic</span>
+        </div>
+        <p class="fr-spec-list__p">Synthetic data covers what an engineer imagined; capture covers what a user actually typed. The distill step picks the rows that matter; capture is what makes those rows exist in the first place.</p>
+      </li>
+      <li class="fr-spec-list__row --verify">
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__h">Every row gets a receipt</h3>
+          <span class="fr-spec-list__delta">VERIFY CHAIN &middot; Ed25519 to artifact</span>
+        </div>
+        <p class="fr-spec-list__p">Each captured row writes a content-addressed event with a row hash. The hash flows into the distilled dataset, the dataset hash flows into the artifact receipt, and the artifact receipt is Ed25519-signed. The whole chain is verifiable offline.</p>
+      </li>
+      <li class="fr-spec-list__row --cost">
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__h">You learn what is actually expensive</h3>
+          <span class="fr-spec-list__delta">COST LENS &middot; per-row tokens + latency</span>
+        </div>
+        <p class="fr-spec-list__p">Capture writes the model, the token count, and the latency on every row. Before you pay an engineer to optimize, you can see which prompt families cost the most and which a distilled model could cover.</p>
+      </li>
+      <li class="fr-spec-list__row --drift">
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__h">You catch upstream drift early</h3>
+          <span class="fr-spec-list__delta">DRIFT WATCH &middot; event store is source-of-truth</span>
+        </div>
+        <p class="fr-spec-list__p">When OpenAI swaps the silent default behind <code>gpt-4o</code>, your latency and K-score numbers move. Capture is the source of truth for that detection; the drift dashboard reads from the event store, not from a vendor status page.</p>
+      </li>
+    </ul>
   </div>
 </section>
 
@@ -175,28 +228,28 @@ ts                    method  model            ns       latency  tokens
   <div class="ks-wrap">
     <h2>Where capture sits in the pipeline</h2>
     <p class="sub">Capture is step 1. The other three steps (distill, compile, verify) all read from the event store written here. You can stop at step 1 and still get a queryable event lake; you can also walk to step 4 and ship a signed specialist.</p>
-    <div class="pipe">
-      <div class="pipe-step">
-        <span class="n">step 1 &middot; capture</span>
-        <h4>Land traffic</h4>
-        <p>Proxy at <code>localhost:11434</code> writes rows to <code>~/.kolm/events</code>. Tenant-scoped, namespace-partitioned.</p>
-      </div>
-      <div class="pipe-step">
-        <span class="n">step 2 &middot; distill</span>
-        <h4>Pick and train</h4>
-        <p>Cluster captures by template, pick the dominant cluster, generate teacher labels, train a smaller student.</p>
-      </div>
-      <div class="pipe-step">
-        <span class="n">step 3 &middot; compile</span>
-        <h4>Quantize and sign</h4>
-        <p>Quantize weights to INT4 or INT8, build the .kolm zip, write the Ed25519-signed receipt, bind to artifact_cid.</p>
-      </div>
-      <div class="pipe-step">
-        <span class="n">step 4 &middot; verify</span>
-        <h4>Run and prove</h4>
-        <p>Load the .kolm in vLLM, llama.cpp, MLX, or TRT-LLM. The signed receipt is verifiable on a clean laptop.</p>
-      </div>
-    </div>
+    <ol class="fr-numbered-list">
+      <li>
+        <span class="fr-numbered-list__k">capture</span>
+        <h3 class="fr-numbered-list__h">Land traffic</h3>
+        <p class="fr-numbered-list__p">Proxy at <code>localhost:11434</code> writes rows to <code>~/.kolm/events</code>. Tenant-scoped, namespace-partitioned.</p>
+      </li>
+      <li>
+        <span class="fr-numbered-list__k">distill</span>
+        <h3 class="fr-numbered-list__h">Pick and train</h3>
+        <p class="fr-numbered-list__p">Cluster captures by template, pick the dominant cluster, generate teacher labels, train a smaller student.</p>
+      </li>
+      <li>
+        <span class="fr-numbered-list__k">compile</span>
+        <h3 class="fr-numbered-list__h">Quantize and sign</h3>
+        <p class="fr-numbered-list__p">Quantize weights to INT4 or INT8, build the .kolm zip, write the Ed25519-signed receipt, bind to artifact_cid.</p>
+      </li>
+      <li>
+        <span class="fr-numbered-list__k">verify</span>
+        <h3 class="fr-numbered-list__h">Run and prove</h3>
+        <p class="fr-numbered-list__p">Load the .kolm in vLLM, llama.cpp, MLX, or TRT-LLM. The signed receipt is verifiable on a clean laptop.</p>
+      </li>
+    </ol>
   </div>
 </section>
 
@@ -226,23 +279,29 @@ ts                    method  model            ns       latency  tokens
   <div class="ks-wrap">
     <h2>Optional redaction at capture time</h2>
     <p class="sub">If a regulated workload moves through the proxy, configure the redaction worker to scrub PHI, secrets, and other sensitive tokens before the row is persisted. The worker is opt-in and isolated so the root install stays light.</p>
-    <div class="grid-3">
-      <div class="sec-card">
-        <div class="row"><span class="tag">text PHI</span><span class="st live">Live</span></div>
-        <h3>Configurable token list</h3>
-        <p>The redactor reads a tenant-scoped pattern list (regex + literal). Patches matched substrings to a stable hash so analytics still work but the raw value never reaches disk.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">media</span><span class="st live">Live</span></div>
-        <h3>Image and audio scrub</h3>
-        <p>Optional <code>workers/media-redact</code> and <code>workers/multimodal-redact-image</code> workers blur faces, mask plates, and strip voiceprints from media captures. Heavy deps stay outside Node.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">honest fail</span><span class="st live">Live</span></div>
-        <h3>No silent passthrough</h3>
-        <p>If the redactor is configured but the optional dep is missing, the capture fails with <code>error:no_detector_installed</code> and an install hint. The proxy never silently lets unredacted media through.</p>
-      </div>
-    </div>
+    <ol class="fr-spec-list">
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Configurable token list</h3>
+          <span class="fr-spec-list__delta">text PHI &middot; live</span>
+        </div>
+        <p class="fr-spec-list__p">The redactor reads a tenant-scoped pattern list (regex + literal). Patches matched substrings to a stable hash so analytics still work but the raw value never reaches disk.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Image and audio scrub</h3>
+          <span class="fr-spec-list__delta">media &middot; live</span>
+        </div>
+        <p class="fr-spec-list__p">Optional <code>workers/media-redact</code> and <code>workers/multimodal-redact-image</code> workers blur faces, mask plates, and strip voiceprints from media captures. Heavy deps stay outside Node.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">No silent passthrough</h3>
+          <span class="fr-spec-list__delta">honest fail &middot; live</span>
+        </div>
+        <p class="fr-spec-list__p">If the redactor is configured but the optional dep is missing, the capture fails with <code>error:no_detector_installed</code> and an install hint. The proxy never silently lets unredacted media through.</p>
+      </li>
+    </ol>
   </div>
 </section>
 
@@ -270,38 +329,50 @@ ts                    method  model            ns       latency  tokens
   <div class="ks-wrap">
     <h2>Proxy capacity and overhead</h2>
     <p class="sub">A drop-in proxy is only useful if it does not become the slow part of the path. The capture proxy is a single Node process by default; it pages writes to the event store in a background flush and adds a small constant overhead per request.</p>
-    <div class="grid-2">
-      <div class="sec-card">
-        <div class="row"><span class="tag">single process</span><span class="st live">Live</span></div>
-        <h3>Sub-millisecond overhead per call</h3>
-        <p>The proxy parses the request, computes the messages hash, and forwards. The added wall-clock per call sits between 0.4 ms and 1.2 ms on a developer laptop; the upstream API latency (200 ms to 2 s) dwarfs it.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">background flush</span><span class="st live">Live</span></div>
-        <h3>Writes never block the response</h3>
-        <p>Captured rows enqueue to an in-memory ring and a background worker flushes them in batches of 64 lines or every 250 ms. A reply returns before disk fsync; durability is best-effort by default with <code>x-kolm-capture-durable</code> reporting the row hash.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">multi-worker</span><span class="st live">Live</span></div>
-        <h3>--workers N for higher fan-out</h3>
-        <p>Run <code>kolm capture serve --workers 8</code> to spawn a pool sharing a Unix socket; tested up to 6500 requests per second on a single 32-core box without losing rows. Each worker holds its own ring; the rotator handles concurrent appenders.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">stream-safe</span><span class="st live">Live</span></div>
-        <h3>SSE and websocket streams</h3>
-        <p>OpenAI-style server-sent event streams are proxied byte-for-byte. The proxy reassembles the completion in the background and writes the row only after the upstream closes the stream; partial captures are never persisted.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">backpressure</span><span class="st live">Live</span></div>
-        <h3>Disk backpressure is honest</h3>
-        <p>If the local disk fills, the proxy refuses new captures with HTTP 507 and the row hash in the response body. A regulated team can wire that to an alert and rotate retention manually before the upstream call completes; a developer can read the error and free space without a silent data loss path.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">replay</span><span class="st live">Live</span></div>
-        <h3>Replay-ready rows</h3>
-        <p>Every captured row carries enough fields (model, parameters, messages hash, response hash) to be replayed against the same upstream or a distilled successor. The bakeoff harness reads from the event store directly; you do not have to re-export to a separate corpus.</p>
-      </div>
-    </div>
+    <ol class="fr-spec-list">
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Sub-millisecond overhead per call</h3>
+          <span class="fr-spec-list__delta">single process &middot; live</span>
+        </div>
+        <p class="fr-spec-list__p">The proxy parses the request, computes the messages hash, and forwards. The added wall-clock per call sits between 0.4 ms and 1.2 ms on a developer laptop; the upstream API latency (200 ms to 2 s) dwarfs it.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Writes never block the response</h3>
+          <span class="fr-spec-list__delta">background flush &middot; live</span>
+        </div>
+        <p class="fr-spec-list__p">Captured rows enqueue to an in-memory ring and a background worker flushes them in batches of 64 lines or every 250 ms. A reply returns before disk fsync; durability is best-effort by default with <code>x-kolm-capture-durable</code> reporting the row hash.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">--workers N for higher fan-out</h3>
+          <span class="fr-spec-list__delta">multi-worker &middot; live</span>
+        </div>
+        <p class="fr-spec-list__p">Run <code>kolm capture serve --workers 8</code> to spawn a pool sharing a Unix socket; tested up to 6500 requests per second on a single 32-core box without losing rows. Each worker holds its own ring; the rotator handles concurrent appenders.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">SSE and websocket streams</h3>
+          <span class="fr-spec-list__delta">stream-safe &middot; live</span>
+        </div>
+        <p class="fr-spec-list__p">OpenAI-style server-sent event streams are proxied byte-for-byte. The proxy reassembles the completion in the background and writes the row only after the upstream closes the stream; partial captures are never persisted.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Disk backpressure is honest</h3>
+          <span class="fr-spec-list__delta">backpressure &middot; live</span>
+        </div>
+        <p class="fr-spec-list__p">If the local disk fills, the proxy refuses new captures with HTTP 507 and the row hash in the response body. A regulated team can wire that to an alert and rotate retention manually before the upstream call completes; a developer can read the error and free space without a silent data loss path.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Replay-ready rows</h3>
+          <span class="fr-spec-list__delta">replay &middot; live</span>
+        </div>
+        <p class="fr-spec-list__p">Every captured row carries enough fields (model, parameters, messages hash, response hash) to be replayed against the same upstream or a distilled successor. The bakeoff harness reads from the event store directly; you do not have to re-export to a separate corpus.</p>
+      </li>
+    </ol>
   </div>
 </section>
 
@@ -393,22 +464,31 @@ kolm.cost_micro_usd       <span class="n">5340</span></pre>
 
 <section class="sec-section" id="reach">
   <div class="ks-wrap">
-    <h2>Next steps</h2>
+    <h2 class="fr-h2">Next steps</h2>
     <p class="sub">Captured rows are the input to the rest of the compiler. Once a namespace holds a thousand rows or more, the distill step can turn them into a quantized specialist with a signed receipt.</p>
-    <div class="grid-3">
-      <div class="sec-card">
-        <h3>Run the quickstart</h3>
-        <p>Five minutes from npm install to first captured row. <a href="/quickstart">Open quickstart</a>.</p>
-      </div>
-      <div class="sec-card">
-        <h3>Connect an SDK</h3>
-        <p>One-line setup for OpenAI, Anthropic, Gemini, OpenRouter. <a href="/docs/connect/openai">OpenAI</a> &middot; <a href="/docs/connect/anthropic">Anthropic</a>.</p>
-      </div>
-      <div class="sec-card">
-        <h3>See the boundary</h3>
-        <p>How captures stay inside your network, what (if anything) crosses the boundary. <a href="/security">Security overview</a>.</p>
-      </div>
-    </div>
+    <ul class="fr-spec-list cap-list cap-reach-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__h">Run the quickstart</h3>
+          <span class="fr-spec-list__delta">QUICKSTART &middot; 5 min</span>
+        </div>
+        <p class="fr-spec-list__p">Five minutes from npm install to first captured row. <a href="/quickstart">Open quickstart</a>.</p>
+      </li>
+      <li class="fr-spec-list__row --sdk">
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__h">Connect an SDK</h3>
+          <span class="fr-spec-list__delta">SDK &middot; OpenAI, Anthropic, Gemini, OpenRouter</span>
+        </div>
+        <p class="fr-spec-list__p">One-line setup for OpenAI, Anthropic, Gemini, OpenRouter. <a href="/docs/connect/openai">OpenAI</a> &middot; <a href="/docs/connect/anthropic">Anthropic</a>.</p>
+      </li>
+      <li class="fr-spec-list__row --boundary">
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__h">See the boundary</h3>
+          <span class="fr-spec-list__delta">SECURITY &middot; what crosses, what stays</span>
+        </div>
+        <p class="fr-spec-list__p">How captures stay inside your network, what (if anything) crosses the boundary. <a href="/security">Security overview</a>.</p>
+      </li>
+    </ul>
     <div style="margin-top:var(--ks-6); display:flex; flex-wrap:wrap; gap:var(--ks-3)">
       <a href="/distill" class="ks-btn ks-btn--primary">Next: distill captures <span class="ks-btn-arrow">&rarr;</span></a>
       <a href="/compile" class="ks-btn ks-btn--ghost">Then compile</a>

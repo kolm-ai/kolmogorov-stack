@@ -18443,6 +18443,151 @@ res.json({
   });
 
   // =====================================================================
+  // W775 — autopilot daemon (THE KILLER FEATURE).
+  //
+  // The autopilot is the continuous-background-distill loop. Once enabled,
+  // the daemon polls W815 coverage gaps, gates on W813 drift, and silently
+  // re-distills when local quality can replace teacher calls. Every tick
+  // writes a durable ledger row so /v1/autopilot/status surfaces WHY the
+  // daemon last held.
+  //
+  // Five auth-gated routes (all reject without req.tenant_record):
+  //
+  //   POST /v1/autopilot/enable      body:{namespace?, host?}
+  //     Writes opt-in row. Returns {ok, autopilot_id, enabled_at, ...}.
+  //     Repeated calls REUSE the existing autopilot_id.
+  //
+  //   POST /v1/autopilot/disable     body:{namespace?}
+  //     Writes opt-out row. Subsequent ticks no-op with action:'disabled'.
+  //
+  //   GET  /v1/autopilot/status?namespace=<ns>
+  //     Returns {enabled, autopilot_id, enabled_at, last_tick_at,
+  //              last_tick_action, holding_pattern_reason, ...}.
+  //
+  //   GET  /v1/autopilot/savings?namespace=<ns>&window_days=<N>
+  //     Conservative dollar savings: sum teacher cost AVOIDED on routing
+  //     rows where the W807 router stayed local. NEVER fabricated.
+  //
+  //   GET  /v1/autopilot/tick?namespace=<ns>
+  //     One tick. Cron normally drives this; the CLI provides a manual hook.
+  //     Returns the action taken {disabled / holding / no_op / redistilled}.
+  //
+  // All five are tenant-fenced via req.tenant_record.id (W411 law). The
+  // route layer ALWAYS forces tenant_id from auth — body.tenant_id is
+  // ignored even if the client tries to pass one.
+  // =====================================================================
+  r.post('/v1/autopilot/enable', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./autopilot-daemon.js');
+      const body = (req.body && typeof req.body === 'object') ? req.body : {};
+      const namespace = (typeof body.namespace === 'string' && body.namespace) ? body.namespace : 'default';
+      const host = (typeof body.host === 'string') ? body.host : null;
+      const env = await mod.enableAutopilot({
+        tenant: req.tenant_record.id,
+        namespace,
+        host,
+      });
+      const status = env && env.ok === false ? 400 : 200;
+      return res.status(status).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'autopilot_enable_error',
+        detail: String(e && e.message || e),
+        version: 'w775-v1',
+      });
+    }
+  });
+
+  r.post('/v1/autopilot/disable', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./autopilot-daemon.js');
+      const body = (req.body && typeof req.body === 'object') ? req.body : {};
+      const namespace = (typeof body.namespace === 'string' && body.namespace) ? body.namespace : 'default';
+      const env = await mod.disableAutopilot({
+        tenant: req.tenant_record.id,
+        namespace,
+      });
+      const status = env && env.ok === false ? 400 : 200;
+      return res.status(status).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'autopilot_disable_error',
+        detail: String(e && e.message || e),
+        version: 'w775-v1',
+      });
+    }
+  });
+
+  r.get('/v1/autopilot/status', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./autopilot-daemon.js');
+      const namespace = (typeof req.query.namespace === 'string' && req.query.namespace) ? req.query.namespace : 'default';
+      const env = await mod.getAutopilotStatus({
+        tenant: req.tenant_record.id,
+        namespace,
+      });
+      const status = env && env.ok === false ? 400 : 200;
+      return res.status(status).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'autopilot_status_error',
+        detail: String(e && e.message || e),
+        version: 'w775-v1',
+      });
+    }
+  });
+
+  r.get('/v1/autopilot/savings', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./autopilot-savings.js');
+      const namespace = (typeof req.query.namespace === 'string' && req.query.namespace) ? req.query.namespace : null;
+      const windowDays = Number.isFinite(Number(req.query.window_days)) ? Number(req.query.window_days) : undefined;
+      const env = await mod.computeSavings({
+        tenant_id: req.tenant_record.id,
+        namespace,
+        window_days: windowDays,
+      });
+      const status = env && env.ok === false ? 400 : 200;
+      return res.status(status).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'autopilot_savings_error',
+        detail: String(e && e.message || e),
+        version: 'w775-v1',
+      });
+    }
+  });
+
+  r.get('/v1/autopilot/tick', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./autopilot-daemon.js');
+      const namespace = (typeof req.query.namespace === 'string' && req.query.namespace) ? req.query.namespace : 'default';
+      const env = await mod.tickAutopilot({
+        tenant: req.tenant_record.id,
+        namespace,
+      });
+      const status = env && env.ok === false ? 400 : 200;
+      return res.status(status).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'autopilot_tick_error',
+        detail: String(e && e.message || e),
+        version: 'w775-v1',
+      });
+    }
+  });
+
+  // =====================================================================
   // W772b — Audio tokenizer worker (Whisper mel/BPE).
   //
   // Wraps workers/audio-tokenize/tokenize.mjs via src/audio-tokenize.js so
@@ -18691,6 +18836,930 @@ res.json({
         error: 'video_tokenize_doctor_error',
         detail: String(e && e.message || e),
         version: 'w773b-v1',
+      });
+    }
+  });
+
+  // W816 - failure-mode -> capture recommendation feedback loop.
+  //
+  // POST /v1/failure-modes/feed-active-learning
+  //   Body: {tenant?, namespace, top_k?}
+  //   Returns: {ok, fed_count, gaps:[{cluster_id, gap_score, recommended_count}], version}
+  //
+  // Auth-gated via req.tenant_record. Tenant fence is forced from the
+  // authenticated record - any body.tenant value is overridden so a caller
+  // cannot point this at another tenant's namespace. The namespace IS read
+  // from the body because a single tenant routinely operates many
+  // namespaces and W816 closes the loop per-namespace.
+  r.post('/v1/failure-modes/feed-active-learning', async (req, res) => {
+    const trec = req && req.tenant_record;
+    if (!trec) {
+      return res.status(401).json({
+        ok: false,
+        error: 'auth_required',
+        hint: 'send Authorization: Bearer <ks_* or kao_* key>',
+      });
+    }
+    const body = (req && req.body) || {};
+    const namespace = body.namespace ? String(body.namespace) : null;
+    if (!namespace) {
+      return res.status(400).json({
+        ok: false,
+        error: 'missing_namespace',
+        hint: 'POST {"namespace": "<ns>"} - W816 refuses to default the namespace',
+        version: 'w816-v1',
+      });
+    }
+    const top_k = Number.isFinite(Number(body.top_k))
+      ? Math.max(1, Math.min(1000, Math.trunc(Number(body.top_k))))
+      : 10;
+    let mod;
+    try {
+      mod = await import('./failure-to-capture-loop.js');
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'failure_to_capture_loop_unavailable',
+        detail: String((e && e.message) || e),
+        hint: 'src/failure-to-capture-loop.js failed to load',
+        version: 'w816-v1',
+      });
+    }
+    try {
+      const envelope = await mod.feedFailureToActiveLearning({
+        tenant: trec.id,
+        namespace,
+        top_k,
+      });
+      const status = envelope && envelope.ok ? 200 : 200;
+      return res.status(status).json(envelope);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'feed_active_learning_error',
+        detail: String((e && e.message) || e),
+        version: 'w816-v1',
+      });
+    }
+  });
+
+  // W814 - speculative decoding (student draft -> teacher verify).
+  //
+  // POST /v1/speculative/bench
+  //   Body: {artifact_id, teacher_endpoint?, n_drafts?, n_samples?, namespace?}
+  //   Returns: {ok, bench_id, summary:{n_rounds, overall_accept, per_cluster:{...}}, version}
+  //
+  // GET /v1/speculative/bench/:id
+  //   Read-only twin via event-store query (workflow_id='speculative_teacher:bench')
+  //
+  // GET /v1/speculative/acceptance?task_cluster=X&limit=Y
+  //   Acceptance log query (workflow_id='speculative_teacher:log')
+  //
+  // Auth-gated via req.tenant_record. Tenant fence forced from session, never
+  // from request body. Distinct prefix /v1/speculative/* so parallel agents on
+  // W811/W812/W813/W815 cannot collide on these route paths.
+  r.post('/v1/speculative/bench', async (req, res) => {
+    const trec = req.tenant_record;
+    if (!trec) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    const artifact_id = (body.artifact_id && typeof body.artifact_id === 'string') ? body.artifact_id : '';
+    if (!artifact_id) {
+      return res.status(400).json({
+        ok: false,
+        error: 'missing_artifact_id',
+        hint: 'POST {artifact_id, teacher_endpoint?, n_drafts?, n_samples?, namespace?}',
+        version: 'w814-v1',
+      });
+    }
+    const namespace = (body.namespace && typeof body.namespace === 'string') ? body.namespace : 'default';
+    const n_drafts = Number.isFinite(body.n_drafts) ? Math.max(1, Math.min(64, body.n_drafts | 0)) : 8;
+    const n_samples = Number.isFinite(body.n_samples) ? Math.max(1, Math.min(500, body.n_samples | 0)) : 50;
+    const teacher_endpoint = (body.teacher_endpoint && typeof body.teacher_endpoint === 'string') ? body.teacher_endpoint : null;
+    let mod;
+    try {
+      mod = await import('./speculative-teacher.js');
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'speculative_teacher_unavailable',
+        detail: String((e && e.message) || e),
+        hint: 'src/speculative-teacher.js failed to load',
+        version: 'w814-v1',
+      });
+    }
+    try {
+      const envelope = await mod.benchSpeculative({
+        tenant: trec.id,
+        namespace,
+        artifact_id,
+        teacher_endpoint,
+        n_drafts,
+        n_samples,
+      });
+      return res.status(200).json(envelope);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'speculative_bench_error',
+        detail: String((e && e.message) || e),
+        version: 'w814-v1',
+      });
+    }
+  });
+
+  r.get('/v1/speculative/bench/:id', async (req, res) => {
+    const trec = req.tenant_record;
+    if (!trec) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const bench_id = String(req.params && req.params.id || '');
+    if (!bench_id) {
+      return res.status(400).json({
+        ok: false,
+        error: 'missing_bench_id',
+        version: 'w814-v1',
+      });
+    }
+    let evMod;
+    try {
+      evMod = await import('./event-store.js');
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'event_store_unavailable',
+        detail: String((e && e.message) || e),
+        version: 'w814-v1',
+      });
+    }
+    try {
+      const rows = await evMod.listEvents({
+        tenant_id: trec.id,
+        workflow_id: 'speculative_teacher:bench',
+        limit: 500,
+      });
+      const match = (rows || []).find((row) => {
+        if (!row || row.tenant_id !== trec.id) return false;
+        try {
+          const fb = row.feedback ? JSON.parse(row.feedback) : null;
+          return fb && fb.bench_id === bench_id;
+        } catch {
+          return false;
+        }
+      });
+      if (!match) {
+        return res.status(404).json({
+          ok: false,
+          error: 'bench_not_found',
+          bench_id,
+          version: 'w814-v1',
+        });
+      }
+      let payload = null;
+      try { payload = JSON.parse(match.feedback); } catch { payload = null; }
+      return res.status(200).json({
+        ok: true,
+        bench_id,
+        payload,
+        version: 'w814-v1',
+      });
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'speculative_bench_read_error',
+        detail: String((e && e.message) || e),
+        version: 'w814-v1',
+      });
+    }
+  });
+
+  r.get('/v1/speculative/acceptance', async (req, res) => {
+    const trec = req.tenant_record;
+    if (!trec) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const q = req.query || {};
+    const task_cluster = (q.task_cluster && typeof q.task_cluster === 'string') ? q.task_cluster : null;
+    const namespace = (q.namespace && typeof q.namespace === 'string') ? q.namespace : null;
+    const artifact_id = (q.artifact_id && typeof q.artifact_id === 'string') ? q.artifact_id : null;
+    const limit = (q.limit && Number.isFinite(+q.limit)) ? Math.max(1, Math.min(1000, (+q.limit) | 0)) : 100;
+    let mod;
+    try {
+      mod = await import('./speculative-teacher.js');
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'speculative_teacher_unavailable',
+        detail: String((e && e.message) || e),
+        version: 'w814-v1',
+      });
+    }
+    try {
+      const envelope = await mod.getAcceptanceLog({
+        tenant: trec.id,
+        namespace,
+        task_cluster,
+        artifact_id,
+        limit,
+      });
+      return res.status(200).json(envelope);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'speculative_acceptance_error',
+        detail: String((e && e.message) || e),
+        version: 'w814-v1',
+      });
+    }
+  });
+
+  // ============================ W780 — multi-region gateway ==================
+  // GET  /v1/region/status     -> { region, gateway_url, capture_residency, version }
+  // GET  /v1/region/gateways   -> the configured short_name -> url map
+  // POST /v1/region/route      -> { region, gateway_url, reason } for {request_hash, residency_requirement?}
+  //
+  // All auth-gated. The MULTI_REGION module is the source of truth for
+  // routing decisions — every read goes through getRegionGateways /
+  // routeRequest so the same envelope shape callers see in the JS SDK
+  // is what the HTTP surface returns. residency_requirement is the
+  // HARD constraint; we never silently downgrade.
+  //
+  // Cross-ref: W769 (data residency) is the per-capture tag; W780 is the
+  // request-routing gateway. The two are joined inside getRegionForCapture
+  // so a tenant who configures a namespace default region in W769 also
+  // pins the W780 capture routing for that namespace.
+  r.get('/v1/region/status', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./multi-region.js');
+      const region = mod.getCurrentRegion();
+      const gateways = mod.getRegionGateways();
+      const sn = Object.keys(gateways).find((k) => {
+        const meta = mod.CANONICAL_REGIONS[k];
+        return meta && meta.canonical === region;
+      }) || Object.keys(gateways)[0] || null;
+      const gateway_url = sn ? gateways[sn] : null;
+      return res.status(200).json({
+        ok: true,
+        region,
+        gateway_url,
+        capture_residency: 'tenant_default',
+        configured_regions: Object.keys(gateways),
+        version: mod.MULTI_REGION_VERSION,
+      });
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'region_status_error',
+        detail: String((e && e.message) || e),
+        version: 'w780-v1',
+      });
+    }
+  });
+
+  r.get('/v1/region/gateways', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./multi-region.js');
+      const gateways = mod.getRegionGateways();
+      return res.status(200).json({
+        ok: true,
+        gateways,
+        region_count: Object.keys(gateways).length,
+        canonical_regions: mod.CANONICAL_REGIONS,
+        version: mod.MULTI_REGION_VERSION,
+      });
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'region_gateways_error',
+        detail: String((e && e.message) || e),
+        version: 'w780-v1',
+      });
+    }
+  });
+
+  r.post('/v1/region/route', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const body = req.body || {};
+      const mod = await import('./multi-region.js');
+      const env = mod.routeRequest({
+        request_hash: body.request_hash || '',
+        residency_requirement: body.residency_requirement || null,
+        prefer_region: body.prefer_region || null,
+      });
+      return res.status(env.ok ? 200 : 400).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'region_route_error',
+        detail: String((e && e.message) || e),
+        version: 'w780-v1',
+      });
+    }
+  });
+
+  // ==========================================================================
+  // W779 - air-gapped + sneakernet
+  //
+  //   GET  /v1/airgap/status            - {enabled, mode, local_teacher_url, ...}
+  //   POST /v1/airgap/test              - probe shape; tests assert envelope
+  //   POST /v1/sneakernet/pack          - body {artifact_id, artifact_path,
+  //                                            dest_path} -> writes a tar
+  //   POST /v1/sneakernet/unpack        - body {src_path, dest_dir?} -> verifies
+  //
+  // All four auth-gate on req.tenant_record. W411 defense-in-depth: every
+  // route binds tenant into the args so a future schema change cannot leak
+  // across tenants.
+  // ==========================================================================
+  r.get('/v1/airgap/status', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./airgap-mode.js');
+      return res.status(200).json(mod.airgapStatus());
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'airgap_status_error',
+        detail: String((e && e.message) || e),
+        version: 'w779-v1',
+      });
+    }
+  });
+
+  r.post('/v1/airgap/test', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./airgap-mode.js');
+      const body = req.body || {};
+      // actuallyProbe defaults to false - the route surface intentionally
+      // returns shape-only by default so probing does not depend on the
+      // network. Operators can opt-in via {actually_probe:true}.
+      const envelope = await mod.testNetworkLeak({
+        actuallyProbe: body.actually_probe === true,
+        probeUrls: Array.isArray(body.probe_urls) ? body.probe_urls : undefined,
+      });
+      return res.status(200).json(envelope);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'airgap_test_error',
+        detail: String((e && e.message) || e),
+        version: 'w779-v1',
+      });
+    }
+  });
+
+  r.post('/v1/sneakernet/pack', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./sneakernet.js');
+      const body = req.body || {};
+      const tenant = req.tenant_record.id;
+      const envelope = mod.packSneakernet({
+        artifact_id: body.artifact_id,
+        artifact_path: body.artifact_path,
+        dest_path: body.dest_path,
+        tenant,
+      });
+      const status = envelope.ok ? 200 : 400;
+      return res.status(status).json(envelope);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'sneakernet_pack_error',
+        detail: String((e && e.message) || e),
+        version: 'w779-v1',
+      });
+    }
+  });
+
+  r.post('/v1/sneakernet/unpack', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./sneakernet.js');
+      const body = req.body || {};
+      const envelope = mod.unpackSneakernet({
+        src_path: body.src_path,
+        dest_dir: body.dest_dir,
+      });
+      const status = envelope.ok ? 200 : 400;
+      return res.status(status).json(envelope);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'sneakernet_unpack_error',
+        detail: String((e && e.message) || e),
+        version: 'w779-v1',
+      });
+    }
+  });
+
+  // W777 - A/B testing
+  //
+  // POST /v1/ab-tests/create
+  //   Body: {namespace?, arm_a, arm_b, split?, sample_target?}
+  //   Returns: {ok, ab_test:{...}, version}
+  //
+  // GET /v1/ab-tests
+  //   Returns: {ok, ab_tests:[...], count, version}
+  //
+  // GET /v1/ab-tests/:id
+  //   Returns: {ok, ab_test, samples_a, samples_b, sig_test, version}
+  //
+  // POST /v1/ab-tests/:id/stop  (Body: {reason?})
+  // POST /v1/ab-tests/:id/promote  (Body: {arm:'a'|'b', reason?})
+  // POST /v1/ab-tests/:id/rollback
+  //   Auto-rollback fires only if arm B was previously promoted and now underperforms.
+  //
+  // GET /v1/ab-tests/:id/assignments?request_hash=X
+  //   Returns: {ok, ab_test_id, request_hash, arm, frozen, reason, version}
+  //
+  // Auth-gated via req.tenant_record. Tenant fence forced from session, never
+  // from request body. Distinct prefix /v1/ab-tests/* so parallel agents on
+  // W779-W783 cannot collide on these route paths.
+  r.post('/v1/ab-tests/create', async (req, res) => {
+    const trec = req.tenant_record;
+    if (!trec) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    try {
+      const mod = await import('./ab-router.js');
+      const envelope = mod.createAbTest({
+        tenant: trec.id,
+        namespace: body.namespace,
+        arm_a: body.arm_a,
+        arm_b: body.arm_b,
+        split: body.split,
+        sample_target: body.sample_target,
+      });
+      const status = envelope && envelope.ok ? 200 : 400;
+      return res.status(status).json(envelope);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'ab_create_error',
+        detail: String((e && e.message) || e),
+        version: 'w777-v1',
+      });
+    }
+  });
+
+  r.get('/v1/ab-tests', async (req, res) => {
+    const trec = req.tenant_record;
+    if (!trec) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./ab-router.js');
+      const envelope = mod.listAbTests({ tenant: trec.id });
+      return res.status(200).json(envelope);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'ab_list_error',
+        detail: String((e && e.message) || e),
+        version: 'w777-v1',
+      });
+    }
+  });
+
+  r.get('/v1/ab-tests/:id', async (req, res) => {
+    const trec = req.tenant_record;
+    if (!trec) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const ab_test_id = String(req.params.id || '');
+    try {
+      const mod = await import('./ab-router.js');
+      const envelope = await mod.getAbStatus({ tenant: trec.id, ab_test_id });
+      const status = envelope && envelope.ok ? 200 : 404;
+      return res.status(status).json(envelope);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'ab_status_error',
+        detail: String((e && e.message) || e),
+        version: 'w777-v1',
+      });
+    }
+  });
+
+  r.post('/v1/ab-tests/:id/stop', async (req, res) => {
+    const trec = req.tenant_record;
+    if (!trec) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const ab_test_id = String(req.params.id || '');
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    try {
+      const mod = await import('./ab-router.js');
+      const envelope = mod.stopAbTest({
+        tenant: trec.id,
+        ab_test_id,
+        reason: body.reason,
+      });
+      const status = envelope && envelope.ok ? 200 : 404;
+      return res.status(status).json(envelope);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'ab_stop_error',
+        detail: String((e && e.message) || e),
+        version: 'w777-v1',
+      });
+    }
+  });
+
+  r.post('/v1/ab-tests/:id/promote', async (req, res) => {
+    const trec = req.tenant_record;
+    if (!trec) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const ab_test_id = String(req.params.id || '');
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    try {
+      const mod = await import('./ab-router.js');
+      const envelope = await mod.promoteArm({
+        tenant: trec.id,
+        ab_test_id,
+        arm: body.arm,
+        reason: body.reason,
+      });
+      const status = envelope && envelope.ok ? 200 : 400;
+      return res.status(status).json(envelope);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'ab_promote_error',
+        detail: String((e && e.message) || e),
+        version: 'w777-v1',
+      });
+    }
+  });
+
+  r.post('/v1/ab-tests/:id/rollback', async (req, res) => {
+    const trec = req.tenant_record;
+    if (!trec) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const ab_test_id = String(req.params.id || '');
+    try {
+      const mod = await import('./ab-router.js');
+      const envelope = await mod.autoRollback({
+        tenant: trec.id,
+        ab_test_id,
+      });
+      const status = envelope && envelope.ok ? 200 : 400;
+      return res.status(status).json(envelope);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'ab_rollback_error',
+        detail: String((e && e.message) || e),
+        version: 'w777-v1',
+      });
+    }
+  });
+
+  r.get('/v1/ab-tests/:id/assignments', async (req, res) => {
+    const trec = req.tenant_record;
+    if (!trec) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const ab_test_id = String(req.params.id || '');
+    const request_hash = String((req.query && req.query.request_hash) || '');
+    if (!request_hash) {
+      return res.status(400).json({
+        ok: false,
+        error: 'missing_request_hash',
+        hint: 'GET /v1/ab-tests/:id/assignments?request_hash=X',
+        version: 'w777-v1',
+      });
+    }
+    try {
+      const mod = await import('./ab-router.js');
+      const envelope = mod.assignArm({
+        tenant: trec.id,
+        ab_test_id,
+        request_hash,
+      });
+      const status = envelope && envelope.ok ? 200 : 404;
+      return res.status(status).json(envelope);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'ab_assign_error',
+        detail: String((e && e.message) || e),
+        version: 'w777-v1',
+      });
+    }
+  });
+
+  // W778 - stat sig + rollback
+  //
+  // POST /v1/stat-sig/test
+  //   Body: {samples_a:[...], samples_b:[...], metric?}
+  //   Returns: {ok, t, df, p, mean_a, mean_b, var_a, var_b, n_a, n_b, ci_low, ci_high, version}
+  //
+  // GET /v1/stat-sig/gate?ab_test_id=X&alpha=Y&min_n=Z&min_effect_size=W
+  //   Returns: {ok, decision:'pass'|'fail'|'insufficient', reasons:[], welch:{...}, version}
+  //
+  // Auth-gated. Pure-math welchT does not need tenant fence; gate() reads via
+  // W777 ab-router which forces tenant from session.
+  r.post('/v1/stat-sig/test', async (req, res) => {
+    const trec = req.tenant_record;
+    if (!trec) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    try {
+      const mod = await import('./stat-sig.js');
+      const envelope = mod.welchT({
+        samples_a: body.samples_a,
+        samples_b: body.samples_b,
+      });
+      const status = envelope && envelope.ok ? 200 : 400;
+      return res.status(status).json(envelope);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'stat_sig_test_error',
+        detail: String((e && e.message) || e),
+        version: 'w778-v1',
+      });
+    }
+  });
+
+  r.get('/v1/stat-sig/gate', async (req, res) => {
+    const trec = req.tenant_record;
+    if (!trec) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const q = (req.query && typeof req.query === 'object') ? req.query : {};
+    const ab_test_id = String(q.ab_test_id || '');
+    if (!ab_test_id) {
+      return res.status(400).json({
+        ok: false,
+        error: 'missing_ab_test_id',
+        hint: 'GET /v1/stat-sig/gate?ab_test_id=X',
+        version: 'w778-v1',
+      });
+    }
+    const alpha = Number.isFinite(parseFloat(q.alpha)) ? parseFloat(q.alpha) : undefined;
+    const min_n = Number.isFinite(parseInt(q.min_n, 10)) ? parseInt(q.min_n, 10) : undefined;
+    const min_effect_size = Number.isFinite(parseFloat(q.min_effect_size)) ? parseFloat(q.min_effect_size) : undefined;
+    try {
+      const mod = await import('./stat-sig.js');
+      const envelope = await mod.gate({
+        tenant: trec.id,
+        ab_test_id,
+        alpha,
+        min_n,
+        min_effect_size,
+      });
+      const status = envelope && envelope.ok ? 200 : 400;
+      return res.status(status).json(envelope);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'stat_sig_gate_error',
+        detail: String((e && e.message) || e),
+        version: 'w778-v1',
+      });
+    }
+  });
+
+  // ============================================================================
+  // W781 — long-context warnings
+  //
+  //   GET  /v1/long-context/p90              -> distribution snapshot for tenant/namespace
+  //   POST /v1/long-context/check            -> warn:bool when {input_length} > p90
+  //
+  // Tenant fence: tenant_id forced from req.tenant_record.id; query/body
+  // never override. Returns honest envelope (no_captures, insufficient_samples)
+  // rather than throwing. version stamp matches /^w781-/.
+  // ============================================================================
+  r.get('/v1/long-context/p90', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./long-context-warn.js');
+      const namespace = (req.query && typeof req.query.namespace === 'string') ? req.query.namespace : null;
+      const windowDaysRaw = req.query && req.query.window_days;
+      const env = await mod.analyzeContextLengthDist({
+        tenant: req.tenant_record.id,
+        namespace,
+        window_days: windowDaysRaw,
+      });
+      return res.status(env.ok ? 200 : 400).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'long_context_p90_error',
+        detail: String((e && e.message) || e),
+        version: 'w781-v1',
+      });
+    }
+  });
+
+  r.post('/v1/long-context/check', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./long-context-warn.js');
+      const body = req.body || {};
+      const env = await mod.checkContextLength({
+        tenant: req.tenant_record.id,
+        namespace: typeof body.namespace === 'string' ? body.namespace : null,
+        input_length: body.input_length,
+        window_days: body.window_days,
+      });
+      return res.status(env.ok ? 200 : 400).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'long_context_check_error',
+        detail: String((e && e.message) || e),
+        version: 'w781-v1',
+      });
+    }
+  });
+
+  // ============================================================================
+  // W782 — team approval workflow
+  //
+  //   POST /v1/approvals/request                -> create pending approval
+  //   GET  /v1/approvals                        -> list approvals for tenant
+  //   GET  /v1/approvals/:id                    -> status snapshot
+  //   POST /v1/approvals/:id/approve            -> transition pending -> granted
+  //   POST /v1/approvals/:id/reject             -> transition pending -> rejected
+  //   POST /v1/approvals/:id/notify             -> best-effort fan-out
+  //
+  // Tenant fence: tenant_id forced from req.tenant_record.id. Status
+  // transitions return honest invalid_transition envelopes - never silently
+  // re-write state. version stamp matches /^w782-/.
+  // ============================================================================
+  r.post('/v1/approvals/request', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./distill-approval-queue.js');
+      const body = req.body || {};
+      const env = mod.requestApproval({
+        tenant: req.tenant_record.id,
+        namespace: typeof body.namespace === 'string' ? body.namespace : null,
+        artifact_id: typeof body.artifact_id === 'string' ? body.artifact_id : null,
+        requested_by: typeof body.requested_by === 'string' ? body.requested_by : (req.tenant_record.id),
+        reason: typeof body.reason === 'string' ? body.reason : '',
+        ttl_days: body.ttl_days,
+      });
+      return res.status(env.ok ? 200 : 400).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'approval_request_error',
+        detail: String((e && e.message) || e),
+        version: 'w782-v1',
+      });
+    }
+  });
+
+  r.get('/v1/approvals', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./distill-approval-queue.js');
+      const status_filter = (req.query && typeof req.query.status === 'string') ? req.query.status : null;
+      const env = mod.listApprovals({
+        tenant: req.tenant_record.id,
+        status_filter,
+      });
+      return res.status(env.ok ? 200 : 400).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'approvals_list_error',
+        detail: String((e && e.message) || e),
+        version: 'w782-v1',
+      });
+    }
+  });
+
+  r.get('/v1/approvals/:id', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./distill-approval-queue.js');
+      const env = mod.getApprovalStatus({
+        tenant: req.tenant_record.id,
+        approval_id: req.params.id,
+      });
+      return res.status(env.ok ? 200 : (env.error === 'not_found' ? 404 : 400)).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'approval_status_error',
+        detail: String((e && e.message) || e),
+        version: 'w782-v1',
+      });
+    }
+  });
+
+  r.post('/v1/approvals/:id/approve', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./distill-approval-queue.js');
+      const body = req.body || {};
+      const env = mod.approveApproval({
+        tenant: req.tenant_record.id,
+        approval_id: req.params.id,
+        approved_by: typeof body.approved_by === 'string' ? body.approved_by : req.tenant_record.id,
+        reason: typeof body.reason === 'string' ? body.reason : '',
+      });
+      return res.status(env.ok ? 200 : (env.error === 'not_found' ? 404 : 400)).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'approval_approve_error',
+        detail: String((e && e.message) || e),
+        version: 'w782-v1',
+      });
+    }
+  });
+
+  r.post('/v1/approvals/:id/reject', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./distill-approval-queue.js');
+      const body = req.body || {};
+      const env = mod.rejectApproval({
+        tenant: req.tenant_record.id,
+        approval_id: req.params.id,
+        rejected_by: typeof body.rejected_by === 'string' ? body.rejected_by : req.tenant_record.id,
+        reason: typeof body.reason === 'string' ? body.reason : '',
+      });
+      return res.status(env.ok ? 200 : (env.error === 'not_found' ? 404 : 400)).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'approval_reject_error',
+        detail: String((e && e.message) || e),
+        version: 'w782-v1',
+      });
+    }
+  });
+
+  r.post('/v1/approvals/:id/notify', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./distill-approval-queue.js');
+      const body = req.body || {};
+      const env = await mod.notifyApprovers({
+        tenant: req.tenant_record.id,
+        approval_id: req.params.id,
+        channels: Array.isArray(body.channels) ? body.channels : null,
+      });
+      return res.status(env.ok ? 200 : 400).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'approval_notify_error',
+        detail: String((e && e.message) || e),
+        version: 'w782-v1',
+      });
+    }
+  });
+
+  // ============================================================================
+  // W783 — cost attribution / chargeback
+  //
+  //   GET  /v1/chargeback?period=YYYY-MM&group_by=namespace|project|department
+  //                                            -> tenant-fenced rollup
+  //   POST /v1/chargeback/export               -> {format:csv|json, period}
+  //                                            -> stream body w/ per-format Content-Type
+  //
+  // Tenant fence: tenant_id forced from req.tenant_record.id; query/body
+  // never override. version stamp matches /^w783-/.
+  // ============================================================================
+  r.get('/v1/chargeback', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./chargeback.js');
+      const period = (req.query && typeof req.query.period === 'string') ? req.query.period : null;
+      const group_by = (req.query && typeof req.query.group_by === 'string') ? req.query.group_by : 'namespace';
+      const env = await mod.chargebackReport({
+        tenant: req.tenant_record.id,
+        period,
+        group_by,
+      });
+      return res.status(env.ok ? 200 : 400).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'chargeback_report_error',
+        detail: String((e && e.message) || e),
+        version: 'w783-v1',
+      });
+    }
+  });
+
+  r.post('/v1/chargeback/export', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./chargeback.js');
+      const body = req.body || {};
+      const env = await mod.exportChargeback({
+        tenant: req.tenant_record.id,
+        period: typeof body.period === 'string' ? body.period : null,
+        group_by: typeof body.group_by === 'string' ? body.group_by : 'namespace',
+        format: typeof body.format === 'string' ? body.format : 'json',
+      });
+      if (!env.ok) return res.status(400).json(env);
+      res.setHeader('Content-Type', env.mime_type);
+      res.setHeader('X-Kolm-Chargeback-Version', env.version);
+      res.setHeader('X-Kolm-Chargeback-Row-Count', String(env.row_count));
+      return res.send(env.body);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'chargeback_export_error',
+        detail: String((e && e.message) || e),
+        version: 'w783-v1',
       });
     }
   });

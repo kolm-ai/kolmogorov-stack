@@ -1,0 +1,65 @@
+{
+  "product_name": "kolm",
+  "tagline": "Open-source AI workbench for frontier-quality on your own infrastructure",
+  "categories": ["machine_learning", "developer_tools", "ai_infrastructure"],
+  "pricing_model": "byol_plus_hourly",
+  "byol_note": "Use your existing kolm Pro license; AWS billing for compute only",
+  "hourly_compute_rate": null,
+  "support_tiers": ["community", "business", "enterprise"],
+  "regions_initial": ["us-east-1", "us-west-2", "eu-west-1"],
+  "regions_roadmap": ["ap-southeast-1", "ap-northeast-1"],
+  "compliance": {
+    "soc_2_type_1": true,
+    "soc_2_type_2": "in_progress",
+    "iso_27001": "in_progress",
+    "gdpr": true,
+    "hipaa": "not_signed"
+  },
+  "version_note": "Listing prep -- not yet submitted to AWS. Awaiting final SOC 2 Type II audit close.",
+  "version": "w799-v1",
+  "deployment": {
+    "template_kind": "cloudformation",
+    "template_path": "infra/aws-marketplace/cloudformation.yaml",
+    "default_instance_type": "t3.2xlarge",
+    "allowed_instance_types": [
+      "t3.xlarge",
+      "t3.2xlarge",
+      "m6i.2xlarge",
+      "m6i.4xlarge",
+      "g5.xlarge",
+      "g5.2xlarge",
+      "g5.4xlarge"
+    ],
+    "estimated_monthly_compute_usd": {
+      "min": 120,
+      "typical": 220,
+      "max": 300,
+      "note": "t3.2xlarge on-demand + 100GB gp3 + modest S3 + CloudWatch retention. Reserved Instances cut this by ~40%."
+    }
+  },
+  "support": {
+    "community": {
+      "channel": "GitHub Issues + Discord",
+      "sla": "best_effort",
+      "price_usd_per_month": 0
+    },
+    "business": {
+      "channel": "Email + Slack Connect",
+      "sla": "next_business_day",
+      "price_usd_per_month": 499
+    },
+    "enterprise": {
+      "channel": "Dedicated Slack + on-call rotation",
+      "sla": "4_hour_response_p1",
+      "price_usd_per_month": "contact_sales",
+      "includes": ["BAA on request", "SAML/SCIM", "dedicated TAM"]
+    }
+  },
+  "listing_status": {
+    "aws_marketplace": "prep_complete_not_submitted",
+    "azure_marketplace": "prep_in_progress",
+    "gcp_marketplace": "prep_in_progress",
+    "blocker": "Final SOC 2 Type II audit close (target Q3 2026)",
+    "submission_target_date": "2026-09-01"
+  }
+}

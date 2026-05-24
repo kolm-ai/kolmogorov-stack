@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Publish a .kolm artifact &middot; Open-source AI workbench &middot; kolm.ai</title>
+<meta name="description" content="Publish a signed .kolm artifact to the kolm marketplace. Required metadata, signature verification, K-Score match check, license declaration, and pricing toggle. Upload disabled in beta -- email rodneyyesep@gmail.com to participate.">
+<meta name="theme-color" content="#07090c">
+<link rel="canonical" href="https://kolm.ai/marketplace/upload">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/frontier.css">
+<script defer src="/frontier.js"></script>
+<script src="/nav.js" defer></script>
+<style>
+  .up-hero { padding-top: clamp(72px, 9vw, 128px); padding-bottom: clamp(56px, 7vw, 96px); border-bottom: 1px solid var(--line-1); position: relative; }
+  .up-hero h1 {
+    font-family: var(--fr-font-display);
+    font-size: var(--fr-text-5xl);
+    letter-spacing: var(--fr-track-display);
+    line-height: 1.04;
+    font-weight: 580;
+    color: var(--ink-1);
+    margin: 14px 0 18px;
+    max-width: 22ch;
+  }
+  .up-hero h1 b { color: var(--fr-mint); font-weight: 580; }
+  .up-hero .meta-row { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 28px; }
+
+  .up-form { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 24px; }
+  .up-form .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 720px) { .up-form .row { grid-template-columns: 1fr; } }
+  .up-form label { display: block; font-family: var(--fr-font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 6px; }
+  .up-form input[type=text],
+  .up-form input[type=number],
+  .up-form textarea,
+  .up-form select {
+    width: 100%;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--line-1);
+    border-radius: 6px;
+    padding: 11px 13px;
+    font-family: var(--fr-font-sans);
+    font-size: 14px;
+    color: var(--ink-1);
+    box-sizing: border-box;
+    outline: none;
+  }
+  .up-form textarea { min-height: 110px; resize: vertical; line-height: 1.55; }
+  .up-form input:focus, .up-form textarea:focus, .up-form select:focus { border-color: var(--fr-mint); }
+  .up-form .hint { font-family: var(--fr-font-sans); font-size: 12.5px; color: var(--ink-3); margin-top: 4px; }
+  .up-form fieldset { border: 1px solid var(--line-1); border-radius: 10px; padding: 16px 18px; margin: 0; }
+  .up-form fieldset legend { padding: 0 8px; font-family: var(--fr-font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+  .up-form .toggles { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 10px; font-family: var(--fr-font-sans); font-size: 13.5px; color: var(--ink-2); }
+  .up-form .toggles label { font-family: var(--fr-font-sans); font-size: 13.5px; letter-spacing: 0; text-transform: none; color: var(--ink-2); margin: 0; }
+
+  .up-sig-block {
+    background: rgba(46,191,145,0.06);
+    border: 1px solid rgba(46,191,145,0.30);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: var(--fr-font-mono);
+    font-size: 12.5px;
+    color: var(--ink-2);
+    line-height: 1.55;
+    overflow-x: auto;
+  }
+  .up-sig-block .verified {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(46, 191, 145, 0.15);
+    border: 1px solid rgba(46, 191, 145, 0.40);
+    font-family: var(--fr-font-mono);
+    font-size: 11.5px;
+    letter-spacing: 0.05em;
+    color: var(--fr-mint);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .up-honesty { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-family: var(--fr-font-sans); font-size: 13px; color: var(--ink-2); line-height: 1.55; margin-top: 20px; }
+  .up-honesty b { color: var(--ink-1); font-weight: 580; }
+
+  .up-beta-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(229, 167, 39, 0.10);
+    border: 1px solid rgba(229, 167, 39, 0.30);
+    font-family: var(--fr-font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--fr-amber);
+    margin: 6px 0;
+  }
+
+  .up-crosslink { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+</style>
+<meta property="og:title" content="Publish a .kolm artifact &middot; Open-source AI workbench &middot; kolm.ai">
+<meta property="og:description" content="Required metadata, signature verification, K-Score match, license declaration, pricing toggle. Upload disabled in beta.">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/marketplace/upload">
+<meta property="og:type" content="website">
+</head>
+<body class="ks">
+<span class="brand-anchor" data-w775="h1" aria-hidden="true">Frontier AI on your own infrastructure.</span>
+<span class="brand-disambig" aria-hidden="true">Not Kolm therapeutics, Kolm band, or other unrelated organizations using similar names.</span>
+
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/k-score">K-score</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">-&gt;</span></a>
+      </div>
+    </div>
+  </header>
+</div>
+
+<main id="main">
+
+<!-- 1. HERO -->
+<section class="up-hero fr-section">
+  <div class="fr-container">
+    <p class="brand-eyebrow" data-w775="brand-eyebrow">Open-source AI workbench</p>
+    <h1>Publish a .kolm artifact.</h1>
+    <p class="fr-lede">Required metadata, signature verification, K-Score match, license declaration, pricing toggle. Every field is checked against the manifest before listing. Open-weights is the default license; commercial-restricted is opt-in.</p>
+    <div class="meta-row">
+      <span class="up-beta-pill">Upload disabled in beta. Email rodneyyesep@gmail.com to participate.</span>
+    </div>
+    <div class="meta-row" style="margin-top:12px">
+      <span class="fr-status"><span class="fr-status__dot"></span>Manifest-checked metadata</span>
+      <span class="fr-status fr-status--info"><span class="fr-status__dot"></span>Teacher signature verified before listing</span>
+      <span class="fr-status fr-status--warn"><span class="fr-status__dot"></span>K-Score must match manifest exactly</span>
+    </div>
+  </div>
+</section>
+
+<!-- 2. REQUIRED METADATA -->
+<section class="fr-section" id="metadata">
+  <div class="fr-container">
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">Required metadata</span>
+      <h2 class="fr-h2">Eight fields, all manifest-bound.</h2>
+      <p class="fr-lede">Every field is cross-checked against the .kolm manifest you upload. If the K-Score you type does not match the published K-Score in the manifest, the listing is rejected. We do not let publishers re-grade their own work.</p>
+    </div>
+
+    <form class="up-form" aria-label="Marketplace upload metadata (UI shell, upload disabled in beta)" onsubmit="event.preventDefault(); window.location.href='mailto:rodneyyesep@gmail.com?subject=Marketplace%20beta%20participation';">
+      <div class="row">
+        <div>
+          <label for="up-name">Artifact name</label>
+          <input type="text" id="up-name" name="artifact_name" placeholder="e.g. cs-intent-classifier-v2" required>
+        </div>
+        <div>
+          <label for="up-vertical">Vertical</label>
+          <select id="up-vertical" name="vertical" required>
+            <option value="">Choose a vertical</option>
+            <option>Customer service</option>
+            <option>Legal</option>
+            <option>Health</option>
+            <option>Code</option>
+            <option>Finance</option>
+            <option>Education</option>
+            <option>Translation</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="up-task">Task type</label>
+          <select id="up-task" name="task_type" required>
+            <option value="">Choose a task</option>
+            <option>Classification</option>
+            <option>Extraction</option>
+            <option>Summarization</option>
+            <option>RAG response</option>
+            <option>Reranking</option>
+            <option>Reasoning</option>
+          </select>
+        </div>
+        <div>
+          <label for="up-teacher">Teacher ID (verified via signature)</label>
+          <input type="text" id="up-teacher" name="teacher_id" placeholder="e.g. anthropic-claude-sonnet-4-7" required>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="up-kscore">K-Score (must match manifest)</label>
+          <input type="number" id="up-kscore" name="k_score" step="0.01" min="0" max="1" placeholder="0.91" required>
+          <p class="hint">Cross-checked against manifest.k_score on submit. Mismatch rejects the listing.</p>
+        </div>
+        <div>
+          <label for="up-license">License</label>
+          <select id="up-license" name="license" required>
+            <option value="open-weights">Open-weights (default)</option>
+            <option value="commercial-restricted">Commercial-restricted (opt-in)</option>
+            <option value="non-commercial">Non-commercial</option>
+            <option value="custom">Custom (provide URL)</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label for="up-desc">Description</label>
+        <textarea id="up-desc" name="description" placeholder="What this artifact does, what it was distilled from, what hardware it targets, and any honest empty-state behavior. 100-300 words." required></textarea>
+      </div>
+
+      <!-- 3. SIGNATURE VERIFICATION -->
+      <fieldset>
+        <legend>Signature verification step</legend>
+        <p style="font-family:var(--fr-font-sans);font-size:13px;color:var(--ink-2);line-height:1.55;margin:8px 0 12px">The signature_block from the manifest is parsed, the teacher public key fetched, and the signature checked. A valid signature is required to list. Below is an example of a verified block as it will appear inline after upload.</p>
+        <div class="up-sig-block">
+          <span class="verified">VERIFIED</span>
+          <div>signature_block:</div>
+          <div>&nbsp;&nbsp;teacher_id: anthropic-claude-sonnet-4-7</div>
+          <div>&nbsp;&nbsp;artifact_hash: sha256:9f1b...e3d2</div>
+          <div>&nbsp;&nbsp;k_score: 0.91</div>
+          <div>&nbsp;&nbsp;signed_at: 2026-05-24T12:00:00Z</div>
+          <div>&nbsp;&nbsp;signature: ed25519:a4cb...07ee</div>
+        </div>
+      </fieldset>
+
+      <!-- 4. PRICING -->
+      <fieldset>
+        <legend>Pricing toggle</legend>
+        <div class="toggles">
+          <label><input type="radio" name="pricing" value="free" checked> Free</label>
+          <label><input type="radio" name="pricing" value="one-time"> One-time (per download)</label>
+          <label><input type="radio" name="pricing" value="subscription"> Subscription (monthly)</label>
+        </div>
+        <p class="hint" style="margin-top:8px">Publishers receive 70 percent of paid downloads, net of payment processor fees.</p>
+      </fieldset>
+
+      <div class="up-honesty">
+        <b>Upload disabled in beta.</b> This form is a UI shell. Submitting opens your local mail client and pre-fills a message to rodneyyesep@gmail.com to request beta participation. The marketplace is in private beta; public listings open Q3 2026.
+      </div>
+
+      <div class="up-crosslink">
+        <button type="submit" class="fr-btn fr-btn--mint">Email to request beta access</button>
+        <a href="/marketplace" class="fr-btn fr-btn--ghost">Back to marketplace</a>
+        <a href="/verify-prod" class="fr-btn fr-btn--ghost">Verify an artifact</a>
+      </div>
+    </form>
+  </div>
+</section>
+
+</main>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI workbench. Capture, distill, quantize, and run signed models on your own hardware.</p>
+        <p class="ks-foot__tag" style="margin-top:8px">Contact: rodneyyesep@gmail.com</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/faq">FAQ</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/marketplace">Marketplace</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Community</h4>
+        <a href="/community">Community</a>
+        <a href="/recipes">Recipes</a>
+        <a href="/forge">Forge</a>
+        <a href="/leaderboard">Leaderboard</a>
+        <a href="/labs">Labs</a>
+        <a href="/pricing">Pricing</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- w825-2-marketplace-upload -->
+</body>
+</html>

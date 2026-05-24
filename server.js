@@ -23,6 +23,18 @@ app.disable('x-powered-by');
 // the rate-limit keyGenerator sees the real client IP, not Railway's edge IP.
 app.set('trust proxy', isProductionRuntime() ? 2 : false);
 
+const cspConnectSrc = [
+  "'self'",
+  'https://api.anthropic.com',
+  'https://kolm.ai',
+  'https://*.vercel-insights.com',
+  'https://api.stripe.com',
+];
+for (const origin of String(process.env.KOLM_CSP_CONNECT_SRC || '').split(',')) {
+  const trimmed = origin.trim();
+  if (trimmed && !cspConnectSrc.includes(trimmed)) cspConnectSrc.push(trimmed);
+}
+
 // Security headers (S3, S4) — mounted BEFORE express.static so static
 // assets get HSTS, CSP, nosniff, etc. CSP allows 'unsafe-inline' for now
 // because every page still has inline <script> blocks; Sprint 1 moves
@@ -36,7 +48,7 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
       fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com'],
-      connectSrc: ["'self'", 'https://api.anthropic.com', 'https://kolm.ai', 'https://kolmogorov-stack-production.up.railway.app', 'https://*.vercel-insights.com', 'https://api.stripe.com'],
+      connectSrc: cspConnectSrc,
       frameSrc: ['https://js.stripe.com'],
       workerSrc: ["'self'", 'blob:'],
       frameAncestors: ["'none'"],

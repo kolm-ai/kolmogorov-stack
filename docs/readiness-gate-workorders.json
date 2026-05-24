@@ -1,0 +1,330 @@
+{
+  "schema_version": "kolm-readiness-gate-workorders-1",
+  "updated_at": "2026-05-23",
+  "purpose": "Executable closure contracts for every readiness item that is not yet shipped or implemented because it requires external partner evidence, package publication, public benchmark data, or live certification.",
+  "definition_of_done": [
+    "Every open readiness requirement has exactly one work order.",
+    "Every work order separates local build/proof from external evidence.",
+    "Every work order lists files, commands, evidence required, public-copy rule, and failure modes.",
+    "No work order may convert an external/package/benchmark/certification gate to shipped without real evidence."
+  ],
+  "workorders": [
+    {
+      "id": "wo-foundation-standardization",
+      "requirement_id": "foundation-standardization",
+      "surface": "format-standard",
+      "status": "needs_external_partner",
+      "priority": "P1",
+      "kind": "external_partner",
+      "local_contract_state": "foundation_packet_ready",
+      "public_copy_rule": "Say the .kolm spec is published and foundation-ready; do not claim CNCF, Linux Foundation, standards-body, Hugging Face, Ollama, or llama.cpp adoption until accepted by the external party.",
+      "local_files": [
+        "public/spec.html",
+        "public/spec-grammar.html",
+        "docs/format-governance-packet.md",
+        "scripts/format-governance-packet.mjs",
+        "src/format-governance-packet.js"
+      ],
+      "local_commands": [
+        "npm run verify:governance-packets",
+        "node scripts/format-governance-packet.mjs --summary --require-local-contract",
+        "npm run verify:sota",
+        "npm run verify:claims-scope"
+      ],
+      "external_actions": [
+        "Create a neutral governance proposal with spec versioning, compatibility policy, verifier API, conformance test plan, and trademark rules.",
+        "Submit to a neutral venue or create a public foundation steering process.",
+        "Get written acceptance, incubation, or public governance commitment from the external venue."
+      ],
+      "evidence_required": [
+        "public governance URL",
+        "accepted proposal or signed steering minutes",
+        "third-party maintainer or foundation contact",
+        "published conformance suite location"
+      ],
+      "failure_modes": [
+        "Public copy says standard-backed before a neutral venue accepts it.",
+        "Spec changes without compatibility policy.",
+        "Verifier/conformance suite is not usable outside the hosted Kolm app."
+      ]
+    },
+    {
+      "id": "wo-ecosystem-runtime-adoption",
+      "requirement_id": "ecosystem-runtime-adoption",
+      "surface": "format-standard",
+      "status": "needs_external_partner",
+      "priority": "P1",
+      "kind": "external_partner",
+      "local_contract_state": "runtime_adoption_packet_ready",
+      "public_copy_rule": "Say Kolm provides runtime adoption packets and conformance fixtures; do not claim native support in Hugging Face, Ollama, llama.cpp, ONNX/GGUF tooling, or hardware vendor stacks until merged or publicly released by those projects.",
+      "local_files": [
+        "docs/runtime-adoption-packets.md",
+        "scripts/runtime-adoption-packets.mjs",
+        "src/runtime-adoption-packets.js",
+        "public/runtimes.html",
+        "docs/product-invention-buildbook.json"
+      ],
+      "local_commands": [
+        "npm run verify:governance-packets",
+        "node scripts/runtime-adoption-packets.mjs --summary --require-local-contract",
+        "node scripts/simulate-product-invention-buildbook.cjs --category=compiler-autotarget --summary",
+        "npm run verify:claims-scope"
+      ],
+      "external_actions": [
+        "Prepare minimal .kolm loader examples for each target runtime.",
+        "Open upstream issues or PRs with conformance fixtures and standalone verifier docs.",
+        "Capture merged PR, release note, partner blog, or signed integration statement."
+      ],
+      "evidence_required": [
+        "upstream merged PR or released package",
+        "public issue/release note",
+        "runtime conformance log",
+        "partner permission to name the integration"
+      ],
+      "failure_modes": [
+        "A demo adapter is treated as native adoption.",
+        "Runtime integration lacks signature verification.",
+        "Public matrix implies support for targets that only have local packets."
+      ]
+    },
+    {
+      "id": "wo-runtime-wasm",
+      "requirement_id": "runtime-wasm",
+      "surface": "runtime-compute",
+      "status": "needs_package_release",
+      "priority": "P1",
+      "kind": "package_release",
+      "local_contract_state": "local_package_surface_ready",
+      "public_copy_rule": "Say browser runtime/package work is locally prepared; do not advertise npm-installable runtime-wasm until a signed release artifact or registry URL exists.",
+      "local_files": [
+        "packages/sdk-ts/package.json",
+        "packages/sdk-ts/src/index.ts",
+        "packages/runtime-rs/Cargo.toml",
+        "scripts/package-release-readiness.mjs",
+        "tests/wave591-package-local-build-contract.test.js"
+      ],
+      "local_commands": [
+        "npm run verify:package-release",
+        "node scripts/package-release-readiness.mjs --run-local-checks --summary",
+        "node scripts/simulate-product-invention-buildbook.cjs --category=device-runtime --summary",
+        "npm run verify:sota"
+      ],
+      "external_actions": [
+        "Cut a signed release archive containing browser/WASM runtime artifacts.",
+        "Publish npm package or release URL and lock checksum into package readiness manifest.",
+        "Run browser smoke on a clean install and attach result to the release."
+      ],
+      "evidence_required": [
+        "signed release artifact or npm registry URL",
+        "package checksum",
+        "clean-install browser smoke log",
+        "runtime version and LTS policy"
+      ],
+      "failure_modes": [
+        "Docs show `npm install` before publication.",
+        "WASM artifact has no signature or checksum.",
+        "Browser runtime passes local imports but fails clean package install."
+      ]
+    },
+    {
+      "id": "wo-ios-android-sdk",
+      "requirement_id": "ios-android-sdk",
+      "surface": "runtime-compute",
+      "status": "needs_package_release",
+      "priority": "P1",
+      "kind": "package_release",
+      "local_contract_state": "mobile_sources_ready",
+      "public_copy_rule": "Say iOS, Android, and React Native SDK sources exist locally; do not claim App Store, CocoaPods, SwiftPM, Maven Central, or npm package availability until release evidence exists.",
+      "local_files": [
+        "packages/sdk-swift/Package.swift",
+        "packages/sdk-kotlin/build.gradle.kts",
+        "packages/sdk-rn/package.json",
+        "packages/sdk-rn/kolm-rn.podspec",
+        "scripts/package-release-readiness.mjs"
+      ],
+      "local_commands": [
+        "npm run verify:package-release",
+        "node scripts/package-release-readiness.mjs --summary --require-local-contract",
+        "node scripts/simulate-product-invention-buildbook.cjs --invention=w598-device-fit-autopilot --summary",
+        "npm run verify:claims-scope"
+      ],
+      "external_actions": [
+        "Publish Swift package tag and CocoaPods spec if used.",
+        "Publish Kotlin artifact to Maven or provide signed GitHub release.",
+        "Publish React Native package to npm with native iOS/Android smoke evidence."
+      ],
+      "evidence_required": [
+        "Swift package tag or registry URL",
+        "Maven/GitHub release URL for Kotlin",
+        "npm package URL for React Native",
+        "clean-install mobile sample logs"
+      ],
+      "failure_modes": [
+        "Mobile docs claim install availability while package channels are pending.",
+        "Native bridge package lacks platform sample smoke.",
+        "Release artifacts have no checksum or signed provenance."
+      ]
+    },
+    {
+      "id": "wo-benchmarking-infra",
+      "requirement_id": "benchmarking-infra",
+      "surface": "infrastructure-enterprise",
+      "status": "needs_public_benchmark_data",
+      "priority": "P0",
+      "kind": "public_benchmark_data",
+      "local_contract_state": "harness_and_fixture_evidence_ready",
+      "public_copy_rule": "Say local benchmark harnesses and fixture evidence exist; do not claim public leaderboard superiority or production benchmark numbers until reproducible public runs are published.",
+      "local_files": [
+        "docs/benchmark-evidence.md",
+        "scripts/benchmark-evidence.mjs",
+        "public/benchmarks/quality-judge-calibration.json",
+        "public/benchmarks/redaction-public-benchmark.json",
+        "bench/README.md"
+      ],
+      "local_commands": [
+        "npm run verify:benchmark-evidence",
+        "npm run verify:quality-calibration",
+        "npm run verify:redaction-benchmark",
+        "node scripts/simulate-product-invention-buildbook.cjs --category=eval-calibration --summary"
+      ],
+      "external_actions": [
+        "Freeze benchmark dataset versions, hardware targets, model/provider versions, pricing assumptions, and exact commands.",
+        "Run public reproducible benchmark jobs and publish raw logs, manifests, receipts, and signed result bundle.",
+        "Update public benchmark pages only after raw data is linked."
+      ],
+      "evidence_required": [
+        "public benchmark dataset manifest",
+        "signed raw output bundle",
+        "hardware and provider version record",
+        "reproducer command and checksum",
+        "published leaderboard URL"
+      ],
+      "failure_modes": [
+        "Synthetic fixture results are marketed as public benchmark evidence.",
+        "Competitor comparisons use stale prices or unpinned model versions.",
+        "Benchmark page links summaries without raw reproducible output."
+      ]
+    },
+    {
+      "id": "wo-sdk-depth",
+      "requirement_id": "sdk-depth",
+      "surface": "infrastructure-enterprise",
+      "status": "needs_package_release",
+      "priority": "P1",
+      "kind": "package_release",
+      "local_contract_state": "multi_sdk_sources_ready",
+      "public_copy_rule": "Say SDK source packages and local dry-run checks exist; do not claim public package-manager availability until the registry or signed-release URL exists for each SDK.",
+      "local_files": [
+        "packages/sdk-ts/package.json",
+        "packages/sdk-python/pyproject.toml",
+        "packages/runtime-rs/Cargo.toml",
+        "packages/sdk-swift/Package.swift",
+        "packages/sdk-kotlin/build.gradle.kts",
+        "packages/browser-extension/manifest.json"
+      ],
+      "local_commands": [
+        "npm run verify:package-release",
+        "node scripts/package-release-readiness.mjs --run-local-checks --summary",
+        "node scripts/verify-sdk-dist.mjs",
+        "node scripts/simulate-product-invention-buildbook.cjs --invention=w598-codegraph-product-indexer --summary"
+      ],
+      "external_actions": [
+        "Publish or sign each SDK package.",
+        "Record registry URL, version, checksum, provenance, and clean-install log.",
+        "Update SDK docs from the release manifest, not hand-written install copy."
+      ],
+      "evidence_required": [
+        "registry URL or signed release URL per SDK",
+        "checksum per release artifact",
+        "clean-install log per package manager",
+        "SDK manifest synced to docs"
+      ],
+      "failure_modes": [
+        "SDK matrix says package exists before it is published.",
+        "Docs drift from actual package manifest names.",
+        "Language SDK release lacks clean-install smoke."
+      ]
+    },
+    {
+      "id": "wo-compliance-certifications",
+      "requirement_id": "compliance-certifications",
+      "surface": "infrastructure-enterprise",
+      "status": "needs_live_certification",
+      "priority": "P0",
+      "kind": "live_certification",
+      "local_contract_state": "evidence_packet_ready",
+      "public_copy_rule": "Say evidence packets, control mappings, and templates are ready; do not claim SOC 2, ISO 27001, HIPAA BAA, GDPR DPA, FedRAMP, or formal SLSA status until signed evidence exists.",
+      "local_files": [
+        "docs/compliance-certification-packet.md",
+        "scripts/compliance-certification-packet.mjs",
+        "src/compliance-certification-packet.js",
+        "public/soc2.html",
+        "public/hipaa-mapping.html",
+        "public/slsa.html"
+      ],
+      "local_commands": [
+        "npm run verify:compliance-packet",
+        "node scripts/compliance-certification-packet.mjs --summary --require-local-contract",
+        "node scripts/simulate-product-invention-buildbook.cjs --category=supply-chain-proof --summary",
+        "npm run verify:claims-scope"
+      ],
+      "external_actions": [
+        "Engage auditor/counsel for SOC 2, ISO 27001, HIPAA BAA, GDPR DPA, FedRAMP boundary, and SLSA provenance review as applicable.",
+        "Attach signed reports, countersigned agreements, or formal authorization letters.",
+        "Update readiness statuses only from signed evidence, not from internal readiness."
+      ],
+      "evidence_required": [
+        "signed SOC 2 or auditor report when claimed",
+        "signed ISO 27001 certificate when claimed",
+        "countersigned BAA/DPA templates when claimed",
+        "FedRAMP boundary/authorization evidence when claimed",
+        "signed SLSA/SBOM provenance evidence when claimed"
+      ],
+      "failure_modes": [
+        "Security page claims certification because controls are implemented locally.",
+        "Compliance packet contains placeholders or unsigned templates.",
+        "Product copy collapses HIPAA-ready workflow into HIPAA-certified status."
+      ]
+    },
+    {
+      "id": "wo-one-line-install",
+      "requirement_id": "one-line-install",
+      "surface": "developer-experience",
+      "status": "needs_package_release",
+      "priority": "P1",
+      "kind": "package_release",
+      "local_contract_state": "installers_ready_for_release_artifacts",
+      "public_copy_rule": "Say install scripts and package manifests exist; do not publish `brew install`, `apt install`, `winget install`, or curl-pipe install as generally available until release artifacts and checksums are real.",
+      "local_files": [
+        "scripts/install.sh",
+        "scripts/install.ps1",
+        "packages/homebrew/kolm.rb",
+        "packages/apt/kolm.control",
+        "packages/winget/kolm.kolm.yaml",
+        "scripts/package-release-readiness.mjs"
+      ],
+      "local_commands": [
+        "npm run verify:package-release",
+        "node scripts/package-release-readiness.mjs --smoke-installers --summary",
+        "node scripts/package-release-readiness.mjs --run-local-checks --summary",
+        "node scripts/simulate-product-invention-buildbook.cjs --metric=dx --summary"
+      ],
+      "external_actions": [
+        "Cut signed CLI release archives for supported OS/architectures.",
+        "Replace placeholder checksums in Homebrew, apt, winget, and install scripts.",
+        "Submit package-manager PRs or publish signed release artifacts with clean install logs."
+      ],
+      "evidence_required": [
+        "signed release archive per platform",
+        "SHA256 checksum per artifact",
+        "package-manager PR or registry URL",
+        "clean install/uninstall smoke log"
+      ],
+      "failure_modes": [
+        "Public install copy points at package managers before release artifacts exist.",
+        "Installer downloads unsigned binaries.",
+        "Generated package manifest carries placeholder SHA256 values."
+      ]
+    }
+  ]
+}

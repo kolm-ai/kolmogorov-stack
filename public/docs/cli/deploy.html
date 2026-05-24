@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>kolm deploy CLI reference &middot; Open-source AI workbench &middot; kolm.ai</title>
+<meta name="description" content="kolm deploy CLI reference: deploy a signed .kolm artifact to docker, kubernetes, or systemd targets. Pre-flight signature verify and memory probe. Honest envelope on unknown target.">
+<meta name="theme-color" content="#07090c">
+<link rel="canonical" href="https://kolm.ai/docs/cli/deploy">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<script src="/nav.js" defer></script>
+<style>
+  .cli-hero { padding-top: clamp(72px, 9vw, 128px); padding-bottom: clamp(40px, 6vw, 72px); border-bottom: 1px solid var(--line-1); }
+  .cli-hero h1 { font-size: clamp(34px, 4.5vw, 50px); font-weight: 580; letter-spacing: -0.02em; margin: 14px 0 18px; max-width: 22ch; font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+  .cli-body { padding: 48px 0 96px; }
+  .cli-body h2 { font-size: 22px; font-weight: 540; margin: 40px 0 12px; letter-spacing: -0.01em; }
+  .cli-body p, .cli-body li { font-size: 15px; line-height: 1.7; color: var(--ink-2); max-width: 76ch; }
+  pre { background: #06080a; border: 1px solid var(--line-1); border-radius: 8px; padding: 16px 18px; overflow-x: auto; font: 12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; color: #e9eef3; max-width: 760px; }
+  code { font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size: 13px; background: rgba(255,255,255,0.04); padding: 1px 6px; border-radius: 4px; }
+  .cli-honest { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-size: 13.5px; color: var(--ink-2); line-height: 1.55; margin: 20px 0; max-width: 76ch; }
+  .cli-honest b { color: var(--ink-1); font-weight: 580; }
+</style>
+</head>
+<body class="ks">
+<span class="brand-anchor" data-w775="h1" aria-hidden="true">Frontier AI on your own infrastructure.</span>
+<span class="brand-disambig" aria-hidden="true">Not Kolm therapeutics, Kolm band, or other unrelated organizations using similar names.</span>
+
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/marketplace">Marketplace</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">-&gt;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main">
+
+<section class="cli-hero">
+  <div class="ks-wrap">
+    <p class="brand-eyebrow" data-w775="brand-eyebrow">Open-source AI workbench</p>
+    <h1>kolm deploy -- CLI reference.</h1>
+    <p class="lede">Deploy a signed .kolm artifact to a docker, kubernetes, or systemd target. Runs a pre-flight signature verify and a memory probe before any host changes.</p>
+  </div>
+</section>
+
+<section class="cli-body">
+  <div class="ks-wrap">
+
+    <h2>Usage</h2>
+    <pre>kolm deploy &lt;artifact&gt; [--target docker|kubernetes|systemd] [--region us-east-1]
+                          [--namespace prod] [--dry-run] [--json]</pre>
+
+    <h2>Arguments</h2>
+    <ul>
+      <li><code>&lt;artifact&gt;</code> -- path to a local <code>.kolm</code> file, or a marketplace artifact id (e.g. <code>kolm-finance-7b</code>).</li>
+      <li><code>--target</code> -- one of <code>docker</code>, <code>kubernetes</code>, <code>systemd</code>. Default: detected from environment (presence of <code>kubectl</code> or <code>docker</code> on PATH).</li>
+      <li><code>--region</code> -- region label stamped on the deployment receipt. Required for multi-region setups; defaults to <code>local</code> otherwise.</li>
+      <li><code>--namespace</code> -- kubernetes namespace, or systemd unit prefix, or docker network name. Default: <code>prod</code>.</li>
+      <li><code>--dry-run</code> -- run pre-flight checks and print the deploy plan; make no host changes.</li>
+      <li><code>--json</code> -- machine-readable envelope output.</li>
+    </ul>
+
+    <h2>Examples</h2>
+    <pre># Deploy locally with docker
+kolm deploy ~/.kolm/artifacts/kolm-finance-7b.kolm --target docker
+
+# Deploy to a k8s cluster in us-west-2
+kolm deploy kolm-finance-7b --target kubernetes --region us-west-2 --namespace prod
+
+# Deploy as a systemd unit on a bare-metal host
+kolm deploy ./my-distill.kolm --target systemd --namespace inference
+
+# Pre-flight only
+kolm deploy ./my-distill.kolm --dry-run --json</pre>
+
+    <h2>Pre-flight checks</h2>
+    <p>Before any host change <code>kolm deploy</code> runs two checks and aborts on failure:</p>
+    <ul>
+      <li><b>Signature verify.</b> Reads the ed25519 signature from the .kolm manifest and verifies it against the trust store at <code>~/.kolm/trust/</code>. A failed verify exits 65 (<code>signature_invalid</code>).</li>
+      <li><b>Memory probe.</b> Reads the artifact's <code>resource_requirements.memory_mb</code> field and checks available host memory. If host memory is below the threshold deploy exits 66 (<code>insufficient_memory</code>) with the gap printed in the envelope.</li>
+    </ul>
+
+    <h2>Honest envelope</h2>
+    <div class="cli-honest">
+      <b>Unknown target.</b> If <code>--target</code> is set to a string outside the known set the CLI exits 64 with <code>{ok:false, error:'unknown_target', hint:'expected one of: docker, kubernetes, systemd'}</code>. We never silently fall back to a default target -- silent fall-back has historically caused deploys to land in the wrong cluster.
+    </div>
+
+    <h2>Exit codes</h2>
+    <ul>
+      <li><code>0</code> -- deploy succeeded.</li>
+      <li><code>3</code> -- auth required (<code>kolm login</code>).</li>
+      <li><code>64</code> -- unknown <code>--target</code> value.</li>
+      <li><code>65</code> -- artifact signature failed verify.</li>
+      <li><code>66</code> -- insufficient memory on target host.</li>
+      <li><code>67</code> -- target backend not installed (<code>docker</code> / <code>kubectl</code> / <code>systemctl</code> not on PATH).</li>
+    </ul>
+
+    <p class="muted" style="margin-top:48px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;color:var(--ink-3)">See also: <a href="/docs/cli/compile">kolm compile</a> &middot; <a href="/docs/cli/capture">kolm capture</a> &middot; <a href="/docs/cli">CLI index</a> &middot; <a href="/docs/runtime-placement">runtime placement</a></p>
+
+  </div>
+</section>
+
+</main>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <p>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm &middot; <a href="mailto:rodneyyesep@gmail.com">rodneyyesep@gmail.com</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

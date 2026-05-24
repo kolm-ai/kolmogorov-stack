@@ -224,8 +224,35 @@
   .cta-strip a span.arrow { font-family: var(--fr-font-mono); color: var(--fr-mint); font-size: 18px; transition: transform var(--fr-duration-quick) var(--fr-spring-base); }
   .cta-strip a:hover span.arrow { transform: translateX(4px); }
 </style>
+  <meta property="og:title" content="Model Forge &middot; kolm.ai">
+  <meta property="og:description" content="The kolm Model Forge. Pick a base, a teacher, a precision, a mode. Every bit-width from 1.0 to 8.0 and every distillation mode (reasoning, on-policy, multi-teacher, agentic, merge-first, MTP, low-bit-specialist) compiles to a single signed .kolm artifact you own.">
+  <meta property="og:image" content="https://kolm.ai/og/forge.svg">
+  <meta property="og:url" content="https://kolm.ai/forge">
+  <meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/forge",
+  "description": "The kolm Model Forge. Pick a base, a teacher, a precision, a mode. Every bit-width from 1.0 to 8.0 and every distillation mode (reasoning, on-policy, multi-teacher, agentic, merge-first, MTP, low-bit-specialist) compiles to a single signed .kolm artifact you own.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
 </head>
 <body class="ks fr-grain">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <a href="#main" class="ks-skip">Skip to content</a>
 
@@ -280,90 +307,114 @@
       <p class="fr-lede">From ternary BitNet to FP8, the forge speaks every quantization scheme worth shipping. Pick the target precision; the compiler picks the kernel. K-score-gated so the receipt is honest even at 1.58 bit.</p>
     </div>
 
-    <div class="bw-grid fr-reveal">
+    <div class="fr-precision-table fr-reveal">
 
-      <div class="bw-cell">
-        <div class="bw-cell__top"><div class="bw-cell__key">1.0 bit</div><span class="bw-cell__chip">binary</span></div>
-        <div class="bw-cell__val">BinaryNet weights</div>
-        <div class="bw-cell__cap">Sign-only weights with FP16 scales. Extreme density, narrow safety margin. K-score gate trips early on most tasks; ideal for classifier heads.</div>
-        <div class="fr-bar"><div class="fr-bar__fill" style="width:12%"></div></div>
+      <div class="fr-precision-table__row">
+        <div class="fr-precision-table__bit">1.0<span class="fr-precision-table__bit-unit">bit</span></div>
+        <div>
+          <h3 class="fr-precision-table__name">BinaryNet weights</h3>
+          <p class="fr-precision-table__desc">Sign-only weights with FP16 scales. Extreme density, narrow safety margin. K-score gate trips early on most tasks; ideal for classifier heads.</p>
+        </div>
+        <div class="fr-precision-table__status"><span class="fr-pill fr-pill--ghost">binary</span></div>
       </div>
 
-      <div class="bw-cell">
-        <div class="bw-cell__top"><div class="bw-cell__key">1.25 bit</div><span class="bw-cell__chip">ternary+</span></div>
-        <div class="bw-cell__val">QTIP variant</div>
-        <div class="bw-cell__cap">Trellis-coded quantization. Sub-2-bit with calibration-free decoding. Holds K-score better than BinaryNet on instruction-following.</div>
-        <div class="fr-bar"><div class="fr-bar__fill" style="width:15%"></div></div>
+      <div class="fr-precision-table__row">
+        <div class="fr-precision-table__bit">1.25<span class="fr-precision-table__bit-unit">bit</span></div>
+        <div>
+          <h3 class="fr-precision-table__name">QTIP variant</h3>
+          <p class="fr-precision-table__desc">Trellis-coded quantization. Sub-2-bit with calibration-free decoding. Holds K-score better than BinaryNet on instruction-following.</p>
+        </div>
+        <div class="fr-precision-table__status"><span class="fr-pill fr-pill--ghost">ternary+</span></div>
       </div>
 
-      <div class="bw-cell">
-        <div class="bw-cell__top"><div class="bw-cell__key">1.58 bit</div><span class="bw-cell__chip">ternary</span></div>
-        <div class="bw-cell__val">BitNet b1.58</div>
-        <div class="bw-cell__cap">Ternary weights {-1, 0, +1}. Approximately 6&times; smaller than NF4. Projected RTX 5090 footprint: 32B class fits in roughly 6.4 GB.</div>
-        <div class="fr-bar"><div class="fr-bar__fill" style="width:20%"></div></div>
+      <div class="fr-precision-table__row">
+        <div class="fr-precision-table__bit">1.58<span class="fr-precision-table__bit-unit">bit</span></div>
+        <div>
+          <h3 class="fr-precision-table__name">BitNet b1.58</h3>
+          <p class="fr-precision-table__desc">Ternary weights {-1, 0, +1}. Approximately 6&times; smaller than NF4. Projected RTX 5090 footprint: 32B class fits in roughly 6.4 GB.</p>
+        </div>
+        <div class="fr-precision-table__status"><span class="fr-pill fr-pill--ghost">ternary</span></div>
       </div>
 
-      <div class="bw-cell">
-        <div class="bw-cell__top"><div class="bw-cell__key">2.0 bit</div><span class="bw-cell__chip">2-bit</span></div>
-        <div class="bw-cell__val">EXL2 / AQLM</div>
-        <div class="bw-cell__cap">Vector-quantized two-bit codebooks. EXL2 for llama.cpp paths; AQLM for transformer paths. K-score holds on most reasoning tasks at 32B+.</div>
-        <div class="fr-bar"><div class="fr-bar__fill" style="width:25%"></div></div>
+      <div class="fr-precision-table__row">
+        <div class="fr-precision-table__bit">2.0<span class="fr-precision-table__bit-unit">bit</span></div>
+        <div>
+          <h3 class="fr-precision-table__name">EXL2 / AQLM</h3>
+          <p class="fr-precision-table__desc">Vector-quantized two-bit codebooks. EXL2 for llama.cpp paths; AQLM for transformer paths. K-score holds on most reasoning tasks at 32B+.</p>
+        </div>
+        <div class="fr-precision-table__status"><span class="fr-pill fr-pill--ghost">2-bit</span></div>
       </div>
 
-      <div class="bw-cell">
-        <div class="bw-cell__top"><div class="bw-cell__key">2.25 bit</div><span class="bw-cell__chip">2-bit+</span></div>
-        <div class="bw-cell__val">QuIP#</div>
-        <div class="bw-cell__cap">Lattice quantization with codebook compression. Slightly larger than AQLM, materially better K-score on math and code.</div>
-        <div class="fr-bar"><div class="fr-bar__fill" style="width:28%"></div></div>
+      <div class="fr-precision-table__row">
+        <div class="fr-precision-table__bit">2.25<span class="fr-precision-table__bit-unit">bit</span></div>
+        <div>
+          <h3 class="fr-precision-table__name">QuIP#</h3>
+          <p class="fr-precision-table__desc">Lattice quantization with codebook compression. Slightly larger than AQLM, materially better K-score on math and code.</p>
+        </div>
+        <div class="fr-precision-table__status"><span class="fr-pill fr-pill--ghost">2-bit+</span></div>
       </div>
 
-      <div class="bw-cell">
-        <div class="bw-cell__top"><div class="bw-cell__key">3.0 bit</div><span class="bw-cell__chip">3-bit</span></div>
-        <div class="bw-cell__val">GPTQ-3 / GGUF Q3_K</div>
-        <div class="bw-cell__cap">Per-group three-bit with mixed-precision outliers. Practical floor for most production deployments under a strict K-score gate.</div>
-        <div class="fr-bar"><div class="fr-bar__fill" style="width:38%"></div></div>
+      <div class="fr-precision-table__row">
+        <div class="fr-precision-table__bit">3.0<span class="fr-precision-table__bit-unit">bit</span></div>
+        <div>
+          <h3 class="fr-precision-table__name">GPTQ-3 / GGUF Q3_K</h3>
+          <p class="fr-precision-table__desc">Per-group three-bit with mixed-precision outliers. Practical floor for most production deployments under a strict K-score gate.</p>
+        </div>
+        <div class="fr-precision-table__status"><span class="fr-pill fr-pill--ghost">3-bit</span></div>
       </div>
 
-      <div class="bw-cell">
-        <div class="bw-cell__top"><div class="bw-cell__key">4.0 bit</div><span class="bw-cell__chip">NF4 &middot; default</span></div>
-        <div class="bw-cell__val">NF4 + double-quant</div>
-        <div class="bw-cell__cap">NormalFloat 4 with double quantization (bitsandbytes 0.49.2). The forge default. Verified: DeepSeek-R1 32B 61.0 GB &rarr; 17.9 GB in 125.3s.</div>
-        <div class="fr-bar"><div class="fr-bar__fill" style="width:50%"></div></div>
+      <div class="fr-precision-table__row">
+        <div class="fr-precision-table__bit">4.0<span class="fr-precision-table__bit-unit">bit</span></div>
+        <div>
+          <h3 class="fr-precision-table__name">NF4 + double-quant <span style="color:var(--fr-mint);font-weight:500;font-size:0.78em;letter-spacing:0.08em;text-transform:uppercase;margin-left:8px">default</span></h3>
+          <p class="fr-precision-table__desc">NormalFloat 4 with double quantization (bitsandbytes 0.49.2). The forge default. Verified: DeepSeek-R1 32B 61.0 GB &rarr; 17.9 GB in 125.3s.</p>
+        </div>
+        <div class="fr-precision-table__status"><span class="fr-pill">NF4</span></div>
       </div>
 
-      <div class="bw-cell">
-        <div class="bw-cell__top"><div class="bw-cell__key">8.0 bit</div><span class="bw-cell__chip">INT8</span></div>
-        <div class="bw-cell__val">SmoothQuant / LLM.int8</div>
-        <div class="bw-cell__cap">Per-channel INT8 with activation smoothing. Near-lossless K-score on the toughest evals; preferred when accuracy budget is zero.</div>
-        <div class="fr-bar"><div class="fr-bar__fill" style="width:80%"></div></div>
+      <div class="fr-precision-table__row">
+        <div class="fr-precision-table__bit">8.0<span class="fr-precision-table__bit-unit">bit</span></div>
+        <div>
+          <h3 class="fr-precision-table__name">SmoothQuant / LLM.int8</h3>
+          <p class="fr-precision-table__desc">Per-channel INT8 with activation smoothing. Near-lossless K-score on the toughest evals; preferred when accuracy budget is zero.</p>
+        </div>
+        <div class="fr-precision-table__status"><span class="fr-pill fr-pill--ghost">INT8</span></div>
       </div>
 
-      <div class="bw-cell">
-        <div class="bw-cell__top"><div class="bw-cell__key">FP8</div><span class="bw-cell__chip">E4M3</span></div>
-        <div class="bw-cell__val">FP8 E4M3 + per-tensor scales</div>
-        <div class="bw-cell__cap">Native Hopper / Blackwell FP8 path. Compiles to TRT-LLM and vLLM with hardware-native kernels. Best wall-clock on H100/H200/B200.</div>
-        <div class="fr-bar"><div class="fr-bar__fill" style="width:85%"></div></div>
+      <div class="fr-precision-table__row">
+        <div class="fr-precision-table__bit">FP8</div>
+        <div>
+          <h3 class="fr-precision-table__name">FP8 E4M3 + per-tensor scales</h3>
+          <p class="fr-precision-table__desc">Native Hopper / Blackwell FP8 path. Compiles to TRT-LLM and vLLM with hardware-native kernels. Best wall-clock on H100/H200/B200.</p>
+        </div>
+        <div class="fr-precision-table__status"><span class="fr-pill fr-pill--ghost">E4M3</span></div>
       </div>
 
-      <div class="bw-cell">
-        <div class="bw-cell__top"><div class="bw-cell__key">NVFP4</div><span class="bw-cell__chip">Blackwell</span></div>
-        <div class="bw-cell__val">NVFP4 block-scaled</div>
-        <div class="bw-cell__cap">NVIDIA Blackwell-native four-bit floating point with shared exponents. Higher throughput than NF4 on B200; falls back to NF4 elsewhere.</div>
-        <div class="fr-bar"><div class="fr-bar__fill" style="width:48%"></div></div>
+      <div class="fr-precision-table__row">
+        <div class="fr-precision-table__bit">NVFP4</div>
+        <div>
+          <h3 class="fr-precision-table__name">NVFP4 block-scaled</h3>
+          <p class="fr-precision-table__desc">NVIDIA Blackwell-native four-bit floating point with shared exponents. Higher throughput than NF4 on B200; falls back to NF4 elsewhere.</p>
+        </div>
+        <div class="fr-precision-table__status"><span class="fr-pill fr-pill--ghost">Blackwell</span></div>
       </div>
 
-      <div class="bw-cell">
-        <div class="bw-cell__top"><div class="bw-cell__key">Dynamic 2.0</div><span class="bw-cell__chip">mixed</span></div>
-        <div class="bw-cell__val">Per-layer adaptive</div>
-        <div class="bw-cell__cap">Layer-by-layer precision search: 2-bit for safe layers, 4-bit for sensitive ones, 8-bit for outlier-heavy projections. The forge picks the schedule by K-score sensitivity.</div>
-        <div class="fr-bar"><div class="fr-bar__fill" style="width:42%"></div></div>
+      <div class="fr-precision-table__row">
+        <div class="fr-precision-table__bit">Dyn</div>
+        <div>
+          <h3 class="fr-precision-table__name">Dynamic 2.0 &middot; per-layer adaptive</h3>
+          <p class="fr-precision-table__desc">Layer-by-layer precision search: 2-bit for safe layers, 4-bit for sensitive ones, 8-bit for outlier-heavy projections. The forge picks the schedule by K-score sensitivity.</p>
+        </div>
+        <div class="fr-precision-table__status"><span class="fr-pill fr-pill--ghost">mixed</span></div>
       </div>
 
-      <div class="bw-cell">
-        <div class="bw-cell__top"><div class="bw-cell__key">TurboQuant KV</div><span class="bw-cell__chip">KV cache</span></div>
-        <div class="bw-cell__val">2-bit KV with rotary preservation</div>
-        <div class="bw-cell__cap">Quantizes the KV cache, not the weights. Cuts memory at long context (32k+) by 4&times;. Composes with every weight-precision above.</div>
-        <div class="fr-bar"><div class="fr-bar__fill" style="width:32%"></div></div>
+      <div class="fr-precision-table__row">
+        <div class="fr-precision-table__bit">KV</div>
+        <div>
+          <h3 class="fr-precision-table__name">TurboQuant KV &middot; 2-bit with rotary preservation</h3>
+          <p class="fr-precision-table__desc">Quantizes the KV cache, not the weights. Cuts memory at long context (32k+) by 4&times;. Composes with every weight-precision above.</p>
+        </div>
+        <div class="fr-precision-table__status"><span class="fr-pill fr-pill--ghost">KV cache</span></div>
       </div>
 
     </div>
@@ -386,72 +437,72 @@
       <p class="fr-lede">Each mode is a flag, not a fork. A single <span class="fr-code">kolm build</span> can combine reasoning traces, on-policy self-distillation, multi-teacher fusion, agentic compilation, and TIES merges. The recipe is recorded in the receipt; an auditor can re-derive every choice.</p>
     </div>
 
-    <div class="fr-grid-3 fr-reveal">
+    <ol class="fr-spec-list fr-reveal">
 
-      <div class="mode-card">
-        <div class="mode-card__head">
-          <h3>reasoning</h3>
-          <span class="fr-pill">CoT traces</span>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">reasoning</h3>
+          <span class="fr-spec-list__delta">CoT traces</span>
         </div>
-        <p>The teacher emits chain-of-thought traces alongside answers; the student learns the reasoning pattern, not just the verdict. Distilling DeepSeek-R1 reasoning into Qwen2.5-7B holds 11+ tok/s on a 5090 with K-score parity.</p>
-        <div class="fr-cli"><span class="fr-cli__prompt">$</span> kolm build qwen2.5-7b <span class="fr-cli__flag">--mode reasoning</span> <span class="fr-cli__flag">--teacher deepseek-r1</span></div>
-      </div>
+        <p class="fr-spec-list__p">The teacher emits chain-of-thought traces alongside answers; the student learns the reasoning pattern, not just the verdict. Distilling DeepSeek-R1 reasoning into Qwen2.5-7B holds 11+ tok/s on a 5090 with K-score parity.</p>
+        <div class="fr-cli" style="margin-top:6px"><span class="fr-cli__prompt">$</span> kolm build qwen2.5-7b <span class="fr-cli__flag">--mode reasoning</span> <span class="fr-cli__flag">--teacher deepseek-r1</span></div>
+      </li>
 
-      <div class="mode-card">
-        <div class="mode-card__head">
-          <h3>on-policy</h3>
-          <span class="fr-pill">self-distill</span>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">on-policy</h3>
+          <span class="fr-spec-list__delta">self-distill</span>
         </div>
-        <p>The student generates a candidate; the teacher grades it; the student learns from its own mistakes rather than from teacher-only outputs. Closes the train/inference distribution gap; what the student saw at train time matches what it emits at serve time.</p>
-        <div class="fr-cli"><span class="fr-cli__prompt">$</span> kolm build qwen2.5-7b <span class="fr-cli__flag">--mode on-policy</span> <span class="fr-cli__flag">--teacher claude-opus-4-7</span></div>
-      </div>
+        <p class="fr-spec-list__p">The student generates a candidate; the teacher grades it; the student learns from its own mistakes rather than from teacher-only outputs. Closes the train/inference distribution gap; what the student saw at train time matches what it emits at serve time.</p>
+        <div class="fr-cli" style="margin-top:6px"><span class="fr-cli__prompt">$</span> kolm build qwen2.5-7b <span class="fr-cli__flag">--mode on-policy</span> <span class="fr-cli__flag">--teacher claude-opus-4-7</span></div>
+      </li>
 
-      <div class="mode-card">
-        <div class="mode-card__head">
-          <h3>multi-teacher</h3>
-          <span class="fr-pill fr-pill--amber">fused</span>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">multi-teacher</h3>
+          <span class="fr-spec-list__delta">fused &middot; cost-traced</span>
         </div>
-        <p>Claude, DeepSeek, GPT, and Gemini score each candidate. Per-token best-of fuses their judgments. The student inherits the best of every teacher rather than the bias of any one. Honest cost-trace per teacher recorded in the receipt.</p>
-        <div class="fr-cli"><span class="fr-cli__prompt">$</span> kolm build qwen2.5-7b <span class="fr-cli__flag">--mode multi-teacher</span> <span class="fr-cli__flag">--teachers claude,deepseek,gpt,gemini</span></div>
-      </div>
+        <p class="fr-spec-list__p">Claude, DeepSeek, GPT, and Gemini score each candidate. Per-token best-of fuses their judgments. The student inherits the best of every teacher rather than the bias of any one. Honest cost-trace per teacher recorded in the receipt.</p>
+        <div class="fr-cli" style="margin-top:6px"><span class="fr-cli__prompt">$</span> kolm build qwen2.5-7b <span class="fr-cli__flag">--mode multi-teacher</span> <span class="fr-cli__flag">--teachers claude,deepseek,gpt,gemini</span></div>
+      </li>
 
-      <div class="mode-card">
-        <div class="mode-card__head">
-          <h3>agentic</h3>
-          <span class="fr-pill fr-pill--violet">multi-step</span>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">agentic</h3>
+          <span class="fr-spec-list__delta">multi-step &middot; collapsed</span>
         </div>
-        <p>A LangGraph or CrewAI run, with its tool calls and intermediate plans, is captured and compiled into one forward pass. Multi-hop reasoning collapses into a single student inference. Trace is preserved end-to-end.</p>
-        <div class="fr-cli"><span class="fr-cli__prompt">$</span> kolm build agent-spec.json <span class="fr-cli__flag">--mode agentic</span> <span class="fr-cli__flag">--framework langgraph</span></div>
-      </div>
+        <p class="fr-spec-list__p">A LangGraph or CrewAI run, with its tool calls and intermediate plans, is captured and compiled into one forward pass. Multi-hop reasoning collapses into a single student inference. Trace is preserved end-to-end.</p>
+        <div class="fr-cli" style="margin-top:6px"><span class="fr-cli__prompt">$</span> kolm build agent-spec.json <span class="fr-cli__flag">--mode agentic</span> <span class="fr-cli__flag">--framework langgraph</span></div>
+      </li>
 
-      <div class="mode-card">
-        <div class="mode-card__head">
-          <h3>merge-first</h3>
-          <span class="fr-pill fr-pill--ghost">mergekit</span>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">merge-first</h3>
+          <span class="fr-spec-list__delta">mergekit &middot; TIES / DARE / SLERP</span>
         </div>
-        <p>TIES, DARE, SLERP, and Model-Stock from mergekit operate on multiple teachers before distillation begins. The student then distills from the merged teacher; you bake the ensemble into the weights rather than carrying it at inference.</p>
-        <div class="fr-cli"><span class="fr-cli__prompt">$</span> kolm build qwen2.5-7b <span class="fr-cli__flag">--mode merge-first</span> <span class="fr-cli__flag">--merge ties:llama-3.3-70b,deepseek-r1</span></div>
-      </div>
+        <p class="fr-spec-list__p">TIES, DARE, SLERP, and Model-Stock from mergekit operate on multiple teachers before distillation begins. The student then distills from the merged teacher; you bake the ensemble into the weights rather than carrying it at inference.</p>
+        <div class="fr-cli" style="margin-top:6px"><span class="fr-cli__prompt">$</span> kolm build qwen2.5-7b <span class="fr-cli__flag">--mode merge-first</span> <span class="fr-cli__flag">--merge ties:llama-3.3-70b,deepseek-r1</span></div>
+      </li>
 
-      <div class="mode-card">
-        <div class="mode-card__head">
-          <h3>MTP</h3>
-          <span class="fr-pill">multi-token</span>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">MTP</h3>
+          <span class="fr-spec-list__delta">multi-token &middot; 2&ndash;4 per pass</span>
         </div>
-        <p>Multi-token prediction trains the student to emit 2&ndash;4 tokens per forward pass, with speculative decoding built into the same weights. No separate draft model. Materially higher tok/s with no K-score loss on instruction-following.</p>
-        <div class="fr-cli"><span class="fr-cli__prompt">$</span> kolm build qwen2.5-7b <span class="fr-cli__flag">--mode mtp</span> <span class="fr-cli__flag">--mtp-heads 4</span></div>
-      </div>
+        <p class="fr-spec-list__p">Multi-token prediction trains the student to emit 2&ndash;4 tokens per forward pass, with speculative decoding built into the same weights. No separate draft model. Materially higher tok/s with no K-score loss on instruction-following.</p>
+        <div class="fr-cli" style="margin-top:6px"><span class="fr-cli__prompt">$</span> kolm build qwen2.5-7b <span class="fr-cli__flag">--mode mtp</span> <span class="fr-cli__flag">--mtp-heads 4</span></div>
+      </li>
 
-      <div class="mode-card">
-        <div class="mode-card__head">
-          <h3>low-bit-specialist</h3>
-          <span class="fr-pill fr-pill--amber">1.58 / 2.0</span>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">low-bit-specialist</h3>
+          <span class="fr-spec-list__delta">1.58 / 2.0 &middot; gate-enforced</span>
         </div>
-        <p>Extreme quantization (BitNet b1.58, AQLM, QuIP#) with the K-score safety floor enforced at compile time. If the gate fails, the build refuses to sign. You only ship a sub-2-bit artifact when the receipt proves it earned the gate.</p>
-        <div class="fr-cli"><span class="fr-cli__prompt">$</span> kolm build qwen2.5-7b <span class="fr-cli__flag">--mode low-bit-specialist</span> <span class="fr-cli__flag">--precision 1.58</span></div>
-      </div>
+        <p class="fr-spec-list__p">Extreme quantization (BitNet b1.58, AQLM, QuIP#) with the K-score safety floor enforced at compile time. If the gate fails, the build refuses to sign. You only ship a sub-2-bit artifact when the receipt proves it earned the gate.</p>
+        <div class="fr-cli" style="margin-top:6px"><span class="fr-cli__prompt">$</span> kolm build qwen2.5-7b <span class="fr-cli__flag">--mode low-bit-specialist</span> <span class="fr-cli__flag">--precision 1.58</span></div>
+      </li>
 
-    </div>
+    </ol>
   </div>
 </section>
 
@@ -562,65 +613,57 @@
       <p class="fr-lede">Numbers below are from end-to-end runs on a single RTX 5090 via bitsandbytes 0.49.2 NF4 + double-quant. Receipts are signed; reproduction is a single <span class="fr-code">kolm verify</span> on any laptop.</p>
     </div>
 
-    <div class="fr-grid-4 fr-reveal">
+    <ol class="fr-spec-list fr-reveal">
 
-      <div class="run-cell">
-        <div class="run-cell__name">Qwen2.5-0.5B &middot; INT4</div>
-        <div class="run-cell__num">
-          <span class="fr-num fr-num--mid">0.93</span><span class="fr-num fr-num--unit">GB</span>
-          <span class="run-cell__arrow">&rarr;</span>
-          <span class="fr-num fr-num--mid">0.44</span><span class="fr-num fr-num--unit">GB</span>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Qwen2.5-0.5B</h3>
+          <span class="fr-spec-list__delta">0.93 GB &rarr; 0.44 GB INT4</span>
         </div>
-        <div class="fr-bar"><div class="fr-bar__fill" style="width:47%"></div></div>
-        <div class="run-cell__meta">
-          <span>11.6s quantize</span>
-          <span>2.1&times; smaller</span>
+        <div class="fr-spec-list__specs">
+          <span><strong>Quantize</strong>11.6s on RTX 5090</span>
+          <span><strong>Ratio</strong>2.1&times; smaller</span>
+          <span><strong>Scheme</strong>NF4 + double-quant</span>
         </div>
-      </div>
+      </li>
 
-      <div class="run-cell">
-        <div class="run-cell__name">Qwen2.5-3B &middot; INT4</div>
-        <div class="run-cell__num">
-          <span class="fr-num fr-num--mid">5.8</span><span class="fr-num fr-num--unit">GB</span>
-          <span class="run-cell__arrow">&rarr;</span>
-          <span class="fr-num fr-num--mid">1.9</span><span class="fr-num fr-num--unit">GB</span>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Qwen2.5-3B</h3>
+          <span class="fr-spec-list__delta">5.8 GB &rarr; 1.9 GB INT4</span>
         </div>
-        <div class="fr-bar"><div class="fr-bar__fill" style="width:33%"></div></div>
-        <div class="run-cell__meta">
-          <span>13.9s quantize</span>
-          <span>3.1&times; smaller</span>
+        <div class="fr-spec-list__specs">
+          <span><strong>Quantize</strong>13.9s on RTX 5090</span>
+          <span><strong>Ratio</strong>3.1&times; smaller</span>
+          <span><strong>Scheme</strong>NF4 + double-quant</span>
         </div>
-      </div>
+      </li>
 
-      <div class="run-cell">
-        <div class="run-cell__name">Qwen2.5-7B &middot; INT4</div>
-        <div class="run-cell__num">
-          <span class="fr-num fr-num--mid">14.2</span><span class="fr-num fr-num--unit">GB</span>
-          <span class="run-cell__arrow">&rarr;</span>
-          <span class="fr-num fr-num--mid">5.2</span><span class="fr-num fr-num--unit">GB</span>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Qwen2.5-7B</h3>
+          <span class="fr-spec-list__delta">14.2 GB &rarr; 5.2 GB INT4</span>
         </div>
-        <div class="fr-bar"><div class="fr-bar__fill" style="width:37%"></div></div>
-        <div class="run-cell__meta">
-          <span>29.2s quantize &middot; 24.5 tok/s</span>
-          <span>2.7&times; smaller</span>
+        <div class="fr-spec-list__specs">
+          <span><strong>Quantize</strong>29.2s on RTX 5090</span>
+          <span><strong>Throughput</strong>24.5 tok/s</span>
+          <span><strong>Ratio</strong>2.7&times; smaller</span>
         </div>
-      </div>
+      </li>
 
-      <div class="run-cell">
-        <div class="run-cell__name">DeepSeek-R1-Distill-32B &middot; INT4</div>
-        <div class="run-cell__num">
-          <span class="fr-num fr-num--mid">61.0</span><span class="fr-num fr-num--unit">GB</span>
-          <span class="run-cell__arrow">&rarr;</span>
-          <span class="fr-num fr-num--mid">17.9</span><span class="fr-num fr-num--unit">GB</span>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">DeepSeek-R1-Distill-Qwen-32B</h3>
+          <span class="fr-spec-list__delta">61.0 GB &rarr; 17.9 GB INT4</span>
         </div>
-        <div class="fr-bar"><div class="fr-bar__fill" style="width:29%"></div></div>
-        <div class="run-cell__meta">
-          <span>125.3s &middot; 11.5 tok/s</span>
-          <span>3.4&times; smaller</span>
+        <div class="fr-spec-list__specs">
+          <span><strong>Quantize</strong>125.3s on RTX 5090</span>
+          <span><strong>Throughput</strong>11.5 tok/s &middot; 19.22 GB VRAM</span>
+          <span><strong>Ratio</strong>3.4&times; smaller</span>
         </div>
-      </div>
+      </li>
 
-    </div>
+    </ol>
 
     <div style="margin-top:32px">
       <div class="fr-cli">
@@ -656,30 +699,36 @@ verify      kolm verify deepseek-r1-32b-int4.kolm</div>
       <p class="fr-lede">A forge build is not a binary blob; it is a content-addressed object with a verifiable lineage. Hand the .kolm to an auditor; they can re-derive every claim offline.</p>
     </div>
 
-    <div class="fr-grid-3 fr-reveal">
+    <ol class="fr-spec-list fr-reveal">
 
-      <div class="fr-card fr-card--mint">
-        <span class="fr-status"><span class="fr-status__dot"></span>Live</span>
-        <h3 class="fr-h3" style="margin-top:14px">Ed25519 signed manifest</h3>
-        <p style="margin:0;font-size:14px;line-height:1.55;color:var(--ink-2)">Every receipt is signed with the tenant Ed25519 key on compile. The public-key fingerprint is embedded; key rotation does not invalidate old receipts.</p>
-        <div style="margin-top:14px"><a href="/k-score" class="fr-pill fr-pill--ghost" style="text-decoration:none">K-score spec &rarr;</a></div>
-      </div>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Ed25519 signed manifest</h3>
+          <span class="fr-spec-list__delta">Live</span>
+        </div>
+        <p class="fr-spec-list__p">Every receipt is signed with the tenant Ed25519 key on compile. The public-key fingerprint is embedded; key rotation does not invalidate old receipts.</p>
+        <a href="/k-score" class="fr-spec-list__cta">K-score spec</a>
+      </li>
 
-      <div class="fr-card fr-card--mint">
-        <span class="fr-status"><span class="fr-status__dot"></span>Live</span>
-        <h3 class="fr-h3" style="margin-top:14px">JCS-canonical SHA-256</h3>
-        <p style="margin:0;font-size:14px;line-height:1.55;color:var(--ink-2)">Receipt JSON is JCS-canonicalized (RFC 8785) and hashed before signing. Editing any field &mdash; the K-score, the teacher id, the precision &mdash; breaks the signature deterministically.</p>
-        <div style="margin-top:14px"><a href="/verify-prod" class="fr-pill fr-pill--ghost" style="text-decoration:none">Verify a sample &rarr;</a></div>
-      </div>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">JCS-canonical SHA-256</h3>
+          <span class="fr-spec-list__delta">Live</span>
+        </div>
+        <p class="fr-spec-list__p">Receipt JSON is JCS-canonicalized (RFC 8785) and hashed before signing. Editing any field &mdash; the K-score, the teacher id, the precision &mdash; breaks the signature deterministically.</p>
+        <a href="/verify-prod" class="fr-spec-list__cta">Verify a sample</a>
+      </li>
 
-      <div class="fr-card fr-card--mint">
-        <span class="fr-status"><span class="fr-status__dot"></span>Live</span>
-        <h3 class="fr-h3" style="margin-top:14px">Reproducible from spec</h3>
-        <p style="margin:0;font-size:14px;line-height:1.55;color:var(--ink-2)">Same spec + same base model SHA-256 + same eval-pack cid = same artifact_cid. The receipt records what is inside the determinism envelope (seeds, scheme) and what sits outside (BLAS kernel, CUDA driver).</p>
-        <div style="margin-top:14px"><a href="/compile" class="fr-pill fr-pill--ghost" style="text-decoration:none">Compile internals &rarr;</a></div>
-      </div>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Reproducible from spec</h3>
+          <span class="fr-spec-list__delta">Live</span>
+        </div>
+        <p class="fr-spec-list__p">Same spec + same base model SHA-256 + same eval-pack cid = same artifact_cid. The receipt records what is inside the determinism envelope (seeds, scheme) and what sits outside (BLAS kernel, CUDA driver).</p>
+        <a href="/compile" class="fr-spec-list__cta">Compile internals</a>
+      </li>
 
-    </div>
+    </ol>
 
     <div style="margin-top:32px;padding:24px;background:var(--surface-1);border:1px solid var(--line-1);border-radius:var(--radius-md)">
       <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:16px;margin-bottom:14px">

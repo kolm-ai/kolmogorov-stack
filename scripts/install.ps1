@@ -12,7 +12,7 @@
 #   4. drops a kolm.cmd shim into KOLM_BIN_DIR (default %USERPROFILE%\.local\bin)
 #   5. runs `kolm doctor --quick`
 
-[CmdletBinding()] param()
+[CmdletBinding(SupportsShouldProcess = $true)] param()
 
 $ErrorActionPreference = 'Stop'
 
@@ -107,6 +107,15 @@ function Test-Install {
 function Main {
   $arch = if ([Environment]::Is64BitOperatingSystem) { if ($env:PROCESSOR_ARCHITECTURE -eq 'ARM64') { 'arm64' } else { 'x86_64' } } else { 'x86' }
   Write-Log "platform: windows/$arch"
+
+  if ($WhatIfPreference) {
+    Write-Log "dry-run: would check Node.js >=$KolmRequireNode"
+    Write-Log "dry-run: would check Git"
+    Write-Log "dry-run: would clone or update $KolmRepoUrl@$KolmVersion into $KolmInstallDir"
+    Write-Log "dry-run: would write shims to $KolmBinDir"
+    Write-Log "dry-run: would run kolm version and kolm doctor --quick"
+    return
+  }
 
   Test-Node
   Test-Git

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Threat model &middot; Open-source AI workbench &middot; kolm.ai</title>
+<meta name="description" content="Threat model for the kolm.ai Open-source AI workbench. Asset inventory, adversary model, threats by asset, mitigation per cell, out-of-scope assumptions, and open questions. Honest about what we defend, what we trust, and what we have not yet proven.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Threat model &middot; Open-source AI workbench &middot; kolm.ai">
+<meta property="og:description" content="Threat model: assets, adversaries, threats per asset with mitigations, out-of-scope assumptions, and open questions.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/security/threat-model">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Threat model &middot; Open-source AI workbench &middot; kolm.ai">
+<meta name="twitter:description" content="Asset inventory, adversaries, threats, mitigations, out-of-scope, and open questions.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/security/threat-model">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Threat model","description":"Threat model for the kolm.ai Open-source AI workbench. Asset inventory, adversary model, threats by asset with mitigations, out-of-scope assumptions, and open questions.","url":"https://kolm.ai/security/threat-model","datePublished":"2026-05-24","dateModified":"2026-05-24","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<link rel="stylesheet" href="/design-tokens.css">
+<style>
+:root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--accent-soft:rgba(16,185,129,0.10);--warn:#d6a65a;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10);--warn:#a06b1a}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.skip-link{position:absolute;left:-9999px}
+.skip-link:focus{position:static;background:var(--accent);color:#fff;padding:8px 14px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+header.site{padding:18px 0;border-bottom:1px solid var(--line)}
+header.site .wrap{display:flex;justify-content:space-between;align-items:center}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.brand-eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 36px}
+h2{font-size:24px;font-weight:500;letter-spacing:-0.018em;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:28px 0 8px;max-width:780px}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px}
+pre code{background:none;border:none;padding:0;color:inherit;font:inherit}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
+li{margin:4px 0}
+table{border-collapse:collapse;width:100%;max-width:920px;margin:14px 0;font-size:13.5px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink);font-weight:500;background:var(--bg-elev)}
+td code{font-size:12px}
+.warn{border:1px solid var(--warn);border-left:4px solid var(--warn);background:rgba(217,119,6,0.07);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
+.honesty{border:1px solid var(--accent);border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
+.asset-list{list-style:none;padding:0;margin:14px 0 18px;max-width:920px}
+.asset-list li{padding:14px 18px;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;background:var(--bg-elev);margin:8px 0;color:var(--ink-mute);font-size:14.5px;line-height:1.6}
+.asset-list li b{display:block;color:var(--ink);font-family:var(--mono);font-size:11.5px;letter-spacing:0.10em;text-transform:uppercase;margin-bottom:6px}
+.asset-list li b.kind{color:var(--accent)}
+.asset-list li.public{border-left-color:var(--ink-faint)}
+.asset-list li.public b.kind{color:var(--ink-faint)}
+.threat-tbl th:nth-child(1),.threat-tbl th:nth-child(2){white-space:nowrap}
+.threat-tbl td:nth-child(1){font-family:var(--mono);font-size:11.5px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink)}
+.threat-tbl td:nth-child(2){font-family:var(--mono);font-size:11.5px;color:var(--ink-mute)}
+.threat-tbl td:nth-child(3){color:var(--ink-mute);font-size:13.5px}
+.threat-tbl td:nth-child(4){font-family:var(--mono);font-size:11.5px;color:var(--accent)}
+.related{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px;max-width:920px}
+@media(max-width:820px){.related{grid-template-columns:1fr}}
+.related a{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:4px}
+.related a:hover{border-color:var(--accent-soft)}
+.related b{font-size:14px;color:var(--ink);font-weight:500}
+.related span{font-size:12.5px;color:var(--ink-mute);line-height:1.5}
+footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
+footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+</style>
+
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/docs-shell.css">
+<script defer src="/docs-shell.js"></script>
+
+</head>
+<body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - Open-source AI workbench. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<h1 class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">Frontier AI on your own infrastructure.</h1>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    </div>
+  </nav>
+  <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+  </div>
+</div>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/security">security</a> / threat model</div>
+<p class="brand-eyebrow">Open-source AI workbench</p>
+<h1>Threat model.</h1>
+<p class="lede">The honest version of a threat model. We name every asset, every adversary, every threat, and every mitigation &mdash; and we name the parts we have not yet proven. The point of this page is to make it cheap for a security reviewer to find the gaps and challenge them, not to assert a defended boundary we have not built. See <a href="/security/posture">/security/posture</a> for the controls inventory and <a href="/security">/security</a> for the overview.</p>
+
+<h2 id="assets">Asset inventory</h2>
+<p>The things worth protecting on the kolm.ai stack. Anything not on this list is either out of scope or downstream of one of these.</p>
+
+<ul class="asset-list">
+  <li>
+    <b class="kind">Captures &middot; tenant-private</b>
+    Raw prompts, completions, tool outputs, retrieval contexts, and run metadata logged by the tenant's calls. The lake holds them per tenant per namespace; they never cross the tenant boundary except by explicit publish. Leak of a tenant's captures is the highest-severity data event we plan for.
+  </li>
+
+  <li>
+    <b class="kind">Distilled artifacts &middot; tenant-private</b>
+    <code>.kolm</code> artifacts produced by the compiler against a tenant's captures and chosen teacher. The artifact contains quantized weights, the signed receipt, the eval pack reference, and the K-score axes. Tenant-private by default; only the receipt CID becomes public if the tenant publishes.
+  </li>
+
+  <li>
+    <b class="kind">API keys &middot; auth credentials</b>
+    Per-tenant API keys minted at signup and rotation. We store only the SHA-256 hash in the control plane; the plaintext exists only on the client. A leaked key authenticates the holder until rotated; an audit log entry on every issued request makes the leak detectable.
+  </li>
+
+  <li>
+    <b class="kind">Event-store rows &middot; audit trail</b>
+    Append-only event rows covering auth, key issuance, namespace mutation, plan change, artifact publish, takedown, and admin action. Used by SOC-2 evidence collection and tenant-side audit pulls. Tampering with this trail is the high-severity integrity event we plan for.
+  </li>
+
+  <li class="public">
+    <b class="kind">Source code &middot; public</b>
+    The kolm stack at <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">github.com/sneaky-hippo/kolmogorov-stack</a>. Apache-2.0. Source disclosure is by design &mdash; the same code an auditor reviews is the code that runs. The risk to manage here is supply-chain on the build pipeline, not source-reading.
+  </li>
+</ul>
+
+<h2 id="adversaries">Adversary model</h2>
+<p>The actors we plan against. Each adversary has a capability boundary; the threats below pair an asset with the adversary that could reach it.</p>
+
+<ul>
+  <li><b>External attacker (no credentials).</b> Network-reachable internet adversary with no kolm account. Capability: probe public endpoints, attempt auth bypass, run vulnerability scanners, attempt CDN/edge attacks. Cannot present a valid API key.</li>
+  <li><b>Low-privilege tenant user.</b> Holds a valid API key for tenant A. Capability: legitimate API calls within tenant A's plan + quota; may attempt cross-tenant reads by spoofing tenant ID, namespace, or row ID. Cannot reach the control-plane admin surface.</li>
+  <li><b>Compromised dependency (npm / pypi / cargo / actions).</b> A transitive package or GitHub Action used in the build pipeline ships a backdoor. Capability: execute arbitrary code on a build runner; influence the bytes of a released artifact; insert a backdoor that lies dormant until activated.</li>
+  <li><b>Insider with op access.</b> A Kolm operator with legitimate access to a subset of production systems (e.g. on-call SRE). Capability: read storage volumes, mutate config, deploy code. The intent is malicious or coerced; the control framework treats them as a separate adversary even though their access is legitimate.</li>
+  <li><b>Regulator (audit).</b> Not an attacker in the adversarial sense; an actor who requires evidence that the controls we claim are in fact in place. Capability: subpoena, audit, request reproducible evidence, demand data-residency proofs. We model them as an adversary because they generate the same evidence requirements an attacker discovers under incident response.</li>
+</ul>
+
+<h2 id="threats">Threats by asset</h2>
+<p>Each row pairs an asset with an adversary and names the mitigation that defends the cell. If the mitigation is "out of scope" we say so explicitly in the <a href="#oos">Out of scope</a> section below.</p>
+
+<table class="threat-tbl">
+  <thead><tr><th>Asset</th><th>Adversary</th><th>Threat</th><th>Mitigation</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Captures</td>
+      <td>External attacker</td>
+      <td>Unauthenticated read of capture rows via probe of public endpoints; brute-force of the API surface.</td>
+      <td>API key auth + TLS 1.3 + rate limit</td>
+    </tr>
+    <tr>
+      <td>Captures</td>
+      <td>Low-priv tenant user (cross-tenant)</td>
+      <td>Tenant A user crafts a request with tenant B's tenant ID, namespace, or row ID and attempts to read captures owned by tenant B.</td>
+      <td>W411 tenant fence + per-row defense in depth</td>
+    </tr>
+    <tr>
+      <td>Distilled artifacts</td>
+      <td>External attacker / insider</td>
+      <td>Tamper with the bytes of a deployed <code>.kolm</code> artifact (swap weights, rewrite K-score, swap eval pack) and ship the same signed receipt.</td>
+      <td>W460 artifact_hash binding in receipt</td>
+    </tr>
+    <tr>
+      <td>Distilled artifacts</td>
+      <td>Low-priv tenant user (cross-tenant)</td>
+      <td>Tenant A user fetches tenant B's <code>.kolm</code> artifact by CID guess or registry probe.</td>
+      <td>W411 tenant fence on registry reads + per-row tenant check</td>
+    </tr>
+    <tr>
+      <td>API keys</td>
+      <td>External attacker</td>
+      <td>Database snapshot leak yields usable credentials.</td>
+      <td>SHA-256 hash only; plaintext never persisted</td>
+    </tr>
+    <tr>
+      <td>API keys</td>
+      <td>External attacker</td>
+      <td>Stolen key used to call hosted teacher or publish to registry.</td>
+      <td><code>kolm keys rotate</code> + per-tenant rate limits + audit log</td>
+    </tr>
+    <tr>
+      <td>Event-store rows</td>
+      <td>Insider with op access</td>
+      <td>Insider edits, deletes, or backdates rows in the audit trail to cover an action.</td>
+      <td>Append-only event-store; periodic offsite hash chain</td>
+    </tr>
+    <tr>
+      <td>Event-store rows</td>
+      <td>Regulator</td>
+      <td>Cannot produce evidence that an action happened at the claimed time.</td>
+      <td>W770 append-only sink + SBOM + signed-receipt chain</td>
+    </tr>
+    <tr>
+      <td>Source code &middot; build pipeline</td>
+      <td>Compromised dependency</td>
+      <td>Transitive npm / pypi / cargo / actions dep ships a backdoor that taints the released binary.</td>
+      <td>W763 SBOM + lockfile pinning + <code>--ignore-scripts</code> + Dependabot</td>
+    </tr>
+    <tr>
+      <td>Captures &middot; data residency</td>
+      <td>Regulator (GDPR / EU-AI)</td>
+      <td>Cannot prove a tenant's captures stayed in the contracted region.</td>
+      <td>W769 region-pinned data plane + DPA + SCC</td>
+    </tr>
+    <tr>
+      <td>Captures &middot; PHI</td>
+      <td>Regulator (HIPAA-shaped)</td>
+      <td>PHI in captures leaves the tenant boundary by accident.</td>
+      <td>On-premise data plane (W742) + storage-layer encryption</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="oos">Out of scope</h2>
+<p>Threats we do not defend against on this stack. We list them honestly so a downstream operator can decide whether their environment closes the gap.</p>
+
+<ul>
+  <li><b>Physical-server compromise.</b> An attacker with physical access to the host running the hosted control plane is out of scope &mdash; we depend on the hosting infrastructure (data-center physical controls, hardware tamper-evidence, on-premise customer controls) for that boundary. The same applies to on-premise deployments: the operator owns physical security of their hardware.</li>
+  <li><b>Attacks via the configured teacher API.</b> The kolm distill path calls a teacher endpoint the tenant chose (Anthropic, OpenAI, a self-hosted vLLM/SGLang/TGI). We trust the configured teacher to behave as specified. A malicious teacher could return distillation data designed to poison the student; we do not defend against that. Tenants that need to defend against a malicious teacher should pin to a known-good teacher and treat distillation output as untrusted.</li>
+  <li><b>User-device compromise.</b> The user's laptop, browser, terminal, or CI runner is out of scope. If the API key on the user's laptop is exfiltrated by malware on that laptop, no server-side control can prevent it. Rotation, audit-log review, and per-tenant rate limits are the recovery path.</li>
+  <li><b>Side-channel attacks on the inference runtime.</b> Timing, power, and cache side channels against a deployed <code>.kolm</code> running on the tenant's hardware are out of scope. Operators in regulated settings should run the inference path on hardware with the relevant side-channel mitigations enabled.</li>
+  <li><b>Social engineering of operators or tenants.</b> Phishing, pretexting, and pressure on a person to grant access are out of scope of the kolm stack. We document the runbook (rotation, audit-log review, account lock); we do not promise to prevent the social-engineering attempt itself.</li>
+</ul>
+
+<h2 id="open">Open questions</h2>
+<p>Things we are still figuring out. Each item is a real engineering question we have not yet resolved to a signed proof; we list them on the public site so a security reviewer can challenge our current reasoning.</p>
+
+<ul>
+  <li><b>Cross-tenant model-leak via fine-tune.</b> If tenant A's captures train a distilled artifact, and tenant B later runs a fine-tune that includes membership-inference probes against the same artifact, can tenant B recover capture content from tenant A? We believe the W411 tenant fence + per-row defense-in-depth holds because tenant A's artifacts are not reachable by tenant B in the first place &mdash; but the formal proof against membership-inference under a shared base-model assumption is still in progress. See <a href="/security/membership-inference">/security/membership-inference</a> for the in-progress write-up.</li>
+  <li><b>Receipt forgery under a quantum-capable adversary.</b> Ed25519 receipts are signed today. A quantum-capable adversary in the future could break Ed25519 retroactively. The forward path is post-quantum signing (Dilithium / SPHINCS+); we have not yet shipped a PQC migration. Open question: at what point do we migrate, and how do we keep historical receipts verifiable through the migration?</li>
+  <li><b>Eval-pack poisoning.</b> If a tenant publishes an eval pack that the wider ecosystem references, can a malicious tenant craft an eval pack that grades unsafe outputs as high-K-score? The K-score gate is a tenant-chosen contract; a malicious tenant can grade their own artifact however they like. The open question is whether public-registry eval packs need a separate trust signal beyond the CID hash.</li>
+  <li><b>Compromised teacher detection.</b> Today we trust the configured teacher (see <a href="#oos">Out of scope</a>). Open question: should the distill worker run a sanity check on teacher output (e.g. canary-prompt detection) and refuse to compile if the teacher fails it? We have not yet shipped this and have not yet decided on the policy.</li>
+  <li><b>Audit-log offsite hash chain.</b> The event store is append-only at the application layer. A sufficiently privileged insider with database access could in principle rewrite history. The mitigation is a periodic offsite hash chain that an external observer can verify; we have not yet shipped that publication step. Open question: cadence (per-hour? per-day?) and where to publish.</li>
+</ul>
+
+<div class="honesty">If you find an item here that you think we have answered (or one we should add), email <code>security@kolm.ai</code> with a writeup. We acknowledge within 24 hours and aim to triage within 72.</div>
+
+<div class="related">
+  <a href="/security"><b>Security overview &rarr;</b><span>The full kolm security overview &mdash; signing, retention, BAA, SOC 2, HIPAA, GDPR, key management.</span></a>
+  <a href="/security/posture"><b>Security posture &rarr;</b><span>What we do, what we don't yet do, what we promise. Architecture diagram and compliance status.</span></a>
+  <a href="/security/sbom"><b>SBOM &rarr;</b><span>Software Bill of Materials for every release and every .kolm artifact.</span></a>
+</div>
+
+</div></main>
+
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Frontier AI on your own infrastructure.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/integrations">Integrations</a></li><li><a href="/docs/api">API reference</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

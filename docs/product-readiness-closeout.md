@@ -11,93 +11,9 @@ This file is the DoD backstop for every readiness item that is not yet `shipped`
 | needs_external_partner | 2 |
 | needs_live_certification | 1 |
 | needs_package_release | 4 |
-| needs_public_benchmark_data | 4 |
+| needs_public_benchmark_data | 1 |
 
 ## Open Requirements
-
-### W574-quality-judge-calibration - quality-scoring
-
-- Surface: `ai-ml-optimizer`
-- Priority: `P0`
-- Status: `needs_public_benchmark_data`
-- Blocker: `judge_calibration_data`
-- Current scope: Quality scoring exists for artifacts, bakeoffs, evals, and production-ready gates; per-call judge quality needs calibration before broad autonomous-quality claims.
-
-Build or proof required:
-- Publish judge calibration fixtures with human labels and deterministic expected scores.
-- Report agreement, drift, and confidence thresholds by task class.
-- Expose calibration version in quality-scoring responses and account UI.
-
-Done when:
-- Quality scoring docs link raw calibration reports and threshold guidance.
-- Product copy distinguishes artifact eval score from calibrated per-call judge score.
-- verify:sota passes with judge calibration evidence attached.
-
-Verification:
-- `npm run verify:sota`
-- `node --test --test-concurrency=1 tests`
-
-Evidence paths:
-- `src/artifact.js`
-- `src/bakeoff.js`
-- `src/production-ready.js`
-- `cli/kolm.js`
-
-### W568-redaction-benchmarks - redaction-quality
-
-- Surface: `capture-gateway-lake`
-- Priority: `P0`
-- Status: `needs_public_benchmark_data`
-- Blocker: `public_redaction_benchmark`
-- Current scope: The redaction membrane is implemented and class-counted; public per-class precision/recall/F1 claims are not done until benchmark fixtures and reports are published.
-
-Build or proof required:
-- Create public synthetic PII/PHI fixtures for SSN, MRN, DOB, address, email, phone, payer, diagnosis, and free-text note patterns.
-- Run redaction precision, recall, and F1 by class.
-- Publish false-positive and false-negative examples with mitigations.
-
-Done when:
-- /privacy and /benchmarks link the per-class redaction report.
-- The account privacy UI can show class counts and benchmark scope without implying certification.
-- verify:sota passes with public redaction benchmark evidence attached.
-
-Verification:
-- `npm run verify:sota`
-- `node --test --test-concurrency=1 tests`
-
-Evidence paths:
-- `src/privacy-membrane.js`
-- `src/phi-redactor.js`
-- `src/router.js`
-- `public/account/privacy-events.html`
-
-### W567-k-score-calibration - k-score-calibration
-
-- Surface: `compile-train-distill`
-- Priority: `P0`
-- Status: `needs_public_benchmark_data`
-- Blocker: `public_reproducible_calibration`
-- Current scope: K-score gates are implemented locally, but broad quality claims remain benchmark-scoped until a public calibration set and methodology are published.
-
-Build or proof required:
-- Publish the K-score axis definitions, weights, and task-specific thresholds.
-- Run the public fixture suite across classification, extraction, generation, and redaction tasks.
-- Attach raw JSON reports and explain known failure modes.
-
-Done when:
-- /benchmarks links reproducible K-score calibration data.
-- The docs state which claims are proven by local fixtures versus live frontier-model runs.
-- verify:sota passes with public benchmark evidence attached.
-
-Verification:
-- `npm run verify:sota`
-- `node scripts/bench-compare.mjs --help`
-
-Evidence paths:
-- `src/artifact.js`
-- `src/production-ready.js`
-- `docs/PRODUCT.md`
-- `public/spec.html`
 
 ### W571-public-leaderboard - benchmarking-infra
 
@@ -105,10 +21,10 @@ Evidence paths:
 - Priority: `P0`
 - Status: `needs_public_benchmark_data`
 - Blocker: `public_leaderboard_data`
-- Current scope: The benchmark harness and sample reference report exist; competitor and hardware leaderboard claims need reproducible public runs.
+- Current scope: The benchmark harness, local evidence contract, and sample reference report exist; competitor and hardware leaderboard claims need reproducible public runs.
 
 Build or proof required:
-- Run public tasks against Kolm artifacts, OpenAI, Anthropic, Gemini, local GGUF, and at least one hosted open-model baseline.
+- Run public tasks against Kolm artifacts, OpenAI, Anthropic, Gemini, local GGUF, browser worker, and at least one hosted open-model baseline.
 - Publish raw JSON, command lines, model versions, hardware, latency, cost, and scoring method.
 - Add freshness and retest cadence to /benchmarks.
 
@@ -118,13 +34,19 @@ Done when:
 - verify:sota passes with public leaderboard evidence attached.
 
 Verification:
+- `npm run verify:benchmark-evidence`
 - `npm run verify:sota`
 - `node scripts/bench-compare.mjs --help`
 
 Evidence paths:
 - `src/benchmarks.js`
+- `src/benchmark-evidence.js`
 - `scripts/bench-compare.mjs`
+- `scripts/benchmark-evidence.mjs`
+- `scripts/bench-redaction-fixtures.mjs`
+- `scripts/quantization-oracle.mjs`
 - `public/benchmarks.html`
+- `docs/benchmark-evidence.md`
 - `docs/benchmark-results-v0.1.0.md`
 
 ### W573-compliance-certification - compliance-certifications
@@ -137,23 +59,29 @@ Evidence paths:
 
 Build or proof required:
 - Collect SOC 2, ISO 27001, HIPAA BAA, GDPR DPA, FedRAMP boundary, SBOM, and SLSA evidence packets.
-- Attach auditor reports or signed attestations when available.
+- Attach auditor reports or signed attestations through reports/compliance-certification-manifest.json.
 - Update public trust pages to distinguish controls implemented from certifications awarded.
 
 Done when:
 - Trust pages link dated auditor/certification evidence or stay scoped to implemented controls.
-- Enterprise readiness exports include the same evidence IDs.
+- Enterprise readiness exports include the same evidence IDs and manifest hashes.
 - verify:sota passes with certification evidence attached or this item remains explicitly blocked.
 
 Verification:
 - `npm run verify:sota`
 - `npm run lint:refs`
+- `npm run verify:compliance-packet`
+- `node --test --test-concurrency=1 tests/wave592-compliance-certification-packet.test.js`
 
 Evidence paths:
 - `public/security.html`
 - `public/baa.html`
 - `docs/kolm-format-v1.md`
 - `.github/workflows/sdk-c-rust.yml`
+- `src/compliance-certification-packet.js`
+- `scripts/compliance-certification-packet.mjs`
+- `docs/compliance-certification-packet.md`
+- `tests/wave592-compliance-certification-packet.test.js`
 
 ### W575-installer-release - one-line-install
 
@@ -175,12 +103,19 @@ Done when:
 
 Verification:
 - `npm run verify:sota`
+- `node scripts/package-release-readiness.mjs --smoke-installers --summary`
+- `node scripts/package-release-readiness.mjs --run-local-checks --summary`
+- `node scripts/build-deb.mjs --dry-run --json`
 - `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/install.ps1 -WhatIf`
 
 Evidence paths:
 - `scripts/install.ps1`
 - `packages/homebrew`
+- `packages/apt`
 - `packages/winget`
+- `src/package-release-readiness.js`
+- `scripts/package-release-readiness.mjs`
+- `docs/package-release-readiness.md`
 
 ### W566-runtime-adapters - ecosystem-runtime-adoption
 
@@ -191,16 +126,17 @@ Evidence paths:
 - Current scope: Kolm runtime and compute adapters exist locally; native third-party support is not claimable until external projects merge or publish support.
 
 Build or proof required:
-- Create adapter packets for Ollama, llama.cpp, ONNX/GGUF, and Hugging Face Hub.
-- Submit or publish at least one external integration PR or plugin package.
+- Create adapter packets for Ollama, llama.cpp, ONNX/GGUF, Hugging Face Hub, and hardware partners.
+- Record merged or published external integration evidence in reports/runtime-adoption-manifest.json.
 - Document compatibility tests and supported artifact subset per runtime.
 
 Done when:
-- At least one external runtime can pull or execute a .kolm artifact without private Kolm code.
-- The runtime support matrix links to external artifacts or merged code.
+- Every required external target row has merged/published status and conformance-report hash.
+- The runtime support matrix links to external artifacts, merged code, or package records.
 - verify:sota passes with third-party adoption evidence attached.
 
 Verification:
+- `npm run verify:governance-packets`
 - `npm run verify:sota`
 - `npm run build:readiness-closeout -- --check`
 
@@ -208,6 +144,9 @@ Evidence paths:
 - `docs/kolm-format-v1.md`
 - `src/compute/registry.json`
 - `public/runtimes.html`
+- `src/runtime-adoption-packets.js`
+- `scripts/runtime-adoption-packets.mjs`
+- `docs/runtime-adoption-packets.md`
 
 ### W565-format-governance - foundation-standardization
 
@@ -218,22 +157,26 @@ Evidence paths:
 - Current scope: The public v1 spec is shipped locally; neutral stewardship is not claimable until an outside standards venue or foundation accepts the process.
 
 Build or proof required:
-- Publish the RFC packet and governance proposal from docs/kolm-format-v1.md.
-- Record a public issue, mailing-list thread, or foundation intake artifact.
+- Publish the RFC packet and governance proposal from docs/format-governance-packet.md.
+- Record accepted public venue evidence in reports/format-governance-submission.json.
 - Add the accepted governance venue and compatibility policy to /spec.
 
 Done when:
-- A neutral venue or foundation process is publicly linked.
-- The spec has an external change-control path and versioning rules.
+- A neutral venue or foundation process is publicly linked and accepted.
+- The spec has an external change-control path, versioning rules, and conformance-suite hash.
 - verify:sota passes with this requirement promoted to implemented or shipped.
 
 Verification:
+- `npm run verify:governance-packets`
 - `npm run verify:sota`
 - `npm run build:readiness-closeout -- --check`
 
 Evidence paths:
 - `docs/kolm-format-v1.md`
 - `public/spec.html`
+- `src/format-governance-packet.js`
+- `scripts/format-governance-packet.mjs`
+- `docs/format-governance-packet.md`
 
 ### W572-sdk-release-matrix - sdk-depth
 
@@ -256,6 +199,11 @@ Done when:
 Verification:
 - `npm run verify:sota`
 - `npm run verify:sdk-manifest`
+- `node scripts/verify-sdk-dist.mjs sdk-ts --json`
+- `node scripts/verify-sdk-dist.mjs sdk-rn --json`
+- `npm run verify:package-release`
+- `node scripts/build-browser-extension.mjs --dry-run --json`
+- `node --test --test-concurrency=1 tests/wave591-package-local-build-contract.test.js`
 
 Evidence paths:
 - `sdk/node`
@@ -268,6 +216,15 @@ Evidence paths:
 - `packages/sdk-swift`
 - `packages/sdk-kotlin`
 - `packages/sdk-rn`
+- `src/package-release-readiness.js`
+- `scripts/package-release-readiness.mjs`
+- `scripts/verify-sdk-dist.mjs`
+- `docs/package-release-readiness.md`
+- `packages/sdk-ts/dist/index.js`
+- `packages/sdk-rn/dist/index.js`
+- `packages/attestation/tests/attestation.test.js`
+- `scripts/build-browser-extension.mjs`
+- `tests/wave591-package-local-build-contract.test.js`
 
 ### W570-mobile-sdk-release - ios-android-sdk
 
@@ -290,11 +247,24 @@ Done when:
 Verification:
 - `npm run verify:sota`
 - `npm --prefix packages/sdk-rn run build`
+- `node scripts/verify-sdk-dist.mjs sdk-rn --json`
+- `npm run verify:package-release`
+- `node --test --test-concurrency=1 tests/wave591-package-local-build-contract.test.js`
 
 Evidence paths:
 - `packages/sdk-swift`
 - `packages/sdk-kotlin`
 - `packages/sdk-rn`
+- `src/package-release-readiness.js`
+- `scripts/package-release-readiness.mjs`
+- `scripts/verify-sdk-dist.mjs`
+- `docs/package-release-readiness.md`
+- `packages/sdk-rn/dist/index.js`
+- `packages/sdk-rn/ios/KolmRN.swift`
+- `packages/sdk-rn/android/src/main/java/ai/kolm/rn/KolmRNModule.kt`
+- `packages/sdk-swift/Tests/KolmTests/KolmTests.swift`
+- `packages/sdk-kotlin/src/main/AndroidManifest.xml`
+- `tests/wave591-package-local-build-contract.test.js`
 
 ### W569-runtime-wasm-package - runtime-wasm
 
@@ -317,9 +287,19 @@ Done when:
 Verification:
 - `npm run verify:sota`
 - `npm --prefix packages/sdk-ts run build`
+- `node scripts/verify-sdk-dist.mjs sdk-ts --json`
+- `npm run verify:package-release`
+- `node --test --test-concurrency=1 tests/wave591-package-local-build-contract.test.js`
 
 Evidence paths:
 - `public/sdk.js`
 - `public/recipe-worker.js`
 - `packages/sdk-ts`
+- `src/package-release-readiness.js`
+- `scripts/package-release-readiness.mjs`
+- `scripts/verify-sdk-dist.mjs`
+- `docs/package-release-readiness.md`
+- `packages/sdk-ts/dist/index.js`
+- `packages/sdk-ts/dist/index.d.ts`
+- `tests/wave591-package-local-build-contract.test.js`
 

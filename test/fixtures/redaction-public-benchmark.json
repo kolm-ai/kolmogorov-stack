@@ -1,0 +1,40 @@
+{
+  "schema": "kolm-redaction-benchmark-fixture-1",
+  "purpose": "Synthetic public fixture for measuring PHI/PII redaction recall, precision, and fail-closed behavior without exposing real patient data.",
+  "cases": [
+    {
+      "id": "safe-harbor-common-contact",
+      "text": "Patient contact: SSN 123-45-6789, phone (415) 555-0134, email j.smith@example.com, DOB 1980-04-03.",
+      "expected": [
+        { "type": "ssn", "raw": "123-45-6789", "must_redact": true, "safe_to_send": true },
+        { "type": "phone", "raw": "(415) 555-0134", "must_redact": true, "safe_to_send": true },
+        { "type": "email", "raw": "j.smith@example.com", "must_redact": true, "safe_to_send": true },
+        { "type": "dob", "raw": "1980-04-03", "must_redact": true, "safe_to_send": true }
+      ]
+    },
+    {
+      "id": "provider-and-billing-identifiers",
+      "text": "Routing note: NPI 1234567893, MRN: AB12345, Account: 1234567890, remittance ZIP+4 94105-1234.",
+      "expected": [
+        { "type": "npi", "raw": "1234567893", "must_redact": true, "safe_to_send": true },
+        { "type": "mrn", "raw": "AB12345", "must_redact": true, "safe_to_send": true },
+        { "type": "account_no", "raw": "1234567890", "must_redact": true, "safe_to_send": true },
+        { "type": "address_fragment", "raw": "94105-1234", "must_redact": true, "safe_to_send": true }
+      ]
+    },
+    {
+      "id": "malformed-identifier-fails-closed",
+      "text": "Escalate before teacher call: invalid SSN 000-00-0000 should never pass as safe raw text.",
+      "expected": [
+        { "type": "ssn_malformed", "raw": "000-00-0000", "must_redact": true, "safe_to_send": false }
+      ],
+      "expected_safe_to_send": false
+    },
+    {
+      "id": "negative-control-no-identifiers",
+      "text": "Queue update: service level is green and the synthetic benchmark row contains no regulated identifier.",
+      "expected": [],
+      "expected_safe_to_send": true
+    }
+  ]
+}

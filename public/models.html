@@ -16,6 +16,7 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/frontier.css">
 <style>
   .mdl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--ks-4); }
   .mdl-card { padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); display: flex; flex-direction: column; gap: var(--ks-3); }
@@ -36,8 +37,30 @@
   .mdl-q td.acc { color: var(--ks-accent); }
   .test-anchor { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/models",
+  "description": "Every model kolm can compile to a signed .kolm artifact. Teachers, students, runtimes, quantization matrix. DeepSeek-R1, Qwen2.5, Llama 3.3, Phi-4, Mistral, Gemma, custom on request.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
 </head>
 <body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <a href="#main" class="ks-skip">Skip to content</a>
 
@@ -145,56 +168,72 @@
       <h2 class="ks-h2">Open-weight base models for the distilled artifact.</h2>
       <p class="ks-lede">Pick the smallest student that meets your K-score floor. The compiler quantizes the result; the K-score gate refuses the artifact if quality drops below the threshold.</p>
     </div>
-    <div class="mdl-grid">
-      <div class="mdl-card">
-        <span class="role student">Student</span>
-        <div class="row1"><h3>Qwen2.5-0.5B-Instruct</h3><span class="sz">0.93 GB &rarr; 0.44 GB INT4</span></div>
-        <p>The smallest base we support. Great fit for single-task narrow specialists where the captures are tightly scoped, latency is the dominant constraint, and the artifact fits on a Raspberry Pi.</p>
-        <div class="specs"><span><b>Best for:</b> classifier, router, validator</span><span><b>Runtime:</b> llama.cpp, ONNX, MLX</span><span><b>Quantize:</b> 11.6s on RTX 5090</span></div>
-      </div>
-      <div class="mdl-card">
-        <span class="role student">Student</span>
-        <div class="row1"><h3>Qwen2.5-3B-Instruct</h3><span class="sz">5.8 GB &rarr; 1.9 GB INT4</span></div>
-        <p>The default for most workflows. The sweet spot for single-task assistants, structured-output specialists, and most kolm starter artifacts. Runs comfortably on a 16 GB laptop.</p>
-        <div class="specs"><span><b>Best for:</b> assistant, structured output, RAG-into-weights</span><span><b>Runtime:</b> llama.cpp, vLLM, ONNX, MLX</span><span><b>Quantize:</b> 13.9s on RTX 5090</span></div>
-      </div>
-      <div class="mdl-card">
-        <span class="role student">Student</span>
-        <div class="row1"><h3>Qwen2.5-7B-Instruct</h3><span class="sz">14.2 GB &rarr; 5.2 GB INT4</span></div>
-        <p>Stepping up. For multi-task specialists with broader input distributions, longer-context summarization, and chain-of-thought tasks where 3B starts to crack.</p>
-        <div class="specs"><span><b>Best for:</b> multi-task, longer context, CoT</span><span><b>Runtime:</b> llama.cpp, vLLM, TRT-LLM</span><span><b>Quantize:</b> 29.2s on RTX 5090</span></div>
-      </div>
-      <div class="mdl-card">
-        <span class="role student">Student</span>
-        <div class="row1"><h3>Llama 3.3-8B-Instruct</h3><span class="sz">16 GB &rarr; 5.6 GB INT4</span></div>
-        <p>Meta's strongest 8B. Tool-use and JSON-mode benchmarks are particularly strong; the right pick for agent-style artifacts that need to call functions from the distilled model.</p>
-        <div class="specs"><span><b>Best for:</b> tool use, JSON output, agents</span><span><b>Runtime:</b> llama.cpp, vLLM, TRT-LLM</span><span><b>Quantize:</b> 32.4s on RTX 5090</span></div>
-      </div>
-      <div class="mdl-card">
-        <span class="role student">Student</span>
-        <div class="row1"><h3>Phi-4-Mini-Reasoning</h3><span class="sz">7.4 GB &rarr; 2.7 GB INT4</span></div>
-        <p>Microsoft's compact reasoner. Pairs unusually well with a reasoning teacher; we see best CoT-to-CoT distill faithfulness with Phi-4-Mini and a Claude Opus 4.7 teacher.</p>
-        <div class="specs"><span><b>Best for:</b> reasoning, math, structured analysis</span><span><b>Runtime:</b> llama.cpp, ONNX</span><span><b>Quantize:</b> 18.1s on RTX 5090</span></div>
-      </div>
-      <div class="mdl-card">
-        <span class="role student">Student</span>
-        <div class="row1"><h3>DeepSeek-R1-Distill-Qwen-32B</h3><span class="sz">61 GB &rarr; 17.9 GB INT4</span></div>
-        <p>The flagship. Already a strong reasoner out of the box from DeepSeek's distillation; further specializable for narrow domains via kolm. Runs at 11.5 tok/s on a single RTX 5090 in INT4.</p>
-        <div class="specs"><span><b>Best for:</b> frontier reasoning, large CoT, complex specialists</span><span><b>Runtime:</b> vLLM, TRT-LLM, llama.cpp</span><span><b>Quantize:</b> 125.3s on RTX 5090</span></div>
-      </div>
-      <div class="mdl-card">
-        <span class="role student">Student</span>
-        <div class="row1"><h3>Mistral 7B v0.3 / Gemma 2-9B</h3><span class="sz">~14-18 GB &rarr; ~5-6 GB INT4</span></div>
-        <p>European and Google-house options. Same Apache-2.0 / Gemma-license terms; supported by the same compiler path. Use them when license terms or regional preferences require them.</p>
-        <div class="specs"><span><b>Best for:</b> general assistant, EU residency</span><span><b>Runtime:</b> llama.cpp, vLLM, ONNX</span><span><b>Quantize:</b> 30-44s on RTX 5090</span></div>
-      </div>
-      <div class="mdl-card">
-        <span class="role student">Student</span>
-        <div class="row1"><h3>Bring your own base</h3><span class="sz">any HF-format</span></div>
-        <p>Any HuggingFace-format causal LM with a tokenizer.json file. The compiler ingests, distills, quantizes, and signs. Custom domain-pretrained bases are common in clinical and finance.</p>
-        <div class="specs"><span><b>Best for:</b> domain-pretrained, in-house bases</span><span><b>Runtime:</b> any HF-supported</span><span><b>Notes:</b> requires K-score baseline test pack</span></div>
-      </div>
-    </div>
+    <ol class="fr-spec-list">
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Qwen2.5-0.5B-Instruct</h3>
+          <span class="fr-spec-list__delta">0.93 GB &rarr; 0.44 GB INT4</span>
+        </div>
+        <p class="fr-spec-list__p">The smallest base we support. Great fit for single-task narrow specialists where the captures are tightly scoped, latency is the dominant constraint, and the artifact fits on a Raspberry Pi.</p>
+        <div class="fr-spec-list__specs"><span><strong>Best for</strong> classifier, router, validator</span><span><strong>Runtime</strong>llama.cpp, ONNX, MLX</span><span><strong>Quantize</strong>11.6s on RTX 5090</span></div>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Qwen2.5-3B-Instruct</h3>
+          <span class="fr-spec-list__delta">5.8 GB &rarr; 1.9 GB INT4</span>
+        </div>
+        <p class="fr-spec-list__p">The default for most workflows. The sweet spot for single-task assistants, structured-output specialists, and most kolm starter artifacts. Runs comfortably on a 16 GB laptop.</p>
+        <div class="fr-spec-list__specs"><span><strong>Best for</strong>assistant, structured output, RAG-into-weights</span><span><strong>Runtime</strong>llama.cpp, vLLM, ONNX, MLX</span><span><strong>Quantize</strong>13.9s on RTX 5090</span></div>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Qwen2.5-7B-Instruct</h3>
+          <span class="fr-spec-list__delta">14.2 GB &rarr; 5.2 GB INT4</span>
+        </div>
+        <p class="fr-spec-list__p">Stepping up. For multi-task specialists with broader input distributions, longer-context summarization, and chain-of-thought tasks where 3B starts to crack.</p>
+        <div class="fr-spec-list__specs"><span><strong>Best for</strong>multi-task, longer context, CoT</span><span><strong>Runtime</strong>llama.cpp, vLLM, TRT-LLM</span><span><strong>Quantize</strong>29.2s on RTX 5090</span></div>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Llama 3.3-8B-Instruct</h3>
+          <span class="fr-spec-list__delta">16 GB &rarr; 5.6 GB INT4</span>
+        </div>
+        <p class="fr-spec-list__p">Meta's strongest 8B. Tool-use and JSON-mode benchmarks are particularly strong; the right pick for agent-style artifacts that need to call functions from the distilled model.</p>
+        <div class="fr-spec-list__specs"><span><strong>Best for</strong>tool use, JSON output, agents</span><span><strong>Runtime</strong>llama.cpp, vLLM, TRT-LLM</span><span><strong>Quantize</strong>32.4s on RTX 5090</span></div>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Phi-4-Mini-Reasoning</h3>
+          <span class="fr-spec-list__delta">7.4 GB &rarr; 2.7 GB INT4</span>
+        </div>
+        <p class="fr-spec-list__p">Microsoft's compact reasoner. Pairs unusually well with a reasoning teacher; we see best CoT-to-CoT distill faithfulness with Phi-4-Mini and a Claude Opus 4.7 teacher.</p>
+        <div class="fr-spec-list__specs"><span><strong>Best for</strong>reasoning, math, structured analysis</span><span><strong>Runtime</strong>llama.cpp, ONNX</span><span><strong>Quantize</strong>18.1s on RTX 5090</span></div>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">DeepSeek-R1-Distill-Qwen-32B</h3>
+          <span class="fr-spec-list__delta">61 GB &rarr; 17.9 GB INT4</span>
+        </div>
+        <p class="fr-spec-list__p">The flagship. Already a strong reasoner out of the box from DeepSeek's distillation; further specializable for narrow domains via kolm. Runs at 11.5 tok/s on a single RTX 5090 in INT4.</p>
+        <div class="fr-spec-list__specs"><span><strong>Best for</strong>frontier reasoning, large CoT, complex specialists</span><span><strong>Runtime</strong>vLLM, TRT-LLM, llama.cpp</span><span><strong>Quantize</strong>125.3s on RTX 5090</span></div>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Mistral 7B v0.3 / Gemma 2-9B</h3>
+          <span class="fr-spec-list__delta">~14-18 GB &rarr; ~5-6 GB INT4</span>
+        </div>
+        <p class="fr-spec-list__p">European and Google-house options. Same Apache-2.0 / Gemma-license terms; supported by the same compiler path. Use them when license terms or regional preferences require them.</p>
+        <div class="fr-spec-list__specs"><span><strong>Best for</strong>general assistant, EU residency</span><span><strong>Runtime</strong>llama.cpp, vLLM, ONNX</span><span><strong>Quantize</strong>30-44s on RTX 5090</span></div>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Bring your own base</h3>
+          <span class="fr-spec-list__delta">any HF-format</span>
+        </div>
+        <p class="fr-spec-list__p">Any HuggingFace-format causal LM with a tokenizer.json file. The compiler ingests, distills, quantizes, and signs. Custom domain-pretrained bases are common in clinical and finance.</p>
+        <div class="fr-spec-list__specs"><span><strong>Best for</strong>domain-pretrained, in-house bases</span><span><strong>Runtime</strong>any HF-supported</span><span><strong>Notes</strong>requires K-score baseline test pack</span></div>
+      </li>
+    </ol>
   </div>
 </section>
 

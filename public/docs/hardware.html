@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Hardware compatibility &middot; Open-source AI workbench &middot; kolm.ai</title>
+<meta name="description" content="kolm hardware compatibility matrix: recommended GPUs, minimum spec for INT4 7B, VRAM RAM NVMe-mmap memory hierarchy, CPU-only fallback, air-gap notes, and the hardware partner program.">
+<meta name="theme-color" content="#07090c">
+<link rel="canonical" href="https://kolm.ai/docs/hardware">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<script src="/nav.js" defer></script>
+<style>
+  .hw-hero { padding-top: clamp(72px, 9vw, 128px); padding-bottom: clamp(40px, 6vw, 72px); border-bottom: 1px solid var(--line-1); }
+  .hw-hero h1 { font-size: clamp(36px, 5vw, 56px); font-weight: 580; letter-spacing: -0.02em; margin: 14px 0 18px; max-width: 22ch; }
+  .hw-body { padding: 48px 0 96px; }
+  .hw-body h2 { font-size: 22px; font-weight: 540; margin: 40px 0 12px; letter-spacing: -0.01em; }
+  .hw-body p, .hw-body li { font-size: 15px; line-height: 1.7; color: var(--ink-2); max-width: 76ch; }
+  pre { background: #06080a; border: 1px solid var(--line-1); border-radius: 8px; padding: 16px 18px; overflow-x: auto; font: 12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; color: #e9eef3; max-width: 760px; }
+  code { font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size: 13px; background: rgba(255,255,255,0.04); padding: 1px 6px; border-radius: 4px; }
+  table { border-collapse: collapse; max-width: 760px; margin: 14px 0; font-size: 13.5px; }
+  th,td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line-1); vertical-align: top; color: var(--ink-2); }
+  th { color: var(--ink-1); font-weight: 500; }
+  .hw-honest { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-size: 13.5px; color: var(--ink-2); line-height: 1.55; margin: 20px 0; max-width: 76ch; }
+  .hw-honest b { color: var(--ink-1); font-weight: 580; }
+</style>
+</head>
+<body class="ks">
+<span class="brand-anchor" data-w775="h1" aria-hidden="true">Frontier AI on your own infrastructure.</span>
+<span class="brand-disambig" aria-hidden="true">Not Kolm therapeutics, Kolm band, or other unrelated organizations using similar names.</span>
+
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/marketplace">Marketplace</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">-&gt;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main">
+
+<section class="hw-hero">
+  <div class="ks-wrap">
+    <p class="brand-eyebrow" data-w775="brand-eyebrow">Open-source AI workbench</p>
+    <h1>Hardware compatibility.</h1>
+    <p class="lede">What kolm runs on. Recommended GPUs, minimum specs, the memory hierarchy, CPU-only fallback, air-gap notes, and the hardware partner program.</p>
+  </div>
+</section>
+
+<section class="hw-body">
+  <div class="ks-wrap">
+
+    <h2>Recommended GPUs</h2>
+    <table>
+      <thead><tr><th>GPU</th><th>VRAM</th><th>Typical workload</th></tr></thead>
+      <tbody>
+        <tr><td>NVIDIA RTX 4090</td><td>24 GB</td><td>INT4 7B inference at 24-28 tok/s; 7B distill loops.</td></tr>
+        <tr><td>NVIDIA RTX 5090</td><td>32 GB</td><td>INT4 32B inference at ~11 tok/s; INT4 32B quantize in ~125s on DeepSeek-R1.</td></tr>
+        <tr><td>NVIDIA A100</td><td>40 / 80 GB</td><td>BF16 7B training, INT4 70B inference, multi-tenant inference.</td></tr>
+        <tr><td>NVIDIA H100</td><td>80 GB</td><td>BF16 training up to 13B, INT4 inference at scale, FP8 distill.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Minimum spec for INT4 7B</h2>
+    <ul>
+      <li><b>GPU VRAM:</b> 8 GB (5.2 GB for the weights + activation headroom).</li>
+      <li><b>System RAM:</b> 16 GB.</li>
+      <li><b>Disk:</b> 16 GB free for the artifact, manifest, and receipt chain.</li>
+    </ul>
+    <p>Below 8 GB VRAM the runtime falls back to the memory hierarchy described below.</p>
+
+    <h2>Memory hierarchy</h2>
+    <p>kolm runtime probes for available memory in order: VRAM -&gt; system RAM -&gt; NVMe-mmap. When VRAM is insufficient the runtime falls back through:</p>
+    <ol>
+      <li><b>VRAM.</b> Fastest path; preferred.</li>
+      <li><b>System RAM with weight offload.</b> Layers swap on demand. Throughput drops by roughly 5-10x.</li>
+      <li><b>NVMe-mmap.</b> The .kolm bundle is mmap'd from disk; weight pages page in via the OS page cache. Throughput drops by another 5-10x.</li>
+    </ol>
+    <p>Each fallback step is logged in the runtime receipt so the throughput number on your inference page is explainable after the fact.</p>
+
+    <h2>CPU-only fallback</h2>
+    <p>The runtime can execute purely on CPU when no GPU is present. Throughput is roughly 1-3 tok/s for INT4 7B on a recent Apple Silicon laptop; the receipt stamps <code>{accelerator:'cpu', estimated_tok_s:N}</code> honestly. For interactive workloads we recommend at least one of the GPUs above; CPU-only is for batch inference, evaluation, and air-gapped review.</p>
+
+    <h2>Air-gap notes</h2>
+    <ul>
+      <li>The kolm runtime is fully air-gap compatible. The signature trust store at <code>~/.kolm/trust/</code> is the only external dependency at run time, and you can pre-populate it on a connected host and rsync into the air-gapped host.</li>
+      <li>The CLI <code>kolm verify</code> and <code>kolm run</code> commands work offline by default; no telemetry, no phone-home.</li>
+      <li>The optional <code>kolm phone-home</code> opt-in beacon is described in <a href="/security">/security</a>; it ships disabled.</li>
+    </ul>
+
+    <h2>Hardware partner program</h2>
+    <p>If you ship a GPU, accelerator, or edge device and want a "Powered by kolm" badge plus a documented runtime target, see <a href="/partners/hardware">/partners/hardware</a>. Co-marketing terms, dedicated runtime support, and the buy-a-partner-GPU-get-one-year-kolm-Pro template are described there.</p>
+
+    <div class="hw-honest">
+      <b>Honest constraints.</b> Throughput numbers above are reproducible on the listed GPUs with bitsandbytes 0.49.2 and torch 2.11.0+cu128, but they will vary with CPU host, PCIe generation, BIOS settings, and competing GPU workloads. Always run <code>kolm bench</code> on your own hardware before quoting a number externally.
+    </div>
+
+    <p class="muted" style="margin-top:48px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;color:var(--ink-3)">See also: <a href="/runtimes">runtimes</a> &middot; <a href="/docs/runtime-placement">runtime placement</a> &middot; <a href="/benchmarks">benchmarks</a> &middot; <a href="/partners/hardware">hardware partner program</a></p>
+
+  </div>
+</section>
+
+</main>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <p>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm &middot; <a href="mailto:rodneyyesep@gmail.com">rodneyyesep@gmail.com</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

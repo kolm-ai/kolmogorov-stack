@@ -1,0 +1,405 @@
+{
+  "schema_version": "kolm-product-frontier-implementation-contracts-1",
+  "updated_at": "2026-05-23",
+  "purpose": "Implementation-agent contracts for the W601 frontier lab. These contracts convert each research-backed experiment into concrete backend interfaces, owner files, smoke fixtures, rollout phases, evidence gates, and verification commands.",
+  "source_lab": "docs/product-frontier-lab.json",
+  "tracked_metrics": ["quality", "latency", "cost", "portability", "proof", "security", "enterprise", "dx", "conversion"],
+  "implementation_research": [
+    {
+      "id": "mlir-dialect-conversion",
+      "url": "https://mlir.llvm.org/docs/DialectConversion/",
+      "area": "compiler-ir",
+      "lesson": "MLIR dialect conversion formalizes legal targets, rewrite patterns, type converters, and partial/full conversion modes; KolmIR should use this as the mental model for declaring target legality and blocked lowering."
+    },
+    {
+      "id": "tvm-relax",
+      "url": "https://tvm.apache.org/docs/deep_dive/relax/index.html",
+      "area": "compiler-ir",
+      "lesson": "TVM Relax represents graph optimization and cross-level transformation across Relax and TensorIR; Kolm should separate behavior-level artifact planning from target-level operator lowering and scheduling."
+    },
+    {
+      "id": "iree-compiler",
+      "url": "https://github.com/iree-org/iree",
+      "area": "compiler-runtime",
+      "lesson": "IREE is an MLIR-based compiler/runtime that scales from datacenter to mobile and edge; Kolm's runtime target matrix should distinguish compile target, runtime driver, and deployment package."
+    },
+    {
+      "id": "onnxruntime-genai",
+      "url": "https://onnxruntime.ai/docs/genai/",
+      "area": "runtime-loop",
+      "lesson": "ONNX Runtime GenAI owns tokenization, generation loop, logits processing, search, sampling, KV cache, chat templates, and structured output; Kolm runtime adapters need to model generation-loop capability, not only model-file format."
+    },
+    {
+      "id": "mlc-llm",
+      "url": "https://llm.mlc.ai/docs/get_started/introduction.html",
+      "area": "compiler-runtime",
+      "lesson": "MLC LLM combines machine-learning compilation with native deployment APIs; Kolm should expose a portable backend contract that can choose compiler-accelerated runtimes without changing product UX."
+    },
+    {
+      "id": "nvidia-dynamo-kv-routing",
+      "url": "https://docs.nvidia.com/dynamo/archive/0.5.0/architecture/kv_cache_routing.html",
+      "area": "serving-runtime",
+      "lesson": "Dynamo KV routing uses worker cache events and direct routing to maximize KV reuse; Kolm serving plans should represent cache locality and worker selection as first-class runtime policy."
+    },
+    {
+      "id": "nvidia-dynamo-kv-offload",
+      "url": "https://docs.nvidia.com/dynamo/backends/v-llm/kv-cache-offloading",
+      "area": "serving-runtime",
+      "lesson": "Dynamo's KV offloading model separates runtime, logical block management, and transport tiers; Kolm long-context memory contracts should specify GPU, CPU, disk, and transport behavior."
+    },
+    {
+      "id": "kserve-genai",
+      "url": "https://kserve.github.io/kserve/",
+      "area": "cloud-serving",
+      "lesson": "KServe standardizes scalable multi-framework generative and predictive serving on Kubernetes with OpenAI-compatible inference and request-based autoscaling; Kolm cloud deploys need a Kubernetes-native contract."
+    },
+    {
+      "id": "ray-serve-llm",
+      "url": "https://docs.ray.io/en/latest/serve/llm/index.html",
+      "area": "cloud-serving",
+      "lesson": "Ray Serve LLM packages distributed multi-node, multi-model serving with OpenAI compatibility, monitoring, fault tolerance, and observability; Kolm should support Ray as a cloud/runtime target for large customer deployments."
+    },
+    {
+      "id": "ray-serve-autoscaling",
+      "url": "https://docs.ray.io/en/latest/serve/autoscaling-guide.html",
+      "area": "cloud-serving",
+      "lesson": "Ray Serve autoscaling uses deployment replica policies and provider node scaling; Kolm compute plans should separate model-serving autoscaling signals from ordinary web autoscaling."
+    },
+    {
+      "id": "openai-evals",
+      "url": "https://github.com/openai/evals",
+      "area": "evals",
+      "lesson": "OpenAI Evals is a framework and benchmark registry for evaluating LLMs and LLM systems; Kolm benchmark governors should ship reproducible eval definitions rather than unstructured benchmark notes."
+    },
+    {
+      "id": "inspect-ai",
+      "url": "https://inspect.aisi.org.uk/reference/inspect_ai.html",
+      "area": "evals",
+      "lesson": "Inspect provides composable evaluation tasks, scorers, model adapters, and logs for safety and capability testing; Kolm security and compliance evals should be exportable to a neutral eval runner."
+    }
+  ],
+  "contract_rules": [
+    "Every W601 experiment must have exactly one W603 implementation contract.",
+    "Every contract must name existing owner files, proposed files, entrypoints, schemas, smoke fixtures, rollout phases, evidence gates, failure modes, and verification commands.",
+    "Every contract is a local implementation contract only; external adoption, package publication, public benchmark data, and live certification remain separate evidence gates.",
+    "Every contract must be filterable by category, experiment, source, and metric so future implementation agents can take a narrow work order without losing global coverage.",
+    "Every contract must improve at least five tracked metrics and include at least one proof or safety gate."
+  ],
+  "contracts": [
+    {
+      "id": "w603-kv-memory-controller-contract",
+      "experiment_id": "w601-kv-memory-controller",
+      "title": "Implement KV Memory Controller",
+      "research_refs": ["nvidia-dynamo-kv-routing", "nvidia-dynamo-kv-offload", "onnxruntime-genai"],
+      "current_files": ["src/runtime-policy.js", "src/build-strategy-brain.js", "src/platform-capabilities.js", "src/product-frontier-lab.js", "docs/product-frontier-lab.json"],
+      "proposed_files": ["src/kv-memory-controller.js", "tests/wave604-kv-memory-controller.test.js", "docs/kv-memory-controller.md"],
+      "entrypoints": [
+        {"name": "planKvMemoryPolicy(input)", "input_contract": "task_type, prompt_tokens, retrieval_density, device_memory_gb, runtime_target, privacy_mode", "output_contract": "policy_id, cache_tiers, retained_span_rules, estimated_prefill_ms, estimated_decode_ms, evidence_level"},
+        {"name": "explainKvMemoryReceipt(policy)", "input_contract": "policy plan plus eval result hashes", "output_contract": "signed receipt fragment with retained spans, evicted spans, cache tiers, and unsupported features"}
+      ],
+      "data_schemas": ["kv_memory_policy", "kv_memory_receipt", "cache_tier_capability"],
+      "api_routes": ["/v1/product/frontier-lab", "/v1/build/strategy"],
+      "cli_commands": ["kolm build plan --context-tokens ...", "kolm surfaces --frontier-lab --json"],
+      "rollout_phases": ["schema-only", "planner-simulation", "runtime-adapter-probe", "artifact-receipt", "public-evidence-after-benchmark"],
+      "smoke_fixture": {"input": {"task_type": "legal_qa", "prompt_tokens": 128000, "device_memory_gb": 12}, "expected": {"policy_id": "sink_window_or_layer_pyramid", "secret_values_included": false}},
+      "verification_commands": ["node scripts/simulate-product-frontier-implementation-contracts.cjs --contract=w603-kv-memory-controller-contract --summary", "npm run verify:frontier-contracts", "npm run verify:build-strategy"],
+      "evidence_gates": ["local_simulator_pass", "long_context_holdout_eval", "runtime_cache_support_probe", "claim_scope_public_benchmark"],
+      "failure_modes": ["runtime lacks KV policy support", "quality loss exceeds holdout tolerance", "receipt cannot explain retained or evicted spans"],
+      "tracked_metrics": ["quality", "latency", "cost", "portability", "proof", "dx"]
+    },
+    {
+      "id": "w603-context-extension-compiler-contract",
+      "experiment_id": "w601-context-extension-compiler",
+      "title": "Implement Context Extension Compiler",
+      "research_refs": ["mlir-dialect-conversion", "tvm-relax", "iree-compiler"],
+      "current_files": ["src/compile-pipeline.js", "src/cloud-compute-broker.js", "src/benchmark-evidence.js", "src/product-frontier-lab.js", "docs/product-frontier-lab.json"],
+      "proposed_files": ["src/context-extension-compiler.js", "tests/wave604-context-extension-compiler.test.js", "docs/context-extension-compiler.md"],
+      "entrypoints": [
+        {"name": "planContextExtension(input)", "input_contract": "base_model, current_context, requested_context, topology, budget, target_runtime", "output_contract": "strategy exact_distributed|sparse_prefill|positional_tune, blockers, cloud_plan, regression_tests"},
+        {"name": "recordContextExtensionManifest(plan)", "input_contract": "plan plus tokenizer and positional metadata", "output_contract": "manifest patch containing tokenizer hash, rope/interpolation parameters, topology, and regression thresholds"}
+      ],
+      "data_schemas": ["context_extension_plan", "positioning_manifest_patch", "short_context_regression_card"],
+      "api_routes": ["/v1/product/frontier-lab", "/v1/build/strategy"],
+      "cli_commands": ["kolm build plan --context-tokens ...", "kolm compile --target-context ..."],
+      "rollout_phases": ["strategy-only", "cloud-topology-estimate", "short-context-regression", "artifact-manifest", "external-runtime-validation"],
+      "smoke_fixture": {"input": {"requested_context": 1048576, "budget_usd": 300, "topology": "multi_gpu"}, "expected": {"requires_regression": true, "claim_scope": "local_contract"}},
+      "verification_commands": ["node scripts/simulate-product-frontier-implementation-contracts.cjs --contract=w603-context-extension-compiler-contract --summary", "npm run verify:frontier-contracts", "npm run verify:cloud-broker"],
+      "evidence_gates": ["short_context_regression_pass", "long_context_eval_pass", "cloud_topology_receipt", "public_benchmark_before_claim"],
+      "failure_modes": ["RoPE change degrades short prompts", "topology estimate lacks viable memory", "manifest omits tokenizer or position metadata"],
+      "tracked_metrics": ["quality", "latency", "cost", "portability", "proof", "enterprise"]
+    },
+    {
+      "id": "w603-structured-decode-contracts-contract",
+      "experiment_id": "w601-structured-decode-contracts",
+      "title": "Implement Structured Decode Contracts",
+      "research_refs": ["onnxruntime-genai", "mlir-dialect-conversion", "inspect-ai"],
+      "current_files": ["src/spec-decode.js", "src/router.js", "cli/kolm.js", "src/product-frontier-lab.js", "docs/product-frontier-lab.json"],
+      "proposed_files": ["src/structured-decode-contracts.js", "tests/wave604-structured-decode-contracts.test.js", "docs/structured-decode-contracts.md"],
+      "entrypoints": [
+        {"name": "compileDecodeContract(schema)", "input_contract": "json_schema, regex, ebnf, tool_schema, target_runtime", "output_contract": "native_constraint, validator, repair_policy, unsupported_reason"},
+        {"name": "testDecodeContract(contract)", "input_contract": "contract plus adversarial samples", "output_contract": "syntax_pass_rate, semantic_pass_rate, repair_count, violation_examples"}
+      ],
+      "data_schemas": ["decode_contract", "schema_violation_report", "tool_call_policy"],
+      "api_routes": ["/v1/product/frontier-lab", "/v1/intent/ask"],
+      "cli_commands": ["kolm compile --schema ...", "kolm eval --schema ..."],
+      "rollout_phases": ["schema-normalizer", "runtime-capability-map", "adversarial-fixtures", "artifact-policy", "sdk-surface"],
+      "smoke_fixture": {"input": {"schema": "strict enum plus nested object", "attack": "wrong enum and extra field"}, "expected": {"syntax_violation_caught": true, "semantic_gate_required": true}},
+      "verification_commands": ["node scripts/simulate-product-frontier-implementation-contracts.cjs --contract=w603-structured-decode-contracts-contract --summary", "npm run verify:frontier-contracts", "npm run verify:quality-calibration"],
+      "evidence_gates": ["runtime_constraint_probe", "adversarial_schema_eval", "semantic_kscore_gate", "sdk_contract_test"],
+      "failure_modes": ["valid JSON has wrong semantic shape", "runtime claims grammar support but ignores constraint", "agent tool call escapes allowed schema"],
+      "tracked_metrics": ["quality", "latency", "security", "proof", "dx", "conversion"]
+    },
+    {
+      "id": "w603-data-curation-engine-contract",
+      "experiment_id": "w601-data-curation-engine",
+      "title": "Implement Data Curation Engine",
+      "research_refs": ["openai-evals", "inspect-ai", "tvm-relax"],
+      "current_files": ["src/lake.js", "src/distill-strategy.js", "src/quality-calibration.js", "src/product-frontier-lab.js", "docs/product-frontier-lab.json"],
+      "proposed_files": ["src/data-curation-engine.js", "tests/wave604-data-curation-engine.test.js", "docs/data-curation-engine.md"],
+      "entrypoints": [
+        {"name": "scoreDatasetRows(rows)", "input_contract": "capture rows with source, label, redaction, duplicate, and eval metadata", "output_contract": "row scores for quality, novelty, risk, uncertainty, and expected K-score lift"},
+        {"name": "promoteTrainingRows(plan)", "input_contract": "ranked rows plus budget and privacy policy", "output_contract": "training split, holdout split, excluded rows, promotion receipt"}
+      ],
+      "data_schemas": ["dataset_card", "row_quality_score", "promotion_receipt"],
+      "api_routes": ["/v1/product/frontier-lab", "/v1/datasets"],
+      "cli_commands": ["kolm dataset split ...", "kolm distill --dry-run --json"],
+      "rollout_phases": ["dataset-card", "duplicate-clustering", "row-scoring", "promotion-receipt", "benchmark-correlation"],
+      "smoke_fixture": {"input": {"rows": 120, "duplicate_ratio": 0.35, "privacy_mode": "redacted"}, "expected": {"promoted_rows_less_than_input": true, "holdout_preserved": true}},
+      "verification_commands": ["node scripts/simulate-product-frontier-implementation-contracts.cjs --contract=w603-data-curation-engine-contract --summary", "npm run verify:frontier-contracts", "npm run verify:distill-strategy"],
+      "evidence_gates": ["row_quality_fixture", "holdout_independence", "redaction_utility_eval", "public_benchmark_before_claim"],
+      "failure_modes": ["dedupe removes rare but important examples", "promotion leaks sensitive raw rows", "holdout rows contaminate training rows"],
+      "tracked_metrics": ["quality", "cost", "proof", "security", "dx", "enterprise"]
+    },
+    {
+      "id": "w603-moe-serving-orchestrator-contract",
+      "experiment_id": "w601-moe-serving-orchestrator",
+      "title": "Implement MoE Serving Orchestrator",
+      "research_refs": ["nvidia-dynamo-kv-routing", "kserve-genai", "ray-serve-llm"],
+      "current_files": ["src/cloud-compute-broker.js", "src/platform-capabilities.js", "src/benchmark-evidence.js", "src/product-frontier-lab.js", "docs/product-frontier-lab.json"],
+      "proposed_files": ["src/moe-serving-orchestrator.js", "tests/wave604-moe-serving-orchestrator.test.js", "docs/moe-serving-orchestrator.md"],
+      "entrypoints": [
+        {"name": "planMoeServingTopology(model, workload)", "input_contract": "expert_count, active_experts, gpu_count, latency_target, budget, runtime_preference", "output_contract": "runtime, expert_parallel_size, placement, load_balance_policy, autoscale_policy"},
+        {"name": "scoreMoeServingEvidence(run)", "input_contract": "latency, throughput, expert utilization, queue depth, cache stats", "output_contract": "pass/fail evidence with imbalance and fallback recommendation"}
+      ],
+      "data_schemas": ["moe_topology_plan", "expert_utilization_receipt", "autoscale_policy"],
+      "api_routes": ["/v1/product/frontier-lab", "/v1/build/strategy"],
+      "cli_commands": ["kolm compute pick --json", "kolm cloud train ..."],
+      "rollout_phases": ["capability-matrix", "topology-estimator", "autoscale-policy", "runtime-probe", "production-telemetry"],
+      "smoke_fixture": {"input": {"experts": 64, "active_experts": 6, "gpu_count": 8}, "expected": {"requires_expert_parallel": true, "imbalance_metric_present": true}},
+      "verification_commands": ["node scripts/simulate-product-frontier-implementation-contracts.cjs --contract=w603-moe-serving-orchestrator-contract --summary", "npm run verify:frontier-contracts", "npm run verify:cloud-broker"],
+      "evidence_gates": ["expert_parallel_probe", "autoscale_simulation", "latency_slo_eval", "runtime_adoption_packet"],
+      "failure_modes": ["expert imbalance unmeasured", "generic GPU plan ignores expert placement", "autoscaling signal is ordinary CPU utilization"],
+      "tracked_metrics": ["quality", "latency", "cost", "portability", "enterprise", "proof"]
+    },
+    {
+      "id": "w603-multimodal-edge-packager-contract",
+      "experiment_id": "w601-multimodal-edge-packager",
+      "title": "Implement Multimodal Edge Packager",
+      "research_refs": ["iree-compiler", "mlc-llm", "onnxruntime-genai"],
+      "current_files": ["src/platform-capabilities.js", "src/runtime-adoption-packets.js", "src/package-release-readiness.js", "src/product-frontier-lab.js", "docs/product-frontier-lab.json"],
+      "proposed_files": ["src/multimodal-edge-packager.js", "tests/wave604-multimodal-edge-packager.test.js", "docs/multimodal-edge-packager.md"],
+      "entrypoints": [
+        {"name": "planEdgeBundle(target)", "input_contract": "os, device, accelerator, modalities, model_family, storage_budget", "output_contract": "runtime_target, package_kind, fallback, capability_warnings"},
+        {"name": "emitEdgePackageManifest(plan)", "input_contract": "edge bundle plan plus artifact hashes", "output_contract": "mobile/browser package manifest with runtime, model, permissions, and fallback mode"}
+      ],
+      "data_schemas": ["edge_bundle_plan", "device_capability_probe", "edge_package_manifest"],
+      "api_routes": ["/v1/product/frontier-lab", "/v1/runtime/targets"],
+      "cli_commands": ["kolm runtime targets --json", "kolm export task.kolm --target ..."],
+      "rollout_phases": ["target-catalog", "device-probe", "package-manifest", "sdk-fixture", "registry-release"],
+      "smoke_fixture": {"input": {"device": "android", "modalities": ["text", "image"], "storage_budget_mb": 400}, "expected": {"fallback_required_if_runtime_absent": true, "package_gate_scoped": true}},
+      "verification_commands": ["node scripts/simulate-product-frontier-implementation-contracts.cjs --contract=w603-multimodal-edge-packager-contract --summary", "npm run verify:frontier-contracts", "npm run verify:package-release"],
+      "evidence_gates": ["device_probe", "package_local_build", "registry_publication", "mobile_screenshot_or_device_log"],
+      "failure_modes": ["runtime support claimed without device probe", "package not published but copy says install live", "fallback missing for unsupported accelerator"],
+      "tracked_metrics": ["quality", "latency", "cost", "portability", "dx", "conversion"]
+    },
+    {
+      "id": "w603-confidential-compute-runbook-contract",
+      "experiment_id": "w601-confidential-compute-runbook",
+      "title": "Implement Confidential Compute Runbook",
+      "research_refs": ["kserve-genai", "ray-serve-llm", "inspect-ai"],
+      "current_files": ["src/cloud-compute-broker.js", "src/compliance-certification-packet.js", "src/format-governance-packet.js", "src/product-frontier-lab.js", "docs/product-frontier-lab.json"],
+      "proposed_files": ["src/confidential-compute-runbook.js", "tests/wave604-confidential-compute-runbook.test.js", "docs/confidential-compute-runbook.md"],
+      "entrypoints": [
+        {"name": "planConfidentialJob(input)", "input_contract": "provider, workload, secret_refs, dataset_refs, tee_target, gpu_required", "output_contract": "attestation_target, key_policy_template, unsupported_controls, advisory_checks"},
+        {"name": "verifyConfidentialEvidence(evidence)", "input_contract": "measurements, provider quote, key policy hash, firmware advisory status", "output_contract": "verified bool, missing evidence, claim_scope"}
+      ],
+      "data_schemas": ["confidential_job_plan", "attestation_evidence", "key_release_policy"],
+      "api_routes": ["/v1/product/frontier-lab", "/v1/compliance/export"],
+      "cli_commands": ["kolm cloud targets --json", "kolm compliance export --json"],
+      "rollout_phases": ["provider-template", "key-policy", "attestation-parser", "advisory-check", "customer-evidence-export"],
+      "smoke_fixture": {"input": {"provider": "aws-nitro", "workload": "distill", "secret_refs": ["teacher_key"]}, "expected": {"key_policy_bound_to_measurement": true, "raw_secret_absent": true}},
+      "verification_commands": ["node scripts/simulate-product-frontier-implementation-contracts.cjs --contract=w603-confidential-compute-runbook-contract --summary", "npm run verify:frontier-contracts", "npm run verify:compliance-packet"],
+      "evidence_gates": ["attestation_parser_pass", "kms_policy_template", "firmware_advisory_freshness", "live_certification_before_claim"],
+      "failure_modes": ["secret material appears in manifest", "attestation not bound to workload image", "known firmware advisory status is unknown"],
+      "tracked_metrics": ["security", "enterprise", "proof", "quality", "cost", "conversion"]
+    },
+    {
+      "id": "w603-runtime-target-matrix-contract",
+      "experiment_id": "w601-runtime-target-matrix",
+      "title": "Implement Runtime Target Matrix",
+      "research_refs": ["mlir-dialect-conversion", "iree-compiler", "onnxruntime-genai", "mlc-llm"],
+      "current_files": ["src/platform-capabilities.js", "src/runtime-adoption-packets.js", "public/product-graph.json", "src/product-frontier-lab.js", "docs/product-frontier-lab.json"],
+      "proposed_files": ["src/runtime-target-matrix.js", "tests/wave604-runtime-target-matrix.test.js", "docs/runtime-target-matrix.md"],
+      "entrypoints": [
+        {"name": "getRuntimeTargetMatrix()", "input_contract": "none or optional target filter", "output_contract": "target rows with supported features, evidence status, package status, and caveats"},
+        {"name": "selectRuntimeTarget(requirements)", "input_contract": "modalities, structured_output, context, privacy, device, budget", "output_contract": "target, unsupported_features, fallback, evidence_status"}
+      ],
+      "data_schemas": ["runtime_target_row", "runtime_feature_flag", "runtime_selection_result"],
+      "api_routes": ["/v1/product/frontier-lab", "/v1/runtime/targets"],
+      "cli_commands": ["kolm runtime targets --json", "kolm surfaces --frontier-lab --json"],
+      "rollout_phases": ["matrix-schema", "target-data", "selection-engine", "docs-generation", "claim-scope-check"],
+      "smoke_fixture": {"input": {"structured_output": true, "target": "browser", "context_tokens": 32000}, "expected": {"unsupported_features_named": true, "fallback_present": true}},
+      "verification_commands": ["node scripts/simulate-product-frontier-implementation-contracts.cjs --contract=w603-runtime-target-matrix-contract --summary", "npm run verify:frontier-contracts", "npm run local:surfaces:deep"],
+      "evidence_gates": ["target_rows_have_evidence", "unsupported_features_test", "generated_copy_scope", "package_gate_alignment"],
+      "failure_modes": ["public claim not generated from matrix", "target lacks evidence status", "export succeeds for unsupported runtime"],
+      "tracked_metrics": ["portability", "latency", "quality", "proof", "dx", "conversion"]
+    },
+    {
+      "id": "w603-benchmark-governor-contract",
+      "experiment_id": "w601-benchmark-governor",
+      "title": "Implement Benchmark Governor",
+      "research_refs": ["openai-evals", "inspect-ai", "nvidia-dynamo-kv-routing"],
+      "current_files": ["src/benchmark-evidence.js", "src/quality-calibration.js", "scripts/benchmark-evidence.mjs", "src/product-frontier-lab.js", "docs/product-frontier-lab.json"],
+      "proposed_files": ["src/benchmark-governor.js", "tests/wave604-benchmark-governor.test.js", "docs/benchmark-governor.md"],
+      "entrypoints": [
+        {"name": "classifyClaimEvidence(claim)", "input_contract": "claim text, metric, source file, evidence refs", "output_contract": "evidence_class, missing_proof, max_public_scope"},
+        {"name": "runBenchmarkGovernor(plan)", "input_contract": "benchmark config, model ids, hardware, dataset card, confidence target", "output_contract": "reproducer manifest, confidence interval, red-team result, claim scope"}
+      ],
+      "data_schemas": ["claim_evidence_class", "benchmark_reproducer_manifest", "redteam_result_card"],
+      "api_routes": ["/v1/product/frontier-lab", "/v1/benchmarks"],
+      "cli_commands": ["kolm bench --json", "kolm evidence --json"],
+      "rollout_phases": ["claim-classifier", "reproducer-manifest", "redteam-fixtures", "confidence-interval", "public-claim-lock"],
+      "smoke_fixture": {"input": {"claim": "7x faster", "evidence": "synthetic"}, "expected": {"public_claim_blocked": true, "missing_public_benchmark": true}},
+      "verification_commands": ["node scripts/simulate-product-frontier-implementation-contracts.cjs --contract=w603-benchmark-governor-contract --summary", "npm run verify:frontier-contracts", "npm run verify:benchmark-evidence"],
+      "evidence_gates": ["reproducer_exists", "dataset_card_exists", "confidence_interval_present", "public_benchmark_data_before_marketing"],
+      "failure_modes": ["synthetic evidence used as public claim", "hardware/model versions omitted", "red-team failures hidden in aggregate"],
+      "tracked_metrics": ["quality", "proof", "security", "enterprise", "conversion", "dx"]
+    },
+    {
+      "id": "w603-privacy-data-quality-loop-contract",
+      "experiment_id": "w601-privacy-data-quality-loop",
+      "title": "Implement Privacy Data Quality Loop",
+      "research_refs": ["inspect-ai", "openai-evals", "tvm-relax"],
+      "current_files": ["src/phi-redactor.js", "src/federated-learning.js", "src/lake.js", "src/product-frontier-lab.js", "docs/product-frontier-lab.json"],
+      "proposed_files": ["src/privacy-data-quality-loop.js", "tests/wave604-privacy-data-quality-loop.test.js", "docs/privacy-data-quality-loop.md"],
+      "entrypoints": [
+        {"name": "scorePrivacyUtilityTradeoff(rows)", "input_contract": "raw/redacted rows, redaction classes, DP budget, task type", "output_contract": "privacy risk, utility score, excluded rows, recommended mode"},
+        {"name": "emitPrivacyUtilityReceipt(result)", "input_contract": "tradeoff result plus benchmark fixture ids", "output_contract": "audit receipt with redaction recall, utility delta, and policy blockers"}
+      ],
+      "data_schemas": ["privacy_utility_score", "redaction_utility_receipt", "dp_policy_blocker"],
+      "api_routes": ["/v1/product/frontier-lab", "/v1/privacy/report"],
+      "cli_commands": ["kolm privacy report --json", "kolm privacy scan --json"],
+      "rollout_phases": ["tradeoff-schema", "fixture-benchmark", "policy-blockers", "receipt-export", "account-surface"],
+      "smoke_fixture": {"input": {"redaction_recall": 0.98, "utility_delta": -0.12, "dp_epsilon": 4}, "expected": {"policy_decision": "review_or_adjust", "receipt_required": true}},
+      "verification_commands": ["node scripts/simulate-product-frontier-implementation-contracts.cjs --contract=w603-privacy-data-quality-loop-contract --summary", "npm run verify:frontier-contracts", "npm run verify:redaction-benchmark"],
+      "evidence_gates": ["redaction_fixture_pass", "utility_delta_report", "dp_budget_receipt", "compliance_copy_scope"],
+      "failure_modes": ["privacy passes while utility collapses", "raw sensitive row exported", "DP budget absent from receipt"],
+      "tracked_metrics": ["quality", "security", "proof", "enterprise", "cost", "dx"]
+    },
+    {
+      "id": "w603-cloud-train-autopilot-contract",
+      "experiment_id": "w601-cloud-train-autopilot",
+      "title": "Implement Cloud Train Autopilot",
+      "research_refs": ["kserve-genai", "ray-serve-llm", "ray-serve-autoscaling"],
+      "current_files": ["src/build-strategy-brain.js", "src/cloud-compute-broker.js", "src/distill-strategy.js", "src/product-frontier-lab.js", "docs/product-frontier-lab.json"],
+      "proposed_files": ["src/cloud-train-autopilot.js", "tests/wave604-cloud-train-autopilot.test.js", "docs/cloud-train-autopilot.md"],
+      "entrypoints": [
+        {"name": "planTrainAutopilot(input)", "input_contract": "task, rows, holdout, local_gpu, privacy, budget, deadline, provider prefs", "output_contract": "recommendation, no-train option, provider plan, storage plan, secret refs, import plan"},
+        {"name": "emitRemoteJobManifest(plan)", "input_contract": "autopilot recommendation, provider target, storage plan, webhook policy, and secret references", "output_contract": "secret-safe job manifest with logs, webhooks, artifact import, and failure diagnostics"}
+      ],
+      "data_schemas": ["train_autopilot_plan", "remote_job_manifest", "artifact_import_receipt"],
+      "api_routes": ["/v1/product/frontier-lab", "/v1/build/strategy"],
+      "cli_commands": ["kolm build plan --simulate runpod-r2 --summary", "kolm cloud train ..."],
+      "rollout_phases": ["strategy-unification", "provider-simulators", "job-manifest", "artifact-import", "customer-cloud-probe"],
+      "smoke_fixture": {"input": {"rows": 1500, "local_gpu": false, "provider": "runpod-r2"}, "expected": {"cloud_path": true, "secrets_redacted": true}},
+      "verification_commands": ["node scripts/simulate-product-frontier-implementation-contracts.cjs --contract=w603-cloud-train-autopilot-contract --summary", "npm run verify:frontier-contracts", "npm run verify:cloud-broker"],
+      "evidence_gates": ["secret_redaction_test", "provider_simulator_pass", "artifact_import_receipt", "cost_quote_present"],
+      "failure_modes": ["training recommended for low-data task", "secret leaks into manifest", "remote result cannot be imported into compile/verify"],
+      "tracked_metrics": ["quality", "latency", "cost", "enterprise", "dx", "conversion"]
+    },
+    {
+      "id": "w603-attested-receipt-chain-contract",
+      "experiment_id": "w601-attested-receipt-chain",
+      "title": "Implement Attested Receipt Chain",
+      "research_refs": ["mlir-dialect-conversion", "openai-evals", "inspect-ai"],
+      "current_files": ["src/artifact.js", "src/event-schema.js", "src/otel.js", "src/product-frontier-lab.js", "docs/product-frontier-lab.json"],
+      "proposed_files": ["src/attested-receipt-chain.js", "tests/wave604-attested-receipt-chain.test.js", "docs/attested-receipt-chain.md"],
+      "entrypoints": [
+        {"name": "appendReceiptEdge(edge)", "input_contract": "stage, input_hashes, output_hashes, actor, runtime, evidence refs", "output_contract": "edge hash, chain hash, signed envelope"},
+        {"name": "verifyReceiptChain(chain)", "input_contract": "receipt chain without hosted service dependency", "output_contract": "valid bool, first broken edge, missing evidence, claim scope"}
+      ],
+      "data_schemas": ["receipt_edge", "receipt_chain", "standalone_verify_report"],
+      "api_routes": ["/v1/product/frontier-lab", "/v1/verify"],
+      "cli_commands": ["kolm verify task.kolm", "kolm audit --json"],
+      "rollout_phases": ["edge-schema", "chain-hashing", "standalone-verifier", "attestation-edge", "package-signing-edge"],
+      "smoke_fixture": {"input": {"tamper_stage": "quantize", "network": "offline"}, "expected": {"verification_fails": true, "hosted_service_not_required": true}},
+      "verification_commands": ["node scripts/simulate-product-frontier-implementation-contracts.cjs --contract=w603-attested-receipt-chain-contract --summary", "npm run verify:frontier-contracts", "npm run verify:governance-packets"],
+      "evidence_gates": ["offline_verify_pass", "tamper_test_pass", "signature_proof", "attestation_edge_when_claimed"],
+      "failure_modes": ["verifier requires Kolm network", "receipt edge missing previous hash", "signature detached from artifact bytes"],
+      "tracked_metrics": ["proof", "security", "enterprise", "portability", "dx", "conversion"]
+    },
+    {
+      "id": "w603-package-adoption-rail-contract",
+      "experiment_id": "w601-package-adoption-rail",
+      "title": "Implement Package Adoption Rail",
+      "research_refs": ["mlc-llm", "iree-compiler", "kserve-genai"],
+      "current_files": ["src/package-release-readiness.js", "src/runtime-adoption-packets.js", "docs/readiness-gate-workorders.json", "src/product-frontier-lab.js", "docs/product-frontier-lab.json"],
+      "proposed_files": ["src/package-adoption-rail.js", "tests/wave604-package-adoption-rail.test.js", "docs/package-adoption-rail.md"],
+      "entrypoints": [
+        {"name": "buildPackageAdoptionRail()", "input_contract": "package targets, registry evidence, signatures, adopter packets", "output_contract": "channel statuses, blockers, public copy scope, next external action"},
+        {"name": "validatePackageClaim(surface)", "input_contract": "public claim or install command", "output_contract": "allowed bool, current gate, required evidence"}
+      ],
+      "data_schemas": ["package_channel_status", "adoption_packet", "install_claim_validation"],
+      "api_routes": ["/v1/product/frontier-lab", "/v1/packages/readiness"],
+      "cli_commands": ["kolm packages readiness --json", "kolm surfaces --frontier-lab --json"],
+      "rollout_phases": ["local-pack-proof", "signature-proof", "registry-publication", "adopter-packet", "foundation-submission"],
+      "smoke_fixture": {"input": {"package": "runtime-wasm", "registry_url": null}, "expected": {"publish_ready": false, "copy_claim_blocked": true}},
+      "verification_commands": ["node scripts/simulate-product-frontier-implementation-contracts.cjs --contract=w603-package-adoption-rail-contract --summary", "npm run verify:frontier-contracts", "npm run verify:package-release"],
+      "evidence_gates": ["local_pack_pass", "signed_release_artifact", "registry_url", "external_adopter_or_foundation_proof"],
+      "failure_modes": ["install command appears before registry URL", "package signed hash missing", "external adoption claimed from local test"],
+      "tracked_metrics": ["portability", "proof", "security", "dx", "conversion", "enterprise"]
+    },
+    {
+      "id": "w603-codegraph-test-miner-contract",
+      "experiment_id": "w601-codegraph-test-miner",
+      "title": "Implement Codegraph Test Miner",
+      "research_refs": ["mlir-dialect-conversion", "openai-evals", "inspect-ai"],
+      "current_files": ["public/product-graph.json", "scripts/build-product-graph.cjs", "scripts/audit-static-refs.cjs", "src/product-frontier-lab.js", "docs/product-frontier-lab.json"],
+      "proposed_files": ["src/codegraph-test-miner.js", "tests/wave604-codegraph-test-miner.test.js", "docs/codegraph-test-miner.md"],
+      "entrypoints": [
+        {"name": "mineSurfaceOwnership(graph)", "input_contract": "product graph plus route, CLI, TUI, docs, and tests indexes", "output_contract": "surface owners, missing tests, claim sources, readiness links"},
+        {"name": "emitImplementationWorkOrders(mined)", "input_contract": "mined ownership graph", "output_contract": "deterministic work orders with local command, evidence gate, and owner files"}
+      ],
+      "data_schemas": ["surface_owner_edge", "claim_source_edge", "implementation_work_order"],
+      "api_routes": ["/v1/product/frontier-lab", "/v1/product/graph"],
+      "cli_commands": ["kolm surfaces --json", "npm run lint:refs"],
+      "rollout_phases": ["graph-index", "owner-edge-mining", "claim-source-mining", "workorder-generation", "ci-lock"],
+      "smoke_fixture": {"input": {"route": "/v1/product/frontier-lab", "claim": "frontier lab implemented"}, "expected": {"owner_file_found": true, "verification_command_found": true}},
+      "verification_commands": ["node scripts/simulate-product-frontier-implementation-contracts.cjs --contract=w603-codegraph-test-miner-contract --summary", "npm run verify:frontier-contracts", "npm run lint:refs"],
+      "evidence_gates": ["route_owner_edge", "cli_owner_edge", "claim_source_edge", "workorder_command_exists"],
+      "failure_modes": ["route has no owning test", "claim source points to stale copy", "generated work order lacks local verification command"],
+      "tracked_metrics": ["quality", "proof", "security", "enterprise", "dx", "conversion"]
+    },
+    {
+      "id": "w603-quant-memory-joint-planner-contract",
+      "experiment_id": "w601-quant-memory-joint-planner",
+      "title": "Implement Quantization Memory Joint Planner",
+      "research_refs": ["onnxruntime-genai", "nvidia-dynamo-kv-offload", "tvm-relax"],
+      "current_files": ["src/quantization-oracle.js", "src/distill-strategy.js", "src/platform-capabilities.js", "src/product-frontier-lab.js", "docs/product-frontier-lab.json"],
+      "proposed_files": ["src/quant-memory-joint-planner.js", "tests/wave604-quant-memory-joint-planner.test.js", "docs/quant-memory-joint-planner.md"],
+      "entrypoints": [
+        {"name": "planQuantMemoryJoint(input)", "input_contract": "model size, target runtime, context tokens, calibration rows, device memory, quality floor", "output_contract": "weight precision, activation precision, KV policy, recovery method, feasibility, fallback"},
+        {"name": "scoreQuantMemoryCandidate(candidate)", "input_contract": "candidate plus holdout and runtime support", "output_contract": "quality, latency, memory, cost, portability, proof score"}
+      ],
+      "data_schemas": ["quant_memory_candidate", "memory_pressure_breakdown", "quant_recovery_receipt"],
+      "api_routes": ["/v1/product/frontier-lab", "/v1/build/strategy"],
+      "cli_commands": ["kolm quantize --doctor --json", "kolm build plan --params-b ..."],
+      "rollout_phases": ["memory-model", "candidate-generator", "runtime-support-check", "holdout-recovery", "receipt-and-fallback"],
+      "smoke_fixture": {"input": {"params_b": 7, "context_tokens": 131072, "device_memory_gb": 8}, "expected": {"weight_only_quant_not_enough": true, "kv_policy_required": true}},
+      "verification_commands": ["node scripts/simulate-product-frontier-implementation-contracts.cjs --contract=w603-quant-memory-joint-planner-contract --summary", "npm run verify:frontier-contracts", "npm run verify:quant-oracle"],
+      "evidence_gates": ["memory_breakdown_present", "runtime_numeric_support", "holdout_quality_pass", "fallback_named"],
+      "failure_modes": ["planner fits weights but not KV cache", "target runtime lacks chosen numeric format", "quality recovery assumed without holdout"],
+      "tracked_metrics": ["quality", "latency", "cost", "portability", "proof", "dx"]
+    }
+  ]
+}

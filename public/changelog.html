@@ -11,6 +11,8 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/frontier.css">
 <style>
   .sec-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
   .sec-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
@@ -57,8 +59,35 @@
   .sub-card p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink-2); }
   .sub-card code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-accent); }
 </style>
+  <meta property="og:title" content="Changelog &middot; kolm.ai">
+  <meta property="og:description" content="Dated release notes for the kolm compiler, CLI, runtimes, and SDKs. Every shipped wave links to the receipt and the verified outcome.">
+  <meta property="og:image" content="https://kolm.ai/og/changelog.svg">
+  <meta property="og:url" content="https://kolm.ai/changelog">
+  <meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/changelog",
+  "description": "Dated release notes for the kolm compiler, CLI, runtimes, and SDKs. Every shipped wave links to the receipt and the verified outcome.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
 </head>
 <body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <a href="#main" class="ks-skip">Skip to content</a>
 
@@ -358,8 +387,8 @@
     <div class="entry">
       <div class="meta">2026-01-26<br><span class="pill">W260</span></div>
       <div>
-        <h4>SOC 2 Type I report available under NDA</h4>
-        <p>SOC 2 Type I observation closed; report available to procurement and compliance reviewers under NDA. SOC 2 Type II observation window starts now; target Q4 2026. See <a href="/soc2">/soc2</a>.</p>
+        <h4>SOC 2 Type I readiness packet under NDA</h4>
+        <p>Current scope: SOC 2 Type I controls evidence is available to procurement and compliance reviewers under NDA; certification remains auditor-gated. SOC 2 Type II observation window starts now; target Q4 2026. See <a href="/soc2">/soc2</a>.</p>
         <div class="tags"><span>compliance</span><span>soc2</span></div>
       </div>
     </div>

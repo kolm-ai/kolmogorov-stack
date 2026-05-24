@@ -2,14 +2,14 @@
   "counts": {
     "account_links": 33,
     "api_routes": 69,
-    "cli_commands": 55,
+    "cli_commands": 64,
     "customization_dimensions": 8,
     "journeys": 12,
     "readiness_groups": 8,
-    "readiness_requirements": 55,
-    "route_groups": 113,
+    "readiness_requirements": 57,
+    "route_groups": 117,
     "route_surfaces": 7,
-    "routes": 385,
+    "routes": 418,
     "tui_views": 19
   },
   "definition": {
@@ -392,6 +392,9 @@
         "GET /v1/multimodal/bakeoff"
       ],
       "cli": [
+        "kolm train plan <dataset> --strategy",
+        "kolm distill strategy --json",
+        "kolm bench evidence --summary",
         "kolm train --namespace <name>",
         "kolm distill --namespace <name>",
         "kolm cloud train <name> --seeds examples.jsonl",
@@ -404,7 +407,12 @@
         "proof-mode"
       ],
       "evidence_paths": [
+        "src/build-strategy-brain.js",
+        "scripts/build-strategy-brain.mjs",
         "src/distill-pipeline.js",
+        "src/distill-strategy.js",
+        "src/benchmark-evidence.js",
+        "scripts/benchmark-evidence.mjs",
         "src/remote-compute.js",
         "src/compute/registry.json",
         "public/account/builds.html"
@@ -428,14 +436,18 @@
         },
         {
           "kind": "command",
-          "label": "Create a dataset or run `kolm cloud readiness --json` to configure hosted training.",
+          "label": "Create a dataset, run `kolm distill strategy --json`, or run `kolm bench evidence --summary` before making benchmark claims.",
           "priority": "P1",
-          "value": "kolm train --namespace <name>"
+          "value": "kolm train plan <dataset> --strategy"
         }
       ],
       "proof_commands": [
+        "kolm build plan --task generation --rows 1500 --holdout-pairs 300 --no-local-gpu --json",
         "kolm cloud readiness --json",
-        "kolm train plan <dataset>",
+        "kolm cloud broker --json",
+        "kolm train plan <dataset> --strategy",
+        "kolm distill strategy --json",
+        "kolm bench evidence --summary",
         "kolm distill runs --json"
       ],
       "stage": "train",
@@ -638,9 +650,11 @@
       ],
       "cli": [
         "kolm compile --spec spec.json --out task.kolm",
+        "kolm quantize oracle --json",
         "kolm verify task.kolm",
         "kolm diff old.kolm new.kolm",
-        "kolm export task.kolm --target gguf --preview"
+        "kolm export task.kolm --target gguf --preview",
+        "kolm evidence format-governance --summary"
       ],
       "customization_dimensions": [
         "artifact-runtime",
@@ -649,7 +663,10 @@
       ],
       "evidence_paths": [
         "src/compile-pipeline.js",
+        "src/quantization-oracle.js",
         "src/artifact.js",
+        "src/format-governance-packet.js",
+        "scripts/format-governance-packet.mjs",
         "docs/kolm-format-v1.md",
         "public/account/artifacts.html"
       ],
@@ -666,7 +683,7 @@
         {
           "href": "/account/artifacts",
           "kind": "account",
-          "label": "Compile, verify, and export an artifact with target runtime and receipts.",
+          "label": "Compile, choose quantization/runtime strategy, verify, and export an artifact with receipts.",
           "priority": "P0",
           "value": "/account/artifacts"
         },
@@ -679,8 +696,10 @@
       ],
       "proof_commands": [
         "kolm compile --spec spec.json --out task.kolm",
+        "kolm quantize oracle --json",
         "kolm verify task.kolm",
-        "kolm export task.kolm --target gguf --preview"
+        "kolm export task.kolm --target gguf --preview",
+        "kolm evidence format-governance --summary"
       ],
       "stage": "compile",
       "status_fields": [
@@ -718,7 +737,9 @@
         "kolm run task.kolm \"input\"",
         "kolm serve --mcp --http",
         "kolm chat-tui --model=kolm:task",
-        "kolm runtime targets"
+        "kolm runtime targets",
+        "kolm packages release-readiness --summary",
+        "kolm evidence runtime-adoption --summary"
       ],
       "customization_dimensions": [
         "model-provider",
@@ -729,6 +750,10 @@
       "evidence_paths": [
         "src/completions-api.js",
         "src/runtime-policy.js",
+        "src/package-release-readiness.js",
+        "src/runtime-adoption-packets.js",
+        "scripts/package-release-readiness.mjs",
+        "scripts/runtime-adoption-packets.mjs",
         "public/sdk.js",
         "public/tui.html"
       ],
@@ -759,7 +784,9 @@
       "proof_commands": [
         "kolm run task.kolm \"input\"",
         "kolm serve --mcp --http",
-        "kolm tui --views --json"
+        "kolm tui --views --json",
+        "kolm packages release-readiness --summary",
+        "kolm evidence runtime-adoption --summary"
       ],
       "stage": "run",
       "status_fields": [
@@ -800,6 +827,7 @@
         "GET /v1/devices/detect"
       ],
       "cli": [
+        "kolm cloud broker --json",
         "kolm cloud readiness --remote --json",
         "kolm cloud storage --json",
         "kolm cloud storage --provider cloudflare-r2-s3 --smoke --json",
@@ -818,9 +846,11 @@
       "evidence_paths": [
         "src/platform-capabilities.js",
         "src/object-storage.js",
+        "src/cloud-compute-broker.js",
         "src/remote-compute.js",
         "docs/cloud-product-readiness.md",
-        "scripts/cloud-readiness.mjs"
+        "scripts/cloud-readiness.mjs",
+        "scripts/cloud-compute-broker.mjs"
       ],
       "happy_path": [
         "run readiness",
@@ -835,7 +865,7 @@
         {
           "href": "/account/devices",
           "kind": "account",
-          "label": "Run the local or remote cloud readiness doctor and choose the cheapest compliant compute/storage/deployment profile.",
+          "label": "Run the cloud broker and readiness doctors to choose the cheapest compliant compute, storage, and deployment profile before launching work.",
           "priority": "P0",
           "value": "/account/devices"
         },
@@ -843,16 +873,19 @@
           "kind": "command",
           "label": "Configure R2/S3/Supabase and a GPU provider env var, or add remote SSH.",
           "priority": "P1",
-          "value": "kolm cloud readiness --remote --json"
+          "value": "kolm cloud broker --json"
         }
       ],
       "proof_commands": [
+        "kolm cloud broker --json",
         "kolm cloud readiness --json",
         "kolm cloud storage --json",
         "kolm cloud storage --provider local-artifacts --smoke --json",
         "kolm cloud readiness --remote --json",
         "GET /v1/cloud/readiness",
         "GET /v1/storage/object-readiness",
+        "GET /v1/cloud/broker/catalog",
+        "POST /v1/cloud/broker",
         "kolm cloud doctor",
         "kolm compute list --json",
         "kolm remote recommend --json"
@@ -987,7 +1020,8 @@
         "kolm keys list",
         "kolm audit --json",
         "kolm billing usage --json",
-        "kolm team members"
+        "kolm team members",
+        "kolm evidence compliance-certification --summary"
       ],
       "customization_dimensions": [
         "governance-mode",
@@ -999,6 +1033,8 @@
         "src/auth.js",
         "src/keys.js",
         "src/audit.js",
+        "src/compliance-certification-packet.js",
+        "scripts/compliance-certification-packet.mjs",
         "public/account/api-keys.html",
         "public/account/audit-log.html"
       ],
@@ -1030,7 +1066,8 @@
         "kolm whoami --json",
         "kolm audit --json",
         "kolm billing usage --json",
-        "kolm keys list --json"
+        "kolm keys list --json",
+        "kolm evidence compliance-certification --summary"
       ],
       "stage": "govern",
       "status_fields": [
@@ -1470,11 +1507,11 @@
   },
   "kernel_version": "2026-05-22",
   "readiness_counts": {
-    "implemented": 30,
+    "implemented": 35,
     "needs_external_partner": 2,
     "needs_live_certification": 1,
     "needs_package_release": 4,
-    "needs_public_benchmark_data": 4,
+    "needs_public_benchmark_data": 1,
     "shipped": 14
   },
   "readiness_groups": [
@@ -1513,7 +1550,10 @@
           "claim_scope": "partner-or-standards-gated",
           "evidence_paths": [
             "docs/kolm-format-v1.md",
-            "public/spec.html"
+            "public/spec.html",
+            "src/format-governance-packet.js",
+            "scripts/format-governance-packet.mjs",
+            "docs/format-governance-packet.md"
           ],
           "group_id": "format-standard",
           "id": "foundation-standardization",
@@ -1526,7 +1566,10 @@
           "evidence_paths": [
             "docs/kolm-format-v1.md",
             "src/compute/registry.json",
-            "public/runtimes.html"
+            "public/runtimes.html",
+            "src/runtime-adoption-packets.js",
+            "scripts/runtime-adoption-packets.mjs",
+            "docs/runtime-adoption-packets.md"
           ],
           "group_id": "format-standard",
           "id": "ecosystem-runtime-adoption",
@@ -1540,18 +1583,25 @@
       "id": "compile-train-distill",
       "requirements": [
         {
-          "claim_scope": "benchmark-gated",
+          "claim_scope": "local-implementation",
           "evidence_paths": [
             "src/artifact.js",
             "src/production-ready.js",
+            "src/kscore.js",
+            "src/kscore-bench.js",
+            "src/router.js",
+            "public/kolm-bench.json",
+            "public/kscore-leaderboard.json",
+            "tests/wave275-kscore-deep.test.js",
+            "tests/wave587-kscore-calibration-contract.test.js",
             "docs/PRODUCT.md",
             "public/spec.html"
           ],
           "group_id": "compile-train-distill",
           "id": "k-score-calibration",
           "priority": "P0",
-          "status": "needs_public_benchmark_data",
-          "title": "K-score is computed per artifact, gates composite and axes, and needs public calibration methodology before broad claims."
+          "status": "implemented",
+          "title": "K-score is computed per artifact, gates composite and axes, and is backed by a frozen public 30-case calibration suite."
         },
         {
           "claim_scope": "local-code-and-tests",
@@ -1594,6 +1644,21 @@
         {
           "claim_scope": "local-implementation",
           "evidence_paths": [
+            "src/distill-strategy.js",
+            "scripts/distill-strategy.mjs",
+            "docs/distill-strategy.md",
+            "cli/kolm.js",
+            "tests/wave584-distill-strategy.test.js"
+          ],
+          "group_id": "compile-train-distill",
+          "id": "distill-strategy-oracle",
+          "priority": "P0",
+          "status": "implemented",
+          "title": "Distillation planner chooses collect/rule/cache/SFT/KD/rejection/preference/on-policy/spec-decode paths and refuses fake teacher plans."
+        },
+        {
+          "claim_scope": "local-implementation",
+          "evidence_paths": [
             "src/router.js",
             "src/compile.js",
             "cli/kolm.js"
@@ -1624,6 +1689,9 @@
           "evidence_paths": [
             "cli/kolm.js",
             "src/export-provenance.js",
+            "src/quantization-oracle.js",
+            "scripts/quantization-oracle.mjs",
+            "docs/quantization-oracle.md",
             "workers/quantize/README.md",
             "tests/wave551-compute-training-contract.test.js"
           ],
@@ -1695,18 +1763,23 @@
           "title": "Local event lake has canonical schema, spend, latency, redaction, provider, and exportable rows."
         },
         {
-          "claim_scope": "benchmark-gated",
+          "claim_scope": "local-implementation",
           "evidence_paths": [
             "src/privacy-membrane.js",
             "src/phi-redactor.js",
+            "src/redaction-benchmark.js",
             "src/router.js",
+            "scripts/bench-redaction-fixtures.mjs",
+            "test/fixtures/redaction-public-benchmark.json",
+            "public/benchmarks/redaction-public-benchmark.json",
+            "tests/wave586-redaction-public-benchmark-contract.test.js",
             "public/account/privacy-events.html"
           ],
           "group_id": "capture-gateway-lake",
           "id": "redaction-quality",
           "priority": "P0",
-          "status": "needs_public_benchmark_data",
-          "title": "PII/PHI redaction is fail-closed and class-counted; public F1 methodology still needs published benchmark data."
+          "status": "implemented",
+          "title": "PII/PHI redaction is fail-closed, class-counted, and backed by a public synthetic precision/recall/F1 benchmark."
         },
         {
           "claim_scope": "local-code-and-tests",
@@ -1774,7 +1847,14 @@
           "evidence_paths": [
             "public/sdk.js",
             "public/recipe-worker.js",
-            "packages/sdk-ts"
+            "packages/sdk-ts",
+            "src/package-release-readiness.js",
+            "scripts/package-release-readiness.mjs",
+            "scripts/verify-sdk-dist.mjs",
+            "docs/package-release-readiness.md",
+            "packages/sdk-ts/dist/index.js",
+            "packages/sdk-ts/dist/index.d.ts",
+            "tests/wave591-package-local-build-contract.test.js"
           ],
           "group_id": "runtime-compute",
           "id": "runtime-wasm",
@@ -1801,7 +1881,17 @@
           "evidence_paths": [
             "packages/sdk-swift",
             "packages/sdk-kotlin",
-            "packages/sdk-rn"
+            "packages/sdk-rn",
+            "src/package-release-readiness.js",
+            "scripts/package-release-readiness.mjs",
+            "scripts/verify-sdk-dist.mjs",
+            "docs/package-release-readiness.md",
+            "packages/sdk-rn/dist/index.js",
+            "packages/sdk-rn/ios/KolmRN.swift",
+            "packages/sdk-rn/android/src/main/java/ai/kolm/rn/KolmRNModule.kt",
+            "packages/sdk-swift/Tests/KolmTests/KolmTests.swift",
+            "packages/sdk-kotlin/src/main/AndroidManifest.xml",
+            "tests/wave591-package-local-build-contract.test.js"
           ],
           "group_id": "runtime-compute",
           "id": "ios-android-sdk",
@@ -1822,6 +1912,21 @@
           "priority": "P1",
           "status": "shipped",
           "title": "Local compute matrix covers OpenVINO and Qualcomm QNN/Hexagon in addition to CPU/CUDA/MPS/ROCm/DirectML."
+        },
+        {
+          "claim_scope": "local-implementation",
+          "evidence_paths": [
+            "src/cloud-compute-broker.js",
+            "scripts/cloud-compute-broker.mjs",
+            "docs/cloud-compute-broker.md",
+            "cli/kolm.js",
+            "tests/wave583-cloud-compute-broker.test.js"
+          ],
+          "group_id": "runtime-compute",
+          "id": "cloud-compute-broker",
+          "priority": "P0",
+          "status": "implemented",
+          "title": "Constraint-first broker chooses local, SSH, rented GPU, managed training, customer cloud, or edge runtime without leaking secrets or launching spend."
         },
         {
           "claim_scope": "local-implementation",
@@ -1974,8 +2079,13 @@
           "claim_scope": "benchmark-gated",
           "evidence_paths": [
             "src/benchmarks.js",
+            "src/benchmark-evidence.js",
             "scripts/bench-compare.mjs",
+            "scripts/benchmark-evidence.mjs",
+            "scripts/bench-redaction-fixtures.mjs",
+            "scripts/quantization-oracle.mjs",
             "public/benchmarks.html",
+            "docs/benchmark-evidence.md",
             "docs/benchmark-results-v0.1.0.md"
           ],
           "group_id": "infrastructure-enterprise",
@@ -2049,7 +2159,16 @@
             "packages/sdk-ts",
             "packages/sdk-swift",
             "packages/sdk-kotlin",
-            "packages/sdk-rn"
+            "packages/sdk-rn",
+            "src/package-release-readiness.js",
+            "scripts/package-release-readiness.mjs",
+            "scripts/verify-sdk-dist.mjs",
+            "docs/package-release-readiness.md",
+            "packages/sdk-ts/dist/index.js",
+            "packages/sdk-rn/dist/index.js",
+            "packages/attestation/tests/attestation.test.js",
+            "scripts/build-browser-extension.mjs",
+            "tests/wave591-package-local-build-contract.test.js"
           ],
           "group_id": "infrastructure-enterprise",
           "id": "sdk-depth",
@@ -2077,7 +2196,11 @@
             "public/security.html",
             "public/baa.html",
             "docs/kolm-format-v1.md",
-            ".github/workflows/sdk-c-rust.yml"
+            ".github/workflows/sdk-c-rust.yml",
+            "src/compliance-certification-packet.js",
+            "scripts/compliance-certification-packet.mjs",
+            "docs/compliance-certification-packet.md",
+            "tests/wave592-compliance-certification-packet.test.js"
           ],
           "group_id": "infrastructure-enterprise",
           "id": "compliance-certifications",
@@ -2135,18 +2258,25 @@
           "title": "Fallback/provider chains exist in connectors, model routing, and runtime copy; explicit per-artifact policy needs tighter enforcement."
         },
         {
-          "claim_scope": "benchmark-gated",
+          "claim_scope": "local-implementation",
           "evidence_paths": [
             "src/artifact.js",
             "src/bakeoff.js",
             "src/production-ready.js",
+            "src/quantization-oracle.js",
+            "src/quality-calibration.js",
+            "scripts/bench-quality-calibration.mjs",
+            "scripts/quality-calibration.mjs",
+            "docs/quality-calibration.md",
+            "public/benchmarks/quality-judge-calibration.json",
+            "tests/wave588-quality-calibration-contract.test.js",
             "cli/kolm.js"
           ],
           "group_id": "ai-ml-optimizer",
           "id": "quality-scoring",
           "priority": "P0",
-          "status": "needs_public_benchmark_data",
-          "title": "K-score, bakeoff, eval, and production-ready verdicts score artifact quality; per-call judge quality needs calibration data."
+          "status": "implemented",
+          "title": "K-score, bakeoff, eval, production-ready verdicts, and per-call quality judge calibration score artifact quality."
         },
         {
           "claim_scope": "local-implementation",
@@ -2266,7 +2396,11 @@
           "evidence_paths": [
             "scripts/install.ps1",
             "packages/homebrew",
-            "packages/winget"
+            "packages/apt",
+            "packages/winget",
+            "src/package-release-readiness.js",
+            "scripts/package-release-readiness.mjs",
+            "docs/package-release-readiness.md"
           ],
           "group_id": "developer-experience",
           "id": "one-line-install",
@@ -2562,7 +2696,9 @@
         "/pricing",
         "/teams",
         "/v1/account",
-        "/v1/billing/tiers"
+        "/v1/billing/tiers",
+        "/v1/account/sso/status",
+        "/v1/scim/v2/ServiceProviderConfig"
       ],
       "production_smoke": [
         {
@@ -2627,6 +2763,32 @@
           "expect": [
             200
           ],
+          "id": "account-sso-status-auth",
+          "method": "GET",
+          "mode": "safe",
+          "path": "/v1/account/sso/status"
+        },
+        {
+          "auth": "none",
+          "checks": [
+            "json"
+          ],
+          "expect": [
+            200
+          ],
+          "id": "scim-service-provider-config-public",
+          "method": "GET",
+          "mode": "safe",
+          "path": "/v1/scim/v2/ServiceProviderConfig"
+        },
+        {
+          "auth": "required",
+          "checks": [
+            "json"
+          ],
+          "expect": [
+            200
+          ],
           "id": "teams-auth",
           "method": "GET",
           "mode": "safe",
@@ -2652,12 +2814,14 @@
         "async-compile-webhooks",
         "capture-filtering",
         "cli-world-class",
+        "cloud-compute-broker",
         "compile-as-mcp",
         "compile-cache",
         "compile-failure-diagnostics",
         "dependency-graphs",
         "deploy-buttons",
         "differential-privacy",
+        "distill-strategy-oracle",
         "doctor-diagnostics",
         "export-quantize-targets",
         "fallback-chains",
@@ -2752,11 +2916,22 @@
       "code_paths": [
         "server.js",
         "src/product-experience.js",
+        "src/evidence-readiness.js",
+        "src/product-frontier-lab.js",
+        "src/product-frontier-contracts.js",
+        "src/product-frontier-operator-kernels.js",
+        "src/package-release-readiness.js",
         "scripts/build-api-ref.cjs",
         "scripts/build-openapi.cjs",
+        "scripts/package-release-readiness.mjs",
+        "scripts/format-governance-packet.mjs",
+        "src/format-governance-packet.js",
         "scripts/build-readiness-closeout.cjs",
         "scripts/build-sdk-version.js",
-        "public/docs/api-routes.json"
+        "public/docs/api-routes.json",
+        "packages/sdk-ts/dist/index.js",
+        "packages/sdk-rn/dist/index.js",
+        "tests/wave591-package-local-build-contract.test.js"
       ],
       "competitor_refs": [
         "openai-finetune",
@@ -2765,8 +2940,19 @@
       "doc_paths": [
         "docs/PRODUCT.md",
         "docs/product-journeys.json",
+        "docs/product-frontier-lab.json",
+        "docs/research/product-frontier-lab-2026-05-23.md",
+        "docs/product-frontier-implementation-contracts.json",
+        "docs/research/product-frontier-implementation-contracts-2026-05-23.md",
+        "docs/product-frontier-operator-kernels.json",
+        "docs/research/product-frontier-operator-kernels-2026-05-23.md",
+        "docs/package-release-readiness.md",
+        "docs/format-governance-packet.md",
         "docs/research/api-docs-contract-drift-audit-2026-05-12.md",
-        "docs/research/sdk-cli-integration-audit-2026-05-12.md"
+        "docs/research/sdk-cli-integration-audit-2026-05-12.md",
+        "packages/sdk-ts/README.md",
+        "packages/sdk-rn/README.md",
+        "packages/attestation/README.md"
       ],
       "id": "public-docs-sdk",
       "name": "Public Site, Docs, API Reference, And SDK Distribution",
@@ -2779,7 +2965,16 @@
         "/sdk-current.json",
         "/v1/product/experience",
         "/v1/product/graph",
-        "/v1/spec"
+        "/v1/product/frontier-lab",
+        "/v1/product/frontier-contracts",
+        "/v1/product/operator-kernels",
+        "/v1/evidence/readiness",
+        "/v1/packages/release-readiness",
+        "/v1/packages/release-readiness/template",
+        "/v1/spec",
+        "/v1/spec/governance-packet",
+        "/v1/spec/governance-packet/template",
+        "/v1/spec/governance-packet/validate"
       ],
       "production_smoke": [
         {
@@ -2872,10 +3067,75 @@
           "expect": [
             200
           ],
+          "id": "product-frontier-lab",
+          "method": "GET",
+          "mode": "safe",
+          "path": "/v1/product/frontier-lab"
+        },
+        {
+          "auth": "none",
+          "checks": [
+            "json"
+          ],
+          "expect": [
+            200
+          ],
+          "id": "product-frontier-contracts",
+          "method": "GET",
+          "mode": "safe",
+          "path": "/v1/product/frontier-contracts"
+        },
+        {
+          "auth": "none",
+          "checks": [
+            "json"
+          ],
+          "expect": [
+            200
+          ],
+          "id": "product-operator-kernels",
+          "method": "GET",
+          "mode": "safe",
+          "path": "/v1/product/operator-kernels"
+        },
+        {
+          "auth": "none",
+          "checks": [
+            "json"
+          ],
+          "expect": [
+            200
+          ],
+          "id": "evidence-readiness",
+          "method": "GET",
+          "mode": "safe",
+          "path": "/v1/evidence/readiness"
+        },
+        {
+          "auth": "none",
+          "checks": [
+            "json"
+          ],
+          "expect": [
+            200
+          ],
           "id": "product-readiness-closeout",
           "method": "GET",
           "mode": "safe",
           "path": "/product-readiness-closeout.json"
+        },
+        {
+          "auth": "none",
+          "checks": [
+            "json"
+          ],
+          "expect": [
+            200
+          ],
+          "id": "package-release-template",
+          "method": "GET",
+          "mode": "safe",
+          "path": "/v1/packages/release-readiness/template"
         },
         {
           "auth": "none",
@@ -2903,11 +3163,56 @@
           "method": "GET",
           "mode": "safe",
           "path": "/v1/spec"
+        },
+        {
+          "auth": "none",
+          "checks": [
+            "json"
+          ],
+          "expect": [
+            200
+          ],
+          "id": "spec-governance-packet-public",
+          "method": "GET",
+          "mode": "safe",
+          "path": "/v1/spec/governance-packet"
+        },
+        {
+          "auth": "none",
+          "checks": [
+            "json"
+          ],
+          "expect": [
+            200
+          ],
+          "id": "spec-governance-template-public",
+          "method": "GET",
+          "mode": "safe",
+          "path": "/v1/spec/governance-packet/template"
+        },
+        {
+          "auth": "none",
+          "checks": [
+            "json"
+          ],
+          "expect": [
+            422
+          ],
+          "id": "spec-governance-validate-public",
+          "method": "POST",
+          "mode": "safe",
+          "path": "/v1/spec/governance-packet/validate"
         }
       ],
       "promise": "Every public page, API reference, SDK asset, and route contract is current, crawlable, coherent, and hash-verifiable.",
       "readiness_requirement_ids": [
-        "k-score-calibration"
+        "foundation-standardization",
+        "ios-android-sdk",
+        "k-score-calibration",
+        "one-line-install",
+        "runtime-edge",
+        "runtime-wasm",
+        "sdk-depth"
       ],
       "route_groups": [
         {
@@ -2932,11 +3237,11 @@
         },
         {
           "id": "product",
-          "routes": 2
+          "routes": 5
         },
         {
           "id": "spec",
-          "routes": 1
+          "routes": 4
         },
         {
           "id": "spec-decode",
@@ -2953,21 +3258,33 @@
         {
           "id": "registry",
           "routes": 6
+        },
+        {
+          "id": "packages",
+          "routes": 3
+        },
+        {
+          "id": "evidence",
+          "routes": 1
         }
       ],
-      "routes": 31,
+      "routes": 41,
       "status": "certified"
     },
     {
       "claim_scope": "surface-certified",
       "code_paths": [
         "src/compile.js",
+        "src/quantization-oracle.js",
+        "src/build-strategy-brain.js",
         "src/artifact.js",
         "src/artifact-runner.js",
         "src/production-ready.js",
         "src/registry.js",
         "src/marketplace.js",
         "src/sigstore.js",
+        "scripts/quantization-oracle.mjs",
+        "scripts/build-strategy-brain.mjs",
         "cli/kolm.js"
       ],
       "competitor_refs": [
@@ -2990,6 +3307,7 @@
         "/run",
         "/registry",
         "/v1/compile",
+        "/v1/quantization/oracle",
         "/v1/artifacts",
         "/v1/verify"
       ],
@@ -3006,6 +3324,19 @@
           "method": "GET",
           "mode": "safe",
           "path": "/v1/compile"
+        },
+        {
+          "auth": "required",
+          "checks": [
+            "json"
+          ],
+          "expect": [
+            200
+          ],
+          "id": "quantization-oracle-auth",
+          "method": "POST",
+          "mode": "safe",
+          "path": "/v1/quantization/oracle"
         },
         {
           "auth": "required",
@@ -3078,6 +3409,32 @@
             "json"
           ],
           "expect": [
+            200
+          ],
+          "id": "build-strategy-catalog-auth",
+          "method": "GET",
+          "mode": "safe",
+          "path": "/v1/build/strategy/catalog"
+        },
+        {
+          "auth": "required",
+          "checks": [
+            "json"
+          ],
+          "expect": [
+            200
+          ],
+          "id": "build-strategy-plan-deep",
+          "method": "POST",
+          "mode": "deep",
+          "path": "/v1/build/strategy"
+        },
+        {
+          "auth": "required",
+          "checks": [
+            "json"
+          ],
+          "expect": [
             200,
             202
           ],
@@ -3091,12 +3448,15 @@
       "readiness_requirement_ids": [
         "artifact-signing-pipeline",
         "async-compile-webhooks",
+        "benchmarking-infra",
         "cli-world-class",
+        "cloud-compute-broker",
         "compile-as-mcp",
         "compile-cache",
         "compile-failure-diagnostics",
         "dependency-graphs",
         "deploy-buttons",
+        "distill-strategy-oracle",
         "doctor-diagnostics",
         "export-quantize-targets",
         "fallback-chains",
@@ -3117,7 +3477,7 @@
       "route_groups": [
         {
           "id": "build",
-          "routes": 1
+          "routes": 4
         },
         {
           "id": "builds",
@@ -3130,6 +3490,10 @@
         {
           "id": "compile",
           "routes": 4
+        },
+        {
+          "id": "quantization",
+          "routes": 3
         },
         {
           "id": "jobs",
@@ -3180,7 +3544,7 @@
           "routes": 4
         }
       ],
-      "routes": 39,
+      "routes": 45,
       "status": "certified"
     },
     {
@@ -3194,6 +3558,8 @@
         "src/assistant.js",
         "src/multimodal-bakeoff.js",
         "src/streaming-contract.js",
+        "src/runtime-adoption-packets.js",
+        "scripts/runtime-adoption-packets.mjs",
         "cli/kolm.js"
       ],
       "competitor_refs": [
@@ -3205,7 +3571,8 @@
       "doc_paths": [
         "docs/research/runtime-sandbox-threat-audit-2026-05-13.md",
         "docs/research/sdk-cli-integration-audit-2026-05-12.md",
-        "docs/research/competitor-landscape-2026-05-12.md"
+        "docs/research/competitor-landscape-2026-05-12.md",
+        "docs/runtime-adoption-packets.md"
       ],
       "id": "runtime-inference-connectors",
       "name": "Runtime, Inference, Connectors, And Multimodal APIs",
@@ -3216,7 +3583,10 @@
         "/integrations/anthropic-sdk",
         "/v1/chat/completions",
         "/v1/responses",
-        "/v1/models"
+        "/v1/models",
+        "/v1/runtime/adoption-packets",
+        "/v1/runtime/adoption-packets/template",
+        "/v1/runtime/adoption-packets/validate"
       ],
       "production_smoke": [
         {
@@ -3244,6 +3614,45 @@
           "method": "GET",
           "mode": "safe",
           "path": "/v1/connectors"
+        },
+        {
+          "auth": "none",
+          "checks": [
+            "json"
+          ],
+          "expect": [
+            200
+          ],
+          "id": "runtime-adoption-packets-public",
+          "method": "GET",
+          "mode": "safe",
+          "path": "/v1/runtime/adoption-packets"
+        },
+        {
+          "auth": "none",
+          "checks": [
+            "json"
+          ],
+          "expect": [
+            200
+          ],
+          "id": "runtime-adoption-template-public",
+          "method": "GET",
+          "mode": "safe",
+          "path": "/v1/runtime/adoption-packets/template"
+        },
+        {
+          "auth": "none",
+          "checks": [
+            "json"
+          ],
+          "expect": [
+            422
+          ],
+          "id": "runtime-adoption-validate-public",
+          "method": "POST",
+          "mode": "safe",
+          "path": "/v1/runtime/adoption-packets/validate"
         },
         {
           "auth": "required",
@@ -3342,11 +3751,14 @@
         "artifact-signing-pipeline",
         "async-compile-webhooks",
         "cli-world-class",
+        "cloud-compute-broker",
         "compile-as-mcp",
         "compile-cache",
         "compile-failure-diagnostics",
         "deploy-buttons",
+        "distill-strategy-oracle",
         "doctor-diagnostics",
+        "ecosystem-runtime-adoption",
         "export-quantize-targets",
         "fallback-chains",
         "incremental-compile",
@@ -3371,7 +3783,7 @@
         },
         {
           "id": "runtime",
-          "routes": 5
+          "routes": 8
         },
         {
           "id": "chat",
@@ -3454,7 +3866,7 @@
           "routes": 1
         }
       ],
-      "routes": 45,
+      "routes": 48,
       "status": "certified"
     },
     {
@@ -3466,6 +3878,14 @@
         "src/label-queue.js",
         "src/lake.js",
         "src/distill*.js",
+        "src/distill-strategy.js",
+        "src/kscore-bench.js",
+        "src/benchmark-evidence.js",
+        "src/quality-calibration.js",
+        "scripts/distill-strategy.mjs",
+        "scripts/benchmark-evidence.mjs",
+        "scripts/bench-quality-calibration.mjs",
+        "scripts/quality-calibration.mjs",
         "src/simulation.js",
         "src/training-planner.js",
         "src/workflow-ir.js",
@@ -3482,7 +3902,9 @@
       "doc_paths": [
         "docs/research/capture-distillation-governance-audit-2026-05-12.md",
         "docs/research/trace-eval-schema-spec-2026-05-13.md",
-        "docs/research/external-score-normalization-audit-2026-05-13.md"
+        "docs/research/external-score-normalization-audit-2026-05-13.md",
+        "docs/benchmark-evidence.md",
+        "docs/quality-calibration.md"
       ],
       "id": "capture-data-eval-training",
       "name": "Capture, Datasets, Evals, Labels, Training, And Improvement Loop",
@@ -3494,7 +3916,12 @@
         "/account/lake",
         "/v1/capture/log",
         "/v1/datasets",
-        "/v1/distill/from-captures"
+        "/v1/eval/k-score-calibration",
+        "/v1/eval/benchmark-evidence",
+        "/v1/eval/benchmark-evidence/template",
+        "/v1/eval/quality-calibration",
+        "/v1/distill/from-captures",
+        "/v1/distill/strategy"
       ],
       "production_smoke": [
         {
@@ -3535,6 +3962,58 @@
           "method": "GET",
           "mode": "safe",
           "path": "/v1/datasets"
+        },
+        {
+          "auth": "none",
+          "checks": [
+            "json"
+          ],
+          "expect": [
+            200
+          ],
+          "id": "k-score-calibration-public",
+          "method": "GET",
+          "mode": "safe",
+          "path": "/v1/eval/k-score-calibration"
+        },
+        {
+          "auth": "none",
+          "checks": [
+            "json"
+          ],
+          "expect": [
+            200
+          ],
+          "id": "benchmark-evidence-public",
+          "method": "GET",
+          "mode": "safe",
+          "path": "/v1/eval/benchmark-evidence"
+        },
+        {
+          "auth": "none",
+          "checks": [
+            "json"
+          ],
+          "expect": [
+            200
+          ],
+          "id": "benchmark-evidence-template-public",
+          "method": "GET",
+          "mode": "safe",
+          "path": "/v1/eval/benchmark-evidence/template"
+        },
+        {
+          "auth": "none",
+          "checks": [
+            "json"
+          ],
+          "expect": [
+            200
+          ],
+          "id": "quality-calibration-public",
+          "method": "GET",
+          "mode": "safe",
+          "path": "/v1/eval/quality-calibration"
         },
         {
           "auth": "required",
@@ -3607,6 +4086,19 @@
             "json"
           ],
           "expect": [
+            200
+          ],
+          "id": "distill-strategy-auth",
+          "method": "POST",
+          "mode": "safe",
+          "path": "/v1/distill/strategy"
+        },
+        {
+          "auth": "required",
+          "checks": [
+            "json"
+          ],
+          "expect": [
             200,
             201,
             207
@@ -3634,18 +4126,22 @@
       "readiness_requirement_ids": [
         "artifact-signing-pipeline",
         "async-compile-webhooks",
+        "benchmarking-infra",
         "capture-filtering",
         "cli-world-class",
+        "cloud-compute-broker",
         "compile-as-mcp",
         "compile-cache",
         "compile-failure-diagnostics",
         "cost-attribution",
         "deploy-buttons",
+        "distill-strategy-oracle",
         "doctor-diagnostics",
         "event-lake-schema",
         "export-quantize-targets",
         "fallback-chains",
         "incremental-compile",
+        "k-score-calibration",
         "quality-scoring",
         "registry-search",
         "runtime-local-artifact",
@@ -3670,7 +4166,7 @@
         },
         {
           "id": "eval",
-          "routes": 4
+          "routes": 9
         },
         {
           "id": "label-queue",
@@ -3686,7 +4182,7 @@
         },
         {
           "id": "distill",
-          "routes": 8
+          "routes": 11
         },
         {
           "id": "training",
@@ -3757,7 +4253,7 @@
           "routes": 4
         }
       ],
-      "routes": 98,
+      "routes": 106,
       "status": "certified"
     },
     {
@@ -3765,11 +4261,15 @@
       "code_paths": [
         "src/audit.js",
         "src/privacy-membrane.js",
+        "src/redaction-benchmark.js",
         "src/notifications.js",
         "src/trace-capture.js",
         "src/artifact-lineage.js",
         "src/agent-telemetry.js",
-        "src/router.js"
+        "src/router.js",
+        "src/compliance-certification-packet.js",
+        "scripts/compliance-certification-packet.mjs",
+        "tests/wave592-compliance-certification-packet.test.js"
       ],
       "competitor_refs": [
         "langsmith-observability",
@@ -3780,7 +4280,8 @@
       "doc_paths": [
         "docs/research/compliance-security-posture-audit-2026-05-12.md",
         "docs/research/audit-observability-evidence-audit-2026-05-12.md",
-        "docs/research/tenant-data-lifecycle-audit-2026-05-12.md"
+        "docs/research/tenant-data-lifecycle-audit-2026-05-12.md",
+        "docs/compliance-certification-packet.md"
       ],
       "id": "governance-compliance-security",
       "name": "Governance, Compliance, Admin, Audit, Privacy, Trace, And Notifications",
@@ -3791,7 +4292,11 @@
         "/account/audit-log",
         "/v1/audit/log",
         "/v1/privacy/scan",
-        "/v1/trace/append"
+        "/v1/privacy/redaction-benchmark",
+        "/v1/trace/append",
+        "/v1/compliance/certification-packet",
+        "/v1/compliance/certification-packet/template",
+        "/v1/compliance/certification-packet/validate"
       ],
       "production_smoke": [
         {
@@ -3845,6 +4350,45 @@
           "method": "GET",
           "mode": "safe",
           "path": "/v1/privacy/report"
+        },
+        {
+          "auth": "none",
+          "checks": [
+            "json"
+          ],
+          "expect": [
+            200
+          ],
+          "id": "privacy-redaction-benchmark-public",
+          "method": "GET",
+          "mode": "safe",
+          "path": "/v1/privacy/redaction-benchmark"
+        },
+        {
+          "auth": "none",
+          "checks": [
+            "json"
+          ],
+          "expect": [
+            200
+          ],
+          "id": "compliance-certification-template-public",
+          "method": "GET",
+          "mode": "safe",
+          "path": "/v1/compliance/certification-packet/template"
+        },
+        {
+          "auth": "none",
+          "checks": [
+            "json"
+          ],
+          "expect": [
+            422
+          ],
+          "id": "compliance-certification-validate-public",
+          "method": "POST",
+          "mode": "safe",
+          "path": "/v1/compliance/certification-packet/validate"
         },
         {
           "auth": "required",
@@ -3916,10 +4460,12 @@
       "readiness_requirement_ids": [
         "async-compile-webhooks",
         "capture-filtering",
+        "compliance-certifications",
         "dependency-graphs",
         "deploy-buttons",
         "differential-privacy",
         "fallback-chains",
+        "k-score-calibration",
         "openai-anthropic-gateway",
         "opentelemetry",
         "private-registry",
@@ -3941,7 +4487,7 @@
         },
         {
           "id": "privacy",
-          "routes": 6
+          "routes": 7
         },
         {
           "id": "notifications",
@@ -3978,9 +4524,13 @@
         {
           "id": "loop",
           "routes": 1
+        },
+        {
+          "id": "compliance",
+          "routes": 3
         }
       ],
-      "routes": 53,
+      "routes": 57,
       "status": "certified"
     },
     {
@@ -4194,7 +4744,7 @@
         },
         {
           "id": "cloud",
-          "routes": 3
+          "routes": 5
         },
         {
           "id": "storage",
@@ -4213,7 +4763,7 @@
           "routes": 2
         }
       ],
-      "routes": 53,
+      "routes": 55,
       "status": "certified"
     }
   ],

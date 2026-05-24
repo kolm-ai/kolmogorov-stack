@@ -62,9 +62,46 @@
   .cm-publish-cards { margin-top: 28px; }
 
   .cm-crosslink { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+
+  /* W641 de-rectangle helpers: pill row + reward line + amber month + feature row */
+  .cm-pill-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .cm-pill-row .fr-pill { padding: 3px 8px; font-size: 10px; }
+  .cm-reward { margin: 6px 0 0 !important; font-family: var(--fr-font-mono); font-size: 12px; color: var(--ink-2) !important; }
+  .cm-month-amber { color: var(--fr-amber) !important; }
+  .cm-creator-list__row--feature .fr-spec-list__head h3 { color: var(--fr-mint); }
+  .cm-creator-list .fr-spec-list__head h3 { font-family: var(--fr-font-mono); font-weight: 540; letter-spacing: -0.005em; }
+  .cm-lboard-list .fr-spec-list__head h3 { font-size: 15px; }
+  .cm-lboard-list .fr-spec-list__p code { font-family: var(--fr-font-mono); font-size: 13px; color: var(--ink-1); background: transparent; padding: 0; }
 </style>
+  <meta property="og:title" content="Community &middot; kolm.ai">
+  <meta property="og:description" content="The forge, the leaderboard, the discord. kolm is built for the people pushing every bit-width, every distillation mode, every merge experiment. Share recipes, fork others, get paid when your artifact ships.">
+  <meta property="og:image" content="https://kolm.ai/og/community.svg">
+  <meta property="og:url" content="https://kolm.ai/community">
+  <meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/community",
+  "description": "The forge, the leaderboard, the discord. kolm is built for the people pushing every bit-width, every distillation mode, every merge experiment. Share recipes, fork others, get paid when your artifact ships.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
 </head>
 <body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <a href="#main" class="ks-skip">Skip to content</a>
 
@@ -117,29 +154,32 @@
       <h2 class="fr-h2">Three primitives. Honest defaults.</h2>
       <p class="fr-lede">Every artifact carries its signature. Every recipe carries its license. Every payout carries its trace.</p>
     </div>
-    <div class="fr-grid-3">
-      <div class="fr-card fr-card--mint">
-        <div class="cm-card-pad">
-          <h3 class="fr-h3">Signed artifacts</h3>
-          <p>Every share carries a verifiable receipt. <code>kolm verify</code> on a clean laptop with no network confirms the weights, the K-score, and the teacher trace.</p>
-          <p><a href="/forge" style="color:var(--fr-mint);text-decoration:none">Open the forge &rarr;</a></p>
+    <ul class="fr-spec-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>Signed artifacts</h3>
+          <span class="fr-spec-list__delta">Ed25519 &middot; offline-verifiable</span>
         </div>
-      </div>
-      <div class="fr-card">
-        <div class="cm-card-pad">
-          <h3 class="fr-h3">Fork + improve</h3>
-          <p>One command pulls any public recipe into your local lake. Re-quantize, re-distill, swap the base. The receipt chain records every parent.</p>
-          <p><a href="/recipes" style="color:var(--fr-mint);text-decoration:none">Browse recipes &rarr;</a></p>
+        <p class="fr-spec-list__p">Every share carries a verifiable receipt. <code>kolm verify</code> on a clean laptop with no network confirms the weights, the K-score, and the teacher trace.</p>
+        <a class="fr-spec-list__cta" href="/forge">Open the forge <span aria-hidden="true">&rarr;</span></a>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>Fork + improve</h3>
+          <span class="fr-spec-list__delta">one command &middot; chain of parents</span>
         </div>
-      </div>
-      <div class="fr-card fr-card--mint">
-        <div class="cm-card-pad">
-          <h3 class="fr-h3">Revenue share</h3>
-          <p>Creators keep 70% or more on marketplace artifacts. Free, pay-what-you-want, or premium licensed. You set the price, the registry tracks the receipts.</p>
-          <p><a href="/pricing" style="color:var(--fr-mint);text-decoration:none">See pricing &rarr;</a></p>
+        <p class="fr-spec-list__p">One command pulls any public recipe into your local lake. Re-quantize, re-distill, swap the base. The receipt chain records every parent.</p>
+        <a class="fr-spec-list__cta" href="/recipes">Browse recipes <span aria-hidden="true">&rarr;</span></a>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>Revenue share</h3>
+          <span class="fr-spec-list__delta">creators keep 70%+</span>
         </div>
-      </div>
-    </div>
+        <p class="fr-spec-list__p">Creators keep 70% or more on marketplace artifacts. Free, pay-what-you-want, or premium licensed. You set the price, the registry tracks the receipts.</p>
+        <a class="fr-spec-list__cta" href="/pricing">See pricing <span aria-hidden="true">&rarr;</span></a>
+      </li>
+    </ul>
   </div>
 </section>
 
@@ -157,330 +197,174 @@
       <span class="label">Tier 1 &middot; Always-on heroes</span>
       <span class="rule"></span>
     </div>
-    <div class="fr-grid-3">
-      <div class="fr-card fr-card--mint">
-        <div class="cm-creator">
-          <span class="handle">bartowski</span>
-          <span class="focus">High-quality imatrix GGUF.</span>
-          <span class="work">Coverage of nearly every 2025-2026 frontier base. If a new model drops at noon, the imatrix quants land by dinner.</span>
-          <div class="tag-row">
-            <span class="fr-pill">Quant</span>
-            <span class="fr-pill fr-pill--violet">Imatrix</span>
-            <span class="fr-pill fr-pill--ghost">GGUF</span>
-          </div>
+    <ul class="fr-spec-list cm-creator-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>bartowski</h3>
+          <span class="fr-spec-list__delta">high-quality imatrix GGUF</span>
         </div>
-      </div>
-      <div class="fr-card fr-card--mint">
-        <div class="cm-creator">
-          <span class="handle">Unsloth</span>
-          <span class="focus">Dynamic 2.0 GGUF + MTP-aware quants.</span>
-          <span class="work">Best-in-class KL-divergence retention. Quant recipes that hold base behavior down to extreme bit-widths on MoE bases.</span>
-          <div class="tag-row">
-            <span class="fr-pill">Quant</span>
-            <span class="fr-pill fr-pill--amber">MTP</span>
-            <span class="fr-pill fr-pill--violet">Low-bit</span>
-          </div>
+        <p class="fr-spec-list__p">Coverage of nearly every 2025-2026 frontier base. If a new model drops at noon, the imatrix quants land by dinner.</p>
+        <div class="cm-pill-row"><span class="fr-pill">Quant</span><span class="fr-pill fr-pill--violet">Imatrix</span><span class="fr-pill fr-pill--ghost">GGUF</span></div>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>Unsloth</h3>
+          <span class="fr-spec-list__delta">dynamic 2.0 GGUF &middot; MTP-aware</span>
         </div>
-      </div>
-      <div class="fr-card fr-card--mint">
-        <div class="cm-creator">
-          <span class="handle">TheBloke</span>
-          <span class="focus">The original GGUF legend.</span>
-          <span class="work">The format owes its mainstream lineage here. Standard-setting README structure; quant naming conventions still in wide use.</span>
-          <div class="tag-row">
-            <span class="fr-pill">Quant</span>
-            <span class="fr-pill fr-pill--ghost">Format</span>
-            <span class="fr-pill fr-pill--ghost">Legacy</span>
-          </div>
+        <p class="fr-spec-list__p">Benchmark-gated target: best-in-class KL-divergence retention, with quant recipes that hold base behavior down to extreme bit-widths on MoE bases.</p>
+        <div class="cm-pill-row"><span class="fr-pill">Quant</span><span class="fr-pill fr-pill--amber">MTP</span><span class="fr-pill fr-pill--violet">Low-bit</span></div>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>TheBloke</h3>
+          <span class="fr-spec-list__delta">the original GGUF legend</span>
         </div>
-      </div>
-      <div class="fr-card">
-        <div class="cm-creator">
-          <span class="handle">mradermacher</span>
-          <span class="focus">Trusted IQ / imatrix specialist.</span>
-          <span class="work">Responsive to community requests. Often covers niche bases and non-English-leaning models others skip.</span>
-          <div class="tag-row">
-            <span class="fr-pill">Quant</span>
-            <span class="fr-pill fr-pill--violet">Imatrix</span>
-          </div>
+        <p class="fr-spec-list__p">The format owes its mainstream lineage here. Standard-setting README structure; quant naming conventions still in wide use.</p>
+        <div class="cm-pill-row"><span class="fr-pill">Quant</span><span class="fr-pill fr-pill--ghost">Format</span><span class="fr-pill fr-pill--ghost">Legacy</span></div>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>mradermacher</h3>
+          <span class="fr-spec-list__delta">trusted IQ / imatrix specialist</span>
         </div>
-      </div>
-      <div class="fr-card">
-        <div class="cm-creator">
-          <span class="handle">ByteShape</span>
-          <span class="focus">Fast NTP/MTP GGUF drops.</span>
-          <span class="work">Hot Qwen3.x MoE coverage. Tight turnaround on freshly released bases.</span>
-          <div class="tag-row">
-            <span class="fr-pill">Quant</span>
-            <span class="fr-pill fr-pill--amber">MTP</span>
-            <span class="fr-pill fr-pill--ghost">MoE</span>
-          </div>
+        <p class="fr-spec-list__p">Responsive to community requests. Often covers niche bases and non-English-leaning models others skip.</p>
+        <div class="cm-pill-row"><span class="fr-pill">Quant</span><span class="fr-pill fr-pill--violet">Imatrix</span></div>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>ByteShape</h3>
+          <span class="fr-spec-list__delta">fast NTP/MTP GGUF drops</span>
         </div>
-      </div>
-    </div>
+        <p class="fr-spec-list__p">Hot Qwen3.x MoE coverage. Tight turnaround on freshly released bases.</p>
+        <div class="cm-pill-row"><span class="fr-pill">Quant</span><span class="fr-pill fr-pill--amber">MTP</span><span class="fr-pill fr-pill--ghost">MoE</span></div>
+      </li>
+    </ul>
 
     <!-- TIER 2 -->
     <div class="cm-tier-head">
       <span class="label">Tier 2 &middot; Very active</span>
       <span class="rule"></span>
     </div>
-    <div class="fr-grid-3">
-      <div class="fr-card">
-        <div class="cm-creator">
-          <span class="handle">DavidAU</span>
-          <span class="focus">Creative / uncensored merged variants.</span>
-          <span class="work">Deep catalog of remixed bases with detailed sampling notes.</span>
-          <div class="tag-row">
-            <span class="fr-pill fr-pill--violet">Merge</span>
-            <span class="fr-pill fr-pill--ghost">Creative</span>
-          </div>
-        </div>
-      </div>
-      <div class="fr-card">
-        <div class="cm-creator">
-          <span class="handle">QuantFactory</span>
-          <span class="focus">High-volume quant releases.</span>
-          <span class="work">Broad coverage; reliable cadence; community discoverability.</span>
-          <div class="tag-row">
-            <span class="fr-pill">Quant</span>
-            <span class="fr-pill fr-pill--ghost">Volume</span>
-          </div>
-        </div>
-      </div>
-      <div class="fr-card">
-        <div class="cm-creator">
-          <span class="handle">lmstudio-community</span>
-          <span class="focus">Curated quants for the LM Studio crowd.</span>
-          <span class="work">Filter signal-to-noise for desktop users running local on consumer GPUs.</span>
-          <div class="tag-row">
-            <span class="fr-pill">Quant</span>
-            <span class="fr-pill fr-pill--ghost">Curated</span>
-          </div>
-        </div>
-      </div>
-      <div class="fr-card">
-        <div class="cm-creator">
-          <span class="handle">MaziyarPanahi</span>
-          <span class="focus">Quality-focused quant work.</span>
-          <span class="work">Careful evals; transparent calibration data choices.</span>
-          <div class="tag-row">
-            <span class="fr-pill">Quant</span>
-            <span class="fr-pill fr-pill--violet">Imatrix</span>
-          </div>
-        </div>
-      </div>
-      <div class="fr-card">
-        <div class="cm-creator">
-          <span class="handle">city96</span>
-          <span class="focus">Vision / multimodal specialty quants.</span>
-          <span class="work">Diffusion and VLM workflows where vanilla GGUF tooling stops short.</span>
-          <div class="tag-row">
-            <span class="fr-pill">Quant</span>
-            <span class="fr-pill fr-pill--ghost">Vision</span>
-          </div>
-        </div>
-      </div>
-      <div class="fr-card">
-        <div class="cm-creator">
-          <span class="handle">trjxter</span>
-          <span class="focus">Reasoning distillations into small bases.</span>
-          <span class="work">Compact models tuned for chain-of-thought behaviour at sub-8B sizes.</span>
-          <div class="tag-row">
-            <span class="fr-pill fr-pill--amber">Distill</span>
-            <span class="fr-pill fr-pill--ghost">Reasoning</span>
-          </div>
-        </div>
-      </div>
-      <div class="fr-card">
-        <div class="cm-creator">
-          <span class="handle">TeichAI / Jackrong</span>
-          <span class="focus">Opus-style reasoning distillations.</span>
-          <span class="work">Captures the trace structure of frontier reasoning models into smaller students.</span>
-          <div class="tag-row">
-            <span class="fr-pill fr-pill--amber">Distill</span>
-            <span class="fr-pill fr-pill--ghost">Reasoning</span>
-          </div>
-        </div>
-      </div>
-      <div class="fr-card">
-        <div class="cm-creator">
-          <span class="handle">LatitudeGames</span>
-          <span class="focus">Gemma finetunes that get quantized fast.</span>
-          <span class="work">Frequent flyer in the community quant pipeline.</span>
-          <div class="tag-row">
-            <span class="fr-pill fr-pill--amber">Distill</span>
-            <span class="fr-pill fr-pill--ghost">Gemma</span>
-          </div>
-        </div>
-      </div>
-      <div class="fr-card">
-        <div class="cm-creator">
-          <span class="handle">NovaSky</span>
-          <span class="focus">Community-driven distillation experiments.</span>
-          <span class="work">Open recipes; methodology shared end-to-end.</span>
-          <div class="tag-row">
-            <span class="fr-pill fr-pill--amber">Distill</span>
-            <span class="fr-pill fr-pill--ghost">Open</span>
-          </div>
-        </div>
-      </div>
-      <div class="fr-card">
-        <div class="cm-creator">
-          <span class="handle">Ilya626</span>
-          <span class="focus">Niche frontier quant work.</span>
-          <span class="work">Picks targets others skip; useful for less-mainstream bases and odd shapes.</span>
-          <div class="tag-row">
-            <span class="fr-pill">Quant</span>
-            <span class="fr-pill fr-pill--ghost">Niche</span>
-          </div>
-        </div>
-      </div>
-    </div>
+    <ul class="fr-spec-list cm-creator-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>DavidAU</h3><span class="fr-spec-list__delta">creative / uncensored merged variants</span></div>
+        <p class="fr-spec-list__p">Deep catalog of remixed bases with detailed sampling notes.</p>
+        <div class="cm-pill-row"><span class="fr-pill fr-pill--violet">Merge</span><span class="fr-pill fr-pill--ghost">Creative</span></div>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>QuantFactory</h3><span class="fr-spec-list__delta">high-volume quant releases</span></div>
+        <p class="fr-spec-list__p">Broad coverage; reliable cadence; community discoverability.</p>
+        <div class="cm-pill-row"><span class="fr-pill">Quant</span><span class="fr-pill fr-pill--ghost">Volume</span></div>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>lmstudio-community</h3><span class="fr-spec-list__delta">curated quants for LM Studio crowd</span></div>
+        <p class="fr-spec-list__p">Filter signal-to-noise for desktop users running local on consumer GPUs.</p>
+        <div class="cm-pill-row"><span class="fr-pill">Quant</span><span class="fr-pill fr-pill--ghost">Curated</span></div>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>MaziyarPanahi</h3><span class="fr-spec-list__delta">quality-focused quant work</span></div>
+        <p class="fr-spec-list__p">Careful evals; transparent calibration data choices.</p>
+        <div class="cm-pill-row"><span class="fr-pill">Quant</span><span class="fr-pill fr-pill--violet">Imatrix</span></div>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>city96</h3><span class="fr-spec-list__delta">vision / multimodal specialty quants</span></div>
+        <p class="fr-spec-list__p">Diffusion and VLM workflows where vanilla GGUF tooling stops short.</p>
+        <div class="cm-pill-row"><span class="fr-pill">Quant</span><span class="fr-pill fr-pill--ghost">Vision</span></div>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>trjxter</h3><span class="fr-spec-list__delta">reasoning distillations into small bases</span></div>
+        <p class="fr-spec-list__p">Compact models tuned for chain-of-thought behaviour at sub-8B sizes.</p>
+        <div class="cm-pill-row"><span class="fr-pill fr-pill--amber">Distill</span><span class="fr-pill fr-pill--ghost">Reasoning</span></div>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>TeichAI / Jackrong</h3><span class="fr-spec-list__delta">Opus-style reasoning distillations</span></div>
+        <p class="fr-spec-list__p">Captures the trace structure of frontier reasoning models into smaller students.</p>
+        <div class="cm-pill-row"><span class="fr-pill fr-pill--amber">Distill</span><span class="fr-pill fr-pill--ghost">Reasoning</span></div>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>LatitudeGames</h3><span class="fr-spec-list__delta">Gemma finetunes that get quantized fast</span></div>
+        <p class="fr-spec-list__p">Frequent flyer in the community quant pipeline.</p>
+        <div class="cm-pill-row"><span class="fr-pill fr-pill--amber">Distill</span><span class="fr-pill fr-pill--ghost">Gemma</span></div>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>NovaSky</h3><span class="fr-spec-list__delta">community-driven distillation experiments</span></div>
+        <p class="fr-spec-list__p">Open recipes; methodology shared end-to-end.</p>
+        <div class="cm-pill-row"><span class="fr-pill fr-pill--amber">Distill</span><span class="fr-pill fr-pill--ghost">Open</span></div>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Ilya626</h3><span class="fr-spec-list__delta">niche frontier quant work</span></div>
+        <p class="fr-spec-list__p">Picks targets others skip; useful for less-mainstream bases and odd shapes.</p>
+        <div class="cm-pill-row"><span class="fr-pill">Quant</span><span class="fr-pill fr-pill--ghost">Niche</span></div>
+      </li>
+    </ul>
 
     <!-- TIER 3 -->
     <div class="cm-tier-head">
       <span class="label">Tier 3 &middot; Merge / distill specialists &middot; Official labs</span>
       <span class="rule"></span>
     </div>
-    <div class="fr-grid-3">
-      <div class="fr-card">
-        <div class="cm-creator">
-          <span class="handle">Gryphe</span>
-          <span class="focus">MythoMax era. Mergekit lineage.</span>
-          <span class="work">Foundational merge work that shaped how the community thinks about model blending.</span>
-          <div class="tag-row">
-            <span class="fr-pill fr-pill--violet">Merge</span>
-            <span class="fr-pill fr-pill--ghost">Legacy</span>
-          </div>
-        </div>
-      </div>
-      <div class="fr-card">
-        <div class="cm-creator">
-          <span class="handle">Undi95</span>
-          <span class="focus">Frankenmerge legend.</span>
-          <span class="work">Persistent experimentation with non-obvious layer-stacking recipes.</span>
-          <div class="tag-row">
-            <span class="fr-pill fr-pill--violet">Merge</span>
-            <span class="fr-pill fr-pill--ghost">Experimental</span>
-          </div>
-        </div>
-      </div>
-      <div class="fr-card">
-        <div class="cm-creator">
-          <span class="handle">Sao10K</span>
-          <span class="focus">Roleplay / creative merges that hit leaderboards.</span>
-          <span class="work">Recipes that consistently surface on community boards.</span>
-          <div class="tag-row">
-            <span class="fr-pill fr-pill--violet">Merge</span>
-            <span class="fr-pill fr-pill--ghost">Creative</span>
-          </div>
-        </div>
-      </div>
-      <div class="fr-card">
-        <div class="cm-creator">
-          <span class="handle">mlabonne</span>
-          <span class="focus">Mergekit + distillation playbooks.</span>
-          <span class="work">Public guides that helped a generation learn the moves.</span>
-          <div class="tag-row">
-            <span class="fr-pill fr-pill--violet">Merge</span>
-            <span class="fr-pill fr-pill--amber">Distill</span>
-            <span class="fr-pill fr-pill--ghost">Education</span>
-          </div>
-        </div>
-      </div>
-      <div class="fr-card fr-card--feature">
-        <div class="cm-creator">
-          <span class="handle">DeepSeek</span>
-          <span class="focus">Official R1 distill series (1.5B - 70B).</span>
-          <span class="work">Reference distillations that defined what was possible to fit into small dense bases.</span>
-          <div class="tag-row">
-            <span class="fr-pill">Official</span>
-            <span class="fr-pill fr-pill--amber">Distill</span>
-            <span class="fr-pill fr-pill--ghost">Reasoning</span>
-          </div>
-        </div>
-      </div>
-      <div class="fr-card fr-card--feature">
-        <div class="cm-creator">
-          <span class="handle">Qwen / Alibaba</span>
-          <span class="focus">MTP-native MoE bases.</span>
-          <span class="work">The most-quantized base family of 2025-2026. The Qwen2.5 and Qwen3 ladders cover practically every parameter budget.</span>
-          <div class="tag-row">
-            <span class="fr-pill">Official</span>
-            <span class="fr-pill fr-pill--amber">MTP</span>
-            <span class="fr-pill fr-pill--ghost">MoE</span>
-          </div>
-        </div>
-      </div>
-      <div class="fr-card fr-card--feature">
-        <div class="cm-creator">
-          <span class="handle">Moonshot / Kimi</span>
-          <span class="focus">Long-context + agentic distills.</span>
-          <span class="work">Bases that pushed long-context training data into the open-weight tier.</span>
-          <div class="tag-row">
-            <span class="fr-pill">Official</span>
-            <span class="fr-pill fr-pill--ghost">Long-context</span>
-          </div>
-        </div>
-      </div>
-      <div class="fr-card fr-card--feature">
-        <div class="cm-creator">
-          <span class="handle">Tencent</span>
-          <span class="focus">Hy-MT2 extreme low-bit work.</span>
-          <span class="work">Reference for what sub-3-bit can look like when calibration is taken seriously.</span>
-          <div class="tag-row">
-            <span class="fr-pill">Official</span>
-            <span class="fr-pill fr-pill--violet">Low-bit</span>
-          </div>
-        </div>
-      </div>
-      <div class="fr-card fr-card--feature">
-        <div class="cm-creator">
-          <span class="handle">Microsoft Phi</span>
-          <span class="focus">Small-model excellence.</span>
-          <span class="work">Sets the bar for what a small base trained on the right data can do.</span>
-          <div class="tag-row">
-            <span class="fr-pill">Official</span>
-            <span class="fr-pill fr-pill--ghost">Small</span>
-          </div>
-        </div>
-      </div>
-      <div class="fr-card fr-card--feature">
-        <div class="cm-creator">
-          <span class="handle">HuggingFaceTB</span>
-          <span class="focus">SmolLM family.</span>
-          <span class="work">Sub-2B bases tuned for on-device. The reference small-base lineage for the open community.</span>
-          <div class="tag-row">
-            <span class="fr-pill">Official</span>
-            <span class="fr-pill fr-pill--ghost">Small</span>
-          </div>
-        </div>
-      </div>
-      <div class="fr-card fr-card--feature">
-        <div class="cm-creator">
-          <span class="handle">Arcee</span>
-          <span class="focus">Merge + distill orchestration.</span>
-          <span class="work">Tooling that codified merge workflow patterns for teams.</span>
-          <div class="tag-row">
-            <span class="fr-pill">Official</span>
-            <span class="fr-pill fr-pill--violet">Merge</span>
-            <span class="fr-pill fr-pill--amber">Distill</span>
-          </div>
-        </div>
-      </div>
-      <div class="fr-card fr-card--feature">
-        <div class="cm-creator">
-          <span class="handle">Prime Intellect</span>
-          <span class="focus">Distributed training + distillation pipelines.</span>
-          <span class="work">Pushing the operational side: how to actually run large distillation runs across heterogeneous compute.</span>
-          <div class="tag-row">
-            <span class="fr-pill">Official</span>
-            <span class="fr-pill fr-pill--amber">Distill</span>
-            <span class="fr-pill fr-pill--ghost">Distributed</span>
-          </div>
-        </div>
-      </div>
-    </div>
+    <ul class="fr-spec-list cm-creator-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Gryphe</h3><span class="fr-spec-list__delta">MythoMax era &middot; mergekit lineage</span></div>
+        <p class="fr-spec-list__p">Foundational merge work that shaped how the community thinks about model blending.</p>
+        <div class="cm-pill-row"><span class="fr-pill fr-pill--violet">Merge</span><span class="fr-pill fr-pill--ghost">Legacy</span></div>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Undi95</h3><span class="fr-spec-list__delta">frankenmerge legend</span></div>
+        <p class="fr-spec-list__p">Persistent experimentation with non-obvious layer-stacking recipes.</p>
+        <div class="cm-pill-row"><span class="fr-pill fr-pill--violet">Merge</span><span class="fr-pill fr-pill--ghost">Experimental</span></div>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Sao10K</h3><span class="fr-spec-list__delta">roleplay / creative merges</span></div>
+        <p class="fr-spec-list__p">Recipes that consistently surface on community boards.</p>
+        <div class="cm-pill-row"><span class="fr-pill fr-pill--violet">Merge</span><span class="fr-pill fr-pill--ghost">Creative</span></div>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>mlabonne</h3><span class="fr-spec-list__delta">mergekit + distillation playbooks</span></div>
+        <p class="fr-spec-list__p">Public guides that helped a generation learn the moves.</p>
+        <div class="cm-pill-row"><span class="fr-pill fr-pill--violet">Merge</span><span class="fr-pill fr-pill--amber">Distill</span><span class="fr-pill fr-pill--ghost">Education</span></div>
+      </li>
+      <li class="fr-spec-list__row cm-creator-list__row--feature">
+        <div class="fr-spec-list__head"><h3>DeepSeek</h3><span class="fr-spec-list__delta">official R1 distill series &middot; 1.5B-70B</span></div>
+        <p class="fr-spec-list__p">Reference distillations that defined what was possible to fit into small dense bases.</p>
+        <div class="cm-pill-row"><span class="fr-pill">Official</span><span class="fr-pill fr-pill--amber">Distill</span><span class="fr-pill fr-pill--ghost">Reasoning</span></div>
+      </li>
+      <li class="fr-spec-list__row cm-creator-list__row--feature">
+        <div class="fr-spec-list__head"><h3>Qwen / Alibaba</h3><span class="fr-spec-list__delta">MTP-native MoE bases</span></div>
+        <p class="fr-spec-list__p">The most-quantized base family of 2025-2026. The Qwen2.5 and Qwen3 ladders cover practically every parameter budget.</p>
+        <div class="cm-pill-row"><span class="fr-pill">Official</span><span class="fr-pill fr-pill--amber">MTP</span><span class="fr-pill fr-pill--ghost">MoE</span></div>
+      </li>
+      <li class="fr-spec-list__row cm-creator-list__row--feature">
+        <div class="fr-spec-list__head"><h3>Moonshot / Kimi</h3><span class="fr-spec-list__delta">long-context + agentic distills</span></div>
+        <p class="fr-spec-list__p">Bases that pushed long-context training data into the open-weight tier.</p>
+        <div class="cm-pill-row"><span class="fr-pill">Official</span><span class="fr-pill fr-pill--ghost">Long-context</span></div>
+      </li>
+      <li class="fr-spec-list__row cm-creator-list__row--feature">
+        <div class="fr-spec-list__head"><h3>Tencent</h3><span class="fr-spec-list__delta">Hy-MT2 extreme low-bit work</span></div>
+        <p class="fr-spec-list__p">Reference for what sub-3-bit can look like when calibration is taken seriously.</p>
+        <div class="cm-pill-row"><span class="fr-pill">Official</span><span class="fr-pill fr-pill--violet">Low-bit</span></div>
+      </li>
+      <li class="fr-spec-list__row cm-creator-list__row--feature">
+        <div class="fr-spec-list__head"><h3>Microsoft Phi</h3><span class="fr-spec-list__delta">small-model excellence</span></div>
+        <p class="fr-spec-list__p">Sets the bar for what a small base trained on the right data can do.</p>
+        <div class="cm-pill-row"><span class="fr-pill">Official</span><span class="fr-pill fr-pill--ghost">Small</span></div>
+      </li>
+      <li class="fr-spec-list__row cm-creator-list__row--feature">
+        <div class="fr-spec-list__head"><h3>HuggingFaceTB</h3><span class="fr-spec-list__delta">SmolLM family</span></div>
+        <p class="fr-spec-list__p">Sub-2B bases tuned for on-device. The reference small-base lineage for the open community.</p>
+        <div class="cm-pill-row"><span class="fr-pill">Official</span><span class="fr-pill fr-pill--ghost">Small</span></div>
+      </li>
+      <li class="fr-spec-list__row cm-creator-list__row--feature">
+        <div class="fr-spec-list__head"><h3>Arcee</h3><span class="fr-spec-list__delta">merge + distill orchestration</span></div>
+        <p class="fr-spec-list__p">Tooling that codified merge workflow patterns for teams.</p>
+        <div class="cm-pill-row"><span class="fr-pill">Official</span><span class="fr-pill fr-pill--violet">Merge</span><span class="fr-pill fr-pill--amber">Distill</span></div>
+      </li>
+      <li class="fr-spec-list__row cm-creator-list__row--feature">
+        <div class="fr-spec-list__head"><h3>Prime Intellect</h3><span class="fr-spec-list__delta">distributed training + distillation pipelines</span></div>
+        <p class="fr-spec-list__p">Pushing the operational side: how to actually run large distillation runs across heterogeneous compute.</p>
+        <div class="cm-pill-row"><span class="fr-pill">Official</span><span class="fr-pill fr-pill--amber">Distill</span><span class="fr-pill fr-pill--ghost">Distributed</span></div>
+      </li>
+    </ul>
 
     <hr class="fr-rule fr-rule--mint" style="margin-top:48px">
     <p class="fr-lede" style="font-size:13.5px;color:var(--ink-3)">Want your handle on this list? Ping us in <a href="#" style="color:var(--fr-mint);text-decoration:none">discord</a>. Order is roughly current public output across HF + GitHub + the open-quant scene; not a ranking and definitely not affiliation.</p>
@@ -507,26 +391,20 @@
 [link]      kolm.ai/r/my-sota-7b
     </div>
 
-    <div class="fr-grid-3 cm-publish-cards">
-      <div class="fr-card fr-card--mint">
-        <div class="cm-card-pad">
-          <h3 class="fr-h3">Free + open</h3>
-          <p>Apache-2.0, MIT, BSD. Anyone can fork and re-quantize. Your receipt stays in the parent chain of every derivative.</p>
-        </div>
-      </div>
-      <div class="fr-card">
-        <div class="cm-card-pad">
-          <h3 class="fr-h3">Pay-what-you-want</h3>
-          <p>Suggested tip; users decide. Stripe-backed. You keep 80%. The registry records every paid pull with a signed receipt.</p>
-        </div>
-      </div>
-      <div class="fr-card">
-        <div class="cm-card-pad">
-          <h3 class="fr-h3">Premium licensed</h3>
-          <p>Set a per-seat or per-inference fee. Custom EULA. You keep 70%. Enterprise buyers can ship the receipt through their procurement chain.</p>
-        </div>
-      </div>
-    </div>
+    <ul class="fr-spec-list cm-publish-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Free + open</h3><span class="fr-spec-list__delta">Apache-2.0 / MIT / BSD</span></div>
+        <p class="fr-spec-list__p">Anyone can fork and re-quantize. Your receipt stays in the parent chain of every derivative.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Pay-what-you-want</h3><span class="fr-spec-list__delta">creator keeps 80%</span></div>
+        <p class="fr-spec-list__p">Suggested tip; users decide. Stripe-backed. The registry records every paid pull with a signed receipt.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Premium licensed</h3><span class="fr-spec-list__delta">creator keeps 70% &middot; custom EULA</span></div>
+        <p class="fr-spec-list__p">Set a per-seat or per-inference fee. Enterprise buyers can ship the receipt through their procurement chain.</p>
+      </li>
+    </ul>
 
     <div class="cm-crosslink">
       <a href="/recipes" class="fr-btn fr-btn--ghost">Browse the recipe gallery</a>
@@ -545,50 +423,32 @@
       <p class="fr-lede">Categories the community actually cares about. Each row is a signed artifact you can verify locally. Full board with diff history at <a href="/leaderboard" style="color:var(--fr-mint);text-decoration:none">/leaderboard</a>.</p>
     </div>
 
-    <div class="cm-lboard">
-      <div class="fr-card cm-lboard-card">
-        <div class="row">
-          <div class="cat">Smallest passing K &gt;= 0.90</div>
-          <div class="who">qwen2.5-0.5b-int4 / @example</div>
-          <div class="score">441 MB &middot; K 0.913 &middot; verified</div>
-        </div>
-      </div>
-      <div class="fr-card">
-        <div class="row">
-          <div class="cat">Fastest inference per watt</div>
-          <div class="who">smollm3-int4-mlx / @example</div>
-          <div class="score">214 tok/s/W &middot; M3 Max &middot; verified</div>
-        </div>
-      </div>
-      <div class="fr-card">
-        <div class="row">
-          <div class="cat">Best Aider score under 8B params</div>
-          <div class="who">qwen3-coder-7b-q5km / @example</div>
-          <div class="score">Aider 64.2% &middot; 7.0B params &middot; verified</div>
-        </div>
-      </div>
-      <div class="fr-card">
-        <div class="row">
-          <div class="cat">Best long-context recall &lt; 16 GB</div>
-          <div class="who">kimi-32k-int4 / @example</div>
-          <div class="score">14.1 GB &middot; recall 0.88 @ 32k</div>
-        </div>
-      </div>
-      <div class="fr-card">
-        <div class="row">
-          <div class="cat">Smallest reasoning model passing GPQA 50%</div>
-          <div class="who">r1-distill-7b-int4 / @example</div>
-          <div class="score">5.2 GB &middot; GPQA 51.4%</div>
-        </div>
-      </div>
-      <div class="fr-card">
-        <div class="row">
-          <div class="cat">Most-forked recipe of the week</div>
-          <div class="who">finance-classifier-3b / @example</div>
-          <div class="score">142 forks &middot; 9 derivatives</div>
-        </div>
-      </div>
-    </div>
+    <ul class="fr-spec-list cm-lboard-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Smallest passing K &ge; 0.90</h3><span class="fr-spec-list__delta">441 MB &middot; K 0.913 &middot; verified</span></div>
+        <p class="fr-spec-list__p"><code>qwen2.5-0.5b-int4</code> / @example</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Fastest inference per watt</h3><span class="fr-spec-list__delta">214 tok/s/W &middot; M3 Max &middot; verified</span></div>
+        <p class="fr-spec-list__p"><code>smollm3-int4-mlx</code> / @example</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Best Aider score under 8B params</h3><span class="fr-spec-list__delta">Aider 64.2% &middot; 7.0B &middot; verified</span></div>
+        <p class="fr-spec-list__p"><code>qwen3-coder-7b-q5km</code> / @example</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Best long-context recall &lt; 16 GB</h3><span class="fr-spec-list__delta">14.1 GB &middot; recall 0.88 @ 32k</span></div>
+        <p class="fr-spec-list__p"><code>kimi-32k-int4</code> / @example</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Smallest reasoning model passing GPQA 50%</h3><span class="fr-spec-list__delta">5.2 GB &middot; GPQA 51.4%</span></div>
+        <p class="fr-spec-list__p"><code>r1-distill-7b-int4</code> / @example</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Most-forked recipe of the week</h3><span class="fr-spec-list__delta">142 forks &middot; 9 derivatives</span></div>
+        <p class="fr-spec-list__p"><code>finance-classifier-3b</code> / @example</p>
+      </li>
+    </ul>
 
     <div class="cm-crosslink">
       <a href="/leaderboard" class="fr-btn fr-btn--ghost">See full leaderboard &rarr;</a>
@@ -605,40 +465,28 @@
       <p class="fr-lede">Each month carries one constraint and one reward. Submit a signed .kolm before the cut-off; the verifier scores against the published eval pack.</p>
     </div>
 
-    <div class="fr-grid-2">
-      <div class="fr-card fr-card--mint">
-        <div class="cm-challenge">
-          <span class="month">Current</span>
-          <h3 class="fr-h3">Smallest model that clears GPQA 60%</h3>
-          <p>Any base, any quant, any merge. Hardware-agnostic. Submission must be a signed .kolm that the verifier scores at GPQA &gt;= 60% with the official eval pack.</p>
-          <span class="reward">Reward &middot; Featured + $1,000 credit + Discord pin</span>
-        </div>
-      </div>
-      <div class="fr-card fr-card--mint">
-        <div class="cm-challenge">
-          <span class="month">Current</span>
-          <h3 class="fr-h3">Fastest Aider 50% pass on a 5090</h3>
-          <p>Score Aider &gt;= 50% on the official harness, run end-to-end on a single RTX 5090, lowest wall-clock wins. Receipt must include the runtime trace.</p>
-          <span class="reward">Reward &middot; Featured + $1,000 credit + 5090 from sponsor</span>
-        </div>
-      </div>
-      <div class="fr-card">
-        <div class="cm-challenge">
-          <span class="month">June 2026</span>
-          <h3 class="fr-h3">Lowest-bit MoE that retains 95% of base</h3>
-          <p>Push the boundary on extreme low-bit MoE. KL divergence against the BF16 base must stay under the published threshold across the eval pack.</p>
-          <span class="reward">Reward &middot; Featured + $1,500 credit + co-write on the kolm blog</span>
-        </div>
-      </div>
-      <div class="fr-card">
-        <div class="cm-challenge">
-          <span class="month">June 2026</span>
-          <h3 class="fr-h3">Best mobile-class artifact for Pixel 9 Pro</h3>
-          <p>Under 4 GB on-disk; over 8 tok/s on a Pixel 9 Pro CPU; clears MMLU &gt;= 55%. Recipe must publish the runtime adapter used.</p>
-          <span class="reward">Reward &middot; Featured + $1,000 credit + device for tester</span>
-        </div>
-      </div>
-    </div>
+    <ul class="fr-spec-list cm-challenge-list">
+      <li class="fr-spec-list__row cm-challenge-list__row--current">
+        <div class="fr-spec-list__head"><h3>Smallest model that clears GPQA 60%</h3><span class="fr-spec-list__delta">CURRENT</span></div>
+        <p class="fr-spec-list__p">Any base, any quant, any merge. Hardware-agnostic. Submission must be a signed .kolm that the verifier scores at GPQA &ge; 60% with the official eval pack.</p>
+        <p class="cm-reward">Reward &middot; Featured + $1,000 credit + Discord pin</p>
+      </li>
+      <li class="fr-spec-list__row cm-challenge-list__row--current">
+        <div class="fr-spec-list__head"><h3>Fastest Aider 50% pass on a 5090</h3><span class="fr-spec-list__delta">CURRENT</span></div>
+        <p class="fr-spec-list__p">Score Aider &ge; 50% on the official harness, run end-to-end on a single RTX 5090, lowest wall-clock wins. Receipt must include the runtime trace.</p>
+        <p class="cm-reward">Reward &middot; Featured + $1,000 credit + 5090 from sponsor</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Lowest-bit MoE that retains 95% of base</h3><span class="fr-spec-list__delta cm-month-amber">JUNE 2026</span></div>
+        <p class="fr-spec-list__p">Push the boundary on extreme low-bit MoE. KL divergence against the BF16 base must stay under the published threshold across the eval pack.</p>
+        <p class="cm-reward">Reward &middot; Featured + $1,500 credit + co-write on the kolm blog</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Best mobile-class artifact for Pixel 9 Pro</h3><span class="fr-spec-list__delta cm-month-amber">JUNE 2026</span></div>
+        <p class="fr-spec-list__p">Under 4 GB on-disk; over 8 tok/s on a Pixel 9 Pro CPU; clears MMLU &ge; 55%. Recipe must publish the runtime adapter used.</p>
+        <p class="cm-reward">Reward &middot; Featured + $1,000 credit + device for tester</p>
+      </li>
+    </ul>
 
     <div class="cm-crosslink">
       <a href="#" class="fr-btn fr-btn--mint">Join Discord to submit</a>

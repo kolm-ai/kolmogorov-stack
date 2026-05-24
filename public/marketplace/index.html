@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark" data-w825-upgrade="true">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Artifact marketplace &middot; Open-source AI workbench &middot; kolm.ai</title>
+<meta name="description" content="kolm artifact marketplace: browse signed .kolm distillations by vertical, task, K-Score, hardware, and teacher origin. Private beta with public listings opening Q3 2026. Publishers receive 70 percent of paid downloads.">
+<meta name="theme-color" content="#07090c">
+<link rel="canonical" href="https://kolm.ai/marketplace">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/frontier.css">
+<script defer src="/frontier.js"></script>
+<script src="/nav.js" defer></script>
+<style>
+  .mk-hero { padding-top: clamp(72px, 9vw, 128px); padding-bottom: clamp(56px, 7vw, 96px); border-bottom: 1px solid var(--line-1); position: relative; }
+  .mk-hero h1 {
+    font-family: var(--fr-font-display);
+    font-size: var(--fr-text-5xl);
+    letter-spacing: var(--fr-track-display);
+    line-height: 1.04;
+    font-weight: 580;
+    color: var(--ink-1);
+    margin: 14px 0 18px;
+    max-width: 22ch;
+  }
+  .mk-hero h1 b { color: var(--fr-mint); font-weight: 580; }
+  .mk-hero .cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+  .mk-hero .meta-row { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 28px; }
+
+  .mk-filter {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    padding: 18px 20px;
+    border: 1px solid var(--line-1);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.015);
+    margin-top: 20px;
+  }
+  @media (max-width: 900px) { .mk-filter { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 540px) { .mk-filter { grid-template-columns: 1fr; } }
+  .mk-filter label { display: block; font-family: var(--fr-font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 6px; }
+  .mk-filter select, .mk-filter input {
+    width: 100%;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--line-1);
+    border-radius: 6px;
+    padding: 9px 11px;
+    font-family: var(--fr-font-sans);
+    font-size: 13.5px;
+    color: var(--ink-1);
+    box-sizing: border-box;
+    outline: none;
+  }
+  .mk-filter select:focus, .mk-filter input:focus { border-color: var(--fr-mint); }
+
+  .mk-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 20px;
+  }
+  @media (max-width: 900px) { .mk-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 540px) { .mk-grid { grid-template-columns: 1fr; } }
+  .mk-card {
+    padding: 18px 20px;
+    border: 1px solid var(--line-1);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.015);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .mk-card h3 { margin: 0; font-family: var(--fr-font-display); font-size: 17px; font-weight: 540; color: var(--ink-1); letter-spacing: -0.01em; }
+  .mk-card .meta { display: flex; gap: 8px; flex-wrap: wrap; font-family: var(--fr-font-mono); font-size: 11px; color: var(--ink-3); letter-spacing: 0.04em; text-transform: uppercase; }
+  .mk-card .meta span { padding: 3px 7px; border: 1px solid var(--line-1); border-radius: 4px; }
+  .mk-card p { margin: 4px 0 0; font-family: var(--fr-font-sans); font-size: 13px; color: var(--ink-2); line-height: 1.55; }
+  .mk-card .stub-tag { font-family: var(--fr-font-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fr-amber); margin-top: 6px; }
+
+  .mk-beta-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(229, 167, 39, 0.10);
+    border: 1px solid rgba(229, 167, 39, 0.30);
+    font-family: var(--fr-font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--fr-amber);
+    margin: 6px 0;
+  }
+
+  .mk-honesty { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-family: var(--fr-font-sans); font-size: 13px; color: var(--ink-2); line-height: 1.55; margin-top: 20px; }
+  .mk-honesty b { color: var(--ink-1); font-weight: 580; }
+
+  .mk-crosslink { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+</style>
+<meta property="og:title" content="Artifact marketplace &middot; Open-source AI workbench &middot; kolm.ai">
+<meta property="og:description" content="Browse signed .kolm distillations. Private beta with public listings opening Q3 2026. Publishers receive 70 percent of paid downloads.">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/marketplace">
+<meta property="og:type" content="website">
+</head>
+<body class="ks">
+<span class="brand-anchor" data-w775="h1" aria-hidden="true">Frontier AI on your own infrastructure.</span>
+<span class="brand-disambig" aria-hidden="true">Not Kolm therapeutics, Kolm band, or other unrelated organizations using similar names.</span>
+
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/k-score">K-score</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">-&gt;</span></a>
+      </div>
+    </div>
+  </header>
+</div>
+
+<main id="main">
+
+<!-- 1. HERO -->
+<section class="mk-hero fr-section">
+  <div class="fr-container">
+    <p class="brand-eyebrow" data-w775="brand-eyebrow">Open-source AI workbench</p>
+    <h1>kolm artifact marketplace.</h1>
+    <p class="fr-lede">Browse signed .kolm distillations by vertical, task, K-Score, hardware target, and teacher origin. Every listed artifact carries a verified signature_block, a published K-Score, and a manifest you can audit before download. Publishers receive 70 percent of paid downloads.</p>
+    <div class="cta-row">
+      <a href="/marketplace/upload" class="fr-btn fr-btn--mint">Publish an artifact</a>
+      <a href="#featured" class="fr-btn fr-btn--ghost">See featured</a>
+    </div>
+    <div class="meta-row">
+      <span class="mk-beta-pill">Marketplace is in private beta. Public listings open Q3 2026.</span>
+    </div>
+    <div class="meta-row" style="margin-top:12px">
+      <span class="fr-status"><span class="fr-status__dot"></span>Publishers receive 70 percent of paid downloads</span>
+      <span class="fr-status fr-status--info"><span class="fr-status__dot"></span>Every artifact carries a signed manifest</span>
+      <span class="fr-status fr-status--warn"><span class="fr-status__dot"></span>Featured grid is placeholder data</span>
+    </div>
+  </div>
+</section>
+
+<!-- 2. FILTER SHELL -->
+<section class="fr-section" id="filters">
+  <div class="fr-container">
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">Browse and filter</span>
+      <h2 class="fr-h2">Narrow by what matters.</h2>
+      <p class="fr-lede">Filters operate on manifest fields, not free-text tags. K-Score min, hardware target, and teacher origin are first-class because those are the fields that change whether the artifact will work for your tenant.</p>
+    </div>
+    <div class="mk-filter" role="search" aria-label="Marketplace filters (UI shell, no live data)">
+      <div>
+        <label for="mk-vertical">Vertical</label>
+        <select id="mk-vertical">
+          <option>Any</option>
+          <option>Customer service</option>
+          <option>Legal</option>
+          <option>Health</option>
+          <option>Code</option>
+          <option>Finance</option>
+          <option>Education</option>
+          <option>Translation</option>
+        </select>
+      </div>
+      <div>
+        <label for="mk-task">Task type</label>
+        <select id="mk-task">
+          <option>Any</option>
+          <option>Classification</option>
+          <option>Extraction</option>
+          <option>Summarization</option>
+          <option>RAG response</option>
+          <option>Reranking</option>
+          <option>Reasoning</option>
+        </select>
+      </div>
+      <div>
+        <label for="mk-kscore">K-Score min</label>
+        <input id="mk-kscore" type="text" placeholder="0.85" inputmode="decimal">
+      </div>
+      <div>
+        <label for="mk-hardware">Hardware target</label>
+        <select id="mk-hardware">
+          <option>Any</option>
+          <option>Single-GPU consumer</option>
+          <option>CPU only</option>
+          <option>Multi-GPU cluster</option>
+          <option>Edge / mobile</option>
+        </select>
+      </div>
+      <div>
+        <label for="mk-teacher">Teacher origin</label>
+        <select id="mk-teacher">
+          <option>Any</option>
+          <option>Anthropic Claude</option>
+          <option>OpenAI</option>
+          <option>Meta Llama</option>
+          <option>Mistral</option>
+          <option>DeepSeek</option>
+          <option>Qwen</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. FEATURED ARTIFACTS -->
+<section class="fr-section" id="featured">
+  <div class="fr-container">
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">Featured artifacts</span>
+      <h2 class="fr-h2">Six placeholder cards.</h2>
+      <p class="fr-lede">These cards are visual stubs marked <code>data-marketplace-stub="true"</code>. When the public marketplace opens, real listings replace this grid. We will not seed the page with fabricated listings to make it look populated.</p>
+    </div>
+    <div class="mk-grid">
+      <div class="mk-card" data-marketplace-stub="true">
+        <h3>CS Intent Classifier</h3>
+        <div class="meta"><span>CS</span><span>classification</span><span>K 0.91</span></div>
+        <p>Distilled from Claude on 14,200 captured customer-service tickets. Runs on a single 5090 at 230 tok/s. Honest empty-state for unknown intents.</p>
+        <span class="stub-tag">Placeholder stub</span>
+      </div>
+      <div class="mk-card" data-marketplace-stub="true">
+        <h3>Legal Clause Extractor</h3>
+        <div class="meta"><span>Legal</span><span>extraction</span><span>K 0.88</span></div>
+        <p>Distilled from GPT-4-class teacher on 6,300 contract pages. Outputs JSON with provenance spans. Refuses if confidence is below 0.7.</p>
+        <span class="stub-tag">Placeholder stub</span>
+      </div>
+      <div class="mk-card" data-marketplace-stub="true">
+        <h3>Invoice Parser</h3>
+        <div class="meta"><span>Finance</span><span>extraction</span><span>K 0.93</span></div>
+        <p>Multilingual invoice parser. Handles 12 locales including EU VAT formats. Distilled from a 70B teacher; runs CPU-only at 18 invoices/sec.</p>
+        <span class="stub-tag">Placeholder stub</span>
+      </div>
+      <div class="mk-card" data-marketplace-stub="true">
+        <h3>PHI Redactor</h3>
+        <div class="meta"><span>Health</span><span>redaction</span><span>K 0.95</span></div>
+        <p>HIPAA-grade PHI redaction for clinical notes. Stamps redacted spans into the output for downstream audit. Single-GPU consumer target.</p>
+        <span class="stub-tag">Placeholder stub</span>
+      </div>
+      <div class="mk-card" data-marketplace-stub="true">
+        <h3>Code Issue Classifier</h3>
+        <div class="meta"><span>Code</span><span>classification</span><span>K 0.89</span></div>
+        <p>Triages GitHub issues into bug, feature, docs, or question. Distilled on 41,000 issues across 18 repos. CPU-friendly.</p>
+        <span class="stub-tag">Placeholder stub</span>
+      </div>
+      <div class="mk-card" data-marketplace-stub="true">
+        <h3>Multilingual Greeter</h3>
+        <div class="meta"><span>Translation</span><span>response</span><span>K 0.86</span></div>
+        <p>Distilled greeter and intent-router for 24 languages. Falls back to English with a clear honesty pill when language detection is low confidence.</p>
+        <span class="stub-tag">Placeholder stub</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. PUBLISH FLOW + HONESTY -->
+<section class="fr-section" id="publish">
+  <div class="fr-container">
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">Publish a .kolm</span>
+      <h2 class="fr-h2">Upload, sign, list.</h2>
+      <p class="fr-lede">Uploading an artifact requires a verified teacher signature, a published K-Score that matches the manifest, and a license declaration. Open-weights is the default; commercial-restricted is an opt-in flag for publishers who want paywall mechanics.</p>
+    </div>
+    <div class="mk-crosslink">
+      <a href="/marketplace/upload" class="fr-btn fr-btn--mint">Open the upload flow</a>
+      <a href="/k-score" class="fr-btn fr-btn--ghost">What is a K-Score</a>
+      <a href="/verify-prod" class="fr-btn fr-btn--ghost">Verify an artifact</a>
+    </div>
+    <div class="mk-honesty">
+      <b>Revenue share.</b> Publishers receive 70 percent of paid downloads, net of payment processor fees. The remaining 30 percent funds marketplace hosting, signature verification, and dispute handling. <b>Beta status.</b> Marketplace is in private beta. Public listings open Q3 2026. Email rodneyyesep@gmail.com to join the beta cohort.
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI workbench. Capture, distill, quantize, and run signed models on your own hardware.</p>
+        <p class="ks-foot__tag" style="margin-top:8px">Contact: rodneyyesep@gmail.com</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/faq">FAQ</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/marketplace">Marketplace</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Community</h4>
+        <a href="/community">Community</a>
+        <a href="/recipes">Recipes</a>
+        <a href="/forge">Forge</a>
+        <a href="/leaderboard">Leaderboard</a>
+        <a href="/labs">Labs</a>
+        <a href="/pricing">Pricing</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- w825-1-marketplace-shell -->
+</body>
+</html>

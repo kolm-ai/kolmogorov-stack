@@ -73,4 +73,4 @@ Apache-2.0. See [LICENSE](./LICENSE).
 
 ## Status
 
-`v0.1.0` — public skeleton. The remote `predict()` path is stable. A local in-process runtime (matching `packages/sdk-python/kolm/runtimes`) is on the roadmap; until then, run `kolm serve --http` and point `endpoint` at it.
+`v0.2.6` — release-aligned SDK metadata. The remote `predict()` path is stable. A local in-process runtime (matching `packages/sdk-python/kolm/runtimes`) is on the roadmap; until then, run `kolm serve --http` and point `endpoint` at it.

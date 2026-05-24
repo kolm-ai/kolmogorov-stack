@@ -13,9 +13,9 @@
 
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { readFile } from "node:fs/promises";
-import { unzipSync } from "node:zlib";
+import { inflateRawSync } from "node:zlib";
 
-export const VERSION = "0.1.0";
+export const VERSION = "0.2.6";
 
 export class VerificationError extends Error {
   constructor(message: string) {
@@ -141,7 +141,7 @@ function readZipEntries(buf: Uint8Array): Map<string, Uint8Array> {
     if (compMethod === 0) {
       content = raw;
     } else if (compMethod === 8) {
-      content = unzipSync(raw, { finishFlush: 2 /* Z_SYNC_FLUSH */ });
+      content = inflateRawSync(raw);
     } else {
       throw new VerificationError(`unsupported zip compression method ${compMethod} for ${name}`);
     }

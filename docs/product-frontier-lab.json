@@ -1,0 +1,497 @@
+{
+  "schema_version": "kolm-product-frontier-lab-1",
+  "updated_at": "2026-05-23",
+  "purpose": "Third-pass backend frontier lab for turning current research into executable product experiments. This wave covers the gaps left after W600: long-context memory, sparse/MoE serving, constrained decoding, data curation, multimodal edge runtimes, confidential compute, package/adoption rails, and proof-grade evidence loops.",
+  "tracked_metrics": ["quality", "latency", "cost", "portability", "proof", "security", "enterprise", "dx", "conversion"],
+  "categories": [
+    "long-context-kv-memory",
+    "long-context-training",
+    "structured-decoding",
+    "data-curation",
+    "sparse-moe-routing",
+    "multimodal-edge",
+    "confidential-compute",
+    "runtime-target-matrix",
+    "benchmark-evidence",
+    "privacy-data-quality",
+    "cloud-train-autopilot",
+    "proof-attestation",
+    "ecosystem-packaging",
+    "codegraph-planning"
+  ],
+  "sources": [
+    {
+      "id": "streamingllm",
+      "url": "https://arxiv.org/abs/2309.17453",
+      "area": "long-context-kv-memory",
+      "lesson": "StreamingLLM shows that preserving attention-sink tokens plus a sliding window can stabilize very long streaming inference without fine-tuning; Kolm should compile a KV policy instead of treating context length as only a model card field."
+    },
+    {
+      "id": "h2o-kv",
+      "url": "https://arxiv.org/abs/2306.14048",
+      "area": "long-context-kv-memory",
+      "lesson": "H2O frames KV cache as a heavy-hitter eviction problem where a small subset of tokens dominates attention utility; Kolm receipts should explain which tokens were retained, evicted, and protected by policy."
+    },
+    {
+      "id": "snapkv",
+      "url": "https://arxiv.org/abs/2404.14469",
+      "area": "long-context-kv-memory",
+      "lesson": "SnapKV uses observation-window attention patterns before generation to choose important KV positions; Kolm should run prefill diagnostics and choose cache compression per task rather than relying on fixed context truncation."
+    },
+    {
+      "id": "pyramidkv",
+      "url": "https://arxiv.org/abs/2406.02069",
+      "area": "long-context-kv-memory",
+      "lesson": "PyramidKV allocates different KV budgets by layer because information funnels across depth; Kolm should model cache budget as a layer-wise artifact property when compiling long-context runtimes."
+    },
+    {
+      "id": "infllm",
+      "url": "https://arxiv.org/abs/2402.04617",
+      "area": "long-context-kv-memory",
+      "lesson": "InfLLM demonstrates training-free memory for extremely long sequences; Kolm should offer external memory indexes for audit, research, legal, and codebase workloads before defaulting to expensive long-context fine-tuning."
+    },
+    {
+      "id": "minference",
+      "url": "https://arxiv.org/abs/2407.02490",
+      "area": "long-context-kv-memory",
+      "lesson": "MInference accelerates long-context prefill with dynamic sparse attention; Kolm should benchmark prefill separately from decode and expose sparse prefill as a target capability in the build plan."
+    },
+    {
+      "id": "ring-attention",
+      "url": "https://arxiv.org/abs/2310.01889",
+      "area": "long-context-training",
+      "lesson": "Ring Attention distributes blockwise attention across devices for near-infinite context; Kolm cloud plans should distinguish exact distributed context extension from approximate cache eviction."
+    },
+    {
+      "id": "longrope",
+      "url": "https://arxiv.org/abs/2402.13753",
+      "area": "long-context-training",
+      "lesson": "LongRoPE extends context windows through non-uniform positional interpolation and staged fine-tuning; Kolm should only promise context extension after short-context regression checks and tokenizer/position receipt capture."
+    },
+    {
+      "id": "vllm-structured",
+      "url": "https://docs.vllm.ai/en/v0.7.3/features/structured_outputs.html",
+      "area": "structured-decoding",
+      "lesson": "vLLM supports guided JSON, regex, choice, and grammar paths through guided decoding backends; Kolm should route schema-constrained workloads to runtimes that enforce structure at decode time."
+    },
+    {
+      "id": "sglang-structured",
+      "url": "https://docs.sglang.io/advanced_features/structured_outputs.html",
+      "area": "structured-decoding",
+      "lesson": "SGLang exposes JSON schema, regex, and EBNF constraints as runtime parameters; Kolm should compile schemas and grammars into signed artifact policy instead of leaving structure in prompt prose."
+    },
+    {
+      "id": "xgrammar-docs",
+      "url": "https://xgrammar.mlc.ai/docs/tutorials/constrained_decoding.html",
+      "area": "structured-decoding",
+      "lesson": "XGrammar treats constrained decoding as a portable grammar engine with low generation impact; Kolm should include grammar compatibility tests in runtime adoption packets."
+    },
+    {
+      "id": "xgrammar-paper",
+      "url": "https://arxiv.org/abs/2411.15100",
+      "area": "structured-decoding",
+      "lesson": "XGrammar's structured-generation paper formalizes efficient context-free grammar execution; Kolm should differentiate syntactic validity from semantic K-score and test both."
+    },
+    {
+      "id": "datacomp-lm",
+      "url": "https://arxiv.org/abs/2406.11794",
+      "area": "data-curation",
+      "lesson": "DataComp-LM shows that controlled data curation can beat model-only improvements; Kolm datasets need filter, mix, dedupe, provenance, and quality receipts as first-class training inputs."
+    },
+    {
+      "id": "semdedup",
+      "url": "https://arxiv.org/abs/2303.09540",
+      "area": "data-curation",
+      "lesson": "SemDeDup uses embeddings to remove semantic duplicates while preserving or improving performance; Kolm capture lakes should surface near-duplicate clusters before users spend money labeling or distilling."
+    },
+    {
+      "id": "datatrove",
+      "url": "https://github.com/huggingface/datatrove",
+      "area": "data-curation",
+      "lesson": "DataTrove packages large-scale filtering, deduplication, reading, and writing as composable blocks; Kolm should expose a pipeline manifest for repeatable capture-to-dataset transformations."
+    },
+    {
+      "id": "nemo-semdedup",
+      "url": "https://docs.nvidia.com/nemo-framework/user-guide/24.09/datacuration/semdedup.html",
+      "area": "data-curation",
+      "lesson": "NVIDIA NeMo operationalizes semantic deduplication as a production data-curation primitive; Kolm should ship local benchmark fixtures proving dedupe changes improve quality instead of just shrinking rows."
+    },
+    {
+      "id": "deepspeed-moe-inference",
+      "url": "https://www.deepspeed.ai/tutorials/mixture-of-experts-inference/",
+      "area": "sparse-moe-routing",
+      "lesson": "DeepSpeed-MoE inference separates data, tensor, expert, and expert-slicing parallelism; Kolm should plan MoE serving topology explicitly when a user picks sparse frontier students."
+    },
+    {
+      "id": "vllm-expert-parallel",
+      "url": "https://docs.vllm.ai/en/stable/serving/expert_parallel_deployment/",
+      "area": "sparse-moe-routing",
+      "lesson": "vLLM documents expert parallel deployment for MoE models; Kolm should model expert placement, locality, and GPU count as backend constraints in compute plans."
+    },
+    {
+      "id": "sglang-expert-parallel",
+      "url": "https://docs.sglang.io/advanced_features/expert_parallelism.html",
+      "area": "sparse-moe-routing",
+      "lesson": "SGLang includes expert parallel load balancing and overlap modes; Kolm should benchmark imbalance and token dispatch overhead as part of serving evidence."
+    },
+    {
+      "id": "tensorrt-moe",
+      "url": "https://nvidia.github.io/TensorRT-LLM/advanced/expert-parallelism.html",
+      "area": "sparse-moe-routing",
+      "lesson": "TensorRT-LLM exposes expert parallelism as a high-performance serving target; Kolm's runtime target matrix should capture MoE-specific flags rather than flattening all runtimes to dense-model assumptions."
+    },
+    {
+      "id": "executorch",
+      "url": "https://docs.pytorch.org/executorch/stable/index.html",
+      "area": "multimodal-edge",
+      "lesson": "ExecuTorch is PyTorch's edge inference stack for mobile and embedded devices with CPU, GPU, NPU, and DSP acceleration; Kolm should treat it as a first-class mobile artifact target."
+    },
+    {
+      "id": "mediapipe-llm",
+      "url": "https://ai.google.dev/edge/mediapipe/solutions/genai/llm_inference/android",
+      "area": "multimodal-edge",
+      "lesson": "MediaPipe LLM Inference runs LLMs fully on Android devices; Kolm mobile SDKs should have explicit on-device model availability checks and graceful fallback contracts."
+    },
+    {
+      "id": "litert",
+      "url": "https://ai.google.dev/edge/litert/overview",
+      "area": "multimodal-edge",
+      "lesson": "LiteRT is Google's edge runtime and optimization stack for ML and GenAI; Kolm should distinguish Android AICore, LiteRT, MediaPipe, ONNX, and ExecuTorch runtime paths in device-fit planning."
+    },
+    {
+      "id": "onnx-nnapi",
+      "url": "https://onnxruntime.ai/docs/execution-providers/NNAPI-ExecutionProvider.html",
+      "area": "multimodal-edge",
+      "lesson": "ONNX Runtime's NNAPI execution provider accelerates Android inference across CPU, GPU, and neural accelerators; Kolm exports should include per-execution-provider compatibility receipts."
+    },
+    {
+      "id": "chrome-web-ai",
+      "url": "https://developer.chrome.com/docs/ai/platform",
+      "area": "runtime-target-matrix",
+      "lesson": "Chrome positions WebAssembly, WebGPU, and WebNN as browser AI acceleration layers; Kolm's WASM package gate must test browser acceleration paths, not just JavaScript import success."
+    },
+    {
+      "id": "aws-nitro-attestation",
+      "url": "https://docs.aws.amazon.com/enclaves/latest/user/set-up-attestation.html",
+      "area": "confidential-compute",
+      "lesson": "AWS Nitro Enclaves expose cryptographic attestation documents and KMS integration; Kolm BYOC plans should bind artifact decryption and compile secrets to enclave measurements."
+    },
+    {
+      "id": "aws-kms-attestation",
+      "url": "https://docs.aws.amazon.com/kms/latest/developerguide/services-nitro-enclaves.html",
+      "area": "confidential-compute",
+      "lesson": "AWS KMS can verify Nitro attestation before decrypting keys; Kolm's secrets management should emit policy templates that prove only measured confidential jobs can access training secrets."
+    },
+    {
+      "id": "gcp-confidential-vm",
+      "url": "https://docs.cloud.google.com/confidential-computing/confidential-vm/docs/confidential-vm-overview",
+      "area": "confidential-compute",
+      "lesson": "Google Confidential VM combines hardware memory encryption and boot-time attestation across AMD SEV/SEV-SNP and Intel TDX options; Kolm should record provider, CPU TEE, and attestation status separately."
+    },
+    {
+      "id": "azure-confidential-vm",
+      "url": "https://learn.microsoft.com/en-us/azure/confidential-computing/confidential-vm-overview",
+      "area": "confidential-compute",
+      "lesson": "Azure confidential VMs support AMD SEV-SNP and Intel TDX attestation flows; Kolm enterprise plans should test that customer cloud images can verify hardware isolation before jobs run."
+    },
+    {
+      "id": "nvidia-attestation",
+      "url": "https://docs.nvidia.com/attestation/index.html",
+      "area": "confidential-compute",
+      "lesson": "NVIDIA Attestation Suite verifies device and platform integrity for confidential GPU deployments; Kolm should require GPU attestation evidence before claiming confidential model training."
+    },
+    {
+      "id": "amd-sb-3034",
+      "url": "https://www.amd.com/en/resources/product-security/bulletin/amd-sb-3034.html",
+      "area": "confidential-compute",
+      "lesson": "AMD's SEV-SNP routing advisory shows confidential compute claims require firmware and advisory checks; Kolm should treat attestation as a living risk signal, not a static checkbox."
+    },
+    {
+      "id": "opentelemetry-genai",
+      "url": "https://opentelemetry.io/docs/specs/semconv/gen-ai/",
+      "area": "proof-attestation",
+      "lesson": "OpenTelemetry GenAI semantic conventions provide standard attributes for model requests, responses, usage, and operation names; Kolm receipts should map to OTEL spans so enterprise telemetry is portable."
+    },
+    {
+      "id": "slsa-framework",
+      "url": "https://slsa.dev/spec/v1.0/",
+      "area": "ecosystem-packaging",
+      "lesson": "SLSA defines supply-chain levels and provenance expectations; Kolm package releases and artifact builders need provenance assertions before public package gates can be marked finished."
+    },
+    {
+      "id": "sigstore-docs",
+      "url": "https://docs.sigstore.dev/",
+      "area": "proof-attestation",
+      "lesson": "Sigstore documents keyless signing and transparency-log verification; Kolm's standalone verify and package rails should verify signatures independently from the hosted service."
+    },
+    {
+      "id": "owasp-llm-top10",
+      "url": "https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/",
+      "area": "benchmark-evidence",
+      "lesson": "OWASP's LLM Top 10 gives attack classes that should become compile and runtime red-team gates; Kolm benchmarks should include prompt injection, sensitive disclosure, supply-chain, and excessive agency checks."
+    },
+    {
+      "id": "codegraph-repo",
+      "url": "https://github.com/colbymchenry/codegraph",
+      "area": "codegraph-planning",
+      "lesson": "Codegraph-style repository mapping is useful as a planning primitive because it turns scattered code relationships into traversable implementation context; Kolm should use this idea to mine ownership, tests, claims, and surface dependencies."
+    }
+  ],
+  "experiments": [
+    {
+      "id": "w601-kv-memory-controller",
+      "category": "long-context-kv-memory",
+      "portfolio_invention_id": "device-fit-autopilot",
+      "title": "KV Memory Controller",
+      "hypothesis": "Long-context workloads should be compiled with an explicit memory controller that chooses attention sinks, heavy hitters, observation-window compression, and layer-wise budgets per task, because the same 128k prompt can be cheap, impossible, or unsafe depending on retrieval pattern and device memory.",
+      "source_refs": ["streamingllm", "h2o-kv", "snapkv", "pyramidkv", "infllm", "minference"],
+      "journeys": ["gateway-capture", "datasets-labeling", "compile-verify", "runtime-inference", "compute-cloud", "devices-fleet"],
+      "dimensions": ["model-provider", "compute-target", "artifact-runtime", "proof-mode"],
+      "readiness": ["benchmarking-infra", "runtime-wasm", "ios-android-sdk", "sdk-depth"],
+      "metrics": ["quality", "latency", "cost", "portability", "proof", "dx"],
+      "implementation_files": ["docs/product-frontier-lab.json", "scripts/simulate-product-frontier-lab.cjs", "tests/wave601-product-frontier-lab.test.js", "src/build-strategy-brain.js", "src/runtime-policy.js", "src/platform-capabilities.js"],
+      "procedure": ["Add context profile inputs to the strategy brain: prompt tokens, retrieval density, answer locality, and device memory.", "Emit one of four KV policies: sink-window, heavy-hitter, observation-snap, or layer-pyramid.", "Record retained-token rules and protected spans in the artifact receipt.", "Run synthetic long-context probes for extraction, summarization, codebase Q&A, and legal review.", "Compare prefill time, decode time, memory, K-score, and citation accuracy against full-cache and truncation baselines.", "Fail closed when the chosen runtime lacks cache-policy support or when evidence falls below the declared threshold."],
+      "acceptance_tests": ["node scripts/simulate-product-frontier-lab.cjs --experiment=w601-kv-memory-controller --summary", "node scripts/simulate-product-frontier-lab.cjs --source=streamingllm --summary", "npm run verify:frontier-lab"],
+      "kill_criteria": ["Any workload loses more quality than the configured K-score tolerance versus full cache.", "Receipt cannot explain retained and evicted context spans.", "Policy only works on one backend and fails portability coverage."],
+      "expected_metric_lift": {"quality": 0.09, "latency": 0.26, "cost": 0.2, "portability": 0.12, "proof": 0.14, "dx": 0.08}
+    },
+    {
+      "id": "w601-context-extension-compiler",
+      "category": "long-context-training",
+      "portfolio_invention_id": "kolm-ir-autotarget",
+      "title": "Context Extension Compiler",
+      "hypothesis": "Context extension should be a compiler target with exact distributed attention, positional-interpolation tuning, and short-context regression proof, because naive RoPE scaling can make the product look capable while silently damaging the normal workloads users actually run.",
+      "source_refs": ["ring-attention", "longrope", "minference", "streamingllm"],
+      "journeys": ["train-distill", "models-backbones", "compile-verify", "runtime-inference", "compute-cloud"],
+      "dimensions": ["compute-target", "artifact-runtime", "deployment-mode", "proof-mode"],
+      "readiness": ["ecosystem-runtime-adoption", "benchmarking-infra", "runtime-lts", "cloud-compute-broker"],
+      "metrics": ["quality", "latency", "cost", "portability", "proof", "enterprise"],
+      "implementation_files": ["docs/product-frontier-lab.json", "scripts/simulate-product-frontier-lab.cjs", "tests/wave601-product-frontier-lab.test.js", "src/compile-pipeline.js", "src/cloud-compute-broker.js", "src/benchmark-evidence.js"],
+      "procedure": ["Add compile target variants for exact distributed attention, approximate sparse prefill, and positional interpolation.", "Require a baseline short-context eval before any context-extension change.", "Estimate GPU topology and memory from the cloud compute broker.", "Record tokenizer, RoPE, interpolation, and distributed-attention settings in the artifact manifest.", "Run needle, multi-hop retrieval, citation, summarization, and short-context regression probes.", "Block claims unless both long-context lift and short-context preservation pass."],
+      "acceptance_tests": ["node scripts/simulate-product-frontier-lab.cjs --experiment=w601-context-extension-compiler --summary", "node scripts/simulate-product-frontier-lab.cjs --category=long-context-training --summary", "npm run verify:depth"],
+      "kill_criteria": ["Short-context regression exceeds the gate.", "Cloud plan cannot name a viable topology for the requested context.", "Receipt lacks model-positioning metadata."],
+      "expected_metric_lift": {"quality": 0.11, "latency": 0.14, "cost": 0.1, "portability": 0.16, "proof": 0.18, "enterprise": 0.08}
+    },
+    {
+      "id": "w601-structured-decode-contracts",
+      "category": "structured-decoding",
+      "portfolio_invention_id": "agent-tool-compiler",
+      "title": "Structured Decode Contracts",
+      "hypothesis": "Every tool, extraction, receipt, and agent action artifact should compile schemas into decode-time constraints when the runtime supports them and into validation-repair fallbacks when it does not, because prompt-only JSON instructions are not a production control.",
+      "source_refs": ["vllm-structured", "sglang-structured", "xgrammar-docs", "xgrammar-paper", "owasp-llm-top10"],
+      "journeys": ["gateway-capture", "datasets-labeling", "compile-verify", "runtime-inference", "agents-registry", "enterprise-governance"],
+      "dimensions": ["model-provider", "artifact-runtime", "governance-mode", "proof-mode"],
+      "readiness": ["runtime-wasm", "sdk-depth", "ecosystem-runtime-adoption", "benchmarking-infra"],
+      "metrics": ["quality", "latency", "security", "proof", "dx", "conversion"],
+      "implementation_files": ["docs/product-frontier-lab.json", "scripts/simulate-product-frontier-lab.cjs", "tests/wave601-product-frontier-lab.test.js", "src/spec-decode.js", "src/router.js", "cli/kolm.js"],
+      "procedure": ["Normalize JSON schema, regex, EBNF, and tool-call constraints into one artifact policy.", "Map each runtime to native guided decoding, grammar decoding, validation-only, or unsupported.", "Run adversarial schema prompts that attempt enum, type, nesting, and tool-name violations.", "Store syntactic pass rate, semantic K-score, repair count, and fallback path in receipts.", "Expose failures in CLI, API, account, and TUI as a concrete next step instead of a generic error.", "Publish the runtime compatibility matrix only after local focused tests pass."],
+      "acceptance_tests": ["node scripts/simulate-product-frontier-lab.cjs --experiment=w601-structured-decode-contracts --summary", "node scripts/simulate-product-frontier-lab.cjs --source=xgrammar-docs --summary", "npm run verify:frontier-lab"],
+      "kill_criteria": ["Provider returns syntactically valid JSON but fails semantic schema tests.", "Runtime matrix marks unsupported engines as supported.", "Agent tool action can escape the compiled grammar."],
+      "expected_metric_lift": {"quality": 0.13, "latency": 0.07, "security": 0.2, "proof": 0.2, "dx": 0.12, "conversion": 0.08}
+    },
+    {
+      "id": "w601-data-curation-engine",
+      "category": "data-curation",
+      "portfolio_invention_id": "distill-forge",
+      "title": "Data Curation Engine",
+      "hypothesis": "The capture lake should become a measurable data-curation engine that filters, deduplicates, mixes, attributes, and promotes examples by expected K-score lift per dollar, because training more rows is often worse than training cleaner rows.",
+      "source_refs": ["datacomp-lm", "semdedup", "datatrove", "nemo-semdedup"],
+      "journeys": ["gateway-capture", "privacy-lake", "datasets-labeling", "train-distill", "compile-verify"],
+      "dimensions": ["storage-plane", "privacy-mode", "governance-mode", "proof-mode"],
+      "readiness": ["benchmarking-infra", "sdk-depth", "compliance-certifications", "one-line-install"],
+      "metrics": ["quality", "cost", "proof", "security", "dx", "enterprise"],
+      "implementation_files": ["docs/product-frontier-lab.json", "scripts/simulate-product-frontier-lab.cjs", "tests/wave601-product-frontier-lab.test.js", "src/lake.js", "src/distill-strategy.js", "src/quality-calibration.js"],
+      "procedure": ["Add dataset cards for source, license, redaction state, duplicate cluster, and label quality.", "Compute exact and semantic duplicate clusters before train/distill recommendations.", "Sample rows by active uncertainty, coverage gap, governance risk, and teacher-cost budget.", "Emit a promotion receipt when a row moves from capture to training.", "Run public and private benchmark fixtures showing dedupe and filtering improve K-score.", "Expose SQL/parquet export paths without leaking raw sensitive examples."],
+      "acceptance_tests": ["node scripts/simulate-product-frontier-lab.cjs --experiment=w601-data-curation-engine --summary", "node scripts/simulate-product-frontier-lab.cjs --category=data-curation --summary", "npm run verify:research-atlas"],
+      "kill_criteria": ["Data reduction improves cost but lowers holdout K-score.", "Duplicate clusters cannot be traced back to source rows.", "Sensitive examples bypass redaction policy during export."],
+      "expected_metric_lift": {"quality": 0.19, "cost": 0.18, "proof": 0.16, "security": 0.13, "dx": 0.11, "enterprise": 0.1}
+    },
+    {
+      "id": "w601-moe-serving-orchestrator",
+      "category": "sparse-moe-routing",
+      "portfolio_invention_id": "cloud-compute-broker",
+      "title": "MoE Serving Orchestrator",
+      "hypothesis": "Sparse frontier models require first-class expert-parallel topology planning, load-balance telemetry, and runtime-specific flags, because a generic GPU count estimator can make MoE cheaper on paper while causing idle experts and unstable latency in production.",
+      "source_refs": ["deepspeed-moe-inference", "vllm-expert-parallel", "sglang-expert-parallel", "tensorrt-moe"],
+      "journeys": ["models-backbones", "runtime-inference", "compute-cloud", "enterprise-governance", "agents-registry"],
+      "dimensions": ["model-provider", "compute-target", "artifact-runtime", "deployment-mode"],
+      "readiness": ["ecosystem-runtime-adoption", "benchmarking-infra", "sdk-depth", "cloud-compute-broker"],
+      "metrics": ["quality", "latency", "cost", "portability", "enterprise", "proof"],
+      "implementation_files": ["docs/product-frontier-lab.json", "scripts/simulate-product-frontier-lab.cjs", "tests/wave601-product-frontier-lab.test.js", "src/cloud-compute-broker.js", "src/platform-capabilities.js", "src/benchmark-evidence.js"],
+      "procedure": ["Extend compute targets with dense, MoE, expert-parallel, and expert-load-balancer capability flags.", "Estimate expert memory, dispatch overhead, and top-k activation from model metadata.", "Choose DeepSpeed, vLLM, SGLang, or TensorRT-LLM based on deployment and hardware constraints.", "Emit MoE topology, expert placement, and imbalance receipts.", "Benchmark p50, p95, p99, TTFT, throughput, and expert utilization under skewed prompts.", "Fail cloud plan if topology cannot meet latency or budget limits."],
+      "acceptance_tests": ["node scripts/simulate-product-frontier-lab.cjs --experiment=w601-moe-serving-orchestrator --summary", "node scripts/simulate-product-frontier-lab.cjs --source=vllm-expert-parallel --summary", "npm run verify:cloud-broker"],
+      "kill_criteria": ["Expert imbalance is unmeasured.", "Plan cannot name a concrete runtime and topology.", "MoE path loses quality or latency versus a dense fallback for the workload."],
+      "expected_metric_lift": {"quality": 0.07, "latency": 0.24, "cost": 0.24, "portability": 0.15, "enterprise": 0.12, "proof": 0.12}
+    },
+    {
+      "id": "w601-multimodal-edge-packager",
+      "category": "multimodal-edge",
+      "portfolio_invention_id": "device-fit-autopilot",
+      "title": "Multimodal Edge Packager",
+      "hypothesis": "Kolm should compile text, audio, image, and tool-routing artifacts into target-specific mobile and browser bundles with hardware capability checks, because the real edge market is not a single local LLM binary.",
+      "source_refs": ["executorch", "mediapipe-llm", "litert", "onnx-nnapi", "chrome-web-ai"],
+      "journeys": ["multimodal-tokenization", "compile-verify", "runtime-inference", "devices-fleet", "agents-registry"],
+      "dimensions": ["compute-target", "artifact-runtime", "deployment-mode", "proof-mode"],
+      "readiness": ["runtime-wasm", "ios-android-sdk", "sdk-depth", "one-line-install"],
+      "metrics": ["quality", "latency", "cost", "portability", "dx", "conversion"],
+      "implementation_files": ["docs/product-frontier-lab.json", "scripts/simulate-product-frontier-lab.cjs", "tests/wave601-product-frontier-lab.test.js", "src/platform-capabilities.js", "src/runtime-adoption-packets.js", "src/package-release-readiness.js"],
+      "procedure": ["Add runtime target rows for ExecuTorch, MediaPipe, LiteRT, ONNX NNAPI, CoreML, WebGPU, and WebNN.", "Generate a device-fit plan from OS, accelerator, memory, browser, and model family.", "Build signed package manifests for mobile SDK and browser runtime release gates.", "Run simulated export compatibility tests for text, vision, audio, and structured tool outputs.", "Record model availability and fallback mode when Android AICore or device runtimes are unavailable.", "Keep public copy scoped until package releases and device screenshots exist."],
+      "acceptance_tests": ["node scripts/simulate-product-frontier-lab.cjs --experiment=w601-multimodal-edge-packager --summary", "node scripts/simulate-product-frontier-lab.cjs --category=multimodal-edge --summary", "npm run verify:package-release"],
+      "kill_criteria": ["SDK package gate lacks release evidence.", "Runtime support is claimed without a device capability probe.", "Fallback path is missing for unsupported phones or browsers."],
+      "expected_metric_lift": {"quality": 0.08, "latency": 0.18, "cost": 0.15, "portability": 0.29, "dx": 0.18, "conversion": 0.12}
+    },
+    {
+      "id": "w601-confidential-compute-runbook",
+      "category": "confidential-compute",
+      "portfolio_invention_id": "privacy-membrane-max",
+      "title": "Confidential Compute Runbook",
+      "hypothesis": "Enterprise train/distill jobs need attestation-bound secrets and live firmware/advisory checks across CPU and GPU TEEs, because confidential computing without measured boot, KMS policy, and advisory freshness is security theater.",
+      "source_refs": ["aws-nitro-attestation", "aws-kms-attestation", "gcp-confidential-vm", "azure-confidential-vm", "nvidia-attestation", "amd-sb-3034"],
+      "journeys": ["privacy-lake", "train-distill", "compute-cloud", "enterprise-governance", "compile-verify"],
+      "dimensions": ["compute-target", "privacy-mode", "deployment-mode", "governance-mode", "proof-mode"],
+      "readiness": ["compliance-certifications", "benchmarking-infra", "cloud-compute-broker", "secrets-management"],
+      "metrics": ["security", "enterprise", "proof", "quality", "cost", "conversion"],
+      "implementation_files": ["docs/product-frontier-lab.json", "scripts/simulate-product-frontier-lab.cjs", "tests/wave601-product-frontier-lab.test.js", "src/cloud-compute-broker.js", "src/compliance-certification-packet.js", "src/format-governance-packet.js"],
+      "procedure": ["Add confidential target variants for Nitro Enclave, AWS NitroTPM, GCP Confidential VM, Azure Confidential VM, and NVIDIA confidential GPU.", "Generate provider-specific attestation and key-release policy templates.", "Require firmware/advisory freshness checks before confidential status is marked ready.", "Bind artifact decryption, dataset pull, and teacher-provider secrets to attested measurements.", "Emit a redacted compliance packet with measurements, policy hash, and unsupported controls.", "Fail closed when attestation cannot be verified locally or by provider APIs."],
+      "acceptance_tests": ["node scripts/simulate-product-frontier-lab.cjs --experiment=w601-confidential-compute-runbook --summary", "node scripts/simulate-product-frontier-lab.cjs --source=amd-sb-3034 --summary", "npm run verify:compliance-packet"],
+      "kill_criteria": ["Confidential claim lacks attestation evidence.", "Key-release policy is not bound to measured workload identity.", "Known firmware advisory status is unknown or stale."],
+      "expected_metric_lift": {"security": 0.31, "enterprise": 0.24, "proof": 0.22, "quality": 0.04, "cost": 0.04, "conversion": 0.08}
+    },
+    {
+      "id": "w601-runtime-target-matrix",
+      "category": "runtime-target-matrix",
+      "portfolio_invention_id": "kolm-ir-autotarget",
+      "title": "Runtime Target Matrix",
+      "hypothesis": "The product needs a capability matrix that distinguishes dense, MoE, structured decoding, long-context, multimodal, browser, mobile, and confidential targets, because saying 'runs anywhere' is only credible when each artifact records what the target actually supports.",
+      "source_refs": ["vllm-structured", "sglang-structured", "tensorrt-moe", "executorch", "onnx-nnapi", "chrome-web-ai"],
+      "journeys": ["compile-verify", "runtime-inference", "compute-cloud", "devices-fleet", "agents-registry"],
+      "dimensions": ["compute-target", "artifact-runtime", "deployment-mode", "proof-mode"],
+      "readiness": ["runtime-wasm", "runtime-lts", "ecosystem-runtime-adoption", "sdk-depth"],
+      "metrics": ["portability", "latency", "quality", "proof", "dx", "conversion"],
+      "implementation_files": ["docs/product-frontier-lab.json", "scripts/simulate-product-frontier-lab.cjs", "tests/wave601-product-frontier-lab.test.js", "src/platform-capabilities.js", "src/runtime-adoption-packets.js", "public/product-graph.json"],
+      "procedure": ["Expand platform-capabilities with per-runtime feature flags and evidence status.", "Map build plans to a target support decision with reason codes.", "Generate docs/API/account copy from the same matrix rather than handwritten claims.", "Attach target support and unsupported features to artifact receipts.", "Run focused smoke tests for browser, mobile, edge, server, confidential, and MoE entries.", "Block unsupported target export commands with a concrete upgrade or fallback."],
+      "acceptance_tests": ["node scripts/simulate-product-frontier-lab.cjs --experiment=w601-runtime-target-matrix --summary", "node scripts/simulate-product-frontier-lab.cjs --category=runtime-target-matrix --summary", "npm run local:surfaces:deep"],
+      "kill_criteria": ["Any public target claim is not generated from capability data.", "Runtime target lacks an evidence status.", "Export command succeeds without a known-compatible target adapter."],
+      "expected_metric_lift": {"portability": 0.32, "latency": 0.11, "quality": 0.07, "proof": 0.2, "dx": 0.16, "conversion": 0.1}
+    },
+    {
+      "id": "w601-benchmark-governor",
+      "category": "benchmark-evidence",
+      "portfolio_invention_id": "adaptive-eval-lab",
+      "title": "Benchmark Governor",
+      "hypothesis": "Public evidence must be governed by reusable benchmark harnesses, red-team suites, calibration cards, and claim-scope rules, because synthetic green tests do not justify marketing claims about 7x speed, 11.6x cost, or frontier-model replacement.",
+      "source_refs": ["owasp-llm-top10", "opentelemetry-genai", "datacomp-lm", "xgrammar-paper"],
+      "journeys": ["datasets-labeling", "train-distill", "compile-verify", "runtime-inference", "enterprise-governance"],
+      "dimensions": ["model-provider", "storage-plane", "governance-mode", "proof-mode"],
+      "readiness": ["benchmarking-infra", "compliance-certifications", "ecosystem-runtime-adoption", "foundation-standardization"],
+      "metrics": ["quality", "proof", "security", "enterprise", "conversion", "dx"],
+      "implementation_files": ["docs/product-frontier-lab.json", "scripts/simulate-product-frontier-lab.cjs", "tests/wave601-product-frontier-lab.test.js", "src/benchmark-evidence.js", "src/quality-calibration.js", "scripts/benchmark-evidence.mjs"],
+      "procedure": ["Define claim classes: local smoke, synthetic simulation, private eval, public benchmark, external certification.", "Require every public metric to point to a reproducer, dataset card, model version, hardware, and confidence interval.", "Run red-team prompts for OWASP classes and attach pass/fail evidence to artifacts.", "Map benchmark spans to OTEL GenAI telemetry so customer proof can be exported.", "Downgrade copy automatically when public benchmark data is absent.", "Promote only after reproducible reports are stored in the public benchmark evidence directory."],
+      "acceptance_tests": ["node scripts/simulate-product-frontier-lab.cjs --experiment=w601-benchmark-governor --summary", "node scripts/simulate-product-frontier-lab.cjs --metric=proof --summary", "npm run verify:benchmark-evidence"],
+      "kill_criteria": ["Marketing claim has no public evidence class.", "Benchmark cannot be reproduced from named files.", "Red-team fail is hidden behind an aggregate score."],
+      "expected_metric_lift": {"quality": 0.12, "proof": 0.32, "security": 0.18, "enterprise": 0.13, "conversion": 0.1, "dx": 0.07}
+    },
+    {
+      "id": "w601-privacy-data-quality-loop",
+      "category": "privacy-data-quality",
+      "portfolio_invention_id": "privacy-membrane-max",
+      "title": "Privacy Data Quality Loop",
+      "hypothesis": "Redaction, zero-retention, differential privacy, dedupe, and data quality must be optimized together, because privacy controls that destroy useful signal will push users back to raw frontier APIs and kill the capture-to-compile loop.",
+      "source_refs": ["semdedup", "nemo-semdedup", "datatrove", "aws-kms-attestation", "owasp-llm-top10"],
+      "journeys": ["gateway-capture", "privacy-lake", "datasets-labeling", "train-distill", "enterprise-governance"],
+      "dimensions": ["privacy-mode", "storage-plane", "governance-mode", "proof-mode"],
+      "readiness": ["compliance-certifications", "benchmarking-infra", "sdk-depth", "one-line-install"],
+      "metrics": ["quality", "security", "proof", "enterprise", "cost", "dx"],
+      "implementation_files": ["docs/product-frontier-lab.json", "scripts/simulate-product-frontier-lab.cjs", "tests/wave601-product-frontier-lab.test.js", "src/phi-redactor.js", "src/federated-learning.js", "src/lake.js"],
+      "procedure": ["Compute per-class redaction quality and downstream utility on every dataset promotion.", "Show users the tradeoff between zero-retention, redacted retention, DP noise, and training utility.", "Use semantic dedupe after redaction to avoid privacy variants creating duplicate clusters.", "Bind sensitive exports to customer-managed keys or attestation-gated secrets when configured.", "Emit privacy receipts that include redaction classes, false-positive budget, and excluded rows.", "Block training when privacy policy and utility target are mutually incompatible."],
+      "acceptance_tests": ["node scripts/simulate-product-frontier-lab.cjs --experiment=w601-privacy-data-quality-loop --summary", "node scripts/simulate-product-frontier-lab.cjs --category=privacy-data-quality --summary", "npm run verify:redaction-benchmark"],
+      "kill_criteria": ["PII/PHI recall drops below public benchmark threshold.", "Useful training rows fall below minimum and the product still recommends distillation.", "Privacy receipt cannot be exported for audit."],
+      "expected_metric_lift": {"quality": 0.1, "security": 0.3, "proof": 0.18, "enterprise": 0.16, "cost": 0.08, "dx": 0.08}
+    },
+    {
+      "id": "w601-cloud-train-autopilot",
+      "category": "cloud-train-autopilot",
+      "portfolio_invention_id": "build-strategy-brain",
+      "title": "Cloud Train Autopilot",
+      "hypothesis": "Users who lack GPUs should still get a verified train, distill, quantize, and compile path through quotes, dry-runs, remote job manifests, artifact import, and failure diagnostics, because compute uncertainty is one of the largest conversion blockers.",
+      "source_refs": ["ring-attention", "deepspeed-moe-inference", "gcp-confidential-vm", "azure-confidential-vm", "aws-nitro-attestation"],
+      "journeys": ["datasets-labeling", "train-distill", "models-backbones", "compute-cloud", "compile-verify"],
+      "dimensions": ["model-provider", "compute-target", "storage-plane", "deployment-mode", "governance-mode"],
+      "readiness": ["benchmarking-infra", "compliance-certifications", "one-line-install", "sdk-depth"],
+      "metrics": ["quality", "latency", "cost", "enterprise", "dx", "conversion"],
+      "implementation_files": ["docs/product-frontier-lab.json", "scripts/simulate-product-frontier-lab.cjs", "tests/wave601-product-frontier-lab.test.js", "src/build-strategy-brain.js", "src/cloud-compute-broker.js", "src/distill-strategy.js"],
+      "procedure": ["Collect constraints: rows, task, privacy, GPU availability, budget, deadline, and provider preference.", "Recommend no-train, teacher-distill, LoRA, quantization, cloud GPU, or confidential cloud path.", "Emit a dry-run job manifest with object storage, logs, webhooks, and import steps.", "Check secrets are referenced through env or provider vaults and never embedded in manifests.", "Run simulated providers for RunPod/R2, AWS, GCP, Azure, OpenAI, and Anthropic teacher paths.", "Import resulting artifacts into compile/verify and attach cost and quality receipts."],
+      "acceptance_tests": ["node scripts/simulate-product-frontier-lab.cjs --experiment=w601-cloud-train-autopilot --summary", "npm run verify:build-strategy", "npm run verify:cloud-broker"],
+      "kill_criteria": ["Plan includes training when data is too small or dirty.", "Secrets appear in a job manifest or CLI output.", "Cloud path cannot rejoin compile/verify with receipt evidence."],
+      "expected_metric_lift": {"quality": 0.11, "latency": 0.1, "cost": 0.2, "enterprise": 0.14, "dx": 0.22, "conversion": 0.18}
+    },
+    {
+      "id": "w601-attested-receipt-chain",
+      "category": "proof-attestation",
+      "portfolio_invention_id": "receipt-os",
+      "title": "Attested Receipt Chain",
+      "hypothesis": "Receipts should bind capture, dataset, build, runtime, package, and confidential-compute attestations into one verifiable chain, because enterprise buyers need proof continuity from raw call to deployed artifact.",
+      "source_refs": ["opentelemetry-genai", "sigstore-docs", "slsa-framework", "aws-nitro-attestation", "nvidia-attestation"],
+      "journeys": ["gateway-capture", "privacy-lake", "compile-verify", "runtime-inference", "compute-cloud", "enterprise-governance", "agents-registry"],
+      "dimensions": ["storage-plane", "privacy-mode", "governance-mode", "proof-mode"],
+      "readiness": ["foundation-standardization", "standalone-verify", "compliance-certifications", "ecosystem-runtime-adoption"],
+      "metrics": ["proof", "security", "enterprise", "portability", "dx", "conversion"],
+      "implementation_files": ["docs/product-frontier-lab.json", "scripts/simulate-product-frontier-lab.cjs", "tests/wave601-product-frontier-lab.test.js", "src/artifact.js", "src/event-schema.js", "src/otel.js"],
+      "procedure": ["Define a receipt envelope that can hold OTEL span IDs, SLSA provenance, Sigstore signatures, and confidential-compute measurements.", "Generate separate receipt edges for capture, redaction, split, train, quantize, compile, publish, deploy, and run.", "Implement standalone verification that works without the hosted service.", "Map receipt fields into OpenAPI and SDK models.", "Create failure receipts for blocked readiness gates so public copy stays honest.", "Run tamper tests that change artifact bytes, runtime target, package hash, and attestation document."],
+      "acceptance_tests": ["node scripts/simulate-product-frontier-lab.cjs --experiment=w601-attested-receipt-chain --summary", "node scripts/simulate-product-frontier-lab.cjs --source=sigstore-docs --summary", "npm run verify:governance-packets"],
+      "kill_criteria": ["Verifier requires network access to trust Kolm.", "Any stage cannot point to previous receipt hash.", "Package or confidential-compute evidence is omitted from the chain."],
+      "expected_metric_lift": {"proof": 0.36, "security": 0.22, "enterprise": 0.2, "portability": 0.12, "dx": 0.08, "conversion": 0.08}
+    },
+    {
+      "id": "w601-package-adoption-rail",
+      "category": "ecosystem-packaging",
+      "portfolio_invention_id": "artifact-market-maker",
+      "title": "Package Adoption Rail",
+      "hypothesis": "Runtime, SDK, one-line install, marketplace, and foundation-standardization gates should share one release/adoption rail with local proof and external evidence slots, because package sprawl otherwise creates false completion and broken onboarding.",
+      "source_refs": ["slsa-framework", "sigstore-docs", "chrome-web-ai", "executorch", "xgrammar-docs"],
+      "journeys": ["compile-verify", "runtime-inference", "devices-fleet", "enterprise-governance", "agents-registry"],
+      "dimensions": ["artifact-runtime", "deployment-mode", "governance-mode", "proof-mode"],
+      "readiness": ["foundation-standardization", "ecosystem-runtime-adoption", "runtime-wasm", "ios-android-sdk", "sdk-depth", "one-line-install"],
+      "metrics": ["portability", "proof", "security", "dx", "conversion", "enterprise"],
+      "implementation_files": ["docs/product-frontier-lab.json", "scripts/simulate-product-frontier-lab.cjs", "tests/wave601-product-frontier-lab.test.js", "src/package-release-readiness.js", "src/runtime-adoption-packets.js", "docs/readiness-gate-workorders.json"],
+      "procedure": ["Group package gates by npm, PyPI, Cargo, Swift, Kotlin, browser extension, Homebrew, winget, apt, and shell installer.", "Require local pack/build proof, signature proof, install proof, and external registry URL before promotion.", "Generate package-specific adoption packets for runtime maintainers and foundation partners.", "Record blocked external steps without claiming completion.", "Expose current channel status in CLI, account, API, and docs from one source.", "Fail deploy readiness when package copy claims more than the gate status permits."],
+      "acceptance_tests": ["node scripts/simulate-product-frontier-lab.cjs --experiment=w601-package-adoption-rail --summary", "node scripts/simulate-product-frontier-lab.cjs --category=ecosystem-packaging --summary", "npm run verify:package-release"],
+      "kill_criteria": ["Package registry URL is missing but copy says install is live.", "External adoption gate lacks partner packet and evidence checklist.", "One-line install path cannot be verified locally."],
+      "expected_metric_lift": {"portability": 0.24, "proof": 0.18, "security": 0.14, "dx": 0.24, "conversion": 0.18, "enterprise": 0.08}
+    },
+    {
+      "id": "w601-codegraph-test-miner",
+      "category": "codegraph-planning",
+      "portfolio_invention_id": "codegraph-product-index",
+      "title": "Codegraph Test Miner",
+      "hypothesis": "The product graph should mine code paths, tests, docs, CLI commands, API routes, and public claims into implementation work units, because the fastest path to 100 percent completion is automatically proving every surface has an owning file, smoke path, and readiness gate.",
+      "source_refs": ["opentelemetry-genai", "datatrove", "slsa-framework", "owasp-llm-top10", "codegraph-repo"],
+      "journeys": ["gateway-capture", "datasets-labeling", "compile-verify", "runtime-inference", "enterprise-governance", "agents-registry"],
+      "dimensions": ["storage-plane", "deployment-mode", "governance-mode", "proof-mode"],
+      "readiness": ["benchmarking-infra", "sdk-depth", "compliance-certifications", "foundation-standardization"],
+      "metrics": ["quality", "proof", "security", "enterprise", "dx", "conversion"],
+      "implementation_files": ["docs/product-frontier-lab.json", "scripts/simulate-product-frontier-lab.cjs", "tests/wave601-product-frontier-lab.test.js", "public/product-graph.json", "scripts/build-product-graph.cjs", "scripts/audit-static-refs.cjs"],
+      "procedure": ["Extend product graph with owner, test, docs, API, CLI, TUI, and claim-source edges.", "Mine missing smoke paths from route handlers, CLI command registration, and docs links.", "Generate work orders for partial, external, package, benchmark, and certification gates.", "Attach source-level claim scopes so marketing cannot outrun implementation evidence.", "Run focused simulator filters whenever a source, metric, or category changes.", "Output a deterministic backend TODO file only for gates that truly need external evidence."],
+      "acceptance_tests": ["node scripts/simulate-product-frontier-lab.cjs --experiment=w601-codegraph-test-miner --summary", "node scripts/simulate-product-frontier-lab.cjs --category=codegraph-planning --summary", "npm run lint:refs"],
+      "kill_criteria": ["Graph contains a route or CLI command with no owner test.", "Generated work order has no local verification command.", "Claim-source edge points at stale or nonexistent public copy."],
+      "expected_metric_lift": {"quality": 0.09, "proof": 0.24, "security": 0.13, "enterprise": 0.1, "dx": 0.22, "conversion": 0.1}
+    },
+    {
+      "id": "w601-quant-memory-joint-planner",
+      "category": "benchmark-evidence",
+      "portfolio_invention_id": "kolm-q-oracle",
+      "title": "Quantization Memory Joint Planner",
+      "hypothesis": "Quantization and KV/cache policy must be planned jointly because low-bit weights do not solve long-context memory, and aggressive cache eviction can erase the quality recovered by quantization-aware distillation.",
+      "source_refs": ["h2o-kv", "pyramidkv", "tensorrt-moe", "executorch", "chrome-web-ai"],
+      "journeys": ["train-distill", "models-backbones", "compile-verify", "runtime-inference", "devices-fleet", "compute-cloud"],
+      "dimensions": ["compute-target", "artifact-runtime", "deployment-mode", "proof-mode"],
+      "readiness": ["benchmarking-infra", "runtime-wasm", "ios-android-sdk", "ecosystem-runtime-adoption"],
+      "metrics": ["quality", "latency", "cost", "portability", "proof", "dx"],
+      "implementation_files": ["docs/product-frontier-lab.json", "scripts/simulate-product-frontier-lab.cjs", "tests/wave601-product-frontier-lab.test.js", "src/quantization-oracle.js", "src/distill-strategy.js", "src/platform-capabilities.js"],
+      "procedure": ["Represent weight precision, activation precision, KV precision, KV eviction, and runtime target in one candidate plan.", "Estimate memory pressure separately for weights, activations, KV cache, and runtime overhead.", "Choose whether to recover quality with QAT, distillation, LoRA, cache budget, or fallback runtime.", "Run focused evals on structured extraction, long document QA, local mobile inference, and edge browser inference.", "Emit a receipt explaining why a quantization/cache pair was chosen or rejected.", "Block export when target runtime cannot support the selected numeric and cache policy."],
+      "acceptance_tests": ["node scripts/simulate-product-frontier-lab.cjs --experiment=w601-quant-memory-joint-planner --summary", "node scripts/simulate-product-frontier-lab.cjs --metric=latency --summary", "npm run verify:quant-oracle"],
+      "kill_criteria": ["Planner optimizes weight size while KV memory remains impossible.", "Quality recovery is assumed without holdout evidence.", "Target runtime cannot execute the chosen numeric format."],
+      "expected_metric_lift": {"quality": 0.13, "latency": 0.25, "cost": 0.22, "portability": 0.14, "proof": 0.12, "dx": 0.08}
+    }
+  ]
+}

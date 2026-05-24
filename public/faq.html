@@ -16,6 +16,7 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/frontier.css">
 <script defer src="/frontier.js"></script>
 <style>
@@ -33,8 +34,20 @@
   .faq-items details p { margin: var(--ks-3) 0 0; font-size: 14px; color: var(--ks-ink-2); line-height: 1.7; }
   .faq-items details p a { color: var(--ks-accent); }
   .test-anchor { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
-  /* W621 frontier overlay for FAQ */
-  .faq-w621 details.fr-card { padding: var(--ks-4) var(--ks-5); margin-bottom: var(--ks-3); }
+  /* W621 frontier overlay for FAQ; W642 de-rectangle: strip card chrome from accordion rows */
+  .faq-w621 details.fr-card {
+    padding: 18px 0 22px !important;
+    margin: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid var(--ks-line-1) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+  .faq-w621 details.fr-card:hover { background: transparent !important; box-shadow: none !important; transform: none !important; }
+  .faq-w621 details.fr-card::after { display: none !important; }
   .faq-w621 details.fr-card summary.fr-h3 { font-size: 16px; font-weight: 600; cursor: pointer; list-style: none; padding-right: 32px; position: relative; line-height: 1.45; margin: 0; }
   .faq-w621 details.fr-card summary.fr-h3::-webkit-details-marker { display: none; }
   .faq-w621 details.fr-card summary.fr-h3::after { content: "+"; color: var(--ks-accent); font-family: var(--ks-mono); position: absolute; right: 0; top: 0; font-size: 20px; line-height: 1; }
@@ -55,8 +68,30 @@
   .faq-w621 .fr-status__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ks-accent); display: inline-block; }
   .faq-w621 .fr-reveal { opacity: 1; }
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/faq",
+  "description": "The questions developers, engineers, compliance leads, and procurement teams ask before signing. Answered in plain English with source citations.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
 </head>
 <body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <a href="#main" class="ks-skip">Skip to content</a>
 
@@ -223,7 +258,7 @@
           <p>On self-host or air-gap deployments, nothing leaves your network. The gateway, the compiler, the verifier, and the runtime are all running entirely inside your perimeter. See <a href="/enterprise">/enterprise</a> for the air-gap kit.</p>
         </details>
 
-        <details class="fr-card"><summary class="fr-h3">Are you HIPAA-ready?</summary>
+        <details class="fr-card"><summary class="fr-h3">Is HIPAA support certification-gated?</summary>
           <p>Yes, under BYOC and on-prem deployment patterns. A BAA is available on the Business and Enterprise tiers. The full HIPAA Security Rule mapping lives on <a href="/hipaa-mapping">/hipaa-mapping</a> and the BAA template is at <a href="/baa">/baa</a>. PHI does not leave your VPC under the recommended deployment pattern.</p>
         </details>
 

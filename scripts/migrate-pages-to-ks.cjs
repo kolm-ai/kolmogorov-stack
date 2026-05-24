@@ -11,6 +11,7 @@ const fs = require('fs');
 const path = require('path');
 
 const root = path.resolve(__dirname, '..', 'public');
+const KOLM_GITHUB_URL = process.env.KOLM_GITHUB_URL || 'https://github.com/sneaky-hippo/kolm';
 
 function walk(dir) {
   const out = [];
@@ -31,7 +32,7 @@ const ksNavBlock = `
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="${KOLM_GITHUB_URL}" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
@@ -40,7 +41,7 @@ const ksNavBlock = `
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="${KOLM_GITHUB_URL}" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 `;
@@ -63,7 +64,7 @@ const ksFooterBlock = `
       </div>
       <div>
         <h4>Company</h4>
-        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="${KOLM_GITHUB_URL}" rel="noopener">GitHub</a></li></ul>
       </div>
     </div>
     <div class="ks-footer__bottom">

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Captures &middot; Open-source AI workbench &middot; kolm.ai</title>
+<meta name="description" content="Captures UI shell. Per-namespace counts by status (clean, quarantined, synthetic), live capture stream, and review queue. Hydrates from /v1/capture/log and /v1/capture/status.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Captures &middot; Open-source AI workbench &middot; kolm.ai">
+<meta property="og:description" content="Capture counts by status and the review queue, per namespace.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/account/captures">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/account/captures">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<script src="/nav.js" defer></script>
+<style>
+:root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--accent-soft:rgba(16,185,129,0.10);--warn:#d97706;--bad:#ef4444;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+main{padding:36px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 14px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.brand-eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+h1{font-size:30px;line-height:1.1;font-weight:500;letter-spacing:-0.01em;margin:0 0 8px}
+.lede{font-size:15.5px;color:var(--ink-mute);max-width:780px;margin:0 0 24px}
+h2{font-size:18px;font-weight:500;margin:32px 0 10px}
+p{color:var(--ink-mute);font-size:14.5px;line-height:1.6;max-width:780px}
+.picker{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 18px;max-width:780px}
+.picker label{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);letter-spacing:0.06em;text-transform:uppercase;align-self:center;margin-right:6px}
+.picker select{background:var(--bg-elev);border:1px solid var(--line);color:var(--ink);font-family:var(--mono);font-size:13px;padding:7px 10px;border-radius:6px}
+.status-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:10px 0 24px;max-width:780px}
+@media(max-width:680px){.status-grid{grid-template-columns:1fr}}
+.status-card{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);display:flex;flex-direction:column;gap:6px}
+.status-card .label{font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint)}
+.status-card .label.clean{color:var(--accent)}
+.status-card .label.quarantined{color:var(--bad)}
+.status-card .label.synthetic{color:var(--warn)}
+.status-card .num{font-family:var(--mono);font-size:24px;color:var(--ink)}
+.stream{border:1px dashed var(--line);border-radius:10px;background:var(--bg-elev);padding:18px 20px;font-family:var(--mono);font-size:12.5px;color:var(--ink-mute);max-width:780px;margin:10px 0 18px;min-height:120px;line-height:1.55}
+.stream b{color:var(--ink)}
+.cta-row{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0 0}
+.cta-primary{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border:1px solid var(--accent);border-radius:10px;background:var(--accent-soft);color:var(--ink);text-decoration:none;font-size:14px;font-weight:500}
+.cta-secondary{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border:1px solid var(--line);border-radius:10px;background:transparent;color:var(--ink-mute);text-decoration:none;font-size:14px}
+.cta-secondary:hover{color:var(--ink);border-color:var(--ink-faint)}
+.placeholder-pill{display:inline-block;font-family:var(--mono);font-size:10.5px;color:var(--warn);background:rgba(217,119,6,0.10);border:1px solid var(--warn);padding:2px 7px;border-radius:99px;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px}
+footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
+footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.brand-disambig{position:absolute;left:-9999px}
+</style>
+</head>
+<body class="ks" data-captures-stub="true">
+<span class="brand-anchor" data-w775="h1" aria-hidden="true">Frontier AI on your own infrastructure.</span>
+<span class="brand-disambig" aria-hidden="true">Not Kolm therapeutics, Kolm band, or other unrelated organizations using similar names.</span>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/marketplace">Marketplace</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">-&gt;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/account">account</a> / captures</div>
+<p class="brand-eyebrow" data-w775="brand-eyebrow">Open-source AI workbench</p>
+<h1>Captures.</h1>
+<p class="lede">Every prompt and response your gateway sees lands here, partitioned by namespace and tagged by capture status. Hydrates from <code>/v1/capture/log</code> for the stream and <code>/v1/capture/status</code> for the counts.</p>
+
+<div class="picker" data-hydrate-from="/v1/namespaces">
+  <label for="ns">Namespace</label>
+  <select id="ns" name="namespace">
+    <option value="default">default</option>
+    <option value="prod">prod</option>
+    <option value="staging">staging</option>
+  </select>
+</div>
+
+<h2>Count by status</h2>
+<span class="placeholder-pill">Sample shell</span>
+<div class="status-grid" data-hydrate-from="/v1/capture/status">
+  <div class="status-card">
+    <span class="label clean">Clean</span>
+    <span class="num">--</span>
+  </div>
+  <div class="status-card">
+    <span class="label quarantined">Quarantined</span>
+    <span class="num">--</span>
+  </div>
+  <div class="status-card">
+    <span class="label synthetic">Synthetic</span>
+    <span class="num">--</span>
+  </div>
+</div>
+<p>Numbers populate from <code>/v1/capture/status?namespace=&lt;ns&gt;</code>. Quarantined rows are held outside the distill corpus until reviewed at <code>/account/captures/review</code>.</p>
+
+<h2>Live stream</h2>
+<div class="stream" data-hydrate-from="/v1/capture/log?live=1">
+  <p><b>(stream paused.)</b> Connect via SSE for live tail of /v1/capture/log. Each row shows: timestamp, namespace, status, input-length, output-length, latency.</p>
+</div>
+
+<h2>Review queue</h2>
+<p>Quarantined captures must be allowed, blocked, or escalated before they can enter the distill corpus. The review queue page has the per-row diff against the teacher baseline.</p>
+
+<div class="cta-row">
+  <a href="/account/captures/review" class="cta-primary">Open review queue <b>-&gt;</b></a>
+  <a href="/account/captures/analytics" class="cta-secondary">Capture analytics</a>
+  <a href="/account" class="cta-secondary">Account home</a>
+</div>
+
+</div></main>
+
+<footer><div class="wrap">
+  <p>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm &middot; <a href="mailto:rodneyyesep@gmail.com">rodneyyesep@gmail.com</a></p>
+</div></footer>
+
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Releasing &middot; A/B test, gate, promote, auto-rollback &middot; kolm.ai</title>
+<meta name="description" content="W777 + W778 release procedure: split traffic between two artifact versions, run the Welch t-test gate, promote the winner, auto-rollback when the promoted arm underperforms. Open-source AI workbench.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Releasing &middot; A/B test, gate, promote, auto-rollback &middot; kolm.ai">
+<meta property="og:description" content="W777 + W778 release procedure: split traffic, Welch t-test gate, promote winner, auto-rollback regressions.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/docs/releasing">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Releasing &middot; A/B test + auto-rollback &middot; kolm.ai">
+<meta name="twitter:description" content="Split traffic, Welch t-test gate, promote, auto-rollback.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/docs/releasing">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Releasing: A/B test, gate, promote, auto-rollback","description":"W777 + W778 release procedure: deterministic traffic splitting between two artifact versions, Welch t-test gate, automatic rollback on regression.","url":"https://kolm.ai/docs/releasing","datePublished":"2026-05-24","dateModified":"2026-05-24","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<link rel="stylesheet" href="/design-tokens.css">
+<style>
+:root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--accent-soft:rgba(16,185,129,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.skip-link{position:absolute;left:-9999px}
+.skip-link:focus{position:static;background:var(--accent);color:#fff;padding:8px 14px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.brand-eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 36px}
+h2{font-size:24px;font-weight:500;letter-spacing:-0.018em;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:28px 0 8px;max-width:780px}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px}
+pre code{background:none;border:none;padding:0;color:inherit;font:inherit}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
+li{margin:4px 0}
+table{border-collapse:collapse;width:100%;max-width:920px;margin:14px 0;font-size:13.5px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink);font-weight:500}
+td code{font-size:12px}
+.related{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+@media(max-width:820px){.related{grid-template-columns:1fr}}
+.related a{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:4px}
+.related a:hover{border-color:var(--accent-soft)}
+.related b{font-size:14px;color:var(--ink);font-weight:500}
+.related span{font-size:12.5px;color:var(--ink-mute);line-height:1.5}
+.metric-card{border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:14px 0;background:var(--bg-elev)}
+.metric-card h3{margin:0 0 6px}
+.metric-card .meta{font-family:var(--mono);font-size:11.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
+footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+</style>
+
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/docs-shell.css">
+<script defer src="/docs-shell.js"></script>
+
+</head>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / releasing</div>
+<p class="brand-eyebrow">Open-source AI workbench &middot; W777 + W778</p>
+<h1>Releasing.</h1>
+<p class="lede">Release a new artifact version the way every honest release engineer wishes they could: split production traffic 50/50 between the old and new artifact, let the W778 Welch t-test decide whether the new version is actually better, promote the winner, and let the auto-rollback hook revert any promotion the gate later turns against. Two CLI verbs, two modules, four route prefixes, one audit log.</p>
+
+<h2 id="why">Why an explicit release path</h2>
+<p>Every team eventually invents this pipeline themselves: a feature flag, a logging table, a stats script, a Slack alert, a runbook. kolm packages the loop directly because every artifact build SHOULD see traffic before it sees all traffic, and every promotion SHOULD have a reversible audit row. <code>kolm ab</code> is the orchestrator. <code>kolm stat-sig</code> is the math. Together they replace ~400 lines of glue code per release pipeline.</p>
+
+<h2 id="quickstart">Quickstart</h2>
+<p>Three commands. Assume you've already built two artifacts (<code>model-v1</code> and <code>model-v2</code>).</p>
+
+<pre><code># 1. Open the test - 50/50 split, advisory sample target 1000 per arm
+kolm ab start --namespace prod --arm-a model-v1 --arm-b model-v2 --split 0.5
+
+# Returns: { ok:true, ab_test_id:"abt_&lt;hex&gt;", record:{...}, version:"w777-v1" }
+
+# 2. Route per-request via the deterministic FNV-1a hash. Same request_hash
+#    always lands on the same arm so a retried call stays on its arm.
+kolm ab assign abt_&lt;hex&gt; --request-hash user_42
+# Returns: { arm:"a", artifact_id:"model-v1", ab_test_id:"...", version:"w777-v1" }
+
+# 3. After ~30+ outcomes per arm, ask the gate what to do
+kolm stat-sig gate --ab-test-id abt_&lt;hex&gt;
+# Returns: { decision:"pass"|"fail"|"insufficient", p:0.0023, effect_size:0.18, ... }
+</code></pre>
+
+<p>When the gate returns <code>decision:"pass"</code>, promote arm B:</p>
+
+<pre><code>kolm ab promote abt_&lt;hex&gt; --arm b --reason "won_the_test"
+# All future kolm ab assign calls now freeze to arm B (artifact=model-v2).</code></pre>
+
+<h2 id="outcomes">Recording outcomes</h2>
+<p>Outcomes feed the gate. Every time you finish serving a request from arm A or arm B, record the K-Score and latency so the W778 gate can score it later. The outcome event lands in the canonical event-store under <code>workflow_id="w777:ab"</code>; W411 tenant fence enforces ownership.</p>
+
+<pre><code># From the SDK / your service layer
+POST /v1/ab-tests/&lt;ab_test_id&gt;/assignments?request_hash=&lt;h&gt;
+&rarr; { arm, artifact_id }
+
+# After your call returns
+POST /v1/capture/log
+{
+  "workflow_id": "w777:ab",
+  "ab_test_id": "abt_...",
+  "arm": "a"|"b",
+  "kscore": 0.93,
+  "latency_ms": 220,
+  ...
+}
+</code></pre>
+
+<h2 id="gate">The gate (W778)</h2>
+<p>The gate combines three checks. All three must pass to return <code>decision:"pass"</code>:</p>
+
+<table>
+  <thead><tr><th>Check</th><th>Default</th><th>Override</th></tr></thead>
+  <tbody>
+    <tr><td>Sample size</td><td><code>min_n &gt;= 30</code> per arm</td><td><code>--min-n</code></td></tr>
+    <tr><td>Statistical significance (Welch's t-test, two-tailed)</td><td><code>p &lt; alpha = 0.05</code></td><td><code>--alpha</code></td></tr>
+    <tr><td>Effect size</td><td><code>|mean_b - mean_a| &gt;= 0.01</code></td><td><code>--min-effect</code></td></tr>
+  </tbody>
+</table>
+
+<p>Decisions:</p>
+<ul>
+  <li><strong>pass</strong> &mdash; arm B beats arm A, statistically significant, and the effect is large enough to be worth shipping. Promote.</li>
+  <li><strong>fail</strong> &mdash; either p &gt;= alpha (no signal) OR arm B underperforms arm A (regression). If arm B was previously promoted, this is the auto-rollback trigger.</li>
+  <li><strong>insufficient</strong> &mdash; sample size or effect size below floor. Keep collecting outcomes; do not act.</li>
+</ul>
+
+<p>The Welch t-test uses Welch-Satterthwaite degrees of freedom (no equal-variance assumption), Hill's series approximation / regularized incomplete beta for the Student's t CDF, and Lanczos approximation for log gamma. Zero-variance arms return <code>p = 1.0</code> instead of <code>NaN</code>.</p>
+
+<h2 id="rollback">Auto-rollback</h2>
+<p>After promotion, call <code>kolm ab rollback</code> on any schedule that fits your operational cadence (e.g., hourly cron, post-deploy hook, on-alert from drift-alert). It re-runs the gate and reverts only when BOTH conditions hold:</p>
+<ol>
+  <li>The promoted arm is <code>b</code> (rollback is only meaningful in the "old vs new" direction).</li>
+  <li>The gate decision is <code>fail</code> AND arm B's mean is strictly less than arm A's mean.</li>
+</ol>
+
+<pre><code>kolm ab rollback abt_&lt;hex&gt;
+# rolled_back=yes  reason=arm_b_underperforms_and_was_promoted
+# &mdash; OR &mdash;
+# rolled_back=no   reason=arm_b_winning|arm_b_not_clearly_worse|insufficient_data
+</code></pre>
+
+<p>After a rollback, <code>kolm ab assign</code> returns <code>arm: "a"</code> for ALL request hashes regardless of bucket math, with <code>reason: "rolled_back_to_arm_a"</code>. The audit log captures the rollback under <code>workflow_id="w777:ab:rollback"</code>.</p>
+
+<h2 id="api">API surface</h2>
+
+<table>
+  <thead><tr><th>Method</th><th>Path</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td>POST</td><td><code>/v1/ab-tests/create</code></td><td>Open a new test</td></tr>
+    <tr><td>GET</td><td><code>/v1/ab-tests</code></td><td>List tests for the authenticated tenant</td></tr>
+    <tr><td>GET</td><td><code>/v1/ab-tests/:id</code></td><td>Status envelope: counts, means, Welch t-test</td></tr>
+    <tr><td>GET</td><td><code>/v1/ab-tests/:id/assignments?request_hash=X</code></td><td>Resolve a request to an arm</td></tr>
+    <tr><td>POST</td><td><code>/v1/ab-tests/:id/promote</code></td><td>Freeze future routing to the chosen arm</td></tr>
+    <tr><td>POST</td><td><code>/v1/ab-tests/:id/rollback</code></td><td>Trigger the auto-rollback check</td></tr>
+    <tr><td>POST</td><td><code>/v1/ab-tests/:id/stop</code></td><td>Mark stopped (no future assignments)</td></tr>
+    <tr><td>POST</td><td><code>/v1/stat-sig/test</code></td><td>Welch t-test on raw <code>samples_a</code> + <code>samples_b</code></td></tr>
+    <tr><td>GET</td><td><code>/v1/stat-sig/gate?ab_test_id=X</code></td><td>Gate decision pulling samples from W777</td></tr>
+  </tbody>
+</table>
+
+<p>All routes auth-gated. Tenant fence forced from session (never from request body) per W411 conventions.</p>
+
+<h2 id="related">Related</h2>
+<div class="related">
+  <a href="/account/ab-tests"><b>A/B tests dashboard</b><span>Live view of the tests, gate decisions, and promote / rollback controls.</span></a>
+  <a href="/docs/drift-alert"><b>Drift alert</b><span>The complementary monitor: distribution shift, not in-window K-Score.</span></a>
+  <a href="/docs/api"><b>Full API reference</b><span>Every route + envelope.</span></a>
+</div>
+
+</div></main>
+
+<footer><div class="wrap">
+kolm.ai &middot; open-source AI workbench &middot; <a href="/changelog">changelog</a> &middot; <a href="/docs">docs</a>
+</div></footer>
+
+</body>
+</html>

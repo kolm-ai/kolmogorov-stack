@@ -127,6 +127,10 @@
       "description": "Compile"
     },
     {
+      "name": "compliance",
+      "description": "Compliance"
+    },
+    {
       "name": "compose",
       "description": "Compose"
     },
@@ -173,6 +177,10 @@
     {
       "name": "eval",
       "description": "Evaluation"
+    },
+    {
+      "name": "evidence",
+      "description": "Evidence"
     },
     {
       "name": "federated",
@@ -287,6 +295,10 @@
       "description": "Opportunities"
     },
     {
+      "name": "packages",
+      "description": "Packages"
+    },
+    {
       "name": "pipeline",
       "description": "Pipeline"
     },
@@ -313,6 +325,10 @@
     {
       "name": "publish",
       "description": "Publish"
+    },
+    {
+      "name": "quantization",
+      "description": "Quantization"
     },
     {
       "name": "recall",
@@ -2334,6 +2350,85 @@
         }
       }
     },
+    "/v1/build/strategy": {
+      "get": {
+        "tags": [
+          "build"
+        ],
+        "operationId": "getV1BuildStrategy",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "build"
+        ],
+        "operationId": "postV1BuildStrategy",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/build/strategy/catalog": {
+      "get": {
+        "tags": [
+          "build"
+        ],
+        "operationId": "getV1BuildStrategyCatalog",
+        "summary": "Build strategy brain - shared planner for capture, prompt/RAG/routing,",
+        "description": "Build strategy brain - shared planner for capture, prompt/RAG/routing, training, distillation, cloud compute, compilation, quantization, and local runtime. It never launches work and never returns secret values.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/builder/compile": {
       "post": {
         "tags": [
@@ -3240,6 +3335,60 @@
         }
       }
     },
+    "/v1/cloud/broker": {
+      "post": {
+        "tags": [
+          "cloud"
+        ],
+        "operationId": "postV1CloudBroker",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/cloud/broker/catalog": {
+      "get": {
+        "tags": [
+          "cloud"
+        ],
+        "operationId": "getV1CloudBrokerCatalog",
+        "summary": "Constraint-first compute planner for local, SSH, rented GPU, managed",
+        "description": "Constraint-first compute planner for local, SSH, rented GPU, managed training, customer cloud, and edge runtime. This is a planning endpoint only: it never launches infrastructure and never returns secret values.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/cloud/deploy-plan": {
       "post": {
         "tags": [
@@ -3465,6 +3614,87 @@
           }
         },
         "description": "Compile artifact download - streams the completed .kolm zip or reports readiness/expiry."
+      }
+    },
+    "/v1/compliance/certification-packet": {
+      "get": {
+        "tags": [
+          "compliance"
+        ],
+        "operationId": "getV1ComplianceCertificationpacket",
+        "summary": "Compliance certification packet - local evidence exists, external auditor",
+        "description": "Compliance certification packet - local evidence exists, external auditor and legal certifications remain explicitly gated.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/compliance/certification-packet/template": {
+      "get": {
+        "tags": [
+          "compliance"
+        ],
+        "operationId": "getV1ComplianceCertificationpacketTemplate",
+        "summary": "Compliance certification manifest template - the exact evidence bundle a",
+        "description": "Compliance certification manifest template - the exact evidence bundle a live auditor/legal/certification claim must provide before Kolm can call compliance certifications complete.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/compliance/certification-packet/validate": {
+      "post": {
+        "tags": [
+          "compliance"
+        ],
+        "operationId": "postV1ComplianceCertificationpacketValidate",
+        "summary": "Compliance certification manifest validation - fails closed on missing",
+        "description": "Compliance certification manifest validation - fails closed on missing auditor/legal evidence, unsigned proof hashes, non-HTTPS evidence URLs, placeholder fields, and secret-looking values.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
       }
     },
     "/v1/compose": {
@@ -4518,6 +4748,85 @@
         "description": "Distill run detail - reads ~/.kolm/distill-runs/run_<id>/{run-meta.json, progress.jsonl, manifest.json} for one run. Tenant-scoped – 404 when run belongs to another tenant or id doesn't match /^run_[a-z0-9_]+$/i."
       }
     },
+    "/v1/distill/strategy": {
+      "get": {
+        "tags": [
+          "distill"
+        ],
+        "operationId": "getV1DistillStrategy",
+        "summary": "Distill strategy plan - ranks the next backend action from current data,",
+        "description": "Distill strategy plan - ranks the next backend action from current data, holdout, privacy, teacher, preference, latency, and budget constraints. This planner does not launch training or call providers.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "distill"
+        ],
+        "operationId": "postV1DistillStrategy",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/distill/strategy/catalog": {
+      "get": {
+        "tags": [
+          "distill"
+        ],
+        "operationId": "getV1DistillStrategyCatalog",
+        "summary": "Distill strategy catalog - static decision vocabulary for data collection,",
+        "description": "Distill strategy catalog - static decision vocabulary for data collection, rule/cache first paths, supervised fine-tune, teacher distillation, preference optimization, on-policy improvement, and speculative decoding.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/drift/detect": {
       "post": {
         "tags": [
@@ -4653,6 +4962,141 @@
         "description": "OpenAI-compatible passthrough for the responses, embeddings, and moderations endpoints. Each routes through __connectorProxy('openai', ...) so the upstream OpenAI API is reached with the configured key, and the request/response is captured into the tenant lake."
       }
     },
+    "/v1/eval/benchmark-evidence": {
+      "get": {
+        "tags": [
+          "eval"
+        ],
+        "operationId": "getV1EvalBenchmarkevidence",
+        "summary": "Benchmark evidence readiness for comparative claims. This route audits",
+        "description": "Benchmark evidence readiness for comparative claims. This route audits local evidence files and reports the exact public data lanes still needed; it never calls providers and never returns secret values.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/eval/benchmark-evidence/template": {
+      "get": {
+        "tags": [
+          "eval"
+        ],
+        "operationId": "getV1EvalBenchmarkevidenceTemplate",
+        "summary": "Benchmark evidence template - returns the strict provider/runtime lane",
+        "description": "Benchmark evidence template - returns the strict provider/runtime lane schema required before comparative benchmark claims can be marked public.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/eval/benchmark-evidence/validate": {
+      "post": {
+        "tags": [
+          "eval"
+        ],
+        "operationId": "postV1EvalBenchmarkevidenceValidate",
+        "summary": "Benchmark evidence validation - validates a proposed provider matrix",
+        "description": "Benchmark evidence validation - validates a proposed provider matrix without saving it, calling providers, or exposing secrets.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/eval/k-score-calibration": {
+      "get": {
+        "tags": [
+          "eval"
+        ],
+        "operationId": "getV1EvalKscorecalibration",
+        "summary": "K-score calibration - public, frozen benchmark contract for the score",
+        "description": "K-score calibration - public, frozen benchmark contract for the score formula, 30-case suite, class mix, axis means, and manual-review leaderboard. This proves how K-score is computed; it does not imply a live best-in-class model leaderboard.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/eval/quality-calibration": {
+      "get": {
+        "tags": [
+          "eval"
+        ],
+        "operationId": "getV1EvalQualitycalibration",
+        "summary": "Quality judge calibration - public, deterministic fixture for the",
+        "description": "Quality judge calibration - public, deterministic fixture for the per-call quality judge. This is calibration evidence, not a broad claim that autonomous judging matches every review domain.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/eval/tenant_holdout": {
       "get": {
         "tags": [
@@ -4777,6 +5221,33 @@
           }
         },
         "description": "Tenant holdout delete - removes one authenticated tenant corpus and audits the deletion."
+      }
+    },
+    "/v1/evidence/readiness": {
+      "get": {
+        "tags": [
+          "evidence"
+        ],
+        "operationId": "getV1EvidenceReadiness",
+        "summary": "Evidence readiness - one public, secret-safe aggregate for every proof gate",
+        "description": "Evidence readiness - one public, secret-safe aggregate for every proof gate that can keep product copy from saying \"final\" too early. This mirrors `kolm evidence --json` so account UI, docs, CLI, and release audits share the same local/external boundary.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
       }
     },
     "/v1/federated/aggregate": {
@@ -7569,6 +8040,87 @@
         }
       }
     },
+    "/v1/packages/release-readiness": {
+      "get": {
+        "tags": [
+          "packages"
+        ],
+        "operationId": "getV1PackagesReleasereadiness",
+        "summary": "Package release readiness - local, secret-safe audit for SDK/runtime/install",
+        "description": "Package release readiness - local, secret-safe audit for SDK/runtime/install package contracts. This is not a registry publication claim: it exposes manifest/docs/dry-run readiness and channel blockers for package-gated items.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/packages/release-readiness/template": {
+      "get": {
+        "tags": [
+          "packages"
+        ],
+        "operationId": "getV1PackagesReleasereadinessTemplate",
+        "summary": "Package release manifest template - the signed artifact/registry evidence",
+        "description": "Package release manifest template - the signed artifact/registry evidence required before package-gated readiness can become publish-ready.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/packages/release-readiness/validate": {
+      "post": {
+        "tags": [
+          "packages"
+        ],
+        "operationId": "postV1PackagesReleasereadinessValidate",
+        "summary": "Package release manifest validation - dry-runs a proposed signed release",
+        "description": "Package release manifest validation - dry-runs a proposed signed release manifest without publishing to npm, PyPI, crates, SwiftPM, Maven, winget, Homebrew, apt, or extension stores.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/pipeline/compile": {
       "post": {
         "tags": [
@@ -7899,6 +8451,33 @@
         }
       }
     },
+    "/v1/privacy/redaction-benchmark": {
+      "get": {
+        "tags": [
+          "privacy"
+        ],
+        "operationId": "getV1PrivacyRedactionbenchmark",
+        "summary": "Redaction benchmark - public, synthetic, secret-safe proof that the PHI/PII",
+        "description": "Redaction benchmark - public, synthetic, secret-safe proof that the PHI/PII redactor detects expected classes, redacts raw values, and fails closed on malformed identifiers. This is benchmark evidence, not a live compliance certification claim.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/privacy/report": {
       "get": {
         "tags": [
@@ -8007,6 +8586,60 @@
         }
       }
     },
+    "/v1/product/frontier-contracts": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "operationId": "getV1ProductFrontiercontracts",
+        "summary": "Product frontier implementation contracts - public, secret-safe handoff",
+        "description": "Product frontier implementation contracts - public, secret-safe handoff from research experiments to implementation-agent owner files, routes, commands, smoke fixtures, evidence gates, and failure modes.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/product/frontier-lab": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "operationId": "getV1ProductFrontierlab",
+        "summary": "Product frontier lab - public, secret-safe summary of the research-to-build",
+        "description": "Product frontier lab - public, secret-safe summary of the research-to-build experiment portfolio. This is a local product planning contract, not a claim of external benchmark, package, adoption, or certification completion.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/product/graph": {
       "get": {
         "tags": [
@@ -8015,6 +8648,33 @@
         "operationId": "getV1ProductGraph",
         "summary": "Product graph - public, secret-safe, generated from the route-surface,",
         "description": "Product graph - public, secret-safe, generated from the route-surface, journey, readiness, and experience contracts. This is the canonical machine-readable map for account UI, CLI/TUI parity, docs, and release audits.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/product/operator-kernels": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "operationId": "getV1ProductOperatorkernels",
+        "summary": "Product frontier operator kernels - public, secret-safe build plans that",
+        "description": "Product frontier operator kernels - public, secret-safe build plans that convert the frontier research and implementation contracts into concrete backend kernels across quantization, compile, distill, serving, eval, cloud, edge, governance, security, and agent automation.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -8188,6 +8848,85 @@
         "operationId": "postV1Publish",
         "summary": "Publish an edited generator (no synthesis required)",
         "description": "Publish an edited generator (no synthesis required)",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/quantization/oracle": {
+      "get": {
+        "tags": [
+          "quantization"
+        ],
+        "operationId": "getV1QuantizationOracle",
+        "summary": "Quantization oracle plan - ranks quantization methods for task, device,",
+        "description": "Quantization oracle plan - ranks quantization methods for task, device, memory, runtime, calibration, quality, and privacy constraints. This is a planner only: promotion still requires quantize doctor, hashes, and holdout eval.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "quantization"
+        ],
+        "operationId": "postV1QuantizationOracle",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/quantization/oracle/catalog": {
+      "get": {
+        "tags": [
+          "quantization"
+        ],
+        "operationId": "getV1QuantizationOracleCatalog",
+        "summary": "Quantization oracle catalog - lists supported planner methods and whether",
+        "description": "Quantization oracle catalog - lists supported planner methods and whether each method is worker-backed, external-toolchain, runtime-policy, or baseline.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -9042,6 +9781,87 @@
         }
       }
     },
+    "/v1/runtime/adoption-packets": {
+      "get": {
+        "tags": [
+          "runtime"
+        ],
+        "operationId": "getV1RuntimeAdoptionpackets",
+        "summary": "Runtime adoption packets - local integration packets for model hubs,",
+        "description": "Runtime adoption packets - local integration packets for model hubs, local runners, conversion tooling, and hardware partners.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/runtime/adoption-packets/template": {
+      "get": {
+        "tags": [
+          "runtime"
+        ],
+        "operationId": "getV1RuntimeAdoptionpacketsTemplate",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/runtime/adoption-packets/validate": {
+      "post": {
+        "tags": [
+          "runtime"
+        ],
+        "operationId": "postV1RuntimeAdoptionpacketsValidate",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/runtime/decide": {
       "post": {
         "tags": [
@@ -9861,6 +10681,87 @@
           }
         },
         "description": "W480 - Speculative decoding draft-head trainer doctor (EAGLE-2/3, Medusa). Reports whether $KOLM_SPECDECODE_TRAINER is resolvable; install_hint when not."
+      }
+    },
+    "/v1/spec/governance-packet": {
+      "get": {
+        "tags": [
+          "spec"
+        ],
+        "operationId": "getV1SpecGovernancepacket",
+        "summary": "A device with this bundle can run every public recipe locally, offline,",
+        "description": "A device with this bundle can run every public recipe locally, offline, forever, for free. Returns a portable JSON envelope of all public recipes with their executable source. This is the on-device runtime payload. Format governance packet - local evidence for neutral .kolm stewardship. External acceptance remains explicitly gated until a public venue accepts it.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/spec/governance-packet/template": {
+      "get": {
+        "tags": [
+          "spec"
+        ],
+        "operationId": "getV1SpecGovernancepacketTemplate",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/spec/governance-packet/validate": {
+      "post": {
+        "tags": [
+          "spec"
+        ],
+        "operationId": "postV1SpecGovernancepacketValidate",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
       }
     },
     "/v1/specialists": {

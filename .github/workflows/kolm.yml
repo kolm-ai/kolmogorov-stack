@@ -1,0 +1,133 @@
+# W820 - kolm/distill-action reference workflow template.
+#
+# REFERENCE ONLY. The kolm-distill job below carries `if: false` so this
+# file does NOT consume CI minutes when committed unchanged. Flip the
+# guard plus configure the `KOLM_API_KEY` secret to enable it on a real
+# repo.
+#
+# Setup (when you are ready to enable)
+# ------------------------------------
+# 1. Add a repo-root `kolm.yaml`. Run `kolm yaml init` locally to scaffold
+#    one if you do not have one already.
+# 2. Repo Settings -> Secrets and variables -> Actions -> New repository
+#    secret named `KOLM_API_KEY` (a `ks_*` tenant key from
+#    https://kolm.ai/account/keys).
+# 3. Optional: repo variable `KOLM_BASE_URL` if you self-host kolm.
+# 4. Remove `if: false` from the `kolm-distill` job below so the gate
+#    actually runs.
+#
+# What it does (once enabled)
+# ---------------------------
+# On every push to main and on every pull_request: parse `kolm.yaml`,
+# replay the most recent captures through the active artifact, score
+# them against the gates pinned in `kolm.yaml`, and re-distill any
+# namespace that fell below `kscore_threshold`. The resulting `.kolm`
+# artifact lands in `./dist` and (with `publish_release: true`) gets
+# attached to a GitHub Release tagged `kolm-distill-<sha>`.
+#
+# Why opt-in by default
+# ---------------------
+# A push trigger that exits non-zero on a missing secret would mark every
+# unrelated commit as red in the GitHub UI. The W211 / W405 fix pattern
+# is mirrored here: the workflow file renders unchanged in forks (so
+# anyone can read the template) but the actual job stays guarded.
+
+name: kolm
+
+# Triggers stay declared so the surface is reviewable; the per-job guards
+# do the actual disabling. push + pull_request is the canonical pair.
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+# Top-level permissions default to read-only; the kolm-distill job
+# elevates only what it needs (contents:write for releases, pull-requests:
+# write for the PR comment).
+permissions:
+  contents: read
+
+jobs:
+  # ------------------------------------------------------------------
+  # install: cheap warm-up job. Runs on every push so the cache stays
+  # warm; does NOT depend on the KOLM_API_KEY secret so it provides a
+  # useful green check even in forks.
+  # ------------------------------------------------------------------
+  install:
+    name: install + lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: setup node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: npm ci
+        # `npm ci` is the deterministic install path; it fails if
+        # package-lock.json is out of date instead of silently bumping
+        # versions. This matches the rest of the kolm CI surface.
+        run: npm ci
+
+  # ------------------------------------------------------------------
+  # kolm-distill: the K-Score gate + auto re-distill loop. Guarded by
+  # `if: false` so this template can ship un-enabled. Remove the guard
+  # plus configure `KOLM_API_KEY` to enable.
+  # ------------------------------------------------------------------
+  kolm-distill:
+    name: K-Score gate
+    needs: install
+    runs-on: ubuntu-latest
+    # REFERENCE COPY ONLY: keep `if: false` until the secret is in
+    # place. With it absent, a fork that imports this workflow file
+    # does not start showing red checks on every commit.
+    if: false
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: setup node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: install dependencies
+        run: npm ci
+
+      - name: K-Score gate via kolm/distill-action
+        id: kolm
+        # The Action reads `kolm.yaml` from the repo root by default.
+        # `kscore_threshold` is the single most important knob; below
+        # this the gate fails and a re-distill is triggered.
+        uses: kolm/distill-action@v1
+        with:
+          kscore_threshold: 0.85
+          publish_release: 'true'
+          comment_on_pr: 'true'
+        env:
+          KOLM_API_KEY: ${{ secrets.KOLM_API_KEY }}
+          KOLM_BASE_URL: ${{ vars.KOLM_BASE_URL || 'https://kolm.ai' }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fail merge on K-Score regression
+        # `kscore_passed` is a string; compare it as a string. The
+        # Action sets it to `"true"` on pass and `"false"` on fail.
+        if: steps.kolm.outputs.kscore_passed != 'true'
+        run: |
+          echo "K-Score below threshold; failing the merge gate."
+          echo "Measured K-Score: ${{ steps.kolm.outputs.kscore }}"
+          exit 1

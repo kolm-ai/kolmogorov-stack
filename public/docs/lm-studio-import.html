@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f7f4ec";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>LM Studio import &middot; Open-source AI workbench &middot; kolm.ai</title>
+<meta name="description" content="Import a signed .kolm artifact into LM Studio: download, drag-drop, register. Honest limitations and the wizard spec we would hand the LM Studio team. W818-5.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="LM Studio import &middot; Open-source AI workbench &middot; kolm.ai">
+<meta property="og:description" content="Import a signed .kolm artifact into LM Studio: download, drag-drop, register. Honest limitations and the wizard spec.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/docs/lm-studio-import">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/docs/lm-studio-import">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<script src="/nav.js" defer></script>
+<style>
+:root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--accent-soft:rgba(16,185,129,0.10);--warn:#d97706;--bad:#dc2626;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--accent);color:#fff;padding:8px 14px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
+.skip-link:focus{left:0}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+main{padding:40px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.brand-eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+.brand-disambig{display:block;font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-top:8px;padding:8px 0;max-width:780px}
+h1{font-size:38px;line-height:1.1;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:17px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 32px}
+h2{font-size:22px;font-weight:500;letter-spacing:-0.018em;margin:40px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:15px;font-weight:500;letter-spacing:-0.01em;margin:24px 0 8px;max-width:780px}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
+li{margin:4px 0}
+table{border-collapse:collapse;width:100%;max-width:920px;margin:14px 0;font-size:13.5px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink);font-weight:500}
+td code{font-size:12px}
+.kpanel{background:var(--bg-elev);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:14px 0 18px;max-width:920px}
+.kpanel h2{margin:0 0 8px;font-size:18px}
+.step-row{display:flex;gap:14px;padding:14px 0;border-bottom:1px dashed var(--line)}
+.step-row:last-child{border-bottom:0}
+.step-row .n{font-family:var(--mono);color:var(--accent);font-size:13px;width:30px;flex-shrink:0}
+.step-row .body{flex:1}
+.step-row .body h3{margin:0 0 6px;font-size:15px;color:var(--ink)}
+.step-row .body p{margin:0 0 6px;font-size:14px;color:var(--ink-mute);max-width:none}
+.honest-note{font-size:12.5px;color:var(--ink-faint);font-style:italic;border-left:2px solid var(--accent);padding:4px 10px;margin:14px 0;max-width:780px}
+.warn-note{font-size:13px;color:var(--ink-mute);border-left:2px solid var(--warn);padding:8px 12px;margin:14px 0;max-width:780px;background:var(--bg-elev);border-radius:0 6px 6px 0}
+footer.page{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line);margin-top:32px}
+footer.page a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<span class="brand-anchor" data-w775="h1" aria-hidden="true">Frontier AI on your own infrastructure.</span>
+
+<main id="main">
+<div class="wrap">
+<p class="crumbs"><a href="/">kolm.ai</a> &rsaquo; <a href="/docs">docs</a> &rsaquo; LM Studio import</p>
+<p class="brand-eyebrow" data-w775="brand-eyebrow">Open-source AI workbench</p>
+<h1>LM Studio import wizard.</h1>
+<span class="brand-disambig" aria-hidden="true">Not Kolm therapeutics, Kolm band, or other unrelated organizations using similar names.</span>
+<p class="lede">A signed <code>.kolm</code> archive carries enough metadata for LM Studio to register it as a local model. The path is drag-and-drop today; the wizard spec below covers what an LM Studio plugin would need to do this in one click.</p>
+
+<div class="honest-note">
+Honesty contract: LM Studio does NOT enforce <code>.kolm</code> signature verification. The kolm CLI does. If you skip <code>kolm verify</code> before importing, you are trusting whoever handed you the file. The drag-and-drop path here is for convenience; the receipt path is for trust.
+</div>
+
+<section id="step-1">
+<h2>Step 1: download the .kolm artifact</h2>
+<div class="step-row">
+<div class="n">1.</div>
+<div class="body">
+<h3>From kolm.ai</h3>
+<p>Browse <a href="/account/artifacts" style="color:var(--accent)">/account/artifacts</a>, find the artifact, click <b>Download .kolm</b>. The file lands in your default downloads folder.</p>
+</div>
+</div>
+<div class="step-row">
+<div class="n">2.</div>
+<div class="body">
+<h3>From the marketplace</h3>
+<p>Browse <a href="/marketplace" style="color:var(--accent)">/marketplace</a>, click <b>Run with kolm</b> on any listing. The marketplace returns a signed download URL; your browser downloads the artifact directly.</p>
+</div>
+</div>
+<div class="step-row">
+<div class="n">3.</div>
+<div class="body">
+<h3>From a USB stick or local file</h3>
+<p>Any <code>.kolm</code> file with the right signature is portable. Air-gapped, sneakernet, or shared via email attachment all work the same way. The artifact is self-contained.</p>
+</div>
+</div>
+<p style="margin-top:12px">Before you import, verify the signature on the CLI:</p>
+<pre>kolm verify ./my-artifact.kolm</pre>
+<p>Output ends with <code>verify_ok: true</code> when the signature checks out. If it doesn't, the kolm CLI refuses to install the artifact and prints the failure reason; do not import an unverified file into LM Studio.</p>
+</section>
+
+<section id="step-2">
+<h2>Step 2: drag and drop into LM Studio</h2>
+<p>Open LM Studio. Drag the verified <code>.kolm</code> file onto the LM Studio window. LM Studio treats it as an unknown archive and prompts for the model name and template.</p>
+<p>The kolm artifact carries that metadata inside its manifest. Today the operator types it in by hand. The wizard spec at the bottom of this page covers what LM Studio would need to read those fields automatically.</p>
+<div class="warn-note">
+If LM Studio refuses the drop, the most likely cause is the <code>weights.bin</code> shard layout. LM Studio reads single-file GGUF natively; sharded artifacts need the kolm CLI to merge before import. Run <code>kolm unpack --merge-shards ./my-artifact.kolm</code> to produce a single-file output.
+</div>
+</section>
+
+<section id="step-3">
+<h2>Step 3: LM Studio extracts and registers</h2>
+<p>Once LM Studio accepts the drop, it:</p>
+<ol>
+<li>Unzips the archive into its local model directory.</li>
+<li>Reads <code>weights.bin</code> as the model payload.</li>
+<li>Reads the operator-supplied (or, in a future plugin path, manifest-supplied) template, system prompt, and stop tokens.</li>
+<li>Lists the new model in the LM Studio model picker.</li>
+</ol>
+<p>The model is now selectable like any other LM Studio model. Chat works, the inference parameters work, the local HTTP server works. You did not need to convert formats or run an extra build step.</p>
+</section>
+
+<section id="limitations">
+<h2>Honest limitations</h2>
+<ul>
+<li><b>No signature enforcement.</b> LM Studio does not check the kolm signature on import. If you want hard refuse-on-tamper, run the artifact under the kolm runtime (which does enforce) and use LM Studio as a UI layer over kolm's local server.</li>
+<li><b>No attestation enforcement.</b> If the manifest carries an <code>attestation_block</code> (TEE-issued report), LM Studio drops it. The kolm runtime is the only path that honours attestation gates today.</li>
+<li><b>No automatic re-distill.</b> LM Studio does not call back to kolm autopilot when the artifact drifts. K-Score watching, drift gates, and auto re-distill all happen in the kolm CLI; LM Studio is a downstream consumer.</li>
+<li><b>Multi-modal artifacts not yet supported.</b> The current LM Studio import path is text-only. Vision-language and audio artifacts need the kolm runtime.</li>
+</ul>
+</section>
+
+<section id="wizard-spec">
+<h2>Wizard spec section</h2>
+<p>These are the keys and values the LM Studio team would need from us to ship a native <code>.kolm</code> import flow. Posted here so it is reviewable in public.</p>
+<table>
+<thead><tr><th>Key</th><th>Source in .kolm</th><th>LM Studio use</th></tr></thead>
+<tbody>
+<tr><td><code>model_name</code></td><td><code>manifest.display_name</code></td><td>label in the model picker</td></tr>
+<tr><td><code>family</code></td><td><code>manifest.architecture</code></td><td>routing hint for compatible runtimes</td></tr>
+<tr><td><code>params_b</code></td><td><code>manifest.params_billions</code></td><td>display only; e.g. "7B"</td></tr>
+<tr><td><code>weights_path</code></td><td>archive offset of <code>weights.bin</code></td><td>passed to the GGUF loader path</td></tr>
+<tr><td><code>tokenizer_kind</code></td><td><code>manifest.tokenizer.kind</code></td><td>selects tokenizer constructor</td></tr>
+<tr><td><code>template</code></td><td><code>manifest.template</code></td><td>filled into the LM Studio "Prompt template" field</td></tr>
+<tr><td><code>system_prompt</code></td><td><code>manifest.system_prompt</code></td><td>filled into the LM Studio "System prompt" field</td></tr>
+<tr><td><code>stop_tokens</code></td><td><code>manifest.stop_tokens[]</code></td><td>filled into the LM Studio "Stop sequences" field</td></tr>
+<tr><td><code>num_ctx</code></td><td><code>manifest.context_window</code></td><td>fills the "Context length" field</td></tr>
+<tr><td><code>license</code></td><td><code>manifest.license</code></td><td>displayed alongside the model card</td></tr>
+<tr><td><code>signature_status</code></td><td>(computed by signature verify)</td><td>green pill on import success; red pill blocks import</td></tr>
+</tbody>
+</table>
+<p>An LM Studio plugin that reads the manifest, runs signature verification against the kolm public key chain, and pre-fills these fields would close the gap entirely. The wizard would still surface the values for the operator to confirm before the final "Register model" click.</p>
+<p>If you are on the LM Studio side and want to scope this together, email <a href="mailto:rodneyyesep@gmail.com" style="color:var(--accent)">rodneyyesep@gmail.com</a>.</p>
+</section>
+
+<footer class="page">
+<div>&copy; 2026 kolm.ai &middot; <a href="mailto:rodneyyesep@gmail.com">rodneyyesep@gmail.com</a> &middot; Receipts signed in CI</div>
+</footer>
+</div>
+</main>
+</body>
+</html>

@@ -11,6 +11,8 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/ks.css" as="style">
 <link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/frontier.css">
 <style>
   .sec-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
   .sec-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
@@ -72,9 +74,49 @@
   .tier-band .text h3 { margin: 0 0 4px; font-size: 16px; font-weight: 540; color: var(--ks-ink); }
   .tier-band .text p { margin: 0; font-size: 13.5px; color: var(--ks-ink-2); line-height: 1.55; max-width: 64ch; }
   .tier-band .actions { display: flex; flex-wrap: wrap; gap: var(--ks-3); }
+
+  /* W645: editorial spec-list helpers. */
+  .sh-list { margin-top: var(--ks-2); }
+  .sh-list .fr-spec-list__p code,
+  .sh-list .fr-spec-list__p a { font-family: inherit; }
+  .sh-list .fr-spec-list__p code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ink-1); background: rgba(126,240,210,0.06); padding: 1px 5px; border-radius: 3px; }
+  .sh-list .fr-spec-list__p a { color: var(--fr-mint); text-decoration: none; border-bottom: 1px solid rgba(126,240,210,0.32); }
+  .sh-list .fr-spec-list__p a:hover { border-bottom-color: var(--fr-mint); }
+  .sh-tier-list .fr-spec-list__row .fr-spec-list__delta { color: var(--fr-mint); }
+  .sh-tier-list .fr-spec-list__row.--paid .fr-spec-list__delta { color: #b693ff; }
+  .sh-reach-list .fr-spec-list__row .fr-spec-list__delta { color: var(--fr-mint); }
+  .sh-reach-list .fr-spec-list__row.--book .fr-spec-list__delta { color: #b693ff; }
+  .sh-reach-list .fr-spec-list__row.--verify .fr-spec-list__delta { color: #d6a65a; }
 </style>
+  <meta property="og:title" content="Self-host &middot; kolm.ai">
+  <meta property="og:description" content="Run the kolm stack on your own hardware. Helm chart plus Terraform module ship a control plane in your Kubernetes and a data plane in your VPC subnet. Hardware sizing for INT4 7B-32B and BF16 70B. KMS integration. Enterprise plan for support SLA.">
+  <meta property="og:image" content="https://kolm.ai/og/self-host.svg">
+  <meta property="og:url" content="https://kolm.ai/self-host">
+  <meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/self-host",
+  "description": "Run the kolm stack on your own hardware. Helm chart plus Terraform module ship a control plane in your Kubernetes and a data plane in your VPC subnet. Hardware sizing for INT4 7B-32B and BF16 70B. KMS integration. Enterprise plan for support SLA.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
 </head>
 <body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <a href="#main" class="ks-skip">Skip to content</a>
 
@@ -244,38 +286,50 @@ kolm verify ./sample.kolm    <span class="c"># offline signature check</span></p
   <div class="ks-wrap">
     <h2>Operational footprint</h2>
     <p class="sub">What the on-call engineer sees once the install is in place. Latency, observability, drift response, and the things that wake people up at 03:00.</p>
-    <div class="grid-3">
-      <div class="sec-card">
-        <div class="row"><span class="tag">latency</span><span class="st live">In-VPC</span></div>
-        <h3>Sub-100 ms control plane</h3>
-        <p>Signup, registry lookup, and verify endpoint serve within 100 ms p50 when co-located with the data plane. Compile and distill latency depends on the teacher path; in-network teachers add no transit hop.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">observability</span><span class="st live">OTLP</span></div>
-        <h3>OpenTelemetry out of the box</h3>
-        <p>Traces, metrics, and structured logs over OTLP. Ship into Datadog, Grafana Cloud, New Relic, Honeycomb, or your in-house OTel collector. The CLI emits <code>~/.kolm/audit.log</code> as structured JSON for SIEM ingestion.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">drift</span><span class="st live">K-score</span></div>
-        <h3>Drift detection on every release</h3>
-        <p>Each compile records a K-score snapshot. Drift detector compares the live snapshot to the last shipped artifact; verdict embeds in the receipt. Roll back by deploying the prior signed artifact; tombstone the failing one.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">storage</span><span class="st live">Yours</span></div>
-        <h3>Object store on your account</h3>
-        <p>S3, GCS, Azure Blob, or any S3-compatible store. Receipts and artifacts live in your bucket with your lifecycle policy; kolm never deletes them. Hosted control plane indexes by CID, not by the underlying bytes.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">backup</span><span class="st live">Native</span></div>
-        <h3>Bucket lifecycle is the backup story</h3>
-        <p>Use S3 Object Lock or GCS Bucket Lock for receipts that must survive operator error. Receipts are kilobytes; artifacts are gigabytes. Most customers retain receipts indefinitely and age artifacts on the bucket's own schedule.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">on-call</span><span class="st live">Runbook</span></div>
-        <h3>Runbook ships with the chart</h3>
-        <p>Standard SRE runbook for the control plane: pod-level health, restart sequence, drift alert triage, signing-key rotation. Linked from the Helm chart README; reviewed against the SOC 2 system description.</p>
-      </div>
-    </div>
+    <ul class="fr-spec-list">
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Sub-100 ms control plane</h3>
+          <span class="fr-spec-list__delta">latency &middot; in-VPC p50</span>
+        </div>
+        <p class="fr-spec-list__p">Signup, registry lookup, and verify endpoint serve within 100 ms p50 when co-located with the data plane. Compile and distill latency depends on the teacher path; in-network teachers add no transit hop.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">OpenTelemetry out of the box</h3>
+          <span class="fr-spec-list__delta">observability &middot; OTLP</span>
+        </div>
+        <p class="fr-spec-list__p">Traces, metrics, and structured logs over OTLP. Ship into Datadog, Grafana Cloud, New Relic, Honeycomb, or your in-house OTel collector. The CLI emits <code>~/.kolm/audit.log</code> as structured JSON for SIEM ingestion.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Drift detection on every release</h3>
+          <span class="fr-spec-list__delta">drift &middot; K-score snapshot</span>
+        </div>
+        <p class="fr-spec-list__p">Each compile records a K-score snapshot. Drift detector compares the live snapshot to the last shipped artifact; verdict embeds in the receipt. Roll back by deploying the prior signed artifact; tombstone the failing one.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Object store on your account</h3>
+          <span class="fr-spec-list__delta">storage &middot; S3 / GCS / Azure / S3-compat</span>
+        </div>
+        <p class="fr-spec-list__p">S3, GCS, Azure Blob, or any S3-compatible store. Receipts and artifacts live in your bucket with your lifecycle policy; kolm never deletes them. Hosted control plane indexes by CID, not by the underlying bytes.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Bucket lifecycle is the backup story</h3>
+          <span class="fr-spec-list__delta">backup &middot; native object-lock</span>
+        </div>
+        <p class="fr-spec-list__p">Use S3 Object Lock or GCS Bucket Lock for receipts that must survive operator error. Receipts are kilobytes; artifacts are gigabytes. Most customers retain receipts indefinitely and age artifacts on the bucket's own schedule.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Runbook ships with the chart</h3>
+          <span class="fr-spec-list__delta">on-call &middot; runbook</span>
+        </div>
+        <p class="fr-spec-list__p">Standard SRE runbook for the control plane: pod-level health, restart sequence, drift alert triage, signing-key rotation. Linked from the Helm chart README; reviewed against the SOC 2 system description.</p>
+      </li>
+    </ul>
   </div>
 </section>
 
@@ -283,28 +337,36 @@ kolm verify ./sample.kolm    <span class="c"># offline signature check</span></p
   <div class="ks-wrap">
     <h2>Upgrade path</h2>
     <p class="sub">A new control-plane image is a <code>helm upgrade</code>. Artifacts do not churn; receipts already in your bucket remain verifiable against any future CLI release. Honest about what an upgrade touches and what it leaves alone.</p>
-    <div class="grid-2">
-      <div class="sec-card">
-        <div class="row"><span class="tag">command</span><span class="st live">helm upgrade</span></div>
-        <h3>Rolling upgrade in place</h3>
-        <p>Pin the chart version (<code>--version &lt;semver&gt;</code>). The chart applies a rolling deployment; the existing signing keys, the registry index, and the captures in your bucket remain untouched. No data migration step.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">command</span><span class="st live">helm rollback</span></div>
-        <h3>Rollback to the prior revision</h3>
-        <p>If a release misbehaves, <code>helm rollback kolm &lt;rev&gt;</code> brings the previous control-plane image back online. The data plane and the bucket are not touched; in-flight compile jobs resume against the rolled-back control plane.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">versioning</span><span class="st live">Receipt v1</span></div>
-        <h3>Receipts are forward-compatible</h3>
-        <p>The receipt schema is versioned (<code>kolm-receipt-1</code>). New compiler releases produce v1 receipts; older receipts in your bucket remain verifiable against any later CLI. If a future schema bump arrives, both versions verify side-by-side during the transition window.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">CLI</span><span class="st live">Independent</span></div>
-        <h3>CLI updates independent of the control plane</h3>
-        <p>Operators upgrade the CLI on their cadence with <code>kolm update</code>. The CLI refuses to run from a repo clone (no silent global-install hazard) and announces a compatible control-plane version range in <code>kolm doctor</code>.</p>
-      </div>
-    </div>
+    <ul class="fr-spec-list">
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Rolling upgrade in place</h3>
+          <span class="fr-spec-list__delta">helm upgrade &middot; rolling deploy</span>
+        </div>
+        <p class="fr-spec-list__p">Pin the chart version (<code>--version &lt;semver&gt;</code>). The chart applies a rolling deployment; the existing signing keys, the registry index, and the captures in your bucket remain untouched. No data migration step.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Rollback to the prior revision</h3>
+          <span class="fr-spec-list__delta">helm rollback &middot; no data touched</span>
+        </div>
+        <p class="fr-spec-list__p">If a release misbehaves, <code>helm rollback kolm &lt;rev&gt;</code> brings the previous control-plane image back online. The data plane and the bucket are not touched; in-flight compile jobs resume against the rolled-back control plane.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Receipts are forward-compatible</h3>
+          <span class="fr-spec-list__delta">receipt v1 &middot; transition-safe</span>
+        </div>
+        <p class="fr-spec-list__p">The receipt schema is versioned (<code>kolm-receipt-1</code>). New compiler releases produce v1 receipts; older receipts in your bucket remain verifiable against any later CLI. If a future schema bump arrives, both versions verify side-by-side during the transition window.</p>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">CLI updates independent of the control plane</h3>
+          <span class="fr-spec-list__delta">CLI &middot; operator cadence</span>
+        </div>
+        <p class="fr-spec-list__p">Operators upgrade the CLI on their cadence with <code>kolm update</code>. The CLI refuses to run from a repo clone (no silent global-install hazard) and announces a compatible control-plane version range in <code>kolm doctor</code>.</p>
+      </li>
+    </ul>
   </div>
 </section>
 
@@ -350,20 +412,24 @@ kolm verify ./sample.kolm    <span class="c"># offline signature check</span></p
 
 <section class="sec-section" id="tier">
   <div class="ks-wrap">
-    <h2>Subscription tier</h2>
+    <h2 class="fr-h2">Subscription tier</h2>
     <p class="sub">The CLI itself is Apache-2.0 and runs without a subscription. The Enterprise plan adds the support SLA, the security engineer for deployment review, and the BAA / SOC 2 paperwork pipeline.</p>
-    <div class="grid-2">
-      <div class="sec-card">
-        <div class="row"><span class="tag">free</span><span class="st live">Apache-2.0</span></div>
-        <h3>CLI runs without a subscription</h3>
-        <p>The full compiler, distill workers, quantization runtimes, and the verifier are Apache-2.0. Install with <code>pip install git+https://github.com/sneaky-hippo/kolmogorov-stack@main#subdirectory=sdk/python</code> or grab a static binary from the releases page. No license server; no telemetry beacon required; no feature gates on the open-source path.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">paid</span><span class="st live">Enterprise</span></div>
-        <h3>Enterprise plan for the support SLA</h3>
-        <p>For regulated payors, providers, federal pilots, and large enterprises. Includes the Helm chart and Terraform module under support, the SOC 2 report and BAA execution pipeline, a named security engineer for deployment review, and the runbook reviewed against your environment. Details on the <a href="/pricing">pricing</a> page; book a review at <a href="/enterprise">/enterprise</a>.</p>
-      </div>
-    </div>
+    <ul class="fr-spec-list sh-list sh-tier-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__h">CLI runs without a subscription</h3>
+          <span class="fr-spec-list__delta">FREE &middot; Apache-2.0</span>
+        </div>
+        <p class="fr-spec-list__p">The full compiler, distill workers, quantization runtimes, and the verifier are Apache-2.0. Install with <code>pip install git+https://github.com/sneaky-hippo/kolmogorov-stack@main#subdirectory=sdk/python</code> or grab a static binary from the releases page. No license server; no telemetry beacon required; no feature gates on the open-source path.</p>
+      </li>
+      <li class="fr-spec-list__row --paid">
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__h">Enterprise plan for the support SLA</h3>
+          <span class="fr-spec-list__delta">PAID &middot; Enterprise</span>
+        </div>
+        <p class="fr-spec-list__p">For regulated payors, providers, federal pilots, and large enterprises. Includes the Helm chart and Terraform module under support, the SOC 2 report and BAA execution pipeline, a named security engineer for deployment review, and the runbook reviewed against your environment. Details on the <a href="/pricing">pricing</a> page; book a review at <a href="/enterprise">/enterprise</a>.</p>
+      </li>
+    </ul>
     <div class="tier-band">
       <div class="text">
         <h3>Air-gapped and sovereign deployments</h3>
@@ -379,22 +445,31 @@ kolm verify ./sample.kolm    <span class="c"># offline signature check</span></p
 
 <section class="sec-section" id="reach">
   <div class="ks-wrap">
-    <h2>Reach the deployment team</h2>
+    <h2 class="fr-h2">Reach the deployment team</h2>
     <p class="sub">For installation help, hardware sizing review, KMS wiring, or a security-engineer walkthrough of the boundary in your environment.</p>
-    <div class="grid-3">
-      <div class="sec-card">
-        <h3>Quickstart</h3>
-        <p>Install the CLI in five minutes against the hosted control plane; promote to self-hosted with the Helm chart and Terraform module when ready. <a href="/quickstart">/quickstart</a>.</p>
-      </div>
-      <div class="sec-card">
-        <h3>Enterprise deployment review</h3>
-        <p>A solutions engineer walks your platform and security teams through the VPC, on-prem, or air-gapped path. Includes Helm values review, KMS wiring, and runbook handoff. <a href="/enterprise">Book a review</a>.</p>
-      </div>
-      <div class="sec-card">
-        <h3>Verify a .kolm artifact</h3>
-        <p>The verifier is a static binary and works offline. Useful as a smoke test of the install: build any sample artifact and verify it round-trip. <a href="/verify-prod">/verify-prod</a>.</p>
-      </div>
-    </div>
+    <ul class="fr-spec-list sh-list sh-reach-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__h">Quickstart</h3>
+          <span class="fr-spec-list__delta">5 MIN &middot; hosted control plane</span>
+        </div>
+        <p class="fr-spec-list__p">Install the CLI in five minutes against the hosted control plane; promote to self-hosted with the Helm chart and Terraform module when ready. <a href="/quickstart">/quickstart</a>.</p>
+      </li>
+      <li class="fr-spec-list__row --book">
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__h">Enterprise deployment review</h3>
+          <span class="fr-spec-list__delta">BOOK &middot; security engineer walkthrough</span>
+        </div>
+        <p class="fr-spec-list__p">A solutions engineer walks your platform and security teams through the VPC, on-prem, or air-gapped path. Includes Helm values review, KMS wiring, and runbook handoff. <a href="/enterprise">Book a review</a>.</p>
+      </li>
+      <li class="fr-spec-list__row --verify">
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__h">Verify a .kolm artifact</h3>
+          <span class="fr-spec-list__delta">OFFLINE &middot; static-binary verifier</span>
+        </div>
+        <p class="fr-spec-list__p">The verifier is a static binary and works offline. Useful as a smoke test of the install: build any sample artifact and verify it round-trip. <a href="/verify-prod">/verify-prod</a>.</p>
+      </li>
+    </ul>
     <div style="margin-top:var(--ks-6); display:flex; flex-wrap:wrap; gap:var(--ks-3)">
       <a href="/quickstart" class="ks-btn ks-btn--primary">Install the CLI <span class="ks-btn-arrow">&rarr;</span></a>
       <a href="/security" class="ks-btn ks-btn--ghost">Security overview</a>

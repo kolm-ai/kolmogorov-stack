@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Chargeback and department attribution &middot; Open-source AI workbench &middot; kolm.ai</title>
+<meta name="description" content="kolm chargeback and department attribution: roll per-namespace billing-breakdown rows up to departments. Eight canonical departments, UTC monthly period bounds, CSV plus JSON export, CLI reference.">
+<meta name="theme-color" content="#07090c">
+<link rel="canonical" href="https://kolm.ai/docs/chargeback">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<script src="/nav.js" defer></script>
+<style>
+  .ch-hero { padding-top: clamp(72px, 9vw, 128px); padding-bottom: clamp(40px, 6vw, 72px); border-bottom: 1px solid var(--line-1); }
+  .ch-hero h1 { font-size: clamp(36px, 5vw, 56px); font-weight: 580; letter-spacing: -0.02em; margin: 14px 0 18px; max-width: 22ch; }
+  .ch-body { padding: 48px 0 96px; }
+  .ch-body h2 { font-size: 22px; font-weight: 540; margin: 40px 0 12px; letter-spacing: -0.01em; }
+  .ch-body p, .ch-body li { font-size: 15px; line-height: 1.7; color: var(--ink-2); max-width: 76ch; }
+  pre { background: #06080a; border: 1px solid var(--line-1); border-radius: 8px; padding: 16px 18px; overflow-x: auto; font: 12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; color: #e9eef3; max-width: 760px; }
+  code { font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size: 13px; background: rgba(255,255,255,0.04); padding: 1px 6px; border-radius: 4px; }
+  table { border-collapse: collapse; max-width: 760px; margin: 14px 0; font-size: 13.5px; }
+  th,td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line-1); vertical-align: top; color: var(--ink-2); }
+  th { color: var(--ink-1); font-weight: 500; }
+</style>
+</head>
+<body class="ks">
+<span class="brand-anchor" data-w775="h1" aria-hidden="true">Frontier AI on your own infrastructure.</span>
+<span class="brand-disambig" aria-hidden="true">Not Kolm therapeutics, Kolm band, or other unrelated organizations using similar names.</span>
+
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/marketplace">Marketplace</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">-&gt;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main">
+
+<section class="ch-hero">
+  <div class="ks-wrap">
+    <p class="brand-eyebrow" data-w775="brand-eyebrow">Open-source AI workbench</p>
+    <h1>Chargeback and department attribution.</h1>
+    <p class="lede">Roll per-namespace billing-breakdown rows up to departments. For finance teams that need a single line item per cost center instead of a sprawl of namespace names.</p>
+  </div>
+</section>
+
+<section class="ch-body">
+  <div class="ks-wrap">
+
+    <h2>What it is</h2>
+    <p>Chargeback layers on top of the W465 billing-breakdown rows (per-namespace cost attribution sourced from the event-store ledger). Each namespace carries an optional <code>department</code> tag; chargeback groups the namespaces by that tag and emits a roll-up row per department per period.</p>
+
+    <h2>Department vocab</h2>
+    <p>Eight canonical departments:</p>
+    <ul>
+      <li><code>engineering</code></li>
+      <li><code>product</code></li>
+      <li><code>ops</code></li>
+      <li><code>sales</code></li>
+      <li><code>marketing</code></li>
+      <li><code>support</code></li>
+      <li><code>research</code></li>
+      <li><code>other</code> -- catch-all for namespaces with no tag, or a tag outside the canonical set.</li>
+    </ul>
+    <p>Free-form department strings are accepted at namespace creation time but normalized to the canonical set at roll-up time. The unnormalized string is preserved in the raw row.</p>
+
+    <h2>Period bounds</h2>
+    <p>Period is a calendar month in UTC, formatted <code>YYYY-MM</code>. The bounds are <code>[YYYY-MM-01T00:00:00Z, YYYY-MM+1-01T00:00:00Z)</code>. The API rejects malformed months (e.g. <code>2026-13</code>) with <code>HTTP 400 invalid_period</code>; it does not silently roll month 13 into January of the next year.</p>
+
+    <h2>Group-by</h2>
+    <p>Three group-by axes:</p>
+    <ul>
+      <li><code>department</code> -- the standard roll-up.</li>
+      <li><code>namespace</code> -- equivalent to <code>kolm billing breakdown --by namespace</code>; useful when you want chargeback in a CSV alongside namespace rows.</li>
+      <li><code>provider</code> -- groups by upstream teacher provider (anthropic, openai, kolm-distill-teacher, vllm, etc.). Useful when finance asks "what did we spend on Claude vs OpenAI this month."</li>
+    </ul>
+
+    <h2>CSV and JSON export</h2>
+    <p>Both formats are first-class. CSV is RFC 4180; JSON is the same shape as the API envelope.</p>
+    <pre>kolm chargeback --period 2026-05 --by department --format csv &gt; chargeback-2026-05.csv
+kolm chargeback --period 2026-05 --by department --format json --pretty</pre>
+    <p>CSV columns: <code>period, department, namespace_count, cost_micro_usd, captures, distill_runs, inference_calls</code>.</p>
+
+    <h2>CLI</h2>
+    <pre>kolm chargeback --period 2026-05 --by department
+kolm chargeback --period 2026-05 --by provider --format csv
+kolm chargeback --period 2026-04 --by namespace --json</pre>
+
+    <h2>API route</h2>
+    <p>Auth-gated. See the dashboard at <a href="/account/chargeback">/account/chargeback</a>.</p>
+    <pre>GET /v1/chargeback?period=2026-05&amp;by=department&amp;format=json</pre>
+
+    <p class="muted" style="margin-top:48px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;color:var(--ink-3)">See also: <a href="/account/chargeback">chargeback dashboard</a> &middot; <a href="/account/billing">billing breakdown</a> &middot; <a href="/docs/cli">CLI index</a> &middot; <a href="/docs/audit">audit</a></p>
+
+  </div>
+</section>
+
+</main>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <p>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm &middot; <a href="mailto:rodneyyesep@gmail.com">rodneyyesep@gmail.com</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

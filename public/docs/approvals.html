@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Distillation approval queue &middot; Open-source AI workbench &middot; kolm.ai</title>
+<meta name="description" content="kolm distillation approval queue: when approvals are required, queue lifecycle, roles and permissions, CLI reference, API routes, and the honest contract that rejection always requires a reason.">
+<meta name="theme-color" content="#07090c">
+<link rel="canonical" href="https://kolm.ai/docs/approvals">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<script src="/nav.js" defer></script>
+<style>
+  .ap-hero { padding-top: clamp(72px, 9vw, 128px); padding-bottom: clamp(40px, 6vw, 72px); border-bottom: 1px solid var(--line-1); }
+  .ap-hero h1 { font-size: clamp(36px, 5vw, 56px); font-weight: 580; letter-spacing: -0.02em; margin: 14px 0 18px; max-width: 22ch; }
+  .ap-body { padding: 48px 0 96px; }
+  .ap-body h2 { font-size: 22px; font-weight: 540; margin: 40px 0 12px; letter-spacing: -0.01em; }
+  .ap-body p, .ap-body li { font-size: 15px; line-height: 1.7; color: var(--ink-2); max-width: 76ch; }
+  pre { background: #06080a; border: 1px solid var(--line-1); border-radius: 8px; padding: 16px 18px; overflow-x: auto; font: 12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; color: #e9eef3; max-width: 760px; }
+  code { font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size: 13px; background: rgba(255,255,255,0.04); padding: 1px 6px; border-radius: 4px; }
+  table { border-collapse: collapse; max-width: 760px; margin: 14px 0; font-size: 13.5px; }
+  th,td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line-1); vertical-align: top; color: var(--ink-2); }
+  th { color: var(--ink-1); font-weight: 500; }
+  .ap-honest { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-size: 13.5px; color: var(--ink-2); line-height: 1.55; margin: 20px 0; max-width: 76ch; }
+  .ap-honest b { color: var(--ink-1); font-weight: 580; }
+</style>
+</head>
+<body class="ks">
+<span class="brand-anchor" data-w775="h1" aria-hidden="true">Frontier AI on your own infrastructure.</span>
+<span class="brand-disambig" aria-hidden="true">Not Kolm therapeutics, Kolm band, or other unrelated organizations using similar names.</span>
+
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/marketplace">Marketplace</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">-&gt;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main">
+
+<section class="ap-hero">
+  <div class="ks-wrap">
+    <p class="brand-eyebrow" data-w775="brand-eyebrow">Open-source AI workbench</p>
+    <h1>Distillation approval queue.</h1>
+    <p class="lede">An optional gate that holds a distillation run until a qualified owner or admin approves it. Useful for high-cost runs, sensitive namespaces, and regulated tiers.</p>
+  </div>
+</section>
+
+<section class="ap-body">
+  <div class="ks-wrap">
+
+    <h2>When approvals are required</h2>
+    <p>Approvals fire on a per-tenant policy. The policy is OFF by default; enable it on namespaces where one of the following applies:</p>
+    <ul>
+      <li><b>High-cost runs.</b> Estimated teacher spend above the namespace cost ceiling (configured at <code>/account/policy</code>).</li>
+      <li><b>Sensitive namespaces.</b> Any namespace tagged with <code>sensitive:true</code> -- typically those handling PHI, PII, or regulated content.</li>
+      <li><b>Regulatory tier.</b> Any namespace under the medical, legal, or financial vertical (the kolm artifact stamps disclaimers automatically for these; the approval gate gives a human one more checkpoint).</li>
+    </ul>
+
+    <h2>Queue lifecycle</h2>
+    <table>
+      <thead><tr><th>State</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>requested</code></td><td>A member or viewer has requested a distill run; awaiting submission to the approver pool.</td></tr>
+        <tr><td><code>pending</code></td><td>Request is in the approver pool; visible to owners and admins.</td></tr>
+        <tr><td><code>granted</code></td><td>An owner or admin approved the request; the distill pipeline picks it up on the next tick.</td></tr>
+        <tr><td><code>rejected</code></td><td>An owner or admin rejected the request. A reason string is required; the request stays in the audit log.</td></tr>
+        <tr><td><code>expired</code></td><td>Request sat in <code>pending</code> longer than the namespace timeout (default 72 hours). The requester may re-submit.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Roles and permissions</h2>
+    <ul>
+      <li><b>Owner.</b> Can approve, reject, or revoke any request. Can change the namespace approval policy.</li>
+      <li><b>Admin.</b> Can approve or reject requests. Cannot change the namespace approval policy.</li>
+      <li><b>Member.</b> Can request a distill run. Cannot approve or reject.</li>
+      <li><b>Viewer.</b> Can view the queue. Cannot request, approve, or reject.</li>
+    </ul>
+
+    <h2>CLI</h2>
+    <pre>kolm approvals list --namespace prod-medical --state pending
+kolm approvals request --namespace prod-medical --reason "weekly retrain"
+kolm approvals approve &lt;request_id&gt; --reason "spend within Q2 budget"
+kolm approvals reject  &lt;request_id&gt; --reason "wait for HIPAA audit close"</pre>
+
+    <h2>API routes</h2>
+    <p>The same surfaces are exposed as auth-gated routes; see <a href="/account/approvals">/account/approvals</a> for the dashboard.</p>
+    <ul>
+      <li><code>POST /v1/approvals/request</code></li>
+      <li><code>POST /v1/approvals/:id/approve</code></li>
+      <li><code>POST /v1/approvals/:id/reject</code></li>
+      <li><code>GET  /v1/approvals?namespace=&amp;state=</code></li>
+    </ul>
+
+    <div class="ap-honest">
+      <b>Honest contract.</b> Rejection requires a reason string -- the API returns <code>HTTP 400 reason_required</code> if <code>reason</code> is missing or empty. We never silently reject. The reason text is written to the audit log alongside the requester id, the approver id, and the request hash.
+    </div>
+
+    <p class="muted" style="margin-top:48px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;color:var(--ink-3)">See also: <a href="/account/approvals">approvals dashboard</a> &middot; <a href="/docs/cli">CLI index</a> &middot; <a href="/docs/distill">distill</a> &middot; <a href="/docs/audit">audit</a></p>
+
+  </div>
+</section>
+
+</main>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <p>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm &middot; <a href="mailto:rodneyyesep@gmail.com">rodneyyesep@gmail.com</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

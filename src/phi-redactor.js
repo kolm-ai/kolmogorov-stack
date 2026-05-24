@@ -485,6 +485,8 @@ function scanFindings(text, opts = {}) {
       // which won't actually look like 10 contiguous digits anyway, but
       // be defensive: require non-digit on both sides (already enforced).
       const digits = m[1];
+      const before = src.slice(Math.max(0, s - 24), s);
+      if (/\b(?:Acct|Account|Member)\s*[:#]?\s*$/i.test(before)) continue;
       const npiOk = isValidNpi(digits);
       if (npiOk) {
         findings.push(makeFinding({
@@ -672,7 +674,7 @@ function scanFindings(text, opts = {}) {
   {
     // Conservative US/intl phone (require separator so we don't double-up
     // with the 9/10 digit SSN/NPI scans above).
-    const re = /\b\+?1?[\s.-]?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}\b/g;
+    const re = /(?<![A-Za-z0-9])(?:\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}\b/g;
     let m;
     while ((m = re.exec(src)) !== null) {
       const s = m.index; const e = s + m[0].length;

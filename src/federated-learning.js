@@ -31,6 +31,8 @@
 //     hash mismatches and per-round duplicate participant IDs; it does not
 //     run Krum, Multi-Krum, trimmed mean, or any other Byzantine-resilient
 //     aggregator out of the box.
+//     Optional local robust aggregation methods are available per round, but
+//     they are algorithmic defenses, not a claim of secure transport or MPC.
 //   - A trained-model output. This module aggregates *deltas*; the training
 //     loop that produces a delta lives in the kolm distill worker (Task J).
 //
@@ -55,7 +57,7 @@ export const FEATURE_STATE = 'foundation';
 // "production federated learning" without registering a real plugin first.
 export const FEATURE_STATE_LABEL = 'Federated learning (foundation)';
 export const FEATURE_STATE_DESCRIPTION =
-  'Foundation: protocol contract + aggregator + DP helpers. No secure-aggregation, no network transport, no production Byzantine robustness. Wire a registered SecAgg plugin to upgrade.';
+  'Foundation: protocol contract + aggregator + DP helpers. No secure-aggregation, no network transport, no production Byzantine robustness by default. Configure robust aggregation per round and wire a registered SecAgg plugin to upgrade proof scope.';
 
 // Pluggable SecAgg plugin registry. Defaults to empty — every artifact that
 // claims secure_aggregation_verified:true MUST come from a registered plugin
@@ -80,9 +82,17 @@ export const STRATEGIES = Object.freeze({
   FEDPROX: 'fedprox',  // FedAvg + proximal-term scaling (uses participant.mu)
 });
 
+export const ROBUST_AGGREGATORS = Object.freeze({
+  NONE: 'none',
+  TRIMMED_MEAN: 'trimmed_mean',
+  COORDINATE_MEDIAN: 'coordinate_median',
+  KRUM: 'krum',
+  MULTI_KRUM: 'multi_krum',
+});
+
 // What's in a Round? The coordinator broadcasts this before participants
 // compute their local updates. Embedded verbatim in every contribution receipt.
-export function newRound({ round_id, model_hash, base_artifact_version, target_strategy, target_dp = null, min_participants = 3, deadline = null, transport = null, secure_aggregation = null }) {
+export function newRound({ round_id, model_hash, base_artifact_version, target_strategy, target_dp = null, min_participants = 3, deadline = null, transport = null, secure_aggregation = null, robust_aggregation = null }) {
   if (!round_id || typeof round_id !== 'string') throw new Error('round_id required');
   if (!model_hash || typeof model_hash !== 'string') throw new Error('model_hash required');
   if (!Object.values(STRATEGIES).includes(target_strategy)) {
@@ -91,6 +101,7 @@ export function newRound({ round_id, model_hash, base_artifact_version, target_s
   if (target_dp && (target_dp.epsilon == null || target_dp.delta == null)) {
     throw new Error('target_dp requires { epsilon, delta }');
   }
+  const robust = _normalizeRobustAggregation(robust_aggregation);
   return {
     spec: FL_SPEC_VERSION,
     feature_state: FEATURE_STATE,
@@ -111,7 +122,8 @@ export function newRound({ round_id, model_hash, base_artifact_version, target_s
       provider: null,
       verified_at: null,
     },
-    byzantine_robust: false,
+    byzantine_robust: robust.method !== ROBUST_AGGREGATORS.NONE,
+    byzantine_strategy: robust.method === ROBUST_AGGREGATORS.NONE ? null : robust,
     // Privacy budget placeholder. Both epsilon + delta are null until a
     // real DP accountant is wired (separate wave). target_dp above still
     // controls round-time noise; this is the cumulative-budget surface
@@ -248,25 +260,15 @@ export function aggregate({ round, contributions, started_at }) {
   }
 
   const first = contributions[0].delta;
-  const keys = Object.keys(first).sort();
-  // Initialize accumulator with zeros matching shape of first contribution.
-  const acc = {};
-  for (const k of keys) acc[k] = new Array(first[k].length).fill(0);
-
-  const total_weight = _totalWeight(round.target_strategy, contributions);
-
-  for (const c of contributions) {
-    const w = _participantWeight(round.target_strategy, c) / total_weight;
-    for (const k of keys) {
-      const v = c.delta[k];
-      if (!v || v.length !== acc[k].length) throw new Error(`shape mismatch for key ${k} in participant ${c.receipt.participant_id}`);
-      for (let i = 0; i < v.length; i++) acc[k][i] += w * v[i];
-    }
-  }
-
-  const aggregated_delta = acc;
+  const keys = _validateDeltaShapes(contributions);
+  const robust = _normalizeRobustAggregation(round.byzantine_strategy || round.robust_aggregation || null);
+  const robustEnabled = robust.method !== ROBUST_AGGREGATORS.NONE;
+  const aggregated_delta = robustEnabled
+    ? _robustAggregate({ round, contributions, keys, config: robust })
+    : _weightedAggregate({ round, contributions, keys, first });
   const aggregated_hash = _shortHash(_canonicalize(aggregated_delta));
   const dp_summary = _summarizeDp(contributions);
+  const privacy_budget = _composePrivacyBudget(round, contributions);
 
   // W409u aggregation_round schema fields:
   //   round_id, participants, started_at, completed_at, aggregation_method,
@@ -296,9 +298,10 @@ export function aggregate({ round, contributions, started_at }) {
     started_at: started_at || completed_at,
     completed_at,
     aggregated_at: completed_at,
-    byzantine_robust: false,
+    byzantine_robust: robustEnabled,
+    byzantine_strategy: robustEnabled ? robust : null,
     secure_aggregation: round.secure_aggregation || { status: 'not_verified', provider: null, verified_at: null },
-    privacy_budget: round.privacy_budget || { epsilon: null, delta: null },
+    privacy_budget,
     dp_summary,
   };
   return { receipt, aggregated_delta };
@@ -316,15 +319,179 @@ function _totalWeight(strategy, contributions) {
   return contributions.reduce((s, c) => s + _participantWeight(strategy, c), 0);
 }
 
+function _weightedAggregate({ round, contributions, keys, first }) {
+  const acc = {};
+  for (const k of keys) acc[k] = new Array(first[k].length).fill(0);
+  const total_weight = _totalWeight(round.target_strategy, contributions);
+  for (const c of contributions) {
+    const w = _participantWeight(round.target_strategy, c) / total_weight;
+    for (const k of keys) {
+      const v = c.delta[k];
+      for (let i = 0; i < v.length; i++) acc[k][i] += w * v[i];
+    }
+  }
+  return acc;
+}
+
+function _normalizeRobustAggregation(config) {
+  if (!config || config === true) return { method: ROBUST_AGGREGATORS.NONE };
+  if (typeof config === 'string') config = { method: config };
+  if (typeof config !== 'object' || Array.isArray(config)) throw new Error('robust_aggregation must be an object, string, or null');
+  const method = String(config.method || ROBUST_AGGREGATORS.NONE).toLowerCase().replace(/-/g, '_');
+  if (!Object.values(ROBUST_AGGREGATORS).includes(method)) throw new Error(`unknown robust aggregation method: ${method}`);
+  if (method === ROBUST_AGGREGATORS.NONE) return { method };
+  const f = Math.max(0, Math.floor(Number(config.f ?? config.max_byzantine ?? 1)));
+  const trim_ratio = Math.max(0, Math.min(0.49, Number(config.trim_ratio ?? 0.2)));
+  const m = config.m == null ? null : Math.max(1, Math.floor(Number(config.m)));
+  return { method, f, trim_ratio, m };
+}
+
+function _validateDeltaShapes(contributions) {
+  const first = contributions[0].delta;
+  const keys = Object.keys(first).sort();
+  for (const c of contributions) {
+    const got = Object.keys(c.delta || {}).sort();
+    if (_canonicalize(got) !== _canonicalize(keys)) throw new Error(`shape mismatch for participant ${c.receipt.participant_id}`);
+    for (const k of keys) {
+      const v = c.delta[k];
+      if (!Array.isArray(v) || !Array.isArray(first[k]) || v.length !== first[k].length) {
+        throw new Error(`shape mismatch for key ${k} in participant ${c.receipt.participant_id}`);
+      }
+      for (const x of v) {
+        if (!Number.isFinite(Number(x))) throw new Error(`non_numeric_delta for key ${k} in participant ${c.receipt.participant_id}`);
+      }
+    }
+  }
+  return keys;
+}
+
+function _robustAggregate({ contributions, keys, config }) {
+  switch (config.method) {
+    case ROBUST_AGGREGATORS.COORDINATE_MEDIAN:
+      return _coordinateMedian(contributions, keys);
+    case ROBUST_AGGREGATORS.TRIMMED_MEAN:
+      return _trimmedMean(contributions, keys, config);
+    case ROBUST_AGGREGATORS.KRUM:
+      return _cloneDelta(contributions[_krumWinner(contributions, keys, config.f)].delta);
+    case ROBUST_AGGREGATORS.MULTI_KRUM:
+      return _meanDeltas(_multiKrumWinners(contributions, keys, config), keys);
+    default:
+      throw new Error(`unsupported robust aggregation method: ${config.method}`);
+  }
+}
+
+function _coordinateMedian(contributions, keys) {
+  const out = {};
+  for (const k of keys) {
+    out[k] = [];
+    for (let i = 0; i < contributions[0].delta[k].length; i++) {
+      const vals = contributions.map((c) => Number(c.delta[k][i])).sort((a, b) => a - b);
+      out[k][i] = _median(vals);
+    }
+  }
+  return out;
+}
+
+function _trimmedMean(contributions, keys, config) {
+  const n = contributions.length;
+  const trim = Math.min(Math.floor((n - 1) / 2), Math.max(config.f || 0, Math.floor(n * (config.trim_ratio || 0))));
+  if (trim * 2 >= n) throw new Error(`trimmed_mean requires more participants than trim count: n=${n} trim=${trim}`);
+  const out = {};
+  for (const k of keys) {
+    out[k] = [];
+    for (let i = 0; i < contributions[0].delta[k].length; i++) {
+      const vals = contributions.map((c) => Number(c.delta[k][i])).sort((a, b) => a - b).slice(trim, n - trim);
+      out[k][i] = vals.reduce((s, v) => s + v, 0) / vals.length;
+    }
+  }
+  return out;
+}
+
+function _krumWinner(contributions, keys, f) {
+  const winners = _multiKrumWinners(contributions, keys, { f, m: 1 });
+  return contributions.indexOf(winners[0]);
+}
+
+function _multiKrumWinners(contributions, keys, config) {
+  const n = contributions.length;
+  const f = Math.max(0, Math.floor(config.f || 0));
+  if (n < (2 * f + 3)) throw new Error(`krum requires n >= 2f + 3; got n=${n} f=${f}`);
+  const vectors = contributions.map((c) => _flattenDelta(c.delta, keys));
+  const neighborCount = n - f - 2;
+  const scored = vectors.map((v, i) => {
+    const distances = vectors
+      .map((other, j) => (i === j ? null : _squaredDistance(v, other)))
+      .filter((x) => x != null)
+      .sort((a, b) => a - b);
+    return { i, score: distances.slice(0, neighborCount).reduce((s, d) => s + d, 0) };
+  }).sort((a, b) => (a.score - b.score) || a.i - b.i);
+  const maxM = Math.max(1, n - f - 2);
+  const m = Math.min(maxM, Math.max(1, Math.floor(config.m || maxM)));
+  return scored.slice(0, m).map((row) => contributions[row.i]);
+}
+
+function _meanDeltas(contributions, keys) {
+  const out = {};
+  for (const k of keys) {
+    out[k] = [];
+    for (let i = 0; i < contributions[0].delta[k].length; i++) {
+      out[k][i] = contributions.reduce((s, c) => s + Number(c.delta[k][i]), 0) / contributions.length;
+    }
+  }
+  return out;
+}
+
+function _flattenDelta(delta, keys) {
+  const out = [];
+  for (const k of keys) out.push(...delta[k].map(Number));
+  return out;
+}
+
+function _cloneDelta(delta) {
+  return Object.fromEntries(Object.entries(delta).map(([k, v]) => [k, v.slice()]));
+}
+
+function _squaredDistance(a, b) {
+  let out = 0;
+  for (let i = 0; i < a.length; i++) {
+    const d = a[i] - b[i];
+    out += d * d;
+  }
+  return out;
+}
+
+function _median(vals) {
+  const mid = Math.floor(vals.length / 2);
+  return vals.length % 2 ? vals[mid] : (vals[mid - 1] + vals[mid]) / 2;
+}
+
 function _summarizeDp(contributions) {
   const applied = contributions.filter(c => c.receipt.dp_applied);
   if (applied.length === 0) return null;
+  const eps = applied.map(c => c.receipt.dp_applied.epsilon_spent).filter((v) => Number.isFinite(Number(v))).map(Number);
+  const deltas = applied.map(c => c.receipt.dp_applied.delta_spent).filter((v) => Number.isFinite(Number(v))).map(Number);
   return {
     participants_with_dp: applied.length,
-    epsilon_min: Math.min(...applied.map(c => c.receipt.dp_applied.epsilon_spent || Infinity)),
-    epsilon_max: Math.max(...applied.map(c => c.receipt.dp_applied.epsilon_spent || 0)),
+    epsilon_min: eps.length ? Math.min(...eps) : null,
+    epsilon_max: eps.length ? Math.max(...eps) : null,
+    epsilon_sum_basic: eps.length ? eps.reduce((s, v) => s + v, 0) : null,
+    delta_sum_basic: deltas.length ? deltas.reduce((s, v) => s + v, 0) : null,
     mechanisms: Array.from(new Set(applied.map(c => c.receipt.dp_applied.mechanism))).sort(),
     note: 'Per-round DP bookkeeping is the participant\'s responsibility. The aggregator surfaces what was claimed; it does not recompute the budget.',
+  };
+}
+
+function _composePrivacyBudget(round, contributions) {
+  const applied = contributions.filter(c => c.receipt.dp_applied);
+  if (!applied.length) return round.privacy_budget || { epsilon: null, delta: null };
+  const eps = applied.map(c => c.receipt.dp_applied.epsilon_spent).filter((v) => Number.isFinite(Number(v))).map(Number);
+  const deltas = applied.map(c => c.receipt.dp_applied.delta_spent).filter((v) => Number.isFinite(Number(v))).map(Number);
+  return {
+    epsilon: eps.length ? eps.reduce((s, v) => s + v, 0) : null,
+    delta: deltas.length ? deltas.reduce((s, v) => s + v, 0) : null,
+    composition: 'basic',
+    participants_with_dp: applied.length,
+    target: round.target_dp || null,
   };
 }
 
@@ -482,11 +649,21 @@ export async function verifyFederatedArtifact(artifact, opts = {}) {
     federated_foundation: true,
     secure_aggregation_verified: false,
     byzantine_robust: false,
+    byzantine_strategy: null,
     transport: artifact.transport || (aggregation && aggregation.transport) || 'in_memory_dev_only',
     plugin: null,
     reason: null,
     verified_at: new Date().toISOString(),
   };
+  const robustClaim = artifact.byzantine_robust === true || (aggregation && aggregation.byzantine_robust === true);
+  if (robustClaim) {
+    const robust = _normalizeRobustAggregation(artifact.byzantine_strategy || (aggregation && aggregation.byzantine_strategy) || null);
+    if (robust.method === ROBUST_AGGREGATORS.NONE) {
+      return { ...state, ok: false, reason: 'byzantine_robust_claimed_no_supported_strategy' };
+    }
+    state.byzantine_robust = true;
+    state.byzantine_strategy = robust;
+  }
   if (claimsVerified) {
     const provider = claim.provider || opts.provider;
     if (!provider) {
@@ -545,6 +722,7 @@ export default {
   FEATURE_STATE_LABEL,
   FEATURE_STATE_DESCRIPTION,
   STRATEGIES,
+  ROBUST_AGGREGATORS,
   newRound,
   roundHash,
   buildContribution,

@@ -226,6 +226,7 @@ export const METHOD_TARGETS = Object.freeze([
   { id: 'dataset-split-holdout', category: 'eval', evidence: ['src/dataset-workbench.js', 'tests/wave411-p0-train-holdout-and-metadata.test.js'], status: 'implemented' },
   { id: 'eval-gates-k-score', category: 'eval', evidence: ['src/kscore.js', 'src/production-ready.js'], status: 'implemented' },
   { id: 'teacher-student-distill', category: 'distill', evidence: ['src/distill-pipeline.js', 'src/distill-provenance.js'], status: 'implemented' },
+  { id: 'distill-strategy-oracle', category: 'distill', evidence: ['src/distill-strategy.js', 'scripts/distill-strategy.mjs', 'docs/distill-strategy.md'], status: 'implemented' },
   { id: 'onpolicy-distill', category: 'distill', evidence: ['src/distill-onpolicy.js', 'cli/kolm.js'], status: 'implemented' },
   { id: 'preference-optimization', category: 'distill', evidence: ['src/distill-preference.js', 'cli/kolm.js'], status: 'implemented' },
   { id: 'speculative-decoding-train', category: 'distill', evidence: ['src/spec-decode.js', 'cli/kolm.js'], status: 'implemented' },
@@ -241,6 +242,7 @@ export const METHOD_TARGETS = Object.freeze([
   { id: 'streaming-sse', category: 'runtime', evidence: ['src/completions-api.js', 'tests/wave144-completions-server.test.js'], status: 'implemented' },
   { id: 'quantize-awq-gptq-gguf-mlx', category: 'compression', evidence: ['workers/quantize/README.md', 'cli/kolm.js'], status: 'implemented' },
   { id: 'cloud-gpu-rental-plan', category: 'compute', evidence: ['src/remote-compute.js', 'docs/cloud-product-readiness.md'], status: 'implemented' },
+  { id: 'cloud-compute-broker', category: 'compute', evidence: ['src/cloud-compute-broker.js', 'scripts/cloud-compute-broker.mjs', 'docs/cloud-compute-broker.md'], status: 'implemented' },
   { id: 'otel-export', category: 'observability', evidence: ['src/otel.js', 'server.js'], status: 'implemented' },
   { id: 'codegraph-impact-audit', category: 'developer-ops', evidence: ['src/repo-codegraph.js', 'scripts/build-codegraph.mjs'], status: 'implemented' },
 ]);

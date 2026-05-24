@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Drift detector &middot; Open-source AI workbench &middot; kolm.ai</title>
+<meta name="description" content="kolm drift detector watches embedding distribution and fallback rate inside the live capture stream. Configurable per-namespace thresholds, webhook plus email alerts, suggested-action text, opt-in auto-remediation through W720 self-improvement.">
+<meta name="theme-color" content="#07090c">
+<link rel="canonical" href="https://kolm.ai/docs/drift-detector">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<script src="/nav.js" defer></script>
+<style>
+  .dd-hero { padding-top: clamp(72px, 9vw, 128px); padding-bottom: clamp(40px, 6vw, 72px); border-bottom: 1px solid var(--line-1); }
+  .dd-hero h1 { font-size: clamp(36px, 5vw, 56px); font-weight: 580; letter-spacing: -0.02em; margin: 14px 0 18px; max-width: 22ch; }
+  .dd-body { padding: 48px 0 96px; }
+  .dd-body h2 { font-size: 22px; font-weight: 540; margin: 40px 0 12px; letter-spacing: -0.01em; }
+  .dd-body p, .dd-body li { font-size: 15px; line-height: 1.7; color: var(--ink-2); max-width: 76ch; }
+  pre { background: #06080a; border: 1px solid var(--line-1); border-radius: 8px; padding: 16px 18px; overflow-x: auto; font: 12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; color: #e9eef3; max-width: 760px; }
+  code { font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size: 13px; background: rgba(255,255,255,0.04); padding: 1px 6px; border-radius: 4px; }
+  table { border-collapse: collapse; max-width: 760px; margin: 14px 0; font-size: 13.5px; }
+  th,td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line-1); vertical-align: top; color: var(--ink-2); }
+  th { color: var(--ink-1); font-weight: 500; }
+</style>
+</head>
+<body class="ks">
+<span class="brand-anchor" data-w775="h1" aria-hidden="true">Frontier AI on your own infrastructure.</span>
+<span class="brand-disambig" aria-hidden="true">Not Kolm therapeutics, Kolm band, or other unrelated organizations using similar names.</span>
+
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/marketplace">Marketplace</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">-&gt;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main">
+
+<section class="dd-hero">
+  <div class="ks-wrap">
+    <p class="brand-eyebrow" data-w775="brand-eyebrow">Open-source AI workbench</p>
+    <h1>Drift detector.</h1>
+    <p class="lede">A live watch on your capture stream. When the embedding distribution moves or the teacher-fallback rate lifts, the detector fires an alert and suggests an action.</p>
+  </div>
+</section>
+
+<section class="dd-body">
+  <div class="ks-wrap">
+
+    <h2>What it watches</h2>
+    <ul>
+      <li><b>Embedding distribution.</b> Per-namespace rolling sketch of capture embeddings, compared baseline-vs-current via KL divergence. Default baseline window: 7 days. Default current window: 24 hours.</li>
+      <li><b>Fallback rate.</b> Per-namespace ratio of W709 routing decisions that escalated from student to teacher. A sudden lift in this number is usually the earliest signal that the distilled student has stopped covering production traffic.</li>
+    </ul>
+
+    <h2>Configurable thresholds</h2>
+    <table>
+      <thead><tr><th>Threshold</th><th>Default</th><th>Effect</th></tr></thead>
+      <tbody>
+        <tr><td><code>kl_threshold</code></td><td>0.10</td><td>Fires alert when baseline-vs-current KL divergence exceeds this value.</td></tr>
+        <tr><td><code>fallback_rate_lift</code></td><td>0.20</td><td>Fires alert when current-window fallback rate exceeds baseline by this absolute lift.</td></tr>
+        <tr><td><code>min_baseline_captures</code></td><td>200</td><td>Below this floor the detector emits an honest <code>{insufficient_baseline:true}</code> envelope and does not fire.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Per-namespace overrides</h2>
+    <p>Each threshold can be set per-namespace. Override at <code>/account/drift</code> or via the CLI:</p>
+    <pre>kolm drift set --namespace prod-coding --kl-threshold 0.06 --fallback-rate-lift 0.15
+kolm drift get --namespace prod-coding --json</pre>
+
+    <h2>Alert delivery</h2>
+    <p>Alerts deliver via the W215 webhook + email transport that handles capture-threshold notifications. Each alert carries a suggested-action string the detector composes from the firing signals (for example: "fallback rate moved from 4% to 23%; consider re-running <code>kolm distill --resume-from-active-queue</code> on namespace <code>prod-coding</code>").</p>
+
+    <h2>Auto-remediation (opt-in)</h2>
+    <p>When the namespace setting <code>auto_remediate_drift</code> is set to <code>true</code> the detector forwards the firing event to the W720 self-improvement loop, which pulls the underperforming captures into the active-learning queue. This is opt-in -- the default behavior is alert-only, never silent auto-distill.</p>
+
+    <pre>kolm namespace settings set prod-coding auto_remediate_drift true</pre>
+
+    <h2>Honest constraints</h2>
+    <ul>
+      <li>The detector uses the same KL/JSD math as <a href="/docs/drift-alert">W747 drift-alert</a> but answers a different question. W813 compares baseline-vs-current windows <i>within</i> the live capture stream. W747 compares the training sketch against the live production sketch.</li>
+      <li>Below <code>min_baseline_captures</code> the detector returns <code>insufficient_baseline:true</code> and stays quiet. We never fire alerts on small-sample noise.</li>
+    </ul>
+
+    <p class="muted" style="margin-top:48px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;color:var(--ink-3)">See also: <a href="/docs/drift-alert">drift-alert (W747)</a> &middot; <a href="/docs/capture-anomaly">capture-anomaly (W808)</a> &middot; <a href="/account/drift">drift dashboard</a></p>
+
+  </div>
+</section>
+
+</main>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <p>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm &middot; <a href="mailto:rodneyyesep@gmail.com">rodneyyesep@gmail.com</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

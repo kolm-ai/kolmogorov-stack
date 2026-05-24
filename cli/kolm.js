@@ -3254,10 +3254,12 @@ USAGE
   kolm airgap enable                     write ~/.kolm/airgap.env (source it in your shell)
   kolm airgap disable                    remove ~/.kolm/airgap.env
   kolm airgap verify <artifact.kolm>     inspect + signature-check entirely offline
+  kolm airgap test [--probe]             network-leak audit (W779; shape-only unless --probe)
 
 Sets TRANSFORMERS_OFFLINE=1, HF_DATASETS_OFFLINE=1, HF_HUB_OFFLINE=1, KOLM_AIRGAP=1.
 After 'enable', source the env file in your shell to make every kolm verb in
-that session refuse any network call.
+that session refuse any network call. See also: kolm pack --sneakernet,
+kolm unpack --sneakernet (W779 USB transport).
 `,
   compute: `kolm compute - where training runs (local CPU/GPU, cloud, or hybrid).
 
@@ -3837,6 +3839,94 @@ EXAMPLE
   kolm shell-init --shell zsh
   eval "$(kolm shell-init --shell bash)"
 `,
+  ab: `kolm ab - W777 A/B testing.
+
+USAGE
+  kolm ab start    --namespace <ns> --arm-a <id> --arm-b <id> [--split 0.5] [--sample-target 1000]
+  kolm ab list                                                                 [--json]
+  kolm ab status   <ab_test_id>                                                [--json]
+  kolm ab assign   <ab_test_id> --request-hash <h>                             [--json]
+  kolm ab promote  <ab_test_id> --arm a|b [--reason <text>]                    [--json]
+  kolm ab rollback <ab_test_id>                                                [--json]
+  kolm ab stop     <ab_test_id> [--reason <text>]                              [--json]
+
+FLAGS
+  --namespace, -n <ns>    REQUIRED on start. Capture namespace the test runs in.
+  --arm-a / --arm-b <id>  REQUIRED on start. Artifact ids / versioned model names.
+  --split <f>             traffic fraction sent to arm A (0..1 exclusive, default 0.5)
+  --sample-target <N>     advisory target sample count per arm (default 1000)
+  --request-hash <h>      assignment key (e.g. user_id, session_id, request_id)
+  --arm a|b               REQUIRED on promote. Which arm wins.
+  --reason <text>         optional human note for the audit log
+  --json                  deterministic JSON envelope
+
+OUTPUT
+  {ok, ab_test_id, arm?, record?, sig_test?, version:'w777-vN', ...}
+  Honest envelopes for missing_args / not_found / stopped / no_traffic_in_window.
+
+EXIT CODES
+  0 ok   1 bad-args   3 auth   4 execution
+
+EXAMPLE
+  kolm ab start --namespace prod --arm-a model-v1 --arm-b model-v2 --split 0.5
+  kolm ab assign abt_<hex> --request-hash user_42
+  kolm ab promote abt_<hex> --arm b
+`,
+  'stat-sig': `kolm stat-sig - W778 statistical significance + auto-rollback gate.
+
+USAGE
+  kolm stat-sig test  --samples-a "0.9,0.91,0.88,..." --samples-b "0.93,0.95,..."  [--json]
+  kolm stat-sig gate  --ab-test-id <id> [--alpha 0.05] [--min-n 30] [--min-effect 0.01] [--json]
+
+FLAGS
+  --samples-a <csv>     comma-separated numeric samples for arm A (test verb)
+  --samples-b <csv>     comma-separated numeric samples for arm B (test verb)
+  --ab-test-id <id>     pull samples from a live W777 A/B test (gate verb)
+  --alpha <f>           significance threshold (default 0.05)
+  --min-n <N>           per-arm minimum sample count before the gate has signal (default 30)
+  --min-effect <f>      minimum |mean_b - mean_a| effect size to consider (default 0.01)
+  --json                deterministic JSON envelope
+
+OUTPUT
+  test: {ok, t, df, p, mean_a, mean_b, ci_low, ci_high, version:'w778-vN'}
+  gate: {ok, decision:'pass'|'fail'|'insufficient', reason, p, effect_size, version}
+
+EXIT CODES
+  0 ok   1 bad-args   3 auth (gate needs api key)   4 execution
+
+EXAMPLE
+  kolm stat-sig test --samples-a "0.9,0.92,0.88" --samples-b "0.94,0.95,0.96"
+  kolm stat-sig gate --ab-test-id abt_<hex> --alpha 0.01
+`,
+  'failure-to-capture-loop': `kolm failure-to-capture-loop - W816 failure-mode -> capture recommendation glue.
+
+USAGE
+  kolm failure-to-capture-loop --namespace <ns>             [--top-k <N>] [--json]
+  kolm failure-to-capture-loop --namespace <ns> --tenant <id> [--min-delta 0.05]
+
+FLAGS
+  --namespace, -n <ns>     REQUIRED. Capture namespace to scan (no default).
+  --tenant <id>            override tenant (default: KOLM_TENANT_ID or whoami)
+  --top-k <N>              cap projected gaps (default 10, max 1000)
+  --min-delta <f>          W812 regression threshold (default 0.05)
+  --window-days <N>        W812 capture window (default 30; 0 = all history)
+  --min-samples <N>        W812 min cluster size (default 2)
+  --json                   deterministic JSON envelope output
+
+OUTPUT
+  {ok, fed_count, gaps:[{cluster_id, gap_score, recommended_count}], version}
+  Honest envelopes for missing_tenant_id, missing_namespace, no_captures,
+  no_failures (returned as ok:true with fed_count:0).
+
+EXIT CODES
+  0 ok          (gaps fed OR no failing clusters detected - both are healthy)
+  1 bad-args    (missing --namespace, etc.)
+  3 auth        (no api key / tenant unresolved)
+  4 execution   (downstream W812 / W815 failure)
+
+EXAMPLE
+  kolm failure-to-capture-loop --namespace prod --top-k 25 --json
+`,
   'active-learn': `kolm active-learn - W815 active-learning coverage-gap detector.
 
 USAGE
@@ -3868,6 +3958,51 @@ EXIT CODES
 EXAMPLE
   kolm active-learn --namespace prod --top 25 --json
   kolm active-learn --feed-w720
+`,
+  'autopilot': `kolm autopilot - W775 continuous-background-distill daemon.
+
+USAGE
+  kolm autopilot start    --namespace <ns>             [--json]
+  kolm autopilot stop     --namespace <ns>             [--json]
+  kolm autopilot status   --namespace <ns>             [--json]
+  kolm autopilot savings  --namespace <ns>             [--window-days N] [--json]
+  kolm autopilot tick     --namespace <ns>             [--json]
+  kolm autopilot disable  --namespace <ns>             (alias for stop)
+
+FLAGS
+  --namespace, -n <ns>     namespace to operate on (default: default)
+  --window-days <N>        savings rolling window (default 30, max 365)
+  --json                   deterministic JSON envelope output
+
+VERBS
+  start      POST /v1/autopilot/enable   - opt in; reuses autopilot_id if any
+  stop       POST /v1/autopilot/disable  - opt out; subsequent ticks no-op
+  status     GET  /v1/autopilot/status   - daemon state, last tick, holding reason
+  savings    GET  /v1/autopilot/savings  - conservative dollar savings vs baseline
+  tick       GET  /v1/autopilot/tick     - force one tick (cron normally drives)
+  disable    alias for stop
+
+HONEST DISCLOSURE
+  System-tray integration (taskbar widget, OS-level start-on-boot) is on the
+  roadmap but not yet shipped. The current daemon is cron-driven via
+  /v1/autopilot/tick; the CLI 'tick' verb is the manual-trigger equivalent.
+
+OUTPUT
+  Every verb returns {ok, version:'w775-v1', ...} JSON.  Tick action is one of
+  {disabled, holding, no_op, redistilled}. Holding reasons:
+   - insufficient_captures (W815 says not enough data)
+   - drift_red             (W813 says moderate/severe drift)
+
+EXIT CODES
+  0 ok
+  1 bad-args  (missing required namespace, etc.)
+  3 auth      (no api key / 401 from server)
+  4 execution (server returned ok:false or non-2xx)
+
+EXAMPLE
+  kolm autopilot start --namespace prod
+  kolm autopilot status --namespace prod --json
+  kolm autopilot savings --namespace prod --window-days 7 --json
 `,
 };
 
@@ -7872,6 +8007,13 @@ async function cmdBenchmark(args) {
   if (args && (args[0] === 'mmlu' || args[0] === 'humaneval' || args[0] === 'mtbench')) {
     return cmdW758Bench(args);
   }
+  // W814 — `kolm bench speculative` routes to the student-as-draft +
+  // teacher-verify speculative-decoding bench. Distinct-named
+  // (cmdW814Bench) so parallel agents on W811/W812/W813/W815 cannot
+  // collide on this symbol.
+  if (args && args[0] === 'speculative') {
+    return cmdW814Bench(args);
+  }
   if (maybeHelp('benchmark', args)) return;
   // `kolm bench --reproduce <suite>` is the public-reproducer path documented at
   // /articles/how-we-benchmark. It runs in a pinned Docker image so the harness
@@ -11032,6 +11174,607 @@ async function cmdActiveLearn(args) {
     console.log('');
     console.log('w720 feed: ' + (feedResult.ok ? 'ok' : 'failed')
       + ' written=' + (feedResult.written || 0) + '/' + (feedResult.attempted || 0));
+  }
+}
+
+// W775 — `kolm autopilot <start|stop|status|disable|savings|tick>` dispatcher.
+// The autopilot is the continuous-background-distill daemon (THE KILLER
+// FEATURE). Distinct-named dispatcher so parallel wave agents on the same
+// revision cannot collide on this symbol — every helper is `_w775_*`.
+//
+// Verb → backend route:
+//   start    POST /v1/autopilot/enable
+//   stop     POST /v1/autopilot/disable
+//   disable  alias for stop
+//   status   GET  /v1/autopilot/status
+//   savings  GET  /v1/autopilot/savings
+//   tick     GET  /v1/autopilot/tick
+//
+// All verbs honour --namespace, --json, and the standard config/auth env.
+async function cmdW775Autopilot(args) {
+  if (maybeHelp('autopilot', args)) return;
+  const verb = (args && args[0]) || '';
+  const rest = args.slice(1);
+  const wantJson = rest.includes('--json');
+  const namespace = pickFlag(rest, '--namespace') || pickFlag(rest, '-n') || 'default';
+  const windowDaysRaw = pickFlag(rest, '--window-days');
+  const windowDays = windowDaysRaw != null && windowDaysRaw !== ''
+    ? Math.max(1, Math.min(365, Math.trunc(Number(windowDaysRaw))))
+    : null;
+
+  function _w775ErrEnv(code, detail) {
+    return {
+      ok: false,
+      error: code,
+      detail: detail || null,
+      version: 'w775-v1',
+    };
+  }
+
+  function _w775PrintEnv(env, exitOk) {
+    if (wantJson) {
+      console.log(JSON.stringify(env, null, 2));
+    } else if (env && env.ok) {
+      // Human-readable summary per verb; the full envelope is always
+      // available via --json.
+      if (verb === 'status') {
+        console.log('autopilot status');
+        console.log('  enabled:                ' + !!env.enabled);
+        console.log('  autopilot_id:           ' + (env.autopilot_id || '(none)'));
+        console.log('  enabled_at:             ' + (env.enabled_at || '(none)'));
+        console.log('  last_tick_at:           ' + (env.last_tick_at || '(none)'));
+        console.log('  last_tick_action:       ' + (env.last_tick_action || '(none)'));
+        console.log('  holding_pattern_reason: ' + (env.holding_pattern_reason || '(none)'));
+        console.log('  namespace:              ' + (env.namespace || namespace));
+      } else if (verb === 'savings') {
+        console.log('autopilot savings');
+        console.log('  window_days:           ' + (env.window_days || 30));
+        console.log('  routing rows in window: ' + (env.n || 0));
+        console.log('  total_saved_usd:       $' + ((env.total_saved_usd || 0).toFixed(4)));
+        console.log('  baseline_usd:          $' + ((env.baseline_usd || 0).toFixed(4)));
+        if (Array.isArray(env.breakdown_by_day) && env.breakdown_by_day.length > 0) {
+          console.log('  breakdown_by_day:');
+          for (const d of env.breakdown_by_day) {
+            console.log('    ' + d.day + ': $' + ((d.saved_micro_usd / 1_000_000).toFixed(4)));
+          }
+        }
+      } else if (verb === 'tick') {
+        console.log('autopilot tick');
+        console.log('  action:                ' + (env.action || '(unknown)'));
+        if (env.reason) console.log('  reason:                ' + env.reason);
+        if (env.top_gap_score != null) console.log('  top_gap_score:         ' + Number(env.top_gap_score).toFixed(4));
+        if (env.artifact_id) console.log('  artifact_id:           ' + env.artifact_id);
+      } else if (verb === 'start') {
+        console.log('autopilot start');
+        console.log('  autopilot_id:          ' + (env.autopilot_id || '(none)'));
+        console.log('  enabled_at:            ' + (env.enabled_at || '(none)'));
+        console.log('  namespace:             ' + (env.namespace || namespace));
+        console.log('  persisted:             ' + !!env.persisted);
+        if (env.persist_error) console.log('  persist_error:         ' + env.persist_error);
+      } else if (verb === 'stop' || verb === 'disable') {
+        console.log('autopilot stop');
+        console.log('  disabled_at:           ' + (env.disabled_at || '(none)'));
+        console.log('  namespace:             ' + (env.namespace || namespace));
+        console.log('  persisted:             ' + !!env.persisted);
+        if (env.persist_error) console.log('  persist_error:         ' + env.persist_error);
+      } else {
+        console.log(JSON.stringify(env, null, 2));
+      }
+    } else {
+      console.error('autopilot ' + verb + ': ' + ((env && env.error) || 'failed'));
+      if (env && env.detail) console.error('  detail: ' + env.detail);
+      if (env && env.hint) console.error('  hint: ' + env.hint);
+    }
+    if (!exitOk) process.exit(EXIT.EXECUTION);
+  }
+
+  async function _w775Call(method, path, body) {
+    let cfg;
+    try { cfg = loadConfig(); } catch (e) { cfg = null; }
+    if (!cfg || !cfg.api_key || !cfg.base) {
+      _w775PrintEnv(_w775ErrEnv('auth_required',
+        'no api key configured; run `kolm login` or set KOLM_API_KEY'), false);
+      process.exit(EXIT.MISSING_PREREQ);
+    }
+    const base = cfg.base.replace(/\/+$/, '');
+    const headers = { Accept: 'application/json', ...authHeaders(cfg) };
+    const init = { method, headers };
+    if (body) {
+      headers['Content-Type'] = 'application/json';
+      init.body = JSON.stringify(body);
+    }
+    let res, jenv;
+    try {
+      res = await fetch(base + path, init);
+      jenv = await res.json().catch(() => ({}));
+    } catch (e) {
+      return { httpStatus: 0, env: _w775ErrEnv('network_error', String(e && e.message || e)) };
+    }
+    return { httpStatus: res.status, env: jenv };
+  }
+
+  // ---------------------------------------------------------------------
+  // Per-verb dispatch.
+  // ---------------------------------------------------------------------
+  if (!verb || verb === '--help' || verb === '-h') {
+    usage('autopilot');
+    return;
+  }
+
+  if (verb === 'start') {
+    const { httpStatus, env } = await _w775Call('POST', '/v1/autopilot/enable', { namespace });
+    _w775PrintEnv(env, httpStatus >= 200 && httpStatus < 300 && env && env.ok);
+    return;
+  }
+  if (verb === 'stop' || verb === 'disable') {
+    const { httpStatus, env } = await _w775Call('POST', '/v1/autopilot/disable', { namespace });
+    _w775PrintEnv(env, httpStatus >= 200 && httpStatus < 300 && env && env.ok);
+    return;
+  }
+  if (verb === 'status') {
+    const { httpStatus, env } = await _w775Call('GET',
+      '/v1/autopilot/status?namespace=' + encodeURIComponent(namespace), null);
+    _w775PrintEnv(env, httpStatus >= 200 && httpStatus < 300 && env && env.ok);
+    return;
+  }
+  if (verb === 'savings') {
+    let path = '/v1/autopilot/savings?namespace=' + encodeURIComponent(namespace);
+    if (windowDays != null) path += '&window_days=' + windowDays;
+    const { httpStatus, env } = await _w775Call('GET', path, null);
+    _w775PrintEnv(env, httpStatus >= 200 && httpStatus < 300 && env && env.ok);
+    return;
+  }
+  if (verb === 'tick') {
+    const { httpStatus, env } = await _w775Call('GET',
+      '/v1/autopilot/tick?namespace=' + encodeURIComponent(namespace), null);
+    _w775PrintEnv(env, httpStatus >= 200 && httpStatus < 300 && env && env.ok);
+    return;
+  }
+  _w775PrintEnv(_w775ErrEnv('bad_verb', 'unknown autopilot verb: ' + verb
+    + ' (expected start|stop|disable|status|savings|tick)'), false);
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// W777 / W778 -- A/B testing + statistical significance + auto-rollback.
+// One source module each (src/ab-router.js, src/stat-sig.js); both CLI verbs
+// resolve tenant via api key (loadConfig + /v1/whoami) or KOLM_TENANT_ID, then
+// dispatch to local module imports. Honest envelopes with version:'w777-vN' or
+// 'w778-vN'. Distinct flag namespace from W775/W815/W816 so dispatch collisions
+// stay impossible.
+
+async function _w777ResolveTenant(args, wantJson, versionTag) {
+  let tenantId = pickFlag(args, '--tenant') || pickFlag(args, '--tenant-id') || null;
+  if (!tenantId) tenantId = process.env.KOLM_TENANT_ID || null;
+  if (!tenantId) {
+    try {
+      const c = loadConfig();
+      if (c && c.api_key && c.base) {
+        const base = c.base.replace(/\/+$/, '');
+        const res = await fetch(base + '/v1/whoami', { headers: { ...authHeaders(c) } });
+        if (res.ok) {
+          const j = await res.json().catch(() => ({}));
+          tenantId = (j && (j.id || j.tenant_id || (j.tenant && j.tenant.id))) || null;
+        }
+      }
+    } catch (_) { /* offline / no auth */ }
+  }
+  if (!tenantId) {
+    const env = {
+      ok: false,
+      error: 'auth_required',
+      hint: 'pass --tenant <id>, set KOLM_TENANT_ID, or `kolm login` first',
+      version: versionTag,
+    };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else console.error('error: ' + env.error + ' - ' + env.hint);
+    process.exit(EXIT.MISSING_PREREQ);
+  }
+  return tenantId;
+}
+
+function _w777EmitEnvelope(envelope, wantJson, label, expectOk = true) {
+  if (wantJson) {
+    console.log(JSON.stringify(envelope, null, 2));
+  } else {
+    if (envelope && envelope.ok === true) {
+      console.log(label + ' ok');
+    } else {
+      console.error(label + ': ' + ((envelope && envelope.error) || 'unknown_error'));
+      if (envelope && envelope.hint) console.error('  hint: ' + envelope.hint);
+    }
+  }
+  if (expectOk && (!envelope || envelope.ok !== true)) process.exit(EXIT.EXECUTION);
+}
+
+async function cmdW777Ab(args) {
+  if (maybeHelp('ab', args)) return;
+  const wantJson = args.includes('--json');
+  const sub = String((args && args[0]) || '').toLowerCase();
+  if (!sub || sub.startsWith('-')) {
+    const env = {
+      ok: false,
+      error: 'missing_subverb',
+      hint: 'expected: kolm ab {start|stop|list|status|promote|rollback|assign}',
+      version: 'w777-v1',
+    };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else console.error('ab: ' + env.hint);
+    process.exit(EXIT.BAD_ARGS);
+  }
+  const rest = args.slice(1);
+  let mod;
+  try { mod = await import('../src/ab-router.js'); }
+  catch (e) {
+    const env = {
+      ok: false,
+      error: 'ab_router_module_missing',
+      detail: e && e.message ? e.message : String(e),
+      version: 'w777-v1',
+    };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else console.error('error: ' + env.error);
+    process.exit(EXIT.MISSING_PREREQ);
+  }
+  const tenantId = await _w777ResolveTenant(rest, wantJson, 'w777-v1');
+
+  if (sub === 'start' || sub === 'create') {
+    const namespace = pickFlag(rest, '--namespace') || pickFlag(rest, '-n') || null;
+    const arm_a = pickFlag(rest, '--arm-a');
+    const arm_b = pickFlag(rest, '--arm-b');
+    const splitRaw = pickFlag(rest, '--split');
+    const split = splitRaw != null && splitRaw !== '' ? Number(splitRaw) : undefined;
+    const targetRaw = pickFlag(rest, '--sample-target') || pickFlag(rest, '--target');
+    const sample_target = targetRaw != null && targetRaw !== '' ? Number(targetRaw) : undefined;
+    const envelope = mod.createAbTest({
+      tenant: tenantId,
+      namespace,
+      arm_a,
+      arm_b,
+      split,
+      sample_target,
+    });
+    _w777EmitEnvelope(envelope, wantJson, 'ab start');
+    return;
+  }
+  if (sub === 'list') {
+    const envelope = mod.listAbTests({ tenant: tenantId });
+    if (wantJson) console.log(JSON.stringify(envelope, null, 2));
+    else {
+      if (!envelope || envelope.ok !== true) {
+        console.error('ab list: ' + (envelope && envelope.error || 'unknown'));
+        process.exit(EXIT.EXECUTION);
+      }
+      console.log('ab tests for tenant=' + tenantId + ' (' + envelope.count + ')');
+      for (const t of envelope.tests || []) {
+        console.log('  ' + t.ab_test_id
+          + '  ns=' + t.namespace
+          + '  status=' + t.status
+          + '  ' + t.arm_a + ' vs ' + t.arm_b
+          + '  split=' + t.split);
+      }
+    }
+    return;
+  }
+  const idArg = rest[0] && !rest[0].startsWith('-') ? rest[0] : (pickFlag(rest, '--ab-test-id') || null);
+  if (!idArg && (sub === 'status' || sub === 'assign' || sub === 'promote' || sub === 'rollback' || sub === 'stop')) {
+    const env = {
+      ok: false,
+      error: 'missing_ab_test_id',
+      hint: 'pass <ab_test_id> as first positional arg or --ab-test-id',
+      version: 'w777-v1',
+    };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else console.error('ab ' + sub + ': ' + env.error);
+    process.exit(EXIT.BAD_ARGS);
+  }
+  if (sub === 'status') {
+    const envelope = await mod.getAbStatus({ tenant: tenantId, ab_test_id: idArg });
+    if (wantJson) console.log(JSON.stringify(envelope, null, 2));
+    else {
+      if (!envelope || envelope.ok !== true) {
+        console.error('ab status: ' + (envelope && envelope.error || 'unknown'));
+        if (envelope && envelope.hint) console.error('  hint: ' + envelope.hint);
+        process.exit(EXIT.EXECUTION);
+      }
+      console.log('ab status ' + idArg);
+      console.log('  status=' + envelope.status
+        + '  n_a=' + envelope.n_a + '  n_b=' + envelope.n_b);
+      if (envelope.kscore_a != null) console.log('  kscore_a=' + Number(envelope.kscore_a).toFixed(4));
+      if (envelope.kscore_b != null) console.log('  kscore_b=' + Number(envelope.kscore_b).toFixed(4));
+      if (envelope.sig_test && envelope.sig_test.ok) {
+        console.log('  welch t=' + Number(envelope.sig_test.t).toFixed(3)
+          + '  p=' + Number(envelope.sig_test.p).toFixed(5)
+          + '  df=' + Number(envelope.sig_test.df).toFixed(1));
+      }
+    }
+    return;
+  }
+  if (sub === 'assign') {
+    const request_hash = pickFlag(rest, '--request-hash') || pickFlag(rest, '--hash') || null;
+    if (!request_hash) {
+      const env = {
+        ok: false,
+        error: 'missing_request_hash',
+        hint: 'pass --request-hash <h>',
+        version: 'w777-v1',
+      };
+      if (wantJson) console.log(JSON.stringify(env, null, 2));
+      else console.error('ab assign: ' + env.error);
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const envelope = mod.assignArm({ tenant: tenantId, ab_test_id: idArg, request_hash });
+    if (wantJson) console.log(JSON.stringify(envelope, null, 2));
+    else {
+      if (!envelope || envelope.ok !== true) {
+        console.error('ab assign: ' + (envelope && envelope.error || 'unknown'));
+        process.exit(EXIT.EXECUTION);
+      }
+      console.log('arm=' + envelope.arm + '  artifact=' + envelope.artifact_id);
+    }
+    return;
+  }
+  if (sub === 'promote') {
+    const arm = pickFlag(rest, '--arm');
+    const reason = pickFlag(rest, '--reason') || null;
+    const envelope = await mod.promoteArm({ tenant: tenantId, ab_test_id: idArg, arm, reason });
+    _w777EmitEnvelope(envelope, wantJson, 'ab promote');
+    return;
+  }
+  if (sub === 'rollback') {
+    const envelope = await mod.autoRollback({ tenant: tenantId, ab_test_id: idArg });
+    if (wantJson) console.log(JSON.stringify(envelope, null, 2));
+    else {
+      if (!envelope || envelope.ok !== true) {
+        console.error('ab rollback: ' + (envelope && envelope.error || 'unknown'));
+        process.exit(EXIT.EXECUTION);
+      }
+      console.log('ab rollback: rolled_back=' + (envelope.rolled_back ? 'yes' : 'no')
+        + '  reason=' + envelope.reason);
+    }
+    return;
+  }
+  if (sub === 'stop') {
+    const reason = pickFlag(rest, '--reason') || null;
+    const envelope = mod.stopAbTest({ tenant: tenantId, ab_test_id: idArg, reason });
+    _w777EmitEnvelope(envelope, wantJson, 'ab stop');
+    return;
+  }
+  const env = {
+    ok: false,
+    error: 'bad_subverb',
+    hint: 'unknown ab subverb: ' + sub + ' (expected start|stop|list|status|promote|rollback|assign)',
+    version: 'w777-v1',
+  };
+  if (wantJson) console.log(JSON.stringify(env, null, 2));
+  else console.error('ab: ' + env.hint);
+  process.exit(EXIT.BAD_ARGS);
+}
+
+async function cmdW778StatSig(args) {
+  if (maybeHelp('stat-sig', args)) return;
+  const wantJson = args.includes('--json');
+  const sub = String((args && args[0]) || '').toLowerCase();
+  if (!sub || sub.startsWith('-')) {
+    const env = {
+      ok: false,
+      error: 'missing_subverb',
+      hint: 'expected: kolm stat-sig {test|gate}',
+      version: 'w778-v1',
+    };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else console.error('stat-sig: ' + env.hint);
+    process.exit(EXIT.BAD_ARGS);
+  }
+  const rest = args.slice(1);
+  let mod;
+  try { mod = await import('../src/stat-sig.js'); }
+  catch (e) {
+    const env = {
+      ok: false,
+      error: 'stat_sig_module_missing',
+      detail: e && e.message ? e.message : String(e),
+      version: 'w778-v1',
+    };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else console.error('error: ' + env.error);
+    process.exit(EXIT.MISSING_PREREQ);
+  }
+  if (sub === 'test') {
+    const csvA = pickFlag(rest, '--samples-a') || '';
+    const csvB = pickFlag(rest, '--samples-b') || '';
+    const samples_a = String(csvA).split(',').map(s => Number(s.trim())).filter(n => Number.isFinite(n));
+    const samples_b = String(csvB).split(',').map(s => Number(s.trim())).filter(n => Number.isFinite(n));
+    const envelope = mod.welchT({ samples_a, samples_b });
+    if (wantJson) console.log(JSON.stringify(envelope, null, 2));
+    else {
+      if (!envelope || envelope.ok !== true) {
+        console.error('stat-sig test: ' + (envelope && envelope.error || 'unknown'));
+        if (envelope && envelope.hint) console.error('  hint: ' + envelope.hint);
+        process.exit(EXIT.EXECUTION);
+      }
+      console.log('welch t-test');
+      console.log('  n_a=' + envelope.n_a + '  mean_a=' + Number(envelope.mean_a).toFixed(4));
+      console.log('  n_b=' + envelope.n_b + '  mean_b=' + Number(envelope.mean_b).toFixed(4));
+      console.log('  t=' + Number(envelope.t).toFixed(3)
+        + '  df=' + Number(envelope.df).toFixed(2)
+        + '  p=' + Number(envelope.p).toFixed(5));
+      console.log('  ci=[' + Number(envelope.ci_low).toFixed(4)
+        + ', ' + Number(envelope.ci_high).toFixed(4) + ']');
+    }
+    return;
+  }
+  if (sub === 'gate') {
+    const ab_test_id = pickFlag(rest, '--ab-test-id') || pickFlag(rest, '--id') || null;
+    if (!ab_test_id) {
+      const env = {
+        ok: false,
+        error: 'missing_ab_test_id',
+        hint: 'pass --ab-test-id <id>',
+        version: 'w778-v1',
+      };
+      if (wantJson) console.log(JSON.stringify(env, null, 2));
+      else console.error('stat-sig gate: ' + env.error);
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const tenantId = await _w777ResolveTenant(rest, wantJson, 'w778-v1');
+    const alphaRaw = pickFlag(rest, '--alpha');
+    const minNRaw = pickFlag(rest, '--min-n');
+    const minEffectRaw = pickFlag(rest, '--min-effect') || pickFlag(rest, '--min-effect-size');
+    const envelope = await mod.gate({
+      tenant: tenantId,
+      ab_test_id,
+      alpha: alphaRaw != null && alphaRaw !== '' ? Number(alphaRaw) : undefined,
+      min_n: minNRaw != null && minNRaw !== '' ? Number(minNRaw) : undefined,
+      min_effect_size: minEffectRaw != null && minEffectRaw !== '' ? Number(minEffectRaw) : undefined,
+    });
+    if (wantJson) console.log(JSON.stringify(envelope, null, 2));
+    else {
+      if (!envelope) { console.error('stat-sig gate: no envelope'); process.exit(EXIT.EXECUTION); }
+      console.log('stat-sig gate ' + ab_test_id);
+      console.log('  decision=' + envelope.decision + '  reason=' + envelope.reason);
+      if (envelope.p != null) console.log('  p=' + Number(envelope.p).toFixed(5));
+      if (envelope.effect_size != null) console.log('  effect_size=' + Number(envelope.effect_size).toFixed(4));
+    }
+    return;
+  }
+  const env = {
+    ok: false,
+    error: 'bad_subverb',
+    hint: 'unknown stat-sig subverb: ' + sub + ' (expected test|gate)',
+    version: 'w778-v1',
+  };
+  if (wantJson) console.log(JSON.stringify(env, null, 2));
+  else console.error('stat-sig: ' + env.hint);
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// W816 - `kolm failure-to-capture-loop` glues W812 (failure-modes) to W815
+// (active-learning), which in turn seeds W720's self-improvement detector.
+// One verb, one entry: pull failing clusters for (tenant, namespace), project
+// each into a synthetic W815 gap row, write the rows. Returns the unified
+// envelope shape with fed_count + gaps[].
+async function cmdW816Loop(args) {
+  if (maybeHelp('failure-to-capture-loop', args)) return;
+  const wantJson = args.includes('--json');
+  const namespace = pickFlag(args, '--namespace') || pickFlag(args, '-n') || null;
+  let tenantId = pickFlag(args, '--tenant') || pickFlag(args, '--tenant-id') || null;
+  const topKRaw = pickFlag(args, '--top-k') || pickFlag(args, '--top');
+  const top_k = topKRaw != null && topKRaw !== ''
+    ? Math.max(1, Math.min(1000, Math.trunc(Number(topKRaw))))
+    : 10;
+  const minDeltaRaw = pickFlag(args, '--min-delta');
+  const min_delta = minDeltaRaw != null && minDeltaRaw !== ''
+    ? Math.max(0, Math.min(1, Number(minDeltaRaw)))
+    : 0.05;
+  const windowRaw = pickFlag(args, '--window-days');
+  const window_days = windowRaw != null && windowRaw !== ''
+    ? Math.max(0, Math.trunc(Number(windowRaw)))
+    : 30;
+  const minSamplesRaw = pickFlag(args, '--min-samples');
+  const min_samples = minSamplesRaw != null && minSamplesRaw !== ''
+    ? Math.max(1, Math.trunc(Number(minSamplesRaw)))
+    : 2;
+
+  // Tenant resolution: explicit flag > env > whoami > honest auth_required.
+  if (!tenantId) tenantId = process.env.KOLM_TENANT_ID || null;
+  if (!tenantId) {
+    try {
+      const c = loadConfig();
+      if (c && c.api_key && c.base) {
+        const base = c.base.replace(/\/+$/, '');
+        const res = await fetch(base + '/v1/whoami', { headers: { ...authHeaders(c) } });
+        if (res.ok) {
+          const j = await res.json().catch(() => ({}));
+          tenantId = (j && (j.id || j.tenant_id || (j.tenant && j.tenant.id))) || null;
+        }
+      }
+    } catch (_) { /* offline / no auth */ }
+  }
+  if (!tenantId) {
+    const env = {
+      ok: false,
+      error: 'auth_required',
+      hint: 'pass --tenant <id>, set KOLM_TENANT_ID, or `kolm login` first',
+      version: 'w816-v1',
+    };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else console.error('failure-to-capture-loop: ' + env.error + ' - ' + env.hint);
+    process.exit(EXIT.MISSING_PREREQ);
+  }
+  if (!namespace) {
+    const env = {
+      ok: false,
+      error: 'missing_namespace',
+      hint: 'pass --namespace <ns> - W816 refuses to default this so the feed cannot land in the wrong namespace',
+      version: 'w816-v1',
+    };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else console.error('failure-to-capture-loop: ' + env.error);
+    process.exit(EXIT.BAD_ARGS);
+  }
+
+  let mod;
+  try { mod = await import('../src/failure-to-capture-loop.js'); }
+  catch (e) {
+    const env = {
+      ok: false,
+      error: 'failure_to_capture_loop_module_missing',
+      detail: e && e.message ? e.message : String(e),
+      hint: 'src/failure-to-capture-loop.js must be importable',
+      version: 'w816-v1',
+    };
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else console.error('error: ' + env.error + ' - ' + env.detail);
+    process.exit(EXIT.MISSING_PREREQ);
+  }
+
+  let envelope;
+  try {
+    envelope = await mod.feedFailureToActiveLearning({
+      tenant: tenantId,
+      namespace,
+      top_k,
+      min_delta,
+      window_days,
+      min_samples,
+    });
+  } catch (e) {
+    const out = {
+      ok: false,
+      error: 'feed_failure_to_active_learning_failed',
+      detail: e && e.message ? e.message : String(e),
+      version: 'w816-v1',
+    };
+    if (wantJson) console.log(JSON.stringify(out, null, 2));
+    else console.error('error: ' + out.error + ' - ' + out.detail);
+    process.exit(EXIT.EXECUTION);
+  }
+
+  if (wantJson) {
+    console.log(JSON.stringify(envelope, null, 2));
+    if (!envelope || envelope.ok !== true) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  if (!envelope || envelope.ok !== true) {
+    console.error('failure-to-capture-loop: ' + (envelope && envelope.error || 'unknown_error'));
+    if (envelope && envelope.hint) console.error('  hint: ' + envelope.hint);
+    process.exit(EXIT.EXECUTION);
+  }
+  console.log('failure-to-capture-loop (tenant=' + tenantId + ', namespace=' + namespace + ')');
+  console.log('  failing clusters projected: ' + (envelope.gaps ? envelope.gaps.length : 0));
+  console.log('  gap rows fed to W815:       ' + (envelope.fed_count || 0)
+    + ' / ' + (envelope.attempted || 0));
+  if (envelope.hint) console.log('  note: ' + envelope.hint);
+  const gaps = envelope.gaps || [];
+  for (let i = 0; i < gaps.length; i++) {
+    const g = gaps[i];
+    console.log('  #' + (i + 1)
+      + '  cluster=' + g.cluster_id
+      + '  gap_score=' + (Number(g.gap_score) || 0).toFixed(4)
+      + '  rec=' + (g.recommended_count || 0)
+      + '  delta=' + (Number(g.source_kscore_delta) || 0).toFixed(3)
+      + '  samples=' + (g.source_sample_count || 0));
   }
 }
 
@@ -22863,9 +23606,142 @@ async function cmdAirgap(args) {
     });
     return;
   }
+  // W779 - `kolm airgap test` is a network-leak audit driven by the
+  // src/airgap-mode.js testNetworkLeak() helper. Defaults to shape-only
+  // (no real network calls); --probe enables actual probing.
+  if (sub === 'test') {
+    const mod = await import('../src/airgap-mode.js');
+    const wantProbe = rest.includes('--probe');
+    const env = await mod.testNetworkLeak({ actuallyProbe: wantProbe });
+    console.log(JSON.stringify(env, null, 2));
+    if (env.leaked) process.exit(EXIT.EXECUTION);
+    return;
+  }
   console.error('unknown airgap subcommand:', sub);
   console.error('try: kolm airgap --help');
   process.exit(EXIT.BAD_ARGS);
+}
+
+// =============================================================================
+// W779 - kolm pack / kolm unpack --sneakernet
+//
+// `kolm pack --sneakernet <artifact.kolm> --out <path>`
+// `kolm unpack --sneakernet <path> [--dest-dir <dir>]`
+//
+// Distinct-named (cmdW779Sneakernet) so parallel W777/W778/W780 wave agents
+// cannot collide on the dispatcher symbol. The dispatcher reads the first
+// arg as the verb (pack | unpack); --sneakernet is the mode marker that
+// keeps this verb open for future packaging targets (e.g. --container,
+// --offline-installer).
+//
+// Honest envelope: every code path returns ok:false with an error code and
+// hint instead of silently writing junk. Exit code mirrors EXIT.EXECUTION
+// on failure so CI catches it.
+// =============================================================================
+
+function _w779PackHelp() {
+  console.log('usage: kolm pack --sneakernet <artifact.kolm> --out <path>');
+  console.log('');
+  console.log('Bundle a .kolm artifact into a USB-transportable tar with HMAC');
+  console.log('signature + manifest + README. Verify on the target host with:');
+  console.log('  kolm unpack --sneakernet <path>');
+  console.log('');
+  console.log('flags:');
+  console.log('  --sneakernet           required mode marker');
+  console.log('  --out <path>           output tar path (required)');
+  console.log('  --artifact-id <id>     manifest artifact_id (default: basename without ext)');
+  console.log('  --help, -h             show this message');
+}
+
+function _w779UnpackHelp() {
+  console.log('usage: kolm unpack --sneakernet <path> [--dest-dir <dir>]');
+  console.log('');
+  console.log('Verify the signature + manifest of a sneakernet bundle. Optionally');
+  console.log('extract the artifact into --dest-dir (only when verification passes).');
+  console.log('');
+  console.log('flags:');
+  console.log('  --sneakernet           required mode marker');
+  console.log('  --dest-dir <dir>       optional extract directory');
+  console.log('  --help, -h             show this message');
+}
+
+async function cmdW779Sneakernet(verb, args) {
+  // verb is 'pack' or 'unpack'; args is the remaining argv after the verb.
+  const wantSneakernet = args.includes('--sneakernet');
+  const wantHelp = args.includes('--help') || args.includes('-h');
+  if (verb === 'pack') {
+    if (wantHelp) { _w779PackHelp(); return; }
+    if (!wantSneakernet) {
+      console.error('kolm pack: only --sneakernet mode is supported in this wave');
+      _w779PackHelp();
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const positional = args.filter(a => !a.startsWith('-'));
+    const srcArg = positional[0];
+    const outIdx = args.indexOf('--out');
+    const outPath = outIdx >= 0 ? args[outIdx + 1] : null;
+    const idIdx = args.indexOf('--artifact-id');
+    const explicitId = idIdx >= 0 ? args[idIdx + 1] : null;
+    if (!srcArg || !outPath) {
+      _w779PackHelp();
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const ap = resolveArtifact(srcArg) || srcArg;
+    const artifactId = explicitId || path.basename(ap).replace(/\.kolm$/, '');
+    const mod = await import('../src/sneakernet.js');
+    const env = mod.packSneakernet({
+      artifact_id: artifactId,
+      artifact_path: ap,
+      dest_path: outPath,
+    });
+    console.log(JSON.stringify(env, null, 2));
+    if (!env.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+  if (verb === 'unpack') {
+    if (wantHelp) { _w779UnpackHelp(); return; }
+    if (!wantSneakernet) {
+      console.error('kolm unpack: only --sneakernet mode is supported in this wave');
+      _w779UnpackHelp();
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const positional = args.filter(a => !a.startsWith('-'));
+    const srcPath = positional[0];
+    const destIdx = args.indexOf('--dest-dir');
+    const destDir = destIdx >= 0 ? args[destIdx + 1] : null;
+    if (!srcPath) {
+      _w779UnpackHelp();
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const mod = await import('../src/sneakernet.js');
+    const env = mod.unpackSneakernet({
+      src_path: srcPath,
+      dest_dir: destDir,
+    });
+    console.log(JSON.stringify(env, null, 2));
+    if (!env.ok || !env.trustworthy) process.exit(EXIT.EXECUTION);
+    return;
+  }
+  console.error('kolm: unknown sneakernet verb: ' + verb);
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// W779 helpers exposed so a parallel agent can re-use the parser without
+// re-importing the full cmd dispatcher.
+function _w779AirgapStatus(_args) {
+  return cmdAirgap(['status']);
+}
+
+function _w779AirgapTest(args) {
+  return cmdAirgap(['test'].concat(Array.isArray(args) ? args : []));
+}
+
+function _w779PackSneakernet(args) {
+  return cmdW779Sneakernet('pack', Array.isArray(args) ? args : []);
+}
+
+function _w779UnpackSneakernet(args) {
+  return cmdW779Sneakernet('unpack', Array.isArray(args) ? args : []);
 }
 
 // Detect when the user typed a bare natural-language string instead of a
@@ -22934,7 +23810,7 @@ const COMPLETION_SUBS = {
   auditor: ['keygen', 'sign', 'verify'],
   build: ['plan'],
   compute: ['list', 'detect', 'pick', 'use', 'info', 'test', 'status'],
-  airgap:  ['status', 'enable', 'disable', 'verify'],
+  airgap:  ['status', 'enable', 'disable', 'verify', 'test'],
   team:    ['create', 'list', 'show', 'invite', 'accept', 'members', 'role', 'remove', 'transfer', 'delete'],
   tunnel:  ['new', 'list', 'start', 'close'],
     cloud:   ['broker', 'compute-plan', 'train', 'readiness', 'doctor', 'storage', 'targets', 'deploy-plan', 'deploy', 'list', 'show', 'destroy'],
@@ -22949,8 +23825,8 @@ const COMPLETION_SUBS = {
   tail:    ['captures'],
   install: ['claude-code', 'cursor', 'continue', 'cline'],
   completion: ['bash', 'zsh', 'fish'],
-  bench: ['evidence', 'mmlu', 'humaneval', 'mtbench'],
-  benchmark: ['evidence', 'mmlu', 'humaneval', 'mtbench'],
+  bench: ['evidence', 'mmlu', 'humaneval', 'mtbench', 'speculative'],
+  benchmark: ['evidence', 'mmlu', 'humaneval', 'mtbench', 'speculative'],
   packages: ['release-readiness', 'release', 'readiness'],
   package: ['release-readiness', 'release', 'readiness'],
   namespace: ['fingerprint', 'warm-start-suggest', 'verticals'],
@@ -23070,12 +23946,18 @@ COMPLETION_VERBS.push('sbom');
 COMPLETION_SUBS.sbom = ['emit', 'repo', 'verify'];
 
 // W769 — Data residency + geo-fence. `kolm residency <regions|tag|get|
-// configure-namespace|enforce>` and the `region` alias. Distinct-named
-// dispatcher cmdW769Residency so parallel W766/W767/W768/W770 wave
-// agents cannot collide on this symbol.
+// configure-namespace|enforce>`. Distinct-named dispatcher
+// cmdW769Residency so parallel W766/W767/W768/W770 wave agents cannot
+// collide on this symbol. The `region` verb is now W780's (reclaimed
+// for the multi-region gateway dispatcher); operators wanting residency
+// must spell out `kolm residency`.
 COMPLETION_VERBS.push('residency', 'region');
 COMPLETION_SUBS.residency = ['regions', 'tag', 'get', 'configure-namespace', 'enforce'];
-COMPLETION_SUBS.region    = ['regions', 'tag', 'get', 'configure-namespace', 'enforce'];
+
+// W780 — Multi-region gateway. `kolm region <status|route|gateways|
+// test-failover>`. Distinct-named dispatcher cmdW780Region so parallel
+// W779/W781 wave agents cannot collide on this symbol.
+COMPLETION_SUBS.region    = ['status', 'route', 'gateways', 'test-failover'];
 
 // W774 — Cross-lingual distillation. `kolm xlang <coverage|sample|per-language-eval|
 // bakeoff>` and the `multilingual` alias. Distinct-named dispatcher
@@ -23084,6 +23966,13 @@ COMPLETION_SUBS.region    = ['regions', 'tag', 'get', 'configure-namespace', 'en
 COMPLETION_VERBS.push('xlang', 'multilingual');
 COMPLETION_SUBS.xlang        = ['coverage', 'sample', 'per-language-eval', 'bakeoff'];
 COMPLETION_SUBS.multilingual = ['coverage', 'sample', 'per-language-eval', 'bakeoff'];
+
+// W775 — Continuous-background-distill daemon (THE KILLER FEATURE).
+// `kolm autopilot <start|stop|status|disable|savings|tick>`. Distinct-named
+// dispatcher cmdW775Autopilot so parallel W773/W774/W807/W813/W814/W815/W816
+// wave agents cannot collide on this symbol.
+COMPLETION_VERBS.push('autopilot');
+COMPLETION_SUBS.autopilot = ['start', 'stop', 'status', 'disable', 'savings', 'tick'];
 
 function emitBashCompletion() {
     const verbs = COMPLETION_VERBS.join(' ');
@@ -30092,8 +30981,16 @@ async function _dispatchVerb(verb, args) {
     route: cmdRoute,
     // W815 — kolm active-learn: coverage-gap detector + recommend-next-capture.
     'active-learn': cmdActiveLearn,
+    // W775 — kolm autopilot: continuous-background-distill daemon (THE KILLER FEATURE).
+    autopilot: cmdW775Autopilot,
     // W812 — kolm failure-modes: cluster regression dashboard from the CLI.
     'failure-modes': cmdFailureModes,
+    // W816 — kolm failure-to-capture-loop: glue W812 -> W815 -> W720.
+    'failure-to-capture-loop': cmdW816Loop,
+    // W777 — kolm ab: A/B test orchestrator (start/stop/list/status/promote/rollback/assign).
+    ab: cmdW777Ab,
+    // W778 — kolm stat-sig: Welch t-test + auto-rollback gate.
+    'stat-sig': cmdW778StatSig,
     jobs: cmdJobs, watch: cmdWatch, resume: cmdResume, rescue: cmdRescue,
     sessions: cmdSessions, checkpoint: cmdCheckpoint, 'import-chat': cmdImportChat,
     import: cmdImportChat, merge: cmdMerge, agent: cmdAgent, 'init-agent': cmdInitAgent,
@@ -30118,6 +31015,10 @@ async function _dispatchVerb(verb, args) {
     devices: cmdDevices, 'install-device': cmdInstallDevice,
     // W384 CLI consolidator — new top-level verbs.
     privacy: cmdPrivacy, pipeline: cmdPipeline, agents: cmdAgents, 'shell-init': cmdShellInit,
+    // W779 — sneakernet pack / unpack. Thin closure so the dispatcher table
+    // keeps the (verb, args) -> Promise contract.
+    pack:   (args) => cmdW779Sneakernet('pack', args),
+    unpack: (args) => cmdW779Sneakernet('unpack', args),
   };
   const fn = table[verb];
   if (!fn) {
@@ -34846,6 +35747,30 @@ async function main() {
       // is the short alias dispatched from the same case arm.
       case 'audit-export':
       case 'ae':       await withErrorContext('audit-export', () => cmdW770AuditExport(rest)); break;
+      // W781 - `kolm long-context <analyze|p90|check|warn>` mirrors the auth-
+      // gated GET /v1/long-context/p90 + POST /v1/long-context/check routes.
+      // Distinct-named (cmdW781LongCtx) so parallel W780/W782/W783 wave
+      // agents cannot collide on the dispatcher symbol.
+      case 'long-context':
+      case 'longctx':  await withErrorContext('long-context', () => cmdW781LongCtx(rest)); break;
+      // W782 - `kolm approvals <request|list|status|approve|reject|notify>`
+      // mirrors the /v1/approvals* routes. Distinct-named (cmdW782Approval)
+      // so parallel W780/W781/W783 wave agents cannot collide on the
+      // dispatcher symbol.
+      case 'approvals':
+      case 'approval': await withErrorContext('approvals', () => cmdW782Approval(rest)); break;
+      // W783 - `kolm chargeback <report|export|departments>` mirrors the
+      // /v1/chargeback + /v1/chargeback/export routes. Distinct-named
+      // (cmdW783Chargeback) so parallel W780/W781/W782 wave agents cannot
+      // collide on the dispatcher symbol.
+      case 'chargeback': await withErrorContext('chargeback', () => cmdW783Chargeback(rest)); break;
+      // W779 - `kolm pack --sneakernet <artifact> --out <path>` bundles a
+      // .kolm into a USB-transportable tar with HMAC signature. Distinct-
+      // named (cmdW779Sneakernet) so parallel W777/W778/W780 wave agents
+      // cannot collide on the dispatcher symbol. Future packaging modes
+      // (--container, --offline-installer) hang off the same verb.
+      case 'pack':     await withErrorContext('pack',     () => cmdW779Sneakernet('pack', rest)); break;
+      case 'unpack':   await withErrorContext('unpack',   () => cmdW779Sneakernet('unpack', rest)); break;
       // W771 — `kolm vlm <detect|bakeoff|captures>` (alias `vision`) is the
       // vision-language capture + bake-off dispatcher. Distinct-named
       // (cmdW771Vlm) so parallel W772 audio / W773 video / W774 xlang wave
@@ -34903,6 +35828,14 @@ async function main() {
       case 'active-learn':
         await withErrorContext('active-learn', () => cmdActiveLearn(rest));
         break;
+      // W775 — `kolm autopilot <start|stop|status|disable|savings|tick>` is
+      // the continuous-background-distill daemon (THE KILLER FEATURE).
+      // Dispatcher cmdW775Autopilot owns its sub-verbs, calls the
+      // /v1/autopilot/* routes, and never partially runs (honest envelope on
+      // missing api key, network error, or non-2xx).
+      case 'autopilot':
+        await withErrorContext('autopilot', () => cmdW775Autopilot(rest));
+        break;
       // W812 — `kolm failure-modes` mirrors /account/failure-modes.html:
       // cluster regression table + per-cluster inspector + optional emit
       // of weakness signals into W720 self-improvement.
@@ -34919,6 +35852,26 @@ async function main() {
         } else {
           await withErrorContext('failure-modes', () => cmdFailureModes(rest));
         }
+        break;
+      // W816 — `kolm failure-to-capture-loop` glues W812 (failure-modes) to
+      // W815 (active-learning), which feeds W720 (self-improvement). Closes
+      // the failure -> capture -> re-distill cycle from one CLI verb.
+      case 'failure-to-capture-loop':
+        await withErrorContext('failure-to-capture-loop', () => cmdW816Loop(rest));
+        break;
+      // W777 — `kolm ab` is the A/B test orchestrator (start/stop/list/status/
+      // promote/rollback/assign). Splits traffic deterministically via fnv1a
+      // hashing then records outcomes to the canonical event-store under
+      // workflow_id='w777:ab' so the W778 gate can read them back.
+      case 'ab':
+        await withErrorContext('ab', () => cmdW777Ab(rest));
+        break;
+      // W778 — `kolm stat-sig` runs Welch's t-test on raw samples (test) or on
+      // a live A/B test pulled via W777 (gate). The gate emits a 'pass'/'fail'/
+      // 'insufficient' decision used by W777 autoRollback to revert a bad
+      // promotion automatically.
+      case 'stat-sig':
+        await withErrorContext('stat-sig', () => cmdW778StatSig(rest));
         break;
       case 'jobs':     await withErrorContext('jobs',     () => cmdJobs(rest)); break;
       // W369 data plane (lake / optimize / dataset / label).
@@ -35181,10 +36134,15 @@ async function main() {
       // W769 — `kolm residency <regions|tag|get|configure-namespace|enforce>`
       // routes the data residency + geo-fence dispatcher. Distinct-named
       // (cmdW769Residency) so parallel W766/W767/W768/W770 wave agents
-      // cannot collide on this symbol. `region` is a no-suffix alias
-      // dispatched from the same arm.
-      case 'residency':
-      case 'region':   await withErrorContext('residency', () => cmdW769Residency(rest)); break;
+      // cannot collide on this symbol.
+      case 'residency': await withErrorContext('residency', () => cmdW769Residency(rest)); break;
+      // W780 — `kolm region <status|route|gateways|test-failover>` routes
+      // the multi-region gateway dispatcher. Distinct-named (cmdW780Region)
+      // so parallel W779/W781 wave agents cannot collide on this symbol.
+      // The W769 `region` alias was reclaimed for W780 because W780 is the
+      // request-routing surface while W769 is the per-capture tag surface;
+      // operators still call the residency dispatcher via `kolm residency`.
+      case 'region':   await withErrorContext('region',    () => cmdW780Region(rest)); break;
       // W774 — `kolm xlang <coverage|sample|per-language-eval|bakeoff>` routes
       // the cross-lingual distillation dispatcher (English teacher → multilingual
       // student). Distinct-named (cmdW774Xlang) so parallel W771/W772/W773/W813
@@ -35585,6 +36543,193 @@ async function cmdW758Bench(args) {
   _print(json);
   if (!resp.ok) process.exit(EXIT.EXECUTION);
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// W814 — `kolm bench speculative` — Speculative Decoding bench (student
+// draft + teacher verify). Distinct-named (cmdW814Bench) per the W724/W751/
+// W758 precedent so parallel agents on W811/W812/W813/W815 cannot collide
+// on this symbol. Routed from the augmented cmdBenchmark switch above.
+//
+// Subcommands:
+//   speculative                   — run a bench against captures (default
+//                                   path; needs --artifact + a teacher CMD)
+//   speculative log               — read the per-task acceptance log
+//   speculative doctor            — print teacher resolution state
+//
+// Honesty contract:
+//   - missing artifact / teacher / captures → emit one of the W814 honest
+//     envelopes verbatim; never invent an acceptance number.
+//   - --json: stable envelope shape (ok, error|by_cluster, version starts
+//     with w814-).
+// ─────────────────────────────────────────────────────────────────────────────
+async function cmdW814Bench(args) {
+  const sub = (args && args[1]) || '';
+  const wantJson = (args || []).includes('--json');
+
+  function _print(envelope) {
+    if (wantJson) console.log(JSON.stringify(envelope, null, 2));
+    else console.log(JSON.stringify(envelope, null, 2));
+  }
+  function _fail(envelope, code = EXIT.EXECUTION) {
+    _print(envelope);
+    process.exit(code);
+  }
+  function _pick(flag) {
+    if (!args) return undefined;
+    const i = args.indexOf(flag);
+    return i >= 0 ? args[i + 1] : undefined;
+  }
+
+  // Help text — surface on --help / -h / help and exit 0.
+  if (
+    (args || []).includes('--help')
+    || (args || []).includes('-h')
+    || sub === 'help'
+  ) {
+    console.log('kolm bench speculative — Speculative Decoding bench (W814)');
+    console.log('');
+    console.log('USAGE');
+    console.log('  kolm bench speculative --artifact <id> [--against <teacher>] [--tenant <id>]');
+    console.log('                         [--namespace <ns>] [--n-drafts 8] [--limit 50] [--json]');
+    console.log('  kolm bench speculative log [--tenant <id>] [--namespace <ns>]');
+    console.log('                             [--task-cluster <c>] [--artifact <id>] [--limit 100] [--json]');
+    console.log('  kolm bench speculative doctor [--json]');
+    console.log('');
+    console.log('HONESTY CONTRACT');
+    console.log('  - missing artifact     → ok:false, error:"artifact_not_found"');
+    console.log('  - missing teacher      → ok:false, error:"no_teacher_configured"');
+    console.log('                            set KOLM_W814_TEACHER_CMD to a JSON array');
+    console.log('                            (e.g. ["node","/abs/teacher.js"]) or install');
+    console.log('                            kolm-w814-teacher on PATH');
+    console.log('  - no captures          → ok:false, error:"no_captures_to_bench"');
+    console.log('  acceptance_rate is NEVER fabricated — every number is a real DI-driven');
+    console.log('  measurement.');
+    process.exit(EXIT.OK);
+    return;
+  }
+
+  let spMod;
+  try { spMod = await import('../src/speculative-teacher.js'); }
+  catch (e) {
+    _fail({
+      ok: false,
+      error: 'speculative_module_missing',
+      detail: String(e && e.message || e),
+      hint: 'src/speculative-teacher.js must be importable',
+      version: 'w814-v1',
+    }, EXIT.MISSING_PREREQ);
+    return;
+  }
+
+  const tenant = _pick('--tenant') || _pick('--tenant-id') || process.env.KOLM_TENANT_ID || 'local-tenant';
+  const namespace = _pick('--namespace') || _pick('-n') || null;
+
+  // -------- subcommand: doctor --------
+  if (sub === 'doctor') {
+    const r = spMod.resolveTeacher(process.env);
+    _print({
+      ...r,
+      tenant,
+      namespace,
+    });
+    process.exit(r.ok ? EXIT.OK : EXIT.MISSING_PREREQ);
+    return;
+  }
+
+  // -------- subcommand: log --------
+  if (sub === 'log') {
+    const taskCluster = _pick('--task-cluster') || null;
+    const artifactId = _pick('--artifact') || _pick('--artifact-id') || null;
+    const limitRaw = _pick('--limit');
+    const limit = limitRaw != null ? Math.max(1, Math.trunc(Number(limitRaw))) : 100;
+    const r = await spMod.getAcceptanceLog({
+      tenant,
+      namespace,
+      task_cluster: taskCluster,
+      artifact_id: artifactId,
+      limit,
+    });
+    _print(r);
+    process.exit(r.ok ? EXIT.OK : EXIT.NOT_FOUND);
+    return;
+  }
+
+  // -------- default: run a bench --------
+  // Helpers scoped under the parent (distinct names so parallel agents
+  // cannot collide on the symbol).
+  return _w814BenchSpeculative({ args, spMod, tenant, namespace, _pick, _print, _fail });
+}
+
+// W814 inner — run a speculative bench against captures.
+async function _w814BenchSpeculative({ args, spMod, tenant, namespace, _pick, _print, _fail }) {
+  const artifactId = _pick('--artifact') || _pick('--artifact-id') || null;
+  if (!artifactId) {
+    _fail({
+      ok: false,
+      error: 'missing_artifact',
+      hint: 'usage: kolm bench speculative --artifact <id> [--against <teacher>]',
+      version: spMod.SPECULATIVE_TEACHER_VERSION,
+    }, EXIT.BAD_ARGS);
+    return;
+  }
+
+  // --against overrides the env-resolved teacher. Accepts an absolute path
+  // OR a JSON array string (mirrors KOLM_W814_TEACHER_CMD); single tokens
+  // are looked up on PATH.
+  const against = _pick('--against') || null;
+  let teacherArgv = null;
+  if (against) {
+    try {
+      const parsed = JSON.parse(against);
+      if (Array.isArray(parsed) && parsed.length > 0) teacherArgv = parsed.map(String);
+    } catch (_) {
+      teacherArgv = [String(against)];
+    }
+  }
+
+  const nDraftsRaw = _pick('--n-drafts') || _pick('--n');
+  const nDrafts = nDraftsRaw != null ? Math.max(1, Math.trunc(Number(nDraftsRaw))) : spMod.N_DRAFT_DEFAULT;
+  const limitRaw = _pick('--limit');
+  const limit = limitRaw != null ? Math.max(1, Math.trunc(Number(limitRaw))) : 50;
+
+  // The runtime cannot fabricate a student draft from the CLI side without
+  // a wired-in artifact loader; if none is provided we emit the
+  // missing_draft_bridge envelope. Plan W814-3 (`--speculative student` on
+  // `kolm serve`) wires the production bridge; the bench-level surface is
+  // documented in --help.
+  let result;
+  try {
+    result = await spMod.benchSpeculative({
+      tenant,
+      artifact_id: artifactId,
+      namespace: namespace || 'default',
+      n_drafts: nDrafts,
+      limit,
+      teacher_argv: teacherArgv,
+      // No draft bridge here — production callers wire it in `kolm serve`
+      // (W814-3). The CLI surfaces the honest envelope.
+      draft: null,
+    });
+  } catch (e) {
+    _fail({
+      ok: false,
+      error: 'bench_failed',
+      detail: String(e && e.message || e),
+      version: spMod.SPECULATIVE_TEACHER_VERSION,
+    });
+    return;
+  }
+  _print(result);
+  process.exit(result.ok ? EXIT.OK : EXIT.EXECUTION);
+}
+
+// W814 inner — doctor mirror as a helper (kept around for direct callers).
+async function _w814BenchSpeculativeDoctor({ spMod, tenant, namespace, _print }) {
+  const r = spMod.resolveTeacher(process.env);
+  _print({ ...r, tenant, namespace });
+  return r;
+}
+void _w814BenchSpeculativeDoctor;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // W757 — cross-namespace anonymized pattern lake CLI.
@@ -37669,6 +38814,19 @@ COMPLETION_VERBS.push('audit-export', 'ae');
 COMPLETION_SUBS['audit-export'] = ['formats', 'export', 'preview'];
 COMPLETION_SUBS.ae = ['formats', 'export', 'preview'];
 
+// W779 — COMPLETION entries for the sneakernet (`pack` / `unpack`) verbs +
+// the new `airgap test` subcommand. Appended post-literal so a parallel
+// agent landing W777/W778/W780 completion edits cannot collide on the
+// literal table.
+if (!COMPLETION_VERBS.includes('pack')) COMPLETION_VERBS.push('pack');
+if (!COMPLETION_VERBS.includes('unpack')) COMPLETION_VERBS.push('unpack');
+COMPLETION_SUBS.pack = ['--sneakernet', '--out', '--artifact-id'];
+COMPLETION_SUBS.unpack = ['--sneakernet', '--dest-dir'];
+// Extend the airgap subverb list with the new `test` action.
+if (Array.isArray(COMPLETION_SUBS.airgap) && !COMPLETION_SUBS.airgap.includes('test')) {
+  COMPLETION_SUBS.airgap.push('test');
+}
+
 // W766 — COMPLETION entries for the `ai-act` (alias `aiact`) dispatcher.
 // Appended post-literal so a parallel agent landing W767/W768/W769/W770
 // completion edits cannot collide on the literal table.
@@ -38541,6 +39699,254 @@ async function cmdW769Residency(args) {
 
   console.error('usage: kolm residency <regions|tag|get|configure-namespace|enforce> [args]');
   process.exit(EXIT.BAD_ARGS);
+}
+
+// =============================================================================
+// W780 — Multi-region gateway dispatcher.
+//
+// Distinct-named (cmdW780Region) so parallel W779/W781 wave agents cannot
+// collide on this symbol. Routed from main() under `case 'region':`. The
+// W769 `region` alias was reclaimed for W780 because W780 is the
+// request-routing surface while W769 is the per-capture residency tag
+// surface; operators wanting residency call `kolm residency` directly.
+//
+// Subcommands:
+//   kolm region status                                        — show current region + gateway
+//   kolm region gateways                                      — list configured gateway map
+//   kolm region route <hash> [--residency R] [--prefer R]     — preview routing decision
+//   kolm region test-failover                                 — probe every configured gateway
+//
+// All thinly wrap the hosted /v1/region/* routes (status/gateways are
+// auth-gated; route is POST with JSON body). test-failover runs LOCALLY
+// against $KOLM_REGION_GATEWAY_URLS so an operator can sanity-check the
+// gateway map before the daemon comes up.
+//
+// Honesty: when $KOLM_REGION_GATEWAY_URLS is unset every subcommand
+// prints {ok:false, error:'region_not_configured'} with a hint and
+// exits non-zero. We never synthesise a placeholder gateway.
+// =============================================================================
+async function cmdW780Region(args) {
+  const sub = (args && args[0]) || '';
+
+  function _envApiKey() {
+    return process.env.KOLM_API_KEY || process.env.KOLM_KEY || '';
+  }
+  function _envBase() {
+    return (process.env.KOLM_BASE_URL || 'https://kolm.ai').replace(/\/$/, '');
+  }
+  function _flag(rest, name) {
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--' + name && i + 1 < rest.length) return rest[i + 1];
+      if (typeof rest[i] === 'string' && rest[i].startsWith('--' + name + '=')) {
+        return rest[i].slice(name.length + 3);
+      }
+    }
+    return null;
+  }
+  function _hasFlag(rest, name) {
+    return (rest || []).some((a) => a === '--' + name);
+  }
+  function _print(envelope) {
+    console.log(JSON.stringify(envelope, null, 2));
+  }
+  function _fail(envelope, code) {
+    _print(envelope);
+    process.exit(code != null ? code : EXIT.EXECUTION);
+  }
+
+  if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
+    console.error('usage: kolm region <status|gateways|route|test-failover> [args]');
+    console.error('  status                                                            — show current region + gateway');
+    console.error('  gateways                                                          — list configured gateway map');
+    console.error('  route <hash> [--residency R] [--prefer R]                         — preview a routing decision');
+    console.error('  test-failover                                                     — probe every configured gateway');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+
+  if (sub === 'status') {
+    const asJson = _hasFlag(args.slice(1), 'json');
+    await _w780RegionStatus({ asJson, _envApiKey, _envBase, _print, _fail });
+    return;
+  }
+  if (sub === 'gateways') {
+    await _w780RegionGateways({ _envApiKey, _envBase, _print, _fail });
+    return;
+  }
+  if (sub === 'route') {
+    const rest = args.slice(1);
+    const positional = rest.find((a) => typeof a === 'string' && !a.startsWith('--'));
+    const request_hash = positional || _flag(rest, 'request-hash') || '';
+    const residency_requirement = _flag(rest, 'residency') || _flag(rest, 'residency-requirement');
+    const prefer_region = _flag(rest, 'prefer') || _flag(rest, 'prefer-region');
+    if (!request_hash) {
+      _fail({
+        ok: false,
+        error: 'request_hash_required',
+        hint: 'usage: kolm region route <request_hash> [--residency R] [--prefer R]',
+        version: 'w780-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    await _w780RegionRoute({
+      request_hash, residency_requirement, prefer_region,
+      _envApiKey, _envBase, _print, _fail,
+    });
+    return;
+  }
+  if (sub === 'test-failover' || sub === 'failover') {
+    await _w780RegionFailover({ _print, _fail });
+    return;
+  }
+  _fail({
+    ok: false,
+    error: 'unknown_subcommand',
+    hint: 'usage: kolm region <status|gateways|route|test-failover>',
+    version: 'w780-v1',
+  }, EXIT.BAD_ARGS);
+}
+
+// Helper — `kolm region status`. Calls the hosted /v1/region/status when
+// $KOLM_API_KEY is set; otherwise falls back to the LOCAL multi-region.js
+// module so an operator can sanity-check the gateway map without an
+// account. The local path always exits 0 (the envelope's ok bit is the
+// signal) unless asJson:false produced a network error.
+async function _w780RegionStatus({ asJson, _envApiKey, _envBase, _print, _fail }) {
+  const key = _envApiKey();
+  if (!key) {
+    // Local path — read the env directly via the module.
+    const mod = await import('../src/multi-region.js');
+    const region = mod.getCurrentRegion();
+    const gateways = mod.getRegionGateways();
+    const sn = Object.keys(gateways).find((k) => {
+      const meta = mod.CANONICAL_REGIONS[k];
+      return meta && meta.canonical === region;
+    }) || Object.keys(gateways)[0] || null;
+    const gateway_url = sn ? gateways[sn] : null;
+    _print({
+      ok: true,
+      region,
+      gateway_url,
+      capture_residency: 'tenant_default',
+      configured_regions: Object.keys(gateways),
+      source: 'local',
+      version: mod.MULTI_REGION_VERSION,
+    });
+    return;
+  }
+  void asJson;
+  let resp;
+  try {
+    resp = await fetch(_envBase() + '/v1/region/status', {
+      method: 'GET',
+      headers: { 'authorization': 'Bearer ' + key },
+    });
+  } catch (e) {
+    _fail({
+      ok: false,
+      error: 'network_error',
+      detail: String((e && e.message) || e),
+      version: 'w780-v1',
+    });
+    return;
+  }
+  const body = await resp.json().catch(() => ({}));
+  _print(body);
+  if (!resp.ok) process.exit(EXIT.EXECUTION);
+}
+
+// Helper — `kolm region gateways`.
+async function _w780RegionGateways({ _envApiKey, _envBase, _print, _fail }) {
+  const key = _envApiKey();
+  if (!key) {
+    const mod = await import('../src/multi-region.js');
+    const gateways = mod.getRegionGateways();
+    _print({
+      ok: true,
+      gateways,
+      region_count: Object.keys(gateways).length,
+      canonical_regions: mod.CANONICAL_REGIONS,
+      source: 'local',
+      version: mod.MULTI_REGION_VERSION,
+    });
+    return;
+  }
+  let resp;
+  try {
+    resp = await fetch(_envBase() + '/v1/region/gateways', {
+      method: 'GET',
+      headers: { 'authorization': 'Bearer ' + key },
+    });
+  } catch (e) {
+    _fail({
+      ok: false,
+      error: 'network_error',
+      detail: String((e && e.message) || e),
+      version: 'w780-v1',
+    });
+    return;
+  }
+  const body = await resp.json().catch(() => ({}));
+  _print(body);
+  if (!resp.ok) process.exit(EXIT.EXECUTION);
+}
+
+// Helper — `kolm region route`.
+async function _w780RegionRoute({
+  request_hash, residency_requirement, prefer_region,
+  _envApiKey, _envBase, _print, _fail,
+}) {
+  const key = _envApiKey();
+  if (!key) {
+    const mod = await import('../src/multi-region.js');
+    const env = mod.routeRequest({
+      request_hash, residency_requirement, prefer_region,
+    });
+    _print({ ...env, source: 'local' });
+    if (!env.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+  let resp;
+  try {
+    resp = await fetch(_envBase() + '/v1/region/route', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+      body: JSON.stringify({ request_hash, residency_requirement, prefer_region }),
+    });
+  } catch (e) {
+    _fail({
+      ok: false,
+      error: 'network_error',
+      detail: String((e && e.message) || e),
+      version: 'w780-v1',
+    });
+    return;
+  }
+  const body = await resp.json().catch(() => ({}));
+  _print(body);
+  if (!resp.ok) process.exit(EXIT.EXECUTION);
+}
+
+// Helper — `kolm region test-failover` (LOCAL only — probes the gateways
+// directly from the operator's box; the hosted daemon does NOT expose
+// this because failover probing from the daemon would amplify a flap
+// into a cross-region thunder).
+async function _w780RegionFailover({ _print, _fail }) {
+  const mod = await import('../src/multi-region.js');
+  let env;
+  try {
+    env = await mod.testFailover({});
+  } catch (e) {
+    _fail({
+      ok: false,
+      error: 'failover_test_error',
+      detail: String((e && e.message) || e),
+      version: 'w780-v1',
+    });
+    return;
+  }
+  _print({ ...env, source: 'local' });
+  if (!env.ok) process.exit(EXIT.EXECUTION);
 }
 
 // W771 — COMPLETION entries appended post-literal so parallel sibling agents
@@ -39897,5 +41303,550 @@ async function _w773bTokenizeDoctor(_rest) {
   // Doctor mode never errors out - even an unwired tokenizer is reportable
   // truth. Exit 0 regardless so CI smokes do not break.
 }
+
+// =============================================================================
+// W781 - Long-context degradation warnings dispatcher.
+//
+// Distinct-named (cmdW781LongCtx) so parallel W780/W782/W783 wave agents
+// cannot collide on this symbol. Wired from main() via two case arms:
+// `case 'long-context':` and `case 'longctx':` (short alias).
+//
+// Subcommands:
+//   analyze [--namespace ns] [--window-days N]    GET /v1/long-context/p90
+//   p90     [--namespace ns] [--window-days N]    alias of analyze
+//   check   --input-length N [--namespace ns]     POST /v1/long-context/check
+//   warn    alias of check
+//
+// All three wrap the auth-gated routes so the CLI honors the same tenant
+// fence + honest envelope contracts as the API. version stamp matches
+// /^w781-/.
+// =============================================================================
+async function cmdW781LongCtx(args) {
+  const sub = (args && args[0]) || '';
+
+  function _envApiKey() {
+    return process.env.KOLM_API_KEY || process.env.KOLM_KEY || '';
+  }
+  function _envBase() {
+    return (process.env.KOLM_BASE_URL || process.env.KOLM_URL || 'https://kolm.ai').replace(/\/$/, '');
+  }
+  function _flag(rest, name) {
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--' + name && i + 1 < rest.length) return rest[i + 1];
+      if (typeof rest[i] === 'string' && rest[i].startsWith('--' + name + '=')) {
+        return rest[i].slice(name.length + 3);
+      }
+    }
+    return null;
+  }
+  function _print(envelope) {
+    console.log(JSON.stringify(envelope, null, 2));
+  }
+  function _fail(envelope, code) {
+    _print(envelope);
+    process.exit(typeof code === 'number' ? code : EXIT.EXECUTION);
+  }
+  function _requireKey() {
+    const key = _envApiKey();
+    if (!key) {
+      _fail({
+        ok: false,
+        error: 'auth_required',
+        hint: 'set KOLM_API_KEY (kolm signup / kolm login)',
+        version: 'w781-v1',
+      }, EXIT.MISSING_PREREQ);
+    }
+    return key;
+  }
+
+  if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
+    console.error('usage: kolm long-context <analyze|p90|check|warn> [args]');
+    console.error('         (alias: kolm longctx ...)');
+    console.error('  analyze [--namespace ns] [--window-days N]');
+    console.error('  p90     [--namespace ns] [--window-days N]    (alias)');
+    console.error('  check   --input-length N [--namespace ns] [--window-days N]');
+    console.error('  warn    --input-length N [--namespace ns] [--window-days N]   (alias)');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+
+  if (sub === 'analyze' || sub === 'p90') {
+    const rest = args.slice(1);
+    const namespace = _flag(rest, 'namespace');
+    const windowDays = _flag(rest, 'window-days') || _flag(rest, 'window_days');
+    const key = _requireKey();
+    const qs = new URLSearchParams();
+    if (namespace) qs.set('namespace', String(namespace));
+    if (windowDays) qs.set('window_days', String(windowDays));
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/long-context/p90' + (qs.toString() ? '?' + qs.toString() : ''), {
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w781-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  if (sub === 'check' || sub === 'warn') {
+    const rest = args.slice(1);
+    const namespace = _flag(rest, 'namespace');
+    const windowDays = _flag(rest, 'window-days') || _flag(rest, 'window_days');
+    const inputLengthRaw = _flag(rest, 'input-length') || _flag(rest, 'input_length');
+    if (!inputLengthRaw) {
+      _fail({ ok: false, error: 'missing_argument', detail: '--input-length N is required', version: 'w781-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const inputLength = Number(inputLengthRaw);
+    if (!Number.isFinite(inputLength) || inputLength < 0) {
+      _fail({ ok: false, error: 'invalid_input_length', detail: 'expected non-negative number', version: 'w781-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _requireKey();
+    const payload = { input_length: inputLength };
+    if (namespace) payload.namespace = namespace;
+    if (windowDays) payload.window_days = Number(windowDays);
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/long-context/check', {
+        method: 'POST',
+        headers: { 'authorization': 'Bearer ' + key, 'content-type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w781-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  console.error('usage: kolm long-context <analyze|p90|check|warn> [args]');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// W781 - COMPLETION entries appended post-literal so a parallel agent on the
+// same revision can land their COMPLETION edit independently without a merge
+// conflict on the literal array. `long-context` is the top-level verb with
+// `longctx` as a short alias.
+COMPLETION_VERBS.push('long-context', 'longctx');
+COMPLETION_SUBS['long-context'] = ['analyze', 'p90', 'check', 'warn'];
+COMPLETION_SUBS.longctx         = ['analyze', 'p90', 'check', 'warn'];
+
+// =============================================================================
+// W782 - Team approval workflow dispatcher.
+//
+// Distinct-named (cmdW782Approval) so parallel W780/W781/W783 wave agents
+// cannot collide on this symbol. Wired from main() via `case 'approvals':`
+// and `case 'approval':` (singular alias).
+//
+// Subcommands:
+//   request --artifact-id ID [--namespace ns] [--reason s] [--ttl-days N]
+//                                              POST /v1/approvals/request
+//   list    [--status pending|granted|rejected|expired]
+//                                              GET  /v1/approvals
+//   status  --id APPROVAL_ID                   GET  /v1/approvals/:id
+//   approve --id APPROVAL_ID [--reason s]      POST /v1/approvals/:id/approve
+//   reject  --id APPROVAL_ID --reason s        POST /v1/approvals/:id/reject
+//   notify  --id APPROVAL_ID [--channel email|webhook ...]
+//                                              POST /v1/approvals/:id/notify
+//
+// All wrap the auth-gated routes so the CLI honors tenant fence + honest
+// envelope contracts. version stamp matches /^w782-/.
+// =============================================================================
+async function cmdW782Approval(args) {
+  const sub = (args && args[0]) || '';
+
+  function _envApiKey() {
+    return process.env.KOLM_API_KEY || process.env.KOLM_KEY || '';
+  }
+  function _envBase() {
+    return (process.env.KOLM_BASE_URL || process.env.KOLM_URL || 'https://kolm.ai').replace(/\/$/, '');
+  }
+  function _flag(rest, name) {
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--' + name && i + 1 < rest.length) return rest[i + 1];
+      if (typeof rest[i] === 'string' && rest[i].startsWith('--' + name + '=')) {
+        return rest[i].slice(name.length + 3);
+      }
+    }
+    return null;
+  }
+  function _flagAll(rest, name) {
+    const out = [];
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--' + name && i + 1 < rest.length) out.push(rest[i + 1]);
+      else if (typeof rest[i] === 'string' && rest[i].startsWith('--' + name + '=')) {
+        out.push(rest[i].slice(name.length + 3));
+      }
+    }
+    return out;
+  }
+  function _print(envelope) {
+    console.log(JSON.stringify(envelope, null, 2));
+  }
+  function _fail(envelope, code) {
+    _print(envelope);
+    process.exit(typeof code === 'number' ? code : EXIT.EXECUTION);
+  }
+  function _requireKey() {
+    const key = _envApiKey();
+    if (!key) {
+      _fail({
+        ok: false,
+        error: 'auth_required',
+        hint: 'set KOLM_API_KEY (kolm signup / kolm login)',
+        version: 'w782-v1',
+      }, EXIT.MISSING_PREREQ);
+    }
+    return key;
+  }
+
+  if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
+    console.error('usage: kolm approvals <request|list|status|approve|reject|notify> [args]');
+    console.error('         (alias: kolm approval ...)');
+    console.error('  request --artifact-id ID [--namespace ns] [--reason s] [--ttl-days N]');
+    console.error('  list    [--status pending|granted|rejected|expired]');
+    console.error('  status  --id APPROVAL_ID');
+    console.error('  approve --id APPROVAL_ID [--reason s]');
+    console.error('  reject  --id APPROVAL_ID --reason s');
+    console.error('  notify  --id APPROVAL_ID [--channel email|webhook ...]');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+
+  if (sub === 'request') {
+    const rest = args.slice(1);
+    const artifactId = _flag(rest, 'artifact-id') || _flag(rest, 'artifact_id');
+    const namespace = _flag(rest, 'namespace');
+    const reason = _flag(rest, 'reason') || '';
+    const ttlDays = _flag(rest, 'ttl-days') || _flag(rest, 'ttl_days');
+    const requestedBy = _flag(rest, 'requested-by') || _flag(rest, 'requested_by');
+    const key = _requireKey();
+    const payload = { artifact_id: artifactId, reason };
+    if (namespace) payload.namespace = namespace;
+    if (ttlDays) payload.ttl_days = Number(ttlDays);
+    if (requestedBy) payload.requested_by = requestedBy;
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/approvals/request', {
+        method: 'POST',
+        headers: { 'authorization': 'Bearer ' + key, 'content-type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w782-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  if (sub === 'list') {
+    const rest = args.slice(1);
+    const status = _flag(rest, 'status');
+    const key = _requireKey();
+    const qs = new URLSearchParams();
+    if (status) qs.set('status', String(status));
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/approvals' + (qs.toString() ? '?' + qs.toString() : ''), {
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w782-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  if (sub === 'status' || sub === 'get') {
+    const rest = args.slice(1);
+    const id = _flag(rest, 'id') || (rest[0] && !rest[0].startsWith('--') ? rest[0] : null);
+    if (!id) {
+      _fail({ ok: false, error: 'missing_argument', detail: '--id APPROVAL_ID is required', version: 'w782-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _requireKey();
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/approvals/' + encodeURIComponent(id), {
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w782-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  if (sub === 'approve') {
+    const rest = args.slice(1);
+    const id = _flag(rest, 'id');
+    const reason = _flag(rest, 'reason') || '';
+    const approvedBy = _flag(rest, 'approved-by') || _flag(rest, 'approved_by');
+    if (!id) {
+      _fail({ ok: false, error: 'missing_argument', detail: '--id APPROVAL_ID is required', version: 'w782-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _requireKey();
+    const payload = { reason };
+    if (approvedBy) payload.approved_by = approvedBy;
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/approvals/' + encodeURIComponent(id) + '/approve', {
+        method: 'POST',
+        headers: { 'authorization': 'Bearer ' + key, 'content-type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w782-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  if (sub === 'reject') {
+    const rest = args.slice(1);
+    const id = _flag(rest, 'id');
+    const reason = _flag(rest, 'reason') || '';
+    const rejectedBy = _flag(rest, 'rejected-by') || _flag(rest, 'rejected_by');
+    if (!id) {
+      _fail({ ok: false, error: 'missing_argument', detail: '--id APPROVAL_ID is required', version: 'w782-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    if (!reason) {
+      _fail({ ok: false, error: 'missing_argument', detail: '--reason is required to reject', version: 'w782-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _requireKey();
+    const payload = { reason };
+    if (rejectedBy) payload.rejected_by = rejectedBy;
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/approvals/' + encodeURIComponent(id) + '/reject', {
+        method: 'POST',
+        headers: { 'authorization': 'Bearer ' + key, 'content-type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w782-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  if (sub === 'notify') {
+    const rest = args.slice(1);
+    const id = _flag(rest, 'id');
+    const channels = _flagAll(rest, 'channel');
+    if (!id) {
+      _fail({ ok: false, error: 'missing_argument', detail: '--id APPROVAL_ID is required', version: 'w782-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _requireKey();
+    const payload = {};
+    if (channels.length > 0) payload.channels = channels;
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/approvals/' + encodeURIComponent(id) + '/notify', {
+        method: 'POST',
+        headers: { 'authorization': 'Bearer ' + key, 'content-type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w782-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  console.error('usage: kolm approvals <request|list|status|approve|reject|notify> [args]');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// W782 - COMPLETION entries appended post-literal.
+COMPLETION_VERBS.push('approvals', 'approval');
+COMPLETION_SUBS.approvals = ['request', 'list', 'status', 'approve', 'reject', 'notify'];
+COMPLETION_SUBS.approval  = ['request', 'list', 'status', 'approve', 'reject', 'notify'];
+
+// =============================================================================
+// W783 - Cost attribution / chargeback dispatcher.
+//
+// Distinct-named (cmdW783Chargeback) so parallel W780/W781/W782 wave agents
+// cannot collide on this symbol. Wired from main() via `case 'chargeback':`.
+//
+// Subcommands:
+//   report  [--period YYYY-MM] [--group-by namespace|project|department]
+//                                              GET  /v1/chargeback
+//   export  --format csv|json [--period YYYY-MM] [--group-by D] [--out PATH]
+//                                              POST /v1/chargeback/export
+//   departments                                lists the canonical department
+//                                              vocab used in dimension mapping
+//
+// All wrap the auth-gated routes so the CLI honors tenant fence + honest
+// envelope contracts. version stamp matches /^w783-/.
+// =============================================================================
+async function cmdW783Chargeback(args) {
+  const sub = (args && args[0]) || '';
+
+  function _envApiKey() {
+    return process.env.KOLM_API_KEY || process.env.KOLM_KEY || '';
+  }
+  function _envBase() {
+    return (process.env.KOLM_BASE_URL || process.env.KOLM_URL || 'https://kolm.ai').replace(/\/$/, '');
+  }
+  function _flag(rest, name) {
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--' + name && i + 1 < rest.length) return rest[i + 1];
+      if (typeof rest[i] === 'string' && rest[i].startsWith('--' + name + '=')) {
+        return rest[i].slice(name.length + 3);
+      }
+    }
+    return null;
+  }
+  function _print(envelope) {
+    console.log(JSON.stringify(envelope, null, 2));
+  }
+  function _fail(envelope, code) {
+    _print(envelope);
+    process.exit(typeof code === 'number' ? code : EXIT.EXECUTION);
+  }
+  function _requireKey() {
+    const key = _envApiKey();
+    if (!key) {
+      _fail({
+        ok: false,
+        error: 'auth_required',
+        hint: 'set KOLM_API_KEY (kolm signup / kolm login)',
+        version: 'w783-v1',
+      }, EXIT.MISSING_PREREQ);
+    }
+    return key;
+  }
+
+  if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
+    console.error('usage: kolm chargeback <report|export|departments|list-departments> [args]');
+    console.error('  report  [--period YYYY-MM] [--group-by namespace|project|department]');
+    console.error('  export  --format csv|json [--period YYYY-MM] [--group-by D] [--out PATH]');
+    console.error('  departments                lists canonical department vocab');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+
+  if (sub === 'report') {
+    const rest = args.slice(1);
+    const period = _flag(rest, 'period');
+    const groupBy = _flag(rest, 'group-by') || _flag(rest, 'group_by') || 'namespace';
+    const key = _requireKey();
+    const qs = new URLSearchParams();
+    if (period) qs.set('period', String(period));
+    qs.set('group_by', String(groupBy));
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/chargeback?' + qs.toString(), {
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w783-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  if (sub === 'export') {
+    const rest = args.slice(1);
+    const period = _flag(rest, 'period');
+    const groupBy = _flag(rest, 'group-by') || _flag(rest, 'group_by') || 'namespace';
+    const format = _flag(rest, 'format') || 'json';
+    const out = _flag(rest, 'out');
+    const key = _requireKey();
+    const payload = { format, group_by: groupBy };
+    if (period) payload.period = period;
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/chargeback/export', {
+        method: 'POST',
+        headers: { 'authorization': 'Bearer ' + key, 'content-type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w783-v1' });
+      return;
+    }
+    if (!resp.ok) {
+      const body = await resp.json().catch(() => ({}));
+      _print(body);
+      process.exit(EXIT.EXECUTION);
+      return;
+    }
+    const text = await resp.text();
+    if (out) {
+      try {
+        const fs = await import('node:fs');
+        fs.writeFileSync(out, text, 'utf8');
+        console.error('# wrote ' + text.length + ' bytes to ' + out + ' (format=' + format + ')');
+      } catch (e) {
+        _fail({ ok: false, error: 'write_failed', detail: String(e && e.message || e), version: 'w783-v1' });
+        return;
+      }
+    } else {
+      process.stdout.write(text);
+    }
+    return;
+  }
+
+  if (sub === 'departments' || sub === 'list-departments') {
+    // Pure local print of the canonical department vocab pulled from
+    // src/chargeback.js. No network/auth needed.
+    try {
+      const mod = await import('../src/chargeback.js');
+      const env = {
+        ok: true,
+        version: mod.CHARGEBACK_VERSION || 'w783-v1',
+        group_by_dimensions: Array.from(mod.GROUP_BY_DIMENSIONS || []),
+        departments: Array.from((mod.DEFAULTS && mod.DEFAULTS.DEPARTMENT_VOCAB) || []),
+      };
+      _print(env);
+    } catch (e) {
+      _fail({ ok: false, error: 'load_failed', detail: String(e && e.message || e), version: 'w783-v1' });
+    }
+    return;
+  }
+
+  console.error('usage: kolm chargeback <report|export|departments> [args]');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// W783 - COMPLETION entries appended post-literal.
+COMPLETION_VERBS.push('chargeback');
+COMPLETION_SUBS.chargeback = ['report', 'export', 'departments', 'list-departments'];
 
 main();

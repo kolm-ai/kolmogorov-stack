@@ -38,7 +38,7 @@ manifest.json     MV3 manifest, requests "downloads" + "contextMenus" + "storage
 background.js     service worker: context menu + downloads hook + issuer key cache
 popup.html/.js    toolbar popup (status + link to /verify-prod)
 verifier.html/.js verification tab opened from the context menu
-icons/            16/48/128 PNGs (TODO: drop the kolm mark in here pre-store-listing)
+icons/            generated 16/48/128 PNGs used by the MV3 manifest
 ```
 
 ## Why a separate package

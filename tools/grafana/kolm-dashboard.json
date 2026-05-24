@@ -1,0 +1,311 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "kolm.ai runtime reference dashboard. Panels: K-Score over time, local-vs-teacher token ratio, fallback rate, p95 splice latency. Replace the data source UID and the namespace label values before saving.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROMETHEUS_DS_UID"
+      },
+      "description": "Calibrated K-Score point estimate over time per namespace. Lower values indicate the artifact is drifting away from its calibration baseline.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "K-Score",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 2,
+            "pointSize": 4,
+            "showPoints": "never",
+            "spanNulls": false
+          },
+          "min": 0,
+          "max": 1,
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROMETHEUS_DS_UID"
+          },
+          "editorMode": "code",
+          "expr": "kolm_kscore_point",
+          "legendFormat": "{{namespace}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "K-Score over time",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROMETHEUS_DS_UID"
+      },
+      "description": "Fraction of response tokens served by the local model vs the teacher. Higher values indicate the local model is handling more of the load.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.5
+              },
+              {
+                "color": "green",
+                "value": 0.85
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROMETHEUS_DS_UID"
+          },
+          "editorMode": "code",
+          "expr": "kolm_local_token_ratio",
+          "legendFormat": "{{namespace}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Local-vs-teacher token ratio",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROMETHEUS_DS_UID"
+      },
+      "description": "Rate of fallback-to-teacher routing decisions. Spikes above 20 percent suggest the response distribution has shifted faster than drift detection caught.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.1
+              },
+              {
+                "color": "red",
+                "value": 0.2
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROMETHEUS_DS_UID"
+          },
+          "editorMode": "code",
+          "expr": "kolm_fallback_rate",
+          "legendFormat": "{{namespace}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Fallback rate",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROMETHEUS_DS_UID"
+      },
+      "description": "95th percentile splice latency in milliseconds. Splice latency is the local-to-teacher handoff time; regressions usually indicate network or teacher backend degradation.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "ms",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 2,
+            "pointSize": 4,
+            "showPoints": "never",
+            "spanNulls": false
+          },
+          "min": 0,
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROMETHEUS_DS_UID"
+          },
+          "editorMode": "code",
+          "expr": "kolm_splice_latency_p95_ms",
+          "legendFormat": "{{namespace}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "p95 splice latency",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [
+    "kolm",
+    "runtime",
+    "ai-compiler"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "kolm.ai runtime",
+  "uid": "kolm-runtime",
+  "version": 1,
+  "weekStart": ""
+}

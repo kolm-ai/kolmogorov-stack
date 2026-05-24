@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" style="background:#07090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>kolm blog &middot; Open-source AI workbench &middot; kolm.ai</title>
+<meta name="description" content="Honest writing about distillation, quantization, and on-device inference. Weekly cadence, monthly State of Distillation report, annual Cost of AI roundup. No clickbait, no fabricated benchmarks.">
+<meta name="theme-color" content="#07090c">
+<link rel="canonical" href="https://kolm.ai/blog">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/frontier.css">
+<script defer src="/frontier.js"></script>
+<script src="/nav.js" defer></script>
+<style>
+  .bl-hero { padding-top: clamp(72px, 9vw, 128px); padding-bottom: clamp(56px, 7vw, 96px); border-bottom: 1px solid var(--line-1); }
+  .bl-hero h1 { font-family: var(--fr-font-display); font-size: var(--fr-text-5xl); letter-spacing: var(--fr-track-display); line-height: 1.04; font-weight: 580; color: var(--ink-1); margin: 14px 0 18px; max-width: 22ch; }
+  .bl-hero h1 b { color: var(--fr-mint); font-weight: 580; }
+  .bl-hero .meta-row { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 28px; }
+
+  .bl-cadence { width: 100%; border-collapse: collapse; margin-top: 18px; }
+  .bl-cadence th, .bl-cadence td { text-align: left; padding: 14px 16px; border-bottom: 1px solid var(--line-1); font-family: var(--fr-font-sans); font-size: 14px; color: var(--ink-2); vertical-align: top; }
+  .bl-cadence th { font-family: var(--fr-font-mono); font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--ink-3); border-bottom: 1px solid var(--line-2); }
+  .bl-cadence td b { color: var(--ink-1); font-weight: 580; }
+  .bl-cadence tr:last-child td { border-bottom: none; }
+
+  .bl-empty { padding: 24px; border: 1px dashed var(--line-1); border-radius: 10px; background: rgba(255,255,255,0.015); margin-top: 18px; }
+  .bl-empty .badge { font-family: var(--fr-font-mono); font-size: 10.5px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--fr-amber); margin-bottom: 8px; display: inline-block; }
+  .bl-empty h3 { margin: 0 0 8px; font-family: var(--fr-font-display); font-size: 22px; font-weight: 540; color: var(--ink-1); letter-spacing: -0.01em; }
+  .bl-empty p { margin: 0; font-family: var(--fr-font-sans); font-size: 14px; color: var(--ink-2); line-height: 1.6; }
+
+  .bl-tmpl { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
+  @media (max-width: 720px) { .bl-tmpl { grid-template-columns: 1fr; } }
+  .bl-tmpl-card { padding: 20px 22px; border: 1px solid var(--line-1); border-radius: 10px; background: rgba(255,255,255,0.015); display: flex; flex-direction: column; gap: 10px; }
+  .bl-tmpl-card .tag { font-family: var(--fr-font-mono); font-size: 10.5px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--ink-3); }
+  .bl-tmpl-card h3 { margin: 0; font-family: var(--fr-font-display); font-size: 20px; font-weight: 540; color: var(--ink-1); letter-spacing: -0.01em; }
+  .bl-tmpl-card p { margin: 0; font-family: var(--fr-font-sans); font-size: 13.5px; color: var(--ink-2); line-height: 1.6; }
+  .bl-tmpl-card .row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+
+  .bl-honesty { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-family: var(--fr-font-sans); font-size: 13px; color: var(--ink-2); line-height: 1.55; margin-top: 20px; }
+  .bl-honesty b { color: var(--ink-1); font-weight: 580; }
+</style>
+<meta property="og:title" content="kolm blog &middot; Open-source AI workbench &middot; kolm.ai">
+<meta property="og:description" content="Honest writing about distillation. Weekly cadence, monthly State of Distillation, annual Cost of AI.">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/blog">
+<meta property="og:type" content="website">
+</head>
+<body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - Open-source AI workbench. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand">kolm<b style="color:var(--ks-accent)">.ai</b></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/k-score">K-score</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
+      </div>
+    </div>
+  </header>
+</div>
+
+<main id="main">
+
+<!-- 1. HERO -->
+<section class="bl-hero fr-section">
+  <div class="fr-container">
+    <span class="fr-eyebrow">Open-source AI workbench</span>
+    <h1>kolm <b>blog</b>.</h1>
+    <p class="fr-lede">Honest writing about distillation. Weekly cadence, monthly State of Distillation report, annual Cost of AI roundup. No clickbait, no fabricated benchmarks. Every number comes from a signed receipt in production.</p>
+    <div class="meta-row">
+      <span class="fr-status"><span class="fr-status__dot"></span>Weekly cadence: recipes and walkthroughs</span>
+      <span class="fr-status fr-status--info"><span class="fr-status__dot"></span>Monthly: State of Distillation</span>
+      <span class="fr-status fr-status--warn"><span class="fr-status__dot"></span>Annual: Cost of AI</span>
+    </div>
+  </div>
+</section>
+
+<!-- 2. CADENCE -->
+<section class="fr-section" id="cadence">
+  <div class="fr-container">
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">Cadence</span>
+      <h2 class="fr-h2">Three rhythms. One discipline.</h2>
+      <p class="fr-lede">The cadence is fixed so writers, readers, and reviewers all know what to expect. Each format has a different scope, a different fact-base, and a different review path.</p>
+    </div>
+    <table class="bl-cadence" aria-label="Cadence overview">
+      <thead>
+        <tr>
+          <th>Cadence</th>
+          <th>Format</th>
+          <th>Scope</th>
+          <th>Fact-base</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>Weekly</b></td>
+          <td>Recipe, walkthrough, or short essay</td>
+          <td>One concrete technique, one model class, one shipped artifact</td>
+          <td>Reproducible from a CLI command and a public dataset</td>
+        </tr>
+        <tr>
+          <td><b>Monthly</b></td>
+          <td>State of Distillation report</td>
+          <td>What shipped from kolm and from the community in the prior month</td>
+          <td>Aggregated production telemetry plus public artifact registry</td>
+        </tr>
+        <tr>
+          <td><b>Annual</b></td>
+          <td>Cost of AI roundup</td>
+          <td>What the year of frontier API spend, distillation savings, and on-device deploys actually cost</td>
+          <td>Multi-tenant billing aggregates plus public benchmark history</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 3. LATEST POSTS -->
+<section class="fr-section" id="latest">
+  <div class="fr-container">
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">Latest posts</span>
+      <h2 class="fr-h2">First post lands Q3 2026.</h2>
+      <p class="fr-lede">The blog launches when there is something worth publishing. We will not seed it with backdated posts or AI-written filler.</p>
+    </div>
+    <div class="bl-empty">
+      <span class="badge">No posts yet</span>
+      <h3>The honest empty state.</h3>
+      <p>Rather than ship a wall of placeholder posts, we are leaving this list blank until the first real piece is ready. The cadence above is the commitment. The templates below are the scaffolding. Q3 2026 is when the writing starts.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 4. TEMPLATE LIBRARY -->
+<section class="fr-section" id="templates">
+  <div class="fr-container">
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">Template library</span>
+      <h2 class="fr-h2">Two report templates.</h2>
+      <p class="fr-lede">The recurring reports follow a fixed shape so they can be compared across months and years. Templates are public so contributors and external researchers can mirror the format.</p>
+    </div>
+    <div class="bl-tmpl">
+      <div class="bl-tmpl-card">
+        <span class="tag">Monthly &middot; State of Distillation</span>
+        <h3>State of Distillation template</h3>
+        <p>Top numbers this month, what we shipped, what the community shipped, what is next. A fixed five-section shape so month-over-month diffs are obvious.</p>
+        <div class="row">
+          <a href="/blog/templates/state-of-distillation" class="fr-btn fr-btn--mint">View template</a>
+        </div>
+      </div>
+      <div class="bl-tmpl-card">
+        <span class="tag">Annual &middot; Cost of AI</span>
+        <h3>Cost of AI template</h3>
+        <p>The big shift, the numbers, what changed, what we predict next year. A long-form annual scaffold meant to be the most-cited piece of the year.</p>
+        <div class="row">
+          <a href="/blog/templates/cost-of-ai" class="fr-btn fr-btn--mint">View template</a>
+        </div>
+      </div>
+    </div>
+    <div class="bl-honesty">
+      <b>A note on numbers.</b> Every figure that appears in any blog post is sourced from a signed receipt in production or from a public artifact in the registry. We do not fabricate numbers to fill a slot. If a slot is empty, we say so.
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI workbench. Capture, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/faq">FAQ</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Community</h4>
+        <a href="/community">Community</a>
+        <a href="/recipes">Recipes</a>
+        <a href="/forge">Forge</a>
+        <a href="/leaderboard">Leaderboard</a>
+        <a href="/labs">Labs</a>
+        <a href="/blog">Blog</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- w802-blog-cadence-scaffold -->
+</body>
+</html>

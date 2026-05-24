@@ -1,6 +1,6 @@
 {
   "name": "kolm",
-  "version": "0.1.0",
+  "version": "0.2.6",
   "description": "One-line embed for .kolm artifacts. TypeScript / JavaScript SDK.",
   "license": "Apache-2.0",
   "type": "module",
@@ -23,7 +23,7 @@
     "node": ">=18"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "node ../../scripts/verify-sdk-dist.mjs sdk-ts",
     "test": "node --test test"
   },
   "keywords": [

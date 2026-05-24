@@ -190,3 +190,12 @@ test('W524 #8 — sdk-manifest gate computes sha256 short + sha384 SRI', () => {
   assert.match(fnSlice, /['"]sha384-['"]\s*\+\s*crypto\.createHash\(['"]sha384['"]\)[\s\S]{0,200}digest\(['"]base64['"]\)/,
     'SRI must be sha384-<base64> (browser SRI spec)');
 });
+
+test('W524 #9 - release verifier gives noisy gates enough output buffer', () => {
+  assert.match(SRC, /KOLM_RELEASE_VERIFY_MAX_BUFFER/,
+    'operator must be able to override the release verifier output buffer');
+  assert.match(SRC, /SPAWN_MAX_BUFFER_BYTES[\s\S]{0,300}256\s*\*\s*1024\s*\*\s*1024/,
+    'default release verifier buffer should cover noisy full-suite failures');
+  assert.match(SRC, /spawnSync\([\s\S]{0,600}maxBuffer:\s*opts\.maxBuffer\s*\|\|\s*SPAWN_MAX_BUFFER_BYTES/,
+    'runSync must pass maxBuffer to spawnSync');
+});

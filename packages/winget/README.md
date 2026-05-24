@@ -24,11 +24,11 @@ winget install --manifest packages/winget --accept-package-agreements
 
 ## Submitting to the public registry
 
-1. Tag a release on `sneaky-hippo/kolm-stack` (`v0.1.x`) with portable
+1. Tag a release on `sneaky-hippo/kolm-stack` (`v0.2.x`) with portable
    zips for x64 + arm64 attached.
 2. Compute SHA-256 of each zip:
    ```powershell
-   Get-FileHash kolm-0.1.0-win-x64.zip -Algorithm SHA256
+   Get-FileHash kolm-0.2.6-win-x64.zip -Algorithm SHA256
    ```
 3. Update the two `InstallerSha256` fields in `kolm.kolm.installer.yaml`.
 4. Validate locally:
@@ -36,7 +36,7 @@ winget install --manifest packages/winget --accept-package-agreements
    winget validate --manifest packages/winget
    ```
 5. Fork [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs),
-   drop these three files under `manifests/k/kolm/kolm/0.1.0/`, open a PR.
+   drop these three files under `manifests/k/kolm/kolm/0.2.6/`, open a PR.
 
 ## Notes
 

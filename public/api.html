@@ -30,10 +30,9 @@
   .api-section h2 { margin: 0 0 var(--ks-2); font-size: clamp(24px, 3vw, 32px); font-weight: 560; letter-spacing: -0.015em; color: var(--ks-ink); }
   .api-section .sub { margin: 0 0 var(--ks-6); font-size: 15px; color: var(--ks-ink-3); max-width: 64ch; line-height: 1.6; }
 
-  .api-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--ks-4); }
-  @media (max-width: 900px) { .api-grid { grid-template-columns: 1fr; } }
-
-  .api-group { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); }
+  /* W642 de-rectangle: route groups flow vertically, hairline between groups, no card chrome */
+  .api-grid { display: flex; flex-direction: column; gap: 0; margin-top: var(--ks-5); border-top: 1px solid var(--ks-line-1); }
+  .api-group { background: transparent; border: none; border-bottom: 1px solid var(--ks-line-1); border-radius: 0; padding: var(--ks-6) 0; }
   .api-group .row { display: flex; justify-content: space-between; align-items: baseline; gap: var(--ks-3); margin-bottom: var(--ks-3); }
   .api-group .tag { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-accent); }
   .api-group .count { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); }
@@ -91,8 +90,30 @@
   .api-ep .ep-body .errors .desc { color: var(--ks-ink-2); }
   .api-ep .ep-body .note { font-size: 12.5px; color: var(--ks-ink-3); line-height: 1.55; margin-top: var(--ks-3); padding: var(--ks-3); border: 1px dashed var(--ks-line-2); border-radius: 6px; background: #050607; }
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/api",
+  "description": "The kolm REST surface. 355+ routes under /v1/* grouped by auth, capture, distill, compile, score, and verify. Honest envelope, x-kolm-api-key header, OpenAPI download.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
 </head>
 <body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <a href="#main" class="ks-skip">Skip to content</a>
 

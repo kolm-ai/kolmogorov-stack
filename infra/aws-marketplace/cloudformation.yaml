@@ -1,0 +1,465 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  kolm.ai gateway deployment on AWS. Brings up a VPC-isolated EC2 instance
+  running the kolm gateway, an S3 bucket for signed .kolm artifacts, an
+  IAM execution role scoped to that bucket, and CloudWatch log groups for
+  audit + operator telemetry. BYOL: bring your own kolm Pro license key
+  via the KolmAPIKey parameter. AWS bills only for the EC2/S3/CloudWatch
+  resources this stack creates. W799-v1 listing prep -- not yet submitted
+  to AWS Marketplace for review.
+
+# -------------------------------------------------------------------
+# Parameters
+# -------------------------------------------------------------------
+Parameters:
+
+  KolmAPIKey:
+    Type: String
+    NoEcho: true
+    Description: >
+      Your kolm Pro API key (ks_...). Issued at https://kolm.ai/signup.
+      Stored on the instance via SSM Parameter Store SecureString. Never
+      logged by CloudFormation or CloudWatch.
+    MinLength: 20
+    MaxLength: 128
+    AllowedPattern: '^ks_[a-zA-Z0-9_-]+$'
+    ConstraintDescription: >
+      Must be a kolm API key beginning with ks_ followed by alphanumerics,
+      underscores, or hyphens.
+
+  TeacherAPIKey:
+    Type: String
+    NoEcho: true
+    Default: ''
+    Description: >
+      Optional teacher-model API key (Anthropic sk-ant-..., OpenAI sk-...,
+      or kolm distill teacher). Required only if you intend to run the
+      distill pipeline on this instance. Leave blank to deploy the gateway
+      without any teacher wired in.
+    MaxLength: 256
+
+  Namespace:
+    Type: String
+    Default: default
+    Description: >
+      Logical kolm namespace for all captures, artifacts, and billing
+      attribution from this instance. Cost rollups in
+      /v1/billing/breakdown will key on this value.
+    MinLength: 1
+    MaxLength: 64
+    AllowedPattern: '^[a-z0-9][a-z0-9-]{0,63}$'
+    ConstraintDescription: >
+      Lowercase alphanumeric with hyphens. Must start with a letter or
+      digit. Max 64 characters.
+
+  InstanceType:
+    Type: String
+    Default: t3.2xlarge
+    Description: EC2 instance type for the kolm gateway.
+    AllowedValues:
+      - t3.xlarge
+      - t3.2xlarge
+      - m6i.2xlarge
+      - m6i.4xlarge
+      - g5.xlarge
+      - g5.2xlarge
+      - g5.4xlarge
+
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: >
+      Existing EC2 KeyPair for SSH access. Create one at
+      EC2 -> Network and Security -> Key Pairs before launching this stack.
+
+  AllowedSshCidr:
+    Type: String
+    Default: 0.0.0.0/0
+    Description: >
+      CIDR block allowed to SSH (port 22) to the gateway. Default is
+      open to the world; tighten to your office IP range for production.
+    AllowedPattern: '^(\d{1,3}\.){3}\d{1,3}/\d{1,2}$'
+
+  AllowedHttpsCidr:
+    Type: String
+    Default: 0.0.0.0/0
+    Description: >
+      CIDR block allowed to hit the gateway HTTPS endpoint (port 443).
+      Default open; tighten to VPC peers or known clients in production.
+    AllowedPattern: '^(\d{1,3}\.){3}\d{1,3}/\d{1,2}$'
+
+  LatestAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/canonical/ubuntu/server/22.04/stable/current/amd64/hvm/ebs-gp2/ami-id
+    Description: >
+      Resolved at deploy time from the public SSM parameter for the
+      latest Ubuntu 22.04 LTS AMI in the chosen region.
+
+# -------------------------------------------------------------------
+# Mappings
+# -------------------------------------------------------------------
+Mappings:
+
+  RegionDefaults:
+    us-east-1:
+      ArtifactBucketSuffix: 'use1'
+    us-west-2:
+      ArtifactBucketSuffix: 'usw2'
+    eu-west-1:
+      ArtifactBucketSuffix: 'euw1'
+    ap-southeast-1:
+      ArtifactBucketSuffix: 'apse1'
+    ap-northeast-1:
+      ArtifactBucketSuffix: 'apne1'
+
+# -------------------------------------------------------------------
+# Conditions
+# -------------------------------------------------------------------
+Conditions:
+
+  HasTeacherKey: !Not [!Equals [!Ref TeacherAPIKey, '']]
+
+# -------------------------------------------------------------------
+# Resources
+# -------------------------------------------------------------------
+Resources:
+
+  # ---------- Networking ----------
+  KolmVpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.42.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-vpc'
+        - Key: kolm.namespace
+          Value: !Ref Namespace
+
+  KolmPublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref KolmVpc
+      CidrBlock: 10.42.1.0/24
+      MapPublicIpOnLaunch: true
+      AvailabilityZone: !Select [0, !GetAZs '']
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-public-subnet'
+
+  KolmInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-igw'
+
+  KolmGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref KolmVpc
+      InternetGatewayId: !Ref KolmInternetGateway
+
+  KolmRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref KolmVpc
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-rt'
+
+  KolmDefaultRoute:
+    Type: AWS::EC2::Route
+    DependsOn: KolmGatewayAttachment
+    Properties:
+      RouteTableId: !Ref KolmRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref KolmInternetGateway
+
+  KolmSubnetRouteAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref KolmRouteTable
+      SubnetId: !Ref KolmPublicSubnet
+
+  # ---------- Security ----------
+  KolmGatewaySg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Inbound rules for the kolm gateway
+      VpcId: !Ref KolmVpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref AllowedSshCidr
+          Description: SSH from operator CIDR
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: !Ref AllowedHttpsCidr
+          Description: HTTPS gateway endpoint
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: !Ref AllowedHttpsCidr
+          Description: HTTP for ACME challenge + redirect to HTTPS
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-gateway-sg'
+
+  # ---------- IAM ----------
+  KolmInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${AWS::StackName}-instance-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      Policies:
+        - PolicyName: artifact-bucket-rw
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub 'arn:aws:s3:::${ArtifactBucket}'
+                  - !Sub 'arn:aws:s3:::${ArtifactBucket}/*'
+        - PolicyName: cloudwatch-logs-write
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - logs:DescribeLogStreams
+                Resource:
+                  - !GetAtt KolmAuditLogGroup.Arn
+                  - !GetAtt KolmOperatorLogGroup.Arn
+        - PolicyName: ssm-parameter-read
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                Resource:
+                  - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/kolm/${AWS::StackName}/*'
+
+  KolmInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Sub '${AWS::StackName}-instance-profile'
+      Roles:
+        - !Ref KolmInstanceRole
+
+  # ---------- Storage ----------
+  ArtifactBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub
+        - 'kolm-artifacts-${Suffix}-${AWS::AccountId}'
+        - Suffix: !FindInMap [RegionDefaults, !Ref 'AWS::Region', ArtifactBucketSuffix]
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: expire-old-versions
+            Status: Enabled
+            NoncurrentVersionExpirationInDays: 90
+      Tags:
+        - Key: kolm.namespace
+          Value: !Ref Namespace
+
+  # ---------- Logs ----------
+  KolmAuditLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/kolm/${AWS::StackName}/audit'
+      RetentionInDays: 365
+
+  KolmOperatorLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/kolm/${AWS::StackName}/operator'
+      RetentionInDays: 30
+
+  # ---------- Secrets ----------
+  KolmApiKeyParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/kolm/${AWS::StackName}/api-key'
+      Type: String
+      Value: !Ref KolmAPIKey
+      Description: >
+        kolm Pro API key. CloudFormation cannot create SecureString
+        parameters directly; rotate to SecureString post-deploy via
+        AWS CLI for production hardening.
+      Tags:
+        kolm.namespace: !Ref Namespace
+
+  KolmTeacherKeyParam:
+    Type: AWS::SSM::Parameter
+    Condition: HasTeacherKey
+    Properties:
+      Name: !Sub '/kolm/${AWS::StackName}/teacher-key'
+      Type: String
+      Value: !Ref TeacherAPIKey
+      Description: Teacher-model API key (Anthropic / OpenAI / kolm distill).
+
+  # ---------- Compute ----------
+  KolmGatewayInstance:
+    Type: AWS::EC2::Instance
+    DependsOn:
+      - KolmApiKeyParam
+    Properties:
+      ImageId: !Ref LatestAmiId
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyName
+      IamInstanceProfile: !Ref KolmInstanceProfile
+      SubnetId: !Ref KolmPublicSubnet
+      SecurityGroupIds:
+        - !Ref KolmGatewaySg
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            VolumeSize: 100
+            VolumeType: gp3
+            Encrypted: true
+            DeleteOnTermination: true
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          set -euxo pipefail
+          export DEBIAN_FRONTEND=noninteractive
+
+          # Base packages
+          apt-get update
+          apt-get install -y curl jq unzip ca-certificates awscli
+
+          # Node 20 LTS (kolm runtime)
+          curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+          apt-get install -y nodejs
+
+          # Kolm install
+          mkdir -p /opt/kolm /var/lib/kolm /var/log/kolm
+          npm install -g kolm@latest || npm install -g github:sneaky-hippo/kolmogorov-stack
+
+          # Fetch API key from SSM (re-fetched each boot for rotation)
+          KOLM_API_KEY=$(aws ssm get-parameter \
+            --region ${AWS::Region} \
+            --name /kolm/${AWS::StackName}/api-key \
+            --query 'Parameter.Value' --output text)
+
+          # Environment file
+          cat > /etc/kolm/env <<EOF
+          KOLM_API_KEY=$KOLM_API_KEY
+          KOLM_NAMESPACE=${Namespace}
+          KOLM_DATA_DIR=/var/lib/kolm
+          KOLM_ARTIFACT_BUCKET=${ArtifactBucket}
+          KOLM_AUDIT_LOG_GROUP=/kolm/${AWS::StackName}/audit
+          KOLM_OPERATOR_LOG_GROUP=/kolm/${AWS::StackName}/operator
+          AWS_DEFAULT_REGION=${AWS::Region}
+          EOF
+          chmod 600 /etc/kolm/env
+
+          # systemd unit
+          cat > /etc/systemd/system/kolm-gateway.service <<'UNIT'
+          [Unit]
+          Description=kolm.ai gateway
+          After=network-online.target
+          Wants=network-online.target
+
+          [Service]
+          Type=simple
+          EnvironmentFile=/etc/kolm/env
+          ExecStart=/usr/bin/kolm gateway --port 443
+          Restart=always
+          RestartSec=5
+          StandardOutput=append:/var/log/kolm/gateway.log
+          StandardError=append:/var/log/kolm/gateway.err
+
+          [Install]
+          WantedBy=multi-user.target
+          UNIT
+
+          systemctl daemon-reload
+          systemctl enable kolm-gateway
+          systemctl start kolm-gateway
+
+          # CloudWatch agent (audit + operator stream)
+          curl -fsSL https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb \
+            -o /tmp/amazon-cloudwatch-agent.deb
+          dpkg -i /tmp/amazon-cloudwatch-agent.deb || true
+
+          /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
+            -a fetch-config -m ec2 -c file:/etc/kolm/cloudwatch.json -s || true
+
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-gateway'
+        - Key: kolm.namespace
+          Value: !Ref Namespace
+        - Key: kolm.role
+          Value: gateway
+
+# -------------------------------------------------------------------
+# Outputs
+# -------------------------------------------------------------------
+Outputs:
+
+  GatewayURL:
+    Description: HTTPS endpoint of the kolm gateway.
+    Value: !Sub 'https://${KolmGatewayInstance.PublicDnsName}'
+    Export:
+      Name: !Sub '${AWS::StackName}-GatewayURL'
+
+  GatewayPublicIP:
+    Description: Public IPv4 address of the gateway instance.
+    Value: !GetAtt KolmGatewayInstance.PublicIp
+
+  ArtifactBucket:
+    Description: S3 bucket holding signed .kolm artifacts.
+    Value: !Ref ArtifactBucket
+    Export:
+      Name: !Sub '${AWS::StackName}-ArtifactBucket'
+
+  InstanceRoleArn:
+    Description: IAM role attached to the gateway instance.
+    Value: !GetAtt KolmInstanceRole.Arn
+
+  AuditLogGroup:
+    Description: CloudWatch log group for audit events.
+    Value: !Ref KolmAuditLogGroup
+
+  OperatorLogGroup:
+    Description: CloudWatch log group for operator telemetry.
+    Value: !Ref KolmOperatorLogGroup
+
+  NamespaceTag:
+    Description: kolm namespace this stack writes to.
+    Value: !Ref Namespace

@@ -1,0 +1,1609 @@
+{
+  "schema_version": "kolm-product-math-frontier-1",
+  "updated_at": "2026-05-23",
+  "purpose": "Algorithmic and mathematical frontier map for making Kolm's compiler, distillation, quantization, runtime, evaluation, privacy, registry, device, and agent surfaces stronger than generic wrappers or fine-tuning dashboards.",
+  "tracked_metrics": [
+    "quality",
+    "latency",
+    "cost",
+    "portability",
+    "proof",
+    "security",
+    "enterprise",
+    "dx",
+    "conversion"
+  ],
+  "categories": [
+    "quantization",
+    "compilation",
+    "distillation",
+    "serving",
+    "evaluation",
+    "privacy",
+    "federated-learning",
+    "device-runtime",
+    "registry-ranking",
+    "agent-tools"
+  ],
+  "sources": [
+    {
+      "id": "gptq",
+      "url": "https://arxiv.org/abs/2210.17323",
+      "type": "paper",
+      "area": "quantization",
+      "lesson": "Approximate second-order sensitivity lets post-training quantization choose safer rounding decisions."
+    },
+    {
+      "id": "awq",
+      "url": "https://arxiv.org/abs/2306.00978",
+      "type": "paper",
+      "area": "quantization",
+      "lesson": "Activation-aware salient weight preservation makes low-bit quantization more robust for LLMs."
+    },
+    {
+      "id": "smoothquant",
+      "url": "https://arxiv.org/abs/2211.10438",
+      "type": "paper",
+      "area": "quantization",
+      "lesson": "Activation outliers can be migrated into weights so weight-and-activation quantization becomes more hardware-friendly."
+    },
+    {
+      "id": "quarot",
+      "url": "https://arxiv.org/abs/2404.00456",
+      "type": "paper",
+      "area": "quantization",
+      "lesson": "Orthogonal rotations can reduce outliers and make 4-bit inference safer without changing model function in full precision."
+    },
+    {
+      "id": "quip-sharp",
+      "url": "https://arxiv.org/abs/2402.04396",
+      "type": "paper",
+      "area": "quantization",
+      "lesson": "Incoherence processing and lattice codebooks improve extreme low-bit quantization."
+    },
+    {
+      "id": "aqlm",
+      "url": "https://arxiv.org/abs/2401.06118",
+      "type": "paper",
+      "area": "quantization",
+      "lesson": "Additive codebooks are a serious path for sub-3-bit model compression when normal scalar quantization collapses."
+    },
+    {
+      "id": "kivi",
+      "url": "https://arxiv.org/abs/2402.02750",
+      "type": "paper",
+      "area": "serving",
+      "lesson": "KV cache quantization can be asymmetric and tuning-free, reducing long-context memory pressure."
+    },
+    {
+      "id": "kvquant",
+      "url": "https://arxiv.org/abs/2401.18079",
+      "type": "paper",
+      "area": "serving",
+      "lesson": "Long-context inference is dominated by KV memory, so KV quantization must be a first-class runtime policy."
+    },
+    {
+      "id": "flashattention",
+      "url": "https://arxiv.org/abs/2205.14135",
+      "type": "paper",
+      "area": "serving",
+      "lesson": "IO-aware tiling matters as much as arithmetic count for exact attention."
+    },
+    {
+      "id": "flashattention2",
+      "url": "https://arxiv.org/abs/2307.08691",
+      "type": "paper",
+      "area": "serving",
+      "lesson": "Parallelism and work partitioning decide realized attention throughput on GPU."
+    },
+    {
+      "id": "pagedattention",
+      "url": "https://arxiv.org/abs/2309.06180",
+      "type": "paper",
+      "area": "serving",
+      "lesson": "Paged KV memory management turns serving into an operating-systems scheduling problem."
+    },
+    {
+      "id": "sglang",
+      "url": "https://arxiv.org/abs/2312.07104",
+      "type": "paper",
+      "area": "serving",
+      "lesson": "Prefix reuse and structured generation need runtime-level scheduling, not only prompt engineering."
+    },
+    {
+      "id": "medusa",
+      "url": "https://arxiv.org/abs/2401.10774",
+      "type": "paper",
+      "area": "serving",
+      "lesson": "Multiple decoding heads can draft several tokens in parallel and verify them with tree attention."
+    },
+    {
+      "id": "eagle",
+      "url": "https://arxiv.org/abs/2401.15077",
+      "type": "paper",
+      "area": "serving",
+      "lesson": "Feature-level speculative sampling can reduce autoregressive latency while preserving target-model distribution."
+    },
+    {
+      "id": "specinfer",
+      "url": "https://arxiv.org/abs/2305.09781",
+      "type": "paper",
+      "area": "serving",
+      "lesson": "Tree-based speculative inference needs parallel verification and explicit acceptance accounting."
+    },
+    {
+      "id": "mlir",
+      "url": "https://arxiv.org/abs/2002.11054",
+      "type": "paper",
+      "area": "compilation",
+      "lesson": "Multi-level IRs and dialects reduce the cost of supporting many compiler targets."
+    },
+    {
+      "id": "tvm",
+      "url": "https://arxiv.org/abs/1802.04799",
+      "type": "paper",
+      "area": "compilation",
+      "lesson": "Operator fusion, memory latency hiding, and hardware mapping need automated schedule search."
+    },
+    {
+      "id": "tvm-docs",
+      "url": "https://tvm.apache.org/docs/",
+      "type": "official-doc",
+      "area": "compilation",
+      "lesson": "Production compiler UX needs explicit tensor program abstractions and meta-schedule/autotuning hooks."
+    },
+    {
+      "id": "iree",
+      "url": "https://iree.dev/guides/deployment-configurations/",
+      "type": "official-doc",
+      "area": "compilation",
+      "lesson": "Deployment configurations must connect input IR, target backend, runtime driver, and binary artifact."
+    },
+    {
+      "id": "onnx-runtime-eps",
+      "url": "https://onnxruntime.ai/docs/execution-providers/",
+      "type": "official-doc",
+      "area": "device-runtime",
+      "lesson": "Execution providers are the practical abstraction boundary for choosing CPU, CUDA, TensorRT, OpenVINO, DirectML, CoreML, QNN, and WebGPU-like targets."
+    },
+    {
+      "id": "minillm",
+      "url": "https://arxiv.org/abs/2306.08543",
+      "type": "paper",
+      "area": "distillation",
+      "lesson": "Reverse KL can be better than forward KL for generative students because it avoids over-covering low-probability teacher regions."
+    },
+    {
+      "id": "gkd",
+      "url": "https://arxiv.org/abs/2306.06629",
+      "type": "paper",
+      "area": "distillation",
+      "lesson": "Autoregressive distillation must address student-generated distribution mismatch."
+    },
+    {
+      "id": "distill-step-by-step",
+      "url": "https://arxiv.org/abs/2305.02301",
+      "type": "paper",
+      "area": "distillation",
+      "lesson": "Rationales can make smaller students more data-efficient than label-only fine-tuning or task distillation."
+    },
+    {
+      "id": "dpo",
+      "url": "https://arxiv.org/abs/2305.18290",
+      "type": "paper",
+      "area": "distillation",
+      "lesson": "Preference optimization can be expressed as a stable direct classification-style objective rather than a full RL loop."
+    },
+    {
+      "id": "conformal",
+      "url": "https://arxiv.org/abs/1604.04173",
+      "type": "paper",
+      "area": "evaluation",
+      "lesson": "Distribution-free calibration can attach finite-sample risk control to model outputs under exchangeability."
+    },
+    {
+      "id": "doubly-robust-ope",
+      "url": "https://arxiv.org/abs/1907.09623",
+      "type": "paper",
+      "area": "evaluation",
+      "lesson": "Doubly robust off-policy estimators reduce variance and bias when replaying policy changes from logged data."
+    },
+    {
+      "id": "opentelemetry-genai",
+      "url": "https://opentelemetry.io/docs/specs/semconv/gen-ai/gen-ai-spans/",
+      "type": "official-doc",
+      "area": "evaluation",
+      "lesson": "AI traces need standard span attributes for provider, model, usage, tool calls, and content-safety controls."
+    },
+    {
+      "id": "dp-sgd",
+      "url": "https://arxiv.org/abs/1607.00133",
+      "type": "paper",
+      "area": "privacy",
+      "lesson": "Per-example gradient clipping and calibrated Gaussian noise make private training auditable."
+    },
+    {
+      "id": "renyi-dp",
+      "url": "https://arxiv.org/abs/1702.07476",
+      "type": "paper",
+      "area": "privacy",
+      "lesson": "Renyi differential privacy gives a composable accounting language for repeated randomized mechanisms."
+    },
+    {
+      "id": "opacus",
+      "url": "https://opacus.ai/api/",
+      "type": "official-doc",
+      "area": "privacy",
+      "lesson": "Private training needs developer-facing diagnostics around clipping, accumulation, accountant state, and optimizer invariants."
+    },
+    {
+      "id": "fedavg",
+      "url": "https://arxiv.org/abs/1602.05629",
+      "type": "paper",
+      "area": "federated-learning",
+      "lesson": "Local updates plus server averaging reduce communication pressure in decentralized training."
+    },
+    {
+      "id": "secure-aggregation",
+      "url": "https://research.google/pubs/practical-secure-aggregation-for-federated-learning-on-user-held-data/",
+      "type": "official-doc",
+      "area": "federated-learning",
+      "lesson": "Federated learning needs aggregation protocols that hide individual client updates."
+    },
+    {
+      "id": "krum",
+      "url": "https://arxiv.org/abs/1703.02757",
+      "type": "paper",
+      "area": "federated-learning",
+      "lesson": "Byzantine-tolerant aggregation requires explicit assumptions about worker count and adversary budget."
+    },
+    {
+      "id": "sigstore",
+      "url": "https://docs.sigstore.dev/quickstart/quickstart-cosign/",
+      "type": "official-doc",
+      "area": "agent-tools",
+      "lesson": "Public artifact trust should include transparency-log-backed signing in addition to local offline verification."
+    }
+  ],
+  "math_primitives": [
+    {
+      "id": "second-order-block-quantization",
+      "category": "quantization",
+      "source_refs": [
+        "gptq"
+      ],
+      "objective": "Minimize blockwise reconstruction error using an approximate inverse-Hessian sensitivity matrix.",
+      "kolm_use": "Score per-layer rounding risk before emitting quantized .kolm payloads."
+    },
+    {
+      "id": "activation-aware-saliency-scaling",
+      "category": "quantization",
+      "source_refs": [
+        "awq"
+      ],
+      "objective": "Protect channels whose activation-weight product dominates output error.",
+      "kolm_use": "Choose which channels get scale protection for extraction, classifier, and tool-call artifacts."
+    },
+    {
+      "id": "outlier-smoothing-rotation",
+      "category": "quantization",
+      "source_refs": [
+        "smoothquant",
+        "quarot"
+      ],
+      "objective": "Reduce activation outliers through smoothing or function-preserving rotations before low-bit lowering.",
+      "kolm_use": "Generate target-specific transforms for W8A8, W4A4, and mobile/NPU runtime paths."
+    },
+    {
+      "id": "lattice-additive-codebooks",
+      "category": "quantization",
+      "source_refs": [
+        "quip-sharp",
+        "aqlm"
+      ],
+      "objective": "Represent weights with incoherent lattice or additive codebook assignments under a memory budget.",
+      "kolm_use": "Offer extreme-compression mode only when task calibration proves safe."
+    },
+    {
+      "id": "kv-cache-adaptive-quantization",
+      "category": "serving",
+      "source_refs": [
+        "kivi",
+        "kvquant"
+      ],
+      "objective": "Minimize KV cache bytes per generated token subject to long-context quality loss and runtime support.",
+      "kolm_use": "Make long-context artifact receipts include KV cache policy and observed context window."
+    },
+    {
+      "id": "io-aware-attention-tiling",
+      "category": "serving",
+      "source_refs": [
+        "flashattention",
+        "flashattention2"
+      ],
+      "objective": "Reduce HBM traffic and improve parallel work partitioning for exact attention kernels.",
+      "kolm_use": "Decide whether a runtime target can meet p95 latency without changing model quality."
+    },
+    {
+      "id": "paged-prefix-memory-scheduling",
+      "category": "serving",
+      "source_refs": [
+        "pagedattention",
+        "sglang"
+      ],
+      "objective": "Allocate KV blocks and reusable prefixes to maximize accepted throughput under memory pressure.",
+      "kolm_use": "Plan vLLM/SGLang/TGI deployment manifests from workload trace shape."
+    },
+    {
+      "id": "speculative-tree-verification",
+      "category": "serving",
+      "source_refs": [
+        "medusa",
+        "eagle",
+        "specinfer"
+      ],
+      "objective": "Draft token trees cheaply and verify acceptance with the target model distribution.",
+      "kolm_use": "Attach lossless speculative decoding policy and acceptance receipts to runtime plans."
+    },
+    {
+      "id": "multi-level-ir-lowering",
+      "category": "compilation",
+      "source_refs": [
+        "mlir",
+        "iree"
+      ],
+      "objective": "Preserve semantic contracts while lowering through dialects to device-specific runtime payloads.",
+      "kolm_use": "Make every .kolm target prove its input dialect, lowering path, runtime driver, and verifier probe."
+    },
+    {
+      "id": "schedule-search-autotuning",
+      "category": "compilation",
+      "source_refs": [
+        "tvm",
+        "tvm-docs"
+      ],
+      "objective": "Search schedules, fusion decisions, memory layouts, and tensorization choices against measured target latency.",
+      "kolm_use": "Compile target-specific kernels only when an autotune trace and fallback exist."
+    },
+    {
+      "id": "reverse-kl-on-policy-distillation",
+      "category": "distillation",
+      "source_refs": [
+        "minillm",
+        "gkd"
+      ],
+      "objective": "Minimize reverse-KL or on-policy divergence so the student avoids low-probability teacher regions and deployment mismatch.",
+      "kolm_use": "Select distillation losses by task, teacher access, and student capacity."
+    },
+    {
+      "id": "rationale-and-preference-distillation",
+      "category": "distillation",
+      "source_refs": [
+        "distill-step-by-step",
+        "dpo"
+      ],
+      "objective": "Combine rationale supervision with direct preference losses when labels alone under-specify behavior.",
+      "kolm_use": "Build label-next queues that ask for rationales, pairwise preferences, or hard labels based on expected K-score lift."
+    },
+    {
+      "id": "conformal-risk-calibration",
+      "category": "evaluation",
+      "source_refs": [
+        "conformal"
+      ],
+      "objective": "Calibrate pass/fail or abstention thresholds to a finite-sample risk target.",
+      "kolm_use": "Turn K-score from a scalar into a risk-controlled quality gate with abstention zones."
+    },
+    {
+      "id": "doubly-robust-shadow-evaluation",
+      "category": "evaluation",
+      "source_refs": [
+        "doubly-robust-ope",
+        "opentelemetry-genai"
+      ],
+      "objective": "Estimate policy or artifact lift from logged traces using behavior propensities and outcome models.",
+      "kolm_use": "Let customers evaluate a new routing/artifact policy before exposing users to it."
+    },
+    {
+      "id": "privacy-budget-composition",
+      "category": "privacy",
+      "source_refs": [
+        "dp-sgd",
+        "renyi-dp",
+        "opacus"
+      ],
+      "objective": "Compose privacy loss across training steps and exported aggregates while enforcing clipping and noise invariants.",
+      "kolm_use": "Make differential privacy settings auditable instead of a checkbox."
+    },
+    {
+      "id": "secure-and-robust-federated-aggregation",
+      "category": "federated-learning",
+      "source_refs": [
+        "fedavg",
+        "secure-aggregation",
+        "krum"
+      ],
+      "objective": "Aggregate client updates under communication, privacy, dropout, and Byzantine-adversary constraints.",
+      "kolm_use": "Upgrade federated learning from foundation state to a proof-carrying enterprise workflow."
+    },
+    {
+      "id": "proof-carrying-artifact-signing",
+      "category": "agent-tools",
+      "source_refs": [
+        "sigstore",
+        "opentelemetry-genai"
+      ],
+      "objective": "Bind executable artifacts, tool calls, traces, and signatures into a verifiable supply chain.",
+      "kolm_use": "Make compiled MCP/agent tools auditable by registry, enterprise admin, and offline verifier."
+    }
+  ],
+  "inventions": [
+    {
+      "id": "w596-kolm-q-lagrangian",
+      "name": "Kolm-Q Lagrangian Quantizer",
+      "category": "quantization",
+      "portfolio_invention_id": "kolm-q-oracle",
+      "primitive_refs": [
+        "second-order-block-quantization",
+        "activation-aware-saliency-scaling",
+        "outlier-smoothing-rotation",
+        "lattice-additive-codebooks"
+      ],
+      "source_refs": [
+        "gptq",
+        "awq",
+        "smoothquant",
+        "quarot",
+        "quip-sharp",
+        "aqlm"
+      ],
+      "journeys": [
+        "compile-verify",
+        "runtime-inference",
+        "compute-cloud",
+        "devices-fleet"
+      ],
+      "dimensions": [
+        "artifact-runtime",
+        "compute-target",
+        "proof-mode",
+        "deployment-mode"
+      ],
+      "readiness": [
+        "export-quantize-targets",
+        "compute-openvino-qnn",
+        "benchmarking-infra",
+        "runtime-telemetry-opt-in"
+      ],
+      "metrics": [
+        "quality",
+        "latency",
+        "cost",
+        "portability",
+        "proof"
+      ],
+      "objective": "minimize E_holdout[loss(q(theta), x)] + lambda_mem bytes(q) + lambda_lat p95(q,target) + lambda_risk max(0, k_floor - k_score(q))",
+      "invariant": "No quantized artifact is promoted unless held-out K-score, row hashes, model hash, calibration hash, and runtime target are all recorded.",
+      "implementation_files": [
+        "src/quantization-oracle.js",
+        "src/quality-calibration.js",
+        "src/runtime-planner.js",
+        "scripts/quantization-oracle.mjs",
+        "docs/quantization-oracle.md",
+        "tests/wave596-kolm-q-lagrangian.test.js"
+      ],
+      "build_steps": [
+        "Add a quantization objective builder that accepts quality floor, memory ceiling, latency target, target runtime, and model family.",
+        "Score candidate methods using second-order block risk, activation saliency, outlier transform feasibility, and codebook availability.",
+        "Run calibration fixtures and record calibration hash before proposing a winner.",
+        "Emit fallback candidates with explicit rejection reasons for unsupported targets.",
+        "Write quantization receipts with method, bits, transforms, candidate scores, and holdout deltas.",
+        "Expose dry-run and JSON modes in CLI, API, account, and TUI surfaces."
+      ],
+      "acceptance_tests": [
+        "A CUDA 7B extraction task selects AWQ/GPTQ only when K-score degradation stays under threshold.",
+        "A mobile QNN target rejects unsupported SmoothQuant/FP8 paths and returns ONNX/QNN-safe alternatives.",
+        "An extreme 2-bit request returns AQLM/QuIP only with explicit external-toolchain and benchmark-data caveats.",
+        "Receipts include calibration hash, model hash, target runtime, and all rejected candidates."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-math-frontier.cjs --invention=w596-kolm-q-lagrangian --summary",
+        "expected": [
+          "quantization category covered",
+          "quality/latency/cost/proof lifted",
+          "benchmarking-infra gate mapped",
+          "promotion invariant present"
+        ]
+      },
+      "expected_metric_lift": {
+        "quality": 0.07,
+        "latency": 0.09,
+        "cost": 0.08,
+        "portability": 0.05,
+        "proof": 0.04
+      }
+    },
+    {
+      "id": "w596-kv-context-compressor",
+      "name": "KV Context Compressor",
+      "category": "serving",
+      "portfolio_invention_id": "device-fit-autopilot",
+      "primitive_refs": [
+        "kv-cache-adaptive-quantization",
+        "paged-prefix-memory-scheduling"
+      ],
+      "source_refs": [
+        "kivi",
+        "kvquant",
+        "pagedattention",
+        "sglang"
+      ],
+      "journeys": [
+        "runtime-inference",
+        "compute-cloud",
+        "devices-fleet",
+        "compile-verify"
+      ],
+      "dimensions": [
+        "artifact-runtime",
+        "compute-target",
+        "deployment-mode",
+        "proof-mode"
+      ],
+      "readiness": [
+        "runtime-local-artifact",
+        "runtime-edge",
+        "runtime-telemetry-opt-in",
+        "model-routing"
+      ],
+      "metrics": [
+        "latency",
+        "cost",
+        "quality",
+        "portability",
+        "proof"
+      ],
+      "objective": "minimize bytes_per_token(K,V,context) subject to acceptance_quality >= floor and p95 <= target_ms",
+      "invariant": "KV cache policy is runtime-scoped; the compiler cannot mark it portable unless the target engine supports equivalent cache layout and quantization.",
+      "implementation_files": [
+        "src/runtime-planner.js",
+        "src/runtime-policy.js",
+        "src/compute/registry.json",
+        "src/completions-api.js",
+        "cli/kolm.js",
+        "tests/wave596-kv-context-compressor.test.js"
+      ],
+      "build_steps": [
+        "Add KV cache policy descriptors for uncompressed, int8, int4, int2, paged, and prefix-reuse modes.",
+        "Score context workloads by prompt length, generated length, prefix reuse, batch size, and memory ceiling.",
+        "Attach runtime support metadata for vLLM, SGLang, TGI, TensorRT-LLM, llama.cpp, and browser targets.",
+        "Emit receipts with context length, KV method, page size, prefix reuse policy, and observed fallback.",
+        "Add warnings when long-context claims rely on a runtime that is not the selected deployment target.",
+        "Expose a dry-run planner for account, CLI, and TUI runtime planning."
+      ],
+      "acceptance_tests": [
+        "A long-context workload selects KV compression only when quality risk stays below configured loss.",
+        "A browser target rejects unsupported KV cache modes and offers a cloud fallback.",
+        "A repeated-prefix workload recommends SGLang/prefix cache or vLLM paged memory with reason codes.",
+        "Inference receipts include context length and KV cache policy."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-math-frontier.cjs --invention=w596-kv-context-compressor --summary",
+        "expected": [
+          "serving category covered",
+          "runtime-inference journey covered",
+          "latency and cost lifted",
+          "KV invariant present"
+        ]
+      },
+      "expected_metric_lift": {
+        "latency": 0.08,
+        "cost": 0.06,
+        "quality": 0.03,
+        "portability": 0.04,
+        "proof": 0.04
+      }
+    },
+    {
+      "id": "w596-lossless-speculative-runtime",
+      "name": "Lossless Speculative Runtime",
+      "category": "serving",
+      "portfolio_invention_id": "device-fit-autopilot",
+      "primitive_refs": [
+        "speculative-tree-verification",
+        "io-aware-attention-tiling"
+      ],
+      "source_refs": [
+        "medusa",
+        "eagle",
+        "specinfer",
+        "flashattention",
+        "flashattention2"
+      ],
+      "journeys": [
+        "runtime-inference",
+        "compute-cloud",
+        "models-backbones",
+        "compile-verify"
+      ],
+      "dimensions": [
+        "artifact-runtime",
+        "compute-target",
+        "proof-mode",
+        "deployment-mode"
+      ],
+      "readiness": [
+        "runtime-local-artifact",
+        "runtime-telemetry-opt-in",
+        "streaming",
+        "fallback-chains"
+      ],
+      "metrics": [
+        "latency",
+        "cost",
+        "quality",
+        "proof",
+        "dx"
+      ],
+      "objective": "maximize accepted_tokens_per_verify_step while preserving target_model_distribution and streaming order",
+      "invariant": "Speculative decoding claims must record draft source, acceptance rate, rejected branches, and target-model verification.",
+      "implementation_files": [
+        "src/speculative-runtime.js",
+        "src/runtime-policy.js",
+        "src/completions-api.js",
+        "src/streaming-contract.js",
+        "cli/kolm.js",
+        "tests/wave596-lossless-speculative-runtime.test.js"
+      ],
+      "build_steps": [
+        "Define speculative policies for draft-model, Medusa-style heads, EAGLE-style feature draft, and disabled mode.",
+        "Add acceptance accounting to streaming and non-streaming completions.",
+        "Expose policy constraints for deterministic artifacts where speculative mode must be disabled.",
+        "Record accepted and rejected token tree statistics in runtime telemetry.",
+        "Fallback to normal decoding when acceptance rate drops below the configured floor.",
+        "Add receipt fields for draft method, verifier model, and acceptance proof."
+      ],
+      "acceptance_tests": [
+        "Speculative mode does not change deterministic artifact outputs.",
+        "Streaming emits tokens in verified order only.",
+        "Low acceptance rate triggers fallback and emits diagnostic telemetry.",
+        "Receipts disclose draft method and target verification."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-math-frontier.cjs --invention=w596-lossless-speculative-runtime --summary",
+        "expected": [
+          "serving category covered",
+          "streaming readiness covered",
+          "latency lift present",
+          "lossless invariant present"
+        ]
+      },
+      "expected_metric_lift": {
+        "latency": 0.09,
+        "cost": 0.05,
+        "quality": 0.02,
+        "proof": 0.04,
+        "dx": 0.03
+      }
+    },
+    {
+      "id": "w596-ir-autotune-compiler",
+      "name": "IR Autotune Compiler",
+      "category": "compilation",
+      "portfolio_invention_id": "kolm-ir-autotarget",
+      "primitive_refs": [
+        "multi-level-ir-lowering",
+        "schedule-search-autotuning"
+      ],
+      "source_refs": [
+        "mlir",
+        "tvm",
+        "tvm-docs",
+        "iree"
+      ],
+      "journeys": [
+        "compile-verify",
+        "runtime-inference",
+        "devices-fleet",
+        "multimodal-tokenization"
+      ],
+      "dimensions": [
+        "artifact-runtime",
+        "compute-target",
+        "deployment-mode",
+        "proof-mode"
+      ],
+      "readiness": [
+        "kolm-format-spec",
+        "export-quantize-targets",
+        "runtime-wasm",
+        "ecosystem-runtime-adoption",
+        "runtime-lts"
+      ],
+      "metrics": [
+        "portability",
+        "latency",
+        "proof",
+        "enterprise",
+        "dx"
+      ],
+      "objective": "minimize measured_runtime_latency(target, schedule) + penalty(unsupported_ops) + penalty(unverified_lowering)",
+      "invariant": "Every compiled target must carry source IR hash, lowering pass list, target backend, runtime version, and fallback path.",
+      "implementation_files": [
+        "src/compile-ir.js",
+        "src/compile-targets.js",
+        "src/lowering-matrix.js",
+        "scripts/verify-lowering-matrix.cjs",
+        "docs/runtime-lowering-matrix.md",
+        "tests/wave596-ir-autotune-compiler.test.js"
+      ],
+      "build_steps": [
+        "Create a Kolm behavior IR for schemas, prompts, tools, adapters, eval gates, and runtime constraints.",
+        "Add target descriptors with accepted input dialects, runtime payload formats, and verifier commands.",
+        "Implement lowering diagnostics for unsupported operators, tokenizers, modalities, and quantization methods.",
+        "Add measured or simulated schedule-search traces per target.",
+        "Record pass list and fallback target in each compiled artifact receipt.",
+        "Publish the matrix through docs, CLI, account, and OpenAPI."
+      ],
+      "acceptance_tests": [
+        "Every artifact-runtime option has a lowering descriptor or an explicit unsupported diagnostic.",
+        "A target compile fails closed when tokenizer or modality is unsupported.",
+        "WASM and third-party runtime support remain package/external gates until proof exists.",
+        "Lowering receipts are stable and hash-addressed."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-math-frontier.cjs --invention=w596-ir-autotune-compiler --summary",
+        "expected": [
+          "compilation category covered",
+          "runtime-wasm and ecosystem gates mapped",
+          "portability/proof lifted",
+          "lowering invariant present"
+        ]
+      },
+      "expected_metric_lift": {
+        "portability": 0.09,
+        "latency": 0.06,
+        "proof": 0.07,
+        "enterprise": 0.04,
+        "dx": 0.04
+      }
+    },
+    {
+      "id": "w596-reverse-kl-distill-forge",
+      "name": "Reverse-KL Distill Forge",
+      "category": "distillation",
+      "portfolio_invention_id": "distill-forge",
+      "primitive_refs": [
+        "reverse-kl-on-policy-distillation",
+        "rationale-and-preference-distillation"
+      ],
+      "source_refs": [
+        "minillm",
+        "gkd",
+        "distill-step-by-step",
+        "dpo"
+      ],
+      "journeys": [
+        "datasets-labeling",
+        "train-distill",
+        "models-backbones",
+        "compile-verify"
+      ],
+      "dimensions": [
+        "model-provider",
+        "compute-target",
+        "governance-mode",
+        "proof-mode"
+      ],
+      "readiness": [
+        "distill-strategy-oracle",
+        "holdout-independence",
+        "compile-failure-diagnostics",
+        "async-compile-webhooks",
+        "compile-cache"
+      ],
+      "metrics": [
+        "quality",
+        "cost",
+        "proof",
+        "dx",
+        "conversion"
+      ],
+      "objective": "choose argmin_loss in {reverse_kl, on_policy_gkd, rationale_ce, dpo_pairwise} under teacher_access, labels, preferences, and student_capacity",
+      "invariant": "Teacher outputs, rationales, and preferences must preserve train/holdout separation and provenance before they can affect K-score.",
+      "implementation_files": [
+        "src/distill-strategy.js",
+        "src/distill-pipeline.js",
+        "src/distill-preference.js",
+        "src/dataset-workbench.js",
+        "scripts/distill-strategy.mjs",
+        "tests/wave596-reverse-kl-distill-forge.test.js"
+      ],
+      "build_steps": [
+        "Add a loss planner that selects reverse KL, on-policy GKD, rationale supervision, pairwise preference, or no-train.",
+        "Estimate teacher-token cost and student capacity before starting generation.",
+        "Separate rationale rows from answer rows and preserve holdout-only metadata.",
+        "Add preference-pair builder from user corrections and evaluator disagreements.",
+        "Emit a distillation receipt with loss family, teacher model, row hashes, and holdout deltas.",
+        "Expose failure diagnostics when data is too small, noisy, or ambiguous."
+      ],
+      "acceptance_tests": [
+        "A generation task with logits unavailable selects reverse-KL-compatible black-box/on-policy strategy only when supported.",
+        "A reasoning task asks for rationales or pairwise preferences instead of blind SFT.",
+        "Holdout-only rows never enter teacher generation or student training.",
+        "Distill receipts include teacher provenance and selected loss objective."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-math-frontier.cjs --invention=w596-reverse-kl-distill-forge --summary",
+        "expected": [
+          "distillation category covered",
+          "train-distill journey covered",
+          "quality and proof lifted",
+          "holdout invariant present"
+        ]
+      },
+      "expected_metric_lift": {
+        "quality": 0.08,
+        "cost": 0.05,
+        "proof": 0.06,
+        "dx": 0.05,
+        "conversion": 0.04
+      }
+    },
+    {
+      "id": "w596-conformal-k-score",
+      "name": "Conformal K-Score Calibrator",
+      "category": "evaluation",
+      "portfolio_invention_id": "adaptive-eval-lab",
+      "primitive_refs": [
+        "conformal-risk-calibration",
+        "doubly-robust-shadow-evaluation"
+      ],
+      "source_refs": [
+        "conformal",
+        "doubly-robust-ope",
+        "opentelemetry-genai"
+      ],
+      "journeys": [
+        "gateway-capture",
+        "privacy-lake",
+        "datasets-labeling",
+        "compile-verify",
+        "enterprise-governance"
+      ],
+      "dimensions": [
+        "proof-mode",
+        "governance-mode",
+        "storage-plane",
+        "privacy-mode"
+      ],
+      "readiness": [
+        "k-score-calibration",
+        "event-lake-schema",
+        "opentelemetry",
+        "quality-scoring",
+        "evals-ab",
+        "shadow-mode"
+      ],
+      "metrics": [
+        "quality",
+        "proof",
+        "enterprise",
+        "dx",
+        "conversion"
+      ],
+      "objective": "calibrate threshold tau so empirical_miscoverage <= alpha, then estimate policy lift with doubly_robust(trace_log)",
+      "invariant": "K-score confidence, abstention, and policy-lift claims must include calibration set hash and logged-policy metadata.",
+      "implementation_files": [
+        "src/kscore.js",
+        "src/quality-calibration.js",
+        "src/event-store.js",
+        "src/otel.js",
+        "scripts/bench-quality-calibration.mjs",
+        "tests/wave596-conformal-k-score.test.js"
+      ],
+      "build_steps": [
+        "Extend K-score output with calibrated confidence bands and abstention zones.",
+        "Record calibration set hash, alpha, threshold, and empirical coverage.",
+        "Add trace fields for behavior policy, candidate policy, outcome, and propensity where available.",
+        "Build a doubly robust replay estimator for routing/artifact changes.",
+        "Export replay and calibration artifacts to external eval systems.",
+        "Fail public claims when calibration evidence is absent or stale."
+      ],
+      "acceptance_tests": [
+        "A low-confidence artifact returns abstain or collect-more-data rather than production-ready.",
+        "Calibration output includes alpha, calibration hash, threshold, and observed coverage.",
+        "Shadow evaluation reports confidence interval and missing propensity diagnostics.",
+        "OTEL exports do not leak raw content under zero-retention policy."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-math-frontier.cjs --invention=w596-conformal-k-score --summary",
+        "expected": [
+          "evaluation category covered",
+          "K-score calibration mapped",
+          "quality/proof/enterprise lifted",
+          "calibration invariant present"
+        ]
+      },
+      "expected_metric_lift": {
+        "quality": 0.07,
+        "proof": 0.08,
+        "enterprise": 0.05,
+        "dx": 0.04,
+        "conversion": 0.03
+      }
+    },
+    {
+      "id": "w596-private-federated-optimizer",
+      "name": "Private Federated Optimizer",
+      "category": "privacy",
+      "portfolio_invention_id": "privacy-membrane-max",
+      "primitive_refs": [
+        "privacy-budget-composition",
+        "secure-and-robust-federated-aggregation"
+      ],
+      "source_refs": [
+        "dp-sgd",
+        "renyi-dp",
+        "opacus",
+        "fedavg",
+        "secure-aggregation"
+      ],
+      "journeys": [
+        "privacy-lake",
+        "train-distill",
+        "enterprise-governance",
+        "compute-cloud"
+      ],
+      "dimensions": [
+        "privacy-mode",
+        "governance-mode",
+        "compute-target",
+        "storage-plane"
+      ],
+      "readiness": [
+        "differential-privacy",
+        "team-capture-rbac",
+        "secrets-management",
+        "compliance-certifications",
+        "cloud-compute-broker"
+      ],
+      "metrics": [
+        "security",
+        "enterprise",
+        "quality",
+        "proof",
+        "conversion"
+      ],
+      "objective": "maximize utility(theta) subject to epsilon_total <= budget, delta <= target, secure_aggregation = verified, and tenant_isolation = true",
+      "invariant": "Private/federated training cannot claim production privacy unless accountant state, clipping policy, secure aggregation state, and participant receipt hashes exist.",
+      "implementation_files": [
+        "src/privacy-membrane.js",
+        "src/federated-learning.js",
+        "src/team-capture-rbac.js",
+        "src/compliance-certification-packet.js",
+        "cli/kolm.js",
+        "tests/wave596-private-federated-optimizer.test.js"
+      ],
+      "build_steps": [
+        "Add DP accountant descriptors for sample-level and client-level privacy budgets.",
+        "Track clipping norm, noise multiplier, sampling rate, steps, epsilon, delta, and accountant method.",
+        "Connect DP accountant receipts to federated round receipts.",
+        "Require secure aggregation plugin verification before production claim scope changes.",
+        "Expose privacy-budget warnings in CLI, TUI, account, and API responses.",
+        "Keep live compliance certification external while local evidence packets improve."
+      ],
+      "acceptance_tests": [
+        "A DP run without accountant metadata fails closed.",
+        "A federated run without secure aggregation cannot claim verified private aggregation.",
+        "Tenant RBAC blocks cross-tenant participant receipt access.",
+        "Compliance certification remains needs_live_certification without auditor evidence."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-math-frontier.cjs --invention=w596-private-federated-optimizer --summary",
+        "expected": [
+          "privacy category covered",
+          "compliance gate mapped",
+          "security/enterprise/proof lifted",
+          "privacy invariant present"
+        ]
+      },
+      "expected_metric_lift": {
+        "security": 0.08,
+        "enterprise": 0.07,
+        "quality": 0.03,
+        "proof": 0.06,
+        "conversion": 0.04
+      }
+    },
+    {
+      "id": "w596-byzantine-aggregation-receipts",
+      "name": "Byzantine Aggregation Receipts",
+      "category": "federated-learning",
+      "portfolio_invention_id": "receipt-os",
+      "primitive_refs": [
+        "secure-and-robust-federated-aggregation",
+        "proof-carrying-artifact-signing"
+      ],
+      "source_refs": [
+        "krum",
+        "secure-aggregation",
+        "fedavg",
+        "sigstore"
+      ],
+      "journeys": [
+        "enterprise-governance",
+        "train-distill",
+        "compile-verify",
+        "agents-registry"
+      ],
+      "dimensions": [
+        "proof-mode",
+        "governance-mode",
+        "privacy-mode",
+        "deployment-mode"
+      ],
+      "readiness": [
+        "artifact-signing-pipeline",
+        "verified-publishers",
+        "dependency-graphs",
+        "standalone-verify",
+        "compliance-certifications"
+      ],
+      "metrics": [
+        "proof",
+        "security",
+        "enterprise",
+        "quality",
+        "conversion"
+      ],
+      "objective": "select aggregation rule a with valid_adversary_budget(f,n,d) and verifiable receipt chain for all accepted client updates",
+      "invariant": "A robust aggregation receipt must state n, f, rule, client hashes, rejected clients, and assumptions; otherwise it is only foundation-state evidence.",
+      "implementation_files": [
+        "src/federated-learning.js",
+        "src/artifact-signing.js",
+        "src/verifier.js",
+        "src/compliance-certification-packet.js",
+        "docs/kolm-format-v1.md",
+        "tests/wave596-byzantine-aggregation-receipts.test.js"
+      ],
+      "build_steps": [
+        "Extend aggregation receipts with adversary budget and supported-rule metadata.",
+        "Require rule-specific assumptions for FedAvg, coordinate median, trimmed mean, Krum, and secure aggregation.",
+        "Record rejected clients and reason codes.",
+        "Hash and sign aggregation round outputs.",
+        "Expose verifier diagnostics when assumptions are not satisfiable.",
+        "Link aggregation receipt hashes into compiled artifact manifests."
+      ],
+      "acceptance_tests": [
+        "A Krum receipt with invalid f,n relationship fails verification.",
+        "A secure aggregation claim without plugin proof remains not_verified.",
+        "Rejected client updates are disclosed by hash and reason.",
+        "Compiled artifacts include aggregation lineage when trained federated."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-math-frontier.cjs --invention=w596-byzantine-aggregation-receipts --summary",
+        "expected": [
+          "federated-learning category covered",
+          "receipt/proof metrics lifted",
+          "standalone verifier mapped",
+          "aggregation invariant present"
+        ]
+      },
+      "expected_metric_lift": {
+        "proof": 0.07,
+        "security": 0.06,
+        "enterprise": 0.05,
+        "quality": 0.03,
+        "conversion": 0.03
+      }
+    },
+    {
+      "id": "w596-device-energy-scheduler",
+      "name": "Device Energy Scheduler",
+      "category": "device-runtime",
+      "portfolio_invention_id": "device-fit-autopilot",
+      "primitive_refs": [
+        "outlier-smoothing-rotation",
+        "kv-cache-adaptive-quantization",
+        "io-aware-attention-tiling",
+        "multi-level-ir-lowering"
+      ],
+      "source_refs": [
+        "iree",
+        "kvquant",
+        "flashattention",
+        "onnx-runtime-eps",
+        "quarot"
+      ],
+      "journeys": [
+        "devices-fleet",
+        "runtime-inference",
+        "compile-verify",
+        "multimodal-tokenization"
+      ],
+      "dimensions": [
+        "compute-target",
+        "artifact-runtime",
+        "deployment-mode",
+        "privacy-mode"
+      ],
+      "readiness": [
+        "ios-android-sdk",
+        "runtime-wasm",
+        "compute-openvino-qnn",
+        "runtime-local-artifact",
+        "runtime-lts"
+      ],
+      "metrics": [
+        "latency",
+        "cost",
+        "portability",
+        "security",
+        "dx"
+      ],
+      "objective": "minimize alpha*p95 + beta*memory + gamma*energy_per_call subject to offline_policy and K-score floor",
+      "invariant": "Device runtime claims must include device class, memory budget, battery/energy estimate class, runtime version, and fallback target.",
+      "implementation_files": [
+        "src/device-capabilities.js",
+        "src/runtime-planner.js",
+        "src/compile-targets.js",
+        "packages/sdk-swift/Package.swift",
+        "packages/sdk-kotlin/build.gradle.kts",
+        "tests/wave596-device-energy-scheduler.test.js"
+      ],
+      "build_steps": [
+        "Define device profiles for browser, iOS, Android, Apple Silicon, Windows NPU, Intel OpenVINO, Qualcomm QNN, and CPU-only.",
+        "Estimate memory and energy class from model size, quantization, context, and runtime.",
+        "Jointly select runtime, quantization, and KV cache policy.",
+        "Generate SDK and CLI integration snippets per target.",
+        "Keep mobile/WASM package claims behind package-release gates.",
+        "Record device profile in inference receipts."
+      ],
+      "acceptance_tests": [
+        "A phone target chooses mobile-compatible runtime and does not claim unpublished SDK channel.",
+        "A browser target respects runtime-wasm package gate.",
+        "A CPU-only target offers a slower safe fallback with explicit latency warning.",
+        "Receipts include device class and fallback target."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-math-frontier.cjs --invention=w596-device-energy-scheduler --summary",
+        "expected": [
+          "device-runtime category covered",
+          "runtime-wasm and ios-android gates mapped",
+          "portability/security lifted",
+          "device invariant present"
+        ]
+      },
+      "expected_metric_lift": {
+        "latency": 0.05,
+        "cost": 0.04,
+        "portability": 0.08,
+        "security": 0.04,
+        "dx": 0.05
+      }
+    },
+    {
+      "id": "w596-bandit-registry-ranker",
+      "name": "Bandit Registry Ranker",
+      "category": "registry-ranking",
+      "portfolio_invention_id": "artifact-market-maker",
+      "primitive_refs": [
+        "doubly-robust-shadow-evaluation",
+        "proof-carrying-artifact-signing"
+      ],
+      "source_refs": [
+        "doubly-robust-ope",
+        "sigstore",
+        "opentelemetry-genai"
+      ],
+      "journeys": [
+        "agents-registry",
+        "runtime-inference",
+        "compile-verify",
+        "enterprise-governance"
+      ],
+      "dimensions": [
+        "proof-mode",
+        "governance-mode",
+        "artifact-runtime",
+        "storage-plane"
+      ],
+      "readiness": [
+        "registry-search",
+        "version-diff",
+        "verified-publishers",
+        "private-registry",
+        "dependency-graphs"
+      ],
+      "metrics": [
+        "conversion",
+        "quality",
+        "proof",
+        "enterprise",
+        "dx"
+      ],
+      "objective": "rank artifact a for user context c by posterior utility with penalties for missing proof, stale benchmark, unsupported runtime, and policy mismatch",
+      "invariant": "Registry ranking must never outrank unverified artifacts above verified compatible artifacts solely because of downloads or engagement.",
+      "implementation_files": [
+        "src/registry.js",
+        "src/marketplace.js",
+        "src/artifact-dependency-graph.js",
+        "src/publisher-verification.js",
+        "public/product-graph.json",
+        "tests/wave596-bandit-registry-ranker.test.js"
+      ],
+      "build_steps": [
+        "Define ranking features from K-score, runtime compatibility, signature status, publisher verification, benchmark freshness, and usage outcomes.",
+        "Estimate offline lift using doubly robust replay from registry events.",
+        "Add policy filters for enterprise allowlists, license, compliance tags, and private registry scope.",
+        "Penalize stale proof and unsupported runtime targets.",
+        "Expose rank reasons in API, CLI, account, and registry pages.",
+        "Log decisions with OTEL attributes and receipt references."
+      ],
+      "acceptance_tests": [
+        "An unsigned artifact cannot outrank a signed compatible artifact when quality is tied.",
+        "A private enterprise policy removes non-allowed publishers before ranking.",
+        "Rank reasons include proof, runtime, K-score, benchmark age, and policy match.",
+        "Offline evaluation reports uncertainty instead of claiming lift without logs."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-math-frontier.cjs --invention=w596-bandit-registry-ranker --summary",
+        "expected": [
+          "registry-ranking category covered",
+          "registry readiness mapped",
+          "conversion/proof lifted",
+          "ranking invariant present"
+        ]
+      },
+      "expected_metric_lift": {
+        "conversion": 0.06,
+        "quality": 0.04,
+        "proof": 0.05,
+        "enterprise": 0.04,
+        "dx": 0.04
+      }
+    },
+    {
+      "id": "w596-agent-proof-carrying-tools",
+      "name": "Agent Proof-Carrying Tools",
+      "category": "agent-tools",
+      "portfolio_invention_id": "agent-tool-compiler",
+      "primitive_refs": [
+        "proof-carrying-artifact-signing",
+        "doubly-robust-shadow-evaluation",
+        "conformal-risk-calibration"
+      ],
+      "source_refs": [
+        "sigstore",
+        "opentelemetry-genai",
+        "conformal",
+        "dpo"
+      ],
+      "journeys": [
+        "agents-registry",
+        "gateway-capture",
+        "compile-verify",
+        "enterprise-governance"
+      ],
+      "dimensions": [
+        "model-provider",
+        "proof-mode",
+        "governance-mode",
+        "deployment-mode"
+      ],
+      "readiness": [
+        "compile-as-mcp",
+        "artifact-signing-pipeline",
+        "foundation-standardization",
+        "token-budget",
+        "verified-publishers",
+        "dependency-graphs"
+      ],
+      "metrics": [
+        "proof",
+        "security",
+        "dx",
+        "enterprise",
+        "conversion"
+      ],
+      "objective": "compile tool behavior with schema risk <= alpha, token budget <= cap, signed dependencies, and traceable execution receipts",
+      "invariant": "Compiled agent tools must bind schema, policy, dependency graph, allowed providers, and receipt verifier before registry publication.",
+      "implementation_files": [
+        "src/mcp-generator.js",
+        "sdk/mcp/server.mjs",
+        "src/artifact-signing.js",
+        "src/dependency-graph.js",
+        "src/otel.js",
+        "tests/wave596-agent-proof-carrying-tools.test.js"
+      ],
+      "build_steps": [
+        "Generate MCP tool schemas from compiled artifact inputs and outputs.",
+        "Attach conformal or deterministic schema-risk gates to tool acceptance.",
+        "Sign dependencies and policy bundles.",
+        "Emit OTEL spans and execution receipts for each tool call.",
+        "Enforce token budget, allowed provider, and privacy policy per invocation.",
+        "Expose verifier output for Claude/OpenAI-compatible tool hosts."
+      ],
+      "acceptance_tests": [
+        "A generated MCP tool includes schema, policy, signature, and verifier command.",
+        "Tool invocations exceeding token budget fail closed.",
+        "Registry publication rejects unsigned dependency graphs.",
+        "Execution receipts include provider, tool schema version, and artifact hash."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-math-frontier.cjs --invention=w596-agent-proof-carrying-tools --summary",
+        "expected": [
+          "agent-tools category covered",
+          "compile-as-mcp mapped",
+          "proof/security lifted",
+          "agent invariant present"
+        ]
+      },
+      "expected_metric_lift": {
+        "proof": 0.07,
+        "security": 0.06,
+        "dx": 0.05,
+        "enterprise": 0.05,
+        "conversion": 0.04
+      }
+    },
+    {
+      "id": "w596-cloud-cost-latency-solver",
+      "name": "Cloud Cost-Latency Solver",
+      "category": "compilation",
+      "portfolio_invention_id": "cloud-compute-broker",
+      "primitive_refs": [
+        "schedule-search-autotuning",
+        "paged-prefix-memory-scheduling",
+        "doubly-robust-shadow-evaluation"
+      ],
+      "source_refs": [
+        "tvm",
+        "pagedattention",
+        "doubly-robust-ope",
+        "opentelemetry-genai"
+      ],
+      "journeys": [
+        "compute-cloud",
+        "train-distill",
+        "compile-verify",
+        "runtime-inference"
+      ],
+      "dimensions": [
+        "compute-target",
+        "storage-plane",
+        "deployment-mode",
+        "model-provider"
+      ],
+      "readiness": [
+        "cloud-compute-broker",
+        "async-compile-webhooks",
+        "webhooks-events",
+        "cost-attribution",
+        "rate-limits-quotas"
+      ],
+      "metrics": [
+        "cost",
+        "latency",
+        "enterprise",
+        "dx",
+        "conversion"
+      ],
+      "objective": "choose compute/storage/provider plan minimizing expected_cost + lambda*p95 + penalty(policy_violation) under deadline and privacy constraints",
+      "invariant": "No cloud plan is production-ready unless compute provider, storage backend, retry policy, cost estimate, and data boundary are explicit.",
+      "implementation_files": [
+        "src/cloud-compute-broker.js",
+        "src/object-storage.js",
+        "src/cost-estimator.js",
+        "src/jobs.js",
+        "scripts/cloud-compute-broker.mjs",
+        "tests/wave596-cloud-cost-latency-solver.test.js"
+      ],
+      "build_steps": [
+        "Add plan scoring over local, SSH, managed GPU, AWS, R2/S3, Supabase, and provider-hosted options.",
+        "Estimate wall-clock, queue time, storage egress, accelerator cost, and expected retry cost.",
+        "Attach policy filters for data residency, zero-retention, and BYOC-only modes.",
+        "Emit idempotent job specs with webhook and cancellation paths.",
+        "Record actual cost and latency after job completion for future calibration.",
+        "Expose plan explanations to CLI, TUI, account, and API."
+      ],
+      "acceptance_tests": [
+        "A no-local-GPU training request gets a viable remote plan or precise missing-env diagnostic.",
+        "A BYOC-only request rejects public hosted GPU providers.",
+        "A storage-missing request blocks before uploading data.",
+        "Completed jobs feed observed cost and latency back into estimates."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-math-frontier.cjs --invention=w596-cloud-cost-latency-solver --summary",
+        "expected": [
+          "compute-cloud journey covered",
+          "cloud broker readiness mapped",
+          "cost/latency lifted",
+          "cloud invariant present"
+        ]
+      },
+      "expected_metric_lift": {
+        "cost": 0.07,
+        "latency": 0.05,
+        "enterprise": 0.05,
+        "dx": 0.06,
+        "conversion": 0.05
+      }
+    },
+    {
+      "id": "w596-policy-choice-brain",
+      "name": "Build Strategy Brain",
+      "category": "evaluation",
+      "portfolio_invention_id": "build-strategy-brain",
+      "primitive_refs": [
+        "conformal-risk-calibration",
+        "doubly-robust-shadow-evaluation",
+        "reverse-kl-on-policy-distillation",
+        "schedule-search-autotuning"
+      ],
+      "source_refs": [
+        "conformal",
+        "doubly-robust-ope",
+        "minillm",
+        "tvm",
+        "opentelemetry-genai"
+      ],
+      "journeys": [
+        "gateway-capture",
+        "datasets-labeling",
+        "train-distill",
+        "runtime-inference",
+        "compute-cloud",
+        "enterprise-governance"
+      ],
+      "dimensions": [
+        "model-provider",
+        "compute-target",
+        "privacy-mode",
+        "governance-mode",
+        "deployment-mode"
+      ],
+      "readiness": [
+        "model-routing",
+        "fallback-chains",
+        "semantic-cache",
+        "quality-scoring",
+        "openai-anthropic-gateway",
+        "shadow-mode"
+      ],
+      "metrics": [
+        "quality",
+        "latency",
+        "cost",
+        "dx",
+        "conversion",
+        "enterprise"
+      ],
+      "objective": "choose among prompt-only, RAG, route, fine-tune, distill, compile, quantize, local runtime, and cloud GPU paths by minimizing expected total cost subject to K-score confidence and enterprise policy constraints.",
+      "invariant": "A recommended build path must carry the evidence chain: captured trace hash, data sufficiency estimate, privacy mode, compute plan, expected K-score interval, and fallback route.",
+      "implementation_files": [
+        "src/product-experience.js",
+        "src/distill-strategy.js",
+        "src/provider-registry.js",
+        "src/runtime-policy.js",
+        "src/cloud-compute-broker.js",
+        "cli/kolm.js",
+        "tests/wave596-policy-choice-brain.test.js"
+      ],
+      "build_steps": [
+        "Represent every product path as a policy action with inputs, output artifact, privacy obligations, compute needs, and proof requirements.",
+        "Estimate data sufficiency, expected K-score interval, latency, cost, and operator burden for each action.",
+        "Use off-policy replay from captured traces to score routing, cache, RAG, distill, and compile alternatives before users spend GPU budget.",
+        "Apply enterprise constraints for zero retention, BYOC, region, model provider, and allowed runtime targets.",
+        "Emit a ranked plan with exact commands for CLI, TUI, account UI, and API wrappers.",
+        "Record why rejected paths failed so first-time users are not left guessing."
+      ],
+      "acceptance_tests": [
+        "A low-data request recommends capture/eval before distillation and names the minimum missing examples.",
+        "A no-local-GPU request chooses cloud broker or hosted teacher options and emits storage/env diagnostics.",
+        "A strict zero-retention request rejects provider paths that cannot satisfy the privacy policy.",
+        "A mature workload receives a ranked build path with K-score interval, compute cost, fallback chain, and exact next command.",
+        "The same policy plan is visible from CLI JSON, TUI, account UI, and /v1 build-plan API."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-math-frontier.cjs --invention=w596-policy-choice-brain --summary",
+        "expected": [
+          "build-strategy-brain portfolio mapped",
+          "gateway/train/runtime/cloud journeys covered",
+          "routing and shadow readiness mapped",
+          "policy invariant present"
+        ]
+      },
+      "expected_metric_lift": {
+        "quality": 0.06,
+        "latency": 0.04,
+        "cost": 0.06,
+        "dx": 0.07,
+        "conversion": 0.06,
+        "enterprise": 0.04
+      }
+    },
+    {
+      "id": "w596-codegraph-risk-index",
+      "name": "Codegraph Risk Index",
+      "category": "evaluation",
+      "portfolio_invention_id": "codegraph-product-index",
+      "primitive_refs": [
+        "conformal-risk-calibration",
+        "proof-carrying-artifact-signing"
+      ],
+      "source_refs": [
+        "conformal",
+        "opentelemetry-genai",
+        "sigstore"
+      ],
+      "journeys": [
+        "compile-verify",
+        "enterprise-governance",
+        "agents-registry",
+        "runtime-inference"
+      ],
+      "dimensions": [
+        "proof-mode",
+        "governance-mode",
+        "deployment-mode",
+        "artifact-runtime"
+      ],
+      "readiness": [
+        "doctor-diagnostics",
+        "dependency-graphs",
+        "artifact-signing-pipeline",
+        "sdk-depth",
+        "one-line-install"
+      ],
+      "metrics": [
+        "dx",
+        "security",
+        "proof",
+        "enterprise",
+        "conversion"
+      ],
+      "objective": "rank files and product surfaces by expected failure impact times uncertainty, then require evidence before release.",
+      "invariant": "A release gate cannot use stale codegraph evidence if touched files changed after graph generation.",
+      "implementation_files": [
+        "src/repo-codegraph.js",
+        "scripts/build-codegraph.mjs",
+        "scripts/release-verify.cjs",
+        "src/package-release-readiness.js",
+        "docs/backend-product-depth-closeout-2026-05-23.md",
+        "tests/wave596-codegraph-risk-index.test.js"
+      ],
+      "build_steps": [
+        "Extend codegraph nodes with product surface, route, CLI command, TUI view, package, and readiness requirement ownership.",
+        "Score changed files by dependency fanout, public exposure, missing tests, and stale verification age.",
+        "Require focused gates based on touched surface classes.",
+        "Emit release diagnostics that name exact proof commands.",
+        "Connect package release readiness and product graph into one risk report.",
+        "Keep frontend route failures separate from backend verifier failures."
+      ],
+      "acceptance_tests": [
+        "Changing a package manifest requires package-release checks.",
+        "Changing router/OpenAPI files requires product surface and OpenAPI checks.",
+        "Changing public pages requires UI/static route checks.",
+        "Risk report includes stale evidence when graph timestamp predates modified files."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-math-frontier.cjs --invention=w596-codegraph-risk-index --summary",
+        "expected": [
+          "evaluation category covered",
+          "codegraph portfolio mapped",
+          "DX/security/proof lifted",
+          "stale evidence invariant present"
+        ]
+      },
+      "expected_metric_lift": {
+        "dx": 0.06,
+        "security": 0.04,
+        "proof": 0.06,
+        "enterprise": 0.04,
+        "conversion": 0.03
+      }
+    }
+  ]
+}

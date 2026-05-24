@@ -1,0 +1,2074 @@
+{
+  "schema_version": "kolm-product-frontier-map-1",
+  "updated_at": "2026-05-23",
+  "purpose": "Research-backed frontier capability map for turning every Kolm product surface into a best-in-class implementation program with verifiable smoke checks.",
+  "tracked_metrics": [
+    "quality",
+    "latency",
+    "cost",
+    "portability",
+    "proof",
+    "security",
+    "enterprise",
+    "dx",
+    "conversion"
+  ],
+  "capability_axes": [
+    "provider-gateway",
+    "teacher-training",
+    "serving-engine",
+    "compiler-runtime",
+    "quantization",
+    "eval-observability",
+    "privacy-governance",
+    "cloud-compute",
+    "package-distribution",
+    "registry-network",
+    "device-edge",
+    "agent-tools"
+  ],
+  "sources": [
+    {
+      "id": "openai-sft-distillation",
+      "name": "OpenAI supervised fine-tuning and distillation flow",
+      "url": "https://platform.openai.com/docs/guides/distillation",
+      "type": "official-doc",
+      "capabilities": [
+        "sft",
+        "distillation",
+        "eval-before-finetune",
+        "checkpoints"
+      ]
+    },
+    {
+      "id": "anthropic-mcp",
+      "name": "Anthropic Model Context Protocol",
+      "url": "https://docs.anthropic.com/en/docs/mcp",
+      "type": "official-doc",
+      "capabilities": [
+        "mcp",
+        "agent-tools",
+        "claude-desktop",
+        "claude-code"
+      ]
+    },
+    {
+      "id": "anthropic-mcp-connector",
+      "name": "Anthropic MCP connector for Messages API",
+      "url": "https://docs.anthropic.com/en/docs/agents-and-tools/mcp-connector",
+      "type": "official-doc",
+      "capabilities": [
+        "remote-mcp",
+        "tool-calling",
+        "oauth",
+        "messages-api"
+      ]
+    },
+    {
+      "id": "fireworks-lora-deploy",
+      "name": "Fireworks LoRA deployment methods",
+      "url": "https://docs.fireworks.ai/fine-tuning/deploying-loras",
+      "type": "official-doc",
+      "capabilities": [
+        "lora",
+        "multi-lora",
+        "live-merge",
+        "on-demand-gpu"
+      ]
+    },
+    {
+      "id": "fireworks-serverless",
+      "name": "Fireworks serverless inference overview",
+      "url": "https://docs.fireworks.ai/serverless/overview",
+      "type": "official-doc",
+      "capabilities": [
+        "serverless-inference",
+        "prompt-cache",
+        "pay-per-token",
+        "model-lifecycle"
+      ]
+    },
+    {
+      "id": "together-finetune",
+      "name": "Together AI fine-tuning overview",
+      "url": "https://docs.together.ai/docs/fine-tuning-overview",
+      "type": "official-doc",
+      "capabilities": [
+        "lora",
+        "full-finetune",
+        "preference-finetune",
+        "vlm-finetune",
+        "byom"
+      ]
+    },
+    {
+      "id": "together-inference-gpu",
+      "name": "Together inference and GPU cluster product surface",
+      "url": "https://docs.together.ai/docs/inference-rest",
+      "type": "official-doc",
+      "capabilities": [
+        "openai-compatible-api",
+        "serverless-inference",
+        "dedicated-endpoints",
+        "gpu-cluster"
+      ]
+    },
+    {
+      "id": "predibase-finetune",
+      "name": "Predibase fine-tuning overview",
+      "url": "https://docs.predibase.com/fine-tuning/overview",
+      "type": "official-doc",
+      "capabilities": [
+        "adapter-training",
+        "multi-lora-base-deployment",
+        "dataset-upload",
+        "python-sdk"
+      ]
+    },
+    {
+      "id": "predibase-lorax",
+      "name": "Predibase LoRAX serving",
+      "url": "https://github.com/predibase/lorax",
+      "type": "repo",
+      "capabilities": [
+        "multi-lora-serving",
+        "dynamic-adapter-loading",
+        "single-gpu-many-adapters",
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": "openpipe-finetune",
+      "name": "OpenPipe fine-tuning quickstart",
+      "url": "https://docs.openpipe.ai/features/fine-tuning/quick-start",
+      "type": "official-doc",
+      "capabilities": [
+        "dataset-first-finetune",
+        "webapp-training",
+        "hyperparameters",
+        "open-model-finetune"
+      ]
+    },
+    {
+      "id": "bedrock-distillation",
+      "name": "Amazon Bedrock model distillation",
+      "url": "https://docs.aws.amazon.com/bedrock/latest/userguide/model-distillation.html",
+      "type": "official-doc",
+      "capabilities": [
+        "teacher-student",
+        "synthetic-data",
+        "train-validation-split",
+        "managed-distillation"
+      ]
+    },
+    {
+      "id": "bedrock-finetune",
+      "name": "Amazon Bedrock fine-tuning",
+      "url": "https://docs.aws.amazon.com/en_us/bedrock/latest/userguide/custom-model-fine-tuning.html",
+      "type": "official-doc",
+      "capabilities": [
+        "managed-finetune",
+        "supported-model-matrix",
+        "regions",
+        "custom-model"
+      ]
+    },
+    {
+      "id": "vllm-openai-server",
+      "name": "vLLM OpenAI-compatible server",
+      "url": "https://docs.vllm.ai/en/stable/serving/openai_compatible_server/",
+      "type": "official-doc",
+      "capabilities": [
+        "openai-compatible-api",
+        "chat-completions",
+        "responses",
+        "embeddings",
+        "multimodal",
+        "rerank"
+      ]
+    },
+    {
+      "id": "vllm-lora",
+      "name": "vLLM LoRA adapters",
+      "url": "https://docs.vllm.ai/en/stable/features/lora/",
+      "type": "official-doc",
+      "capabilities": [
+        "lora-serving",
+        "dynamic-lora",
+        "max-loras",
+        "adapter-lineage"
+      ]
+    },
+    {
+      "id": "sglang-openai-api",
+      "name": "SGLang OpenAI-compatible APIs",
+      "url": "https://docs.sglang.io/docs/basic_usage/openai_api",
+      "type": "official-doc",
+      "capabilities": [
+        "openai-compatible-api",
+        "vision",
+        "embedding",
+        "ollama-compatible"
+      ]
+    },
+    {
+      "id": "sglang-lora",
+      "name": "SGLang LoRA serving",
+      "url": "https://docs.sglang.io/docs/advanced_features/lora",
+      "type": "official-doc",
+      "capabilities": [
+        "multi-lora",
+        "dynamic-lora-loading",
+        "lora-eviction",
+        "tensor-parallel-lora"
+      ]
+    },
+    {
+      "id": "tensorrt-llm-quant",
+      "name": "TensorRT-LLM quantization",
+      "url": "https://nvidia.github.io/TensorRT-LLM/latest/features/quantization.html",
+      "type": "official-doc",
+      "capabilities": [
+        "fp4",
+        "fp8",
+        "awq",
+        "gptq",
+        "kv-cache-quant"
+      ]
+    },
+    {
+      "id": "tensorrt-llm-ifb",
+      "name": "TensorRT-LLM paged attention and in-flight batching",
+      "url": "https://nvidia.github.io/TensorRT-LLM/features/paged-attention-ifb-scheduler.html",
+      "type": "official-doc",
+      "capabilities": [
+        "in-flight-batching",
+        "paged-attention",
+        "request-scheduling",
+        "gpu-throughput"
+      ]
+    },
+    {
+      "id": "tgi-index",
+      "name": "Hugging Face Text Generation Inference",
+      "url": "https://huggingface.co/docs/text-generation-inference/index",
+      "type": "official-doc",
+      "capabilities": [
+        "continuous-batching",
+        "streaming",
+        "quantization",
+        "paged-attention",
+        "opentelemetry"
+      ]
+    },
+    {
+      "id": "onnx-runtime-eps",
+      "name": "ONNX Runtime execution providers",
+      "url": "https://onnxruntime.ai/docs/execution-providers/",
+      "type": "official-doc",
+      "capabilities": [
+        "cuda",
+        "tensorrt",
+        "openvino",
+        "coreml",
+        "directml",
+        "qnn"
+      ]
+    },
+    {
+      "id": "iree-deploy",
+      "name": "IREE deployment configurations",
+      "url": "https://iree.dev/guides/deployment-configurations/",
+      "type": "official-doc",
+      "capabilities": [
+        "llvm-cpu",
+        "vulkan",
+        "cuda",
+        "rocm",
+        "metal",
+        "webgpu"
+      ]
+    },
+    {
+      "id": "executorch",
+      "name": "PyTorch ExecuTorch edge runtime",
+      "url": "https://docs.pytorch.org/executorch/stable/index.html",
+      "type": "official-doc",
+      "capabilities": [
+        "mobile",
+        "embedded",
+        "npu",
+        "dsp",
+        "edge-llm"
+      ]
+    },
+    {
+      "id": "mlir-paper",
+      "name": "MLIR compiler infrastructure",
+      "url": "https://arxiv.org/abs/2002.11054",
+      "type": "paper",
+      "capabilities": [
+        "multi-level-ir",
+        "dialects",
+        "retargetable-compiler",
+        "optimization-pipeline"
+      ]
+    },
+    {
+      "id": "langsmith",
+      "name": "LangSmith observability and evals",
+      "url": "https://docs.smith.langchain.com/",
+      "type": "official-doc",
+      "capabilities": [
+        "tracing",
+        "dashboards",
+        "alerts",
+        "production-evals",
+        "prompt-versioning"
+      ]
+    },
+    {
+      "id": "braintrust-evals",
+      "name": "Braintrust systematic evaluations",
+      "url": "https://www.braintrust.dev/docs/evaluate",
+      "type": "official-doc",
+      "capabilities": [
+        "datasets",
+        "experiments",
+        "ci-evals",
+        "regression-detection"
+      ]
+    },
+    {
+      "id": "phoenix-observability",
+      "name": "Arize Phoenix observability and evaluation",
+      "url": "https://arize.com/docs/phoenix",
+      "type": "official-doc",
+      "capabilities": [
+        "opentelemetry",
+        "tracing",
+        "evals",
+        "prompt-replay",
+        "datasets"
+      ]
+    },
+    {
+      "id": "weave-evals",
+      "name": "W&B Weave evaluations",
+      "url": "https://weave-docs.wandb.ai/guides/core-types/evaluations",
+      "type": "official-doc",
+      "capabilities": [
+        "evaluations",
+        "tracing",
+        "scorers",
+        "monitors",
+        "llm-debugging"
+      ]
+    },
+    {
+      "id": "otel-genai",
+      "name": "OpenTelemetry GenAI semantic conventions",
+      "url": "https://opentelemetry.io/docs/specs/semconv/gen-ai/gen-ai-spans/",
+      "type": "official-doc",
+      "capabilities": [
+        "span-schema",
+        "token-usage",
+        "tool-spans",
+        "sensitive-content-controls"
+      ]
+    },
+    {
+      "id": "cloudflare-r2-s3",
+      "name": "Cloudflare R2 S3 API compatibility",
+      "url": "https://developers.cloudflare.com/r2/api/s3/api/",
+      "type": "official-doc",
+      "capabilities": [
+        "s3-compatible-storage",
+        "object-storage",
+        "range-reads",
+        "temporary-credentials"
+      ]
+    },
+    {
+      "id": "cloudflare-workers-ai",
+      "name": "Cloudflare Workers AI",
+      "url": "https://developers.cloudflare.com/workers-ai/",
+      "type": "official-doc",
+      "capabilities": [
+        "serverless-gpu",
+        "workers",
+        "ai-gateway",
+        "vectorize",
+        "global-network"
+      ]
+    },
+    {
+      "id": "sigstore-cosign",
+      "name": "Sigstore Cosign blob signing and verification",
+      "url": "https://docs.sigstore.dev/quickstart/quickstart-cosign/",
+      "type": "official-doc",
+      "capabilities": [
+        "artifact-signing",
+        "verification-bundle",
+        "transparency-log",
+        "keyless-signing"
+      ]
+    }
+  ],
+  "competitors": [
+    {
+      "id": "fireworks",
+      "name": "Fireworks AI",
+      "category": "hosted-inference-training",
+      "source_refs": [
+        "fireworks-lora-deploy",
+        "fireworks-serverless"
+      ],
+      "strengths": [
+        "Serverless base-model inference with managed billing and lifecycle",
+        "Dedicated LoRA deployment modes including live merge and multi-LoRA",
+        "Clear performance/cost path for teams that do not want to operate GPUs"
+      ],
+      "kolm_response": [
+        "Keep OpenAI-compatible hosted and BYOC inference, but make the .kolm artifact portable instead of deployment-bound",
+        "Route LoRA and compiled artifacts through the same verifier, receipt, and K-score gates",
+        "Expose no-GPU training and distill flows through the cloud compute broker"
+      ]
+    },
+    {
+      "id": "together",
+      "name": "Together AI",
+      "category": "hosted-inference-training",
+      "source_refs": [
+        "together-finetune",
+        "together-inference-gpu"
+      ],
+      "strengths": [
+        "Broad model catalog, OpenAI-compatible inference, fine-tuning, and GPU clusters",
+        "LoRA, full fine-tune, preference fine-tune, function-calling fine-tune, reasoning fine-tune, VLM fine-tune, and BYOM",
+        "A unified cloud destination for teams that need hosted training and inference"
+      ],
+      "kolm_response": [
+        "Provider parity must include OpenAI, Anthropic, Together, Bedrock, local, and self-hosted OpenAI-compatible targets",
+        "Kolm must make the output artifact auditable, signed, portable, and runnable after training",
+        "Training UX must plan local vs managed vs BYOC compute explicitly"
+      ]
+    },
+    {
+      "id": "predibase",
+      "name": "Predibase",
+      "category": "fine-tuning-multi-lora",
+      "source_refs": [
+        "predibase-finetune",
+        "predibase-lorax"
+      ],
+      "strengths": [
+        "Adapter-first training and multi-LoRA base deployments",
+        "LoRAX pattern for many adapters on one GPU",
+        "Enterprise story around fine-tuned SLM serving"
+      ],
+      "kolm_response": [
+        "Kolm must treat multi-adapter serving engines as targets, not as the whole product",
+        "Every adapter or distilled artifact needs lineage, diff, verifier, and runtime receipt",
+        "Registry network effects should make artifact discovery and governance stronger than a fine-tune dashboard"
+      ]
+    },
+    {
+      "id": "openpipe",
+      "name": "OpenPipe",
+      "category": "fine-tuning-workflow",
+      "source_refs": [
+        "openpipe-finetune"
+      ],
+      "strengths": [
+        "Simple dataset-to-fine-tune flow",
+        "Friendly UI for training open and closed model variants",
+        "Practical low-friction fine-tuning entry point"
+      ],
+      "kolm_response": [
+        "Kolm quickstarts must be as easy, but with capture, eval, artifact, and runtime in one loop",
+        "The CLI, TUI, and account UI must expose the same guided path",
+        "K-score diagnostics must tell users why a compile fails and what to label next"
+      ]
+    },
+    {
+      "id": "bedrock",
+      "name": "Amazon Bedrock",
+      "category": "hyperscaler-managed-ai",
+      "source_refs": [
+        "bedrock-distillation",
+        "bedrock-finetune"
+      ],
+      "strengths": [
+        "Managed distillation and fine-tuning inside AWS procurement and governance",
+        "Teacher-student workflow with synthetic data and validation split",
+        "Supported model and region matrix"
+      ],
+      "kolm_response": [
+        "AWS should be a Kolm compute and storage target, not a competitor-only path",
+        "Kolm must preserve training/validation split proof and teacher provenance across providers",
+        "Enterprise docs must explain when to use Bedrock-native jobs versus portable .kolm outputs"
+      ]
+    },
+    {
+      "id": "vllm",
+      "name": "vLLM",
+      "category": "serving-engine",
+      "source_refs": [
+        "vllm-openai-server",
+        "vllm-lora"
+      ],
+      "strengths": [
+        "OpenAI-compatible serving surface across chat, responses, embeddings, audio, rerank, and scoring",
+        "LoRA support and deployment patterns",
+        "Production ecosystem around high-throughput serving"
+      ],
+      "kolm_response": [
+        "Kolm runtime planner must generate vLLM manifests and smoke checks",
+        "Artifacts need OpenAI-compatible conformance probes before being marked deployable",
+        "Serving-engine choice should be automatic from workload, model, LoRA count, and hardware"
+      ]
+    },
+    {
+      "id": "sglang",
+      "name": "SGLang",
+      "category": "serving-engine",
+      "source_refs": [
+        "sglang-openai-api",
+        "sglang-lora"
+      ],
+      "strengths": [
+        "OpenAI-compatible, Ollama-compatible, native, and offline APIs",
+        "Multi-LoRA with dynamic loading, eviction, tensor parallelism, and overlap loading",
+        "Deep focus on structured generation, deterministic inference, tracing, and long-context serving"
+      ],
+      "kolm_response": [
+        "Kolm should compile serving plans that can target SGLang for structured and adapter-heavy workloads",
+        "LoRA cache pressure, eviction, rank, and target-module limits must appear in runtime diagnostics",
+        "Receipts must capture serving backend, adapter id, rank, and cache policy"
+      ]
+    },
+    {
+      "id": "tensorrt-llm",
+      "name": "NVIDIA TensorRT-LLM",
+      "category": "accelerated-serving-engine",
+      "source_refs": [
+        "tensorrt-llm-quant",
+        "tensorrt-llm-ifb"
+      ],
+      "strengths": [
+        "NVIDIA-optimized FP4, FP8, AWQ, GPTQ, and KV cache quantization recipes",
+        "Paged attention and in-flight batching for GPU throughput",
+        "Strong hardware-specific acceleration story"
+      ],
+      "kolm_response": [
+        "Quantization oracle must emit TensorRT-LLM-ready recommendations for NVIDIA GPU targets",
+        "Runtime profiles need p50/p95/p99 latency, batch policy, and quantization provenance",
+        "Compiler lowering must never market generic portability as NVIDIA-optimized without a backend proof"
+      ]
+    },
+    {
+      "id": "huggingface-tgi",
+      "name": "Hugging Face TGI",
+      "category": "serving-engine",
+      "source_refs": [
+        "tgi-index"
+      ],
+      "strengths": [
+        "Production LLM serving toolkit with streaming, continuous batching, quantization, PagedAttention, OpenTelemetry, and Prometheus",
+        "Broad model support and familiar Hugging Face deployment path",
+        "Useful baseline for serving and observability expectations"
+      ],
+      "kolm_response": [
+        "Kolm should test generated artifacts against TGI-style telemetry and OpenAI-compatible contracts",
+        "The product must be honest that TGI is a target/baseline, not a replacement category",
+        "Observability exports should match the production norms TGI established"
+      ]
+    },
+    {
+      "id": "onnx-runtime",
+      "name": "ONNX Runtime",
+      "category": "portable-runtime",
+      "source_refs": [
+        "onnx-runtime-eps"
+      ],
+      "strengths": [
+        "Execution provider matrix across CPU, CUDA, TensorRT, OpenVINO, CoreML, DirectML, QNN, and other targets",
+        "Stable runtime API across heterogeneous hardware",
+        "Enterprise-friendly deployment familiarity"
+      ],
+      "kolm_response": [
+        "Artifact runtime metadata must identify EP support, fallback, and unsupported operators",
+        "Compiler must surface why an ONNX target is or is not valid for a model family",
+        "Device-fit autopilot should pick ONNX Runtime when broad hardware wins over custom engine speed"
+      ]
+    },
+    {
+      "id": "iree",
+      "name": "IREE",
+      "category": "compiler-runtime",
+      "source_refs": [
+        "iree-deploy",
+        "mlir-paper"
+      ],
+      "strengths": [
+        "MLIR-derived compilation path across CPU, Vulkan, CUDA, ROCm, Metal, and experimental WebGPU",
+        "Clear separation between compiler targets and runtime HAL drivers",
+        "A real compiler architecture for heterogeneous deployment"
+      ],
+      "kolm_response": [
+        "Kolm IR needs a target-lowering matrix instead of vague compiler language",
+        "Every runtime target must define input dialect, lowering path, runtime driver, and conformance probe",
+        "The .kolm spec should distinguish artifact contract from engine-specific executable payloads"
+      ]
+    },
+    {
+      "id": "executorch",
+      "name": "ExecuTorch",
+      "category": "device-edge-runtime",
+      "source_refs": [
+        "executorch"
+      ],
+      "strengths": [
+        "PyTorch-native on-device inference for mobile, embedded, wearables, NPUs, and DSPs",
+        "Edge deployment productivity from export to runtime",
+        "Relevant for consumer/mobile/offline-first AI apps"
+      ],
+      "kolm_response": [
+        "Mobile SDKs and runtime packages must be real release artifacts, not docs-only claims",
+        "Device-fit autopilot must include battery, memory, NPU, and offline-mode checks",
+        "Artifact receipts should include device target and runtime version"
+      ]
+    },
+    {
+      "id": "langsmith-braintrust-phoenix-weave",
+      "name": "LangSmith, Braintrust, Phoenix, and Weave",
+      "category": "eval-observability",
+      "source_refs": [
+        "langsmith",
+        "braintrust-evals",
+        "phoenix-observability",
+        "weave-evals",
+        "otel-genai"
+      ],
+      "strengths": [
+        "Production tracing, datasets, evals, prompt iteration, experiments, alerts, and monitors",
+        "Strong operator UX for debugging non-deterministic AI systems",
+        "OpenTelemetry and provider integrations are becoming expected"
+      ],
+      "kolm_response": [
+        "Kolm must export OTEL GenAI spans, receipt references, eval rows, and dataset lineage instead of trapping logs",
+        "K-score needs trace-to-eval replay and external eval export",
+        "Account UI and CLI should make failed cases labelable immediately"
+      ]
+    },
+    {
+      "id": "cloudflare",
+      "name": "Cloudflare R2 and Workers AI",
+      "category": "edge-cloud-storage",
+      "source_refs": [
+        "cloudflare-r2-s3",
+        "cloudflare-workers-ai"
+      ],
+      "strengths": [
+        "S3-compatible R2 object storage and serverless AI/Workers platform",
+        "Global network, AI Gateway, Vectorize, R2, Durable Objects, D1, and Workers all in one developer surface",
+        "Practical deploy target for edge inference and artifact distribution"
+      ],
+      "kolm_response": [
+        "Cloudflare R2 should be a first-class storage backend for artifacts, lake exports, and benchmark fixtures",
+        "Workers/Edge deployments should have generated manifests and probe commands",
+        "Temporary credentials and claim-scoped object policies need to be part of enterprise controls"
+      ]
+    },
+    {
+      "id": "sigstore-slsa-cyclonedx",
+      "name": "Sigstore, SLSA, and CycloneDX",
+      "category": "supply-chain-proof",
+      "source_refs": [
+        "sigstore-cosign"
+      ],
+      "strengths": [
+        "Industry-recognized signing, verification bundle, transparency log, and artifact proof patterns",
+        "A clear trust model beyond proprietary signatures",
+        "Procurement-friendly evidence path"
+      ],
+      "kolm_response": [
+        ".kolm signatures should keep local Ed25519 verification and add optional Sigstore bundles for public artifacts",
+        "Compliance exports need SBOM/SLSA/CycloneDX-compatible packets",
+        "Verifier CLI should work offline and disclose which trust roots were used"
+      ]
+    }
+  ],
+  "programs": [
+    {
+      "id": "w595-provider-parity-router",
+      "capability_axis": "provider-gateway",
+      "portfolio_invention_id": "build-strategy-brain",
+      "journeys": [
+        "gateway-capture",
+        "train-distill",
+        "models-backbones",
+        "runtime-inference",
+        "compute-cloud"
+      ],
+      "dimensions": [
+        "model-provider",
+        "compute-target",
+        "privacy-mode",
+        "deployment-mode"
+      ],
+      "readiness": [
+        "openai-anthropic-gateway",
+        "model-routing",
+        "fallback-chains",
+        "streaming",
+        "cloud-compute-broker"
+      ],
+      "metrics": [
+        "quality",
+        "latency",
+        "cost",
+        "dx",
+        "conversion"
+      ],
+      "source_refs": [
+        "openai-sft-distillation",
+        "anthropic-mcp",
+        "together-inference-gpu",
+        "bedrock-distillation",
+        "cloudflare-workers-ai"
+      ],
+      "competitors_addressed": [
+        "together",
+        "fireworks",
+        "bedrock",
+        "cloudflare"
+      ],
+      "product_gap": "Provider choice currently exists as a capability, but best-in-class users expect OpenAI, Anthropic, hosted open model clouds, Bedrock, local, and self-hosted OpenAI-compatible endpoints to be interchangeable across capture, teacher generation, training, and runtime.",
+      "invention": "Provider Parity Router: one policy engine that scores provider/model choices by quality gate, latency, cost ceiling, data residency, tool support, and allowed teacher licenses before every capture, distill, compile, or runtime call.",
+      "implementation_files": [
+        "src/provider-router.js",
+        "src/model-catalog.js",
+        "src/teacher-client.js",
+        "src/compute/registry.json",
+        "cli/kolm.js",
+        "public/product-graph.json",
+        "tests/wave595-provider-parity-router.test.js"
+      ],
+      "build_steps": [
+        "Normalize provider descriptors for OpenAI, Anthropic, Together, Bedrock, Cloudflare Workers AI, local .kolm, and generic OpenAI-compatible endpoints.",
+        "Attach model capabilities: chat, responses, tools, vision, embeddings, fine-tune, distill, streaming, JSON mode, MCP, and data-residency constraints.",
+        "Add a solver that rejects providers violating privacy, budget, latency, or modality constraints before ranking candidates.",
+        "Persist the selected provider and fallback chain into compile receipts and event-lake rows.",
+        "Expose the same provider override UX in CLI, TUI, account UI, and OpenAPI.",
+        "Add a provider dry-run mode that returns reasons, rejected candidates, and required env vars without sending data."
+      ],
+      "acceptance_tests": [
+        "OpenAI and Anthropic teacher paths both produce compatible distill job envelopes without changing downstream compile code.",
+        "A no-GPU user with Cloudflare R2 and RunPod/Together/AWS env vars gets a valid remote training plan instead of a local hardware blocker.",
+        "A HIPAA zero-retention policy rejects providers without allowed retention and emits an actionable diagnostic.",
+        "Fallback chain receipts record primary, backup, policy reason, and whether user data left the configured boundary."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-frontier-map.cjs --program=w595-provider-parity-router --summary",
+        "expected": [
+          "provider-gateway covered",
+          "model-provider dimension covered",
+          "OpenAI and Anthropic parity checked",
+          "provider reasons emitted"
+        ]
+      },
+      "expected_metric_lift": {
+        "quality": 0.05,
+        "latency": 0.04,
+        "cost": 0.05,
+        "dx": 0.06,
+        "conversion": 0.04
+      }
+    },
+    {
+      "id": "w595-teacher-training-orchestrator",
+      "capability_axis": "teacher-training",
+      "portfolio_invention_id": "distill-forge",
+      "journeys": [
+        "datasets-labeling",
+        "train-distill",
+        "models-backbones",
+        "compute-cloud",
+        "enterprise-governance"
+      ],
+      "dimensions": [
+        "model-provider",
+        "compute-target",
+        "storage-plane",
+        "governance-mode"
+      ],
+      "readiness": [
+        "distill-strategy-oracle",
+        "holdout-independence",
+        "async-compile-webhooks",
+        "compile-cache",
+        "benchmarking-infra"
+      ],
+      "metrics": [
+        "quality",
+        "cost",
+        "proof",
+        "enterprise",
+        "dx"
+      ],
+      "source_refs": [
+        "openai-sft-distillation",
+        "together-finetune",
+        "predibase-finetune",
+        "openpipe-finetune",
+        "bedrock-distillation"
+      ],
+      "competitors_addressed": [
+        "together",
+        "predibase",
+        "openpipe",
+        "bedrock"
+      ],
+      "product_gap": "Kolm has distill and training surfaces, but the user experience must choose between SFT, DPO/preference, RFT-style graders, synthetic teacher labeling, LoRA, full fine-tune, and managed distillation without making the user understand vendor quirks first.",
+      "invention": "Teacher Training Orchestrator: a strategy compiler that converts examples, evals, model constraints, and budget into a staged training plan with teacher calls, train/holdout separation, labels to collect next, provider job adapters, and rollback thresholds.",
+      "implementation_files": [
+        "src/distill-strategy.js",
+        "src/training-orchestrator.js",
+        "src/dataset-splitter.js",
+        "src/quality-calibration.js",
+        "scripts/distill-strategy.mjs",
+        "cli/kolm.js",
+        "tests/wave595-teacher-training-orchestrator.test.js"
+      ],
+      "build_steps": [
+        "Add task classifier for extraction, classification, generation, tool calling, vision-language, retrieval, and agent actions.",
+        "Map task class to viable training methods: prompt-only, distillation, LoRA, full fine-tune, preference fine-tune, RFT-style grader loop, or no-train recommendation.",
+        "Attach provider-specific job adapters for OpenAI, Together, Bedrock, Predibase-compatible LoRA exports, local Axolotl/TRL, and future BYOC runners.",
+        "Preserve train/holdout split hashes and teacher provenance through every exported job.",
+        "Estimate cost, wall time, storage, and likely quality gain before submitting work.",
+        "Add webhook and polling envelopes that converge into the same compile receipt."
+      ],
+      "acceptance_tests": [
+        "A 20-row dataset gets a no-train or collect-more-data diagnostic instead of an overconfident fine-tune plan.",
+        "A 2,000-row extraction task with strict schema selects LoRA or distillation and preserves holdout hashes.",
+        "A reasoning-heavy legal task recommends grader-backed evaluation before RFT-style or large-teacher distillation.",
+        "Provider job adapters produce normalized status, artifact, metric, and failure diagnostics."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-frontier-map.cjs --program=w595-teacher-training-orchestrator --summary",
+        "expected": [
+          "teacher-training covered",
+          "train-distill journey covered",
+          "benchmarking-infra open gate addressed",
+          "quality and proof lifts present"
+        ]
+      },
+      "expected_metric_lift": {
+        "quality": 0.08,
+        "cost": 0.04,
+        "proof": 0.05,
+        "enterprise": 0.03,
+        "dx": 0.05
+      }
+    },
+    {
+      "id": "w595-serving-engine-fabric",
+      "capability_axis": "serving-engine",
+      "portfolio_invention_id": "device-fit-autopilot",
+      "journeys": [
+        "runtime-inference",
+        "compute-cloud",
+        "compile-verify",
+        "agents-registry"
+      ],
+      "dimensions": [
+        "artifact-runtime",
+        "compute-target",
+        "deployment-mode",
+        "proof-mode"
+      ],
+      "readiness": [
+        "runtime-local-artifact",
+        "runtime-edge",
+        "compute-openvino-qnn",
+        "runtime-telemetry-opt-in",
+        "model-routing"
+      ],
+      "metrics": [
+        "latency",
+        "cost",
+        "portability",
+        "proof",
+        "dx"
+      ],
+      "source_refs": [
+        "vllm-openai-server",
+        "vllm-lora",
+        "sglang-openai-api",
+        "sglang-lora",
+        "tgi-index",
+        "tensorrt-llm-ifb"
+      ],
+      "competitors_addressed": [
+        "vllm",
+        "sglang",
+        "huggingface-tgi",
+        "tensorrt-llm",
+        "predibase"
+      ],
+      "product_gap": "A finished AI compiler needs serving-engine literacy. vLLM, SGLang, TGI, TensorRT-LLM, llama.cpp, and ONNX Runtime have different strengths; Kolm should plan and verify a target instead of presenting runtime as a generic checkbox.",
+      "invention": "Serving Engine Fabric: an engine planner that benchmarks or simulates workload shape, LoRA count, context length, streaming needs, hardware, and observability requirements, then emits a runnable deployment manifest and conformance probe.",
+      "implementation_files": [
+        "src/runtime-planner.js",
+        "src/serving-engines.js",
+        "src/runtime-telemetry.js",
+        "src/openai-compat-probe.js",
+        "scripts/serve-plan.mjs",
+        "cli/kolm.js",
+        "tests/wave595-serving-engine-fabric.test.js"
+      ],
+      "build_steps": [
+        "Create engine descriptors for vLLM, SGLang, TGI, TensorRT-LLM, ONNX Runtime, llama.cpp/GGUF, MLX, CoreML, and ExecuTorch.",
+        "Define capability probes for OpenAI-compatible chat, responses, embeddings, streaming, tool calls, structured outputs, LoRA, multi-modal, and telemetry.",
+        "Add workload scoring for context length, batch shape, adapter count, cold-start tolerance, target latency, and hardware.",
+        "Generate Docker, SSH, BYOC, and local launch manifests with health checks and rollback commands.",
+        "Write receipts with engine version, quantization, adapter policy, model hash, and conformance result.",
+        "Expose a dry-run diff comparing two engine plans."
+      ],
+      "acceptance_tests": [
+        "An adapter-heavy workload selects SGLang, LoRAX-compatible, or vLLM LoRA over a generic TGI plan with reason codes.",
+        "A low-latency NVIDIA plan recommends TensorRT-LLM only when model and hardware support match.",
+        "A broad enterprise hardware plan recommends ONNX Runtime/OpenVINO/QNN when portability outranks absolute throughput.",
+        "Every generated plan has a health endpoint, OpenAI-compatible probe, receipt fields, and telemetry export config."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-frontier-map.cjs --program=w595-serving-engine-fabric --summary",
+        "expected": [
+          "serving-engine covered",
+          "artifact-runtime dimension covered",
+          "vLLM, SGLang, TGI, TensorRT-LLM addressed",
+          "runtime conformance checked"
+        ]
+      },
+      "expected_metric_lift": {
+        "latency": 0.09,
+        "cost": 0.05,
+        "portability": 0.06,
+        "proof": 0.04,
+        "dx": 0.04
+      }
+    },
+    {
+      "id": "w595-kolm-ir-lowering-matrix",
+      "capability_axis": "compiler-runtime",
+      "portfolio_invention_id": "kolm-ir-autotarget",
+      "journeys": [
+        "compile-verify",
+        "runtime-inference",
+        "devices-fleet",
+        "multimodal-tokenization"
+      ],
+      "dimensions": [
+        "artifact-runtime",
+        "compute-target",
+        "deployment-mode",
+        "proof-mode"
+      ],
+      "readiness": [
+        "kolm-format-spec",
+        "export-quantize-targets",
+        "runtime-wasm",
+        "ecosystem-runtime-adoption",
+        "runtime-lts"
+      ],
+      "metrics": [
+        "portability",
+        "latency",
+        "proof",
+        "enterprise",
+        "dx"
+      ],
+      "source_refs": [
+        "mlir-paper",
+        "iree-deploy",
+        "onnx-runtime-eps",
+        "executorch",
+        "cloudflare-workers-ai"
+      ],
+      "competitors_addressed": [
+        "iree",
+        "onnx-runtime",
+        "executorch",
+        "cloudflare"
+      ],
+      "product_gap": "The term compiler is only defensible if each output target has explicit input dialect, lowering, verifier, runtime, and fallback semantics.",
+      "invention": "Kolm IR Lowering Matrix: a contract table that maps .kolm recipe features to GGUF, ONNX, CoreML, MLX, ExecuTorch, LiteRT, WASM/WebGPU, TensorRT-LLM, vLLM, SGLang, and TGI, including unsupported-feature diagnostics.",
+      "implementation_files": [
+        "src/kolm-ir.js",
+        "src/lowering-matrix.js",
+        "docs/kolm-format-v1.md",
+        "docs/runtime-lowering-matrix.md",
+        "scripts/verify-lowering-matrix.cjs",
+        "public/runtimes.html",
+        "tests/wave595-kolm-ir-lowering-matrix.test.js"
+      ],
+      "build_steps": [
+        "Define a normalized recipe IR for prompts, tools, schemas, eval gates, model payloads, tokenizers, adapters, and receipt requirements.",
+        "Enumerate target runtimes and supported payload families with versioned compatibility ranges.",
+        "Add lowering diagnostics for unsupported modality, tokenizer, quantization, operator, schema, or streaming semantics.",
+        "Emit target manifests with verifier expectations and runtime probe commands.",
+        "Add conformance fixtures for one extraction, one classifier, one tool-call, one RAG, one multimodal, and one agent artifact.",
+        "Publish the matrix into docs and product graph so UI surfaces cannot overclaim unsupported targets."
+      ],
+      "acceptance_tests": [
+        "Every artifact-runtime option in product-graph has a target descriptor and at least one conformance fixture.",
+        "Unsupported targets return structured reasons instead of silent fallback.",
+        "WASM/WebGPU package-release readiness stays marked external until package artifacts are actually publishable.",
+        "Third-party runtime adoption remains external until external support is linked."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-frontier-map.cjs --program=w595-kolm-ir-lowering-matrix --summary",
+        "expected": [
+          "compiler-runtime covered",
+          "runtime-wasm open gate addressed",
+          "ecosystem-runtime-adoption open gate addressed",
+          "portability lift present"
+        ]
+      },
+      "expected_metric_lift": {
+        "portability": 0.1,
+        "latency": 0.04,
+        "proof": 0.06,
+        "enterprise": 0.04,
+        "dx": 0.03
+      }
+    },
+    {
+      "id": "w595-quantization-runtime-oracle",
+      "capability_axis": "quantization",
+      "portfolio_invention_id": "kolm-q-oracle",
+      "journeys": [
+        "compile-verify",
+        "runtime-inference",
+        "compute-cloud",
+        "devices-fleet"
+      ],
+      "dimensions": [
+        "artifact-runtime",
+        "compute-target",
+        "proof-mode",
+        "deployment-mode"
+      ],
+      "readiness": [
+        "export-quantize-targets",
+        "compute-openvino-qnn",
+        "benchmarking-infra",
+        "runtime-telemetry-opt-in"
+      ],
+      "metrics": [
+        "quality",
+        "latency",
+        "cost",
+        "portability",
+        "proof"
+      ],
+      "source_refs": [
+        "tensorrt-llm-quant",
+        "onnx-runtime-eps",
+        "iree-deploy",
+        "executorch",
+        "tgi-index"
+      ],
+      "competitors_addressed": [
+        "tensorrt-llm",
+        "onnx-runtime",
+        "iree",
+        "executorch",
+        "huggingface-tgi"
+      ],
+      "product_gap": "A generic quantize button is not enough. Users need a target-aware recommendation across AWQ, GPTQ, FP8, FP4, KV-cache quantization, ONNX EPs, mobile runtimes, and quality-risk gates.",
+      "invention": "Quantization Runtime Oracle: an advisor that chooses the smallest safe representation for the task, model family, target device, context length, and K-score budget, then records rejected quantization options and why.",
+      "implementation_files": [
+        "src/quantization-oracle.js",
+        "src/runtime-planner.js",
+        "src/quality-calibration.js",
+        "scripts/quantization-oracle.mjs",
+        "docs/quantization-oracle.md",
+        "public/benchmarks.html",
+        "tests/wave595-quantization-runtime-oracle.test.js"
+      ],
+      "build_steps": [
+        "Extend model descriptors with supported quantization recipes by model family and runtime.",
+        "Add calibration-set scoring for task-specific degradation rather than relying on perplexity only.",
+        "Add hardware compatibility matrix for NVIDIA, AMD, Intel, Apple, Qualcomm, CPU, browser, and edge.",
+        "Emit quantization manifests with method, calibration rows, held-out score delta, and rollback target.",
+        "Add public benchmark export for every quantization claim before marketing it.",
+        "Tie runtime telemetry back into future quantization recommendations."
+      ],
+      "acceptance_tests": [
+        "A 7B extraction workload on RTX selects an aggressive recipe only when K-score loss stays under threshold.",
+        "A mobile Qualcomm target rejects unsupported FP8 paths and suggests QNN/ExecuTorch-compatible outputs.",
+        "A long-context workload accounts for KV cache memory and quality degradation.",
+        "Benchmarking-infra remains in needs_public_benchmark_data until external reproducible data exists."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-frontier-map.cjs --program=w595-quantization-runtime-oracle --summary",
+        "expected": [
+          "quantization covered",
+          "benchmarking-infra open gate addressed",
+          "device and runtime dimensions covered",
+          "latency/cost/quality tradeoff emitted"
+        ]
+      },
+      "expected_metric_lift": {
+        "quality": 0.04,
+        "latency": 0.08,
+        "cost": 0.07,
+        "portability": 0.05,
+        "proof": 0.03
+      }
+    },
+    {
+      "id": "w595-eval-observability-spine",
+      "capability_axis": "eval-observability",
+      "portfolio_invention_id": "adaptive-eval-lab",
+      "journeys": [
+        "gateway-capture",
+        "privacy-lake",
+        "datasets-labeling",
+        "compile-verify",
+        "enterprise-governance"
+      ],
+      "dimensions": [
+        "governance-mode",
+        "proof-mode",
+        "storage-plane",
+        "privacy-mode"
+      ],
+      "readiness": [
+        "k-score-calibration",
+        "event-lake-schema",
+        "opentelemetry",
+        "quality-scoring",
+        "evals-ab",
+        "shadow-mode"
+      ],
+      "metrics": [
+        "quality",
+        "proof",
+        "enterprise",
+        "dx",
+        "conversion"
+      ],
+      "source_refs": [
+        "langsmith",
+        "braintrust-evals",
+        "phoenix-observability",
+        "weave-evals",
+        "otel-genai"
+      ],
+      "competitors_addressed": [
+        "langsmith-braintrust-phoenix-weave",
+        "huggingface-tgi"
+      ],
+      "product_gap": "Kolm's proof story is strongest when K-score, receipts, traces, datasets, and replay are one auditable workflow. Competing observability tools set the UX expectation for trace search, eval runs, experiment comparison, and monitors.",
+      "invention": "Eval Observability Spine: OpenTelemetry GenAI export plus trace-to-dataset replay, K-score drilldown, production shadow evals, and external eval exports for Braintrust/Phoenix/LangSmith/Weave-compatible workflows.",
+      "implementation_files": [
+        "src/otel-genai.js",
+        "src/eval-replay.js",
+        "src/quality-calibration.js",
+        "src/event-lake.js",
+        "public/account.html",
+        "cli/kolm.js",
+        "tests/wave595-eval-observability-spine.test.js"
+      ],
+      "build_steps": [
+        "Emit OTEL GenAI spans for provider calls, retrieval, tool calls, distill jobs, evals, and runtime inference.",
+        "Store sensitive content by policy: inline, redacted, external reference, or zero-retention hash only.",
+        "Create trace-to-dataset promotion with human labels, auto-label suggestions, and provenance hashes.",
+        "Add replay against prompt, model, artifact, and runtime variants with statistical comparison.",
+        "Export datasets and eval results in formats accepted by external eval tooling.",
+        "Make account and CLI failures immediately actionable with label-next, replay, and compile-next affordances."
+      ],
+      "acceptance_tests": [
+        "A captured production failure can be promoted to a dataset row and replayed against an artifact candidate.",
+        "OTEL spans include required GenAI provider/model/token/error fields and redact content under zero-retention policy.",
+        "K-score detail links to row-level eval evidence and train/holdout provenance.",
+        "External export smoke creates Braintrust/Phoenix-style dataset rows without leaking secrets."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-frontier-map.cjs --program=w595-eval-observability-spine --summary",
+        "expected": [
+          "eval-observability covered",
+          "proof-mode dimension covered",
+          "OTEL source linked",
+          "quality and proof lifts present"
+        ]
+      },
+      "expected_metric_lift": {
+        "quality": 0.07,
+        "proof": 0.08,
+        "enterprise": 0.05,
+        "dx": 0.04,
+        "conversion": 0.03
+      }
+    },
+    {
+      "id": "w595-privacy-governance-membrane",
+      "capability_axis": "privacy-governance",
+      "portfolio_invention_id": "privacy-membrane-max",
+      "journeys": [
+        "privacy-lake",
+        "gateway-capture",
+        "enterprise-governance",
+        "runtime-inference"
+      ],
+      "dimensions": [
+        "privacy-mode",
+        "governance-mode",
+        "storage-plane",
+        "proof-mode"
+      ],
+      "readiness": [
+        "zero-retention-mode",
+        "capture-filtering",
+        "redaction-quality",
+        "differential-privacy",
+        "team-capture-rbac",
+        "secrets-management",
+        "compliance-certifications"
+      ],
+      "metrics": [
+        "security",
+        "proof",
+        "enterprise",
+        "quality",
+        "conversion"
+      ],
+      "source_refs": [
+        "otel-genai",
+        "cloudflare-r2-s3",
+        "sigstore-cosign",
+        "phoenix-observability"
+      ],
+      "competitors_addressed": [
+        "langsmith-braintrust-phoenix-weave",
+        "cloudflare",
+        "sigstore-slsa-cyclonedx"
+      ],
+      "product_gap": "Enterprise buyers need selectable retention, redaction, tenant isolation, CMK/BYOK, storage residency, audit logs, and formal certification evidence. Local tests cannot honestly replace certification, but the product can make the evidence factory complete.",
+      "invention": "Privacy Governance Membrane: policy compiler for zero retention, redacted capture, differential privacy, encrypted lake exports, tenant RBAC, storage residency, and audit-evidence packets.",
+      "implementation_files": [
+        "src/privacy-policy.js",
+        "src/phi-redactor.js",
+        "src/event-lake.js",
+        "src/compliance-certification-packet.js",
+        "scripts/compliance-certification-packet.mjs",
+        "docs/compliance-certification-packet.md",
+        "tests/wave595-privacy-governance-membrane.test.js"
+      ],
+      "build_steps": [
+        "Define privacy modes as executable policy, not page copy: zero-retention, redacted-retention, local-only, BYOC, air-gap, and federated.",
+        "Add CMK/BYOK hooks and object-storage encryption metadata to lake and artifact exports.",
+        "Ensure every capture path either stores redacted content or hash-only proof depending on policy.",
+        "Generate compliance evidence packets with control owner, evidence file, date, and auditor-ready notes.",
+        "Keep formal SOC 2, ISO, HIPAA, GDPR, FedRAMP, SLSA, and SBOM rows marked external until live proof exists.",
+        "Add tenant-isolation tests for all new policy paths."
+      ],
+      "acceptance_tests": [
+        "Zero-retention requests do not persist raw prompt/output content while preserving hash and receipt proof.",
+        "BYOC/R2/S3 exports include storage region, encryption mode, and key reference without exposing key material.",
+        "Compliance-certifications remains a live-certification gate with generated evidence packet only.",
+        "Team RBAC prevents a user from reading another tenant's lake rows, artifacts, or receipts."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-frontier-map.cjs --program=w595-privacy-governance-membrane --summary",
+        "expected": [
+          "privacy-governance covered",
+          "compliance-certifications open gate addressed",
+          "security and enterprise lifts present",
+          "storage-plane dimension covered"
+        ]
+      },
+      "expected_metric_lift": {
+        "security": 0.08,
+        "proof": 0.06,
+        "enterprise": 0.08,
+        "quality": 0.02,
+        "conversion": 0.03
+      }
+    },
+    {
+      "id": "w595-cloud-compute-control-plane",
+      "capability_axis": "cloud-compute",
+      "portfolio_invention_id": "cloud-compute-broker",
+      "journeys": [
+        "compute-cloud",
+        "train-distill",
+        "compile-verify",
+        "runtime-inference",
+        "enterprise-governance"
+      ],
+      "dimensions": [
+        "compute-target",
+        "storage-plane",
+        "deployment-mode",
+        "privacy-mode"
+      ],
+      "readiness": [
+        "cloud-compute-broker",
+        "runtime-edge",
+        "async-compile-webhooks",
+        "webhooks-events",
+        "secrets-management",
+        "benchmarking-infra"
+      ],
+      "metrics": [
+        "latency",
+        "cost",
+        "enterprise",
+        "dx",
+        "conversion"
+      ],
+      "source_refs": [
+        "cloudflare-r2-s3",
+        "cloudflare-workers-ai",
+        "together-inference-gpu",
+        "bedrock-finetune",
+        "fireworks-serverless"
+      ],
+      "competitors_addressed": [
+        "cloudflare",
+        "together",
+        "bedrock",
+        "fireworks"
+      ],
+      "product_gap": "Users without local GPUs must still be able to train, distill, compile, benchmark, and deploy. Enterprise users need BYOC and storage controls instead of a black-box Kolm cloud only.",
+      "invention": "Cloud Compute Control Plane: a broker that chooses local, SSH, managed GPU, AWS, Cloudflare, RunPod, Together, Modal, or BYOC workers, binds them to R2/S3/Supabase/local storage, and returns deterministic job receipts.",
+      "implementation_files": [
+        "src/cloud-compute-broker.js",
+        "src/storage-backends.js",
+        "src/job-orchestrator.js",
+        "scripts/cloud-compute-broker.mjs",
+        "docs/cloud-compute-broker.md",
+        "cli/kolm.js",
+        "tests/wave595-cloud-compute-control-plane.test.js"
+      ],
+      "build_steps": [
+        "Normalize compute provider descriptors with required env vars, GPU SKUs, data plane, pricing model, and privacy notes.",
+        "Normalize storage backends for local, R2-compatible, S3-compatible, AWS S3/KMS, Supabase Storage, and air-gap bundles.",
+        "Add a dry-run planner that chooses compute and storage from workload, model size, rows, privacy, cost, and deadline.",
+        "Implement job submission adapters behind a queue abstraction with idempotency keys.",
+        "Attach webhook, polling, cancellation, retry, and artifact fetch contracts.",
+        "Add production-readiness diagnostics for missing env vars and insufficient quotas without failing unrelated local flows."
+      ],
+      "acceptance_tests": [
+        "No-local-GPU training returns a remote compute plan with storage staging and explicit costs.",
+        "A BYOC enterprise policy rejects public managed workers and chooses SSH/AWS VPC targets.",
+        "R2-compatible storage config passes S3 endpoint, region, key, and object prefix validation.",
+        "Job receipts include compute provider, storage backend, artifact hash, and retry lineage."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-frontier-map.cjs --program=w595-cloud-compute-control-plane --summary",
+        "expected": [
+          "cloud-compute covered",
+          "compute-target and storage-plane dimensions covered",
+          "no-local-gpu path checked",
+          "benchmarking-infra open gate addressed"
+        ]
+      },
+      "expected_metric_lift": {
+        "latency": 0.05,
+        "cost": 0.06,
+        "enterprise": 0.06,
+        "dx": 0.07,
+        "conversion": 0.05
+      }
+    },
+    {
+      "id": "w595-package-release-factory",
+      "capability_axis": "package-distribution",
+      "portfolio_invention_id": "codegraph-product-index",
+      "journeys": [
+        "runtime-inference",
+        "devices-fleet",
+        "agents-registry",
+        "enterprise-governance"
+      ],
+      "dimensions": [
+        "deployment-mode",
+        "artifact-runtime",
+        "proof-mode",
+        "compute-target"
+      ],
+      "readiness": [
+        "sdk-depth",
+        "one-line-install",
+        "ios-android-sdk",
+        "runtime-wasm",
+        "doctor-diagnostics"
+      ],
+      "metrics": [
+        "dx",
+        "conversion",
+        "portability",
+        "security",
+        "enterprise"
+      ],
+      "source_refs": [
+        "executorch",
+        "onnx-runtime-eps",
+        "anthropic-mcp",
+        "sigstore-cosign"
+      ],
+      "competitors_addressed": [
+        "executorch",
+        "onnx-runtime",
+        "sigstore-slsa-cyclonedx"
+      ],
+      "product_gap": "Local SDK code is not the same thing as production distribution. Public npm, PyPI, crates, Homebrew, winget, apt, Swift, Kotlin, React Native, WASM, and MCP package releases need structural gates.",
+      "invention": "Package Release Factory: a manifest-driven package publisher that builds, smoke-installs, signs, and documents every distribution channel while keeping unreleased channels honest in readiness data.",
+      "implementation_files": [
+        "src/package-release-readiness.js",
+        "scripts/package-release-readiness.mjs",
+        "packages/sdk-ts/package.json",
+        "packages/sdk-swift/Package.swift",
+        "packages/sdk-kotlin/build.gradle.kts",
+        "packages/sdk-rn/package.json",
+        "tests/wave595-package-release-factory.test.js"
+      ],
+      "build_steps": [
+        "Define package manifests for npm, PyPI, crates, Homebrew, winget, apt, SwiftPM, Kotlin/Maven, React Native, WASM, MCP, and VS Code.",
+        "Run local build and smoke-install commands for every package that can be tested without external credentials.",
+        "Add signing and provenance hooks for public artifacts.",
+        "Generate release readiness JSON consumed by docs, CLI, account UI, and release verifier.",
+        "Keep external package publication gates marked needs_package_release until package registries confirm publication.",
+        "Add doctor diagnostics that tell users the exact supported install path per platform."
+      ],
+      "acceptance_tests": [
+        "Every SDK/package row has a source path, build command, smoke command, and publication status.",
+        "Unpublished package channels cannot be advertised as one-line installs.",
+        "WASM, iOS, Android, and React Native rows stay external until package artifacts are built and publishable.",
+        "Package manifests and docs use the same package names."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-frontier-map.cjs --program=w595-package-release-factory --summary",
+        "expected": [
+          "package-distribution covered",
+          "sdk-depth, one-line-install, runtime-wasm, ios-android-sdk gates addressed",
+          "DX and conversion lifts present",
+          "publication honesty checked"
+        ]
+      },
+      "expected_metric_lift": {
+        "dx": 0.1,
+        "conversion": 0.08,
+        "portability": 0.06,
+        "security": 0.03,
+        "enterprise": 0.03
+      }
+    },
+    {
+      "id": "w595-registry-network-effects",
+      "capability_axis": "registry-network",
+      "portfolio_invention_id": "artifact-market-maker",
+      "journeys": [
+        "agents-registry",
+        "compile-verify",
+        "runtime-inference",
+        "enterprise-governance"
+      ],
+      "dimensions": [
+        "artifact-runtime",
+        "proof-mode",
+        "governance-mode",
+        "storage-plane"
+      ],
+      "readiness": [
+        "registry-search",
+        "version-diff",
+        "verified-publishers",
+        "private-registry",
+        "dependency-graphs",
+        "artifact-signing-pipeline"
+      ],
+      "metrics": [
+        "conversion",
+        "enterprise",
+        "proof",
+        "dx",
+        "security"
+      ],
+      "source_refs": [
+        "sigstore-cosign",
+        "cloudflare-r2-s3",
+        "anthropic-mcp",
+        "vllm-openai-server"
+      ],
+      "competitors_addressed": [
+        "sigstore-slsa-cyclonedx",
+        "cloudflare",
+        "vllm"
+      ],
+      "product_gap": "To become a format winner, Kolm needs artifact discovery, trust, versioning, verified publishers, private registries, dependency graphs, and deploy buttons that feel closer to Docker Hub plus npm than a static recipe gallery.",
+      "invention": "Registry Network Effects: a verified artifact registry that makes .kolm files searchable, diffable, signed, deployable, privately mirrorable, and dependency-aware.",
+      "implementation_files": [
+        "src/registry.js",
+        "src/registry-diff.js",
+        "src/artifact-signing.js",
+        "src/dependency-graph.js",
+        "public/registry.html",
+        "public/marketplace.html",
+        "tests/wave595-registry-network-effects.test.js"
+      ],
+      "build_steps": [
+        "Index artifact metadata by task, model family, runtime, compliance tag, license, K-score, publisher, and dependency graph.",
+        "Add version diff views for prompt, schema, model, quantization, eval, receipt, and runtime changes.",
+        "Implement verified publisher badges backed by signing keys and organization verification.",
+        "Generate deploy buttons for local, Docker, SSH, AWS, Cloudflare, Vercel, and BYOC targets.",
+        "Support private registry mirrors with export/import and air-gap bundle paths.",
+        "Add marketplace transaction hooks later, but keep current scope focused on trust and deployability."
+      ],
+      "acceptance_tests": [
+        "A public artifact listing exposes hash, signature, K-score, runtime targets, license, and dependency graph.",
+        "A private registry export can be verified offline.",
+        "Version diff shows material behavior and proof changes, not only text metadata.",
+        "Deploy buttons are generated only for runtime targets with passing conformance probes."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-frontier-map.cjs --program=w595-registry-network-effects --summary",
+        "expected": [
+          "registry-network covered",
+          "registry readiness covered",
+          "proof and conversion lifts present",
+          "private registry path checked"
+        ]
+      },
+      "expected_metric_lift": {
+        "conversion": 0.06,
+        "enterprise": 0.05,
+        "proof": 0.06,
+        "dx": 0.05,
+        "security": 0.03
+      }
+    },
+    {
+      "id": "w595-device-runtime-autopilot",
+      "capability_axis": "device-edge",
+      "portfolio_invention_id": "device-fit-autopilot",
+      "journeys": [
+        "devices-fleet",
+        "runtime-inference",
+        "compile-verify",
+        "multimodal-tokenization"
+      ],
+      "dimensions": [
+        "compute-target",
+        "artifact-runtime",
+        "deployment-mode",
+        "privacy-mode"
+      ],
+      "readiness": [
+        "ios-android-sdk",
+        "runtime-wasm",
+        "compute-openvino-qnn",
+        "runtime-local-artifact",
+        "runtime-lts",
+        "ecosystem-runtime-adoption"
+      ],
+      "metrics": [
+        "portability",
+        "latency",
+        "security",
+        "dx",
+        "conversion"
+      ],
+      "source_refs": [
+        "executorch",
+        "onnx-runtime-eps",
+        "iree-deploy",
+        "cloudflare-workers-ai"
+      ],
+      "competitors_addressed": [
+        "executorch",
+        "onnx-runtime",
+        "iree",
+        "cloudflare"
+      ],
+      "product_gap": "On-device AI requires more than saying local. Phones, laptops, browsers, edge gateways, NPUs, and air-gapped servers have different memory, power, runtime, and packaging constraints.",
+      "invention": "Device Runtime Autopilot: a target planner that profiles device class and chooses CoreML/MLX, ONNX Runtime EP, ExecuTorch, LiteRT, WASM/WebGPU, OpenVINO, QNN, GGUF, or cloud fallback.",
+      "implementation_files": [
+        "src/device-profiler.js",
+        "src/runtime-planner.js",
+        "src/lowering-matrix.js",
+        "packages/sdk-swift/Package.swift",
+        "packages/sdk-kotlin/build.gradle.kts",
+        "packages/sdk-rn/package.json",
+        "tests/wave595-device-runtime-autopilot.test.js"
+      ],
+      "build_steps": [
+        "Define device profiles for iOS, Android, Apple Silicon, Windows NPU, Intel OpenVINO, Qualcomm QNN, browser WebGPU, edge Linux, and CPU-only.",
+        "Estimate memory, battery, p95 latency, cold start, context budget, and offline constraints.",
+        "Select runtime target and quantization jointly rather than independently.",
+        "Generate SDK integration snippets and offline verifier commands per target.",
+        "Add package-release gates for mobile/WASM artifacts and keep external status honest.",
+        "Record device profile and runtime version in each inference receipt."
+      ],
+      "acceptance_tests": [
+        "An Android/QNN target rejects CoreML-only outputs and offers ExecuTorch/ONNX/QNN options.",
+        "A browser target uses WASM/WebGPU readiness and does not advertise unpublished package release as done.",
+        "A CPU-only air-gap target produces a GGUF/ONNX fallback with expected latency warning.",
+        "Device receipts include runtime version, quantization, model hash, and offline mode."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-frontier-map.cjs --program=w595-device-runtime-autopilot --summary",
+        "expected": [
+          "device-edge covered",
+          "ios-android-sdk and runtime-wasm gates addressed",
+          "compute-target dimension covered",
+          "portability lift present"
+        ]
+      },
+      "expected_metric_lift": {
+        "portability": 0.09,
+        "latency": 0.05,
+        "security": 0.04,
+        "dx": 0.04,
+        "conversion": 0.04
+      }
+    },
+    {
+      "id": "w595-agent-tool-supply-chain",
+      "capability_axis": "agent-tools",
+      "portfolio_invention_id": "agent-tool-compiler",
+      "journeys": [
+        "agents-registry",
+        "gateway-capture",
+        "compile-verify",
+        "enterprise-governance"
+      ],
+      "dimensions": [
+        "model-provider",
+        "proof-mode",
+        "governance-mode",
+        "deployment-mode"
+      ],
+      "readiness": [
+        "compile-as-mcp",
+        "artifact-signing-pipeline",
+        "verified-publishers",
+        "dependency-graphs",
+        "token-budget",
+        "fallback-chains"
+      ],
+      "metrics": [
+        "proof",
+        "security",
+        "dx",
+        "conversion",
+        "enterprise"
+      ],
+      "source_refs": [
+        "anthropic-mcp",
+        "anthropic-mcp-connector",
+        "openai-sft-distillation",
+        "sigstore-cosign",
+        "otel-genai"
+      ],
+      "competitors_addressed": [
+        "sigstore-slsa-cyclonedx",
+        "langsmith-braintrust-phoenix-weave"
+      ],
+      "product_gap": "Agent tools are becoming distributed software artifacts. Kolm should be the signed, testable, auditable way to ship agent behavior and MCP tools, not just an API wrapper.",
+      "invention": "Agent Tool Supply Chain: compile .kolm artifacts into MCP servers and tool bundles with schema tests, policy limits, signed dependencies, runtime receipts, and Claude/OpenAI-compatible invocation probes.",
+      "implementation_files": [
+        "src/mcp-generator.js",
+        "sdk/mcp/server.mjs",
+        "src/tool-policy.js",
+        "src/artifact-signing.js",
+        "src/dependency-graph.js",
+        "cli/kolm.js",
+        "tests/wave595-agent-tool-supply-chain.test.js"
+      ],
+      "build_steps": [
+        "Generate MCP tool descriptors from compiled artifacts and schemas.",
+        "Add tool input/output conformance tests and prompt-injection budget checks.",
+        "Support Claude Desktop/Claude Code, Anthropic Messages MCP connector, OpenAI tool calling, and local MCP hosts.",
+        "Sign tool bundles and dependency manifests.",
+        "Emit OTEL spans and receipts for every tool call.",
+        "Publish registry metadata that lets enterprises approve, pin, or revoke agent tools."
+      ],
+      "acceptance_tests": [
+        "kolm compile --as-mcp produces a local MCP server with tool schema and verifier command.",
+        "Tool calls enforce token budget, data policy, and allowed provider constraints.",
+        "Signed dependency graph lets a registry revoke or pin a tool artifact.",
+        "Anthropic and OpenAI tool-call probe fixtures both pass against the generated server contract."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-frontier-map.cjs --program=w595-agent-tool-supply-chain --summary",
+        "expected": [
+          "agent-tools covered",
+          "compile-as-mcp readiness covered",
+          "proof and security lifts present",
+          "Anthropic MCP sources linked"
+        ]
+      },
+      "expected_metric_lift": {
+        "proof": 0.07,
+        "security": 0.06,
+        "dx": 0.05,
+        "conversion": 0.05,
+        "enterprise": 0.05
+      }
+    },
+    {
+      "id": "w595-format-governance-standard",
+      "capability_axis": "privacy-governance",
+      "portfolio_invention_id": "receipt-os",
+      "journeys": [
+        "compile-verify",
+        "agents-registry",
+        "enterprise-governance",
+        "runtime-inference"
+      ],
+      "dimensions": [
+        "proof-mode",
+        "governance-mode",
+        "artifact-runtime",
+        "storage-plane"
+      ],
+      "readiness": [
+        "foundation-standardization",
+        "ecosystem-runtime-adoption",
+        "standalone-verify",
+        "kolm-format-spec",
+        "artifact-signing-pipeline",
+        "compliance-certifications"
+      ],
+      "metrics": [
+        "proof",
+        "enterprise",
+        "security",
+        "conversion",
+        "portability"
+      ],
+      "source_refs": [
+        "sigstore-cosign",
+        "mlir-paper",
+        "iree-deploy",
+        "onnx-runtime-eps"
+      ],
+      "competitors_addressed": [
+        "sigstore-slsa-cyclonedx",
+        "iree",
+        "onnx-runtime"
+      ],
+      "product_gap": "The $10B path depends on .kolm becoming an ecosystem artifact format. That requires public spec governance, verifier portability, conformance tests, compatibility policy, and external adoption proof.",
+      "invention": "Format Governance Standard: a standards packet that turns .kolm v1 into an RFC-grade artifact spec with conformance suite, verifier CLI, compatibility badges, Sigstore optional bundle, and external adoption ledger.",
+      "implementation_files": [
+        "docs/kolm-format-v1.md",
+        "docs/format-governance-packet.md",
+        "src/format-governance-packet.js",
+        "scripts/format-governance-packet.mjs",
+        "src/artifact-signing.js",
+        "public/spec.html",
+        "tests/wave595-format-governance-standard.test.js"
+      ],
+      "build_steps": [
+        "Publish RFC-style spec sections for ZIP layout, manifest schema, runtime payloads, signatures, receipts, eval gates, and compatibility.",
+        "Define conformance fixtures and expected verifier output for valid, tampered, expired, unsupported, and future-version artifacts.",
+        "Add optional Sigstore bundle support while keeping offline Ed25519 verification.",
+        "Generate external submission packet for foundation or standards venue.",
+        "Track external adoption evidence separately from local implementation evidence.",
+        "Fail docs/release checks if external adoption is claimed without linked proof."
+      ],
+      "acceptance_tests": [
+        "A third-party verifier can validate a fixture without hosted Kolm.",
+        "Spec examples match machine-readable schemas and conformance outputs.",
+        "Foundation-standardization remains external until accepted venue evidence exists.",
+        "Ecosystem-runtime-adoption remains external until external projects publish support."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-frontier-map.cjs --program=w595-format-governance-standard --summary",
+        "expected": [
+          "foundation-standardization open gate addressed",
+          "ecosystem-runtime-adoption open gate addressed",
+          "proof-mode dimension covered",
+          "external-proof honesty checked"
+        ]
+      },
+      "expected_metric_lift": {
+        "proof": 0.09,
+        "enterprise": 0.05,
+        "security": 0.04,
+        "conversion": 0.04,
+        "portability": 0.05
+      }
+    },
+    {
+      "id": "w595-benchmark-evidence-network",
+      "capability_axis": "eval-observability",
+      "portfolio_invention_id": "adaptive-eval-lab",
+      "journeys": [
+        "datasets-labeling",
+        "train-distill",
+        "compile-verify",
+        "runtime-inference",
+        "compute-cloud"
+      ],
+      "dimensions": [
+        "proof-mode",
+        "storage-plane",
+        "compute-target",
+        "artifact-runtime"
+      ],
+      "readiness": [
+        "benchmarking-infra",
+        "k-score-calibration",
+        "quality-scoring",
+        "evals-ab",
+        "runtime-telemetry-opt-in",
+        "shadow-mode"
+      ],
+      "metrics": [
+        "quality",
+        "latency",
+        "cost",
+        "proof",
+        "conversion"
+      ],
+      "source_refs": [
+        "braintrust-evals",
+        "phoenix-observability",
+        "weave-evals",
+        "tensorrt-llm-quant",
+        "vllm-openai-server",
+        "sglang-lora"
+      ],
+      "competitors_addressed": [
+        "langsmith-braintrust-phoenix-weave",
+        "tensorrt-llm",
+        "vllm",
+        "sglang"
+      ],
+      "product_gap": "Benchmark claims are the credibility engine. Local tests prove contracts; they do not prove public performance leadership. Kolm needs reproducible public benchmark packets with hardware, model, dataset, runtime, cost, and quality metadata.",
+      "invention": "Benchmark Evidence Network: a reproducible benchmark harness that publishes signed result packets for provider, distill, quantize, compile, and runtime comparisons, while preventing stale or unverified claims from reaching public copy.",
+      "implementation_files": [
+        "src/benchmark-evidence.js",
+        "scripts/benchmark-evidence.mjs",
+        "public/benchmarks.html",
+        "public/benchmarks/quality-judge-calibration.json",
+        "docs/benchmark-evidence.md",
+        "tests/wave589-benchmark-evidence-contract.test.js",
+        "tests/wave595-benchmark-evidence-network.test.js"
+      ],
+      "build_steps": [
+        "Define benchmark packet schema with task, dataset hash, model, runtime, hardware, quantization, provider, cost, latency, quality, and date.",
+        "Add local reproducibility harness and remote runner hooks.",
+        "Sign benchmark packets and link them to artifact versions.",
+        "Add stale-claim scanner that rejects public claims lacking current benchmark packets.",
+        "Publish minimal public fixtures first, then expand to hosted leaderboard.",
+        "Keep benchmarking-infra status as needs_public_benchmark_data until public packets are posted."
+      ],
+      "acceptance_tests": [
+        "A benchmark result cannot be public-ready without signed hardware, dataset, and model metadata.",
+        "Stale public claims fail release verification when benchmark packet date or hash is missing.",
+        "Kolm vs provider comparisons include quality, latency, cost, and artifact size.",
+        "Public benchmark gate remains external until reproducible packet URLs are available."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-frontier-map.cjs --program=w595-benchmark-evidence-network --summary",
+        "expected": [
+          "benchmarking-infra open gate addressed",
+          "quality/latency/cost/proof metrics covered",
+          "external public data honesty checked",
+          "runtime competitors addressed"
+        ]
+      },
+      "expected_metric_lift": {
+        "quality": 0.05,
+        "latency": 0.04,
+        "cost": 0.04,
+        "proof": 0.08,
+        "conversion": 0.05
+      }
+    },
+    {
+      "id": "w595-data-lake-governance-loop",
+      "capability_axis": "privacy-governance",
+      "portfolio_invention_id": "privacy-membrane-max",
+      "journeys": [
+        "gateway-capture",
+        "privacy-lake",
+        "datasets-labeling",
+        "train-distill",
+        "enterprise-governance"
+      ],
+      "dimensions": [
+        "privacy-mode",
+        "storage-plane",
+        "governance-mode",
+        "model-provider"
+      ],
+      "readiness": [
+        "event-lake-schema",
+        "capture-filtering",
+        "team-capture-rbac",
+        "differential-privacy",
+        "rag-artifact",
+        "prompt-compression"
+      ],
+      "metrics": [
+        "quality",
+        "cost",
+        "security",
+        "enterprise",
+        "dx"
+      ],
+      "source_refs": [
+        "otel-genai",
+        "cloudflare-r2-s3",
+        "braintrust-evals",
+        "phoenix-observability",
+        "openai-sft-distillation"
+      ],
+      "competitors_addressed": [
+        "langsmith-braintrust-phoenix-weave",
+        "cloudflare",
+        "openpipe"
+      ],
+      "product_gap": "The capture lake is the product flywheel, but it only creates durable value if users can query, filter, redact, label, export, and recompile from it without breaking privacy boundaries.",
+      "invention": "Data Lake Governance Loop: capture-to-label-to-eval-to-compile workflow with SQL/Parquet export, OTEL spans, privacy policies, active-learning ranking, and storage adapters.",
+      "implementation_files": [
+        "src/event-lake.js",
+        "src/capture-filters.js",
+        "src/labeling.js",
+        "src/dataset-export.js",
+        "src/distill-strategy.js",
+        "cli/kolm.js",
+        "tests/wave595-data-lake-governance-loop.test.js"
+      ],
+      "build_steps": [
+        "Expose lake schema and query/export commands for JSONL, Parquet-compatible metadata, and SQL-like filters.",
+        "Add capture filters by provider, model, latency, cost, error, endpoint, user, team, and policy.",
+        "Rank unlabeled examples by expected K-score improvement and distribution coverage.",
+        "Promote selected rows into datasets while preserving tenant, redaction, consent, and holdout metadata.",
+        "Allow one-click or CLI recompile from a filtered dataset snapshot.",
+        "Export lake evidence to external eval tools without raw secret leakage."
+      ],
+      "acceptance_tests": [
+        "A user can filter high-cost GPT calls, redact them, label a subset, and create a compile dataset.",
+        "Holdout-only and tenant metadata survive export/import.",
+        "Differential privacy policy changes the exported aggregates and records epsilon/delta metadata.",
+        "Zero-retention lake mode supports hash-only analytics without raw prompt storage."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-frontier-map.cjs --program=w595-data-lake-governance-loop --summary",
+        "expected": [
+          "privacy-lake journey covered",
+          "privacy-governance axis covered",
+          "storage-plane dimension covered",
+          "quality and security lifts present"
+        ]
+      },
+      "expected_metric_lift": {
+        "quality": 0.06,
+        "cost": 0.04,
+        "security": 0.05,
+        "enterprise": 0.05,
+        "dx": 0.05
+      }
+    },
+    {
+      "id": "w595-multimodal-tokenization-targets",
+      "capability_axis": "compiler-runtime",
+      "portfolio_invention_id": "kolm-ir-autotarget",
+      "journeys": [
+        "multimodal-tokenization",
+        "models-backbones",
+        "compile-verify",
+        "runtime-inference",
+        "devices-fleet"
+      ],
+      "dimensions": [
+        "model-provider",
+        "artifact-runtime",
+        "compute-target",
+        "deployment-mode"
+      ],
+      "readiness": [
+        "export-quantize-targets",
+        "runtime-local-artifact",
+        "compute-openvino-qnn",
+        "ios-android-sdk",
+        "runtime-wasm"
+      ],
+      "metrics": [
+        "quality",
+        "latency",
+        "portability",
+        "dx",
+        "conversion"
+      ],
+      "source_refs": [
+        "together-finetune",
+        "vllm-openai-server",
+        "sglang-openai-api",
+        "tgi-index",
+        "executorch",
+        "onnx-runtime-eps"
+      ],
+      "competitors_addressed": [
+        "together",
+        "vllm",
+        "sglang",
+        "huggingface-tgi",
+        "executorch",
+        "onnx-runtime"
+      ],
+      "product_gap": "Text-only artifacts are not enough for frontier product depth. Users need image, audio, embedding, rerank, classifier, tool-call, and structured-output artifact targets where feasible, with honest unsupported diagnostics where not.",
+      "invention": "Multimodal Tokenization Targets: a target contract for tokenizer, processor, modality, schema, and runtime support that prevents text-only assumptions from leaking into compile, runtime, SDK, and docs.",
+      "implementation_files": [
+        "src/model-catalog.js",
+        "src/tokenization.js",
+        "src/lowering-matrix.js",
+        "src/runtime-planner.js",
+        "public/models.html",
+        "public/runtimes.html",
+        "tests/wave595-multimodal-tokenization-targets.test.js"
+      ],
+      "build_steps": [
+        "Classify model families by text, vision-language, audio, embedding, rerank, classifier, and tool-call support.",
+        "Represent tokenizer and processor hashes in artifact manifests.",
+        "Add runtime-specific modality support checks for vLLM, SGLang, TGI, ONNX Runtime, ExecuTorch, CoreML, and WASM.",
+        "Extend compile diagnostics to explain unsupported processors or missing model assets.",
+        "Add fixtures for multimodal and embedding artifacts where local-only tests can be deterministic.",
+        "Make docs and product graph consume the same capability matrix."
+      ],
+      "acceptance_tests": [
+        "A vision-language compile plan records image processor hash and runtime support.",
+        "An embedding/rerank artifact does not route through chat-only runtime assumptions.",
+        "Unsupported multimodal targets return structured diagnostics with alternate targets.",
+        "Mobile and WASM package gates remain honest until package artifacts exist."
+      ],
+      "smoke_simulation": {
+        "command": "node scripts/simulate-product-frontier-map.cjs --program=w595-multimodal-tokenization-targets --summary",
+        "expected": [
+          "multimodal-tokenization journey covered",
+          "compiler-runtime covered",
+          "model-provider and artifact-runtime dimensions covered",
+          "quality and portability lifts present"
+        ]
+      },
+      "expected_metric_lift": {
+        "quality": 0.05,
+        "latency": 0.03,
+        "portability": 0.06,
+        "dx": 0.04,
+        "conversion": 0.04
+      }
+    }
+  ]
+}

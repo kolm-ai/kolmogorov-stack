@@ -1,0 +1,186 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://kolm.ai/schemas/infra/dns-schema.json",
+  "title": "kolm.ai multi-region DNS layout",
+  "description": "Schema describing the Route53 + Cloudflare records required to launch the W780 multi-region gateway (us.kolm.ai / eu.kolm.ai / ap.kolm.ai). The schema is consumed by infra automation (Terraform plan-validate, Pulumi preview) AND surfaced verbatim in /docs/multi-region.html so operators can audit the layout before touching production.",
+  "type": "object",
+  "version": "w780-v1",
+  "required": ["regions", "geodns", "health_checks"],
+  "properties": {
+    "regions": {
+      "type": "array",
+      "description": "One record per launch region. The launch plan is three regions: us-east-1, eu-west-1, ap-southeast-1.",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["short", "canonical", "hostname", "origin", "geo"],
+        "properties": {
+          "short": {
+            "type": "string",
+            "enum": ["us", "eu", "apac"],
+            "description": "Short name keyed against $KOLM_REGION_GATEWAY_URLS."
+          },
+          "canonical": {
+            "type": "string",
+            "description": "Canonical AWS-style region code (e.g. us-east-1)."
+          },
+          "hostname": {
+            "type": "string",
+            "format": "hostname",
+            "description": "Public hostname (e.g. us.kolm.ai)."
+          },
+          "origin": {
+            "type": "string",
+            "format": "uri",
+            "description": "Origin URL the gateway proxies to (e.g. https://us-origin.kolm.ai)."
+          },
+          "geo": {
+            "type": "string",
+            "enum": ["NORTH_AMERICA", "EUROPE", "ASIA_PACIFIC"],
+            "description": "Geo bucket for the geodns weight table."
+          }
+        }
+      },
+      "default": [
+        {
+          "short": "us",
+          "canonical": "us-east-1",
+          "hostname": "us.kolm.ai",
+          "origin": "https://us-origin.kolm.ai",
+          "geo": "NORTH_AMERICA"
+        },
+        {
+          "short": "eu",
+          "canonical": "eu-west-1",
+          "hostname": "eu.kolm.ai",
+          "origin": "https://eu-origin.kolm.ai",
+          "geo": "EUROPE"
+        },
+        {
+          "short": "apac",
+          "canonical": "ap-southeast-1",
+          "hostname": "ap.kolm.ai",
+          "origin": "https://ap-origin.kolm.ai",
+          "geo": "ASIA_PACIFIC"
+        }
+      ]
+    },
+    "geodns": {
+      "type": "object",
+      "description": "GeoDNS weight table. The apex record (kolm.ai) resolves to the closest region by client IP. Route53 GeoDNS routing policy + Cloudflare Geo Steering both consume this table.",
+      "required": ["apex_hostname", "weights", "fallback_region"],
+      "properties": {
+        "apex_hostname": {
+          "type": "string",
+          "format": "hostname",
+          "description": "Apex record that resolves by client geo (e.g. kolm.ai or api.kolm.ai).",
+          "default": "kolm.ai"
+        },
+        "weights": {
+          "type": "array",
+          "description": "Per-region weight table. Higher weight = preferred when client falls in that geo bucket. Use 100 for primary, 50 for secondary failover.",
+          "items": {
+            "type": "object",
+            "required": ["geo", "region_short", "weight"],
+            "properties": {
+              "geo": { "type": "string", "enum": ["NORTH_AMERICA", "SOUTH_AMERICA", "EUROPE", "AFRICA", "ASIA_PACIFIC", "OCEANIA", "*"] },
+              "region_short": { "type": "string", "enum": ["us", "eu", "apac"] },
+              "weight": { "type": "integer", "minimum": 0, "maximum": 100 }
+            }
+          },
+          "default": [
+            { "geo": "NORTH_AMERICA", "region_short": "us",   "weight": 100 },
+            { "geo": "SOUTH_AMERICA", "region_short": "us",   "weight": 100 },
+            { "geo": "EUROPE",        "region_short": "eu",   "weight": 100 },
+            { "geo": "AFRICA",        "region_short": "eu",   "weight": 100 },
+            { "geo": "ASIA_PACIFIC",  "region_short": "apac", "weight": 100 },
+            { "geo": "OCEANIA",       "region_short": "apac", "weight": 100 },
+            { "geo": "*",             "region_short": "us",   "weight": 100 }
+          ]
+        },
+        "fallback_region": {
+          "type": "string",
+          "enum": ["us", "eu", "apac"],
+          "description": "Region returned when no geo match. Default: us.",
+          "default": "us"
+        }
+      }
+    },
+    "health_checks": {
+      "type": "object",
+      "description": "Per-region health check definition. Route53 health checks + Cloudflare monitors consume this block to remove unhealthy regions from rotation.",
+      "required": ["path", "interval_s", "failure_threshold", "regions"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Liveness path probed every interval_s seconds. Same path src/multi-region.js#testFailover probes.",
+          "default": "/v1/health"
+        },
+        "interval_s": {
+          "type": "integer",
+          "minimum": 10,
+          "maximum": 300,
+          "description": "Probe interval in seconds.",
+          "default": 30
+        },
+        "failure_threshold": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10,
+          "description": "Consecutive failures before the region is removed from rotation.",
+          "default": 3
+        },
+        "expected_status_range": {
+          "type": "array",
+          "items": { "type": "integer" },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "[min, max] inclusive HTTP status range that counts as healthy.",
+          "default": [200, 299]
+        },
+        "regions": {
+          "type": "array",
+          "description": "Per-region health-check overrides. Leave empty to inherit the defaults above.",
+          "items": {
+            "type": "object",
+            "required": ["region_short"],
+            "properties": {
+              "region_short": { "type": "string", "enum": ["us", "eu", "apac"] },
+              "path": { "type": "string" },
+              "interval_s": { "type": "integer" },
+              "failure_threshold": { "type": "integer" }
+            }
+          },
+          "default": [
+            { "region_short": "us" },
+            { "region_short": "eu" },
+            { "region_short": "apac" }
+          ]
+        }
+      }
+    },
+    "certificate_strategy": {
+      "type": "object",
+      "description": "TLS cert strategy. Each region terminates its own cert; we never share a cert across regions because rotation must be region-independent.",
+      "properties": {
+        "issuer": { "type": "string", "enum": ["lets_encrypt", "aws_acm", "cloudflare"], "default": "aws_acm" },
+        "san_per_region": {
+          "type": "boolean",
+          "description": "When true, each region's cert lists only its own hostname (us.kolm.ai). When false, every region's cert lists every hostname (legacy compat).",
+          "default": true
+        },
+        "rotation_days": { "type": "integer", "minimum": 30, "maximum": 365, "default": 60 }
+      }
+    },
+    "cors_residency_headers": {
+      "type": "object",
+      "description": "Headers the edge gateway forwards to the origin so downstream code can audit the routing decision.",
+      "properties": {
+        "request_residency_header": { "type": "string", "default": "x-kolm-residency" },
+        "request_prefer_region_header": { "type": "string", "default": "x-kolm-prefer-region" },
+        "response_routed_region_header": { "type": "string", "default": "x-kolm-routed-region" },
+        "response_routed_reason_header": { "type": "string", "default": "x-kolm-routed-reason" }
+      }
+    }
+  }
+}
