@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Token-level DPO &middot; per-token preference alignment &middot; kolm.ai</title>
+<meta name="description" content="Token-level Direct Preference Optimization for fine-grained alignment. Per-token gradient steering vs sequence-level DPO. Rafailov 2023 loss with beta=0.1, attention-mask aware, contrastive distill flag --contrastive-token-level.">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="Token-level DPO &middot; kolm.ai">
+<meta property="og:description" content="Per-token preference loss instead of one DPO term per sequence. Gradient lands on the exact tokens that mattered, not the whole completion.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://kolm.ai/docs/token-dpo">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/docs/token-dpo">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<style>
+  .doc-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
+  .doc-hero h1 { margin: 0 0 var(--ks-4); font-size: clamp(36px, 5vw, 56px); font-weight: 560; letter-spacing: -0.02em; line-height: 1.05; color: var(--ks-ink); }
+  .doc-hero p.lede { margin: 0 0 var(--ks-6); font-size: 18px; line-height: 1.55; color: var(--ks-ink-2); max-width: 64ch; }
+  .doc-section { padding: var(--ks-9) 0; border-bottom: 1px solid var(--ks-line-1); }
+  .doc-section h2 { margin: 0 0 var(--ks-2); font-size: clamp(24px, 3vw, 32px); font-weight: 560; letter-spacing: -0.015em; color: var(--ks-ink); }
+  .doc-section .sub { margin: 0 0 var(--ks-6); font-size: 15px; color: var(--ks-ink-3); max-width: 64ch; line-height: 1.6; }
+  .doc-section p { color: var(--ks-ink-2); font-size: 15px; line-height: 1.65; max-width: 72ch; margin: 0 0 var(--ks-3); }
+  .doc-section ul { color: var(--ks-ink-2); font-size: 15px; line-height: 1.7; max-width: 80ch; padding-left: 22px; }
+  .doc-section li + li { margin-top: 4px; }
+  .doc-section h3 { margin: var(--ks-5) 0 var(--ks-2); font-size: 17px; font-weight: 560; color: var(--ks-ink); }
+  .code-card { background: #05070a; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-4); margin: var(--ks-3) 0; }
+  .code-card pre { margin: 0; font-family: var(--ks-mono); font-size: 12.5px; line-height: 1.6; color: var(--ks-ink); overflow-x: auto; }
+  code { font-family: var(--ks-mono); font-size: 13px; color: var(--ks-ink); background: var(--ks-bg-1); padding: 1px 6px; border-radius: 4px; border: 1px solid var(--ks-line-2); }
+  table { border-collapse: collapse; width: 100%; max-width: 920px; margin: var(--ks-3) 0; font-size: 13.5px; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--ks-line-1); vertical-align: top; color: var(--ks-ink-2); }
+  th { color: var(--ks-ink); font-weight: 540; }
+  td code { font-size: 12px; }
+  .related { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--ks-3); margin: var(--ks-4) 0; }
+  @media(max-width:820px){ .related{ grid-template-columns:1fr } }
+  .related a { padding: var(--ks-4); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); background: var(--ks-bg-1); text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 4px; }
+  .related a:hover { border-color: var(--ks-accent-edge); }
+  .related b { font-size: 14px; color: var(--ks-ink); font-weight: 540; }
+  .related span { font-size: 12.5px; color: var(--ks-ink-3); line-height: 1.5; }
+</style>
+</head>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/wrapper">Wrapper</a>
+        <a href="/studio">Studio</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/docs">Docs</a>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
+      </div>
+    </div>
+  </header>
+</div>
+
+<main id="main">
+
+<section class="doc-hero">
+  <div class="ks-wrap">
+    <p class="ks-eyebrow">Open-source AI workbench</p>
+    <h1>Token-level DPO.</h1>
+    <p class="lede">Sequence-level DPO assigns one preference reward to the whole completion. Token-level DPO assigns a reward to every token, weighted by the attention mask, so the gradient lands on the exact spans that earned the preference flip. Built on the Rafailov 2023 loss with beta=0.1, accessible behind one trainer flag.</p>
+  </div>
+</section>
+
+<section class="doc-section" id="why-token-level">
+  <div class="ks-wrap">
+    <h2>Sequence-level vs token-level</h2>
+    <p class="sub">Sequence-level DPO collapses a long answer into one scalar. If only the last sentence was the actual win, the gradient still updates every token in the response uniformly. Token-level DPO assigns the loss per token so the update concentrates where the preference signal actually lives.</p>
+    <p>The Rafailov 2023 DPO loss compares the log-probability of a preferred response against a rejected response under both the trained policy and a frozen reference policy. The classic implementation reduces both log-probs to a scalar (one number per pair) and applies <code>F.logsigmoid(beta * (log_pi_pos - log_pi_neg))</code>. Token-level changes the reduction: each token contributes its own log-prob delta, masked by the attention mask so padding never enters the gradient.</p>
+    <p>When to use it: the preference signal is concentrated (a single hallucinated number, a refusal that should have been a yes, the wrong tool call). When NOT to use it: the entire response style is the preference axis (long-vs-short, formal-vs-casual). Sequence-level DPO handles the latter cleanly; token-level over-weights the high-entropy tokens at the start.</p>
+  </div>
+</section>
+
+<section class="doc-section" id="loss-math">
+  <div class="ks-wrap">
+    <h2>The loss function</h2>
+    <p class="sub">The token-level DPO loss lives at <code>apps/trainer/contrastive_distill.py</code>. It accepts paired logits for the preferred and rejected continuations, the target token IDs, an attention mask, and the beta temperature (default 0.1).</p>
+    <h3>Reference signature</h3>
+    <div class="code-card"><pre>def token_level_dpo_loss(
+    logits_pos,       # [batch, seq, vocab] - logits for the preferred completion
+    logits_neg,       # [batch, seq, vocab] - logits for the rejected completion
+    target_ids,       # [batch, seq]        - ground-truth token IDs (shared)
+    attention_mask,   # [batch, seq]        - 1 for real tokens, 0 for padding
+    beta=0.1,         # Rafailov 2023 default
+):
+    # Per-token log-prob of the target under each policy
+    log_pi_pos = log_prob_of_target(logits_pos, target_ids)  # [batch, seq]
+    log_pi_neg = log_prob_of_target(logits_neg, target_ids)  # [batch, seq]
+
+    # DPO term per token, masked to real tokens
+    per_token = -F.logsigmoid(beta * (log_pi_pos - log_pi_neg))
+    per_token = per_token * attention_mask
+    return per_token.sum() / attention_mask.sum().clamp(min=1)
+</pre></div>
+    <p>Two design decisions worth flagging. First, the mask is multiplicative rather than additive (we never subtract a sentinel), so the loss is exactly zero on padded positions instead of "small and noisy." Second, the divisor is the count of real tokens, not the sequence length, so the gradient norm is independent of batch padding.</p>
+  </div>
+</section>
+
+<section class="doc-section" id="captured-format">
+  <div class="ks-wrap">
+    <h2>Captured input format</h2>
+    <p class="sub">A token-level DPO run reads a captured.kolm artifact whose rows pair a preferred and rejected completion. The simplest source is the W458 approvals queue: every thumbs-up is the preferred response, every thumbs-down is rejected, the input is shared.</p>
+    <p>Each row in the JSONL stream must carry an <code>input</code> (the shared prompt), a <code>preferred</code> string, and a <code>rejected</code> string. The trainer tokenizes both completions, pads to the longest, builds an attention mask, and packs into the DPO batch. Rows without both arms are dropped at preprocessing time.</p>
+    <h3>Minimal row</h3>
+    <div class="code-card"><pre>{
+  "namespace": "support-bot",
+  "input": "What is the refund window for annual plans?",
+  "preferred": "Annual plans can be refunded within 30 days, prorated for unused months.",
+  "rejected": "Annual plans are non-refundable. Please contact support.",
+  "feedback_source": "w458_approvals"
+}
+</pre></div>
+    <p>The trainer ignores all other fields. The <code>feedback_source</code> hint is kept in the manifest for audit (so a downstream reviewer can re-derive the preference labels from the same queue). Provenance is bound to the K-Score receipt.</p>
+  </div>
+</section>
+
+<section class="doc-section" id="training-cli">
+  <div class="ks-wrap">
+    <h2>Training CLI</h2>
+    <p class="sub">The contrastive distill driver accepts <code>--contrastive-token-level</code> as the toggle. Without the flag, the loss reduces to standard sequence-level DPO. The environment variable <code>KOLM_CONTRASTIVE_TOKEN_LEVEL=1</code> is equivalent.</p>
+    <div class="code-card"><pre>kolm distill contrastive \
+  --student qwen2.5-3b \
+  --teacher anthropic/claude-sonnet-4-5 \
+  --captured ~/.kolm/captures/support-bot/approvals.jsonl \
+  --contrastive-token-level \
+  --beta 0.1 \
+  --epochs 1 \
+  --learning-rate 5e-7 \
+  --output ./student-tokendpo.kolm
+</pre></div>
+    <h3>Hyperparameter table</h3>
+    <table>
+      <thead><tr><th>flag</th><th>default</th><th>meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>--beta</code></td><td>0.1</td><td>DPO temperature; lower means tighter to the reference policy</td></tr>
+        <tr><td><code>--learning-rate</code></td><td>5e-7</td><td>One order of magnitude below SFT defaults</td></tr>
+        <tr><td><code>--epochs</code></td><td>1</td><td>DPO drifts fast; multiple epochs almost always overfit the preference</td></tr>
+        <tr><td><code>--contrastive-token-level</code></td><td>off</td><td>Per-token reduction; off means sequence-level reduction</td></tr>
+        <tr><td><code>--reference-model</code></td><td>SFT student</td><td>The frozen policy DPO compares against; defaults to the pre-DPO student</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="doc-section" id="bench-scaffold">
+  <div class="ks-wrap">
+    <h2>Bench scaffold</h2>
+    <p class="sub">The token-level vs sequence-level comparison is wired as a deterministic benchmark so the loss change can be regression-tested without spending teacher tokens.</p>
+    <p>The scaffold at <code>apps/trainer/bench_contrastive_token.py</code> builds a synthetic preference dataset with a known sparse signal (one specific token in the rejected completion is the wrong answer; the rest matches). It then trains for one step with each reduction and reports the L2 norm of the gradient at the marked token vs everywhere else. Token-level concentrates the gradient on the marked position; sequence-level smears it.</p>
+    <p>Run the bench locally to verify the loss is behaving as documented before you spend a real preference dataset on a 7B run.</p>
+    <div class="code-card"><pre>cd apps/trainer
+python bench_contrastive_token.py --batch 8 --seq 64 --marked-position 47
+# expected: token-level gradient norm at position 47 is &gt;3x norm at unmarked positions
+</pre></div>
+  </div>
+</section>
+
+<section class="doc-section" id="surfacing">
+  <div class="ks-wrap">
+    <h2>HTTP and TUI surface</h2>
+    <p class="sub">Token-DPO runs surface in two places: the bare HTTP collection at <code>GET /v1/training/token-dpo</code> and the TUI view bound to hotkey <code>T</code> (or commands <code>:dpo</code> / <code>:token-dpo</code>).</p>
+    <p>The HTTP endpoint returns an honest envelope today: until the trainer queue is mounted through the daemon, the response is <code>{ok:true, view:'token-dpo', status:'pending', items:[]}</code> with a note pointing at the trainer module. The endpoint is still useful as a probe in dashboards (so a tenant can poll for "is the W827 trainer wired yet?" without parsing source).</p>
+    <p>The TUI view (hotkey <code>T</code>) is the operator surface. It will list completed runs once the queue is wired; today it shares the same pending envelope so the view always renders.</p>
+  </div>
+</section>
+
+<section class="doc-section" id="related">
+  <div class="ks-wrap">
+    <h2>Related</h2>
+    <div class="related">
+      <a href="/docs/quickstart"><b>Quickstart</b><span>30-second path: install, login, first distillation.</span></a>
+      <a href="/docs/cookbook"><b>Distillation recipes</b><span>End-to-end recipes: SFT, contrastive, DPO, GRPO.</span></a>
+      <a href="/k-score"><b>K-Score</b><span>How the K-Score is computed and how to read the receipt.</span></a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__brand">
+        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-foot__tag">Open-source AI workbench. Distill, compile, deploy.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/k-score">K-Score</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/docs">Docs</a><a href="/docs/quickstart">Quickstart</a><a href="/docs/cli">CLI</a><a href="/docs/cookbook">Recipes</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/trust">Trust center</a><a href="/security">Security</a><a href="/trust">Trust center</a><a href="/changelog">Changelog</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/about">About</a><a href="/contact">Contact</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
+      </div>
+    </div>
+    <div class="ks-foot__bottom"><span>&copy; 2026 kolm.ai</span><span>Apache-2.0</span></div>
+  </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+</body>
+</html>

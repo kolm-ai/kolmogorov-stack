@@ -37,24 +37,10 @@
   function storeGet(key) { try { return window.localStorage.getItem(key); } catch (_) { return null; } }
   function storeSet(key, val) { try { window.localStorage.setItem(key, val); } catch (_) {} }
 
-  /* ──────────────── WF26 announcement bar ──────────────── */
-  function installAnnouncementBar() {
-    if (doc.querySelector('.kolm-announce')) return;
-    var skip = doc.documentElement.getAttribute('data-kolm-announce') === 'off';
-    if (skip) return;
-    if (storeGet(ANNOUNCE_KEY) === 'dismissed') return;
-
-    var bar = el('div', { class: 'kolm-announce', role: 'region', 'aria-label': 'Site announcement' });
-    bar.innerHTML =
-      '<span><strong>Kolm v1.0</strong> — DeepSeek-R1 32B distilled to INT4 in 125s on RTX 5090. ' +
-      '<a href="/quickstart">Quickstart →</a></span>' +
-      '<button type="button" class="kolm-announce__close" aria-label="Dismiss announcement">×</button>';
-    bar.querySelector('.kolm-announce__close').addEventListener('click', function () {
-      bar.setAttribute('hidden', '');
-      storeSet(ANNOUNCE_KEY, 'dismissed');
-    });
-    if (doc.body) doc.body.insertBefore(bar, doc.body.firstChild);
-  }
+  /* ──────────────── WF26 announcement bar — disabled W838 ────────────────
+     User killed the "Kolm v1.0 / DeepSeek-R1 32B distilled to INT4 in 125s"
+     banner. The page is the message; no banner needed above it. */
+  function installAnnouncementBar() { /* no-op */ }
 
   /* ──────────────── WF04 sticky-scroll nav ──────────────── */
   function installStickyNav() {

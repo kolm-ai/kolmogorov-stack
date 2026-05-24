@@ -358,7 +358,8 @@ COMMANDS
   install-device <art> --device d  push a .kolm onto a registered device (local/ssh/http)
   cc <sub>                         confidential compute attestation inspector (kinds|shape|verify)
   fl <sub>                         federated learning helpers — local only (strategies|new-round|verify|aggregate)
-  federated <sub>                  hash-only approval-row sharing across tenants — opt-in / opt-out / peers / share / aggregate / audit (W461)
+  federated <sub>                  hash-only approval-row sharing across tenants — opt-in / opt-out / peers / share / aggregate / audit (W461) + consortium <verify-mia|audit-epsilon|status> (W830)
+  regulatory <sub>                 regulatory compliance toolkit (W834): eu-aiact / risk-classify / hil / data-governance / model-card / grc-export (alias: reg)
   anonymize <file.jsonl> [opts]    shortcut for 'seeds generate --strategy redact-pii-templated'
   run <art.kolm> '<input>'         execute a .kolm against an input
   eval <art.kolm>                  re-run embedded evals, print this artifact's K-score
@@ -29133,6 +29134,13 @@ async function cmdFederated(args) {
   const sub = args && args[0];
   const rest = (args || []).slice(1);
   const jsonOut = rest.includes('--json');
+  // W830 — `kolm federated consortium <verify-mia|audit-epsilon|status>`
+  // is a separate sub-tree that hits /v1/federated/consortium/* routes
+  // (not the federated-approvals local module). Routed first so it never
+  // touches the local fa import path.
+  if (sub === 'consortium') {
+    return cmdW830FederatedConsortium(rest);
+  }
   const fa = await import('../src/federated-approvals.js');
   if (!sub || sub === '--help' || sub === '-h' || sub === 'help') {
     console.log('kolm federated - hash-only approval-row sharing across tenants\n\n' +
@@ -29142,7 +29150,8 @@ async function cmdFederated(args) {
       '  kolm federated peers\n' +
       '  kolm federated share --namespace=<ns> [--since=<iso>]\n' +
       '  kolm federated aggregate --local=<rows.json> --peers=<rows.json> [--epsilon=1.0]\n' +
-      '  kolm federated audit [--limit=N]\n\n' +
+      '  kolm federated audit [--limit=N]\n' +
+      '  kolm federated consortium <verify-mia|audit-epsilon|status> [args]   (W830)\n\n' +
       'Honest scope: hash-only sharing + Laplace-DP-noised aggregates. Network\n' +
       'transport + peer authentication are the caller responsibility.');
     return;
@@ -30543,7 +30552,7 @@ async function cmdTui(args) {
     // status bar.
     view: 'live-calls',
     viewData: [],
-    status: 'kolm tui  ?=help  q=quit  /=filter  :=command  1=live-calls 2=artifacts 3=compile  4=spend 5=privacy-events 6=repeated-workflows 7=opportunities 8=labeling-queue 9=datasets 0=builds A=bakeoffs B=devices C=storage-sync D=agent-telemetry N=next',
+    status: 'kolm tui  ?=help  q=quit  /=filter  :=command  1=live-calls 2=artifacts 3=compile  4=spend 5=privacy-events 6=repeated-workflows 7=opportunities 8=labeling-queue 9=datasets 0=builds A=bakeoffs B=devices C=storage-sync D=agent-telemetry N=next  O=pipelines P=ab Q=k8s R=marketplace S=placement T=token-dpo U=reasoning V=multimodal',
     // W246 compile wizard pane — mirrors /account + cmdCompile + cmdDistill knobs.
     // Picking field with j/k while in the compile pane edits one of these values;
     // 'c' (when state.leftSource === 'compile') ships the wizard via /v1/compile.
@@ -30613,6 +30622,54 @@ async function cmdTui(args) {
     // W466 — Multimodal bake-off view. Closes the multimodal compare triangle:
     // /account/multimodal-bakeoff page, CLI (`kolm bakeoff multimodal`), TUI.
     { id: 'multimodal-bakeoff', key: 'M', endpoint: '/v1/multimodal/bakeoff',    kind: 'get',   label: 'multimodal bakeoff (base vs compiled)' },
+    // W821 — Pipeline orchestrator view. Closes the pipeline triangle:
+    // pipelines page, CLI (`kolm pipeline list`), TUI. Hits the W821 list
+    // endpoint so the operator sees every composed kolm.pipeline.yaml under
+    // the current tenant.
+    { id: 'pipeline-orchestrator', key: 'O', endpoint: '/v1/pipelines',          kind: 'get',   label: 'pipelines (orchestrator)' },
+    // W822 — A/B experiments view. Reads /v1/ab-tests so the same tenant sees
+    // their tests in the operator TUI alongside the dashboard + CLI.
+    { id: 'ab-experiments',     key: 'P', endpoint: '/v1/ab-tests',              kind: 'get',   label: 'A/B experiments' },
+    // W824 — Kubernetes deep-readiness view. Mirrors the kubelet probe so an
+    // operator can see whether the artifact is loaded without leaving the TUI.
+    { id: 'k8s-readiness',      key: 'Q', endpoint: '/v1/ready/deep',            kind: 'get',   label: 'k8s readiness (artifact-aware)' },
+    // W825 — Marketplace view. Closes the listings triangle: public
+    // marketplace page, CLI (`kolm marketplace list`), TUI.
+    { id: 'marketplace',        key: 'R', endpoint: '/v1/marketplace/listings',  kind: 'get',   label: 'marketplace (listings)' },
+    // W826 — Runtime placement view. VRAM -> RAM -> NVMe -> network tier
+    // decision tree visible from the TUI so the operator can audit which
+    // tier an artifact will land on before it runs.
+    { id: 'runtime-placement',  key: 'S', endpoint: '/v1/runtime/placement',     kind: 'get',   label: 'runtime placement (VRAM/RAM/NVMe)' },
+    // W827 — Token-DPO training view. Mirrors the preference-optimization
+    // queue + recent runs so the operator can see active token-level DPO jobs.
+    { id: 'token-dpo',          key: 'T', endpoint: '/v1/training/token-dpo',    kind: 'get',   label: 'token-DPO training' },
+    // W828 — Reasoning trace distill view. Surfaces the chain-of-thought
+    // distill jobs that turn captured reasoning traces into smaller students.
+    { id: 'reasoning-distill',  key: 'U', endpoint: '/v1/trace/distill',         kind: 'get',   label: 'reasoning v2 (trace distill)' },
+    // W829 — Multimodal capture pipeline view. Lists the image/audio/tool-use
+    // capture rows feeding the VLM distill queue. Same /account/multimodal
+    // surface the dashboard reads.
+    { id: 'multimodal-pipeline', key: 'V', endpoint: '/v1/multimodal/pipeline',  kind: 'get',   label: 'multimodal pipeline (captures + VLM distill)' },
+    // W830 — Federated consortium view (no hotkey — accessed via :federated /
+    // :consortium command-mode). Reads the consortium membership the calling
+    // tenant has opted into so the operator can see peers + privacy budget.
+    { id: 'federated-consortium', key: null, endpoint: '/v1/federated/consortium', kind: 'get', label: 'federated consortium (members + budget)' },
+    // W831 — Air-gapped jobs view (no hotkey — accessed via :airgap /
+    // :sneakernet command-mode). Lists the offline distill + sneakernet
+    // bundle jobs the tenant has queued.
+    { id: 'airgap-jobs',        key: null, endpoint: '/v1/airgap/jobs',          kind: 'get',   label: 'air-gapped jobs (sneakernet + offline distill)' },
+    // W833 — Cross-lingual manifest view (no hotkey — :lingual /
+    // :multilingual command-mode). Surfaces the language mixture the tenant
+    // has captured + the per-locale balance recommendations.
+    { id: 'lingual-manifest',   key: null, endpoint: '/v1/lingual/manifest',     kind: 'get',   label: 'cross-lingual manifest' },
+    // W834 — Regulatory compliance view (no hotkey — :regulatory / :grc /
+    // :compliance command-mode). Reads the EU AI Act Annex IV docs blob plus
+    // the related GRC packet status.
+    { id: 'regulatory-grc',     key: null, endpoint: '/v1/reg/eu-aiact-docs',    kind: 'get',   label: 'regulatory (EU AI Act docs + GRC)' },
+    // W835 — Savings tracking view (no hotkey — :savings / :cost-track
+    // command-mode). Reads the savings summary so the operator can see net
+    // $ saved by routing teacher traffic through the gateway.
+    { id: 'savings-tracker',    key: null, endpoint: '/v1/savings',              kind: 'get',   label: 'savings (teacher cost vs net)' },
   ];
   // Also expose simulations under view 'simulations' (alias for one of the
   // workflow rows so the W384 14-view test grep finds the literal). We list
@@ -30800,7 +30857,9 @@ async function cmdTui(args) {
       lines.push('      4=spend 5=privacy-events 6=repeated-workflows');
       lines.push('      7=opportunities 8=labeling-queue 9=datasets');
       lines.push('      0=builds A=bakeoffs B=devices C=storage-sync D=agent-telemetry N=next');
+      lines.push('      O=pipelines P=ab Q=k8s R=marketplace S=placement T=token-dpo U=reasoning V=multimodal');
       lines.push('      :connectors provider status  :providers alias');
+      lines.push('      :federated :airgap :lingual :regulatory :savings');
       lines.push('      / filter  : command  r refresh  ? help  q quit');
       lines.push('      d distill  R replay  v verify  Enter open');
     } else if (state.leftSource === 'view') {
@@ -30990,6 +31049,65 @@ async function cmdTui(args) {
       'tokenization':  'multimodal-tokenize',
       'multimodal-tokenize':'multimodal-tokenize',
       'mm-tokenize':   'multimodal-tokenize',
+      // W821 — pipeline orchestrator (hotkey O + :pipelines / :pipeline aliases).
+      'pipelines':     'pipeline-orchestrator',
+      'pipeline':      'pipeline-orchestrator',
+      'pipeline-orchestrator':'pipeline-orchestrator',
+      'orchestrator':  'pipeline-orchestrator',
+      // W822 — A/B experiments (hotkey P + :ab / :experiments aliases).
+      'ab':            'ab-experiments',
+      'ab-tests':      'ab-experiments',
+      'ab-experiments':'ab-experiments',
+      'experiments':   'ab-experiments',
+      // W824 — k8s readiness (hotkey Q + :k8s / :ready aliases).
+      'k8s':           'k8s-readiness',
+      'k8s-readiness': 'k8s-readiness',
+      'ready':         'k8s-readiness',
+      'ready-deep':    'k8s-readiness',
+      // W825 — marketplace (hotkey R + :marketplace / :listings aliases).
+      'marketplace':   'marketplace',
+      'listings':      'marketplace',
+      // W826 — runtime placement (hotkey S + :placement / :runtime aliases).
+      'placement':     'runtime-placement',
+      'runtime-placement':'runtime-placement',
+      'runtime':       'runtime-placement',
+      // W827 — token-DPO training (hotkey T + :dpo / :token-dpo aliases).
+      'token-dpo':     'token-dpo',
+      'dpo':           'token-dpo',
+      // W828 — reasoning trace distill (hotkey U + :reasoning aliases).
+      'reasoning':     'reasoning-distill',
+      'reasoning-distill':'reasoning-distill',
+      'reasoning-v2':  'reasoning-distill',
+      'trace-distill': 'reasoning-distill',
+      // W829 — multimodal pipeline (hotkey V).
+      'multimodal-pipeline':'multimodal-pipeline',
+      'mm-pipeline':   'multimodal-pipeline',
+      'vlm':           'multimodal-pipeline',
+      'vlm-distill':   'multimodal-pipeline',
+      // W830 — federated consortium (alias-only — no hotkey).
+      'federated':     'federated-consortium',
+      'consortium':    'federated-consortium',
+      'federated-consortium':'federated-consortium',
+      // W831 — air-gapped jobs (alias-only — no hotkey).
+      'airgap':        'airgap-jobs',
+      'sneakernet':    'airgap-jobs',
+      'airgap-jobs':   'airgap-jobs',
+      'offline':       'airgap-jobs',
+      // W833 — cross-lingual manifest (alias-only — no hotkey).
+      'lingual':       'lingual-manifest',
+      'multilingual':  'lingual-manifest',
+      'lingual-manifest':'lingual-manifest',
+      // W834 — regulatory compliance (alias-only — no hotkey).
+      'regulatory':    'regulatory-grc',
+      'grc':           'regulatory-grc',
+      'compliance':    'regulatory-grc',
+      'regulatory-grc':'regulatory-grc',
+      'eu-aiact':      'regulatory-grc',
+      // W835 — savings tracker (alias-only — no hotkey).
+      'savings':       'savings-tracker',
+      'cost-track':    'savings-tracker',
+      'savings-tracker':'savings-tracker',
+      'cost-savings':  'savings-tracker',
     };
     if (VIEW_ALIAS[verb]) {
       const id = VIEW_ALIAS[verb];
@@ -31039,7 +31157,7 @@ async function cmdTui(args) {
     // Normal mode.
     if (k === 'q') { teardown(); process.exit(EXIT.OK); return; }
     if (k === '?') {
-      state.status = 'views: 1=live-calls 2=artifacts 3=compile 4=spend 5=privacy-events 6=repeated-workflows 7=opportunities 8=labeling-queue 9=datasets 0=builds A=bakeoffs B=devices C=storage-sync D=agent-telemetry N=next J=billing-breakdown  |  :verbs: :events :opportunities :datasets :labels :bakeoffs :artifacts :billing :breakdown :next  |  keys: j/k move  g/G top/bot  Tab pane  / filter  : cmd  r refresh  d distill  R replay  v verify  q quit';
+      state.status = 'views: 1=live-calls 2=artifacts 3=compile 4=spend 5=privacy-events 6=repeated-workflows 7=opportunities 8=labeling-queue 9=datasets 0=builds A=bakeoffs B=devices C=storage-sync D=agent-telemetry N=next J=billing-breakdown O=pipelines P=ab Q=k8s R=marketplace S=placement T=token-dpo U=reasoning V=multimodal  |  :verbs: :events :opportunities :datasets :labels :bakeoffs :artifacts :billing :breakdown :next :pipelines :ab :marketplace :placement :federated :airgap :lingual :regulatory :savings  |  keys: j/k move  g/G top/bot  Tab pane  / filter  : cmd  r refresh  d distill  R replay  v verify  q quit';
       render(); return;
     }
     if (k === 'j') { state.selectedIdx = Math.min(state.selectedIdx + 1, 9999); render(); return; }
@@ -37019,6 +37137,16 @@ async function main() {
       // parallel W766/W768/W769/W770 wave agents cannot collide on this
       // symbol.
       case 'cert':     await withErrorContext('cert',      () => cmdW767Cert(rest)); break;
+      // W834 — `kolm regulatory <eu-aiact|risk-classify|hil|data-governance|
+      // model-card|grc-export>` routes the regulatory compliance toolkit
+      // dispatcher (EU AI Act Annex IV docs, intended-use risk classifier,
+      // mandatory HIL thresholds, data-governance reports, extended model
+      // cards, vendor GRC exports). Distinct-named (cmdW834Regulatory) so
+      // it lives alongside W766's `kolm ai-act` without colliding — W834 is
+      // the broader regulatory surface that wires to /v1/reg/* (not the
+      // narrower /v1/compliance/ai-act/* W766 surface).
+      case 'regulatory':
+      case 'reg':      await withErrorContext('regulatory', () => cmdW834Regulatory(rest)); break;
       // W766 — `kolm ai-act <export-docs|risk-score|human-in-loop|governance-report>`
       // routes the EU AI Act compliance toolkit dispatcher (Annex IV docs,
       // Article 5/Annex III risk scoring, Article 14 human-in-loop config, and
@@ -40279,6 +40407,671 @@ async function cmdW767Cert(args) {
     error: 'unknown_subcommand',
     hint: 'usage: kolm cert <soc2-checklist|iso27001-controls|audit-retention-status|audit-retention-set|monitoring-snapshot>',
     version: 'w767-v1',
+  }, EXIT.BAD_ARGS);
+}
+
+// W834 — COMPLETION entries for the `regulatory` (alias `reg`) dispatcher.
+// Appended post-literal so a parallel agent on W766/W767/W768/W769/W770/W830
+// cannot collide with us on the literal completion table.
+COMPLETION_VERBS.push('regulatory', 'reg');
+COMPLETION_SUBS.regulatory = ['eu-aiact', 'risk-classify', 'hil', 'data-governance', 'model-card', 'grc-export'];
+COMPLETION_SUBS.reg        = ['eu-aiact', 'risk-classify', 'hil', 'data-governance', 'model-card', 'grc-export'];
+
+// =============================================================================
+// W834 — Regulatory Compliance Toolkit dispatcher.
+//
+// Distinct-named (cmdW834Regulatory) so it lives alongside W766's
+// `kolm ai-act` (which wires to /v1/compliance/ai-act/*) without colliding —
+// W834 is the broader regulatory surface wired to /v1/reg/* (EU AI Act
+// Annex IV docs, intended-use risk classifier, mandatory HIL thresholds,
+// data-governance reports, extended model cards, vendor GRC exports).
+//
+// Subcommands (route names match src/reg-routes.js exactly):
+//   kolm regulatory eu-aiact <OUTPUT_PATH> [--manifest PATH] [--format json|markdown|html]
+//                                          - POST /v1/reg/eu-aiact-docs
+//   kolm regulatory risk-classify --intended-use "<text>" [--namespace X] [--manifest PATH]
+//                                          - POST /v1/reg/classify-risk
+//   kolm regulatory hil set --threshold <N> [--namespace X]
+//                                          - POST /v1/reg/hil/threshold
+//   kolm regulatory hil show [--namespace X]
+//                                          - GET  /v1/reg/hil/threshold
+//   kolm regulatory data-governance [--namespace X] [--period YYYY-MM]
+//                                          - GET  /v1/reg/data-governance
+//   kolm regulatory model-card [--artifact PATH] [--format json|markdown]
+//                                          - POST /v1/reg/model-card
+//   kolm regulatory grc-export --vendor <onetrust|servicenow|ibm_openpages> [--report PATH]
+//                                          - POST /v1/reg/grc-export
+//
+// HONESTY CONTRACT: bubble the upstream envelope verbatim. The CLI only
+// exits nonzero when the network call itself fails or auth is missing.
+//
+// Honest exit codes:
+//   0 - success (envelope printed; even ok:false envelopes from valid input
+//       print at exit 0 so the CLI doesn't double-fail when the server
+//       already gave an honest 400 with details).
+//   1 - bad CLI args (missing subverb / missing positional)
+//   3 - auth missing (KOLM_API_KEY unset)
+//   4 - network failure / unexpected route error
+// =============================================================================
+async function cmdW834Regulatory(args) {
+  const sub = (args && args[0]) || '';
+
+  function _envApiKey() { return process.env.KOLM_API_KEY || ''; }
+  function _envBase()   {
+    const b = process.env.KOLM_BASE_URL || process.env.KOLM_BASE || 'https://kolm.ai';
+    return b.replace(/\/$/, '');
+  }
+  function _flag(rest, name) {
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--' + name && i + 1 < rest.length) return rest[i + 1];
+      if (typeof rest[i] === 'string' && rest[i].startsWith('--' + name + '=')) {
+        return rest[i].slice(name.length + 3);
+      }
+    }
+    return null;
+  }
+  function _print(envelope) { console.log(JSON.stringify(envelope, null, 2)); }
+  function _fail(envelope, code) {
+    _print(envelope);
+    process.exit(code != null ? code : EXIT.EXECUTION);
+  }
+  function _requireKey() {
+    const key = _envApiKey();
+    if (!key) {
+      _fail({
+        ok: false,
+        error: 'auth_required',
+        hint: 'set KOLM_API_KEY (kolm signup / kolm login) - /v1/reg/* is auth-gated',
+        version: 'w834-v1',
+      }, EXIT.MISSING_PREREQ);
+    }
+    return key;
+  }
+  async function _readJsonFile(filePath, label) {
+    let fsMod;
+    try {
+      fsMod = await import('node:fs');
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'fs_unavailable',
+        detail: String(e && e.message || e),
+        version: 'w834-v1',
+      });
+      return null;
+    }
+    let raw;
+    try {
+      raw = fsMod.readFileSync(filePath, 'utf8');
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: (label || 'file') + '_read_failed',
+        detail: String(e && e.message || e),
+        hint: 'pass a path to a readable JSON file',
+        version: 'w834-v1',
+      }, EXIT.BAD_ARGS);
+      return null;
+    }
+    try {
+      return JSON.parse(raw);
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: (label || 'file') + '_parse_failed',
+        detail: String(e && e.message || e),
+        hint: (label || 'file') + ' must be valid JSON',
+        version: 'w834-v1',
+      }, EXIT.BAD_ARGS);
+      return null;
+    }
+  }
+
+  function _usage() {
+    console.error('usage: kolm regulatory <eu-aiact|risk-classify|hil|data-governance|model-card|grc-export> [args]');
+    console.error('        (alias: kolm reg ...)');
+    console.error('  eu-aiact <OUTPUT_PATH> [--manifest PATH] [--format json|markdown|html]');
+    console.error('  risk-classify --intended-use "<text>" [--namespace X] [--manifest PATH]');
+    console.error('  hil set --threshold <N> [--namespace X]');
+    console.error('  hil show [--namespace X]');
+    console.error('  data-governance [--namespace X] [--period YYYY-MM]');
+    console.error('  model-card [--artifact PATH] [--format json|markdown]');
+    console.error('  grc-export --vendor <onetrust|servicenow|ibm_openpages> [--report PATH]');
+  }
+
+  // --- usage / help -------------------------------------------------------
+  if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
+    _usage();
+    process.exit(sub === '' ? EXIT.BAD_ARGS : EXIT.OK);
+    return;
+  }
+
+  // --- subcommand: eu-aiact -----------------------------------------------
+  if (sub === 'eu-aiact') {
+    const rest = args.slice(1);
+    // Positional output path; --manifest PATH is the artifact manifest.
+    let outputPath = null;
+    for (const a of rest) {
+      if (typeof a === 'string' && !a.startsWith('-')) { outputPath = a; break; }
+    }
+    if (!outputPath) {
+      _fail({
+        ok: false,
+        error: 'output_path_required',
+        hint: 'usage: kolm regulatory eu-aiact <OUTPUT_PATH> [--manifest PATH] [--format json|markdown|html]',
+        version: 'w834-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    const manifestPath = _flag(rest, 'manifest');
+    let manifest = {};
+    if (manifestPath) {
+      manifest = await _readJsonFile(manifestPath, 'manifest');
+      if (manifest == null) return;
+    }
+    const format = _flag(rest, 'format') || 'json';
+    const key = _requireKey();
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/reg/eu-aiact-docs', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({ artifact_manifest: manifest, format }),
+      });
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'network_error',
+        detail: String(e && e.message || e),
+        version: 'w834-v1',
+      });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    try {
+      const fsMod = await import('node:fs');
+      fsMod.writeFileSync(outputPath, JSON.stringify(body, null, 2) + '\n', 'utf8');
+      _print({
+        ok: body && body.ok != null ? body.ok : true,
+        version: body && body.version ? body.version : 'w834-v1',
+        format,
+        output: outputPath,
+      });
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'output_write_failed',
+        detail: String(e && e.message || e),
+        version: 'w834-v1',
+      });
+      return;
+    }
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // --- subcommand: risk-classify ------------------------------------------
+  if (sub === 'risk-classify') {
+    const rest = args.slice(1);
+    const intended_use = _flag(rest, 'intended-use');
+    if (!intended_use) {
+      _fail({
+        ok: false,
+        error: 'intended_use_required',
+        hint: 'usage: kolm regulatory risk-classify --intended-use "<text>" [--namespace X] [--manifest PATH]',
+        version: 'w834-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    const namespace = _flag(rest, 'namespace');
+    const manifestPath = _flag(rest, 'manifest');
+    let manifest = {};
+    if (manifestPath) {
+      manifest = await _readJsonFile(manifestPath, 'manifest');
+      if (manifest == null) return;
+    }
+    if (namespace) manifest.namespace = namespace;
+    const key = _requireKey();
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/reg/classify-risk', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({ intended_use, artifact_manifest: manifest }),
+      });
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'network_error',
+        detail: String(e && e.message || e),
+        version: 'w834-v1',
+      });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // --- subcommand: hil (set | show) ---------------------------------------
+  if (sub === 'hil') {
+    const rest = args.slice(1);
+    const op = rest[0];
+    const innerRest = rest.slice(1);
+    const namespace = _flag(innerRest, 'namespace');
+    const key = _requireKey();
+    if (op === 'set') {
+      const thresholdRaw = _flag(innerRest, 'threshold');
+      if (thresholdRaw == null) {
+        _fail({
+          ok: false,
+          error: 'threshold_required',
+          hint: 'usage: kolm regulatory hil set --threshold <N> [--namespace X]  (THRESHOLD in [0.0, 1.0])',
+          version: 'w834-v1',
+        }, EXIT.BAD_ARGS);
+        return;
+      }
+      if (!namespace) {
+        _fail({
+          ok: false,
+          error: 'namespace_required',
+          hint: 'usage: kolm regulatory hil set --threshold <N> --namespace <X>',
+          version: 'w834-v1',
+        }, EXIT.BAD_ARGS);
+        return;
+      }
+      let resp;
+      try {
+        resp = await fetch(_envBase() + '/v1/reg/hil/threshold', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+          body: JSON.stringify({
+            namespace: String(namespace),
+            threshold: Number(thresholdRaw),
+            confirm: true,
+          }),
+        });
+      } catch (e) {
+        _fail({
+          ok: false,
+          error: 'network_error',
+          detail: String(e && e.message || e),
+          version: 'w834-v1',
+        });
+        return;
+      }
+      const body = await resp.json().catch(() => ({}));
+      _print(body);
+      if (!resp.ok) process.exit(EXIT.EXECUTION);
+      return;
+    }
+    if (op === 'show' || op == null) {
+      if (!namespace) {
+        _fail({
+          ok: false,
+          error: 'namespace_required',
+          hint: 'usage: kolm regulatory hil show --namespace <X>',
+          version: 'w834-v1',
+        }, EXIT.BAD_ARGS);
+        return;
+      }
+      const qs = new URLSearchParams();
+      qs.set('namespace', String(namespace));
+      let resp;
+      try {
+        resp = await fetch(_envBase() + '/v1/reg/hil/threshold?' + qs.toString(), {
+          method: 'GET',
+          headers: { 'authorization': 'Bearer ' + key },
+        });
+      } catch (e) {
+        _fail({
+          ok: false,
+          error: 'network_error',
+          detail: String(e && e.message || e),
+          version: 'w834-v1',
+        });
+        return;
+      }
+      const body = await resp.json().catch(() => ({}));
+      _print(body);
+      if (!resp.ok) process.exit(EXIT.EXECUTION);
+      return;
+    }
+    _fail({
+      ok: false,
+      error: 'unknown_hil_op',
+      hint: 'usage: kolm regulatory hil <set|show> [args]',
+      version: 'w834-v1',
+    }, EXIT.BAD_ARGS);
+    return;
+  }
+
+  // --- subcommand: data-governance ----------------------------------------
+  if (sub === 'data-governance') {
+    const rest = args.slice(1);
+    const namespace = _flag(rest, 'namespace');
+    const period = _flag(rest, 'period');
+    const key = _requireKey();
+    const qs = new URLSearchParams();
+    if (namespace) qs.set('namespace', String(namespace));
+    if (period) qs.set('period', String(period));
+    const url = _envBase() + '/v1/reg/data-governance' + (qs.toString() ? '?' + qs.toString() : '');
+    let resp;
+    try {
+      resp = await fetch(url, {
+        method: 'GET',
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'network_error',
+        detail: String(e && e.message || e),
+        version: 'w834-v1',
+      });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // --- subcommand: model-card ---------------------------------------------
+  if (sub === 'model-card') {
+    const rest = args.slice(1);
+    const manifestPath = _flag(rest, 'artifact') || _flag(rest, 'manifest');
+    const format = _flag(rest, 'format') || 'json';
+    let manifest = {};
+    if (manifestPath) {
+      manifest = await _readJsonFile(manifestPath, 'manifest');
+      if (manifest == null) return;
+    }
+    const key = _requireKey();
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/reg/model-card', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({ artifact_manifest: manifest, format }),
+      });
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'network_error',
+        detail: String(e && e.message || e),
+        version: 'w834-v1',
+      });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // --- subcommand: grc-export ---------------------------------------------
+  if (sub === 'grc-export') {
+    const rest = args.slice(1);
+    const vendorRaw = _flag(rest, 'vendor');
+    if (!vendorRaw) {
+      _fail({
+        ok: false,
+        error: 'vendor_required',
+        hint: 'usage: kolm regulatory grc-export --vendor <onetrust|servicenow|ibm_openpages> [--report PATH]',
+        version: 'w834-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    // Normalize common case variations to the wire enum the server expects.
+    const vMap = {
+      'onetrust': 'onetrust',
+      'one-trust': 'onetrust',
+      'oneTrust': 'onetrust',
+      'servicenow': 'servicenow',
+      'service-now': 'servicenow',
+      'serviceNow': 'servicenow',
+      'ibm-openpages': 'ibm_openpages',
+      'ibm_openpages': 'ibm_openpages',
+      'ibm-openPages': 'ibm_openpages',
+      'ibmOpenPages': 'ibm_openpages',
+    };
+    const vendor = vMap[String(vendorRaw)] || String(vendorRaw).toLowerCase();
+    const reportPath = _flag(rest, 'report');
+    let report;
+    if (reportPath) {
+      report = await _readJsonFile(reportPath, 'report');
+      if (report == null) return;
+    } else {
+      // Minimum honest envelope the server accepts when no report file is on
+      // disk yet. The server returns the vendor-shaped payload + a
+      // no_grc_creds sub-envelope so the operator can still pre-stage uploads.
+      report = { ok: true, source: 'cli-stub', generated_at: new Date().toISOString() };
+    }
+    const key = _requireKey();
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/reg/grc-export', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({ vendor, report }),
+      });
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'network_error',
+        detail: String(e && e.message || e),
+        version: 'w834-v1',
+      });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // Unknown subverb.
+  _usage();
+  _fail({
+    ok: false,
+    error: 'unknown_subcommand',
+    detail: 'subverb=' + sub,
+    hint: 'usage: kolm regulatory <eu-aiact|risk-classify|hil|data-governance|model-card|grc-export>',
+    version: 'w834-v1',
+  }, EXIT.BAD_ARGS);
+}
+
+// =============================================================================
+// W830 - Federated consortium dispatcher (subverb of `kolm federated`).
+//
+// Distinct-named (cmdW830FederatedConsortium) so it lives alongside the
+// existing W461 cmdFederated approval-row dispatcher without colliding.
+// Wires to /v1/federated/consortium/* routes shipped in
+// src/federated-consortium-routes.js.
+//
+// Subverbs (route names match the router exactly where they exist):
+//   kolm federated consortium verify-mia --contrib-id <id>
+//                              - POST /v1/federated/consortium/verify-mia
+//                                (honest stub on the server when shadow_models
+//                                empty over the wire - returns the
+//                                mia_requires_shadow_models envelope)
+//   kolm federated consortium audit-epsilon --epsilon <float>
+//                              - HONEST envelope: no /v1/federated/consortium/
+//                                audit-epsilon route exists yet; the W830
+//                                dpEpsilonAudit() module is callable only
+//                                in-process. Returns awaiting_operator_hook.
+//   kolm federated consortium status [--consortium-id ID]
+//                              - HONEST envelope: no single status route
+//                                exists yet; closest reads are members,
+//                                budget, and aggregations. Returns
+//                                awaiting_operator_hook with the three
+//                                read-route hints so the operator can
+//                                stitch a status view from those.
+//
+// HONESTY CONTRACT: bubble the upstream envelope verbatim. Subverbs whose
+// hosted route does not yet exist print an `awaiting_operator_hook` envelope
+// (matching the W767 audit-retention-set pattern) - never silent-passes,
+// never invents a route.
+// =============================================================================
+async function cmdW830FederatedConsortium(args) {
+  const sub = (args && args[0]) || '';
+
+  function _envApiKey() { return process.env.KOLM_API_KEY || ''; }
+  function _envBase()   {
+    const b = process.env.KOLM_BASE_URL || process.env.KOLM_BASE || 'https://kolm.ai';
+    return b.replace(/\/$/, '');
+  }
+  function _flag(rest, name) {
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--' + name && i + 1 < rest.length) return rest[i + 1];
+      if (typeof rest[i] === 'string' && rest[i].startsWith('--' + name + '=')) {
+        return rest[i].slice(name.length + 3);
+      }
+    }
+    return null;
+  }
+  function _print(envelope) { console.log(JSON.stringify(envelope, null, 2)); }
+  function _fail(envelope, code) {
+    _print(envelope);
+    process.exit(code != null ? code : EXIT.EXECUTION);
+  }
+  function _requireKey() {
+    const key = _envApiKey();
+    if (!key) {
+      _fail({
+        ok: false,
+        error: 'auth_required',
+        hint: 'set KOLM_API_KEY (kolm signup / kolm login) - /v1/federated/consortium/* is auth-gated',
+        version: 'w830-v1',
+      }, EXIT.MISSING_PREREQ);
+    }
+    return key;
+  }
+
+  function _usage() {
+    console.error('usage: kolm federated consortium <verify-mia|audit-epsilon|status> [args]');
+    console.error('  verify-mia    --contrib-id <id>         - POST /v1/federated/consortium/verify-mia');
+    console.error('  audit-epsilon --epsilon <float>         - honest awaiting_operator_hook (no hosted route)');
+    console.error('  status        [--consortium-id ID]      - honest awaiting_operator_hook (stitch members+budget+aggregations)');
+  }
+
+  if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
+    _usage();
+    process.exit(sub === '' ? EXIT.BAD_ARGS : EXIT.OK);
+    return;
+  }
+
+  // --- verify-mia ---------------------------------------------------------
+  if (sub === 'verify-mia') {
+    const rest = args.slice(1);
+    const contribId = _flag(rest, 'contrib-id') || _flag(rest, 'artifact-id') || _flag(rest, 'artifact_id');
+    if (!contribId) {
+      _fail({
+        ok: false,
+        error: 'contrib_id_required',
+        hint: 'usage: kolm federated consortium verify-mia --contrib-id <id>',
+        version: 'w830-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _requireKey();
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/federated/consortium/verify-mia', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        // The hosted route accepts `artifact_id` per src/federated-consortium-
+        // routes.js. Shadow models can't cross the JSON wire as callable
+        // functions; the server returns the mia_requires_shadow_models stub
+        // envelope when shadow_models is empty. That's the HONEST happy path.
+        body: JSON.stringify({
+          artifact_id: String(contribId),
+          test_inputs: [],
+          shadow_models: [],
+        }),
+      });
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'network_error',
+        detail: String(e && e.message || e),
+        version: 'w830-v1',
+      });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // --- audit-epsilon (route not yet wired) --------------------------------
+  if (sub === 'audit-epsilon') {
+    const rest = args.slice(1);
+    const epsilonRaw = _flag(rest, 'epsilon');
+    if (epsilonRaw == null) {
+      _fail({
+        ok: false,
+        error: 'epsilon_required',
+        hint: 'usage: kolm federated consortium audit-epsilon --epsilon <float>',
+        version: 'w830-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    // Honest envelope: no hosted /v1/federated/consortium/audit-epsilon
+    // route ships in this revision. The W830 dpEpsilonAudit() module
+    // (src/federated-mia.js) is callable in-process only.
+    _print({
+      ok: false,
+      error: 'awaiting_operator_hook',
+      hint: 'POST /v1/federated/consortium/audit-epsilon is not in this revision; '
+        + 'call dpEpsilonAudit({artifact_manifest}) from src/federated-mia.js '
+        + 'in-process, OR build a manifest carrying {privacy:{dp_epsilon, '
+        + 'dp_sensitivity, dp_sigma, dp_delta}} and re-issue this command '
+        + 'once the route ships.',
+      version: 'w830-v1',
+      claimed_epsilon: Number(epsilonRaw),
+    });
+    process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // --- status (route not yet wired) ---------------------------------------
+  if (sub === 'status') {
+    const rest = args.slice(1);
+    const consortium_id = _flag(rest, 'consortium-id') || _flag(rest, 'consortium_id') || 'default-consortium';
+    // Honest envelope: no hosted /v1/federated/consortium/status route
+    // ships in this revision. The closest reads are members + budget +
+    // aggregations; the operator can stitch a status view from those.
+    _print({
+      ok: false,
+      error: 'awaiting_operator_hook',
+      hint: 'GET /v1/federated/consortium/status is not in this revision; '
+        + 'compose a status view from GET /v1/federated/consortium/members '
+        + '+ GET /v1/federated/consortium/budget + GET /v1/federated/'
+        + 'consortium/aggregations (all hosted, all auth-gated).',
+      version: 'w830-v1',
+      consortium_id,
+      hosted_read_routes: [
+        '/v1/federated/consortium/members',
+        '/v1/federated/consortium/budget',
+        '/v1/federated/consortium/aggregations',
+      ],
+    });
+    process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // Unknown subverb.
+  _usage();
+  _fail({
+    ok: false,
+    error: 'unknown_subcommand',
+    detail: 'subverb=' + sub,
+    hint: 'usage: kolm federated consortium <verify-mia|audit-epsilon|status>',
+    version: 'w830-v1',
   }, EXIT.BAD_ARGS);
 }
 

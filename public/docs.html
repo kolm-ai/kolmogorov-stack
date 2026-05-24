@@ -73,10 +73,7 @@
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand">
-      <span class="ks-nav__mark">k</span>
-      <span>kolm<b>.ai</b></span>
-    </a>
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
@@ -129,6 +126,7 @@
         <a href="#deploy">Deployment patterns</a>
         <a href="#security">Security &amp; compliance</a>
         <a href="#integrations">Integrations</a>
+        <a href="#features">Features</a>
       </aside>
     </div>
   </div>
@@ -333,6 +331,27 @@ kolm run cm-claims-v4.kolm --target trt-llm --input <span class="s">"$(cat case.
       <a href="/integrations" class="doc-card"><span class="tag">Index</span><h3>Every integration we ship</h3><p>CI, observability, EHR, EDI, identity, secrets, datastores. The matrix updates when a new adapter merges.</p><span class="arr">/integrations &rarr;</span></a>
       <a href="/integrations/github-actions" class="doc-card"><span class="tag">CI/CD</span><h3>GitHub Actions / GitLab CI</h3><p>Drop-in action for `kolm score --min`. The build fails on a below-floor artifact. Receipts uploaded as CI artifacts.</p><span class="arr">/integrations/github-actions &rarr;</span></a>
       <a href="/integrations/litellm" class="doc-card"><span class="tag">Gateway</span><h3>LiteLLM / OpenAI SDK</h3><p>Drop-in proxy that captures every call as a labeled row, ready to distill. Works with the OpenAI Python and Node SDKs unchanged.</p><span class="arr">/integrations/litellm &rarr;</span></a>
+    </div>
+  </div>
+</section>
+
+<section class="ks-section" id="features">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Features</span>
+      <h2 class="ks-h2">Per-feature deep dives.</h2>
+      <p class="ks-lede">Recently shipped features documented in their own dedicated pages. Each page covers the model, the routes, the CLI, the honesty contract, and the related dashboard.</p>
+    </div>
+    <div class="doc-cards">
+      <a href="/docs/ab-testing" class="doc-card"><span class="tag">W822</span><h3>A/B testing</h3><p>Two artifacts on one namespace. Bootstrap significance, K-Score uplift gate, auto-promote, auto-rollback on regression. Six <code>/v1/ab/*</code> routes plus <code>kolm ab</code> CLI plus <code>/account/ab-tests</code> dashboard.</p><span class="arr">/docs/ab-testing &rarr;</span></a>
+      <a href="/docs/marketplace" class="doc-card"><span class="tag">W825</span><h3>Artifact marketplace</h3><p>Eight routes for publishing, browsing, rating, and downloading signed artifacts. Ed25519 verified uploads, 402 paid-listing gate, anti-gaming on ratings, 70/30 publisher split, fine-tune queue.</p><span class="arr">/docs/marketplace &rarr;</span></a>
+      <a href="/docs/token-dpo" class="doc-card"><span class="tag">W827</span><h3>Token-level DPO</h3><p>Per-token preference loss instead of one DPO term per sequence. Rafailov 2023 with beta=0.1, attention-mask aware, behind the <code>--contrastive-token-level</code> trainer flag.</p><span class="arr">/docs/token-dpo &rarr;</span></a>
+      <a href="/docs/reasoning-traces" class="doc-card"><span class="tag">W828</span><h3>Reasoning-trace distillation</h3><p>Auto-detect the reasoning chain across Anthropic thinking, OpenAI reasoning_tokens, DeepSeek reasoning_content, Gemini thinking. Compile to a replay, verify mismatches.</p><span class="arr">/docs/reasoning-traces &rarr;</span></a>
+      <a href="/docs/multimodal-pipeline" class="doc-card"><span class="tag">W829</span><h3>Multimodal capture pipeline</h3><p>Image, audio, tool-use, multi-turn into one filesystem capture lake. VLM distillation against GPT-4V / Claude 3 Vision / Gemini Vision. Honest <code>real_run:false</code> when teacher key is missing.</p><span class="arr">/docs/multimodal-pipeline &rarr;</span></a>
+      <a href="/docs/federated-consortium" class="doc-card"><span class="tag">W830</span><h3>Federated consortium</h3><p>Opt-in / opt-out membership across tenants, differential-privacy budget tracking in epsilon, membership-inference attack verification on shipped artifacts. Hash-only approval-row sharing.</p><span class="arr">/docs/federated-consortium &rarr;</span></a>
+      <a href="/docs/cross-lingual" class="doc-card"><span class="tag">W833</span><h3>Cross-lingual distillation</h3><p>Eleven languages auto-detected per capture. Auto-balance suggests sampler weights when a language drops below the floor; synthetic translation fills the gaps; per-language K-Score on the artifact manifest.</p><span class="arr">/docs/cross-lingual &rarr;</span></a>
+      <a href="/docs/regulatory-toolkit" class="doc-card"><span class="tag">W834</span><h3>Regulatory toolkit</h3><p>EU AI Act Annex IV docs generator, intended-use risk classifier, per-namespace human-in-loop threshold, data-governance report, extended model card, GRC export for OneTrust / ServiceNow / IBM OpenPages.</p><span class="arr">/docs/regulatory-toolkit &rarr;</span></a>
+      <a href="/docs/cost-optimization" class="doc-card"><span class="tag">W835</span><h3>Cost optimization</h3><p>Savings-based pricing. Frozen quarterly rate-card, 7-day baseline floor, 12.5% fee on measured savings, zero on regression. Honest <code>insufficient_baseline</code> envelope until enough data lands.</p><span class="arr">/docs/cost-optimization &rarr;</span></a>
     </div>
   </div>
 </section>

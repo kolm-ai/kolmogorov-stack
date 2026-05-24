@@ -522,23 +522,81 @@ function accountPageTagline() {
  if (path.indexOf('/account/security') === 0) return 'Manage 2FA, sessions, recovery, and admin safeguards.';
  return 'Route model calls, compile specialists, deploy signed artifacts, prove governance.';
 }
+ // W840 job-based sidebar — every account/*.html reachable in <=2 clicks.
+ // Collapsible <details> groups: open by default + open when active route lives
+ // inside the group so the user always sees their current section expanded.
+ // Single ungrouped Overview row sits above the BUILD..ACCOUNT eyebrows.
  var accountNavGroups = [
- { h: 'Start', links: [['Overview', '/account/overview'], ['Connectors', '/account/connectors'], ['API keys', '/account/api-keys']] },
- { h: 'Capture', links: [['Captured', '/account/captured'], ['Agents', '/account/agent-telemetry'], ['Privacy', '/account/privacy-events']] },
- { h: 'Data', links: [['Lake', '/account/lake'], ['Workflows', '/account/repeated-workflows'], ['Opportunities', '/account/opportunities'], ['Labels', '/account/labeling'], ['Datasets', '/account/datasets']] },
-{ h: 'Compile', links: [['Simulations', '/account/simulations'], ['Bakeoffs', '/account/bakeoffs'], ['Multimodal', '/account/multimodal-bakeoff'], ['Artifact jobs', '/account/builds'], ['Distill runs', '/account/distill-runs'], ['Artifacts', '/account/artifacts']] },
- { h: 'Deploy', links: [['Devices', '/account/devices'], ['Storage', '/account/storage']] },
- { h: 'Govern', links: [['Billing', '/account/billing'], ['Audit log', '/account/audit-log'], ['Settings', '/account/settings'], ['2FA', '/account/security/2fa']] }
+ { h: 'BUILD', links: [
+ ['Connectors', '/account/connectors'],
+ ['Captured calls', '/account/captured'],
+ ['Privacy events', '/account/privacy-events'],
+ ['Datasets', '/account/datasets'],
+ ['Labeling', '/account/labeling'],
+ ['Simulations', '/account/simulations'],
+ ['Bakeoffs', '/account/bakeoffs'],
+ ['Multimodal bakeoff', '/account/multimodal-bakeoff']
+ ] },
+ { h: 'COMPILE', links: [
+ ['Builds', '/account/builds'],
+ ['Distill runs', '/account/distill-runs'],
+ ['Active learning', '/account/active-learning'],
+ ['A/B tests', '/account/ab-tests'],
+ ['Confidence routing', '/account/confidence'],
+ ['Failure modes', '/account/failure-modes'],
+ ['Pipelines', '/account/pipelines'],
+ ['Opportunities', '/account/opportunities'],
+ ['Repeated workflows', '/account/repeated-workflows']
+ ] },
+ { h: 'DEPLOY', links: [
+ ['Artifacts', '/account/artifacts'],
+ ['Devices', '/account/devices'],
+ ['Storage', '/account/storage'],
+ ['SLA', '/account/sla'],
+ ['Routing', '/account/routing']
+ ] },
+ { h: 'OBSERVE', links: [
+ ['Drift', '/account/drift'],
+ ['Drift alerts', '/account/drift-alert'],
+ ['Continuous monitoring', '/account/continuous-monitoring'],
+ ['Staleness', '/account/staleness'],
+ ['Seasonal', '/account/seasonal'],
+ ['Sustainability', '/account/sustainability'],
+ ['Agent telemetry', '/account/agent-telemetry']
+ ] },
+ { h: 'GOVERN', links: [
+ ['Approvals', '/account/approvals'],
+ ['Audit log', '/account/audit-log'],
+ ['Federated consortium', '/account/federated/consortium'],
+ ['Lake', '/account/lake']
+ ] },
+ { h: 'ACCOUNT', links: [
+ ['Billing', '/account/billing'],
+ ['Chargeback', '/account/chargeback'],
+ ['API keys', '/account/api-keys'],
+ ['Security / MFA', '/account/security/2fa'],
+ ['Settings', '/account/settings']
+ ] }
  ];
  function renderAccountSidebar() {
  var side = document.getElementById('account-sidebar');
  if (!side) return;
- side.innerHTML = '<p class="kac-sidebar-note">Workflow</p>' + accountNavGroups.map(function(group) {
- return '<div class="kac-side-group"><h2>' + escAccount(group.h) + '</h2><ul>' + group.links.map(function(pair) {
+ var overviewActive = path === '/account/overview' ? ' aria-current="page"' : '';
+ var html = '<p class="kac-sidebar-note">Workspace</p>';
+ html += '<nav class="kac-side-nav" aria-label="Account sections">';
+ html += '<ul class="kac-side-home"><li><a href="/account/overview"' + overviewActive + '>Overview</a></li></ul>';
+ html += accountNavGroups.map(function(group) {
+ var groupHasActive = group.links.some(function(pair) { return path === pair[1]; });
+ var openAttr = groupHasActive ? ' open' : ' open';
+ return '<details class="kac-side-group"' + openAttr + '>' +
+ '<summary>' + escAccount(group.h) + '</summary>' +
+ '<ul>' + group.links.map(function(pair) {
  var active = path === pair[1] ? ' aria-current="page"' : '';
  return '<li><a href="' + escAccount(pair[1]) + '"' + active + '>' + escAccount(pair[0]) + '</a></li>';
- }).join('') + '</ul></div>';
+ }).join('') + '</ul></details>';
  }).join('');
+ html += '</nav>';
+ side.innerHTML = html;
  }
  var command = path.indexOf('/account/billing') === 0 ? 'kolm billing usage --json'
  : path.indexOf('/account/connectors') === 0 ? 'kolm capture status --json'

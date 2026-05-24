@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Federated consortium &middot; cross-tenant training without raw data &middot; kolm.ai</title>
+<meta name="description" content="Multi-tenant federated learning. Opt-in / opt-out consortium membership, differential-privacy budget tracking (epsilon spent vs allocated), membership-inference attack verification on shipped artifacts.">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="Federated consortium &middot; kolm.ai">
+<meta property="og:description" content="Multiple tenants contribute gradients, not raw data. DP budget bookkeeping is enforced at the consortium level; MIA verification rounds out the privacy proof.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://kolm.ai/docs/federated-consortium">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/docs/federated-consortium">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<style>
+  .doc-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
+  .doc-hero h1 { margin: 0 0 var(--ks-4); font-size: clamp(36px, 5vw, 56px); font-weight: 560; letter-spacing: -0.02em; line-height: 1.05; color: var(--ks-ink); }
+  .doc-hero p.lede { margin: 0 0 var(--ks-6); font-size: 18px; line-height: 1.55; color: var(--ks-ink-2); max-width: 64ch; }
+  .doc-section { padding: var(--ks-9) 0; border-bottom: 1px solid var(--ks-line-1); }
+  .doc-section h2 { margin: 0 0 var(--ks-2); font-size: clamp(24px, 3vw, 32px); font-weight: 560; letter-spacing: -0.015em; color: var(--ks-ink); }
+  .doc-section .sub { margin: 0 0 var(--ks-6); font-size: 15px; color: var(--ks-ink-3); max-width: 64ch; line-height: 1.6; }
+  .doc-section p { color: var(--ks-ink-2); font-size: 15px; line-height: 1.65; max-width: 72ch; margin: 0 0 var(--ks-3); }
+  .doc-section ul { color: var(--ks-ink-2); font-size: 15px; line-height: 1.7; max-width: 80ch; padding-left: 22px; }
+  .doc-section li + li { margin-top: 4px; }
+  .doc-section h3 { margin: var(--ks-5) 0 var(--ks-2); font-size: 17px; font-weight: 560; color: var(--ks-ink); }
+  .code-card { background: #05070a; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-4); margin: var(--ks-3) 0; }
+  .code-card pre { margin: 0; font-family: var(--ks-mono); font-size: 12.5px; line-height: 1.6; color: var(--ks-ink); overflow-x: auto; }
+  code { font-family: var(--ks-mono); font-size: 13px; color: var(--ks-ink); background: var(--ks-bg-1); padding: 1px 6px; border-radius: 4px; border: 1px solid var(--ks-line-2); }
+  table { border-collapse: collapse; width: 100%; max-width: 920px; margin: var(--ks-3) 0; font-size: 13.5px; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--ks-line-1); vertical-align: top; color: var(--ks-ink-2); }
+  th { color: var(--ks-ink); font-weight: 540; }
+  td code { font-size: 12px; }
+  .related { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--ks-3); margin: var(--ks-4) 0; }
+  @media(max-width:820px){ .related{ grid-template-columns:1fr } }
+  .related a { padding: var(--ks-4); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); background: var(--ks-bg-1); text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 4px; }
+  .related a:hover { border-color: var(--ks-accent-edge); }
+  .related b { font-size: 14px; color: var(--ks-ink); font-weight: 540; }
+  .related span { font-size: 12.5px; color: var(--ks-ink-3); line-height: 1.5; }
+</style>
+</head>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/wrapper">Wrapper</a>
+        <a href="/studio">Studio</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/docs">Docs</a>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
+      </div>
+    </div>
+  </header>
+</div>
+
+<main id="main">
+
+<section class="doc-hero">
+  <div class="ks-wrap">
+    <p class="ks-eyebrow">Open-source AI workbench</p>
+    <h1>Federated consortium.</h1>
+    <p class="lede">Multiple tenants pool gradients on a shared training target without crossing raw-data boundaries. Opt-in / opt-out membership, per-consortium privacy budget in epsilon, membership-inference attack verification on the shipped artifact. Hash-only approval sharing keeps the prompt text on the source tenant.</p>
+  </div>
+</section>
+
+<section class="doc-section" id="model">
+  <div class="ks-wrap">
+    <h2>How it works</h2>
+    <p class="sub">A consortium is a named set of opted-in tenants who agree on a shared training target. Each tenant runs the training on its own captures; only the gradients (plus the optional Laplace-noised approval counts) are aggregated.</p>
+    <p>Membership is per-tenant and per-consortium_id. A tenant calls <code>POST /v1/federated/consortium/opt-in</code> with a consortium_id and an optional scope (which namespaces are eligible to contribute). The member row records <code>opted_in_at</code>, <code>contribution_count</code>, and <code>last_share_at</code> so the consortium can spot dormant members and "who is pulling their weight."</p>
+    <p>Aggregation rounds consume the consortium-wide privacy budget. Every round is logged with its epsilon spend and the participant list; an aggregation that pushes the consortium over its allocated budget is rejected at the aggregator before raw values are touched.</p>
+  </div>
+</section>
+
+<section class="doc-section" id="opt-in">
+  <div class="ks-wrap">
+    <h2>Opt-in / opt-out</h2>
+    <p class="sub">Membership is explicit. A tenant must POST to opt in; opt-out is symmetric. Both routes are tenant-fenced via <code>req.tenant_record.id</code>; the body's consortium_id cannot impersonate another tenant.</p>
+    <h3>POST /v1/federated/consortium/opt-in</h3>
+    <div class="code-card"><pre>curl -X POST https://kolm.ai/v1/federated/consortium/opt-in \
+  -H "Authorization: Bearer $KOLM_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "consortium_id": "support-bots-2026",
+    "scope": ["support-bot", "billing-bot"],
+    "epsilon_allocated": 10.0,
+    "note": "joining for the Q2 cohort"
+  }'
+
+# -&gt; {
+#   "ok": true,
+#   "consortium_id": "support-bots-2026",
+#   "member": { "tenant_id":"tenant_...", "scope":[...], "opted_in_at":"...", ... },
+#   "epsilon_allocated": 10.0
+# }
+</pre></div>
+    <p>Default epsilon allocation is 10.0; pass any positive number to override (only the first opt-in for a consortium can set the allocation, subsequent opt-ins read whatever was set). The scope is optional; an empty scope means "any of my namespaces can contribute when I run rounds."</p>
+    <h3>POST /v1/federated/consortium/opt-out</h3>
+    <div class="code-card"><pre>curl -X POST https://kolm.ai/v1/federated/consortium/opt-out \
+  -H "Authorization: Bearer $KOLM_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "consortium_id": "support-bots-2026", "reason": "ending Q2 participation" }'
+</pre></div>
+  </div>
+</section>
+
+<section class="doc-section" id="budget">
+  <div class="ks-wrap">
+    <h2>Privacy budget</h2>
+    <p class="sub">Differential privacy is enforced as a budget. Every aggregation round spends some epsilon; the consortium has an allocated cap. The budget endpoint returns the totals plus the caller's personal contribution.</p>
+    <h3>GET /v1/federated/consortium/budget</h3>
+    <div class="code-card"><pre>curl -H "Authorization: Bearer $KOLM_API_KEY" \
+  "https://kolm.ai/v1/federated/consortium/budget?consortium_id=support-bots-2026"
+
+# -&gt; {
+#   "ok": true,
+#   "consortium_id": "support-bots-2026",
+#   "epsilon_allocated": 10.0,
+#   "epsilon_spent": 3.7,
+#   "epsilon_spent_by_self": 1.2,
+#   "epsilon_remaining": 6.3,
+#   "pct_spent": 0.37,
+#   "n_aggregations": 4
+# }
+</pre></div>
+    <p>The <code>epsilon_spent_by_self</code> field is computed by intersecting the round participant lists with the caller's tenant_id. A consortium that wants to enforce a per-tenant cap reads this field and refuses local round participation when the personal spend crosses a threshold.</p>
+  </div>
+</section>
+
+<section class="doc-section" id="members-aggregations">
+  <div class="ks-wrap">
+    <h2>Members and aggregations</h2>
+    <p class="sub">Two read endpoints expose the consortium state: the member roster and the recent aggregation runs.</p>
+    <h3>GET /v1/federated/consortium/members</h3>
+    <div class="code-card"><pre>curl -H "Authorization: Bearer $KOLM_API_KEY" \
+  "https://kolm.ai/v1/federated/consortium/members?consortium_id=support-bots-2026"
+
+# -&gt; { "ok":true, "consortium_id":"support-bots-2026", "total":4, "members":[
+#      { "tenant_id":"tenant_a...", "scope":["support-bot"], "opted_in_at":"2026-04-12T...",
+#        "contribution_count":12, "last_share_at":"2026-05-23T...", "is_self":true },
+#      ...
+#   ] }
+</pre></div>
+    <h3>GET /v1/federated/consortium/aggregations</h3>
+    <div class="code-card"><pre>curl -H "Authorization: Bearer $KOLM_API_KEY" \
+  "https://kolm.ai/v1/federated/consortium/aggregations?consortium_id=support-bots-2026&limit=20"
+
+# -&gt; { "ok":true, "consortium_id":"...", "total":4, "aggregations":[
+#      { "aggregation_id":"agg_...", "round_id":"round_...", "status":"completed",
+#        "started_at":"...", "completed_at":"...", "epsilon_spent":0.9,
+#        "n_participants":3, "participant_in_round":true },
+#      ...
+#   ] }
+</pre></div>
+    <p>Defense in depth: a tenant only sees aggregation rows where they were a participant OR they are a current member. A foreign tenant who guesses the consortium_id still cannot read other tenants' contributions.</p>
+  </div>
+</section>
+
+<section class="doc-section" id="mia-verify">
+  <div class="ks-wrap">
+    <h2>Membership-inference verification</h2>
+    <p class="sub">A shipped artifact should resist the "was this row in your training set" attack. The W830-2 verifier scores an attacker's AUC against a configured threshold (default 0.55, near-chance) and returns <code>passing</code> or <code>leaking</code>.</p>
+    <h3>POST /v1/federated/consortium/verify-mia</h3>
+    <div class="code-card"><pre>curl -X POST https://kolm.ai/v1/federated/consortium/verify-mia \
+  -H "Authorization: Bearer $KOLM_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "artifact_id":"art_...", "test_inputs":[...], "shadow_models":[],
+        "p_threshold": 0.55 }'
+
+# When shadow_models is empty (the honest HTTP case):
+# -&gt; { "ok":false, "error":"mia_requires_shadow_models",
+#      "install_hint":"Provide &gt;=3 shadow models trained on disjoint shards" }
+</pre></div>
+    <p>Honest scope: this module is the protocol contract. The actual shadow-model attack runs on the operator side because callable models cannot cross the JSON wire. When the route returns the missing-shadow-models envelope, the SDK runs the attack locally and re-posts the AUC for verdict scoring.</p>
+    <p>The verdict envelope tags the audit method: a 'passing' verdict bounds the attacker AUC observed in YOUR test setup; it does not bound a more sophisticated adversary. The verdict is honest within its scope and the scope is stamped.</p>
+  </div>
+</section>
+
+<section class="doc-section" id="related">
+  <div class="ks-wrap">
+    <h2>Related</h2>
+    <div class="related">
+      <a href="/docs/quickstart"><b>Quickstart</b><span>30-second path: install, login, first distillation.</span></a>
+      <a href="/account/federated/consortium"><b>Federated dashboard</b><span>Membership status, budget, aggregation history.</span></a>
+      <a href="/trust"><b>Trust center</b><span>What we measure, what we do not claim.</span></a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__brand">
+        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-foot__tag">Open-source AI workbench. Distill, compile, deploy.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/k-score">K-Score</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/docs">Docs</a><a href="/docs/quickstart">Quickstart</a><a href="/docs/cli">CLI</a><a href="/docs/cookbook">Recipes</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/trust">Trust center</a><a href="/security">Security</a><a href="/trust">Trust center</a><a href="/changelog">Changelog</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/about">About</a><a href="/contact">Contact</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
+      </div>
+    </div>
+    <div class="ks-foot__bottom"><span>&copy; 2026 kolm.ai</span><span>Apache-2.0</span></div>
+  </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+</body>
+</html>

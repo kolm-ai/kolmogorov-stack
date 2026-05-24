@@ -1245,28 +1245,30 @@ body { position: relative; }
    order. No !important needed.
    ============================================================================ */
 
-/* -- 1. Monochrome brand mark ------------------------------------------- */
-/* Strip the mint gradient. Mark becomes a tactile ink chip on dark canvas;
-   inverts cleanly in light mode. Logo === black + white only. */
+/* -- 1. Three-bars brand mark (W838) ---------------------------------------
+   Descending bars (h=20/14/8) carry the wordmark. Pure currentColor — the
+   bars are ink in light mode and warm-bone in dark mode. The legacy "k" tile
+   is gone. .ks-nav__mark is now an SVG wrapper, not a chip. */
 .ks-nav__mark {
-  background: var(--ks-ink) !important;
-  color: var(--ks-bg) !important;
-  border-radius: 6px;
-  font-family: var(--ks-mono);
-  font-size: 12.5px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  width: 24px;
-  height: 24px;
-  display: grid;
-  place-items: center;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.08),
-    0 1px 0 rgba(0,0,0,0.5);
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent !important;
+  border-radius: 0;
+  box-shadow: none;
+  color: var(--ks-ink) !important;
 }
-[data-theme="light"] .ks-nav__mark {
-  background: #0c111a !important;
-  color: #f7f4ec !important;
+.ks-nav__mark svg { width: 26px; height: 26px; display: block; }
+.ks-nav__mark svg rect { fill: currentColor; }
+[data-theme="light"] .ks-nav__mark { color: #111111 !important; }
+[data-theme="dark"]  .ks-nav__mark { color: #e8e3d6 !important; }
+.ks-nav__brand {
+  font-family: var(--ks-mono);
+  letter-spacing: -0.01em;
+  font-weight: 540;
+  gap: 8px !important;
 }
 /* Wordmark: drop the mint accent on the .ai — keep the whole wordmark in ink. */
 .ks-nav__brand b,

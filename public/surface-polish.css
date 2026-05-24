@@ -2068,6 +2068,88 @@ body.kolm-account-surface #account-sidebar a[aria-current="page"] {
  color: var(--kolm-ink-0) !important;
 }
 
+/* W840: job-based sidebar — collapsible <details>/<summary> groups.
+ Replaces the old flat 6-section <h2>+<ul> layout with semantic
+ disclosure widgets so every account/*.html page is reachable in <=2
+ clicks (one to expand the section, one to click the link). Open by
+ default + open whenever the active route lives inside the group. */
+body.kolm-account-surface #account-sidebar .kac-side-nav {
+ display: block !important;
+}
+body.kolm-account-surface #account-sidebar .kac-side-home {
+ list-style: none !important;
+ margin: 0 0 12px !important;
+ padding: 0 !important;
+ border-bottom: 1px solid rgba(255,247,232,0.08) !important;
+ padding-bottom: 10px !important;
+}
+body.kolm-account-surface #account-sidebar details.kac-side-group {
+ margin: 0 !important;
+ padding: 8px 0 !important;
+ border-top: 1px solid rgba(255,247,232,0.08) !important;
+}
+body.kolm-account-surface #account-sidebar details.kac-side-group:first-of-type {
+ border-top: 0 !important;
+ padding-top: 0 !important;
+}
+body.kolm-account-surface #account-sidebar details.kac-side-group > summary {
+ list-style: none !important;
+ cursor: pointer !important;
+ display: flex !important;
+ align-items: center !important;
+ justify-content: space-between !important;
+ min-height: 28px !important;
+ padding: 4px 4px !important;
+ margin: 0 0 4px !important;
+ color: var(--ink-3, var(--kolm-ink-3)) !important;
+ font-family: var(--ks-font-mono, var(--kolm-mono, ui-monospace, monospace)) !important;
+ font-size: 11px !important;
+ font-weight: 700 !important;
+ letter-spacing: 0.12em !important;
+ text-transform: uppercase !important;
+ user-select: none !important;
+}
+body.kolm-account-surface #account-sidebar details.kac-side-group > summary::-webkit-details-marker {
+ display: none !important;
+}
+body.kolm-account-surface #account-sidebar details.kac-side-group > summary::after {
+ content: "+" !important;
+ font-family: var(--ks-font-mono, var(--kolm-mono, ui-monospace, monospace)) !important;
+ font-size: 13px !important;
+ line-height: 1 !important;
+ opacity: 0.55 !important;
+ transition: transform 120ms ease, opacity 120ms ease !important;
+}
+body.kolm-account-surface #account-sidebar details.kac-side-group[open] > summary::after {
+ content: "-" !important;
+ opacity: 0.85 !important;
+}
+body.kolm-account-surface #account-sidebar details.kac-side-group > summary:hover,
+body.kolm-account-surface #account-sidebar details.kac-side-group > summary:focus-visible {
+ color: var(--kolm-ink-0) !important;
+ outline: none !important;
+}
+body.kolm-account-surface #account-sidebar details.kac-side-group > ul {
+ list-style: none !important;
+ margin: 0 !important;
+ padding: 2px 0 6px !important;
+ display: grid !important;
+ gap: 2px !important;
+}
+[data-theme="light"] body.kolm-account-surface #account-sidebar details.kac-side-group {
+ border-top-color: rgba(8,16,12,0.08) !important;
+}
+[data-theme="light"] body.kolm-account-surface #account-sidebar .kac-side-home {
+ border-bottom-color: rgba(8,16,12,0.08) !important;
+}
+[data-theme="light"] body.kolm-account-surface #account-sidebar details.kac-side-group > summary {
+ color: #6b6b66 !important;
+}
+[data-theme="light"] body.kolm-account-surface #account-sidebar details.kac-side-group > summary:hover,
+[data-theme="light"] body.kolm-account-surface #account-sidebar details.kac-side-group > summary:focus-visible {
+ color: #101418 !important;
+}
+
 body.kolm-account-surface .acct-content {
  min-width: 0 !important;
 }

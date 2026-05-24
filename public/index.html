@@ -247,10 +247,7 @@
 <!-- ================== Nav ================== -->
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand">
-      <span class="ks-nav__mark">k</span>
-      <span>kolm<b>.ai</b></span>
-    </a>
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
@@ -334,78 +331,84 @@
       <p class="ks-hero__sub" style="margin-top:14px; font-family:var(--ks-mono); font-size:11.5px; letter-spacing:0.06em; text-transform:uppercase; color:var(--ks-ink-3);">Apache-2.0 &middot; self-hostable &middot; 6 SDKs &middot; <a href="#how" style="color:var(--ks-ink-3); text-decoration:underline; text-underline-offset:3px;">see the 4-command flow &darr;</a></p>
     </div>
 
-    <!-- W706: animated hero demo. Replaces the static <pre> (W681) with a
-         live pipeline visualization  -  five-station SVG flow with staggered
-         node pulses, an animated quantize bar that compresses orange->mint,
-         and a live status stream that rotates the actual line of work. All
-         pure CSS keyframes; @media (prefers-reduced-motion) freezes to the
-         final state. The point is not "watch this demo"  -  it's "your traffic
-         already flows like this, you just don't see it yet". -->
-    <div class="w706-demo hero-artifact" data-w260="lede-beats" aria-label="kolm flow: gateway, capture, distill, quantize, run">
-      <div class="w706-demo__chrome">
-        <span class="w706-demo__dot w706-demo__dot--r"></span>
-        <span class="w706-demo__dot w706-demo__dot--y"></span>
-        <span class="w706-demo__dot w706-demo__dot--g"></span>
-        <span class="w706-demo__chrome-title">~/kolm/pipelines/support</span>
-        <span class="w706-demo__live">live</span>
-      </div>
-      <div class="w706-demo__body">
-        <div class="w706-pipe" aria-hidden="true">
-          <svg class="w706-pipe__svg" viewBox="0 0 600 110" preserveAspectRatio="xMidYMid meet">
-            <path class="w706-pipe__rail" d="M 50 55 L 550 55"></path>
-            <path class="w706-pipe__flow" d="M 50 55 L 550 55"></path>
-            <g transform="translate(50,55)">
-              <circle class="w706-pipe__node-pulse w706-pipe__node-pulse--1" r="12"></circle>
-              <circle class="w706-pipe__node-bg" r="12"></circle>
-              <path class="w706-pipe__node-icon" d="M -5 -3 L 5 -3 L 5 3 L -5 3 Z M -3 -5 L 3 -5 L 3 5 L -3 5 Z" transform="scale(0.7)"></path>
-              <text class="w706-pipe__label" y="30">gateway</text>
-              <text class="w706-pipe__metric" y="-22">3.1 ms</text>
-            </g>
-            <g transform="translate(175,55)">
-              <circle class="w706-pipe__node-pulse w706-pipe__node-pulse--2" r="12"></circle>
-              <circle class="w706-pipe__node-bg" r="12"></circle>
-              <circle class="w706-pipe__node-icon" r="3"></circle>
-              <text class="w706-pipe__label" y="30">capture</text>
-              <text class="w706-pipe__metric" y="-22">47,392 rows</text>
-            </g>
-            <g transform="translate(300,55)">
-              <circle class="w706-pipe__node-pulse w706-pipe__node-pulse--3" r="12"></circle>
-              <circle class="w706-pipe__node-bg" r="12"></circle>
-              <path class="w706-pipe__node-icon" d="M -4 -4 L 4 -4 L 0 4 Z"></path>
-              <text class="w706-pipe__label" y="30">distill</text>
-              <text class="w706-pipe__metric" y="-22">K&nbsp;0.91</text>
-            </g>
-            <g transform="translate(425,55)">
-              <circle class="w706-pipe__node-pulse w706-pipe__node-pulse--4" r="12"></circle>
-              <circle class="w706-pipe__node-bg" r="12"></circle>
-              <rect class="w706-pipe__node-icon" x="-5" y="-2" width="10" height="4" rx="1"></rect>
-              <text class="w706-pipe__label" y="30">quantize</text>
-              <text class="w706-pipe__metric" y="-22">INT4</text>
-            </g>
-            <g transform="translate(550,55)">
-              <circle class="w706-pipe__node-pulse w706-pipe__node-pulse--5" r="12"></circle>
-              <circle class="w706-pipe__node-bg" r="12"></circle>
-              <path class="w706-pipe__node-icon" d="M -4 -3 L 4 0 L -4 3 Z"></path>
-              <text class="w706-pipe__label" y="30">run</text>
-              <text class="w706-pipe__metric" y="-22">$0/tok</text>
-            </g>
-          </svg>
-        </div>
-        <div class="w706-bar" aria-label="Quantize compression ratio">
-          <div class="w706-bar__head"><span>Quantize</span><strong>NF4 + double &middot; 3.5&times;</strong></div>
-          <div class="w706-bar__track"><span class="w706-bar__fill"></span></div>
-          <div class="w706-bar__ticks"><span>full precision</span><span>INT4 .kolm</span></div>
-        </div>
-        <div class="w706-stream" aria-label="Live build stream">
-          <span class="w706-stream__line"><span class="ok">&check;</span> gateway routed 47,392 calls <span class="dim">claude-opus-4-7 &middot; tenant_f33c</span></span>
-          <span class="w706-stream__line"><span class="ok">&check;</span> capture lake hash-chained <span class="dim">240 receipts pinned</span></span>
-          <span class="w706-stream__line"><span class="ok">&check;</span> distill kd_softmax + on-policy <span class="dim">student qwen-7b &middot; teacher match 94%</span></span>
-          <span class="w706-stream__line"><span class="ok">&check;</span> quantize bnb 0.49.2 NF4 <span class="dim">14.2 GB &rarr; 5.2 GB &middot; 29.2 s</span></span>
-          <span class="w706-stream__line"><span class="ok">&check;</span> bake-off K 0.91 <span class="dim">gate 0.85 &middot; passed</span></span>
-          <span class="w706-stream__line"><span class="ok">&check;</span> sign Ed25519 over manifest.sha256 <span class="dim">support.kolm shipped</span></span>
-        </div>
-      </div>
-    </div>
+    <!-- W838: hero diagram — clean inputs / processing / outputs architecture.
+         No fake telemetry, no live numbers. Three columns connected by hairlines.
+         Shows what the product IS, not what one demo run happened to clock. -->
+    <figure class="kolm-arch hero-artifact" data-w260="lede-beats" aria-label="kolm architecture: inputs, processing, outputs">
+      <svg class="kolm-arch__svg" viewBox="0 0 560 360" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="kolmArchTitle kolmArchDesc">
+        <title id="kolmArchTitle">kolm architecture diagram</title>
+        <desc id="kolmArchDesc">Inputs from any LLM client flow into the compiler (route, capture, distill, quantize, sign) and produce a signed .kolm artifact that runs on your hardware.</desc>
+
+        <!-- column headers -->
+        <text x="86"  y="22" class="kolm-arch__h">INPUTS</text>
+        <text x="280" y="22" class="kolm-arch__h" text-anchor="middle">PROCESSING</text>
+        <text x="476" y="22" class="kolm-arch__h" text-anchor="middle">OUTPUTS</text>
+
+        <!-- header underlines (hairlines) -->
+        <line x1="40"  y1="32" x2="160" y2="32" class="kolm-arch__rule"/>
+        <line x1="200" y1="32" x2="360" y2="32" class="kolm-arch__rule"/>
+        <line x1="400" y1="32" x2="540" y2="32" class="kolm-arch__rule"/>
+
+        <!-- INPUTS column: client SDKs -->
+        <g class="kolm-arch__col">
+          <rect x="40" y="60"  width="120" height="32" class="kolm-arch__chip"/>
+          <text x="100" y="80" class="kolm-arch__chipt">OpenAI SDK</text>
+          <rect x="40" y="100" width="120" height="32" class="kolm-arch__chip"/>
+          <text x="100" y="120" class="kolm-arch__chipt">Anthropic SDK</text>
+          <rect x="40" y="140" width="120" height="32" class="kolm-arch__chip"/>
+          <text x="100" y="160" class="kolm-arch__chipt">LangChain</text>
+          <rect x="40" y="180" width="120" height="32" class="kolm-arch__chip"/>
+          <text x="100" y="200" class="kolm-arch__chipt">Vercel AI</text>
+          <rect x="40" y="220" width="120" height="32" class="kolm-arch__chip"/>
+          <text x="100" y="240" class="kolm-arch__chipt">Cursor / Aider</text>
+          <text x="100" y="278" class="kolm-arch__note">Your traffic, unchanged.</text>
+        </g>
+
+        <!-- arrows: inputs -> processing (one bundled line) -->
+        <line x1="160" y1="155" x2="200" y2="155" class="kolm-arch__line"/>
+        <path d="M 196 151 L 200 155 L 196 159" class="kolm-arch__arrow"/>
+
+        <!-- PROCESSING column: the compiler stages -->
+        <g class="kolm-arch__col">
+          <rect x="200" y="60"  width="160" height="40" class="kolm-arch__stage"/>
+          <text x="280" y="80"  class="kolm-arch__staget">Route &amp; capture</text>
+          <text x="280" y="94"  class="kolm-arch__stagen">one URL · redact at edge</text>
+
+          <rect x="200" y="110" width="160" height="40" class="kolm-arch__stage"/>
+          <text x="280" y="130" class="kolm-arch__staget">Distill</text>
+          <text x="280" y="144" class="kolm-arch__stagen">teacher → student</text>
+
+          <rect x="200" y="160" width="160" height="40" class="kolm-arch__stage"/>
+          <text x="280" y="180" class="kolm-arch__staget">Quantize</text>
+          <text x="280" y="194" class="kolm-arch__stagen">your bit-width target</text>
+
+          <rect x="200" y="210" width="160" height="40" class="kolm-arch__stage"/>
+          <text x="280" y="230" class="kolm-arch__staget">Sign</text>
+          <text x="280" y="244" class="kolm-arch__stagen">Ed25519 receipt chain</text>
+
+          <text x="280" y="278" class="kolm-arch__note" text-anchor="middle">One Apache-2.0 codebase.</text>
+        </g>
+
+        <!-- arrow: processing -> outputs -->
+        <line x1="360" y1="155" x2="400" y2="155" class="kolm-arch__line"/>
+        <path d="M 396 151 L 400 155 L 396 159" class="kolm-arch__arrow"/>
+
+        <!-- OUTPUTS column: the artifact -->
+        <g class="kolm-arch__col">
+          <rect x="400" y="80" width="140" height="100" class="kolm-arch__artifact"/>
+          <text x="470" y="108" class="kolm-arch__artt">.kolm</text>
+          <line x1="416" y1="118" x2="524" y2="118" class="kolm-arch__rule kolm-arch__rule--in"/>
+          <text x="470" y="138" class="kolm-arch__artn">weights · spec</text>
+          <text x="470" y="154" class="kolm-arch__artn">eval split · receipts</text>
+          <text x="470" y="170" class="kolm-arch__artn">Ed25519 signature</text>
+
+          <text x="470" y="206" class="kolm-arch__chipt">Runs on your hardware</text>
+          <text x="470" y="224" class="kolm-arch__chipt">$0 per token</text>
+          <text x="470" y="242" class="kolm-arch__chipt">Yours forever</text>
+          <text x="470" y="278" class="kolm-arch__note" text-anchor="middle">One signed file.</text>
+        </g>
+      </svg>
+    </figure>
   </div>
 </section>
 

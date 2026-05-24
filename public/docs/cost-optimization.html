@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Cost optimization &middot; savings-based pricing tracker &middot; kolm.ai</title>
+<meta name="description" content="Track teacher-API spend during a baseline window and after a kolm deployment. Compute dollar savings; kolm.ai charges 12.5% on the savings (within the 10-15% band) and zero on negative deltas. Frozen rate-card, honest insufficient-baseline envelope.">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="Cost optimization &middot; kolm.ai">
+<meta property="og:description" content="Savings-based pricing: 12.5% of measured spend reduction, zero on regression. Frozen rate-card snapshot, 7-day baseline floor, no fabricated numbers.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://kolm.ai/docs/cost-optimization">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/docs/cost-optimization">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<style>
+  .doc-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
+  .doc-hero h1 { margin: 0 0 var(--ks-4); font-size: clamp(36px, 5vw, 56px); font-weight: 560; letter-spacing: -0.02em; line-height: 1.05; color: var(--ks-ink); }
+  .doc-hero p.lede { margin: 0 0 var(--ks-6); font-size: 18px; line-height: 1.55; color: var(--ks-ink-2); max-width: 64ch; }
+  .doc-section { padding: var(--ks-9) 0; border-bottom: 1px solid var(--ks-line-1); }
+  .doc-section h2 { margin: 0 0 var(--ks-2); font-size: clamp(24px, 3vw, 32px); font-weight: 560; letter-spacing: -0.015em; color: var(--ks-ink); }
+  .doc-section .sub { margin: 0 0 var(--ks-6); font-size: 15px; color: var(--ks-ink-3); max-width: 64ch; line-height: 1.6; }
+  .doc-section p { color: var(--ks-ink-2); font-size: 15px; line-height: 1.65; max-width: 72ch; margin: 0 0 var(--ks-3); }
+  .doc-section ul { color: var(--ks-ink-2); font-size: 15px; line-height: 1.7; max-width: 80ch; padding-left: 22px; }
+  .doc-section li + li { margin-top: 4px; }
+  .doc-section h3 { margin: var(--ks-5) 0 var(--ks-2); font-size: 17px; font-weight: 560; color: var(--ks-ink); }
+  .code-card { background: #05070a; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-4); margin: var(--ks-3) 0; }
+  .code-card pre { margin: 0; font-family: var(--ks-mono); font-size: 12.5px; line-height: 1.6; color: var(--ks-ink); overflow-x: auto; }
+  code { font-family: var(--ks-mono); font-size: 13px; color: var(--ks-ink); background: var(--ks-bg-1); padding: 1px 6px; border-radius: 4px; border: 1px solid var(--ks-line-2); }
+  table { border-collapse: collapse; width: 100%; max-width: 920px; margin: var(--ks-3) 0; font-size: 13.5px; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--ks-line-1); vertical-align: top; color: var(--ks-ink-2); }
+  th { color: var(--ks-ink); font-weight: 540; }
+  td code { font-size: 12px; }
+  .related { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--ks-3); margin: var(--ks-4) 0; }
+  @media(max-width:820px){ .related{ grid-template-columns:1fr } }
+  .related a { padding: var(--ks-4); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); background: var(--ks-bg-1); text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 4px; }
+  .related a:hover { border-color: var(--ks-accent-edge); }
+  .related b { font-size: 14px; color: var(--ks-ink); font-weight: 540; }
+  .related span { font-size: 12.5px; color: var(--ks-ink-3); line-height: 1.5; }
+</style>
+</head>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/wrapper">Wrapper</a>
+        <a href="/studio">Studio</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/docs">Docs</a>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
+      </div>
+    </div>
+  </header>
+</div>
+
+<main id="main">
+
+<section class="doc-hero">
+  <div class="ks-wrap">
+    <p class="ks-eyebrow">Open-source AI workbench</p>
+    <h1>Cost optimization.</h1>
+    <p class="lede">Record teacher API spend during a baseline window. Deploy the kolm gateway. Record post-deployment spend over the same window. The savings tracker computes the dollar delta; kolm.ai charges 12.5% on the savings, zero on regression. Default 30-day window, 7-day minimum, frozen quarterly rate-card.</p>
+  </div>
+</section>
+
+<section class="doc-section" id="model">
+  <div class="ks-wrap">
+    <h2>The bargain</h2>
+    <p class="sub">Savings-based pricing makes the vendor share the outcome. If kolm.ai does not reduce your teacher spend, kolm.ai does not bill on the savings dimension. The fee is a flat 12.5% within the 10-15% band published in <code>SAVINGS_FEE_RATE_DEFAULT</code>; the per-tenant rate can be negotiated for very large or very small deployments.</p>
+    <p>Two windows: the baseline window is your pre-kolm spend (typically 30 days of normal usage), and the post-deployment window is the same length, starting after the gateway is in path. The dollar saving is <code>baseline_total_usd - post_total_usd</code>, the fee is <code>max(0, saving) * fee_rate</code>, the net to you is <code>saving - fee</code>.</p>
+    <p>Regression handling is explicit: if post spend exceeds baseline the saved_usd is negative and the fee_usd is exactly zero. We do not bill against negative savings. The envelope still includes the negative figure plus <code>regression:true</code> so the operator sees the regression rather than a silent zero.</p>
+  </div>
+</section>
+
+<section class="doc-section" id="rate-card">
+  <div class="ks-wrap">
+    <h2>Frozen rate-card</h2>
+    <p class="sub">The rate-card in <code>src/savings-tracker.js</code> is frozen at module load and refreshed quarterly. Volume discounts, batch-API discounts, and cached-input discounts are explicitly NOT modelled. Those are negotiated; baking them in would let the savings tracker overstate per-call savings against a list-price baseline.</p>
+    <h3>Snapshot 2025-Q4</h3>
+    <table>
+      <thead><tr><th>provider</th><th>model</th><th>$ / 1M input</th><th>$ / 1M output</th></tr></thead>
+      <tbody>
+        <tr><td>anthropic</td><td><code>claude-opus-4-7</code></td><td>15.00</td><td>75.00</td></tr>
+        <tr><td>anthropic</td><td><code>claude-sonnet-4-7</code></td><td>3.00</td><td>15.00</td></tr>
+        <tr><td>anthropic</td><td><code>claude-haiku-4-5</code></td><td>0.80</td><td>4.00</td></tr>
+        <tr><td>openai</td><td><code>gpt-4o</code></td><td>2.50</td><td>10.00</td></tr>
+        <tr><td>openai</td><td><code>gpt-4o-mini</code></td><td>0.15</td><td>0.60</td></tr>
+        <tr><td>openai</td><td><code>o1</code></td><td>15.00</td><td>60.00</td></tr>
+        <tr><td>google</td><td><code>gemini-2.5-pro</code></td><td>1.25</td><td>5.00</td></tr>
+        <tr><td>google</td><td><code>gemini-2.5-flash</code></td><td>0.075</td><td>0.30</td></tr>
+        <tr><td>deepseek</td><td><code>deepseek-v4-pro</code></td><td>0.27</td><td>1.10</td></tr>
+      </tbody>
+    </table>
+    <p>Unrecognized provider or model returns <code>{ok:false, error:'unknown_provider'}</code> or <code>'unknown_model'</code>. We never silently default to zero because that would understate baseline spend (and overstate post-kolm savings).</p>
+  </div>
+</section>
+
+<section class="doc-section" id="baseline">
+  <div class="ks-wrap">
+    <h2>Baseline window</h2>
+    <p class="sub">Start the baseline before you deploy kolm. The marker row is a zero-cost event in the event-store, so the same /v1/lake/export endpoint will surface it for audit.</p>
+    <h3>POST /v1/savings/baseline</h3>
+    <div class="code-card"><pre>curl -X POST https://kolm.ai/v1/savings/baseline \
+  -H "Authorization: Bearer $KOLM_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "namespace": "support-bot" }'
+
+# -&gt; { "ok":true, "namespace":"support-bot", "started_at":"2026-04-24T...",
+#      "min_baseline_days": 7 }
+</pre></div>
+    <h3>GET /v1/savings/baseline</h3>
+    <div class="code-card"><pre>curl -H "Authorization: Bearer $KOLM_API_KEY" \
+  "https://kolm.ai/v1/savings/baseline?namespace=support-bot&period_days=30"
+# -&gt; { "ok":true, "namespace":"support-bot", "started_at":"...",
+#      "days_elapsed": 18, "accumulated_usd": 142.37,
+#      "status": "in_progress" }
+</pre></div>
+    <p>Below the 7-day minimum the status is <code>insufficient_baseline</code> and downstream summary calls refuse to report a saving. Above 7 days the status flips to <code>ready</code> and computeSavings has enough signal.</p>
+  </div>
+</section>
+
+<section class="doc-section" id="record-spend">
+  <div class="ks-wrap">
+    <h2>Record teacher spend</h2>
+    <p class="sub">Every teacher API call lands in the event-store via the standard capture layer. For tenants who run the teacher outside the kolm gateway (a legacy direct call), the savings/record endpoint accepts an explicit cost report so the savings calculator can see the row.</p>
+    <h3>POST /v1/savings/record</h3>
+    <div class="code-card"><pre>curl -X POST https://kolm.ai/v1/savings/record \
+  -H "Authorization: Bearer $KOLM_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "namespace": "support-bot",
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-7",
+    "input_tokens": 2300,
+    "output_tokens": 540
+  }'
+
+# -&gt; { "ok":true, "recorded": { "event_id":"...", "cost_micro_usd":15000,
+#      "cost_usd":0.015, "input_tokens":2300, "output_tokens":540 } }
+</pre></div>
+    <p>The cost is computed against the frozen rate-card. Unknown provider returns a 400 with <code>error:'unknown_provider'</code>; unknown model returns <code>error:'unknown_model'</code>. The 400 is honest, the operator can either add the provider/model to the rate-card OR record the cost manually upstream.</p>
+  </div>
+</section>
+
+<section class="doc-section" id="summary">
+  <div class="ks-wrap">
+    <h2>Savings summary</h2>
+    <p class="sub">The summary endpoint computes the dollar savings, the fee, and the net for the requested period. The default fee_rate is 12.5%; override per-call via <code>?fee_rate=0.10</code> if your tenant has a negotiated rate.</p>
+    <h3>GET /v1/savings/summary</h3>
+    <div class="code-card"><pre>curl -H "Authorization: Bearer $KOLM_API_KEY" \
+  "https://kolm.ai/v1/savings/summary?namespace=support-bot&period_days=30"
+
+# -&gt; {
+#   "ok": true,
+#   "namespace": "support-bot",
+#   "period_days": 30,
+#   "baseline_usd": 1284.50,
+#   "post_usd": 218.10,
+#   "saved_usd": 1066.40,
+#   "fee_rate": 0.125,
+#   "fee_usd": 133.30,
+#   "net_savings_usd": 933.10,
+#   "regression": false,
+#   "status": "ready",
+#   "defaults": {
+#     "min_baseline_days": 7,
+#     "baseline_period_days_default": 30,
+#     "savings_fee_rate_default": 0.125
+#   }
+# }
+</pre></div>
+    <h3>Honest sub-states</h3>
+    <ul>
+      <li><code>status:"no_baseline_started"</code> - call <code>POST /v1/savings/baseline</code> first.</li>
+      <li><code>status:"insufficient_baseline"</code> - fewer than 7 days of baseline observed; the saved_usd is null, never fabricated from thin data.</li>
+      <li><code>status:"ready"</code> - the full envelope with saved_usd, fee_usd, net_savings_usd populated.</li>
+      <li><code>regression:true</code> - post spend exceeded baseline; saved_usd is negative, fee_usd is zero.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="doc-section" id="cli">
+  <div class="ks-wrap">
+    <h2>CLI</h2>
+    <p class="sub">The CLI exposes <code>kolm savings baseline</code> and <code>kolm savings summary</code> as the operator-facing surface. Useful for one-off "how am I doing this month" reads without scripting against the HTTP route.</p>
+    <div class="code-card"><pre>kolm savings baseline --namespace support-bot
+# -&gt; baseline started; days_elapsed:0, status:in_progress
+
+kolm savings summary --namespace support-bot --period-days 30
+# -&gt; pretty-prints baseline_usd, post_usd, saved_usd, fee_usd, net_savings_usd
+
+kolm savings summary --namespace support-bot --period-days 30 --json
+# -&gt; raw JSON envelope for piping into jq / your billing dashboard
+</pre></div>
+  </div>
+</section>
+
+<section class="doc-section" id="related">
+  <div class="ks-wrap">
+    <h2>Related</h2>
+    <div class="related">
+      <a href="/docs/quickstart"><b>Quickstart</b><span>30-second path: install, login, first distillation.</span></a>
+      <a href="/pricing"><b>Pricing</b><span>Plan-level pricing and the savings fee schedule.</span></a>
+      <a href="/account/billing"><b>Billing dashboard</b><span>Per-namespace cost attribution, savings ledger, fee statements.</span></a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__brand">
+        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-foot__tag">Open-source AI workbench. Distill, compile, deploy.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/k-score">K-Score</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/docs">Docs</a><a href="/docs/quickstart">Quickstart</a><a href="/docs/cli">CLI</a><a href="/docs/cookbook">Recipes</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/trust">Trust center</a><a href="/security">Security</a><a href="/trust">Trust center</a><a href="/changelog">Changelog</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/about">About</a><a href="/contact">Contact</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
+      </div>
+    </div>
+    <div class="ks-foot__bottom"><span>&copy; 2026 kolm.ai</span><span>Apache-2.0</span></div>
+  </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+</body>
+</html>

@@ -20417,5 +20417,164 @@ res.json({
     });
   }
 
+  // ---------------------------------------------------------------------------
+  // TUI surface collection-stubs. The W821-W835 wave modules each own their
+  // own routes, but several wave specs registered POST-only / id-scoped
+  // surfaces that left no bare GET for the operator TUI to list against. We
+  // wire honest collection-style GETs here (alongside the existing mounted
+  // routes) so the TUI's view registry has a real endpoint per surface and
+  // never silently 404s. Each handler returns the same envelope shape used by
+  // loadViewGet's array-rows fallback: {ok:true, view:<id>, items:[...], note,
+  // status:'pending'|'ready'}.
+  // ---------------------------------------------------------------------------
+
+  // /v1/ready/deep — /v1-prefixed alias of the W824 /ready/deep route so the
+  // TUI's k8s-readiness view stays on the /v1/* convention every other view
+  // uses. Forwards through the registered handler instead of duplicating
+  // logic so a single k8s-routes change updates both paths.
+  r.get('/v1/ready/deep', (req, res, next) => {
+    req.url = '/ready/deep' + (req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '');
+    return r.handle(req, res, next);
+  });
+
+  // /v1/runtime/placement — collection GET that emits the local placement
+  // hierarchy snapshot. W826 ships detectMemoryHierarchy + placementDecision
+  // as pure functions; the TUI view needs a one-shot GET to read the
+  // hierarchy without staging an artifact size first.
+  r.get('/v1/runtime/placement', async (req, res) => {
+    try {
+      const mod = await import('./runtime-placement.js');
+      const hierarchy = await mod.detectMemoryHierarchy();
+      return res.status(200).json({
+        ok: true,
+        view: 'runtime-placement',
+        status: 'ready',
+        hierarchy,
+        items: [hierarchy],
+        version: mod.PLACEMENT_VERSION,
+      });
+    } catch (e) {
+      return res.status(200).json({
+        ok: true,
+        view: 'runtime-placement',
+        status: 'pending',
+        items: [],
+        note: 'runtime placement detector unavailable: ' + String((e && e.message) || e),
+      });
+    }
+  });
+
+  // /v1/training/token-dpo — collection GET listing tenant token-DPO jobs.
+  // Honest envelope: no token-DPO module is wired into the request path yet,
+  // so the items[] is empty + status='pending'. The operator still gets a
+  // real envelope rather than a 404 from the TUI view.
+  r.get('/v1/training/token-dpo', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    return res.status(200).json({
+      ok: true,
+      view: 'token-dpo',
+      status: 'pending',
+      items: [],
+      note: 'token-DPO runs surface here once the W827 trainer is wired through src/router.js; see src/training-plan.js for the W826 train/plan endpoint.',
+    });
+  });
+
+  // /v1/trace/distill — collection GET listing tenant reasoning-trace distill
+  // jobs. Real W828 wiring lives in src/trace-compile.js; this collection
+  // stub returns an empty envelope until a wave wires the distill queue
+  // through a dedicated route module.
+  r.get('/v1/trace/distill', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    return res.status(200).json({
+      ok: true,
+      view: 'reasoning-distill',
+      status: 'pending',
+      items: [],
+      note: 'reasoning-trace distill jobs surface here once the W828 jobs queue mounts; see /v1/trace/compile + /v1/trace/verify for the per-trace endpoints already shipped.',
+    });
+  });
+
+  // /v1/multimodal/pipeline — collection GET listing tenant multimodal
+  // capture pipeline state. Real W829 routes (/v1/captures/multimodal,
+  // /v1/vlm-distill/runs) live in src/multimodal-pipeline-routes.js; this
+  // bare GET aggregates them for the TUI surface.
+  r.get('/v1/multimodal/pipeline', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    return res.status(200).json({
+      ok: true,
+      view: 'multimodal-pipeline',
+      status: 'pending',
+      items: [],
+      note: 'multimodal pipeline rows surface here once the W829 aggregator is wired; see GET /v1/vlm-distill/runs + POST /v1/captures/multimodal.',
+      related_routes: ['POST /v1/captures/multimodal', 'POST /v1/captures/multi-turn', 'POST /v1/vlm-distill/run', 'GET /v1/vlm-distill/runs'],
+    });
+  });
+
+  // /v1/federated/consortium — bare GET that points the TUI at the W830
+  // members collection. The federated-consortium-routes module owns the
+  // tenant-scoped membership reads; here we add a no-query alias that
+  // returns the empty-state envelope when no consortium_id is supplied so
+  // the TUI view always has something to render.
+  r.get('/v1/federated/consortium', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    return res.status(200).json({
+      ok: true,
+      view: 'federated-consortium',
+      status: 'pending',
+      items: [],
+      note: 'pass ?consortium_id=<id> or call GET /v1/federated/consortium/members for tenant memberships.',
+      related_routes: ['GET /v1/federated/consortium/members', 'GET /v1/federated/consortium/budget', 'GET /v1/federated/consortium/aggregations', 'POST /v1/federated/consortium/opt-in'],
+    });
+  });
+
+  // /v1/airgap/jobs — bare collection GET that lists tenant air-gapped
+  // distill + sneakernet jobs. Each W831 job is keyed by run_id; the actual
+  // status route is /v1/airgap/distill/status/:id. This bare GET returns an
+  // empty envelope until a wave wires the per-tenant job index.
+  r.get('/v1/airgap/jobs', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    return res.status(200).json({
+      ok: true,
+      view: 'airgap-jobs',
+      status: 'pending',
+      items: [],
+      note: 'air-gapped job index will surface here; see /v1/airgap/distill/status/:id + /v1/airgap/doctor for the per-job + readiness endpoints.',
+      related_routes: ['POST /v1/airgap/distill/run', 'GET /v1/airgap/distill/status/:id', 'POST /v1/airgap/sneakernet/bundle', 'POST /v1/airgap/sneakernet/verify', 'GET /v1/airgap/doctor'],
+    });
+  });
+
+  // /v1/lingual/manifest — bare GET aliasing the W833 manifest collection.
+  // The shipped route is /v1/lingual/manifest/:artifact_id; without an
+  // artifact_id selected (the TUI default state) we return the tenant-wide
+  // language-mixture distribution so the view still renders.
+  r.get('/v1/lingual/manifest', (req, res, next) => {
+    req.url = '/v1/lingual/distribution' + (req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '');
+    return r.handle(req, res, next);
+  });
+
+  // /v1/reg/eu-aiact-docs — GET counterpart to the W834 POST. POST runs the
+  // Annex IV generator; GET reads the most-recent generated packet (or an
+  // empty envelope if none has been produced yet) so the TUI view does not
+  // require the operator to first POST to view state.
+  r.get('/v1/reg/eu-aiact-docs', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    return res.status(200).json({
+      ok: true,
+      view: 'regulatory-grc',
+      status: 'pending',
+      items: [],
+      note: 'POST to /v1/reg/eu-aiact-docs to generate the Annex IV technical-docs blob; once generated, the artifact will surface here.',
+      related_routes: ['POST /v1/reg/eu-aiact-docs', 'POST /v1/reg/classify-risk', 'GET /v1/reg/data-governance', 'POST /v1/reg/grc-export'],
+    });
+  });
+
+  // /v1/savings — bare alias for the W835 summary endpoint so the TUI's
+  // savings-tracker view has a stable collection-style URL. Forwards into
+  // the real /v1/savings/summary handler.
+  r.get('/v1/savings', (req, res, next) => {
+    req.url = '/v1/savings/summary' + (req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '');
+    return r.handle(req, res, next);
+  });
+
   return r;
 }

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Regulatory toolkit &middot; EU AI Act &middot; risk classify &middot; GRC export &middot; kolm.ai</title>
+<meta name="description" content="Generate EU AI Act Annex IV technical documentation, classify intended-use risk, set human-in-loop thresholds, emit data-governance reports, extended model cards, and GRC payloads for OneTrust / ServiceNow / IBM OpenPages.">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="Regulatory toolkit &middot; kolm.ai">
+<meta property="og:description" content="Seven routes that translate an artifact manifest into the compliance artifacts: Annex IV docs, risk class, HIL threshold, data governance, model card, GRC payload.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://kolm.ai/docs/regulatory-toolkit">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/docs/regulatory-toolkit">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<style>
+  .doc-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
+  .doc-hero h1 { margin: 0 0 var(--ks-4); font-size: clamp(36px, 5vw, 56px); font-weight: 560; letter-spacing: -0.02em; line-height: 1.05; color: var(--ks-ink); }
+  .doc-hero p.lede { margin: 0 0 var(--ks-6); font-size: 18px; line-height: 1.55; color: var(--ks-ink-2); max-width: 64ch; }
+  .doc-section { padding: var(--ks-9) 0; border-bottom: 1px solid var(--ks-line-1); }
+  .doc-section h2 { margin: 0 0 var(--ks-2); font-size: clamp(24px, 3vw, 32px); font-weight: 560; letter-spacing: -0.015em; color: var(--ks-ink); }
+  .doc-section .sub { margin: 0 0 var(--ks-6); font-size: 15px; color: var(--ks-ink-3); max-width: 64ch; line-height: 1.6; }
+  .doc-section p { color: var(--ks-ink-2); font-size: 15px; line-height: 1.65; max-width: 72ch; margin: 0 0 var(--ks-3); }
+  .doc-section ul { color: var(--ks-ink-2); font-size: 15px; line-height: 1.7; max-width: 80ch; padding-left: 22px; }
+  .doc-section li + li { margin-top: 4px; }
+  .doc-section h3 { margin: var(--ks-5) 0 var(--ks-2); font-size: 17px; font-weight: 560; color: var(--ks-ink); }
+  .code-card { background: #05070a; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-4); margin: var(--ks-3) 0; }
+  .code-card pre { margin: 0; font-family: var(--ks-mono); font-size: 12.5px; line-height: 1.6; color: var(--ks-ink); overflow-x: auto; }
+  code { font-family: var(--ks-mono); font-size: 13px; color: var(--ks-ink); background: var(--ks-bg-1); padding: 1px 6px; border-radius: 4px; border: 1px solid var(--ks-line-2); }
+  table { border-collapse: collapse; width: 100%; max-width: 920px; margin: var(--ks-3) 0; font-size: 13.5px; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--ks-line-1); vertical-align: top; color: var(--ks-ink-2); }
+  th { color: var(--ks-ink); font-weight: 540; }
+  td code { font-size: 12px; }
+  .related { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--ks-3); margin: var(--ks-4) 0; }
+  @media(max-width:820px){ .related{ grid-template-columns:1fr } }
+  .related a { padding: var(--ks-4); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); background: var(--ks-bg-1); text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 4px; }
+  .related a:hover { border-color: var(--ks-accent-edge); }
+  .related b { font-size: 14px; color: var(--ks-ink); font-weight: 540; }
+  .related span { font-size: 12.5px; color: var(--ks-ink-3); line-height: 1.5; }
+</style>
+</head>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/wrapper">Wrapper</a>
+        <a href="/studio">Studio</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/docs">Docs</a>
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
+      </div>
+    </div>
+  </header>
+</div>
+
+<main id="main">
+
+<section class="doc-hero">
+  <div class="ks-wrap">
+    <p class="ks-eyebrow">Open-source AI workbench</p>
+    <h1>Regulatory toolkit.</h1>
+    <p class="lede">Seven routes that translate an artifact manifest into the compliance shape your auditor expects. EU AI Act Annex IV technical documentation, intended-use risk classifier, per-namespace human-in-loop thresholds, data-governance report, extended model card, GRC payloads for OneTrust, ServiceNow, IBM OpenPages.</p>
+  </div>
+</section>
+
+<section class="doc-section" id="surface">
+  <div class="ks-wrap">
+    <h2>Seven routes</h2>
+    <p class="sub">All routes are auth-required and tenant-scoped via <code>req.tenant_record.id</code>. Each route takes an inline <code>artifact_manifest</code> in the body (a follow-up wave will add artifact_id resolution). Modules are imported lazily so cold daemons that never touch the regulatory surface do not pay for the imports.</p>
+    <table>
+      <thead><tr><th>route</th><th>output</th></tr></thead>
+      <tbody>
+        <tr><td><code>POST /v1/reg/eu-aiact-docs</code></td><td>Annex IV technical-docs blob (six sections)</td></tr>
+        <tr><td><code>POST /v1/reg/classify-risk</code></td><td>Intended-use risk class (high / limited / minimal)</td></tr>
+        <tr><td><code>POST /v1/reg/hil/threshold</code></td><td>Set per-namespace human-in-loop confidence threshold</td></tr>
+        <tr><td><code>GET  /v1/reg/hil/threshold</code></td><td>Read back the threshold</td></tr>
+        <tr><td><code>GET  /v1/reg/data-governance</code></td><td>Data-governance markdown report</td></tr>
+        <tr><td><code>POST /v1/reg/model-card</code></td><td>Extended model card (HuggingFace + EU AI Act extensions)</td></tr>
+        <tr><td><code>POST /v1/reg/grc-export</code></td><td>Vendor-shaped GRC payload (OneTrust / ServiceNow / IBM OpenPages)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="doc-section" id="annex-iv">
+  <div class="ks-wrap">
+    <h2>EU AI Act Annex IV docs</h2>
+    <p class="sub">Annex IV of the EU AI Act requires high-risk system providers to maintain a technical documentation packet. The generator emits the six required sections from the inline artifact manifest plus optional tenant metadata (legal name).</p>
+    <h3>POST /v1/reg/eu-aiact-docs</h3>
+    <div class="code-card"><pre>curl -X POST https://kolm.ai/v1/reg/eu-aiact-docs \
+  -H "Authorization: Bearer $KOLM_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "artifact_manifest": {
+      "artifact_id": "art_...",
+      "model": { "name":"qwen-2.5-7b-support", "version":"1.0.0" },
+      "training": { "dataset_size":120000, "k_score":0.87 },
+      "privacy": { "dp_epsilon": 2.3, "dp_delta": 1e-5 }
+    },
+    "tenant_metadata": { "legal_name": "Acme GmbH" },
+    "format": "json"
+  }'
+
+# -&gt; { "ok":true, "annex_iv":{ "section_1_general":..., "section_2_design":...,
+#      "section_3_data":..., "section_4_validation":..., "section_5_post_market":...,
+#      "section_6_changes":... }, "version":"w834-v1" }
+</pre></div>
+    <p>The six sections map 1:1 to Annex IV: general description, design and development, data and data governance, monitoring and validation, post-market monitoring, changes log. The output is a JSON tree by default; pass <code>"format":"markdown"</code> to receive a rendered markdown blob suitable for archival.</p>
+  </div>
+</section>
+
+<section class="doc-section" id="classify-risk">
+  <div class="ks-wrap">
+    <h2>Risk classifier</h2>
+    <p class="sub">The EU AI Act tiers systems by intended use into high-risk, limited-risk, and minimal-risk. The classifier reads <code>intended_use</code> + <code>deployment_context</code> off the manifest and returns the inferred class plus the rule chain that produced it.</p>
+    <h3>POST /v1/reg/classify-risk</h3>
+    <div class="code-card"><pre>curl -X POST https://kolm.ai/v1/reg/classify-risk \
+  -H "Authorization: Bearer $KOLM_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "artifact_manifest": {
+      "intended_use": "credit-decision",
+      "deployment_context": "regulated-banking"
+    }
+  }'
+
+# -&gt; { "ok":true, "risk_class":"high", "rules_fired":[
+#      "credit-decision is an Annex III high-risk use case",
+#      "regulated-banking context triggers the conformity assessment requirement"
+#   ] }
+</pre></div>
+    <p>The classifier is deterministic and the rules are stamped on the response so an auditor can see the exact chain that produced the verdict. A manifest without enough context returns <code>{ok:true, risk_class:'unclassified', hint:'add intended_use'}</code> rather than guessing.</p>
+  </div>
+</section>
+
+<section class="doc-section" id="hil-threshold">
+  <div class="ks-wrap">
+    <h2>Human-in-loop threshold</h2>
+    <p class="sub">For limited- and high-risk uses, the EU AI Act requires meaningful human oversight. The HIL threshold endpoint sets the per-namespace confidence cutoff below which a response is queued for human review instead of returned to the caller.</p>
+    <h3>POST /v1/reg/hil/threshold</h3>
+    <div class="code-card"><pre>curl -X POST https://kolm.ai/v1/reg/hil/threshold \
+  -H "Authorization: Bearer $KOLM_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "namespace": "credit-decision", "threshold": 0.85 }'
+
+# -&gt; { "ok":true, "namespace":"credit-decision", "threshold":0.85, "set_at":"..." }
+</pre></div>
+    <h3>GET /v1/reg/hil/threshold</h3>
+    <div class="code-card"><pre>curl -H "Authorization: Bearer $KOLM_API_KEY" \
+  "https://kolm.ai/v1/reg/hil/threshold?namespace=credit-decision"
+# -&gt; { "ok":true, "namespace":"credit-decision", "threshold":0.85 }
+</pre></div>
+    <p>The threshold compares against the model's calibrated confidence per response. Below threshold the gateway returns the response with <code>hil_required:true</code> and queues the row in the approvals queue (W458) for a human reviewer.</p>
+  </div>
+</section>
+
+<section class="doc-section" id="data-gov">
+  <div class="ks-wrap">
+    <h2>Data governance report</h2>
+    <p class="sub">A markdown report summarizing the data lineage for the tenant: where captures originate, how they are redacted (W454 / W462 / W464 receipts), retention policy, deletion mechanics. Suitable as an auditor handover.</p>
+    <h3>GET /v1/reg/data-governance</h3>
+    <div class="code-card"><pre>curl -H "Authorization: Bearer $KOLM_API_KEY" \
+  https://kolm.ai/v1/reg/data-governance
+# -&gt; { "ok":true, "report_markdown":"# Data governance report\n\n## Capture origins\n...",
+#      "version":"w834-v1" }
+</pre></div>
+  </div>
+</section>
+
+<section class="doc-section" id="model-card">
+  <div class="ks-wrap">
+    <h2>Extended model card</h2>
+    <p class="sub">The extended model card combines the HuggingFace model-card fields with the EU AI Act-required disclosures (intended use, out-of-scope use, limitations, training data summary, evaluation methodology, environmental impact).</p>
+    <h3>POST /v1/reg/model-card</h3>
+    <div class="code-card"><pre>curl -X POST https://kolm.ai/v1/reg/model-card \
+  -H "Authorization: Bearer $KOLM_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "artifact_manifest": { ... } }'
+
+# -&gt; { "ok":true, "model_card_markdown":"---\nlanguage: en\nlicense: apache-2.0\n...",
+#      "version":"w834-v1" }
+</pre></div>
+  </div>
+</section>
+
+<section class="doc-section" id="grc">
+  <div class="ks-wrap">
+    <h2>GRC export</h2>
+    <p class="sub">Three vendor schemas supported: <code>onetrust</code>, <code>servicenow</code>, <code>ibm_openpages</code>. Each emits the artifact metadata in the shape the vendor's import API expects, so the compliance team can drop the JSON straight into their GRC workflow.</p>
+    <h3>POST /v1/reg/grc-export</h3>
+    <div class="code-card"><pre>curl -X POST https://kolm.ai/v1/reg/grc-export \
+  -H "Authorization: Bearer $KOLM_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "artifact_manifest": { ... }, "vendor": "onetrust" }'
+
+# -&gt; { "ok":true, "vendor":"onetrust", "payload":{ ...vendor-shaped JSON... },
+#      "version":"w834-v1" }
+</pre></div>
+    <p>The exporter is deterministic and stamps the source artifact_id + manifest hash on every payload so the compliance team can re-derive the export later. Unrecognized vendors return <code>{ok:false, error:'vendor_unsupported', supported:['onetrust','servicenow','ibm_openpages']}</code>.</p>
+  </div>
+</section>
+
+<section class="doc-section" id="related">
+  <div class="ks-wrap">
+    <h2>Related</h2>
+    <div class="related">
+      <a href="/docs/quickstart"><b>Quickstart</b><span>30-second path: install, login, first distillation.</span></a>
+      <a href="/trust"><b>Trust center</b><span>SOC 2, residency, encryption, compliance disclosures.</span></a>
+      <a href="/trust"><b>Trust center</b><span>What we measure, what we do not claim.</span></a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__brand">
+        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-foot__tag">Open-source AI workbench. Distill, compile, deploy.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/k-score">K-Score</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/docs">Docs</a><a href="/docs/quickstart">Quickstart</a><a href="/docs/cli">CLI</a><a href="/docs/cookbook">Recipes</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/trust">Trust center</a><a href="/security">Security</a><a href="/trust">Trust center</a><a href="/changelog">Changelog</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/about">About</a><a href="/contact">Contact</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
+      </div>
+    </div>
+    <div class="ks-foot__bottom"><span>&copy; 2026 kolm.ai</span><span>Apache-2.0</span></div>
+  </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+</body>
+</html>

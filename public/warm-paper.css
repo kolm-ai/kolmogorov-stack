@@ -58,39 +58,39 @@ html[style*="background"], body[style*="background"] {
 
 h1, .h1, .display, .ks-display {
   font-family: var(--ks-font-sans);
-  font-weight: 700;
-  font-size: clamp(42px, 5.8vw, 80px);
-  line-height: 1.02;
-  letter-spacing: -0.034em;
+  font-weight: 580;
+  font-size: clamp(38px, 5.2vw, 72px);
+  line-height: 1.05;
+  letter-spacing: -0.032em;
   color: var(--ink-1);
   text-wrap: balance;
 }
 
 h2, .h2 {
   font-family: var(--ks-font-sans);
-  font-weight: 700;
-  font-size: clamp(30px, 3.6vw, 48px);
-  line-height: 1.1;
-  letter-spacing: -0.028em;
+  font-weight: 560;
+  font-size: clamp(26px, 3.2vw, 42px);
+  line-height: 1.15;
+  letter-spacing: -0.026em;
   color: var(--ink-1);
   text-wrap: balance;
 }
 
 h3, .h3 {
   font-family: var(--ks-font-sans);
-  font-weight: 600;
-  font-size: clamp(20px, 2.0vw, 24px);
-  line-height: 1.25;
-  letter-spacing: -0.018em;
+  font-weight: 540;
+  font-size: clamp(19px, 1.9vw, 22px);
+  line-height: 1.3;
+  letter-spacing: -0.016em;
   color: var(--ink-1);
 }
 
 h4 {
   font-family: var(--ks-font-sans);
-  font-weight: 600;
-  font-size: clamp(17px, 1.6vw, 20px);
-  line-height: 1.35;
-  letter-spacing: -0.012em;
+  font-weight: 540;
+  font-size: clamp(16px, 1.5vw, 18px);
+  line-height: 1.4;
+  letter-spacing: -0.01em;
   color: var(--ink-1);
 }
 
@@ -202,8 +202,8 @@ a:focus-visible {
 .ks > main > section,
 body > section,
 main > section {
-  padding-top: clamp(72px, 7.5vw, 112px);
-  padding-bottom: clamp(72px, 7.5vw, 112px);
+  padding-top: clamp(56px, 6vw, 88px);
+  padding-bottom: clamp(56px, 6vw, 88px);
   position: relative;
 }
 
@@ -236,8 +236,8 @@ main > section:first-of-type,
 section.hero,
 section.kolm-hero,
 section[data-hero] {
-  padding-top: clamp(56px, 6vw, 88px);
-  padding-bottom: clamp(72px, 7.5vw, 112px);
+  padding-top: clamp(40px, 5vw, 72px);
+  padding-bottom: clamp(56px, 6vw, 88px);
   border-top: none;
   box-shadow: none;
 }
@@ -1115,4 +1115,408 @@ main > section:first-of-type .fr-h1--hero {
 [data-theme="dark"] .kolm-diagram__schematic {
   background: var(--surface-1);
   border-color: var(--line-2);
+}
+
+/* ============================================================
+   23. .KOLM-ARCH - hero architecture diagram (inputs / processing / outputs)
+   Replaces the W706 "demo terminal" with a real product schematic.
+   The SVG sits in column 2 of the hero grid. Pure monochrome:
+   ink rectangles, ink text, hairline rules. Sized to feel like
+   a printed reference card, not a screenshot.
+   ============================================================ */
+
+.kolm-arch {
+  margin: 0;
+  padding: clamp(20px, 2.4vw, 32px);
+  background: var(--surface-1);
+  border: 1px solid var(--line-2);
+  border-radius: var(--ks-radius-lg);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 14px 40px -28px rgba(17, 17, 17, 0.12);
+  align-self: start;
+}
+
+.kolm-arch__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  color: var(--ink-1);
+}
+
+/* column header micro-caps */
+.kolm-arch__h {
+  font-family: var(--ks-font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  fill: var(--ink-3);
+}
+
+/* hairline rules under column headers and inside artifact box */
+.kolm-arch__rule {
+  stroke: var(--line-3);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.kolm-arch__rule--in {
+  stroke: var(--line-2);
+}
+
+/* input column chips (SDK names) */
+.kolm-arch__chip {
+  fill: none;
+  stroke: var(--line-2);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  rx: 4;
+  ry: 4;
+}
+.kolm-arch__chipt {
+  font-family: var(--ks-font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  fill: var(--ink-1);
+  text-anchor: middle;
+}
+
+/* connector lines and arrows between columns */
+.kolm-arch__line {
+  stroke: var(--ink-3);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.kolm-arch__arrow {
+  fill: none;
+  stroke: var(--ink-3);
+  stroke-width: 1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* processing column - the compiler stages */
+.kolm-arch__stage {
+  fill: var(--surface-2);
+  stroke: var(--line-3);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  rx: 4;
+  ry: 4;
+}
+.kolm-arch__staget {
+  font-family: var(--ks-font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  fill: var(--ink-1);
+  text-anchor: middle;
+}
+.kolm-arch__stagen {
+  font-family: var(--ks-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  fill: var(--ink-3);
+  text-anchor: middle;
+}
+
+/* output artifact box - heavier border, looks like a sealed file */
+.kolm-arch__artifact {
+  fill: var(--surface-1);
+  stroke: var(--ink-1);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+  rx: 4;
+  ry: 4;
+}
+.kolm-arch__artt {
+  font-family: var(--ks-font-mono);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0;
+  fill: var(--ink-1);
+  text-anchor: middle;
+}
+.kolm-arch__artn {
+  font-family: var(--ks-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  fill: var(--ink-2);
+  text-anchor: middle;
+}
+
+/* column footer note */
+.kolm-arch__note {
+  font-family: var(--ks-font-sans);
+  font-size: 11px;
+  font-style: italic;
+  letter-spacing: -0.005em;
+  fill: var(--ink-3);
+  text-anchor: middle;
+}
+
+[data-theme="dark"] .kolm-arch {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.03) inset,
+    0 18px 48px -28px rgba(0, 0, 0, 0.5);
+}
+
+/* mobile: drop diagram below the lede with comfortable height cap */
+@media (max-width: 900px) {
+  .kolm-arch {
+    margin-top: 24px;
+    padding: 20px;
+  }
+}
+
+/* ============================================================
+   24. SURGICAL LIFTS - patterns adopted from the 2026-05-24 Warm
+   Paper redline. Burnt-sienna accent intentionally stripped; the
+   palette stays pure monochrome (ink + paper + mute).
+   ============================================================ */
+
+/* 24a. Strong focus ring - keyboard accessibility, not just mouse */
+*:focus-visible {
+  outline: 2px solid var(--ink-1);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+[data-theme="dark"] *:focus-visible {
+  outline-color: var(--ink-1);
+}
+
+/* 24b. Refined hr - centered, narrow, hairline */
+hr, .section-rule {
+  appearance: none;
+  border: 0;
+  height: 1px;
+  width: min(100%, 200px);
+  margin: clamp(40px, 5vw, 64px) auto;
+  background: var(--line-3);
+}
+
+/* 24c. Blockquote - left rule, italic, ink-2 */
+blockquote {
+  margin: 24px 0;
+  padding: 4px 0 4px 20px;
+  border-left: 2px solid var(--ink-1);
+  font-family: var(--ks-font-sans);
+  font-style: italic;
+  font-size: 17.5px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  letter-spacing: -0.005em;
+}
+blockquote cite, blockquote footer {
+  display: block;
+  margin-top: 10px;
+  font-family: var(--ks-font-mono);
+  font-style: normal;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* 24d. Inline code - subtle background, no chromatic tint */
+code:not(pre code) {
+  font-family: var(--ks-font-mono);
+  font-size: 0.92em;
+  padding: 1.5px 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--line-1);
+  border-radius: 3px;
+  color: var(--ink-1);
+  letter-spacing: -0.005em;
+}
+
+/* 24e. Pre/code block - terminal look, ink on paper, no shadow drama */
+pre, .codeblock {
+  font-family: var(--ks-font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 18px 20px;
+  margin: 20px 0;
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  border-radius: var(--ks-radius-md);
+  overflow-x: auto;
+  color: var(--ink-1);
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+
+/* 24f. Stat strip - horizontally laid numerals, mono caption */
+.stat-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: clamp(20px, 3vw, 40px);
+  padding: clamp(24px, 3vw, 40px) 0;
+  border-top: 1px solid var(--line-2);
+  border-bottom: 1px solid var(--line-2);
+  margin: clamp(40px, 5vw, 64px) 0;
+}
+.stat-strip__cell {
+  text-align: left;
+}
+.stat-strip__n {
+  display: block;
+  font-family: var(--ks-font-sans);
+  font-weight: 580;
+  font-size: clamp(28px, 3.4vw, 40px);
+  line-height: 1.05;
+  letter-spacing: -0.026em;
+  color: var(--ink-1);
+  font-variant-numeric: tabular-nums;
+}
+.stat-strip__k {
+  display: block;
+  margin-top: 8px;
+  font-family: var(--ks-font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* 24g. Pricing card - hairline default, ink-bordered when highlighted */
+.pricing-card {
+  background: var(--surface-1);
+  border: 1px solid var(--line-2);
+  border-radius: var(--ks-radius-lg);
+  padding: clamp(24px, 3vw, 36px);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  transition: border-color 200ms ease, transform 200ms ease, box-shadow 200ms ease;
+}
+.pricing-card--featured,
+.pricing-card[data-featured="true"] {
+  border-color: var(--ink-1);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 18px 48px -28px rgba(17, 17, 17, 0.18);
+}
+.pricing-card--featured::before,
+.pricing-card[data-featured="true"]::before {
+  content: "Recommended";
+  position: absolute;
+  top: -10px;
+  left: 24px;
+  padding: 3px 10px;
+  background: var(--ink-1);
+  color: var(--surface-1);
+  font-family: var(--ks-font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border-radius: 999px;
+}
+.pricing-card__price {
+  font-family: var(--ks-font-sans);
+  font-weight: 580;
+  font-size: clamp(36px, 4.2vw, 52px);
+  line-height: 1;
+  letter-spacing: -0.028em;
+  color: var(--ink-1);
+  font-variant-numeric: tabular-nums;
+}
+.pricing-card__price small {
+  font-family: var(--ks-font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+  margin-left: 4px;
+}
+
+/* 24h. Tabular figures everywhere they belong - prevents number jitter */
+.tabular, .price, .stat, td.num, .num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 24i. Reveal stagger - each fr-reveal child eases up on enter */
+.fr-reveal {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 480ms cubic-bezier(0.2, 0.7, 0.2, 1),
+              transform 480ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.fr-reveal.is-visible,
+.fr-reveal[data-visible="true"] {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fr-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* 24j. Smooth scroll for in-page anchors, with offset for the sticky nav */
+html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+/* 24k. Selection - ink on paper, no chromatic tint */
+::selection {
+  background: var(--ink-1);
+  color: var(--surface-0);
+}
+
+/* 24l. Footer grid - kept hairline, evenly spaced, mono labels */
+footer.site, .site-footer, .ks-footer {
+  border-top: 1px solid var(--line-2);
+  padding: clamp(40px, 5vw, 72px) 0 clamp(28px, 3vw, 40px);
+  margin-top: clamp(64px, 8vw, 120px);
+  background: var(--surface-0);
+}
+footer.site .footer-grid,
+.site-footer .footer-grid,
+.ks-footer__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: clamp(24px, 3vw, 48px);
+}
+footer.site h6, .site-footer h6, .ks-footer h6,
+footer.site .footer-h, .site-footer .footer-h, .ks-footer__h {
+  font-family: var(--ks-font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 14px;
+}
+footer.site ul, .site-footer ul, .ks-footer ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+footer.site ul a, .site-footer ul a, .ks-footer ul a {
+  font-size: 14px;
+  color: var(--ink-2);
+  text-decoration: none;
+}
+footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
+  color: var(--ink-1);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
