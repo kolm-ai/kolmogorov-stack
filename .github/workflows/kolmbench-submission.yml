@@ -1,0 +1,135 @@
+# W756 — KolmBench v1 submission validator.
+#
+# Trigger: any PR that touches submissions/**. Validates every JSONL row
+# against src/kolmbench.js → validateSubmission(). Comments the validation
+# result back on the PR via actions/github-script.
+#
+# HONEST: auto-merge is gated by the W807 reviewer-bot ship; until then
+# human review is required to merge a submission into the leaderboard.
+
+name: kolmbench-submission
+
+on:
+  pull_request:
+    paths:
+      - 'submissions/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate submission files
+        id: validate
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Find every submissions/*.jsonl file changed in this PR. We use the
+          # union of the workspace ./submissions tree and the PR diff so
+          # forks adding their first file are covered.
+          mkdir -p submissions
+          files=$(ls -1 submissions/*.jsonl 2>/dev/null || true)
+          if [ -z "$files" ]; then
+            echo "result_md=No JSONL submission files found under submissions/." >> "$GITHUB_OUTPUT"
+            echo "validation_ok=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Build a small Node script that reads each file, calls
+          # validateSubmission, and emits a markdown report.
+          cat > /tmp/kolmbench-validate.mjs <<'NODE_EOF'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import { validateSubmission, KOLMBENCH_VERSION } from './src/kolmbench.js';
+
+          const argv = process.argv.slice(2);
+          const lines = [];
+          let allOk = true;
+          lines.push('# KolmBench submission validation (' + KOLMBENCH_VERSION + ')');
+          lines.push('');
+          for (const file of argv) {
+            const rel = path.relative(process.cwd(), file);
+            const text = fs.readFileSync(file, 'utf8');
+            const rows = text.split(/\r?\n/).filter(Boolean).map((ln, i) => {
+              try { return JSON.parse(ln); }
+              catch (e) {
+                allOk = false;
+                return { __parse_error: e && e.message, __line: i + 1 };
+              }
+            });
+            const parseErrors = rows.filter(r => r && r.__parse_error);
+            if (parseErrors.length > 0) {
+              lines.push('## ' + rel + ' &mdash; JSONL parse FAIL');
+              for (const pe of parseErrors) {
+                lines.push('- line ' + pe.__line + ': ' + pe.__parse_error);
+              }
+              lines.push('');
+              continue;
+            }
+            const result = validateSubmission(rows);
+            if (result.ok) {
+              lines.push('## ' + rel + ' &mdash; PASS (' + rows.length + ' rows)');
+              lines.push('');
+            } else {
+              allOk = false;
+              lines.push('## ' + rel + ' &mdash; FAIL (' + result.errors.length + ' errors)');
+              for (const err of result.errors.slice(0, 25)) {
+                lines.push('- ' + err.code + (err.task_id ? ' (task_id=' + err.task_id + ')' : '') + (err.hint ? ' &mdash; ' + err.hint : ''));
+              }
+              if (result.errors.length > 25) {
+                lines.push('- ... and ' + (result.errors.length - 25) + ' more');
+              }
+              lines.push('');
+            }
+          }
+          lines.push('---');
+          lines.push('');
+          lines.push('Auto-merge is gated by the W807 reviewer-bot ship; until then human review is required to merge a submission into the leaderboard.');
+          const md = lines.join('\n');
+          fs.writeFileSync('/tmp/kolmbench-validate-report.md', md);
+          process.stdout.write(allOk ? 'PASS\n' : 'FAIL\n');
+          process.exit(allOk ? 0 : 1);
+          NODE_EOF
+          if node /tmp/kolmbench-validate.mjs $files; then
+            echo "validation_ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "validation_ok=false" >> "$GITHUB_OUTPUT"
+          fi
+          # Emit the markdown into the GitHub output. Use a delimiter so
+          # multi-line content rides through correctly.
+          {
+            echo "result_md<<KOLMBENCH_EOF"
+            cat /tmp/kolmbench-validate-report.md
+            echo "KOLMBENCH_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Comment validation result on PR
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = `${{ steps.validate.outputs.result_md }}`;
+            if (!body || body.trim() === '') return;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+
+      - name: Fail job if validation failed
+        if: steps.validate.outputs.validation_ok != 'true'
+        run: |
+          echo "kolmbench-submission validation failed; see PR comment for details."
+          exit 1

@@ -7866,6 +7866,12 @@ async function cmdBenchmark(args) {
   if (args && (args[0] === 'evidence' || args[0] === 'benchmark-evidence')) {
     return cmdBenchmarkEvidence(args.slice(1));
   }
+  // W758 — `kolm bench mmlu|humaneval|mtbench` routes to the external
+  // bench harness dispatcher. Distinct-named (cmdW758Bench) so parallel
+  // W756/W757/W759/W760 wave agents cannot collide on this symbol.
+  if (args && (args[0] === 'mmlu' || args[0] === 'humaneval' || args[0] === 'mtbench')) {
+    return cmdW758Bench(args);
+  }
   if (maybeHelp('benchmark', args)) return;
   // `kolm bench --reproduce <suite>` is the public-reproducer path documented at
   // /articles/how-we-benchmark. It runs in a pinned Docker image so the harness
@@ -23038,6 +23044,8 @@ const COMPLETION_VERBS = [
   'evidence',
   // W715 — cross-namespace transfer learning verbs.
   'namespace', 'ns', 'federated',
+  // W756 — KolmBench v1 spec + leaderboard verbs (`kb` is the short alias).
+  'kolmbench', 'kb',
 ];
 const COMPLETION_SUBS = {
   auditor: ['keygen', 'sign', 'verify'],
@@ -23058,8 +23066,8 @@ const COMPLETION_SUBS = {
   tail:    ['captures'],
   install: ['claude-code', 'cursor', 'continue', 'cline'],
   completion: ['bash', 'zsh', 'fish'],
-  bench: ['evidence'],
-  benchmark: ['evidence'],
+  bench: ['evidence', 'mmlu', 'humaneval', 'mtbench'],
+  benchmark: ['evidence', 'mmlu', 'humaneval', 'mtbench'],
   packages: ['release-readiness', 'release', 'readiness'],
   package: ['release-readiness', 'release', 'readiness'],
   namespace: ['fingerprint', 'warm-start-suggest', 'verticals'],
@@ -23135,6 +23143,20 @@ COMPLETION_SUBS.team    = Array.from(new Set([...(COMPLETION_SUBS.team || []),
   'sync', 'queue', 'export']));
 COMPLETION_SUBS.install = Array.from(new Set([...(COMPLETION_SUBS.install || []),
   'codex', 'aider', 'gemini-cli', 'claude-code-cli', 'cursor-cli', 'windsurf-cli', 'all']));
+// W760 — `kolm lang <detect|kscore|augment>` completion stamps.
+if (!COMPLETION_VERBS.includes('lang')) COMPLETION_VERBS.push('lang');
+COMPLETION_SUBS.lang = ['detect', 'kscore', 'augment'];
+// W756 — kolmbench subverbs (short alias `kb` reuses the same set).
+COMPLETION_SUBS.kolmbench = ['spec', 'leaderboard', 'validate', 'submit'];
+COMPLETION_SUBS.kb = ['spec', 'leaderboard', 'validate', 'submit'];
+
+// W759 — numeric-accuracy verbs added post-literal so a parallel agent on the
+// same revision can land their COMPLETION_VERBS edit independently without a
+// merge conflict on the literal array. `num` is the short alias dispatched
+// from the same case arm as `numeric` in main().
+COMPLETION_VERBS.push('numeric', 'num');
+COMPLETION_SUBS.numeric = ['eval', 'calc', 'flag-namespace'];
+COMPLETION_SUBS.num     = ['eval', 'calc', 'flag-namespace'];
 
 function emitBashCompletion() {
     const verbs = COMPLETION_VERBS.join(' ');
@@ -34939,7 +34961,20 @@ async function main() {
         break;
       case 'jobs':     await withErrorContext('jobs',     () => cmdJobs(rest)); break;
       // W369 data plane (lake / optimize / dataset / label).
-      case 'lake':     await withErrorContext('lake',     () => cmdLake(rest)); break;
+      // W757 — `kolm lake <opt-in|opt-out|trends|contribute>` routes the
+      // cross-namespace anonymized pattern-lake dispatcher. Other subverbs
+      // (stats / tail / inspect / export / purge / sync) keep flowing to
+      // the original W369 cmdLake handler so muscle-memory + scripted
+      // pipelines stay byte-stable.
+      case 'lake': {
+        const __w757Sub = String((rest && rest[0]) || '').toLowerCase();
+        if (__w757Sub === 'opt-in' || __w757Sub === 'opt-out' || __w757Sub === 'trends' || __w757Sub === 'contribute') {
+          await withErrorContext('lake', () => cmdW757Lake(rest));
+        } else {
+          await withErrorContext('lake', () => cmdLake(rest));
+        }
+        break;
+      }
       case 'optimize': await withErrorContext('optimize', () => cmdOptimize(rest)); break;
       // W409m — `kolm opportunities` is a top-level alias for `optimize list`
       // with --top N pagination, kept separate so muscle-memory of either verb
@@ -35115,6 +35150,23 @@ async function main() {
       // (cmdW751Verticals) so parallel W750/W752/W753 wave agents cannot
       // collide on this case.
       case 'vertical': await withErrorContext('vertical', () => cmdW751Verticals(rest)); break;
+      // W756 — `kolm kolmbench <spec|leaderboard|validate|submit>` routes the
+      // KolmBench v1 spec + leaderboard dispatcher. Distinct-named
+      // (cmdW756Kolmbench) so parallel W757/W758/W759/W760 wave agents
+      // cannot collide on this symbol. `kb` is the short alias.
+      case 'kolmbench':
+      case 'kb':       await withErrorContext('kolmbench', () => cmdW756Kolmbench(rest)); break;
+      // W759 — `kolm numeric <eval|calc|flag-namespace>` routes the
+      // numerical-accuracy evaluator. Distinct-named (cmdW759Numeric) so
+      // parallel W756/W757/W758/W760 wave agents cannot collide on this
+      // symbol. `num` is the short alias.
+      case 'numeric':
+      case 'num':      await withErrorContext('numeric',   () => cmdW759Numeric(rest)); break;
+      // W760 — `kolm lang <detect|kscore|augment>` routes the
+      // per-language K-Score + multilingual augmentation dispatcher.
+      // Distinct-named (cmdW760Lang) so parallel W756/W757/W758/W759
+      // wave agents cannot collide on this symbol.
+      case 'lang':     await withErrorContext('lang',      () => cmdW760Lang(rest)); break;
       case 'agents':     await withErrorContext('agents',     () => cmdAgents(rest)); break;
       case 'shell-init': await withErrorContext('shell-init', () => cmdShellInit(rest)); break;
       case '--version':
@@ -35157,6 +35209,986 @@ async function main() {
     const code = Number.isInteger(e && e.exitCode) ? e.exitCode : EXIT.EXECUTION;
     process.exit(code);
   }
+}
+
+// =============================================================================
+// W759 — `kolm numeric <eval|calc|flag-namespace>` dispatcher.
+//
+// Distinct-named (cmdW759Numeric) per the W724/.../W751 precedent so parallel
+// wave agents on W756/W757/W758/W760 cannot collide on this symbol.
+//
+// Subcommands:
+//   eval --text TEXT [--expected N] [--tolerance-pct P]
+//       Pre-flight a response. Extracts numbers + equations, verifies each
+//       equation through the pure recursive-descent arithmetic evaluator,
+//       optionally compares against an expected answer. Hits POST
+//       /v1/numeric/eval which gates on body.confirm:true.
+//
+//   calc <expr>
+//       Local-only. Routes through src/calculator-tool.js evalSafeArithmetic
+//       directly — no network, no auth. The same evaluator the API uses, just
+//       loaded in-process so a developer can pre-flight an expression with no
+//       round-trip cost.
+//
+//   flag-namespace --namespace ns [--threshold 0.10] [--sample-n 100]
+//       Hits GET /v1/numeric/namespace-flag/:namespace. Reports the mean
+//       numeric-content ratio across a sample of the namespace's captures.
+//       Above the threshold, the operator should wire the calculator tool
+//       into the W735 tool-use distillation path for that namespace.
+//
+// Honest exit codes:
+//   0 — success (numeric pass / expression evaluated / namespace not flagged)
+//   3 — numeric mismatch found OR namespace flagged (informational, not error)
+//   2 — bad args / auth missing / network failure / syntax error
+//
+// `numeric` is the canonical verb; `num` is the short alias dispatched from
+// the same case arm above. The COMPLETION_VERBS list carries both.
+// =============================================================================
+async function cmdW759Numeric(args) {
+  const sub = (args && args[0]) || '';
+
+  function _envApiKey() {
+    return process.env.KOLM_API_KEY || '';
+  }
+  function _envBase() {
+    return (process.env.KOLM_BASE_URL || 'https://kolm.ai').replace(/\/$/, '');
+  }
+  function _print(envelope) {
+    console.log(JSON.stringify(envelope, null, 2));
+  }
+  function _fail(envelope, code = 2) {
+    _print(envelope);
+    process.exit(code);
+  }
+  function _flag(rest, name) {
+    const i = rest.indexOf('--' + name);
+    if (i < 0) return undefined;
+    return rest[i + 1];
+  }
+
+  if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
+    console.error('usage: kolm numeric <eval|calc|flag-namespace> [args]');
+    console.error('  eval --text TEXT [--expected N] [--tolerance-pct P]');
+    console.error('       — POST /v1/numeric/eval  (confirm-gated)');
+    console.error('  calc <expr>');
+    console.error('       — local pure-arithmetic evaluator (+ - * / parens)');
+    console.error('  flag-namespace --namespace ns [--threshold 0.10] [--sample-n 100]');
+    console.error('       — GET  /v1/numeric/namespace-flag/:namespace');
+    console.error('exit codes: 0 ok, 3 mismatch/flagged (informational), 2 error');
+    process.exit(2);
+    return;
+  }
+
+  // ──────────────────────── subcommand: calc ─────────────────────────────────
+  // Local-only path — loads the evaluator in-process. Safe to run with no
+  // auth and no network. We import lazily via file URL so the CLI bin's own
+  // module-resolution rules don't interfere.
+  if (sub === 'calc') {
+    const expr = args.slice(1).join(' ');
+    if (!expr) {
+      _fail({
+        ok: false,
+        error: 'missing_expression',
+        hint: 'usage: kolm numeric calc "2 + 3 * 4"',
+        version: 'w759-v1',
+      });
+      return;
+    }
+    let calc;
+    try {
+      const url = await import('node:url');
+      const pathMod = await import('node:path');
+      const here = url.fileURLToPath(import.meta.url);
+      const calcPath = pathMod.join(pathMod.dirname(here), '..', 'src', 'calculator-tool.js');
+      calc = await import(url.pathToFileURL(calcPath).href);
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'calculator_load_error',
+        detail: String(e && e.message || e),
+        version: 'w759-v1',
+      });
+      return;
+    }
+    const r = calc.evalSafeArithmetic(expr);
+    _print(r);
+    if (!r.ok) process.exit(2);
+    return;
+  }
+
+  // ──────────────────────── subcommand: eval ─────────────────────────────────
+  if (sub === 'eval') {
+    const rest = args.slice(1);
+    const text = _flag(rest, 'text');
+    if (typeof text !== 'string') {
+      _fail({
+        ok: false,
+        error: 'missing_text',
+        hint: 'usage: kolm numeric eval --text "<response text>" [--expected N] [--tolerance-pct P]',
+        version: 'w759-v1',
+      });
+      return;
+    }
+    const expectedRaw = _flag(rest, 'expected');
+    const tolRaw = _flag(rest, 'tolerance-pct');
+    const key = _envApiKey();
+    if (!key) {
+      _fail({
+        ok: false,
+        error: 'auth_required',
+        hint: 'set KOLM_API_KEY (kolm signup / kolm login)',
+        version: 'w759-v1',
+      });
+      return;
+    }
+    const body = {
+      confirm: true,
+      response_text: text,
+    };
+    if (expectedRaw !== undefined) body.expected_answer = Number(expectedRaw);
+    if (tolRaw !== undefined) body.tolerance_pct = Number(tolRaw);
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/numeric/eval', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify(body),
+      });
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'network_error',
+        detail: String(e && e.message || e),
+        version: 'w759-v1',
+      });
+      return;
+    }
+    const env = await resp.json().catch(() => ({}));
+    _print(env);
+    if (!resp.ok) process.exit(2);
+    // Honest exit code: 3 if numeric mismatch was found, 0 otherwise.
+    const hasErrors = env && Array.isArray(env.errors) && env.errors.length > 0;
+    const mismatchExpected = env && env.expected_answer !== undefined && env.match_with_expected === false;
+    if (hasErrors || mismatchExpected) process.exit(3);
+    return;
+  }
+
+  // ────────────────── subcommand: flag-namespace ─────────────────────────────
+  if (sub === 'flag-namespace') {
+    const rest = args.slice(1);
+    const namespace = _flag(rest, 'namespace');
+    if (!namespace) {
+      _fail({
+        ok: false,
+        error: 'missing_namespace',
+        hint: 'usage: kolm numeric flag-namespace --namespace ns [--threshold 0.1] [--sample-n 100]',
+        version: 'w759-v1',
+      });
+      return;
+    }
+    const thresholdRaw = _flag(rest, 'threshold');
+    const sampleNRaw = _flag(rest, 'sample-n');
+    const key = _envApiKey();
+    if (!key) {
+      _fail({
+        ok: false,
+        error: 'auth_required',
+        hint: 'set KOLM_API_KEY (kolm signup / kolm login)',
+        version: 'w759-v1',
+      });
+      return;
+    }
+    const qs = new URLSearchParams();
+    if (thresholdRaw !== undefined) qs.set('threshold', String(Number(thresholdRaw)));
+    if (sampleNRaw !== undefined) qs.set('sample_n', String(Math.trunc(Number(sampleNRaw))));
+    const qsStr = qs.toString();
+    const url = _envBase()
+      + '/v1/numeric/namespace-flag/'
+      + encodeURIComponent(namespace)
+      + (qsStr ? '?' + qsStr : '');
+    let resp;
+    try {
+      resp = await fetch(url, {
+        method: 'GET',
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({
+        ok: false,
+        error: 'network_error',
+        detail: String(e && e.message || e),
+        version: 'w759-v1',
+      });
+      return;
+    }
+    const env = await resp.json().catch(() => ({}));
+    _print(env);
+    if (!resp.ok) process.exit(2);
+    if (env && env.flagged === true) process.exit(3);
+    return;
+  }
+
+  // Unknown subcommand.
+  console.error('usage: kolm numeric <eval|calc|flag-namespace> [args]');
+  console.error('  eval --text TEXT [--expected N] [--tolerance-pct P]');
+  console.error('  calc <expr>');
+  console.error('  flag-namespace --namespace ns [--threshold 0.10] [--sample-n 100]');
+  console.error('exit codes: 0 ok, 3 mismatch/flagged (informational), 2 error');
+  process.exit(2);
+}
+
+// =============================================================================
+// W758 — External bench harness CLI (MMLU / HumanEval / MT-Bench).
+//
+// Distinct-named (cmdW758Bench) per the W724/.../W751 precedent so parallel
+// wave agents on W756/W757/W759/W760 cannot collide on this symbol.
+//
+// Subcommands:
+//   mmlu       --artifact PATH [--pack-dir P] [--n N] [--subjects s1,s2,...]
+//   humaneval  --artifact PATH [--pack-dir P] [--n N] [--sandbox-cmd CMD]
+//   mtbench    --artifact PATH [--pack-dir P] [--n N] [--judge-cmd CMD]
+//
+// Each subcommand POSTs to /v1/bench/<kind> with {confirm:true} so the route
+// runs end-to-end against the configured server. The route surfaces the
+// honest envelopes from src/eval-*.js (bench_pack_not_local, runtime_not_wired,
+// no_code_sandbox_configured, no_judge_model_configured) verbatim — the CLI
+// never invents a fake number on the caller's behalf.
+// =============================================================================
+async function cmdW758Bench(args) {
+  const sub = (args && args[0]) || '';
+
+  function _envApiKey() {
+    return process.env.KOLM_API_KEY || '';
+  }
+  function _envBase() {
+    return (process.env.KOLM_BASE_URL || 'https://kolm.ai').replace(/\/$/, '');
+  }
+  function _print(envelope) {
+    console.log(JSON.stringify(envelope, null, 2));
+  }
+  function _fail(envelope, code = EXIT.EXECUTION) {
+    _print(envelope);
+    process.exit(code);
+  }
+  function _flagValue(flag) {
+    const i = args.indexOf(flag);
+    return i >= 0 ? args[i + 1] : undefined;
+  }
+
+  if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
+    console.error('usage: kolm bench <mmlu|humaneval|mtbench> --artifact PATH [opts]');
+    console.error('  mmlu        --pack-dir P  --n N  --subjects s1,s2,...');
+    console.error('  humaneval   --pack-dir P  --n N  --sandbox-cmd CMD');
+    console.error('  mtbench     --pack-dir P  --n N  --judge-cmd CMD');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+
+  if (sub !== 'mmlu' && sub !== 'humaneval' && sub !== 'mtbench') {
+    _fail({
+      ok: false,
+      error: 'unknown_subcommand',
+      hint: 'kolm bench supports: mmlu, humaneval, mtbench',
+      version: 'w758-v1',
+    }, EXIT.BAD_ARGS);
+    return;
+  }
+
+  const key = _envApiKey();
+  if (!key) {
+    _fail({
+      ok: false,
+      error: 'auth_required',
+      hint: 'set KOLM_API_KEY (kolm signup / kolm login)',
+      version: 'w758-v1',
+    }, EXIT.MISSING_PREREQ);
+    return;
+  }
+
+  const artifact = _flagValue('--artifact');
+  if (!artifact) {
+    _fail({
+      ok: false,
+      error: 'missing_artifact',
+      hint: 'usage: kolm bench ' + sub + ' --artifact PATH [opts]',
+      version: 'w758-v1',
+    }, EXIT.BAD_ARGS);
+    return;
+  }
+
+  const body = { confirm: true, artifact_path: artifact };
+  const packDir = _flagValue('--pack-dir');
+  if (packDir) body.pack_dir = String(packDir);
+  const nRaw = _flagValue('--n') || _flagValue('--n-samples');
+  if (nRaw != null) {
+    const n = Number(nRaw);
+    if (Number.isFinite(n) && n > 0) body.n_samples = n;
+  }
+  if (sub === 'mmlu') {
+    const subjRaw = _flagValue('--subjects');
+    if (subjRaw) body.subjects = String(subjRaw).split(',').map((s) => s.trim()).filter(Boolean);
+  }
+  // sandbox-cmd / judge-cmd are CLI-side knobs that map to the server's
+  // env-var configuration; we pass them as hints so the operator can see
+  // what the request expects.
+  if (sub === 'humaneval') {
+    const sandbox = _flagValue('--sandbox-cmd');
+    if (sandbox) body.sandbox_cmd_hint = String(sandbox);
+  }
+  if (sub === 'mtbench') {
+    const judge = _flagValue('--judge-cmd');
+    if (judge) body.judge_cmd_hint = String(judge);
+  }
+
+  let resp;
+  try {
+    resp = await fetch(_envBase() + '/v1/bench/' + sub, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+      body: JSON.stringify(body),
+    });
+  } catch (e) {
+    _fail({
+      ok: false,
+      error: 'network_error',
+      detail: String(e && e.message || e),
+      version: 'w758-v1',
+    });
+    return;
+  }
+  const json = await resp.json().catch(() => ({}));
+  _print(json);
+  if (!resp.ok) process.exit(EXIT.EXECUTION);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// W757 — cross-namespace anonymized pattern lake CLI.
+//
+// Subverbs: opt-in | opt-out | trends | contribute
+//
+// Distinct-named (cmdW757Lake) per the W724/.../W751 precedent so parallel
+// W756/W758/W759/W760 wave agents cannot collide on the dispatcher symbol.
+// Wired from the augmented `case 'lake':` arm above — known W757 subverbs
+// route here, all other subverbs (stats/tail/inspect/export/purge/sync from
+// W369) keep flowing to cmdLake.
+//
+// Completion data:
+//   COMPLETION_VERBS already includes 'lake' (W369 — kept).
+//   COMPLETION_SUBS.lake extended below to merge in opt-in/opt-out/trends/
+//   contribute alongside the existing W369 subverbs.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Extend COMPLETION_SUBS.lake (W369 already populates this with W369 verbs).
+// Idempotent merge — re-running this file is a no-op.
+COMPLETION_SUBS.lake = Array.from(new Set([
+  ...(COMPLETION_SUBS.lake || []),
+  'opt-in', 'opt-out', 'trends', 'contribute',
+]));
+
+async function cmdW757Lake(args) {
+  const sub = (args && args[0]) || '';
+
+  function _envApiKey() {
+    return process.env.KOLM_API_KEY || '';
+  }
+  function _envBase() {
+    return (process.env.KOLM_BASE_URL || 'https://kolm.ai').replace(/\/$/, '');
+  }
+  function _pick(flag) {
+    if (!args) return null;
+    const i = args.indexOf(flag);
+    return i >= 0 ? args[i + 1] : null;
+  }
+  function _has(flag) {
+    return !!(args && args.indexOf(flag) >= 0);
+  }
+  function _print(envelope) {
+    console.log(JSON.stringify(envelope, null, 2));
+  }
+  function _fail(envelope, code = EXIT.EXECUTION) {
+    _print(envelope);
+    process.exit(code);
+  }
+
+  if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
+    console.error('usage: kolm lake <opt-in|opt-out|trends|contribute> [args]');
+    console.error('  opt-in --namespace <ns> --confirm      — opt a namespace into the cross-tenant pattern lake');
+    console.error('  opt-out --namespace <ns>               — durably opt out (latest-wins)');
+    console.error('  trends                                  — rolled-up summary across opted-in namespaces');
+    console.error('  contribute --namespace <ns> --capture-id <id> --consent');
+    console.error('                                          — submit hash-only bigrams for a capture');
+    console.error('');
+    console.error('Note: the lake is disabled by default. Set KOLM_W757_LAKE_ENABLED=1 to opt your install in.');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+
+  // ─────────────────────────── subcommand: opt-in ────────────────────────────
+  if (sub === 'opt-in') {
+    const namespace = _pick('--namespace') || _pick('-n');
+    if (!namespace) {
+      _fail({ ok: false, error: 'missing_namespace', hint: 'usage: kolm lake opt-in --namespace <ns> --confirm', version: 'w757-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    if (!_has('--confirm')) {
+      _fail({ ok: false, error: 'confirm_required', hint: 'opt-in is destructive (durable registry write) — pass --confirm', version: 'w757-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w757-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/lake/opt-in', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({ namespace, confirm: true }),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w757-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ─────────────────────────── subcommand: opt-out ───────────────────────────
+  if (sub === 'opt-out') {
+    const namespace = _pick('--namespace') || _pick('-n');
+    if (!namespace) {
+      _fail({ ok: false, error: 'missing_namespace', hint: 'usage: kolm lake opt-out --namespace <ns>', version: 'w757-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w757-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/lake/opt-out', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({ namespace }),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w757-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ─────────────────────────── subcommand: trends ────────────────────────────
+  if (sub === 'trends') {
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w757-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/lake/trends', {
+        method: 'GET',
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w757-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (body && body.ok === true) {
+      console.log('');
+      console.log('total contributors      ' + body.total_contributors);
+      console.log('total namespaces        ' + body.total_namespaces);
+      console.log('total opted-in tenants  ' + (body.total_optin_tenants != null ? body.total_optin_tenants : '—'));
+      console.log('emerging bigrams        ' + body.emerging_count);
+      if (Array.isArray(body.top_verticals_by_density) && body.top_verticals_by_density.length) {
+        console.log('');
+        console.log('top verticals by density:');
+        for (const v of body.top_verticals_by_density) {
+          console.log('  ' + String(v.vertical_id).padEnd(10) + 'rows=' + v.contribution_rows);
+        }
+      }
+    }
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ─────────────────────────── subcommand: contribute ────────────────────────
+  if (sub === 'contribute') {
+    const namespace = _pick('--namespace') || _pick('-n');
+    const captureId = _pick('--capture-id') || _pick('--id');
+    if (!namespace) {
+      _fail({ ok: false, error: 'missing_namespace', hint: 'usage: kolm lake contribute --namespace <ns> --capture-id <id> --consent', version: 'w757-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    if (!captureId) {
+      _fail({ ok: false, error: 'missing_capture_id', hint: 'usage: kolm lake contribute --namespace <ns> --capture-id <id> --consent', version: 'w757-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    if (!_has('--consent')) {
+      _fail({ ok: false, error: 'consent_not_granted', hint: 'every contribution requires --consent; the lake never auto-contributes', version: 'w757-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w757-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    // Optional --input <text> for one-shot CLI contributions. When omitted the
+    // server-side contribute call will still produce a row (empty bigram set)
+    // so the idempotency contract is exercised; tests prefer the explicit form.
+    const inputText = _pick('--input') || '';
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/lake/contribute', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({
+          namespace,
+          consent: true,
+          capture: { id: captureId, input: inputText },
+        }),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w757-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // Unknown subverb — surface honest usage and exit BAD_ARGS.
+  console.error('usage: kolm lake <opt-in|opt-out|trends|contribute> [args]');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// =============================================================================
+// W756 — `kolm kolmbench <spec|leaderboard|validate|submit>` dispatcher.
+//
+// Distinct-named (cmdW756Kolmbench) per the W724/.../W757 precedent so parallel
+// wave agents on W757/W758/W759/W760 cannot collide on this symbol. The four
+// subcommands map 1:1 onto the four /v1/kolmbench/* routes plus a local
+// validator fast-path that imports src/kolmbench.js directly so air-gapped
+// users can dry-run a JSONL submission without an API key.
+//
+// Honest envelopes everywhere: every error path emits {ok:false, error, hint}
+// and exits non-zero via EXIT.BAD_ARGS / EXIT.MISSING_PREREQ / EXIT.EXECUTION.
+// =============================================================================
+async function cmdW756Kolmbench(args) {
+  const sub = (args && args[0]) || '';
+  const rest = (args || []).slice(1);
+
+  const _has = (flag) => rest.includes(flag);
+  const _pick = (flag) => {
+    const i = rest.indexOf(flag);
+    if (i < 0) return null;
+    const v = rest[i + 1];
+    if (v == null || String(v).startsWith('--')) return '';
+    return v;
+  };
+
+  // ─────────────────────────── subcommand: spec ──────────────────────────────
+  if (sub === 'spec' || sub === '') {
+    // Public route — no API key required. We still hit the live server so the
+    // CLI reflects the deployed spec, not a stale bundled copy.
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/kolmbench/spec', {
+        method: 'GET',
+        headers: { 'accept': 'application/json' },
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w756-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ─────────────────────────── subcommand: leaderboard ───────────────────────
+  if (sub === 'leaderboard' || sub === 'lb') {
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/kolmbench/leaderboard', {
+        method: 'GET',
+        headers: { 'accept': 'application/json' },
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w756-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (body && body.ok === true && Array.isArray(body.entries) && body.entries.length) {
+      console.log('');
+      console.log('rank submitter             model               k-score verified');
+      let rank = 1;
+      for (const e of body.entries.slice(0, 25)) {
+        const r = String(rank++).padStart(2, ' ');
+        const s = String(e.submitter || '—').padEnd(20, ' ').slice(0, 20);
+        const m = String(e.model || '—').padEnd(19, ' ').slice(0, 19);
+        const k = (e.k_score == null ? '—' : Number(e.k_score).toFixed(3)).padStart(7, ' ');
+        const v = e.verified === true ? 'yes' : 'no';
+        console.log('  ' + r + '  ' + s + ' ' + m + ' ' + k + ' ' + v);
+      }
+    }
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ─────────────────────────── subcommand: validate ──────────────────────────
+  // `kolm kolmbench validate <jsonl>` runs the OFFLINE validator (no API key
+  // required) so contributors can dry-run before opening a PR. We import
+  // src/kolmbench.js directly via a resolved path off the CLI install root.
+  if (sub === 'validate') {
+    const file = rest[0];
+    if (!file || String(file).startsWith('--')) {
+      _fail({ ok: false, error: 'missing_file', hint: 'usage: kolm kolmbench validate <path.jsonl>', version: 'w756-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    let fs, path, url, kolmbench;
+    try {
+      fs = await import('node:fs');
+      path = await import('node:path');
+      url = await import('node:url');
+    } catch (e) {
+      _fail({ ok: false, error: 'import_failed', detail: String(e && e.message || e), version: 'w756-v1' });
+      return;
+    }
+    // Resolve src/kolmbench.js relative to THIS file (cli/kolm.js → ../src/kolmbench.js).
+    let here;
+    try {
+      here = path.dirname(url.fileURLToPath(import.meta.url));
+    } catch (e) {
+      _fail({ ok: false, error: 'cli_path_resolution_failed', detail: String(e && e.message || e), version: 'w756-v1' });
+      return;
+    }
+    const kbPath = path.resolve(here, '..', 'src', 'kolmbench.js');
+    if (!fs.existsSync(kbPath)) {
+      _fail({
+        ok: false,
+        error: 'kolmbench_module_missing',
+        hint: 'src/kolmbench.js not found alongside the CLI; use the bundled npm install or run from the kolmogorov-stack repo',
+        expected_at: kbPath,
+        version: 'w756-v1',
+      }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    try {
+      kolmbench = await import(url.pathToFileURL(kbPath).href);
+    } catch (e) {
+      _fail({ ok: false, error: 'kolmbench_import_failed', detail: String(e && e.message || e), version: 'w756-v1' });
+      return;
+    }
+    if (!fs.existsSync(file)) {
+      _fail({ ok: false, error: 'file_not_found', hint: 'path does not exist: ' + file, version: 'w756-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    let text;
+    try {
+      text = fs.readFileSync(file, 'utf8');
+    } catch (e) {
+      _fail({ ok: false, error: 'read_failed', detail: String(e && e.message || e), version: 'w756-v1' }, EXIT.EXECUTION);
+      return;
+    }
+    const lines = text.split(/\r?\n/).filter(Boolean);
+    const rows = [];
+    const parseErrors = [];
+    for (let i = 0; i < lines.length; i++) {
+      try { rows.push(JSON.parse(lines[i])); }
+      catch (e) { parseErrors.push({ line: i + 1, detail: String(e && e.message || e) }); }
+    }
+    if (parseErrors.length > 0) {
+      _fail({
+        ok: false,
+        error: 'jsonl_parse_failed',
+        parse_errors: parseErrors.slice(0, 25),
+        parse_error_count: parseErrors.length,
+        version: kolmbench.KOLMBENCH_VERSION || 'w756-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    const result = kolmbench.validateSubmission(rows);
+    _print({
+      ok: result.ok === true,
+      version: kolmbench.KOLMBENCH_VERSION,
+      rows_seen: rows.length,
+      errors: result.errors || [],
+      error_count: (result.errors || []).length,
+    });
+    if (!result.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ─────────────────────────── subcommand: submit ────────────────────────────
+  // `kolm kolmbench submit <jsonl> --confirm [--submitter NAME --model M]`.
+  // Requires API key + --confirm (W411 spend-protection gate). The server-side
+  // route additionally enforces ed25519 receipt presence before setting
+  // verified:true — clients can never fake the receipt locally.
+  if (sub === 'submit') {
+    const file = rest[0];
+    if (!file || String(file).startsWith('--')) {
+      _fail({ ok: false, error: 'missing_file', hint: 'usage: kolm kolmbench submit <path.jsonl> --confirm [--submitter NAME --model M]', version: 'w756-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    if (!_has('--confirm')) {
+      _fail({
+        ok: false,
+        error: 'confirm_required',
+        hint: 're-run with --confirm to write a leaderboard entry; submissions are visible publicly',
+        version: 'w756-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w756-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    const submitter = _pick('--submitter') || _pick('-s') || '';
+    const model = _pick('--model') || _pick('-m') || '';
+    const receiptPath = _pick('--ed25519-receipt') || _pick('--receipt') || '';
+    let fs;
+    try { fs = await import('node:fs'); }
+    catch (e) {
+      _fail({ ok: false, error: 'import_failed', detail: String(e && e.message || e), version: 'w756-v1' });
+      return;
+    }
+    if (!fs.existsSync(file)) {
+      _fail({ ok: false, error: 'file_not_found', hint: 'path does not exist: ' + file, version: 'w756-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    let text;
+    try {
+      text = fs.readFileSync(file, 'utf8');
+    } catch (e) {
+      _fail({ ok: false, error: 'read_failed', detail: String(e && e.message || e), version: 'w756-v1' }, EXIT.EXECUTION);
+      return;
+    }
+    const lines = text.split(/\r?\n/).filter(Boolean);
+    const rows = [];
+    const parseErrors = [];
+    for (let i = 0; i < lines.length; i++) {
+      try { rows.push(JSON.parse(lines[i])); }
+      catch (e) { parseErrors.push({ line: i + 1, detail: String(e && e.message || e) }); }
+    }
+    if (parseErrors.length > 0) {
+      _fail({
+        ok: false,
+        error: 'jsonl_parse_failed',
+        parse_errors: parseErrors.slice(0, 25),
+        parse_error_count: parseErrors.length,
+        version: 'w756-v1',
+      }, EXIT.BAD_ARGS);
+      return;
+    }
+    const payload = { confirm: true, rows, submitter, model };
+    if (receiptPath) payload.ed25519_receipt_path = receiptPath;
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/kolmbench/submit', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify(payload),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w756-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // Unknown subverb — surface honest usage and exit BAD_ARGS.
+  console.error('usage: kolm kolmbench <spec|leaderboard|validate|submit> [args]');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// =============================================================================
+// W760 — `kolm lang <detect|kscore|augment>` dispatcher.
+//
+// Distinct-named (cmdW760Lang) per the W724/.../W759 precedent so parallel
+// wave agents on W756/W757/W758/W759 cannot collide on this symbol.
+//
+// Subcommands:
+//   detect  --text TEXT                                                 — heuristic lang detect
+//   kscore  --namespace ns                                              — per-language K-Score breakdown
+//   augment --namespace ns --target-langs es,fr,de [--confirm] [--dry-run]
+//                                                                       — multilingual augmentation
+//
+// Every subcommand returns a JSON envelope on stdout so CI loops can parse
+// it without screen-scraping. Honest fallback envelopes everywhere.
+// =============================================================================
+async function cmdW760Lang(args) {
+  const sub = (args && args[0]) || '';
+
+  function _envApiKey() {
+    return process.env.KOLM_API_KEY || '';
+  }
+  function _envBase() {
+    return (process.env.KOLM_BASE_URL || 'https://kolm.ai').replace(/\/$/, '');
+  }
+  function _flag(rest, name) {
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--' + name && i + 1 < rest.length) return rest[i + 1];
+      if (typeof rest[i] === 'string' && rest[i].startsWith('--' + name + '=')) {
+        return rest[i].slice(name.length + 3);
+      }
+    }
+    return null;
+  }
+  function _hasFlag(rest, name) {
+    return (rest || []).some((a) => a === '--' + name);
+  }
+  function _print(envelope) {
+    console.log(JSON.stringify(envelope, null, 2));
+  }
+  function _fail(envelope, code = EXIT.EXECUTION) {
+    _print(envelope);
+    process.exit(code);
+  }
+  function _warnStderr(msg) {
+    try {
+      const yellow = '\x1b[33m';
+      const reset = '\x1b[0m';
+      console.error(yellow + 'WARN: ' + msg + reset);
+    } catch (_) {
+      console.error('WARN: ' + msg);
+    }
+  }
+
+  if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
+    console.error('usage: kolm lang <detect|kscore|augment> [args]');
+    console.error('  detect  --text TEXT                                                 — heuristic lang detect');
+    console.error('  kscore  --namespace ns                                              — per-language K-Score breakdown');
+    console.error('  augment --namespace ns --target-langs es,fr,de [--confirm] [--dry-run]');
+    process.exit(EXIT.BAD_ARGS);
+    return;
+  }
+
+  // ──────────────────────── subcommand: detect ───────────────────────────────
+  if (sub === 'detect') {
+    const rest = args.slice(1);
+    const text = _flag(rest, 'text');
+    if (text == null) {
+      _fail({ ok: false, error: 'text_required', hint: 'pass --text "your text here"', version: 'w760-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w760-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/lang/detect', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({ text }),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w760-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: kscore ───────────────────────────────
+  if (sub === 'kscore') {
+    const rest = args.slice(1);
+    const namespace = _flag(rest, 'namespace') || (rest[0] && !rest[0].startsWith('--') ? rest[0] : '');
+    if (!namespace) {
+      _fail({ ok: false, error: 'missing_namespace', hint: 'pass --namespace <ns>', version: 'w760-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w760-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/lang/kscore-by-lang/' + encodeURIComponent(namespace), {
+        method: 'GET',
+        headers: { 'authorization': 'Bearer ' + key },
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w760-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ──────────────────────── subcommand: augment ──────────────────────────────
+  if (sub === 'augment') {
+    const rest = args.slice(1);
+    const namespace = _flag(rest, 'namespace');
+    const targetLangsRaw = _flag(rest, 'target-langs');
+    const confirm = _hasFlag(rest, 'confirm');
+    const dryRunExplicit = _hasFlag(rest, 'dry-run');
+    if (!namespace) {
+      _fail({ ok: false, error: 'missing_namespace', hint: 'pass --namespace <ns>', version: 'w760-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    if (!targetLangsRaw) {
+      _fail({ ok: false, error: 'target_langs_required', hint: 'pass --target-langs es,fr,de', version: 'w760-v1' }, EXIT.BAD_ARGS);
+      return;
+    }
+    const target_langs = String(targetLangsRaw).split(',').map((s) => s.trim()).filter(Boolean);
+    if (!confirm && !dryRunExplicit) {
+      _warnStderr('preview only: --confirm omitted; translator not called, no cost incurred.');
+    }
+    const key = _envApiKey();
+    if (!key) {
+      _fail({ ok: false, error: 'auth_required', hint: 'set KOLM_API_KEY (kolm signup / kolm login)', version: 'w760-v1' }, EXIT.MISSING_PREREQ);
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(_envBase() + '/v1/lang/augment-multilingual', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+        body: JSON.stringify({ namespace, target_langs, confirm }),
+      });
+    } catch (e) {
+      _fail({ ok: false, error: 'network_error', detail: String(e && e.message || e), version: 'w760-v1' });
+      return;
+    }
+    const body = await resp.json().catch(() => ({}));
+    _print(body);
+    if (body && body.error === 'no_translator_configured') {
+      _warnStderr('no translator backend wired; set KOLM_TRANSLATOR_CMD or inject _w760_translator_caller.');
+    }
+    if (!resp.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  console.error('usage: kolm lang <detect|kscore|augment> [args]');
+  console.error('  detect  --text TEXT                                                 — heuristic lang detect');
+  console.error('  kscore  --namespace ns                                              — per-language K-Score breakdown');
+  console.error('  augment --namespace ns --target-langs es,fr,de [--confirm] [--dry-run]');
+  process.exit(EXIT.BAD_ARGS);
 }
 
 main();

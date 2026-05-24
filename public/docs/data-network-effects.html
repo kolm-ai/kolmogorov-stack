@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Data network effects &middot; Opt-in pattern lake &middot; kolm.ai</title>
+<meta name="description" content="W757 cross-namespace anonymized pattern lake. Hash-only contributions, opt-in by namespace, Laplace-noised aggregates, differential privacy floor of epsilon 0.1. No raw text crosses tenant boundaries.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Data network effects &middot; Opt-in pattern lake &middot; kolm.ai">
+<meta property="og:description" content="W757 cross-namespace anonymized pattern lake. Hash-only contributions, Laplace-noised aggregates.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/docs/data-network-effects">
+<link rel="canonical" href="https://kolm.ai/docs/data-network-effects">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/design-tokens.css">
+<style>
+:root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--accent-soft:rgba(16,185,129,0.10);--pending:#d97706;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10);--pending:#b45309}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.skip-link{position:absolute;left:-9999px}
+.skip-link:focus{position:static;background:var(--accent);color:#fff;padding:8px 14px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.brand-eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 36px}
+h2{font-size:24px;font-weight:500;letter-spacing:-0.018em;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:28px 0 8px;max-width:780px}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
+li{margin:4px 0}
+.callout{border:1px solid var(--line);background:var(--bg-elev);border-radius:10px;padding:16px 18px;margin:16px 0;max-width:820px}
+.callout b{color:var(--ink)}
+.status-pill{display:inline-flex;align-items:center;gap:6px;color:var(--pending);font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor;padding:1px 7px;border-radius:999px}
+.status-pill::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill-good{color:#10b981;font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor;padding:1px 7px;border-radius:999px}
+.related{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+@media(max-width:820px){.related{grid-template-columns:1fr}}
+.related a{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:4px}
+.related a:hover{border-color:var(--accent-soft)}
+.related b{font-size:14px;color:var(--ink);font-weight:500}
+.related span{font-size:12.5px;color:var(--ink-mute);line-height:1.5}
+footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
+footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+</style>
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/docs-shell.css">
+<script defer src="/docs-shell.js"></script>
+</head>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/marketplace">Marketplace</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / data network effects</div>
+<p class="brand-eyebrow">Open-source AI workbench</p>
+<h1>Data network effects &mdash; opt-in pattern lake.</h1>
+
+<p class="lede">Every kolm installation produces signal about how AI is used in the real world. The W757 pattern lake lets opted-in installations contribute that signal back as <strong>hash-only bigram fingerprints</strong>, never raw text. The collective fingerprint helps the W751-W755 vertical foundation students (<code>kolm-legal-7b</code>, <code>kolm-medical-7b</code>, <code>kolm-code-7b</code>, <code>kolm-finance-7b</code>, <code>kolm-support-7b</code>) learn the shape of each industry without anyone shipping prompts off-prem.</p>
+
+<div style="margin:0 0 22px">
+  <span class="pill-good">w757-v1</span>
+  <span class="status-pill" style="margin-left:8px">disabled by default</span>
+</div>
+
+<h2 id="why">1. Why a hash-only lake (privacy by design)</h2>
+<p>The classic "network effect" pitch &mdash; everyone benefits when everyone contributes data &mdash; collapses the moment privacy enters the room. Most enterprise prompts contain PII, contract drafts, patient summaries, or proprietary code. Shipping those to a central aggregator is a non-starter.</p>
+<p>The W757 lake takes the opposite shape: it never sees raw text. The only payload that crosses your tenant boundary is a list of <code>sha256(bigram)</code> hashes &mdash; a one-way fingerprint that lets the aggregator count how often a given two-word pattern appears across opted-in installations, without ever being able to reverse the hash back to the prompt.</p>
+<div class="callout" data-w757="consent-flow">
+  <b>Consent is binding.</b> Every contribution must carry an explicit <code>consent:true</code> flag. The lake throws <code>consent_not_granted</code> on missing consent and refuses the write. There is no default-on path; opting in is an explicit operator action, per namespace.
+</div>
+
+<h2 id="enters">2. What enters the lake</h2>
+<ul>
+  <li><strong>Bigram SHA256 hashes</strong> &mdash; adjacent token pairs from your capture, hashed before persistence. Never the raw token, never the joined prompt.</li>
+  <li><strong>Capture id + source namespace</strong> &mdash; so duplicate writes are idempotent (we never re-hash the same row twice).</li>
+  <li><strong>Timestamp + lake version stamp</strong> (<code>w757-v1</code>).</li>
+</ul>
+<p>What does <em>not</em> enter the lake: prompt text, completion text, tool calls, user identity, request hash, or any payload that could be used to re-identify the original capture. The contribution row in the event-store is a tight envelope; <code>tests/wave757-pattern-lake.test.js</code> pins that no raw substring survives the tokenizer.</p>
+
+<h2 id="optin">3. Opt-in flow</h2>
+<pre><code># 1. Flip the install-level hatch (operator action; defaults to OFF).
+export KOLM_W757_LAKE_ENABLED=1
+
+# 2. Opt a namespace in (per-namespace, per-tenant; requires --confirm).
+kolm lake opt-in --namespace support-team-a --confirm
+
+# 3. Contribute a capture (explicit consent flag on top of the opt-in).
+kolm lake contribute --namespace support-team-a --capture-id abc123 --consent
+
+# 4. Pull the cross-tenant trend rollup any time.
+kolm lake trends
+
+# 5. Opt back out durably (append-only registry; future reads observe latest-wins).
+kolm lake opt-out --namespace support-team-a
+</code></pre>
+
+<h2 id="dp">4. Differential privacy guarantee</h2>
+<p>Cross-tenant aggregates pass through a Laplace mechanism before they leave the aggregation surface. The default epsilon is <code>1.0</code>; the floor is <code>0.1</code>. An aggregate query with <code>epsilon &lt; 0.1</code> throws <code>epsilon_below_floor</code> &mdash; we never publish a weaker noise level than the floor.</p>
+<div class="callout" data-w757="dp-mechanism-doc">
+  <b>Mechanism: <code>laplace_v1</code>.</b> Noise distribution is Laplace(0, sensitivity / epsilon) where sensitivity defaults to 1 (count queries). Negative counts are clamped at zero. The mechanism stamp travels with every aggregate response so consumers can branch on the exact algorithm. A future Gaussian or RAPPOR mechanism would carry a different stamp and a different contract.
+</div>
+<p>A separate, stronger privacy claim &mdash; the hash-only contribution surface above &mdash; means the DP layer is the belt over the suspenders. The lake's primary guarantee is that raw text never crosses the tenant boundary; DP is the second-order protection against count-based reconstruction attacks.</p>
+
+<h2 id="verticals">5. How vertical fingerprints unlock W751-W755</h2>
+<p>The five vertical foundation students each need a fingerprint of how their industry actually uses AI &mdash; what bigrams dominate in legal prompts versus medical prompts versus support prompts. With the lake disabled, the fingerprint surface returns an honest <code>insufficient_lake_data</code> envelope. With the lake enabled and at least 5 opted-in contributors per vertical, the fingerprint surface returns the top-K bigram hashes the vertical's student should learn to predict.</p>
+<pre><code>GET /v1/verticals/legal/fingerprint
+&rarr; {
+  "ok": true,
+  "vertical_id": "legal",
+  "version": "w757-v1",
+  "n_contributing_namespaces": 12,
+  "top_bigram_hashes": [{"hash":"...", "count": 47}, ...],
+  "generated_at": "..."
+}
+</code></pre>
+<p>See <a href="/docs/verticals">/docs/verticals</a> for the five vertical foundation students, their target K-Scores, and the marketplace stubs that flip from <code>pending_distill:true</code> once the fingerprint pipeline produces real compiles.</p>
+
+<h2 id="honesty">6. Honesty note</h2>
+<div class="callout">
+  <b>Lake disabled by default.</b> Set <code>KOLM_W757_LAKE_ENABLED=1</code> to opt your installation in. No data crosses tenant boundaries without consent. The opt-in registry is append-only and per-namespace; opting a namespace in does NOT implicitly opt other namespaces in. Opt-out is durable and observed by all future reads.
+</div>
+
+<h2 id="related">Related docs</h2>
+<div class="related">
+  <a href="/docs/verticals"><b>Verticals catalog</b><span>The five W751-W755 foundation students this lake unblocks.</span></a>
+  <a href="/docs/api"><b>API reference</b><span>POST /v1/lake/opt-in, GET /v1/lake/trends, GET /v1/verticals/:id/fingerprint.</span></a>
+  <a href="/docs/quickstart"><b>Quickstart</b><span>From signup to first capture in under two minutes.</span></a>
+</div>
+
+</div></main>
+<footer><div class="wrap">
+  <a href="/">kolm.ai</a> &middot; w757-v1 pattern lake &middot; <a href="/docs">docs</a> &middot; <a href="/docs/verticals">verticals</a>
+</div></footer>
+
+</body>
+</html>

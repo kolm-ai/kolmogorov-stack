@@ -435,7 +435,12 @@ const PUBLIC_API = (p) =>
   // without an API key during federation setup. The tenant-scoped SSO
   // configure + SCIM Users endpoints stay auth-gated.
   p === '/v1/account/saml/metadata' ||
-  p === '/v1/scim/v2/ServiceProviderConfig';
+  p === '/v1/scim/v2/ServiceProviderConfig' ||
+  // W756 — KolmBench v1 spec + leaderboard are public marketing/discovery
+  // surfaces (same policy as /v1/verticals + /v1/changelog). validate +
+  // submit stay auth-gated above; submit additionally requires confirm:true.
+  p === '/v1/kolmbench/spec' ||
+  p === '/v1/kolmbench/leaderboard';
 
 export function adminApiKey() {
   return process.env.ADMIN_KEY || null;

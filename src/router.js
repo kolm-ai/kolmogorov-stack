@@ -16095,5 +16095,534 @@ res.json({
     }
   });
 
+  // =====================================================================
+  // W758 — MMLU / HumanEval / MT-Bench harness routes (honest scaffolds).
+  //
+  // All three are auth-gated AND confirm-gated. The confirm gate exists
+  // because a real bench run is expensive (LLM calls) — we refuse to
+  // start without an explicit body.confirm:true. The runtime wiring
+  // (runOnArtifact / sandbox_cmd / judge) is intentionally NOT plugged
+  // in at the route layer; W470+W775 own the runtime adapter. Until
+  // then, every route returns the harness's honest 'runtime_not_wired'
+  // envelope when called without a tester-supplied DI seam.
+  //
+  // The routes import lazily so the bench modules don't pay startup
+  // cost on cold daemons that never call them.
+  // =====================================================================
+  r.post('/v1/bench/mmlu', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const body = req.body || {};
+    if (body.confirm !== true) {
+      return res.status(400).json({
+        ok: false,
+        error: 'confirm_required',
+        hint: 'send {"confirm": true} in body — a real MMLU run is expensive (14k LLM calls).',
+      });
+    }
+    try {
+      const mod = await import('./eval-mmlu.js');
+      // No runtime adapter is wired yet (W470+W775 territory). Surface
+      // the harness's honest runtime_not_wired envelope so callers know
+      // exactly which seam needs to be supplied; status stays 200
+      // because the route succeeded — the FEATURE is what's not wired.
+      const result = await mod.runMMLU({
+        artifact_path: typeof body.artifact_path === 'string' ? body.artifact_path : null,
+        pack_dir: typeof body.pack_dir === 'string' ? body.pack_dir : null,
+        n_samples: typeof body.n_samples === 'number' ? body.n_samples : null,
+        subjects: Array.isArray(body.subjects) ? body.subjects : null,
+        runOnArtifact: null,
+      });
+      res.json(result);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'bench_mmlu_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  r.post('/v1/bench/humaneval', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const body = req.body || {};
+    if (body.confirm !== true) {
+      return res.status(400).json({
+        ok: false,
+        error: 'confirm_required',
+        hint: 'send {"confirm": true} in body — HumanEval generates+executes Python code per problem.',
+      });
+    }
+    try {
+      const mod = await import('./eval-humaneval.js');
+      const result = await mod.runHumanEval({
+        artifact_path: typeof body.artifact_path === 'string' ? body.artifact_path : null,
+        pack_dir: typeof body.pack_dir === 'string' ? body.pack_dir : null,
+        n_samples: typeof body.n_samples === 'number' ? body.n_samples : null,
+        runOnArtifact: null,
+        sandbox_cmd: null,
+      });
+      res.json(result);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'bench_humaneval_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  r.post('/v1/bench/mtbench', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const body = req.body || {};
+    if (body.confirm !== true) {
+      return res.status(400).json({
+        ok: false,
+        error: 'confirm_required',
+        hint: 'send {"confirm": true} in body — MT-Bench requires a judge model (e.g. GPT-4).',
+      });
+    }
+    try {
+      const mod = await import('./eval-mtbench.js');
+      const result = await mod.runMTBench({
+        artifact_path: typeof body.artifact_path === 'string' ? body.artifact_path : null,
+        pack_dir: typeof body.pack_dir === 'string' ? body.pack_dir : null,
+        n_samples: typeof body.n_samples === 'number' ? body.n_samples : null,
+        runOnArtifact: null,
+        judge: null,
+      });
+      res.json(result);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'bench_mtbench_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // ============== W759: numerical accuracy eval ==============
+  // POST /v1/numeric/eval                       — body {response_text, expected_answer?, tolerance_pct?}
+  // POST /v1/numeric/calculator                 — body {expression}  (also {expr})
+  // GET  /v1/numeric/namespace-flag/:namespace  — {ok, mean_ratio, flagged, ...}
+  //
+  // Extracts numbers from outputs and verifies mathematical correctness.
+  // The calculator is a pure recursive-descent + - * / parser — no eval,
+  // no new Function(), no vm.runInNewContext. The namespace flag samples
+  // observations and computes the mean fraction of numeric tokens so the
+  // operator knows when distillation needs the calculator tool wired in.
+  //
+  // /v1/numeric/eval gates on body.confirm:true to match the W758 bench
+  // surfaces (mmlu/humaneval/mtbench) and the W144 destructive-route
+  // contract — a stray request must not fire an evaluation by accident.
+  //
+  // Honest envelope on every error path: ok:false + structured error +
+  // version stamp `w759-vN.M`. Consumers MUST version-pin via regex
+  // (/^w759-/), not literal equality (W604 anti-brittleness).
+  r.post('/v1/numeric/eval', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const body = req.body || {};
+      if (body.confirm !== true) {
+        return res.status(400).json({
+          ok: false,
+          error: 'confirm_required',
+          hint: 'send {"confirm": true} alongside response_text to evaluate',
+        });
+      }
+      const evalMod = await import('./eval-numeric.js');
+      const result = evalMod.evalNumericResponse({
+        response_text: body.response_text,
+        expected_answer: (body.expected_answer === undefined ? null : body.expected_answer),
+        tolerance_pct: (body.tolerance_pct === undefined ? 0.001 : Number(body.tolerance_pct)),
+      });
+      return res.json(result);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'numeric_eval_error', detail: e && e.message });
+    }
+  });
+
+  r.post('/v1/numeric/calculator', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const body = req.body || {};
+      const expression = typeof body.expression === 'string' ? body.expression
+        : (typeof body.expr === 'string' ? body.expr : null);
+      if (!expression) {
+        return res.status(400).json({
+          ok: false,
+          error: 'expression_required',
+          hint: 'POST body must be {"expression":"2 + 3 * 4"}',
+        });
+      }
+      const calcMod = await import('./calculator-tool.js');
+      const result = calcMod.evalSafeArithmetic(expression);
+      // result already carries {ok, value|error, detail?, version}.
+      return res.json(result);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'numeric_calculator_error', detail: e && e.message });
+    }
+  });
+
+  r.get('/v1/numeric/namespace-flag/:namespace', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const evalMod = await import('./eval-numeric.js');
+      const tenant_id = req.tenant_record.id;
+      const namespace = String(req.params.namespace || 'default').slice(0, 128);
+      const threshold = req.query.threshold != null
+        ? Math.max(0, Math.min(1, Number(req.query.threshold))) : 0.10;
+      const sample_n = req.query.sample_n != null
+        ? Math.max(1, Math.min(5000, Math.trunc(Number(req.query.sample_n)))) : 100;
+      const result = evalMod.flagHighNumericNamespace({
+        tenant_id, namespace, threshold, sample_n,
+      });
+      return res.json(result);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'numeric_namespace_flag_error', detail: e && e.message });
+    }
+  });
+
+  // =====================================================================
+  // W756 — KolmBench v1 public spec + leaderboard.
+  //
+  //   GET  /v1/kolmbench/spec        PUBLIC — frozen v1 spec catalog
+  //   GET  /v1/kolmbench/leaderboard PUBLIC — current leaderboard JSON
+  //   POST /v1/kolmbench/validate    AUTH   — pure-compute validation of rows[]
+  //   POST /v1/kolmbench/submit      AUTH+confirm — append to leaderboard
+  //
+  // The two GETs mirror /v1/verticals + /v1/changelog policy: public + read-
+  // only + safe to cache. Both POST routes require auth via the standard
+  // middleware path; submit additionally requires body.confirm:true as a
+  // spend-protection gate (the W411 confirm-pattern). Honest envelopes on
+  // every degraded path.
+  // =====================================================================
+  r.get('/v1/kolmbench/spec', async (_req, res) => {
+    try {
+      const mod = await import('./kolmbench.js');
+      res.json({
+        ok: true,
+        version: mod.KOLMBENCH_VERSION,
+        spec: mod.KOLMBENCH_V1_SPEC,
+        authoritative_task_count: mod.AUTHORITATIVE_TASKS.length,
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'kolmbench_spec_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  r.get('/v1/kolmbench/leaderboard', async (_req, res) => {
+    try {
+      const mod = await import('./kolmbench.js');
+      const board = mod.readLeaderboard();
+      // readLeaderboard already returns an honest ok:true/false envelope so
+      // we forward it verbatim. 500 only for unexpected throws.
+      res.json(board);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'kolmbench_leaderboard_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  r.post('/v1/kolmbench/validate', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const body = req.body || {};
+      const rows = Array.isArray(body.rows) ? body.rows : null;
+      if (!rows) {
+        return res.status(400).json({
+          ok: false,
+          error: 'missing_rows',
+          hint: 'POST { "rows": [ { task_id, response, model?, artifact_cid_or_null? } ] }',
+        });
+      }
+      const mod = await import('./kolmbench.js');
+      const result = mod.validateSubmission(rows);
+      res.json({
+        ok: result.ok,
+        errors: result.errors,
+        row_count: rows.length,
+        version: mod.KOLMBENCH_VERSION,
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'kolmbench_validate_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  r.post('/v1/kolmbench/submit', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const body = req.body || {};
+    if (body.confirm !== true) {
+      return res.status(400).json({
+        ok: false,
+        error: 'confirm_required',
+        hint: 'send {"confirm": true} in body — submit writes to the leaderboard JSON.',
+      });
+    }
+    try {
+      const mod = await import('./kolmbench.js');
+      // Validate the rows first so we never accept a malformed submission
+      // into the leaderboard. Even if rows[] is absent we still require the
+      // submitter/model/k_score fields for the leaderboard row itself.
+      const rows = Array.isArray(body.rows) ? body.rows : [];
+      if (rows.length > 0) {
+        const v = mod.validateSubmission(rows);
+        if (!v.ok) {
+          return res.status(400).json({
+            ok: false,
+            error: 'validation_failed',
+            errors: v.errors,
+            version: mod.KOLMBENCH_VERSION,
+          });
+        }
+      }
+      const result = mod.appendLeaderboardEntry({
+        submitter: typeof body.submitter === 'string' ? body.submitter : (req.tenant_record.name || 'unknown'),
+        model: typeof body.model === 'string' ? body.model : null,
+        k_score: typeof body.k_score === 'number' ? body.k_score : NaN,
+        k_axes: body.k_axes && typeof body.k_axes === 'object' ? body.k_axes : null,
+        artifact_cid: typeof body.artifact_cid === 'string' ? body.artifact_cid : null,
+        source_repo: typeof body.source_repo === 'string' ? body.source_repo : null,
+        verified: body.verified === true,
+        ed25519_receipt_path: typeof body.ed25519_receipt_path === 'string' ? body.ed25519_receipt_path : null,
+      });
+      if (!result.ok) {
+        return res.status(400).json(result);
+      }
+      res.json(result);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'kolmbench_submit_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // ============== W757 — cross-namespace anonymized pattern lake ==============
+  // POST /v1/lake/opt-in       AUTH + confirm:true required (per-namespace gate)
+  // POST /v1/lake/opt-out      AUTH; durable opt-out, future reads observe latest
+  // POST /v1/lake/contribute   AUTH + consent:true required; hash-only write
+  // GET  /v1/lake/trends       AUTH; rolled-up summary (no raw text, no identity)
+  //
+  // The W751 GET /v1/verticals/:id/fingerprint route already exists above; the
+  // W757 module is consumed via the new pattern-lake helpers. New code paths
+  // (CLI lake subverbs, the W757 docs page) call these routes directly.
+
+  r.post('/v1/lake/opt-in', async (req, res) => {
+    if (!req.tenant_record) {
+      return res.status(401).json({ ok: false, error: 'auth_required' });
+    }
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    const namespace = String(body.namespace || '').trim();
+    if (!namespace) {
+      return res.status(400).json({
+        ok: false,
+        error: 'missing_namespace',
+        hint: 'POST {namespace:"<ns>", confirm:true}',
+      });
+    }
+    if (body.confirm !== true) {
+      // Belt-and-suspenders consent gate — the per-contribution call ALSO
+      // requires consent:true. Opt-in alone never auto-contributes.
+      return res.status(400).json({
+        ok: false,
+        error: 'confirm_required',
+        hint: 'opt-in is destructive (writes a durable registry row); pass confirm:true',
+      });
+    }
+    try {
+      const lake = await import('./pattern-lake.js');
+      const result = await lake.optIn(req.tenant_record.id, namespace);
+      res.json(result);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'lake_optin_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  r.post('/v1/lake/opt-out', async (req, res) => {
+    if (!req.tenant_record) {
+      return res.status(401).json({ ok: false, error: 'auth_required' });
+    }
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    const namespace = String(body.namespace || '').trim();
+    if (!namespace) {
+      return res.status(400).json({
+        ok: false,
+        error: 'missing_namespace',
+        hint: 'POST {namespace:"<ns>"}',
+      });
+    }
+    try {
+      const lake = await import('./pattern-lake.js');
+      const result = await lake.optOut(req.tenant_record.id, namespace);
+      res.json(result);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'lake_optout_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  r.post('/v1/lake/contribute', async (req, res) => {
+    if (!req.tenant_record) {
+      return res.status(401).json({ ok: false, error: 'auth_required' });
+    }
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    const namespace = String(body.namespace || '').trim();
+    const capture = body.capture && typeof body.capture === 'object' ? body.capture : null;
+    if (!namespace) {
+      return res.status(400).json({ ok: false, error: 'missing_namespace' });
+    }
+    if (!capture || !capture.id) {
+      return res.status(400).json({
+        ok: false,
+        error: 'missing_capture',
+        hint: 'POST {namespace, capture:{id, input}, consent:true}',
+      });
+    }
+    if (body.consent !== true) {
+      return res.status(400).json({
+        ok: false,
+        error: 'consent_not_granted',
+        hint: 'every contribution must carry consent:true — the lake never auto-contributes',
+      });
+    }
+    try {
+      const lake = await import('./pattern-lake.js');
+      const result = await lake.contributePattern({
+        tenant_id: req.tenant_record.id,
+        namespace,
+        capture,
+        consent: true,
+      });
+      res.json(result);
+    } catch (e) {
+      // Honest map: consent failures land as 400; everything else 500.
+      const code = e && e.code === 'CONSENT_NOT_GRANTED' ? 400 : 500;
+      res.status(code).json({
+        ok: false,
+        error: e && e.code === 'CONSENT_NOT_GRANTED' ? 'consent_not_granted' : 'lake_contribute_error',
+        detail: String(e && e.message || e),
+      });
+    }
+  });
+
+  r.get('/v1/lake/trends', async (req, res) => {
+    if (!req.tenant_record) {
+      return res.status(401).json({ ok: false, error: 'auth_required' });
+    }
+    try {
+      const trend = await import('./trend-extract.js');
+      const result = await trend.summarizeTrends();
+      res.json(result);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'lake_trends_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // ============== W760: per-language K-Score + multilingual augmentation ==============
+  // POST /v1/lang/detect                              — heuristic lang detect over body.text
+  // GET  /v1/lang/kscore-by-lang/:namespace           — perLanguageKScore for tenant+namespace
+  // POST /v1/lang/augment-multilingual                — request synthetic multilingual augmentation
+  //
+  // Honesty contract:
+  //   * Wilson 95% CI gated at n>=30 PER LANGUAGE. Below that the per-lang
+  //     k_score is null — never estimated.
+  //   * augment-multilingual is dry_run by default. confirm:true required to
+  //     incur translator cost. teacher_caller is DI'd from req.app.locals so
+  //     tests never hit a real translation API.
+  r.post('/v1/lang/detect', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const { detectLang, LANG_DETECT_VERSION } = await import('./lang-detect.js');
+      const body = req.body || {};
+      const text = typeof body.text === 'string' ? body.text : '';
+      const min_confidence = Number.isFinite(Number(body.min_confidence))
+        ? Number(body.min_confidence)
+        : undefined;
+      const result = detectLang(text, { min_confidence });
+      return res.json({ ok: true, ...result, version: LANG_DETECT_VERSION });
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: 'lang_detect_error', detail: e && e.message });
+    }
+  });
+
+  r.get('/v1/lang/kscore-by-lang/:namespace', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const { perLanguageKScore } = await import('./kscore-per-language.js');
+      const es = await import('./event-store.js');
+      const namespace = String(req.params.namespace || 'default').slice(0, 128);
+      const tenant_id = req.tenant_record.id;
+      let rows = [];
+      try {
+        rows = await es.listEvents({
+          tenant_id,
+          namespace,
+          limit: 5000,
+          order: 'desc',
+        });
+      } catch (_) { rows = []; }
+      rows = (rows || []).filter((rr) => rr && rr.tenant_id === tenant_id);
+      // Project event rows into the lean shape perLanguageKScore expects.
+      const projected = rows.map((rr) => ({
+        cid: rr.event_id || rr.cid,
+        input: rr.prompt_redacted || rr.prompt || rr.input || '',
+        output: rr.response_redacted || rr.response || rr.output || '',
+        k_score: rr.k_score,
+        accuracy: rr.accuracy,
+        coverage: rr.coverage,
+        size_bytes: rr.size_bytes,
+        p50_latency_us: rr.p50_latency_us,
+        cost_usd_per_call: rr.cost_usd_per_call,
+      }));
+      const langFilterRaw = req.query && req.query.lang_filter;
+      const lang_filter = (typeof langFilterRaw === 'string' && langFilterRaw.length)
+        ? langFilterRaw.split(',').map((s) => s.trim()).filter(Boolean)
+        : null;
+      const env = perLanguageKScore({ rows: projected, lang_filter });
+      return res.json({ namespace, ...env });
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: 'kscore_per_lang_error', detail: e && e.message });
+    }
+  });
+
+  r.post('/v1/lang/augment-multilingual', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const { requestMultilingualAugmentation, MULTI_AUGMENT_VERSION } = await import('./multilingual-augment.js');
+      const es = await import('./event-store.js');
+      const body = req.body || {};
+      const namespace = String(body.namespace || 'default').slice(0, 128);
+      const confirm = body.confirm === true;
+      const target_langs = Array.isArray(body.target_langs) ? body.target_langs : [];
+      const max_rows = Math.max(1, Math.min(500, Math.trunc(Number(body.max_rows) || 50)));
+
+      if (target_langs.length === 0) {
+        return res.status(400).json({
+          ok: false,
+          error: 'target_langs_required',
+          hint: 'pass {target_langs:["es","fr",...]} naming ISO codes',
+          version: MULTI_AUGMENT_VERSION,
+        });
+      }
+
+      // Pull source rows from the namespace.
+      let sourceRowsRaw = [];
+      try {
+        sourceRowsRaw = await es.listEvents({
+          tenant_id: req.tenant_record.id,
+          namespace,
+          limit: max_rows,
+          order: 'desc',
+        });
+      } catch (_) { sourceRowsRaw = []; }
+      sourceRowsRaw = (sourceRowsRaw || []).filter((rr) => rr && rr.tenant_id === req.tenant_record.id);
+      const source_rows = sourceRowsRaw.map((rr) => ({
+        cid: rr.event_id || rr.cid,
+        input: rr.prompt_redacted || rr.prompt || rr.input || '',
+        output: rr.response_redacted || rr.response || rr.output || '',
+      }));
+
+      // confirm:true required to incur cost. Without confirm we always run dry.
+      const dry_run = !confirm;
+
+      // Resolve translator from req.app.locals (DI seam — tests inject here).
+      let teacher_caller = null;
+      try { teacher_caller = req.app && req.app.locals && req.app.locals._w760_translator_caller; } catch (_) {}
+
+      const env = await requestMultilingualAugmentation({
+        source_rows,
+        target_langs,
+        teacher_caller,
+        dry_run,
+      });
+      return res.status(200).json({ namespace, ...env });
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: 'augment_multilingual_error', detail: e && e.message });
+    }
+  });
+
   return r;
 }

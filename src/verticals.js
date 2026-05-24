@@ -245,13 +245,26 @@ export async function registerAllVerticalStubs(publisher = 'kolm.ai-foundation')
   };
 }
 
-// verticalFingerprintStub(vertical_id) — honest envelope for the W757-blocked
-// fingerprint surface. The route layer wraps this into HTTP 501-not-yet-
-// implemented but returns a 200 envelope because the call itself succeeded;
-// the FEATURE is what's not shipped.
+// verticalFingerprintStub(vertical_id) — W751 honest envelope for the W757-
+// blocked fingerprint surface.
 //
-// Returns an honest envelope with ok:false + error + blocked_by + hint so
-// callers can branch on the error code (NEVER on a magic substring).
+// SYNC contract preserved (W751 #7 + #14 sibling tests pin the literal
+// envelope shape). The W757 pattern lake is ASYNCHRONOUS by necessity (it
+// reads the event-store) so wiring it directly into this function would
+// break the sync sibling test contract and the express route handler that
+// invokes `res.json(verticalFingerprintStub(req.params.id))` without await.
+//
+// The W757 lake surface is exposed as src/pattern-lake.js#extractVerticalFingerprint
+// (async). New code SHOULD call that surface directly:
+//
+//     import { extractVerticalFingerprint } from './pattern-lake.js';
+//     const fp = await extractVerticalFingerprint(vertical_id);
+//
+// This stub kept its name + sync signature to preserve byte-stable behavior
+// for callers that linked against the pre-W757 envelope shape. The W757
+// route handlers (POST /v1/lake/* + the trends GET) use the lake module
+// directly; the legacy GET /v1/verticals/:id/fingerprint continues to call
+// this sync stub for backward compatibility.
 export function verticalFingerprintStub(vertical_id) {
   const v = getVertical(vertical_id);
   // Even unknown verticals return the same not-yet-shipped envelope when the
@@ -265,7 +278,13 @@ export function verticalFingerprintStub(vertical_id) {
     hint:
       'vertical fingerprint extraction requires W757 — coming in plan. ' +
       'Until then, capture per-namespace via /v1/capture/log and distill ' +
-      'through /v1/distill.',
+      'through /v1/distill. For the W757-wired async surface, call ' +
+      'extractVerticalFingerprint(id) from src/pattern-lake.js.',
     version: VERTICALS_VERSION,
+    // W757 sub-envelope (additive; pre-W757 callers see {ok,error,blocked_by,
+    // vertical,hint,version} verbatim). The async lake surface is the canonical
+    // path; this hint helps a consumer discover it.
+    lake_surface_async: 'src/pattern-lake.js#extractVerticalFingerprint',
+    lake_version: 'w757-v1',
   };
 }

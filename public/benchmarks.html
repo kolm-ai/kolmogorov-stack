@@ -73,8 +73,30 @@
   .axis-tbl td:first-child { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); width: 180px; }
   .axis-tbl td.num { font-family: var(--ks-mono); font-size: 13px; color: var(--ks-accent); text-align: right; }
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/benchmarks",
+  "description": "kscore-bench numbers across distilled artifacts. Quantize matrix from Qwen2.5-0.5B through DeepSeek-R1 32B on an RTX 5090. Real wall-clock, real GB, real K-score.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
 </head>
 <body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <a href="#main" class="ks-skip">Skip to content</a>
 
@@ -423,56 +445,56 @@ kolm run    ./r1-distill-qwen-32b.int4.kolm \
     <div class="fr-eyebrow">Five suites &middot; one CLI verb</div>
     <h2 class="fr-h2">Benchmark suites</h2>
     <p class="fr-lede">Every suite below runs against a compiled .kolm artifact and emits a signed receipt. The eval pack is embedded in the artifact manifest, so a third party can replay the score offline.</p>
-    <div class="fr-grid-3" style="margin-top:var(--ks-6)">
-      <div class="fr-card fr-reveal">
-        <span class="fr-pill fr-pill--violet">Code editing</span>
-        <h3 class="fr-h3">Aider</h3>
-        <p>Measures whether the model can apply a real pull-request diff against a real repository and pass the repo's own tests. The grader is the repo's CI, not a synthetic judge.</p>
-        <div class="fr-cli" style="margin-top:var(--ks-3)">
-          <span class="fr-cli__prompt">$</span> kolm bench <span class="fr-cli__flag">aider</span>
+    <ol class="fr-spec-list fr-reveal" style="margin-top:var(--ks-6)">
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Aider</h3>
+          <span class="fr-spec-list__delta">Code editing</span>
         </div>
-      </div>
-      <div class="fr-card fr-reveal">
-        <span class="fr-pill fr-pill--amber">Issue resolution</span>
-        <h3 class="fr-h3">SWE-Bench</h3>
-        <p>Takes a real GitHub issue and asks the model to produce a patch that closes it. Pass requires the resulting PR to compile and pass the project's existing test suite end to end.</p>
-        <div class="fr-cli" style="margin-top:var(--ks-3)">
-          <span class="fr-cli__prompt">$</span> kolm bench <span class="fr-cli__flag">swe-bench</span>
+        <p class="fr-spec-list__p">Measures whether the model can apply a real pull-request diff against a real repository and pass the repo's own tests. The grader is the repo's CI, not a synthetic judge.</p>
+        <div class="fr-cli" style="margin-top:6px"><span class="fr-cli__prompt">$</span> kolm bench <span class="fr-cli__flag">aider</span></div>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">SWE-Bench</h3>
+          <span class="fr-spec-list__delta">Issue resolution</span>
         </div>
-      </div>
-      <div class="fr-card fr-reveal">
-        <span class="fr-pill">Graduate science</span>
-        <h3 class="fr-h3">GPQA</h3>
-        <p>Graduate-level multiple-choice questions in physics, chemistry, and biology authored by domain PhDs. Tests reasoning depth on problems that resist surface pattern-matching.</p>
-        <div class="fr-cli" style="margin-top:var(--ks-3)">
-          <span class="fr-cli__prompt">$</span> kolm bench <span class="fr-cli__flag">gpqa</span>
+        <p class="fr-spec-list__p">Takes a real GitHub issue and asks the model to produce a patch that closes it. Pass requires the resulting PR to compile and pass the project's existing test suite end to end.</p>
+        <div class="fr-cli" style="margin-top:6px"><span class="fr-cli__prompt">$</span> kolm bench <span class="fr-cli__flag">swe-bench</span></div>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">GPQA</h3>
+          <span class="fr-spec-list__delta">Graduate science</span>
         </div>
-      </div>
-      <div class="fr-card fr-reveal">
-        <span class="fr-pill fr-pill--violet">Live coding</span>
-        <h3 class="fr-h3">LiveCodeBench</h3>
-        <p>Competitive-programming problems sourced from live contest streams after the model's cutoff. The contamination control is the key feature; scores are not inflated by training-set leakage.</p>
-        <div class="fr-cli" style="margin-top:var(--ks-3)">
-          <span class="fr-cli__prompt">$</span> kolm bench <span class="fr-cli__flag">livecodebench</span>
+        <p class="fr-spec-list__p">Graduate-level multiple-choice questions in physics, chemistry, and biology authored by domain PhDs. Tests reasoning depth on problems that resist surface pattern-matching.</p>
+        <div class="fr-cli" style="margin-top:6px"><span class="fr-cli__prompt">$</span> kolm bench <span class="fr-cli__flag">gpqa</span></div>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">LiveCodeBench</h3>
+          <span class="fr-spec-list__delta">Live coding &middot; contamination-controlled</span>
         </div>
-      </div>
-      <div class="fr-card fr-reveal">
-        <span class="fr-pill fr-pill--amber">Extreme generalization</span>
-        <h3 class="fr-h3">Humanity's Last Exam (HLE)</h3>
-        <p>An expert-authored set covering subjects where the modal correct answer requires synthesis across multiple fields. Designed to remain difficult as frontier models improve.</p>
-        <div class="fr-cli" style="margin-top:var(--ks-3)">
-          <span class="fr-cli__prompt">$</span> kolm bench <span class="fr-cli__flag">hle</span>
+        <p class="fr-spec-list__p">Competitive-programming problems sourced from live contest streams after the model's cutoff. The contamination control is the key feature; scores are not inflated by training-set leakage.</p>
+        <div class="fr-cli" style="margin-top:6px"><span class="fr-cli__prompt">$</span> kolm bench <span class="fr-cli__flag">livecodebench</span></div>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Humanity's Last Exam (HLE)</h3>
+          <span class="fr-spec-list__delta">Extreme generalization</span>
         </div>
-      </div>
-      <div class="fr-card fr-card--mint fr-reveal">
-        <span class="fr-pill fr-pill--ghost">All five</span>
-        <h3 class="fr-h3">Full sweep</h3>
-        <p>Run every suite against an artifact and aggregate into a single receipt. The result is what /leaderboard uses to rank entries; the eval packs are pinned per-quarter.</p>
-        <div class="fr-cli" style="margin-top:var(--ks-3)">
-          <span class="fr-cli__prompt">$</span> kolm bench <span class="fr-cli__flag">--all</span>
+        <p class="fr-spec-list__p">An expert-authored set covering subjects where the modal correct answer requires synthesis across multiple fields. Designed to remain difficult as frontier models improve.</p>
+        <div class="fr-cli" style="margin-top:6px"><span class="fr-cli__prompt">$</span> kolm bench <span class="fr-cli__flag">hle</span></div>
+      </li>
+      <li>
+        <div class="fr-spec-list__head">
+          <h3 class="fr-spec-list__name">Full sweep</h3>
+          <span class="fr-spec-list__delta">all five &middot; aggregated receipt</span>
         </div>
-      </div>
-    </div>
+        <p class="fr-spec-list__p">Run every suite against an artifact and aggregate into a single receipt. The result is what /leaderboard uses to rank entries; the eval packs are pinned per-quarter.</p>
+        <div class="fr-cli" style="margin-top:6px"><span class="fr-cli__prompt">$</span> kolm bench <span class="fr-cli__flag">--all</span></div>
+      </li>
+    </ol>
   </div>
 </section>
 
@@ -582,6 +604,21 @@ kolm run    ./r1-distill-qwen-32b.int4.kolm \
       <a href="/k-score" class="ks-btn ks-btn--ghost">How K-score is composed</a>
     </div>
   </div>
+</section>
+
+<section id="w758-external-benchmarks" class="bench-section">
+  <p class="eyebrow">External benchmarks (W758)</p>
+  <h2>MMLU &middot; HumanEval &middot; MT-Bench</h2>
+  <p class="lede">Three industry-standard harnesses, locally runnable, honest-empty until pack downloaded.</p>
+  <table class="bench-table" data-w758="external-results">
+    <thead><tr><th>Benchmark</th><th>Pack source</th><th>Local status</th><th>Latest run</th></tr></thead>
+    <tbody>
+      <tr><td>MMLU</td><td>huggingface.co/datasets/cais/mmlu</td><td><span class="status-pill">pack_not_local</span></td><td>&mdash;</td></tr>
+      <tr><td>HumanEval</td><td>huggingface.co/datasets/openai_humaneval</td><td><span class="status-pill">pack_not_local</span></td><td>&mdash;</td></tr>
+      <tr><td>MT-Bench</td><td>github.com/lm-sys/FastChat</td><td><span class="status-pill">pack_not_local</span></td><td>&mdash;</td></tr>
+    </tbody>
+  </table>
+  <p class="note">Status reflects whether the benchmark data is present on this server. Run <code>kolm bench &lt;mmlu|humaneval|mtbench&gt; --pack-dir &lt;path&gt;</code> to score locally. The harness ships honest envelopes (<code>bench_pack_not_local</code>, <code>runtime_not_wired</code>, <code>no_code_sandbox_configured</code>, <code>no_judge_model_configured</code>) and never fakes numbers.</p>
 </section>
 
 </main>
