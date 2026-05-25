@@ -458,7 +458,12 @@ const PUBLIC_API = (p) =>
   p === '/v1/hardware' ||
   p === '/v1/inspect' ||
   p === '/v1/fit' ||
-  p === '/v1/experts';
+  p === '/v1/experts' ||
+  // W869 — teacher-chat health probe publishes only booleans (which vendors
+  // have a server-side key configured). Used by local distill workers to
+  // decide whether to route through the proxy before burning a real call.
+  // The actual POST /v1/teacher/chat remains auth-gated.
+  p === '/v1/teacher/chat/health';
 
 export function adminApiKey() {
   return process.env.ADMIN_KEY || null;

@@ -224,9 +224,48 @@ export async function callTeacher(opts) {
   return out;
 }
 
+// W869 — proxy fallback. When the local env lacks a vendor key but the
+// caller has a kolm.ai API key + base URL set (KOLM_BASE_URL + KOLM_API_KEY),
+// route through the server-side /v1/teacher/chat proxy so sensitive Vercel
+// env vars never have to be exfiltrated to the local box. Used in the
+// fully-local distill flow on the user's RTX 5090 where the teacher keys
+// live only in the kolm.ai production runtime.
+function _proxyConfigured() {
+  return !!(process.env.KOLM_BASE_URL && process.env.KOLM_API_KEY);
+}
+async function callViaKolmProxy({ vendor, model, system, input, maxTokens }) {
+  const base = String(process.env.KOLM_BASE_URL || '').replace(/\/+$/, '');
+  const key  = String(process.env.KOLM_API_KEY || '');
+  if (!base || !key) throw new Error('KOLM_BASE_URL + KOLM_API_KEY required for proxy fallback');
+  const res = await fetch(`${base}/v1/teacher/chat`, {
+    method: 'POST',
+    headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
+    body: JSON.stringify({
+      vendor, model,
+      system: system || undefined,
+      messages: [{ role: 'user', content: input }],
+      max_tokens: maxTokens,
+    }),
+  });
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`kolm-proxy ${vendor} ${res.status}: ${txt.slice(0, 400)}`);
+  }
+  const j = await res.json();
+  if (j && j.ok === false) {
+    throw new Error(`kolm-proxy ${vendor} envelope error: ${j.error || 'unknown'} ${j.detail || ''}`);
+  }
+  return (j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || '';
+}
+
 async function callAnthropic({ model, system, input, maxTokens }) {
   const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) throw new Error('ANTHROPIC_API_KEY required for vendor=anthropic');
+  if (!key) {
+    if (_proxyConfigured()) {
+      return callViaKolmProxy({ vendor: 'anthropic', model, system, input, maxTokens });
+    }
+    throw new Error('ANTHROPIC_API_KEY required for vendor=anthropic (or set KOLM_BASE_URL+KOLM_API_KEY to proxy through kolm.ai)');
+  }
   const { default: Anthropic } = await import('@anthropic-ai/sdk');
   const client = new Anthropic({ apiKey: key });
   const resp = await client.messages.create({
@@ -241,7 +280,12 @@ async function callAnthropic({ model, system, input, maxTokens }) {
 
 async function callOpenAI({ model, system, input, maxTokens }) {
   const key = process.env.OPENAI_API_KEY;
-  if (!key) throw new Error('OPENAI_API_KEY required for vendor=openai');
+  if (!key) {
+    if (_proxyConfigured()) {
+      return callViaKolmProxy({ vendor: 'openai', model, system, input, maxTokens });
+    }
+    throw new Error('OPENAI_API_KEY required for vendor=openai (or set KOLM_BASE_URL+KOLM_API_KEY to proxy through kolm.ai)');
+  }
   const messages = [];
   if (system) messages.push({ role: 'system', content: system });
   messages.push({ role: 'user', content: input });
@@ -266,7 +310,12 @@ async function callOpenAI({ model, system, input, maxTokens }) {
 // message becomes the single content part. Auth is x-goog-api-key header.
 async function callGoogle({ model, system, input, maxTokens }) {
   const key = process.env.GOOGLE_API_KEY;
-  if (!key) throw new Error('GOOGLE_API_KEY required for vendor=google');
+  if (!key) {
+    if (_proxyConfigured()) {
+      return callViaKolmProxy({ vendor: 'google', model, system, input, maxTokens });
+    }
+    throw new Error('GOOGLE_API_KEY required for vendor=google (or set KOLM_BASE_URL+KOLM_API_KEY to proxy through kolm.ai)');
+  }
   const body = {
     contents: [{ role: 'user', parts: [{ text: input }] }],
     generationConfig: { maxOutputTokens: maxTokens },
@@ -290,7 +339,12 @@ async function callGoogle({ model, system, input, maxTokens }) {
 // xAI Grok ships an OpenAI-compatible /v1/chat/completions at api.x.ai.
 async function callXAI({ model, system, input, maxTokens }) {
   const key = process.env.XAI_API_KEY;
-  if (!key) throw new Error('XAI_API_KEY required for vendor=xai');
+  if (!key) {
+    if (_proxyConfigured()) {
+      return callViaKolmProxy({ vendor: 'xai', model, system, input, maxTokens });
+    }
+    throw new Error('XAI_API_KEY required for vendor=xai (or set KOLM_BASE_URL+KOLM_API_KEY to proxy through kolm.ai)');
+  }
   const messages = [];
   if (system) messages.push({ role: 'system', content: system });
   messages.push({ role: 'user', content: input });

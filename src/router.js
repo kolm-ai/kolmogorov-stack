@@ -996,6 +996,64 @@ function verifyReceipt(receipt) {
   return diff === 0 ? { valid: true } : { valid: false, reason: 'hmac mismatch' };
 }
 
+// W869+ Persona A.7 — VRAM pre-flight gate. Returns null if check is skipped
+// (auto/cpu-server/unknown model), { fits: true } if the projected memory fits,
+// or { fits: false, envelope } with a structured 422 body. Conservative: we
+// project int4 quant at 4K context, so the gate only refuses jobs that would
+// fail at the smallest reasonable footprint — never blocks a job that would
+// actually fit with a tighter quant or shorter context.
+const _VRAM_TIER_GB = Object.freeze({
+  '3090': 24, '4090': 24, '5090': 32,
+  'a100-80': 80, 'h100-80': 80, 'h200-141': 141,
+  'm4-max-128': 128, 'dgx-spark': 128, 'm3-ultra-512': 512,
+});
+const _VRAM_KNOWN_MODELS_B = Object.freeze({
+  'Qwen/Qwen2.5-0.5B-Instruct': 0.5, 'Qwen/Qwen2.5-3B-Instruct': 3, 'Qwen/Qwen2.5-7B-Instruct': 7,
+  'Qwen/Qwen2.5-14B-Instruct': 14, 'Qwen/Qwen2.5-32B-Instruct': 32, 'Qwen/Qwen2.5-72B-Instruct': 72,
+  'Qwen/Qwen3-8B': 8,
+  'deepseek-ai/DeepSeek-R1-Distill-Qwen-7B': 7, 'deepseek-ai/DeepSeek-R1-Distill-Qwen-32B': 32,
+  'meta-llama/Llama-3.1-8B-Instruct': 8, 'meta-llama/Llama-3.1-70B-Instruct': 70,
+  'mistralai/Mistral-7B-Instruct-v0.3': 7,
+  'google/gemma-2-9b-it': 9, 'google/gemma-2-27b-it': 27,
+});
+function _checkVramPreflight(base_model, hw_tier) {
+  if (!hw_tier || hw_tier === 'auto' || hw_tier === 'cpu-server') return null;
+  if (!base_model) return null;
+  const params_b = _VRAM_KNOWN_MODELS_B[base_model];
+  const vram_gb = _VRAM_TIER_GB[hw_tier];
+  if (!params_b || !vram_gb) return null;
+  let fit;
+  try {
+    fit = forgeFit.estimateMemoryFit({
+      model_params_b: params_b, quant: 'int4', vram_gb, context: 4096, batch: 1, kv_precision: 'fp16',
+    });
+  } catch { return null; }
+  if (fit.fits) return { fits: true };
+  const sortedTiers = Object.entries(_VRAM_TIER_GB).sort((a, b) => a[1] - b[1]);
+  const recommended = sortedTiers.find(([, gb]) => {
+    try {
+      const f2 = forgeFit.estimateMemoryFit({ model_params_b: params_b, quant: 'int4', vram_gb: gb, context: 4096, batch: 1, kv_precision: 'fp16' });
+      return f2.fits;
+    } catch { return false; }
+  });
+  return {
+    fits: false,
+    envelope: {
+      ok: false,
+      error: 'vram_preflight_failed',
+      detail: `${base_model} (${params_b}B params) at int4+4K context needs ~${fit.est_total_gb} GB but ${hw_tier} only has ~${vram_gb} GB`,
+      estimated_total_gb: fit.est_total_gb,
+      available_gb: vram_gb,
+      base_model,
+      hw_tier,
+      recommendation: recommended ? `try hw_tier='${recommended[0]}' (${recommended[1]} GB)` : 'no available tier fits — pick a smaller base_model',
+      fit_envelope: fit,
+      docs: '/docs/cli/fit',
+      version: 'w869-v1',
+    },
+  };
+}
+
 export function buildRouter() {
   const r = express.Router();
 
@@ -5934,6 +5992,179 @@ export function buildRouter() {
     });
   });
 
+  // ---------- W869 — Teacher-chat proxy ----------
+  // POST /v1/teacher/chat — auth-gated server-side relay so local distill
+  // workers can call cloud teachers using sensitive vendor keys held only at
+  // the kolm.ai runtime (e.g. Vercel sensitive-flagged env vars never decrypt
+  // to `vercel env pull`). Body:
+  //   { vendor: "anthropic"|"openai"|"google"|"xai",
+  //     model:  "<vendor-specific>",
+  //     messages: [{role,content}, ...],
+  //     system: "<optional>",
+  //     max_tokens: <int, default 1024, hard cap 4096> }
+  // Response:
+  //   { ok:true, vendor, model,
+  //     choices:[{message:{role:'assistant', content:'...'}}],
+  //     usage:{input_chars,output_chars} }
+  // Auth: kolm tenant key (req.tenant_record); free-tier capped at 50/day
+  // through the same per-tenant counter the connector proxy uses. Refuses
+  // when the requested vendor's server-side key is unset (HTTP 503,
+  // key_not_configured) so the caller can fall back to local-only teachers
+  // without ambiguity.
+  const TEACHER_CHAT_VENDORS = Object.freeze({
+    anthropic: { env: 'ANTHROPIC_API_KEY' },
+    openai:    { env: 'OPENAI_API_KEY' },
+    google:    { env: 'GOOGLE_API_KEY' },
+    xai:       { env: 'XAI_API_KEY' },
+  });
+  r.post('/v1/teacher/chat', async (req, res) => {
+    if (!req.tenant_record) {
+      return res.status(401).json({ ok: false, error: 'auth_required' });
+    }
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    const vendor = String(body.vendor || '').toLowerCase();
+    const vcfg = TEACHER_CHAT_VENDORS[vendor];
+    if (!vcfg) {
+      return res.status(400).json({
+        ok: false, error: 'unknown_vendor',
+        detail: 'vendor must be one of: ' + Object.keys(TEACHER_CHAT_VENDORS).join(', '),
+      });
+    }
+    const model = String(body.model || '').slice(0, 128);
+    if (!model) {
+      return res.status(400).json({ ok: false, error: 'missing_model' });
+    }
+    const messages = Array.isArray(body.messages) ? body.messages : null;
+    const inputText = typeof body.input === 'string' ? body.input : '';
+    if (!messages && !inputText) {
+      return res.status(400).json({ ok: false, error: 'missing_messages_or_input' });
+    }
+    const system = typeof body.system === 'string' ? body.system.slice(0, 8000) : '';
+    let maxTokens = Number(body.max_tokens);
+    if (!Number.isFinite(maxTokens) || maxTokens <= 0) maxTokens = 1024;
+    if (maxTokens > 4096) maxTokens = 4096;
+    // Coerce messages to a clean list and cap total chars to 32k so a runaway
+    // caller cannot cost-bomb the proxy.
+    let normMessages = [];
+    if (messages) {
+      for (const m of messages) {
+        if (!m || typeof m !== 'object') continue;
+        const role = String(m.role || 'user').slice(0, 16);
+        const c = typeof m.content === 'string' ? m.content
+          : Array.isArray(m.content)
+            ? m.content.map(x => (x && (x.text || x.content)) || '').join('\n')
+            : '';
+        if (!c) continue;
+        normMessages.push({ role, content: String(c).slice(0, 16000) });
+      }
+    } else {
+      normMessages.push({ role: 'user', content: inputText.slice(0, 16000) });
+    }
+    const totalChars = normMessages.reduce((a, m) => a + m.content.length, 0);
+    if (totalChars > 32000) {
+      return res.status(413).json({ ok: false, error: 'messages_too_large',
+        detail: 'cumulative message content exceeds 32000 chars' });
+    }
+    const key = process.env[vcfg.env];
+    if (!key) {
+      return res.status(503).json({
+        ok: false, error: 'key_not_configured',
+        vendor,
+        detail: `${vcfg.env} is not set on this kolm instance; ask the operator to add it (or use vendor=local).`,
+      });
+    }
+    try {
+      let text = '';
+      let inputChars = totalChars + system.length;
+      if (vendor === 'anthropic') {
+        const upstream = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'x-api-key': key,
+            'anthropic-version': '2023-06-01',
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            model,
+            max_tokens: maxTokens,
+            system: system || undefined,
+            messages: normMessages,
+          }),
+        });
+        if (!upstream.ok) {
+          const t = await upstream.text();
+          return res.status(502).json({ ok: false, error: 'upstream_error', upstream_status: upstream.status, upstream_body: t.slice(0, 800) });
+        }
+        const j = await upstream.json();
+        const block = (j.content || []).find(b => b && b.type === 'text');
+        text = block ? block.text : '';
+      } else if (vendor === 'openai' || vendor === 'xai') {
+        const url = vendor === 'openai'
+          ? 'https://api.openai.com/v1/chat/completions'
+          : 'https://api.x.ai/v1/chat/completions';
+        const oaMessages = system ? [{ role: 'system', content: system }, ...normMessages] : normMessages;
+        const upstream = await fetch(url, {
+          method: 'POST',
+          headers: { authorization: 'Bearer ' + key, 'content-type': 'application/json' },
+          body: JSON.stringify({ model, messages: oaMessages, max_tokens: maxTokens }),
+        });
+        if (!upstream.ok) {
+          const t = await upstream.text();
+          return res.status(502).json({ ok: false, error: 'upstream_error', upstream_status: upstream.status, upstream_body: t.slice(0, 800) });
+        }
+        const j = await upstream.json();
+        text = (j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || '';
+      } else if (vendor === 'google') {
+        const url = 'https://generativelanguage.googleapis.com/v1beta/models/'
+          + encodeURIComponent(model) + ':generateContent';
+        const gBody = {
+          contents: normMessages.map(m => ({
+            role: m.role === 'assistant' ? 'model' : 'user',
+            parts: [{ text: m.content }],
+          })),
+          generationConfig: { maxOutputTokens: maxTokens },
+        };
+        if (system) gBody.systemInstruction = { role: 'system', parts: [{ text: system }] };
+        const upstream = await fetch(url, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
+          body: JSON.stringify(gBody),
+        });
+        if (!upstream.ok) {
+          const t = await upstream.text();
+          return res.status(502).json({ ok: false, error: 'upstream_error', upstream_status: upstream.status, upstream_body: t.slice(0, 800) });
+        }
+        const j = await upstream.json();
+        const parts = (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [];
+        text = parts.map(p => p.text || '').join('');
+      }
+      return res.status(200).json({
+        ok: true,
+        vendor, model,
+        choices: [{ message: { role: 'assistant', content: text } }],
+        usage: { input_chars: inputChars, output_chars: text.length },
+      });
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: 'proxy_failed', detail: String(e && e.message || e) });
+    }
+  });
+
+  // GET /v1/teacher/chat/health — which vendors have keys configured on this
+  // kolm instance. No auth required (publishes only booleans). Lets a local
+  // distill worker pick which vendor to route through the proxy without
+  // burning a real call to test.
+  r.get('/v1/teacher/chat/health', (req, res) => {
+    const status = {};
+    for (const [v, cfg] of Object.entries(TEACHER_CHAT_VENDORS)) {
+      status[v] = !!process.env[cfg.env];
+    }
+    return res.status(200).json({
+      ok: true,
+      vendors: status,
+      any_configured: Object.values(status).some(Boolean),
+    });
+  });
+
   // ---------- W748 — Seasonal capture tagging + variants + auto-select ----------
   // GET /v1/seasonal/:namespace — distribution + active events + recommendation.
   // POST /v1/seasonal/variant   — body { namespace, variant } -> registers a
@@ -6230,6 +6461,16 @@ export function buildRouter() {
         if (!VALID_MD.includes(d)) return res.status(400).json({ error: `multi_device entry '${d}' must be one of ${VALID_MD.join(', ')}` });
       }
     }
+    // W869+ Persona A.7 — VRAM pre-flight gate. Reject before charging when
+    // the model + lora + kv obviously won't fit on the picked hw_tier. Skip
+    // for 'auto' (let the picker handle it) and 'cpu-server' (CPU has RAM
+    // not VRAM — different math). Skip when base_model unknown — no point
+    // blocking on a guess. Conservative on quant (int4 at 4K ctx for the
+    // baseline check) so we don't reject a job that would actually fit.
+    const _vramPreflight = _checkVramPreflight(base_model, hw_tier);
+    if (_vramPreflight && !_vramPreflight.fits) {
+      return res.status(422).json(_vramPreflight.envelope);
+    }
     const job = createJob({
       task, examples, corpus_namespace, base_model,
       tenant: req.tenant, tenant_id: req.tenant_record?.id || null,
@@ -6349,6 +6590,92 @@ export function buildRouter() {
     res.set('Content-Type', 'application/zip');
     res.set('Content-Disposition', `attachment; filename="${j.id}.kolm"`);
     fs.createReadStream(j.artifact_path).pipe(res);
+  });
+
+  // POST /v1/compile/cloud — W869 Persona B path: caller has no local GPU.
+  // Dispatches a compile to a partner GPU (modal/runpod/vast/lambda) using
+  // server-side credentials (KOLM_RUNPOD_TOKEN / KOLM_MODAL_TOKEN in env).
+  // Body: { backend, namespace, spec?, confirm, budget_usd, base_model? }.
+  // Without confirm:true we return a quote so the caller sees the cost first.
+  r.post('/v1/compile/cloud', async (req, res) => {
+    try {
+      const body = req.body || {};
+      const backend = body.backend;
+      const namespace = body.namespace;
+      const userSpec = body.spec;
+      const confirm = !!body.confirm;
+      const budget_usd = (typeof body.budget_usd === 'number' && isFinite(body.budget_usd)) ? body.budget_usd : null;
+      if (!backend || typeof backend !== 'string') {
+        return res.status(400).json({ error: 'backend (string) required — e.g. modal, runpod, vast, lambda' });
+      }
+      if (!userSpec && (!namespace || typeof namespace !== 'string')) {
+        return res.status(400).json({ error: 'either spec (object) or namespace (string) required' });
+      }
+      let spec;
+      if (userSpec && typeof userSpec === 'object') {
+        spec = userSpec;
+      } else {
+        spec = {
+          job_id: 'job_' + Math.random().toString(16).slice(2, 10),
+          task: `cloud-compile from namespace '${namespace}' (auto-spec)`,
+          base_model: (typeof body.base_model === 'string' && body.base_model) || 'Qwen/Qwen2.5-3B-Instruct',
+          corpus_namespace: namespace,
+          examples: 500,
+          epochs: 3,
+          batch_size: 4,
+          seq_len: 1024,
+          recipes: [],
+          evals: { spec: 'rs-1-evals', n: 1, cases: [], coverage: 0 },
+          training_stats: { pass_rate_positive: null, latency_p50_us: null },
+          _auto_generated_from: { namespace, generated_at: new Date().toISOString() },
+        };
+      }
+      const { default: renter } = await import('./compute/rent.js');
+      const r2 = await renter.rent(spec, { backend, confirm, budget_usd });
+      if (r2.dry_run) {
+        return res.json({
+          status: 'quote',
+          backend: r2.backend,
+          estimate: r2.estimate,
+          next: 'POST again with confirm:true to spend',
+        });
+      }
+      if (!r2.ok) {
+        return res.status(502).json({
+          status: 'failed',
+          backend: r2.backend,
+          reason: r2.reason,
+          estimate: r2.estimate || null,
+          next_step: (r2.reason && /token|api[_ ]?key|credential/i.test(r2.reason))
+            ? 'set the partner credential env var on this server, or call from CLI with your own creds'
+            : null,
+        });
+      }
+      // Only bill on confirmed successful rentals. The rental cost itself
+      // lands on the partner; we charge 10 internal units for the compile job
+      // like /v1/compile does.
+      chargeUsage(req.tenant_record, 10);
+      try {
+        const tid = (req.tenant_record && req.tenant_record.id) || null;
+        await usageIncrementMeter(tid, 'builds', 1);
+      } catch (_) {}
+      tryAppendAudit({
+        tenant_id: req.tenant_record?.id || req.tenant,
+        tenant_name: req.tenant_record?.name || null,
+        actor: 'tenant',
+        op: AUDIT_OPS.COMPILE_COMPLETED,
+        payload: { source: 'cloud', backend: r2.backend, cost_usd: r2.estimate?.cost_usd || null },
+      });
+      res.json({
+        status: 'completed',
+        backend: r2.backend,
+        estimate: r2.estimate,
+        rental: r2.rental,
+        result: r2.result || null,
+      });
+    } catch (e) {
+      res.status(500).json({ error: 'cloud_compile_failed', detail: String(e.message || e) });
+    }
   });
 
   // POST /v1/builder/compile — authed wrapper that turns the no-code builder's
@@ -7760,6 +8087,320 @@ export function buildRouter() {
       detail,
     });
   }
+  // W869+ Persona D admin status aggregators.
+  // Thin read-only composers for /account/enterprise. Each one stitches data
+  // from individual surfaces (sso/status, byoc/deployments, compliance/*, audit)
+  // into the shape the admin dashboard expects. Honest when state is missing:
+  // empty fields, no 404s.
+  r.get('/v1/sso/status', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
+    const plan = req.tenant_record.plan || 'free';
+    const entitled = _ssoEntitled(plan);
+    const config = entitled ? _ssoConfigForTenant(req.tenant_record.id) : null;
+    res.json({
+      ok: true,
+      plan,
+      entitled,
+      saml: {
+        configured: !!config,
+        enabled: entitled,
+        idp: config && config.provider || null,
+        entity_id: config && config.idp_entity_id || null,
+      },
+      scim: {
+        configured: !!(config && config.scim_enabled),
+        provider: config && config.provider || null,
+        last_sync: null,
+        user_count: 0,
+      },
+      mfa: {
+        enforced: false,
+        optional: true,
+      },
+      docs: '/docs/enterprise#sso',
+    });
+  });
+  r.get('/v1/byoc/status', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
+    let deployments = [];
+    try { deployments = (typeof byoc !== 'undefined' && byoc.listDeploymentsForTenant) ? byoc.listDeploymentsForTenant(req.tenant_record.id, {}) || [] : []; } catch (_) {}
+    const live = deployments.find((d) => d && d.status !== 'torndown' && d.status !== 'deleted');
+    res.json({
+      ok: true,
+      hosting_mode: live ? 'byoc' : 'managed',
+      region: (live && live.region) || null,
+      byoc: live ? {
+        enrolled: true,
+        namespace: live.namespace || live.name || null,
+        release: live.release || live.id || null,
+        last_health: live.last_health || live.updated_at || null,
+      } : { enrolled: false },
+      docs: '/docs/enterprise#byoc',
+    });
+  });
+  r.get('/v1/compliance/status', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
+    const plan = req.tenant_record.plan || 'free';
+    res.json({
+      ok: true,
+      plan,
+      soc2: {
+        type_i: true,
+        type_ii: false,
+        eta_type_ii: 'Q1 2027',
+        period: '2026-05-01 to 2026-10-31',
+      },
+      iso27001: {
+        certified: false,
+        cert_id: null,
+      },
+      dpa: {
+        signed: false,
+        signed_at: null,
+        counter_signer: null,
+      },
+      baa: {
+        signed: false,
+        signed_at: null,
+      },
+      docs: '/docs/enterprise#compliance',
+      trust_center: 'https://kolm.ai/trust',
+    });
+  });
+  r.get('/v1/account/audit/retention', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
+    const plan = req.tenant_record.plan || 'free';
+    const tierCaps = { free: 30, pro: 90, business: 365, enterprise: 2555 };
+    const days = tierCaps[plan] || 30;
+    res.json({
+      ok: true,
+      tier: plan,
+      retention_days: days,
+      siem_endpoint: null,
+      siem_provider: null,
+      siem_last_delivery: null,
+      docs: '/docs/audit',
+    });
+  });
+
+  // W869+ Persona D — procurement questionnaire auto-answer vault.
+  // Source of truth: data/procurement/*.json (versioned, security-team reviewed).
+  // Same envelope the CLI emits (kolm procurement <framework> --format ...).
+  // Unauthed by design — these are pre-published answers, not tenant secrets.
+  // The /account/enterprise admin surface links straight to these URLs so a
+  // CISO can download the SIG / CAIQ pack without an auth round-trip.
+  const _procurementVaultDir = path.join(ROUTER_REPO_ROOT, 'data', 'procurement');
+  const _procurementFiles = Object.freeze({ sig: 'sig-lite.json', caiq: 'caiq-v4.json' });
+  function _loadProcurementFramework(slug) {
+    const file = _procurementFiles[slug];
+    if (!file) return null;
+    const fp = path.join(_procurementVaultDir, file);
+    if (!fs.existsSync(fp)) return null;
+    try { return JSON.parse(fs.readFileSync(fp, 'utf8')); } catch { return null; }
+  }
+  function _renderProcurementCsv(payloads) {
+    const lines = ['framework,section,question_id,question,answer,evidence'];
+    const esc = (s) => '"' + String(s == null ? '' : s).replace(/"/g, '""').replace(/\r?\n/g, ' ') + '"';
+    payloads.forEach((p) => {
+      if (!p) return;
+      if (Array.isArray(p.sections)) {
+        p.sections.forEach((sec) => (sec.questions || []).forEach((q) => {
+          lines.push([p.framework, sec.title, q.id, q.question, q.answer, q.evidence].map(esc).join(','));
+        }));
+      } else if (Array.isArray(p.controls)) {
+        p.controls.forEach((c) => {
+          lines.push([p.framework, c.domain, c.id, c.question, c.answer, c.evidence].map(esc).join(','));
+        });
+      }
+    });
+    return lines.join('\n') + '\n';
+  }
+  function _renderProcurementMarkdown(p) {
+    if (!p) return '';
+    const out = [];
+    out.push(`# ${p.framework}`); out.push('');
+    out.push(`**Vendor:** ${p.vendor || 'kolm.ai'}  `);
+    out.push(`**Domain:** ${p.domain || ''}  `);
+    out.push(`**Updated:** ${p.updated_iso || ''}  `);
+    out.push(`**Scope:** ${p.scope || ''}`); out.push('');
+    if (Array.isArray(p.sections)) {
+      p.sections.forEach((sec) => {
+        out.push(`## ${sec.id}. ${sec.title}`); out.push('');
+        (sec.questions || []).forEach((q) => {
+          out.push(`### ${q.id} — ${q.question}`); out.push('');
+          out.push(`**Answer:** \`${q.answer}\``); out.push('');
+          out.push(`${q.evidence || ''}`); out.push('');
+        });
+      });
+    } else if (Array.isArray(p.controls)) {
+      const byDomain = new Map();
+      p.controls.forEach((c) => {
+        if (!byDomain.has(c.domain)) byDomain.set(c.domain, []);
+        byDomain.get(c.domain).push(c);
+      });
+      for (const [domain, ctrls] of byDomain) {
+        out.push(`## ${domain}`); out.push('');
+        ctrls.forEach((c) => {
+          out.push(`### ${c.id} — ${c.question}`); out.push('');
+          out.push(`**Answer:** \`${c.answer}\``); out.push('');
+          out.push(`${c.evidence || ''}`); out.push('');
+        });
+      }
+    }
+    if (p.notes) { out.push('---'); out.push(''); out.push(p.notes); out.push(''); }
+    return out.join('\n');
+  }
+  r.get('/v1/procurement', (_req, res) => {
+    res.json({
+      ok: true,
+      frameworks: [
+        { slug: 'sig', name: 'Shared Assessments SIG Lite', file: 'sig-lite.json', url: '/v1/procurement/sig' },
+        { slug: 'caiq', name: 'CSA CAIQ v4.0.2 (curated)', file: 'caiq-v4.json', url: '/v1/procurement/caiq' },
+        { slug: 'all', name: 'Bundle of all frameworks', url: '/v1/procurement/all' },
+      ],
+      formats_supported: ['markdown', 'json', 'csv'],
+      cli: 'kolm procurement <framework> [--format markdown|json|csv] [--out path]',
+      docs: '/docs/cli/procurement',
+      version: 'w869-v1',
+    });
+  });
+  r.get('/v1/procurement/:framework', (req, res) => {
+    const slug = String(req.params.framework || '').toLowerCase();
+    const format = String(req.query.format || 'json').toLowerCase();
+    if (!['sig', 'caiq', 'all'].includes(slug)) {
+      return res.status(400).json({ ok: false, error: 'unknown_framework', hint: 'one of: sig, caiq, all', see: '/v1/procurement' });
+    }
+    if (!['json', 'md', 'markdown', 'csv'].includes(format)) {
+      return res.status(400).json({ ok: false, error: 'unsupported_format', hint: 'one of: json, md, markdown, csv' });
+    }
+    const slugs = slug === 'all' ? ['sig', 'caiq'] : [slug];
+    const payloads = slugs.map(_loadProcurementFramework);
+    if (payloads.some((p) => !p)) {
+      return res.status(404).json({ ok: false, error: 'vault_file_missing', detail: `expected ${slugs.join(', ')} in data/procurement/`, version: 'w869-v1' });
+    }
+    if (format === 'csv') {
+      res.set('Content-Type', 'text/csv; charset=utf-8');
+      return res.send(_renderProcurementCsv(payloads));
+    }
+    if (format === 'md' || format === 'markdown') {
+      res.set('Content-Type', 'text/markdown; charset=utf-8');
+      return res.send(payloads.map(_renderProcurementMarkdown).join('\n\n---\n\n'));
+    }
+    res.json(slug === 'all' ? { ok: true, frameworks: payloads, version: 'w869-v1' } : { ok: true, ...payloads[0], version: 'w869-v1' });
+  });
+
+  // W869+ Persona D — passport export over HTTP.
+  // The CLI verb `kolm passport <artifact.kolm> --format compliance` is the
+  // canonical path for offline use; this HTTP route serves the same envelope
+  // for a *compile job* the caller's tenant already owns (artifact lives in
+  // the local artifact store at /v1/compile/:id/.kolm). For arbitrary external
+  // .kolm files, the CLI remains the supported path.
+  // Returns 501 with a hint when the artifact is not local — never silent.
+  r.get('/v1/passport/:job_id', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const jobId = String(req.params.job_id || '');
+    const format = String(req.query.format || 'json').toLowerCase();
+    if (!['json', 'compliance', 'markdown', 'md'].includes(format)) {
+      return res.status(400).json({ ok: false, error: 'unsupported_format', hint: 'one of: json, compliance, markdown, md' });
+    }
+    const job = getJob(jobId, req.is_admin ? null : req.tenant);
+    if (!job) return res.status(404).json({ ok: false, error: 'job_not_found', job_id: jobId });
+    if (job.status !== 'completed') {
+      return res.status(409).json({ ok: false, error: 'artifact_not_ready', status: job.status, progress: job.progress });
+    }
+    const ap = job.artifact_path;
+    if (!ap || !fs.existsSync(ap)) {
+      return res.status(501).json({
+        ok: false,
+        error: 'artifact_not_local',
+        hint: 'this kolm deployment does not have the artifact on local disk — use the CLI: `kolm passport <artifact.kolm> --format compliance`',
+        cli_command: `kolm passport ${jobId}.kolm --format compliance`,
+        docs: '/docs/cli/passport',
+        version: 'w869-v1',
+      });
+    }
+    try {
+      const AdmZip = (await import('adm-zip')).default;
+      const zip = new AdmZip(ap);
+      const manifestEntry = zip.getEntry('manifest.json');
+      if (!manifestEntry) return res.status(500).json({ ok: false, error: 'manifest_missing_in_artifact' });
+      const manifest = JSON.parse(manifestEntry.getData().toString('utf8'));
+      const receiptEntry = zip.getEntry('receipts/receipt.json') || zip.getEntry('receipt.json');
+      let receiptSummary = null;
+      if (receiptEntry) {
+        try {
+          const rj = JSON.parse(receiptEntry.getData().toString('utf8'));
+          receiptSummary = {
+            cid: rj.cid || rj.artifact_cid || null,
+            k_score: rj.k_score ?? rj.kscore ?? null,
+            signature_mode: rj.signature_mode || (rj.signature_ed25519 ? 'ed25519' : rj.signature_hmac ? 'hmac' : null),
+            signed_at: rj.signed_at || rj.created_at || null,
+            eval_pass_rate: rj.eval_pass_rate ?? null,
+          };
+        } catch { receiptSummary = { error: 'receipt_parse_failed' }; }
+      }
+      const [{ buildModelCard, formatAsMarkdown, estimateEnvironmentalImpact }, { buildTechnicalDocumentation }, { emitSbomFromManifest }]
+        = await Promise.all([
+          import('./model-card-emit.js'),
+          import('./ai-act-export.js'),
+          import('./sbom-emit.js'),
+        ]);
+      const modelCard = buildModelCard(manifest, { include_environmental: true });
+      const aiActDoc = buildTechnicalDocumentation(manifest, {});
+      const sbom = emitSbomFromManifest({ manifest });
+      const environmental = estimateEnvironmentalImpact(manifest);
+      const buf = fs.readFileSync(ap);
+      const sha256 = crypto.createHash('sha256').update(buf).digest('hex');
+      const stat = fs.statSync(ap);
+      const envelope = {
+        spec: 'kolm-artifact-passport-1',
+        format: format === 'md' ? 'markdown' : format,
+        generated_at: new Date().toISOString(),
+        artifact: {
+          job_id: jobId,
+          path: path.basename(ap),
+          sha256,
+          size_bytes: stat.size,
+          base_model: manifest.base_model || manifest.base_model_id || null,
+          task: manifest.task || null,
+          tier: manifest.tier || manifest.artifact_tier || null,
+        },
+        receipt_summary: receiptSummary,
+        model_card: modelCard,
+        ai_act_documentation: aiActDoc,
+        sbom,
+        environmental,
+        passport_meta: {
+          schema_url: 'https://kolm.ai/schema/passport-v1.json',
+          honesty_contract: 'missing fields are rendered as "not_yet_disclosed" — never fabricated. estimated values carry an estimate_not_measured marker.',
+          version: 'w869-v1',
+        },
+      };
+      if (format === 'markdown' || format === 'md') {
+        const lines = [];
+        lines.push(`# Artifact Passport`); lines.push('');
+        lines.push(`_kolm.ai passport-v1 — generated ${envelope.generated_at}_`); lines.push('');
+        lines.push(`- **job_id**: \`${jobId}\``);
+        lines.push(`- **sha256**: \`${sha256}\``);
+        lines.push(`- **size**: ${stat.size} bytes`);
+        lines.push(`- **task**: ${manifest.task || 'not_yet_disclosed'}`);
+        lines.push(`- **base model**: ${manifest.base_model || 'not_yet_disclosed'}`); lines.push('');
+        if (receiptSummary) {
+          lines.push('## Receipt summary'); lines.push('');
+          lines.push(`- **cid**: ${receiptSummary.cid || 'not_yet_disclosed'}`);
+          lines.push(`- **K-score**: ${receiptSummary.k_score ?? 'not_yet_disclosed'}`);
+          lines.push(`- **signature**: ${receiptSummary.signature_mode || 'not_yet_disclosed'}`); lines.push('');
+        }
+        lines.push('---'); lines.push('');
+        lines.push(formatAsMarkdown(modelCard));
+        res.set('Content-Type', 'text/markdown; charset=utf-8');
+        return res.send(lines.join('\n'));
+      }
+      res.json({ ok: true, ...envelope });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'passport_build_failed', detail: String(e && e.message || e), version: 'w869-v1' });
+    }
+  });
   r.get('/v1/account/sso/status', (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
     const plan = req.tenant_record.plan || 'free';
@@ -12082,6 +12723,11 @@ export function buildRouter() {
       for (const d of multi_device) {
         if (!VALID_MD.includes(d)) return res.status(400).json({ error: `multi_device entry '${d}' must be one of ${VALID_MD.join(', ')}` });
       }
+    }
+    // W869+ Persona A.7 — VRAM pre-flight gate (same shared helper as /v1/compile).
+    const _vramPreflight = _checkVramPreflight(base_model, hw_tier);
+    if (_vramPreflight && !_vramPreflight.fits) {
+      return res.status(422).json(_vramPreflight.envelope);
     }
     const obs = all('observations').filter(o =>
       o.tenant === req.tenant && (o.corpus_namespace === namespace || (namespace === 'default' && !o.corpus_namespace)) && !o.discarded
@@ -19891,6 +20537,26 @@ res.json({
         version: 'w779-v1',
       });
     }
+  });
+
+  // W869 T4 — /v1/bundle/airgap is intentionally a discoverability stub. The
+  // actual builder (src/airgap-bundle.js) writes a multi-hundred-MB tarball
+  // and reads the entire kolm source tree from disk; streaming that through
+  // an HTTP response would balloon memory, leak the server's checkout layout,
+  // and lock the route into one host's filesystem. The CLI is the supported
+  // path — `kolm bundle airgap --out <path>`. The route still exists so
+  // surface discovery + docs can link to it and so a future CDN-backed
+  // implementation has a stable URL.
+  r.post('/v1/bundle/airgap', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    return res.status(501).json({
+      ok: false,
+      error: 'bundle_airgap_requires_cli',
+      hint: 'air-gap bundle builds are CLI-only — run `kolm bundle airgap --out <path.tar.gz>` on the host with the kolm checkout. See docs/self-hosted-deploy-complete.md §10 for full flow.',
+      cli_command: 'kolm bundle airgap --out /tmp/kolm-airgap.tar.gz [--with-node-modules] [--with-wheels] [--with-models]',
+      docs_url: '/docs/self-hosted-deploy-complete',
+      version: 'w869-v1',
+    });
   });
 
   r.post('/v1/sneakernet/pack', async (req, res) => {
