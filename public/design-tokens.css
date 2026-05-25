@@ -11,12 +11,12 @@
    cascade from this file + ks.css without per-page rewrite.
 
    Palette anchors:
-     . paper      #f3f5f7   cool warm paper
+     . paper      #f3f5f7   cool slate paper (W850 binding — no warmth)
      . card       #ffffff   pure card on paper
-     . ink        #111111   near-black, imperceptible warmth
+     . ink        #111111   near-black
      . mute       #6b6b66   secondary text
      . hairline   rgba(17,17,17, 0.10)
-     . status     muted forest / sepia-gray / oxblood (near-monochrome)
+     . status     muted forest / neutral gray / oxblood (no orange/amber)
 
    Accent discipline: there is no chromatic accent. Emphasis comes
    from weight, scale, and hairline rules. The "brand color" tokens
@@ -51,7 +51,7 @@
   --surface-3: #dde1e7;
   --surface-input: #ffffff;
 
-  /* Ink scale - text on warm paper */
+  /* Ink scale - text on cool slate paper */
   --ink-1: #111111;
   --ink-2: #3a3a38;
   --ink-3: #6b6b66;
@@ -156,7 +156,7 @@
   --ks-color-brand-on-primary: #ffffff;
   --ks-color-brand-on-secondary: #ffffff;
 
-  /* --- Color: surface (4 levels) - monochrome warm paper -- */
+  /* --- Color: surface (4 levels) - monochrome cool slate ---- */
   --ks-color-surface-0: #f3f5f7;
   --ks-color-surface-1: #ffffff;
   --ks-color-surface-2: #e8ebef;

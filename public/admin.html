@@ -179,6 +179,7 @@
  <button type="button" id="aTab-compile" class="a-tab" data-tab="compile" role="tab" aria-selected="false" aria-controls="aPanel-compile">compile jobs</button>
  <button type="button" id="aTab-observability" class="a-tab" data-tab="observability" role="tab" aria-selected="false" aria-controls="aPanel-observability">observability</button>
  <button type="button" id="aTab-health" class="a-tab" data-tab="health" role="tab" aria-selected="false" aria-controls="aPanel-health">health</button>
+ <button type="button" id="aTab-control-files" class="a-tab" data-tab="control-files" role="tab" aria-selected="false" aria-controls="aPanel-control-files">control files</button>
  </nav>
 
  <!-- Overview panel -->
@@ -342,6 +343,23 @@
  </div>
  <div class="a-health" id="healthCards"></div>
  </div>
+
+ <!-- W855 - Control files panel: the 7 internal JSON registries in docs/internal/ -->
+ <div id="aPanel-control-files" class="a-panel" role="tabpanel" aria-labelledby="aTab-control-files">
+ <div class="a-actions">
+ <span class="a-loading">7 internal control files &middot; truth registries (waves, files, cascade, media, catalog)</span>
+ <button type="button" class="a-refresh" data-refresh="control-files">refresh</button>
+ </div>
+ <div class="a-table-wrap">
+ <table class="a-table">
+ <thead><tr>
+ <th>file</th><th>schema</th><th>generated</th><th class="mono">size</th><th class="mono">rows</th><th>parse</th><th>view</th>
+ </tr></thead>
+ <tbody id="controlFilesRows"><tr><td colspan="7" class="dim mono">loading...</td></tr></tbody>
+ </table>
+ </div>
+ <pre id="controlFileViewer" class="mono" style="margin-top:18px;padding:14px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid var(--line, rgba(255,255,255,0.08));max-height:500px;overflow:auto;font-size:11px;color:var(--ink-mute, #aab0b8);display:none;"></pre>
+ </div>
  </section>
  </div>
 </main>
@@ -414,6 +432,7 @@
  else if (t === 'compile') loadCompile();
  else if (t === 'observability') loadObservability();
  else if (t === 'health') loadHealth();
+ else if (t === 'control-files') loadControlFiles();
  else loadOverview();
  });
  }
@@ -426,6 +445,7 @@
  else if (r === 'compile') loadCompile();
  else if (r === 'observability') loadObservability();
  else if (r === 'health') loadHealth();
+ else if (r === 'control-files') loadControlFiles();
  });
  }
 
@@ -621,6 +641,58 @@
  }
  $('healthCards').innerHTML = html;
  }).catch(function () { $('healthCards').innerHTML = '<div class="a-loading">load failed</div>'; });
+ }
+
+ function loadControlFiles() {
+ var rowsEl = $('controlFilesRows');
+ var viewerEl = $('controlFileViewer');
+ if (!rowsEl) return;
+ rowsEl.innerHTML = '<tr><td colspan="7" class="a-loading">loading&hellip;</td></tr>';
+ if (viewerEl) viewerEl.textContent = '';
+ api('/v1/admin/control-files').then(function (j) {
+ var files = (j && j.files) || [];
+ if (!files.length) { rowsEl.innerHTML = '<tr><td colspan="7" class="a-loading">no control files</td></tr>'; return; }
+ var html = '';
+ for (var i = 0; i < files.length; i++) {
+ var f = files[i];
+ var schemaExpected = f.expected_schema || '';
+ var schemaActual = f.schema || '';
+ var schemaMatch = !!schemaExpected ? (schemaActual === schemaExpected) : true;
+ var parsePill = f.exists === false
+ ? '<span class="warn">missing</span>'
+ : (f.parse_ok ? '<span class="ok">ok</span>' : '<span class="warn">parse_fail</span>');
+ var schemaPill;
+ if (!schemaExpected) {
+ schemaPill = '<span class="dim mono">(no schema)</span>';
+ } else if (schemaMatch) {
+ schemaPill = '<span class="ok mono">' + esc(schemaExpected) + '</span>';
+ } else {
+ schemaPill = '<span class="warn mono">' + esc(schemaActual || 'mismatch') + '</span>';
+ }
+ var rowCount = 0;
+ if (f.row_counts) { for (var rk in f.row_counts) { if (Object.prototype.hasOwnProperty.call(f.row_counts, rk)) rowCount += (f.row_counts[rk] | 0); } }
+ html += '<tr>'
+ + '<td class="mono" title="' + esc(f.path || '') + '">' + esc(f.key) + '</td>'
+ + '<td>' + schemaPill + '</td>'
+ + '<td class="mono dim">' + esc(f.generated_at || f.modified_at || '') + '</td>'
+ + '<td class="mono">' + fmtBytes(f.size_bytes || 0) + '</td>'
+ + '<td class="mono">' + fmtNum(rowCount) + '</td>'
+ + '<td>' + parsePill + '</td>'
+ + '<td><button type="button" class="a-btn a-btn-mini" data-cf-view="' + esc(f.key) + '">view</button></td>'
+ + '</tr>';
+ }
+ rowsEl.innerHTML = html;
+ var btns = rowsEl.querySelectorAll('[data-cf-view]');
+ for (var k = 0; k < btns.length; k++) {
+ btns[k].addEventListener('click', function () {
+ var key = this.getAttribute('data-cf-view');
+ if (viewerEl) { viewerEl.style.display = 'block'; viewerEl.textContent = 'loading ' + key + '...'; }
+ api('/v1/admin/control-files/' + encodeURIComponent(key)).then(function (raw) {
+ if (viewerEl) viewerEl.textContent = JSON.stringify(raw, null, 2);
+ }).catch(function () { if (viewerEl) viewerEl.textContent = 'load failed: ' + key; });
+ });
+ }
+ }).catch(function () { rowsEl.innerHTML = '<tr><td colspan="7" class="a-loading">load failed</td></tr>'; });
  }
 
  // Bootstrap

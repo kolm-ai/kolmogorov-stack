@@ -7274,6 +7274,146 @@ export function buildRouter() {
     }
   });
 
+  // W854 — /v1/free/cli. Anonymous visitors can run a strict allowlist of
+  // read-only kolm CLI verbs straight from the homepage chat, so the box
+  // really IS our CLI not a demo. Same free-tier limiter pool as /v1/free/chat
+  // (20 calls/day/IP). All execution is sandboxed: argv tokens are checked
+  // against a regex whitelist (no shell metachars), the kolm binary is
+  // resolved relative to repo root (no $PATH lookup), spawn has a 5s wall-time
+  // cap, stdout+stderr each capped at 8KB, no env inheritance beyond a
+  // hand-curated PATH+HOME+TMP set.
+  const KOLM_SAFE_VERBS = new Set([
+    'whoami', 'doctor', 'version', '--version', '-v',
+    'help', '--help', '-h', 'changelog', 'catalog', 'list',
+    'route', 'federated', 'intent', 'verbs', 'gateway', 'envcheck',
+  ]);
+  const KOLM_SAFE_SUBVERBS = {
+    route: new Set(['doctor', '--help']),
+    // `kolm federated` has no bare `status`; consortium status is a sub-sub-verb
+    // and would need the W830 server endpoint. Keep this to the cheap, fully
+    // local read-only subs that always work.
+    federated: new Set(['peers', 'audit', '--help']),
+    intent: new Set(['--help']),
+    gateway: new Set(['--help']),
+  };
+  const KOLM_ARG_TOKEN_RE = /^[A-Za-z0-9._:\/\-=,@]+$/;
+  const KOLM_QUOTED_ARG_RE = /^"[^"\\\n\r]{0,300}"$/;
+  function _w854ParseKolmArgv(cmdRaw) {
+    const cmd = String(cmdRaw || '').trim();
+    if (!cmd) return { ok: false, error: 'empty_command' };
+    if (cmd.length > 400) return { ok: false, error: 'command_too_long' };
+    const tokens = [];
+    let i = 0;
+    while (i < cmd.length) {
+      while (i < cmd.length && cmd[i] === ' ') i++;
+      if (i >= cmd.length) break;
+      if (cmd[i] === '"') {
+        const end = cmd.indexOf('"', i + 1);
+        if (end < 0) return { ok: false, error: 'unbalanced_quote' };
+        tokens.push(cmd.slice(i, end + 1));
+        i = end + 1;
+      } else {
+        let j = i;
+        while (j < cmd.length && cmd[j] !== ' ') j++;
+        tokens.push(cmd.slice(i, j));
+        i = j;
+      }
+    }
+    if (tokens.length === 0) return { ok: false, error: 'empty_command' };
+    if (tokens[0] !== 'kolm') return { ok: false, error: 'not_a_kolm_command', detail: 'commands must start with "kolm "' };
+    const verb = tokens[1] || '';
+    if (!verb) return { ok: false, error: 'missing_verb' };
+    if (!KOLM_SAFE_VERBS.has(verb)) {
+      return { ok: false, error: 'verb_not_allowed', detail: `'${verb}' is not in the free-tier allowlist. Sign up for the full CLI.` };
+    }
+    const rest = tokens.slice(2);
+    if (KOLM_SAFE_SUBVERBS[verb]) {
+      const sub = rest[0];
+      if (sub && !sub.startsWith('-') && !KOLM_SAFE_SUBVERBS[verb].has(sub)) {
+        return { ok: false, error: 'subverb_not_allowed', detail: `'kolm ${verb} ${sub}' is not in the free-tier allowlist.` };
+      }
+    }
+    for (const t of rest) {
+      if (KOLM_QUOTED_ARG_RE.test(t)) continue;
+      if (KOLM_ARG_TOKEN_RE.test(t)) continue;
+      return { ok: false, error: 'arg_rejected', detail: `argument contains disallowed characters: ${t.slice(0, 30)}` };
+    }
+    return { ok: true, argv: tokens.slice(1) };
+  }
+
+  r.post('/v1/free/cli', freeChatLimiter, async (req, res) => {
+    const command = String((req.body && req.body.command) || '').trim();
+    const parsed = _w854ParseKolmArgv(command);
+    if (!parsed.ok) {
+      return res.status(400).json({ ok: false, mode: req.tenant_record ? 'auth' : 'free', error: parsed.error, message: parsed.detail || parsed.error, command });
+    }
+    try {
+      const { spawn } = await import('node:child_process');
+      const path = await import('node:path');
+      const url = await import('node:url');
+      const here = url.fileURLToPath(import.meta.url);
+      const cliPath = path.resolve(path.dirname(here), '..', 'cli', 'kolm.js');
+      const env = {
+        PATH: process.env.PATH || '',
+        HOME: process.env.HOME || process.env.USERPROFILE || '',
+        TMP: process.env.TMP || '/tmp',
+        KOLM_FREE_CLI: '1',
+        KOLM_NO_TELEMETRY: '1',
+        NO_COLOR: '1',
+      };
+      const t0 = Date.now();
+      const child = spawn(process.execPath, [cliPath, ...parsed.argv], {
+        env,
+        cwd: path.dirname(cliPath),
+        timeout: 5000,
+        windowsHide: true,
+      });
+      let stdout = ''; let stderr = ''; let cappedOut = false; let cappedErr = false;
+      const CAP = 8192;
+      child.stdout.on('data', (b) => {
+        if (cappedOut) return;
+        stdout += b.toString('utf8');
+        if (stdout.length > CAP) { stdout = stdout.slice(0, CAP); cappedOut = true; }
+      });
+      child.stderr.on('data', (b) => {
+        if (cappedErr) return;
+        stderr += b.toString('utf8');
+        if (stderr.length > CAP) { stderr = stderr.slice(0, CAP); cappedErr = true; }
+      });
+      const code = await new Promise((resolve) => {
+        child.on('close', (c, signal) => resolve({ c, signal }));
+      });
+      const duration_ms = Date.now() - t0;
+      const remainingHeader = res.getHeader('RateLimit-Remaining');
+      const remaining = (remainingHeader == null) ? null : Number(remainingHeader);
+      res.json({
+        ok: true,
+        mode: req.tenant_record ? 'auth' : 'free',
+        command,
+        argv: parsed.argv,
+        stdout,
+        stderr,
+        truncated: cappedOut || cappedErr,
+        exit_code: code.c,
+        signal: code.signal,
+        duration_ms,
+        remaining,
+        cta: req.tenant_record ? null : (remaining !== null && remaining <= 3 ? { label: 'Sign up free for the full CLI', href: '/signup' } : null),
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'spawn_failed', message: String(e && e.message || e) });
+    }
+  });
+
+  r.get('/v1/free/cli/allowlist', (req, res) => {
+    res.json({
+      ok: true,
+      verbs: Array.from(KOLM_SAFE_VERBS).sort(),
+      subverbs: Object.fromEntries(Object.entries(KOLM_SAFE_SUBVERBS).map(([k, v]) => [k, Array.from(v).sort()])),
+      caps: { wall_time_ms: 5000, stdout_bytes: 8192, stderr_bytes: 8192, daily_per_ip: 20 },
+    });
+  });
+
   r.post('/v1/intent/ask', loadQueueMiddleware, async (req, res) => {
     _w788SlaTrack(req, res, 'intent_ask');
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
@@ -9825,6 +9965,75 @@ export function buildRouter() {
       artifact_dir: checkDir(artifactDir),
       mkdir_result: mkdirResult,
     });
+  });
+
+  // W855 — admin browser for the 7 internal control files in docs/internal/.
+  // These are the truth registries (waves, files, design cascade, media proofs,
+  // catalog manifest). NOT shipped publicly; admin-only. The release-verify
+  // control-files gate validates them at build time; these routes let an
+  // operator inspect their current state without shell access.
+  const CONTROL_FILE_MAP = {
+    'catalog-manifest':      { path: 'docs/internal/catalog-manifest.json',      schema: 'kolm.catalog_manifest.v1' },
+    'codebase-file-ledger':  { path: 'docs/internal/codebase-file-ledger.json',  schema: 'kolm.codebase_file_ledger.v1' },
+    'design-cascade-ledger': { path: 'docs/internal/design-cascade-ledger.json', schema: 'kolm.design_cascade_ledger.v1' },
+    'product-media-proof':   { path: 'docs/internal/product-media-proof.json',   schema: 'kolm.product_media_proof.v1' },
+    'wave-reconcile-report': { path: 'docs/internal/wave-reconcile-report.json', schema: 'kolm.wave_reconcile_report.v1' },
+    'wave-registry':         { path: 'docs/internal/wave-registry.json',         schema: 'kolm.wave_registry.v1' },
+    'wave-registry-schema':  { path: 'docs/internal/wave-registry.schema.json',  schema: null },
+  };
+  r.get('/v1/admin/control-files', async (req, res) => {
+    if (!req.is_admin) return res.status(403).json({ error: 'admin only' });
+    const fs = await import('node:fs');
+    const path = await import('node:path');
+    const here = path.dirname(new URL(import.meta.url).pathname).replace(/^\/([A-Za-z]):/, '$1:');
+    const repoRoot = path.resolve(here, '..');
+    const files = [];
+    for (const [key, ctl] of Object.entries(CONTROL_FILE_MAP)) {
+      const abs = path.join(repoRoot, ctl.path);
+      const out = { key, path: ctl.path, expected_schema: ctl.schema };
+      try {
+        const stat = fs.statSync(abs);
+        out.exists = true;
+        out.size_bytes = stat.size;
+        out.modified_at = new Date(stat.mtimeMs).toISOString();
+        try {
+          const j = JSON.parse(fs.readFileSync(abs, 'utf8'));
+          out.parse_ok = true;
+          out.schema = j.schema || null;
+          out.generated_at = j.generated_at || j.updated_at || null;
+          out.row_counts = {};
+          for (const arrKey of ['entries', 'paths', 'files', 'pages', 'waves', 'proofs']) {
+            if (Array.isArray(j[arrKey])) out.row_counts[arrKey] = j[arrKey].length;
+          }
+        } catch (e) {
+          out.parse_ok = false;
+          out.parse_error = String(e.message || e).slice(0, 200);
+        }
+      } catch (e) {
+        out.exists = false;
+        out.error = String(e.code || e.message || e);
+      }
+      files.push(out);
+    }
+    res.json({ ok: true, total: files.length, files });
+  });
+  r.get('/v1/admin/control-files/:key', async (req, res) => {
+    if (!req.is_admin) return res.status(403).json({ error: 'admin only' });
+    const key = String(req.params.key || '');
+    const ctl = CONTROL_FILE_MAP[key];
+    if (!ctl) return res.status(404).json({ error: 'unknown_control_file', detail: 'no control file named ' + key, known: Object.keys(CONTROL_FILE_MAP) });
+    const fs = await import('node:fs');
+    const path = await import('node:path');
+    const here = path.dirname(new URL(import.meta.url).pathname).replace(/^\/([A-Za-z]):/, '$1:');
+    const repoRoot = path.resolve(here, '..');
+    const abs = path.join(repoRoot, ctl.path);
+    try {
+      const raw = fs.readFileSync(abs, 'utf8');
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      res.send(raw);
+    } catch (e) {
+      res.status(500).json({ error: 'read_failed', detail: String(e.message || e) });
+    }
   });
 
   // ---------- Recipe aliases ----------

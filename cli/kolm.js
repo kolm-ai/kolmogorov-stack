@@ -23344,10 +23344,12 @@ function levenshtein(a, b) {
 function suggestVerb(cmd, verbs) {
   if (!cmd || typeof cmd !== 'string') return null;
   const lower = cmd.toLowerCase();
+  const lowerNorm = lower.replace(/[_\s]+/g, '-');
   let best = null;
   let bestDist = Infinity;
   for (const v of verbs) {
-    const d = levenshtein(lower, v);
+    const vNorm = String(v).toLowerCase().replace(/[_\s]+/g, '-');
+    const d = Math.min(levenshtein(lower, v), levenshtein(lowerNorm, vNorm));
     if (d < bestDist) { bestDist = d; best = v; }
   }
   if (best == null) return null;
@@ -37361,6 +37363,16 @@ async function main() {
   // which read process.argv directly, so the side effect persists.
   const A11Y_FLAGS = new Set(['--no-color', '--no-unicode', '--plain']);
   const filtered = process.argv.filter(a => !A11Y_FLAGS.has(a));
+  // W856 — mutually exclusive output-format flags. `--plain` forces ANSI off and
+  // strict prose; `--json` forces machine-readable output. Both together is
+  // ambiguous, so fail fast with a clear message rather than letting individual
+  // verb handlers pick one silently.
+  if (process.argv.includes('--plain') && process.argv.includes('--json')) {
+    console.error('error: --plain and --json are mutually exclusive');
+    console.error('  --plain    strips ANSI / unicode for screen readers and pipes');
+    console.error('  --json     emits machine-readable output for scripts');
+    process.exit(EXIT.BAD_ARGS);
+  }
   const [, , cmd, ...rest] = filtered;
   try {
     switch (cmd) {
@@ -37539,12 +37551,9 @@ async function main() {
       // merge-conflict on the symbol. Honest envelopes on missing file +
       // parse error + already-exists.
       case 'yaml':     await withErrorContext('yaml',     () => cmdW732YamlSync(rest)); break;
-      // W732-4 — `kolm diff <a.kolm> <b.kolm>` was historically wired here as
-      // a duplicate case label below the active wire-up above; the W739 real
-      // implementation replaces the active site (line ~32537). This arm is
-      // unreachable JS (duplicate case label) but kept as a no-op pointer to
-      // cmdW732Diff for git-blame archaeology — the real wire-up is upstream.
-      case 'diff_w732_unreachable_duplicate': await withErrorContext('diff', () => cmdW732Diff(rest)); break;
+      // `kolm diff` is wired upstream (W739, line ~32537). The W732 duplicate
+      // case-label placeholder used to sit here as a git-blame breadcrumb; it
+      // was unreachable JS and shipped as completion noise, so it was removed.
       case 'hmac':     await withErrorContext('hmac',     () => cmdHmac(rest)); break;
       case 'keygen':   await withErrorContext('keygen',   () => cmdKeygen(rest)); break;
       case 'pubkey':   await withErrorContext('pubkey',   () => cmdPubkey(rest)); break;
@@ -37760,9 +37769,10 @@ async function main() {
       case 'migrate':
         await withErrorContext('migrate', () => (rest && (rest[0] === 'from-ollama' || rest[0] === 'from-lmstudio' || rest[0] === 'doctor')) ? cmdW743Migrate(rest) : cmdMigrate(rest)); break;
       case 'wrap':        await withErrorContext('wrap',        () => cmdWrap(rest)); break;
-      // W256 #6 — kolm import / import-chat reuses the wrap importer for shell session captures.
-      case 'import':
-      case 'import-chat': await withErrorContext('import',      () => cmdWrap(['import', ...rest])); break;
+      // W256 #6 — `kolm import` / `kolm import-chat` for shell-session captures
+      // is wired upstream through the W740 importer (line ~37739). The W256
+      // wrap-importer arm that used to sit here was unreachable (duplicate
+      // case label `import` shadowed by W740) and was removed.
       case 'tail':     await withErrorContext('tail',     () => cmdTail(rest)); break;
       case 'bridges':  await withErrorContext('bridges',  () => cmdBridges(rest)); break;
       case 'replay':   await withErrorContext('replay',   () => cmdReplay(rest)); break;
@@ -37771,7 +37781,9 @@ async function main() {
       case 'drift':    await withErrorContext('drift',    () => cmdW813Drift(rest)); break;
       case 'install':  await withErrorContext('install',  () => cmdInstall(rest)); break;
       case 'tune':     await withErrorContext('tune',     () => cmdTune(rest)); break;
-      case 'rag':      await withErrorContext('rag',      () => cmdRag(rest)); break;
+      // `kolm rag` is owned by the W734 RAG-aware capture dispatcher upstream
+      // (line ~37395, cmdW734RagCapture). The legacy local-lookup arm that
+      // used to sit here was unreachable (duplicate case label) and removed.
       case 'team':     await withErrorContext('team',     () => cmdTeam(rest)); break;
       case 'tunnel':   await withErrorContext('tunnel',   () => cmdTunnel(rest)); break;
       case 'cloud':    await withErrorContext('cloud',    () => cmdCloud(rest)); break;

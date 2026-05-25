@@ -22,15 +22,31 @@
   // act on. Replaced with concrete user-pain prompts where the next CLI is
   // obviously valuable.
   var EXAMPLES = [
-    'where do I start?',
-    'how do I cut my OpenAI bill in half?',
-    'capture my anthropic traffic',
-    'distill a 7B model from my support transcripts',
-    'fit deepseek-r1-32b on a single 5090',
-    'what runs on a Mac laptop?',
-    'how do I prove to compliance the model didn’t change?',
+    'kolm whoami',
+    'kolm doctor',
+    'kolm changelog',
+    'kolm route doctor',
+    'kolm federated peers',
+    'distill from claude, gpt, and gemini together',
+    'show me a regulatory packet for the EU AI Act',
     'how do I self-host this air-gapped?'
   ];
+
+  // W854 — safe verbs are runnable inline. Mirrors the server-side allowlist
+  // in src/router.js. Used to decide which workflow steps get a "▶ run" button.
+  var RUNNABLE_VERBS = {
+    whoami: true, doctor: true, version: true, '--version': true,
+    help: true, '--help': true, '-h': true, changelog: true,
+    catalog: true, list: true, route: true, federated: true,
+    intent: true, verbs: true, gateway: true, envcheck: true,
+  };
+
+  function isRunnableCmd(cmd) {
+    var s = String(cmd || '').trim().replace(/^\$\s*/, '');
+    if (!/^kolm\s+/.test(s)) return false;
+    var verb = s.split(/\s+/)[1] || '';
+    return !!RUNNABLE_VERBS[verb];
+  }
 
   function el(tag, attrs, kids) {
     var n = document.createElement(tag);
@@ -75,8 +91,8 @@
     var mode = host.getAttribute('data-kolm-chat-mode') || (detectAuthed() ? 'auth' : 'free');
     var heading = host.getAttribute('data-kolm-chat-heading') || (mode === 'auth' ? 'kolm console' : 'try kolm');
     var subtitle = host.getAttribute('data-kolm-chat-subtitle') || (mode === 'auth'
-      ? 'ask in plain English. the console returns the exact CLI command.'
-      : 'ask anything about kolm. the chat returns the exact CLI you would run, plus the why. 20 free messages a day, no account needed.');
+      ? 'type a kolm command or ask in plain English. read-only verbs run inline; write verbs return the recipe to copy.'
+      : 'type a kolm command — `kolm whoami`, `kolm doctor`, `kolm changelog`. or ask in plain English and run the recipe. 20 free / day, no account needed.');
 
     host.innerHTML = '';
     host.classList.add('ks-cli-chat__box');
@@ -109,8 +125,8 @@
 
     // greeting
     var greet = mode === 'auth'
-      ? 'tenant context loaded. ask in plain English &mdash; e.g. <code>distill my anthropic traffic</code> or <code>verify receipt cid:abc</code>. i return the exact CLI.'
-      : 'hi. ask anything about kolm and i&rsquo;ll tell you the exact CLI to run plus the why. try <code>capture my openai calls</code> or click an example below.';
+      ? 'tenant context loaded. type a kolm command (read-only verbs run inline) or ask in plain English to synth a recipe. <code>kolm whoami</code> · <code>kolm doctor</code> · <code>kolm changelog</code> all just work.'
+      : 'this is the real kolm CLI &mdash; read-only verbs run live, write verbs return the recipe to copy. try <code>kolm whoami</code>, <code>kolm doctor</code>, <code>kolm route doctor</code>, or click a chip below.';
     addMsg('kolm', greet);
 
     // example chips
@@ -128,7 +144,7 @@
 
     // form
     var form = el('form', { class: 'ks-cli-chat__form', autocomplete: 'off' });
-    var input = el('input', { type: 'text', name: 'q', placeholder: 'ask kolm anything', maxlength: '600', 'aria-label': 'Ask kolm anything' });
+    var input = el('input', { type: 'text', name: 'q', placeholder: 'kolm whoami  ·  or ask in plain English', maxlength: '600', 'aria-label': 'Type a kolm command or ask a question' });
     var btn = el('button', { type: 'submit', text: 'send' });
     form.appendChild(input);
     form.appendChild(btn);
@@ -174,9 +190,21 @@
         for (var s = 0; s < data.workflow.steps.length; s++) {
           var step = data.workflow.steps[s];
           var li = el('li', { class: 'ks-cli-chat__wf-step' });
+          var cmdRow = el('div', { class: 'ks-cli-chat__cmd-row' });
           var pre = el('pre', { class: 'ks-cli-chat__cmd' });
           pre.textContent = '$ ' + step.cmd;
-          li.appendChild(pre);
+          cmdRow.appendChild(pre);
+          // W854 — actual CLI execution button for safe read-only verbs.
+          // Anything else (distill, capture, compile, run) stays a
+          // copy-and-paste suggestion because it would change tenant state.
+          if (isRunnableCmd(step.cmd)) {
+            (function (cmdText, mountInto) {
+              var runBtn = el('button', { type: 'button', class: 'ks-cli-chat__run', text: '▶ run' });
+              runBtn.addEventListener('click', function () { runCli(cmdText.replace(/^\$\s*/, ''), mountInto, runBtn); });
+              cmdRow.appendChild(runBtn);
+            })(step.cmd, li);
+          }
+          li.appendChild(cmdRow);
           if (step.why) li.appendChild(el('span', { class: 'ks-cli-chat__wf-why', text: step.why }));
           ol.appendChild(li);
         }
@@ -186,9 +214,19 @@
         }
       } else {
         // single-command path (status verbs, fully-specified asks)
+        var cmdRow1 = el('div', { class: 'ks-cli-chat__cmd-row' });
         var pre1 = el('pre', { class: 'ks-cli-chat__cmd' });
-        pre1.textContent = '$ ' + (data.command || ('kolm ' + (data.verb || 'next')));
-        wrap.appendChild(pre1);
+        var singleCmd = data.command || ('kolm ' + (data.verb || 'next'));
+        pre1.textContent = '$ ' + singleCmd;
+        cmdRow1.appendChild(pre1);
+        if (isRunnableCmd(singleCmd)) {
+          (function (cmdText, mountInto) {
+            var runBtn = el('button', { type: 'button', class: 'ks-cli-chat__run', text: '▶ run' });
+            runBtn.addEventListener('click', function () { runCli(cmdText, mountInto, runBtn); });
+            cmdRow1.appendChild(runBtn);
+          })(singleCmd, wrap);
+        }
+        wrap.appendChild(cmdRow1);
         if (data.why) {
           wrap.appendChild(el('p', { class: 'ks-cli-chat__why', html: '<b>why:</b> ' + escapeHtml(data.why) + (data.confidence != null ? ' &middot; <span class="conf">confidence ' + (Math.round((data.confidence || 0) * 100)) + '%</span>' : '') }));
         }
@@ -233,6 +271,77 @@
       return wrap;
     }
 
+    // W854 — render real stdout/stderr from /v1/free/cli into the chat log.
+    function renderCliResult(data) {
+      var wrap = el('div', { class: 'ks-cli-chat__resp ks-cli-chat__resp--cli' });
+      var meta = el('p', { class: 'ks-cli-chat__cli-meta' });
+      var statusOk = data.exit_code === 0;
+      meta.innerHTML = (statusOk
+        ? '<span class="ks-cli-chat__cli-ok">exit 0</span>'
+        : '<span class="ks-cli-chat__cli-err">exit ' + data.exit_code + '</span>')
+        + ' &middot; ' + data.duration_ms + 'ms'
+        + (data.truncated ? ' &middot; <span class="ks-cli-chat__cli-truncated">output truncated</span>' : '');
+      wrap.appendChild(meta);
+      if (data.stdout && data.stdout.length) {
+        var outPre = el('pre', { class: 'ks-cli-chat__cli-out', text: data.stdout });
+        wrap.appendChild(outPre);
+      }
+      if (data.stderr && data.stderr.length) {
+        var errPre = el('pre', { class: 'ks-cli-chat__cli-err-pre', text: data.stderr });
+        wrap.appendChild(errPre);
+      }
+      if (!data.stdout && !data.stderr) {
+        wrap.appendChild(el('p', { class: 'ks-cli-chat__cli-empty', text: '(no output)' }));
+      }
+      if (data.cta) {
+        var cta = el('a', { class: 'ks-cli-chat__cta', href: data.cta.href, text: data.cta.label + ' →' });
+        wrap.appendChild(cta);
+      }
+      if (data.mode === 'free' && data.remaining != null) {
+        hint.textContent = 'free tier · ' + data.remaining + ' messages left today · ' + (data.remaining <= 5 ? 'sign up free for unlimited' : 'no account needed');
+      }
+      return wrap;
+    }
+
+    // W854 — execute a kolm command directly via /v1/free/cli. The button is
+    // only emitted next to safe verbs; the server enforces the allowlist
+    // independently so a forged client can't escalate.
+    function runCli(cmdText, mountInto, btn) {
+      if (busy) return;
+      setBusy(true);
+      if (btn) { btn.disabled = true; btn.textContent = 'running…'; }
+      var placeholder = addMsg('kolm', '<span class="ks-cli-chat__thinking">running ' + escapeHtml(cmdText) + '…</span>');
+      fetch('/v1/free/cli', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ command: cmdText })
+      }).then(function (r) {
+        return r.json().then(function (data) { return { status: r.status, data: data }; }).catch(function () { return { status: r.status, data: null }; });
+      }).then(function (out) {
+        placeholder.parentNode.removeChild(placeholder);
+        if (out.status >= 200 && out.status < 300 && out.data && out.data.ok) {
+          addMsg('kolm', renderCliResult(out.data));
+        } else if (out.data && out.data.error) {
+          var wrap = el('div', { class: 'ks-cli-chat__resp ks-cli-chat__resp--err' });
+          wrap.appendChild(el('p', { html: '<b>can’t run that here:</b> ' + escapeHtml(out.data.message || out.data.error) }));
+          if (out.data.error === 'verb_not_allowed' || out.data.error === 'subverb_not_allowed') {
+            wrap.appendChild(el('a', { class: 'ks-cli-chat__cta', href: '/signup', text: 'Sign up free for the full CLI →' }));
+          }
+          addMsg('kolm', wrap);
+        } else {
+          addMsg('kolm', renderError(out.status, out.data));
+        }
+      }).catch(function () {
+        placeholder.parentNode.removeChild(placeholder);
+        addMsg('kolm', renderError(0, null));
+      }).then(function () {
+        setBusy(false);
+        if (btn) { btn.disabled = false; btn.textContent = '▶ run again'; }
+        input.focus();
+      });
+    }
+
     function send(q) {
       q = String(q || '').trim();
       if (!q || busy) return;
@@ -240,6 +349,13 @@
       // remove chips after first send
       if (chips.parentNode) chips.parentNode.removeChild(chips);
       input.value = '';
+      // W854 — if the input is already a kolm command, skip the classifier
+      // and execute it directly. This is what makes the chat box an actual
+      // terminal rather than just a command synthesizer.
+      if (/^kolm\s+/i.test(q)) {
+        runCli(q, null, null);
+        return;
+      }
       setBusy(true);
       var placeholder = addMsg('kolm', '<span class="ks-cli-chat__thinking">thinking…</span>');
       // W848 — thread the previous workflow back to the server so the

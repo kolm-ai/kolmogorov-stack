@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <title>kolm distill | CLI reference | kolm.ai</title>
 <meta name="description" content="Auto-distill a captured namespace into a local student artifact via the kolm trainer bridge.">
 <link rel="canonical" href="https://kolm.ai/docs/cli/distill">
@@ -15,7 +15,6 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/surface-polish.css">
-    <link rel="stylesheet" href="/warm-paper.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm distill","description":"Auto-distill a captured namespace into a local student artifact via the kolm trainer bridge.","url":"https://kolm.ai/docs/cli/distill","mainEntityOfPage":"https://kolm.ai/docs/cli/distill","author":{"@type":"Organization","name":"kolm.ai"}}
@@ -140,8 +139,32 @@
 <blockquote><p>Auto-distill a captured namespace into a local student artifact via the kolm trainer bridge.</p></blockquote>
 <h2>Usage</h2>
 <pre><code>
-kolm distill --namespace &lt;n&gt; [--base-model &lt;name&gt;] [--target &lt;size&gt;]
+# Capture-driven distillation (the common path)
+kolm distill --from-captures --namespace &lt;n&gt; [--base-model &lt;name&gt;] [--target &lt;size&gt;]
 
+# Multi-teacher council (W718): per-capture best-of with attribution
+kolm distill --teachers &lt;a,b,c&gt; --weights &lt;auto|equal|domain&gt; --namespace &lt;n&gt; [--base-model &lt;name&gt;]
+
+# W711-W719 advanced recipes (mix-and-match with --from-captures)
+kolm distill --from-captures --namespace &lt;n&gt; --importance-weighted              # W711
+kolm distill --from-captures --namespace &lt;n&gt; --progressive                      # W712
+kolm distill --from-captures --namespace &lt;n&gt; --reasoning-trace-loss-weight 0.5  # W713
+kolm distill --from-captures --namespace &lt;n&gt; --contrastive                      # W714
+kolm distill --from-captures --namespace &lt;n&gt; --curriculum                       # W717
+kolm distill --from-captures --namespace &lt;n&gt; --auto-arch                        # W716 TAAS
+kolm distill --from-captures --namespace &lt;n&gt; --mixed-precision auto             # W719 DAQ
+
+# Reinforcement-learning subverbs (W480)
+kolm distill onpolicy   --namespace &lt;n&gt; [--grader &lt;vendor:model&gt;]
+kolm distill preference --namespace &lt;n&gt;
+kolm distill dpo        --namespace &lt;n&gt;
+kolm distill simpo      --namespace &lt;n&gt;
+
+# Attention / KV optimization subverbs
+kolm distill sparse-attention --namespace &lt;n&gt;                                   # W721 TSAC
+kolm distill itkv             --namespace &lt;n&gt;                                   # W722 importance-tiered KV
+
+# Lower-level: spec/seeds local worker
 kolm distill --local-worker --spec &lt;file&gt; --seeds &lt;file&gt; --out &lt;dir&gt;
  [--mode stub|collect|full|doctor]
  [--teacher &lt;vendor:model&gt;] [--student-base &lt;name&gt;]
@@ -152,7 +175,12 @@ kolm distill --local-worker --spec &lt;file&gt; --seeds &lt;file&gt; --out &lt;d
  [--split-seed N] [--redact phi|pci|multi|none|auto]
  [--no-redact]
 
+# Subverbs
 kolm distill --local-worker --list-catalog
+kolm distill strategy   [--task ...] [--simulate ...]
+kolm distill efficiency [--namespace &lt;n&gt;]                                       # W787
+kolm distill improve    [--namespace &lt;n&gt;]                                       # W720 self-improve
+kolm distill runs       [--namespace &lt;n&gt;] [--limit N]                           # W455 history
 </code></pre>
 <h2>Flags</h2>
 <div class="table-wrap"><table>
@@ -161,17 +189,31 @@ kolm distill --local-worker --list-catalog
 </thead>
 <tbody>
 <tr><td><code>--namespace &lt;n&gt;</code></td><td>none</td><td>the namespace captured via <code>kolm capture</code></td></tr>
-<tr><td><code>--base-model &lt;name&gt;</code></td><td><code>Qwen/Qwen2.5-3B-Instruct</code></td><td>base model id</td></tr>
+<tr><td><code>--from-captures</code></td><td>off</td><td>use captured (prompt, completion) pairs as training data</td></tr>
+<tr><td><code>--base-model &lt;name&gt;</code></td><td><code>Qwen/Qwen2.5-3B-Instruct</code></td><td>base / student model id</td></tr>
 <tr><td><code>--target &lt;size&gt;</code></td><td><code>phi-3-mini</code></td><td>target artifact size</td></tr>
+<tr><td><code>--teachers &lt;csv&gt;</code></td><td>none</td><td>**W718** comma-list of teacher model ids (e.g. <code>claude-opus-4-7,gpt-4o,deepseek-v4-pro</code>). Requires <code>--weights</code>.</td></tr>
+<tr><td><code>--weights &lt;m&gt;</code></td><td>none</td><td>**W718** teacher weighting: <code>auto</code> (per-capture best-of), <code>equal</code>, or <code>domain</code> (route by capture metadata)</td></tr>
+<tr><td><code>--importance-weighted</code></td><td>off</td><td>**W711** weight training pairs by capture rarity / surprise score</td></tr>
+<tr><td><code>--progressive</code></td><td>off</td><td>**W712** 3-pass curriculum: easy → medium → hard</td></tr>
+<tr><td><code>--curriculum</code></td><td>off</td><td>**W717** sort training pairs by difficulty before SFT</td></tr>
+<tr><td><code>--contrastive</code></td><td>off</td><td>**W714** add a contrastive loss term on positive / negative response pairs</td></tr>
+<tr><td><code>--auto-arch</code></td><td>off</td><td>**W716** TAAS searches student-architecture + merge recipe</td></tr>
+<tr><td><code>--mixed-precision &lt;m&gt;</code></td><td>off</td><td>**W719** DAQ: per-layer bit budget. Values: <code>auto</code>, <code>int4</code>, <code>int8</code>, <code>bitnet158</code></td></tr>
+<tr><td><code>--reasoning-trace-loss-weight &lt;w&gt;</code></td><td><code>0.0</code></td><td>**W713** weight ∈ [0,1] on the CE loss over <code>&lt;think&gt;...&lt;/think&gt;</code> spans</td></tr>
+<tr><td><code>--no-cot</code></td><td>off</td><td>**W713** force <code>response_only</code> mode (don&#39;t include reasoning trace)</td></tr>
+<tr><td><code>--mtp &lt;N&gt;</code></td><td>off</td><td>**W722** multi-token-prediction student head (predict N tokens / step)</td></tr>
 <tr><td><code>--local-worker</code></td><td>off</td><td>run the in-tree distill worker, no cloud bridge</td></tr>
 <tr><td><code>--spec &lt;file&gt;</code></td><td>none</td><td>spec.json describing the recipe</td></tr>
 <tr><td><code>--seeds &lt;file&gt;</code></td><td>none</td><td>jsonl seed pairs</td></tr>
 <tr><td><code>--out &lt;dir&gt;</code></td><td>none</td><td>worker output dir (becomes <code>--distill-provenance</code> for <code>kolm compile</code>)</td></tr>
 <tr><td><code>--mode &lt;m&gt;</code></td><td><code>stub</code></td><td>`stub</td><td>collect</td><td>full</td><td>doctor<code>. </code>full` requires the Python ML stack</td></tr>
-<tr><td><code>--teacher &lt;vendor:model&gt;</code></td><td>none</td><td>e.g. <code>anthropic:claude-opus-4-7</code>, <code>openai:gpt-5</code>, <code>local:llama3.1-8b</code></td></tr>
-<tr><td><code>--student-base &lt;name&gt;</code></td><td>none</td><td>e.g. <code>qwen2.5-3b</code>, <code>phi-3.5-mini</code>, <code>llama-3.2-3b</code></td></tr>
+<tr><td><code>--teacher &lt;vendor:model&gt;</code></td><td>none</td><td>(local-worker path) e.g. <code>anthropic:claude-opus-4-7</code>, <code>openai:gpt-5</code>, <code>local:llama3.1-8b</code></td></tr>
+<tr><td><code>--student-base &lt;name&gt;</code></td><td>none</td><td>(local-worker path) e.g. <code>qwen2.5-3b</code>, <code>phi-3.5-mini</code>, <code>llama-3.2-3b</code></td></tr>
 <tr><td><code>--distillation-method &lt;m&gt;</code></td><td>derived</td><td>`lora</td><td>qlora</td><td>full-ft</td><td>prompt-distill`</td></tr>
+<tr><td><code>--grader &lt;vendor:model&gt;</code></td><td>teacher</td><td>(onpolicy) the scorer for student rollouts</td></tr>
 <tr><td><code>--redact &lt;class&gt;</code></td><td><code>auto</code></td><td>`none</td><td>phi</td><td>pci</td><td>multi</td><td>auto<code>. Auto reads </code>redact_class` from the spec</td></tr>
+<tr><td><code>--detach</code></td><td>off</td><td>run the distill in a background session; <code>kolm resume &lt;id&gt;</code> to follow logs</td></tr>
 </tbody>
 </table></div>
 <h2>Redact classes</h2>
@@ -189,18 +231,48 @@ kolm distill --local-worker --list-catalog
 </table></div>
 <h2>Examples</h2>
 <pre><code>
-# bridge path (after kolm capture has filled the namespace)
-kolm distill --namespace tickets
+# Simple capture-driven distill (after kolm capture has filled the namespace)
+kolm distill --from-captures --namespace tickets --base-model Qwen/Qwen2.5-7B-Instruct
 
-# local-worker path with a cross-vendor teacher
+# W718 Teacher Council: three teachers, per-capture best-of, attribution preserved
+kolm distill --teachers claude-opus-4-7,gpt-4o,deepseek-v4-pro --weights auto \
+  --namespace support --base-model Qwen/Qwen2.5-14B-Instruct
+
+# W713 Reasoning-trace distill: student inherits the &lt;think&gt; spans, not just the answer
+kolm distill --from-captures --namespace math \
+  --base-model Qwen/Qwen2.5-7B-Instruct \
+  --reasoning-trace-loss-weight 0.5
+
+# W480 On-policy: student rolls out, an external grader scores, only positives flow back
+kolm distill onpolicy --namespace support --grader anthropic:claude-opus-4-7 \
+  --base-model Qwen/Qwen2.5-7B-Instruct
+
+# W711 + W712 + W717 stacked: importance-weighted + progressive + curriculum
+kolm distill --from-captures --namespace support \
+  --importance-weighted --progressive --curriculum
+
+# W716 TAAS: search student architecture and merge recipe
+kolm distill --from-captures --namespace support --auto-arch
+
+# W719 DAQ: mixed-precision auto-budget (heavy layers FP16, attention INT4, embedding INT8)
+kolm distill --from-captures --namespace support --mixed-precision auto
+
+# Background run (detach + watch)
+kolm distill --from-captures --namespace support --detach
+kolm resume &lt;session-id&gt;
+
+# Lower-level local-worker path with explicit teacher / student / spec
 kolm distill --local-worker \
  --spec phi.spec.json --seeds seeds.jsonl --out ./out \
  --teacher anthropic:claude-haiku-4-5-20251001 \
  --student-base qwen2.5-3b \
  --mode full --redact phi
 
-# inspect the catalog
+# Inspect the catalog
 kolm distill --local-worker --list-catalog
+
+# Distill history (W455)
+kolm distill runs --namespace support --limit 20
 </code></pre>
 <h2>Notes</h2>
 <p>Receipt chain captures <code>teacher_vendor</code>, <code>teacher_model</code>, <code>teacher_version</code>, <code>student_base</code>, <code>student_base_repo</code>, <code>student_base_origin</code>, <code>student_base_license</code>, <code>student_base_revision</code>, <code>distillation_method</code>. Verifier check #15 confirms the full set is present whenever <code>lineage.source=&#39;distillation&#39;</code>.</p>

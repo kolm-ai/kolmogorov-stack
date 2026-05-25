@@ -1,0 +1,122 @@
+{
+  "$id": "kolm.wave_registry.v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "counts": {
+      "type": "object"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "plan_files": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "reconcile": {
+      "type": "object"
+    },
+    "schema": {
+      "const": "kolm.wave_registry.v1"
+    },
+    "secret_values_included": {
+      "const": false
+    },
+    "waves": {
+      "items": {
+        "properties": {
+          "canonical_wave_id": {
+            "pattern": "^W\\d+$",
+            "type": "string"
+          },
+          "claim_scope": {
+            "type": "string"
+          },
+          "docs_sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "owner_lane": {
+            "enum": [
+              "frontend",
+              "backend",
+              "research",
+              "cli",
+              "docs",
+              "production",
+              "spec",
+              null
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "plan_files": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "proof_commands": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "secondary_sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "state": {
+            "enum": [
+              "planned",
+              "in_progress",
+              "local_green",
+              "production_verified",
+              "external_gated",
+              "historical",
+              "unknown",
+              "superseded",
+              "killed"
+            ]
+          },
+          "test_files": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "test_letter_suffixes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "canonical_wave_id",
+          "state",
+          "test_files",
+          "plan_files"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema",
+    "generated_at",
+    "counts",
+    "waves",
+    "reconcile"
+  ],
+  "type": "object"
+}

@@ -445,7 +445,12 @@ const PUBLIC_API = (p) =>
   // Same pipe; rate limiter inside the route enforces the 20/IP/day cap when
   // no key is attached. With a valid key the soft-auth above promotes the
   // call to the full snapshotContext path (same as /v1/intent/ask).
-  p === '/v1/free/chat';
+  p === '/v1/free/chat' ||
+  // W854 — public CLI runner for the homepage chat. Strict allowlist of
+  // read-only verbs is enforced inside the route handler; the same rate
+  // limiter pool as /v1/free/chat caps anonymous calls at 20/IP/day.
+  p === '/v1/free/cli' ||
+  p === '/v1/free/cli/allowlist';
 
 export function adminApiKey() {
   return process.env.ADMIN_KEY || null;

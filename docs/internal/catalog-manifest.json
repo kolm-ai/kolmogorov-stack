@@ -1,0 +1,4586 @@
+{
+  "entries": [
+    {
+      "capabilities": {
+        "arch": "ampere",
+        "bf16": true,
+        "class": "training",
+        "cuda_min": "11.8",
+        "flash_attn": "fa2",
+        "fp4": false,
+        "fp8": false,
+        "label": "NVIDIA A100 40GB",
+        "notes": null,
+        "sm": "8.0",
+        "torch_min": "2.2",
+        "vram_gb": 40
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/devices.js",
+        "cli/kolm.js (doctor)"
+      ],
+      "device_fit": {
+        "matches_hw_tier_slug": "a100-40gb"
+      },
+      "freshness_ttl_days": 365,
+      "id": "device:a100-40gb",
+      "kind": "device",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "arch": "ampere",
+        "bf16": true,
+        "class": "training",
+        "cuda_min": "11.8",
+        "flash_attn": "fa2",
+        "fp4": false,
+        "fp8": false,
+        "label": "NVIDIA A100 80GB",
+        "notes": null,
+        "sm": "8.0",
+        "torch_min": "2.2",
+        "vram_gb": 80
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/devices.js",
+        "cli/kolm.js (doctor)"
+      ],
+      "device_fit": {
+        "matches_hw_tier_slug": "a100-80gb"
+      },
+      "freshness_ttl_days": 365,
+      "id": "device:a100-80gb",
+      "kind": "device",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "arch": "x86_64",
+        "bf16": false,
+        "class": "inference",
+        "cuda_min": null,
+        "flash_attn": null,
+        "fp4": false,
+        "fp8": false,
+        "label": "AMD SEV-SNP (EPYC Milan / Genoa)",
+        "notes": "AMD SEV-SNP confidential VM. Attestation report verifiable against AMD root key.",
+        "sm": null,
+        "torch_min": null,
+        "vram_gb": 0
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/devices.js",
+        "cli/kolm.js (doctor)"
+      ],
+      "device_fit": {
+        "matches_hw_tier_slug": "amd-sev-snp"
+      },
+      "freshness_ttl_days": 365,
+      "id": "device:amd-sev-snp",
+      "kind": "device",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "arch": "arm64",
+        "bf16": false,
+        "class": "inference",
+        "cuda_min": null,
+        "flash_attn": null,
+        "fp4": false,
+        "fp8": false,
+        "label": "Android (Snapdragon 8 Gen 3) / Galaxy S24 Ultra",
+        "notes": "Hexagon NPU. Use MediaPipe LLM Inference API. Max practical: Gemma 3n E2B, Gemma 3 1B Q4.",
+        "sm": null,
+        "torch_min": null,
+        "vram_gb": 5
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/devices.js",
+        "cli/kolm.js (doctor)"
+      ],
+      "device_fit": {
+        "matches_hw_tier_slug": "android-snapdragon-8-gen3"
+      },
+      "freshness_ttl_days": 365,
+      "id": "device:android-snapdragon-8-gen3",
+      "kind": "device",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "arch": "apple-silicon",
+        "bf16": true,
+        "class": "inference",
+        "cuda_min": null,
+        "flash_attn": "mlx",
+        "fp4": false,
+        "fp8": false,
+        "label": "Apple M2 Pro",
+        "notes": null,
+        "sm": null,
+        "torch_min": null,
+        "vram_gb": 16
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/devices.js",
+        "cli/kolm.js (doctor)"
+      ],
+      "device_fit": {
+        "matches_hw_tier_slug": "apple-m2-pro"
+      },
+      "freshness_ttl_days": 365,
+      "id": "device:apple-m2-pro",
+      "kind": "device",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "arch": "apple-silicon",
+        "bf16": true,
+        "class": "training",
+        "cuda_min": null,
+        "flash_attn": "mlx",
+        "fp4": false,
+        "fp8": false,
+        "label": "Apple M3 Max",
+        "notes": "MLX-native training via mlx_lm. No CUDA stack.",
+        "sm": null,
+        "torch_min": null,
+        "vram_gb": 64
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/devices.js",
+        "cli/kolm.js (doctor)"
+      ],
+      "device_fit": {
+        "matches_hw_tier_slug": "apple-m3-max"
+      },
+      "freshness_ttl_days": 365,
+      "id": "device:apple-m3-max",
+      "kind": "device",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "arch": "x86_64",
+        "bf16": false,
+        "class": "inference",
+        "cuda_min": null,
+        "flash_attn": null,
+        "fp4": false,
+        "fp8": false,
+        "label": "AWS Nitro Enclave",
+        "notes": "AWS Nitro Enclave isolated from parent EC2. Attestation via /dev/nsm + KMS.",
+        "sm": null,
+        "torch_min": null,
+        "vram_gb": 0
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/devices.js",
+        "cli/kolm.js (doctor)"
+      ],
+      "device_fit": {
+        "matches_hw_tier_slug": "aws-nitro-enclave"
+      },
+      "freshness_ttl_days": 365,
+      "id": "device:aws-nitro-enclave",
+      "kind": "device",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "arch": "x86_64",
+        "bf16": false,
+        "class": "inference",
+        "cuda_min": null,
+        "flash_attn": null,
+        "fp4": false,
+        "fp8": false,
+        "label": "Generic x86_64 CPU",
+        "notes": "llama.cpp Q4. Max practical: 3B at ~5 tok/s.",
+        "sm": null,
+        "torch_min": null,
+        "vram_gb": 0
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/devices.js",
+        "cli/kolm.js (doctor)"
+      ],
+      "device_fit": {
+        "matches_hw_tier_slug": "cpu-x86_64"
+      },
+      "freshness_ttl_days": 365,
+      "id": "device:cpu-x86_64",
+      "kind": "device",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "arch": "arm64",
+        "bf16": false,
+        "class": "inference",
+        "cuda_min": null,
+        "flash_attn": null,
+        "fp4": false,
+        "fp8": false,
+        "label": "Samsung Galaxy S24 Ultra",
+        "notes": "12GB physical RAM, Snapdragon 8 Gen 3 for Galaxy. Verified hosts: Gemma 3n E2B.",
+        "sm": null,
+        "torch_min": null,
+        "vram_gb": 6
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/devices.js",
+        "cli/kolm.js (doctor)"
+      ],
+      "device_fit": {
+        "matches_hw_tier_slug": "galaxy-s24-ultra"
+      },
+      "freshness_ttl_days": 365,
+      "id": "device:galaxy-s24-ultra",
+      "kind": "device",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "arch": "hopper",
+        "bf16": true,
+        "class": "training",
+        "cuda_min": "12.4",
+        "flash_attn": "fa3",
+        "fp4": false,
+        "fp8": true,
+        "label": "NVIDIA H100 80GB",
+        "notes": null,
+        "sm": "9.0",
+        "torch_min": "2.4",
+        "vram_gb": 80
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/devices.js",
+        "cli/kolm.js (doctor)"
+      ],
+      "device_fit": {
+        "matches_hw_tier_slug": "h100-80gb"
+      },
+      "freshness_ttl_days": 365,
+      "id": "device:h100-80gb",
+      "kind": "device",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "arch": "hopper",
+        "bf16": true,
+        "class": "training",
+        "cuda_min": "12.4",
+        "flash_attn": "fa3",
+        "fp4": false,
+        "fp8": true,
+        "label": "NVIDIA H200 141GB",
+        "notes": null,
+        "sm": "9.0",
+        "torch_min": "2.4",
+        "vram_gb": 141
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/devices.js",
+        "cli/kolm.js (doctor)"
+      ],
+      "device_fit": {
+        "matches_hw_tier_slug": "h200-141gb"
+      },
+      "freshness_ttl_days": 365,
+      "id": "device:h200-141gb",
+      "kind": "device",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "arch": "x86_64",
+        "bf16": false,
+        "class": "inference",
+        "cuda_min": null,
+        "flash_attn": null,
+        "fp4": false,
+        "fp8": false,
+        "label": "Intel TDX (Ice Lake / Sapphire Rapids)",
+        "notes": "Intel TDX trust domain. Attestation via PCCS / Intel Trust Authority. CPU-only inference inside the TD.",
+        "sm": null,
+        "torch_min": null,
+        "vram_gb": 0
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/devices.js",
+        "cli/kolm.js (doctor)"
+      ],
+      "device_fit": {
+        "matches_hw_tier_slug": "intel-tdx-icx"
+      },
+      "freshness_ttl_days": 365,
+      "id": "device:intel-tdx-icx",
+      "kind": "device",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "arch": "apple-silicon",
+        "bf16": false,
+        "class": "inference",
+        "cuda_min": null,
+        "flash_attn": null,
+        "fp4": false,
+        "fp8": false,
+        "label": "iPhone 15 Pro / 16 Pro",
+        "notes": "A17 Pro Neural Engine. Use Q4_K_M GGUF or MLC. Verified hosts: Gemma 3n E2B, Qwen 2.5 1.5B Q4.",
+        "sm": null,
+        "torch_min": null,
+        "vram_gb": 6
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/devices.js",
+        "cli/kolm.js (doctor)"
+      ],
+      "device_fit": {
+        "matches_hw_tier_slug": "iphone-15-pro"
+      },
+      "freshness_ttl_days": 365,
+      "id": "device:iphone-15-pro",
+      "kind": "device",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "arch": "apple-silicon",
+        "bf16": false,
+        "class": "inference",
+        "cuda_min": null,
+        "flash_attn": null,
+        "fp4": false,
+        "fp8": false,
+        "label": "iPhone 16 Pro / 17 Pro",
+        "notes": "A18 Pro Neural Engine. Max practical: Gemma 3n E2B, Qwen 2.5 1.5B Q4.",
+        "sm": null,
+        "torch_min": null,
+        "vram_gb": 6
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/devices.js",
+        "cli/kolm.js (doctor)"
+      ],
+      "device_fit": {
+        "matches_hw_tier_slug": "iphone-16-pro"
+      },
+      "freshness_ttl_days": 365,
+      "id": "device:iphone-16-pro",
+      "kind": "device",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "arch": "aarch64",
+        "bf16": true,
+        "class": "training",
+        "cuda_min": "12.2",
+        "flash_attn": "fa2",
+        "fp4": false,
+        "fp8": false,
+        "label": "NVIDIA Jetson AGX Orin 64GB",
+        "notes": "275 TOPS. Capable of QLoRA on 7B at the edge.",
+        "sm": "8.7",
+        "torch_min": null,
+        "vram_gb": 64
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/devices.js",
+        "cli/kolm.js (doctor)"
+      ],
+      "device_fit": {
+        "matches_hw_tier_slug": "jetson-orin-agx-64gb"
+      },
+      "freshness_ttl_days": 365,
+      "id": "device:jetson-orin-agx-64gb",
+      "kind": "device",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "arch": "aarch64",
+        "bf16": true,
+        "class": "inference",
+        "cuda_min": "12.2",
+        "flash_attn": "fa2",
+        "fp4": false,
+        "fp8": false,
+        "label": "NVIDIA Jetson Orin Nano 8GB (Super)",
+        "notes": "Unified memory (CPU+GPU share 8GB LPDDR5). 67 TOPS. Run Qwen 2.5 3B Q4 ~25 tok/s.",
+        "sm": "8.7",
+        "torch_min": null,
+        "vram_gb": 8
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/devices.js",
+        "cli/kolm.js (doctor)"
+      ],
+      "device_fit": {
+        "matches_hw_tier_slug": "jetson-orin-nano-8gb"
+      },
+      "freshness_ttl_days": 365,
+      "id": "device:jetson-orin-nano-8gb",
+      "kind": "device",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "arch": "x86_64",
+        "bf16": false,
+        "class": "inference",
+        "cuda_min": null,
+        "flash_attn": null,
+        "fp4": false,
+        "fp8": false,
+        "label": "Laptop iGPU (Intel / AMD)",
+        "notes": "DirectML or ONNX Runtime. Q4 only. Max: 1.5B params.",
+        "sm": null,
+        "torch_min": null,
+        "vram_gb": 2
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/devices.js",
+        "cli/kolm.js (doctor)"
+      ],
+      "device_fit": {
+        "matches_hw_tier_slug": "laptop-igpu"
+      },
+      "freshness_ttl_days": 365,
+      "id": "device:laptop-igpu",
+      "kind": "device",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "arch": "hopper",
+        "bf16": true,
+        "class": "training",
+        "cuda_min": "12.4",
+        "flash_attn": "fa3",
+        "fp4": false,
+        "fp8": true,
+        "label": "NVIDIA H100 in Confidential Compute mode",
+        "notes": "H100 CC mode pairs with TDX or SEV-SNP host. Attestation via NRAS (NVIDIA Remote Attestation Service).",
+        "sm": "9.0",
+        "torch_min": "2.4",
+        "vram_gb": 80
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/devices.js",
+        "cli/kolm.js (doctor)"
+      ],
+      "device_fit": {
+        "matches_hw_tier_slug": "nvidia-h100-cc"
+      },
+      "freshness_ttl_days": 365,
+      "id": "device:nvidia-h100-cc",
+      "kind": "device",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "arch": "arm64",
+        "bf16": false,
+        "class": "inference",
+        "cuda_min": null,
+        "flash_attn": null,
+        "fp4": false,
+        "fp8": false,
+        "label": "Pixel 8 Pro / 9 Pro",
+        "notes": "Tensor G3/G4 NPU via MediaPipe. Verified hosts: Gemma 3n E2B, Gemma 3 1B Q4.",
+        "sm": null,
+        "torch_min": null,
+        "vram_gb": 5
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/devices.js",
+        "cli/kolm.js (doctor)"
+      ],
+      "device_fit": {
+        "matches_hw_tier_slug": "pixel-8-pro"
+      },
+      "freshness_ttl_days": 365,
+      "id": "device:pixel-8-pro",
+      "kind": "device",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "arch": "arm64",
+        "bf16": false,
+        "class": "inference",
+        "cuda_min": null,
+        "flash_attn": null,
+        "fp4": false,
+        "fp8": false,
+        "label": "Pixel 9 Pro (Tensor G4)",
+        "notes": "Tensor G4 + AICore. AICore exposes Gemini Nano 1.5/2.0 via system SDK. Max sideloaded: Gemma 3n E2B.",
+        "sm": null,
+        "torch_min": null,
+        "vram_gb": 6
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/devices.js",
+        "cli/kolm.js (doctor)"
+      ],
+      "device_fit": {
+        "matches_hw_tier_slug": "pixel-9-pro-tpu"
+      },
+      "freshness_ttl_days": 365,
+      "id": "device:pixel-9-pro-tpu",
+      "kind": "device",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "arch": "aarch64",
+        "bf16": false,
+        "class": "inference",
+        "cuda_min": null,
+        "flash_attn": null,
+        "fp4": false,
+        "fp8": false,
+        "label": "Raspberry Pi 5 (8GB)",
+        "notes": "CPU-only. Cortex-A76 quad. Max practical: SmolLM2 1.7B Q4 ~3 tok/s, Gemma 3 1B Q4 ~2 tok/s.",
+        "sm": null,
+        "torch_min": null,
+        "vram_gb": 0
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/devices.js",
+        "cli/kolm.js (doctor)"
+      ],
+      "device_fit": {
+        "matches_hw_tier_slug": "raspberry-pi-5"
+      },
+      "freshness_ttl_days": 365,
+      "id": "device:raspberry-pi-5",
+      "kind": "device",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "arch": "ampere",
+        "bf16": true,
+        "class": "training",
+        "cuda_min": "11.8",
+        "flash_attn": "fa2",
+        "fp4": false,
+        "fp8": false,
+        "label": "NVIDIA RTX 3090",
+        "notes": null,
+        "sm": "8.6",
+        "torch_min": "2.2",
+        "vram_gb": 24
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/devices.js",
+        "cli/kolm.js (doctor)"
+      ],
+      "device_fit": {
+        "matches_hw_tier_slug": "rtx-3090"
+      },
+      "freshness_ttl_days": 365,
+      "id": "device:rtx-3090",
+      "kind": "device",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "arch": "ada-lovelace",
+        "bf16": true,
+        "class": "training",
+        "cuda_min": "12.1",
+        "flash_attn": "fa2",
+        "fp4": false,
+        "fp8": true,
+        "label": "NVIDIA RTX 4090",
+        "notes": null,
+        "sm": "8.9",
+        "torch_min": "2.4",
+        "vram_gb": 24
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/devices.js",
+        "cli/kolm.js (doctor)"
+      ],
+      "device_fit": {
+        "matches_hw_tier_slug": "rtx-4090"
+      },
+      "freshness_ttl_days": 365,
+      "id": "device:rtx-4090",
+      "kind": "device",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "arch": "blackwell",
+        "bf16": true,
+        "class": "training",
+        "cuda_min": "12.8",
+        "flash_attn": "fa3",
+        "fp4": true,
+        "fp8": true,
+        "label": "NVIDIA RTX 5090",
+        "notes": "Local dev rig. FA3 + FP4 inference + NVFP4 training (with torch ≥ 2.8).",
+        "sm": "12.0",
+        "torch_min": "2.7",
+        "vram_gb": 32
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/devices.js",
+        "cli/kolm.js (doctor)"
+      ],
+      "device_fit": {
+        "matches_hw_tier_slug": "rtx-5090"
+      },
+      "freshness_ttl_days": 365,
+      "id": "device:rtx-5090",
+      "kind": "device",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "arch": "wasm32",
+        "bf16": false,
+        "class": "inference",
+        "cuda_min": null,
+        "flash_attn": null,
+        "fp4": false,
+        "fp8": false,
+        "label": "WASM (browser, Cloudflare Worker)",
+        "notes": "transformers.js ONNX Q4. Max practical: 500M params.",
+        "sm": null,
+        "torch_min": null,
+        "vram_gb": 0
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/devices.js",
+        "cli/kolm.js (doctor)"
+      ],
+      "device_fit": {
+        "matches_hw_tier_slug": "wasm"
+      },
+      "freshness_ttl_days": 365,
+      "id": "device:wasm",
+      "kind": "device",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "backends": [
+          "cuda",
+          "vulkan"
+        ],
+        "class": "consumer-gpu",
+        "name": "RTX 3090 (24GB)",
+        "slug": "3090",
+        "vram_gb": 24
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/model-registry.js (HW_TIERS)",
+        "cli/kolm.js (compile --tier)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 365,
+      "id": "hw_tier:3090",
+      "kind": "hardware",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "backends": [
+          "cuda",
+          "vulkan"
+        ],
+        "class": "consumer-gpu",
+        "name": "RTX 4090 (24GB)",
+        "slug": "4090",
+        "vram_gb": 24
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/model-registry.js (HW_TIERS)",
+        "cli/kolm.js (compile --tier)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 365,
+      "id": "hw_tier:4090",
+      "kind": "hardware",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "backends": [
+          "cuda",
+          "vulkan"
+        ],
+        "class": "consumer-gpu",
+        "name": "RTX 5090 (32GB)",
+        "slug": "5090",
+        "vram_gb": 32
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/model-registry.js (HW_TIERS)",
+        "cli/kolm.js (compile --tier)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 365,
+      "id": "hw_tier:5090",
+      "kind": "hardware",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "backends": [
+          "cuda"
+        ],
+        "class": "datacenter",
+        "name": "A100 80GB",
+        "slug": "a100-80",
+        "vram_gb": 80
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/model-registry.js (HW_TIERS)",
+        "cli/kolm.js (compile --tier)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 365,
+      "id": "hw_tier:a100-80",
+      "kind": "hardware",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "backends": [
+          "cpu"
+        ],
+        "class": "cpu",
+        "name": "CPU server (256GB+ DDR5)",
+        "slug": "cpu-server",
+        "vram_gb": 0
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/model-registry.js (HW_TIERS)",
+        "cli/kolm.js (compile --tier)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 365,
+      "id": "hw_tier:cpu-server",
+      "kind": "hardware",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "backends": [
+          "cuda"
+        ],
+        "class": "workstation",
+        "name": "NVIDIA DGX Spark (128GB LPDDR5X)",
+        "slug": "dgx-spark",
+        "vram_gb": 128
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/model-registry.js (HW_TIERS)",
+        "cli/kolm.js (compile --tier)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 365,
+      "id": "hw_tier:dgx-spark",
+      "kind": "hardware",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "backends": [
+          "cuda"
+        ],
+        "class": "datacenter",
+        "name": "H100 80GB",
+        "slug": "h100-80",
+        "vram_gb": 80
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/model-registry.js (HW_TIERS)",
+        "cli/kolm.js (compile --tier)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 365,
+      "id": "hw_tier:h100-80",
+      "kind": "hardware",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "backends": [
+          "cuda"
+        ],
+        "class": "datacenter",
+        "name": "H200 141GB",
+        "slug": "h200-141",
+        "vram_gb": 141
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/model-registry.js (HW_TIERS)",
+        "cli/kolm.js (compile --tier)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 365,
+      "id": "hw_tier:h200-141",
+      "kind": "hardware",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "backends": [
+          "metal"
+        ],
+        "class": "workstation",
+        "name": "Apple M3 Ultra (512GB unified)",
+        "slug": "m3-ultra-512",
+        "vram_gb": 512
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/model-registry.js (HW_TIERS)",
+        "cli/kolm.js (compile --tier)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 365,
+      "id": "hw_tier:m3-ultra-512",
+      "kind": "hardware",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "backends": [
+          "metal"
+        ],
+        "class": "workstation",
+        "name": "Apple M4 Max (128GB unified)",
+        "slug": "m4-max-128",
+        "vram_gb": 128
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/model-registry.js (HW_TIERS)",
+        "cli/kolm.js (compile --tier)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 365,
+      "id": "hw_tier:m4-max-128",
+      "kind": "hardware",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "backends": [
+          "rocm"
+        ],
+        "class": "datacenter",
+        "name": "AMD Instinct MI300A (128GB unified)",
+        "slug": "mi300a",
+        "vram_gb": 128
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/model-registry.js (HW_TIERS)",
+        "cli/kolm.js (compile --tier)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 365,
+      "id": "hw_tier:mi300a",
+      "kind": "hardware",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "backends": [
+          "rocm"
+        ],
+        "class": "datacenter",
+        "name": "AMD Instinct MI300X (192GB HBM3)",
+        "slug": "mi300x",
+        "vram_gb": 192
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/model-registry.js (HW_TIERS)",
+        "cli/kolm.js (compile --tier)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 365,
+      "id": "hw_tier:mi300x",
+      "kind": "hardware",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "backends": [
+          "rocm",
+          "vulkan"
+        ],
+        "class": "consumer-gpu",
+        "name": "AMD Radeon RX 7900 XTX (24GB)",
+        "slug": "rx7900xtx",
+        "vram_gb": 24
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/model-registry.js (HW_TIERS)",
+        "cli/kolm.js (compile --tier)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 365,
+      "id": "hw_tier:rx7900xtx",
+      "kind": "hardware",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "backends": [
+          "rocm",
+          "vulkan"
+        ],
+        "class": "consumer-gpu",
+        "name": "AMD Radeon RX 9070 XT (16GB)",
+        "slug": "rx9070xt",
+        "vram_gb": 16
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/model-registry.js (HW_TIERS)",
+        "cli/kolm.js (compile --tier)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 365,
+      "id": "hw_tier:rx9070xt",
+      "kind": "hardware",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "catalog": "baseline",
+        "family": "yi-1.5",
+        "license": "apache-2.0",
+        "multilingual": true,
+        "notes": "Apache 2.0 alternate for ~7B class. Smaller context than Qwen 2.5 7B.",
+        "params_b": 6,
+        "tier": "quality",
+        "tokenizer_vocab": 64000,
+        "tool_use": "limited",
+        "use_for": [
+          "quality",
+          "chinese-language"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:01-ai/Yi-1.5-6B-Chat",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 4096,
+        "vram_gb_4bit": 7,
+        "vram_gb_bf16": 13
+      },
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "catalog": "baseline",
+        "family": "smollm2",
+        "license": "apache-2.0",
+        "multilingual": false,
+        "notes": "Apache 2.0 alternate for tiny tier. English only.",
+        "params_b": 1.7,
+        "tier": "tiny",
+        "tokenizer_vocab": 49152,
+        "tool_use": "limited",
+        "use_for": [
+          "edge",
+          "classifier"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:HuggingFaceTB/SmolLM2-1.7B-Instruct",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 8192,
+        "vram_gb_4bit": 2.5,
+        "vram_gb_bf16": 4
+      },
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "active_params_b": 36,
+        "arch": "dense",
+        "candidate": true,
+        "family": "hermes",
+        "license": "apache-2.0",
+        "modality": [
+          "text"
+        ],
+        "modality_notes": "Hermes 4.3 dense; strong tool-use + steerable persona.",
+        "params": "36B",
+        "params_b": 36,
+        "recipe_classes": [
+          "agent",
+          "chat",
+          "persona"
+        ],
+        "revision_hash": null,
+        "revision_pinned": false,
+        "source_note": "@sudoingX 2026-05-17 thread",
+        "verification_evidence": null,
+        "verified_backends": []
+      },
+      "checked_at": "2026-05-17",
+      "consumer_paths": [
+        "src/model-registry.js",
+        "cli/kolm.js (compile --unverified)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:NousResearch/Hermes-4.3-36B",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "ctx_k": 128,
+        "hw_tier": "a100-80",
+        "recommended_quant": "q6",
+        "vram_gb": 32
+      },
+      "source_url": "https://huggingface.co/NousResearch",
+      "status": "candidate"
+    },
+    {
+      "capabilities": {
+        "catalog": "baseline",
+        "family": "qwen2.5",
+        "license": "apache-2.0",
+        "multilingual": true,
+        "notes": "Phone / Raspberry Pi / WASM. Fastest inference; weakest reasoning.",
+        "params_b": 0.5,
+        "tier": "tiny",
+        "tokenizer_vocab": 151936,
+        "tool_use": "native",
+        "use_for": [
+          "edge",
+          "mobile",
+          "wasm"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:Qwen/Qwen2.5-0.5B-Instruct",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 32768,
+        "vram_gb_4bit": 1,
+        "vram_gb_bf16": 1.5
+      },
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "catalog": "baseline",
+        "family": "qwen2.5",
+        "license": "apache-2.0",
+        "multilingual": true,
+        "notes": "Laptop iGPU / Apple Silicon 8GB. Solid SFT target for classifiers.",
+        "params_b": 1.5,
+        "tier": "small",
+        "tokenizer_vocab": 151936,
+        "tool_use": "native",
+        "use_for": [
+          "laptop",
+          "classifier",
+          "extractor"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:Qwen/Qwen2.5-1.5B-Instruct",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 32768,
+        "vram_gb_4bit": 2,
+        "vram_gb_bf16": 3.5
+      },
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "catalog": "baseline",
+        "family": "qwen2.5",
+        "license": "apache-2.0",
+        "multilingual": true,
+        "notes": "Server-class. A100-40GB / H100. Best K-score in tests at 14B.",
+        "params_b": 14,
+        "tier": "large",
+        "tokenizer_vocab": 151936,
+        "tool_use": "native",
+        "use_for": [
+          "server",
+          "high-stakes"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:Qwen/Qwen2.5-14B-Instruct",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 131072,
+        "vram_gb_4bit": 16,
+        "vram_gb_bf16": 30
+      },
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "active_params_b": 32,
+        "arch": "dense",
+        "candidate": false,
+        "family": "qwen2.5",
+        "license": "apache-2.0",
+        "modality": [
+          "text"
+        ],
+        "modality_notes": "Apache 2.0 dense 32B; fits RTX 5090 32GB at Q4.",
+        "params": "32B",
+        "params_b": 32,
+        "recipe_classes": [
+          "rules",
+          "extraction",
+          "classification",
+          "agent",
+          "chat"
+        ],
+        "revision_hash": null,
+        "revision_pinned": false,
+        "source_note": "codebase audit 2026-05-18 (W295 split)",
+        "verification_evidence": {
+          "license_url_status": null,
+          "revision_hash": null,
+          "source_url_checked_at": null,
+          "source_url_status": null,
+          "verifier_note": "exact model-card URL confirmed against well-known Qwen2.5 release; license Apache-2.0 per model card; revision not pinned (warn-band)."
+        },
+        "verified_backends": [
+          "cuda",
+          "vulkan"
+        ]
+      },
+      "checked_at": "2026-05-18",
+      "consumer_paths": [
+        "src/model-registry.js",
+        "cli/kolm.js (compile, models)",
+        "public/models.html"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:Qwen/Qwen2.5-32B-Instruct",
+      "kind": "local_model",
+      "license_url": "https://huggingface.co/Qwen/Qwen2.5-32B-Instruct/blob/main/LICENSE",
+      "pricing": null,
+      "runtime_fit": {
+        "ctx_k": 128,
+        "hw_tier": "5090",
+        "recommended_quant": "q4",
+        "vram_gb": 20
+      },
+      "source_url": "https://huggingface.co/Qwen/Qwen2.5-32B-Instruct",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "catalog": "baseline",
+        "family": "qwen2.5",
+        "license": "apache-2.0",
+        "multilingual": true,
+        "notes": "DEFAULT. Apache 2.0, strong tool/JSON, fits in 8GB consumer GPU.",
+        "params_b": 3,
+        "tier": "default",
+        "tokenizer_vocab": 151936,
+        "tool_use": "native",
+        "use_for": [
+          "default",
+          "chat",
+          "agent",
+          "healthcare",
+          "finance",
+          "legal"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:Qwen/Qwen2.5-3B-Instruct",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 32768,
+        "vram_gb_4bit": 4,
+        "vram_gb_bf16": 7
+      },
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "active_params_b": 72,
+        "arch": "dense",
+        "candidate": false,
+        "family": "qwen2.5",
+        "license": "qwen-license",
+        "modality": [
+          "text"
+        ],
+        "modality_notes": "Qwen license dense 72B; fits DGX Spark 128GB unified at Q5.",
+        "params": "72B",
+        "params_b": 72,
+        "recipe_classes": [
+          "rules",
+          "extraction",
+          "classification",
+          "agent",
+          "chat",
+          "reasoning"
+        ],
+        "revision_hash": null,
+        "revision_pinned": false,
+        "source_note": "codebase audit 2026-05-18 (W295 split)",
+        "verification_evidence": {
+          "license_url_status": null,
+          "revision_hash": null,
+          "source_url_checked_at": null,
+          "source_url_status": null,
+          "verifier_note": "exact model-card URL confirmed against well-known Qwen2.5 release; license is Qwen Tongyi Qianwen LICENSE per model card; revision not pinned (warn-band)."
+        },
+        "verified_backends": [
+          "cuda"
+        ]
+      },
+      "checked_at": "2026-05-18",
+      "consumer_paths": [
+        "src/model-registry.js",
+        "cli/kolm.js (compile, models)",
+        "public/models.html"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:Qwen/Qwen2.5-72B-Instruct",
+      "kind": "local_model",
+      "license_url": "https://huggingface.co/Qwen/Qwen2.5-72B-Instruct/blob/main/LICENSE",
+      "pricing": null,
+      "runtime_fit": {
+        "ctx_k": 128,
+        "hw_tier": "dgx-spark",
+        "recommended_quant": "q5",
+        "vram_gb": 56
+      },
+      "source_url": "https://huggingface.co/Qwen/Qwen2.5-72B-Instruct",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "active_params_b": 7,
+        "arch": "dense",
+        "candidate": false,
+        "family": "qwen2.5",
+        "license": "apache-2.0",
+        "modality": [
+          "text"
+        ],
+        "modality_notes": "Apache 2.0 dense 7B; canonical 3090 daily-driver tier.",
+        "params": "7B",
+        "params_b": 7,
+        "recipe_classes": [
+          "rules",
+          "extraction",
+          "classification",
+          "agent",
+          "chat"
+        ],
+        "revision_hash": null,
+        "revision_pinned": false,
+        "source_note": "codebase audit 2026-05-18 (W295 split)",
+        "verification_evidence": {
+          "license_url_status": null,
+          "revision_hash": null,
+          "source_url_checked_at": null,
+          "source_url_status": null,
+          "verifier_note": "exact model-card URL confirmed against well-known Qwen2.5 release; license Apache-2.0 per model card; revision not pinned (warn-band)."
+        },
+        "verified_backends": [
+          "cuda",
+          "vulkan"
+        ]
+      },
+      "checked_at": "2026-05-18",
+      "consumer_paths": [
+        "src/model-registry.js",
+        "cli/kolm.js (compile, models)",
+        "public/models.html"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:Qwen/Qwen2.5-7B-Instruct",
+      "kind": "local_model",
+      "license_url": "https://huggingface.co/Qwen/Qwen2.5-7B-Instruct/blob/main/LICENSE",
+      "pricing": null,
+      "runtime_fit": {
+        "ctx_k": 128,
+        "hw_tier": "3090",
+        "recommended_quant": "q4",
+        "vram_gb": 8
+      },
+      "source_url": "https://huggingface.co/Qwen/Qwen2.5-7B-Instruct",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "catalog": "baseline",
+        "family": "qwen2.5-coder",
+        "license": "apache-2.0",
+        "multilingual": true,
+        "notes": "Code-specialized. HumanEval 88.4. Use for IDE / repo agents.",
+        "params_b": 7,
+        "tier": "coder",
+        "tokenizer_vocab": 151936,
+        "tool_use": "native",
+        "use_for": [
+          "code",
+          "agent"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:Qwen/Qwen2.5-Coder-7B-Instruct",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 131072,
+        "vram_gb_4bit": 8,
+        "vram_gb_bf16": 16
+      },
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "active_params_b": 3,
+        "arch": "moe",
+        "candidate": true,
+        "family": "qwen3",
+        "license": "apache-2.0",
+        "modality": [
+          "text"
+        ],
+        "modality_notes": "Coder-tuned MoE; A3B active; fits 3090 at Q4; 256K ctx.",
+        "params": "30B",
+        "params_b": 30,
+        "recipe_classes": [
+          "code",
+          "agent",
+          "extraction"
+        ],
+        "revision_hash": null,
+        "revision_pinned": false,
+        "source_note": "@sudoingX 2026-05-17 thread",
+        "verification_evidence": null,
+        "verified_backends": []
+      },
+      "checked_at": "2026-05-17",
+      "consumer_paths": [
+        "src/model-registry.js",
+        "cli/kolm.js (compile --unverified)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:Qwen/Qwen3-Coder-30B-A3B-Instruct",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "ctx_k": 256,
+        "hw_tier": "3090",
+        "recommended_quant": "q4",
+        "vram_gb": 18
+      },
+      "source_url": "https://huggingface.co/Qwen",
+      "status": "candidate"
+    },
+    {
+      "capabilities": {
+        "active_params_b": 3,
+        "arch": "moe",
+        "candidate": true,
+        "family": "qwen3",
+        "license": "apache-2.0",
+        "modality": [
+          "text"
+        ],
+        "modality_notes": "Coder MoE A3B candidate-listed for RX 7900 XTX via ROCm 6.2 and Vulkan.",
+        "params": "30B",
+        "params_b": 30,
+        "recipe_classes": [
+          "code",
+          "agent",
+          "extraction"
+        ],
+        "revision_hash": null,
+        "revision_pinned": false,
+        "source_note": "@sudoingX 2026-05-17 thread",
+        "verification_evidence": null,
+        "verified_backends": [
+          "rocm",
+          "vulkan"
+        ]
+      },
+      "checked_at": "2026-05-18",
+      "consumer_paths": [
+        "src/model-registry.js",
+        "cli/kolm.js (compile --unverified)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:Qwen/Qwen3-Coder-30B-A3B-Instruct-rocm",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "ctx_k": 256,
+        "hw_tier": "rx7900xtx",
+        "recommended_quant": "q4",
+        "vram_gb": 18
+      },
+      "source_url": "https://huggingface.co/Qwen",
+      "status": "candidate"
+    },
+    {
+      "capabilities": {
+        "active_params_b": 22,
+        "arch": "moe",
+        "candidate": true,
+        "family": "qwen3-vl",
+        "license": "apache-2.0",
+        "modality": [
+          "text",
+          "vision"
+        ],
+        "modality_notes": "Vision-language MoE; A22B active; runs on H200 / 2xH100.",
+        "params": "235B",
+        "params_b": 235,
+        "recipe_classes": [
+          "extraction",
+          "classification",
+          "agent",
+          "multimodal"
+        ],
+        "revision_hash": null,
+        "revision_pinned": false,
+        "source_note": "@sudoingX 2026-05-17 thread",
+        "verification_evidence": null,
+        "verified_backends": []
+      },
+      "checked_at": "2026-05-17",
+      "consumer_paths": [
+        "src/model-registry.js",
+        "cli/kolm.js (compile --unverified)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:Qwen/Qwen3-VL-235B-A22B-Instruct",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "ctx_k": 256,
+        "hw_tier": "h200-141",
+        "recommended_quant": "q5",
+        "vram_gb": 140
+      },
+      "source_url": "https://huggingface.co/Qwen",
+      "status": "candidate"
+    },
+    {
+      "capabilities": {
+        "active_params_b": 27,
+        "arch": "dense",
+        "candidate": true,
+        "family": "qwen3",
+        "license": "apache-2.0",
+        "modality": [
+          "text"
+        ],
+        "modality_notes": "Prior-generation dense 27B; 4090 daily-driver tier.",
+        "params": "27B",
+        "params_b": 27,
+        "recipe_classes": [
+          "rules",
+          "extraction",
+          "classification",
+          "agent",
+          "chat"
+        ],
+        "revision_hash": null,
+        "revision_pinned": false,
+        "source_note": "@sudoingX 2026-05-17 thread",
+        "verification_evidence": null,
+        "verified_backends": []
+      },
+      "checked_at": "2026-05-17",
+      "consumer_paths": [
+        "src/model-registry.js",
+        "cli/kolm.js (compile --unverified)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:Qwen/Qwen3.5-27B-Instruct",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "ctx_k": 128,
+        "hw_tier": "4090",
+        "recommended_quant": "q4",
+        "vram_gb": 18
+      },
+      "source_url": "https://huggingface.co/Qwen",
+      "status": "candidate"
+    },
+    {
+      "capabilities": {
+        "active_params_b": 27,
+        "arch": "dense",
+        "candidate": true,
+        "family": "qwen3",
+        "license": "apache-2.0",
+        "modality": [
+          "text"
+        ],
+        "modality_notes": "Dense, fits a single RTX 3090 at Q4 with headroom.",
+        "params": "27B",
+        "params_b": 27,
+        "recipe_classes": [
+          "rules",
+          "extraction",
+          "classification",
+          "agent",
+          "chat"
+        ],
+        "revision_hash": null,
+        "revision_pinned": false,
+        "source_note": "@sudoingX 2026-05-17 thread",
+        "verification_evidence": null,
+        "verified_backends": []
+      },
+      "checked_at": "2026-05-17",
+      "consumer_paths": [
+        "src/model-registry.js",
+        "cli/kolm.js (compile --unverified)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:Qwen/Qwen3.6-27B-Instruct",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "ctx_k": 128,
+        "hw_tier": "3090",
+        "recommended_quant": "q4",
+        "vram_gb": 16
+      },
+      "source_url": "https://huggingface.co/Qwen",
+      "status": "candidate"
+    },
+    {
+      "capabilities": {
+        "catalog": "baseline",
+        "family": "glm-4",
+        "license": "glm-license",
+        "multilingual": true,
+        "notes": "Zhipu AI. Strong CJK. License terms tighter than Apache; verify before commercial ship.",
+        "params_b": 9,
+        "tier": "quality",
+        "tokenizer_vocab": 151552,
+        "tool_use": "good",
+        "use_for": [
+          "chinese-language",
+          "multilingual",
+          "long-context"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:THUDM/glm-4-9b-chat",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 131072,
+        "vram_gb_4bit": 10,
+        "vram_gb_bf16": 19
+      },
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "active_params_b": 3,
+        "arch": "moe",
+        "candidate": true,
+        "family": "carnice",
+        "license": "apache-2.0",
+        "modality": [
+          "text"
+        ],
+        "modality_notes": "Sparse-MoE A3B active; consumer-tier frontier alternative.",
+        "params": "35B",
+        "params_b": 35,
+        "recipe_classes": [
+          "rules",
+          "extraction",
+          "classification",
+          "agent"
+        ],
+        "revision_hash": null,
+        "revision_pinned": false,
+        "source_note": "@sudoingX 2026-05-17 thread",
+        "verification_evidence": null,
+        "verified_backends": []
+      },
+      "checked_at": "2026-05-17",
+      "consumer_paths": [
+        "src/model-registry.js",
+        "cli/kolm.js (compile --unverified)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:cerebras/Carnice-35B-A3B-Instruct",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "ctx_k": 128,
+        "hw_tier": "5090",
+        "recommended_quant": "q4",
+        "vram_gb": 22
+      },
+      "source_url": "https://huggingface.co/cerebras",
+      "status": "candidate"
+    },
+    {
+      "capabilities": {
+        "catalog": "baseline",
+        "family": "deepseek-r1-distill",
+        "license": "llama-community",
+        "multilingual": false,
+        "notes": "Reasoning trace distilled into Llama 3.1 8B. Llama-Community license.",
+        "params_b": 8,
+        "tier": "reasoning-quality",
+        "tokenizer_vocab": 128256,
+        "tool_use": "limited",
+        "use_for": [
+          "reasoning",
+          "english-only"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 131072,
+        "vram_gb_4bit": 9,
+        "vram_gb_bf16": 18
+      },
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "catalog": "baseline",
+        "family": "deepseek-r1-distill",
+        "license": "mit",
+        "multilingual": true,
+        "notes": "Reasoning trace distilled into Qwen 2.5 1.5B base. MIT. Strong on math/code at this size.",
+        "params_b": 1.5,
+        "tier": "reasoning-tiny",
+        "tokenizer_vocab": 151936,
+        "tool_use": "limited",
+        "use_for": [
+          "reasoning",
+          "math",
+          "classifier"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 131072,
+        "vram_gb_4bit": 2,
+        "vram_gb_bf16": 3.5
+      },
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "catalog": "baseline",
+        "family": "deepseek-r1-distill",
+        "license": "mit",
+        "multilingual": true,
+        "notes": "Reasoning trace distilled into Qwen 2.5 7B. Best <10B reasoning at MIT license.",
+        "params_b": 7,
+        "tier": "reasoning-quality",
+        "tokenizer_vocab": 151936,
+        "tool_use": "limited",
+        "use_for": [
+          "reasoning",
+          "math",
+          "agent"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 131072,
+        "vram_gb_4bit": 8,
+        "vram_gb_bf16": 16
+      },
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "active_params_b": 21,
+        "arch": "moe",
+        "candidate": true,
+        "family": "deepseek-v4",
+        "license": "deepseek-license",
+        "modality": [
+          "text"
+        ],
+        "modality_notes": "Mid-tier MoE for Spark / 2x A100; faster than PRO.",
+        "params": "158B",
+        "params_b": 158,
+        "recipe_classes": [
+          "agent",
+          "chat",
+          "reasoning",
+          "extraction"
+        ],
+        "revision_hash": null,
+        "revision_pinned": false,
+        "source_note": "@sudoingX 2026-05-17 thread",
+        "verification_evidence": null,
+        "verified_backends": []
+      },
+      "checked_at": "2026-05-17",
+      "consumer_paths": [
+        "src/model-registry.js",
+        "cli/kolm.js (compile --unverified)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:deepseek-ai/DeepSeek-V4-Flash-158B",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "ctx_k": 128,
+        "hw_tier": "dgx-spark",
+        "recommended_quant": "q5",
+        "vram_gb": 112
+      },
+      "source_url": "https://huggingface.co/deepseek-ai",
+      "status": "candidate"
+    },
+    {
+      "capabilities": {
+        "active_params_b": 21,
+        "arch": "moe",
+        "candidate": true,
+        "family": "deepseek-v4",
+        "license": "deepseek-license",
+        "modality": [
+          "text"
+        ],
+        "modality_notes": "Same DeepSeek V4 Flash weights, candidate-listed for MI300X via ROCm.",
+        "params": "158B",
+        "params_b": 158,
+        "recipe_classes": [
+          "agent",
+          "chat",
+          "reasoning",
+          "extraction"
+        ],
+        "revision_hash": null,
+        "revision_pinned": false,
+        "source_note": "@sudoingX 2026-05-17 thread",
+        "verification_evidence": null,
+        "verified_backends": [
+          "rocm"
+        ]
+      },
+      "checked_at": "2026-05-18",
+      "consumer_paths": [
+        "src/model-registry.js",
+        "cli/kolm.js (compile --unverified)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:deepseek-ai/DeepSeek-V4-Flash-158B-rocm",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "ctx_k": 128,
+        "hw_tier": "mi300x",
+        "recommended_quant": "q6",
+        "vram_gb": 140
+      },
+      "source_url": "https://huggingface.co/deepseek-ai",
+      "status": "candidate"
+    },
+    {
+      "capabilities": {
+        "active_params_b": 37,
+        "arch": "moe",
+        "candidate": true,
+        "family": "deepseek-v4",
+        "license": "deepseek-license",
+        "modality": [
+          "text"
+        ],
+        "modality_notes": "1.6T MoE; fits an M3 Ultra 512GB at Q2 with KV-cache room.",
+        "params": "1.6T",
+        "params_b": 1600,
+        "recipe_classes": [
+          "agent",
+          "chat",
+          "reasoning"
+        ],
+        "revision_hash": null,
+        "revision_pinned": false,
+        "source_note": "@sudoingX 2026-05-17 thread",
+        "verification_evidence": null,
+        "verified_backends": []
+      },
+      "checked_at": "2026-05-17",
+      "consumer_paths": [
+        "src/model-registry.js",
+        "cli/kolm.js (compile --unverified)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:deepseek-ai/DeepSeek-V4-PRO-1.6T",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "ctx_k": 128,
+        "hw_tier": "m3-ultra-512",
+        "recommended_quant": "q2",
+        "vram_gb": 480
+      },
+      "source_url": "https://huggingface.co/deepseek-ai",
+      "status": "candidate"
+    },
+    {
+      "capabilities": {
+        "catalog": "baseline",
+        "family": "embeddinggemma",
+        "license": "gemma",
+        "multilingual": true,
+        "notes": "Embedding model. 100+ languages. Matryoshka representation (truncatable). Pair with EmbeddingGemma tokenizer; do not mix with Qwen embeddings in same index.",
+        "params_b": 0.308,
+        "tier": "embedding",
+        "tokenizer_vocab": 262144,
+        "tool_use": "none",
+        "use_for": [
+          "embedding",
+          "rag",
+          "similarity-search",
+          "on-device-rag"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:google/embeddinggemma-300m",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 2048,
+        "vram_gb_4bit": 0.5,
+        "vram_gb_bf16": 0.8
+      },
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "active_params_b": 27,
+        "arch": "dense",
+        "candidate": false,
+        "family": "gemma-2",
+        "license": "gemma-tou",
+        "modality": [
+          "text"
+        ],
+        "modality_notes": "Gemma 2 TOU license dense 27B; verified on AMD MI300X via ROCm.",
+        "params": "27B",
+        "params_b": 27,
+        "recipe_classes": [
+          "rules",
+          "extraction",
+          "classification",
+          "agent",
+          "chat"
+        ],
+        "revision_hash": null,
+        "revision_pinned": false,
+        "source_note": "codebase audit 2026-05-18 (W295 split)",
+        "verification_evidence": {
+          "license_url_status": null,
+          "revision_hash": null,
+          "source_url_checked_at": null,
+          "source_url_status": null,
+          "verifier_note": "exact model-card URL confirmed against well-known Gemma 2 release; license is Gemma Terms of Use per model card; revision not pinned (warn-band)."
+        },
+        "verified_backends": [
+          "rocm",
+          "cuda"
+        ]
+      },
+      "checked_at": "2026-05-18",
+      "consumer_paths": [
+        "src/model-registry.js",
+        "cli/kolm.js (compile, models)",
+        "public/models.html"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:google/gemma-2-27b-it",
+      "kind": "local_model",
+      "license_url": "https://huggingface.co/google/gemma-2-27b-it/blob/main/LICENSE",
+      "pricing": null,
+      "runtime_fit": {
+        "ctx_k": 8,
+        "hw_tier": "mi300x",
+        "recommended_quant": "q6",
+        "vram_gb": 24
+      },
+      "source_url": "https://huggingface.co/google/gemma-2-27b-it",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "catalog": "baseline",
+        "family": "gemma2",
+        "license": "gemma",
+        "multilingual": true,
+        "notes": "Legacy. Prefer gemma-3-1b-it for new edge work.",
+        "params_b": 2,
+        "tier": "small",
+        "tokenizer_vocab": 256000,
+        "tool_use": "limited",
+        "use_for": [
+          "classifier",
+          "extractor"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:google/gemma-2-2b-it",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 8192,
+        "vram_gb_4bit": 2.5,
+        "vram_gb_bf16": 5
+      },
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "active_params_b": 9,
+        "arch": "dense",
+        "candidate": false,
+        "family": "gemma-2",
+        "license": "gemma-tou",
+        "modality": [
+          "text"
+        ],
+        "modality_notes": "Gemma 2 TOU license dense 9B; verified on AMD RX 9070 XT 16GB via ROCm + Vulkan.",
+        "params": "9B",
+        "params_b": 9,
+        "recipe_classes": [
+          "rules",
+          "extraction",
+          "classification",
+          "agent",
+          "chat"
+        ],
+        "revision_hash": null,
+        "revision_pinned": false,
+        "source_note": "codebase audit 2026-05-18 (W295 split)",
+        "verification_evidence": {
+          "license_url_status": null,
+          "revision_hash": null,
+          "source_url_checked_at": null,
+          "source_url_status": null,
+          "verifier_note": "exact model-card URL confirmed against well-known Gemma 2 release; license is Gemma Terms of Use per model card; revision not pinned (warn-band)."
+        },
+        "verified_backends": [
+          "rocm",
+          "vulkan",
+          "cuda"
+        ]
+      },
+      "checked_at": "2026-05-18",
+      "consumer_paths": [
+        "src/model-registry.js",
+        "cli/kolm.js (compile, models)",
+        "public/models.html"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:google/gemma-2-9b-it",
+      "kind": "local_model",
+      "license_url": "https://huggingface.co/google/gemma-2-9b-it/blob/main/LICENSE",
+      "pricing": null,
+      "runtime_fit": {
+        "ctx_k": 8,
+        "hw_tier": "rx9070xt",
+        "recommended_quant": "q4",
+        "vram_gb": 7
+      },
+      "source_url": "https://huggingface.co/google/gemma-2-9b-it",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "catalog": "baseline",
+        "family": "gemma3",
+        "license": "gemma",
+        "multilingual": true,
+        "notes": "Vision+text 12B. Fits 5090 4-bit with room for batch.",
+        "params_b": 12,
+        "tier": "large",
+        "tokenizer_vocab": 262144,
+        "tool_use": "good",
+        "use_for": [
+          "vision",
+          "quality"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:google/gemma-3-12b-it",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 131072,
+        "vram_gb_4bit": 14,
+        "vram_gb_bf16": 26
+      },
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "active_params_b": 12,
+        "arch": "dense",
+        "candidate": true,
+        "family": "gemma3",
+        "license": "gemma-tou",
+        "modality": [
+          "text",
+          "vision"
+        ],
+        "modality_notes": "Gemma 3 12B instruction model candidate-listed for RX 9070 XT via Vulkan + ROCm.",
+        "params": "12B",
+        "params_b": 12,
+        "recipe_classes": [
+          "rules",
+          "extraction",
+          "classification",
+          "agent",
+          "multimodal"
+        ],
+        "revision_hash": null,
+        "revision_pinned": false,
+        "source_note": "Google AI Gemma 3 docs reconciled 2026-05-20",
+        "verification_evidence": {
+          "license_url_status": null,
+          "revision_hash": null,
+          "source_url_checked_at": null,
+          "source_url_status": null,
+          "verifier_note": "Official Google Gemma 3 docs list 12B, image+text input, 128K context; exact device benchmark must be supplied before promotion."
+        },
+        "verified_backends": [
+          "vulkan",
+          "rocm"
+        ]
+      },
+      "checked_at": "2026-05-20",
+      "consumer_paths": [
+        "src/model-registry.js",
+        "cli/kolm.js (compile --unverified)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:google/gemma-3-12b-it-vulkan",
+      "kind": "local_model",
+      "license_url": "https://huggingface.co/google/gemma-3-12b-it/blob/main/LICENSE",
+      "pricing": null,
+      "runtime_fit": {
+        "ctx_k": 128,
+        "hw_tier": "rx9070xt",
+        "recommended_quant": "q4",
+        "vram_gb": 10
+      },
+      "source_url": "https://huggingface.co/google",
+      "status": "candidate"
+    },
+    {
+      "capabilities": {
+        "catalog": "baseline",
+        "family": "gemma3",
+        "license": "gemma",
+        "multilingual": true,
+        "notes": "Mobile target. Released 2025-03. Verified on iPhone 15 Pro via MLC.",
+        "params_b": 1,
+        "tier": "tiny",
+        "tokenizer_vocab": 262144,
+        "tool_use": "limited",
+        "use_for": [
+          "mobile",
+          "edge"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:google/gemma-3-1b-it",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 32768,
+        "vram_gb_4bit": 1.5,
+        "vram_gb_bf16": 2.5
+      },
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "active_params_b": 27,
+        "arch": "dense",
+        "candidate": true,
+        "family": "gemma3",
+        "license": "gemma-tou",
+        "modality": [
+          "text",
+          "vision"
+        ],
+        "modality_notes": "Gemma 3 27B instruction model; official image+text input and 128K context.",
+        "params": "27B",
+        "params_b": 27,
+        "recipe_classes": [
+          "rules",
+          "extraction",
+          "classification",
+          "agent",
+          "multimodal"
+        ],
+        "revision_hash": null,
+        "revision_pinned": false,
+        "source_note": "Google AI Gemma 3 docs reconciled 2026-05-20",
+        "verification_evidence": {
+          "license_url_status": null,
+          "revision_hash": null,
+          "source_url_checked_at": null,
+          "source_url_status": null,
+          "verifier_note": "Official Google Gemma 3 docs list 27B, image+text input, 128K context, and responsible commercial use; HF revision not pinned (warn-band)."
+        },
+        "verified_backends": []
+      },
+      "checked_at": "2026-05-20",
+      "consumer_paths": [
+        "src/model-registry.js",
+        "cli/kolm.js (compile --unverified)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:google/gemma-3-27b-it",
+      "kind": "local_model",
+      "license_url": "https://huggingface.co/google/gemma-3-27b-it/blob/main/LICENSE",
+      "pricing": null,
+      "runtime_fit": {
+        "ctx_k": 128,
+        "hw_tier": "5090",
+        "recommended_quant": "q4",
+        "vram_gb": 24
+      },
+      "source_url": "https://huggingface.co/google",
+      "status": "candidate"
+    },
+    {
+      "capabilities": {
+        "catalog": "baseline",
+        "family": "gemma3",
+        "license": "gemma",
+        "multilingual": true,
+        "notes": "Closest match to the \"Gemma 3B\" target user referenced. Image+text input.",
+        "params_b": 4,
+        "tier": "small",
+        "tokenizer_vocab": 262144,
+        "tool_use": "good",
+        "use_for": [
+          "mobile",
+          "vision",
+          "multilingual"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:google/gemma-3-4b-it",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 131072,
+        "vram_gb_4bit": 4.5,
+        "vram_gb_bf16": 8.5
+      },
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "catalog": "baseline",
+        "family": "gemma3n",
+        "license": "gemma",
+        "multilingual": true,
+        "notes": "On-device Gemma. Official 32K context. Per-Layer Embeddings: 2B effective, 5B raw weights; text, image, audio, and video inputs.",
+        "params_b": 2,
+        "tier": "mobile-selective",
+        "tokenizer_vocab": 262144,
+        "tool_use": "good",
+        "use_for": [
+          "mobile",
+          "edge",
+          "multimodal",
+          "on-device-clinical-intake"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:google/gemma-3n-E2B-it",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 32768,
+        "vram_gb_4bit": 2.5,
+        "vram_gb_bf16": 4
+      },
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "catalog": "baseline",
+        "family": "gemma3n",
+        "license": "gemma",
+        "multilingual": true,
+        "notes": "On-device Gemma. Official 32K context. 4B effective, 8B raw weights; text, image, audio, and video inputs.",
+        "params_b": 4,
+        "tier": "mobile-selective",
+        "tokenizer_vocab": 262144,
+        "tool_use": "good",
+        "use_for": [
+          "mobile",
+          "edge",
+          "multimodal",
+          "on-device-clinical-intake"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:google/gemma-3n-E4B-it",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 32768,
+        "vram_gb_4bit": 4,
+        "vram_gb_bf16": 6.5
+      },
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "catalog": "baseline",
+        "family": "medgemma",
+        "license": "health-ai-developer-foundations",
+        "multilingual": false,
+        "notes": "Text-only MedGemma. 128K input context, 8192 output tokens. Best benchmark scores in family; A100-40GB+ class.",
+        "params_b": 27,
+        "tier": "medical-large",
+        "tokenizer_vocab": 262144,
+        "tool_use": "limited",
+        "use_for": [
+          "medical-qa",
+          "clinical-summary",
+          "high-stakes-medical"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:google/medgemma-27b-text-it",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 131072,
+        "vram_gb_4bit": 18,
+        "vram_gb_bf16": 54
+      },
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "catalog": "baseline",
+        "family": "medgemma",
+        "license": "health-ai-developer-foundations",
+        "multilingual": false,
+        "notes": "Medical-tuned Gemma 3 4B. Vision+text input, 128K input context, 8192 output tokens. Not for direct clinical decisions; require local eval + clinician review.",
+        "params_b": 4,
+        "tier": "medical-small",
+        "tokenizer_vocab": 262144,
+        "tool_use": "limited",
+        "use_for": [
+          "medical-qa",
+          "radiology-text",
+          "clinical-summary"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:google/medgemma-4b-it",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 131072,
+        "vram_gb_4bit": 4.5,
+        "vram_gb_bf16": 8
+      },
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "catalog": "baseline",
+        "family": "medgemma",
+        "license": "health-ai-developer-foundations",
+        "multilingual": false,
+        "notes": "Pretrained (not instruction-tuned). 128K input context, 8192 output tokens. Use as base for domain SFT/LoRA.",
+        "params_b": 4,
+        "tier": "medical-small-pt",
+        "tokenizer_vocab": 262144,
+        "tool_use": "none",
+        "use_for": [
+          "medical-finetune-base"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:google/medgemma-4b-pt",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 131072,
+        "vram_gb_4bit": 4.5,
+        "vram_gb_bf16": 8
+      },
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "active_params_b": 405,
+        "arch": "dense",
+        "candidate": false,
+        "family": "llama-3.1",
+        "license": "llama-3.1-community",
+        "modality": [
+          "text"
+        ],
+        "modality_notes": "Llama 3.1 community license dense 405B; fits M3 Ultra 512GB unified at Q4.",
+        "params": "405B",
+        "params_b": 405,
+        "recipe_classes": [
+          "rules",
+          "extraction",
+          "classification",
+          "agent",
+          "chat",
+          "reasoning"
+        ],
+        "revision_hash": null,
+        "revision_pinned": false,
+        "source_note": "codebase audit 2026-05-18 (W295 split)",
+        "verification_evidence": {
+          "license_url_status": null,
+          "revision_hash": null,
+          "source_url_checked_at": null,
+          "source_url_status": null,
+          "verifier_note": "exact model-card URL confirmed against well-known Llama 3.1 release; license is Llama 3.1 Community License per model card; revision not pinned (warn-band)."
+        },
+        "verified_backends": [
+          "cuda",
+          "metal"
+        ]
+      },
+      "checked_at": "2026-05-18",
+      "consumer_paths": [
+        "src/model-registry.js",
+        "cli/kolm.js (compile, models)",
+        "public/models.html"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:meta-llama/Llama-3.1-405B-Instruct",
+      "kind": "local_model",
+      "license_url": "https://huggingface.co/meta-llama/Llama-3.1-405B-Instruct/blob/main/LICENSE",
+      "pricing": null,
+      "runtime_fit": {
+        "ctx_k": 128,
+        "hw_tier": "m3-ultra-512",
+        "recommended_quant": "q4",
+        "vram_gb": 240
+      },
+      "source_url": "https://huggingface.co/meta-llama/Llama-3.1-405B-Instruct",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "active_params_b": 70,
+        "arch": "dense",
+        "candidate": false,
+        "family": "llama-3.1",
+        "license": "llama-3.1-community",
+        "modality": [
+          "text"
+        ],
+        "modality_notes": "Llama 3.1 community license dense 70B; fits one H100 at Q6.",
+        "params": "70B",
+        "params_b": 70,
+        "recipe_classes": [
+          "rules",
+          "extraction",
+          "classification",
+          "agent",
+          "chat"
+        ],
+        "revision_hash": null,
+        "revision_pinned": false,
+        "source_note": "codebase audit 2026-05-18 (W295 split)",
+        "verification_evidence": {
+          "license_url_status": null,
+          "revision_hash": null,
+          "source_url_checked_at": null,
+          "source_url_status": null,
+          "verifier_note": "exact model-card URL confirmed against well-known Llama 3.1 release; license is Llama 3.1 Community License per model card; revision not pinned (warn-band)."
+        },
+        "verified_backends": [
+          "cuda"
+        ]
+      },
+      "checked_at": "2026-05-18",
+      "consumer_paths": [
+        "src/model-registry.js",
+        "cli/kolm.js (compile, models)",
+        "public/models.html"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:meta-llama/Llama-3.1-70B-Instruct",
+      "kind": "local_model",
+      "license_url": "https://huggingface.co/meta-llama/Llama-3.1-70B-Instruct/blob/main/LICENSE",
+      "pricing": null,
+      "runtime_fit": {
+        "ctx_k": 128,
+        "hw_tier": "h100-80",
+        "recommended_quant": "q6",
+        "vram_gb": 64
+      },
+      "source_url": "https://huggingface.co/meta-llama/Llama-3.1-70B-Instruct",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "active_params_b": 8,
+        "arch": "dense",
+        "candidate": false,
+        "family": "llama-3.1",
+        "license": "llama-3.1-community",
+        "modality": [
+          "text"
+        ],
+        "modality_notes": "Llama 3.1 community license dense 8B; fits 4090 at Q4 with headroom.",
+        "params": "8B",
+        "params_b": 8,
+        "recipe_classes": [
+          "rules",
+          "extraction",
+          "classification",
+          "agent",
+          "chat"
+        ],
+        "revision_hash": null,
+        "revision_pinned": false,
+        "source_note": "codebase audit 2026-05-18 (W295 split)",
+        "verification_evidence": {
+          "license_url_status": null,
+          "revision_hash": null,
+          "source_url_checked_at": null,
+          "source_url_status": null,
+          "verifier_note": "exact model-card URL confirmed against well-known Llama 3.1 release; license is Llama 3.1 Community License per model card; revision not pinned (warn-band)."
+        },
+        "verified_backends": [
+          "cuda",
+          "vulkan"
+        ]
+      },
+      "checked_at": "2026-05-18",
+      "consumer_paths": [
+        "src/model-registry.js",
+        "cli/kolm.js (compile, models)",
+        "public/models.html"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:meta-llama/Llama-3.1-8B-Instruct",
+      "kind": "local_model",
+      "license_url": "https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct/blob/main/LICENSE",
+      "pricing": null,
+      "runtime_fit": {
+        "ctx_k": 128,
+        "hw_tier": "4090",
+        "recommended_quant": "q4",
+        "vram_gb": 6
+      },
+      "source_url": "https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "catalog": "baseline",
+        "family": "llama3.2",
+        "license": "llama-community",
+        "multilingual": false,
+        "notes": "English-first edge model. Use when Apache license not required.",
+        "params_b": 1,
+        "tier": "tiny",
+        "tokenizer_vocab": 128256,
+        "tool_use": "limited",
+        "use_for": [
+          "edge",
+          "english-only"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:meta-llama/Llama-3.2-1B-Instruct",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 131072,
+        "vram_gb_4bit": 1.5,
+        "vram_gb_bf16": 2.5
+      },
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "catalog": "baseline",
+        "family": "llama3.2",
+        "license": "llama-community",
+        "multilingual": false,
+        "notes": "Stronger raw English than Qwen 2.5 3B; weaker JSON/tool. 128K context.",
+        "params_b": 3,
+        "tier": "alternate-default",
+        "tokenizer_vocab": 128256,
+        "tool_use": "limited",
+        "use_for": [
+          "english-only",
+          "long-context"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:meta-llama/Llama-3.2-3B-Instruct",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 131072,
+        "vram_gb_4bit": 4,
+        "vram_gb_bf16": 7.5
+      },
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "active_params_b": 3.8,
+        "arch": "dense",
+        "candidate": false,
+        "family": "phi-3.5",
+        "license": "mit",
+        "modality": [
+          "text"
+        ],
+        "modality_notes": "MIT-licensed dense 3.8B; runs CPU-only on 256GB+ DDR5 servers.",
+        "params": "3.8B",
+        "params_b": 3.8,
+        "recipe_classes": [
+          "rules",
+          "extraction",
+          "classification",
+          "agent"
+        ],
+        "revision_hash": null,
+        "revision_pinned": false,
+        "source_note": "codebase audit 2026-05-18 (W295 split)",
+        "verification_evidence": {
+          "license_url_status": null,
+          "revision_hash": null,
+          "source_url_checked_at": null,
+          "source_url_status": null,
+          "verifier_note": "exact model-card URL confirmed against well-known Phi-3.5 release; license MIT per model card; revision not pinned (warn-band)."
+        },
+        "verified_backends": [
+          "cpu",
+          "cuda",
+          "vulkan",
+          "rocm"
+        ]
+      },
+      "checked_at": "2026-05-18",
+      "consumer_paths": [
+        "src/model-registry.js",
+        "cli/kolm.js (compile, models)",
+        "public/models.html"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:microsoft/Phi-3.5-mini-instruct",
+      "kind": "local_model",
+      "license_url": "https://huggingface.co/microsoft/Phi-3.5-mini-instruct/blob/main/LICENSE",
+      "pricing": null,
+      "runtime_fit": {
+        "ctx_k": 128,
+        "hw_tier": "cpu-server",
+        "recommended_quant": "q4",
+        "vram_gb": 4
+      },
+      "source_url": "https://huggingface.co/microsoft/Phi-3.5-mini-instruct",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "catalog": "baseline",
+        "family": "ministral",
+        "license": "mrl-research",
+        "multilingual": true,
+        "notes": "MRL license blocks commercial use; research/eval only by default.",
+        "params_b": 3,
+        "tier": "small",
+        "tokenizer_vocab": 131072,
+        "tool_use": "good",
+        "use_for": [
+          "research"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:mistralai/Ministral-3B-Instruct-2410",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 131072,
+        "vram_gb_4bit": 4,
+        "vram_gb_bf16": 7
+      },
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "active_params_b": 7,
+        "arch": "dense",
+        "candidate": false,
+        "family": "mistral",
+        "license": "apache-2.0",
+        "modality": [
+          "text"
+        ],
+        "modality_notes": "Apache 2.0 dense 7B; verified on AMD RX 7900 XTX via ROCm + Vulkan.",
+        "params": "7B",
+        "params_b": 7,
+        "recipe_classes": [
+          "rules",
+          "extraction",
+          "classification",
+          "agent",
+          "chat"
+        ],
+        "revision_hash": null,
+        "revision_pinned": false,
+        "source_note": "codebase audit 2026-05-18 (W295 split)",
+        "verification_evidence": {
+          "license_url_status": null,
+          "revision_hash": null,
+          "source_url_checked_at": null,
+          "source_url_status": null,
+          "verifier_note": "exact model-card URL confirmed against well-known Mistral release; license Apache-2.0 per model card; revision not pinned (warn-band)."
+        },
+        "verified_backends": [
+          "rocm",
+          "vulkan",
+          "cuda"
+        ]
+      },
+      "checked_at": "2026-05-18",
+      "consumer_paths": [
+        "src/model-registry.js",
+        "cli/kolm.js (compile, models)",
+        "public/models.html"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:mistralai/Mistral-7B-Instruct-v0.3",
+      "kind": "local_model",
+      "license_url": "https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3/blob/main/LICENSE",
+      "pricing": null,
+      "runtime_fit": {
+        "ctx_k": 32,
+        "hw_tier": "rx7900xtx",
+        "recommended_quant": "q4",
+        "vram_gb": 6
+      },
+      "source_url": "https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "active_params_b": 32,
+        "arch": "moe",
+        "candidate": true,
+        "family": "kimi",
+        "license": "modified-mit",
+        "modality": [
+          "text"
+        ],
+        "modality_notes": "1T MoE; A32B active; fits M3 Ultra 512GB at Q3.",
+        "params": "1T",
+        "params_b": 1000,
+        "recipe_classes": [
+          "agent",
+          "chat",
+          "reasoning"
+        ],
+        "revision_hash": null,
+        "revision_pinned": false,
+        "source_note": "@sudoingX 2026-05-17 thread",
+        "verification_evidence": null,
+        "verified_backends": []
+      },
+      "checked_at": "2026-05-17",
+      "consumer_paths": [
+        "src/model-registry.js",
+        "cli/kolm.js (compile --unverified)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:moonshotai/Kimi-K2.5-1T",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "ctx_k": 200,
+        "hw_tier": "m3-ultra-512",
+        "recommended_quant": "q3",
+        "vram_gb": 380
+      },
+      "source_url": "https://huggingface.co/moonshotai",
+      "status": "candidate"
+    },
+    {
+      "capabilities": {
+        "active_params_b": 3,
+        "arch": "omni",
+        "candidate": true,
+        "family": "nemotron",
+        "license": "nvidia-open",
+        "modality": [
+          "text",
+          "vision",
+          "video",
+          "audio"
+        ],
+        "modality_notes": "True omni: text + image + video + audio; A3B active params.",
+        "params": "30B",
+        "params_b": 30,
+        "recipe_classes": [
+          "extraction",
+          "classification",
+          "agent",
+          "multimodal"
+        ],
+        "revision_hash": null,
+        "revision_pinned": false,
+        "source_note": "@sudoingX 2026-05-17 thread",
+        "verification_evidence": null,
+        "verified_backends": []
+      },
+      "checked_at": "2026-05-17",
+      "consumer_paths": [
+        "src/model-registry.js",
+        "cli/kolm.js (compile --unverified)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:nvidia/Nemotron-3-Nano-Omni-30B-A3B",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "ctx_k": 128,
+        "hw_tier": "dgx-spark",
+        "recommended_quant": "bf16",
+        "vram_gb": 64
+      },
+      "source_url": "https://huggingface.co/nvidia",
+      "status": "candidate"
+    },
+    {
+      "capabilities": {
+        "active_params_b": null,
+        "arch": "reap-moe",
+        "candidate": true,
+        "family": "step",
+        "license": "apache-2.0",
+        "modality": [
+          "text"
+        ],
+        "modality_notes": "REAP-quantized MoE; fits Spark unified memory at Q6.",
+        "params": "121B",
+        "params_b": 121,
+        "recipe_classes": [
+          "rules",
+          "extraction",
+          "classification",
+          "agent"
+        ],
+        "revision_hash": null,
+        "revision_pinned": false,
+        "source_note": "@sudoingX 2026-05-17 thread",
+        "verification_evidence": null,
+        "verified_backends": []
+      },
+      "checked_at": "2026-05-17",
+      "consumer_paths": [
+        "src/model-registry.js",
+        "cli/kolm.js (compile --unverified)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:stepfun-ai/step3.5-flash-reap-121b",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "ctx_k": 128,
+        "hw_tier": "dgx-spark",
+        "recommended_quant": "q6",
+        "vram_gb": 96
+      },
+      "source_url": "https://huggingface.co/stepfun-ai",
+      "status": "candidate"
+    },
+    {
+      "capabilities": {
+        "active_params_b": 12,
+        "arch": "reap-moe",
+        "candidate": true,
+        "family": "glm",
+        "license": "apache-2.0",
+        "modality": [
+          "text"
+        ],
+        "modality_notes": "REAP-quantized 82B MoE; A12B active; runs on Spark/2xA100.",
+        "params": "82B",
+        "params_b": 82,
+        "recipe_classes": [
+          "agent",
+          "chat",
+          "extraction"
+        ],
+        "revision_hash": null,
+        "revision_pinned": false,
+        "source_note": "@sudoingX 2026-05-17 thread",
+        "verification_evidence": null,
+        "verified_backends": []
+      },
+      "checked_at": "2026-05-17",
+      "consumer_paths": [
+        "src/model-registry.js",
+        "cli/kolm.js (compile --unverified)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:zai-org/GLM-4.5-Air-REAP-82B-A12B",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "ctx_k": 128,
+        "hw_tier": "dgx-spark",
+        "recommended_quant": "q5",
+        "vram_gb": 80
+      },
+      "source_url": "https://huggingface.co/zai-org",
+      "status": "candidate"
+    },
+    {
+      "capabilities": {
+        "active_params_b": 70,
+        "arch": "dense",
+        "candidate": true,
+        "family": "glm",
+        "license": "apache-2.0",
+        "modality": [
+          "text"
+        ],
+        "modality_notes": "GLM 4.7 dense; fits one H100 at Q6.",
+        "params": "70B",
+        "params_b": 70,
+        "recipe_classes": [
+          "agent",
+          "chat",
+          "extraction"
+        ],
+        "revision_hash": null,
+        "revision_pinned": false,
+        "source_note": "@sudoingX 2026-05-17 thread",
+        "verification_evidence": null,
+        "verified_backends": []
+      },
+      "checked_at": "2026-05-17",
+      "consumer_paths": [
+        "src/model-registry.js",
+        "cli/kolm.js (compile --unverified)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:zai-org/GLM-4.7-Flash",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "ctx_k": 128,
+        "hw_tier": "h100-80",
+        "recommended_quant": "q6",
+        "vram_gb": 64
+      },
+      "source_url": "https://huggingface.co/zai-org",
+      "status": "candidate"
+    },
+    {
+      "capabilities": {
+        "auth": "x-api-key",
+        "env_key": "ANTHROPIC_API_KEY",
+        "model_count": 9,
+        "paths": [
+          "/v1/messages",
+          "/v1/complete"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider:anthropic",
+      "kind": "provider",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": "https://api.anthropic.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "key-param",
+        "env_key": "GEMINI_API_KEY",
+        "model_count": 4,
+        "paths": [
+          "/v1beta/models/*",
+          "/v1beta/openai/chat/completions"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider:gemini",
+      "kind": "provider",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": "https://generativelanguage.googleapis.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "OPENAI_API_KEY",
+        "model_count": 10,
+        "paths": [
+          "/v1/chat/completions",
+          "/v1/responses",
+          "/v1/embeddings",
+          "/v1/audio/transcriptions",
+          "/v1/audio/translations",
+          "/v1/audio/speech",
+          "/v1/images/generations",
+          "/v1/moderations"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider:openai",
+      "kind": "provider",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": "https://api.openai.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "OPENROUTER_API_KEY",
+        "model_count": 11,
+        "paths": [
+          "/v1/chat/completions",
+          "/v1/completions"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider:openrouter",
+      "kind": "provider",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": "https://openrouter.ai/api",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "x-api-key",
+        "env_key": "ANTHROPIC_API_KEY",
+        "model": "claude-3-5-haiku-20241022",
+        "provider": "anthropic"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:anthropic/claude-3-5-haiku-20241022",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.0008,
+        "output": 0.004,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.anthropic.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "x-api-key",
+        "env_key": "ANTHROPIC_API_KEY",
+        "model": "claude-3-5-sonnet-20241022",
+        "provider": "anthropic"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:anthropic/claude-3-5-sonnet-20241022",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.003,
+        "output": 0.015,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.anthropic.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "x-api-key",
+        "env_key": "ANTHROPIC_API_KEY",
+        "model": "claude-3-opus-20240229",
+        "provider": "anthropic"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:anthropic/claude-3-opus-20240229",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.015,
+        "output": 0.075,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.anthropic.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "x-api-key",
+        "env_key": "ANTHROPIC_API_KEY",
+        "model": "claude-haiku-4-5",
+        "provider": "anthropic"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:anthropic/claude-haiku-4-5",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.0008,
+        "output": 0.004,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.anthropic.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "x-api-key",
+        "env_key": "ANTHROPIC_API_KEY",
+        "model": "claude-opus-4-6",
+        "provider": "anthropic"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:anthropic/claude-opus-4-6",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.015,
+        "output": 0.075,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.anthropic.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "x-api-key",
+        "env_key": "ANTHROPIC_API_KEY",
+        "model": "claude-opus-4-7",
+        "provider": "anthropic"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:anthropic/claude-opus-4-7",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.015,
+        "output": 0.075,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.anthropic.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "x-api-key",
+        "env_key": "ANTHROPIC_API_KEY",
+        "model": "claude-sonnet-4-5",
+        "provider": "anthropic"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:anthropic/claude-sonnet-4-5",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.003,
+        "output": 0.015,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.anthropic.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "x-api-key",
+        "env_key": "ANTHROPIC_API_KEY",
+        "model": "claude-sonnet-4-6",
+        "provider": "anthropic"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:anthropic/claude-sonnet-4-6",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.003,
+        "output": 0.015,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.anthropic.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "x-api-key",
+        "env_key": "ANTHROPIC_API_KEY",
+        "model": "claude-sonnet-4-7",
+        "provider": "anthropic"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:anthropic/claude-sonnet-4-7",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.003,
+        "output": 0.015,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.anthropic.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "key-param",
+        "env_key": "GEMINI_API_KEY",
+        "model": "gemini-2.0-flash",
+        "provider": "gemini"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:gemini/gemini-2.0-flash",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.0001,
+        "output": 0.0004,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://generativelanguage.googleapis.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "key-param",
+        "env_key": "GEMINI_API_KEY",
+        "model": "gemini-2.5-flash",
+        "provider": "gemini"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:gemini/gemini-2.5-flash",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.000075,
+        "output": 0.0003,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://generativelanguage.googleapis.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "key-param",
+        "env_key": "GEMINI_API_KEY",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "gemini"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:gemini/gemini-2.5-flash-lite",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.00004,
+        "output": 0.00016,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://generativelanguage.googleapis.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "key-param",
+        "env_key": "GEMINI_API_KEY",
+        "model": "gemini-2.5-pro",
+        "provider": "gemini"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:gemini/gemini-2.5-pro",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.00125,
+        "output": 0.005,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://generativelanguage.googleapis.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "OPENAI_API_KEY",
+        "model": "gpt-3.5-turbo",
+        "provider": "openai"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:openai/gpt-3.5-turbo",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.0005,
+        "output": 0.0015,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.openai.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "OPENAI_API_KEY",
+        "model": "gpt-4",
+        "provider": "openai"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:openai/gpt-4",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.03,
+        "output": 0.06,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.openai.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "OPENAI_API_KEY",
+        "model": "gpt-4-turbo",
+        "provider": "openai"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:openai/gpt-4-turbo",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.01,
+        "output": 0.03,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.openai.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "OPENAI_API_KEY",
+        "model": "gpt-4o",
+        "provider": "openai"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:openai/gpt-4o",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.0025,
+        "output": 0.01,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.openai.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "OPENAI_API_KEY",
+        "model": "gpt-4o-mini",
+        "provider": "openai"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:openai/gpt-4o-mini",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.00015,
+        "output": 0.0006,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.openai.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "OPENAI_API_KEY",
+        "model": "o1",
+        "provider": "openai"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:openai/o1",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.015,
+        "output": 0.06,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.openai.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "OPENAI_API_KEY",
+        "model": "o1-mini",
+        "provider": "openai"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:openai/o1-mini",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.003,
+        "output": 0.012,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.openai.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "OPENAI_API_KEY",
+        "model": "o3-mini",
+        "provider": "openai"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:openai/o3-mini",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.0011,
+        "output": 0.0044,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.openai.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "OPENAI_API_KEY",
+        "model": "text-embedding-3-large",
+        "provider": "openai"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:openai/text-embedding-3-large",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.00013,
+        "output": 0,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.openai.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "OPENAI_API_KEY",
+        "model": "text-embedding-3-small",
+        "provider": "openai"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:openai/text-embedding-3-small",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.00002,
+        "output": 0,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.openai.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "OPENROUTER_API_KEY",
+        "model": "anthropic/claude-haiku-4-5",
+        "provider": "openrouter"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:openrouter/anthropic/claude-haiku-4-5",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.0008,
+        "output": 0.004,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://openrouter.ai/api",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "OPENROUTER_API_KEY",
+        "model": "anthropic/claude-opus-4-7",
+        "provider": "openrouter"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:openrouter/anthropic/claude-opus-4-7",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.015,
+        "output": 0.075,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://openrouter.ai/api",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "OPENROUTER_API_KEY",
+        "model": "anthropic/claude-sonnet-4-6",
+        "provider": "openrouter"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:openrouter/anthropic/claude-sonnet-4-6",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.003,
+        "output": 0.015,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://openrouter.ai/api",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "OPENROUTER_API_KEY",
+        "model": "deepseek/deepseek-v4-flash",
+        "provider": "openrouter"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:openrouter/deepseek/deepseek-v4-flash",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.00014,
+        "output": 0.00028,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://openrouter.ai/api",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "OPENROUTER_API_KEY",
+        "model": "deepseek/deepseek-v4-pro",
+        "provider": "openrouter"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:openrouter/deepseek/deepseek-v4-pro",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.00027,
+        "output": 0.0011,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://openrouter.ai/api",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "OPENROUTER_API_KEY",
+        "model": "google/gemini-2.5-flash",
+        "provider": "openrouter"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:openrouter/google/gemini-2.5-flash",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.000075,
+        "output": 0.0003,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://openrouter.ai/api",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "OPENROUTER_API_KEY",
+        "model": "google/gemini-2.5-pro",
+        "provider": "openrouter"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:openrouter/google/gemini-2.5-pro",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.00125,
+        "output": 0.005,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://openrouter.ai/api",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "OPENROUTER_API_KEY",
+        "model": "meta-llama/llama-3.3-70b",
+        "provider": "openrouter"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:openrouter/meta-llama/llama-3.3-70b",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.00023,
+        "output": 0.0004,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://openrouter.ai/api",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "OPENROUTER_API_KEY",
+        "model": "openai/gpt-4o",
+        "provider": "openrouter"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:openrouter/openai/gpt-4o",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.0025,
+        "output": 0.01,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://openrouter.ai/api",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "OPENROUTER_API_KEY",
+        "model": "openai/gpt-4o-mini",
+        "provider": "openrouter"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:openrouter/openai/gpt-4o-mini",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.00015,
+        "output": 0.0006,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://openrouter.ai/api",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "OPENROUTER_API_KEY",
+        "model": "qwen/qwen-3.6-27b",
+        "provider": "openrouter"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:openrouter/qwen/qwen-3.6-27b",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.00018,
+        "output": 0.00072,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://openrouter.ai/api",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "is_default": false,
+        "ladder": [
+          "token_budget",
+          "privacy_check",
+          "cache",
+          "semantic_cache",
+          "local_artifact",
+          "cheaper_model",
+          "frontier"
+        ],
+        "name": "cost_optimized"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/runtime-policy.js",
+        "src/router.js (/v1/policy/*)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 60,
+      "id": "runtime_policy:cost_optimized",
+      "kind": "runtime",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "is_default": false,
+        "ladder": [
+          "token_budget",
+          "privacy_check",
+          "frontier"
+        ],
+        "name": "frontier_first"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/runtime-policy.js",
+        "src/router.js (/v1/policy/*)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 60,
+      "id": "runtime_policy:frontier_first",
+      "kind": "runtime",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "is_default": true,
+        "ladder": [
+          "token_budget",
+          "privacy_check",
+          "cache",
+          "semantic_cache",
+          "local_artifact",
+          "cheaper_model",
+          "frontier"
+        ],
+        "name": "local_first"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/runtime-policy.js",
+        "src/router.js (/v1/policy/*)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 60,
+      "id": "runtime_policy:local_first",
+      "kind": "runtime",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "is_default": false,
+        "ladder": [
+          "token_budget",
+          "privacy_check",
+          "local_artifact",
+          "cache"
+        ],
+        "name": "privacy_only"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/runtime-policy.js",
+        "src/router.js (/v1/policy/*)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 60,
+      "id": "runtime_policy:privacy_only",
+      "kind": "runtime",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": null,
+      "status": "available"
+    }
+  ],
+  "generated_at": "2026-05-25T05:51:40.745Z",
+  "schema": "kolm.catalog_manifest.v1",
+  "source_evidence": [
+    {
+      "bytes": 5460,
+      "path": "src/provider-registry.js",
+      "sha1_short": "e419f955df31"
+    },
+    {
+      "bytes": 65422,
+      "path": "src/model-registry.js",
+      "sha1_short": "813e7a01cfd9"
+    },
+    {
+      "bytes": 30462,
+      "path": "src/models.js",
+      "sha1_short": "c6f0f40ba6f0"
+    },
+    {
+      "bytes": 24854,
+      "path": "src/runtime-policy.js",
+      "sha1_short": "3f3198dc6e97"
+    },
+    {
+      "bytes": 32384,
+      "path": "src/devices.js",
+      "sha1_short": "0358e722d38d"
+    },
+    {
+      "bytes": 2553,
+      "path": "src/cost-estimator.js",
+      "sha1_short": "9a09803bdca0"
+    }
+  ],
+  "summary": {
+    "by_kind": {
+      "device": 25,
+      "hardware": 14,
+      "local_model": 51,
+      "provider": 4,
+      "provider_model": 34,
+      "runtime": 4
+    },
+    "by_status": {
+      "available": 115,
+      "candidate": 17
+    },
+    "total": 132
+  }
+}

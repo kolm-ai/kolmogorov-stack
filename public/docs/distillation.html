@@ -170,8 +170,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
       <h3 class="fr-h3">Reasoning / CoT-trace distillation</h3>
       <p>Capture full step-by-step traces from the teacher. The student learns the reasoning shape, not just the final answer. Lineage: Hinton, Vinyals, Dean 2015 on soft targets; the DeepSeek-R1-Distill family 2025 is the canonical open reference at 1.5B-70B scale.</p>
       <div class="fr-cli">
-        <span class="fr-cli__prompt">$</span> kolm distill <span class="fr-cli__flag">--mode</span>=reasoning <span class="fr-cli__flag">--teacher</span>=deepseek-r1 <span class="fr-cli__flag">--student</span>=qwen2-5-7b
-        <div class="fr-cli__comment"># student inherits the trace, not just the label</div>
+        <span class="fr-cli__prompt">$</span> kolm distill <span class="fr-cli__flag">--from-captures</span> <span class="fr-cli__flag">--namespace</span> support <span class="fr-cli__flag">--base-model</span> Qwen/Qwen2.5-7B-Instruct <span class="fr-cli__flag">--reasoning-trace-loss-weight</span> 0.5
+        <div class="fr-cli__comment"># student inherits the trace, not just the label (W713)</div>
       </div>
     </div>
 
@@ -180,8 +180,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
       <h3 class="fr-h3">On-policy / self-distillation</h3>
       <p>Student generates rollouts. A grader (the teacher or a separate judge) scores them. Only the positives flow into the SFT batch. Lineage: the RLHF reward-model family and the more recent self-distill papers that close the loop without a full reinforcement-learning stage.</p>
       <div class="fr-cli">
-        <span class="fr-cli__prompt">$</span> kolm distill <span class="fr-cli__flag">--mode</span>=on-policy <span class="fr-cli__flag">--student</span>=qwen2-5-7b <span class="fr-cli__flag">--grader</span>=claude-opus-4-7
-        <div class="fr-cli__comment"># student rolls out, grader scores, only positives flow back</div>
+        <span class="fr-cli__prompt">$</span> kolm distill onpolicy <span class="fr-cli__flag">--namespace</span> support <span class="fr-cli__flag">--grader</span> claude-opus-4-7 <span class="fr-cli__flag">--base-model</span> Qwen/Qwen2.5-7B-Instruct
+        <div class="fr-cli__comment"># student rolls out, grader scores, only positives flow back (W480)</div>
       </div>
     </div>
 
@@ -190,8 +190,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
       <h3 class="fr-h3">Multi-teacher fusion</h3>
       <p>Per-token best-of across multiple teacher logits. Pair a reasoning teacher, a code teacher, and a generalist into one student. The runner records which teacher won each token; auditable end to end. Lineage: the multi-teacher distillation line; Fukuda et al. 2017 is an early reference.</p>
       <div class="fr-cli">
-        <span class="fr-cli__prompt">$</span> kolm distill <span class="fr-cli__flag">--mode</span>=multi-teacher <span class="fr-cli__flag">--teachers</span>=claude,gpt,deepseek <span class="fr-cli__flag">--student</span>=qwen2-5-14b
-        <div class="fr-cli__comment"># per-token best-of, attribution preserved</div>
+        <span class="fr-cli__prompt">$</span> kolm distill <span class="fr-cli__flag">--teachers</span> claude-opus-4-7,gpt-4o,deepseek-v4-pro <span class="fr-cli__flag">--weights</span> auto <span class="fr-cli__flag">--namespace</span> support <span class="fr-cli__flag">--base-model</span> Qwen/Qwen2.5-14B-Instruct
+        <div class="fr-cli__comment"># per-token best-of across teachers, attribution preserved (W718)</div>
       </div>
     </div>
 
@@ -200,8 +200,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
       <h3 class="fr-h3">Agentic workflow distillation</h3>
       <p>Replay captured multi-step LangGraph or CrewAI runs. Compile the orchestrator plus the tool dialogues into one forward pass on a single student. Reduces inference cost on workflows that repeat. Lineage: the 2025-2026 agent-distill literature.</p>
       <div class="fr-cli">
-        <span class="fr-cli__prompt">$</span> kolm distill <span class="fr-cli__flag">--mode</span>=agentic <span class="fr-cli__flag">--capture</span>=~/.kolm/lake/workflows
-        <div class="fr-cli__comment"># orchestrator + tool calls fold into one student forward</div>
+        <span class="fr-cli__prompt">$</span> kolm distill <span class="fr-cli__flag">--from-captures</span> <span class="fr-cli__flag">--namespace</span> workflows <span class="fr-cli__flag">--base-model</span> Qwen/Qwen2.5-7B-Instruct
+        <div class="fr-cli__comment"># capture LangGraph/CrewAI rollouts under ns=workflows, then distill the orchestrator + tool calls into one forward (W463 trace-compile)</div>
       </div>
     </div>
 
@@ -210,8 +210,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
       <h3 class="fr-h3">Merge-first</h3>
       <p>Run mergekit TIES (Yadav et al. 2023), DARE (Yu et al. 2024), or SLERP on multiple bases or teachers, then distill the merged result. Lineage: mergekit by Charles Goddard; community recipes popularized by mlabonne. The merge config and source SHAs are pinned in the receipt.</p>
       <div class="fr-cli">
-        <span class="fr-cli__prompt">$</span> kolm distill <span class="fr-cli__flag">--mode</span>=merge-first <span class="fr-cli__flag">--merge</span>=ties <span class="fr-cli__flag">--models</span>=gemma-4-31b,qwen2-5-14b
-        <div class="fr-cli__comment"># mergekit recipe pinned, source hashes locked</div>
+        <span class="fr-cli__prompt">$</span> kolm distill <span class="fr-cli__flag">--auto-arch</span> <span class="fr-cli__flag">--namespace</span> support <span class="fr-cli__flag">--base-model</span> Qwen/Qwen2.5-14B-Instruct
+        <div class="fr-cli__comment"># TAAS searches student-arch + merge recipe; result + source SHAs land in spec.json (W716). Pin a specific merge with --merge-recipe ties|dare|slerp.</div>
       </div>
     </div>
 
@@ -220,8 +220,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
       <h3 class="fr-h3">MTP (multi-token prediction)</h3>
       <p>Architectural option in the student head: predict N tokens per forward and accept the longest consistent prefix. Native speculative decoding without an external draft model. Lineage: the 2025-2026 Alibaba and DeepSeek MTP lines. The runner refuses MTP for student families that have not validated the head.</p>
       <div class="fr-cli">
-        <span class="fr-cli__prompt">$</span> kolm distill <span class="fr-cli__flag">--mode</span>=mpt <span class="fr-cli__flag">--student</span>=qwen2-5-14b
-        <div class="fr-cli__comment"># N=4 default; student head predicts ahead</div>
+        <span class="fr-cli__prompt">$</span> kolm distill <span class="fr-cli__flag">--auto-arch</span> <span class="fr-cli__flag">--mtp</span> 4 <span class="fr-cli__flag">--namespace</span> support <span class="fr-cli__flag">--base-model</span> Qwen/Qwen2.5-14B-Instruct
+        <div class="fr-cli__comment"># N=4 default; student head predicts ahead. Runner refuses MTP for families that haven't validated the head.</div>
       </div>
     </div>
 
@@ -230,8 +230,9 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
       <h3 class="fr-h3">Low-bit specialist</h3>
       <p>Aggressive quantization with a K-score safety floor. The runner walks 4.0 to 2.0 to 1.58-bit and stops the moment K-score drops below the floor you set. Lineage: BitNet b1.58 (Microsoft Research 2024) and the SpQR family for outlier-aware low-bit. The receipt records the final bit-width and the floor.</p>
       <div class="fr-cli">
-        <span class="fr-cli__prompt">$</span> kolm distill <span class="fr-cli__flag">--mode</span>=low-bit-specialist <span class="fr-cli__flag">--bit</span>=1.58 <span class="fr-cli__flag">--kscore-min</span>=0.85
-        <div class="fr-cli__comment"># walks 4.0 to 1.58; aborts if K-score floor breached</div>
+        <span class="fr-cli__prompt">$</span> kolm distill <span class="fr-cli__flag">--from-captures</span> <span class="fr-cli__flag">--namespace</span> support <span class="fr-cli__flag">--base-model</span> Qwen/Qwen2.5-7B-Instruct
+        <div class="fr-cli__prompt">$</span> kolm quantize <span class="fr-cli__flag">--local-worker</span> <span class="fr-cli__flag">--method</span>=bitnet158 <span class="fr-cli__flag">--in</span> ./out/student <span class="fr-cli__flag">--out</span> ./out/q158 <span class="fr-cli__flag">--kscore-floor</span> 0.85
+        <div class="fr-cli__comment"># distill, then quantize walks 4.0 → 1.58-bit and aborts if K-score breaches floor (BitNet b1.58 + SpQR outlier-aware path)</div>
       </div>
     </div>
 

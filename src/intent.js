@@ -109,10 +109,20 @@ export const VERB_DESCRIPTIONS = [
       'cut llm costs', 'reduce llm costs', 'save on openai', 'save money on openai',
       'cheaper than openai', 'replace openai', 'stop paying openai'],
     examples: ['kolm capture --provider openai --as ks_proxy'] },
-  { verb: 'distill', desc: 'Auto-distill captured (input, output) pairs into a local LoRA.',
-    when: 'You have hundreds of captures and want a specialist model.',
-    phrasings: ['distill', 'distill captures', 'train from captures', 'fine tune'],
-    examples: ['kolm distill --from-captures --namespace support'] },
+  { verb: 'distill', desc: 'Auto-distill captured (input, output) pairs into a local LoRA. Supports a multi-teacher council via --teachers a,b,c --weights auto|equal|domain.',
+    when: 'You have hundreds of captures and want a specialist model. Use --teachers when you want per-token best-of across multiple frontier teachers.',
+    phrasings: ['distill', 'distill captures', 'train from captures', 'fine tune',
+      'multi teacher', 'multi-teacher', 'multiteacher', 'multiple teachers',
+      'teacher council', 'teachers council', 'council of teachers', 'ensemble teachers',
+      'distill with multiple teachers', 'distill from multiple teachers',
+      'distill from anthropic and openai', 'distill from openai and anthropic',
+      'distill from claude and gpt', 'distill from gpt and claude',
+      'rank teachers', 'pick the best teacher', 'best teacher per token',
+      'teacher weighting', 'weighted teachers', 'teacher reliability'],
+    examples: [
+      'kolm distill --from-captures --namespace support',
+      'kolm distill --teachers claude-opus-4-7,gpt-4o,gemini-2.5-pro --weights auto --namespace support',
+    ] },
   { verb: 'replay', desc: 'Replay captured pairs against an artifact and diff results.',
     when: 'You want regression detection on a new artifact version.',
     phrasings: ['replay', 'replay captures', 'replay a namespace'],
@@ -401,6 +411,122 @@ export const VERB_DESCRIPTIONS = [
     phrasings: ['bakeoff', 'bake off', 'bake-off', 'compare models', 'pick a model',
       'which model is best', 'rank models', 'cheapest model', 'eval candidates'],
     examples: ['kolm bakeoff --dataset ds_xxx', 'kolm bakeoff --namespace support'] },
+
+  // W853 — surface W700-W834 shipped features in the NL classifier so the
+  // homepage chat box + `kolm do` can dispatch them. Without these entries the
+  // verb dispatches in cli/kolm.js work but the natural-language frontdoor
+  // does not see them, which is exactly the "advertised feature, broken chat"
+  // pattern the user called out.
+  { verb: 'diagnose', desc: 'W741 — K-score category breakdown + remediation hints for an artifact.',
+    when: 'An artifact passed but you want to know which categories are weakest.',
+    phrasings: ['diagnose', 'diagnostic', 'breakdown', 'show diagnosis', 'category breakdown',
+      'k score breakdown', 'kscore breakdown', 'weak categories', 'where does it fail',
+      'why is k-score low', 'show k-score by category'],
+    examples: ['kolm diagnose phi-redactor.kolm', 'kolm diagnose --json'] },
+  { verb: 'gateway', desc: 'W742 — Switch routing mode (cloud / local-ollama / local-vllm / mirror).',
+    when: 'You want to move traffic to a local runtime or compare against cloud.',
+    phrasings: ['gateway', 'gateway mode', 'switch gateway', 'route through ollama',
+      'route through vllm', 'local ollama', 'local vllm', 'mirror traffic',
+      'switch to local', 'point gateway at', 'change routing'],
+    examples: ['kolm gateway status', 'kolm gateway switch local-ollama'] },
+  { verb: 'route', desc: 'W709 — Confidence routing: cheap base model for the easy 90%, premium teacher for the long tail.',
+    when: 'You want to cut frontier-model spend by routing only low-confidence requests to the expensive model.',
+    phrasings: ['confidence routing', 'confidence router', 'route by confidence',
+      'route the easy', 'cheap model for easy', 'easy 90%', 'easy 90 percent',
+      'route to a cheap model', 'cheap base model', 'premium teacher for hard',
+      'frontier only when', 'route only when uncertain', 'route on confidence',
+      'fallback to frontier', 'cheap then expensive', 'route doctor'],
+    examples: ['kolm route doctor --profile balanced', 'kolm route doctor --namespace support --json'] },
+  { verb: 'import', desc: 'W740 — Import a GGUF / safetensors / Ollama model into kolm.',
+    when: 'You already have weights and want a .kolm wrapper around them.',
+    phrasings: ['import', 'import model', 'import weights', 'load gguf', 'load safetensors',
+      'import safetensors', 'import gguf', 'import from file', 'wrap my weights',
+      'bring my own model'],
+    examples: ['kolm import qwen-7b.gguf --as qwen-7b', 'kolm import --from ollama llama3'] },
+  { verb: 'migrate', desc: 'W743 — Migrate models from Ollama / LM Studio / vLLM into kolm.',
+    when: 'You used to run Ollama/LM Studio and want kolm to take over.',
+    phrasings: ['migrate', 'migrate from ollama', 'migrate from lm studio', 'migrate from vllm',
+      'migrate from lmstudio', 'import models', 'move from ollama', 'switch from ollama'],
+    examples: ['kolm migrate from ollama', 'kolm migrate from lm-studio'] },
+  { verb: 'pack', desc: 'W779 — Sneakernet pack/unpack: bundle artifacts for offline transfer.',
+    when: 'You need to move .kolm artifacts to an airgapped network.',
+    phrasings: ['pack', 'pack sneakernet', 'sneakernet', 'bundle for offline', 'create offline bundle',
+      'offline bundle', 'airgap bundle', 'pack for transfer', 'export for airgap'],
+    examples: ['kolm pack ./artifacts --out bundle.tar', 'kolm pack unpack bundle.tar'] },
+  { verb: 'pipeline', desc: 'W821 — Compose multiple artifacts into a chained inference pipeline.',
+    when: 'You want one .kolm to call another (redactor → classifier → summarizer).',
+    phrasings: ['pipeline', 'compose artifacts', 'chain artifacts', 'build a pipeline',
+      'chain models', 'orchestrate', 'pipe artifacts', 'pipeline orchestrator'],
+    examples: ['kolm pipeline create --steps redact,classify,summarize', 'kolm pipeline run pipeline.kolmp'] },
+  { verb: 'lineage', desc: 'W739 — Show provenance graph for an artifact (captures → dataset → distill → quantize).',
+    when: 'Audit / compliance: which captures trained this artifact?',
+    phrasings: ['lineage', 'artifact lineage', 'show lineage', 'show dependencies', 'dependency graph',
+      'provenance', 'show provenance', 'where did this come from', 'training history'],
+    examples: ['kolm lineage phi-redactor.kolm', 'kolm lineage --json'] },
+  { verb: 'guardrails', desc: 'W736 — Attach safety guardrails (refusal patterns, output schemas, jailbreak filters) to a .kolm.',
+    when: 'You want to constrain what the artifact is allowed to emit.',
+    phrasings: ['guardrails', 'add guardrails', 'safety rules', 'refusal rules', 'jailbreak filter',
+      'output schema', 'constrain output', 'block patterns'],
+    examples: ['kolm guardrails attach phi-redactor.kolm --policy refuse-pii.json',
+      'kolm guardrails list'] },
+  { verb: 'tool', desc: 'W735 — Enable tool / function calling for an artifact (web search, RAG, custom tools).',
+    when: 'You want the model to call tools, not just emit text.',
+    phrasings: ['tool', 'tool use', 'tools', 'function calling', 'enable tool use', 'enable tools',
+      'enable agents', 'attach tools', 'register a tool'],
+    examples: ['kolm tool register web_search ./tools/web.json', 'kolm tool list'] },
+  { verb: 'long-context', desc: 'W781 — Warn before sending a prompt that exceeds the model context window.',
+    when: 'You want pre-flight checks for over-long prompts.',
+    phrasings: ['long context', 'long-context', 'context window', 'check context length',
+      'will this fit', 'context overflow', 'warn about long prompts'],
+    examples: ['kolm long-context check input.txt', 'kolm long-context --model qwen-7b'] },
+  { verb: 'approvals', desc: 'W782 — Team approval queue for sensitive operations (deploys, key rotations, exports).',
+    when: 'You want a human gate before a teammate runs something risky.',
+    phrasings: ['approvals', 'approval queue', 'pending approvals', 'review approvals',
+      'team approval', 'request approval', 'approve operation'],
+    examples: ['kolm approvals queue', 'kolm approvals approve op_xxx'] },
+  { verb: 'chargeback', desc: 'W783 — Per-team / per-cost-center chargeback report from event-store ledger.',
+    when: 'Finance wants a breakdown by team or project.',
+    phrasings: ['chargeback', 'cost center', 'team chargeback', 'chargeback report',
+      'cost by team', 'who is spending what', 'team spend report'],
+    examples: ['kolm chargeback --period 2026-05', 'kolm chargeback --by team'] },
+  { verb: 'failure-modes', desc: 'W812 — Catalogue of known failure modes for an artifact (OOM, latency tails, refusal misses).',
+    when: 'You want to anticipate what breaks before deploying.',
+    phrasings: ['failure modes', 'known failures', 'what breaks', 'common failures',
+      'failure catalog', 'show known failures'],
+    examples: ['kolm failure-modes phi-redactor.kolm', 'kolm failure-modes --json'] },
+  { verb: 'active-learn', desc: 'W815 — Active-learning loop: surface coverage gaps and queue rows for human review.',
+    when: 'You want the dataset to grow toward weak coverage areas.',
+    phrasings: ['active learn', 'active learning', 'coverage gaps', 'find weak coverage',
+      'queue uncertain rows', 'active sampling'],
+    examples: ['kolm active-learn --namespace support', 'kolm active-learn --dataset ds_xxx'] },
+  { verb: 'failure-to-capture-loop', desc: 'W816 — Auto-capture on production failure: turn outages into training data.',
+    when: 'A prod error should become a labelled example in your dataset.',
+    phrasings: ['failure to capture', 'failure to capture loop', 'capture on failure',
+      'turn errors into training data', 'capture incidents'],
+    examples: ['kolm failure-to-capture-loop --namespace support', 'kolm failure-to-capture-loop status'] },
+  { verb: 'federated', desc: 'W830 — Federated consortium: share approvals / weights with differential privacy across orgs.',
+    when: 'You belong to a consortium that pools training signal without sharing raw data.',
+    phrasings: ['federated', 'federated learning', 'consortium', 'federated consortium',
+      'share with privacy', 'differential privacy', 'pool training signal', 'federated approvals'],
+    examples: ['kolm federated join <consortium-url>', 'kolm federated status'] },
+  { verb: 'lingual', desc: 'W833 — Cross-lingual coverage: which languages does this artifact actually serve?',
+    when: 'You support multiple languages and want per-language K-score.',
+    phrasings: ['lingual', 'cross lingual', 'cross-lingual', 'language coverage', 'per language',
+      'which languages', 'multilingual'],
+    examples: ['kolm lingual phi-redactor.kolm', 'kolm lingual --langs en,es,zh'] },
+  { verb: 'regulatory', desc: 'W834 — EU AI Act / GDPR / SOC 2 regulatory packet for a .kolm.',
+    when: 'You need a compliance packet for auditors / regulators.',
+    phrasings: ['regulatory', 'regulation', 'eu ai act', 'gdpr packet', 'soc 2 packet',
+      'compliance packet', 'audit packet', 'regulatory pack'],
+    examples: ['kolm regulatory pack phi-redactor.kolm --framework eu-ai-act',
+      'kolm regulatory --framework gdpr'] },
+  { verb: 'cloud', desc: 'W785 — Cloud control plane: targets, readiness, train, and `cloud distill` for rented-GPU jobs.',
+    when: 'You do not have a local GPU and want kolm to rent one for the distill.',
+    phrasings: ['cloud', 'cloud distill', 'cloud-distill', 'rent gpu', 'rent a gpu', 'rented distill',
+      'distill in the cloud', 'submit cloud distill', 'runpod distill', 'no local gpu',
+      'managed gpu', 'managed distill', 'cloud train'],
+    examples: ['kolm cloud distill submit --namespace support --gpu-sku H100-80GB',
+      'kolm cloud distill status job_xxx', 'kolm cloud targets'] },
 ];
 
 // ---------------------------------------------------------------------------
@@ -638,6 +764,119 @@ const REGEX_RULES = [
       source: 'regex',
     }),
   },
+  // multi-teacher distill — "distill from anthropic and openai together",
+  // "multi-teacher distillation", "teacher council with claude, gpt, gemini".
+  // Maps to the real cli verb: `kolm distill --teachers <a,b,c> --weights auto`.
+  // Extracts known vendor/model slugs when present; falls back to a
+  // claude+gpt placeholder list when phrasing is generic ("multi-teacher
+  // distillation").
+  {
+    pattern: /(?:multi[- ]?teacher|teacher[- ]?council|ensemble\s+teachers?|multiple\s+teachers?|distill\s+(?:from\s+)?(?:multiple|several|both)\s+teachers?)/i,
+    build: (raw) => {
+      // raw[0] is only the *matched* keyword ("multi-teacher"); we need the
+      // *full* input to scan for vendor/model names downstream. The regex
+      // engine populates `raw.input` with the original string for arrays
+      // returned by String.prototype.match — use that first.
+      const text = raw.input || raw[0] || '';
+      const found = [];
+      const slug = (s) => s.toLowerCase().trim();
+      const VENDOR_MAP = [
+        [/anthropic|claude(?:[- ]?(?:opus|sonnet|haiku))?/i, 'claude-opus-4-7'],
+        [/openai|gpt[- ]?(?:5|4o|4)?/i, 'gpt-4o'],
+        [/gemini|google/i, 'gemini-2.5-pro'],
+        [/deepseek/i, 'deepseek-v4-pro'],
+        [/qwen/i, 'qwen-3.6-27b'],
+        [/llama|meta/i, 'meta-llama/llama-3.3-70b'],
+        [/mistral/i, 'mistralai/Mistral-Large-2'],
+      ];
+      for (const [re, model] of VENDOR_MAP) {
+        if (re.test(text) && !found.includes(model)) found.push(model);
+      }
+      const teachers = found.length >= 2 ? found : ['claude-opus-4-7', 'gpt-4o', 'gemini-2.5-pro'];
+      const nsM = text.match(/(?:in|from|for|under)\s+(?:namespace\s+)?["'`]?([\w.\-:/]+)["'`]?/i);
+      const weightsM = text.match(/--weights\s+(auto|equal|domain)/i);
+      const weights = weightsM ? weightsM[1].toLowerCase() : 'auto';
+      const args = ['--teachers', teachers.join(','), '--weights', weights];
+      if (nsM) args.push('--namespace', nsM[1]);
+      return {
+        verb: 'distill',
+        args,
+        confidence: 0.93,
+        source: 'regex',
+        matchedPhrase: 'multi-teacher distillation',
+      };
+    },
+  },
+  // "distill from <vendor a> and <vendor b>" / "distill with anthropic and openai"
+  // The `(?:[^,]{0,30}\s+)?` slop tolerates intervening words like
+  // "distill a model from anthropic and openai" — we still anchor the
+  // vendor list to "from|with|using" so we don't capture arbitrary text.
+  {
+    pattern: /distill\s+(?:[^,]{0,30}\s+)?(?:from|with|using)\s+([\w.\-]+(?:\s*[, ]\s*(?:and\s+)?[\w.\-]+){1,})(?:\s+together)?/i,
+    build: (m) => {
+      const raw = m[1] || '';
+      const tokens = raw.split(/\s*(?:,|and|&|\+)\s*/).map(s => s.trim()).filter(Boolean);
+      const VENDOR_MAP = [
+        [/anthropic|claude/i, 'claude-opus-4-7'],
+        [/openai|gpt/i, 'gpt-4o'],
+        [/gemini|google/i, 'gemini-2.5-pro'],
+        [/deepseek/i, 'deepseek-v4-pro'],
+        [/qwen/i, 'qwen-3.6-27b'],
+        [/llama|meta/i, 'meta-llama/llama-3.3-70b'],
+        [/mistral/i, 'mistralai/Mistral-Large-2'],
+      ];
+      const teachers = [];
+      for (const t of tokens) {
+        for (const [re, model] of VENDOR_MAP) {
+          if (re.test(t) && !teachers.includes(model)) { teachers.push(model); break; }
+        }
+      }
+      if (teachers.length < 2) return null; // fall through to single-teacher distill regex
+      return {
+        verb: 'distill',
+        args: ['--teachers', teachers.join(','), '--weights', 'auto'],
+        confidence: 0.92,
+        source: 'regex',
+        matchedPhrase: 'distill from ' + tokens.join(' + '),
+      };
+    },
+  },
+  // W853 — federated consortium: "set up a federated consortium", "join the
+  // federated network", "share approvals across orgs with privacy". Keyword
+  // fast path otherwise loses to "set up" → quickstart because of bag-of-words
+  // scoring, so we anchor the federated intent with a regex pre-pass.
+  // Always emits at least one positional arg so classifyIntent's "prefer regex
+  // if it extracted args" rule (line 1263) picks this over the keyword hit.
+  {
+    pattern: /\b(?:federated|consortium)\b/i,
+    build: (m, raw) => {
+      const text = String(raw || m.input || '').toLowerCase();
+      const sub = /\b(?:join|enroll|connect|set\s+up|setup|start|create)\b/.test(text) ? 'join'
+        : /\b(?:leave|disconnect|remove|opt[- ]?out)\b/.test(text) ? 'leave'
+        : 'status';
+      return {
+        verb: 'federated',
+        args: [sub],
+        confidence: 0.9,
+        source: 'regex',
+        matchedPhrase: 'federated consortium',
+      };
+    },
+  },
+  // W853 — confidence routing: "route the easy 90% to a cheap model" and the
+  // sibling shapes the homepage chip set uses. Maps to `kolm route doctor`
+  // (W709). Sits before keyword fast path so "route" doesn't collide with the
+  // /v1/intent/ask 'ask' fallback at confidence 0.4.
+  {
+    pattern: /\b(?:confidence[- ]?rout(?:ing|er)|route\s+(?:the\s+)?easy(?:\s+\d+%?)?|cheap\s+(?:base\s+)?model\s+for(?:\s+the)?\s+easy|frontier\s+only\s+when|route\s+(?:only\s+)?on\s+confidence)\b/i,
+    build: () => ({
+      verb: 'route',
+      args: ['doctor'],
+      confidence: 0.88,
+      source: 'regex',
+      matchedPhrase: 'confidence routing',
+    }),
+  },
   // build a (redactor|classifier|extractor|agent|chatbot) [from <dir>]
   {
     pattern: /(?:build|make|create|scaffold)\s+(?:a\s+)?(redactor|classifier|extractor|extraction|chatbot|agent)(?:\s+(?:from|using)\s+["'`]?([^"'`]+?)["'`]?)?$/i,
@@ -752,7 +991,14 @@ function regexMatch(normalizedText, original) {
     // for `run X.kolm with "Patient John Doe"`) preserve their original case.
     // Fall back to the normalized lowercase match for case-insensitive verbs.
     const m = original.match(rule.pattern) || normalizedText.match(rule.pattern);
-    if (m) return rule.build(m, original);
+    if (!m) continue;
+    // A builder may return null to signal "this pattern matched but the
+    // shape we extracted is not specific enough; let the next rule try."
+    // The multi-vendor distill builder uses this to fall through to the
+    // single-vendor `distill from captures` rule when fewer than two
+    // teachers were recognised.
+    const result = rule.build(m, original);
+    if (result) return result;
   }
   return null;
 }
@@ -996,6 +1242,12 @@ export async function classifyIntent(text, context = {}) {
     }
     if (kw.verb === 'distill') {
       const r = regexMatch(normalized, original);
+      // W853 — if the regex extracted --teachers (multi-teacher / council
+      // pattern), prefer that envelope verbatim. The keyword fast-path's
+      // default `--from-captures` would mask the council recipe.
+      if (r && r.verb === 'distill' && r.args && r.args.includes('--teachers')) {
+        return baseEnvelope({ ...r, source: 'regex' });
+      }
       const hasRegexNs = !!(r && r.verb === 'distill' && r.args && r.args.includes('--namespace'));
       const ns = hasRegexNs
         ? r.args[r.args.indexOf('--namespace') + 1]
@@ -1595,6 +1847,22 @@ const WORKFLOWS = {
       { cmd: 'kolm distill --from-captures --namespace <name>',        why: 'Train the specialist LoRA from the dataset.' },
     ],
   },
+  // W853 — multi-teacher distillation (teacher council). The classifier
+  // routes any "multi-teacher", "teacher council", or "distill from <vendor a>
+  // and <vendor b>" question here. expandToWorkflow promotes single-teacher
+  // distill workflows to this one whenever cls.args contains '--teachers'.
+  multi_teacher_distill: {
+    summary: 'Distill with a teacher council — multiple frontier teachers, per-capture best-of, full attribution chain.',
+    steps: [
+      { cmd: 'kolm capture --provider openai --as ks_proxy',                                                    why: 'Route real traffic through the kolm proxy so pairs land in a tenant namespace.' },
+      { cmd: 'kolm capture --provider anthropic --as ks_anthropic_proxy',                                       why: 'Add a second provider so the council has more than one teacher to weigh.' },
+      { cmd: 'kolm tail captures --namespace <name>',                                                           why: 'Watch live pairs accumulate. You need ~1000 to cross the auto-distill threshold.' },
+      { cmd: 'kolm dataset create --namespace <name>',                                                          why: 'Promote captures into a reviewable train/holdout split.' },
+      { cmd: 'kolm distill --teachers claude-opus-4-7,gpt-4o,gemini-2.5-pro --weights auto --namespace <name>', why: 'Rank teachers per capture with the W718 teacher-council. --weights auto blends domain, task, verifier, human, cost, and risk signals.' },
+      { cmd: 'kolm verify <artifact>.kolm --binder council.html',                                               why: 'The receipt chain records which teacher won each token — auditable end to end.' },
+    ],
+    namespace_hint: '<name>',
+  },
   run: {
     summary: 'List your local artifacts, then call the one you want against an input.',
     steps: [
@@ -1720,6 +1988,71 @@ export function expandToWorkflow(intent, originalQuestion) {
       namespace_hint: null,
       steps: subwf.steps.map(s => ({ cmd: s.cmd, why: s.why })),
     };
+  }
+  // W853 — multi-teacher distill: when the regex extracted --teachers, route to
+  // the council recipe even though args.length > 0, because the user benefits
+  // from seeing the full capture→dataset→distill→verify pipeline with their
+  // chosen vendors threaded through.
+  if (verb === 'distill' && intent.args && intent.args.includes('--teachers')) {
+    const wf = WORKFLOWS.multi_teacher_distill;
+    if (wf) {
+      const teachersIdx = intent.args.indexOf('--teachers');
+      const teachersCsv = teachersIdx >= 0 ? intent.args[teachersIdx + 1] : null;
+      const teacherList = teachersCsv ? String(teachersCsv).split(',').map(s => s.trim()).filter(Boolean) : [];
+      const q853 = String(originalQuestion || '').toLowerCase();
+      // Prefer goal phrasing ("for support", "to handle tickets") over `from`
+      // because `from <vendor>` is the teacher list itself — extracting that
+      // as the namespace produces nonsense like `--namespace anthropic-and-openai`.
+      // Also blacklist obvious vendor / model tokens from a fallback `from`
+      // match so generic phrasings still land somewhere sensible.
+      const VENDOR_BLACKLIST = /^(?:my\s+)?(?:anthropic|openai|gemini|google|deepseek|qwen|llama|meta|mistral|claude|gpt|grok|xai|together|fireworks|huggingface|hf)\b/i;
+      let hint853 = null;
+      const goalMatch853 = q853.match(/\b(?:for|to\s+(?:handle|cover|serve|support|automate))\s+(?:my\s+)?([a-z][a-z0-9 -]{2,40})/);
+      if (goalMatch853) hint853 = goalMatch853[1].trim().split(/\s+/).slice(0, 3).join('-');
+      if (!hint853) {
+        const nsMatch853 = q853.match(/\b(?:in|under)\s+(?:namespace\s+)?["'`]?([a-z][\w.\-:/]{2,30})["'`]?/);
+        if (nsMatch853) hint853 = nsMatch853[1];
+      }
+      if (!hint853) {
+        const fromMatch853 = q853.match(/\bfrom\s+(my\s+)?([a-z][a-z0-9 -]{2,30})/);
+        if (fromMatch853) {
+          const candidate = fromMatch853[2].trim().split(/\s+/).slice(0, 3).join('-');
+          if (!VENDOR_BLACKLIST.test(candidate)) hint853 = candidate;
+        }
+      }
+      const safeHint853 = hint853 ? hint853.replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').slice(0, 30) : 'council';
+      const providerByModel = {
+        'claude-opus-4-7': 'anthropic',
+        'gpt-4o': 'openai',
+        'gemini-2.5-pro': 'gemini',
+        'deepseek-v4-pro': 'deepseek',
+      };
+      const teacherSteps = teacherList.length > 0 ? teacherList.slice(0, 4).map(model => {
+        const provider = providerByModel[model] || (model.includes('claude') ? 'anthropic' : model.includes('gpt') ? 'openai' : model.includes('gemini') ? 'gemini' : 'anthropic');
+        return {
+          cmd: `kolm capture --provider ${provider} --model ${model} --as ks_${provider}_proxy`,
+          why: `Front ${provider} (${model}) as a captured teacher — every reply gets logged with full attribution.`,
+        };
+      }) : [
+        { cmd: 'kolm capture --provider anthropic --as ks_anthropic_proxy', why: 'Front Anthropic Claude — every reply gets logged.' },
+        { cmd: 'kolm capture --provider openai --as ks_openai_proxy', why: 'Front OpenAI GPT — same dataset, second teacher.' },
+      ];
+      const distillStepIdx = wf.steps.findIndex(s => s.cmd.startsWith('kolm distill'));
+      const baseDistill = distillStepIdx >= 0 ? wf.steps[distillStepIdx] : null;
+      const distillCmd = baseDistill
+        ? (teachersCsv ? `kolm distill --teachers ${teachersCsv} --weights auto --namespace ${safeHint853}` : baseDistill.cmd.replace(/<name>/g, safeHint853))
+        : `kolm distill --teachers ${teacherList.join(',') || 'claude-opus-4-7,gpt-4o'} --weights auto --namespace ${safeHint853}`;
+      const tailStep = { cmd: `kolm tail captures --namespace ${safeHint853}`, why: 'Watch both feeds land in one namespace — confirms attribution before you spend on a distill.' };
+      const datasetStep = { cmd: `kolm dataset create --namespace ${safeHint853}`, why: 'Freeze captures into a dataset so the distill is reproducible.' };
+      const distillStep = { cmd: distillCmd, why: 'Run the council — kolm weighs each teacher per capture and picks the best-of label, then trains your student on the merged signal.' };
+      const verifyStep = { cmd: `kolm verify <artifact>.kolm --binder council.html`, why: 'Binder shows which teacher won which row + the agreement matrix.' };
+      const steps853 = [...teacherSteps, tailStep, datasetStep, distillStep, verifyStep];
+      return {
+        summary: wf.summary,
+        namespace_hint: safeHint853,
+        steps: steps853,
+      };
+    }
   }
   // If the classifier already extracted concrete args, the user knows what they
   // want — no expansion needed.

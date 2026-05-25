@@ -8,22 +8,25 @@
 // Gates, in order:
 //   1.  npm run lint:refs                (static-ref + href integrity + product-surface
 //                                         catalog vs api-routes.json contract)
-//   2.  openapi-sync                     (W490: public/openapi.json covers every
+//   2.  control-files                    (W855: 7 internal JSONs in docs/internal/
+//                                         parse + match expected schema strings +
+//                                         carry non-empty required arrays)
+//   3.  openapi-sync                     (W490: public/openapi.json covers every
 //                                         non-stub route in api-routes.json)
-//   3.  sdk-manifest                     (current + versioned browser SDK assets
+//   4.  sdk-manifest                     (current + versioned browser SDK assets
 //                                         exist, match hashes/SRI, and are not ignored)
-//   4.  npm test                         (full test suite, --test-concurrency=1)
-//   5.  SDK smoke against local server   (boots PORT=3939, then runs
+//   5.  npm test                         (full test suite, --test-concurrency=1)
+//   6.  SDK smoke against local server   (boots PORT=3939, then runs
 //                                         sdk/node/test/sdk.test.mjs)
-//   6.  local-surfaces                   (W545: boots an isolated server, provisions
+//   7.  local-surfaces                   (W545: boots an isolated server, provisions
 //                                         a disposable tenant, runs every safe
 //                                         production_smoke probe declared in
 //                                         docs/product-surfaces.json. With
 //                                         --deep-surfaces also runs deep probes.)
-//   7.  kolm doctor --json               (ok:true + blockers:0 unless --allow-logged-out)
-//   8.  kolm whoami --json               (logged_in:true unless --allow-logged-out)
-//   9.  kolm verify <kolm> --json        (ok:true + production_ready:true)
-//  10.  kolm billing tiers --json        (data is non-empty tier list)
+//   8.  kolm doctor --json               (ok:true + blockers:0 unless --allow-logged-out)
+//   9.  kolm whoami --json               (logged_in:true unless --allow-logged-out)
+//  10.  kolm verify <kolm> --json        (ok:true + production_ready:true)
+//  11.  kolm billing tiers --json        (data is non-empty tier list)
 //
 // Invocation:
 //   node scripts/release-verify.cjs                       # all gates
@@ -236,6 +239,55 @@ async function gateLintRefs() {
   if (!brokenOk) fail_reasons.push('broken refs not 0');
   recordResult('lint:refs', ok, {
     detail: ok ? out.match(/missing.*\n.*broken: \d+/)?.[0] || '' : (fail_reasons.join('; ') + ' :: ' + out.slice(-300)),
+    duration_ms: Date.now() - t,
+  });
+  return ok;
+}
+
+// W855 — control-files gate. The 7 JSONs in docs/internal/ are the internal
+// truth registry (waves, files, design cascade, media proofs, catalog manifest).
+// They aren't shipped to public, but a corrupt or missing one means a future
+// surface-scan will produce nonsense. This gate is parse-and-shape only — no
+// drift check between the registry and the codebase, which would require a
+// separate, slower scrape and is the job of the regenerate-script.
+async function gateControlFiles() {
+  if (!shouldRun('control-files')) return recordResult('control-files', true, { skipped: true });
+  progress('control-files running');
+  const t = Date.now();
+  const CONTROL = [
+    { file: 'docs/internal/catalog-manifest.json',     schema: 'kolm.catalog_manifest.v1',     requiredArrays: ['entries'] },
+    { file: 'docs/internal/codebase-file-ledger.json', schema: 'kolm.codebase_file_ledger.v1', requiredArrays: ['paths'] },
+    { file: 'docs/internal/design-cascade-ledger.json',schema: 'kolm.design_cascade_ledger.v1',requiredArrays: ['files'] },
+    { file: 'docs/internal/product-media-proof.json',  schema: 'kolm.product_media_proof.v1',  requiredArrays: ['pages'] },
+    { file: 'docs/internal/wave-reconcile-report.json',schema: 'kolm.wave_reconcile_report.v1',requiredArrays: [] },
+    { file: 'docs/internal/wave-registry.json',        schema: 'kolm.wave_registry.v1',        requiredArrays: ['waves'] },
+    { file: 'docs/internal/wave-registry.schema.json', schema: null, requiredArrays: [] },
+  ];
+  const failures = [];
+  const summaries = [];
+  for (const ctl of CONTROL) {
+    const abs = path.join(REPO_ROOT, ctl.file);
+    if (!fs.existsSync(abs)) { failures.push(`${ctl.file}: missing`); continue; }
+    let raw;
+    try { raw = fs.readFileSync(abs, 'utf8'); } catch (e) { failures.push(`${ctl.file}: read ${e.message}`); continue; }
+    let j;
+    try { j = JSON.parse(raw); } catch (e) { failures.push(`${ctl.file}: invalid JSON (${e.message.slice(0, 80)})`); continue; }
+    if (ctl.schema && j.schema !== ctl.schema) {
+      failures.push(`${ctl.file}: schema=${j.schema} expected=${ctl.schema}`);
+      continue;
+    }
+    for (const arrKey of ctl.requiredArrays) {
+      if (!Array.isArray(j[arrKey]) || j[arrKey].length === 0) {
+        failures.push(`${ctl.file}: ${arrKey} not a non-empty array`);
+      }
+    }
+    summaries.push(`${path.basename(ctl.file)} ${Math.round((raw.length/1024))}KB`);
+  }
+  const ok = failures.length === 0;
+  recordResult('control-files', ok, {
+    detail: ok ? `7 files ok: ${summaries.join(', ')}` : failures.join('; '),
+    files: CONTROL.length,
+    failures: failures.length,
     duration_ms: Date.now() - t,
   });
   return ok;
@@ -602,6 +654,7 @@ function gateCli(name, argv, validator) {
 
 (async function main() {
   await gateLintRefs();
+  await gateControlFiles();
   await gateOpenapiSync();
   await gateSdkManifest();
   await gateTests();

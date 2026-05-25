@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>kolm.ai · Frontier AI on your own infrastructure · open-source AI workbench · kolm.ai</title>
-<meta name="description" content="Kolm is the open-source AI workbench for running frontier AI on your own infrastructure. Capture your traffic, distill it into a private .kolm artifact, deploy to your hardware. Apache-2.0, signed, no per-token bill.">
-<meta name="keywords" content="AI workbench, AI compiler, model distillation, INT4 quantization, on-device LLM, OpenRouter alternative, model gateway, edge inference, private AI, regulated AI">
+<title>kolm.ai · Compile your AI workload into a model you own · evidence-to-artifact compiler</title>
+<meta name="description" content="Kolm is the evidence-to-artifact compiler. Capture your traffic, distill it into a private .kolm artifact, deploy to your hardware. Apache-2.0, signed, no per-token bill.">
+<meta name="keywords" content="AI compiler, evidence to artifact, model distillation, INT4 quantization, on-device LLM, OpenRouter alternative, model gateway, edge inference, private AI, regulated AI">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:locale" content="en_US">
-<meta property="og:title" content="Frontier AI on your own infrastructure - kolm.ai">
-<meta property="og:description" content="Capture, distill, compile, deploy frontier AI on your own hardware. Every .kolm artifact is signed, reproducible, Apache-2.0, no per-token bill.">
+<meta property="og:title" content="Compile your AI workload into a model you own — kolm.ai">
+<meta property="og:description" content="Capture, distill, compile, deploy. Every .kolm artifact is signed, reproducible, Apache-2.0, no per-token bill.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -22,8 +22,8 @@
 <meta property="og:image:alt" content="kolm.ai: route models, distill specialists, and run signed .kolm artifacts anywhere.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="Frontier AI on your own infrastructure - kolm.ai">
-<meta name="twitter:description" content="Open-source AI workbench. Capture, distill, compile, deploy frontier models on your own hardware. Signed, reproducible, no per-token bill.">
+<meta name="twitter:title" content="Compile your AI workload into a model you own — kolm.ai">
+<meta name="twitter:description" content="The evidence-to-artifact compiler. Capture, distill, compile, deploy models on your own hardware. Signed, reproducible, no per-token bill.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/">
 <link rel="alternate" hreflang="en" href="https://kolm.ai/">
@@ -540,20 +540,26 @@
 <section class="ks-cli-chat" id="chat" aria-label="Try kolm before signing up">
   <div class="ks-cli-chat__inner">
     <div class="ks-cli-chat__copy">
-      <span class="eye">Live &middot; /v1/free/chat &middot; same classifier as <code>kolm do</code></span>
+      <span class="eye">Live &middot; /v1/free/cli &middot; spawns this server&rsquo;s <code>cli/kolm.js</code></span>
       <h2>This box is the CLI. Not a demo.</h2>
-      <p>Every reply is produced by the same <code>src/intent.js</code> classifier that resolves <code>kolm do "&lt;natural language&gt;"</code> on your laptop. The box returns the exact shell command &mdash; paste it into your terminal and it runs. With a key attached the route promotes to your tenant snapshot; without one you get 20 messages/IP/day to kick the tires.</p>
+      <p>This is the real <code>kolm</code> CLI &mdash; not a demo. Read-only verbs (<code>whoami</code>, <code>doctor</code>, <code>changelog</code>, <code>route doctor</code>, <code>federated peers</code>, &hellip;) run inline against this server&rsquo;s <code>cli/kolm.js</code> through <code>POST /v1/free/cli</code>. Write verbs (<code>capture</code>, <code>distill</code>, <code>compile</code>, <code>run</code>) return the exact shell command to copy. Same allowlist for everyone; 20 calls/IP/day on the free tier.</p>
       <ul>
         <li>20 free messages per day &middot; no account needed</li>
         <li>Sign up free for unlimited &middot; same chat at <code>/account</code></li>
         <li>Apache-2.0 <code>src/intent.js</code> &middot; you can read the classifier</li>
       </ul>
       <details class="ks-cli-chat__verify">
-        <summary>verify it yourself &middot; one curl</summary>
-<pre class="ks-cli-chat__verify-pre"><code>$ curl -s https://kolm.ai/v1/free/chat \
+        <summary>verify it yourself &middot; two curls</summary>
+<pre class="ks-cli-chat__verify-pre"><code># 1. run a real read-only verb (server spawns cli/kolm.js)
+$ curl -s https://kolm.ai/v1/free/cli \
     -H 'content-type: application/json' \
-    -d '{"question":"distill my anthropic traffic"}' | jq '.command, .workflow.steps[].cmd'</code></pre>
-        <p class="ks-cli-chat__verify-why">No key &rarr; <code>mode:"free"</code>. Add <code>-H "X-API-Key: ks_&hellip;"</code> &rarr; <code>mode:"auth"</code>. Same handler, same classifier, same shape.</p>
+    -d '{"command":"kolm whoami"}' | jq '.exit_code, .duration_ms, .stdout'
+
+# 2. ask in plain English (classifier returns a recipe)
+$ curl -s https://kolm.ai/v1/free/chat \
+    -H 'content-type: application/json' \
+    -d '{"question":"distill from claude, gpt and gemini"}' | jq '.command, .workflow.steps[].cmd'</code></pre>
+        <p class="ks-cli-chat__verify-why">The CLI route enforces a verb allowlist (<code>whoami</code>, <code>doctor</code>, <code>changelog</code>, <code>route</code>, <code>federated</code>, &hellip;) and a strict arg-token regex &mdash; shell metachars are rejected before <code>spawn</code>. 5s timeout, 8KB output cap, 20 calls/IP/day. <code>GET /v1/free/cli/allowlist</code> returns the exact set the server accepts.</p>
       </details>
       <div class="ctas">
         <a class="ks-btn ks-btn--ghost" href="/docs/cli">Read the CLI reference</a>
@@ -837,9 +843,10 @@
         <ul>
           <li><b>Confidence routing.</b> Frontier only when your model isn&rsquo;t confident &mdash; cheap base for the easy 90%, premium teacher for the long tail.</li>
           <li><b>Approval-only capture.</b> Nothing trains on a response you didn&rsquo;t green-light.</li>
+          <li><b>Multimodal too.</b> Image, audio, video, and PDF captures land in the same lake &mdash; with voiceprint scrub and image-PII redaction before they ever touch training.</li>
           <li><b>Same SDK in and out.</b> If your code already calls OpenAI or Anthropic, you change one URL.</li>
         </ul>
-        <a class="ks-three-surface__link" href="/route">Route &amp; Capture &rarr;</a>
+        <a class="ks-three-surface__link" href="/capture">Route &amp; Capture &rarr;</a>
       </article>
 
       <article class="ks-three-surface__col ks-three-surface__col--feat">
@@ -851,6 +858,7 @@
         <ul>
           <li><b>Teacher Council.</b> Blend multiple teachers into one specialist &mdash; GPT-4 for code, Claude for prose, Gemini for math, your domain expert for the rest. The student inherits all of them.</li>
           <li><b>Five distillation strategies, ten quantization methods.</b> The compiler picks the right combination for your target hardware.</li>
+          <li><b>Federated consortium.</b> Pool training signal across orgs with differential privacy &mdash; your raw data never leaves, only the noised approval rows do.</li>
           <li><b>Reproducible from seed.</b> Same input, same artifact, bit-identical. Auditable in two seconds.</li>
         </ul>
         <a class="ks-three-surface__link" href="/forge">Distill &amp; Compile &rarr;</a>
@@ -865,6 +873,7 @@
         <ul>
           <li><b>Runtime targets.</b> vLLM, SGLang, llama.cpp, Core ML, WebGPU &mdash; same artifact, picked at deploy time.</li>
           <li><b>Verifiable receipts.</b> Ed25519-signed, frozen-eval gated, drift-alerted. Pull any response back to the exact weights that produced it.</li>
+          <li><b>Regulatory packets.</b> One command emits an EU AI Act, GDPR, SOC 2 or HIPAA binder &mdash; the receipt chain is already the evidence.</li>
           <li><b>Air-gap one binary.</b> Self-host the whole stack on systemd, k8s, or a docker compose &mdash; Apache-2.0, no phone-home.</li>
         </ul>
         <a class="ks-three-surface__link" href="/runtimes">Run &amp; Govern &rarr;</a>
