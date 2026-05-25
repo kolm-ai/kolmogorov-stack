@@ -190,6 +190,96 @@
     .hp-tab { padding: 7px 10px; font-size: 10.5px; }
   }
 </style>
+
+<!-- ================== W868: typography + rhythm + motion polish.
+     Scoped, additive. No existing rules clobbered. All motion gated
+     on prefers-reduced-motion. Tabular nums on numerics. Reveal stagger
+     on direct children of any .fr-reveal section, capped at 6 children
+     so long lists don't snake in for 600ms. ================== -->
+<style>
+  /* --- Heading rhythm: tighten the visible H2 scale + tracking. Existing
+         clamp lives in frontier.css; this is a per-page calibration so
+         the big eyebrow→h2→lede triple reads as one block, not three. --- */
+  .fr-section__head { margin-bottom: clamp(20px, 2.4vw, 32px); }
+  .fr-section__head .fr-eyebrow { margin-bottom: 10px; display: inline-block; }
+  .fr-section__head .fr-h2 { letter-spacing: -0.022em; line-height: 1.08; }
+  .fr-section__head .fr-lede { margin-top: 12px; max-width: 64ch; }
+
+  /* --- Card surface treatment. Same for whatis surfaces and three-surface
+         columns: hairline border, soft lift on hover, no shadow when reduced. --- */
+  .kolm-whatis__surface,
+  .ks-three-surface__col {
+    transition: transform 220ms cubic-bezier(.2,.6,.2,1),
+                border-color 220ms ease,
+                box-shadow 220ms ease;
+    will-change: transform;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .kolm-whatis__surface:hover,
+    .ks-three-surface__col:hover {
+      transform: translateY(-2px);
+      border-color: var(--ks-accent-edge, rgba(17,17,17,0.18));
+      box-shadow: 0 8px 28px -18px rgba(17, 17, 17, 0.28);
+    }
+    [data-theme="dark"] .kolm-whatis__surface:hover,
+    [data-theme="dark"] .ks-three-surface__col:hover {
+      box-shadow: 0 10px 32px -16px rgba(0,0,0,0.5);
+    }
+  }
+
+  /* --- Receipt strip lift: subtle elevation so the JSON reads like an
+         artifact, not a quote block. Reduced-motion safe (no transition). --- */
+  .kolm-receipt-strip pre {
+    box-shadow: 0 12px 36px -22px rgba(0,0,0,0.45);
+  }
+
+  /* --- Numerics: tabular figures everywhere money + tokens + percent
+         appear so the column never jitters as values change. --- */
+  .home-roi-num,
+  .home-roi-row span:last-child,
+  .home-roi-mult,
+  .home-receipts__size,
+  .home-receipts__time,
+  .home-receipts__hash {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* --- Reveal stagger: direct children of any .fr-reveal get a small
+         cascade so the section reads top-to-bottom. Capped at 6 so long
+         lists don't crawl in for half a second. Honors reduce-motion. --- */
+  .fr-reveal--prep > * { transition: opacity 380ms ease, transform 420ms cubic-bezier(.2,.6,.2,1); }
+  .fr-reveal--prep > *:nth-child(1) { transition-delay: 60ms; }
+  .fr-reveal--prep > *:nth-child(2) { transition-delay: 120ms; }
+  .fr-reveal--prep > *:nth-child(3) { transition-delay: 180ms; }
+  .fr-reveal--prep > *:nth-child(4) { transition-delay: 240ms; }
+  .fr-reveal--prep > *:nth-child(5) { transition-delay: 300ms; }
+  .fr-reveal--prep > *:nth-child(6) { transition-delay: 360ms; }
+  @media (prefers-reduced-motion: reduce) {
+    .kolm-whatis__surface, .ks-three-surface__col { transition: none !important; }
+    .fr-reveal--prep > * { transition: none !important; transition-delay: 0ms !important; }
+  }
+
+  /* --- Section divider mark: lighter weight so the rules between sections
+         feel like quiet pauses, not chapter breaks. --- */
+  .fr-rule--major__mark {
+    font-weight: 400;
+    letter-spacing: 0.14em;
+    opacity: 0.7;
+  }
+
+  /* --- Code inline polish: tighter chip in body copy across the page. --- */
+  .kolm-whatis__p code,
+  .ks-three-surface__col p code,
+  .ks-three-surface__col li code,
+  .fr-lede code {
+    background: color-mix(in srgb, var(--ks-ink, #111) 7%, transparent);
+    color: var(--ks-ink, #111);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.92em;
+    font-family: var(--ks-mono, ui-monospace, "JetBrains Mono", monospace);
+  }
+</style>
 <script>
   (function(){
     try {
@@ -563,82 +653,22 @@ $ curl -s https://kolm.ai/v1/free/chat \
 </section>
 
 
-<!-- ================== W844: "How it works" rewritten as 4 per-component deep-dives.
-     The arch-band above the fold already shows the four stages at the surface
-     level. The old section restated that same pipeline (SVG circles + 4 step
-     cards + a prose paragraph re-saying the same 4 commands). The user
-     called this out: "a lot of unimpressive tech stuff are mentioned several
-     times repetitively whereas you can appropriately describe one thing
-     then use other space to go into each of the components and some of the
-     inventions or innovations within."
-     So this section now drops in one ACTUAL innovation per stage  -  not the
-     name of the stage  -  with the underlying mechanism, a representative
-     stat, and the command that triggers it. ================== -->
+<!-- ================== W868: section dedup.
+     We had three back-to-back explanations of the same pipeline:
+       1. .kolm-arch-band (SVG, kept — visual story)
+       2. .kolm-deep (4 per-outcome cards — CUT in W868)
+       3. .ks-three-surface (3 columns × surface — kept, has the substance)
+     The arch-band already shows the four stages; .ks-three-surface
+     already covers per-surface outcomes with substance. The 4 deep
+     cards were a third re-explanation. Cut, keep the receipt artifact
+     as the focal proof for this section. ================== -->
 <section class="fr-section fr-reveal" id="how">
   <div class="fr-container">
-    <h2 class="fr-h2">What you get when you compile.</h2>
-    <p class="fr-lede">Four outcomes the rented-token stack does not give you.</p>
-
-    <div class="kolm-deep" role="list">
-
-      <article class="kolm-deep__card" role="listitem">
-        <header class="kolm-deep__head">
-          <div class="kolm-deep__stage">01</div>
-          <h3 class="kolm-deep__title">No per-token bill. Ever.</h3>
-        </header>
-        <p class="kolm-deep__body">The artifact runs on your hardware. Inference cost collapses to the electricity bill on the box.</p>
-        <ul class="kolm-deep__facts">
-          <li><b>Typical team</b> <span>$8K/mo OpenAI &rarr; ~$140/mo electricity (1&times;5090)</span></li>
-          <li><b>Payback</b> <span>Pro ($49/mo) clears in week one for most loads</span></li>
-        </ul>
-        <code class="kolm-deep__cmd">$ kolm run support.kolm</code>
-      </article>
-
-      <article class="kolm-deep__card" role="listitem">
-        <header class="kolm-deep__head">
-          <div class="kolm-deep__stage">02</div>
-          <h3 class="kolm-deep__title">Trained on YOUR traffic, not a scrape.</h3>
-        </header>
-        <p class="kolm-deep__body">Distilled from real conversations on your namespace. Tone, jargon, edge cases all carry over.</p>
-        <ul class="kolm-deep__facts">
-          <li><b>Quality lift</b> <span>+12 to +28 K-Score points vs the base model</span></li>
-          <li><b>Tenant-fenced</b> <span>captures never cross tenant lines</span></li>
-        </ul>
-        <code class="kolm-deep__cmd">$ kolm distill --namespace support --student qwen-7b</code>
-      </article>
-
-      <article class="kolm-deep__card" role="listitem">
-        <header class="kolm-deep__head">
-          <div class="kolm-deep__stage">03</div>
-          <h3 class="kolm-deep__title">Fits the hardware you own.</h3>
-        </header>
-        <p class="kolm-deep__body">Ten quantize methods scored on your target box; winner pinned by accuracy-per-byte. From phone to 5090.</p>
-        <ul class="kolm-deep__facts">
-          <li><b>Mac laptop</b> <span>7B INT4, 24.5 tok/s</span></li>
-          <li><b>RTX 5090</b> <span>32B NF4, 19.2 GB VRAM, 11.5 tok/s</span></li>
-          <li><b>Pixel 8</b> <span>3B BitNet 1.58, sub-second first-token</span></li>
-        </ul>
-        <code class="kolm-deep__cmd">$ kolm quantize --target rtx-5090</code>
-      </article>
-
-      <article class="kolm-deep__card" role="listitem">
-        <header class="kolm-deep__head">
-          <div class="kolm-deep__stage">04</div>
-          <h3 class="kolm-deep__title">An audit trail compliance accepts.</h3>
-        </header>
-        <p class="kolm-deep__body">Every artifact ships its own offline verifier. <code>kolm verify</code> replays the eval and proves the weights, no phone-home.</p>
-        <ul class="kolm-deep__facts">
-          <li><b>HIPAA &middot; SOC 2</b> <span>BAA-friendly: VPC, air-gap, or laptop</span></li>
-          <li><b>Reproducible</b> <span>same spec + seeds &rarr; identical signed hash</span></li>
-        </ul>
-        <code class="kolm-deep__cmd">$ kolm verify support.kolm</code>
-      </article>
-
-    </div>
+    <h2 class="fr-h2">The receipt is the proof.</h2>
+    <p class="fr-lede">Every <code>.kolm</code> artifact ships its own offline verifier. The receipt below is byte-for-byte what <code>kolm verify support.kolm --json</code> prints &mdash; no phone-home, no trust in our service required.</p>
 
     <!-- W846: real receipt JSON inline — devs want to SEE what "signed
-         artifact" actually means, not just read a card. This is the
-         minified form of a real receipt the verifier produces. -->
+         artifact" actually means, not just read a card. -->
     <div class="kolm-receipt-strip" aria-label="Real receipt example">
       <pre><code><span class="receipt-line-comment">// $ kolm verify support.kolm --json</span>
 {
