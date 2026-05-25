@@ -6011,12 +6011,23 @@ export function buildRouter() {
   // when the requested vendor's server-side key is unset (HTTP 503,
   // key_not_configured) so the caller can fall back to local-only teachers
   // without ambiguity.
+  // Vercel env vars are case-sensitive and operators have been known to add
+  // them as lowercase (e.g. `anthropic_api_key`) or as the short form
+  // (`openai_key`, `google_key`). Read every reasonable casing so the proxy
+  // never silently misses a configured key.
   const TEACHER_CHAT_VENDORS = Object.freeze({
-    anthropic: { env: 'ANTHROPIC_API_KEY' },
-    openai:    { env: 'OPENAI_API_KEY' },
-    google:    { env: 'GOOGLE_API_KEY' },
-    xai:       { env: 'XAI_API_KEY' },
+    anthropic: { envs: ['ANTHROPIC_API_KEY', 'anthropic_api_key', 'ANTHROPIC_KEY', 'anthropic_key'] },
+    openai:    { envs: ['OPENAI_API_KEY', 'openai_api_key', 'OPENAI_KEY', 'openai_key'] },
+    google:    { envs: ['GOOGLE_API_KEY', 'google_api_key', 'GOOGLE_KEY', 'google_key', 'GEMINI_API_KEY', 'gemini_api_key'] },
+    xai:       { envs: ['XAI_API_KEY', 'xai_api_key', 'XAI_KEY', 'xai_key'] },
   });
+  function _w869FirstEnv(envs) {
+    for (const k of envs) {
+      const v = process.env[k];
+      if (v && String(v).trim().length > 0) return { key: v, var: k };
+    }
+    return null;
+  }
   r.post('/v1/teacher/chat', async (req, res) => {
     if (!req.tenant_record) {
       return res.status(401).json({ ok: false, error: 'auth_required' });
@@ -6065,14 +6076,15 @@ export function buildRouter() {
       return res.status(413).json({ ok: false, error: 'messages_too_large',
         detail: 'cumulative message content exceeds 32000 chars' });
     }
-    const key = process.env[vcfg.env];
-    if (!key) {
+    const keyHit = _w869FirstEnv(vcfg.envs);
+    if (!keyHit) {
       return res.status(503).json({
         ok: false, error: 'key_not_configured',
         vendor,
-        detail: `${vcfg.env} is not set on this kolm instance; ask the operator to add it (or use vendor=local).`,
+        detail: `none of ${vcfg.envs.join(' / ')} is set on this kolm instance; ask the operator to add one (or use vendor=local).`,
       });
     }
+    const key = keyHit.key;
     try {
       let text = '';
       let inputChars = totalChars + system.length;
@@ -6155,12 +6167,16 @@ export function buildRouter() {
   // burning a real call to test.
   r.get('/v1/teacher/chat/health', (req, res) => {
     const status = {};
+    const sources = {};
     for (const [v, cfg] of Object.entries(TEACHER_CHAT_VENDORS)) {
-      status[v] = !!process.env[cfg.env];
+      const hit = _w869FirstEnv(cfg.envs);
+      status[v] = !!hit;
+      if (hit) sources[v] = hit.var;
     }
     return res.status(200).json({
       ok: true,
       vendors: status,
+      sources,
       any_configured: Object.values(status).some(Boolean),
     });
   });
