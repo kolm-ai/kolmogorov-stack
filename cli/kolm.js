@@ -1216,6 +1216,8 @@ USAGE
   kolm bench evidence --validate <matrix.json>        validate a public provider benchmark matrix
   kolm bench --reproduce <suite> [opts]               public-reproducer suite (Docker)
   kolm bench --compare <artifact.kolm> [opts]         head-to-head: kolm vs LLM
+  kolm bench --axes <artifact.kolm> [--json]          per-axis K-Score breakdown (A/S/L/C/V + R/T/F/E/Z)
+  kolm bench --all-targets <artifact.kolm> [--json]   compare every sibling artifact (k-score, size, fits)
 
 OPTIONS (artifact mode)
   --runs <n>                   runs per embedded eval case (default: 1)
@@ -6880,16 +6882,56 @@ async function cmdCompile(args) {
   // ---- Rent-compile path: ship a spec to a rental backend (modal/vast/lambda/runpod),
   // train remotely, fetch the .kolm back. Must run BEFORE the local --spec path
   // since both require --spec; the presence of --rent decides where the work lands.
+  //
+  // W869 — `--cloud <backend>` is a friendlier alias for `--rent <backend>`.
+  // Both flags route through src/compute/rent.js; --cloud is the name surfaced
+  // in docs + the Studio compile wizard for Persona B (no local GPU).
+  const cloudIdxRewrite = args.indexOf('--cloud');
+  if (cloudIdxRewrite >= 0 && args.indexOf('--rent') < 0) {
+    const cloudBackend = args[cloudIdxRewrite + 1];
+    if (cloudBackend) {
+      args.splice(cloudIdxRewrite, 2, '--rent', cloudBackend);
+    }
+  }
   const rentIdxEarly = args.indexOf('--rent');
   if (rentIdxEarly >= 0) {
     const backend = args[rentIdxEarly + 1];
-    if (!backend) { console.error('error: --rent needs a backend name. try: kolm compute list'); process.exit(EXIT.BAD_ARGS); }
+    if (!backend) { console.error('error: --rent / --cloud needs a backend name. try: kolm compute list'); process.exit(EXIT.BAD_ARGS); }
+    // W869 — accept either --spec <file.json> (authored) OR --namespace <name>
+    // (auto-spec). The auto-spec path makes Persona B work without ever
+    // touching JSON. The synthesized spec is conservative — bump examples /
+    // epochs by handing in --spec instead for finer control.
     const specIdx2 = args.indexOf('--spec');
-    if (specIdx2 < 0) { console.error('error: --rent requires --spec <file.json>'); process.exit(EXIT.BAD_ARGS); }
-    const specArg2 = args[specIdx2 + 1];
+    const nsIdx2 = args.indexOf('--namespace');
+    const specArg2 = specIdx2 >= 0 ? args[specIdx2 + 1] : null;
+    const nsArg2 = nsIdx2 >= 0 ? args[nsIdx2 + 1] : null;
     let spec2;
-    try { spec2 = JSON.parse(fs.readFileSync(specArg2, 'utf-8')); }
-    catch (e) { console.error(`error: cannot read spec: ${e.message}`); process.exit(EXIT.NOT_FOUND); }
+    if (specArg2) {
+      try { spec2 = JSON.parse(fs.readFileSync(specArg2, 'utf-8')); }
+      catch (e) { console.error(`error: cannot read spec: ${e.message}`); process.exit(EXIT.NOT_FOUND); }
+    } else if (nsArg2) {
+      const baseModelIdx = args.indexOf('--base-model');
+      const baseModel = baseModelIdx >= 0 ? args[baseModelIdx + 1] : 'Qwen/Qwen2.5-3B-Instruct';
+      spec2 = {
+        job_id: 'job_' + Math.random().toString(16).slice(2, 10),
+        task: `cloud-compile from namespace '${nsArg2}' (auto-spec)`,
+        base_model: baseModel,
+        corpus_namespace: nsArg2,
+        examples: 500,
+        epochs: 3,
+        batch_size: 4,
+        seq_len: 1024,
+        recipes: [],
+        evals: { spec: 'rs-1-evals', n: 1, cases: [], coverage: 0 },
+        training_stats: { pass_rate_positive: null, latency_p50_us: null },
+        _auto_generated_from: { namespace: nsArg2, generated_at: new Date().toISOString() },
+      };
+    } else {
+      console.error('error: --rent / --cloud requires either --spec <file.json> or --namespace <name>.');
+      console.error('  --namespace <name>  auto-builds a minimal spec from your captured calls');
+      console.error('  --spec <file.json>  uses the exact spec you authored (for finer control)');
+      process.exit(EXIT.BAD_ARGS);
+    }
     const confirm = args.includes('--confirm');
     const budgetIdxR = args.indexOf('--budget');
     const budget = budgetIdxR >= 0 ? Number(args[budgetIdxR + 1]) : null;
@@ -6901,13 +6943,14 @@ async function cmdCompile(args) {
       on_progress: ({ stage, pct }) => console.error(`  [${backend}] ${stage} ${pct != null ? pct + '%' : ''}`),
     });
     if (r.dry_run) {
+      const replay = specArg2 ? `--spec ${specArg2}` : `--namespace ${nsArg2}`;
       console.log(`quote for ${r.backend}:`);
       console.log(`  duration:   ${r.estimate.duration_human}`);
       console.log(`  cost:       ${r.estimate.cost_usd == null ? '(varies)' : '$' + r.estimate.cost_usd.toFixed(2)}`);
       console.log(`  basis:      ${r.estimate.cost_basis}`);
       console.log('');
       console.log('pass --confirm to actually rent + train. e.g.');
-      console.log(`  kolm compile --spec ${specArg2} --rent ${backend} --confirm`);
+      console.log(`  kolm compile ${replay} --cloud ${backend} --confirm`);
       return;
     }
     if (!r.ok) {
@@ -7026,6 +7069,54 @@ async function cmdCompile(args) {
     let spec;
     try { spec = JSON.parse(raw); }
     catch (e) { console.error(`error: spec is not valid JSON: ${e.message}`); process.exit(EXIT.BAD_ARGS); }
+
+    // W869 — pre-compile VRAM gate (Persona A). Refuse to start a local compile
+    // when the planned (model, quant, context, batch) won't fit on the primary
+    // GPU. Honest failure now > OOM 3 hours in. Bypass with --no-fit-check or
+    // KOLM_NO_FIT_CHECK=1. Cloud/rent paths returned earlier so they bypass
+    // this naturally — the cloud machine's VRAM is the server's concern.
+    if (!args.includes('--no-fit-check') && !envBool('KOLM_NO_FIT_CHECK', false)
+        && (spec.base_model || spec.base_model_id)) {
+      try {
+        const [{ detectHardware }, { estimateMemoryFit }] = await Promise.all([
+          import('../src/forge-hardware.js'),
+          import('../src/forge-fit.js'),
+        ]);
+        const hw = detectHardware();
+        // Reuse estimator's HF-id → params parser (e.g. "Qwen2.5-7B" → 7).
+        const baseId = String(spec.base_model || spec.base_model_id);
+        const pm = /([0-9]+(?:\.[0-9]+)?)B/i.exec(baseId);
+        const paramsB = pm ? parseFloat(pm[1]) : null;
+        if (paramsB && paramsB > 0 && hw.primary && hw.primary.vram_gb > 0) {
+          const quant = process.env.KOLM_QUANT || 'int4';
+          const ctx = Math.max(64, Number(spec.seq_len || spec.max_seq_length || 1024));
+          const batch = Math.max(1, Number(spec.batch_size || 4));
+          let fit;
+          try { fit = estimateMemoryFit({ model_params_b: paramsB, quant, vram_gb: hw.primary.vram_gb, context: ctx, batch }); }
+          catch { fit = null; }
+          if (fit && !fit.fits) {
+            console.error('');
+            console.error(`error: this compile will NOT fit on your primary GPU.`);
+            console.error(`  model:   ${baseId}  (~${paramsB}B params)`);
+            console.error(`  quant:   ${quant}    (${fit.bytes_per_param} bytes/param)`);
+            console.error(`  needs:   ${fit.est_total_gb} GB  (weights ${fit.est_weights_gb} + kv ${fit.est_kv_gb} + activations ${fit.est_activations_gb} + ${fit.overhead_gb} overhead)`);
+            console.error(`  have:    ${hw.primary.vram_gb} GB on ${hw.primary.name} (${hw.primary.vendor})`);
+            console.error('');
+            console.error('options:');
+            console.error(`  - rent a bigger GPU:  kolm compile --spec ${specArg} --cloud modal --confirm`);
+            console.error(`  - try a smaller quant: kolm fit --params-b ${paramsB} --vram-gb ${hw.primary.vram_gb} --pick-best`);
+            console.error(`  - try a smaller model: pick a 3B base instead of ${paramsB}B`);
+            console.error(`  - bypass the check:   --no-fit-check  (or KOLM_NO_FIT_CHECK=1)`);
+            if (fit.recommendation) console.error(`  - estimator hint:     ${fit.recommendation}`);
+            console.error('');
+            process.exit(EXIT.MISSING_PREREQ);
+          }
+          if (fit && fit.tight) {
+            console.error(`note: fit is tight on ${hw.primary.name} (${fit.headroom_gb} GB headroom). long contexts may OOM. use --no-fit-check to silence.`);
+          }
+        }
+      } catch { /* gate is best-effort; never block on its own bugs */ }
+    }
 
     // recipes[i].source_file: <path> - author-friendly alternative to embedding
     // the JS function as a JSON-escaped one-liner in recipes[i].source. Path is
@@ -8397,6 +8488,125 @@ async function cmdBenchmark(args) {
     }
     return;
   }
+  // W869 Persona F.5 — `kolm bench --axes <artifact.kolm> [--json]` prints
+  // the per-axis K-Score breakdown from the artifact's stored manifest
+  // (composite + A/S/L/C/V + optional R/T/F/E/Z + W714 contrastive). Pure
+  // read of manifest.k_score — does not re-run the benchmark.
+  if (args.includes('--axes')) {
+    const positional = args.filter(a => !a.startsWith('--'));
+    const apAxes = resolveArtifact(positional[0]);
+    if (!apAxes) {
+      console.error('usage: kolm bench --axes <artifact.kolm> [--json]');
+      process.exit(EXIT.NOT_FOUND);
+    }
+    const wantJsonAxes = args.includes('--json');
+    let manAxes;
+    try {
+      manAxes = await withRunner(({ inspectArtifact }) => inspectArtifact(apAxes));
+    } catch (e) {
+      console.error(`bench --axes: cannot read manifest: ${e.message}`);
+      process.exit(EXIT.EXECUTION);
+    }
+    const ks = manAxes.k_score || null;
+    if (!ks) {
+      const out = {
+        ok: false, code: 'no_k_score',
+        artifact: path.basename(apAxes),
+        hint: 'artifact has no k_score in manifest — recompile or run `kolm bench <artifact>` first',
+      };
+      if (wantJsonAxes) { console.log(JSON.stringify(out, null, 2)); return; }
+      console.error(`bench --axes: ${out.code} — ${out.hint}`);
+      process.exit(EXIT.EXECUTION);
+    }
+    const AXIS_LABEL = {
+      A: 'accuracy',
+      S: 'size',
+      L: 'latency',
+      C: 'cost',
+      V: 'coverage',
+      R: 'robustness',
+      T: 'teacher-fidelity',
+      F: 'fairness',
+      E: 'energy',
+      Z: 'drift',
+    };
+    const AXIS_VALUE_KEY = {
+      A: 'accuracy',
+      S: 'size_score',
+      L: 'latency_score',
+      C: 'cost_score',
+      V: 'coverage',
+      R: 'robustness_score',
+      T: 'teacher_fidelity_score',
+      F: 'fairness_score',
+      E: 'energy_score',
+      Z: 'drift_score',
+    };
+    const weights = ks.weights || {};
+    const baseWeights = ks.weights_base || null;
+    const axes = [];
+    for (const code of ['A', 'S', 'L', 'C', 'V', 'R', 'T', 'F', 'E', 'Z']) {
+      const value = ks[AXIS_VALUE_KEY[code]];
+      const weight = weights[code] ?? null;
+      const baseWeight = baseWeights ? (baseWeights[code] ?? null) : null;
+      axes.push({
+        code,
+        name: AXIS_LABEL[code],
+        value: value == null ? null : value,
+        weight,
+        weight_base: baseWeight,
+        contribution: (value != null && weight != null) ? Number((value * weight).toFixed(4)) : null,
+        supplied: value != null,
+      });
+    }
+    const out = {
+      ok: true,
+      artifact: path.basename(apAxes),
+      spec: ks.spec || 'k-score-1',
+      composite: ks.composite ?? null,
+      gate: ks.gate ?? 0.85,
+      ships: !!ks.ships,
+      axes,
+      k_contrastive_score: ks.k_contrastive_score ?? null,
+      k_contrastive_axis_version: ks.k_contrastive_axis_version ?? null,
+      warnings: Array.isArray(ks.warnings) ? ks.warnings : [],
+    };
+    if (wantJsonAxes) { console.log(JSON.stringify(out, null, 2)); return; }
+    console.log(`K-Score axes: ${out.artifact}`);
+    console.log(`  spec      ${out.spec}`);
+    console.log(`  composite ${out.composite != null ? out.composite.toFixed(4) : '?'}  (gate ${out.gate})  ships=${out.ships ? 'YES' : 'no'}`);
+    console.log('');
+    const fmtRow = (a, b, c, d, e, f) =>
+      `  ${String(a).padEnd(4)} ${String(b).padEnd(16)} ${String(c).padStart(8)}  ${String(d).padStart(7)}  ${String(e).padStart(12)}  ${String(f).padEnd(10)}`;
+    console.log(fmtRow('code', 'axis', 'value', 'weight', 'contribution', 'status'));
+    console.log(fmtRow('----', '----', '-----', '------', '------------', '------'));
+    for (const a of axes) {
+      const status = !a.supplied
+        ? 'not supplied'
+        : (a.weight != null ? 'in composite' : 'no weight');
+      console.log(fmtRow(
+        a.code,
+        a.name,
+        a.value == null ? '—' : a.value.toFixed(4),
+        a.weight == null ? '—' : a.weight.toFixed(4),
+        a.contribution == null ? '—' : a.contribution.toFixed(4),
+        status,
+      ));
+    }
+    if (out.k_contrastive_score != null) {
+      console.log('');
+      console.log(`  K_contrastive (W714, opt-in informational axis — not in composite)`);
+      console.log(`    score = ${out.k_contrastive_score.toFixed(4)}   axis_version = ${out.k_contrastive_axis_version}`);
+    }
+    if (out.warnings.length) {
+      console.log('');
+      console.log('  Warnings:');
+      for (const w of out.warnings) {
+        console.log(`    ${w.code}: ${w.message}`);
+      }
+    }
+    return;
+  }
   const ap = resolveArtifact(args[0]);
   if (!ap) {
     const err = new Error(`artifact not found: ${args[0]}`);
@@ -8539,12 +8749,26 @@ metadata.`);
 async function cmdBenchCompare(args) {
   // strip --compare so the rest of arg parsing is positional-friendly
   const rest = args.filter(a => a !== '--compare');
-  const positional = rest.find(a => !a.startsWith('-'));
-  const ap = positional ? resolveArtifact(positional) : null;
-  if (!ap) {
+  const positionals = rest.filter(a => !a.startsWith('-'));
+  // W869 Persona F — two positional args = two-artifact A-vs-B diff.
+  // One positional arg = the existing artifact-vs-external-runtimes path.
+  const isTwoArtifact = positionals.length >= 2;
+  if (positionals.length === 0) {
     console.error('error: kolm bench --compare requires an artifact path');
-    console.error('usage: kolm bench --compare <artifact.kolm> [--corpus seeds.jsonl] [--runs N] [--llm-sample N] [--md out.md] [--json out.json]');
+    console.error('usage: kolm bench --compare <artifact.kolm>                  one artifact vs llm-api / local-llm / native');
+    console.error('       kolm bench --compare <a.kolm> <b.kolm>                A-vs-B head-to-head (Persona F)');
+    console.error('       [--corpus seeds.jsonl] [--runs N] [--llm-sample N] [--md out.md] [--json out.json]');
     process.exit(EXIT.USAGE || 64);
+  }
+  const apA = resolveArtifact(positionals[0]);
+  if (!apA) {
+    console.error(`error: artifact not found: ${positionals[0]}`);
+    process.exit(EXIT.NOT_FOUND);
+  }
+  const apB = isTwoArtifact ? resolveArtifact(positionals[1]) : null;
+  if (isTwoArtifact && !apB) {
+    console.error(`error: artifact not found: ${positionals[1]}`);
+    process.exit(EXIT.NOT_FOUND);
   }
   const value = (flag) => {
     const i = rest.indexOf(flag);
@@ -8575,7 +8799,43 @@ async function cmdBenchCompare(args) {
     }
     process.stderr.write(`[bench --compare] loaded ${cases.length} rows from ${corpusPath}\n`);
   }
-  const report = await compareArtifact(ap, { cases, input, runs, llmSampleN });
+
+  if (isTwoArtifact) {
+    // Pin the LLM paths off — A-vs-B is a head-to-head of the two artifacts,
+    // not artifact-vs-external. Caller can opt back in with --include-llm.
+    const includeLlm = rest.includes('--include-llm');
+    const commonOpts = { cases, input, runs, llmSampleN, llmApi: includeLlm, localLlm: includeLlm };
+    process.stderr.write(`[bench --compare] A = ${apA}\n[bench --compare] B = ${apB}\n`);
+    const [reportA, reportB] = await Promise.all([
+      compareArtifact(apA, commonOpts),
+      compareArtifact(apB, commonOpts),
+    ]);
+    const diff = diffTwoArtifactReports(reportA, reportB);
+    const combined = {
+      spec: 'kolm-benchmark-compare-2',
+      mode: 'two-artifact',
+      started_at: reportA.started_at,
+      finished_at: reportB.finished_at,
+      a: { artifact: apA, sha256: reportA.artifact_sha256, task: reportA.task, paths: reportA.paths },
+      b: { artifact: apB, sha256: reportB.artifact_sha256, task: reportB.task, paths: reportB.paths },
+      cases: reportA.cases,
+      runs_per_case: reportA.runs_per_case,
+      diff,
+      host: reportA.host,
+    };
+    if (jsonOut) {
+      fs.writeFileSync(jsonOut, JSON.stringify(combined, null, 2) + '\n');
+      process.stderr.write(`[bench --compare] JSON diff written to ${jsonOut}\n`);
+    }
+    if (mdOut) {
+      fs.writeFileSync(mdOut, renderTwoArtifactMd(combined));
+      process.stderr.write(`[bench --compare] Markdown diff written to ${mdOut}\n`);
+    }
+    console.log(JSON.stringify(combined, null, 2));
+    return;
+  }
+
+  const report = await compareArtifact(apA, { cases, input, runs, llmSampleN });
 
   if (jsonOut) {
     fs.writeFileSync(jsonOut, JSON.stringify(report, null, 2) + '\n');
@@ -8590,6 +8850,81 @@ async function cmdBenchCompare(args) {
   // requested, also emit JSON to stdout so the user always has a parseable
   // surface — Markdown is for humans, JSON is for jq pipes.
   console.log(JSON.stringify(report, null, 2));
+}
+
+// W869 Persona F — diff two artifact reports on the kolm-js path (always run
+// for both) + kolm-native if both have it. Returns latency delta, throughput
+// delta, correctness delta, and a winner per metric.
+function diffTwoArtifactReports(rA, rB) {
+  const PATHS = ['kolm-js', 'kolm-native'];
+  const out = {};
+  for (const p of PATHS) {
+    const a = rA.paths[p];
+    const b = rB.paths[p];
+    if (!a || a.skipped || !b || b.skipped) {
+      out[p] = { skipped: true, reason: a?.reason || b?.reason || 'one side missing' };
+      continue;
+    }
+    const aLatP50 = a.latency_us_p50 ?? a.latency_us?.p50 ?? null;
+    const bLatP50 = b.latency_us_p50 ?? b.latency_us?.p50 ?? null;
+    const aLatP99 = a.latency_us_p99 ?? a.latency_us?.p99 ?? null;
+    const bLatP99 = b.latency_us_p99 ?? b.latency_us?.p99 ?? null;
+    const aCorr = a.correct?.passed ?? null;
+    const bCorr = b.correct?.passed ?? null;
+    const aGrad = a.correct?.graded ?? null;
+    out[p] = {
+      latency_p50_us: { a: aLatP50, b: bLatP50, delta_pct: pct(bLatP50, aLatP50), winner: lower(aLatP50, bLatP50) },
+      latency_p99_us: { a: aLatP99, b: bLatP99, delta_pct: pct(bLatP99, aLatP99), winner: lower(aLatP99, bLatP99) },
+      correctness: aGrad
+        ? { a_pass: aCorr, b_pass: bCorr, graded: aGrad, delta_pp: (bCorr - aCorr) * (aGrad ? 100 / aGrad : 0), winner: higher(aCorr, bCorr) }
+        : { graded: 0, note: 'no eval cases in artifact; correctness diff not computable' },
+    };
+  }
+  return out;
+}
+
+function pct(b, a) {
+  if (a == null || b == null || a === 0) return null;
+  return Math.round(((b - a) / a) * 1000) / 10;
+}
+function lower(a, b) {
+  if (a == null || b == null) return null;
+  return a === b ? 'tie' : (a < b ? 'A' : 'B');
+}
+function higher(a, b) {
+  if (a == null || b == null) return null;
+  return a === b ? 'tie' : (a > b ? 'A' : 'B');
+}
+
+function renderTwoArtifactMd(combined) {
+  const lines = [];
+  lines.push('# bench compare — A vs B');
+  lines.push('');
+  lines.push(`- **A**: \`${combined.a.artifact}\` (sha256:${(combined.a.sha256 || '').slice(0, 12)}...)`);
+  lines.push(`- **B**: \`${combined.b.artifact}\` (sha256:${(combined.b.sha256 || '').slice(0, 12)}...)`);
+  lines.push(`- cases: ${combined.cases}, runs per case: ${combined.runs_per_case}`);
+  lines.push(`- host: ${combined.host.platform}/${combined.host.arch} node ${combined.host.node}`);
+  lines.push('');
+  for (const [path, d] of Object.entries(combined.diff)) {
+    lines.push(`## ${path}`);
+    lines.push('');
+    if (d.skipped) {
+      lines.push(`_skipped: ${d.reason}_`);
+      lines.push('');
+      continue;
+    }
+    lines.push('| metric | A | B | delta | winner |');
+    lines.push('| --- | --- | --- | --- | --- |');
+    lines.push(`| latency p50 (us) | ${d.latency_p50_us.a ?? '-'} | ${d.latency_p50_us.b ?? '-'} | ${d.latency_p50_us.delta_pct ?? '-'}% | ${d.latency_p50_us.winner ?? '-'} |`);
+    lines.push(`| latency p99 (us) | ${d.latency_p99_us.a ?? '-'} | ${d.latency_p99_us.b ?? '-'} | ${d.latency_p99_us.delta_pct ?? '-'}% | ${d.latency_p99_us.winner ?? '-'} |`);
+    if (d.correctness.graded > 0) {
+      lines.push(`| correctness | ${d.correctness.a_pass}/${d.correctness.graded} | ${d.correctness.b_pass}/${d.correctness.graded} | ${d.correctness.delta_pp.toFixed(1)}pp | ${d.correctness.winner} |`);
+    } else {
+      lines.push(`| correctness | _ungraded_ | _ungraded_ | - | - |`);
+    }
+    lines.push('');
+  }
+  return lines.join('\n') + '\n';
 }
 
 // `kolm bench --reproduce <suite> [--seed N] [--n N] [--out path] [--dry-run]`
@@ -8901,6 +9236,377 @@ async function cmdInspect(args) {
       if (lic.url) console.log(`            ${lic.url}`);
     }
   });
+}
+
+// W869 Persona D — `kolm passport <artifact.kolm> [--format compliance|json|markdown] [--out path]`
+//
+// Bundles the artifact's compliance surface into ONE envelope:
+//   * model_card           (HF Model Card v0.3, src/model-card-emit.js)
+//   * ai_act_documentation (EU AI Act Annex IV, src/ai-act-export.js)
+//   * sbom                 (CycloneDX 1.5, src/sbom-emit.js)
+//   * environmental        (CO2 estimate, src/model-card-emit.js)
+//   * receipt_summary      (signature mode + valid + K-score + cid)
+//   * passport_meta        (kolm version, generated_at, artifact path/sha)
+//
+// Default format `compliance` is the model-risk-management JSON shape banks
+// and insurers expect to attach to a third-line-of-defense review. `markdown`
+// is the human-readable digest. `json` is the raw merged envelope.
+//
+// Pure local: no network, no auth, no telemetry. Every section uses the same
+// HONESTY CONTRACT — missing fields render as `"not_yet_disclosed"`, never
+// fabricated.
+async function cmdPassport(args) {
+  if (maybeHelp('passport', args)) return;
+  const positional = args.filter(a => !a.startsWith('--'));
+  const get = (flag) => {
+    const i = args.indexOf(flag);
+    return i >= 0 ? args[i + 1] : null;
+  };
+  const ap = resolveArtifact(positional[0]);
+  if (!ap) {
+    const err = new Error(`artifact not found: ${positional[0] || '<arg>'}\nusage: kolm passport <artifact.kolm> [--format compliance|json|markdown] [--out path]`);
+    err.exitCode = EXIT.NOT_FOUND;
+    throw err;
+  }
+  const format = (get('--format') || 'compliance').toLowerCase();
+  if (!['compliance', 'json', 'markdown', 'md'].includes(format)) {
+    const err = new Error(`--format must be one of: compliance | json | markdown`);
+    err.exitCode = EXIT.BAD_ARGS;
+    throw err;
+  }
+  const outPath = get('--out');
+
+  // Extract manifest from the .kolm zip (no full eject — just the one file).
+  const AdmZip = (await import('adm-zip')).default;
+  let zip;
+  try { zip = new AdmZip(ap); }
+  catch (e) {
+    const err = new Error(`cannot read artifact zip: ${e.message}`);
+    err.exitCode = EXIT.EXECUTION;
+    throw err;
+  }
+  const manifestEntry = zip.getEntry('manifest.json');
+  if (!manifestEntry) {
+    const err = new Error(`artifact has no manifest.json: ${ap}`);
+    err.exitCode = EXIT.NOT_FOUND;
+    throw err;
+  }
+  let manifest;
+  try { manifest = JSON.parse(manifestEntry.getData().toString('utf8')); }
+  catch (e) {
+    const err = new Error(`manifest.json parse failed: ${e.message}`);
+    err.exitCode = EXIT.EXECUTION;
+    throw err;
+  }
+
+  // Pull receipt summary if present (signature + K-score + cid).
+  const receiptEntry = zip.getEntry('receipts/receipt.json') || zip.getEntry('receipt.json');
+  let receiptSummary = null;
+  if (receiptEntry) {
+    try {
+      const r = JSON.parse(receiptEntry.getData().toString('utf8'));
+      receiptSummary = {
+        cid: r.cid || r.artifact_cid || null,
+        k_score: r.k_score ?? r.kscore ?? null,
+        signature_mode: r.signature_mode || (r.signature_ed25519 ? 'ed25519' : r.signature_hmac ? 'hmac' : null),
+        signed_at: r.signed_at || r.created_at || null,
+        eval_pass_rate: r.eval_pass_rate ?? null,
+      };
+    } catch { receiptSummary = { error: 'receipt_parse_failed' }; }
+  }
+
+  // Build each compliance section. All three modules are pure JS, no spawn.
+  const [{ buildModelCard, formatAsMarkdown, estimateEnvironmentalImpact }, { buildTechnicalDocumentation }, { emitSbomFromManifest }]
+    = await Promise.all([
+      import('../src/model-card-emit.js'),
+      import('../src/ai-act-export.js'),
+      import('../src/sbom-emit.js'),
+    ]);
+
+  const modelCard = buildModelCard(manifest, { include_environmental: true });
+  const aiActDoc = buildTechnicalDocumentation(manifest, {});
+  const sbom = emitSbomFromManifest({ manifest });
+  const environmental = estimateEnvironmentalImpact(manifest);
+
+  // Artifact metadata: sha256 + size + mtime, signing identity if available.
+  const artifactBuf = fs.readFileSync(ap);
+  const sha256 = crypto.createHash('sha256').update(artifactBuf).digest('hex');
+  const stat = fs.statSync(ap);
+
+  const envelope = {
+    spec: 'kolm-artifact-passport-1',
+    format: format === 'md' ? 'markdown' : format,
+    generated_at: new Date().toISOString(),
+    artifact: {
+      path: ap,
+      sha256,
+      size_bytes: stat.size,
+      mtime: stat.mtime.toISOString(),
+      base_model: manifest.base_model || manifest.base_model_id || null,
+      task: manifest.task || null,
+      tier: manifest.tier || manifest.artifact_tier || null,
+    },
+    receipt_summary: receiptSummary,
+    model_card: modelCard,
+    ai_act_documentation: aiActDoc,
+    sbom,
+    environmental,
+    passport_meta: {
+      kolm_version: (() => {
+        try {
+          const pkgPath = path.join(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Z]):/, '$1:')), '..', 'package.json');
+          return JSON.parse(fs.readFileSync(pkgPath, 'utf8')).version || 'unknown';
+        } catch { return 'unknown'; }
+      })(),
+      schema_url: 'https://kolm.ai/schema/passport-v1.json',
+      honesty_contract: 'missing fields are rendered as "not_yet_disclosed" — never fabricated. estimated values carry an estimate_not_measured marker.',
+    },
+  };
+
+  if (format === 'markdown' || format === 'md') {
+    const md = renderPassportMarkdown(envelope, formatAsMarkdown);
+    if (outPath) {
+      fs.writeFileSync(outPath, md);
+      console.error(`passport markdown written to ${outPath}`);
+      return;
+    }
+    process.stdout.write(md);
+    return;
+  }
+
+  // compliance == json with a fixed schema label. Both emit the same envelope.
+  const json = JSON.stringify(envelope, null, 2);
+  if (outPath) {
+    fs.writeFileSync(outPath, json + '\n');
+    console.error(`passport ${format} written to ${outPath}`);
+    return;
+  }
+  console.log(json);
+}
+
+function renderPassportMarkdown(envelope, formatAsMarkdown) {
+  const lines = [];
+  lines.push(`# Artifact Passport`);
+  lines.push('');
+  lines.push(`_kolm.ai passport-v1 — generated ${envelope.generated_at}_`);
+  lines.push('');
+  lines.push('## Artifact');
+  lines.push('');
+  lines.push(`- **path**: \`${envelope.artifact.path}\``);
+  lines.push(`- **sha256**: \`${envelope.artifact.sha256}\``);
+  lines.push(`- **size**: ${envelope.artifact.size_bytes} bytes`);
+  lines.push(`- **task**: ${envelope.artifact.task || 'not_yet_disclosed'}`);
+  lines.push(`- **base model**: ${envelope.artifact.base_model || 'not_yet_disclosed'}`);
+  lines.push(`- **tier**: ${envelope.artifact.tier || 'not_yet_disclosed'}`);
+  lines.push('');
+  if (envelope.receipt_summary) {
+    lines.push('## Receipt summary');
+    lines.push('');
+    lines.push(`- **cid**: ${envelope.receipt_summary.cid || 'not_yet_disclosed'}`);
+    lines.push(`- **K-score**: ${envelope.receipt_summary.k_score ?? 'not_yet_disclosed'}`);
+    lines.push(`- **signature mode**: ${envelope.receipt_summary.signature_mode || 'not_yet_disclosed'}`);
+    lines.push(`- **signed at**: ${envelope.receipt_summary.signed_at || 'not_yet_disclosed'}`);
+    lines.push('');
+  }
+  lines.push('## Environmental impact (estimate)');
+  lines.push('');
+  if (envelope.environmental && envelope.environmental.estimate_kg_co2_eq != null) {
+    lines.push(`- **estimated CO2eq**: ${envelope.environmental.estimate_kg_co2_eq} kg`);
+    lines.push(`- **methodology**: ${envelope.environmental.methodology || 'static_grid_average_w768_v1'}`);
+    lines.push(`- **caveat**: ${envelope.environmental.caveat || 'estimate_not_measured'}`);
+  } else {
+    lines.push('- not_yet_disclosed');
+  }
+  lines.push('');
+  lines.push('---');
+  lines.push('');
+  lines.push(formatAsMarkdown(envelope.model_card));
+  lines.push('');
+  lines.push('---');
+  lines.push('');
+  lines.push('## EU AI Act — Annex IV Technical Documentation');
+  lines.push('');
+  lines.push('```json');
+  lines.push(JSON.stringify(envelope.ai_act_documentation, null, 2));
+  lines.push('```');
+  lines.push('');
+  lines.push('## SBOM (CycloneDX 1.5 excerpt)');
+  lines.push('');
+  lines.push('```json');
+  lines.push(JSON.stringify({
+    bomFormat: envelope.sbom?.bomFormat,
+    specVersion: envelope.sbom?.specVersion,
+    serialNumber: envelope.sbom?.serialNumber,
+    metadata: envelope.sbom?.metadata,
+    components_count: Array.isArray(envelope.sbom?.components) ? envelope.sbom.components.length : null,
+  }, null, 2));
+  lines.push('```');
+  lines.push('');
+  return lines.join('\n');
+}
+
+// cmdProcurement renders pre-answered vendor-security questionnaires (SIG Lite,
+// CSA CAIQ v4) so an Enterprise prospect can hand a buyer the answers they
+// would otherwise wait weeks for. Source of truth is data/procurement/*.json;
+// answers are versioned + reviewed by the security team. The CLI just renders.
+async function cmdProcurement(args) {
+  if (maybeHelp('procurement', args)) return;
+  const sub = args[0];
+  const rest = args.slice(1);
+  const get = (flag) => {
+    const i = rest.indexOf(flag);
+    return i >= 0 ? rest[i + 1] : null;
+  };
+  const format = (get('--format') || 'markdown').toLowerCase();
+  const outPath = get('--out');
+  const wantJson = rest.includes('--json') || format === 'json';
+
+  if (!sub || sub === '--help' || sub === '-h' || sub === 'help') {
+    console.log('kolm procurement — pre-answered vendor-security questionnaires');
+    console.log('');
+    console.log('Usage:');
+    console.log('  kolm procurement <framework> [--format markdown|json|csv] [--out <path>]');
+    console.log('');
+    console.log('Frameworks:');
+    console.log('  sig         Shared Assessments SIG Lite (managed cloud + BYOC)');
+    console.log('  caiq        CSA Cloud Controls Matrix CAIQ v4.0.2 (curated)');
+    console.log('  all         Both frameworks bundled into one document');
+    console.log('  list        Index of available frameworks');
+    console.log('');
+    console.log('Examples:');
+    console.log('  kolm procurement sig --out ./kolm-sig.md');
+    console.log('  kolm procurement caiq --format json --out ./kolm-caiq.json');
+    console.log('  kolm procurement all --format csv --out ./kolm-vendor-pack.csv');
+    return;
+  }
+
+  const procDir = (() => {
+    const here = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Z]):/, '$1:'));
+    return path.join(here, '..', 'data', 'procurement');
+  })();
+
+  const loadFramework = (slug) => {
+    const file = slug === 'sig' ? 'sig-lite.json' : slug === 'caiq' ? 'caiq-v4.json' : null;
+    if (!file) {
+      const err = new Error(`unknown framework: ${slug} (try: sig, caiq, all, list)`);
+      err.exitCode = EXIT.BAD_ARGS;
+      throw err;
+    }
+    const fp = path.join(procDir, file);
+    if (!fs.existsSync(fp)) {
+      const err = new Error(`vault file missing at ${fp} — corrupt install`);
+      err.exitCode = EXIT.NOT_FOUND;
+      throw err;
+    }
+    return JSON.parse(fs.readFileSync(fp, 'utf8'));
+  };
+
+  if (sub === 'list') {
+    const out = {
+      ok: true,
+      frameworks: [
+        { slug: 'sig', name: 'Shared Assessments SIG Lite 2026', file: 'sig-lite.json' },
+        { slug: 'caiq', name: 'CSA CAIQ v4.0.2 (curated)', file: 'caiq-v4.json' },
+      ],
+      vault_dir: procDir,
+    };
+    if (wantJson) { console.log(JSON.stringify(out, null, 2)); return; }
+    console.log('Available procurement frameworks:');
+    out.frameworks.forEach((f) => console.log(`  ${f.slug.padEnd(8)} ${f.name}`));
+    console.log(`\nVault: ${procDir}`);
+    return;
+  }
+
+  const slugs = sub === 'all' ? ['sig', 'caiq'] : [sub];
+  const payloads = slugs.map(loadFramework);
+
+  // CSV: flat (framework, section, question_id, question, answer, evidence)
+  if (format === 'csv') {
+    const lines = ['framework,section,question_id,question,answer,evidence'];
+    const esc = (s) => '"' + String(s == null ? '' : s).replace(/"/g, '""').replace(/\r?\n/g, ' ') + '"';
+    payloads.forEach((p) => {
+      if (Array.isArray(p.sections)) {
+        p.sections.forEach((sec) => {
+          (sec.questions || []).forEach((q) => {
+            lines.push([p.framework, sec.title, q.id, q.question, q.answer, q.evidence].map(esc).join(','));
+          });
+        });
+      } else if (Array.isArray(p.controls)) {
+        p.controls.forEach((c) => {
+          lines.push([p.framework, c.domain, c.id, c.question, c.answer, c.evidence].map(esc).join(','));
+        });
+      }
+    });
+    const csv = lines.join('\n') + '\n';
+    if (outPath) { fs.writeFileSync(outPath, csv); console.log(`wrote ${outPath}`); return; }
+    console.log(csv);
+    return;
+  }
+
+  if (wantJson) {
+    const out = sub === 'all'
+      ? { ok: true, frameworks: payloads }
+      : { ok: true, ...payloads[0] };
+    const s = JSON.stringify(out, null, 2);
+    if (outPath) { fs.writeFileSync(outPath, s); console.log(`wrote ${outPath}`); return; }
+    console.log(s);
+    return;
+  }
+
+  // Markdown — the default + most useful for procurement teams.
+  const renderMd = (p) => {
+    const out = [];
+    out.push(`# ${p.framework}`);
+    out.push('');
+    out.push(`**Vendor:** ${p.vendor}  `);
+    out.push(`**Domain:** ${p.domain}  `);
+    out.push(`**Updated:** ${p.updated_iso}  `);
+    out.push(`**Scope:** ${p.scope}`);
+    out.push('');
+    if (Array.isArray(p.sections)) {
+      p.sections.forEach((sec) => {
+        out.push(`## ${sec.id}. ${sec.title}`);
+        out.push('');
+        (sec.questions || []).forEach((q) => {
+          out.push(`### ${q.id} — ${q.question}`);
+          out.push('');
+          out.push(`**Answer:** \`${q.answer}\``);
+          out.push('');
+          out.push(`${q.evidence}`);
+          out.push('');
+        });
+      });
+    } else if (Array.isArray(p.controls)) {
+      const byDomain = new Map();
+      p.controls.forEach((c) => {
+        if (!byDomain.has(c.domain)) byDomain.set(c.domain, []);
+        byDomain.get(c.domain).push(c);
+      });
+      for (const [domain, ctrls] of byDomain) {
+        out.push(`## ${domain}`);
+        out.push('');
+        ctrls.forEach((c) => {
+          out.push(`### ${c.id} — ${c.question}`);
+          out.push('');
+          out.push(`**Answer:** \`${c.answer}\``);
+          out.push('');
+          out.push(`${c.evidence}`);
+          out.push('');
+        });
+      }
+    }
+    if (p.notes) {
+      out.push('---');
+      out.push('');
+      out.push(p.notes);
+      out.push('');
+    }
+    return out.join('\n');
+  };
+
+  const md = payloads.map(renderMd).join('\n\n---\n\n');
+  if (outPath) { fs.writeFileSync(outPath, md); console.log(`wrote ${outPath}`); return; }
+  console.log(md);
 }
 
 // cmdEject unpacks a .kolm artifact into a directory of its parts: manifest,
@@ -9758,7 +10464,8 @@ async function cmdServe(args) {
   const runtimeFlag = pickFlag(args, '--runtime');
   const wantDocker = args.includes('--docker');
   const wantK8s = args.includes('--k8s');
-  if (runtimeFlag || wantDocker || wantK8s) {
+  const wantHelm = args.includes('--helm');
+  if (runtimeFlag || wantDocker || wantK8s || wantHelm) {
     const artifact = args.find(a => !a.startsWith('--') && a !== 'serve');
     if (!artifact) {
       console.error('usage: kolm serve <artifact.kolm> --runtime <vllm|llama.cpp|ollama|tgi|sglang> [--docker | --k8s] [--port 8765]');
@@ -9853,7 +10560,127 @@ spec:
       targetPort: ${port}
   type: ClusterIP`;
     }
-    if (!wantDocker && !wantK8s) {
+    if (wantHelm) {
+      // W869 Persona C — real Helm chart renderer. Writes a packaged chart to
+      // --out (default ./kolm-{base}-chart/). The chart is Helm v3 compliant
+      // and includes: Chart.yaml, values.yaml (image, port, GPU, replicas,
+      // service type, ingress, HPA, resources, env, artifact volume),
+      // templates/{deployment,service,hpa,ingress,_helpers}.tpl + .helmignore
+      // + NOTES.txt + README.md. Operators run `helm install kolm-{base} ./kolm-{base}-chart`.
+      const outDir = pickFlag(args, '--out') || path.join(process.cwd(), `kolm-${base}-chart`);
+      const chartName = `kolm-${base}`;
+      const appVersion = '1.0.0';
+      const chartVersion = '0.1.0';
+      const ns = pickFlag(args, '--namespace') || 'default';
+      try {
+        fs.mkdirSync(path.join(outDir, 'templates'), { recursive: true });
+      } catch (e) {
+        console.error(`error: failed to create ${outDir}: ${e.message}`);
+        process.exit(EXIT.EXECUTION);
+      }
+      // ---- Chart.yaml
+      fs.writeFileSync(path.join(outDir, 'Chart.yaml'),
+        `apiVersion: v2\nname: ${chartName}\ndescription: kolm-distilled artifact (${base}) served via ${rt}\ntype: application\nversion: ${chartVersion}\nappVersion: "${appVersion}"\nkeywords:\n  - kolm\n  - llm\n  - inference\n  - ${rt}\nmaintainers:\n  - name: kolm.ai\n    url: https://kolm.ai\nannotations:\n  kolm.ai/artifact-sha256: not_yet_computed\n  kolm.ai/runtime: ${rt}\n`);
+      // ---- values.yaml
+      fs.writeFileSync(path.join(outDir, 'values.yaml'),
+        `# Generated by kolm serve --helm\n# Edit before `+'`helm install`'+`.\n\nartifact:\n  name: ${base}\n  hostPath: ${path.dirname(ap)}        # path on each node; replace with PVC for multi-node clusters\n  file: ${path.basename(ap)}\n\nimage:\n  repository: ${rtImage.split(':')[0]}\n  tag: ${rtImage.split(':').slice(1).join(':') || 'latest'}\n  pullPolicy: IfNotPresent\n\nruntime: ${rt}\n\nreplicaCount: 1\n\nservice:\n  type: ClusterIP\n  port: ${port}\n\nresources:\n  limits:\n    nvidia.com/gpu: 1\n    memory: 24Gi\n  requests:\n    memory: 8Gi\n\ngpu:\n  enabled: true\n  count: 1\n\nautoscaling:\n  enabled: false\n  minReplicas: 1\n  maxReplicas: 4\n  targetCPUUtilizationPercentage: 80\n\ningress:\n  enabled: false\n  className: ""\n  annotations: {}\n  hosts:\n    - host: ${base}.example.com\n      paths:\n        - path: /\n          pathType: Prefix\n  tls: []\n\nnodeSelector: {}\ntolerations: []\naffinity: {}\npodSecurityContext: {}\nsecurityContext: {}\n\nenv: []\n  # - name: KOLM_SERVE_DTYPE\n  #   value: bfloat16\n`);
+      // ---- templates/_helpers.tpl
+      fs.writeFileSync(path.join(outDir, 'templates', '_helpers.tpl'),
+        `{{/* Common labels */}}\n{{- define "${chartName}.labels" -}}\nhelm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}\napp.kubernetes.io/name: {{ .Chart.Name }}\napp.kubernetes.io/instance: {{ .Release.Name }}\napp.kubernetes.io/version: {{ .Chart.AppVersion | quote }}\napp.kubernetes.io/managed-by: {{ .Release.Service }}\nkolm.ai/runtime: {{ .Values.runtime }}\nkolm.ai/artifact: {{ .Values.artifact.name }}\n{{- end -}}\n\n{{- define "${chartName}.selectorLabels" -}}\napp.kubernetes.io/name: {{ .Chart.Name }}\napp.kubernetes.io/instance: {{ .Release.Name }}\n{{- end -}}\n`);
+      // ---- templates/deployment.yaml
+      fs.writeFileSync(path.join(outDir, 'templates', 'deployment.yaml'),
+        `apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: {{ include "${chartName}.fullname" . | default .Release.Name }}\n  labels:\n    {{- include "${chartName}.labels" . | nindent 4 }}\nspec:\n  {{- if not .Values.autoscaling.enabled }}\n  replicas: {{ .Values.replicaCount }}\n  {{- end }}\n  selector:\n    matchLabels:\n      {{- include "${chartName}.selectorLabels" . | nindent 6 }}\n  template:\n    metadata:\n      labels:\n        {{- include "${chartName}.selectorLabels" . | nindent 8 }}\n    spec:\n      {{- with .Values.podSecurityContext }}\n      securityContext:\n        {{- toYaml . | nindent 8 }}\n      {{- end }}\n      containers:\n        - name: {{ .Chart.Name }}\n          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"\n          imagePullPolicy: {{ .Values.image.pullPolicy }}\n          ports:\n            - name: http\n              containerPort: {{ .Values.service.port }}\n              protocol: TCP\n          args:\n            - "--model"\n            - "/artifacts/{{ .Values.artifact.file }}"\n            - "--port"\n            - "{{ .Values.service.port }}"\n          {{- with .Values.env }}\n          env:\n            {{- toYaml . | nindent 12 }}\n          {{- end }}\n          resources:\n            {{- toYaml .Values.resources | nindent 12 }}\n          volumeMounts:\n            - name: artifact-vol\n              mountPath: /artifacts\n              readOnly: true\n          readinessProbe:\n            httpGet:\n              path: /v1/models\n              port: http\n            initialDelaySeconds: 60\n            periodSeconds: 10\n            failureThreshold: 6\n          livenessProbe:\n            httpGet:\n              path: /v1/models\n              port: http\n            initialDelaySeconds: 120\n            periodSeconds: 30\n            failureThreshold: 3\n      volumes:\n        - name: artifact-vol\n          hostPath:\n            path: {{ .Values.artifact.hostPath }}\n            type: Directory\n      {{- with .Values.nodeSelector }}\n      nodeSelector:\n        {{- toYaml . | nindent 8 }}\n      {{- end }}\n      {{- with .Values.affinity }}\n      affinity:\n        {{- toYaml . | nindent 8 }}\n      {{- end }}\n      {{- with .Values.tolerations }}\n      tolerations:\n        {{- toYaml . | nindent 8 }}\n      {{- end }}\n`);
+      // ---- templates/service.yaml
+      fs.writeFileSync(path.join(outDir, 'templates', 'service.yaml'),
+        `apiVersion: v1\nkind: Service\nmetadata:\n  name: {{ include "${chartName}.fullname" . | default .Release.Name }}\n  labels:\n    {{- include "${chartName}.labels" . | nindent 4 }}\nspec:\n  type: {{ .Values.service.type }}\n  ports:\n    - port: {{ .Values.service.port }}\n      targetPort: http\n      protocol: TCP\n      name: http\n  selector:\n    {{- include "${chartName}.selectorLabels" . | nindent 4 }}\n`);
+      // ---- templates/hpa.yaml
+      fs.writeFileSync(path.join(outDir, 'templates', 'hpa.yaml'),
+        `{{- if .Values.autoscaling.enabled }}\napiVersion: autoscaling/v2\nkind: HorizontalPodAutoscaler\nmetadata:\n  name: {{ include "${chartName}.fullname" . | default .Release.Name }}\n  labels:\n    {{- include "${chartName}.labels" . | nindent 4 }}\nspec:\n  scaleTargetRef:\n    apiVersion: apps/v1\n    kind: Deployment\n    name: {{ include "${chartName}.fullname" . | default .Release.Name }}\n  minReplicas: {{ .Values.autoscaling.minReplicas }}\n  maxReplicas: {{ .Values.autoscaling.maxReplicas }}\n  metrics:\n    {{- if .Values.autoscaling.targetCPUUtilizationPercentage }}\n    - type: Resource\n      resource:\n        name: cpu\n        target:\n          type: Utilization\n          averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}\n    {{- end }}\n{{- end }}\n`);
+      // ---- templates/ingress.yaml
+      fs.writeFileSync(path.join(outDir, 'templates', 'ingress.yaml'),
+        `{{- if .Values.ingress.enabled }}\napiVersion: networking.k8s.io/v1\nkind: Ingress\nmetadata:\n  name: {{ include "${chartName}.fullname" . | default .Release.Name }}\n  labels:\n    {{- include "${chartName}.labels" . | nindent 4 }}\n  {{- with .Values.ingress.annotations }}\n  annotations:\n    {{- toYaml . | nindent 4 }}\n  {{- end }}\nspec:\n  {{- with .Values.ingress.className }}\n  ingressClassName: {{ . }}\n  {{- end }}\n  {{- with .Values.ingress.tls }}\n  tls:\n    {{- toYaml . | nindent 4 }}\n  {{- end }}\n  rules:\n    {{- range .Values.ingress.hosts }}\n    - host: {{ .host | quote }}\n      http:\n        paths:\n          {{- range .paths }}\n          - path: {{ .path }}\n            pathType: {{ .pathType }}\n            backend:\n              service:\n                name: {{ include "${chartName}.fullname" $ | default $.Release.Name }}\n                port:\n                  number: {{ $.Values.service.port }}\n          {{- end }}\n    {{- end }}\n{{- end }}\n`);
+      // ---- templates/NOTES.txt
+      fs.writeFileSync(path.join(outDir, 'templates', 'NOTES.txt'),
+        `kolm artifact "${base}" is now serving via ${rt}.\n\n1. Get the application URL:\n{{- if .Values.ingress.enabled }}\n  https://{{ (index .Values.ingress.hosts 0).host }}/\n{{- else if contains "NodePort" .Values.service.type }}\n  export NODE_PORT=$(kubectl get -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "${chartName}.fullname" . | default .Release.Name }})\n  export NODE_IP=$(kubectl get nodes -o jsonpath="{.items[0].status.addresses[0].address}")\n  echo http://$NODE_IP:$NODE_PORT\n{{- else if contains "LoadBalancer" .Values.service.type }}\n  kubectl get svc -w {{ include "${chartName}.fullname" . | default .Release.Name }}\n{{- else }}\n  kubectl port-forward svc/{{ include "${chartName}.fullname" . | default .Release.Name }} 8080:{{ .Values.service.port }}\n  curl http://localhost:8080/v1/models\n{{- end }}\n\n2. Send a test request:\n  curl http://<host>/v1/chat/completions \\\n    -H 'content-type: application/json' \\\n    -d '{"messages":[{"role":"user","content":"hello"}]}'\n`);
+      // ---- .helmignore
+      fs.writeFileSync(path.join(outDir, '.helmignore'),
+        `.DS_Store\n.git/\n.gitignore\n.bzr/\n.hg/\n.svn/\n*.swp\n*.bak\n*.tmp\n*.orig\n*~\n.project\n.idea/\n*.tmproj\n.vscode/\n`);
+      // ---- _helpers.tpl name include helper
+      fs.writeFileSync(path.join(outDir, 'templates', '_fullname.tpl'),
+        `{{- define "${chartName}.fullname" -}}\n{{- if .Values.fullnameOverride -}}\n{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}\n{{- else -}}\n{{- $name := default .Chart.Name .Values.nameOverride -}}\n{{- if contains $name .Release.Name -}}\n{{- .Release.Name | trunc 63 | trimSuffix "-" -}}\n{{- else -}}\n{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}\n{{- end -}}\n{{- end -}}\n{{- end -}}\n`);
+      // ---- README.md inside the chart (chart README is canonical and welcome here)
+      const tic = String.fromCharCode(96);
+      const fence = tic + tic + tic;
+      const readmeLines = [
+        '# ' + chartName,
+        '',
+        'Helm chart for the kolm-distilled artifact ' + tic + base + tic + ' served via ' + tic + rt + tic + '.',
+        '',
+        'Generated by ' + tic + 'kolm serve --helm' + tic + ' on ' + new Date().toISOString().slice(0, 10) + '.',
+        '',
+        '## Install',
+        '',
+        fence + 'bash',
+        'helm install ' + chartName + ' . --namespace ' + ns + ' --create-namespace',
+        fence,
+        '',
+        '## Upgrade',
+        '',
+        fence + 'bash',
+        'helm upgrade ' + chartName + ' . --namespace ' + ns + ' -f values-prod.yaml',
+        fence,
+        '',
+        '## Values',
+        '',
+        'See ' + tic + 'values.yaml' + tic + ' for the full configuration surface. Key knobs:',
+        '',
+        '| Key | Default | Notes |',
+        '|-----|---------|-------|',
+        '| ' + tic + 'replicaCount' + tic + ' | ' + tic + '1' + tic + ' | Number of pod replicas |',
+        '| ' + tic + 'image.repository' + tic + ' | ' + tic + rtImage.split(':')[0] + tic + ' | Runtime image |',
+        '| ' + tic + 'image.tag' + tic + ' | ' + tic + (rtImage.split(':').slice(1).join(':') || 'latest') + tic + ' | Runtime tag |',
+        '| ' + tic + 'service.type' + tic + ' | ' + tic + 'ClusterIP' + tic + ' | Set to LoadBalancer for external |',
+        '| ' + tic + 'autoscaling.enabled' + tic + ' | ' + tic + 'false' + tic + ' | HPA on CPU |',
+        '| ' + tic + 'gpu.enabled' + tic + ' | ' + tic + 'true' + tic + ' | nvidia.com/gpu = 1 |',
+        '| ' + tic + 'artifact.hostPath' + tic + ' | ' + tic + path.dirname(ap) + tic + ' | Replace with PVC for multi-node |',
+        '',
+        '## Pre-flight checks',
+        '',
+        '- NVIDIA device plugin installed on the cluster (' + tic + 'kubectl get pods -n kube-system | grep nvidia-device-plugin' + tic + ')',
+        '- Artifact ' + tic + path.basename(ap) + tic + ' is present on each node at ' + tic + path.dirname(ap) + tic + ' (or convert to PVC)',
+        '- ' + rt + ' image ' + tic + rtImage + tic + ' is reachable from the cluster',
+        '',
+        '## Uninstall',
+        '',
+        fence + 'bash',
+        'helm uninstall ' + chartName + ' --namespace ' + ns,
+        fence,
+        '',
+      ];
+      fs.writeFileSync(path.join(outDir, 'README.md'), readmeLines.join('\n'));
+
+      manifests.helm = {
+        chart_dir: outDir,
+        chart_name: chartName,
+        chart_version: chartVersion,
+        app_version: appVersion,
+        runtime: rt,
+        files: [
+          'Chart.yaml',
+          'values.yaml',
+          '.helmignore',
+          'README.md',
+          'templates/_helpers.tpl',
+          'templates/_fullname.tpl',
+          'templates/deployment.yaml',
+          'templates/service.yaml',
+          'templates/hpa.yaml',
+          'templates/ingress.yaml',
+          'templates/NOTES.txt',
+        ],
+      };
+    }
+    if (!wantDocker && !wantK8s && !wantHelm) {
       // Bare --runtime: just print the chosen runtime line + an example
       manifests.runtime_line = `${rt} --model ${ap} --port ${port}`;
     }
@@ -9905,9 +10732,66 @@ spec:
     }
     const py = process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
     const repoRoot = path.dirname(path.dirname(new URL(import.meta.url).pathname));
+
+    // W869 — hardware auto-detect (Persona A). Inspect the primary GPU, pick a
+    // sensible runtime + dtype + KV cache precision, surface the choice to the
+    // user, and pass it to apps/runtime/serve.py via env vars. Bypass with
+    // --no-hw-detect or set KOLM_NO_HW_DETECT=1. Explicit env vars on the
+    // command line win over auto-picks (we never overwrite a set var).
+    const serveEnv = { ...process.env };
+    let hwSummary = null;
+    if (!args.includes('--no-hw-detect') && !envBool('KOLM_NO_HW_DETECT', false)) {
+      try {
+        const { detectHardware } = await import('../src/forge-hardware.js');
+        const hw = detectHardware();
+        const p = hw.primary;
+        let runtime = 'vllm';
+        let dtype = 'auto';
+        let kvDtype = 'auto';
+        if (p.vendor === 'nvidia') {
+          // Compute-capability driven choices. Blackwell (10+) → FP8 KV;
+          // Hopper (9) → FP8 KV; everyone else → fp16 KV.
+          const cc = String(p.compute_capability || '');
+          const ccMajor = parseInt(cc.split('.')[0], 10);
+          if (ccMajor >= 9) { kvDtype = 'fp8'; }
+          else { kvDtype = 'auto'; }
+          // Dtype: BF16 on Ampere+ (8+), FP16 otherwise.
+          dtype = ccMajor >= 8 ? 'bfloat16' : 'float16';
+        } else if (p.vendor === 'amd') {
+          runtime = 'vllm';  // ROCm vLLM works on MI200+
+          dtype = 'float16';
+        } else if (p.vendor === 'apple') {
+          runtime = 'transformers';  // vLLM not on Apple Silicon yet (2026-05); MLX-LM is separate path
+          dtype = 'float16';
+        } else if (p.vendor === 'cpu') {
+          runtime = 'transformers';  // CPU fallback; warn user
+          dtype = 'float32';
+          kvDtype = 'auto';
+        }
+        // Force transformers if user set KOLM_FORCE_TRANSFORMERS=1 (existing env)
+        if (envBool('KOLM_FORCE_TRANSFORMERS', false)) runtime = 'transformers';
+        // Only set vars that aren't already set — explicit env always wins.
+        if (!serveEnv.KOLM_SERVE_RUNTIME)        serveEnv.KOLM_SERVE_RUNTIME = runtime;
+        if (!serveEnv.KOLM_SERVE_DTYPE)          serveEnv.KOLM_SERVE_DTYPE = dtype;
+        if (!serveEnv.KOLM_SERVE_KV_CACHE_DTYPE) serveEnv.KOLM_SERVE_KV_CACHE_DTYPE = kvDtype;
+        hwSummary = { primary: p, runtime: serveEnv.KOLM_SERVE_RUNTIME, dtype: serveEnv.KOLM_SERVE_DTYPE, kv_cache_dtype: serveEnv.KOLM_SERVE_KV_CACHE_DTYPE };
+        console.log(`hardware: ${p.name} (${p.vendor}, ${p.vram_gb} GB VRAM${p.compute_capability ? ', cc ' + p.compute_capability : ''})`);
+        console.log(`  runtime:        ${hwSummary.runtime}`);
+        console.log(`  dtype:          ${hwSummary.dtype}`);
+        console.log(`  kv cache dtype: ${hwSummary.kv_cache_dtype}`);
+        if (p.vendor === 'cpu') {
+          console.log(`  NOTE: no GPU detected — CPU inference will be slow. Use \`kolm serve --http <art> --runtime llama.cpp --docker\` for a CPU-optimized container.`);
+        }
+        console.log('');
+      } catch (e) {
+        console.log(`(hardware auto-detect skipped: ${e.message})`);
+      }
+    }
+
     console.log(`booting HTTP serve for ${path.basename(ap)} via ${py} apps/runtime/serve.py`);
     const r = spawnSync(py, ['-m', 'apps.runtime.serve', '--artifact', ap, '--port', String(port), '--host', host], {
       stdio: 'inherit',
+      env: serveEnv,
       cwd: repoRoot.replace(/^\/([A-Z]):/, '$1:'),
     });
     process.exit(r.status || 0);
@@ -11445,23 +12329,38 @@ async function cmdExperts(args) {
   }
 }
 
-// kolm quantize: wave 195 (Q+5). Quantize an adapter via the isolated
-// quantize worker. Without --local-worker prints a scaffolding message and
-// exits 0 (no work done). With --local-worker spawns workers/quantize/
-// quantize.mjs which detects whether python3 + bitsandbytes are importable
-// and falls back to an honest manifest if missing.
+// kolm quantize: wave 195 (Q+5). Quantize a model directory via the isolated
+// quantize worker at workers/quantize/quantize.mjs. The worker detects whether
+// python3 + bitsandbytes are importable and falls back to an honest manifest
+// if missing.
+//
+// W869 ergonomics: any of --in / --out / --method / --doctor / --mixed-precision
+// dispatches straight to the worker (the worker is fully wired — there's no
+// reason to print a "scaffolding required" wall when the user has already given
+// us the inputs). `--scaffold` keeps the legacy install-hint output as an
+// explicit escape hatch. `--local-worker` is preserved as a no-op alias so older
+// docs and scripts keep working.
 async function cmdQuantize(args) {
   if (maybeHelp('quantize', args)) return;
   if (args[0] === 'oracle') return cmdQuantizeOracle(args.slice(1));
-  if (!args.includes('--local-worker')) {
-    console.log('kolm quantize requires --local-worker flag.');
-    console.log('The worker lives at workers/quantize/. Run:');
+  const explicitScaffold = args.includes('--scaffold');
+  const hasWorkArgs = args.includes('--doctor') ||
+    args.some((a) => a === '--in' || a === '--out' || a === '--method' || a === '--mixed-precision' ||
+                     a.startsWith('--in=') || a.startsWith('--out=') || a.startsWith('--method=') || a.startsWith('--mixed-precision='));
+  if (explicitScaffold || (!hasWorkArgs && !args.includes('--local-worker'))) {
+    console.log('kolm quantize — local INT4/INT8/FP8 quantization via workers/quantize/');
+    console.log('');
+    console.log('usage:');
+    console.log('  kolm quantize --in <model-dir> --out <out-dir> [--method int4|int8|fp8|...]');
+    console.log('  kolm quantize --doctor                # check python+bitsandbytes are importable');
+    console.log('  kolm quantize --mixed-precision <profile.json>');
+    console.log('  kolm quantize oracle ...              # quant-method recommender (no GPU)');
+    console.log('');
+    console.log('worker setup (one time):');
     console.log('  cd workers/quantize && npm install');
     console.log('  python3 -m venv .venv && .venv/bin/pip install -r requirements.txt');
-    console.log('to enable. Today the verb returns this scaffolding message; the python');
-    console.log('path runs only when the worker is installed and detected.');
     console.log('');
-    console.log('See: kolm quantize --help for the supported methods + flag list.');
+    console.log('See `kolm quantize --help` for the supported methods + flag list.');
     return;
   }
   // Wave 253 backend#10: cmdQuantizeLocalWorker spawns the python quantizer
@@ -19889,6 +20788,10 @@ async function cmdDistillLocalWorker(args) {
   const allowUnknownStudentBase = args.includes('--allow-unknown-student-base');
   const listCatalog = args.includes('--list-catalog');
   const doctor = mode === 'doctor' || args.includes('--doctor');
+  const localEndpoint = pick('--local-endpoint');
+  const localApiKey = pick('--local-api-key');
+  const maxRows = pick('--max-rows');
+  const maxTokens = pick('--max-tokens');
 
   // Validate redact class on the CLI side so the user gets the hint without
   // round-tripping through worker spawn. The worker re-validates so direct
@@ -19932,6 +20835,10 @@ async function cmdDistillLocalWorker(args) {
     if (studentBaseRevision) passthru.push(`--student-base-revision=${studentBaseRevision}`);
     if (distillationMethod) passthru.push(`--distillation-method=${distillationMethod}`);
     if (allowUnknownStudentBase) passthru.push('--allow-unknown-student-base');
+    if (localEndpoint) passthru.push(`--local-endpoint=${localEndpoint}`);
+    if (localApiKey) passthru.push(`--local-api-key=${localApiKey}`);
+    if (maxRows) passthru.push(`--max-rows=${maxRows}`);
+    if (maxTokens) passthru.push(`--max-tokens=${maxTokens}`);
   }
 
   // W787 — accept --precision / --gradient-checkpointing / --early-stop-patience
@@ -25536,6 +26443,122 @@ async function cmdAirgap(args) {
   console.error('unknown airgap subcommand:', sub);
   console.error('try: kolm airgap --help');
   process.exit(EXIT.BAD_ARGS);
+}
+
+// =============================================================================
+// W869 T4 - kolm bundle airgap
+//
+// `kolm bundle airgap --out /tmp/kolm-airgap.tar.gz [--with-node-modules]
+//                      [--with-wheels] [--with-models] [--models-dir <dir>]
+//                      [--force] [--json]`
+//
+// Produces a single .tar.gz containing the kolm runtime + workers + docs +
+// optional Python wheels / model weights, ready to drop into an air-gapped
+// host. Backing logic lives in src/airgap-bundle.js so the route layer
+// (/v1/bundle/airgap) and the CLI share the same builder.
+// =============================================================================
+
+function _bundleAirgapHelp() {
+  console.log('usage: kolm bundle airgap --out <path.tar.gz> [flags]');
+  console.log('');
+  console.log('Build a self-contained air-gap deployment tarball with the kolm');
+  console.log('runtime, Python workers, docs, and (optionally) pinned wheels and');
+  console.log('default model weights. The target host extracts once and runs');
+  console.log('entirely offline. See docs/self-hosted-deploy-complete.md.');
+  console.log('');
+  console.log('Required:');
+  console.log('  --out <path>            output tarball path (must end .tar.gz or .tgz)');
+  console.log('');
+  console.log('Flags:');
+  console.log('  --with-node-modules     include installed node_modules/ (production-only ideally — run');
+  console.log('                          `npm prune --omit=dev` before bundling)');
+  console.log('  --with-wheels           include local wheelhouse at ./wheels (`pip wheel -r requirements.txt -w wheels`)');
+  console.log('  --with-models           include default model weights from KOLM_MODELS_DIR or ./models');
+  console.log('  --models-dir <dir>      override KOLM_MODELS_DIR for --with-models');
+  console.log('  --repo-root <dir>       override the kolm source root (defaults to the CLI checkout)');
+  console.log('  --force                 overwrite an existing --out file');
+  console.log('  --json                  emit the result envelope as JSON');
+  console.log('  --help, -h              show this message');
+  console.log('');
+  console.log('Examples:');
+  console.log('  kolm bundle airgap --out /tmp/kolm-airgap.tar.gz');
+  console.log('  kolm bundle airgap --out kolm-airgap.tgz --with-node-modules --with-wheels');
+  console.log('  kolm bundle airgap --out kolm-full.tar.gz --with-node-modules --with-wheels --with-models');
+}
+
+async function cmdBundle(args) {
+  const sub = args[0];
+  const rest = args.slice(1);
+  if (!sub || sub === '--help' || sub === '-h' || sub === 'help') {
+    console.log('kolm bundle — deployment-bundle builders');
+    console.log('');
+    console.log('Sub-commands:');
+    console.log('  airgap                  build a self-contained air-gap deployment tarball');
+    console.log('');
+    console.log('Run `kolm bundle airgap --help` for the air-gap builder options.');
+    return;
+  }
+  if (sub !== 'airgap') {
+    console.error('unknown bundle subcommand:', sub);
+    console.error('try: kolm bundle --help');
+    process.exit(EXIT.BAD_ARGS);
+  }
+  if (rest.includes('--help') || rest.includes('-h')) {
+    _bundleAirgapHelp();
+    return;
+  }
+  const get = (flag) => {
+    const i = rest.indexOf(flag);
+    return i >= 0 ? rest[i + 1] : null;
+  };
+  const out = get('--out');
+  const reposRoot = get('--repo-root');
+  const modelsDir = get('--models-dir');
+  const withNm = rest.includes('--with-node-modules');
+  const withWheels = rest.includes('--with-wheels');
+  const withModels = rest.includes('--with-models');
+  const force = rest.includes('--force');
+  const wantJson = rest.includes('--json');
+  if (!out) {
+    console.error('kolm bundle airgap: --out is required');
+    _bundleAirgapHelp();
+    process.exit(EXIT.BAD_ARGS);
+  }
+  const mod = await import('../src/airgap-bundle.js');
+  const repoRoot = reposRoot
+    ? path.resolve(reposRoot)
+    : path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Z]):/, '$1:')), '..');
+  const env = await mod.buildAirgapBundle({
+    dest_path: path.resolve(out),
+    repo_root: repoRoot,
+    with_node_modules: withNm,
+    with_wheels: withWheels,
+    with_models: withModels,
+    models_dir: modelsDir,
+    force,
+  });
+  if (wantJson) {
+    console.log(JSON.stringify(env, null, 2));
+  } else if (env.ok) {
+    const mb = (env.size_bytes / 1024 / 1024).toFixed(1);
+    const payloadMb = (env.payload_bytes / 1024 / 1024).toFixed(1);
+    console.log('air-gap bundle written: ' + env.path);
+    console.log('  size:               ' + mb + ' MB compressed (' + payloadMb + ' MB payload)');
+    console.log('  files:              ' + env.file_count);
+    console.log('  sha256:             ' + env.sha256);
+    console.log('  git_sha:            ' + (env.git_sha || '(unknown)'));
+    console.log('  with_node_modules:  ' + env.options.with_node_modules);
+    console.log('  with_wheels:        ' + env.options.with_wheels);
+    console.log('  with_models:        ' + env.options.with_models);
+    console.log('');
+    console.log('Extract on the target host:');
+    console.log('  tar -xzf ' + path.basename(env.path) + ' && cat BUNDLE-README.md');
+  } else {
+    console.error('kolm bundle airgap: ' + (env.error || 'unknown_error'));
+    if (env.hint) console.error('  hint: ' + env.hint);
+    if (env.missing) console.error('  missing: ' + env.missing.join(', '));
+    process.exit(EXIT.EXECUTION);
+  }
 }
 
 // =============================================================================
@@ -31411,6 +32434,54 @@ async function cmdExport(args) {
   };
   const isPreview = args.includes('--preview');
   const artifact = args.find(a => !a.startsWith('--'));
+
+  // ---------- doctor path: probe which export backends are ready ----------
+  // W869 Persona F — `kolm export --doctor` reports per-backend whether the
+  // toolchain (python imports + binaries on PATH) is installed. No artifact
+  // needed; safe to run on any box, exits 0 even when nothing is installed.
+  if (args.includes('--doctor')) {
+    const py = process.env.KOLM_PY || (process.platform === 'win32' ? 'python' : 'python3');
+    const { spawnSync } = await import('node:child_process');
+    const script = [
+      'import json, sys',
+      'try:',
+      '    from apps.export import doctor',
+      '    print(json.dumps(doctor(), indent=2))',
+      'except Exception as e:',
+      '    print(json.dumps({"ok": False, "error": str(e)}))',
+      '    sys.exit(1)',
+    ].join('\n');
+    const res = spawnSync(py, ['-c', script], { encoding: 'utf8' });
+    if (res.error) {
+      const e = new Error(`failed to spawn python (${py}): ${res.error.message}\nset KOLM_PY to your python interpreter`);
+      e.exitCode = EXIT.EXECUTION;
+      throw e;
+    }
+    if (args.includes('--json')) {
+      process.stdout.write(res.stdout || '');
+      return;
+    }
+    // Human-readable summary
+    let report;
+    try { report = JSON.parse(res.stdout || '{}'); } catch { report = null; }
+    if (!report || !report.backends) {
+      process.stdout.write(res.stdout || '');
+      return;
+    }
+    console.log(`export backends:  ${report.ready_count} of ${report.total} ready`);
+    console.log('');
+    for (const [name, b] of Object.entries(report.backends)) {
+      const status = b.ready ? 'OK  ' : 'MISS';
+      console.log(`  ${status}  ${name.padEnd(12)}${b.ready ? '' : ' ('  + [
+        b.missing_python.length ? 'py: ' + b.missing_python.join(', ') : null,
+        b.missing_binaries.length ? 'bin: ' + b.missing_binaries.join(', ') : null,
+      ].filter(Boolean).join('; ') + ')'}`);
+      if (!b.ready && b.hint) {
+        console.log(`        install:  ${b.hint}`);
+      }
+    }
+    return;
+  }
   // --downgrade=v1 (W296g) re-serializes a bundle into the legacy v1 JSON-only
   // layout for tenants whose verifier hasn't been upgraded. Reject if the
   // source bundle contains compiled binary that cannot round-trip into v1.
@@ -38205,6 +39276,20 @@ async function main() {
       // <cid> against local artifacts (~/.kolm/artifacts/*.kolm).
       case 'lineage':  await withErrorContext('lineage',  () => cmdW739Lineage(rest)); break;
       case 'verify':   await withErrorContext('verify',   () => cmdVerify(rest)); break;
+      // W869 Persona D — `kolm passport <artifact.kolm> [--format compliance|json|markdown]`
+      // bundles model card + AI Act Annex IV + SBOM + carbon estimate + signed
+      // receipt summary into a single envelope a model-risk-management team can
+      // attach to a third-line-of-defense review. No network calls; honest
+      // envelopes when the artifact lacks a field (HF Model Card v0.3 contract).
+      case 'passport': await withErrorContext('passport', () => cmdPassport(rest)); break;
+      case 'procurement':
+      case 'vendor-pack':
+        await withErrorContext('procurement', () => cmdProcurement(rest));
+        break;
+      case 'sig':
+      case 'caiq':
+        await withErrorContext('procurement', () => cmdProcurement([cmd, ...rest]));
+        break;
       case 'sigstore-attest':
       case 'attest':   await withErrorContext('sigstore-attest', () => cmdSigstoreAttest(rest)); break;
       case 'test':     await withErrorContext('test',     () => cmdTest(rest)); break;
@@ -38350,6 +39435,61 @@ async function main() {
       case 'hardware': await withErrorContext('hardware', () => cmdHardware(rest)); break;
       case 'fit':      await withErrorContext('fit',      () => cmdFit(rest)); break;
       case 'experts':  await withErrorContext('experts',  () => cmdExperts(rest)); break;
+      // W869 — `kolm forge` is the discoverability umbrella for the entire
+      // Forge family. Each sub-verb delegates to the existing top-level cmd*,
+      // so `kolm forge hardware` ≡ `kolm forge:hardware` ≡ `kolm hardware`.
+      // The umbrella exists so a first-time user typing `kolm forge` learns
+      // the whole pipeline (detect hw → fit → inspect → compile → quantize →
+      // merge → serve → bench → export) without reading docs first.
+      case 'forge': {
+        const sub = (rest && rest[0]) || '';
+        const sr = rest.slice(1);
+        switch (sub) {
+          case 'hardware': case 'hw':       await withErrorContext('forge hardware', () => cmdHardware(sr)); break;
+          case 'fit':                       await withErrorContext('forge fit',      () => cmdFit(sr)); break;
+          case 'inspect':                   await withErrorContext('forge inspect',  () => cmdInspect(sr)); break;
+          case 'experts':                   await withErrorContext('forge experts',  () => cmdExperts(sr)); break;
+          case 'compile':                   await withErrorContext('forge compile',  () => cmdCompile(sr)); break;
+          case 'quantize': case 'quant':    await withErrorContext('forge quantize', () => cmdQuantize(sr)); break;
+          case 'merge':                     await withErrorContext('forge merge',    () => cmdMerge(sr)); break;
+          case 'serve':                     await withErrorContext('forge serve',    () => cmdServe(sr)); break;
+          case 'bench': case 'benchmark':   await withErrorContext('forge bench',    () => cmdBenchmark(sr)); break;
+          case 'export':                    await withErrorContext('forge export',   () => cmdExport(sr)); break;
+          case 'list': case 'ls': case '':  case '--help': case '-h': case 'help': {
+            console.log('kolm forge — distill-and-deploy pipeline');
+            console.log('');
+            console.log('  detect what hardware you have, what fits, what to run.');
+            console.log('');
+            console.log('  hardware            list every GPU/CPU + native dtypes + supported quants');
+            console.log('  fit                 will model X at quant Q fit in N GB? returns best target');
+            console.log('  inspect <ref>       open a .kolm artifact OR HF model id: layout, params, MoE detail');
+            console.log('  experts <ref>       MoE expert routing analysis (Mixtral / Qwen-MoE / DeepSeek-V2/V3)');
+            console.log('');
+            console.log('  build a distilled artifact.');
+            console.log('');
+            console.log('  compile             author a spec.json and turn captured calls into a .kolm artifact');
+            console.log('  quantize <artifact> re-quantize an existing .kolm to a different target');
+            console.log('  merge               TIES / DARE / SLERP weight merge across two artifacts');
+            console.log('');
+            console.log('  run + measure + ship.');
+            console.log('');
+            console.log('  serve <artifact>    start a local OpenAI-compatible server (CPU/GPU auto-detect)');
+            console.log('  bench <artifact>    K-score + throughput + latency + (--compare a.kolm b.kolm)');
+            console.log('  export <artifact>   GGUF / EXL2 / AWQ / NVFP4 / FP8 export for downstream runtimes');
+            console.log('');
+            console.log('every sub-verb also works top-level: `kolm forge hardware` ≡ `kolm hardware`.');
+            console.log('full per-verb help: `kolm <verb> --help`.');
+            break;
+          }
+          default: {
+            console.error(`error: unknown forge sub-verb '${sub}'.`);
+            console.error('try one of: hardware | fit | inspect | experts | compile | quantize | merge | serve | bench | export');
+            console.error('or run `kolm forge` with no args for the full menu.');
+            process.exit(EXIT.BAD_ARGS);
+          }
+        }
+        break;
+      }
       case 'runtime':  await withErrorContext('runtime',  () => cmdRuntime(rest)); break;
       // W729 — `kolm load queue --stats | --capacity <N>` mirrors the
       // server-side src/load-queue.js singleton. Sub-verb routing keeps the
@@ -38521,6 +39661,7 @@ async function main() {
       case 'package':  await withErrorContext('packages', () => cmdPackages(rest)); break;
       case 'evidence': await withErrorContext('evidence', () => cmdEvidence(rest)); break;
       case 'airgap':   await withErrorContext('airgap',   () => cmdAirgap(rest)); break;
+      case 'bundle':   await withErrorContext('bundle',   () => cmdBundle(rest)); break;
       case 'compute':  await withErrorContext('compute',  () => cmdCompute(rest)); break;
       case 'doctor':   await withErrorContext('doctor',   () => cmdDoctor(rest)); break;
       case 'loop':     await withErrorContext('loop',     () => cmdLoop(rest)); break;
