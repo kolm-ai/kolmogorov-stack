@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>kolm audit-export | CLI reference | kolm.ai</title>
+<meta name="description" content="Export an audit log slice for SIEM ingestion, archival, or regulator submission.">
+<link rel="canonical" href="https://kolm.ai/docs/cli/audit-export">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
+<script src="/nav.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm audit-export","description":"Export an audit log slice for SIEM ingestion, archival, or regulator submission.","url":"https://kolm.ai/docs/cli/audit-export","author":{"@type":"Organization","name":"kolm.ai"}}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<main id="main" class="docs-main" data-w401f="cli-verb" data-verb="audit-export">
+<nav aria-label="Breadcrumb" class="crumbs"><a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>audit-export</span></nav>
+<h1>kolm audit-export</h1>
+<blockquote><p>Export an audit log slice for SIEM ingestion, archival, or regulator submission.</p></blockquote>
+
+<h2>Usage</h2>
+<pre><code>kolm audit-export [--since &lt;ts&gt;] [--until &lt;ts&gt;] [--format jsonl|csv|cef] [--out &lt;path&gt;]</code></pre>
+
+<h2>Flags</h2>
+<table>
+<thead><tr><th>Flag</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>--since <ts></code></td><td>epoch</td><td>Start of the export window.</td></tr>
+<tr><td><code>--until <ts></code></td><td>now</td><td>End of the export window.</td></tr>
+<tr><td><code>--format <fmt></code></td><td><code>jsonl</code></td><td><code>jsonl</code>, <code>csv</code>, or <code>cef</code> (ArcSight Common Event Format).</td></tr>
+<tr><td><code>--out <path></code></td><td>stdout</td><td>Destination file.</td></tr>
+<tr><td><code>--signed</code></td><td>off</td><td>Attach an Ed25519 signature for tamper-evidence.</td></tr>
+</tbody>
+</table>
+
+<h2>Examples</h2>
+<pre><code>kolm audit-export --since 2026-04-01 --until 2026-04-30 --format csv --out apr.csv
+kolm audit-export --format cef --signed --out audit.cef</code></pre>
+
+<h2>Notes</h2>
+<p>Pairs with the SIEM-streaming feature (Enterprise tier) at <code>/account/enterprise</code>. The signed flag produces a sidecar <code>.sig</code> file.</p>
+
+<h2>See also</h2>
+<ul>
+<li><a href="/docs/cli/audit">kolm audit</a></li>
+<li><a href="/docs/cli/attest">kolm attest</a></li>
+<li><a href="/docs/cli">All CLI verbs</a></li>
+</ul>
+
+</main>
+
+</body>
+</html>

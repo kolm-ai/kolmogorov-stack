@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>kolm attest | CLI reference | kolm.ai</title>
+<meta name="description" content="Sign an artifact or document with the local Ed25519 keypair. Produces a sidecar .sig verifiable by kolm verify.">
+<link rel="canonical" href="https://kolm.ai/docs/cli/attest">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
+<script src="/nav.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm attest","description":"Sign an artifact or document with the local Ed25519 keypair. Produces a sidecar .sig verifiable by kolm verify.","url":"https://kolm.ai/docs/cli/attest","author":{"@type":"Organization","name":"kolm.ai"}}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<main id="main" class="docs-main" data-w401f="cli-verb" data-verb="attest">
+<nav aria-label="Breadcrumb" class="crumbs"><a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>attest</span></nav>
+<h1>kolm attest</h1>
+<blockquote><p>Sign an artifact or document with the local Ed25519 keypair. Produces a sidecar <code>.sig</code> verifiable by <code>kolm verify</code>.</p></blockquote>
+
+<h2>Usage</h2>
+<pre><code>kolm attest &lt;file&gt; [--key &lt;path&gt;] [--out &lt;path.sig&gt;]</code></pre>
+
+<h2>Flags</h2>
+<table>
+<thead><tr><th>Flag</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code><file></code></td><td>required</td><td>File to sign.</td></tr>
+<tr><td><code>--key <path></code></td><td><code>~/.kolm/keys/ed25519</code></td><td>Private key path.</td></tr>
+<tr><td><code>--out <path.sig></code></td><td><code>&lt;file&gt;.sig</code></td><td>Where to write the signature.</td></tr>
+</tbody>
+</table>
+
+<h2>Examples</h2>
+<pre><code>kolm attest ./out/recipe.kolm
+kolm attest ./out/audit.cef --out ./audit.sig</code></pre>
+
+<h2>Notes</h2>
+<p>Pair with <code>kolm pubkey</code> to publish your verification key. Sigstore integration is available via <code>kolm sigstore-attest</code>.</p>
+
+<h2>See also</h2>
+<ul>
+<li><a href="/docs/cli/verify">kolm verify</a></li>
+<li><a href="/docs/cli/sigstore-attest">kolm sigstore-attest</a></li>
+<li><a href="/docs/cli/pubkey">kolm pubkey</a></li>
+<li><a href="/docs/cli">All CLI verbs</a></li>
+</ul>
+
+</main>
+
+</body>
+</html>

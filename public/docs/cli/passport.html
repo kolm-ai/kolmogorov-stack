@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>kolm passport | CLI reference | kolm.ai</title>
+<meta name="description" content="Export a compliance-friendly model card envelope for model risk review (MRR) and vendor security review.">
+<link rel="canonical" href="https://kolm.ai/docs/cli/passport">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
+<script src="/nav.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm passport","description":"Export a compliance-friendly model card envelope for model risk review (MRR) and vendor security review.","url":"https://kolm.ai/docs/cli/passport","author":{"@type":"Organization","name":"kolm.ai"}}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<main id="main" class="docs-main" data-w401f="cli-verb" data-verb="passport">
+<nav aria-label="Breadcrumb" class="crumbs"><a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>passport</span></nav>
+<h1>kolm passport</h1>
+<blockquote><p>Export a compliance-friendly model card envelope for model risk review (MRR) and vendor security review.</p></blockquote>
+
+<h2>Usage</h2>
+<pre><code>kolm passport export &lt;artifact.kolm&gt; [--format compliance|model-card|json] [--out &lt;path&gt;]</code></pre>
+
+<h2>Flags</h2>
+<table>
+<thead><tr><th>Flag</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>export</code></td><td>required</td><td>Sub-verb. Currently the only one.</td></tr>
+<tr><td><code><artifact.kolm></code></td><td>required</td><td>Artifact to export from.</td></tr>
+<tr><td><code>--format <fmt></code></td><td><code>compliance</code></td><td>Output format. <code>compliance</code> = MRR pack, <code>model-card</code> = HF-style card, <code>json</code> = raw envelope.</td></tr>
+<tr><td><code>--out <path></code></td><td>stdout</td><td>Destination file.</td></tr>
+</tbody>
+</table>
+
+<h2>Examples</h2>
+<pre><code>kolm passport export ./out/recipe.kolm --format compliance --out ./passport.pdf
+kolm passport export ./out/recipe.kolm --format model-card --out ./MODEL_CARD.md</code></pre>
+
+<h2>Notes</h2>
+<p>The compliance format bundles K-Score axes, training data lineage, evals, base model attribution, license, and SBOM into a single document review boards typically request. Sign with <code>kolm attest</code> for cryptographic provenance.</p>
+
+<h2>See also</h2>
+<ul>
+<li><a href="/docs/cli/sbom">kolm sbom</a></li>
+<li><a href="/docs/cli/attest">kolm attest</a></li>
+<li><a href="/docs/cli/ai-act">kolm ai-act</a></li>
+<li><a href="/docs/cli/model-card">kolm model-card</a></li>
+<li><a href="/docs/cli">All CLI verbs</a></li>
+</ul>
+
+</main>
+
+</body>
+</html>

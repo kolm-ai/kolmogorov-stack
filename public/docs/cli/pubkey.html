@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>kolm pubkey | CLI reference | kolm.ai</title>
+<meta name="description" content="Print, export, or rotate the local Ed25519 public key used by kolm attest.">
+<link rel="canonical" href="https://kolm.ai/docs/cli/pubkey">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
+<script src="/nav.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm pubkey","description":"Print, export, or rotate the local Ed25519 public key used by kolm attest.","url":"https://kolm.ai/docs/cli/pubkey","author":{"@type":"Organization","name":"kolm.ai"}}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<main id="main" class="docs-main" data-w401f="cli-verb" data-verb="pubkey">
+<nav aria-label="Breadcrumb" class="crumbs"><a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>pubkey</span></nav>
+<h1>kolm pubkey</h1>
+<blockquote><p>Print, export, or rotate the local Ed25519 public key used by <code>kolm attest</code>.</p></blockquote>
+
+<h2>Usage</h2>
+<pre><code>kolm pubkey [--export &lt;path&gt;] [--rotate] [--json]</code></pre>
+
+<h2>Flags</h2>
+<table>
+<thead><tr><th>Flag</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>--export <path></code></td><td>stdout</td><td>Write the public key to a file (PEM).</td></tr>
+<tr><td><code>--rotate</code></td><td>off</td><td>Generate a fresh keypair (existing key archived).</td></tr>
+<tr><td><code>--json</code></td><td>off</td><td>JSON envelope.</td></tr>
+</tbody>
+</table>
+
+<h2>Examples</h2>
+<pre><code>kolm pubkey
+kolm pubkey --export ./kolm.pub
+kolm pubkey --rotate</code></pre>
+
+<h2>Notes</h2>
+<p>Keys live under <code>~/.kolm/keys/</code>. Rotation archives the previous key so old signatures still verify.</p>
+
+<h2>See also</h2>
+<ul>
+<li><a href="/docs/cli/attest">kolm attest</a></li>
+<li><a href="/docs/cli/verify">kolm verify</a></li>
+<li><a href="/docs/cli">All CLI verbs</a></li>
+</ul>
+
+</main>
+
+</body>
+</html>

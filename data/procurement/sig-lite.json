@@ -1,0 +1,293 @@
+{
+  "spec": "kolm-procurement-vault-v1",
+  "framework": "Shared Assessments SIG Lite 2026",
+  "vendor": "Kolm AI Inc.",
+  "domain": "kolm.ai",
+  "updated_iso": "2026-05-25",
+  "scope": "kolm distillation + serving platform (managed cloud + BYOC self-hosted).",
+  "respondent": {
+    "name": "Kolm Security",
+    "email": "security@kolm.ai",
+    "title": "Security & Compliance"
+  },
+  "sections": [
+    {
+      "id": "A",
+      "title": "Risk Management",
+      "questions": [
+        {
+          "id": "A.1.1",
+          "question": "Do you maintain a documented risk management program?",
+          "answer": "yes",
+          "evidence": "Risk register reviewed quarterly. Aligned with ISO/IEC 27005."
+        },
+        {
+          "id": "A.1.2",
+          "question": "Is the risk management program reviewed at least annually by executive leadership?",
+          "answer": "yes",
+          "evidence": "Annual review at the Q1 board meeting; approved risk appetite + remediation budget signed by CEO."
+        }
+      ]
+    },
+    {
+      "id": "B",
+      "title": "Security Policy",
+      "questions": [
+        {
+          "id": "B.1.1",
+          "question": "Do you have a written information security policy?",
+          "answer": "yes",
+          "evidence": "Master security policy + 18 subordinate policies (acceptable use, access control, BCP, change mgmt, etc). Reviewed annually."
+        },
+        {
+          "id": "B.1.2",
+          "question": "Is the security policy communicated to all employees?",
+          "answer": "yes",
+          "evidence": "Mandatory acceptance during onboarding; annual re-attestation tracked in HRIS."
+        }
+      ]
+    },
+    {
+      "id": "C",
+      "title": "Organizational Security",
+      "questions": [
+        {
+          "id": "C.1.1",
+          "question": "Is there a designated information security officer or equivalent role?",
+          "answer": "yes",
+          "evidence": "VP of Security reports directly to CEO. Charter at /trust/security-charter."
+        }
+      ]
+    },
+    {
+      "id": "D",
+      "title": "Asset Management",
+      "questions": [
+        {
+          "id": "D.1.1",
+          "question": "Do you maintain an inventory of information assets?",
+          "answer": "yes",
+          "evidence": "CMDB tracks all production assets (servers, services, repos, data stores). Asset owner + classification + retention policy per row."
+        }
+      ]
+    },
+    {
+      "id": "E",
+      "title": "Human Resources",
+      "questions": [
+        {
+          "id": "E.1.1",
+          "question": "Are employees required to undergo security awareness training?",
+          "answer": "yes",
+          "evidence": "KnowBe4 quarterly modules; mandatory completion gated by access reviews. Phishing simulation quarterly."
+        },
+        {
+          "id": "E.1.2",
+          "question": "Are background checks performed prior to hiring?",
+          "answer": "yes",
+          "evidence": "Checkr (criminal + employment + education) prior to first day. Re-check every 24 months for sustained prod access."
+        }
+      ]
+    },
+    {
+      "id": "F",
+      "title": "Physical & Environmental Security",
+      "questions": [
+        {
+          "id": "F.1.1",
+          "question": "Are physical security controls in place at facilities housing customer data?",
+          "answer": "yes",
+          "evidence": "Inherited from hosting providers: Vercel (AWS us-east-1) + Railway (GCP us-central1). Both SOC 2 Type II. No Kolm-operated datacenters."
+        }
+      ]
+    },
+    {
+      "id": "G",
+      "title": "Communications & Operations",
+      "questions": [
+        {
+          "id": "G.1.1",
+          "question": "Are change management procedures documented and followed?",
+          "answer": "yes",
+          "evidence": "All prod changes via git → CI → human review → tagged release. CHANGELOG.md + release notes for every shipped change."
+        },
+        {
+          "id": "G.1.2",
+          "question": "Are backups performed and tested?",
+          "answer": "yes",
+          "evidence": "Daily encrypted backups to S3-compatible storage; monthly restore drills. Last successful drill 2026-05-01 (logged in /trust/backup-drills)."
+        }
+      ]
+    },
+    {
+      "id": "H",
+      "title": "Access Control",
+      "questions": [
+        {
+          "id": "H.1.1",
+          "question": "Is access to systems granted based on least privilege?",
+          "answer": "yes",
+          "evidence": "RBAC with 4 roles (owner / admin / member / viewer). Default viewer. Quarterly access reviews."
+        },
+        {
+          "id": "H.1.2",
+          "question": "Is multi-factor authentication required for privileged access?",
+          "answer": "yes",
+          "evidence": "MFA mandatory for all prod-access employees. TOTP + WebAuthn enforced via SSO IdP."
+        },
+        {
+          "id": "H.1.3",
+          "question": "Are user accounts disabled within 24 hours of termination?",
+          "answer": "yes",
+          "evidence": "Termination triggers automatic SSO disable + secrets rotation playbook (HashiCorp Vault). SLA tracked in HRIS."
+        }
+      ]
+    },
+    {
+      "id": "I",
+      "title": "Application Security",
+      "questions": [
+        {
+          "id": "I.1.1",
+          "question": "Is application security testing performed prior to release?",
+          "answer": "yes",
+          "evidence": "Static analysis (ESLint security plugins, semgrep) + dependency audit (npm/pip/cargo) + SAST gate in CI. All blocked findings remediated before merge."
+        },
+        {
+          "id": "I.1.2",
+          "question": "Are penetration tests performed at least annually?",
+          "answer": "yes",
+          "evidence": "Independent third-party pentest annually. Latest report Q2 2026 — summary at /trust/pentest; full report under NDA."
+        }
+      ]
+    },
+    {
+      "id": "J",
+      "title": "Incident Management",
+      "questions": [
+        {
+          "id": "J.1.1",
+          "question": "Do you have a documented incident response plan?",
+          "answer": "yes",
+          "evidence": "Playbooks at docs/runbooks/. PagerDuty rotation, 15min ack SLA. Sev-1 triggers customer comms within 1h."
+        },
+        {
+          "id": "J.1.2",
+          "question": "Are customers notified of incidents that may affect their data?",
+          "answer": "yes",
+          "evidence": "72h notification per GDPR Art 33 for confirmed breaches. Statuspage at status.kolm.ai for service incidents. Postmortems at /trust/postmortems."
+        }
+      ]
+    },
+    {
+      "id": "K",
+      "title": "Business Continuity",
+      "questions": [
+        {
+          "id": "K.1.1",
+          "question": "Do you have a documented business continuity plan?",
+          "answer": "yes",
+          "evidence": "BCP/DR plan: RTO 4h, RPO 24h for managed cloud. Self-hosted (BYOC) tenants own their own continuity — see docs/self-hosted-deploy-complete.md."
+        }
+      ]
+    },
+    {
+      "id": "L",
+      "title": "Compliance",
+      "questions": [
+        {
+          "id": "L.1.1",
+          "question": "Are you compliant with applicable data protection regulations (GDPR / CCPA / equivalent)?",
+          "answer": "yes",
+          "evidence": "DPA template at /legal/dpa. Sub-processor list at /legal/subprocessors. DSAR flow at /privacy/request — 30d SLA."
+        },
+        {
+          "id": "L.1.2",
+          "question": "Do you hold SOC 2 Type II certification?",
+          "answer": "in_progress",
+          "evidence": "SOC 2 Type II audit in progress (period 2026-01-01 to 2026-12-31). Type I report available now under NDA. ETA full Type II Q1 2027."
+        },
+        {
+          "id": "L.1.3",
+          "question": "Do you hold ISO/IEC 27001 certification?",
+          "answer": "controls_aligned",
+          "evidence": "ISMS designed against ISO/IEC 27001:2022 controls. Formal certification scheduled 2027 H2 once SOC 2 Type II is complete."
+        }
+      ]
+    },
+    {
+      "id": "M",
+      "title": "Third-Party Management",
+      "questions": [
+        {
+          "id": "M.1.1",
+          "question": "Do you have a vendor risk management program?",
+          "answer": "yes",
+          "evidence": "All sub-processors reviewed annually for SOC 2 + DPA + data residency. Active list at /legal/subprocessors."
+        },
+        {
+          "id": "M.1.2",
+          "question": "Is customer data shared with sub-processors only under contractual protection?",
+          "answer": "yes",
+          "evidence": "All sub-processors bound by DPA. List versioned + customer-notified of changes per GDPR Art 28(2). 30-day objection window."
+        }
+      ]
+    },
+    {
+      "id": "N",
+      "title": "Cloud / Hosting Specifics",
+      "questions": [
+        {
+          "id": "N.1.1",
+          "question": "Is tenant data logically isolated?",
+          "answer": "yes",
+          "evidence": "Tenant-scoped event store. Defense-in-depth: per-row tenant_id verification inside every query loop (src/event-store.js findByTenant)."
+        },
+        {
+          "id": "N.1.2",
+          "question": "Does your service expose a means for customers to verify data integrity?",
+          "answer": "yes",
+          "evidence": "Every .kolm artifact ships with cryptographic 4-ring receipt + ed25519 sigstore seal. `kolm verify` replays offline. Receipts available at /v1/verify/:cid."
+        },
+        {
+          "id": "N.1.3",
+          "question": "Can customers self-host the service in their own cloud environment?",
+          "answer": "yes",
+          "evidence": "Self-hosted BYOC available on Enterprise tier. Helm chart via `kolm serve --helm`. Air-gap bundle via `kolm bundle airgap`. Full deploy guide at docs/self-hosted-deploy-complete.md."
+        }
+      ]
+    },
+    {
+      "id": "O",
+      "title": "AI / ML Specific",
+      "questions": [
+        {
+          "id": "O.1.1",
+          "question": "Do you provide an AI Bill of Materials (AI BOM) for your models / artifacts?",
+          "answer": "yes",
+          "evidence": "Every .kolm artifact emits a CycloneDX 1.5 SBOM via `kolm sbom artifact.kolm`. Includes teacher model lineage, training data hashes, dependencies, license SPDX IDs."
+        },
+        {
+          "id": "O.1.2",
+          "question": "Do your AI artifacts comply with the EU AI Act technical documentation requirements (Annex IV)?",
+          "answer": "yes",
+          "evidence": "`kolm passport export <artifact> --format compliance` produces EU AI Act Annex IV technical documentation + Hugging Face model card + carbon estimate in a single bundle."
+        },
+        {
+          "id": "O.1.3",
+          "question": "Are training data sources documented and auditable?",
+          "answer": "yes",
+          "evidence": "spec.toml + eval.frozen.jsonl + bakeoff/ + receipts/data.json bundled inside every .kolm. Frozen eval set hash recorded in manifest; replayable offline via `kolm verify`."
+        },
+        {
+          "id": "O.1.4",
+          "question": "Can the artifact be quantified for environmental impact (carbon)?",
+          "answer": "yes",
+          "evidence": "Carbon estimate (kg CO2e) recorded in manifest using compute_hours × gpu_class_kw × 0.475 kg/kWh (IEA 2024 grid avg). Surfaced via `kolm passport --format compliance`."
+        }
+      ]
+    }
+  ],
+  "notes": "This SIG Lite mapping covers the most-requested questions in enterprise vendor reviews. Full SIG Core (~875 questions) available via `kolm procurement sig --full --out sig.xlsx` or by request to security@kolm.ai.",
+  "version": 1
+}

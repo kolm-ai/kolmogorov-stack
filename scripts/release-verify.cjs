@@ -13,20 +13,23 @@
 //                                         carry non-empty required arrays)
 //   3.  openapi-sync                     (W490: public/openapi.json covers every
 //                                         non-stub route in api-routes.json)
-//   4.  sdk-manifest                     (current + versioned browser SDK assets
+//   4.  claim-verify (X04)               (W869 T7: every numeric claim in public/**/*.html
+//                                         declared in data/x04-claim-fixtures.json must
+//                                         match its checked-in evidence file)
+//   5.  sdk-manifest                     (current + versioned browser SDK assets
 //                                         exist, match hashes/SRI, and are not ignored)
-//   5.  npm test                         (full test suite, --test-concurrency=1)
-//   6.  SDK smoke against local server   (boots PORT=3939, then runs
+//   6.  npm test                         (full test suite, --test-concurrency=1)
+//   7.  SDK smoke against local server   (boots PORT=3939, then runs
 //                                         sdk/node/test/sdk.test.mjs)
-//   7.  local-surfaces                   (W545: boots an isolated server, provisions
+//   8.  local-surfaces                   (W545: boots an isolated server, provisions
 //                                         a disposable tenant, runs every safe
 //                                         production_smoke probe declared in
 //                                         docs/product-surfaces.json. With
 //                                         --deep-surfaces also runs deep probes.)
-//   8.  kolm doctor --json               (ok:true + blockers:0 unless --allow-logged-out)
-//   9.  kolm whoami --json               (logged_in:true unless --allow-logged-out)
-//  10.  kolm verify <kolm> --json        (ok:true + production_ready:true)
-//  11.  kolm billing tiers --json        (data is non-empty tier list)
+//   9.  kolm doctor --json               (ok:true + blockers:0 unless --allow-logged-out)
+//  10.  kolm whoami --json               (logged_in:true unless --allow-logged-out)
+//  11.  kolm verify <kolm> --json        (ok:true + production_ready:true)
+//  12.  kolm billing tiers --json        (data is non-empty tier list)
 //
 // Invocation:
 //   node scripts/release-verify.cjs                       # all gates
@@ -484,6 +487,41 @@ function verifySdkEntry(entry, label, failures) {
   if (entry.bytes !== body.length) failures.push(`${label} bytes ${entry.bytes} != ${body.length}`);
 }
 
+// X04 (W869 T7) — every numeric claim that appears on a public page must trace
+// to a checked-in evidence row. data/x04-claim-fixtures.json maps each claim
+// substring to an evidence file/row/field/format; scripts/x04-claim-verify.cjs
+// confirms the derived value byte-equals the rendered claim. Blocks the gate
+// only on value drift (a number on the page no longer matches measured fact)
+// or a structurally invalid fixture — fixture orphans (declared but never
+// rendered) are reported as warnings, never blockers, so coverage can grow
+// without breaking the build.
+async function gateClaimVerify() {
+  if (!shouldRun('claim-verify')) return recordResult('claim-verify', true, { skipped: true });
+  progress('claim-verify (X04) checking');
+  const t = Date.now();
+  const r = runSync(nodeBin, [path.join('scripts', 'x04-claim-verify.cjs'), '--json'], { silent: true, timeoutMs: 60_000 });
+  let parsed = null;
+  try { parsed = JSON.parse((r.stdout || '').trim()); } catch (_) {}
+  if (!parsed) {
+    recordResult('claim-verify', false, {
+      detail: 'non-JSON output from x04-claim-verify (first 300): ' + (r.stdout || '').slice(0, 300) + ' | stderr: ' + (r.stderr || '').slice(0, 200),
+      duration_ms: Date.now() - t,
+    });
+    return false;
+  }
+  const c = parsed.counts || {};
+  const ok = parsed.ok === true && r.status === 0;
+  const detail = ok
+    ? `${c.fixtures_evidence_ok}/${c.fixtures} fixtures match evidence, ${c.total_appearances} appearances across ${c.html_files_scanned} HTML files, ${c.fixtures_orphaned} orphan(s)`
+    : `ok=${parsed.ok} drifts=${c.fixtures_value_drift} missing=${c.fixtures_evidence_missing} invalid=${c.fixtures_invalid} blockers: ${(parsed.blocking_failures || []).slice(0, 4).join(' | ')}`;
+  recordResult('claim-verify', ok, {
+    detail,
+    duration_ms: Date.now() - t,
+    counts: c,
+  });
+  return ok;
+}
+
 async function gateSdkManifest() {
   if (!shouldRun('sdk-manifest')) return recordResult('sdk-manifest', true, { skipped: true });
   progress('sdk-manifest checking');
@@ -656,6 +694,7 @@ function gateCli(name, argv, validator) {
   await gateLintRefs();
   await gateControlFiles();
   await gateOpenapiSync();
+  await gateClaimVerify();
   await gateSdkManifest();
   await gateTests();
   await gateSdkSmoke();

@@ -1,0 +1,74 @@
+{
+  "spec": "kolm-sota-quantize-matrix-1",
+  "ok": true,
+  "generated_at": "2026-05-22T00:00:00.000Z",
+  "hardware": {
+    "gpu": "NVIDIA RTX 5090",
+    "vram_gb": 32,
+    "compute_capability": "12.0",
+    "cuda": "12.8",
+    "torch": "2.11.0+cu128",
+    "bitsandbytes": "0.49.2",
+    "host_os": "Windows 11 Pro"
+  },
+  "method": {
+    "id": "nf4_double_quant",
+    "scheme": "QLoRA NF4 with double-quantization",
+    "paper": "https://arxiv.org/abs/2305.14314",
+    "implementation": "bitsandbytes 0.49.2 via workers/quantize/scripts/quantize.py"
+  },
+  "rows": [
+    {
+      "model": "Qwen2.5-0.5B-Instruct",
+      "size_class": "0.5B",
+      "input_bf16_gb": 0.93,
+      "output_int4_gb": 0.44,
+      "compression_ratio_pct": 47,
+      "quantize_seconds": 11.59,
+      "receipt_path": "~/.kolm/models-hf/qwen2_5-0_5b-instruct-int4/quantize-receipt.json",
+      "measured_on": "2026-05-22"
+    },
+    {
+      "model": "Qwen2.5-3B-Instruct",
+      "size_class": "3B",
+      "input_bf16_gb": 5.76,
+      "output_int4_gb": 1.92,
+      "compression_ratio_pct": 33,
+      "quantize_seconds": 13.85,
+      "receipt_path": "~/.kolm/models-hf/qwen2_5-3b-instruct-int4/quantize-receipt.json",
+      "measured_on": "2026-05-22"
+    },
+    {
+      "model": "Qwen2.5-7B-Instruct",
+      "size_class": "7B",
+      "input_bf16_gb": 14.2,
+      "output_int4_gb": 5.18,
+      "compression_ratio_pct": 36,
+      "quantize_seconds": 29.20,
+      "inference_throughput_tok_per_sec": 24.5,
+      "receipt_path": "~/.kolm/models-hf/qwen2_5-7b-instruct-int4/quantize-receipt.json",
+      "measured_on": "2026-05-22"
+    },
+    {
+      "model": "DeepSeek-R1-Distill-Qwen-32B",
+      "size_class": "32B",
+      "input_bf16_gb": 61.03,
+      "output_int4_gb": 17.9,
+      "compression_ratio_pct": 29,
+      "quantize_seconds": 125.26,
+      "inference_throughput_tok_per_sec": 11.53,
+      "inference_vram_gb": 19.22,
+      "load_seconds": 13.3,
+      "receipt_path": "~/.kolm/models-hf/deepseek-r1-distill-qwen-32b-int4/quantize-receipt.json",
+      "measured_on": "2026-05-22"
+    }
+  ],
+  "verification_steps": [
+    "BF16 weights downloaded from Hugging Face and SHA256-hashed into receipt input_tree_sha256.",
+    "bitsandbytes NF4+double quantization run via workers/quantize/scripts/quantize.py (worker isolation pattern).",
+    "Output INT4 weights SHA256-hashed per-file into receipt output_files_sha256.",
+    "Receipt JSON written alongside the quantized weights with wall-clock duration and host hardware profile.",
+    "For 7B and 32B: inference forward pass exercised on a known reasoning problem; tok/s and VRAM logged from torch."
+  ],
+  "note": "Mirror of the on-disk per-model quantize-receipt.json files under ~/.kolm/models-hf/. The receipts themselves contain input_tree_sha256 + per-file output_files_sha256 for byte-level reproducibility; this checked-in JSON exists so X04 claim verification can audit every public number against a checked-in source of truth."
+}

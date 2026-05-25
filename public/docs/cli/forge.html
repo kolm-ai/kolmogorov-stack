@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>kolm forge | CLI reference | kolm.ai</title>
+<meta name="description" content="Umbrella verb for the Forge pipeline: hardware detection, fit checks, model inspection, MoE expert routing, merging, serving, and benchmarking.">
+<link rel="canonical" href="https://kolm.ai/docs/cli/forge">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
+<script src="/nav.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm forge","description":"Umbrella verb for the Forge pipeline: hardware detection, fit checks, model inspection, MoE expert routing, merging, serving, and benchmarking.","url":"https://kolm.ai/docs/cli/forge","author":{"@type":"Organization","name":"kolm.ai"}}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<main id="main" class="docs-main" data-w401f="cli-verb" data-verb="forge">
+<nav aria-label="Breadcrumb" class="crumbs"><a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>forge</span></nav>
+<h1>kolm forge</h1>
+<blockquote><p>Umbrella verb for the Forge pipeline: hardware detection, fit checks, model inspection, MoE expert routing, merging, serving, and benchmarking.</p></blockquote>
+
+<h2>Usage</h2>
+<pre><code>kolm forge &lt;sub-verb&gt; [flags]</code></pre>
+
+<h2>Flags</h2>
+<table>
+<thead><tr><th>Flag</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>hardware</code></td><td>-</td><td>Auto-detect local GPU/CPU and report VRAM/RAM (alias for <code>kolm hardware</code>).</td></tr>
+<tr><td><code>fit</code></td><td>-</td><td>Check whether a target model will fit on detected hardware before compile (alias for <code>kolm fit</code>).</td></tr>
+<tr><td><code>inspect</code></td><td>-</td><td>Inspect a <code>.kolm</code> or <code>.safetensors</code> file (alias for <code>kolm inspect</code>).</td></tr>
+<tr><td><code>experts</code></td><td>-</td><td>List or route Mixture-of-Experts components (alias for <code>kolm experts</code>).</td></tr>
+<tr><td><code>merge</code></td><td>-</td><td>Merge two artifacts (alias for <code>kolm merge</code>).</td></tr>
+<tr><td><code>serve</code></td><td>-</td><td>Start a local inference server (alias for <code>kolm serve</code>).</td></tr>
+<tr><td><code>bench</code></td><td>-</td><td>Benchmark an artifact (alias for <code>kolm bench</code>).</td></tr>
+</tbody>
+</table>
+
+<h2>Examples</h2>
+<pre><code>kolm forge hardware
+kolm forge fit --model meta-llama/Llama-3.1-8B --target cuda
+kolm forge inspect ./out/recipe.kolm
+kolm forge serve ./out/recipe.kolm --port 8787</code></pre>
+
+<h2>Notes</h2>
+<p>The forge umbrella is for discoverability — every sub-verb is also reachable directly. Add <code>--json</code> to any sub-verb for machine-readable output.</p>
+
+<h2>See also</h2>
+<ul>
+<li><a href="/docs/cli/hardware">kolm hardware</a></li>
+<li><a href="/docs/cli/fit">kolm fit</a></li>
+<li><a href="/docs/cli/compile">kolm compile</a></li>
+<li><a href="/docs/cli/serve">kolm serve</a></li>
+<li><a href="/docs/cli">All CLI verbs</a></li>
+</ul>
+
+</main>
+
+</body>
+</html>

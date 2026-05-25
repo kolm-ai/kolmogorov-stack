@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>kolm guardrails | CLI reference | kolm.ai</title>
+<meta name="description" content="Compile, test, and ship guardrails (input/output filters, policy bundles) that bind to artifacts.">
+<link rel="canonical" href="https://kolm.ai/docs/cli/guardrails">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
+<script src="/nav.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm guardrails","description":"Compile, test, and ship guardrails (input/output filters, policy bundles) that bind to artifacts.","url":"https://kolm.ai/docs/cli/guardrails","author":{"@type":"Organization","name":"kolm.ai"}}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<main id="main" class="docs-main" data-w401f="cli-verb" data-verb="guardrails">
+<nav aria-label="Breadcrumb" class="crumbs"><a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>guardrails</span></nav>
+<h1>kolm guardrails</h1>
+<blockquote><p>Compile, test, and ship guardrails (input/output filters, policy bundles) that bind to artifacts.</p></blockquote>
+
+<h2>Usage</h2>
+<pre><code>kolm guardrails &lt;list|compile|test|attach&gt; [flags]</code></pre>
+
+<h2>Flags</h2>
+<table>
+<thead><tr><th>Flag</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>list</code></td><td>-</td><td>List built-in guardrail packs.</td></tr>
+<tr><td><code>compile</code></td><td>-</td><td>Compile a guardrail spec (YAML/JSON) to a runtime filter.</td></tr>
+<tr><td><code>test</code></td><td>-</td><td>Run a guardrail against a prompt set.</td></tr>
+<tr><td><code>attach</code></td><td>-</td><td>Attach a compiled guardrail to an artifact.</td></tr>
+</tbody>
+</table>
+
+<h2>Examples</h2>
+<pre><code>kolm guardrails list
+kolm guardrails compile ./guardrails/pii.yaml --out pii.kgr
+kolm guardrails attach ./out/recipe.kolm --rail pii.kgr</code></pre>
+
+<h2>Notes</h2>
+<p>Guardrails are versioned alongside artifacts. Verification covers both content (the policy) and binding (the artifact-rail signature).</p>
+
+<h2>See also</h2>
+<ul>
+<li><a href="/docs/cli/redteam">kolm redteam</a></li>
+<li><a href="/docs/cli/verify">kolm verify</a></li>
+<li><a href="/docs/cli">All CLI verbs</a></li>
+</ul>
+
+</main>
+
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>kolm video | CLI reference | kolm.ai</title>
+<meta name="description" content="Capture and run video through the multimodal pipeline. Frame-extract + per-frame VLM analysis.">
+<link rel="canonical" href="https://kolm.ai/docs/cli/video">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
+<script src="/nav.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm video","description":"Capture and run video through the multimodal pipeline. Frame-extract + per-frame VLM analysis.","url":"https://kolm.ai/docs/cli/video","author":{"@type":"Organization","name":"kolm.ai"}}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<main id="main" class="docs-main" data-w401f="cli-verb" data-verb="video">
+<nav aria-label="Breadcrumb" class="crumbs"><a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>video</span></nav>
+<h1>kolm video</h1>
+<blockquote><p>Capture and run video through the multimodal pipeline. Frame-extract + per-frame VLM analysis.</p></blockquote>
+
+<h2>Usage</h2>
+<pre><code>kolm video &lt;capture|extract&gt; &lt;file.mp4|webm&gt; [--every &lt;s&gt;]</code></pre>
+
+<h2>Flags</h2>
+<table>
+<thead><tr><th>Flag</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>capture</code></td><td>-</td><td>Record a video capture into the corpus.</td></tr>
+<tr><td><code>extract</code></td><td>-</td><td>Extract frames + per-frame caption without storing.</td></tr>
+<tr><td><code><file></code></td><td>required</td><td>Video file.</td></tr>
+<tr><td><code>--every <s></code></td><td><code>1</code></td><td>Frame extraction interval in seconds.</td></tr>
+</tbody>
+</table>
+
+<h2>Examples</h2>
+<pre><code>kolm video capture ./demo.mp4
+kolm video extract ./demo.mp4 --every 5</code></pre>
+
+<h2>Notes</h2>
+<p>Heavy work runs in <code>workers/video-redact/</code>. Faces and license plates are redacted by default.</p>
+
+<h2>See also</h2>
+<ul>
+<li><a href="/docs/cli/vlm">kolm vlm</a></li>
+<li><a href="/docs/cli/capture">kolm capture</a></li>
+<li><a href="/docs/cli">All CLI verbs</a></li>
+</ul>
+
+</main>
+
+</body>
+</html>

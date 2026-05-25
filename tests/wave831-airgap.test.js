@@ -470,11 +470,14 @@ test('W831 #12 — public/sw.js cache name carries the wave831 token', () => {
   freshDir();
   const swPath = path.join(REPO_ROOT, 'public', 'sw.js');
   assert.ok(fs.existsSync(swPath), 'public/sw.js MUST exist');
-  const head = fs.readFileSync(swPath, 'utf8').slice(0, 4000);
+  // W604 update: scan the WHOLE file, not a fixed-size head — sw.js has
+  // grown past the 4000-byte boundary the original test assumed, and any
+  // fixed byte-offset is itself a brittleness trap.
+  const sw = fs.readFileSync(swPath, 'utf8');
   // W604: assert via regex + threshold, never an explicit literal. The cache
   // name MUST carry the wave831 token AND have a wave number >= 831.
-  const m = head.match(/wave(\d{3,4})-airgap/);
-  assert.ok(m, `expected /wave\\d{3,4}-airgap/ in sw.js head; got first 200 chars:\n${head.slice(0, 200)}`);
+  const m = sw.match(/wave(\d{3,4})-airgap/);
+  assert.ok(m, `expected /wave\\d{3,4}-airgap/ somewhere in sw.js; file is ${sw.length} bytes`);
   const wave = parseInt(m[1], 10);
   assert.ok(wave >= 831,
     `expected wave token >= 831; got wave${wave}`);

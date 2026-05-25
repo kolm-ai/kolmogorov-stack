@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>kolm procurement | CLI reference | kolm.ai</title>
+<meta name="description" content="Auto-answer vendor security questionnaires (SIG Lite, CAIQ v4.0.2). Pulls answers from the procurement vault and renders to PDF/JSON.">
+<link rel="canonical" href="https://kolm.ai/docs/cli/procurement">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
+<script src="/nav.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm procurement","description":"Auto-answer vendor security questionnaires (SIG Lite, CAIQ v4.0.2). Pulls answers from the procurement vault and renders to PDF/JSON.","url":"https://kolm.ai/docs/cli/procurement","author":{"@type":"Organization","name":"kolm.ai"}}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<main id="main" class="docs-main" data-w401f="cli-verb" data-verb="procurement">
+<nav aria-label="Breadcrumb" class="crumbs"><a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>procurement</span></nav>
+<h1>kolm procurement</h1>
+<blockquote><p>Auto-answer vendor security questionnaires (SIG Lite, CAIQ v4.0.2). Pulls answers from the procurement vault and renders to PDF/JSON.</p></blockquote>
+
+<h2>Usage</h2>
+<pre><code>kolm procurement &lt;sig|caiq|all&gt; [--out &lt;path&gt;] [--json]</code></pre>
+
+<h2>Flags</h2>
+<table>
+<thead><tr><th>Flag</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>sig</code></td><td>-</td><td>Render Shared Assessments SIG Lite responses.</td></tr>
+<tr><td><code>caiq</code></td><td>-</td><td>Render CSA CAIQ v4.0.2 responses.</td></tr>
+<tr><td><code>all</code></td><td>-</td><td>Render both packs.</td></tr>
+<tr><td><code>--out <path></code></td><td>stdout</td><td>Destination file or directory.</td></tr>
+<tr><td><code>--json</code></td><td>off</td><td>JSON output.</td></tr>
+</tbody>
+</table>
+
+<h2>Examples</h2>
+<pre><code>kolm procurement sig --out ./sig-lite.pdf
+kolm procurement caiq --out ./caiq.json --json
+kolm procurement all --out ./vendor-pack/</code></pre>
+
+<h2>Notes</h2>
+<p>Backed by <code>/v1/procurement/sig</code>, <code>/v1/procurement/caiq</code>, <code>/v1/procurement/all</code>. Answers are sourced from <code>data/procurement/vault.json</code> and reviewed quarterly.</p>
+
+<h2>See also</h2>
+<ul>
+<li><a href="/docs/cli/sbom">kolm sbom</a></li>
+<li><a href="/docs/cli/cert">kolm cert</a></li>
+<li><a href="/account/enterprise">Enterprise admin</a></li>
+<li><a href="/docs/cli">All CLI verbs</a></li>
+</ul>
+
+</main>
+
+</body>
+</html>

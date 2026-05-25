@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<title>Enterprise - Account - kolm.ai</title>
+<meta name="description" content="Enterprise admin for Persona D: SSO/SAML/SCIM status, BYOC enrollment, compliance dashboard, data residency, audit retention, procurement pack, and air-gap deployment.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://kolm.ai/account/enterprise">
+<meta property="og:title" content="Enterprise - Account - kolm.ai">
+<meta property="og:description" content="Enterprise admin for Persona D: SSO/SAML/SCIM, BYOC, compliance, audit retention, procurement, air-gap.">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/account/enterprise">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Enterprise","description":"Enterprise admin for kolm.ai","url":"https://kolm.ai/account/enterprise","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"Enterprise","item":"https://kolm.ai/account/enterprise"}]}}</script>
+<style>
+.acct-shell{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:flex-start;max-width:1280px;margin:0 auto;padding:24px}
+#account-sidebar{position:sticky;top:24px;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13px}
+#account-sidebar h2{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin:0 0 10px}
+#account-sidebar ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+#account-sidebar a{display:block;padding:6px 10px;border-radius:4px;color:var(--ink-mute);text-decoration:none;font-family:var(--mono);font-size:12.5px}
+#account-sidebar a:hover{background:var(--bg-elev);color:var(--ink)}
+#account-sidebar a[aria-current=page]{background:var(--bg-elev);color:var(--accent);border-left:2px solid var(--accent);padding-left:8px}
+.acct-content h1{margin:0 0 4px;font-size:28px}
+.acct-content h2{font-size:16px;margin:22px 0 10px}
+.acct-content h3{font-size:13.5px;margin:18px 0 6px;color:var(--ink)}
+.acct-content .lede{color:var(--ink-mute);font-size:14.5px;margin:0 0 20px;max-width:64ch}
+.kpanel{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:16px}
+.kpanel h2{margin:0 0 12px;font-size:15px;display:flex;align-items:center;gap:10px}
+.kpanel .pdesc{color:var(--ink-mute);font-size:13px;margin:0 0 12px}
+.ktable{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
+.ktable th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);color:var(--ink-faint);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;font-size:10.5px;background:var(--bg-elev)}
+.ktable td{padding:8px 8px;border-bottom:1px solid var(--line);color:var(--ink);vertical-align:top;word-break:break-word}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor}
+.pill.ok{color:#9bbb6b}.pill.warn{color:#d6a65a}.pill.bad{color:#ff6b91}.pill.mute{color:var(--ink-faint)}.pill.info{color:var(--accent)}
+.btn{display:inline-block;padding:6px 12px;border-radius:5px;border:1px solid var(--line-strong);background:transparent;color:var(--ink);font-family:var(--mono);font-size:12px;cursor:pointer;text-decoration:none}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#0b0d10}
+.empty{background:var(--bg-card);border:1px dashed var(--line);border-radius:8px;padding:18px;color:var(--ink-mute);font-size:13.5px;line-height:1.6}
+.empty code{background:var(--bg-elev);padding:2px 6px;border-radius:3px;font-size:12.5px;color:var(--accent)}
+.code-snippet{background:var(--bg-elev);border:1px solid var(--line);border-radius:5px;padding:10px 12px;font-family:var(--mono);font-size:12px;color:var(--ink);overflow-x:auto;margin:8px 0;white-space:pre-wrap}
+.code-snippet .c{color:var(--ink-faint)}
+.help{font-size:12px;color:var(--ink-faint);margin:6px 0 0;line-height:1.55}
+.status-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:6px}
+.status-card{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:12px}
+.status-card h3{margin:0 0 6px;font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.status-card .val{font-family:var(--mono);font-size:13px;color:var(--ink);margin:0;line-height:1.6}
+.status-card .val a{color:var(--accent);text-decoration:none}
+.status-card .val a:hover{text-decoration:underline}
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--ink,#e6e9ee);color:var(--bg,#08090c);padding:8px 12px;font-family:var(--mono);font-size:12px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
+.skip-link:focus{left:0}
+.readonly-note{display:inline-block;padding:3px 9px;border:1px solid var(--line-strong);border-radius:4px;font-size:11px;color:var(--ink-faint);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.08em;margin-left:8px}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--bg-card)}
+.table-wrap table{margin:0}
+.action-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+@media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}}
+</style>
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Enterprise - Account - kolm.ai">
+<meta name="twitter:description" content="Enterprise admin for kolm.ai">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/warm-paper.css">
+</head>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    </div>
+  </nav>
+  <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+  </div>
+</div>
+
+<a href="#main" class="skip-link">Skip to content</a>
+
+<main id="main">
+<div class="acct-shell">
+<nav id="account-sidebar" aria-label="Account sections">
+ <h2>Account</h2>
+ <ul>
+ <li><a href="/account">Settings</a></li>
+ <li><a href="/account/overview">Overview</a></li>
+ <li><a href="/account/team">Team</a></li>
+ <li><a href="/account/enterprise" aria-current="page">Enterprise</a></li>
+ <li><a href="/account/api-keys">API keys</a></li>
+ <li><a href="/account/audit-log">Audit log</a></li>
+ <li><a href="/account/billing">Billing</a></li>
+ <li><a href="/account/artifacts">Artifacts</a></li>
+ </ul>
+</nav>
+
+<section class="acct-content">
+<h1>Enterprise. <span id="ent-tier-pill" class="readonly-note">Enterprise tier</span></h1>
+<p class="lede">Persona D admin surface: identity, residency, deployment posture, and compliance evidence at a glance. Every status here is sourced from a live <code>/v1/*</code> endpoint &mdash; what you see is what the next vendor-security questionnaire will say. Operator details live in <a href="/docs/enterprise">docs/self-hosted-deploy-complete.md</a>.</p>
+
+<div class="kpanel">
+ <h2>Identity &amp; access</h2>
+ <p class="pdesc">SSO/SAML, SCIM provisioning, and MFA enforcement. Backed by <code>GET /v1/sso/status</code>, <code>GET /v1/scim/v2/ServiceProviderConfig</code>.</p>
+ <div class="status-grid">
+   <div class="status-card">
+     <h3>SAML 2.0 SSO <span id="s-saml-pill" class="pill mute">unknown</span></h3>
+     <p class="val" id="s-saml-detail">Loading&hellip;</p>
+     <div class="action-row">
+       <a class="btn" href="/v1/saml/metadata">SP metadata XML</a>
+       <a class="btn" href="/docs/enterprise#sso">Setup guide</a>
+     </div>
+   </div>
+   <div class="status-card">
+     <h3>SCIM 2.0 provisioning <span id="s-scim-pill" class="pill mute">unknown</span></h3>
+     <p class="val" id="s-scim-detail">Loading&hellip;</p>
+     <div class="action-row">
+       <a class="btn" href="/docs/enterprise#scim">Setup guide</a>
+       <a class="btn" href="/v1/scim/v2/ServiceProviderConfig">Service provider config</a>
+     </div>
+   </div>
+   <div class="status-card">
+     <h3>MFA enforcement <span id="s-mfa-pill" class="pill mute">unknown</span></h3>
+     <p class="val" id="s-mfa-detail">Loading&hellip;</p>
+     <div class="action-row">
+       <a class="btn" href="/account/security/2fa">2FA settings</a>
+     </div>
+   </div>
+   <div class="status-card">
+     <h3>Custom roles <span class="pill info">RBAC</span></h3>
+     <p class="val">Built-in roles: owner / admin / member / viewer. Custom roles + ABAC available on Enterprise &mdash; <a href="mailto:enterprise@kolm.ai">enterprise@kolm.ai</a>.</p>
+   </div>
+ </div>
+</div>
+
+<div class="kpanel">
+ <h2>Deployment &amp; data residency</h2>
+ <p class="pdesc">Where your data lives, and how it gets there. BYOC (Bring Your Own Cloud) deployments keep customer data inside your VPC &mdash; kolm.ai never sees a byte. Backed by <code>GET /v1/byoc/status</code>.</p>
+ <div class="status-grid">
+   <div class="status-card">
+     <h3>Hosting mode <span id="s-host-pill" class="pill info">managed</span></h3>
+     <p class="val" id="s-host-detail">Loading&hellip;</p>
+   </div>
+   <div class="status-card">
+     <h3>Data residency <span id="s-region-pill" class="pill mute">unknown</span></h3>
+     <p class="val" id="s-region-detail">Loading&hellip;</p>
+     <div class="action-row">
+       <a class="btn" href="/docs/multi-region">Region matrix</a>
+     </div>
+   </div>
+   <div class="status-card">
+     <h3>BYOC enrollment <span id="s-byoc-pill" class="pill mute">none</span></h3>
+     <p class="val" id="s-byoc-detail">Loading&hellip;</p>
+     <div class="action-row">
+       <a class="btn" href="/docs/enterprise">Deploy guide</a>
+       <a class="btn" href="/docs/enterprise#byoc">Onboarding checklist</a>
+     </div>
+   </div>
+   <div class="status-card">
+     <h3>Air-gap bundle <span class="pill info">CLI</span></h3>
+     <p class="val">Build a reproducible offline tarball:</p>
+     <div class="code-snippet" style="margin:6px 0 0">kolm bundle airgap --out kolm-airgap.tar.gz \
+  --with-node-modules --with-wheels</div>
+   </div>
+ </div>
+</div>
+
+<div class="kpanel">
+ <h2>Compliance</h2>
+ <p class="pdesc">Live status of certifications + signed agreements. Customer-facing trust page: <a href="/trust">/trust</a>. Drop a signed PDF (BAA, DPA) into your secrets store and the status flips here on the next sync.</p>
+ <div class="status-grid">
+   <div class="status-card">
+     <h3>SOC 2 Type II <span id="s-soc2-pill" class="pill mute">unknown</span></h3>
+     <p class="val" id="s-soc2-detail">Loading&hellip;</p>
+   </div>
+   <div class="status-card">
+     <h3>ISO 27001 <span id="s-iso-pill" class="pill mute">unknown</span></h3>
+     <p class="val" id="s-iso-detail">Loading&hellip;</p>
+   </div>
+   <div class="status-card">
+     <h3>GDPR / DPA <span id="s-dpa-pill" class="pill mute">unknown</span></h3>
+     <p class="val" id="s-dpa-detail">Loading&hellip;</p>
+   </div>
+   <div class="status-card">
+     <h3>HIPAA / BAA <span id="s-baa-pill" class="pill mute">unknown</span></h3>
+     <p class="val" id="s-baa-detail">Loading&hellip;</p>
+   </div>
+   <div class="status-card">
+     <h3>EU AI Act <span class="pill info">Annex IV</span></h3>
+     <p class="val">Every .kolm artifact emits Annex IV technical documentation: <code>kolm passport export &lt;artifact&gt; --format compliance</code>.</p>
+   </div>
+   <div class="status-card">
+     <h3>Sub-processors <span class="pill info">notified</span></h3>
+     <p class="val">List + GDPR Art 28(2) 30-day objection window at <a href="/security">/security</a>.</p>
+   </div>
+ </div>
+</div>
+
+<div class="kpanel">
+ <h2>Audit &amp; retention</h2>
+ <p class="pdesc">Audit log retention is 365 days on Business; Enterprise can extend to 7 years (HIPAA &sect;164.316(b)(2)(i)) and stream events to your SIEM. Hash-chained &mdash; tampering is detectable.</p>
+ <div class="status-grid">
+   <div class="status-card">
+     <h3>Retention window <span id="s-retain-pill" class="pill info">365d</span></h3>
+     <p class="val" id="s-retain-detail">Default 365 days. Configurable on Enterprise.</p>
+     <div class="action-row">
+       <a class="btn" href="/account/audit-log">View log</a>
+     </div>
+   </div>
+   <div class="status-card">
+     <h3>SIEM streaming <span id="s-siem-pill" class="pill mute">not configured</span></h3>
+     <p class="val" id="s-siem-detail">Stream every audit event via webhook to Splunk, Datadog, Sumo Logic, or a custom HTTPS endpoint.</p>
+     <div class="action-row">
+       <a class="btn" href="/docs/audit">SIEM setup</a>
+     </div>
+   </div>
+   <div class="status-card">
+     <h3>Tenant export <span class="pill info">portable</span></h3>
+     <p class="val">Full tenant dump including audit log: <code>kolm export-tenant --out tenant.tar.gz</code>. No vendor lock-in.</p>
+   </div>
+   <div class="status-card">
+     <h3>Tenant deletion <span class="pill warn">irreversible</span></h3>
+     <p class="val">Right-to-deletion honored within 30 days per GDPR Art 17. Receipts (cryptographic proofs) retained as anchored hashes only.</p>
+   </div>
+ </div>
+</div>
+
+<div class="kpanel">
+ <h2>Procurement &amp; vendor-security</h2>
+ <p class="pdesc">Pre-answered SIG Lite + CSA CAIQ v4.0.2. Drop into your procurement workflow. Generated from <code>data/procurement/*.json</code> &mdash; same source the CLI uses.</p>
+ <div class="code-snippet"><span class="c"># list available frameworks</span>
+kolm procurement list
+<span class="c"># Shared Assessments SIG Lite — markdown</span>
+kolm procurement sig --out kolm-sig.md
+<span class="c"># CSA CAIQ v4.0.2 — JSON for upload</span>
+kolm procurement caiq --format json --out kolm-caiq.json
+<span class="c"># both bundled, CSV for vendor portal upload</span>
+kolm procurement all --format csv --out vendor-pack.csv</div>
+ <div class="action-row">
+   <a class="btn primary" href="/v1/procurement/sig?format=md" download="kolm-sig.md">Download SIG Lite (md)</a>
+   <a class="btn" href="/v1/procurement/caiq?format=json" download="kolm-caiq.json">Download CAIQ (json)</a>
+   <a class="btn" href="/v1/procurement/all?format=csv" download="kolm-vendor-pack.csv">Download bundle (csv)</a>
+ </div>
+</div>
+
+<h2 style="margin-top:30px">Quick links</h2>
+<ul style="color:var(--ink-mute);font-size:14px;line-height:1.7;max-width:64ch">
+ <li><strong>Deploy guide.</strong> <a href="/docs/enterprise">docs/self-hosted-deploy-complete.md</a> &mdash; every env var, every secret, every cert.</li>
+ <li><strong>Sub-processors.</strong> <a href="/security">/security</a> &mdash; Art 28(2) compliant, 30d objection window.</li>
+ <li><strong>DPA.</strong> <a href="/legal/distillation-tos-clarity">/legal/distillation-tos-clarity</a> &mdash; standard SCCs included.</li>
+ <li><strong>Trust center.</strong> <a href="/trust">/trust</a> &mdash; pentest reports + postmortems (NDA-gated).</li>
+ <li><strong>Status page.</strong> <a href="https://status.kolm.ai">status.kolm.ai</a> &mdash; live + 90d history.</li>
+ <li><strong>Security contact.</strong> <a href="mailto:security@kolm.ai">security@kolm.ai</a> &middot; PGP key at <a href="/.well-known/security.txt">/.well-known/security.txt</a>.</li>
+</ul>
+
+<p class="help" style="margin-top:18px">Need a custom MSA, named CSM, or formal red-team engagement? <a href="mailto:enterprise@kolm.ai">enterprise@kolm.ai</a>.</p>
+</section>
+</div>
+</main>
+
+<script>
+(function(){
+ var key=null; try{key=localStorage.getItem("ks_api_key")||localStorage.getItem("kolm-key")||localStorage.getItem("kolm_api_key")||localStorage.getItem("apiKey")||localStorage.getItem("recipeApiKey");}catch(_){}
+ function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});}
+ function headers(){var h={"Accept":"application/json"};if(key)h["Authorization"]="Bearer "+key;return h;}
+ function setPill(id,cls,text){var el=document.getElementById(id); if(!el)return; el.className='pill '+cls; el.textContent=text;}
+ function setDetail(id,text){var el=document.getElementById(id); if(el)el.innerHTML=text;}
+
+ function loadSSO(){
+  if(!key){setDetail('s-saml-detail','Sign in to view'); setDetail('s-scim-detail','Sign in to view'); setDetail('s-mfa-detail','Sign in to view'); return;}
+  fetch('/v1/sso/status',{headers:headers()}).then(function(r){return r.json();}).then(function(j){
+   var saml=j&&j.saml||{};
+   if(saml.configured){
+    setPill('s-saml-pill','ok','active'); setDetail('s-saml-detail','IdP: '+esc(saml.idp||'-')+'<br>Entity ID: '+esc(saml.entity_id||'-'));
+   } else if(saml.enabled===false){
+    setPill('s-saml-pill','mute','not entitled'); setDetail('s-saml-detail','SAML SSO available on Business and Enterprise. Upgrade at <a href="/pricing">/pricing</a>.');
+   } else {
+    setPill('s-saml-pill','warn','available'); setDetail('s-saml-detail','SAML SSO is supported but not yet configured for this tenant.');
+   }
+   var scim=j&&j.scim||{};
+   if(scim.configured){
+    setPill('s-scim-pill','ok','active'); setDetail('s-scim-detail','Provider: '+esc(scim.provider||'-')+'<br>Last sync: '+esc(scim.last_sync||'-')+'<br>Users provisioned: '+esc(scim.user_count||0));
+   } else {
+    setPill('s-scim-pill','warn','available'); setDetail('s-scim-detail','SCIM 2.0 supported (Okta, Azure AD, Google Workspace).');
+   }
+   var mfa=j&&j.mfa||{};
+   if(mfa.enforced){
+    setPill('s-mfa-pill','ok','enforced'); setDetail('s-mfa-detail','MFA enforced for all members (TOTP + WebAuthn).');
+   } else if(mfa.optional){
+    setPill('s-mfa-pill','warn','optional'); setDetail('s-mfa-detail','MFA is supported but not enforced. Enable enforcement in <a href="/account/security/2fa">2FA settings</a>.');
+   } else {
+    setPill('s-mfa-pill','mute','unknown'); setDetail('s-mfa-detail','Status unavailable.');
+   }
+  }).catch(function(){
+   setDetail('s-saml-detail','Status endpoint not reachable; see <a href="/docs/enterprise#sso">setup guide</a>.');
+   setDetail('s-scim-detail','Status endpoint not reachable.');
+   setDetail('s-mfa-detail','Status endpoint not reachable.');
+  });
+ }
+
+ function loadDeploy(){
+  if(!key){setDetail('s-host-detail','Sign in to view'); setDetail('s-region-detail','Sign in to view'); setDetail('s-byoc-detail','Sign in to view'); return;}
+  fetch('/v1/byoc/status',{headers:headers()}).then(function(r){return r.json();}).then(function(j){
+   var mode=j&&j.hosting_mode||'managed';
+   setPill('s-host-pill', mode==='byoc'?'ok':'info', mode);
+   setDetail('s-host-detail', mode==='byoc'?'Running inside your VPC. kolm.ai sees no customer data.':'Managed cloud (Vercel + Railway). SOC2-inherited.');
+   var region=j&&j.region;
+   if(region){
+    setPill('s-region-pill','info',region); setDetail('s-region-detail','Data stored in '+esc(region)+'. Backups stay in-region.');
+   } else {
+    setPill('s-region-pill','mute','us-east-1'); setDetail('s-region-detail','Default region: us-east-1 (managed). Multi-region available on Enterprise.');
+   }
+   var byoc=j&&j.byoc||{};
+   if(byoc.enrolled){
+    setPill('s-byoc-pill','ok','active');
+    setDetail('s-byoc-detail','K8s namespace: '+esc(byoc.namespace||'-')+'<br>Helm release: '+esc(byoc.release||'-')+'<br>Last health check: '+esc(byoc.last_health||'-'));
+   } else {
+    setPill('s-byoc-pill','mute','none');
+    setDetail('s-byoc-detail','Not enrolled. Run <code>kolm serve --helm</code> on your cluster to start.');
+   }
+  }).catch(function(){
+   setDetail('s-host-detail','Status endpoint not reachable.');
+   setDetail('s-region-detail','Status endpoint not reachable.');
+   setDetail('s-byoc-detail','Status endpoint not reachable. See <a href="/docs/enterprise">deploy guide</a>.');
+  });
+ }
+
+ function loadCompliance(){
+  if(!key){setDetail('s-soc2-detail','Sign in to view'); setDetail('s-iso-detail','Sign in to view'); setDetail('s-dpa-detail','Sign in to view'); setDetail('s-baa-detail','Sign in to view'); return;}
+  fetch('/v1/compliance/status',{headers:headers()}).then(function(r){return r.json();}).then(function(j){
+   j=j||{};
+   var soc2=j.soc2||{};
+   if(soc2.type_ii){setPill('s-soc2-pill','ok','Type II'); setDetail('s-soc2-detail','Audit period: '+esc(soc2.period||'-')+'<br>Report available under NDA: <a href="mailto:security@kolm.ai">security@kolm.ai</a>');}
+   else if(soc2.type_i){setPill('s-soc2-pill','warn','Type I'); setDetail('s-soc2-detail','Type I complete. Type II audit in progress; target completion '+esc(soc2.eta_type_ii||'Q1 2027')+'.');}
+   else {setPill('s-soc2-pill','mute','planned'); setDetail('s-soc2-detail','SOC 2 Type II target: Q1 2027.');}
+   var iso=j.iso27001||{};
+   setPill('s-iso-pill', iso.certified?'ok':'mute', iso.certified?'certified':'controls aligned');
+   setDetail('s-iso-detail', iso.certified?('Certificate: '+esc(iso.cert_id||'-')):'ISMS designed against ISO/IEC 27001:2022. Formal certification scheduled 2027 H2.');
+   var dpa=j.dpa||{};
+   setPill('s-dpa-pill', dpa.signed?'ok':'info', dpa.signed?'signed':'template ready');
+   setDetail('s-dpa-detail', dpa.signed?('Signed '+esc(dpa.signed_at||'-')+' &mdash; counter-signed by '+esc(dpa.counter_signer||'kolm Legal')):'Standard DPA + SCCs at <a href="/legal/distillation-tos-clarity">/legal/distillation-tos-clarity</a>. Sign with DocuSign or counter-sign your template.');
+   var baa=j.baa||{};
+   setPill('s-baa-pill', baa.signed?'ok':'mute', baa.signed?'signed':'on request');
+   setDetail('s-baa-detail', baa.signed?('Signed '+esc(baa.signed_at||'-')+' &mdash; PHI processing allowed under this BAA.'):'HIPAA BAA available on Business and Enterprise. Request via <a href="mailto:legal@kolm.ai">legal@kolm.ai</a>.');
+  }).catch(function(){
+   setDetail('s-soc2-detail','Status endpoint not reachable. See <a href="/trust">/trust</a>.');
+   setDetail('s-iso-detail','Status endpoint not reachable.');
+   setDetail('s-dpa-detail','Status endpoint not reachable. Template at <a href="/legal/distillation-tos-clarity">/legal/distillation-tos-clarity</a>.');
+   setDetail('s-baa-detail','Status endpoint not reachable. Request via <a href="mailto:legal@kolm.ai">legal@kolm.ai</a>.');
+  });
+ }
+
+ function loadRetention(){
+  if(!key){setDetail('s-retain-detail','Sign in to view'); setDetail('s-siem-detail','Sign in to view'); return;}
+  fetch('/v1/account/audit/retention',{headers:headers()}).then(function(r){return r.json();}).then(function(j){
+   j=j||{};
+   var days=j.retention_days||365;
+   setPill('s-retain-pill','info',days+'d');
+   setDetail('s-retain-detail','Retaining '+days+' days of audit events. '+(j.tier==='enterprise'?'Up to 7 years available.':'Upgrade to Enterprise to extend.'));
+   if(j.siem_endpoint){
+    setPill('s-siem-pill','ok','active');
+    setDetail('s-siem-detail','Streaming to '+esc(j.siem_provider||'custom HTTPS')+'<br>Last delivery: '+esc(j.siem_last_delivery||'-'));
+   } else {
+    setPill('s-siem-pill','mute','not configured');
+    setDetail('s-siem-detail','Stream every audit event via webhook to your SIEM.');
+   }
+  }).catch(function(){
+   setDetail('s-retain-detail','Status endpoint not reachable. Default retention is 365 days.');
+   setDetail('s-siem-detail','Status endpoint not reachable.');
+  });
+ }
+
+ loadSSO(); loadDeploy(); loadCompliance(); loadRetention();
+})();
+</script>
+
+</body>
+</html>

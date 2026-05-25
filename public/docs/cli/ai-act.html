@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>kolm ai-act | CLI reference | kolm.ai</title>
+<meta name="description" content="EU AI Act compliance helpers: Annex IV export, risk classification, human-in-loop logging, and governance reports.">
+<link rel="canonical" href="https://kolm.ai/docs/cli/ai-act">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
+<script src="/nav.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm ai-act","description":"EU AI Act compliance helpers: Annex IV export, risk classification, human-in-loop logging, and governance reports.","url":"https://kolm.ai/docs/cli/ai-act","author":{"@type":"Organization","name":"kolm.ai"}}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<main id="main" class="docs-main" data-w401f="cli-verb" data-verb="ai-act">
+<nav aria-label="Breadcrumb" class="crumbs"><a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>ai-act</span></nav>
+<h1>kolm ai-act</h1>
+<blockquote><p>EU AI Act compliance helpers: Annex IV export, risk classification, human-in-loop logging, and governance reports.</p></blockquote>
+
+<h2>Usage</h2>
+<pre><code>kolm ai-act &lt;export|risk-score|human-in-loop|governance-report&gt; [flags]</code></pre>
+
+<h2>Flags</h2>
+<table>
+<thead><tr><th>Flag</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>export</code></td><td>-</td><td>Build Annex IV technical documentation for an artifact.</td></tr>
+<tr><td><code>risk-score</code></td><td>-</td><td>Classify a manifest against the AI Act risk tiers (minimal, limited, high, unacceptable).</td></tr>
+<tr><td><code>human-in-loop</code></td><td>-</td><td>Persist a human-in-loop decision (with confirm).</td></tr>
+<tr><td><code>governance-report</code></td><td>-</td><td>Aggregate captures into a governance summary.</td></tr>
+<tr><td><code>--artifact <path></code></td><td>required-for-export</td><td>Path to the <code>.kolm</code> artifact under review.</td></tr>
+<tr><td><code>--out <path></code></td><td>stdout</td><td>Where to write the export / report.</td></tr>
+<tr><td><code>--json</code></td><td>off</td><td>JSON output.</td></tr>
+</tbody>
+</table>
+
+<h2>Examples</h2>
+<pre><code>kolm ai-act risk-score --manifest ./manifest.json
+kolm ai-act export --artifact ./out/recipe.kolm --out ./annex-iv.pdf
+kolm ai-act governance-report --period 2026-Q2</code></pre>
+
+<h2>Notes</h2>
+<p>Backed by the <code>/v1/compliance/ai-act/*</code> routes. Output is auditor-ready; pair with <code>kolm passport</code> for model risk review packs.</p>
+
+<h2>See also</h2>
+<ul>
+<li><a href="/docs/cli/passport">kolm passport</a></li>
+<li><a href="/docs/cli/sbom">kolm sbom</a></li>
+<li><a href="/docs/cli/cert">kolm cert</a></li>
+<li><a href="/docs/cli">All CLI verbs</a></li>
+</ul>
+
+</main>
+
+</body>
+</html>

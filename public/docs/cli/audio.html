@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>kolm audio | CLI reference | kolm.ai</title>
+<meta name="description" content="Capture and run audio through the multimodal pipeline. Whisper-class ASR + optional speaker diarization.">
+<link rel="canonical" href="https://kolm.ai/docs/cli/audio">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
+<script src="/nav.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm audio","description":"Capture and run audio through the multimodal pipeline. Whisper-class ASR + optional speaker diarization.","url":"https://kolm.ai/docs/cli/audio","author":{"@type":"Organization","name":"kolm.ai"}}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<main id="main" class="docs-main" data-w401f="cli-verb" data-verb="audio">
+<nav aria-label="Breadcrumb" class="crumbs"><a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>audio</span></nav>
+<h1>kolm audio</h1>
+<blockquote><p>Capture and run audio through the multimodal pipeline. Whisper-class ASR + optional speaker diarization.</p></blockquote>
+
+<h2>Usage</h2>
+<pre><code>kolm audio &lt;capture|transcribe&gt; &lt;file.wav|mp3|m4a&gt; [--language &lt;code&gt;]</code></pre>
+
+<h2>Flags</h2>
+<table>
+<thead><tr><th>Flag</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>capture</code></td><td>-</td><td>Record an audio capture into the corpus.</td></tr>
+<tr><td><code>transcribe</code></td><td>-</td><td>Transcribe to text without storing.</td></tr>
+<tr><td><code><file></code></td><td>required</td><td>Audio file (wav, mp3, m4a, ogg).</td></tr>
+<tr><td><code>--language <code></code></td><td>auto</td><td>BCP-47 code; auto-detect when omitted.</td></tr>
+</tbody>
+</table>
+
+<h2>Examples</h2>
+<pre><code>kolm audio capture ./call.mp3
+kolm audio transcribe ./meeting.wav --language en</code></pre>
+
+<h2>Notes</h2>
+<p>Backed by <code>workers/audio-redact/</code>. Captures go through the redaction layer before storage.</p>
+
+<h2>See also</h2>
+<ul>
+<li><a href="/docs/cli/video">kolm video</a></li>
+<li><a href="/docs/cli/capture">kolm capture</a></li>
+<li><a href="/docs/cli">All CLI verbs</a></li>
+</ul>
+
+</main>
+
+</body>
+</html>

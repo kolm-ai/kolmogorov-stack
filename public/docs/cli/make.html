@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>kolm make | CLI reference | kolm.ai</title>
+<meta name="description" content="Unified pipeline verb: takes a recipe and runs distill, quantize, compile, eval, and (optionally) deploy. Like make for AI models.">
+<link rel="canonical" href="https://kolm.ai/docs/cli/make">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
+<script src="/nav.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm make","description":"Unified pipeline verb: takes a recipe and runs distill, quantize, compile, eval, and (optionally) deploy. Like make for AI models.","url":"https://kolm.ai/docs/cli/make","author":{"@type":"Organization","name":"kolm.ai"}}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<main id="main" class="docs-main" data-w401f="cli-verb" data-verb="make">
+<nav aria-label="Breadcrumb" class="crumbs"><a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>make</span></nav>
+<h1>kolm make</h1>
+<blockquote><p>Unified pipeline verb: takes a recipe and runs distill, quantize, compile, eval, and (optionally) deploy. Like <code>make</code> for AI models.</p></blockquote>
+
+<h2>Usage</h2>
+<pre><code>kolm make &lt;recipe.toml&gt; [--target &lt;slug&gt;] [--deploy]</code></pre>
+
+<h2>Flags</h2>
+<table>
+<thead><tr><th>Flag</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code><recipe.toml></code></td><td>required</td><td>Path to the recipe file.</td></tr>
+<tr><td><code>--target <slug></code></td><td><code>cuda</code></td><td>Compile target. See <code>kolm compile --help</code> for the full list.</td></tr>
+<tr><td><code>--deploy</code></td><td>off</td><td>Push to the deploy hook after a green compile.</td></tr>
+<tr><td><code>--gate <n></code></td><td><code>0.85</code></td><td>K-Score floor for the gate.</td></tr>
+</tbody>
+</table>
+
+<h2>Examples</h2>
+<pre><code>kolm make ./recipes/support-bot.toml
+kolm make ./recipes/support-bot.toml --target metal --deploy</code></pre>
+
+<h2>Notes</h2>
+<p>Wrapper over <code>kolm distill</code> + <code>kolm quantize</code> + <code>kolm compile</code> + <code>kolm eval</code>. Use the explicit verbs for per-step overrides.</p>
+
+<h2>See also</h2>
+<ul>
+<li><a href="/docs/cli/ship">kolm ship</a></li>
+<li><a href="/docs/cli/build">kolm build</a></li>
+<li><a href="/docs/cli/compile">kolm compile</a></li>
+<li><a href="/docs/cli">All CLI verbs</a></li>
+</ul>
+
+</main>
+
+</body>
+</html>

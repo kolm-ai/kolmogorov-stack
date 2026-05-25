@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Studio &middot; Compile wizard &middot; kolm.ai</title>
+<meta name="description" content="The Studio compile wizard. Pick a namespace, pick a target (local GPU or a cloud partner), pick a base model. Get a quote. Confirm. Download the signed .kolm artifact.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://kolm.ai/studio/compile">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<style>
+  /* W869 Studio compile wizard. Cool slate only (W850 binding).
+     Atomic: step rail + step card + receipt strip. No frameworks.
+     Reduce-motion gated. Same component shape light/dark. */
+
+  .swiz-wrap { max-width: 980px; margin: 0 auto; padding: 0 var(--ks-pad-x); }
+  .swiz-head { padding: var(--ks-12) 0 var(--ks-6); }
+  .swiz-eyebrow { font-family: var(--ks-mono); font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ks-ink-3); margin: 0 0 var(--ks-3); }
+  .swiz-h1 { font-size: clamp(28px, 3.4vw, 40px); font-weight: 560; line-height: 1.08; letter-spacing: -0.022em; color: var(--ks-ink); margin: 0 0 var(--ks-3); text-wrap: balance; }
+  .swiz-lede { font-size: 16px; line-height: 1.6; color: var(--ks-ink-2); max-width: 62ch; margin: 0; }
+  .swiz-lede code { font-family: var(--ks-mono); font-size: 0.92em; padding: 1px 6px; border-radius: 5px; background: var(--ks-accent-soft); color: var(--ks-ink); }
+
+  /* Step rail — 4 pips, click-to-jump if step already filled */
+  .swiz-rail { display: flex; gap: 0; margin: var(--ks-8) 0 var(--ks-6); border-top: 1px solid var(--ks-line-2); border-bottom: 1px solid var(--ks-line-2); }
+  .swiz-rail__pip { flex: 1; padding: var(--ks-4) var(--ks-3); border-left: 1px solid var(--ks-line-2); display: flex; flex-direction: column; gap: 4px; cursor: pointer; background: transparent; border-top: 0; border-right: 0; border-bottom: 0; text-align: left; font: inherit; color: var(--ks-ink-3); transition: background 140ms ease, color 140ms ease; }
+  .swiz-rail__pip:first-child { border-left: 0; }
+  .swiz-rail__pip:hover { background: var(--ks-bg-2); color: var(--ks-ink-2); }
+  .swiz-rail__pip[aria-current="true"] { background: var(--ks-bg-1); color: var(--ks-ink); }
+  .swiz-rail__num { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .swiz-rail__label { font-size: 14px; font-weight: 520; }
+  .swiz-rail__val { font-family: var(--ks-mono); font-size: 11.5px; color: var(--ks-ink-3); margin-top: 2px; min-height: 14px; }
+  .swiz-rail__pip[data-done="true"] .swiz-rail__val { color: var(--ks-ink); }
+
+  /* Step card */
+  .swiz-step { padding: var(--ks-8) 0 var(--ks-12); }
+  .swiz-step[hidden] { display: none; }
+  .swiz-step__h { font-size: 22px; font-weight: 560; letter-spacing: -0.012em; color: var(--ks-ink); margin: 0 0 var(--ks-2); }
+  .swiz-step__p { font-size: 14.5px; line-height: 1.6; color: var(--ks-ink-2); margin: 0 0 var(--ks-6); max-width: 62ch; }
+
+  .swiz-row { display: flex; gap: var(--ks-3); flex-wrap: wrap; align-items: center; }
+  .swiz-input { flex: 1 1 280px; min-width: 0; padding: 10px 14px; border: 1px solid var(--ks-line-3); border-radius: var(--ks-r-md); background: var(--ks-bg-1); color: var(--ks-ink); font: inherit; font-size: 14.5px; font-family: var(--ks-mono); }
+  .swiz-input:focus { outline: 2px solid var(--ks-accent-edge); outline-offset: 1px; border-color: var(--ks-accent-edge); }
+
+  /* Option grid (target backends + base models) */
+  .swiz-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--ks-3); margin-top: var(--ks-4); }
+  .swiz-opt { padding: var(--ks-4); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); background: var(--ks-bg-1); cursor: pointer; display: flex; flex-direction: column; gap: 6px; text-align: left; font: inherit; color: inherit; transition: border-color 140ms ease, background 140ms ease; }
+  .swiz-opt:hover { border-color: var(--ks-accent-edge); background: var(--ks-bg-2); }
+  .swiz-opt[aria-pressed="true"] { border-color: var(--ks-ink); background: var(--ks-bg-1); box-shadow: inset 0 0 0 1px var(--ks-ink); }
+  .swiz-opt__name { font-size: 15px; font-weight: 560; color: var(--ks-ink); }
+  .swiz-opt__sub { font-size: 12.5px; color: var(--ks-ink-3); font-family: var(--ks-mono); }
+  .swiz-opt__price { font-size: 12px; color: var(--ks-ink-2); font-family: var(--ks-mono); margin-top: auto; }
+
+  /* Quote + run console */
+  .swiz-quote { padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); margin-top: var(--ks-5); }
+  .swiz-quote__row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--ks-line-1); font-size: 13.5px; font-family: var(--ks-mono); }
+  .swiz-quote__row:last-child { border-bottom: 0; }
+  .swiz-quote__row span:first-child { color: var(--ks-ink-3); letter-spacing: 0.04em; text-transform: uppercase; font-size: 11.5px; padding-top: 1px; }
+  .swiz-quote__row span:last-child { color: var(--ks-ink); font-variant-numeric: tabular-nums; }
+
+  .swiz-console { margin-top: var(--ks-5); padding: var(--ks-4); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); font-family: var(--ks-mono); font-size: 13px; line-height: 1.55; color: var(--ks-ink-2); max-height: 320px; overflow: auto; white-space: pre-wrap; word-break: break-word; }
+  .swiz-console:empty::before { content: 'output appears here once you confirm.'; color: var(--ks-ink-3); }
+
+  .swiz-actions { display: flex; gap: var(--ks-3); margin-top: var(--ks-6); flex-wrap: wrap; }
+
+  .swiz-empty { padding: var(--ks-5); border: 1px dashed var(--ks-line-3); border-radius: var(--ks-r-md); background: var(--ks-bg-1); color: var(--ks-ink-2); font-size: 14px; }
+  .swiz-empty a { color: var(--ks-ink); border-bottom: 1px solid var(--ks-line-3); }
+
+  /* Persona hint strip */
+  .swiz-personas { margin-top: var(--ks-12); padding-top: var(--ks-6); border-top: 1px solid var(--ks-line-2); }
+  .swiz-personas h2 { font-size: 14px; font-weight: 560; color: var(--ks-ink); margin: 0 0 var(--ks-3); letter-spacing: 0.02em; text-transform: uppercase; }
+  .swiz-personas dl { display: grid; grid-template-columns: 220px 1fr; gap: 8px var(--ks-5); margin: 0; }
+  .swiz-personas dt { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink-3); }
+  .swiz-personas dd { margin: 0; font-size: 13.5px; color: var(--ks-ink-2); }
+  @media (max-width: 640px) { .swiz-personas dl { grid-template-columns: 1fr; gap: 4px var(--ks-3); } .swiz-personas dt { margin-top: 8px; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .swiz-rail__pip, .swiz-opt { transition: none !important; }
+  }
+</style>
+</head>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio" aria-current="page">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main">
+
+<div class="swiz-wrap">
+  <header class="swiz-head">
+    <p class="swiz-eyebrow">Studio &middot; compile wizard</p>
+    <h1 class="swiz-h1">Compile a <code>.kolm</code> in four steps.</h1>
+    <p class="swiz-lede">Pick a namespace from your captures. Pick where the work runs &mdash; your local GPU, or a cloud partner if you don&rsquo;t have one. Pick a base model. Get a quote. Confirm. Same compiler that powers the CLI; this is the browser face.</p>
+  </header>
+
+  <div class="swiz-rail" role="tablist" aria-label="Compile steps">
+    <button class="swiz-rail__pip" id="pip-1" role="tab" aria-current="true" data-done="false" type="button">
+      <span class="swiz-rail__num">01 &middot; data</span>
+      <span class="swiz-rail__label">Namespace</span>
+      <span class="swiz-rail__val" id="pip-1-val">&mdash;</span>
+    </button>
+    <button class="swiz-rail__pip" id="pip-2" role="tab" data-done="false" type="button">
+      <span class="swiz-rail__num">02 &middot; target</span>
+      <span class="swiz-rail__label">Where it runs</span>
+      <span class="swiz-rail__val" id="pip-2-val">&mdash;</span>
+    </button>
+    <button class="swiz-rail__pip" id="pip-3" role="tab" data-done="false" type="button">
+      <span class="swiz-rail__num">03 &middot; model</span>
+      <span class="swiz-rail__label">Base model</span>
+      <span class="swiz-rail__val" id="pip-3-val">&mdash;</span>
+    </button>
+    <button class="swiz-rail__pip" id="pip-4" role="tab" data-done="false" type="button">
+      <span class="swiz-rail__num">04 &middot; run</span>
+      <span class="swiz-rail__label">Quote &amp; confirm</span>
+      <span class="swiz-rail__val" id="pip-4-val">&mdash;</span>
+    </button>
+  </div>
+
+  <section class="swiz-step" id="step-1" role="tabpanel" aria-labelledby="pip-1">
+    <h2 class="swiz-step__h">Which namespace?</h2>
+    <p class="swiz-step__p">A namespace is the bucket your captured calls land in. The wizard will pull rows from this namespace and use them to train the student model. If you haven&rsquo;t captured any calls yet, follow the <a href="/docs/quickstart">5-minute quickstart</a> first.</p>
+    <div class="swiz-row">
+      <input class="swiz-input" type="text" id="ns-input" placeholder="e.g. support, extraction, inbox" autocomplete="off" spellcheck="false">
+      <button class="ks-btn ks-btn--primary ks-btn--md" id="ns-next" type="button">Use this namespace &rarr;</button>
+    </div>
+    <p class="swiz-step__p" style="margin-top: var(--ks-3); font-size: 13px;">No captures yet? <a href="/quickstart">Start with the quickstart</a> or <a href="/account/captured">browse what you already have</a>.</p>
+  </section>
+
+  <section class="swiz-step" id="step-2" role="tabpanel" aria-labelledby="pip-2" hidden>
+    <h2 class="swiz-step__h">Where should the compile run?</h2>
+    <p class="swiz-step__p">No local GPU? Pick a cloud partner &mdash; we run it on your behalf, you pay only for the seconds you use, the partner tears down the rental when the job finishes. Local is free if you already have hardware.</p>
+    <div class="swiz-grid" id="target-grid">
+      <button class="swiz-opt" type="button" data-target="local" aria-pressed="false">
+        <span class="swiz-opt__name">Local GPU</span>
+        <span class="swiz-opt__sub">your machine</span>
+        <span class="swiz-opt__price">$0.00 &middot; needs CUDA / MPS / ROCm</span>
+      </button>
+      <button class="swiz-opt" type="button" data-target="modal" aria-pressed="false">
+        <span class="swiz-opt__name">Modal</span>
+        <span class="swiz-opt__sub">A100 80GB &middot; ~$2.10/hr</span>
+        <span class="swiz-opt__price">platform-managed teardown</span>
+      </button>
+      <button class="swiz-opt" type="button" data-target="runpod" aria-pressed="false">
+        <span class="swiz-opt__name">RunPod</span>
+        <span class="swiz-opt__sub">H100 80GB &middot; ~$1.99/hr</span>
+        <span class="swiz-opt__price">serverless endpoint</span>
+      </button>
+      <button class="swiz-opt" type="button" data-target="vast" aria-pressed="false">
+        <span class="swiz-opt__name">Vast.ai</span>
+        <span class="swiz-opt__sub">4090 / A100 mix &middot; ~$0.50/hr</span>
+        <span class="swiz-opt__price">spot pricing, kolm-managed</span>
+      </button>
+      <button class="swiz-opt" type="button" data-target="lambda" aria-pressed="false">
+        <span class="swiz-opt__name">Lambda</span>
+        <span class="swiz-opt__sub">A100 80GB &middot; ~$1.10/hr</span>
+        <span class="swiz-opt__price">on-demand, kolm-managed</span>
+      </button>
+    </div>
+    <p class="swiz-step__p" style="margin-top:var(--ks-5);font-size:13.5px;">
+      <strong>No card, no install?</strong>
+      <a href="https://colab.research.google.com/github/sneaky-hippo/kolmogorov-stack/blob/main/examples/colab-compile.ipynb" rel="noopener" target="_blank" style="border-bottom:1px solid var(--ks-line-3);color:var(--ks-ink);">Open the Colab notebook</a>
+      &mdash; same flow, runs on Colab's free T4 GPU. Good for 0.5B&ndash;7B models.
+    </p>
+    <div class="swiz-actions">
+      <button class="ks-btn ks-btn--ghost ks-btn--md" id="t-back" type="button">&larr; Back</button>
+      <button class="ks-btn ks-btn--primary ks-btn--md" id="t-next" type="button" disabled>Next &rarr;</button>
+    </div>
+  </section>
+
+  <section class="swiz-step" id="step-3" role="tabpanel" aria-labelledby="pip-3" hidden>
+    <h2 class="swiz-step__h">Which base model?</h2>
+    <p class="swiz-step__p">The student model is what gets trained. Smaller = faster + cheaper but lower ceiling. The proven matrix in <a href="/studio">Studio</a> shows the sweet spots. Default to <code>Qwen2.5-3B</code> if unsure &mdash; it covers most tasks at 1.9 GB INT4.</p>
+    <div class="swiz-grid" id="model-grid">
+      <button class="swiz-opt" type="button" data-model="Qwen/Qwen2.5-0.5B-Instruct" aria-pressed="false">
+        <span class="swiz-opt__name">Qwen2.5-0.5B</span>
+        <span class="swiz-opt__sub">0.93 GB &rarr; 0.44 GB INT4</span>
+        <span class="swiz-opt__price">tiniest &middot; classifiers, simple routing</span>
+      </button>
+      <button class="swiz-opt" type="button" data-model="Qwen/Qwen2.5-3B-Instruct" aria-pressed="true">
+        <span class="swiz-opt__name">Qwen2.5-3B (default)</span>
+        <span class="swiz-opt__sub">5.80 GB &rarr; 1.90 GB INT4</span>
+        <span class="swiz-opt__price">general support, extraction</span>
+      </button>
+      <button class="swiz-opt" type="button" data-model="Qwen/Qwen2.5-7B-Instruct" aria-pressed="false">
+        <span class="swiz-opt__name">Qwen2.5-7B</span>
+        <span class="swiz-opt__sub">14.2 GB &rarr; 5.20 GB INT4</span>
+        <span class="swiz-opt__price">harder reasoning, longer context</span>
+      </button>
+      <button class="swiz-opt" type="button" data-model="Qwen/Qwen3-8B" aria-pressed="false">
+        <span class="swiz-opt__name">Qwen3-8B</span>
+        <span class="swiz-opt__sub">~16 GB &rarr; ~5.5 GB INT4</span>
+        <span class="swiz-opt__price">2026 baseline, recommended for new builds</span>
+      </button>
+      <button class="swiz-opt" type="button" data-model="deepseek-ai/DeepSeek-R1-Distill-Qwen-32B" aria-pressed="false">
+        <span class="swiz-opt__name">DeepSeek-R1-32B</span>
+        <span class="swiz-opt__sub">61.0 GB &rarr; 17.9 GB INT4</span>
+        <span class="swiz-opt__price">reasoning &middot; needs &ge; 24 GB VRAM</span>
+      </button>
+    </div>
+    <div class="swiz-actions">
+      <button class="ks-btn ks-btn--ghost ks-btn--md" id="m-back" type="button">&larr; Back</button>
+      <button class="ks-btn ks-btn--primary ks-btn--md" id="m-next" type="button">Next &rarr;</button>
+    </div>
+  </section>
+
+  <section class="swiz-step" id="step-4" role="tabpanel" aria-labelledby="pip-4" hidden>
+    <h2 class="swiz-step__h">Review the quote, then confirm.</h2>
+    <p class="swiz-step__p">Below is the estimate from <code>src/compute/estimator.js</code>. The quote is conservative (2&times; slack on top of reference TPS) so the actual bill usually comes in under. Local runs are free; cloud runs charge the partner&rsquo;s rate and tear down automatically when the job finishes.</p>
+    <div class="swiz-quote" id="quote">
+      <div class="swiz-quote__row"><span>Namespace</span><span id="q-ns">&mdash;</span></div>
+      <div class="swiz-quote__row"><span>Target</span><span id="q-target">&mdash;</span></div>
+      <div class="swiz-quote__row"><span>Base model</span><span id="q-model">&mdash;</span></div>
+      <div class="swiz-quote__row"><span>Duration (est.)</span><span id="q-dur">&mdash;</span></div>
+      <div class="swiz-quote__row"><span>Cost (est.)</span><span id="q-cost">&mdash;</span></div>
+      <div class="swiz-quote__row"><span>Basis</span><span id="q-basis">&mdash;</span></div>
+    </div>
+    <div class="swiz-actions">
+      <button class="ks-btn ks-btn--ghost ks-btn--md" id="q-back" type="button">&larr; Back</button>
+      <button class="ks-btn ks-btn--ghost ks-btn--md" id="q-refresh" type="button">Refresh quote</button>
+      <button class="ks-btn ks-btn--primary ks-btn--md" id="q-confirm" type="button">Confirm &amp; run</button>
+      <a class="ks-btn ks-btn--link ks-btn--md" href="/studio/jobs">View jobs &rarr;</a>
+    </div>
+    <div class="swiz-console" id="console" aria-live="polite" aria-atomic="false"></div>
+  </section>
+
+  <section class="swiz-personas" aria-labelledby="personas-h">
+    <h2 id="personas-h">Who this is for</h2>
+    <dl>
+      <dt>Persona A &middot; solo + GPU</dt><dd>Pick <strong>Local GPU</strong>. The same flow runs <code>kolm compile</code> against your CUDA / MPS / ROCm card. Quote is $0.</dd>
+      <dt>Persona B &middot; no GPU</dt><dd>Pick <strong>Modal</strong> or <strong>RunPod</strong>. We rent the GPU on your behalf, train, return the <code>.kolm</code>, tear down. You see the cost before you spend anything.</dd>
+      <dt>Persona C &middot; team</dt><dd>Use this once per namespace from your team workspace; the resulting artifact lands in your shared registry at <a href="/account/artifacts">/account/artifacts</a>.</dd>
+      <dt>Persona D &middot; enterprise</dt><dd>Use the same wizard inside your <a href="/byoc">BYOC</a> deployment &mdash; quote + run hits your in-VPC kolm instance and your own GPU pool.</dd>
+      <dt>Persona E &middot; free tier</dt><dd>Stay under 50k gateway calls and use a free Colab GPU via the <a href="/docs/quickstart">Colab notebook</a>.</dd>
+      <dt>Persona F &middot; ML engineer</dt><dd>Skip the wizard &mdash; <code>kolm compile --spec spec.json --cloud modal --confirm</code> from your terminal is the same path.</dd>
+    </dl>
+  </section>
+</div>
+
+</main>
+
+<script>
+(function(){
+  var state = { ns: '', target: '', model: 'Qwen/Qwen2.5-3B-Instruct' };
+  var modelLabel = function(id){ var b = (document.querySelector('.swiz-opt[data-model="'+id+'"] .swiz-opt__name')||{}).textContent; return b ? b.replace(' (default)', '') : id; };
+
+  function showStep(n){
+    for (var i=1; i<=4; i++) {
+      var sec = document.getElementById('step-'+i);
+      if (sec) sec.hidden = (i !== n);
+      var pip = document.getElementById('pip-'+i);
+      if (pip) pip.setAttribute('aria-current', i === n ? 'true' : 'false');
+    }
+  }
+  function setDone(n, val){
+    var pip = document.getElementById('pip-'+n);
+    var sl = document.getElementById('pip-'+n+'-val');
+    if (pip) pip.setAttribute('data-done', val ? 'true' : 'false');
+    if (sl) sl.textContent = val || '—';
+  }
+
+  // Rail click jumps to previously visited step.
+  for (var i=1; i<=4; i++) (function(n){
+    var pip = document.getElementById('pip-'+n);
+    if (!pip) return;
+    pip.addEventListener('click', function(){
+      // Only allow jumping to a step that's already been filled, or one ahead.
+      var ok = true;
+      if (n >= 2 && !state.ns) ok = false;
+      if (n >= 3 && !state.target) ok = false;
+      if (n >= 4 && !state.model) ok = false;
+      if (ok) showStep(n);
+    });
+  })(i);
+
+  // Step 1 — namespace
+  document.getElementById('ns-next').addEventListener('click', function(){
+    var v = (document.getElementById('ns-input').value || '').trim();
+    if (!v) { document.getElementById('ns-input').focus(); return; }
+    if (!/^[a-z0-9][a-z0-9_.-]{0,63}$/i.test(v)) {
+      alert('namespace must be a-z, 0-9, dot, dash, underscore (max 64 chars).');
+      return;
+    }
+    state.ns = v;
+    setDone(1, v);
+    showStep(2);
+  });
+  document.getElementById('ns-input').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') { e.preventDefault(); document.getElementById('ns-next').click(); }
+  });
+
+  // Step 2 — target
+  var tgrid = document.getElementById('target-grid');
+  tgrid.addEventListener('click', function(e){
+    var btn = e.target.closest('.swiz-opt');
+    if (!btn) return;
+    var all = tgrid.querySelectorAll('.swiz-opt');
+    for (var i=0; i<all.length; i++) all[i].setAttribute('aria-pressed', 'false');
+    btn.setAttribute('aria-pressed', 'true');
+    state.target = btn.getAttribute('data-target');
+    setDone(2, btn.querySelector('.swiz-opt__name').textContent.trim());
+    document.getElementById('t-next').disabled = false;
+  });
+  document.getElementById('t-back').addEventListener('click', function(){ showStep(1); });
+  document.getElementById('t-next').addEventListener('click', function(){ if (state.target) showStep(3); });
+
+  // Step 3 — model
+  var mgrid = document.getElementById('model-grid');
+  setDone(3, modelLabel(state.model));
+  mgrid.addEventListener('click', function(e){
+    var btn = e.target.closest('.swiz-opt');
+    if (!btn) return;
+    var all = mgrid.querySelectorAll('.swiz-opt');
+    for (var i=0; i<all.length; i++) all[i].setAttribute('aria-pressed', 'false');
+    btn.setAttribute('aria-pressed', 'true');
+    state.model = btn.getAttribute('data-model');
+    setDone(3, modelLabel(state.model));
+  });
+  document.getElementById('m-back').addEventListener('click', function(){ showStep(2); });
+  document.getElementById('m-next').addEventListener('click', function(){
+    if (!state.model) return;
+    showStep(4);
+    refreshQuote();
+  });
+
+  // Step 4 — quote + confirm
+  function setRow(id, v){ var el = document.getElementById(id); if (el) el.textContent = v == null ? '—' : v; }
+  function logLine(s){
+    var c = document.getElementById('console');
+    c.textContent += (c.textContent ? '\n' : '') + s;
+    c.scrollTop = c.scrollHeight;
+  }
+  function clearLog(){ document.getElementById('console').textContent = ''; }
+
+  async function refreshQuote(){
+    setRow('q-ns', state.ns);
+    setRow('q-target', state.target);
+    setRow('q-model', modelLabel(state.model));
+    setRow('q-dur', '...');
+    setRow('q-cost', '...');
+    setRow('q-basis', '...');
+    setDone(4, 'quoting');
+    if (state.target === 'local') {
+      // Local runs: no estimator call. Tell them the truth — runs on their hardware, free.
+      setRow('q-dur', 'depends on your GPU');
+      setRow('q-cost', '$0.00');
+      setRow('q-basis', 'local hardware');
+      setDone(4, '$0.00 local');
+      return;
+    }
+    try {
+      var resp = await fetch('/v1/compile/cloud', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ backend: state.target, namespace: state.ns, base_model: state.model, confirm: false }),
+      });
+      var body = await resp.json();
+      if (resp.ok && body.status === 'quote' && body.estimate) {
+        var est = body.estimate;
+        if (est.supported === false) {
+          setRow('q-dur', '—');
+          setRow('q-cost', '—');
+          setRow('q-basis', 'unsupported: ' + (est.reason || 'unknown'));
+          setDone(4, 'unsupported');
+          return;
+        }
+        setRow('q-dur', est.duration_human || (est.duration_seconds + 's'));
+        setRow('q-cost', est.cost_usd == null ? '(varies)' : '$' + Number(est.cost_usd).toFixed(2));
+        setRow('q-basis', est.cost_basis || '');
+        setDone(4, est.cost_usd == null ? '(varies)' : '$' + Number(est.cost_usd).toFixed(2));
+      } else {
+        setRow('q-dur', '—');
+        setRow('q-cost', '—');
+        setRow('q-basis', body.error || body.reason || ('http ' + resp.status));
+        setDone(4, 'error');
+      }
+    } catch (e) {
+      setRow('q-basis', 'fetch failed: ' + (e && e.message || e));
+      setDone(4, 'error');
+    }
+  }
+
+  document.getElementById('q-back').addEventListener('click', function(){ showStep(3); });
+  document.getElementById('q-refresh').addEventListener('click', refreshQuote);
+
+  document.getElementById('q-confirm').addEventListener('click', async function(){
+    if (state.target === 'local') {
+      clearLog();
+      logLine('local target: this wizard does not dispatch local jobs from the browser.');
+      logLine('run the equivalent in your terminal:');
+      logLine('');
+      logLine('  kolm compile --namespace ' + state.ns + ' --base-model ' + state.model);
+      logLine('');
+      logLine('artifact lands at ~/.kolm/artifacts/. ' + 'k-score gate defaults to 0.85.');
+      return;
+    }
+    var btn = document.getElementById('q-confirm');
+    btn.disabled = true;
+    btn.textContent = 'running...';
+    clearLog();
+    logLine('[' + state.target + '] dispatching cloud compile');
+    logLine('[' + state.target + '] namespace=' + state.ns + ' base_model=' + state.model);
+    try {
+      var resp = await fetch('/v1/compile/cloud', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ backend: state.target, namespace: state.ns, base_model: state.model, confirm: true }),
+      });
+      var body = await resp.json();
+      if (resp.ok && body.status === 'completed') {
+        logLine('[' + state.target + '] completed');
+        logLine('  duration: ' + (body.estimate && body.estimate.duration_human));
+        logLine('  cost:     ' + (body.estimate && (body.estimate.cost_usd == null ? '(varies)' : '$' + Number(body.estimate.cost_usd).toFixed(2))));
+        if (body.result && body.result.artifact_path) {
+          logLine('  artifact: ' + body.result.artifact_path);
+        }
+        if (body.result && body.result.artifact_url) {
+          logLine('  download: ' + body.result.artifact_url);
+        }
+        logLine('');
+        logLine('track every job at /studio/jobs (live polling)');
+        setDone(4, 'done');
+      } else if (body.status === 'failed') {
+        logLine('[' + state.target + '] failed: ' + (body.reason || 'unknown'));
+        if (body.next_step) logLine('  next: ' + body.next_step);
+      } else {
+        logLine('[' + state.target + '] http ' + resp.status + ': ' + JSON.stringify(body));
+      }
+    } catch (e) {
+      logLine('[' + state.target + '] fetch failed: ' + (e && e.message || e));
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Confirm & run';
+    }
+  });
+
+  showStep(1);
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,192 @@
+{
+  "spec": "kolm-procurement-vault-v1",
+  "framework": "CSA CAIQ v4.0.2",
+  "vendor": "Kolm AI Inc.",
+  "domain": "kolm.ai",
+  "updated_iso": "2026-05-25",
+  "scope": "kolm distillation + serving platform (managed cloud) and self-hosted distribution (BYOC).",
+  "contact": {
+    "security": "security@kolm.ai",
+    "privacy": "privacy@kolm.ai",
+    "trust_center": "https://kolm.ai/trust"
+  },
+  "controls": [
+    {
+      "id": "AIS-01.1",
+      "domain": "Application & Interface Security",
+      "question": "Are applications and programming interfaces (APIs) designed, developed, deployed, and tested in accordance with industry standards (e.g., OWASP)?",
+      "answer": "yes",
+      "evidence": "OWASP ASVS L2 controls applied across HTTP surface. All public-API routes pass through src/auth.js (auth) + src/route-table.js (input shape) + src/audit-static-refs.cjs (no dead refs). CI fails on any route without an auth gate or input validator."
+    },
+    {
+      "id": "AIS-04.1",
+      "domain": "Application & Interface Security",
+      "question": "Are data input and output integrity routines (i.e., MD5 / SHA checksums) implemented for application interfaces and databases?",
+      "answer": "yes",
+      "evidence": "Every .kolm artifact ships with a four-ring receipt chain (data, train, eval, sigstore) anchored by ed25519 signatures + SHA-256 manifests. `kolm verify` replays the chain offline. Source: src/sigstore.js, src/receipt.js."
+    },
+    {
+      "id": "BCR-01.1",
+      "domain": "Business Continuity & Resilience",
+      "question": "Is there a documented business continuity / disaster recovery (BCP / DR) plan?",
+      "answer": "yes",
+      "evidence": "Managed cloud runs on Vercel (web tier) + Railway (API tier) with daily KOLM_DATA_DIR snapshots to S3-compatible object storage. RTO 4h, RPO 24h. Self-hosted customers retain full sovereignty — see docs/self-hosted-deploy-complete.md."
+    },
+    {
+      "id": "BCR-08.1",
+      "domain": "Business Continuity & Resilience",
+      "question": "Does the organization maintain a tested incident response plan?",
+      "answer": "yes",
+      "evidence": "Pagerduty + Statuspage wired. Sev-1 response: 15min ack, 1h initial comms, post-mortem within 5 business days published at /trust/postmortems. Incident playbooks at docs/runbooks/."
+    },
+    {
+      "id": "CCC-01.1",
+      "domain": "Change Control & Configuration Management",
+      "question": "Are policies and procedures in place to govern changes to the production environment?",
+      "answer": "yes",
+      "evidence": "All production deploys go through git → CI (scripts/release-verify.cjs 7 gates) → human review → tagged release. No direct prod console access; root credentials in HashiCorp Vault, broken-glass procedure requires two-person rule."
+    },
+    {
+      "id": "CEK-01.1",
+      "domain": "Cryptography, Encryption & Key Management",
+      "question": "Are cryptographic protections deployed for data at rest?",
+      "answer": "yes",
+      "evidence": "All persistent data encrypted at rest via storage-provider-managed AES-256 (Vercel, Railway, S3). Tenant API keys hashed with argon2id at the database boundary."
+    },
+    {
+      "id": "CEK-03.1",
+      "domain": "Cryptography, Encryption & Key Management",
+      "question": "Are cryptographic protections deployed for data in transit?",
+      "answer": "yes",
+      "evidence": "TLS 1.2+ enforced on all public surfaces (HSTS preload). Internal services mTLS via Tailscale. No plaintext HTTP outside of localhost dev."
+    },
+    {
+      "id": "CEK-05.1",
+      "domain": "Cryptography, Encryption & Key Management",
+      "question": "Are cryptographic keys rotated periodically?",
+      "answer": "yes",
+      "evidence": "Sigstore ring keys rotated every 90 days via scripts/rotate-sigstore-keys.cjs. Tenant API keys are user-rotatable from /account/keys with one-click revoke. TLS certs auto-rotated by hosting provider (60d)."
+    },
+    {
+      "id": "DCS-01.1",
+      "domain": "Datacenter Security",
+      "question": "Are physical security perimeters implemented at the datacenter?",
+      "answer": "yes",
+      "evidence": "Managed cloud relies on SOC2-certified hosting providers (Vercel — AWS us-east, Railway — GCP us-central). Physical security inherited from underlying provider; SOC2 reports available under NDA via security@kolm.ai."
+    },
+    {
+      "id": "DSP-01.1",
+      "domain": "Data Security & Privacy Lifecycle",
+      "question": "Is sensitive customer data identified, classified, and labeled?",
+      "answer": "yes",
+      "evidence": "Customer data classified as Tenant-Private (default), Tenant-Public (opt-in), or Anonymous-Aggregate. PII redaction default-on via src/redact.js + workers/media-redact. Classification is per-namespace and enforced at the event-store boundary."
+    },
+    {
+      "id": "DSP-08.1",
+      "domain": "Data Security & Privacy Lifecycle",
+      "question": "Does the organization comply with GDPR / CCPA / equivalent regional privacy laws?",
+      "answer": "yes",
+      "evidence": "DPA template at /legal/dpa, sub-processor list at /legal/subprocessors, data-subject-request flow at /privacy/request. Self-hosted (BYOC) tenants run in their own cloud — no data egress; Kolm is not a processor."
+    },
+    {
+      "id": "DSP-15.1",
+      "domain": "Data Security & Privacy Lifecycle",
+      "question": "Is there a documented data retention and deletion policy?",
+      "answer": "yes",
+      "evidence": "Tenant data retained 90 days after subscription end; deletion-on-request honored within 30 days (GDPR Art 17). Receipts (cryptographic proofs) retained indefinitely as anchored hashes only (no raw data)."
+    },
+    {
+      "id": "GRC-04.1",
+      "domain": "Governance, Risk & Compliance",
+      "question": "Is there a documented information security management system (ISMS)?",
+      "answer": "yes",
+      "evidence": "ISMS aligned with ISO/IEC 27001 controls. SOC 2 Type II in progress (audit period 2026-01-01 to 2026-12-31, report Q1 2027). Type I report available now under NDA."
+    },
+    {
+      "id": "HRS-04.1",
+      "domain": "Human Resources Security",
+      "question": "Do personnel undergo background checks prior to employment?",
+      "answer": "yes",
+      "evidence": "All employees and contractors with production access pass third-party background check (Checkr) prior to onboarding. Re-checks every 24 months for those with persistent prod credentials."
+    },
+    {
+      "id": "IAM-01.1",
+      "domain": "Identity & Access Management",
+      "question": "Is multi-factor authentication (MFA) enforced for privileged users?",
+      "answer": "yes",
+      "evidence": "MFA mandatory for all employees with prod access (TOTP + WebAuthn). Customer-facing SSO via SAML 2.0 + SCIM supports IdP-enforced MFA (Okta, Azure AD, Google Workspace) on Enterprise and Business tiers."
+    },
+    {
+      "id": "IAM-08.1",
+      "domain": "Identity & Access Management",
+      "question": "Is access provisioned based on least privilege and need-to-know?",
+      "answer": "yes",
+      "evidence": "Role-based access control (RBAC) with four roles (owner, admin, member, viewer). Default to viewer; promotion requires owner approval. Audit log at /account/audit captures every role mutation."
+    },
+    {
+      "id": "IPY-01.1",
+      "domain": "Interoperability & Portability",
+      "question": "Can customer data and configurations be exported in standard formats?",
+      "answer": "yes",
+      "evidence": "Full tenant export via `kolm export-tenant --out tenant.tar.gz` (CLI) or `/v1/tenant/export` (API). Includes specs, artifacts (.kolm), receipts, captures (jsonl), and audit log. No proprietary lock-in."
+    },
+    {
+      "id": "IVS-01.1",
+      "domain": "Infrastructure & Virtualization Security",
+      "question": "Is network traffic between tenants isolated?",
+      "answer": "yes",
+      "evidence": "Multi-tenancy enforced at the application layer via tenant_id-scoped event-store reads/writes (src/event-store.js findByTenant). Defense-in-depth: per-row tenant_id checks inside every loop. BYOC customers get hard physical isolation."
+    },
+    {
+      "id": "IVS-03.1",
+      "domain": "Infrastructure & Virtualization Security",
+      "question": "Are firewalls or equivalent network controls deployed?",
+      "answer": "yes",
+      "evidence": "Vercel + Railway provide DDoS-mitigated edge. Application-layer rate limits at src/rate-limit.js (per-IP + per-tenant + per-route). Public endpoints PUBLIC_API explicitly allow-listed in src/auth.js."
+    },
+    {
+      "id": "LOG-01.1",
+      "domain": "Logging & Monitoring",
+      "question": "Are security-relevant events logged and monitored?",
+      "answer": "yes",
+      "evidence": "Auth events (login, logout, key issue, key revoke, role change) logged to the tenant audit trail. Public access logs retained 30d. Anomaly detection on failed-auth rate; alerts to security@kolm.ai."
+    },
+    {
+      "id": "SEF-01.1",
+      "domain": "Security Incident Management",
+      "question": "Are customers notified of security incidents that may affect them?",
+      "answer": "yes",
+      "evidence": "Customer notification within 72h of confirmed breach (GDPR Art 33). Postmortems published at /trust/postmortems. Status page at status.kolm.ai for service-level incidents."
+    },
+    {
+      "id": "STA-01.1",
+      "domain": "Supply Chain Management",
+      "question": "Is there a vendor risk management program?",
+      "answer": "yes",
+      "evidence": "Sub-processors listed at /legal/subprocessors. Each sub-processor reviewed annually for SOC 2 + DPA + data residency. List of evaluated AI inference providers (Anthropic, OpenAI, Modal, RunPod) at /trust/sub-processors."
+    },
+    {
+      "id": "TVM-01.1",
+      "domain": "Threat & Vulnerability Management",
+      "question": "Are vulnerabilities identified and remediated on a defined schedule?",
+      "answer": "yes",
+      "evidence": "npm audit + pip-audit + cargo audit run in CI. SLAs: critical 7d, high 30d, medium 90d. Penetration test annually by independent third party; latest report Q2 2026 (NDA)."
+    },
+    {
+      "id": "TVM-04.1",
+      "domain": "Threat & Vulnerability Management",
+      "question": "Is there a coordinated vulnerability disclosure (CVD) program?",
+      "answer": "yes",
+      "evidence": "security.txt at /.well-known/security.txt. Safe-harbor language at /security/disclosure. PGP key published. 90-day disclosure timeline; bounty program at hackerone.com/kolm (Q3 2026)."
+    },
+    {
+      "id": "UEM-04.1",
+      "domain": "Universal Endpoint Management",
+      "question": "Are endpoints (laptops, servers) hardened and managed?",
+      "answer": "yes",
+      "evidence": "Employee laptops MDM-enrolled (Kandji). Full-disk encryption, OS patches within 14d, no local admin, password manager mandatory (1Password), USB write-block."
+    }
+  ],
+  "notes": "This is a curated subset of CAIQ v4.0.2 controls covering the highest-asked enterprise procurement questions. Full 261-control workbook available via `kolm procurement caiq --full --out caiq.xlsx` or by request to security@kolm.ai.",
+  "version": 1
+}

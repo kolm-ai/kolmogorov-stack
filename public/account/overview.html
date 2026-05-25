@@ -149,7 +149,7 @@
     <a class="journey-card" href="/account/storage" data-journey-id="compute-cloud" data-surface="compute"><span>Cloud</span><b>Attach capacity</b><small>R2-compatible object storage, S3-compatible storage, AWS, Supabase, Modal, RunPod, Lambda, Together, or remote SSH.</small></a>
     <a class="journey-card" href="/account/devices" data-journey-id="devices-fleet" data-surface="devices"><span>Devices</span><b>Install the fleet</b><small>Registered device fleet, local/SSH/HTTP installs, tunnels, health checks, and remote ops.</small></a>
     <a class="journey-card" href="/account/audit-log" data-journey-id="enterprise-governance" data-surface="enterprise"><span>Enterprise</span><b>Govern every action</b><small>Teams, approvals, audit log, privacy membrane, BAA, SSO/SAML/SCIM, evidence export.</small></a>
-    <a class="journey-card" href="/account/sla" data-journey-id="sla-dashboard" data-surface="sla"><span>SLA</span><b>Latency p50/p95/p99 per surface</b><small>Always-on rollup over the last 24h, 7d, 30d. Honest empty state when no samples land in the window.</small></a>
+    <a class="journey-card" href="/account/sla" data-journey-id="sla-dashboard" data-surface="sla"><span>SLA</span><b>Latency p50/p95/p99 per surface</b><small>Always-on rollup over the last 24h, 7d, 30d. Empty state when no samples land in the window.</small></a>
     <a class="journey-card" href="/marketplace" data-journey-id="agents-registry" data-surface="agents-registry"><span>Agents/registry</span><b>Publish artifacts</b><small>Private registry, MCP tools, verifier badges, handoff.</small></a>
   </div>
 </section>
@@ -160,6 +160,20 @@
     <span class="readiness-token"><b>...</b> loading product graph</span>
   </div>
   <div id="readiness-closeout" class="closeout-list" aria-busy="true"></div>
+</section>
+<section class="kpanel" data-compile-ready aria-label="Compile readiness">
+  <h2>Compile readiness</h2>
+  <p class="pdesc">Captures with shared structure can be compiled into a signed <code>.kolm</code> specialist. Pick the path that matches your hardware — local for a GPU you own, cloud when there isn't one, browser for the smallest experiments.</p>
+  <div id="compile-ready-signals" class="readiness-row" aria-busy="true">
+    <span class="readiness-token"><b>...</b> scanning namespaces</span>
+  </div>
+  <div id="compile-ready-ctas" class="toolbar" style="margin-top:14px">
+    <a class="btn primary" href="/studio/compile" data-compile-cta="studio">Open compile wizard</a>
+    <a class="btn" href="/studio/compile?backend=local" data-compile-cta="local" hidden>Compile locally</a>
+    <a class="btn" href="/studio/compile?backend=cloud&amp;provider=modal" data-compile-cta="cloud">Compile in cloud · Modal</a>
+    <a class="btn" href="/docs/colab-compile" data-compile-cta="colab">Try free-tier Colab</a>
+  </div>
+  <p class="pdesc" id="compile-ready-hint" style="margin-top:10px"></p>
 </section>
 <section class="kpanel" data-w415="ask-form">
   <h2>Ask kolm</h2>
@@ -337,6 +351,57 @@ Promise.allSettled([
     "</div>";
   }).join("");
 });
+// W869 Persona A.6 + B.6 — compile readiness panel.
+// Reads hardware (GPU presence) + repeated-workflows (compile-ready namespaces).
+// Toggles "Compile locally" CTA when a local GPU is present, always shows
+// the cloud and Colab CTAs so the no-GPU path is never a dead end.
+(function(){
+  var signals=document.getElementById("compile-ready-signals");
+  var hint=document.getElementById("compile-ready-hint");
+  if(!signals)return;
+  var localBtn=document.querySelector('[data-compile-cta="local"]');
+  var cloudBtn=document.querySelector('[data-compile-cta="cloud"]');
+  var colabBtn=document.querySelector('[data-compile-cta="colab"]');
+  Promise.allSettled([
+    fetch("/v1/hardware",{headers:{accept:"application/json"}}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+    window.kfetch("/v1/workflows/repeated?min_count=2").catch(function(){return {total:0,workflows:[]};})
+  ]).then(function(rs){
+    var hw=rs[0].value||{};
+    var wf=rs[1].value||{total:0,workflows:[]};
+    var primary=hw&&hw.primary?hw.primary:null;
+    var vram=primary?Number(primary.vram_gb||0):0;
+    var hasGpu=primary&&vram>=8;
+    var nsCount=Number(wf.total||0);
+    var topNs=null,topCount=0;
+    (wf.workflows||[]).forEach(function(w){if((w.count||0)>topCount){topCount=w.count||0;topNs=w.template||null;}});
+    signals.removeAttribute("aria-busy");
+    var tokens=[];
+    tokens.push('<span class="readiness-token"><b>'+window.kesc(String(nsCount))+'</b> compile-ready workflow clusters</span>');
+    if(hasGpu){
+      tokens.push('<span class="readiness-token"><b>'+window.kesc(String(vram))+' GB</b> local GPU detected ('+window.kesc(primary.vendor||"gpu")+')</span>');
+    } else {
+      tokens.push('<span class="readiness-token" data-open="true"><b>no</b> local GPU detected — use cloud or Colab</span>');
+    }
+    if(topNs){
+      tokens.push('<span class="readiness-token"><b>top</b> '+window.kesc(String(topCount))+' calls match <code style="font-size:11px">'+window.kesc(String(topNs).slice(0,42))+'</code></span>');
+    }
+    signals.innerHTML=tokens.join("");
+    if(localBtn) localBtn.hidden=!hasGpu;
+    if(cloudBtn) cloudBtn.hidden=false;
+    if(colabBtn) colabBtn.hidden=!!hasGpu;
+    if(nsCount===0){
+      hint.textContent="No repeated workflow clusters yet. Capture a few calls (Connectors → OpenAI / Anthropic / OpenRouter) and Kolm will spot patterns that benefit from a compiled specialist.";
+    } else if(hasGpu){
+      hint.textContent="Your hardware ("+window.kesc(primary.vendor||"")+", "+window.kesc(String(vram))+" GB VRAM) can compile up to ~"+Math.max(1,Math.floor(vram/2))+"B params at int4. Larger models compile in the cloud.";
+    } else {
+      hint.textContent="No local GPU available. Modal autoscales to A100/H100, Colab is free for ≤7B at int4. Both produce the same signed .kolm artifact.";
+    }
+  }).catch(function(){
+    signals.innerHTML='<span class="readiness-token"><b>!</b> compile-readiness unavailable</span>';
+    if(cloudBtn) cloudBtn.hidden=false;
+    if(colabBtn) colabBtn.hidden=false;
+  });
+})();
 </script>
 
 <footer class="ks-footer">

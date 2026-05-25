@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>kolm quickstart | CLI reference | kolm.ai</title>
+<meta name="description" content="Interactive setup wizard. Walks new users through signup, key install, recipe scaffold, and first compile.">
+<link rel="canonical" href="https://kolm.ai/docs/cli/quickstart">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
+<script src="/nav.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm quickstart","description":"Interactive setup wizard. Walks new users through signup, key install, recipe scaffold, and first compile.","url":"https://kolm.ai/docs/cli/quickstart","author":{"@type":"Organization","name":"kolm.ai"}}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<main id="main" class="docs-main" data-w401f="cli-verb" data-verb="quickstart">
+<nav aria-label="Breadcrumb" class="crumbs"><a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>quickstart</span></nav>
+<h1>kolm quickstart</h1>
+<blockquote><p>Interactive setup wizard. Walks new users through signup, key install, recipe scaffold, and first compile.</p></blockquote>
+
+<h2>Usage</h2>
+<pre><code>kolm quickstart [--non-interactive] [--profile &lt;name&gt;]</code></pre>
+
+<h2>Flags</h2>
+<table>
+<thead><tr><th>Flag</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>--non-interactive</code></td><td>off</td><td>Run with reasonable defaults (signup expected to be done already).</td></tr>
+<tr><td><code>--profile <name></code></td><td><code>default</code></td><td>Credential profile to use.</td></tr>
+</tbody>
+</table>
+
+<h2>Examples</h2>
+<pre><code>kolm quickstart
+kolm quickstart --non-interactive</code></pre>
+
+<h2>Notes</h2>
+<p>Defers to <code>kolm signup</code> + <code>kolm init</code> + <code>kolm build</code> under the hood. Re-runnable; existing files are not overwritten.</p>
+
+<h2>See also</h2>
+<ul>
+<li><a href="/docs/cli/signup">kolm signup</a></li>
+<li><a href="/docs/cli/init">kolm init</a></li>
+<li><a href="/quickstart">Quickstart guide</a></li>
+<li><a href="/docs/cli">All CLI verbs</a></li>
+</ul>
+
+</main>
+
+</body>
+</html>

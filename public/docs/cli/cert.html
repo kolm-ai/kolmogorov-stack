@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>kolm cert | CLI reference | kolm.ai</title>
+<meta name="description" content="Compliance certification packet management — generate, validate, and submit attestation packets.">
+<link rel="canonical" href="https://kolm.ai/docs/cli/cert">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
+<script src="/nav.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm cert","description":"Compliance certification packet management — generate, validate, and submit attestation packets.","url":"https://kolm.ai/docs/cli/cert","author":{"@type":"Organization","name":"kolm.ai"}}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<main id="main" class="docs-main" data-w401f="cli-verb" data-verb="cert">
+<nav aria-label="Breadcrumb" class="crumbs"><a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>cert</span></nav>
+<h1>kolm cert</h1>
+<blockquote><p>Compliance certification packet management — generate, validate, and submit attestation packets.</p></blockquote>
+
+<h2>Usage</h2>
+<pre><code>kolm cert &lt;generate|validate|submit&gt; [--type &lt;slug&gt;] [--out &lt;path&gt;]</code></pre>
+
+<h2>Flags</h2>
+<table>
+<thead><tr><th>Flag</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>generate</code></td><td>-</td><td>Generate a certification packet for a given certification.</td></tr>
+<tr><td><code>validate</code></td><td>-</td><td>Validate an existing packet against the schema.</td></tr>
+<tr><td><code>submit</code></td><td>-</td><td>Submit a packet to an external auditor (HTTPS POST).</td></tr>
+<tr><td><code>--type <slug></code></td><td>required</td><td><code>soc2-type2</code>, <code>iso27001</code>, <code>hipaa</code>, <code>gdpr</code>, <code>aiact</code>.</td></tr>
+<tr><td><code>--out <path></code></td><td>stdout</td><td>Where to write the packet.</td></tr>
+</tbody>
+</table>
+
+<h2>Examples</h2>
+<pre><code>kolm cert generate --type soc2-type2 --out ./soc2-packet.zip
+kolm cert validate ./soc2-packet.zip</code></pre>
+
+<h2>Notes</h2>
+<p>Backed by <code>/v1/compliance/certification-packet</code>. The packet bundles audit log, SBOMs, model passports, training data lineage, and signed attestations.</p>
+
+<h2>See also</h2>
+<ul>
+<li><a href="/docs/cli/sbom">kolm sbom</a></li>
+<li><a href="/docs/cli/passport">kolm passport</a></li>
+<li><a href="/docs/cli/ai-act">kolm ai-act</a></li>
+<li><a href="/docs/cli">All CLI verbs</a></li>
+</ul>
+
+</main>
+
+</body>
+</html>

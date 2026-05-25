@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>kolm wizard | CLI reference | kolm.ai</title>
+<meta name="description" content="Interactive wizards: compile, distill, deploy. Walks step-by-step with sensible defaults and validation at each step.">
+<link rel="canonical" href="https://kolm.ai/docs/cli/wizard">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
+<script src="/nav.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm wizard","description":"Interactive wizards: compile, distill, deploy. Walks step-by-step with sensible defaults and validation at each step.","url":"https://kolm.ai/docs/cli/wizard","author":{"@type":"Organization","name":"kolm.ai"}}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<main id="main" class="docs-main" data-w401f="cli-verb" data-verb="wizard">
+<nav aria-label="Breadcrumb" class="crumbs"><a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>wizard</span></nav>
+<h1>kolm wizard</h1>
+<blockquote><p>Interactive wizards: compile, distill, deploy. Walks step-by-step with sensible defaults and validation at each step.</p></blockquote>
+
+<h2>Usage</h2>
+<pre><code>kolm wizard &lt;compile|distill|deploy&gt;</code></pre>
+
+<h2>Flags</h2>
+<table>
+<thead><tr><th>Flag</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>compile</code></td><td>-</td><td>Compile wizard. Same flow as <code>/studio/compile</code>.</td></tr>
+<tr><td><code>distill</code></td><td>-</td><td>Distillation wizard.</td></tr>
+<tr><td><code>deploy</code></td><td>-</td><td>Deployment wizard (cloud + BYOC).</td></tr>
+</tbody>
+</table>
+
+<h2>Examples</h2>
+<pre><code>kolm wizard compile</code></pre>
+
+<h2>Notes</h2>
+<p>Wizards are TTY-only. For scripts use the underlying verb directly (e.g. <code>kolm compile</code>) with explicit flags.</p>
+
+<h2>See also</h2>
+<ul>
+<li><a href="/docs/cli/studio">kolm studio</a></li>
+<li><a href="/docs/cli/compile">kolm compile</a></li>
+<li><a href="/docs/cli/tui">kolm tui</a></li>
+<li><a href="/docs/cli">All CLI verbs</a></li>
+</ul>
+
+</main>
+
+</body>
+</html>
