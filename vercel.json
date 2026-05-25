@@ -275,6 +275,14 @@
       "destination": "https://kolmogorov-stack-production.up.railway.app/ready"
     },
     {
+      "source": "/v1/teacher/chat",
+      "destination": "/api/teacher-chat"
+    },
+    {
+      "source": "/v1/teacher/chat/health",
+      "destination": "/api/teacher-chat"
+    },
+    {
       "source": "/v1/(.*)",
       "destination": "https://kolmogorov-stack-production.up.railway.app/v1/$1"
     },
@@ -297,6 +305,14 @@
     {
       "source": "/studio",
       "destination": "/studio.html"
+    },
+    {
+      "source": "/studio/compile",
+      "destination": "/studio/compile.html"
+    },
+    {
+      "source": "/studio/jobs",
+      "destination": "/studio/jobs.html"
     },
     {
       "source": "/tui",
@@ -423,6 +439,14 @@
     {
       "source": "/account/enterprise/sso",
       "destination": "/account/enterprise/sso.html"
+    },
+    {
+      "source": "/account/enterprise",
+      "destination": "/account/enterprise.html"
+    },
+    {
+      "source": "/account/team",
+      "destination": "/account/team.html"
     },
     {
       "source": "/account/artifacts",
