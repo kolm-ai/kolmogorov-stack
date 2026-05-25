@@ -143,6 +143,35 @@ function ensureDir() {
   fs.mkdirSync(ARTIFACTS_DIR, { recursive: true });
 }
 
+// W870 — kolm-native .env loader. Reads ~/.kolm/.env on every CLI run and
+// merges KEY=VALUE pairs into process.env, but ONLY for keys that aren't
+// already set (explicit process env still wins so users can override per
+// invocation). Strips matching surrounding quotes and skips blanks/#-comments.
+// Quiet on missing file. Soft-fails on malformed lines to keep the CLI
+// usable when a stray BOM or CRLF is in the .env.
+function _loadKolmDotEnv() {
+  try {
+    const p = path.join(KOLM_DIR, '.env');
+    if (!fs.existsSync(p)) return;
+    const txt = fs.readFileSync(p, 'utf-8');
+    for (const raw of txt.split(/\r?\n/)) {
+      const line = raw.replace(/^﻿/, '').trim();
+      if (!line || line.startsWith('#')) continue;
+      const eq = line.indexOf('=');
+      if (eq <= 0) continue;
+      const k = line.slice(0, eq).trim();
+      if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(k)) continue;
+      if (process.env[k] !== undefined && process.env[k] !== '') continue;
+      let v = line.slice(eq + 1).trim();
+      if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) {
+        v = v.slice(1, -1);
+      }
+      process.env[k] = v;
+    }
+  } catch { /* malformed .env should never break the CLI */ }
+}
+_loadKolmDotEnv();
+
 function loadConfig() {
   ensureDir();
   let c;
@@ -2616,6 +2645,32 @@ EXIT CODES
 
 ALIAS
   Equivalent to:  kolm doctor --loop  (with the same --remote/--json flags)
+`,
+  teacher: `kolm teacher - show where teacher API keys come from and where kolm puts things.
+
+USAGE
+  kolm teacher               # alias for \`kolm teacher status\`
+  kolm teacher status [--json]
+  kolm teacher paths  [--json]
+  kolm teacher setup         # printable / interactive walkthrough
+
+RESOLUTION ORDER (per vendor: anthropic, openai, google, xai)
+  1. local env var (any casing: ANTHROPIC_API_KEY, anthropic_api_key, ...)
+  2. ~/.kolm/.env (loaded automatically — same KEY=VALUE syntax)
+  3. kolm.ai hosted proxy at https://kolm.ai/v1/teacher/chat
+     (uses your saved kolm key; vendor keys live as Vercel sensitive env vars
+     so you never have to paste a secret onto your laptop)
+  4. missing — distillation calls for that vendor will fail with a clear hint
+
+KOLM-NATIVE PATHS
+  config            ~/.kolm/config.json    (auto-created on login)
+  optional .env     ~/.kolm/.env           (chmod 0600 if you use it)
+  distill runs      ~/.kolm/distill-runs/  (one directory per run)
+  artifacts (.kolm) ~/.kolm/artifacts/     (compiled outputs)
+  build cache       ~/.kolm/cache/         (downloaded weights, intermediates)
+
+EXIT CODES
+  0    status printed (no failure semantics — this verb is informational)
 `,
   doctor: `kolm doctor - sanity-check the environment.
 
@@ -5816,6 +5871,228 @@ async function cmdHealth(args) {
   if (requireAuth || account) console.log('  auth:    ' + (account && account.ok ? 'validated' : 'failed' + (authReason ? ' (' + authReason + ')' : '')) + (requireAuth ? ' required' : ''));
   console.log('  capture: ' + (capture.ok ? 'driver=' + driver + ' durable=' + durable : 'status=' + capture.status) + (captureReason ? ' (' + captureReason + ')' : '') + (requireCapture ? ' required' : ''));
   process.exit(exit);
+}
+
+// W870 — `kolm teacher` shows where teacher API keys are sourced from, where
+// kolm stores config/runs/artifacts, and offers an interactive setup that
+// asks the user which path they want (local env vars vs. kolm.ai hosted
+// proxy). The whole point: a brand-new user runs `kolm teacher setup` and
+// is told exactly where to put keys + where output will land. No magic.
+//
+// Subverbs:
+//   kolm teacher                  alias for `kolm teacher status`
+//   kolm teacher status [--json]  source resolution for each vendor + paths
+//   kolm teacher paths  [--json]  just print kolm-native file paths
+//   kolm teacher setup            interactive wizard (or printable guide on non-TTY)
+async function cmdTeacher(args) {
+  if (maybeHelp('teacher', args)) return;
+  const sub = (args[0] && !args[0].startsWith('-')) ? args[0] : 'status';
+  const rest = args.slice(args[0] === sub ? 1 : 0);
+  const jsonOut = rest.includes('--json');
+
+  const VENDORS = [
+    { vendor: 'anthropic', envs: ['ANTHROPIC_API_KEY', 'anthropic_api_key', 'ANTHROPIC_KEY', 'anthropic_key'] },
+    { vendor: 'openai',    envs: ['OPENAI_API_KEY', 'openai_api_key', 'OPENAI_KEY', 'openai_key'] },
+    { vendor: 'google',    envs: ['GOOGLE_API_KEY', 'google_api_key', 'GOOGLE_KEY', 'google_key', 'GEMINI_API_KEY', 'gemini_api_key'] },
+    { vendor: 'xai',       envs: ['XAI_API_KEY', 'xai_api_key', 'XAI_KEY', 'xai_key'] },
+  ];
+
+  const _firstEnv = (envs) => {
+    for (const k of envs) {
+      const v = process.env[k];
+      if (v && String(v).trim().length > 0) return k;
+    }
+    return null;
+  };
+
+  // Probe proxy health WITHOUT auth — the /v1/teacher/chat/health endpoint
+  // is PUBLIC_API allow-listed precisely so the CLI can ask "is the proxy
+  // configured?" before pasting any key.
+  const c = loadConfig();
+  const base = String(c.base || 'https://kolm.ai').replace(/\/+$/, '');
+  let proxyHealth = null;
+  try {
+    const u = new URL(base + '/v1/teacher/chat/health');
+    const lib = u.protocol === 'https:' ? https : http;
+    proxyHealth = await new Promise((resolve) => {
+      const req = lib.request({
+        protocol: u.protocol,
+        hostname: u.hostname,
+        port: u.port || (u.protocol === 'https:' ? 443 : 80),
+        path: u.pathname,
+        method: 'GET',
+        headers: { 'accept': 'application/json' },
+      }, (res) => {
+        let buf = '';
+        res.setEncoding('utf8');
+        res.on('data', (d) => { buf += d; });
+        res.on('end', () => {
+          try { resolve(JSON.parse(buf)); } catch { resolve({ ok: false, error: 'parse_failed' }); }
+        });
+      });
+      req.setTimeout(5000, () => { try { req.destroy(); } catch {} resolve({ ok: false, error: 'timeout' }); });
+      req.on('error', (e) => resolve({ ok: false, error: e.message }));
+      req.end();
+    });
+  } catch (e) {
+    proxyHealth = { ok: false, error: e.message };
+  }
+
+  // Resolve each vendor against the priority order:
+  //   1. local env var (any acceptable casing)
+  //   2. kolm proxy (if kolm.ai has the key + the user has a kolm API key)
+  //   3. missing — vendor calls will fail until the user picks a path
+  const haveKolmKey = !!c.api_key;
+  const proxyVendors = (proxyHealth && proxyHealth.vendors) || {};
+  const proxySources = (proxyHealth && proxyHealth.sources) || {};
+  const vendorStatus = VENDORS.map((v) => {
+    const localEnv = _firstEnv(v.envs);
+    const proxyHas = !!proxyVendors[v.vendor];
+    const usable = !!localEnv || (proxyHas && haveKolmKey);
+    const source = localEnv
+      ? { kind: 'local_env', env_var: localEnv }
+      : (proxyHas && haveKolmKey)
+        ? { kind: 'kolm_proxy', proxy_env_var: proxySources[v.vendor] || null, proxy_base: base }
+        : { kind: 'missing' };
+    return { vendor: v.vendor, usable, source, acceptable_env_vars: v.envs };
+  });
+
+  const paths = {
+    config:       CONFIG_PATH,
+    kolm_dir:     KOLM_DIR,
+    artifacts:    ARTIFACTS_DIR,
+    distill_runs: path.join(KOLM_DIR, 'distill-runs'),
+    cache:        path.join(KOLM_DIR, 'cache'),
+    env_file:     path.join(KOLM_DIR, '.env'),
+  };
+
+  if (sub === 'paths') {
+    if (jsonOut) {
+      console.log(JSON.stringify({ ok: true, paths }, null, 2));
+      return;
+    }
+    console.log('kolm-native paths:');
+    console.log('  config file       ' + paths.config);
+    console.log('  kolm home dir     ' + paths.kolm_dir);
+    console.log('  artifacts (.kolm) ' + paths.artifacts);
+    console.log('  distill runs      ' + paths.distill_runs);
+    console.log('  build cache       ' + paths.cache);
+    console.log('  optional .env     ' + paths.env_file + '  (loaded if present)');
+    return;
+  }
+
+  if (sub === 'setup') {
+    // Interactive prompt only if stdin is a TTY. Otherwise dump the full
+    // walkthrough so a piped invocation (CI, README copy-paste) still gets
+    // every choice + path.
+    const tty = !!(process.stdin.isTTY && process.stdout.isTTY);
+    const missing = vendorStatus.filter((s) => !s.usable).map((s) => s.vendor);
+    const usable  = vendorStatus.filter((s) =>  s.usable);
+
+    console.log('kolm teacher setup');
+    console.log('==================');
+    console.log('Your kolm key:    ' + (haveKolmKey ? (String(c.api_key).slice(0, 10) + '...') : '(none — run `kolm signup` or `kolm login`)'));
+    console.log('Cloud base:       ' + base);
+    console.log('Proxy reachable:  ' + (proxyHealth && proxyHealth.ok ? 'yes (served_by=' + (proxyHealth.served_by || '?') + ')' : 'no (' + ((proxyHealth && proxyHealth.error) || 'unreachable') + ')'));
+    console.log('');
+    console.log('Resolution order for each teacher vendor:');
+    console.log('  1. local env var (any casing — see acceptable list below)');
+    console.log('  2. kolm.ai hosted proxy (requires kolm key + the vendor key configured on kolm.ai)');
+    console.log('  3. missing — calls fail with a clear error');
+    console.log('');
+    for (const s of vendorStatus) {
+      const tag = s.usable ? '[ok]    ' : '[missing]';
+      const detail = s.source.kind === 'local_env' ? 'local env ' + s.source.env_var
+                   : s.source.kind === 'kolm_proxy' ? 'kolm proxy (' + s.source.proxy_base + ', upstream=' + (s.source.proxy_env_var || '?') + ')'
+                   : 'no source — set one of: ' + s.acceptable_env_vars.join(' / ');
+      console.log('  ' + tag + ' ' + s.vendor.padEnd(10) + ' -> ' + detail);
+    }
+    console.log('');
+    console.log('kolm-native paths (where stuff lives):');
+    console.log('  config            ' + paths.config);
+    console.log('  artifacts (.kolm) ' + paths.artifacts);
+    console.log('  distill runs      ' + paths.distill_runs);
+    console.log('  optional .env     ' + paths.env_file + '  (loaded if present)');
+    console.log('');
+    if (missing.length === 0) {
+      console.log('All four cloud teacher vendors are usable. You can run:');
+      console.log('  kolm distill --namespace <ns> --teacher anthropic:claude-opus-4-7');
+      console.log('  kolm distill --namespace <ns> --teacher openai:gpt-4o-mini');
+      return;
+    }
+    console.log('To enable a missing vendor pick ONE of the three paths:');
+    console.log('');
+    console.log('  (A) local env var — fastest if you already have a key');
+    for (const m of missing) {
+      const envHints = VENDORS.find((v) => v.vendor === m).envs;
+      console.log('      ' + m.padEnd(10) + '  setx ' + envHints[0] + ' "<your key>"   (PowerShell: $env:' + envHints[0] + ' = "<key>")');
+    }
+    console.log('');
+    console.log('  (B) kolm.ai hosted proxy — zero local secrets');
+    console.log('      ask kolm.ai operator to add ' + missing.map((m) => VENDORS.find((v) => v.vendor === m).envs[1]).join(' / ') + ' to the Vercel project,');
+    console.log('      then re-run `kolm teacher status` (no local change needed)');
+    console.log('');
+    console.log('  (C) kolm-native .env file — same as (A) but file-based');
+    console.log('      add lines to ' + paths.env_file + ' such as: ANTHROPIC_API_KEY=sk-ant-...');
+    console.log('      (the worker loads ~/.kolm/.env automatically; mode it 0600)');
+    console.log('');
+    if (!tty) {
+      console.log('(non-interactive — printed the full guide. Re-run from a TTY to be prompted.)');
+      return;
+    }
+    // Minimal interactive prompt — just confirm the user has read the guide
+    // and offer to open the docs URL. We do NOT collect keys here because
+    // that would mean writing secrets to a CLI we don't own the audit chain
+    // for; the user does it via setx / Vercel / their own .env editor.
+    const readline = await import('node:readline');
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    const ask = (q) => new Promise((res) => rl.question(q, (a) => res(String(a || '').trim().toLowerCase())));
+    const a = await ask('open the teacher setup docs in your browser? [y/N] ');
+    rl.close();
+    if (a === 'y' || a === 'yes') {
+      const url = base + '/docs/teacher-keys';
+      try {
+        const { exec } = await import('node:child_process');
+        if (process.platform === 'win32')      exec('start "" "' + url + '"');
+        else if (process.platform === 'darwin') exec('open "' + url + '"');
+        else                                    exec('xdg-open "' + url + '"');
+      } catch {}
+      console.log('opening ' + url);
+    }
+    void usable;
+    return;
+  }
+
+  // Default: `kolm teacher` or `kolm teacher status`
+  if (jsonOut) {
+    const out = {
+      ok: true,
+      proxy: { base, ok: !!(proxyHealth && proxyHealth.ok), served_by: (proxyHealth && proxyHealth.served_by) || null, vendors: proxyVendors, sources: proxySources, error: (proxyHealth && proxyHealth.error) || null },
+      kolm_key_present: haveKolmKey,
+      vendors: vendorStatus,
+      paths,
+    };
+    console.log(JSON.stringify(out, null, 2));
+    return;
+  }
+  console.log('kolm teacher status');
+  console.log('  kolm key:        ' + (haveKolmKey ? '✓ ' + String(c.api_key).slice(0, 10) + '...' : '✗ (run `kolm login` or `kolm signup`)'));
+  console.log('  proxy base:      ' + base);
+  console.log('  proxy reachable: ' + ((proxyHealth && proxyHealth.ok) ? '✓ served_by=' + (proxyHealth.served_by || '?') : '✗ ' + ((proxyHealth && proxyHealth.error) || 'unreachable')));
+  console.log('');
+  console.log('  vendor      source');
+  for (const s of vendorStatus) {
+    const detail = s.source.kind === 'local_env' ? 'local env ' + s.source.env_var
+                 : s.source.kind === 'kolm_proxy' ? 'kolm proxy (upstream=' + (s.source.proxy_env_var || '?') + ')'
+                 : '(none — `kolm teacher setup`)';
+    const tag = s.usable ? '✓' : '✗';
+    console.log('  ' + tag + ' ' + s.vendor.padEnd(10) + '  ' + detail);
+  }
+  console.log('');
+  console.log('  paths: config=' + paths.config);
+  console.log('         runs=' + paths.distill_runs);
+  console.log('         artifacts=' + paths.artifacts);
+  console.log('  (see `kolm teacher paths` or `kolm teacher setup`)');
 }
 
 // W368 — `kolm connect` is THE WEDGE. Single command that starts the local
@@ -20870,11 +21147,73 @@ async function cmdDistillLocalWorker(args) {
     }
   }
 
+  // W870 — auto-inject KOLM_BASE_URL + KOLM_API_KEY from saved config so the
+  // teacher-bridge proxy fallback (workers/distill/teacher-bridge.mjs) works
+  // out-of-the-box. Users who already exported these env vars win — only fill
+  // in the gaps. The proxy reads sensitive teacher keys (anthropic_api_key,
+  // openai_key, ...) at kolm.ai's Vercel runtime via api/teacher-chat.js, so
+  // local users never have to paste vendor keys into a .env file.
+  let _w870ProxyEnv = {};
+  let _w870Cfg = null;
+  try {
+    _w870Cfg = loadConfig();
+    if (!process.env.KOLM_BASE_URL && _w870Cfg.base) _w870ProxyEnv.KOLM_BASE_URL = _w870Cfg.base;
+    if (!process.env.KOLM_API_KEY && _w870Cfg.api_key) _w870ProxyEnv.KOLM_API_KEY = _w870Cfg.api_key;
+  } catch { /* no config yet — local-only teacher will be used */ }
+
+  // W870.3 — one-screen preflight before the worker spawns. Tells the user
+  // exactly where each teacher key resolves from + where the run output and
+  // final artifact will land. Suppressed for --json / --doctor / --list-catalog
+  // (machine flows) and skippable with --no-preflight (CI).
+  const _w870NoPre = args.includes('--no-preflight') || args.includes('--json') || doctor || listCatalog;
+  if (!_w870NoPre && (mode === 'collect' || mode === 'full' || mode === 'train' || mode === 'verify' || mode === 'test')) {
+    try {
+      const _resolveVendor = (vendor) => {
+        const envMap = {
+          anthropic: ['ANTHROPIC_API_KEY', 'anthropic_api_key', 'ANTHROPIC_KEY', 'anthropic_key'],
+          openai:    ['OPENAI_API_KEY', 'openai_api_key', 'OPENAI_KEY', 'openai_key'],
+          google:    ['GOOGLE_API_KEY', 'google_api_key', 'GOOGLE_KEY', 'google_key', 'GEMINI_API_KEY', 'gemini_api_key'],
+          xai:       ['XAI_API_KEY', 'xai_api_key', 'XAI_KEY', 'xai_key'],
+        };
+        const envs = envMap[vendor] || [];
+        for (const k of envs) if (process.env[k] && String(process.env[k]).trim()) return { kind: 'local_env', env_var: k };
+        if (_w870ProxyEnv.KOLM_BASE_URL || process.env.KOLM_BASE_URL) {
+          if (_w870ProxyEnv.KOLM_API_KEY || process.env.KOLM_API_KEY) {
+            return { kind: 'kolm_proxy', base: _w870ProxyEnv.KOLM_BASE_URL || process.env.KOLM_BASE_URL };
+          }
+        }
+        return { kind: 'missing' };
+      };
+      // Derive teacher vendor from --teacher VEND:MODEL or default to anthropic
+      const teacherVendor = teacher ? String(teacher).split(':')[0].toLowerCase() : 'anthropic';
+      const src = _resolveVendor(teacherVendor);
+      const runRoot = path.join(KOLM_DIR, 'distill-runs');
+      const artifactRoot = ARTIFACTS_DIR;
+      console.log('────────────────────────────────────────────────────────────');
+      console.log('kolm distill preflight');
+      console.log('  mode:     ' + mode + (spec ? '  (spec=' + spec + ')' : ''));
+      console.log('  teacher:  ' + (teacher || '(default: anthropic:claude-opus-4-7)'));
+      const srcLine = src.kind === 'local_env' ? 'local env ' + src.env_var
+                    : src.kind === 'kolm_proxy' ? 'kolm proxy ' + src.base + ' (vendor key on kolm.ai)'
+                    : 'NOT CONFIGURED — see `kolm teacher setup`';
+      console.log('  key:      ' + srcLine);
+      console.log('  runs ->   ' + runRoot);
+      console.log('  output -> ' + (out || runRoot + '/<run-id>/'));
+      console.log('  artifact->' + artifactRoot);
+      if (src.kind === 'missing') {
+        console.log('');
+        console.log('  WARNING: teacher key not resolvable for vendor=' + teacherVendor + '.');
+        console.log('  Run `kolm teacher setup` for instructions, or pass --no-preflight to ignore.');
+      }
+      console.log('────────────────────────────────────────────────────────────');
+    } catch { /* preflight is best-effort; never block the worker on its failure */ }
+  }
+
   const { spawn } = await import('node:child_process');
   await new Promise((resolve) => {
     const child = spawn(process.execPath, [workerPath, ...passthru], {
       stdio: 'inherit',
-      env: { ...process.env, ..._w787Env },
+      env: { ...process.env, ..._w870ProxyEnv, ..._w787Env },
     });
     // Wave 253 backend#10: relay SIGINT/SIGTERM to the distill worker so
     // Ctrl+C in the parent terminal stops the python LoRA trainer (or the
@@ -26801,6 +27140,7 @@ const COMPLETION_SUBS = {
   services: ['list', 'start', 'stop', 'status', 'logs'],
   proxy: ['start', 'stop', 'status', 'config', 'sdks'],
   connect: ['start', 'stop', 'status', 'doctor', 'config', 'test'],
+  teacher: ['status', 'setup', 'paths'],
   remote: ['list', 'info', 'rank', 'recommend', 'plan', 'env'],
   mesh:    ['discover', 'plan', 'deploy', 'k8s', 'validate'],
   migrate: [],
@@ -39664,6 +40004,8 @@ async function main() {
       case 'bundle':   await withErrorContext('bundle',   () => cmdBundle(rest)); break;
       case 'compute':  await withErrorContext('compute',  () => cmdCompute(rest)); break;
       case 'doctor':   await withErrorContext('doctor',   () => cmdDoctor(rest)); break;
+      // W870 — `kolm teacher` shows teacher key sources + paths + offers setup.
+      case 'teacher':  await withErrorContext('teacher',  () => cmdTeacher(rest)); break;
       case 'loop':     await withErrorContext('loop',     () => cmdLoop(rest)); break;
       case 'logs':     await withErrorContext('logs',     () => cmdLogs(rest)); break;
       case 'ask':
