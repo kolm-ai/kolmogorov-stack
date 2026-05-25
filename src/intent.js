@@ -422,6 +422,97 @@ const PHRASING_INDEX = (() => {
   return idx;
 })();
 
+// W852 — fuzzy vocabulary. Single source of truth for what counts as a "real
+// word" the classifier knows. Built from every phrasing token + every verb
+// name. Used by fuzzyCorrect() below to repair typos like "whjere" → "where",
+// "captres" → "captures", "distil" → "distill" before keyword matching.
+const FUZZY_VOCAB = (() => {
+  const vocab = new Set();
+  for (const entry of VERB_DESCRIPTIONS) {
+    vocab.add(entry.verb);
+    for (const phrase of entry.phrasings) {
+      for (const tok of normalize(phrase).split(' ')) {
+        if (tok.length >= 4) vocab.add(tok);
+      }
+    }
+  }
+  // common interrogatives + locators we route on but aren't always in phrasings
+  for (const w of ['where', 'which', 'what', 'when', 'show', 'list', 'tail', 'watch', 'find', 'captures', 'dataset', 'distill', 'compile', 'quantize', 'export', 'verify', 'replay', 'bakeoff', 'wrapper', 'studio', 'quickstart']) {
+    vocab.add(w);
+  }
+  return vocab;
+})();
+
+function _edit1(a, b) {
+  // True iff Levenshtein(a,b) <= 1. Optimised for short strings.
+  if (a === b) return true;
+  const la = a.length, lb = b.length;
+  if (Math.abs(la - lb) > 1) return false;
+  // single substitution
+  if (la === lb) {
+    let diffs = 0;
+    for (let i = 0; i < la; i++) {
+      if (a[i] !== b[i]) {
+        diffs++;
+        if (diffs > 1) return false;
+      }
+    }
+    return diffs === 1;
+  }
+  // single insert/delete — walk both strings, allow one skip
+  const [s, t] = la < lb ? [a, b] : [b, a]; // s shorter
+  let i = 0, j = 0, skipped = false;
+  while (i < s.length && j < t.length) {
+    if (s[i] === t[j]) { i++; j++; continue; }
+    if (skipped) return false;
+    skipped = true;
+    j++; // skip one char in the longer string
+  }
+  return true;
+}
+
+function fuzzyCorrect(normalized) {
+  // W852 — typo repair pass. For each token of length >= 5 that is not already
+  // in vocab, try to find a single-edit-distance neighbour and substitute it.
+  // Returns the corrected string, or null if nothing changed.
+  if (!normalized) return null;
+  const toks = normalized.split(' ');
+  let changed = false;
+  for (let i = 0; i < toks.length; i++) {
+    const t = toks[i];
+    if (t.length < 5 || FUZZY_VOCAB.has(t)) continue;
+    for (const word of FUZZY_VOCAB) {
+      if (Math.abs(word.length - t.length) > 1) continue;
+      if (_edit1(t, word)) { toks[i] = word; changed = true; break; }
+    }
+  }
+  return changed ? toks.join(' ') : null;
+}
+
+// W852 — subcommand-aware workflows for verbs that accept a sub-verb. When
+// the user pastes `$ kolm quickstart wrapper` we want to surface the wrapper
+// walk-through, not the generic 3-step picker.
+const SUBCOMMAND_WORKFLOWS = {
+  quickstart: {
+    wrapper: {
+      summary: 'Stand up the wrapper (gateway + capture) end to end.',
+      steps: [
+        { cmd: 'kolm quickstart wrapper',                          why: 'Walk-through: install, capture proxy key, point your provider base URL at it.' },
+        { cmd: 'kolm tail captures --namespace <name>',            why: 'Watch the first real (input,output) pairs land.' },
+        { cmd: 'kolm capture status',                              why: 'Confirm counts + cost rollup look right before you distill.' },
+      ],
+    },
+    studio: {
+      summary: 'Open Studio, the browser UI for the distill + quantize + sign loop.',
+      steps: [
+        { cmd: 'kolm quickstart studio',                           why: 'Walk-through: launch Studio, sign in, pick captures, pick a base model.' },
+        { cmd: 'kolm studio open',                                 why: 'Open the local Studio tab against your namespace.' },
+        { cmd: 'kolm list',                                        why: 'After the loop signs an artifact, see it on disk under ~/.kolm/artifacts/.' },
+      ],
+    },
+  },
+};
+
 // ---------------------------------------------------------------------------
 // Normalisation. Lowercase, collapse whitespace, strip trailing punctuation,
 // strip surrounding quotes. Keep contractions ("what's", "i'd") because the
@@ -839,9 +930,16 @@ export async function classifyIntent(text, context = {}) {
     alternatives: alts,
     source: intent.source,
     matchedPhrase: intent.matchedPhrase || null,
+    subcommand: intent.subcommand || null,
     original,
     normalized,
   });
+
+  // W852 — when the user pastes `$ kolm <verb> <sub>` we lose <sub> after
+  // normalize() strips the prompt + the kolm prefix and keywordMatch picks
+  // only the verb. Stash the tail so SUBCOMMAND_WORKFLOWS can route on it.
+  const subMatch = original.match(/^\s*[$>%#]?\s*(?:kolm\s+)?(\w+)\s+(\S+)/i);
+  const subverb = subMatch ? subMatch[2].toLowerCase() : null;
 
   if (empty) {
     return baseEnvelope({ verb: 'what', args: [], confidence: 0.5, source: 'empty' });
@@ -864,8 +962,25 @@ export async function classifyIntent(text, context = {}) {
   }
 
   // 1. KEYWORD FAST PATH
-  const kw = keywordMatch(normalized);
+  let kw = keywordMatch(normalized);
+  // W852 — if exact-keyword match misses, repair typos and re-try BEFORE
+  // dropping to regex/overlap. Catches "whjere are my captures" → "where are
+  // my captures" → tail captures, with source:'keyword_fuzzy'.
+  if (!kw) {
+    const fixed = fuzzyCorrect(normalized);
+    if (fixed && fixed !== normalized) {
+      const kw2 = keywordMatch(fixed);
+      if (kw2) kw = { ...kw2, source: 'keyword_fuzzy', confidence: Math.max(0.6, kw2.confidence - 0.1) };
+    }
+  }
   if (kw) {
+    // W852 — subcommand-aware dispatch. If we have a verb + sub-verb and
+    // SUBCOMMAND_WORKFLOWS knows it, return the verb plus the sub in args so
+    // expandToWorkflow short-circuits (args.length>0) and the synth path
+    // emits the subcommand-specific recipe.
+    if (subverb && SUBCOMMAND_WORKFLOWS[kw.verb] && SUBCOMMAND_WORKFLOWS[kw.verb][subverb]) {
+      return baseEnvelope({ ...kw, args: [subverb], subcommand: subverb });
+    }
     // Apply contextual heuristics for capture-related verbs FIRST so a phrase
     // like "show captures support" can pull the namespace from caller context
     // even when the regex pattern (which requires "in/from/for ...") did not
@@ -1594,6 +1709,18 @@ const VERB_NEEDS_ARGS = new Set([
 export function expandToWorkflow(intent, originalQuestion) {
   if (!intent || !intent.verb) return null;
   const verb = intent.verb;
+  // W852 — if a subcommand-aware workflow matches, use it FIRST regardless of
+  // whether intent.args has the subverb in it. This is what makes pasting
+  // `$ kolm quickstart wrapper` actually pick the wrapper recipe instead of
+  // the generic 3-step picker.
+  if (intent.subcommand && SUBCOMMAND_WORKFLOWS[verb] && SUBCOMMAND_WORKFLOWS[verb][intent.subcommand]) {
+    const subwf = SUBCOMMAND_WORKFLOWS[verb][intent.subcommand];
+    return {
+      summary: subwf.summary,
+      namespace_hint: null,
+      steps: subwf.steps.map(s => ({ cmd: s.cmd, why: s.why })),
+    };
+  }
   // If the classifier already extracted concrete args, the user knows what they
   // want — no expansion needed.
   if (intent.args && intent.args.length > 0) return null;

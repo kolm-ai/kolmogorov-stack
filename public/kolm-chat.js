@@ -261,10 +261,20 @@
           // classifier itself flagged low confidence (in which case the
           // user is probably changing topic and a stale "yes" should not
           // re-fire the last recipe).
+          // W852 — belt-and-suspenders: when the server returned a usable
+          // command but didn't ship a workflow envelope (older router build
+          // or future skinny-response opt-in), synth a one-step workflow
+          // from data.command so the FOLLOWUP_AFFIRM_RE pre-pass on the
+          // next turn still has something to latch onto.
           if (out.data.source === 'low_confidence') {
             lastWorkflow = null;
           } else if (out.data.workflow && out.data.workflow.steps && out.data.workflow.steps.length) {
             lastWorkflow = out.data.workflow;
+          } else if (out.data.command) {
+            lastWorkflow = {
+              summary: 'previous command',
+              steps: [{ cmd: String(out.data.command).replace(/^\$\s*/, ''), why: '' }],
+            };
           }
           addMsg('kolm', renderResponse(out.data));
         } else {

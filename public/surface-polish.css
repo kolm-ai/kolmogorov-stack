@@ -225,16 +225,16 @@ body {
 :root {
  --kolm-bg-deep: #07090b;
  --kolm-bg-soft: #0d1115;
- --kolm-paper: #f7f2e8;
- --kolm-ink-strong: #fff7e8;
+ --kolm-paper: #f3f5f7;
+ --kolm-ink-strong: #ffffff;
  --kolm-ink-soft: #d9ded7;
  --kolm-ink-muted: #8e9a91;
  --kolm-teal: #72e7cd;
  --kolm-cyan: #80cfff;
- --kolm-amber: #f0c77a;
+ --kolm-amber: #6b6b66;
  --kolm-red: #ff8a8a;
- --kolm-border: rgba(255,247,232,0.12);
- --kolm-border-strong: rgba(255,247,232,0.22);
+ --kolm-border: rgba(230,233,238,0.12);
+ --kolm-border-strong: rgba(230,233,238,0.22);
  --kolm-radius: 8px;
 }
 
@@ -248,7 +248,7 @@ body {
  --kolm-border-strong: rgba(16,24,32,0.22);
  --kolm-teal: #06745f;
  --kolm-cyan: #1263a3;
- --kolm-amber: #8a5a00;
+ --kolm-amber: #44494f;
 }
 
 .site-header,
@@ -755,12 +755,12 @@ body:has(#acct-loaded) {
  --kolm-bg-1: #0b0d11;
  --kolm-bg-2: #101319;
  --kolm-bg-3: #171b22;
- --kolm-ink-0: #fff7e8;
- --kolm-ink-1: #ddd5c6;
- --kolm-ink-2: #a9b0aa;
- --kolm-ink-3: #727b76;
- --kolm-rule-1: rgba(255, 247, 232, 0.10);
- --kolm-rule-2: rgba(255, 247, 232, 0.18);
+ --kolm-ink-0: #ffffff;
+ --kolm-ink-1: #d6dae0;
+ --kolm-ink-2: #a8aeb6;
+ --kolm-ink-3: #727980;
+ --kolm-rule-1: rgba(255, 255, 255, 0.10);
+ --kolm-rule-2: rgba(255, 255, 255, 0.18);
  --kolm-green: #e6e9ee;
  --kolm-green-2: #111111;
  --kolm-page-max: 1180px;
@@ -895,7 +895,7 @@ body > .site-nav {
 
  :where(.site-nav .mega-col) {
  padding: 12px !important;
- border: 1px solid rgba(255,247,232,0.08) !important;
+ border: 1px solid rgba(255,255,255,0.08) !important;
  border-radius: 10px !important;
  background: rgba(255,255,255,0.026) !important;
  }
@@ -1458,9 +1458,9 @@ h6:not(#kolm-noop) {
 }
 
 :where(.btn.primary, .btn-primary, a.btn-primary, .site-actions .cta, button.primary) {
- background: #fff3df !important;
- color: #08090c !important;
- border-color: rgba(255,243,223,0.72) !important;
+ background: #111418 !important;
+ color: #ffffff !important;
+ border-color: #111418 !important;
 }
 
 :where(.site-actions, header.site .right) {
@@ -1754,8 +1754,8 @@ h6:not(#kolm-noop) {
   rgba(8, 9, 12, 0.92) !important;
  backdrop-filter: blur(18px) saturate(140%) !important;
  -webkit-backdrop-filter: blur(18px) saturate(140%) !important;
- border-top: 1px solid rgba(255,247,232,0.06) !important;
- border-bottom: 1px solid rgba(255,247,232,0.12) !important;
+ border-top: 1px solid rgba(255,255,255,0.06) !important;
+ border-bottom: 1px solid rgba(255,255,255,0.12) !important;
 }
 
 .kolm-product-spine a {
@@ -1768,7 +1768,7 @@ h6:not(#kolm-noop) {
  gap: 1px 9px !important;
  padding: 7px 10px !important;
  border-radius: 9px !important;
- border-color: rgba(255,247,232,0.10) !important;
+ border-color: rgba(255,255,255,0.10) !important;
  background: rgba(255,255,255,0.026) !important;
  color: var(--kolm-ink-1) !important;
 }
@@ -1855,7 +1855,7 @@ body.kolm-account-surface {
 
 .kac-copy,
 .kac-console {
- border: 1px solid rgba(255,247,232,0.13) !important;
+ border: 1px solid rgba(255,255,255,0.13) !important;
  border-radius: 14px !important;
  background:
   linear-gradient(135deg, rgba(255,255,255,0.055), rgba(255,255,255,0.018)),
@@ -1901,7 +1901,7 @@ body.kolm-account-surface {
  align-items: center !important;
  gap: 8px !important;
  padding: 0 15px !important;
- border-bottom: 1px solid rgba(255,247,232,0.10) !important;
+ border-bottom: 1px solid rgba(255,255,255,0.10) !important;
  color: var(--kolm-ink-2) !important;
  font: 560 12px/1.2 var(--kolm-mono, ui-monospace, monospace) !important;
 }
@@ -1928,7 +1928,7 @@ body.kolm-account-surface {
  display: grid !important;
  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
  gap: 1px !important;
- background: rgba(255,247,232,0.10) !important;
+ background: rgba(255,255,255,0.10) !important;
 }
 
 .kac-steps a {
@@ -1946,8 +1946,8 @@ body.kolm-account-surface {
  display: grid !important;
  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
  gap: 1px !important;
- border-top: 1px solid rgba(255,247,232,0.10) !important;
- background: rgba(255,247,232,0.10) !important;
+ border-top: 1px solid rgba(255,255,255,0.10) !important;
+ background: rgba(255,255,255,0.10) !important;
 }
 
 .kac-matrix a {
@@ -2014,7 +2014,7 @@ body.kolm-account-surface #account-sidebar {
  top: 82px !important;
  padding: 14px !important;
  border-radius: 14px !important;
- border-color: rgba(255,247,232,0.13) !important;
+ border-color: rgba(255,255,255,0.13) !important;
  background: rgba(12,15,20,0.80) !important;
  box-shadow: 0 20px 58px rgba(0,0,0,0.22) !important;
 }
@@ -2029,7 +2029,7 @@ body.kolm-account-surface #account-sidebar {
 .kac-side-group + .kac-side-group {
  margin-top: 10px !important;
  padding-top: 10px !important;
- border-top: 1px solid rgba(255,247,232,0.08) !important;
+ border-top: 1px solid rgba(255,255,255,0.08) !important;
 }
 
 body.kolm-account-surface #account-sidebar .kac-side-group h2 {
@@ -2075,13 +2075,13 @@ body.kolm-account-surface #account-sidebar .kac-side-home {
  list-style: none !important;
  margin: 0 0 12px !important;
  padding: 0 !important;
- border-bottom: 1px solid rgba(255,247,232,0.08) !important;
+ border-bottom: 1px solid rgba(255,255,255,0.08) !important;
  padding-bottom: 10px !important;
 }
 body.kolm-account-surface #account-sidebar details.kac-side-group {
  margin: 0 !important;
  padding: 8px 0 !important;
- border-top: 1px solid rgba(255,247,232,0.08) !important;
+ border-top: 1px solid rgba(255,255,255,0.08) !important;
 }
 body.kolm-account-surface #account-sidebar details.kac-side-group:first-of-type {
  border-top: 0 !important;
@@ -2163,7 +2163,7 @@ body.kolm-account-surface .metric-card,
 body.kolm-account-surface .card,
 body.kolm-account-surface .settings-card {
  border-radius: 14px !important;
- border-color: rgba(255,247,232,0.13) !important;
+ border-color: rgba(255,255,255,0.13) !important;
  background:
   linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.018)),
   rgba(12,15,20,0.78) !important;
@@ -2530,7 +2530,7 @@ body.kolm-account-surface .ktable th {
 
 .mega-menu {
  border-radius: 12px !important;
- border: 1px solid rgba(255,247,232,0.12) !important;
+ border: 1px solid rgba(255,255,255,0.12) !important;
  background:
   linear-gradient(180deg, rgba(22,27,32,0.96), rgba(11,13,17,0.96)) !important;
  box-shadow: 0 26px 80px rgba(0,0,0,0.32) !important;
@@ -2694,14 +2694,14 @@ body.kolm-account-surface .acct-shell {
  header.site nav.is-open {
   z-index: 1001 !important;
   background: #0b0d10 !important;
-  border-bottom: 1px solid rgba(255,247,232,0.12) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.12) !important;
   box-shadow: 0 28px 80px rgba(0,0,0,0.56) !important;
   backdrop-filter: none !important;
  }
 
  .site-nav.is-open .mega-menu {
   background: #111418 !important;
-  border: 1px solid rgba(255,247,232,0.12) !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
   box-shadow: none !important;
  }
 
@@ -2895,12 +2895,12 @@ body:has(.w373-pricing-block) .plans-header .sec-lede {
  --kolm-green: #e6e9ee;
  --kolm-dark: #08090c;
  --kolm-panel-strong: #0b0f12;
- --kolm-ink-0: #fff7e8;
- --kolm-ink-1: #d8dfd5;
- --kolm-ink-2: #aeb8ae;
+ --kolm-ink-0: #ffffff;
+ --kolm-ink-1: #d8dde3;
+ --kolm-ink-2: #aab0b8;
  --kolm-ink-3: #6a727c;
- --kolm-border: rgba(255, 247, 232, 0.10);
- --kolm-border-strong: rgba(255, 247, 232, 0.16);
+ --kolm-border: rgba(255, 255, 255, 0.10);
+ --kolm-border-strong: rgba(255, 255, 255, 0.16);
 }
 
 html.kolm-sota-ui-v560 body {
@@ -2962,7 +2962,7 @@ html.kolm-sota-ui-v560 :where(.site-nav .mega-menu) {
 
 html.kolm-sota-ui-v560 :where(.site-nav .mega-col) {
  border-radius: 6px !important;
- border-color: rgba(255, 247, 232, 0.08) !important;
+ border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 html.kolm-sota-ui-v560 :where(.site-nav .mega-h) {
@@ -3007,7 +3007,7 @@ html.kolm-sota-ui-v560 :where(.btn, .btn-ghost, .btn-secondary, .button, button:
 }
 
 html.kolm-sota-ui-v560 :where(.btn.ghost, .btn-ghost, .btn-secondary) {
- background: rgba(255, 247, 232, 0.035) !important;
+ background: rgba(255, 255, 255, 0.035) !important;
  border-color: var(--kolm-border-strong) !important;
  color: var(--kolm-ink-1) !important;
 }
@@ -3072,7 +3072,7 @@ html.kolm-sota-ui-v560 :where(.kolm-surface-media .ksm-shell) {
 
 html.kolm-sota-ui-v560 :where(.kolm-surface-media .ksm-copy) {
  padding: 18px !important;
- background: rgba(255, 247, 232, 0.035) !important;
+ background: rgba(255, 255, 255, 0.035) !important;
 }
 
 html.kolm-sota-ui-v560 :where(.kolm-surface-media .ksm-copy h2) {
@@ -3368,7 +3368,7 @@ html.kolm-sota-ui-v560 main:has(> .kolm-surface-media[aria-label="kolm CLI comma
 [data-theme="light"].kolm-sota-ui-v560 :where(.site-actions .cta, header.site .right .cta, .btn.primary, .btn-primary, a.cta, button.primary) {
  background: #111418 !important;
  border-color: #111418 !important;
- color: #fff7e8 !important;
+ color: #ffffff !important;
 }
 
 @media (max-width: 980px) {
@@ -3424,7 +3424,7 @@ html.kolm-sota-ui-v560 main:has(> .kolm-surface-media[aria-label="kolm CLI comma
 html.kolm-sota-ui-v560 {
  --kolm-panel-bg: rgba(14, 18, 22, 0.84);
  --kolm-panel-bg-2: rgba(18, 23, 28, 0.92);
- --kolm-panel-border: rgba(255, 247, 232, 0.13);
+ --kolm-panel-border: rgba(255, 255, 255, 0.13);
  --kolm-focus: rgba(230, 233, 238, 0.36);
 }
 
@@ -3455,8 +3455,8 @@ html.kolm-sota-ui-v560 :where(.site-nav .nav-item > .nav-top.active, .site-nav .
 }
 
 html.kolm-sota-ui-v560 :where(.site-nav .nav-item > .nav-top:hover, .site-nav .nav-item > .nav-top:focus-visible, .site-nav > a:hover, .site-nav > a:focus-visible, header.site nav a:hover, header.site nav a:focus-visible) {
- background: rgba(255, 247, 232, 0.055) !important;
- border-color: rgba(255, 247, 232, 0.14) !important;
+ background: rgba(255, 255, 255, 0.055) !important;
+ border-color: rgba(255, 255, 255, 0.14) !important;
  color: var(--kolm-ink-0, #e6e9ee) !important;
 }
 
@@ -3483,7 +3483,7 @@ html.kolm-sota-ui-v560 :where(.site-nav .nav-item > .nav-top:focus-visible, .sit
 
  html.kolm-sota-ui-v560 :where(.site-nav .mega-col) {
   padding: 10px !important;
-  background: rgba(255, 247, 232, 0.026) !important;
+  background: rgba(255, 255, 255, 0.026) !important;
   border-radius: 8px !important;
  }
 }
@@ -3514,8 +3514,8 @@ html.kolm-sota-ui-v560 :where(.btn, .site-actions .cta, header.site .right .cta,
 html.kolm-sota-ui-v560 :where(.home-hero-centered, .home-hero-split, .hero, main > .hero.wrap) {
  background-image:
   radial-gradient(circle at 82% 18%, rgba(230, 233, 238, 0.06), transparent 32%),
-  linear-gradient(rgba(255, 247, 232, 0.035) 1px, transparent 1px),
-  linear-gradient(90deg, rgba(255, 247, 232, 0.035) 1px, transparent 1px) !important;
+  linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px) !important;
  background-size: auto, 112px 112px, 112px 112px !important;
 }
 
@@ -3605,7 +3605,7 @@ html.kolm-sota-ui-v560 :where(.kolm-product-spine) {
  grid-auto-rows: 50px !important;
  border-radius: 8px !important;
  overflow: hidden !important;
- background: rgba(255, 247, 232, 0.055) !important;
+ background: rgba(255, 255, 255, 0.055) !important;
 }
 
 html.kolm-sota-ui-v560 :where(.kolm-product-spine a) {
@@ -3665,7 +3665,7 @@ html.kolm-sota-ui-v560 body.kolm-account-surface :where(.kolm-account-command) {
 html.kolm-sota-ui-v560 body.kolm-account-surface :where(.kac-copy) {
  padding: 20px !important;
  min-height: 240px !important;
- background: linear-gradient(145deg, rgba(255, 247, 232, 0.045), rgba(230, 233, 238, 0.025)) !important;
+ background: linear-gradient(145deg, rgba(255, 255, 255, 0.045), rgba(230, 233, 238, 0.025)) !important;
 }
 
 html.kolm-sota-ui-v560 body.kolm-account-surface :where(.kac-copy h1) {
@@ -3979,8 +3979,8 @@ html.kolm-sota-ui-v565 :where(.site-nav .nav-item > .nav-top.active, .site-nav .
 }
 
 html.kolm-sota-ui-v565 :where(.site-nav .nav-item > .nav-top:hover, .site-nav .nav-item > .nav-top:focus-visible, .site-nav > a:hover, .site-nav > a:focus-visible, header.site nav a:hover, header.site nav a:focus-visible) {
- background: rgba(255, 247, 232, 0.055) !important;
- border-color: rgba(255, 247, 232, 0.16) !important;
+ background: rgba(255, 255, 255, 0.055) !important;
+ border-color: rgba(255, 255, 255, 0.16) !important;
  color: var(--kolm-ink-0, #e6e9ee) !important;
 }
 
@@ -4237,8 +4237,8 @@ html.kolm-sota-ui-v597 :where(.kolm-product-spine) {
  grid-template-columns: repeat(6, minmax(126px, 1fr)) !important;
  gap: 8px !important;
  border-radius: 0 !important;
- border-top: 1px solid rgba(255,247,232,0.07) !important;
- border-bottom: 1px solid rgba(255,247,232,0.12) !important;
+ border-top: 1px solid rgba(255,255,255,0.07) !important;
+ border-bottom: 1px solid rgba(255,255,255,0.12) !important;
  background:
   linear-gradient(180deg, rgba(8, 10, 13, 0.96), rgba(8, 10, 13, 0.90)),
   rgba(8, 10, 13, 0.92) !important;
@@ -4260,7 +4260,7 @@ html.kolm-sota-ui-v597 :where(.kolm-product-spine a) {
  align-items: center !important;
  gap: 2px 9px !important;
  padding: 9px 10px !important;
- border: 1px solid rgba(255,247,232,0.11) !important;
+ border: 1px solid rgba(255,255,255,0.11) !important;
  border-radius: 8px !important;
  background: rgba(255,255,255,0.026) !important;
  color: var(--kolm-ink-1, #d8dfd6) !important;

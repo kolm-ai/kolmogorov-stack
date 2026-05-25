@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Studio, distill, quantize, compile · kolm.ai</title>
-<meta name="description" content="Distill a frontier teacher into a smaller student. Quantize to INT4. Compile a portable .kolm artifact that runs on CUDA, ROCm, Metal, CPU, or WASM. The kolm Studio, for ML engineers.">
+<title>Studio &middot; the browser UI for kolm &middot; same compiler, no CLI</title>
+<meta name="description" content="Studio is the browser UI. Pick captures, pick a base model, watch the distill + quantize + sign loop run in your browser tab. Same .kolm file out the other side. Same compiler that powers the CLI and TUI.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
-<meta property="og:title" content="kolm Studio &middot; Distill, quantize, compile">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="kolm Studio &middot; the browser UI">
 <meta property="og:description" content="The training-side of kolm. Frontier teachers, INT4 quantization, portable artifacts, k-score regression gates.">
 <meta property="og:url" content="https://kolm.ai/studio">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -40,6 +41,22 @@
   .stu-matrix td.tag { color: var(--ks-accent); }
   .stu-matrix tr:hover td { background: var(--ks-bg-1); }
   .test-anchor { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+
+  /* W852 — three-faces grid: Studio / CLI / TUI as parallel surfaces of one
+     compiler. Same visual weight to all three, with the middle card slightly
+     emphasized (.stu-face--feat) to signal "any of these works — pick one". */
+  .stu-faces { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--ks-5); margin: var(--ks-8) 0 var(--ks-3); }
+  @media (max-width: 880px) { .stu-faces { grid-template-columns: 1fr; gap: var(--ks-4); } }
+  .stu-face { padding: var(--ks-6); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); display: flex; flex-direction: column; gap: var(--ks-3); transition: border-color 140ms ease, transform 140ms ease; }
+  .stu-face:hover { border-color: var(--ks-accent-edge); transform: translateY(-1px); }
+  .stu-face--feat { border-color: var(--ks-accent-edge); background: var(--ks-bg); }
+  .stu-face__step { margin: 0; font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-ink-3); }
+  .stu-face h3 { margin: 0; font-size: 22px; font-weight: 580; letter-spacing: -0.012em; color: var(--ks-ink); }
+  .stu-face p { margin: 0; font-size: 14.5px; line-height: 1.6; color: var(--ks-ink-2); }
+  .stu-face p code { font-family: var(--ks-mono); font-size: 0.9em; padding: 1px 5px; border-radius: 4px; background: rgba(17,17,17,0.05); color: var(--ks-ink); }
+  .stu-face__cmd { margin-top: auto !important; font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink-2); padding: 10px 12px; background: rgba(17,17,17,0.04); border: 1px solid var(--ks-line-2); border-radius: 6px; }
+  .stu-faces__caption { max-width: 64ch; margin: var(--ks-5) auto 0; text-align: center; font-size: 14.5px; color: var(--ks-ink-3); }
+  .stu-faces__caption code { font-family: var(--ks-mono); font-size: 0.92em; padding: 1px 5px; border-radius: 4px; background: rgba(17,17,17,0.05); color: var(--ks-ink); }
 </style>
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
   <meta property="og:type" content="website">
@@ -51,7 +68,7 @@
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL)",
   "url": "https://kolm.ai/studio",
-  "description": "Distill a frontier teacher into a smaller student. Quantize to INT4. Compile a portable .kolm artifact that runs on CUDA, ROCm, Metal, CPU, or WASM. The kolm Studio, for ML engineers.",
+  "description": "Studio is the browser UI. Pick captures, pick a base model, watch the distill + quantize + sign loop run in your browser tab. Same .kolm file out the other side. Same compiler that powers the CLI and TUI.",
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -95,11 +112,12 @@
   <div class="ks-hero__bg" aria-hidden="true"></div>
   <div class="ks-hero__wrap" style="grid-template-columns: 1fr;">
     <div style="max-width: 880px;">
-      <span class="ks-eyebrow">For ML engineers and data scientists</span>
-      <h1 class="ks-hero__h1" style="max-width: 22ch;"><span class="grad">Distill, quantize, compile.</span> Frontier-class models on your hardware.</h1>
-      <p class="ks-hero__lede">Pick a frontier teacher. Pick a smaller student. Distill on your captured data. Quantize to INT4. Compile a portable <code>.kolm</code> the wrapper can serve on CUDA, ROCm, Metal, CPU, or WASM. The same artifact, every target, byte-reproducible build. Gated by k-score so a regression cannot ship.</p>
+      <span class="ks-eyebrow">Studio &middot; the browser UI</span>
+      <h1 class="ks-hero__h1" style="max-width: 22ch;">Same compiler, no CLI.</h1>
+      <p class="ks-hero__lede">Pick captures, pick a base model, watch the distill + quantize + sign loop run in your browser tab. Same <code>.kolm</code> file out the other side. Same compiler that powers the CLI and the TUI &mdash; Studio is the third face.</p>
+      <p class="ks-hero__lede" style="margin-top: 12px; font-family: var(--ks-mono); font-size: 14px; color: var(--ks-ink-3);">$ kolm studio open</p>
       <div class="ks-hero__ctas">
-        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/signup">Start free</a>
+        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/signup">Open Studio &rarr;</a>
         <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/quickstart">Run the 5-minute distill</a>
         <a class="ks-btn ks-btn--link" href="/wrapper">Looking for Wrapper &rarr;</a>
       </div>
@@ -113,6 +131,32 @@
         </tbody>
       </table>
     </div>
+  </div>
+</section>
+
+<section class="ks-section" style="padding-top: 0; padding-bottom: 12px;">
+  <div class="ks-wrap">
+    <div class="stu-faces" aria-label="Three faces, one compiler">
+      <div class="stu-face">
+        <p class="stu-face__step">01 &middot; web</p>
+        <h3>Studio</h3>
+        <p>The browser tab. Pick captures from a list, pick a base model, click <em>distill</em>. Watch loss, k-score, and quantize size update live. Download the signed <code>.kolm</code>.</p>
+        <p class="stu-face__cmd">$ kolm studio open</p>
+      </div>
+      <div class="stu-face stu-face--feat">
+        <p class="stu-face__step">02 &middot; cli</p>
+        <h3>CLI</h3>
+        <p>The same compiler from a terminal. Scriptable, pipeable, CI-friendly. Every Studio click maps to a verb you can paste into a Makefile or a GitHub Action.</p>
+        <p class="stu-face__cmd">$ kolm distill from-captures --since 7d</p>
+      </div>
+      <div class="stu-face">
+        <p class="stu-face__step">03 &middot; tui</p>
+        <h3>TUI</h3>
+        <p>The same compiler from a single keystroke. Twenty live views over your namespaces, captures, runs, artifacts. Same key bindings on every machine.</p>
+        <p class="stu-face__cmd">$ kolm tui</p>
+      </div>
+    </div>
+    <p class="stu-faces__caption">Three faces. One compiler. One <code>.kolm</code> file. Pick the surface that fits the moment.</p>
   </div>
 </section>
 
