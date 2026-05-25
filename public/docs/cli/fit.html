@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>kolm fit | CLI reference | kolm.ai</title>
+<meta name="description" content="Estimate memory fit for a model + quantization target on a given VRAM. Weights, KV, total, headroom. Pick the best target with --pick-best.">
+<link rel="canonical" href="https://kolm.ai/docs/cli/fit">
+<meta property="og:title" content="kolm fit | CLI reference | kolm.ai">
+<meta property="og:description" content="Estimate memory fit. Weights + KV + total + headroom. --pick-best picks the highest-quality target that fits.">
+<meta property="og:url" content="https://kolm.ai/docs/cli/fit">
+<meta property="og:type" content="article">
+<meta property="og:image" content="/og/docs-cli.svg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
+<script src="/nav.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm fit","description":"Estimate memory fit. Weights + KV + total + headroom. --pick-best picks the highest-quality target that fits.","url":"https://kolm.ai/docs/cli/fit","mainEntityOfPage":"https://kolm.ai/docs/cli/fit","author":{"@type":"Organization","name":"kolm.ai"}}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col"><p class="mega-h">Start</p><a href="/product">Overview</a><a href="/quickstart">Quickstart</a><a href="/capture">Gateway</a></div>
+        <div class="mega-col"><p class="mega-h">Build</p><a href="/training">Training loop</a><a href="/distill">Distill</a><a href="/compile">Compile</a></div>
+        <div class="mega-col"><p class="mega-h">Run</p><a href="/runtimes">Runtimes</a><a href="/docs/devices">Devices</a><a href="/trust">Verify</a></div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col"><p class="mega-h">Choose</p><a href="/models">Model catalog</a><a href="/build-your-own">Build your own</a><a href="/docs/runtime">Runtime targets</a></div>
+        <div class="mega-col"><p class="mega-h">Deploy</p><a href="/compute">Compute</a><a href="/runtimes">Mobile and edge</a></div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col"><p class="mega-h">Start</p><a href="/capture">API gateway</a><a href="/docs/cli">CLI</a><a href="/docs/sdk">SDKs</a></div>
+        <div class="mega-col"><p class="mega-h">Reference</p><a href="/docs">Docs home</a><a href="/docs/api">API reference</a><a href="/api">HTTP routes</a></div>
+        <div class="mega-col"><p class="mega-h">Operate</p><a href="/integrations">Integrations</a><a href="/docs/privacy">Privacy membrane</a><a href="/docs/datasets">Datasets</a><a href="/docs/distillation">Distillation</a><a href="/docs/verify">Verification</a></div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col"><p class="mega-h">Buy</p><a href="/pricing">Plans</a><a href="/pricing#roi">ROI calculator</a><a href="/nonprofits">Nonprofits</a></div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col"><p class="mega-h">Deploy</p><a href="/enterprise">Enterprise overview</a><a href="/self-host">Self-host</a><a href="/airgap">Air-gap</a></div>
+        <div class="mega-col"><p class="mega-h">Trust</p><a href="/trust">Trust center</a><a href="/security">Security</a><a href="/compliance">Compliance</a><a href="/baa">BAA</a></div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+<main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="fit">
+<nav aria-label="Breadcrumb" class="crumbs">
+  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>fit</span>
+</nav>
+<section class="kolm-surface-media kolm-surface-media--inline" aria-label="CLI workflow proof">
+  <div class="media-terminal">
+    <span class="media-kicker">CLI contract</span>
+    <span class="media-line"><span class="ok">$</span> kolm fit --help</span>
+    <span class="media-line"><span class="ok">$</span> kolm fit --params-b 7 --quant gguf-q4km --vram-gb 24</span>
+    <p>Estimate weight + KV + total memory footprint of a model on a given VRAM. Same handler powers <code>POST /v1/fit</code> and the wizard at <a href="/account/quantize">/account/quantize</a>.</p>
+  </div>
+  <div class="media-proof">
+    <span class="media-kicker">Operational proof</span>
+    <p>Pure compute, no GPU touch. Use <code>--pick-best</code> to get the highest-quality target that fits with comfortable headroom &mdash; the same answer the bench wizard highlights.</p>
+  </div>
+</section>
+<h1>kolm fit</h1>
+<blockquote><p>Will it fit? Estimate the weight + KV-cache + total VRAM footprint of a model at a given quant target. Pure compute, no GPU touch &mdash; the honest answer before you queue the job.</p></blockquote>
+<h2>Usage</h2>
+<pre><code>
+kolm fit --params-b &lt;N&gt; --quant &lt;target&gt; --vram-gb &lt;N&gt; [--context &lt;N&gt;] [--batch &lt;N&gt;]
+kolm fit --params-b &lt;N&gt; --pick-best --vram-gb &lt;N&gt;          # auto-pick the best target
+kolm fit --artifact &lt;path.kolm&gt; --quant &lt;target&gt; --vram-gb &lt;N&gt;  # infer params from artifact
+</code></pre>
+<h2>Flags</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Flag</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>--params-b &lt;N&gt;</code></td><td>required</td><td>model size in billions of params (e.g. <code>7</code> for 7B)</td></tr>
+<tr><td><code>--quant &lt;target&gt;</code></td><td>required*</td><td>one of the 19 quant targets (see <code>kolm hardware</code>)</td></tr>
+<tr><td><code>--vram-gb &lt;N&gt;</code></td><td>required</td><td>VRAM cap for the fit calculation (auto-fills from <code>/v1/hardware</code> in the wizard)</td></tr>
+<tr><td><code>--context &lt;N&gt;</code></td><td><code>8192</code></td><td>context length, for the KV cache size</td></tr>
+<tr><td><code>--batch &lt;N&gt;</code></td><td><code>1</code></td><td>batch size, for the KV cache size</td></tr>
+<tr><td><code>--pick-best</code></td><td>off</td><td>auto-pick the highest-quality target that fits with comfortable headroom (skip <code>--quant</code>)</td></tr>
+<tr><td><code>--artifact &lt;path&gt;</code></td><td>none</td><td>infer <code>--params-b</code> from a compiled <code>.kolm</code> instead of typing it</td></tr>
+<tr><td><code>--supported &lt;list&gt;</code></td><td>auto</td><td>restrict the target picker to a comma-separated list (used with <code>--pick-best</code>)</td></tr>
+<tr><td><code>--json</code></td><td>off</td><td>emit the response envelope as JSON</td></tr>
+</tbody>
+</table></div>
+<p>* <code>--quant</code> is required unless you pass <code>--pick-best</code>.</p>
+<h2>Response shape</h2>
+<pre><code>
+{
+  "ok":              true,
+  "quant":           "gguf-q4km",
+  "bytes_per_param": 4.0,
+  "est_weights_gb":  5.2,
+  "est_kv_gb":       3.4,
+  "est_total_gb":    8.6,
+  "headroom_gb":     +23.4,
+  "fits":            true,
+  "tight":           false
+}
+</code></pre>
+<h2>Examples</h2>
+<pre><code>
+# will a 7B fit at GGUF Q4_K_M on a 24 GB card?
+kolm fit --params-b 7 --quant gguf-q4km --vram-gb 24
+
+# auto-pick the best target for 7B on a 24 GB card.
+kolm fit --params-b 7 --vram-gb 24 --pick-best
+
+# infer params from an artifact, then pick the best target.
+kolm fit --artifact qwen-7b.kolm --vram-gb 24 --pick-best
+
+# longer context blows up the KV cache.
+kolm fit --params-b 7 --quant gguf-q4km --vram-gb 24 --context 32768
+
+# JSON output for CI.
+kolm fit --params-b 7 --quant gguf-q4km --vram-gb 24 --json | jq '.fits'
+</code></pre>
+<h2>Notes</h2>
+<p><code>kolm fit</code> is pure compute; it never touches a GPU. The numbers are estimates: real-world memory depends on framework overhead (vLLM vs llama.cpp vs TRT-LLM), activation memory, and CUDA kernel choice. The <code>tight</code> flag flips to <code>true</code> when headroom drops below 2 GB &mdash; you might fit on paper but you&rsquo;ll OOM the first time someone sends a long prompt.</p>
+<p><code>--pick-best</code> walks the canonical 19-target quality order (fp16 &rarr; gguf-iq2xs) and returns the first target that fits with comfortable headroom. The Account bench wizard at <a href="/account/bench">/account/bench</a> shows the full matrix and highlights the same row.</p>
+<h2>See also</h2>
+<ul>
+<li><a href="/account/bench">/account/bench</a> &mdash; the full matrix wizard</li>
+<li><a href="/account/quantize">/account/quantize</a> &mdash; the quantize wizard auto-fills VRAM and calls fit</li>
+<li><a href="/docs/cli/hardware">kolm hardware</a> &mdash; lists supported quant targets for this host</li>
+<li><a href="/docs/cli/bench">kolm bench</a> &mdash; iterate every supported target in one pass</li>
+<li><a href="/forge#surfaces">All Forge surfaces</a></li>
+</ul>
+<section class="see-also" aria-labelledby="see-also-h">
+  <h2 id="see-also-h">See also</h2>
+  <ul>
+    <li><a href="/docs/cli">All CLI verbs</a></li>
+    <li><a href="/quickstart">Quickstart</a></li>
+    <li><a href="/docs/api">HTTP API reference</a></li>
+    <li><a href="/docs/sdk">SDK reference</a></li>
+  </ul>
+</section>
+</main>
+</body>
+</html>

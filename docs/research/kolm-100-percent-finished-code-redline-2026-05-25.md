@@ -2451,6 +2451,17 @@ Current live API evidence:
 - `public/docs/api.html` is a 551 KB generated catalog that says `455 reference-ready` and `127 source-indexed`; it is useful as an inventory, but it is not yet a finished API reference.
 - `public/sdk-current.json` points to one browser SDK bundle with SRI, but the broader SDK/package tree includes Node, Python, Rust, C, MCP, VS Code, TypeScript, React Native, Swift, Kotlin, browser extension, LangChain/LlamaIndex integrations, Homebrew, winget, apt, and attestation packages.
 
+Current live docs/SDK evidence:
+
+- `public/docs/` contains 221 HTML pages, 58 Markdown files, 28 JSON files, one `.kolm` file, and one text file.
+- A local docs-shell pass found 48 docs HTML pages with the bad `繚` separator in source title/metadata, 141 docs HTML pages missing `/nav.js`, 51 missing `/ks.css`, and 170 missing `/surface-polish.css`.
+- The docs surface has 170 `<style>` blocks, 116 inline `style=` attributes, 569 `<script>` tags, and one hidden `test-anchor` artifact in the parsed docs/public sample.
+- `public/docs/api.html` says 582 wired routes and uses `Authorization: Bearer $KOLM_KEY` plus `kolm-demo-key` examples in the generated route catalog. `public/api.html` says `355+ routes`, `x-kolm-api-key`, and one honest envelope. Those pages disagree on count, auth header framing, and API contract shape.
+- Docs and SDK pages still contain old key-shape examples. The docs source search found hundreds of `kolm-demo-key`/`kolm_` examples alongside newer `ks_...` examples. `public/docs/cli/capture.html` is closer to current truth because it says the Kolm API key uses `Authorization: Bearer ks_*`, but this is not consistently propagated across generated docs and top-level API pages.
+- `public/docs/sdk.html` markets "one official JS SDK" while also listing equivalent Python/Rust/Go invocations. Local SDK/package sources are broader and more nuanced: `sdk/node` says the npm package is not published yet and must be installed from a local checkout; `sdk/python` says the PyPI `kolm` name is unrelated and must not be installed as this SDK; `public/sdk-current.json` only proves one browser bundle with SRI.
+- The public docs shell is not one system. Some CLI pages load generated `docs-shell`/`surface-polish` assets, many docs pages use older `/ks.css` + `/warm-paper.css` combinations, API pages have their own inline CSS and nav variants, and quickstart ships large inline styles/scripts plus the same `繚` title separator.
+- `public/quickstart.html` is directionally useful because it walks install, auth, route, capture, distill, quantize, sign, and run. It is not yet a contract-bound first-value tutorial because expected outputs, install-channel truth, API key shape, generated examples, and package publication state are not controlled from SDK/API contracts.
+
 REDLINE: the API docs are still source-indexed inventory, not a complete API product contract.
 ACTION: CREATE `src/api/route-contracts.js`, `src/api/register-route.js`, `src/api/schemas/index.js`, `src/api/problem.js`, `src/api/idempotency.js`, `src/api/object-authorization.js`, `docs/internal/api-contract-matrix.json`, and `scripts/build-api-contract-matrix.cjs`; REPLACE route scraping as the authority for `public/docs/api-routes.json`, `public/openapi.json`, `public/docs/api.html`, SDK fixtures, account action contracts, and CLI examples.
 CODE: every route contract must declare `route_id`, `operation_id`, `method`, `path`, `surface`, `journey`, `owner`, `status`, `auth`, `security`, `tenant_scope`, `object_scope`, `rate_limit`, `resource_limit`, `idempotency`, `request_schema`, `response_schema`, `problem_types`, `audit_event`, `account_exposure`, `cli_exposure`, `sdk_exposure`, `docs_exposure`, `production_smoke`, and `claim_scope`.
@@ -2488,6 +2499,33 @@ ACTION: CREATE `docs/internal/docs-ia-contract.json`, `scripts/build-docs-ia.cjs
 CODE: docs must follow four user needs: tutorial, how-to, reference, explanation. Each of the three Kolm product loops gets one runnable tutorial, one operational how-to, one generated reference path, and one explanation page. Every code sample declares prerequisites, environment variables, exact command, expected output, cleanup, failure cases, and account/API/CLI equivalent.
 EXIT: docs help a developer get first value without reading the route catalog or guessing which product loop they are in.
 
+REDLINE: docs shell consistency is release-critical because docs are now product UI.
+ACTION: CREATE `docs/internal/developer-docs-shell-contract.json`, `docs/internal/developer-docs-shell-contract.md`, `scripts/build-developer-docs-shell-contract.cjs`, and `scripts/verify-developer-docs-shell.cjs`; WIRE every `public/docs/**/*.html`, `public/api.html`, `public/quickstart.html`, `public/sdks.html`, and `public/docs/sdk.html`.
+CODE: every docs page must declare one shell family, one metadata policy, one title separator policy, one nav source, one stylesheet set, one skip link, one keyboard/focus rule, one product graph journey, one Diataxis type, one first-value state, and one generated/source/manual classification. Docs pages with `繚`, unowned inline style blocks, hidden test anchors, inconsistent nav, or missing shell CSS are not finished.
+EXIT: docs are not a pile of generated pages; they are a governed developer product surface with the same visual/system contract as the marketing and account surfaces.
+
+REDLINE: API reference completion requires one API story, not `/api` and `/docs/api` disagreeing.
+ACTION: CREATE `docs/internal/api-reference-contract.json`, `docs/internal/api-reference-contract.md`, `scripts/build-api-reference-contract.cjs`, and `scripts/verify-api-reference-contract.cjs`; WIRE `/api`, `/docs/api`, `public/openapi.json`, `public/docs/api-routes.json`, CLI REST hints, SDK examples, account actions, and quickstart snippets.
+CODE: route count, auth header, base URL, envelope shape, streaming shape, idempotency, problem details, examples, code samples, SDK method links, account destinations, production smoke, and source-indexed/beta status must render from route contracts. Handwritten API pages may add explanation, but cannot override generated contract facts.
+EXIT: `/api` is the guided product map and `/docs/api` is the exhaustive generated reference, both using the same route contract data.
+
+REDLINE: code samples are product behavior and must not be stale copy.
+ACTION: CREATE `docs/internal/docs-sample-contract.json`, `docs/internal/docs-sample-contract.md`, `scripts/build-docs-sample-contract.cjs`, and `scripts/verify-docs-samples.cjs`.
+CODE: every code sample must declare language, surface, source route or CLI verb, required env vars, placeholder policy, secret-safety policy, package/install prerequisites, expected stdout/body, cleanup command, failure mode, and whether it is smoke-tested, syntax-checked, generated, or illustrative-only. Stale examples like `kolm-demo-key`, old `kolm_` key shapes, mismatched auth headers, unpublished package install commands, and unverified expected outputs block final docs completion.
+EXIT: docs examples become executable artifacts or explicitly scoped illustrative snippets. Nothing in docs teaches a developer a stale API key, route, package, or payload shape.
+
+REDLINE: SDK docs must match package truth, not aspiration.
+ACTION: CREATE `docs/internal/sdk-package-truth-matrix.json`, `docs/internal/sdk-package-truth-matrix.md`, `scripts/build-sdk-package-truth-matrix.cjs`, and `scripts/verify-sdk-package-truth.cjs`; WIRE package manifests, READMEs, `public/docs/sdk.html`, `/sdks`, package-release readiness, SBOM/provenance, and SDK parity.
+CODE: each SDK/package/integration must declare package name, registry owner, install command, publication state, package channel, version, route coverage, generated/manual source, typed errors, streaming/upload support, examples, smoke command, known unsupported operations, and public-copy allowance. A package in `source_preview` cannot be documented as published/installable except via local checkout instructions.
+EXIT: users can trust docs install commands and know exactly which SDKs are browser-ready, source-only, package-ready, published, deprecated, or name-blocked.
+
+External baselines imported into this redline:
+
+- OpenAPI Specification 3.2.0 was released on 2025-09-19; 3.1.2 and 3.0.4 are patch releases on the same date, and current Kolm `3.0.3` is not the latest patch/minor target: https://spec.openapis.org/oas/latest
+- JSON Schema Draft 2020-12 is the current JSON Schema draft and defines the schema/metaschema baseline Kolm should use for route request/response validation and OpenAPI dialect planning: https://json-schema.org/draft/2020-12
+- RFC 9457 Problem Details says problem types should document type URI, title, HTTP status, and should not expose implementation internals; this should govern Kolm API/SDK/account error rendering: https://www.ietf.org/rfc/rfc9457.html
+- Diataxis defines four documentation needs: tutorials, how-to guides, technical reference, and explanation. Kolm docs must map every page into one of those types instead of mixing first-value tutorials with exhaustive reference catalogs: https://diataxis.fr/
+
 ## Live Product Capability And Build Completion Redline
 
 Current local product-capability evidence:
@@ -2500,6 +2538,76 @@ Current local product-capability evidence:
 - `public/product-readiness-closeout.json` and `docs/readiness-gate-workorders.json` both report 8 open non-local closeout items: foundation standardization, ecosystem runtime adoption, runtime WASM, iOS/Android SDK, benchmarking infrastructure, SDK depth, compliance certification, and one-line install.
 - The account tree currently has 51 account HTML pages, while the product graph has only 33 account links. That means account coverage exists, but not every account page is yet owned by a journey/feature/state contract.
 - The package scripts now include useful verification lanes (`verify:control-files`, `verify:depth`, product frontier simulations, benchmark gates, package release readiness, UI audits), but the route-contract, SDK-parity, docs-IA, account-matrix, page-family, production-evidence, and final-redline verifiers are still absent.
+
+## Live AI Capability, Forge, Distill, Eval, And Runtime Redline
+
+Current local AI-capability evidence:
+
+- `src/product-kernel.js` is the vocabulary authority: 12 product journeys, route classes, deployment modes, proof kinds, failure codes, and readiness states.
+- `src/product-experience.js` is the product journey authority: gateway/capture, privacy lake, datasets/labeling, train/distill, models/backbones, multimodal/tokenization, compile/verify, runtime/inference, compute/cloud, devices/fleet, enterprise/governance, and agents/registry.
+- `docs/product-sota-readiness.json` currently has 57 readiness requirements: 14 shipped, 35 implemented, 2 external-partner gated, 1 live-certification gated, 4 package-release gated, and 1 public-benchmark gated requirement.
+- `docs/product-frontier-lab.json` contains 15 frontier experiments and 36 sources; `docs/product-frontier-implementation-contracts.json` contains 15 implementation contracts and 12 implementation-research refs; `docs/product-frontier-operator-kernels.json` contains 12 operator kernels and 23 sources. These are useful planning/proof contracts, not shipped benchmark superiority.
+- `docs/product-invention-portfolio.json` contains 12 inventions and a synthetic portfolio simulation. It is useful for prioritization, but synthetic lift is not public product proof.
+- `KOLM_W866_FORGE_DISTILL_FRONTIER_PLAN.md` is an untracked in-flight plan. It raises the Forge/Distill bar to GGUF, MoE-aware quantization, hardware-aware target selection, large-model sharding, merge pipelines, `kolm serve`, continuous quality verification, and benchmark reproduction. It is not release authority until it is tracked, owned, and joined to generated control files.
+- The W866 plan requires `src/forge/*`, `src/quantize/*`, `src/export/*`, `src/merge/*`, `src/serve/*`, and `src/bench/*`, but the current `src/` top-level directories are only `compute`, `data`, `migrations`, `runners`, `services`, and `store-drivers`; the named W866 directories do not exist locally.
+- Capability code is broad but flat: important modules include `src/quantization-oracle.js`, `src/distill-strategy.js`, `src/kscore-calibration.js`, `src/benchmark-evidence.js`, `src/model-card-schema.js`, `src/model-card-emit.js`, `src/runtime-placement.js`, `src/compile-targets.js`, `src/tsac-compiler.js`, `src/product-frontier-contracts.js`, `src/product-frontier-lab.js`, and `src/product-frontier-operator-kernels.js`.
+- `src/quantization-oracle.js` ranks FP16/BF16, int8, SmoothQuant, int4/NF4, GPTQ, AWQ, HQQ, EXL2, AQLM, QuIP, EfficientQAT, and KIVI KV-cache strategies, but it is a deterministic planner. Methods marked `external_toolchain`, `worker_external_repo`, or `runtime_policy` cannot be marketed as first-class shipped worker execution.
+- `workers/quantize/` exists and includes `package.json`, `quantize.mjs`, `README.md`, `requirements.txt`, and `scripts/quantize.py`. That is real implementation surface, but it is still separate from the W866 Forge topology and must be bound to method-level execution proof.
+- `src/router.js` exposes product graph, frontier contracts, models, compile, distill, and benchmark routes, including `/v1/product/graph`, `/v1/product/frontier-contracts`, `/v1/compile`, `/v1/distill/*`, and `/v1/bench/mmlu|humaneval|mtbench`. It does not yet expose the W866 planned route families `/v1/forge/*`, `/v1/quantize/*`, `/v1/merge/*`, `/v1/serve/*`, and broad `/v1/bench/*` reproduction endpoints.
+- `cli/kolm.js` contains compile, distill, quantize, bench, serve, surfaces, and frontier-contract help. That is meaningful CLI breadth, but it needs a capability contract so help text, implementation, docs, API, account UI, and artifact passport do not diverge.
+- `src/model-registry.js` has verified and candidate model separation, exact Hugging Face model-card URL rules, hardware tiers, modality, architecture, quant, and revision-pin honesty. Its current rows use warn-band revision pinning for many models; public model claims must expose that state.
+- `src/provider-registry.js` contains provider auth/path/cost data for OpenAI, Anthropic, OpenRouter, and Gemini. Because provider pricing and model names change, this must be freshness-controlled by catalog evidence before it drives public savings claims.
+- `src/benchmark-evidence.js` requires lanes for `.kolm` local runner, OpenAI-compatible API, Anthropic, Gemini, hosted open model, local GGUF, and browser worker. Local files exist for `public/kolm-bench.json`, `public/kscore-leaderboard.json`, `public/benchmarks/redaction-public-benchmark.json`, and `public/benchmarks/quality-judge-calibration.json`, but `reports/benchmarks/provider-matrix.json` is absent locally.
+- `public/kolm-bench.json` is only a small local fixture set and currently contains a visible encoding artifact in one Spanish reference token. Benchmark fixtures need the same encoding/integrity gate as HTML metadata.
+- The local quality calibration fixture says `public_claim_ready=false` and lists blockers: external human-labeled set missing, cross-model judge panel missing, and raw prompt/output public corpus missing. That is the correct scope and must remain visible until closed.
+- The local redaction benchmark is strong for its fixture (`tp=9`, `fp=0`, `fn=0`, `f1=1`), but it is not a broad PHI/PII industry benchmark until the public fixture set, external dataset policy, and per-class methodology scale up.
+
+External baselines imported into this redline:
+
+- Hugging Face model cards support structured metadata for base model, dataset, task, license, evaluation results, source links, and CO2 impact. Kolm artifact/model cards need those fields plus Kolm-specific provenance, K-Score, quantization, runtime, and receipt metadata: https://huggingface.co/docs/hub/model-cards
+- vLLM treats quantization as a hardware-specific compatibility matrix and explicitly notes that support changes over time. Kolm quantization claims need hardware/runtime freshness, not a static "supports all quantization" statement: https://docs.vllm.ai/en/stable/features/quantization/
+- OpenAI Evals frames evals as a framework plus registry for testing LLM systems and encourages custom evals for real workflows. Kolm K-Score must be a reproducible eval system with data rights and workflow-specific private/public split, not just an internal score: https://github.com/openai/evals
+- Inspect AI is an open-source framework for frontier AI evaluations with reusable components, prebuilt evals, monitoring, and VS Code tooling. Kolm should treat K-Score and benchmark reproduction as an eval platform with logs/viewers/authoring support, not a one-off benchmark JSON: https://inspect.aisi.org.uk/
+- GGUF is designed as an extensible single-file model format containing metadata and tensors for GGML-based inference, with fast loading, `mmap`, and complete load information. Kolm GGUF export must preserve enough `.kolm` passport metadata to be useful outside Kolm, not just emit a file with weights: https://github.com/ggml-org/ggml/blob/master/docs/gguf.md
+
+REDLINE: AI capability completion cannot be inferred from broad module count or W-number volume.
+ACTION: CREATE `docs/internal/ai-capability-contract.json`, `docs/internal/ai-capability-contract.md`, `scripts/build-ai-capability-contract.cjs`, and `scripts/verify-ai-capability-contract.cjs`.
+CODE: every AI capability must declare `capability_id`, journey, source modules, worker modules, route families, CLI commands, account pages, TUI views, docs pages, artifact passport fields, data inputs, output artifacts, supported targets, unsupported targets, freshness source, readiness status, public claim scope, proof command, production smoke requirement, and external gate state.
+EXIT: no page, route, CLI command, SDK method, or account UI can claim "distill", "compile", "quantize", "run anywhere", "best", "automatic", "portable", "benchmark", or "gold standard" unless the capability contract proves the claim.
+
+REDLINE: Forge/Distill frontier work is not release-complete while the W866 topology is only an untracked plan and the planned source directories do not exist.
+ACTION: CREATE `docs/internal/forge-distill-runtime-frontier-contract.json`, `docs/internal/forge-distill-runtime-frontier-contract.md`, `scripts/build-forge-distill-runtime-frontier-contract.cjs`, and `scripts/verify-forge-distill-runtime-frontier-contract.cjs`; MOVE or REGISTER the W866 plan under a governed docs path if it remains authoritative.
+CODE: the contract must map W867-W880 to actual owner files, planned files, route families, CLI flags, account tabs, TUI views, worker dependencies, artifact passport fields, benchmark fixtures, live smoke commands, and external blockers. If the final architecture remains flat modules, the contract must explicitly map W866 planned directories to existing flat modules; if the architecture moves to `src/forge/*` and siblings, the contract must define module boundaries before implementation.
+CODE: W866 cannot bypass the existing product graph, readiness ledger, API reference contract, SDK package truth matrix, docs sample contract, account matrix, release artifact evidence, or production evidence packet.
+EXIT: W866 becomes a buildable release lane rather than a parallel checklist.
+
+REDLINE: K-Score and benchmark claims are not finished until local fixtures, public calibration, provider/runtime comparison, and model-card export are one evidence system.
+ACTION: CREATE `docs/internal/eval-kscore-benchmark-contract.json`, `docs/internal/eval-kscore-benchmark-contract.md`, `scripts/build-eval-kscore-benchmark-contract.cjs`, and `scripts/verify-eval-kscore-benchmark-contract.cjs`.
+CODE: include K-Score axes, task categories, fixture IDs, public/private split, human label source, judge model policy, calibration version, Brier/calibration bins, holdout independence, provider baseline lanes, hardware profile, latency/cost/quality/energy fields, raw prompt/output hash policy, report paths, leaderboard freshness, data rights, and public-copy claim scope.
+CODE: the absence of `reports/benchmarks/provider-matrix.json` blocks comparative provider/runtime superiority claims. The small local fixture and synthetic portfolio simulation can support engineering prioritization, not market-facing "gold standard" copy.
+EXIT: K-Score is a reproducible eval platform with publishable methodology and explicit public/private boundaries.
+
+REDLINE: quantization/export is not complete until method support is method-level, hardware-level, runtime-level, and evidence-level.
+ACTION: CREATE `docs/internal/quantization-export-contract.json`, `docs/internal/quantization-export-contract.md`, `scripts/build-quantization-export-contract.cjs`, and `scripts/verify-quantization-export-contract.cjs`.
+CODE: for every method (`fp16`, `int8`, `smoothquant`, `int4`, `gptq`, `awq`, `hqq`, `exl2`, `aqlm`, `quip`, `qat`, `kivi_kv`, W866 `gguf`, `nvfp4`, `fp8`) declare worker status, external dependency, license, calibration requirement, supported architecture, MoE behavior, supported hardware, supported runtime, memory model, quality-risk model, output format, load test, generation test, benchmark test, fallback, and claim scope.
+CODE: GGUF, EXL2, GPTQ/AWQ, NVFP4/FP8, HQQ, large-model sharding, split-file export, model merging, and `kolm serve` must not be public-shipped claims until each has load, generate, measure, compare, and passport evidence.
+EXIT: "best quantization" becomes a measurable method matrix, not a slogan.
+
+REDLINE: artifacts need a canonical passport, not scattered metadata in `src/artifact.js`, model cards, benchmark files, route responses, and CLI output.
+ACTION: CREATE `docs/internal/artifact-passport-contract.json`, `docs/internal/artifact-passport-contract.md`, `scripts/build-artifact-passport-contract.cjs`, and `scripts/verify-artifact-passport-contract.cjs`.
+CODE: the passport must bind artifact hash, spec hash, recipe class, dataset hash, holdout hash, teacher/student/base model, model revision pin, provider pricing snapshot, license, K-Score version, eval report IDs, redaction/privacy state, quantization method, runtime targets, memory/latency/cost estimates, export formats, dependency graph, signatures, receipt hashes, SBOM/provenance refs, model-card fields, and public/private claim scope.
+CODE: JSON is acceptable as an inspectable, hash-bound projection for the passport, but the source of truth is the signed artifact and generated passport, not hand-maintained docs.
+EXIT: every artifact answers what it is, where it came from, how it was evaluated, where it can run, what it costs, what it cannot claim, and how to verify it.
+
+REDLINE: model/provider/runtime truth cannot be scattered across registries, pricing docs, runtime pages, account selectors, and CLI defaults.
+ACTION: CREATE `docs/internal/model-provider-runtime-catalog-contract.json`, `docs/internal/model-provider-runtime-catalog-contract.md`, `scripts/build-model-provider-runtime-catalog-contract.cjs`, and `scripts/verify-model-provider-runtime-catalog-contract.cjs`.
+CODE: join `src/model-registry.js`, `src/provider-registry.js`, `docs/internal/catalog-manifest.json`, `src/compile-targets.js`, `src/runtime-placement.js`, `src/runtime-policy.js`, SDK docs, account selectors, pricing/ROI, and model pages. Every row must carry source URL, checked date, revision pin state, license, modality, context, architecture, active/total params, provider auth path, pricing source/freshness, hardware fit, runtime support, quant support, and public-copy allowance.
+EXIT: model/provider/device/runtime selectors become trustworthy product controls instead of manually aligned copy.
+
+REDLINE: capability copy must be claim-proof-mapped before frontend polish can be considered done.
+ACTION: CREATE `docs/internal/capability-claim-proof-map.json`, `docs/internal/capability-claim-proof-map.md`, `scripts/build-capability-claim-proof-map.cjs`, and `scripts/verify-capability-claim-proof-map.cjs`.
+CODE: map every homepage/product/docs/account/CLI phrase that implies superiority, portability, benchmark status, certification, package availability, runtime support, quantization support, model support, or savings to one of `allowed`, `scoped`, `blocked`, or `internal_only`. The map must reference capability contract rows, benchmark evidence rows, package truth rows, readiness closeout rows, and production evidence rows.
+EXIT: the site can be visually rewritten without accidentally overclaiming backend reality.
 
 REDLINE: Kolm is not 100 percent finished while feature completion is inferred from pages, route groups, or tests instead of a product-capability state machine.
 ACTION: CREATE `docs/internal/product-feature-completion-matrix.json`, `docs/internal/product-feature-completion-matrix.md`, `scripts/build-product-feature-completion-matrix.cjs`, and `scripts/verify-product-feature-completion-matrix.cjs`.
@@ -4014,3 +4122,91 @@ Implementation owner notes:
 - Do not replace working local gates. Wrap them in a release evidence model that captures subjects, outputs, hashes, attestations, and production proof.
 - The first build agent should implement the new contracts in read-only/warn mode, then fail on only three things first: missing release subjects, placeholder hashes, and secret leakage in release artifacts.
 - The second build agent should update CI to run the contract verifiers and emit artifacts, then only after that tighten branch/release requirements.
+
+## Live Account Shell, Navigation, Component State, And UI System Redline
+
+Current local evidence:
+
+- `public/account/**/*.html` contains 51 account HTML pages.
+- Account pages are not on one account shell. A local source pass found all 51 account pages have page-local `<style>` blocks, 373 inline `style=` attributes, 142 `<script>` tags, 191 `innerHTML` writes, 82 `aria-current` occurrences, 509 `aria-label` occurrences, and 89 `kfetch(` calls.
+- `public/account/overview.html` is the only account page that loads `/surface-polish.css`. The other 50 account pages miss the finish layer entirely.
+- Only 7 account pages load `/nav.js`: `overview.html`, `bakeoff.html`, `captures.html`, `federated/consortium.html`, `pipelines.html`, `sla.html`, and `sustainability.html`. The remaining 44 account pages do not load the shared nav/runtime shell.
+- Three account pages miss `/ks.css`: `public/account/drift.html`, `public/account/pipelines/index.html`, and `public/account/pipelines/_template.html`.
+- Ten account pages have no `account-sidebar` marker: `bakeoff.html`, `captures.html`, `continuous-monitoring.html`, `drift.html`, `pipelines.html`, `sla.html`, `sustainability.html`, `federated/consortium.html`, `pipelines/index.html`, and `pipelines/_template.html`.
+- Seventeen account pages still contain the bad `繚` separator in source: `artifacts.html`, `bakeoffs.html`, `billing.html`, `builds.html`, `captured.html`, `connectors.html`, `datasets.html`, `devices.html`, `labeling.html`, `opportunities.html`, `overview.html`, `privacy-events.html`, `repeated-workflows.html`, `simulations.html`, `storage.html`, `captures/analytics.html`, and `captures/review.html`.
+- Ten account pages have more than 10 inline style attributes: `agent-telemetry.html`, `api-keys.html`, `audit-log.html`, `billing.html`, `confidence.html`, `failure-modes.html`, `labeling.html`, `lake.html`, `overview.html`, and `storage.html`.
+- `public/account/overview.html` hardcodes a `ks-nav` top nav and two skip links, then also loads `public/nav.js`. Its source title is `Overview 繚 Account 繚 kolm.ai`, while OpenGraph and JSON-LD use different separators. This is visible polish debt and metadata truth drift.
+- `public/nav.js` owns a large runtime account command center: it injects `.kolm-account-command`, a chat panel, an 8-step account workflow, an 8-card product matrix, and an account sidebar if `#account-sidebar` exists. That is product-critical shell behavior living as runtime DOM patching, not as a generated account shell.
+- `public/nav.js` also injects a broad surface guard with many `!important` rules, product media bands, footer trust ribbon, primary-nav unifier, auth-aware pill, theme controls, and mobile nav. It is doing too many jobs: shell composition, design-system patching, copy repair, product media insertion, auth affordance, and footer/trust repair.
+- `public/ks.css`, `public/surface-polish.css`, and `public/warm-paper.css` are overlapping design layers. `warm-paper.css` is explicitly a legacy filename that now ships cool-slate styling. `surface-polish.css` says it keeps page art direction while applying accessibility/mobile finish. Account pages consume these inconsistently.
+- `docs/internal/design-cascade-ledger.json` already reports the larger public design debt: 729 public HTML pages, 19 CSS files, 3,873 CSS `!important` uses, 1,524 raw CSS hex values, 75 negative letter-spacing uses, and 3,215 inline styles. The account surface proves why those aggregate numbers matter.
+- `public/account/overview.html` has the right strategic idea: it exposes three product modes, journey cards, readiness counts, and closeout rows from `/v1/product/graph` and `/product-readiness-closeout.json`. But this is not yet a product-wide account shell contract. Most account pages do not prove the same journey/state/readiness model.
+
+What this means:
+
+Kolm does not yet have a finished post-auth product UI. It has a useful account overview plus many individually styled account pages and a powerful runtime patcher that tries to make the site coherent after the browser loads. That can pass screenshot audits while still failing structural finish: source shells disagree, page metadata differs, account navigation is not generated from one manifest, component states are not contract-bound, and UI quality depends on late JavaScript repair.
+
+Hard redlines:
+
+1. Build `docs/internal/account-shell-contract.json` and `.md`.
+   - Inputs: all 51 `public/account/**/*.html` pages, `public/nav.js`, `public/ks.css`, `public/surface-polish.css`, `public/warm-paper.css`, `src/product-experience.js`, `public/product-graph.json`, `public/product-readiness-closeout.json`, `docs/product-journeys.json`, and route contracts.
+   - It must declare one account shell authority: top nav, side nav, command center, chat placement, skip link, theme controls, auth gate, account footer, readiness band, and error/loading/empty containers.
+   - Every account page must declare `shell_mode`: `generated_shell`, `legacy_shell_pending_migration`, `embedded_tool`, `archive`, or `remove`.
+   - Final state must have zero account pages silently outside the shell. Pages that intentionally bypass the shell must declare why and must still satisfy accessibility, metadata, auth, and product journey requirements.
+   - The contract must fail on duplicate skip links, inconsistent metadata separators, missing `/ks.css`, missing shell CSS, missing nav loader where shell mode requires it, and unowned page-local style/script blocks.
+
+2. Build `docs/internal/account-nav-manifest.json` and `.md`.
+   - Inputs: `public/nav.js` account groups, account HTML paths, Vercel account rewrites, product graph journeys, CLI/TUI equivalents, and account route/API contracts.
+   - It must define every account nav item once: label, path, group, journey ids, feature ids, account page owner, API routes, CLI equivalent, TUI view, required auth scope, badge/count source, and active-state matching rule.
+   - It must include all 51 account pages or explicitly classify a page as template/archive/remove.
+   - It must replace hardcoded sidebars in account HTML and runtime-only sidebar rewrites with generated markup or a shared build-time include.
+   - It must prove `aria-current="page"` appears exactly where the active route is displayed, not by page-local guesswork.
+
+3. Build `docs/internal/component-interaction-state-contract.json` and `.md`.
+   - Inputs: shared CSS, account pages, public nav, demo widgets, video widgets, calculators, tables, forms, drawers, popovers, chat, status tokens, and product media components.
+   - It must define canonical states for buttons, links, nav items, popovers, menus, tabs, tables, forms, cards, status pills, dialogs, videos, demos, calculators, account widgets, loading skeletons, error blocks, partial/readiness blocks, disabled controls, destructive actions, copy buttons, and auth-gated actions.
+   - Every component family must define light/dark colors by token, focus-visible ring, hover, pressed, disabled, loading, error, success, selected/current, external-gated, empty, partial, and reduced-motion behavior.
+   - Inline styles and raw CSS hex values in component instances must be replaced by tokens or listed as time-boxed exceptions with owner, page, and removal wave.
+   - Runtime `!important` surface guards cannot count as final component design. They can remain only as compatibility shims while the contract is migrated into source CSS/components.
+
+4. Build `docs/internal/ui-accessibility-performance-contract.json` and `.md`.
+   - Inputs: account shell contract, page-family contracts, design cascade ledger, product media proof, screenshot reports, route list, and production RUM/field metrics once deployed.
+   - It must encode WCAG 2.2 gates that matter to the current failures: focus not obscured, visible focus appearance, target sizing, consistent help placement, accessible authentication, meaningful headings, skip-link uniqueness, no hover-only popovers, keyboard navigation, and reduced-motion support.
+   - It must encode Core Web Vitals gates: LCP, INP, and CLS at the 75th percentile, segmented by mobile and desktop. Local screenshots are not enough; production needs field-capable measurement or an explicit no-field-data exception.
+   - It must require width/height or aspect-ratio for product media, stable skeleton dimensions for async account panels, no layout jumps from injected runtime bands, and bounded main-thread work for nav/account injections.
+   - It must require account pages to be tested in no-auth, auth with API key, missing cloud credentials, partial data, empty tenant, error response, and external-gated readiness states.
+
+5. Build `docs/internal/nav-runtime-debt-ledger.json` and `.md`.
+   - Inputs: `public/nav.js`, shared CSS, all public/account HTML shells, route list, and screenshot/a11y results.
+   - It must classify every behavior in `nav.js` as `permanent_runtime_feature`, `build_time_shell_candidate`, `css_migration_candidate`, `copy_metadata_migration_candidate`, `auth_runtime_required`, or `remove_after_migration`.
+   - Permanent runtime features should be small: theme switching, mobile disclosure behavior, auth-aware account pill, and genuine dynamic account data. Product copy repair, source nav rewrite, metadata repair, CSS emergency styling, and large static account command markup should move to build-time/generated source.
+   - It must define a burn-down budget: fewer `!important` rules, fewer inline account styles, fewer page-local style blocks, fewer page-local nav variants, and zero mojibake title separators in source.
+
+6. Build `docs/internal/account-product-journey-state-machine.json` and `.md`.
+   - Inputs: product graph journeys, account routes, API route contracts, CLI/TUI maps, readiness closeout, storage/cloud readiness, billing tiers, and tenant data state.
+   - It must make the post-auth account a command center for the three loops:
+     - Route and capture: connectors, captured calls, lake, privacy events, datasets, labeling.
+     - Distill and compile: builds, new build, distill runs, new distill, bakeoffs, failure modes, active learning, confidence, pipelines.
+     - Run and govern: artifacts, devices, storage, routing, SLA, billing, API keys, audit log, security, SSO, agent telemetry, federated consortium.
+   - Each page must expose primary object state, next action, readiness state, proof path, and fallback state. A page that only displays a report without action/proof is not finished.
+   - Overview must not be the only place where product readiness and closeout scope are visible. Relevant readiness belongs near the feature that depends on it.
+
+7. Wire the account/UI contracts into `reports/build-redline/final-build-redline.json`.
+   - `final-build-redline` must fail if any account page is unclassified, missing shell resources, carrying unapproved mojibake metadata, outside the nav manifest, missing core UI states, or failing keyboard/mobile/light/dark screenshot proof.
+   - It must fail if runtime DOM patching is the only reason a page has a working nav, sidebar, product proof component, or title/copy repair.
+   - It must fail if account pages do not map to API route contracts and product graph journeys.
+
+External baselines imported into this redline:
+
+- WCAG 2.2 was published as a W3C Recommendation on 2023-10-05 and adds success criteria directly relevant here: focus not obscured, target size, consistent help, redundant entry, and accessible authentication: https://www.w3.org/WAI/standards-guidelines/wcag/new-in-22/
+- WAI-ARIA Authoring Practices disclosure navigation guidance says typical site nav should use disclosure buttons, list semantics, `aria-expanded`, `aria-controls`, `aria-current`, keyboard movement, and Escape close behavior rather than inappropriate menu roles: https://www.w3.org/TR/2021/NOTE-wai-aria-practices-1.2-20211129/examples/disclosure/disclosure-navigation.html
+- Core Web Vitals current stable metrics are LCP, INP, and CLS; good thresholds are LCP within 2.5s, INP at 200ms or less, and CLS 0.1 or less at the 75th percentile across mobile and desktop: https://web.dev/articles/vitals
+- MDN documents that `<title>` is text-only browser/search metadata, should be unique/descriptive, and search engines commonly display about the first 55 to 60 characters, so mojibake and inconsistent separators are release defects: https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/title
+
+Implementation owner notes:
+
+- Do not start by restyling every account page by hand. The first implementation cut is to generate the account shell/nav/component contracts from the current files, mark exceptions, and fail only on structural contradictions: missing shell, bad metadata, missing nav ownership, duplicate skip links, and unclassified pages.
+- The first code cut after that should be build-time shell generation for account pages, not more runtime repair in `nav.js`.
+- The second code cut should split `nav.js` into small owned modules: theme/auth/mobile nav, account shell data, product media, trust ribbon, and migration shims. The contract should make it clear which shims are temporary.
+- The third code cut should migrate account page-local CSS into shared tokens/components and remove inline style exceptions page by page.
+- Do not call the account product matrix complete until an authenticated local and production pass proves every page in no-auth, empty, loading, partial, error, success, and external-gated states.

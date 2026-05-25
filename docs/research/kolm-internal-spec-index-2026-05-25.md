@@ -56,12 +56,22 @@ These internal specs should produce generated files and verifiers:
 | P0 control file spec/buildbook + retention redline | `docs/internal/data-retention-backup-contract.json` | `verify:data-retention` |
 | P0 control file spec/buildbook + tenant-boundary redline | `docs/internal/tenant-data-boundary-contract.json` | `verify:tenant-boundary` |
 | P0 control file spec/buildbook + SDK redline | `docs/internal/sdk-api-parity.json` | `verify:sdk-parity` |
+| SDK/package truth redline | `docs/internal/sdk-package-truth-matrix.json` | `verify:sdk-package-truth` |
 | P0 control file spec/buildbook + docs redline | `docs/internal/docs-ia-contract.json` | `verify:docs-ia` |
+| developer docs shell redline | `docs/internal/developer-docs-shell-contract.json` | `verify:developer-docs-shell` |
+| API reference redline | `docs/internal/api-reference-contract.json` | `verify:api-reference-contract` |
+| docs sample redline | `docs/internal/docs-sample-contract.json` | `verify:docs-samples` |
 | P0 control file spec/buildbook + feature matrix seed | `docs/internal/product-feature-completion-matrix.json` | `verify:feature-matrix` |
 | account product matrix seed | `docs/internal/account-product-matrix.json` | `verify:account-matrix` |
+| account shell/nav redline | `docs/internal/account-shell-contract.json` | `verify:account-shell` |
+| account shell/nav redline | `docs/internal/account-nav-manifest.json` | `verify:account-nav` |
+| account shell/nav redline | `docs/internal/nav-runtime-debt-ledger.json` | `verify:nav-runtime-debt` |
+| account journey redline | `docs/internal/account-product-journey-state-machine.json` | `verify:account-product-journey-state-machine` |
 | P0 control file spec/buildbook + page-family redline | `docs/internal/page-family-contracts.json` | `verify:page-families` |
 | P0 control file spec/buildbook + page-family redline | `docs/internal/component-state-contracts.json` | `verify:page-families` |
 | P0 control file spec/buildbook + page-family redline | `docs/internal/nav-contract.json` | `verify:page-families` |
+| component/UI redline | `docs/internal/component-interaction-state-contract.json` | `verify:component-interaction-state` |
+| component/UI redline | `docs/internal/ui-accessibility-performance-contract.json` | `verify:ui-accessibility-performance` |
 | P0 control file spec/buildbook + design cascade seed | `docs/internal/design-cascade-ledger.json` | `verify:design-cascade-ledger` |
 | P0 control file spec/buildbook + media proof seed | `docs/internal/product-media-proof.json` | `verify:product-media-proof` |
 | P0 control file spec/buildbook | `docs/internal/catalog-manifest.json` | `verify:catalog-manifest` |
@@ -69,6 +79,10 @@ These internal specs should produce generated files and verifiers:
 | P0 control file spec/buildbook + production redline | `docs/internal/observability-contract.json` | `verify:observability-contract` |
 | P0 control file spec/buildbook + production redline | `docs/internal/security-release-contract.json` | `verify:security-release` |
 | P0 control file spec/buildbook + release-boundary redline | `docs/internal/release-boundary-manifest.json` | `verify:release-boundary` |
+| P0 control file spec/buildbook + CI release redline | `docs/internal/ci-release-pipeline-contract.json` | `verify:ci-release` |
+| P0 control file spec/buildbook + required-checks redline | `docs/internal/ci-required-checks-policy.json` | `verify:ci-required-checks` |
+| P0 control file spec/buildbook + release artifact redline | `docs/internal/release-artifact-evidence-matrix.json` | `verify:release-artifacts` |
+| P0 control file spec/buildbook + SBOM/provenance redline | `docs/internal/sbom-provenance-contract.json` | `verify:sbom-provenance` |
 | P0 control file spec/buildbook | `reports/deployments/<release-id>/production-evidence.json` | `verify:production-evidence` |
 | P0 control file spec/buildbook | `reports/build-redline/final-build-redline.json` | `verify:final-redline` |
 

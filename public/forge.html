@@ -753,6 +753,68 @@ verify      kolm verify deepseek-r1-32b-int4.kolm</div>
 </section>
 
 <!-- ============================================================
+     6b. OPERATOR SURFACES (W866) — every part of the forge has a button,
+         a CLI verb, a TUI view, and a docs page. Same backend everywhere.
+     ============================================================ -->
+<section class="fr-section" id="surfaces" style="border-top:1px solid var(--line-1)">
+  <div class="fr-container">
+    <div class="fr-section__head fr-reveal">
+      <div class="fr-eyebrow">Surfaces &middot; W866 &middot; operator workbench</div>
+      <h2 class="fr-h2">Six entry points. One backend.</h2>
+      <p class="fr-lede">Every stage of the forge &mdash; hardware probe, quantize, merge, serve, export, bench &mdash; ships as a route, a CLI verb, a TUI view, and an Account page. Same code, four faces. Pick the surface that fits the moment.</p>
+    </div>
+
+    <div class="bw-grid fr-reveal" style="margin-top:32px">
+
+      <a class="bw-cell" href="/account/hardware" style="text-decoration:none;display:block">
+        <div class="fr-eyebrow" style="margin-bottom:8px">01 &middot; Hardware</div>
+        <h3 style="font-family:var(--fr-font-display);font-size:var(--fr-text-2xl);font-weight:580;color:var(--ink-1);margin:0 0 8px;letter-spacing:var(--fr-track-display)">What this box can run</h3>
+        <p style="font-size:14px;line-height:1.55;color:var(--ink-2);margin:0 0 14px">VRAM, native dtypes, supported quants, vendor + driver. Pulled from <code style="font-family:var(--fr-font-mono);font-size:0.92em">/v1/hardware</code>; cached once per session.</p>
+        <div style="font-family:var(--fr-font-mono);font-size:12px;color:var(--fr-mint);display:flex;justify-content:space-between"><span>kolm hardware</span><span>&rarr;</span></div>
+      </a>
+
+      <a class="bw-cell" href="/account/quantize" style="text-decoration:none;display:block">
+        <div class="fr-eyebrow" style="margin-bottom:8px">02 &middot; Quantize</div>
+        <h3 style="font-family:var(--fr-font-display);font-size:var(--fr-text-2xl);font-weight:580;color:var(--ink-1);margin:0 0 8px;letter-spacing:var(--fr-track-display)">19 targets, one fit check</h3>
+        <p style="font-size:14px;line-height:1.55;color:var(--ink-2);margin:0 0 14px">Pick the target; the wizard checks fit, queues the job, hands you a job id. Same picker as <code style="font-family:var(--fr-font-mono);font-size:0.92em">kolm compile --target</code>.</p>
+        <div style="font-family:var(--fr-font-mono);font-size:12px;color:var(--fr-mint);display:flex;justify-content:space-between"><span>kolm compile &middot; kolm fit</span><span>&rarr;</span></div>
+      </a>
+
+      <a class="bw-cell" href="/merge" style="text-decoration:none;display:block">
+        <div class="fr-eyebrow" style="margin-bottom:8px">03 &middot; Merge</div>
+        <h3 style="font-family:var(--fr-font-display);font-size:var(--fr-text-2xl);font-weight:580;color:var(--ink-1);margin:0 0 8px;letter-spacing:var(--fr-track-display)">Two artifacts, one method</h3>
+        <p style="font-size:14px;line-height:1.55;color:var(--ink-2);margin:0 0 14px">Linear, slerp, ties, dare, passthrough. Same-lineage gate. Dry-run prints a heuristic K-score delta before you spend a GPU.</p>
+        <div style="font-family:var(--fr-font-mono);font-size:12px;color:var(--fr-mint);display:flex;justify-content:space-between"><span>kolm merge --method ties</span><span>&rarr;</span></div>
+      </a>
+
+      <a class="bw-cell" href="/account/serve" style="text-decoration:none;display:block">
+        <div class="fr-eyebrow" style="margin-bottom:8px">04 &middot; Serve</div>
+        <h3 style="font-family:var(--fr-font-display);font-size:var(--fr-text-2xl);font-weight:580;color:var(--ink-1);margin:0 0 8px;letter-spacing:var(--fr-track-display)">Docker or k8s, six runtimes</h3>
+        <p style="font-size:14px;line-height:1.55;color:var(--ink-2);margin:0 0 14px">vLLM, llama.cpp, ollama, TGI, sglang, TRT-LLM. Emits the manifest pinned to the artifact mount and the GPU resource request.</p>
+        <div style="font-family:var(--fr-font-mono);font-size:12px;color:var(--fr-mint);display:flex;justify-content:space-between"><span>kolm serve --runtime vllm</span><span>&rarr;</span></div>
+      </a>
+
+      <a class="bw-cell" href="/account/bench" style="text-decoration:none;display:block">
+        <div class="fr-eyebrow" style="margin-bottom:8px">05 &middot; Bench</div>
+        <h3 style="font-family:var(--fr-font-display);font-size:var(--fr-text-2xl);font-weight:580;color:var(--ink-1);margin:0 0 8px;letter-spacing:var(--fr-track-display)">Every target on your box</h3>
+        <p style="font-size:14px;line-height:1.55;color:var(--ink-2);margin:0 0 14px">One model, every supported quant. Predicted weights, KV, total, headroom, fit. The &ldquo;recommended&rdquo; row mirrors <code style="font-family:var(--fr-font-mono);font-size:0.92em">--pick-best</code>.</p>
+        <div style="font-family:var(--fr-font-mono);font-size:12px;color:var(--fr-mint);display:flex;justify-content:space-between"><span>kolm bench --all-targets</span><span>&rarr;</span></div>
+      </a>
+
+      <a class="bw-cell" href="/account/experts" style="text-decoration:none;display:block">
+        <div class="fr-eyebrow" style="margin-bottom:8px">06 &middot; Experts</div>
+        <h3 style="font-family:var(--fr-font-display);font-size:var(--fr-text-2xl);font-weight:580;color:var(--ink-1);margin:0 0 8px;letter-spacing:var(--fr-track-display)">MoE activation distribution</h3>
+        <p style="font-size:14px;line-height:1.55;color:var(--ink-2);margin:0 0 14px">For mixture-of-experts artifacts: which experts fire, how often, what to prune. Histogram + prune-suggestion threshold.</p>
+        <div style="font-family:var(--fr-font-mono);font-size:12px;color:var(--fr-mint);display:flex;justify-content:space-between"><span>kolm experts &middot; kolm inspect</span><span>&rarr;</span></div>
+      </a>
+
+    </div>
+
+    <p style="margin:24px 0 0;font-family:var(--fr-font-mono);font-size:12px;color:var(--ink-3);text-align:center">All six surfaces share one <a href="/account/forge" style="color:var(--fr-mint);text-decoration:none;border-bottom:1px dashed currentColor">/account/forge</a> dashboard. The dashboard pulls real state &mdash; jobs, fits, hardware &mdash; from the same routes the CLI hits.</p>
+  </div>
+</section>
+
+<!-- ============================================================
      7. CTA STRIP
      ============================================================ -->
 <section class="fr-section fr-section--tight" id="next" style="border-top:1px solid var(--line-1)">

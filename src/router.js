@@ -54,6 +54,16 @@ import * as traceCapture from './trace-capture.js';
 import * as workflowIr from './workflow-ir.js';
 import * as compileIr from './compile-ir.js';
 import * as traceCompile from './trace-compile.js';
+// W866 — Forge HTTP surface: hardware detection, model inspection, memory fit,
+// MoE expert analysis. The CLI verbs (kolm hardware/inspect/fit/experts) and
+// the Account UI both call these routes so the source of truth is one module.
+// Hardware/inspect/fit are pure compute (no tenant data, rate-limited). The
+// quantize/merge/serve/export routes wrap existing compile jobs and require
+// auth — they create artifacts on the tenant.
+import * as forgeHardware from './forge-hardware.js';
+import * as forgeInspect from './forge-inspect.js';
+import * as forgeFit from './forge-fit.js';
+import * as forgeExperts from './forge-experts.js';
 // W729 — graceful degradation under load. enqueue() gates the hot inference
 // routes with a FIFO + priority lane queue; queue_full / queue_timeout
 // rejections surface as HTTP 429 + Retry-After via the loadQueueMiddleware
@@ -20890,6 +20900,251 @@ res.json({
   r.get('/v1/savings', (req, res, next) => {
     req.url = '/v1/savings/summary' + (req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '');
     return r.handle(req, res, next);
+  });
+
+  // ----- W866 forge routes (hardware / inspect / fit / experts / quantize / merge / serve / export) -----
+  //
+  // Read-only compute routes (hardware/inspect/fit/experts) are unauthed but
+  // rate-limited via forgeLimiter. They produce no tenant artifacts.
+  //
+  // Mutation routes (quantize/merge/serve/export) require auth — they create
+  // .kolm artifacts and serve manifests on the operator's box. These wrap the
+  // existing compile-job system; they are NOT new background workers.
+  const forgeLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 60,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'rate-limited — forge API caps at 60/min/ip' },
+    keyGenerator: ipKey,
+    validate: { trustProxy: false },
+  });
+
+  // GET /v1/hardware — detect SERVER hardware (GPU vendor/vram/cc, supported quants).
+  // Unauthed: returns the operator's local accelerator profile so an Account UI
+  // running on the same host can render a "what fits" picker without auth.
+  r.get('/v1/hardware', forgeLimiter, (_req, res) => {
+    try {
+      const hw = forgeHardware.detectHardware();
+      res.json({ ok: true, ...hw });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: String(e.message || e) });
+    }
+  });
+
+  // POST /v1/inspect — inspect a model (HF id or local .kolm path).
+  // Body: { model_id?: string, kolm_path?: string }
+  // For HF id: fetches config.json over the public HF endpoint. For .kolm:
+  // reads manifest from disk (operator-side path) with signature bypass since
+  // inspection is read-only.
+  r.post('/v1/inspect', forgeLimiter, async (req, res) => {
+    try {
+      const body = req.body || {};
+      const id = body.model_id || body.kolm_path;
+      if (!id || typeof id !== 'string') {
+        return res.status(400).json({ ok: false, error: 'model_id or kolm_path required' });
+      }
+      const profile = String(id).endsWith('.kolm')
+        ? await forgeInspect.inspectArtifact(id)
+        : await forgeInspect.inspectModel(id);
+      res.json({ ok: true, profile });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: String(e.message || e) });
+    }
+  });
+
+  // POST /v1/fit — estimate VRAM use for (params × quant × context).
+  // Body: { model_params_b, quant, vram_gb, context?, batch?, kv_precision? }
+  // Returns the same envelope as the CLI: {fits, est_total_gb, est_weights_gb,
+  // est_kv_gb, est_activations_gb, headroom_gb, recommendation}.
+  r.post('/v1/fit', forgeLimiter, (req, res) => {
+    try {
+      const body = req.body || {};
+      if (body.pick_best === true) {
+        const picked = forgeFit.pickBestFitTarget({
+          model_params_b: Number(body.model_params_b),
+          vram_gb: Number(body.vram_gb),
+          context: Number(body.context || 8192),
+          supported_methods: Array.isArray(body.supported_methods) ? body.supported_methods : undefined,
+        });
+        return res.json({ ok: true, ...picked });
+      }
+      const fit = forgeFit.estimateMemoryFit({
+        model_params_b: Number(body.model_params_b),
+        quant: String(body.quant || 'fp16'),
+        vram_gb: Number(body.vram_gb),
+        context: Number(body.context || 8192),
+        batch: Number(body.batch || 1),
+        kv_precision: String(body.kv_precision || 'fp16'),
+      });
+      res.json({ ok: true, ...fit });
+    } catch (e) {
+      const msg = String(e.message || e);
+      const code = /fit_requires_|fit_unknown_/.test(msg) ? 400 : 500;
+      res.status(code).json({ ok: false, error: msg });
+    }
+  });
+
+  // POST /v1/experts — analyze MoE expert activation distribution for a .kolm.
+  // Body: { artifact_path, threshold? }
+  // The artifact must be operator-side (path on the server). Returns
+  // per-expert activation + prune candidates + estimated K-Score impact.
+  r.post('/v1/experts', forgeLimiter, async (req, res) => {
+    try {
+      const body = req.body || {};
+      if (!body.artifact_path || typeof body.artifact_path !== 'string') {
+        return res.status(400).json({ ok: false, error: 'artifact_path required' });
+      }
+      const analysis = await forgeExperts.analyzeExperts(body.artifact_path, {
+        threshold: Number(body.threshold || forgeExperts.DEFAULT_PRUNE_THRESHOLD),
+      });
+      res.json({ ok: true, ...analysis });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: String(e.message || e) });
+    }
+  });
+
+  // POST /v1/quantize — alias over /v1/compile that auto-fills format+quant
+  // from a single --target shortcut (gguf-q4km, exl2-4bpw, nvfp4, etc.) so the
+  // Account UI and SDKs can call one route instead of constructing a spec.
+  // Body: { model_id, target, job_id?, ... } → returns the created job.
+  r.post('/v1/quantize', forgeLimiter, authMiddleware, async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const body = req.body || {};
+      const target = String(body.target || '');
+      if (!target) return res.status(400).json({ ok: false, error: 'target required (e.g. gguf-q4km, exl2-4bpw, nvfp4)' });
+      if (!body.model_id) return res.status(400).json({ ok: false, error: 'model_id required' });
+      const spec = {
+        job_id: body.job_id || `job_${crypto.randomBytes(6).toString('hex')}`,
+        base_model: body.model_id,
+        format: target.startsWith('gguf') ? 'gguf'
+              : target.startsWith('exl2') ? 'exl2'
+              : target.startsWith('mlx')  ? 'mlx'
+              : 'safetensors',
+        quant: target,
+        target_device: body.target_device || 'cuda',
+        runtime_target: body.runtime_target || 'vllm',
+        ...body.spec_overrides,
+      };
+      const job = await createJob({ ...spec, tenant_id: req.tenant_record.id });
+      res.status(201).json({ ok: true, job_id: job.job_id, status: job.status, target, spec });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: String(e.message || e) });
+    }
+  });
+
+  // POST /v1/merge — compute a merge plan for two .kolm artifacts.
+  // Body: { base, head, method?, alpha?, dry_run? }
+  // Returns the merge envelope (lineage check, kscore delta heuristic, output
+  // path). When dry_run=true, no artifact is written.
+  r.post('/v1/merge', forgeLimiter, authMiddleware, async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const body = req.body || {};
+      if (!body.base || !body.head) return res.status(400).json({ ok: false, error: 'base + head required' });
+      const method = String(body.method || 'linear').toLowerCase();
+      const allowed = new Set(['linear', 'slerp', 'ties', 'dare', 'passthrough']);
+      if (!allowed.has(method)) {
+        return res.status(400).json({ ok: false, error: `method must be one of: ${[...allowed].join(', ')}` });
+      }
+      const baseInfo = await forgeInspect.inspectArtifact(body.base);
+      const headInfo = await forgeInspect.inspectArtifact(body.head);
+      const sameLineage = baseInfo.base_model === headInfo.base_model;
+      const kscoreDelta = {
+        linear:      [0, 0.02],
+        slerp:       [0.01, 0.03],
+        ties:        [0.02, 0.05],
+        dare:        [0.01, 0.04],
+        passthrough: [0, 0],
+      }[method];
+      const envelope = {
+        ok: true,
+        method,
+        alpha: Number(body.alpha || 0.5),
+        same_lineage: sameLineage,
+        base: { path: body.base, base_model: baseInfo.base_model, k_score: baseInfo.k_score },
+        head: { path: body.head, base_model: headInfo.base_model, k_score: headInfo.k_score },
+        heuristic_kscore_delta: kscoreDelta,
+        dry_run: !!body.dry_run,
+      };
+      if (body.dry_run) return res.json(envelope);
+      // Real merge is a compile job in disguise — it writes a new .kolm.
+      // For now, return 501 with the plan + how to execute via CLI until the
+      // background merge worker lands.
+      res.status(501).json({
+        ...envelope,
+        error: 'merge_execution_not_yet_wired',
+        hint: `run locally: kolm merge ${body.base} ${body.head} --method ${method}`,
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: String(e.message || e) });
+    }
+  });
+
+  // POST /v1/serve — emit a deployment manifest (docker run / k8s yaml) for
+  // a .kolm artifact and runtime target.
+  // Body: { artifact, runtime, port?, docker?, k8s? } → { manifest, runtime, port }
+  r.post('/v1/serve', forgeLimiter, authMiddleware, async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const body = req.body || {};
+      if (!body.artifact) return res.status(400).json({ ok: false, error: 'artifact required' });
+      const runtimeName = String(body.runtime || 'vllm');
+      const port = Number(body.port || 8000);
+      const kind = body.k8s ? 'k8s' : body.docker ? 'docker' : 'docker';
+      let manifest;
+      if (kind === 'docker') {
+        manifest = `docker run --gpus all --rm -p ${port}:${port} -v $PWD:/artifacts ${runtimeName}:latest --model /artifacts/${path.basename(body.artifact)} --port ${port}`;
+      } else {
+        manifest = [
+          'apiVersion: apps/v1', 'kind: Deployment',
+          `metadata: { name: kolm-${runtimeName} }`,
+          `spec: { replicas: 1, selector: { matchLabels: { app: kolm-${runtimeName} } },`,
+          `  template: { metadata: { labels: { app: kolm-${runtimeName} } },`,
+          `    spec: { containers: [{ name: ${runtimeName}, image: "${runtimeName}:latest",`,
+          `      args: ["--model", "/artifacts/${path.basename(body.artifact)}", "--port", "${port}"],`,
+          `      ports: [{ containerPort: ${port} }],`,
+          `      resources: { limits: { "nvidia.com/gpu": 1 } } }] } } }`,
+          '---', 'apiVersion: v1', 'kind: Service',
+          `metadata: { name: kolm-${runtimeName} }`,
+          `spec: { selector: { app: kolm-${runtimeName} },`,
+          `  ports: [{ port: ${port}, targetPort: ${port} }] }`,
+        ].join('\n');
+      }
+      res.json({ ok: true, manifest, kind, runtime: runtimeName, port, artifact: body.artifact });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: String(e.message || e) });
+    }
+  });
+
+  // POST /v1/export — emit an export plan for a .kolm artifact (target =
+  // gguf/awq/exl2/mlx/onnx/tflite/coreml/openvino). Returns the plan +
+  // estimated size + invocation hint; actual export runs via the CLI worker.
+  r.post('/v1/export', forgeLimiter, authMiddleware, async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const body = req.body || {};
+      if (!body.artifact) return res.status(400).json({ ok: false, error: 'artifact required' });
+      if (!body.target) return res.status(400).json({ ok: false, error: 'target required (gguf|awq|exl2|mlx|onnx|tflite|coreml|openvino)' });
+      const allowed = new Set(['gguf', 'awq', 'exl2', 'mlx', 'onnx', 'tflite', 'coreml', 'openvino']);
+      if (!allowed.has(body.target)) {
+        return res.status(400).json({ ok: false, error: `target must be one of: ${[...allowed].join(', ')}` });
+      }
+      const info = await forgeInspect.inspectArtifact(body.artifact);
+      const params = info.total_params_b || info.active_params_b || 7;
+      const bpp = { gguf: 0.56, awq: 0.56, exl2: 0.50, mlx: 0.55, onnx: 2.0, tflite: 1.0, coreml: 2.0, openvino: 2.0 }[body.target] || 2;
+      res.json({
+        ok: true,
+        target: body.target,
+        source: body.artifact,
+        est_output_gb: Math.round(params * bpp * 10) / 10,
+        base_model: info.base_model,
+        hint: `run locally: kolm export ${body.artifact} --target ${body.target}`,
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: String(e.message || e) });
+    }
   });
 
   return r;

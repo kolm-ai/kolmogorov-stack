@@ -33,10 +33,20 @@ The consolidated review named the P0 control files that should exist before Kolm
 | SBOM/provenance contract | `docs/internal/sbom-provenance-contract.json` | no | Required because the SBOM workflow uploads SBOM artifacts but does not bind SBOM/provenance/signature evidence to each release subject and deployed release ID. |
 | SDK API parity | `docs/internal/sdk-api-parity.json` | no | Required to prove Node, Python, Rust, C, MCP, VS Code, TypeScript/browser, React Native, Swift, Kotlin, integrations, and installers cover the API honestly. |
 | Docs IA contract | `docs/internal/docs-ia-contract.json` | no | Required to turn broad docs into runnable tutorial/how-to/reference/explanation paths for each product loop. |
+| Developer docs shell contract | `docs/internal/developer-docs-shell-contract.json` | no | Required because current local source shows 221 docs HTML pages, 48 docs pages with bad `繚` separators, 141 missing `/nav.js`, 51 missing `/ks.css`, and 170 missing `/surface-polish.css`. |
+| API reference contract | `docs/internal/api-reference-contract.json` | no | Required because `/api`, `/docs/api`, `public/openapi.json`, and `public/docs/api-routes.json` currently disagree on route count, auth header framing, envelope truth, examples, and source-indexed status. |
+| Docs sample contract | `docs/internal/docs-sample-contract.json` | no | Required because docs contain stale key placeholders and hand-maintained examples that are not tied to route/CLI/SDK contract output or expected results. |
+| SDK package truth matrix | `docs/internal/sdk-package-truth-matrix.json` | no | Required because SDK docs and local SDK/package READMEs currently mix browser bundle proof, source-only local installs, unpublished package states, and name-blocked package channels. |
 | Product feature completion matrix | `docs/internal/product-feature-completion-matrix.json` | no | Required to prove each feature is done as behavior, API, account UI, public page, CLI, TUI, SDK, docs, tests, readiness, UI states, and production proof. |
 | Account product matrix | `docs/internal/account-product-matrix.json` | no | Required to classify all 51 account HTML pages by journey, feature, data state, API route, UI state, and authenticated smoke. |
 | Page family contracts | `docs/internal/page-family-contracts.json` | no | Required to govern homepage, product pages, docs, pricing, trust, comparisons, verticals, account pages, demos, and content pages. |
 | Component and nav contracts | `docs/internal/component-state-contracts.json`, `docs/internal/nav-contract.json` | no | Required to fix buttons, nav underlines/popovers, interaction states, mobile behavior, focus states, and component consistency. |
+| Account shell contract | `docs/internal/account-shell-contract.json` | no | Required because current local source shows 51 account page-local style blocks, 44 account pages missing `/nav.js`, 50 missing `/surface-polish.css`, 10 missing `account-sidebar`, and 17 source files with the bad `繚` separator. |
+| Account nav manifest | `docs/internal/account-nav-manifest.json` | no | Required because account navigation currently lives in duplicated account HTML plus runtime `public/nav.js` sidebar repair rather than one generated account route/journey/CLI/TUI manifest. |
+| Component interaction state contract | `docs/internal/component-interaction-state-contract.json` | no | Required to make buttons, links, nav, popovers, forms, tables, cards, demos, videos, calculators, chat, and account widgets share one token/state model across light/dark/mobile/auth states. |
+| UI accessibility/performance contract | `docs/internal/ui-accessibility-performance-contract.json` | no | Required to bind WCAG 2.2, WAI-ARIA nav behavior, Core Web Vitals LCP/INP/CLS, skeleton/media stability, no-auth/auth/error/partial account states, and production field proof. |
+| Nav runtime debt ledger | `docs/internal/nav-runtime-debt-ledger.json` | no | Required because `public/nav.js` is currently shell composer, account injector, media injector, copy repair, auth affordance, trust ribbon, and emergency CSS patcher; only true runtime behavior should remain there. |
+| Account product journey state machine | `docs/internal/account-product-journey-state-machine.json` | no | Required to make post-auth route/capture, distill/compile, and run/govern workflows explicit as object state, next action, readiness, proof, and fallback states. |
 | Generated artifact manifest | `docs/internal/generated-artifact-manifest.json` | no | Required to register every generated file, generator, input, check command, downstream consumer, release inclusion, and write lock. |
 | Observability contract | `docs/internal/observability-contract.json` | no | Required to prove traces, metrics, logs/events, SLOs, alerts, dashboards, owners, and runbooks by product journey. |
 | Security release contract | `docs/internal/security-release-contract.json` | no | Required to tie ASVS/API controls, headers, auth, object authorization, rate limits, webhooks, CORS/CSP, secret handling, SBOM/provenance, and incident response to release evidence. |
@@ -85,22 +95,32 @@ Do not build these files in arbitrary order. The correct sequence is:
 8. `docs/internal/tenant-data-boundary-contract.json`
 9. `docs/internal/api-contract-matrix.json` and `docs/internal/openapi-dialect-policy.json`
 10. `docs/internal/sdk-api-parity.json`
-11. `docs/internal/docs-ia-contract.json`
-12. `docs/internal/product-feature-completion-matrix.json`
-13. `docs/internal/account-product-matrix.json`
-14. `docs/internal/page-family-contracts.json`, `docs/internal/component-state-contracts.json`, and `docs/internal/nav-contract.json`
-15. `docs/internal/design-cascade-ledger.json`
-16. `docs/internal/product-media-proof.json`
-17. `docs/internal/generated-artifact-manifest.json`
-18. `docs/internal/observability-contract.json`
-19. `docs/internal/security-release-contract.json`
-20. `docs/internal/release-boundary-manifest.json`
-21. `docs/internal/ci-release-pipeline-contract.json`
-22. `docs/internal/ci-required-checks-policy.json`
-23. `docs/internal/release-artifact-evidence-matrix.json`
-24. `docs/internal/sbom-provenance-contract.json`
-25. `reports/deployments/<release-id>/production-evidence.json`
-26. `reports/build-redline/final-build-redline.json`
+11. `docs/internal/sdk-package-truth-matrix.json`
+12. `docs/internal/docs-ia-contract.json`
+13. `docs/internal/developer-docs-shell-contract.json`
+14. `docs/internal/api-reference-contract.json`
+15. `docs/internal/docs-sample-contract.json`
+16. `docs/internal/product-feature-completion-matrix.json`
+17. `docs/internal/account-product-matrix.json`
+18. `docs/internal/account-shell-contract.json`
+19. `docs/internal/account-nav-manifest.json`
+20. `docs/internal/account-product-journey-state-machine.json`
+21. `docs/internal/page-family-contracts.json`, `docs/internal/component-state-contracts.json`, and `docs/internal/nav-contract.json`
+22. `docs/internal/component-interaction-state-contract.json`
+23. `docs/internal/ui-accessibility-performance-contract.json`
+24. `docs/internal/nav-runtime-debt-ledger.json`
+25. `docs/internal/design-cascade-ledger.json`
+26. `docs/internal/product-media-proof.json`
+27. `docs/internal/generated-artifact-manifest.json`
+28. `docs/internal/observability-contract.json`
+29. `docs/internal/security-release-contract.json`
+30. `docs/internal/release-boundary-manifest.json`
+31. `docs/internal/ci-release-pipeline-contract.json`
+32. `docs/internal/ci-required-checks-policy.json`
+33. `docs/internal/release-artifact-evidence-matrix.json`
+34. `docs/internal/sbom-provenance-contract.json`
+35. `reports/deployments/<release-id>/production-evidence.json`
+36. `reports/build-redline/final-build-redline.json`
 
 Reason: file ownership comes before wave ownership; wave ownership comes before lane locks; catalog truth and data-plane truth feed route contracts; route contracts feed OpenAPI, SDKs, docs, account UX, CLI help, design proof, and production proof; release-boundary truth must be known before production evidence can certify a build artifact; CI and artifact/provenance truth must be known before any package or deploy can be called shipped; final build redline consumes all prior packets.
 
@@ -582,6 +602,67 @@ Acceptance:
 - SDK docs cannot advertise a package as installable until its release state says `package_ready` or `published`.
 - Route payloads come from API schemas, not hand-maintained duplicate shapes.
 
+## Control File 9A: SDK Package Truth Matrix
+
+Target paths:
+
+- `docs/internal/sdk-package-truth-matrix.json`
+- `docs/internal/sdk-package-truth-matrix.md`
+
+Build script to add: `scripts/build-sdk-package-truth-matrix.cjs`
+
+Verify script to add: `scripts/verify-sdk-package-truth.cjs`
+
+Inputs:
+
+- `sdk/**/README.md`
+- `sdk/**/package.json`
+- `sdk/**/pyproject.toml`
+- `sdk/**/Cargo.toml`
+- `packages/**/README.md`
+- `packages/**/package.json`
+- `packages/**/pyproject.toml`
+- `packages/**/Cargo.toml`
+- `packages/**/Package.swift`
+- `packages/**/build.gradle*`
+- `public/sdk-current.json`
+- package release readiness reports
+- SBOM/provenance contracts
+- API and SDK parity matrices
+
+Minimum schema:
+
+```json
+{
+  "schema": "kolm.sdk_package_truth_matrix.v1",
+  "generated_at": "iso-8601",
+  "packages": [
+    {
+      "id": "sdk-node",
+      "source_path": "sdk/node",
+      "language": "javascript",
+      "package_name": "@kolm/kolm-sdk",
+      "registry": "npm",
+      "registry_owner": "kolm|unrelated|unknown",
+      "release_state": "source_preview|local_build|package_ready|published|name_blocked|deprecated",
+      "install_commands_allowed": ["local_checkout"],
+      "docs_pages": ["/docs/sdk"],
+      "public_copy_allowed": "local_source_only|package_installable|published|do_not_market",
+      "smoke_command": "npm test",
+      "known_unsupported_operations": ["string"],
+      "proof_paths": ["path"]
+    }
+  ]
+}
+```
+
+Acceptance:
+
+- SDK docs and package READMEs cannot disagree on package publication state.
+- Name-blocked packages, unpublished packages, source-only local checkouts, and browser-bundle-only SDKs are labeled explicitly.
+- `/docs/sdk`, `/sdks`, SDK READMEs, package release readiness, and release artifact evidence consume this matrix.
+- No public install command appears unless the package state allows it.
+
 ## Control File 10: Docs IA Contract
 
 Target paths:
@@ -623,6 +704,147 @@ Acceptance:
 - Every product journey has a tutorial, how-to, reference, and explanation.
 - Every runnable sample includes prerequisites, env vars, exact command, expected output, cleanup, failure cases, and account/API/CLI equivalents.
 - Docs search and page nav derive from the same IA contract instead of ad hoc links.
+
+## Control File 10A: Developer Docs Shell Contract
+
+Target paths:
+
+- `docs/internal/developer-docs-shell-contract.json`
+- `docs/internal/developer-docs-shell-contract.md`
+
+Build script to add: `scripts/build-developer-docs-shell-contract.cjs`
+
+Verify script to add: `scripts/verify-developer-docs-shell.cjs`
+
+Inputs:
+
+- `public/docs/**/*.html`
+- `public/api.html`
+- `public/quickstart.html`
+- `public/sdks.html`
+- `public/docs/sdk.html`
+- docs shell CSS/JS files
+- `public/nav.js`
+- `docs/internal/page-family-contracts.json`
+- `docs/internal/ui-accessibility-performance-contract.json`
+
+Minimum schema:
+
+```json
+{
+  "schema": "kolm.developer_docs_shell_contract.v1",
+  "generated_at": "iso-8601",
+  "pages": [
+    {
+      "path": "/docs/api",
+      "source_path": "public/docs/api.html",
+      "doc_type": "tutorial|how_to|reference|explanation|index|archive|remove",
+      "product_loop": "route_capture|distill_compile|run_govern|cross_product",
+      "shell_family": "docs_shell|public_ks_shell|legacy_docs_shell|archive",
+      "loads": {
+        "ks_css": true,
+        "surface_polish_css": true,
+        "warm_paper_css": true,
+        "nav_js": true
+      },
+      "metadata": {
+        "has_mojibake": false,
+        "title_policy": "ascii_separator",
+        "description_within_budget": true
+      },
+      "local_debt": {
+        "style_tags": 0,
+        "style_attributes": 0,
+        "script_tags": 0,
+        "test_anchors": 0
+      }
+    }
+  ]
+}
+```
+
+Acceptance:
+
+- All public docs pages are classified by Diataxis type and product loop.
+- Bad `繚` separators, hidden test anchors, unowned shell variants, and missing docs shell assets fail the verifier.
+- Docs nav, metadata, stylesheet sets, skip-link policy, and accessibility behavior are generated or declared by one docs shell contract.
+
+## Control File 10B: API Reference And Docs Sample Contracts
+
+Target paths:
+
+- `docs/internal/api-reference-contract.json`
+- `docs/internal/api-reference-contract.md`
+- `docs/internal/docs-sample-contract.json`
+- `docs/internal/docs-sample-contract.md`
+
+Build scripts to add:
+
+- `scripts/build-api-reference-contract.cjs`
+- `scripts/build-docs-sample-contract.cjs`
+
+Verify scripts to add:
+
+- `scripts/verify-api-reference-contract.cjs`
+- `scripts/verify-docs-samples.cjs`
+
+Minimum API reference schema:
+
+```json
+{
+  "schema": "kolm.api_reference_contract.v1",
+  "generated_at": "iso-8601",
+  "sources": ["docs/internal/api-contract-matrix.json", "public/openapi.json", "public/docs/api-routes.json"],
+  "surfaces": [
+    {
+      "page": "/docs/api",
+      "role": "exhaustive_reference",
+      "route_count_source": "api_contract_matrix",
+      "auth_header_policy": "authorization_bearer_ks|x_api_key_alias|both_documented",
+      "envelope_policy": "problem_details|kolm_envelope|hybrid_documented",
+      "source_indexed_policy": "visible_not_market_ready"
+    },
+    {
+      "page": "/api",
+      "role": "guided_api_map",
+      "route_count_source": "api_contract_matrix",
+      "auth_header_policy": "authorization_bearer_ks|x_api_key_alias|both_documented",
+      "envelope_policy": "problem_details|kolm_envelope|hybrid_documented",
+      "source_indexed_policy": "visible_not_market_ready"
+    }
+  ]
+}
+```
+
+Minimum docs sample schema:
+
+```json
+{
+  "schema": "kolm.docs_sample_contract.v1",
+  "generated_at": "iso-8601",
+  "samples": [
+    {
+      "sample_id": "quickstart-route-call",
+      "source_path": "public/quickstart.html",
+      "language": "bash",
+      "surface": "route_capture",
+      "route_or_cli": "/v1/chat/completions",
+      "required_env": ["KOLM_API_KEY"],
+      "placeholder_policy": "ks_placeholder_only",
+      "secret_safe": true,
+      "expected_output": "declared",
+      "cleanup": "not_applicable",
+      "verification": "smoke_tested|syntax_checked|generated|illustrative_only"
+    }
+  ]
+}
+```
+
+Acceptance:
+
+- `/api`, `/docs/api`, `public/openapi.json`, `public/docs/api-routes.json`, SDK examples, CLI REST hints, and account actions use the same route facts.
+- Route count, auth header, key shape, base URL, envelope, request/response schemas, problem types, examples, and source-indexed/beta status cannot diverge between API pages.
+- Every sample either runs in CI/local smoke or is clearly marked illustrative-only with no stale keys, package claims, or unsupported payloads.
 
 ## Control File 11: Product Feature Completion Matrix
 
@@ -795,6 +1017,260 @@ Acceptance:
 - Nav active state, underline, popover, keyboard, mobile, and CTA behavior are governed by `nav-contract`.
 - Buttons, forms, cards, tables, dialogs, videos, demos, calculators, and account widgets share a state contract.
 - WCAG 2.2, Core Web Vitals LCP/INP/CLS, and product-media proof are explicit gates.
+
+## Control File 13A: Account Shell, Nav Manifest, And Runtime Debt
+
+Target paths:
+
+- `docs/internal/account-shell-contract.json`
+- `docs/internal/account-shell-contract.md`
+- `docs/internal/account-nav-manifest.json`
+- `docs/internal/account-nav-manifest.md`
+- `docs/internal/nav-runtime-debt-ledger.json`
+- `docs/internal/nav-runtime-debt-ledger.md`
+
+Build scripts to add:
+
+- `scripts/build-account-shell-contract.cjs`
+- `scripts/build-account-nav-manifest.cjs`
+- `scripts/build-nav-runtime-debt-ledger.cjs`
+
+Verify scripts to add:
+
+- `scripts/verify-account-shell.cjs`
+- `scripts/verify-account-nav.cjs`
+- `scripts/verify-nav-runtime-debt.cjs`
+
+Minimum schema for account shell:
+
+```json
+{
+  "schema": "kolm.account_shell_contract.v1",
+  "generated_at": "iso-8601",
+  "source_inputs": [
+    "public/account/**/*.html",
+    "public/nav.js",
+    "public/ks.css",
+    "public/surface-polish.css",
+    "public/warm-paper.css",
+    "public/product-graph.json"
+  ],
+  "pages": [
+    {
+      "path": "/account/overview",
+      "shell_mode": "generated_shell|legacy_shell_pending_migration|embedded_tool|archive|remove",
+      "loads": {
+        "ks_css": true,
+        "surface_polish_css": true,
+        "warm_paper_css": true,
+        "nav_js": true
+      },
+      "metadata": {
+        "title_separator": "ascii_pipe|middle_dot|invalid",
+        "has_mojibake": false,
+        "canonical_url": "https://kolm.ai/account/overview"
+      },
+      "shell_regions": {
+        "top_nav": "present|missing",
+        "account_sidebar": "present|missing",
+        "command_center": "present|missing",
+        "readiness_band": "present|missing",
+        "skip_link_count": 1
+      },
+      "local_debt": {
+        "style_tags": 0,
+        "style_attributes": 0,
+        "inline_scripts": 0,
+        "inner_html_writes": 0
+      },
+      "states_required": ["no_auth", "loading", "empty", "partial", "error", "success", "external_gated"]
+    }
+  ]
+}
+```
+
+Minimum schema for account nav:
+
+```json
+{
+  "schema": "kolm.account_nav_manifest.v1",
+  "generated_at": "iso-8601",
+  "groups": [
+    {
+      "group_id": "build",
+      "label": "BUILD",
+      "items": [
+        {
+          "label": "Connectors",
+          "path": "/account/connectors",
+          "active_match": "exact|prefix",
+          "journey_ids": ["gateway-capture"],
+          "feature_ids": ["gateway-capture.provider-setup"],
+          "api_routes": ["/v1/account"],
+          "cli_equivalents": ["kolm capture status --json"],
+          "tui_views": ["connectors"],
+          "badge_source": "none|api|readiness|billing|route",
+          "auth_scope": "tenant_user|tenant_admin|owner"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Minimum schema for runtime debt:
+
+```json
+{
+  "schema": "kolm.nav_runtime_debt_ledger.v1",
+  "generated_at": "iso-8601",
+  "behaviors": [
+    {
+      "behavior_id": "account-command-center-injection",
+      "source_path": "public/nav.js",
+      "classification": "permanent_runtime_feature|build_time_shell_candidate|css_migration_candidate|copy_metadata_migration_candidate|auth_runtime_required|remove_after_migration",
+      "current_reason": "string",
+      "target_owner": "frontend|account|design-system|auth|release",
+      "target_artifact": "docs/internal/account-shell-contract.json",
+      "removal_or_keep_rule": "string",
+      "proof_required": ["keyboard", "mobile", "dark_light", "no_auth", "auth"]
+    }
+  ],
+  "budgets": {
+    "account_pages_missing_nav_js": 0,
+    "account_pages_missing_surface_polish": 0,
+    "account_pages_missing_sidebar": 0,
+    "account_pages_with_mojibake": 0,
+    "unowned_runtime_patch_behaviors": 0
+  }
+}
+```
+
+Acceptance:
+
+- All 51 account HTML pages are present in the shell contract.
+- No account page has an unclassified shell mode.
+- No account page has a bad `繚` source separator.
+- No account page has duplicate skip links.
+- No shell-required account page is missing `/ks.css`, `/surface-polish.css`, `/warm-paper.css`, `/nav.js`, `#account-sidebar`, or a generated command/readiness region.
+- Every account nav path maps to a product graph journey, API route contract, CLI equivalent, and TUI view or declares a scoped exception.
+- Every static `public/nav.js` repair behavior has a target migration owner. Runtime behavior remains only where runtime state is genuinely required.
+
+## Control File 13B: Component Interaction State And UI Accessibility/Performance
+
+Target paths:
+
+- `docs/internal/component-interaction-state-contract.json`
+- `docs/internal/component-interaction-state-contract.md`
+- `docs/internal/ui-accessibility-performance-contract.json`
+- `docs/internal/ui-accessibility-performance-contract.md`
+
+Build scripts to add:
+
+- `scripts/build-component-interaction-state-contract.cjs`
+- `scripts/build-ui-accessibility-performance-contract.cjs`
+
+Verify scripts to add:
+
+- `scripts/verify-component-interaction-state.cjs`
+- `scripts/verify-ui-accessibility-performance.cjs`
+
+Minimum component schema:
+
+```json
+{
+  "schema": "kolm.component_interaction_state_contract.v1",
+  "generated_at": "iso-8601",
+  "component_families": [
+    {
+      "family_id": "button",
+      "selectors": [".btn", ".ks-btn", "button"],
+      "tokens_required": ["color", "background", "border", "radius", "focus_ring", "motion"],
+      "states": ["default", "hover", "pressed", "focus_visible", "disabled", "loading", "selected", "success", "warning", "error", "external_gated"],
+      "light_dark_required": true,
+      "min_target_css_px": 44,
+      "raw_hex_allowed": false,
+      "important_allowed": false,
+      "inline_style_allowed": false
+    }
+  ]
+}
+```
+
+Minimum UI/accessibility/performance schema:
+
+```json
+{
+  "schema": "kolm.ui_accessibility_performance_contract.v1",
+  "generated_at": "iso-8601",
+  "standards": {
+    "wcag": "2.2",
+    "aria_practices": "disclosure-navigation",
+    "core_web_vitals": ["lcp", "inp", "cls"]
+  },
+  "gates": {
+    "focus_not_obscured": "required",
+    "focus_visible": "required",
+    "target_size": "required",
+    "consistent_help": "required",
+    "accessible_authentication": "required",
+    "keyboard_navigation": "required",
+    "reduced_motion": "required",
+    "lcp_ms_p75": 2500,
+    "inp_ms_p75": 200,
+    "cls_p75": 0.1
+  },
+  "page_state_matrix": {
+    "account": ["no_auth", "auth", "loading", "empty", "partial", "error", "success", "external_gated"],
+    "public": ["initial", "interactive", "media_loaded", "media_failed", "reduced_motion"]
+  }
+}
+```
+
+Acceptance:
+
+- Buttons, links, nav items, popovers, forms, tables, cards, dialogs, videos, demos, calculators, chat, account widgets, status tokens, and copy buttons have a canonical state contract.
+- Light/dark, desktop/mobile, keyboard, reduced-motion, no-auth, auth, loading, empty, partial, error, success, and external-gated states are not optional.
+- WCAG 2.2 and WAI-ARIA disclosure navigation rules are treated as release gates for account/nav surfaces.
+- Core Web Vitals proof uses LCP, INP, and CLS thresholds at the 75th percentile and distinguishes local lab data from production field data.
+- Product media, skeletons, async account panels, and runtime injected bands reserve dimensions so CLS cannot be hidden by screenshots alone.
+
+## Control File 13C: Account Product Journey State Machine
+
+Target paths:
+
+- `docs/internal/account-product-journey-state-machine.json`
+- `docs/internal/account-product-journey-state-machine.md`
+
+Build script to add: `scripts/build-account-product-journey-state-machine.cjs`
+
+Verify script to add: `scripts/verify-account-product-journey-state-machine.cjs`
+
+Minimum schema:
+
+```json
+{
+  "schema": "kolm.account_product_journey_state_machine.v1",
+  "generated_at": "iso-8601",
+  "loops": [
+    {
+      "loop_id": "route-capture",
+      "pages": ["/account/connectors", "/account/captured", "/account/lake"],
+      "objects": ["provider_connection", "capture_event", "privacy_event", "dataset_row"],
+      "states": ["not_connected", "capturing", "review_required", "ready_for_dataset", "error", "external_gated"],
+      "next_actions": ["connect_provider", "review_capture", "redact", "promote_to_dataset"],
+      "proof_paths": ["api_route", "audit_event", "cli_command", "screenshot", "production_smoke"]
+    }
+  ]
+}
+```
+
+Acceptance:
+
+- The three product loops are explicit in account: route/capture, distill/compile, and run/govern.
+- Every account page exposes object state, next action, readiness state, proof path, and fallback state.
+- Pages that only show a report without a next action and proof path are marked incomplete.
+- Readiness and closeout scope appear on the page where they affect the user's action, not only on account overview.
 
 ## Control File 14: Generated Artifact Manifest
 
@@ -1189,6 +1665,200 @@ Acceptance:
 - No release bundle can include local env files, local data, backups, screenshots, reports, node_modules cache, temp artifacts, local agent dirs, or malformed prior test artifacts.
 - `final-build-redline` must consume this manifest before certifying clean git or deploy readiness.
 
+## Control File 16F: CI Release Pipeline Contract
+
+Target paths:
+
+- `docs/internal/ci-release-pipeline-contract.json`
+- `docs/internal/ci-release-pipeline-contract.md`
+
+Inputs:
+
+- `package.json`
+- `.github/workflows/*.yml`
+- `.github/actions/*/action.yml`
+- `scripts/release-verify.cjs`
+- `scripts/local-surface-smoke.cjs`
+- `scripts/prod-surface-smoke.cjs`
+- `scripts/ui-surface-audit.cjs`
+- package release readiness scripts
+- generated control files
+
+Minimum schema:
+
+```json
+{
+  "schema_version": "kolm-ci-release-pipeline-contract/1",
+  "workflows": [
+    {
+      "path": ".github/workflows/test-suite.yml",
+      "classification": "required|optional|reference_template|manual_only|disabled",
+      "triggers": ["pull_request", "push"],
+      "path_filters": ["src/**"],
+      "permissions": {"contents": "read"},
+      "runtime_matrix": ["node20"],
+      "install_commands": ["npm ci"],
+      "commands": ["node --test --test-concurrency=1 tests/"],
+      "artifacts": [],
+      "retention_days": null,
+      "secrets": [],
+      "blocks_release_phase": ["merge"],
+      "redlines": []
+    }
+  ],
+  "actions": [],
+  "runtime_policy": {
+    "node_versions": ["20", "22", "24"],
+    "minimum_release_matrix": ["20", "22"],
+    "node_sqlite_coverage_required": true
+  }
+}
+```
+
+Acceptance:
+
+- Every workflow and composite action is classified. Reference/template workflows cannot count as product release proof.
+- Release-critical commands are not duplicated only in chat or local shells.
+- Permissions, secrets, runtime versions, install modes, path filters, emitted artifacts, and retention are explicit.
+- Unpinned `@latest` or unbounded global installs are not accepted in release-critical proof paths unless a signed exception exists.
+
+## Control File 16G: CI Required Checks Policy
+
+Target paths:
+
+- `docs/internal/ci-required-checks-policy.json`
+- `docs/internal/ci-required-checks-policy.md`
+
+Inputs:
+
+- CI release pipeline contract
+- active lanes
+- generated control files
+- package release evidence
+- production evidence
+- final build redline
+
+Minimum schema:
+
+```json
+{
+  "schema_version": "kolm-ci-required-checks-policy/1",
+  "phases": [
+    {
+      "id": "merge",
+      "required_checks": ["lint", "test-suite", "verify:control-files"],
+      "optional_checks": [],
+      "allowed_skips": [],
+      "flake_policy": "retry_once_then_owner",
+      "timeout_policy": "hard_timeout_required",
+      "owner_escalation": "CODEOWNER or internal ledger owner"
+    }
+  ],
+  "exceptions": []
+}
+```
+
+Acceptance:
+
+- Merge, release candidate, production deploy, and post-deploy phases are separate.
+- Each phase lists exact commands, workflows, artifacts, owners, retries, and skip rules.
+- No release can be certified from local-only evidence when production evidence is required.
+
+## Control File 16H: Release Artifact Evidence Matrix
+
+Target paths:
+
+- `docs/internal/release-artifact-evidence-matrix.json`
+- `docs/internal/release-artifact-evidence-matrix.md`
+
+Inputs:
+
+- package release readiness catalog
+- release boundary manifest
+- generated artifact manifest
+- SBOM/provenance contract
+- package manifests
+- static/backend/Docker/SDK/installer/browser-extension build outputs
+- production evidence packet
+
+Minimum schema:
+
+```json
+{
+  "schema_version": "kolm-release-artifact-evidence-matrix/1",
+  "release_id": "pending",
+  "subjects": [
+    {
+      "id": "sdk-ts",
+      "kind": "npm_package",
+      "version": "0.2.6",
+      "source_paths": ["packages/sdk-ts"],
+      "build_command": "npm run build",
+      "output_paths": ["dist or npm pack tarball"],
+      "sha256": "required",
+      "sbom_sha256": "required",
+      "provenance_sha256": "required",
+      "signature_bundle_sha256": "required",
+      "registry_url": "required_or_not_released",
+      "local_checks": ["npm run build", "npm pack --dry-run"],
+      "channel_checks": [],
+      "retention_days": 365,
+      "status": "missing|local_ready|published|not_released|blocked"
+    }
+  ]
+}
+```
+
+Acceptance:
+
+- All 16 package-release targets are represented.
+- Static site, API backend, Docker image, CLI/root package, browser SDK, SDK packages, installers, browser extension, GitHub Actions, and sample `.kolm` artifacts are represented.
+- `publish_ready=false` remains visible until every released target has registry/artifact URL, hashes, SBOM, provenance, signature/attestation bundle, and channel checks.
+- Placeholder hashes fail.
+
+## Control File 16I: SBOM And Provenance Contract
+
+Target paths:
+
+- `docs/internal/sbom-provenance-contract.json`
+- `docs/internal/sbom-provenance-contract.md`
+
+Inputs:
+
+- `.github/workflows/sbom.yml`
+- `apps/export/sbom.py`
+- package lockfiles and manifests
+- release artifact evidence matrix
+- SLSA/GitHub/npm provenance outputs
+- package/channel evidence
+
+Minimum schema:
+
+```json
+{
+  "schema_version": "kolm-sbom-provenance-contract/1",
+  "formats": ["cyclonedx-json", "spdx-json", "slsa-provenance"],
+  "subjects": [
+    {
+      "subject_id": "docker-image",
+      "subject_digest": "sha256",
+      "sbom": {"format": "cyclonedx-json", "path": "artifact", "sha256": "required", "validated": true},
+      "provenance": {"format": "slsa-v1.1", "path": "artifact", "sha256": "required", "verified": true},
+      "attestation": {"provider": "github|npm|sigstore|manual", "verified": true},
+      "verification_command": "command"
+    }
+  ],
+  "secret_values_included": false
+}
+```
+
+Acceptance:
+
+- SBOMs are release artifacts tied to subject digests, not loose workflow uploads.
+- Provenance is verified against expected repository, commit, workflow, and subject digest.
+- npm packages use provenance where supported; Docker/images/archives/extensions use GitHub/SLSA-style attestations or a documented equivalent.
+- Final build redline fails if a released subject lacks SBOM/provenance/signature evidence.
+
 ## Control File 17: Production Evidence Packet
 
 Target path: `reports/deployments/<release-id>/production-evidence.json`
@@ -1259,12 +1929,22 @@ Minimum schema:
     "api_contract_matrix": "docs/internal/api-contract-matrix.json",
     "openapi_dialect_policy": "docs/internal/openapi-dialect-policy.json",
     "sdk_api_parity": "docs/internal/sdk-api-parity.json",
+    "sdk_package_truth_matrix": "docs/internal/sdk-package-truth-matrix.json",
     "docs_ia_contract": "docs/internal/docs-ia-contract.json",
+    "developer_docs_shell_contract": "docs/internal/developer-docs-shell-contract.json",
+    "api_reference_contract": "docs/internal/api-reference-contract.json",
+    "docs_sample_contract": "docs/internal/docs-sample-contract.json",
     "product_feature_completion_matrix": "docs/internal/product-feature-completion-matrix.json",
     "account_product_matrix": "docs/internal/account-product-matrix.json",
+    "account_shell_contract": "docs/internal/account-shell-contract.json",
+    "account_nav_manifest": "docs/internal/account-nav-manifest.json",
+    "account_product_journey_state_machine": "docs/internal/account-product-journey-state-machine.json",
     "page_family_contracts": "docs/internal/page-family-contracts.json",
     "component_state_contracts": "docs/internal/component-state-contracts.json",
+    "component_interaction_state_contract": "docs/internal/component-interaction-state-contract.json",
+    "ui_accessibility_performance_contract": "docs/internal/ui-accessibility-performance-contract.json",
     "nav_contract": "docs/internal/nav-contract.json",
+    "nav_runtime_debt_ledger": "docs/internal/nav-runtime-debt-ledger.json",
     "design_cascade_ledger": "docs/internal/design-cascade-ledger.json",
     "product_media_proof": "docs/internal/product-media-proof.json",
     "generated_artifact_manifest": "docs/internal/generated-artifact-manifest.json",
@@ -1279,11 +1959,31 @@ Minimum schema:
     "local_surfaces": "pass|fail",
     "prod_surfaces": "pass|fail",
     "visual_proof": "pass|fail",
+    "developer_docs_shell": "pass|fail",
+    "api_reference_contract": "pass|fail",
+    "docs_samples": "pass|fail",
+    "sdk_package_truth": "pass|fail",
     "account_matrix": "pass|fail",
+    "account_shell": "pass|fail",
+    "account_nav": "pass|fail",
+    "account_product_journey_state_machine": "pass|fail",
+    "component_interaction_state": "pass|fail",
+    "ui_accessibility_performance": "pass|fail",
+    "nav_runtime_debt": "pass|fail",
     "claim_scope": "pass|fail",
+    "data_plane": "pass|fail",
+    "env_secrets": "pass|fail",
+    "data_retention": "pass|fail",
+    "tenant_boundary": "pass|fail",
     "observability": "pass|fail",
     "security_release": "pass|fail",
+    "release_boundary": "pass|fail",
+    "ci_release": "pass|fail",
+    "required_checks": "pass|fail",
+    "release_artifacts": "pass|fail",
+    "sbom": "pass|fail",
     "slsa_provenance": "pass|fail",
+    "package_channels": "pass|fail",
     "rollback_ready": "pass|fail",
     "external_gates_scoped": "pass|fail"
   },
@@ -1317,8 +2017,16 @@ The implementation agent should add scripts with these names:
   "verify:openapi-policy": "node scripts/verify-openapi-dialect-policy.cjs",
   "build:sdk-parity": "node scripts/build-sdk-capability-matrix.cjs",
   "verify:sdk-parity": "node scripts/verify-sdk-api-parity.cjs",
+  "build:sdk-package-truth": "node scripts/build-sdk-package-truth-matrix.cjs",
+  "verify:sdk-package-truth": "node scripts/verify-sdk-package-truth.cjs",
   "build:docs-ia": "node scripts/build-docs-ia.cjs",
   "verify:docs-ia": "node scripts/verify-docs-ia.cjs",
+  "build:developer-docs-shell": "node scripts/build-developer-docs-shell-contract.cjs",
+  "verify:developer-docs-shell": "node scripts/verify-developer-docs-shell.cjs",
+  "build:api-reference-contract": "node scripts/build-api-reference-contract.cjs",
+  "verify:api-reference-contract": "node scripts/verify-api-reference-contract.cjs",
+  "build:docs-samples": "node scripts/build-docs-sample-contract.cjs",
+  "verify:docs-samples": "node scripts/verify-docs-samples.cjs",
   "build:feature-matrix": "node scripts/build-product-feature-completion-matrix.cjs",
   "verify:feature-matrix": "node scripts/verify-product-feature-completion-matrix.cjs",
   "build:account-matrix": "node scripts/build-account-product-matrix.cjs",
@@ -1339,6 +2047,14 @@ The implementation agent should add scripts with these names:
   "verify:tenant-boundary": "node scripts/verify-tenant-data-boundary-contract.cjs",
   "build:release-boundary": "node scripts/build-release-boundary-manifest.cjs",
   "verify:release-boundary": "node scripts/verify-release-boundary-manifest.cjs",
+  "build:ci-release": "node scripts/build-ci-release-pipeline-contract.cjs",
+  "verify:ci-release": "node scripts/verify-ci-release-pipeline-contract.cjs",
+  "build:ci-required-checks": "node scripts/build-ci-required-checks-policy.cjs",
+  "verify:ci-required-checks": "node scripts/verify-ci-required-checks-policy.cjs",
+  "build:release-artifacts": "node scripts/build-release-artifact-evidence-matrix.cjs",
+  "verify:release-artifacts": "node scripts/verify-release-artifact-evidence-matrix.cjs",
+  "build:sbom-provenance": "node scripts/build-sbom-provenance-contract.cjs",
+  "verify:sbom-provenance": "node scripts/verify-sbom-provenance-contract.cjs",
   "build:generated-artifacts": "node scripts/build-generated-artifact-manifest.cjs",
   "verify:generated-artifacts": "node scripts/verify-generated-artifacts.cjs",
   "build:observability-contract": "node scripts/build-observability-contract.cjs",
@@ -1362,7 +2078,11 @@ npm run verify:catalog-manifest
 npm run verify:api-contracts
 npm run verify:openapi-policy
 npm run verify:sdk-parity
+npm run verify:sdk-package-truth
 npm run verify:docs-ia
+npm run verify:developer-docs-shell
+npm run verify:api-reference-contract
+npm run verify:docs-samples
 npm run verify:feature-matrix
 npm run verify:account-matrix
 npm run verify:page-families
@@ -1373,6 +2093,10 @@ npm run verify:env-secrets
 npm run verify:data-retention
 npm run verify:tenant-boundary
 npm run verify:release-boundary
+npm run verify:ci-release
+npm run verify:ci-required-checks
+npm run verify:release-artifacts
+npm run verify:sbom-provenance
 npm run verify:generated-artifacts
 npm run verify:observability-contract
 npm run verify:security-release
@@ -1395,18 +2119,27 @@ Do not try to make all files perfect in one pass. Build them in this order:
 9. API contract matrix from router, product graph, account pages, CLI, SDK tree, data plane, tenant boundary, and existing generated API artifacts.
 10. OpenAPI dialect policy, then regenerate OpenAPI from API contracts only.
 11. SDK parity matrix from API contracts and package trees.
-12. Docs IA contract from product graph, API contracts, CLI docs, SDK docs, and current page families.
-13. Product feature completion matrix from product graph, API contracts, SDK parity, docs IA, control files, tests, and scripts.
-14. Account product matrix from all `public/account/**/*.html` pages and authenticated smoke requirements.
-15. Page family, component state, and nav contracts from public/account pages and design ledger evidence.
-16. Design cascade ledger from static scans.
-17. Product media proof from static routes and screenshot reports.
-18. Generated artifact manifest from every generated output and generator script.
-19. Observability contract from router, OTEL code, product journeys, events, audit logs, SLO pages, and runbooks.
-20. Security release contract from route contracts, headers, auth, object authorization, dependency/provenance evidence, and production probes.
-21. Release boundary manifest from Git, Vercel, Railway, Docker, npm/SDK package, CLI, and public static bundle inclusion rules.
-22. Production evidence packet from explicit release ID.
-23. Final build redline as read-only aggregate.
+12. SDK package truth matrix from package manifests, READMEs, package readiness, browser SDK manifest, and release artifact evidence.
+13. Docs IA contract from product graph, API contracts, CLI docs, SDK docs, and current page families.
+14. Developer docs shell contract from all `public/docs/**/*.html`, `/api`, `/quickstart`, `/sdks`, and SDK docs pages.
+15. API reference contract from `/api`, `/docs/api`, OpenAPI, API route inventory, CLI REST hints, SDK examples, and account action contracts.
+16. Docs sample contract from every code block/sample in quickstarts, docs, SDK pages, CLI docs, and top-level API pages.
+17. Product feature completion matrix from product graph, API contracts, SDK parity, SDK package truth, docs IA, docs samples, control files, tests, and scripts.
+18. Account product matrix from all `public/account/**/*.html` pages and authenticated smoke requirements.
+19. Account shell/nav/component state controls from public/account pages, docs shell evidence, and design ledger evidence.
+20. Page family, component state, and nav contracts from public/account pages and design ledger evidence.
+21. Design cascade ledger from static scans.
+22. Product media proof from static routes and screenshot reports.
+23. Generated artifact manifest from every generated output and generator script.
+24. Observability contract from router, OTEL code, product journeys, events, audit logs, SLO pages, and runbooks.
+25. Security release contract from route contracts, headers, auth, object authorization, dependency/provenance evidence, and production probes.
+26. Release boundary manifest from Git, Vercel, Railway, Docker, npm/SDK package, CLI, and public static bundle inclusion rules.
+27. CI release pipeline contract from workflows/actions/scripts and package scripts.
+28. CI required checks policy from the release pipeline, active lanes, control files, and owner model.
+29. Release artifact evidence matrix from every package/channel/build/deploy subject.
+30. SBOM/provenance contract from SBOM workflow, package manifests, release artifacts, attestations, and verification commands.
+31. Production evidence packet from explicit release ID.
+32. Final build redline as read-only aggregate.
 
 Then tighten each from warn mode to fail mode.
 

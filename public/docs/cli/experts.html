@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>kolm experts | CLI reference | kolm.ai</title>
+<meta name="description" content="Analyze MoE expert activation distribution in a .kolm artifact. Per-expert activation pct, prune candidates, estimated K-Score impact.">
+<link rel="canonical" href="https://kolm.ai/docs/cli/experts">
+<meta property="og:title" content="kolm experts | CLI reference | kolm.ai">
+<meta property="og:description" content="MoE expert activation analysis. Identify cold experts, estimate prune savings, walk to kolm compile --prune-experts.">
+<meta property="og:url" content="https://kolm.ai/docs/cli/experts">
+<meta property="og:type" content="article">
+<meta property="og:image" content="/og/docs-cli.svg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
+<script src="/nav.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm experts","description":"MoE expert activation analysis. Identify cold experts, estimate prune savings.","url":"https://kolm.ai/docs/cli/experts","mainEntityOfPage":"https://kolm.ai/docs/cli/experts","author":{"@type":"Organization","name":"kolm.ai"}}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col"><p class="mega-h">Start</p><a href="/product">Overview</a><a href="/quickstart">Quickstart</a><a href="/capture">Gateway</a></div>
+        <div class="mega-col"><p class="mega-h">Build</p><a href="/training">Training loop</a><a href="/distill">Distill</a><a href="/compile">Compile</a></div>
+        <div class="mega-col"><p class="mega-h">Run</p><a href="/runtimes">Runtimes</a><a href="/docs/devices">Devices</a><a href="/trust">Verify</a></div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col"><p class="mega-h">Choose</p><a href="/models">Model catalog</a><a href="/build-your-own">Build your own</a><a href="/docs/runtime">Runtime targets</a></div>
+        <div class="mega-col"><p class="mega-h">Deploy</p><a href="/compute">Compute</a><a href="/runtimes">Mobile and edge</a></div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col"><p class="mega-h">Start</p><a href="/capture">API gateway</a><a href="/docs/cli">CLI</a><a href="/docs/sdk">SDKs</a></div>
+        <div class="mega-col"><p class="mega-h">Reference</p><a href="/docs">Docs home</a><a href="/docs/api">API reference</a><a href="/api">HTTP routes</a></div>
+        <div class="mega-col"><p class="mega-h">Operate</p><a href="/integrations">Integrations</a><a href="/docs/privacy">Privacy membrane</a><a href="/docs/datasets">Datasets</a><a href="/docs/distillation">Distillation</a><a href="/docs/verify">Verification</a></div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col"><p class="mega-h">Buy</p><a href="/pricing">Plans</a><a href="/pricing#roi">ROI calculator</a><a href="/nonprofits">Nonprofits</a></div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col"><p class="mega-h">Deploy</p><a href="/enterprise">Enterprise overview</a><a href="/self-host">Self-host</a><a href="/airgap">Air-gap</a></div>
+        <div class="mega-col"><p class="mega-h">Trust</p><a href="/trust">Trust center</a><a href="/security">Security</a><a href="/compliance">Compliance</a><a href="/baa">BAA</a></div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+<main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="experts">
+<nav aria-label="Breadcrumb" class="crumbs">
+  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>experts</span>
+</nav>
+<section class="kolm-surface-media kolm-surface-media--inline" aria-label="CLI workflow proof">
+  <div class="media-terminal">
+    <span class="media-kicker">CLI contract</span>
+    <span class="media-line"><span class="ok">$</span> kolm experts --help</span>
+    <span class="media-line"><span class="ok">$</span> kolm experts mixtral-8x7b.kolm --bars</span>
+    <p>Probe the MoE router. Per-expert activation %, prune candidates below the threshold, estimated size reduction and K-Score impact. Same handler powers <code>POST /v1/experts</code> and <a href="/account/experts">/account/experts</a>.</p>
+  </div>
+  <div class="media-proof">
+    <span class="media-kicker">Operational proof</span>
+    <p>Pure read of cached router decisions in <code>receipts/router.jsonl</code>. No live inference, no GPU touch. The walkout line is a ready-to-paste <code>kolm compile --prune-experts</code> command.</p>
+  </div>
+</section>
+<h1>kolm experts</h1>
+<blockquote><p>What experts are doing the work? For a Mixture-of-Experts artifact, report per-expert activation, flag cold experts, and estimate what pruning would cost in K-Score and save in size.</p></blockquote>
+<h2>Usage</h2>
+<pre><code>
+kolm experts &lt;artifact.kolm&gt;                          # compact table (top-5 + bottom-5)
+kolm experts &lt;artifact.kolm&gt; --bars                   # full activation bar chart
+kolm experts &lt;artifact.kolm&gt; --threshold 0.005        # tighter prune threshold (0.5%)
+kolm experts &lt;artifact.kolm&gt; --json                   # full envelope for scripts
+</code></pre>
+<h2>Flags</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Flag</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>&lt;artifact.kolm&gt;</code></td><td>required</td><td>path to a <code>.kolm</code> file or an unpacked artifact directory</td></tr>
+<tr><td><code>--threshold &lt;f&gt;</code></td><td><code>0.01</code></td><td>activation fraction below which an expert is a prune candidate (e.g. <code>0.005</code> = 0.5%)</td></tr>
+<tr><td><code>--bars</code></td><td>off</td><td>render the full activation bar chart instead of the top-5 / bottom-5 compact table</td></tr>
+<tr><td><code>--json</code></td><td>off</td><td>emit the full analysis envelope as JSON</td></tr>
+</tbody>
+</table></div>
+<h2>Response shape</h2>
+<pre><code>
+{
+  "is_moe":                 true,
+  "num_experts":            8,
+  "num_experts_per_tok":    2,
+  "total_decisions":        4096,
+  "source":                 "cached_router_decisions",
+  "expert_activations":     [{ "expert_id": 0, "count": 1812, "pct": 22.12 }, ... ],
+  "prune_candidates":       [{ "expert_id": 6, "pct": 0.41 }, ... ],
+  "pruned_size_pct_reduction":  12.5,
+  "estimated_kscore_impact":    0.013
+}
+</code></pre>
+<p>For dense (non-MoE) artifacts, <code>is_moe</code> is <code>false</code> and the response carries a <code>reason</code> + <code>hint</code> field instead.</p>
+<h2>Examples</h2>
+<pre><code>
+# compact view: top-5 most-used and bottom-5 cold experts
+kolm experts mixtral-8x7b.kolm
+
+# full bar chart for every expert
+kolm experts mixtral-8x7b.kolm --bars
+
+# tighter prune threshold (anything used &lt; 0.5% of decisions is a candidate)
+kolm experts mixtral-8x7b.kolm --threshold 0.005
+
+# script: pull just the prune candidate IDs
+kolm experts mixtral-8x7b.kolm --json | jq -r '.prune_candidates[].expert_id'
+
+# walk into the compile step with the suggested prune list
+kolm experts mixtral-8x7b.kolm --json \
+  | jq -r '.prune_candidates | map(.expert_id) | join(",")' \
+  | xargs -I {} kolm compile --spec mixtral.spec.json --prune-experts {}
+</code></pre>
+<h2>Notes</h2>
+<p><code>kolm experts</code> is a passive read of <code>receipts/router.jsonl</code> inside the artifact &mdash; one JSON record per routing decision, written during the eval-set pass that gates K-Score. If no cached router log exists, the response carries <code>reason: "no_cached_router_decisions"</code> and a hint to re-run <code>kolm verify</code> or recompile with router-trace enabled. No live inference is performed.</p>
+<p>The <code>estimated_kscore_impact</code> is conservative: it assumes pruned experts contribute proportionally to their activation share, capped at -0.05 (5 K-Score points). Real impact depends on whether the cold experts were specialists on rare-but-important inputs &mdash; always re-evaluate with <code>kolm bench</code> after pruning.</p>
+<p>For dense (non-MoE) artifacts the command exits 0 with a one-line message and no analysis &mdash; there are no experts to analyze. Use <a href="/docs/cli/inspect"><code>kolm inspect</code></a> to confirm architecture.</p>
+<h2>See also</h2>
+<ul>
+<li><a href="/account/experts">/account/experts</a> &mdash; the same analysis with a click-through prune flow</li>
+<li><a href="/docs/cli/inspect">kolm inspect</a> &mdash; confirm artifact is MoE before analyzing</li>
+<li><a href="/docs/cli/compile">kolm compile</a> &mdash; the <code>--prune-experts</code> flag walked into from the walkout line</li>
+<li><a href="/docs/cli/bench">kolm bench</a> &mdash; re-evaluate K-Score after pruning</li>
+<li><a href="/forge#surfaces">All Forge surfaces</a></li>
+</ul>
+<section class="see-also" aria-labelledby="see-also-h">
+  <h2 id="see-also-h">See also</h2>
+  <ul>
+    <li><a href="/docs/cli">All CLI verbs</a></li>
+    <li><a href="/quickstart">Quickstart</a></li>
+    <li><a href="/docs/api">HTTP API reference</a></li>
+    <li><a href="/docs/sdk">SDK reference</a></li>
+  </ul>
+</section>
+</main>
+</body>
+</html>

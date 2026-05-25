@@ -132,6 +132,14 @@ kolm --help</code></pre>
  <a class="verb-card" href="/docs/cli/quantize"><b>kolm quantize</b><span>int4 | int8 | gptq | awq. Local worker that quantizes a checkpoint.</span></a>
 </div>
 
+<h3 id="forge">Forge: hardware, fit, merge, experts</h3>
+<div class="verb-grid">
+ <a class="verb-card" href="/docs/cli/hardware"><b>kolm hardware</b><span>Probe local GPUs. VRAM, native dtypes, supported quant targets, vendor and driver &mdash; plain text or JSON.</span></a>
+ <a class="verb-card" href="/docs/cli/fit"><b>kolm fit</b><span>Will it fit? Estimate weights + KV cache + total VRAM for a model at a quant target. <code>--pick-best</code> auto-picks.</span></a>
+ <a class="verb-card" href="/docs/cli/merge"><b>kolm merge</b><span>linear / slerp / ties / dare / passthrough. Two signed artifacts in, one signed artifact out, lineage preserved.</span></a>
+ <a class="verb-card" href="/docs/cli/experts"><b>kolm experts</b><span>MoE only. Per-expert activation %, prune candidates, estimated K-Score impact, ready-to-paste compile line.</span></a>
+</div>
+
 <h3 id="capture">Capture and distill</h3>
 <div class="verb-grid">
  <a class="verb-card" href="/docs/cli/keys"><b>kolm keys</b><span>list | rotate | fingerprint | export. Ed25519 signing-key lifecycle.</span></a>
@@ -159,6 +167,10 @@ kolm seeds new scaffold seeds.jsonl from a template or brief
 kolm nl "&lt;request&gt;" natural-language recipe scaffolder
 kolm models list inspect the frontier model catalog
 kolm quantize --local-worker quantize a checkpoint via the local worker
+kolm hardware probe local GPUs (VRAM, dtypes, supported quants)
+kolm fit --params-b N --vram-gb N estimate weight + KV-cache footprint
+kolm merge &lt;a.kolm&gt; &lt;b.kolm&gt; combine two signed artifacts (linear/slerp/ties/dare)
+kolm experts &lt;art.kolm&gt; MoE per-expert activation + prune candidates
 kolm keys rotate Ed25519 signing-key rotation
 kolm improve &lt;artifact&gt; epsilon-step recompile from audit-log fallbacks
 kolm doctor sanity-check env (config, cloud, docker, project)

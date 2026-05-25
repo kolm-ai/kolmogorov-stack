@@ -7159,8 +7159,55 @@ async function cmdCompile(args) {
     // 'rust' / 'wasm') is reachable directly from the CLI without forcing
     // tenants to remember the longer form. Mapping happens just before the
     // compileSpec call below.
-    if (targetFlag && !['gguf', 'onnx', 'safetensors', 'coreml', 'mlx', 'executorch', 'tensorrt', 'native-c', 'native-rust', 'c', 'rust', 'wasm'].includes(targetFlag)) {
-      console.error(`error: --target must be one of: gguf, onnx, safetensors, coreml, mlx, executorch, tensorrt, native-c (alias c), native-rust (alias rust), wasm (got '${targetFlag}')`);
+    //
+    // W866 — quant-method shortcuts. `--target gguf-q4km` (etc.) sets
+    // KOLM_QUANT for the underlying pipeline AND normalizes --target back to
+    // the bare format type ('gguf'). `--target exl2-6bpw` keeps the bpw
+    // suffix in KOLM_EXL2_BPW. `--target nvfp4` / `fp8` map to safetensors
+    // (NVFP4/FP8 ship as raw safetensors with a per-channel scale tensor).
+    // `--target all` enables the fan-out plan (multiple targets emitted in
+    // one compile via KOLM_TARGET_ALL).
+    const FORGE_QUANT_SHORTCUTS = {
+      'gguf-q8':     { format: 'gguf', quant: 'gguf-q8' },
+      'gguf-q6k':    { format: 'gguf', quant: 'gguf-q6k' },
+      'gguf-q5km':   { format: 'gguf', quant: 'gguf-q5km' },
+      'gguf-q4km':   { format: 'gguf', quant: 'gguf-q4km' },
+      'gguf-q3km':   { format: 'gguf', quant: 'gguf-q3km' },
+      'gguf-q2k':    { format: 'gguf', quant: 'gguf-q2k' },
+      'gguf-iq4xs':  { format: 'gguf', quant: 'gguf-iq4xs' },
+      'gguf-iq3xxs': { format: 'gguf', quant: 'gguf-iq3xxs' },
+      'gguf-iq2xs':  { format: 'gguf', quant: 'gguf-iq2xs' },
+      'gptq-4bit':   { format: 'safetensors', quant: 'gptq-4bit' },
+      'awq-4bit':    { format: 'safetensors', quant: 'awq-4bit' },
+      'nvfp4':       { format: 'safetensors', quant: 'nvfp4' },
+      'fp8':         { format: 'safetensors', quant: 'fp8' },
+      'mlx-4bit':    { format: 'mlx',         quant: 'mlx-4bit' },
+      'hqq':         { format: 'safetensors', quant: 'hqq' },
+    };
+    let resolvedTargetFlag = targetFlag;
+    if (targetFlag === 'all') {
+      // Fan-out: spec-compile reads KOLM_TARGET_ALL and emits all viable
+      // targets for the detected hardware. Pre-flighted by W866 forge-hardware.
+      process.env.KOLM_TARGET_ALL = '1';
+      resolvedTargetFlag = null;
+      const ti = args.indexOf('--target');
+      if (ti >= 0) args.splice(ti, 2);
+    } else if (targetFlag && FORGE_QUANT_SHORTCUTS[targetFlag]) {
+      const sc = FORGE_QUANT_SHORTCUTS[targetFlag];
+      process.env.KOLM_QUANT = sc.quant;
+      resolvedTargetFlag = sc.format;
+      const ti = args.indexOf('--target');
+      if (ti >= 0) args[ti + 1] = sc.format;
+    } else if (targetFlag && /^exl2-(\d+(\.\d+)?)bpw$/.test(targetFlag)) {
+      const m = targetFlag.match(/^exl2-(\d+(\.\d+)?)bpw$/);
+      process.env.KOLM_EXL2_BPW = m[1];
+      process.env.KOLM_QUANT = 'exl2';
+      resolvedTargetFlag = 'safetensors';
+      const ti = args.indexOf('--target');
+      if (ti >= 0) args[ti + 1] = 'safetensors';
+    }
+    if (resolvedTargetFlag && !['gguf', 'onnx', 'safetensors', 'coreml', 'mlx', 'executorch', 'tensorrt', 'native-c', 'native-rust', 'c', 'rust', 'wasm'].includes(resolvedTargetFlag)) {
+      console.error(`error: --target must be one of: gguf, onnx, safetensors, coreml, mlx, executorch, tensorrt, native-c (alias c), native-rust (alias rust), wasm, all, OR a W866 quant shortcut (gguf-q4km, gguf-iq4xs, exl2-Nbpw, gptq-4bit, awq-4bit, nvfp4, fp8, mlx-4bit, hqq) — got '${targetFlag}'`);
       process.exit(EXIT.BAD_ARGS);
     }
     if (multiDeviceFlag) {
@@ -8257,6 +8304,99 @@ async function cmdBenchmark(args) {
   if (args.includes('--compare')) {
     return cmdBenchCompare(args);
   }
+  // W866 — `kolm bench --all-targets <artifact.kolm>` enumerates every
+  // adjacent .kolm artifact for the same base model + task and emits a
+  // comparison matrix (latency_us p50/p99, K-Score, size_mb, fits_on
+  // current GPU). Uses src/forge-fit + the existing benchmarkArtifact loop.
+  if (args.includes('--all-targets')) {
+    const positional = args.filter(a => !a.startsWith('--'));
+    const seed = resolveArtifact(positional[0]);
+    if (!seed) {
+      console.error('usage: kolm bench --all-targets <artifact.kolm> [--json]');
+      process.exit(EXIT.NOT_FOUND);
+    }
+    const wantJson = args.includes('--json');
+    // Find sibling artifacts that share base_model + task
+    let seedMan;
+    try {
+      seedMan = await withRunner(({ inspectArtifact }) => inspectArtifact(seed));
+    } catch (e) {
+      console.error(`bench --all-targets: cannot read seed manifest: ${e.message}`);
+      process.exit(EXIT.EXECUTION);
+    }
+    const dir = path.dirname(seed);
+    const siblings = [];
+    try {
+      const files = fs.readdirSync(dir).filter(f => f.endsWith('.kolm'));
+      for (const f of files) {
+        const ap = path.join(dir, f);
+        try {
+          const m = await withRunner(({ inspectArtifact }) => inspectArtifact(ap));
+          const sameBase = (m.base_model || '?') === (seedMan.base_model || '?');
+          const sameTask = (m.task || '?') === (seedMan.task || '?');
+          if (sameBase && sameTask) siblings.push({ path: ap, manifest: m });
+        } catch {}
+      }
+    } catch (e) {
+      console.error(`bench --all-targets: cannot enumerate ${dir}: ${e.message}`);
+      process.exit(EXIT.EXECUTION);
+    }
+    const { detectHardware } = await import('../src/forge-hardware.js');
+    const hw = detectHardware();
+    const vramGb = hw.primary ? hw.primary.vram_gb : null;
+    const rows = [];
+    for (const sib of siblings) {
+      const m = sib.manifest;
+      let fits = null;
+      if (vramGb && m.runtime_target) {
+        // Conservative: assume seed param count carries across the family
+        const paramsB = seedMan.export?.params_b || seedMan.params_b || null;
+        const quant = m.quantization?.method || m.runtime_target || 'fp16';
+        if (paramsB) {
+          try {
+            const { estimateMemoryFit } = await import('../src/forge-fit.js');
+            const fit = estimateMemoryFit({ model_params_b: paramsB, quant, vram_gb: vramGb });
+            fits = fit.fits;
+          } catch {}
+        }
+      }
+      let sizeMb = null;
+      try { sizeMb = Math.round(fs.statSync(sib.path).size / 1e6 * 10) / 10; } catch {}
+      rows.push({
+        path: path.basename(sib.path),
+        runtime_target: m.runtime_target || m.target_device || '?',
+        quantization: m.quantization?.method || '?',
+        k_score: m.k_score?.composite ?? null,
+        size_mb: sizeMb,
+        fits_on_gpu: fits,
+      });
+    }
+    rows.sort((a, b) => (b.k_score || 0) - (a.k_score || 0));
+    if (wantJson) {
+      console.log(JSON.stringify({
+        ok: true, seed: path.basename(seed),
+        vram_gb: vramGb, n_targets: rows.length, rows,
+        forge_bench_version: 'forge-bench-v1',
+      }, null, 2));
+      return;
+    }
+    console.log(`bench --all-targets: ${rows.length} sibling(s) of ${path.basename(seed)}`);
+    if (vramGb) console.log(`current GPU VRAM: ${vramGb} GB (fits column is preflight, not runtime)`);
+    console.log('');
+    const fmtRow = (a, b, c, d, e, f) =>
+      `  ${String(a).padEnd(28)} ${String(b).padEnd(14)} ${String(c).padEnd(12)} ${String(d).padStart(7)}  ${String(e).padStart(7)}  ${String(f).padEnd(6)}`;
+    console.log(fmtRow('artifact', 'target', 'quant', 'kscore', 'size_mb', 'fits?'));
+    console.log(fmtRow('--------', '------', '-----', '------', '-------', '-----'));
+    for (const r of rows) {
+      console.log(fmtRow(
+        r.path, r.runtime_target, r.quantization,
+        r.k_score != null ? r.k_score.toFixed(3) : '?',
+        r.size_mb != null ? r.size_mb : '?',
+        r.fits_on_gpu == null ? '?' : (r.fits_on_gpu ? '✓' : '✗'),
+      ));
+    }
+    return;
+  }
   const ap = resolveArtifact(args[0]);
   if (!ap) {
     const err = new Error(`artifact not found: ${args[0]}`);
@@ -8624,6 +8764,49 @@ async function cmdInspect(args) {
   if (maybeHelp('inspect', args)) return;
   const jsonOut = args.includes('--json');
   const positional = args.filter(a => !a.startsWith('--'));
+  // W866 — HuggingFace model id path. `kolm inspect Qwen/Qwen3-27B` fetches
+  // config.json off the HF hub and renders the same ModelProfile shape that
+  // /v1/inspect/model returns. Detection is conservative: org/repo form, no
+  // .kolm suffix, and the arg is NOT a local file/dir on disk. Anything that
+  // matches a local path falls through to the artifact path so muscle-memory
+  // for `kolm inspect ./build/foo.kolm` keeps working byte-stable.
+  const arg0 = positional[0] || '';
+  const looksLikeHfId = arg0
+    && arg0.includes('/')
+    && !arg0.endsWith('.kolm')
+    && !arg0.endsWith('.json')
+    && !fs.existsSync(arg0)
+    && !fs.existsSync(path.join(ARTIFACTS_DIR, arg0));
+  if (looksLikeHfId) {
+    const { inspectModel } = await import('../src/forge-inspect.js');
+    let prof;
+    try { prof = await inspectModel(arg0); }
+    catch (e) {
+      console.error(`inspect: ${e.message}`);
+      process.exit(EXIT.EXECUTION);
+    }
+    if (jsonOut) { console.log(JSON.stringify(prof, null, 2)); return; }
+    console.log(`model:        ${prof.name}`);
+    console.log(`source:       ${prof.source}`);
+    console.log(`family:       ${prof.family || '?'}`);
+    console.log(`architecture: ${prof.architecture || '?'}`);
+    console.log(`type:         ${prof.is_moe ? 'MoE' : 'dense'}`);
+    if (prof.is_moe) {
+      console.log(`  experts:           ${prof.num_experts}`);
+      console.log(`  active per token:  ${prof.num_experts_per_tok}`);
+    }
+    console.log(`total params: ${prof.total_params_b != null ? prof.total_params_b + 'B' : '?'}`);
+    console.log(`active params:${prof.active_params_b != null ? prof.active_params_b + 'B' : '?'}`);
+    console.log(`hidden:       ${prof.hidden_size}`);
+    console.log(`layers:       ${prof.num_hidden_layers}`);
+    console.log(`heads:        ${prof.num_attention_heads}`);
+    console.log(`vocab:        ${prof.vocab_size}`);
+    console.log(`max context:  ${prof.context_length}`);
+    console.log(`chat tmpl:    ${prof.chat_template_present ? 'yes' : 'no'}`);
+    console.log('');
+    console.log(`next: kolm fit --model ${prof.name} --pick-best`);
+    return;
+  }
   const ap = resolveArtifact(positional[0]);
   if (!ap) {
     const err = new Error(`artifact not found: ${positional[0]}`);
@@ -9568,6 +9751,138 @@ async function cmdServe(args) {
   const port = portIdx >= 0 ? Number(args[portIdx + 1]) : 8765;
   const hostIdx = args.indexOf('--host');
   const host = hostIdx >= 0 ? args[hostIdx + 1] : '127.0.0.1';
+
+  // W866 — --runtime / --docker / --k8s deployment-manifest emitters. These
+  // do NOT boot a server; they print a manifest the operator can hand to
+  // their runtime of choice. The serve flow above is unchanged.
+  const runtimeFlag = pickFlag(args, '--runtime');
+  const wantDocker = args.includes('--docker');
+  const wantK8s = args.includes('--k8s');
+  if (runtimeFlag || wantDocker || wantK8s) {
+    const artifact = args.find(a => !a.startsWith('--') && a !== 'serve');
+    if (!artifact) {
+      console.error('usage: kolm serve <artifact.kolm> --runtime <vllm|llama.cpp|ollama|tgi|sglang> [--docker | --k8s] [--port 8765]');
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const ap = path.isAbsolute(artifact) ? artifact : path.join(ARTIFACTS_DIR, artifact);
+    if (!fs.existsSync(ap)) {
+      console.error(`artifact not found: ${ap}`);
+      process.exit(EXIT.NOT_FOUND);
+    }
+    const VALID_RT = ['vllm', 'llama.cpp', 'llamacpp', 'ollama', 'tgi', 'sglang', 'trt-llm', 'tensorrt-llm'];
+    const rt = runtimeFlag || 'vllm';
+    if (!VALID_RT.includes(rt)) {
+      console.error(`error: --runtime must be one of: ${VALID_RT.join(', ')} (got '${rt}')`);
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const wantJson = args.includes('--json');
+    const base = path.basename(ap, '.kolm');
+    const manifests = {};
+    const rtImage = {
+      'vllm':      'vllm/vllm-openai:latest',
+      'llama.cpp': 'ghcr.io/ggerganov/llama.cpp:server',
+      'llamacpp':  'ghcr.io/ggerganov/llama.cpp:server',
+      'ollama':    'ollama/ollama:latest',
+      'tgi':       'ghcr.io/huggingface/text-generation-inference:latest',
+      'sglang':    'lmsysorg/sglang:latest',
+      'trt-llm':   'nvcr.io/nvidia/tensorrt-llm/release:latest',
+      'tensorrt-llm': 'nvcr.io/nvidia/tensorrt-llm/release:latest',
+    }[rt];
+    if (wantDocker) {
+      manifests.docker = [
+        `docker run --gpus all --rm \\`,
+        `  -p ${port}:${port} \\`,
+        `  -v ${path.dirname(ap)}:/artifacts \\`,
+        `  ${rtImage} \\`,
+        `  --model /artifacts/${path.basename(ap)} --port ${port}`,
+      ].join('\n');
+    }
+    if (wantK8s) {
+      manifests.k8s = `apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kolm-${base}
+  labels:
+    app: kolm-serve
+    artifact: ${base}
+    runtime: ${rt}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kolm-serve
+      artifact: ${base}
+  template:
+    metadata:
+      labels:
+        app: kolm-serve
+        artifact: ${base}
+        runtime: ${rt}
+    spec:
+      containers:
+        - name: kolm-serve
+          image: ${rtImage}
+          ports:
+            - containerPort: ${port}
+          resources:
+            limits:
+              nvidia.com/gpu: 1
+          volumeMounts:
+            - name: artifact-vol
+              mountPath: /artifacts
+          args:
+            - "--model"
+            - "/artifacts/${path.basename(ap)}"
+            - "--port"
+            - "${port}"
+      volumes:
+        - name: artifact-vol
+          hostPath:
+            path: ${path.dirname(ap)}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kolm-${base}-svc
+spec:
+  selector:
+    app: kolm-serve
+    artifact: ${base}
+  ports:
+    - port: ${port}
+      targetPort: ${port}
+  type: ClusterIP`;
+    }
+    if (!wantDocker && !wantK8s) {
+      // Bare --runtime: just print the chosen runtime line + an example
+      manifests.runtime_line = `${rt} --model ${ap} --port ${port}`;
+    }
+    if (wantJson) {
+      console.log(JSON.stringify({
+        ok: true, artifact: ap, runtime: rt, port, image: rtImage, manifests,
+        forge_serve_version: 'forge-serve-v1',
+      }, null, 2));
+      return;
+    }
+    console.log(`# kolm serve manifest — ${base} via ${rt}`);
+    console.log(`# image: ${rtImage}`);
+    console.log('');
+    if (manifests.docker) {
+      console.log('## docker:');
+      console.log(manifests.docker);
+      console.log('');
+    }
+    if (manifests.k8s) {
+      console.log('## kubernetes:');
+      console.log(manifests.k8s);
+      console.log('');
+    }
+    if (manifests.runtime_line) {
+      console.log('## runtime command:');
+      console.log(manifests.runtime_line);
+    }
+    return;
+  }
 
   if (useMcp) {
     const { startMcpServer } = await import('../services/mcp/server.js');
@@ -10917,6 +11232,217 @@ async function cmdQuantizeOracle(args) {
   if (fallback) console.log(`fallback: ${fallback.method} (${fallback.execution_status})`);
   if (primary.warnings?.length) console.log('warnings: ' + primary.warnings.join(', '));
   if (plan.ok === false) process.exitCode = 1;
+}
+
+// ---------------------------------------------------------------------------
+// W866 forge family — `kolm hardware`, `kolm fit`, `kolm experts`.
+//
+// These three verbs round out the compile-side preflight surface:
+//
+//   kolm hardware            inventory accelerator(s) + supported quant methods
+//   kolm fit <model> <quant> "will it fit?" memory calc (weights + KV + activations)
+//   kolm experts <art.kolm>  per-expert activation pct + prune candidates (MoE only)
+//
+// Each verb is a thin wrapper over src/forge-*.js. The module side keeps the
+// numbers + the data shape; the CLI side renders text / --json / exits.
+// ---------------------------------------------------------------------------
+
+async function cmdHardware(args) {
+  if (maybeHelp('hardware', args)) return;
+  const wantJson = args.includes('--json');
+  const { detectHardware, ALL_METHODS } = await import('../src/forge-hardware.js');
+  const hw = detectHardware();
+  if (wantJson) {
+    console.log(JSON.stringify(hw, null, 2));
+    return;
+  }
+  const all = Array.isArray(hw.all) ? hw.all : [];
+  const primary = hw.primary || (all[0] || null);
+  const cpuOnly = primary && primary.vendor === 'cpu';
+  if (cpuOnly) {
+    console.log('no GPU detected — falling back to CPU profile.');
+    console.log('');
+  }
+  console.log(`accelerator(s):   ${all.length}`);
+  for (const a of all) {
+    const cc = a.compute_capability ? ` (cc ${a.compute_capability})` : '';
+    const vram = a.vram_gb != null ? `${a.vram_gb} GB` : '?';
+    const tag = (a === primary) ? '  ★' : '';
+    console.log(`  [${a.vendor}] ${a.name || '?'}${cc} — ${vram}${tag}`);
+  }
+  console.log('');
+  const sm = primary ? (primary.supported_methods || []) : [];
+  console.log(`supported quants on primary (${sm.length}/${ALL_METHODS.length}):`);
+  for (let i = 0; i < sm.length; i += 4) {
+    const row = sm.slice(i, i + 4).map(s => s.padEnd(16)).join('');
+    console.log('  ' + row);
+  }
+  if (cpuOnly) console.log('\n(CPU-only — heavy methods like nvfp4/fp8 unavailable; GGUF + HQQ work)');
+  console.log(`\nnative dtypes:    ${(primary?.native_dtypes || []).join(', ')}`);
+  console.log(`detected at:      ${hw.detected_at} (${hw.forge_hardware_version})`);
+}
+
+async function cmdFit(args) {
+  if (maybeHelp('fit', args)) return;
+  const wantJson = args.includes('--json');
+  const model = pickFlag(args, '--model');
+  const paramsBFlag = pickFlag(args, '--params-b');
+  const quant = pickFlag(args, '--quant') || pickFlag(args, '--target') || 'gguf-q4km';
+  const vramFlag = pickFlag(args, '--vram-gb') || pickFlag(args, '--vram');
+  const ctxFlag = pickFlag(args, '--context') || pickFlag(args, '--ctx') || '8192';
+  const batchFlag = pickFlag(args, '--batch') || '1';
+  const kvPrec = pickFlag(args, '--kv-precision') || 'fp16';
+  const pickBest = args.includes('--pick-best');
+  if (!model && !paramsBFlag) {
+    console.error('usage: kolm fit --model <hf-id> [--quant gguf-q4km] [--vram-gb N] [--context 8192] [--batch 1] [--pick-best] [--json]');
+    console.error('   or: kolm fit --params-b 7 --quant gguf-q4km --vram-gb 24');
+    process.exit(EXIT.BAD_ARGS);
+  }
+  let modelParamsB = paramsBFlag ? Number(paramsBFlag) : null;
+  let modelName = model || `${paramsBFlag}B model`;
+  if (!modelParamsB && model) {
+    const { inspectModel } = await import('../src/forge-inspect.js');
+    try {
+      const prof = await inspectModel(model);
+      modelParamsB = prof.active_params_b || prof.total_params_b;
+      modelName = `${model} (${prof.is_moe ? 'MoE' : 'dense'}, active=${prof.active_params_b}B, total=${prof.total_params_b}B)`;
+    } catch (e) {
+      console.error(`fit: cannot inspect model: ${e.message}`);
+      process.exit(EXIT.EXECUTION);
+    }
+  }
+  // VRAM: explicit flag, else detected GPU
+  let vramGb = vramFlag ? Number(vramFlag) : null;
+  if (!vramGb) {
+    const { detectHardware } = await import('../src/forge-hardware.js');
+    const hw = detectHardware();
+    vramGb = hw.primary ? hw.primary.vram_gb : null;
+    if (!vramGb) {
+      console.error('fit: no --vram-gb flag and no GPU detected. pass --vram-gb <N>.');
+      process.exit(EXIT.BAD_ARGS);
+    }
+  }
+  const fitMod = await import('../src/forge-fit.js');
+  if (pickBest) {
+    const { detectHardware } = await import('../src/forge-hardware.js');
+    const hw = detectHardware();
+    const picked = fitMod.pickBestFitTarget({
+      model_params_b: modelParamsB,
+      vram_gb: vramGb,
+      context: Number(ctxFlag),
+      supported_methods: hw.primary ? hw.primary.supported_methods : undefined,
+    });
+    if (wantJson) { console.log(JSON.stringify(picked, null, 2)); return; }
+    console.log(`model:    ${modelName}`);
+    console.log(`vram:     ${vramGb} GB`);
+    console.log(`context:  ${ctxFlag}`);
+    console.log('');
+    if (!picked.picked) {
+      console.log(`✗ ${picked.rationale}`);
+      process.exitCode = EXIT.EXECUTION;
+      return;
+    }
+    console.log(`✓ best fit: ${picked.picked} — ${picked.rationale}`);
+    console.log(`  weights:    ${picked.fit.est_weights_gb} GB`);
+    console.log(`  kv cache:   ${picked.fit.est_kv_gb} GB (@ ${ctxFlag} ctx)`);
+    console.log(`  activations:${picked.fit.est_activations_gb} GB`);
+    console.log(`  overhead:   ${picked.fit.overhead_gb} GB`);
+    console.log(`  total:      ${picked.fit.est_total_gb} GB`);
+    console.log(`  headroom:   ${picked.fit.headroom_gb} GB free`);
+    return;
+  }
+  let result;
+  try {
+    result = fitMod.estimateMemoryFit({
+      model_params_b: modelParamsB,
+      quant,
+      vram_gb: vramGb,
+      context: Number(ctxFlag),
+      batch: Number(batchFlag),
+      kv_precision: kvPrec,
+    });
+  } catch (e) {
+    console.error(`fit: ${e.message}`);
+    process.exit(EXIT.BAD_ARGS);
+  }
+  if (wantJson) { console.log(JSON.stringify({ ...result, model: modelName, quant }, null, 2)); return; }
+  const mark = result.fits ? (result.tight ? '⚠' : '✓') : '✗';
+  console.log(`${mark} ${modelName} @ ${quant} on ${vramGb} GB VRAM (ctx=${ctxFlag}, batch=${batchFlag})`);
+  console.log('');
+  console.log(`  weights:     ${result.est_weights_gb} GB  (${result.bytes_per_param} bytes/param)`);
+  console.log(`  kv cache:    ${result.est_kv_gb} GB  (@ ${kvPrec})`);
+  console.log(`  activations: ${result.est_activations_gb} GB`);
+  console.log(`  overhead:    ${result.overhead_gb} GB`);
+  console.log(`  ────────────────────`);
+  console.log(`  total:       ${result.est_total_gb} GB`);
+  console.log(`  headroom:    ${result.headroom_gb} GB ${result.headroom_gb < 0 ? '(OVERSHOOT)' : ''}`);
+  console.log('');
+  console.log(`  ${result.recommendation}`);
+  if (!result.fits) process.exitCode = EXIT.EXECUTION;
+}
+
+async function cmdExperts(args) {
+  if (maybeHelp('experts', args)) return;
+  const wantJson = args.includes('--json');
+  const wantBars = args.includes('--bars');
+  const thresholdFlag = pickFlag(args, '--threshold');
+  const threshold = thresholdFlag ? Number(thresholdFlag) : 0.01;
+  if (!Number.isFinite(threshold) || threshold < 0 || threshold > 1) {
+    console.error(`error: --threshold must be a fraction in [0, 1], got ${thresholdFlag}`);
+    process.exit(EXIT.BAD_ARGS);
+  }
+  const positional = args.filter(a => !a.startsWith('--'));
+  const ap = resolveArtifact(positional[0]);
+  if (!ap) {
+    console.error('usage: kolm experts <artifact.kolm> [--threshold 0.01] [--bars] [--json]');
+    process.exit(EXIT.NOT_FOUND);
+  }
+  const { analyzeExperts, renderActivationBars } = await import('../src/forge-experts.js');
+  let analysis;
+  try {
+    analysis = await analyzeExperts(ap, { threshold });
+  } catch (e) {
+    console.error(`experts: ${e.message}`);
+    process.exit(EXIT.EXECUTION);
+  }
+  if (wantJson) { console.log(JSON.stringify(analysis, null, 2)); return; }
+  if (!analysis.is_moe) {
+    console.log(`${path.basename(ap)}: dense artifact (not MoE)`);
+    if (analysis.hint) console.log(`hint: ${analysis.hint}`);
+    return;
+  }
+  console.log(`${path.basename(ap)}: MoE artifact`);
+  console.log(`  experts:           ${analysis.num_experts}`);
+  if (analysis.num_experts_per_tok) console.log(`  active per token:  ${analysis.num_experts_per_tok}`);
+  if (analysis.reason === 'no_cached_router_decisions') {
+    console.log('');
+    console.log(`  ${analysis.hint}`);
+    return;
+  }
+  console.log(`  total decisions:   ${analysis.total_decisions}`);
+  console.log('');
+  if (wantBars) {
+    console.log(renderActivationBars(analysis));
+    console.log('');
+  } else {
+    // Compact table mode
+    const top5 = [...analysis.expert_activations].sort((a, b) => b.pct - a.pct).slice(0, 5);
+    const bot5 = [...analysis.expert_activations].sort((a, b) => a.pct - b.pct).slice(0, 5);
+    console.log('  top-5 most-activated:');
+    for (const e of top5) console.log(`    expert ${String(e.expert_id).padStart(3)}  ${e.pct.toFixed(2)}%`);
+    console.log('  bottom-5 least-activated:');
+    for (const e of bot5) console.log(`    expert ${String(e.expert_id).padStart(3)}  ${e.pct.toFixed(2)}%`);
+    console.log('');
+  }
+  console.log(`  prune candidates (< ${(threshold * 100).toFixed(1)}%):  ${analysis.prune_candidates.length}`);
+  if (analysis.prune_candidates.length > 0) {
+    console.log(`  est. size reduction:  ${analysis.pruned_size_pct_reduction}%`);
+    console.log(`  est. K-Score impact:  -${(analysis.estimated_kscore_impact * 100).toFixed(2)} pts (conservative, capped at -5)`);
+    console.log('');
+    console.log('  next: kolm compile --spec <spec.json> --prune-experts ' +
+      analysis.prune_candidates.map(p => p.expert_id).slice(0, 8).join(',') +
+      (analysis.prune_candidates.length > 8 ? ',...' : ''));
+  }
 }
 
 // kolm quantize: wave 195 (Q+5). Quantize an adapter via the isolated
@@ -13469,19 +13995,101 @@ async function cmdImportChat(args) {
 // W232 — kolm merge <base> <head> [--evaluator <file>] [--output <path>]
 async function cmdMerge(args) {
   if (maybeHelp('merge', args)) return;
-  const base = args[0];
-  const head = args[1];
-  if (!base || !head || base.startsWith('--') || head.startsWith('--')) {
-    console.error('usage: kolm merge <base.kolm> <head.kolm> [--evaluator <file>] [--output <path>]');
+  const positional = args.filter(a => !a.startsWith('--'));
+  const baseArg = positional[0];
+  const headArg = positional[1];
+  if (!baseArg || !headArg) {
+    console.error('usage: kolm merge <base.kolm> <head.kolm> [--method linear|slerp|ties|dare|passthrough] [--alpha 0.5] [--dry-run] [--evaluator <file>] [--output <path>] [--json]');
     process.exit(EXIT.BAD_ARGS);
   }
+  // Resolve both paths against ~/.kolm/artifacts/ so bare basenames work.
+  const base = resolveArtifact(baseArg) || baseArg;
+  const head = resolveArtifact(headArg) || headArg;
+  // W866 — merge methods catalog. The numerical merge work lives in
+  // workers/merge/ (Python, heavy linear-algebra path); the CLI exposes the
+  // method choice + a dry-run preflight that emits an honest plan envelope.
+  const VALID_METHODS = ['linear', 'slerp', 'ties', 'dare', 'passthrough'];
+  const methodFlag = pickFlag(args, '--method');
+  const method = methodFlag || 'linear';
+  if (!VALID_METHODS.includes(method)) {
+    console.error(`error: --method must be one of: ${VALID_METHODS.join(', ')} (got '${method}')`);
+    process.exit(EXIT.BAD_ARGS);
+  }
+  const alphaFlag = pickFlag(args, '--alpha');
+  const alpha = alphaFlag ? Number(alphaFlag) : 0.5;
+  if (!Number.isFinite(alpha) || alpha < 0 || alpha > 1) {
+    console.error(`error: --alpha must be a fraction in [0, 1] (got '${alphaFlag}')`);
+    process.exit(EXIT.BAD_ARGS);
+  }
+  const dryRun = args.includes('--dry-run');
+  const wantJson = args.includes('--json');
   const evaluator = pickFlag(args, '--evaluator') || null;
   const output = pickFlag(args, '--output') || null;
   const projectDir = pickFlag(args, '--project') || process.cwd();
+  if (dryRun) {
+    // Preflight: validate both artifacts exist + share a base lineage + emit
+    // estimated output size + the method's k-score-impact heuristic. The
+    // numerical merge is NOT executed. Uses the unsigned forge-inspect path
+    // (manifest read only) so a dev can preview a merge even if local
+    // signature trust is stale.
+    const { inspectArtifact: forgeInspect } = await import('../src/forge-inspect.js');
+    let baseMan, headMan;
+    try {
+      baseMan = await forgeInspect(base);
+      headMan = await forgeInspect(head);
+    } catch (e) {
+      console.error(`merge --dry-run: cannot inspect inputs: ${e.message}`);
+      process.exit(EXIT.EXECUTION);
+    }
+    const sameBase = (baseMan.base_model || '?') === (headMan.base_model || '?');
+    const baseSize = fs.statSync(base).size;
+    const headSize = fs.statSync(head).size;
+    // Method heuristics — kscore-delta is forecast, not measured
+    const methodHeuristics = {
+      linear:      { kscore_delta_forecast: '+0.00 to +0.02', notes: 'simple weighted average; safe baseline' },
+      slerp:       { kscore_delta_forecast: '+0.01 to +0.03', notes: 'spherical interpolation; better for non-orthogonal updates' },
+      ties:        { kscore_delta_forecast: '+0.02 to +0.05', notes: 'task-vector ties: resolves sign conflicts, often beats linear' },
+      dare:        { kscore_delta_forecast: '+0.01 to +0.04', notes: 'drop and rescale; reduces interference' },
+      passthrough: { kscore_delta_forecast: '+0.00',          notes: 'no math; stitches layers from both — for franken-merges' },
+    };
+    const baseKscore = (baseMan.k_score && typeof baseMan.k_score === 'object') ? (baseMan.k_score.composite ?? null) : null;
+    const headKscore = (headMan.k_score && typeof headMan.k_score === 'object') ? (headMan.k_score.composite ?? null) : null;
+    const plan = {
+      ok: sameBase,
+      method, alpha,
+      base: { path: base, base_model: baseMan.base_model, k_score: baseKscore, size_mb: Math.round(baseSize / 1e6 * 10) / 10 },
+      head: { path: head, base_model: headMan.base_model, k_score: headKscore, size_mb: Math.round(headSize / 1e6 * 10) / 10 },
+      same_base_lineage: sameBase,
+      est_output_size_mb: Math.round(Math.max(baseSize, headSize) / 1e6 * 10) / 10,
+      heuristic: methodHeuristics[method],
+      output: output || path.join(path.dirname(base), `${path.basename(base, '.kolm')}__merge_${method}.kolm`),
+      forge_merge_version: 'forge-merge-v1',
+    };
+    if (!sameBase) plan.warning = `base_model mismatch: ${baseMan.base_model} vs ${headMan.base_model} — merge will likely fail or produce garbage`;
+    if (wantJson) { console.log(JSON.stringify(plan, null, 2)); return; }
+    console.log(`merge --dry-run: ${method} (alpha=${alpha})`);
+    console.log(`  base: ${path.basename(base)} — ${baseMan.base_model} kscore=${plan.base.k_score}`);
+    console.log(`  head: ${path.basename(head)} — ${headMan.base_model} kscore=${plan.head.k_score}`);
+    console.log(`  same lineage: ${sameBase ? 'yes' : 'NO — merge will likely fail'}`);
+    console.log(`  est. output: ${plan.est_output_size_mb} MB → ${plan.output}`);
+    console.log('');
+    console.log(`  heuristic K-Score delta: ${plan.heuristic.kscore_delta_forecast}`);
+    console.log(`  notes: ${plan.heuristic.notes}`);
+    if (plan.warning) console.log(`\n  ⚠ ${plan.warning}`);
+    return;
+  }
+  // Real merge — thread method/alpha through to the existing recipe-merger.
   const state = await import('../src/kolm-state.js');
   try {
-    const r = state.mergeRecipes(base, head, { evaluator, output, projectDir });
-    console.log('ok  merged → ' + r.output + ' (strategy=' + r.strategy + ')');
+    const r = state.mergeRecipes(base, head, { evaluator, output, projectDir, method, alpha });
+    if (wantJson) {
+      console.log(JSON.stringify({
+        ok: true, output: r.output, strategy: r.strategy, method, alpha,
+        manifest_file: r.manifest_file, forge_merge_version: 'forge-merge-v1',
+      }, null, 2));
+      return;
+    }
+    console.log('ok  merged → ' + r.output + ' (strategy=' + r.strategy + ', method=' + method + ')');
     console.log('manifest: ' + r.manifest_file);
   } catch (e) {
     console.error('merge failed: ' + (e && e.message ? e.message : e));
@@ -31574,6 +32182,14 @@ async function cmdTui(args) {
     // the latest .kolm outputs without leaving the terminal. Keybind 'W'
     // mnemonically maps to "workshop" (studio = workshop in Italian).
     { id: 'studio',             key: 'W', endpoint: '/v1/artifacts',             kind: 'get',   label: 'studio (recent .kolm outputs + sessions)' },
+    // W866 — Forge hardware view. The W866 Forge surface entry point: shows
+    // local accelerator profile (GPU vendor/vram/cc, native dtypes, supported
+    // quants). Keybind 'H' is the only free letter in the BEMNOPQRSTUVW run.
+    // Aliases (`:forge`, `:hardware`, `:fit`, `:bench-targets`, `:experts`,
+    // `:compile-wizard`, `:merge-jobs`, `:serve-pods`, `:export-jobs`) below
+    // route the various Forge entry-points onto this view so the operator has
+    // a single TUI surface for the whole W866 namespace.
+    { id: 'hardware',           key: 'H', endpoint: '/v1/hardware',              kind: 'get',   label: 'hardware (GPU + supported quants)' },
   ];
   // Also expose simulations under view 'simulations' (alias for one of the
   // workflow rows so the W384 14-view test grep finds the literal). We list
@@ -32012,6 +32628,30 @@ async function cmdTui(args) {
       'cost-track':    'savings-tracker',
       'savings-tracker':'savings-tracker',
       'cost-savings':  'savings-tracker',
+      // W866 — Forge surface aliases. All routed onto the hardware view (the
+      // single GET-backed entry point for W866). Compile/merge/serve/export
+      // wizards live in the CLI verbs (`kolm compile|merge|serve|export`); the
+      // matching :compile-wizard / :merge-jobs / :serve-pods / :export-jobs
+      // command-mode entries land the operator on the hardware view as a
+      // discoverable "what runs here" anchor before they switch to the CLI.
+      'forge':            'hardware',
+      'hardware':         'hardware',
+      'hw':               'hardware',
+      'gpu':              'hardware',
+      'fit':              'hardware',
+      'bench-targets':    'hardware',
+      'all-targets':      'hardware',
+      'experts':          'hardware',
+      'moe':              'hardware',
+      'expert-analysis':  'hardware',
+      'compile-wizard':   'hardware',
+      'quantize-wizard':  'hardware',
+      'merge-jobs':       'hardware',
+      'merge-wizard':     'hardware',
+      'serve-pods':       'hardware',
+      'serve-wizard':     'hardware',
+      'export-jobs':      'hardware',
+      'export-wizard':    'hardware',
     };
     if (VIEW_ALIAS[verb]) {
       const id = VIEW_ALIAS[verb];
@@ -37704,6 +38344,12 @@ async function main() {
       // /account/settings.html + the TUI settings view (key F).
       case 'settings': await withErrorContext('settings', () => cmdSettings(rest)); break;
       case 'quantize': await withErrorContext('quantize', () => cmdQuantize(rest)); break;
+      // W866 forge family — hardware / fit / experts. cmdInspect (line ~8623)
+      // is extended in place to thread HF model ids through forge-inspect.js
+      // alongside its existing .kolm artifact path.
+      case 'hardware': await withErrorContext('hardware', () => cmdHardware(rest)); break;
+      case 'fit':      await withErrorContext('fit',      () => cmdFit(rest)); break;
+      case 'experts':  await withErrorContext('experts',  () => cmdExperts(rest)); break;
       case 'runtime':  await withErrorContext('runtime',  () => cmdRuntime(rest)); break;
       // W729 — `kolm load queue --stats | --capacity <N>` mirrors the
       // server-side src/load-queue.js singleton. Sub-verb routing keeps the

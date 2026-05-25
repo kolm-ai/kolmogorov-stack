@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>kolm hardware | CLI reference | kolm.ai</title>
+<meta name="description" content="Probe local GPUs. VRAM, native dtypes, supported quants, vendor + driver. Backed by /v1/hardware.">
+<link rel="canonical" href="https://kolm.ai/docs/cli/hardware">
+<meta property="og:title" content="kolm hardware | CLI reference | kolm.ai">
+<meta property="og:description" content="Probe local GPUs. VRAM, native dtypes, supported quants, vendor + driver.">
+<meta property="og:url" content="https://kolm.ai/docs/cli/hardware">
+<meta property="og:type" content="article">
+<meta property="og:image" content="/og/docs-cli.svg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
+<script src="/nav.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm hardware","description":"Probe local GPUs. VRAM, native dtypes, supported quants, vendor + driver.","url":"https://kolm.ai/docs/cli/hardware","mainEntityOfPage":"https://kolm.ai/docs/cli/hardware","author":{"@type":"Organization","name":"kolm.ai"}}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col"><p class="mega-h">Start</p><a href="/product">Overview</a><a href="/quickstart">Quickstart</a><a href="/capture">Gateway</a></div>
+        <div class="mega-col"><p class="mega-h">Build</p><a href="/training">Training loop</a><a href="/distill">Distill</a><a href="/compile">Compile</a></div>
+        <div class="mega-col"><p class="mega-h">Run</p><a href="/runtimes">Runtimes</a><a href="/docs/devices">Devices</a><a href="/trust">Verify</a></div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col"><p class="mega-h">Choose</p><a href="/models">Model catalog</a><a href="/build-your-own">Build your own</a><a href="/docs/runtime">Runtime targets</a></div>
+        <div class="mega-col"><p class="mega-h">Deploy</p><a href="/compute">Compute</a><a href="/runtimes">Mobile and edge</a></div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col"><p class="mega-h">Start</p><a href="/capture">API gateway</a><a href="/docs/cli">CLI</a><a href="/docs/sdk">SDKs</a></div>
+        <div class="mega-col"><p class="mega-h">Reference</p><a href="/docs">Docs home</a><a href="/docs/api">API reference</a><a href="/api">HTTP routes</a></div>
+        <div class="mega-col"><p class="mega-h">Operate</p><a href="/integrations">Integrations</a><a href="/docs/privacy">Privacy membrane</a><a href="/docs/datasets">Datasets</a><a href="/docs/distillation">Distillation</a><a href="/docs/verify">Verification</a></div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col"><p class="mega-h">Buy</p><a href="/pricing">Plans</a><a href="/pricing#roi">ROI calculator</a><a href="/nonprofits">Nonprofits</a></div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col"><p class="mega-h">Deploy</p><a href="/enterprise">Enterprise overview</a><a href="/self-host">Self-host</a><a href="/airgap">Air-gap</a></div>
+        <div class="mega-col"><p class="mega-h">Trust</p><a href="/trust">Trust center</a><a href="/security">Security</a><a href="/compliance">Compliance</a><a href="/baa">BAA</a></div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+<main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="hardware">
+<nav aria-label="Breadcrumb" class="crumbs">
+  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>hardware</span>
+</nav>
+<section class="kolm-surface-media kolm-surface-media--inline" aria-label="CLI workflow proof">
+  <div class="media-terminal">
+    <span class="media-kicker">CLI contract</span>
+    <span class="media-line"><span class="ok">$</span> kolm hardware --help</span>
+    <span class="media-line"><span class="ok">$</span> kolm hardware --json</span>
+    <p>Probe local GPUs and report VRAM, native dtypes, supported quants, vendor and driver. Same envelope the Account dashboard at <a href="/account/hardware">/account/hardware</a> renders.</p>
+  </div>
+  <div class="media-proof">
+    <span class="media-kicker">Operational proof</span>
+    <p>The probe is read-only; no auth, no tenant scoping. Use the supported_methods list to filter <code>kolm compile --target &lt;...&gt;</code> picks.</p>
+  </div>
+</section>
+<h1>kolm hardware</h1>
+<blockquote><p>What this box can actually run. Live VRAM, native dtypes, supported quant targets, vendor and driver &mdash; in plain text or JSON.</p></blockquote>
+<h2>Usage</h2>
+<pre><code>
+kolm hardware              # human-readable summary of the primary GPU
+kolm hardware --json       # full JSON: primary + every detected device
+kolm hardware --all        # human-readable summary of every device
+</code></pre>
+<h2>Flags</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Flag</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>--json</code></td><td>off</td><td>emit the full <code>/v1/hardware</code> envelope as JSON</td></tr>
+<tr><td><code>--all</code></td><td>off</td><td>print one block per detected device, not just the primary</td></tr>
+<tr><td><code>--quiet</code></td><td>off</td><td>only print the primary device name and VRAM (single line, scriptable)</td></tr>
+</tbody>
+</table></div>
+<h2>Response shape</h2>
+<pre><code>
+{
+  "ok":      true,
+  "primary": {
+    "vendor":             "nvidia",
+    "name":               "NVIDIA GeForce RTX 5090",
+    "vram_gb":            31.8,
+    "compute_capability": "12.0",
+    "driver_version":     "596.21",
+    "native_dtypes":      ["nvfp4", "fp8", "fp16", "bf16", "int8", "int4"],
+    "supported_methods":  ["fp16", "bf16", "fp8", "nvfp4",
+                           "gguf-q8", "gguf-q6k", "gguf-q5km",
+                           "awq-4bit", "gptq-4bit", "gguf-q4km",
+                           "gguf-iq4xs", "int4", "exl2", "mlx-4bit", "hqq",
+                           "gguf-q3km", "gguf-iq3xxs", "gguf-q2k", "gguf-iq2xs"]
+  },
+  "all":     [ { /* ... per-GPU detail ... */ } ]
+}
+</code></pre>
+<h2>Examples</h2>
+<pre><code>
+# human-readable
+kolm hardware
+
+# extract just the VRAM for scripting
+kolm hardware --json | jq -r '.primary.vram_gb'
+
+# list every supported quant target
+kolm hardware --json | jq -r '.primary.supported_methods[]'
+
+# pair with fit: pick the highest-quality target that fits
+kolm hardware --json | jq -r '.primary | "--vram-gb " + (.vram_gb|tostring)' \
+  | xargs kolm fit --params-b 7 --pick-best
+</code></pre>
+<h2>Notes</h2>
+<p>The probe calls into <code>src/forge-hardware.js</code> &middot; <code>detectHardware()</code>. NVIDIA detection uses <code>nvidia-smi</code> if present; otherwise it falls back to a CPU-only envelope. AMD ROCm and Apple Metal detection are best-effort &mdash; please file a bug at <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github.com/sneaky-hippo/kolmogorov-stack</a> if your device shows up wrong.</p>
+<p>The same route powers the Account dashboard auto-fill for VRAM; you should never have to type your VRAM into the quantize wizard.</p>
+<h2>See also</h2>
+<ul>
+<li><a href="/hardware">/hardware</a> &mdash; the marketing page with a live probe</li>
+<li><a href="/account/hardware">/account/hardware</a> &mdash; the Account dashboard</li>
+<li><a href="/docs/cli/fit">kolm fit</a> &mdash; pair with the supported_methods list to pick the right target</li>
+<li><a href="/docs/cli/bench">kolm bench</a> &mdash; iterate every supported target for one base model</li>
+<li><a href="/forge#surfaces">All Forge surfaces</a></li>
+</ul>
+<section class="see-also" aria-labelledby="see-also-h">
+  <h2 id="see-also-h">See also</h2>
+  <ul>
+    <li><a href="/docs/cli">All CLI verbs</a></li>
+    <li><a href="/quickstart">Quickstart</a></li>
+    <li><a href="/docs/api">HTTP API reference</a></li>
+    <li><a href="/docs/sdk">SDK reference</a></li>
+  </ul>
+</section>
+</main>
+</body>
+</html>

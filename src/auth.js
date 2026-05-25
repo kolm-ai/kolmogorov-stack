@@ -450,7 +450,15 @@ const PUBLIC_API = (p) =>
   // read-only verbs is enforced inside the route handler; the same rate
   // limiter pool as /v1/free/chat caps anonymous calls at 20/IP/day.
   p === '/v1/free/cli' ||
-  p === '/v1/free/cli/allowlist';
+  p === '/v1/free/cli/allowlist' ||
+  // W866 — Forge read-only compute routes (hardware/inspect/fit/experts).
+  // These are pure compute over caller-supplied or server-side data, with no
+  // tenant scoping. Rate-limited inside the routes via forgeLimiter. Same
+  // policy as /v1/device/* and /v1/cc/* (stateless validators).
+  p === '/v1/hardware' ||
+  p === '/v1/inspect' ||
+  p === '/v1/fit' ||
+  p === '/v1/experts';
 
 export function adminApiKey() {
   return process.env.ADMIN_KEY || null;
