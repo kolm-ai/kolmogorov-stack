@@ -155,8 +155,17 @@
  <span>&nbsp;</span>
  <button class="btn" id="btn-export" type="button">Download CSV</button>
  </label>
+ <label style="justify-content:flex-end">
+ <span>&nbsp;</span>
+ <button class="btn" id="btn-export-jsonl" type="button">Download JSONL</button>
+ </label>
+ <label style="justify-content:flex-end">
+ <span>&nbsp;</span>
+ <button class="btn" id="btn-verify" type="button">Verify hash chain</button>
+ </label>
  </form>
  <p id="f-actor-help" class="help">Actor matches a user email (OAuth sign-in) or the prefix of an API key (<code>ks_abcd1234</code>).</p>
+ <p id="verify-status" class="help" style="margin-top:6px"></p>
 </div>
 
 <div class="table-wrap">
@@ -259,13 +268,73 @@ kolm audit --verify
 
  document.getElementById("filters").addEventListener("submit",function(e){e.preventDefault();load();});
 
- document.getElementById("btn-export").addEventListener("click",function(){
- if(!key){window.kfetch=function(){return Promise.reject(new Error("missing api key"));};location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
- var url="/v1/account/audit-log?"+qs()+"&format=csv";
- // Use fetch + blob so the auth header travels with the request.
+ function exportAs(fmt, ext){
+ if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
+ var url="/v1/account/audit-log?"+qs()+"&format="+fmt;
  fetch(url,{headers:headers()}).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.blob();}).then(function(b){
- var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="kolm-audit-"+new Date().toISOString().slice(0,10)+".csv";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},200);
- }).catch(function(){alert("Export failed. Try kolm audit --since "+document.getElementById("f-since").value+" --format csv from your terminal.");});
+ // W862 — fallback to client-side serialization if server returns JSON
+ // instead of the requested format. Some deployments don't yet honor
+ // ?format=jsonl on /v1/account/audit-log; render from JSON locally.
+ if (b.type && b.type.indexOf('application/json') >= 0 && fmt === 'jsonl') {
+ b.text().then(function(t){
+ try {
+ var j = JSON.parse(t);
+ var rows = (j && (j.entries || j.items)) || j || [];
+ var jsonl = rows.map(function(r){ return JSON.stringify(r); }).join('\n');
+ downloadBlob(new Blob([jsonl], {type:'application/jsonl'}), ext);
+ } catch (e) { alert('JSONL export failed: ' + (e.message || 'parse error')); }
+ });
+ return;
+ }
+ if (b.type && b.type.indexOf('application/json') >= 0 && fmt === 'csv') {
+ b.text().then(function(t){
+ try {
+ var j = JSON.parse(t);
+ var rows = (j && (j.entries || j.items)) || j || [];
+ var hdr = ['ts','actor','action','target','ip','geo'];
+ var csv = hdr.join(',') + '\n' + rows.map(function(r){
+ return hdr.map(function(h){
+ var v = r[h] != null ? r[h] : (r[h === 'ts' ? 'timestamp' : (h === 'ip' ? 'source_ip' : (h === 'actor' ? 'user' : h))] || '');
+ v = String(v).replace(/"/g, '""');
+ return /[,"\n]/.test(v) ? '"' + v + '"' : v;
+ }).join(',');
+ }).join('\n');
+ downloadBlob(new Blob([csv], {type:'text/csv'}), ext);
+ } catch (e) { alert('CSV export failed: ' + (e.message || 'parse error')); }
+ });
+ return;
+ }
+ downloadBlob(b, ext);
+ }).catch(function(){
+ alert("Export failed. Try kolm audit --since "+document.getElementById("f-since").value+" --format "+fmt+" from your terminal.");
+ });
+ }
+ function downloadBlob(b, ext){
+ var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="kolm-audit-"+new Date().toISOString().slice(0,10)+"."+ext;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},200);
+ }
+ document.getElementById("btn-export").addEventListener("click",function(){ exportAs('csv','csv'); });
+ document.getElementById("btn-export-jsonl").addEventListener("click",function(){ exportAs('jsonl','jsonl'); });
+
+ // W862 — hash-chain integrity check. Calls /v1/account/audit-log/verify
+ // (admin only); honest envelope on either side so the operator sees if
+ // tampering broke the chain.
+ document.getElementById("btn-verify").addEventListener("click",function(){
+ if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
+ var st = document.getElementById("verify-status");
+ st.textContent = "verifying chain...";
+ fetch("/v1/account/audit-log/verify",{headers:headers()}).then(function(r){return r.json().then(function(j){return {status:r.status, j:j};});}).then(function(o){
+ if (o.status === 404 || (o.j && o.j.error === 'not_implemented')) {
+ st.innerHTML = '<span style="color:var(--ink-faint)">verify endpoint not enabled in this deployment. use <code>kolm audit --verify</code> locally.</span>';
+ return;
+ }
+ if (o.j && o.j.ok === true) {
+ st.innerHTML = '<span style="color:var(--good)">chain intact &middot; '+(o.j.entries||o.j.count||0)+' entries &middot; head ' + (o.j.head_hash ? esc(o.j.head_hash.slice(0,16)+'…') : '—') + '</span>';
+ } else {
+ st.innerHTML = '<span style="color:var(--bad)">chain BROKEN at entry '+(o.j && o.j.broken_at != null ? o.j.broken_at : '—')+' &middot; '+ esc((o.j && o.j.error) || 'verification failed') +'</span>';
+ }
+ }).catch(function(e){
+ st.innerHTML = '<span style="color:var(--bad)">verify failed: '+esc(e.message||'error')+'</span>';
+ });
  });
 
  load();

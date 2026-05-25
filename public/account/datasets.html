@@ -100,6 +100,18 @@
   <select id="ns-pick" aria-label="Namespace" style="min-width:200px"></select>
   <input id="ds-name" type="text" placeholder="Dataset name (auto if blank)" style="min-width:240px">
 </div>
+
+<details id="upload-panel" style="margin:18px 0 24px;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px 16px">
+<summary style="cursor:pointer;font-size:14px;color:var(--ink);font-weight:600">Upload a JSONL corpus &darr;</summary>
+<p class="lede" style="margin:10px 0 8px;font-size:13px">
+  Drop a JSONL file (one <code>{"input": "...", "output": "..."}</code> per line) to bulk-import captures into the selected namespace. After ingest, click "Create from accepted labels" above. Max 200 rows per batch &mdash; larger files are chunked automatically.
+</p>
+<div id="drop-zone" style="border:2px dashed var(--line-strong);border-radius:8px;padding:24px;text-align:center;color:var(--ink-mute);font-family:var(--mono);font-size:13px;cursor:pointer;transition:all 0.2s">
+  drag a .jsonl file here, or click to pick &middot;
+  <input type="file" id="file-input" accept=".jsonl,application/jsonl,application/json,text/plain" style="display:none">
+</div>
+<div id="upload-status" style="margin-top:10px;font-size:12px;font-family:var(--mono);color:var(--ink-mute)"></div>
+</details>
 <table class="ktable">
   <thead><tr><th>Name</th><th>Namespace</th><th>Train / Holdout</th><th>Disjoint</th><th>Examples</th><th>Created</th></tr></thead>
   <tbody id="ds-rows"><tr><td colspan="6"><div class="skel" style="width:260px"></div></td></tr></tbody>
@@ -149,6 +161,74 @@ document.getElementById("btn-create").addEventListener("click",function(){
   var name=document.getElementById("ds-name").value.trim();
   window.kfetch("/v1/datasets",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({namespace:ns,name:name||null,source:"accepted_labels"})}).then(refresh).catch(function(e){alert("create failed: "+e.message);});
 });
+
+// W859 — bulk JSONL upload. Reads file client-side, splits into <=200-row
+// batches, posts each to /v1/capture/log. No server-side upload route needed
+// because capture/log is the authoritative ingest path.
+(function(){
+  var drop = document.getElementById('drop-zone');
+  var input = document.getElementById('file-input');
+  var status = document.getElementById('upload-status');
+  if (!drop || !input || !status) return;
+  drop.addEventListener('click', function(){ input.click(); });
+  drop.addEventListener('dragover', function(e){ e.preventDefault(); drop.style.background = 'var(--bg-elev)'; });
+  drop.addEventListener('dragleave', function(){ drop.style.background = ''; });
+  drop.addEventListener('drop', function(e){
+    e.preventDefault(); drop.style.background = '';
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+  });
+  input.addEventListener('change', function(){
+    if (input.files && input.files[0]) handleFile(input.files[0]);
+  });
+
+  function handleFile(file){
+    if (!file) return;
+    if (file.size > 100 * 1024 * 1024) { status.textContent = 'file > 100 MB; please split client-side first'; return; }
+    var ns = document.getElementById('ns-pick').value || 'default';
+    status.textContent = 'parsing ' + file.name + ' (' + window.kbytes(file.size) + ')...';
+    var reader = new FileReader();
+    reader.onerror = function(){ status.textContent = 'read failed'; };
+    reader.onload = function(){
+      var text = String(reader.result || '');
+      var lines = text.split(/\r?\n/).filter(function(l){ return l.trim().length > 0; });
+      var items = [];
+      var bad = 0;
+      for (var i = 0; i < lines.length; i++) {
+        try {
+          var row = JSON.parse(lines[i]);
+          var inp = row.input != null ? row.input : row.prompt;
+          var outp = row.output != null ? row.output : row.response;
+          if (typeof inp === 'string' && typeof outp === 'string' && inp.length && outp.length) items.push({ input: inp, output: outp });
+          else bad++;
+        } catch (_) { bad++; }
+      }
+      if (!items.length) { status.textContent = 'no valid rows (' + bad + ' parse failures). expected one {"input":"...","output":"..."} per line.'; return; }
+      status.textContent = 'parsed ' + items.length + ' rows' + (bad ? ' (' + bad + ' skipped)' : '') + '; uploading...';
+      uploadBatches(items, ns, 0, 0, items.length);
+    };
+    reader.readAsText(file);
+  }
+
+  function uploadBatches(items, ns, sent, ingested, total){
+    if (sent >= items.length) {
+      status.textContent = 'done. ingested ' + ingested + ' / ' + total + ' rows into "' + ns + '". refresh below or click "Create from accepted labels" above to materialise as a dataset.';
+      refresh();
+      return;
+    }
+    var batch = items.slice(sent, sent + 200);
+    window.kfetch('/v1/capture/log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ namespace: ns, items: batch, provider: 'manual', model: 'upload' })
+    }).then(function(r){
+      var n = (r && r.count) || 0;
+      uploadBatches(items, ns, sent + 200, ingested + n, total);
+      status.textContent = 'uploaded ' + (sent + batch.length) + ' / ' + total + ' rows (' + (ingested + n) + ' ingested)...';
+    }).catch(function(e){
+      status.textContent = 'upload failed at row ' + sent + ': ' + (e.message || 'error');
+    });
+  }
+})();
 </script>
 
 <footer class="ks-footer">

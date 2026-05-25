@@ -32,6 +32,109 @@ EXIT: <behavior that exists after the code change>
 
 Do not write "review", "scan", "audit", "consider", "improve", or "verify" as the action. Those are allowed only in the `EXIT` line after implementation exists.
 
+## Master Spec Tree And Contract Encoding Redline
+
+Direct answer: no, all of this should not be JSON.
+
+Current local reality after reviewing the live repo:
+
+- The backend is Node ESM JavaScript, not TypeScript and not a separate non-JS backend stack. `package.json` declares `"type": "module"`, route/runtime code lives primarily under `src/`, CLI under `cli/`, and scripts are mixed ESM/CJS.
+- JSON is already used correctly as generated evidence in several places: `public/product-graph.json`, `docs/internal/codebase-file-ledger.json`, `docs/internal/design-cascade-ledger.json`, `docs/internal/product-media-proof.json`, `docs/internal/catalog-manifest.json`, and `docs/internal/wave-registry.json`.
+- JSON is also used correctly as wire/interchange data: API responses, OpenAPI output, JSON Schema files, `.kolm` artifact internals such as `manifest.json`, `recipes.json`, `evals.json`, and receipts.
+- JSON is used as local/offline persistence in places where it should stay demoted: `src/store.js` defaults to local JSON files for dependency-free development but switches production-like environments toward SQLite when available; `src/event-store.js` uses SQLite as the main event path and JSONL as the fallback.
+- The dangerous pattern is not "JSON exists." The dangerous pattern is hand-authored JSON being treated as runtime truth for behavior, policy, mutable state, pricing, routes, auth, or product completion.
+
+REDLINE: the current spec language creates too many future `docs/internal/*.json` files without consistently saying whether they are source authority, generated projection, static browser payload, persistence fallback, or evidence.
+ACTION: CREATE `docs/internal/contract-encoding-policy.md`, `src/contracts/contract-registry.js`, `src/contracts/schema-registry.js`, `src/contracts/policy-registry.js`, `src/contracts/projection-writers.js`, and `scripts/build-contract-projections.cjs`; REPLACE any redline that treats `docs/internal/*.json` as behavioral source of truth with a declared source/projection split.
+CODE: every contract-like artifact must declare:
+
+```json
+{
+  "id": "kolm.example_contract.v1",
+  "source_kind": "code_authority|schema_authority|policy_authority|database_authority|artifact_authority|human_decision_record|generated_projection|runtime_cache|dev_fallback_store",
+  "source_paths": ["src/..."],
+  "projection_paths": ["docs/internal/...json", "public/...json"],
+  "generator": "scripts/...",
+  "validator": "scripts/... --check",
+  "runtime_enforcer": "src/...",
+  "mutable": false,
+  "customer_visible": false,
+  "secret_values_included": false
+}
+```
+
+EXIT: no implementation agent can confuse a generated JSON ledger with the behavior, state, or policy it describes.
+
+REDLINE: the master spec tree is split across prose, generated JSON, route scraping, product graph output, account pages, and package scripts without one explicit authority hierarchy.
+ACTION: CREATE a master spec authority tree and WIRE every site/product surface to it.
+CODE: the hierarchy must be:
+
+| layer | authority | generated/public projection |
+|---|---|---|
+| Product vocabulary | `src/product-kernel.js` | `public/product-graph.json` kernel section |
+| Product journeys and UX surface map | `src/product-experience.js` | product graph, account overview, CLI/TUI surface output |
+| Route/API behavior | `src/api/route-contracts.js` and route modules | `public/openapi.json`, `public/docs/api-routes.json`, API docs |
+| Request/response validation | JSON Schema 2020-12 schemas exported from `src/api/schemas/*` | OpenAPI schema components, SDK fixtures |
+| Error model | `src/api/problem.js` using RFC 9457 problem details | API docs, SDK typed errors, account/CLI error renderers |
+| Mutable tenant/account/data state | SQLite/Postgres migrations and repositories | JSON state snapshots/evidence only |
+| Event stream and audit log | append-only event store and event schema modules | CloudEvents/AsyncAPI-style docs, SIEM export, JSONL fallback |
+| Authorization and governance policy | code-backed policy engine, or Cedar/Rego if externalized | policy matrix JSON and docs |
+| Pricing/commercial rules | `src/commercial/*` modules and billing state machine | pricing pages, ROI JSON, plan API responses |
+| Provider/model/runtime/device catalog | source modules plus dated upstream evidence | `docs/internal/catalog-manifest.json`, public model/runtime pages |
+| Website/page design system | design tokens, component CSS/JS modules, page-family contracts | design cascade ledger, screenshots, media proof |
+| Artifact format | `.kolm` container spec and canonical artifact code | manifest/receipt JSON inside artifact, public spec page |
+| Release proof | deploy packet, smoke results, screenshots, rollback evidence | production evidence JSON/Markdown report |
+
+EXIT: `kolm.ai` becomes one system: product kernel -> route contracts -> UI/account/docs -> generated projections -> proof packets.
+
+REDLINE: the site/product spec currently risks optimizing public pages separately from the actual product matrix.
+ACTION: REPLACE page-by-page copy/design drift with a site master spec that owns all surfaced product promises.
+CODE: the master site spec must map every public and account surface to one of the three product loops:
+
+1. `route-and-capture`: OpenAI-compatible traffic capture, provider choice, privacy lake, cost/latency proof, zero-retention controls.
+2. `distill-and-compile`: dataset promotion, teacher/student strategy, K-Score, eval gates, quantization, signed `.kolm` artifact build.
+3. `run-and-govern`: runtime/device/cloud deployment, BYOC/storage, audit receipts, account readiness, enterprise controls.
+
+Each page-family contract must declare `first_screen_claim`, `primary_action`, `proof_component`, `demo_or_media`, `account_destination`, `api_cli_docs_destination`, `readiness_scope`, `seo_title`, `structured_data`, `theme_states`, `mobile_states`, and `empty_error_loading_states`.
+EXIT: homepage, product pages, docs, pricing, trust, demos, API docs, SDK docs, and post-auth account pages all tell the same product story instead of competing with each other.
+
+REDLINE: "more serious than JSON" is being treated as a binary choice, but the serious choice is domain-specific authority.
+ACTION: IMPLEMENT the following format policy instead of changing every artifact to one format.
+CODE:
+
+| domain | use this as authority | why | JSON role |
+|---|---|---|---|
+| HTTP contracts | code route contracts plus JSON Schema 2020-12 | runtime can enforce the same contract docs publish | OpenAPI/docs/SDK projection |
+| Public static manifests | generated JSON | browser, CLI, and docs can consume it directly | primary projection, not behavior |
+| Mutable app state | SQLite/Postgres repositories and migrations | transactions, constraints, migration history, recovery | export/snapshot only |
+| Append-only events | SQLite/event log with schema module | auditability, replay, ordering, partial-write safety | JSONL fallback and CloudEvents payload |
+| Authorization | policy engine/code relation model | deny/allow logic must be testable and centrally enforced | generated policy matrix |
+| Cross-language binary SDK/runtime protocol | Protocol Buffers only when language-neutral binary compatibility is actually needed | smaller/faster, generated bindings, explicit schema | JSON debug projection |
+| Artifact manifests and receipts | canonical deterministic JSON inside signed `.kolm` container | inspectable, hashable, portable, auditable | valid authority for artifact metadata |
+| Large tensors/weights | safetensors/GGUF/ONNX/CoreML/etc. | JSON is wrong for large numeric arrays | metadata pointer only |
+| Long-running jobs/streams | job state machine plus event stream contract | progress, cancellation, retry, partial failure need state semantics | JSON event payloads only |
+| Human planning/redlines | Markdown plus generated extracted packets | humans need rationale and implementation language | generated index/projection only |
+
+EXIT: Kolm uses JSON where JSON is strong and stops using JSON where it creates fake rigor.
+
+REDLINE: the local control files prove the JSON/projection model is useful but also expose unfinished master-spec work.
+ACTION: WIRE current generated ledgers into a single final build redline packet.
+CODE: consume these current live artifacts:
+
+- `public/product-graph.json`: 12 journeys, 8 customization dimensions, 582 routes, 163 route groups, 64 CLI commands, 32 TUI views.
+- `docs/internal/codebase-file-ledger.json`: 3,673 paths, 2,509 source paths, 228 generated paths, 569 test paths, 0 unowned paths.
+- `docs/internal/design-cascade-ledger.json`: 729 public HTML pages, 19 CSS files, 3,873 CSS `!important` uses, 1,524 raw CSS hex values, 75 negative letter-spacing uses, 3,215 inline HTML styles.
+- `docs/internal/product-media-proof.json`: 729 HTML pages, 3,710 media references, 0 missing local media, 4 image dimension gaps.
+- `docs/internal/catalog-manifest.json`: 132 catalog entries across providers, provider models, local models, devices, hardware, and runtimes.
+- `docs/internal/wave-registry.json`: 551 waves, 450 local-green states, 93 planned states, 323 test-only waves, 93 plan-only waves.
+
+EXIT: the master spec stops being "a pile of JSON" and becomes a control plane: source authority, generated projection, runtime enforcement, visible product surface, and final proof all connected.
+
+REDLINE: the repo has no TypeScript project today, so demanding "serious" by switching everything to TypeScript would be a separate migration, not an immediate product finish.
+ACTION: CREATE a typed-contract bridge before any TypeScript migration.
+CODE: add JSDoc/type declarations, JSON Schema validation, generated `.d.ts` files for SDK consumers, and contract tests around JS modules first. Only migrate route contracts, schema registries, SDK generation, and high-churn product catalogs to TypeScript after the build can enforce mixed JS/TS without slowing release work.
+EXIT: Kolm gets typed boundaries without a risky whole-repo language rewrite.
+
 ## Hard Implementation Redlines
 
 These are the redlines an implementation agent should execute first. They are not research tasks.
@@ -570,6 +673,72 @@ ACTION: CREATE `src/data/residency-policy.js` and `docs/internal/data-residency-
 CODE: region policy must include tenant region, allowed storage providers, forbidden transfer targets, compute regions, artifact export regions, backup regions, subprocessor list, account display state, and route enforcement. Violations return typed problems before work starts.
 EXIT: EU/GDPR/data-residency copy is backed by enforceable routing and storage decisions.
 
+#### Tenant, State, Data Plane, And Lifecycle Implementation Blueprint
+
+CURRENT CUT: `src/store.js`, `src/event-store.js`, `src/auth.js`, `src/audit-retention.js`, `src/data-residency.js`, `src/billing-upgrade.js`, `src/object-storage.js`, `src/privacy-membrane.js`, and the capture/team/audit modules already contain real data logic. The product gap is that they do not yet share one tenant/data state machine. Finished Kolm needs a canonical data plane that makes tenant ownership, lifecycle, retention, residency, billing, artifact storage, and observability move together.
+
+SOURCE ANCHORS: OWASP API Security Top 10 2023 names object/function/property authorization, resource consumption, sensitive business flows, SSRF, inventory, and unsafe upstream consumption as API risks. OWASP ASVS 5.0.0 is a requirement-addressable verification standard. NIST Privacy Framework defines privacy risk management for products and services. RFC 9457 is the HTTP problem-details error contract. Stripe idempotency guidance defines safe retry semantics for create/update operations. S3 security guidance requires least privilege, temporary credentials, and encryption decisions. OpenTelemetry HTTP and GenAI semantic conventions should shape traces/metrics for API and model operations.
+
+REDLINE: tenant identity is represented by names, ids, email, API-key hash, anonymous tenant state, plan, country, geo check, and soft deletion across multiple stores without one tenant aggregate.
+ACTION: CREATE `src/tenant/tenant-state.js`, `src/tenant/tenant-repository.js`, `src/tenant/tenant-events.js`, `src/tenant/tenant-authz.js`, `docs/internal/tenant-state-machine.json`, and `scripts/build-tenant-state-machine.cjs`; WIRE `src/auth.js`, `src/teams.js`, `src/team.js`, `src/router.js`, `src/store.js`, `src/event-store.js`, account pages, CLI `whoami`, and product graph.
+CODE: tenant state is one aggregate with these canonical fields: `tenant_id`, `tenant_slug`, `display_name`, `kind`, `email`, `plan_id`, `entitlements`, `api_key_prefixes`, `session_state`, `country_code`, `geo_check`, `residency_region`, `storage_provider`, `created_at`, `claimed_at`, `last_login_at`, `disabled_at`, `deleted_at`, and `legal_hold_state`.
+CODE: tenant transitions are explicit: `anonymous_created`, `claimed`, `oauth_linked`, `api_key_rotated`, `plan_changed`, `team_joined`, `geo_denied`, `disabled`, `delete_requested`, `deleted`, `restored`, and `legal_hold_applied`. Each transition declares preconditions, writes, emitted events, audit event, account state, CLI output, rollback/compensation, and problem details.
+EXIT: no route, CLI command, account page, or worker guesses tenant state from loose rows or tenant names.
+
+REDLINE: JSON file store, SQLite store, event-store SQLite/JSONL fallback, object storage, and local artifact paths have separate readiness and failure semantics.
+ACTION: CREATE `src/data/data-plane.js`, `src/data/storage-topology.js`, `src/data/data-plane-readiness.js`, `docs/internal/data-plane-topology.json`, and `scripts/build-data-plane-topology.cjs`.
+CODE: data-plane topology rows declare store id, driver, path/bucket/table, tenant partition key, consistency model, transaction support, backup behavior, corruption recovery, encryption state, residency region, retention class, export class, deletion behavior, health command, and owner. Drivers include `json_table`, `sqlite_table`, `sqlite_event_log`, `jsonl_event_log`, `local_artifact_dir`, `s3_object_store`, `r2_rest`, `r2_s3`, `supabase_s3`, and `external_provider`.
+CODE: every data write goes through a typed repository that returns one of `committed`, `duplicate_idempotency_key`, `validation_failed`, `authz_failed`, `quota_exceeded`, `storage_unavailable`, `residency_blocked`, `retention_blocked`, `legal_hold_blocked`, or `corruption_recovered`. Raw `insert`, `update`, `appendFileSync`, and direct object put calls are allowed only inside repository modules.
+EXIT: local JSON, SQLite, event logs, artifact objects, and cloud storage expose one readiness and failure vocabulary to API, CLI, account, and docs.
+
+REDLINE: object-level authorization is not enforceable until every stored object type has an authz policy.
+ACTION: CREATE `src/authz/object-policy.js`, `src/authz/object-scope.js`, `docs/internal/object-authorization-matrix.json`, and `scripts/build-object-authorization-matrix.cjs`.
+CODE: each object type declares id pattern, tenant field, team field, namespace field, owner field, role requirement, plan requirement, read/write/delete/export policy, cross-tenant denial, service-account behavior, admin bypass policy, and audit event. Required object types include tenants, teams, team members, API keys, captures, observations, artifacts, jobs, distill runs, datasets, evals, benchmarks, marketplace listings, tunnels, storage objects, audit events, invoices, upgrade requests, redaction vaults, and residency tags.
+CODE: route handlers must not call `all()`, `findOne()`, `update()`, or event-store list functions directly for tenant-scoped objects. They call repository methods that enforce object policy before data access.
+EXIT: OWASP API1/API3/API5 risks are addressed by code structure, not comments.
+
+REDLINE: mutating routes do not share a universal idempotency, audit, and compensation policy.
+ACTION: CREATE `src/http/idempotency.js`, `src/http/mutation-contract.js`, `src/http/problem-details.js`, `docs/internal/mutation-contract.json`, and `scripts/build-mutation-contract.cjs`.
+CODE: every `POST`, `PUT`, `PATCH`, and `DELETE` declares idempotency mode: `required`, `accepted`, `ignored`, or `forbidden`. For required/accepted modes, the implementation stores key, tenant, route, request hash, response status, response body hash, started_at, completed_at, expiry, and conflict behavior. Reusing a key with different parameters returns a typed RFC 9457 problem.
+CODE: every mutation declares audit event, side effects, compensation, retryability, timeout, lock scope, concurrency behavior, and account/CLI user-visible state. Stripe-like create/update retries must be safe; destructive operations require confirmation and record an audit event id.
+EXIT: retries cannot double-create jobs, artifacts, plans, keys, exports, storage objects, or team actions.
+
+REDLINE: privacy membrane, redaction vaults, capture forget, export, delete, retention, legal hold, and residency policies are separate mechanisms.
+ACTION: CREATE `src/data/data-subject-request.js`, `src/data/privacy-workflow.js`, `src/data/legal-hold-policy.js`, `docs/internal/privacy-workflow-matrix.json`, and `scripts/build-privacy-workflow-matrix.cjs`.
+CODE: privacy workflows declare data subject, verified tenant, identity proof, data classes, search scope, redaction policy, export format, delivery channel, deletion/retention effect, legal hold blockers, residency constraints, deadline, audit events, and customer-visible state. Workflow states are `received`, `identity_required`, `collecting`, `redacting`, `awaiting_approval`, `ready`, `delivered`, `deleting`, `deleted`, `blocked_by_legal_hold`, `blocked_by_retention`, `failed`, and `expired`.
+CODE: capture-forget and redaction vault deletion must produce a tombstone with tenant, class, object ids, actor, reason, and irreversible/retained fields. Audit logs keep integrity metadata but not raw deleted content.
+EXIT: privacy rights are implemented workflows with evidence, not scattered helper routes.
+
+REDLINE: billing, quota, rate limit, usage, cost, and ROI data are not yet one financial ledger.
+ACTION: CREATE `src/commercial/financial-ledger.js`, `src/commercial/quota-engine.js`, `src/commercial/usage-meter.js`, `src/commercial/idempotent-billing.js`, `docs/internal/financial-ledger-contract.json`, and `scripts/build-financial-ledger-contract.cjs`.
+CODE: financial ledger entries declare tenant, account, plan, entitlement, unit, quantity, provider, model, route, artifact/job id, cost basis, customer price, currency, timestamp, idempotency key, invoice linkage, and reversal/adjustment state. Usage and quota decisions read the ledger, not ad hoc counters.
+CODE: upgrade fallback rows, Stripe checkout sessions, webhook events, manual enterprise requests, marketplace entitlements, and local plan aliases all flow through one subscription state machine. `paid`, `checkout_started`, `invoice_paid`, `active`, `past_due`, `canceled`, `sales_required`, and `manual_pending` are distinct states.
+EXIT: account billing, `/v1/plans`, CLI billing tiers, pricing copy, and route quota enforcement cannot disagree.
+
+REDLINE: audit retention and audit export exist, but audit is not yet an append-only product evidence spine across all critical actions.
+ACTION: CREATE `src/audit/audit-ledger.js`, `src/audit/audit-chain.js`, `src/audit/audit-policy.js`, `docs/internal/audit-event-catalog.json`, and `scripts/build-audit-event-catalog.cjs`.
+CODE: audit events are append-only, hash-chained per tenant, typed, retention-scoped, exportable, and redaction-aware. Required event families: auth, key rotation, team membership, role change, capture, redaction, artifact build, artifact publish, distill job, eval result, billing, storage readiness, residency decision, export/delete request, legal hold, admin action, worker job, marketplace listing, and deployment.
+CODE: each audit event declares actor, subject, target object, route/command, request id, idempotency key, before/after summaries, sensitive fields omitted, retention class, and external evidence visibility. Audit export must preserve chain verification without leaking secrets or deleted raw payloads.
+EXIT: enterprise governance can show real event lineage for product actions instead of isolated logs.
+
+REDLINE: object storage readiness currently reports providers, but artifact storage security and lifecycle are not fully encoded.
+ACTION: CREATE `src/storage/artifact-storage-policy.js`, `src/storage/artifact-object-lifecycle.js`, `docs/internal/artifact-storage-policy.json`, and `scripts/build-artifact-storage-policy.cjs`.
+CODE: each storage provider row declares credential mode, long-lived credential risk, least-privilege policy template, encryption mode, public access state, bucket/object naming, max object size, multipart support, checksum/signature mode, lifecycle/retention, region, residency compatibility, delete semantics, listing semantics, signed URL policy, smoke command, and account display state.
+CODE: local artifact storage is never called cloud-ready. Cloud storage cannot be called configured until credentials, bucket, write/read/head/delete smoke, max object path, encryption, and public-access state are verified without secret values in output.
+EXIT: artifact storage claims are backed by security policy, lifecycle, and real round-trip proof.
+
+REDLINE: observability exists in pieces, but data-plane, route, model, worker, and billing operations do not share a semantic telemetry contract.
+ACTION: CREATE `src/observability/semantic-events.js`, `src/observability/telemetry-contract.js`, `docs/internal/telemetry-contract.json`, and `scripts/build-telemetry-contract.cjs`.
+CODE: telemetry rows declare span name, metric name, log event, route/command, tenant-safe dimensions, model/provider fields, artifact/job fields, storage fields, cost fields, error fields, sample policy, privacy class, and retention. HTTP spans use OpenTelemetry HTTP conventions. Model/provider operations use GenAI conventions where applicable. Business metrics include captures, distill jobs, artifacts built, route savings, quota denials, storage readiness, billing state changes, and failed user actions.
+CODE: secret values, prompts, PHI/PII, raw API keys, bearer tokens, private keys, and customer payloads are never telemetry attributes. Hashes, classes, counts, and scoped ids are allowed only when declared.
+EXIT: production can answer what failed, which tenant/product surface was affected, what it cost, whether it retried, and what the user should do next.
+
+REDLINE: data corruption recovery exists for JSON tables, but backup, restore, migration, and disaster recovery are not a full product surface.
+ACTION: CREATE `src/data/backup-restore.js`, `src/data/migration-ledger.js`, `src/data/disaster-recovery.js`, `docs/internal/backup-restore-runbook.json`, and `scripts/build-backup-restore-runbook.cjs`.
+CODE: every store declares backup frequency, backup destination, restore command, schema version, migration command, rollback command, corruption quarantine path, recovery evidence, and maximum data loss objective. Local development backups are short-lived managed artifacts; production backups are encrypted, region-scoped, and access-controlled.
+CODE: migrations are append-only records with migration id, input schema, output schema, rows affected, tenant scope, dry-run result, live-run result, rollback/irreversible marker, and account/customer impact.
+EXIT: data durability means tested backup/restore and migrations, not only atomic writes.
+
 #### Security, Privacy, And AI Trust Implementation Blueprint
 
 SOURCE ANCHORS: OWASP LLM Top 10 2025, OWASP API Security Top 10 2023, RFC 9700 OAuth 2.0 Security BCP, RFC 7644 SCIM, NIST AI RMF / Generative AI Profile, NIST Privacy Framework, and NIST CSF 2.0 must be treated as implementation inputs, not trust-page references.
@@ -980,6 +1149,210 @@ CODE: `public/demo/artifact-preview.js` renders artifact hash, provenance, K-Sco
 
 EXIT: homepage/product/pricing/enterprise/docs demos prove working Kolm behavior and share one state/error/accessibility implementation.
 
+#### Public Surface Implementation Redlines From Manual Use
+
+REFERENCE BASELINE: WCAG 2.2, WAI-ARIA Authoring Practices, Core Web Vitals, Google title/snippet guidance, Schema.org `SoftwareApplication`, Diataxis, and the local UI/UX contract all point to the same implementation requirement: the website must be built from deterministic components and page contracts, not repaired after load by page-local scripts.
+
+REDLINE: `public/nav.js` is doing production UI repair work that should not exist at runtime.
+ACTION: SPLIT it into source-owned shell modules and generated manifests:
+
+```text
+public/ui/shell.js
+public/ui/nav.js
+public/ui/theme.js
+public/ui/disclosure.js
+public/ui/account-shell.js
+docs/internal/navigation-manifest.json
+docs/internal/page-registry.json
+scripts/build-public-shell.cjs
+```
+
+CODE: delete runtime CSS injection, `!important` guardrails, heading repair, checkbox/radio wrapping, brand text rewriting, GitHub button deletion, and ad hoc page-family patching from `public/nav.js`. Generated HTML must already contain the right landmarks, headings, labels, button names, nav state, skip link, theme hook, and account shell slot.
+
+CODE: `public/ui/nav.js` owns one active-state algorithm and one disclosure primitive. It must not have contradictory mega-menu comments and mega-menu code in the same file. The implementation must choose either click/tap disclosure or no disclosure; hover-only navigation is forbidden. Current-state underline, focus ring, expanded state, mobile drawer state, and breadcrumb label come from `docs/internal/navigation-manifest.json`.
+
+CODE: every nav item declares `id`, `label`, `href`, `page_family`, `children`, `mobile_behavior`, `requires_auth`, `product_loop`, `seo_priority`, and `breadcrumb_label`. The only top-level public nav groups are Product, Docs, Pricing, Enterprise, Proof, and Account. Product children are exactly the three buyer mental models: route/capture, compile/distill, and run/govern.
+
+EXIT: no public page relies on `nav.js` to correct broken markup after load. View source already contains the final nav, title, active state hooks, skip link, and account entrypoint.
+
+REDLINE: homepage source is carrying legacy wave assets, repeated style systems, mojibake, hidden anchors, and product proof fragments instead of one finished product story.
+ACTION: REBUILD `public/index.html` from a homepage content contract and component set:
+
+```text
+docs/internal/homepage-product-proof.json
+public/home/home-hero.js
+public/home/home-proof-runner.js
+public/home/home-code-compare.js
+public/home/home-roi.js
+public/home/home-proof-media.js
+public/home/home-social-proof.js
+public/home/home.css
+scripts/build-homepage.cjs
+```
+
+CODE: first viewport must not say abstract category filler like "turn model traffic into owned AI" unless the next seven words concretely explain all three product loops. The hero must state the product in one line, then show three executable outcomes:
+
+```text
+Route and capture existing AI API traffic.
+Compile and distill task artifacts from top models.
+Run governed artifacts on cloud, VPC, local, and device targets.
+```
+
+CODE: no hero paragraph may exceed two sentences. No first-screen block may use jargon without a visible proof element beside it. The proof runner, code comparison, ROI calculator, and demo video must share a single `demo_state` model with `ready`, `running`, `artifact_ready`, `demo_unavailable`, `sample_only`, and `needs_auth`.
+
+CODE: homepage may load only the canonical shell CSS, homepage CSS, and proof-runner JS. Remove migration wave sheets and scripts from the critical path unless a source manifest proves they own a live component. Inline CSS is limited to critical token bootstrapping; all product layout CSS lives in `public/home/home.css`.
+
+EXIT: a cold visitor can answer "what is Kolm, who is it for, why now, what can I try" within five seconds without reading a long paragraph.
+
+REDLINE: design tokens exist, but the cascade is still fragmented by `ks.css`, `surface-polish.css`, `frontier.css`, `w687.css`, `w706.css`, `supplement.css`, `warm-paper.css`, and page-local styles.
+ACTION: CREATE a CSS cascade authority and retire the migration layer:
+
+```text
+docs/internal/css-cascade-contract.json
+docs/internal/component-style-registry.json
+public/ui/tokens.css
+public/ui/base.css
+public/ui/components.css
+public/ui/layouts.css
+public/ui/account.css
+public/ui/docs.css
+scripts/build-css-cascade.cjs
+```
+
+CODE: `public/design-tokens.css` or its successor owns only semantic tokens: color, typography, spacing, radius, border, elevation, focus, state, motion, and z-index. Component files consume tokens and may not define raw brand color values. Page files may not ship page-local button, nav, card, modal, table, form, code-block, tooltip, popover, tab, toast, or account-panel CSS.
+
+CODE: every remaining stylesheet declares `layer`, `owner`, `allowed_selectors`, `forbidden_selectors`, `depends_on`, `loaded_on`, `max_bytes`, and `sunset_condition`. No stylesheet named for a wave, migration, temporary polish pass, or experiment is allowed in production HTML.
+
+CODE: visual density rules are explicit: marketing pages use spacious proof-led sections; account/docs/productivity pages use dense operational layouts; buttons use one primary action per screen; cards are used only for repeated items, modals, and framed tools; page sections are not nested card stacks.
+
+EXIT: all public, docs, pricing, enterprise, product, and account pages render as one designed product without page-specific CSS fights.
+
+REDLINE: account overview is trying to be the product command center, but it is hard-coded while `nav.js` also injects account chrome and the repo has many account pages with no single operational spine.
+ACTION: CREATE an account application shell generated from the product matrix:
+
+```text
+docs/internal/account-surface-matrix.json
+docs/internal/account-navigation-contract.json
+docs/internal/account-state-contract.json
+public/account/account-shell.js
+public/account/account-nav.js
+public/account/account-home.js
+public/account/product-loop-card.js
+public/account/readiness-panel.js
+public/account/action-center.js
+scripts/build-account-pages.cjs
+```
+
+CODE: remove duplicate skip links, stale `Wrapper`/`Studio`/old GitHub nav labels, inline account layout styles, and page-owned sidebar lists from account HTML. The generated account shell owns top nav, sidebar, breadcrumbs, product loop switcher, account status, API key safety state, plan/entitlement state, and cloud/storage readiness.
+
+CODE: account home shows three product loops, not a pile of unrelated feature cards. Each loop card renders current data, missing setup, next action, API route, CLI command, docs page, last proof event, entitlement requirement, and blocking reason. Blocking reasons are constrained to `needs_auth`, `needs_plan`, `needs_api_key`, `needs_credentials`, `needs_storage`, `needs_cloud`, `needs_package_release`, `needs_benchmark_data`, `needs_certification`, `needs_external_partner`, and `ready`.
+
+CODE: every account page consumes `account-state-contract.json` for loading, empty, partial, failed, disabled, dangerous, and success states. Browser alerts are forbidden. Every mutating action uses the action contract: method, route, idempotency, permission, confirmation, retry, undo/rollback, audit event id, telemetry event, and CLI equivalent.
+
+EXIT: post-auth account feels like a production control plane: users can see exactly what is ready, what is blocked by them, what is blocked by Kolm, and what action moves the product forward.
+
+REDLINE: docs are a mixture of generated references, hand-written hubs, stale nav chrome, and page-local command palette behavior.
+ACTION: BUILD docs from a Diataxis and product-route registry:
+
+```text
+docs/internal/docs-ia-contract.json
+docs/internal/docs-route-registry.json
+public/docs/docs-shell.js
+public/docs/docs-search.js
+public/docs/docs-command-palette.js
+public/docs/search-index.json
+scripts/build-docs-ia.cjs
+scripts/build-docs-shell.cjs
+```
+
+CODE: every product surface has one tutorial, one how-to, one reference, and one explanation document. Every doc page declares `audience`, `prerequisite`, `product_surface`, `product_loop`, `account_page`, `api_routes`, `cli_commands`, `sdk_methods`, `freshness_owner`, `last_verified_at`, `example_kind`, and `external_scope`.
+
+CODE: docs search and command palette use the same search index. Results are ranked by product loop, activation path, exact command/API match, freshness, and current page context. CLI docs, API docs, SDK docs, tutorials, account help, and product pages cannot each invent their own search/navigation shell.
+
+CODE: API docs become executable developer surfaces. Every operation shows auth scheme, plan/entitlement, request schema, response schema, problem details, idempotency, rate limit, tenant authorization, cURL, Node, Python, OpenAI-compatible variant where relevant, try-it environment, request id, and secret-handling warning.
+
+EXIT: a developer can go from "I have an OpenAI call" to "I compiled and ran a governed artifact" through docs without jumping across disconnected hubs.
+
+REDLINE: pricing is still allowed to drift between marketing copy, JSON-LD, Stripe mappings, account plan UI, CLI billing tiers, and backend plan routes.
+ACTION: CREATE a billing/pricing generator with one source of truth:
+
+```text
+docs/internal/billing-catalog.json
+docs/internal/pricing-page-contract.json
+src/billing/catalog.js
+public/pricing/pricing-data.json
+scripts/build-pricing-surfaces.cjs
+```
+
+CODE: public pricing, `/v1/plans`, `/v1/billing/tiers`, Stripe prices, checkout/change-plan actions, account plan cards, upgrade modals, enterprise inquiry copy, docs, CLI billing output, OpenAPI examples, JSON-LD offers, and sales emails all read from the same catalog. If Business is legacy, it is only a compatibility alias and never appears as a live public self-serve plan. If Business is a real public tier, every surface must say so with the same price, limits, entitlement, and support path.
+
+CODE: enterprise cannot look self-serve unless sales checkout is actually implemented. Enterprise CTA goes to inquiry/contact sales, shows procurement/security docs, and declares sales-required state. JSON-LD must not advertise fake prices or fake availability.
+
+EXIT: no buyer, crawler, account user, CLI user, or backend route can see a different pricing model.
+
+REDLINE: media, demo video, screenshots, and proof visuals are treated as decoration instead of evidence.
+ACTION: CREATE a product media proof system:
+
+```text
+docs/internal/product-proof-media-matrix.json
+public/media/media-manifest.json
+public/media/video-player.js
+public/media/proof-frame.js
+scripts/build-media-manifest.cjs
+```
+
+CODE: every primary image/video declares product loop, claim supported, source capture, optimized files, width, height, aspect ratio, loading priority, transcript, captions, poster, alt text, dark/light behavior, reduced-motion behavior, fallback, owner, and stale date. A video without a poster, captions, transcript, fallback, and visible product UI is not a product video.
+
+CODE: hero media must show actual Kolm product states: pasted OpenAI call, generated `.kolm` artifact, K-Score/eval scope, runtime target decision, account readiness, or artifact proof. Abstract code rain, generic dashboard cards, and empty video shells are deleted or moved to archive.
+
+EXIT: every above-the-fold visual proves a real product capability.
+
+REDLINE: metadata and discovery files still tolerate mojibake, stale product names, stale pricing, inconsistent schema, and page-specific manual edits.
+ACTION: CREATE one metadata authority:
+
+```text
+docs/internal/page-metadata-contract.json
+public/page-metadata.json
+scripts/build-page-metadata.cjs
+scripts/build-discovery-files.cjs
+```
+
+CODE: every page declares title, H1, description, canonical, robots, page family, product loop, primary CTA, secondary CTA, schema type, image, alt, freshness, sitemap priority, and whether it appears in `llms.txt` or `.well-known/ai-context.json`. Titles must be concise, unique, and subject-specific. Descriptions must be page-specific and human-readable. Schema.org `SoftwareApplication` or `WebApplication` appears only when the page is actually about the application, not as generic site filler.
+
+CODE: mojibake and replacement markers are release-blocking content defects. The generator rejects known bad separator codepoints such as `U+7E5A`, `??kolm`, broken separators, duplicate titles, empty descriptions, repeated descriptions, stale `kolmogorov` brand strings, and public GitHub URLs that point to old repository identity.
+
+EXIT: search snippets, social cards, AI discovery files, browser tabs, breadcrumbs, and structured data all tell the same clean story.
+
+REDLINE: accessibility and performance are being handled as after-the-fact corrections instead of component implementation constraints.
+ACTION: BUILD the constraints into component source:
+
+```text
+docs/internal/accessibility-contract.json
+docs/internal/performance-budget-contract.json
+src/ux/web-vitals-contract.js
+public/perf/vitals.js
+scripts/build-accessibility-contract.cjs
+scripts/build-performance-budget.cjs
+```
+
+CODE: every component declares role, accessible name source, keyboard model, focus entry, focus exit, focus ring token, target size, pointer/touch behavior, status announcement, reduced-motion behavior, contrast token, loading skeleton dimensions, and error announcement. Use WAI-ARIA APG patterns for custom widgets and native HTML controls where possible.
+
+CODE: every route declares LCP element, critical CSS budget, JS budget, image budget, font budget, CLS risk elements, INP-critical handlers, deferred scripts, third-party scripts, and offline/degraded state. Homepage and account shell must reserve dimensions for hero media, demo runner, auth status, account metrics, and async readiness panels before data arrives.
+
+EXIT: the product cannot regress into broken focus, cramped targets, invisible state changes, layout jumps, or slow input because those constraints live in the modules that render the UI.
+
+REDLINE: manual product use is not encoded as a buildable redline.
+ACTION: CREATE a human-use script that implementation agents must actually perform while building, not after claiming done:
+
+```text
+docs/internal/manual-product-use-redline.md
+docs/internal/manual-product-use-scenarios.json
+```
+
+CODE: the minimum manual scenarios are: anonymous homepage five-second read, paste OpenAI request into demo, compare before/after code, run ROI calculator, watch/read demo video fallback, open pricing and enterprise, search docs for "OpenAI", execute API try-it with a safe key, sign in, open account overview, generate/rotate/revoke key, view storage readiness, view product graph/readiness closeout, open CLI docs, open API reference, open mobile nav, use keyboard-only nav, and use dark/light mode. Each scenario records the exact page, expected visible state, expected next action, and failure text.
+
+EXIT: implementation work is judged by whether the product can actually be used end to end, not by whether a scanner says the page rendered.
+
 ### Build, Release, And Source Boundary Redlines
 
 REDLINE: the repo cannot distinguish source, generated output, archive, local state, reports, cache, fixtures, and release artifacts strongly enough.
@@ -1086,6 +1459,100 @@ REDLINE: product code completion is not visible from account, CLI, API, or docs 
 ACTION: CREATE `/v1/build/redline`, `kolm build redline --json`, `public/account/build-readiness.html`, and `public/docs/build-redline.html` backed by `reports/build-redline/final-build-redline.json`.
 CODE: the public-safe API returns release id, local completion status, external gates, product-surface completion, route/docs/package/security/UI coverage, and next required implementation work without leaking internal file paths or secrets. Authenticated account view includes owner, evidence, and repair commands.
 EXIT: anyone on the team can see what remains before ship from product UI, CLI, and API, with one source of truth.
+
+#### Directory-Level Codebase Implementation Redlines
+
+CURRENT CUT: raw file enumeration still shows a repo that mixes product source, generated output, build caches, screenshots, package artifacts, local runtime data, and research state. The existing codebase file ledger is useful, but it only covers a filtered release-relevant slice. The finished codebase needs a directory authority that can classify the whole tree, then produce release views for git, npm, Vercel, Docker, Railway, customer evidence, and internal work.
+
+REDLINE: top-level directories do not yet have one enforceable product role.
+ACTION: CREATE `docs/internal/directory-authority.json`, `src/build/directory-authority.js`, and `scripts/build-directory-authority.cjs`; WIRE file ledger, source-boundary policy, `.gitignore`, `.vercelignore`, npm package `files`, Docker context, CI artifacts, release evidence, and final redline.
+CODE: every top-level path declares `kind`, `runtime`, `release_role`, `git_policy`, `deploy_policy`, `package_policy`, `generated_by`, `owner`, `product_surface`, `evidence_visibility`, `retention_days`, `clean_command`, and `forbidden_children`. Unknown top-level files fail the directory authority unless explicitly classified.
+
+Directory authority must start with this implementation map:
+
+| path family | runtime role | implementation redline | finished exit |
+|---|---|---|---|
+| `src/` | Node backend/product kernel | Split monolithic route and product modules into owned domains with route authority, problem details, tenant authorization, idempotency, and product graph links. | Every exported backend capability has API/CLI/account/docs/test ownership or is internal-only. |
+| `server.js` and `api/` | HTTP entrypoints | Generate route collision rules, security headers, CSP exceptions, Vercel function wrappers, Railway/direct server parity, health/readiness, and static route rewrites from one deploy topology contract. | Local, Vercel, Railway, and Docker entrypoints serve the same canonical route map with explicit differences. |
+| `cli/` | operator and developer command surface | Decompose the large CLI into command modules that read product graph, route authority, package identity, and readiness state. | Each command has help, examples, JSON schema, exit codes, stderr policy, docs page, and account/API equivalent. |
+| `public/` | shipped web product | Generate public pages from page registry, metadata authority, design system, media proof, nav contract, pricing catalog, docs IA, and account shell. | No public HTML depends on runtime repair scripts, stale metadata, page-local nav, or hidden wave artifacts. |
+| `public/account/` | post-auth product console | Generate account pages from account surface matrix and action/state contracts. | Every account control has permission, API route, state, error, audit, telemetry, keyboard, and docs ownership. |
+| `public/docs/` | developer activation surface | Generate docs shell, search, API explorer, CLI docs, SDK examples, and product tutorials from docs IA and route authority. | Docs are executable enough to onboard a developer through route/capture, compile/distill, and run/govern without stale package names. |
+| `apps/` | Python product runtime surfaces | Give each app a `pyproject.toml` or package contract, CLI entrypoint, env schema, artifact I/O boundary, smoke command, and docs owner. | Capture/data/eval/export/import/runtime/trainer/showcase apps can be installed, invoked, and diagnosed outside the root Node process. |
+| `workers/` | long-running or heavy compute services | Normalize worker command surfaces to doctor, run, smoke, package, container, health, metrics, and failure JSON. | Quantize/distill/compile/runtime/multimodal workers are either production services or explicitly labs/reference code. |
+| `services/` | integration services | Classify MCP and side services as production, preview, or internal; add auth, rate limit, lifecycle, package, and observability contract. | Services are deployable and documented or excluded from release claims. |
+| `sdk/` | language SDKs and generated clients | Separate source from build outputs, normalize package names, generate examples from route authority, and add per-language build/test/package evidence. | Node, Python, MCP, VS Code, C, Rust, Swift, Kotlin, RN, and browser SDK surfaces have explicit publish or local-source status. |
+| `packages/` | publishable npm/local packages | Generate package identity matrix, `files`, provenance, smoke install, readme, and changelog from one package registry. | Every package is publishable, intentionally private, or explicitly not a product claim. |
+| `scripts/` | build, release, migration, evidence machinery | Convert one-off `fix-*`, `inject-*`, screenshot, archive, and generated-file writers into idempotent DAG nodes or retire them. | No script writes release artifacts unless registered with inputs, outputs, lock, owner, check mode, and retention. |
+| `.github/` | distribution and release automation | Add explicit permissions, concurrency, OIDC/provenance policy, action pinning, secret handling, shell safety, and artifact retention. | Workflows are secure release code, not background automation. |
+| `infra/`, `Dockerfile`, `vercel.json`, `railway.toml` | deploy topology | Generate deploy include/exclude, env requirements, route topology, health checks, rollback, and runtime limits from deploy contract. | Deploy config cannot drift from route authority, source boundary, or secret policy. |
+| `tests/`, `test/`, `qa/`, `bench/` | verification and benchmark source | Classify tests as unit, contract, smoke, integration, benchmark, fixture, or product evidence; connect each to product surfaces and redlines. | Tests prove specific requirements and do not become the definition of completion by themselves. |
+| `docs/internal/` | machine-readable control state | Promote missing ledgers: directory authority, source boundary, build DAG, generator registry, generated artifacts, brand/package, route authority, account matrix, page registry, release gates, and final redline. | Internal JSON is the control plane for build completion, not an unserved side folder. |
+| `docs/research/` | implementation planning and redlines | Keep research out of deploy bundles; only promote work into code via explicit implementation rows. | Research cannot masquerade as shipped capability; promoted items have owners, files, and exit conditions. |
+| `data/`, `.kolm-bundle/`, `.shots/`, `.ui-debug/`, `reports/`, `tmp*`, `.tmp*` | local state, evidence, caches, scratch | Move live state and bulky generated artifacts behind managed retention and ignore rules; never include them in release source or deploy contexts. | Local state is recoverable, cleanable, non-secret, and never confused with product code. |
+
+EXIT: `scripts/build-directory-authority.cjs --check` proves every path family has a role before any release gate can claim the repo is clean.
+
+REDLINE: `.gitignore` and `.vercelignore` are currently hand-maintained policy files, while source-boundary rules live separately in scripts and comments.
+ACTION: GENERATE ignore/deploy-exclude files from `docs/internal/source-boundary-policy.json`.
+CODE: the policy emits `.gitignore.generated`, `.vercelignore.generated`, `.dockerignore.generated`, package `files` previews, and a drift report against the committed files. Humans may add comments, but path rules must come from the source-boundary authority.
+CODE: deny patterns include env files, credentials, local SQLite/WAL/SHM, root Windows-path scratch files, `.bak`, `.tmp`, test TAP output, local OCR/model downloads, old report folders, screenshot folders, Rust/Python build targets, npm caches, package-release caches, and internal redline docs in public deploys.
+EXIT: release exclusion behavior is not a memory exercise. Git, Vercel, Docker, npm, and evidence bundles consume the same boundary.
+
+REDLINE: source and generated output are still mixed inside `public/`, `sdk/`, `workers/`, and root package folders.
+ACTION: CREATE `docs/internal/generated-artifact-authority.json`, `src/build/generated-artifact-authority.js`, and `scripts/build-generated-artifact-authority.cjs`.
+CODE: every generated file declares source generator, source inputs, output path, stable sort policy, timestamp policy, parser compatibility, hash, release inclusion, and stale handling. Generated JSON must parse with Node and one non-Node parser. Generated HTML must have metadata, main landmark, title, canonical URL, and page-family owner.
+CODE: source directories may contain generated files only if a `.generated.json` manifest beside the output declares why colocating is required. Otherwise generated output moves under a generated subtree or is created during release packaging.
+EXIT: implementation agents can tell whether a file should be edited directly, regenerated, deleted, or moved.
+
+REDLINE: `sdk/` currently behaves like a source tree and a build-output cache at the same time.
+ACTION: CREATE `docs/internal/sdk-package-matrix.json`, `scripts/build-sdk-package-matrix.cjs`, and per-language package contracts.
+CODE: each SDK row declares package name, language, source root, generated root, build output root, ignored output root, package manager, build command, test command, smoke install command, publish channel, provenance mode, docs install command, owner, and current release state.
+CODE: Rust/C/native targets, Python `__pycache__`, package dist folders, vendored binaries, and generated clients must never sit unclassified in the SDK tree. If an output is intentionally committed, it must have a package reason, hash, and release test.
+EXIT: SDKs are a product surface with installable or honestly local-source status, not a pile of mixed artifacts.
+
+REDLINE: `apps/` and `workers/` carry the core compile/distill/run-anywhere promise but are not yet governed like production services.
+ACTION: CREATE `docs/internal/runtime-service-matrix.json`, `src/runtime/service-contract.js`, and `scripts/build-runtime-service-matrix.cjs`.
+CODE: each app/worker declares language, entrypoint, dependency lock, GPU/CPU requirements, input artifact schema, output artifact schema, env vars, secret vars, storage needs, queue model, health endpoint or doctor command, metrics, logs, timeout, memory/GPU limits, retry policy, cancellation, cleanup, package/container target, and local smoke.
+CODE: heavy ML services must fail closed when toolchains, CUDA, model files, provider credentials, or storage credentials are missing. They must return typed readiness problems rather than stack traces or silent local fallbacks.
+EXIT: "compile", "distill", "quantize", "runtime-build", "vision/audio/video tokenize", "TSAC", and "ITKV" each have runnable service contracts or are explicitly non-production.
+
+REDLINE: `src/router.js` is still too central to be the long-term authority for hundreds of operations.
+ACTION: CREATE `src/routes/` domain modules and migrate route ownership in batches:
+
+```text
+src/routes/account.js
+src/routes/capture.js
+src/routes/distill.js
+src/routes/artifacts.js
+src/routes/runtime.js
+src/routes/registry.js
+src/routes/governance.js
+src/routes/billing.js
+src/routes/deployment.js
+src/routes/public.js
+```
+
+CODE: `src/router.js` becomes composition only: middleware, shared limits, route module registration, static helper routes, and final error bridge. Each route module exports `routes`, `schemas`, `authz`, `smoke`, and `docs` metadata consumed by route authority and OpenAPI.
+CODE: direct `res.status(...).json({ error: ... })` paths are replaced by the canonical RFC 9457 problem bridge. Mutations must declare idempotency handling. Object routes must declare tenant/object authorization. Upstream calls must declare timeout, retry, SSRF boundary, and response redaction.
+EXIT: route count can grow without turning the backend into a monolith that only generated docs can understand.
+
+REDLINE: package, deploy, and release provenance are not yet source-to-output complete.
+ACTION: CREATE `docs/internal/provenance-authority.json`, `src/release/provenance.js`, and `scripts/build-provenance-authority.cjs`; WIRE SLSA, SPDX, package release, Docker, Vercel/Railway deploy, generated docs, worker images, SDK packages, and final evidence index.
+CODE: every release artifact declares source commit, clean/dirty status, build command, builder identity, input hashes, output hash, package name/version, SBOM path, provenance attestation path, signing status, upload/publish target, and verification command.
+CODE: SPDX or CycloneDX SBOM generation must cover root app, CLI, SDK packages, worker packages, Docker images, and any bundled native/python/runtime assets. VEX/vulnerability status must be explicit for known vulnerabilities.
+EXIT: customers can trace a shipped file, package, image, docs bundle, API spec, or artifact example back to code and build evidence.
+
+REDLINE: current release verification can pass local code paths while production deploy context and bundle contents remain implicit.
+ACTION: CREATE `scripts/build-deploy-context-report.cjs` and `docs/internal/deploy-context-report.json`.
+CODE: the report computes what Vercel, Railway, Docker, npm packages, and public static hosting will actually include. It compares include/exclude decisions against directory authority, secret policy, source-boundary policy, route authority, and public page registry.
+CODE: production deployment is blocked if deploy bundles include internal docs, local state, report folders, screenshot folders, env files, raw test outputs, stale archives, or generated files without generator evidence.
+EXIT: "deployable" means the shipped context is known, minimal, secret-clean, and consistent with the product route/page registry.
+
+REDLINE: manual implementation agents have no atomic work package for cleaning a directory without breaking parallel work.
+ACTION: ADD `docs/internal/source-cleanup-workorders.json` generated from directory authority and final redline.
+CODE: each workorder contains directory, exact paths, ownership, allowed operations, forbidden operations, expected generated replacements, commands to run after, user-visible impact, and merge-conflict rule. Workorders must be disjoint by write set so parallel agents do not corrupt generated files.
+EXIT: cleanup moves from broad "clean git" requests to safe, atomic directory work that can be executed and reviewed.
 
 #### CI, Package, And Provenance Implementation Blueprint
 
@@ -1669,6 +2136,99 @@ ACTION: CREATE `src/runtime/local-runtime-discovery.js`, `packages/vscode-kolm-r
 CODE: local runtime states are `not_installed`, `installed_unverified`, `version_mismatch`, `artifact_missing`, `artifact_incompatible`, `ready`, `timeout`, `crashed`, `permission_denied`, and `fallback_to_teacher`. Each state has install command, evidence, and next action.
 EXIT: users understand why local/offline/device execution works or does not work.
 
+#### Product Engine Spine, Compiler Runtime, And Completion Execution Blueprint
+
+SOURCE ANCHORS: vLLM latest docs expose PagedAttention, automatic prefix caching, disaggregated serving, structured outputs, tool calling, quantized KV cache, and speculative decoding as concrete serving primitives. IREE documents ahead-of-time PyTorch export to deployment artifacts with externalized parameters. ONNX Runtime GenAI exposes token generation, tokenization/preprocessing, logits processing, sampling/search, structured output, and KV cache management. KServe positions `InferenceService`, `LLMInferenceService`, `ServingRuntime`, local model cache, autoscaling, serverless mode, and ModelMesh as Kubernetes serving primitives. MLIR exposes dialects, pass infrastructure, bytecode, quantization, and lowering as compiler foundations. TVM documents a compiler stack for importing models, optimizing models, cross compilation, Relax executables, TensorIR, and target-specific deployment.
+
+REDLINE: Kolm has many engine primitives, but no single product-engine object owns the journey from captured traffic to compiled artifact to runtime decision to post-run evidence.
+ACTION: CREATE `src/engine/product-engine.js`, `src/engine/product-engine-contract.js`, `src/engine/engine-state-machine.js`, `src/engine/engine-evidence.js`, `docs/internal/product-engine-contract.json`, and `public/account/product-engine.html`; WIRE `src/distill-pipeline.js`, `src/compile-pipeline.js`, `src/compile-ir.js`, `src/native-compile.js`, `src/quantization-oracle.js`, `src/runtime-confidence-router.js`, `src/tsac-compiler.js`, `src/itkv-profile.js`, `src/speculative-teacher.js`, `src/kernel-selector.js`, `src/completions-api.js`, `src/runtime-placement.js`, `src/artifact-runner.js`, CLI, account, API docs, and product graph.
+CODE: every engine run must share one durable envelope:
+
+```json
+{
+  "engine_run_id": "eng_...",
+  "tenant_id": "t_...",
+  "surface": "route_capture|compile_distill|run_anywhere|code_assistant",
+  "input": {"source": "capture|trace|upload|repo|artifact", "namespace": "..."},
+  "plan": {"compile_ir": null, "distill": null, "quantization": null, "runtime": null},
+  "state": "planned|queued|running|blocked|failed|succeeded|promotable|deployed",
+  "evidence": {"audit_event_id": "...", "artifact_digest": null, "reports": []},
+  "next_action": {"kind": "fix_config|add_data|run_eval|publish|deploy|rollback", "command": "..."}
+}
+```
+
+CODE: the state machine must reject hidden transitions. `distill-pipeline` async iterator events, `compile-pipeline` phase logs, quantization oracle decisions, runtime route decisions, TSAC/ITKV profiles, speculative teacher acceptance logs, and OpenAI-compatible completion provenance must all append to the same engine run id.
+CODE: account pages must show engine run timeline, current blocker, evidence artifacts, commands, API route, runtime placement, cost/quality delta, and whether the result is fixture-only, private-customer-only, public-benchmark-backed, or production-ready.
+EXIT: Kolm's core product is no longer a bag of scripts and route helpers; it is one inspectable engine with state, proof, and customer action.
+
+REDLINE: distillation orchestration still mixes collection, fixture, full worker, approval, TOS policy, and production promotion in a long Node module.
+ACTION: SPLIT product boundaries by creating `src/distill/distill-job.js`, `src/distill/distill-corpus.js`, `src/distill/teacher-policy.js`, `src/distill/student-planner.js`, `src/distill/training-worker-adapter.js`, `src/distill/promotion-gate.js`, and `docs/internal/distill-state-machine.json`.
+CODE: distill states must be `draft`, `corpus_ready`, `policy_checked`, `worker_queued`, `training`, `eval_running`, `eval_failed`, `eval_passed`, `artifact_built`, `promotion_blocked`, `production_ready`, and `retired`.
+CODE: `fixture_only`, `collect_only`, and `full_train` must be separate execution modes with separate environment guards. A route or account button cannot accidentally call fixture behavior while claiming a trained artifact.
+CODE: teacher policy must classify source as `open_weights`, `proprietary_api`, `customer_owned`, `synthetic`, or `unknown`, and record TOS risk, allowed distillation purpose, model version, provider retention policy, and required customer acknowledgment before training starts.
+CODE: promotion requires disjoint holdout, dataset rights, redaction and poisoning status, teacher source policy, K-score scope, model card, artifact signature, runtime target, rollback plan, and account-visible evidence.
+EXIT: distillation can be debugged and audited phase by phase, and no student model is promoted from ambiguous data or ambiguous teacher rights.
+
+REDLINE: compile IR and native compile are useful, but compilation is not yet a full compiler product with IR versions, lowering passes, diagnostics, and target backends.
+ACTION: CREATE `src/compiler/kolm-ir.js`, `src/compiler/pass-manager.js`, `src/compiler/diagnostics.js`, `src/compiler/lowering-targets.js`, `src/compiler/target-artifact.js`, `docs/internal/compiler-pass-pipeline.json`, and `public/account/compiler.html`; WIRE `src/compile-ir.js`, `src/workflow-ir.js`, `src/native-compile.js`, `src/spec-compile.js`, `src/compile-targets.js`, exporters, artifact builder, and docs.
+CODE: compile pipeline must have explicit passes: `trace_import`, `privacy_redaction`, `workflow_ir_build`, `coverage_analysis`, `determinism_analysis`, `tool_boundary_analysis`, `shape_inference`, `target_selection`, `runtime_lowering`, `native_optional_compile`, `artifact_bundle`, `verify`, and `emit_evidence`.
+CODE: each pass emits diagnostics with severity, source span, tenant-safe message, machine code, suggested fix, blocked promotion flag, evidence id, and owning file. Passes cannot throw raw exceptions to account/API/CLI.
+CODE: lowering targets must declare whether they are `workflow_capsule`, `compiled_rule`, `distilled_model`, `tool_agent`, `code_assistant`, `onnx`, `gguf`, `mlx`, `coreml`, `executorch`, `tensorrt`, `wasm`, or `kserve_llmservice`, and what semantics are preserved or lost.
+EXIT: "compiler" means users can see IR coverage, pass diagnostics, target lowering, and exact reason a build can or cannot run anywhere.
+
+REDLINE: quantization oracle is currently a constraint solver and method catalog; it is not yet the best quantization tool until it closes the loop with measured per-layer evidence.
+ACTION: CREATE `src/quant/quantization-executor.js`, `src/quant/layer-sensitivity.js`, `src/quant/activation-profiler.js`, `src/quant/quant-debugger.js`, `src/quant/rollback-selector.js`, `docs/internal/quantization-evidence-contract.json`, and `public/account/quantization.html`.
+CODE: quantization must execute an evidence loop: baseline run, calibration capture, layer/tensor sensitivity, candidate method selection, conversion, smoke, eval, runtime benchmark, failure localization, rollback artifact, and recommendation.
+CODE: every layer/tensor decision records source dtype, target dtype, block size, scale granularity, outlier handling, calibration rows, saturation rate, activation drift, logit delta, K-score delta, memory delta, latency delta, and whether the layer was excluded.
+CODE: method support must separate `planned`, `worker_available`, `external_toolchain_required`, `runtime_policy_only`, `unsupported_target`, and `measured_production_ready`. Catalog entries like AWQ/GPTQ/SmoothQuant/HQQ/KV-only compression cannot be shown as shipped unless executor evidence exists for the target runtime.
+EXIT: Kolm can recommend quantization because it measured the artifact on the target, not because a catalog said the method is plausible.
+
+REDLINE: TSAC and ITKV currently ship profile schemas and heuristics, but the runtime dispatch path is future-scoped in comments.
+ACTION: CREATE `src/runtime/attention-runtime-dispatch.js`, `src/runtime/kv-runtime-dispatch.js`, `src/runtime/tsac-telemetry-collector.js`, `src/runtime/itkv-cache-manager.js`, `docs/internal/attention-kv-runtime-contract.json`, and `reports/runtime-attention/<run-id>/evidence.json`.
+CODE: TSAC cannot be production-enabled until attention telemetry is collected from real runs, sparse profiles are validated against dense fallback, and quality guards record logit delta, K-score delta, schema failure delta, and task class.
+CODE: ITKV cannot be production-enabled until token classes are produced by the tokenizer/runtime, precision tiers are applied by a runtime backend, cache hits/misses are measured, and citation precision is compared against non-tiered KV.
+CODE: both systems must support `disabled_no_telemetry`, `enabled_shadow`, `enabled_guarded`, `fallback_dense`, `fallback_full_precision`, and `blocked_safety_task`.
+EXIT: sparse attention and tiered KV become safe runtime optimizations with live dispatch and rollback, not static profiles.
+
+REDLINE: confidence routing and speculative teacher decoding are separate features even though both choose when a student and teacher cooperate.
+ACTION: CREATE `src/runtime/student-teacher-policy.js`, `src/runtime/student-teacher-evidence.js`, `src/runtime/student-teacher-budget.js`, `docs/internal/student-teacher-runtime-contract.json`, and `public/account/student-teacher-routing.html`.
+CODE: policy modes must be `student_only`, `teacher_only`, `confidence_escalation`, `student_draft_teacher_verify`, `teacher_council`, and `blocked_no_evidence`.
+CODE: every decision records logprobs availability, entropy threshold, calibration version, acceptance rate, token spans, teacher calls avoided, teacher calls made, cost saved, latency saved, quality risk, fallback reason, provider capability gap, and customer policy reason.
+CODE: if a provider lacks logprobs or teacher verification support, the decision must say `no_entropy_signal_available` or `teacher_verify_unavailable` and route through an honest fallback. It cannot imply confidence routing is active.
+EXIT: hybrid inference is one measurable student-teacher system that can optimize cost, quality, and latency without overclaiming unsupported provider capabilities.
+
+REDLINE: OpenAI-compatible completions are a valuable wedge, but the endpoint is not complete until it is tied to the engine state, trust policy, model catalog, runtime selection, and usage accounting.
+ACTION: CREATE `src/api/openai-compatible-contract.js`, `src/api/completion-runtime-adapter.js`, `src/api/completion-stream-contract.js`, `docs/internal/openai-compatible-surface.json`, and `public/account/api-traffic.html`; WIRE `src/completions-api.js`, router endpoints, provider adapters, runtime policy, trust control plane, billing usage, event capture, and SDK docs.
+CODE: every chat/completions response must record selected model, fallback chain, runtime backend, capture status, privacy status, trust decisions, route decision, usage tokens, estimated cost, artifact provenance when applicable, request id, and engine run id.
+CODE: streaming must preserve the same metadata by emitting start, delta, tool, finish, error, usage, and evidence events without leaking secrets or breaking OpenAI SDK compatibility.
+CODE: fallback chains must respect tenant policy, data residency, model capability, cost ceiling, latency SLO, modality, structured-output support, and provider terms. A fallback that violates policy is not attempted.
+EXIT: "drop-in OpenAI replacement" becomes a governed traffic product, not only protocol compatibility.
+
+REDLINE: model/runtime/provider capability truth is still too spread out to power placement, pricing, docs, account UI, and engine decisions reliably.
+ACTION: CREATE `src/catalog/capability-authority.js`, `src/catalog/model-row.js`, `src/catalog/runtime-row.js`, `src/catalog/provider-row.js`, `src/catalog/capability-freshness.js`, `public/capabilities/engine-capabilities.json`, and `docs/internal/capability-authority-contract.json`.
+CODE: each row must declare modalities, context, logprobs, tool calls, structured output, streaming, batch, embeddings, rerank, vision, audio, video, reasoning, cost, rate limits, data retention, residency, ToS constraints, distill eligibility, runtime export eligibility, quantization eligibility, benchmark coverage, last verified date, and source of truth.
+CODE: engine decisions cannot read ad hoc provider/model strings. They must call capability authority and record the row id and version in evidence.
+EXIT: placement, routing, docs, pricing, SDK examples, and account pickers all use the same capability truth.
+
+REDLINE: KServe/Kubernetes deployment is not complete until Kolm can emit and reconcile production serving objects, not just describe cloud targets.
+ACTION: CREATE `src/deploy/kserve-renderer.js`, `src/deploy/kserve-reconciler.js`, `src/deploy/serving-runtime-renderer.js`, `docs/internal/kserve-deployment-contract.json`, and `public/account/kubernetes-serving.html`; WIRE deployment targets, object storage, model/artifact registry, runtime placement, cloud readiness, and rollback.
+CODE: deployment output must include `InferenceService` or `LLMInferenceService`, `ServingRuntime`, storage URI, runtime image, resource requests, autoscaling policy, canary weights, readiness/liveness probes, data residency labels, secret references, artifact digest, trust bundle, and rollback target.
+CODE: reconcile loop must report desired vs observed state, pod readiness, model load status, runtime health, route URL, autoscaler status, last failure, canary split, and evidence id.
+EXIT: enterprise "run anywhere" includes Kubernetes-native serving objects with operational state and rollback.
+
+REDLINE: code completion and engineering agents require an engine path equivalent to compile/distill/runtime, not just separate IDE files.
+ACTION: CREATE `src/engine/code-engine-adapter.js`, `src/code/context-indexer.js`, `src/code/repo-policy-engine.js`, `src/code/code-artifact-builder.js`, `docs/internal/code-engine-contract.json`, and `public/account/code-engine.html`.
+CODE: code-engine runs must ingest editor events, build a privacy-filtered context graph, decide local/cloud provider, produce completions or patches, capture accept/reject/test outcome, feed approved rows into distillation, and compile a repo/team-scoped code artifact with eval evidence.
+CODE: code context must be represented as AST symbols, diagnostics, dependency graph, test graph, recent edits, file windows, and policy exclusions. Raw repository upload is a separate explicit mode, never the default.
+CODE: engineering-agent patch mode must use sandboxed worktrees, unified diff validation, command evidence, changed-file ownership, destructive-operation blocklist, secret scanning, and human approval before applying to a real workspace.
+EXIT: code completion is one of Kolm's product loops with capture, distill, artifact, runtime, trust, and account evidence.
+
+REDLINE: benchmarking the product engine cannot be a collection of route tests; it must reproduce the business metrics Kolm sells.
+ACTION: CREATE `src/engine/engine-benchmark-harness.js`, `docs/internal/engine-benchmark-scenarios.json`, `reports/engine/<run-id>/engine-benchmark.json`, and `public/benchmarks/engine.html`.
+CODE: benchmark scenarios must include `openai_drop_in_route`, `capture_to_artifact`, `distill_customer_task`, `quantize_for_device`, `run_local_vs_cloud`, `student_teacher_cost_saving`, `structured_output_reliability`, `code_completion_private_local`, and `kserve_deploy_rollback`.
+CODE: each scenario records setup, dataset, model/provider, artifact, runtime, hardware, environment, exact commands, p50/p95/p99 latency, throughput, cost, quality, K-score, failure rate, trust blocks, customer-visible next action, and reproducibility hash.
+EXIT: every product claim maps to a scenario with numbers, proof, and failure examples.
+
 ## Current State From The Worktree
 
 Observed current state:
@@ -1837,6 +2397,187 @@ Use this tree as the code-finish authority chain:
 | Final release decision | `reports/build-redline/final-build-redline.json` | Does not exist yet. This is the eventual completion certificate. |
 
 If these disagree, generated control state wins for current facts, this redline wins for what must be fixed, and the archive loses unless a human explicitly promotes an item.
+
+## Live Site/Product Master Spec Redline
+
+Current live product graph: `12` journeys, `8` customization dimensions, `582` routes, `163` route groups, `64` CLI commands, `32` TUI views, `33` account links, and `57` readiness requirements.
+
+Current live account surface: `51` account HTML pages under `public/account/**/*.html`.
+
+Current live design/media ledgers: `729` public HTML pages, `19` CSS files, `3,873` CSS `!important` uses, `1,524` raw CSS hex values, `75` negative letter-spacing uses, `3,215` inline HTML styles, `3,710` media references, `0` missing local media, and `4` image dimension gaps.
+
+REDLINE: the site still has many pages, many account surfaces, and many generated ledgers, but it does not yet have a single live site/product master spec that all pages and account states must obey.
+ACTION: CREATE `docs/internal/page-family-contracts.json`, `docs/internal/product-feature-completion-matrix.json`, `docs/internal/account-product-matrix.json`, `docs/internal/site-master-spec.json`, `src/site/page-family-contracts.js`, `src/site/product-page-map.js`, `src/site/structured-data-contract.js`, `public/account/product-command-center.js`, and `scripts/build-site-master-spec.cjs`; WIRE product graph, route contracts, account pages, docs, OpenAPI, catalog manifest, design cascade ledger, product media proof, claim-copy map, and final release evidence.
+CODE: the master site spec must expose exactly three user loops:
+
+- `route-and-capture`: `gateway-capture`, `privacy-lake`, `datasets-labeling`; visible through homepage, capture/product/quickstart/API/docs pages, connector/account/lake/dataset pages, and provider/cost/privacy proof.
+- `distill-and-compile`: `datasets-labeling`, `train-distill`, `models-backbones`, `multimodal-tokenization`, `compile-verify`; visible through distill/compile/train/models/K-Score/benchmark/spec/runtime pages, build/distill/artifact/bakeoff account pages, and artifact/eval/signature proof.
+- `run-and-govern`: `runtime-inference`, `compute-cloud`, `devices-fleet`, `enterprise-governance`, `agents-registry`; visible through run/cloud/BYOC/device/enterprise/security/trust/SDK/integration pages, device/storage/audit/billing/keys/SSO/agent account pages, and deployment/audit/readiness proof.
+
+CODE: every page-family record must declare `family`, `pages`, `loop`, `journeys`, `primary_claim`, `primary_action`, `secondary_action`, `proof_component`, `required_media`, `required_demo_state`, `account_destination`, `docs_destination`, `api_destination`, `cli_destination`, `structured_data_types`, `seo_intent`, `nav_group`, `theme_states`, `mobile_states`, `a11y_requirements`, `core_web_vitals_budget`, `readiness_scope`, and `claim_scope`.
+EXIT: homepage, product pages, docs pages, pricing pages, trust pages, comparison pages, vertical pages, and account pages cannot drift into separate stories; every surfaced promise is route/account/docs/proof owned.
+
+REDLINE: generated product media proof currently proves assets exist, not that media communicates product value or supports the active page claim.
+ACTION: ADD primary-proof semantics to `docs/internal/product-media-proof.json` via `scripts/build-product-media-proof.cjs` and WIRE key pages to live demo/video/screenshot/product-state proof.
+CODE: each key page must declare `primary_media_role` as `live_demo|product_screenshot|workflow_video|artifact_receipt|api_explorer|account_state|diagram_with_data|decorative_only`; `decorative_only` cannot satisfy the proof slot for homepage, product, pricing, docs quickstart, API, SDK, trust, enterprise, or account overview.
+EXIT: "image/video/demo elements are trash" becomes a concrete failing state: key pages fail the master spec unless media proves the promised product loop.
+
+REDLINE: design cascade ledger currently measures visual debt, but the site can still ship with raw style sprawl.
+ACTION: CREATE `docs/internal/design-token-migration-plan.json` and WIRE it to `docs/internal/design-cascade-ledger.json`.
+CODE: every raw hex, `!important`, negative letter-spacing, inline style, and page-local style tag must be classified as `tokenize`, `componentize`, `delete`, `temporary_exception`, or `third_party_required`; exception rows require owner, reason, expiration wave, replacement selector/token, and page-family impact.
+EXIT: nav underlines, popouts, button states, colors, fonts, spacing, and theme differences are not subjective feedback anymore; they are owned contract violations with a removal path.
+
+REDLINE: account pages are numerous but not yet a single optimized post-auth product cockpit.
+ACTION: CREATE `docs/internal/account-product-matrix.json`, `public/account/product-command-center.js`, `public/account/state-renderers.js`, and `public/account/action-registry.js`; WIRE all `public/account/**/*.html` pages to product graph journey, route contract, and state renderer.
+CODE: every account page must implement `loading`, `empty`, `ready`, `partial`, `error`, `unauthorized`, `external_gated`, and `upgrade_required` states; every action button declares route, method, auth, idempotency, audit event, success state, problem state, and docs/CLI equivalent.
+EXIT: post-auth account is the product operating system, not a loose set of dashboards.
+
+REDLINE: SEO and AI-discovery metadata cannot be page-local copy because Kolm has three product loops and many page families.
+ACTION: CREATE `src/site/metadata-registry.js`, `docs/internal/structured-data-map.json`, and `scripts/build-site-metadata.cjs`; WIRE sitemap, OpenGraph, Twitter cards, JSON-LD, `llms.txt`, `ai-context`, docs metadata, and page titles.
+CODE: structured data must generate coherent `SoftwareApplication`, `WebApplication`, `Product`, `FAQPage`, `BreadcrumbList`, and organization identity objects from the same page-family records. Every page gets one canonical intent, one canonical title, one description under snippet budget, one product loop, and one account/docs destination.
+EXIT: search snippets, social cards, AI crawlers, and page tabs all describe the same Kolm product instead of fragmented slogans.
+
+## Live API, Docs, And SDK Completion Redline
+
+Current live API evidence:
+
+- `public/openapi.json` is still OpenAPI `3.0.3`.
+- `public/openapi.json` has `556` paths and `586` operations.
+- `583` OpenAPI operations do not declare operation-level `security`.
+- `282` mutating `POST`/`PUT`/`PATCH` operations do not declare `requestBody`.
+- `11` operations have no `operationId`.
+- `public/docs/api-routes.json` has `582` routes across `163` groups.
+- `127` route entries are `stub: true` and have no short/comment documentation.
+- `public/docs/api.html` is a 551 KB generated catalog that says `455 reference-ready` and `127 source-indexed`; it is useful as an inventory, but it is not yet a finished API reference.
+- `public/sdk-current.json` points to one browser SDK bundle with SRI, but the broader SDK/package tree includes Node, Python, Rust, C, MCP, VS Code, TypeScript, React Native, Swift, Kotlin, browser extension, LangChain/LlamaIndex integrations, Homebrew, winget, apt, and attestation packages.
+
+REDLINE: the API docs are still source-indexed inventory, not a complete API product contract.
+ACTION: CREATE `src/api/route-contracts.js`, `src/api/register-route.js`, `src/api/schemas/index.js`, `src/api/problem.js`, `src/api/idempotency.js`, `src/api/object-authorization.js`, `docs/internal/api-contract-matrix.json`, and `scripts/build-api-contract-matrix.cjs`; REPLACE route scraping as the authority for `public/docs/api-routes.json`, `public/openapi.json`, `public/docs/api.html`, SDK fixtures, account action contracts, and CLI examples.
+CODE: every route contract must declare `route_id`, `operation_id`, `method`, `path`, `surface`, `journey`, `owner`, `status`, `auth`, `security`, `tenant_scope`, `object_scope`, `rate_limit`, `resource_limit`, `idempotency`, `request_schema`, `response_schema`, `problem_types`, `audit_event`, `account_exposure`, `cli_exposure`, `sdk_exposure`, `docs_exposure`, `production_smoke`, and `claim_scope`.
+CODE: route status must be one of `production_contract`, `beta_contract`, `local_only`, `external_gated`, `source_indexed`, `deprecated_alias`, `internal_hidden`, or `remove`. A `source_indexed` route cannot be marketed or SDK-generated.
+EXIT: every route has a runtime-enforced contract and the generated API catalog becomes a projection, not the source of truth.
+
+REDLINE: OpenAPI `3.0.3` is not final for Kolm because it prevents modern JSON Schema alignment and hides dialect decisions.
+ACTION: CREATE `docs/internal/openapi-dialect-policy.json` and WIRE `scripts/build-openapi.cjs` to route contracts and JSON Schema 2020-12 schemas.
+CODE: choose `3.2.0` if the client/tooling path can support it; otherwise pin `3.1.2` with a documented compatibility reason. The emitted spec must include `jsonSchemaDialect`, complete `components.securitySchemes`, per-operation `security` or explicit `security: []`, stable `operationId`, tags from product surface, full request/response schemas, known RFC 9457 problem schemas, streaming/SSE media modeling, file upload/download modeling, webhooks/callbacks where applicable, examples, and `x-kolm-*` extensions for product loop, readiness, account link, CLI command, SDK method, idempotency, object authorization, and production smoke.
+EXIT: OpenAPI can generate clients and reference docs without reading `src/router.js`.
+
+REDLINE: mutating operations are not complete while `282` mutating OpenAPI operations lack request bodies and idempotency semantics.
+ACTION: IMPLEMENT `src/api/idempotency.js` and require idempotency declaration on every mutating route contract.
+CODE: every mutating route is classified as `requires_key`, `accepts_key`, `server_generated`, `rejects_key`, or `non_retryable`; replay storage records method, path, tenant, actor, key, body hash, response hash, status, expiry, and conflict reason. Money, delete/purge, deploy, publish, key rotation, SSO/SCIM, marketplace, billing, and artifact state transitions must not be `not_applicable`.
+EXIT: clients and SDKs can safely retry create/update/publish/deploy operations or see an explicit non-retryable problem.
+
+REDLINE: route auth is not API-complete while `583` operations lack per-operation security metadata and object IDs can appear in path/query/body without generated object-authorization proof.
+ACTION: CREATE `src/api/security-contract.js`, `src/api/object-authorization.js`, `docs/internal/api-auth-matrix.json`, and `docs/internal/object-authorization-matrix.json`; WIRE route registration, OpenAPI, API docs, account actions, and smoke tests.
+CODE: every route declares auth mechanism, required scopes, tenant binding, object id fields, object type, relation/action, plan gate, regional/residency gate, and denial problem type. Object IDs in paths such as artifacts, datasets, keys, jobs, teams, captures, storage objects, deployments, tunnels, invoices, approvals, and agents must call a centralized object authorization decision before handler logic.
+EXIT: Kolm closes the OWASP API1/BOLA class by construction instead of relying on route-local checks.
+
+REDLINE: API errors are not complete while route-local JSON envelopes and comment-derived docs coexist.
+ACTION: REPLACE route-local ad hoc errors with RFC 9457-compatible problem details from `src/api/problem.js` and WIRE SDK decoding to typed problem classes.
+CODE: problem details must include `type`, `title`, `status`, `detail`, `instance`, plus safe Kolm extensions: `code`, `request_id`, `trace_id`, `surface`, `journey`, `retryable`, `next_action`, `docs_url`, `account_url`, `support_ref`, `redaction`, and `secret_values_included:false`. Problem type URLs must resolve to docs and must not leak internals.
+EXIT: API docs, SDKs, CLI, and account pages can render failures without string parsing.
+
+REDLINE: SDKs are broad but not proven as generated, parity-checked clients for the complete API surface.
+ACTION: CREATE `src/sdk/sdk-contract.js`, `scripts/build-sdk-source.cjs`, `scripts/build-sdk-capability-matrix.cjs`, `docs/internal/sdk-capability-matrix.json`, `docs/internal/sdk-api-parity.json`, `docs/internal/sdk-generation-manifest.json`, and `tests/sdk-generated-client-smoke.test.js`.
+CODE: generated clients must include typed requests/responses, typed problem errors, auth helpers, idempotency helpers, pagination helpers, streaming helpers, upload/download helpers, retries, redaction-safe logging, examples, package identity, version binding, and method names derived from stable OpenAPI `operationId`. Handwritten SDKs may wrap generated clients but cannot redefine payloads by hand.
+CODE: parity matrix must cover `sdk/node`, `sdk/python`, `sdk/rust`, `sdk/c`, `sdk/mcp`, `sdk/vscode`, `packages/sdk-ts`, `packages/sdk-rn`, `packages/sdk-swift`, `packages/sdk-kotlin`, browser SDK, extension packages, LangChain/LlamaIndex adapters, and installer packages with `source_preview|local_build|package_ready|published|deprecated` state.
+EXIT: every SDK page can say exactly which operations it supports, what is generated, what is handwritten, what package channel exists, and how to smoke it.
+
+REDLINE: docs breadth is not the same as docs usability.
+ACTION: CREATE `docs/internal/docs-ia-contract.json`, `scripts/build-docs-ia.cjs`, and `public/docs/start/*`; WIRE API reference, CLI reference, SDK docs, tutorials, how-to guides, technical reference, and explanations to product graph journeys.
+CODE: docs must follow four user needs: tutorial, how-to, reference, explanation. Each of the three Kolm product loops gets one runnable tutorial, one operational how-to, one generated reference path, and one explanation page. Every code sample declares prerequisites, environment variables, exact command, expected output, cleanup, failure cases, and account/API/CLI equivalent.
+EXIT: docs help a developer get first value without reading the route catalog or guessing which product loop they are in.
+
+## Live Product Capability And Build Completion Redline
+
+Current local product-capability evidence:
+
+- The runtime backend is a Node.js/Express application (`server.js` mounts `src/router.js`) with many JS product modules under `src/`.
+- The repo is not "only JS": it also has `workers/`, `services/`, multi-language `sdk/` packages, `packages/sdk-ts`, `packages/sdk-python`, `packages/sdk-rn`, `packages/sdk-swift`, `packages/sdk-kotlin`, Rust runtime package, installers, VS Code/MCP integrations, and browser extension packages.
+- `docs/internal/` currently contains seven generated control files: catalog manifest, codebase file ledger, design cascade ledger, product media proof, wave reconcile report, wave registry, and wave registry schema.
+- `public/product-graph.json` reports 12 journeys, 7 route surfaces, 582 routes, 163 route groups, 69 product API routes, 64 CLI commands, 32 TUI views, 33 account links, 8 customization dimensions, and 57 readiness requirements.
+- Readiness status is not all final: 14 shipped, 35 implemented, 2 external-partner gated, 1 live-certification gated, 4 package-release gated, and 1 public-benchmark gated requirement.
+- `public/product-readiness-closeout.json` and `docs/readiness-gate-workorders.json` both report 8 open non-local closeout items: foundation standardization, ecosystem runtime adoption, runtime WASM, iOS/Android SDK, benchmarking infrastructure, SDK depth, compliance certification, and one-line install.
+- The account tree currently has 51 account HTML pages, while the product graph has only 33 account links. That means account coverage exists, but not every account page is yet owned by a journey/feature/state contract.
+- The package scripts now include useful verification lanes (`verify:control-files`, `verify:depth`, product frontier simulations, benchmark gates, package release readiness, UI audits), but the route-contract, SDK-parity, docs-IA, account-matrix, page-family, production-evidence, and final-redline verifiers are still absent.
+
+REDLINE: Kolm is not 100 percent finished while feature completion is inferred from pages, route groups, or tests instead of a product-capability state machine.
+ACTION: CREATE `docs/internal/product-feature-completion-matrix.json`, `docs/internal/product-feature-completion-matrix.md`, `scripts/build-product-feature-completion-matrix.cjs`, and `scripts/verify-product-feature-completion-matrix.cjs`.
+CODE: build the matrix by joining `public/product-graph.json`, `docs/product-surfaces.json`, `docs/product-journeys.json`, `docs/product-sota-readiness.json`, `docs/readiness-gate-workorders.json`, `docs/internal/codebase-file-ledger.json`, `docs/internal/catalog-manifest.json`, `docs/internal/design-cascade-ledger.json`, `docs/internal/product-media-proof.json`, `public/docs/api-routes.json`, `public/openapi.json`, account HTML pages, CLI help, TUI view inventory, tests, package scripts, SDK/package directories, frontier/invention ledgers, and production evidence when available.
+CODE: every feature row must declare `feature_id`, `journey_id`, `route_surface_id`, `stage`, `user_outcome`, `first_value_path`, `source_files`, `runtime_modules`, `account_pages`, `public_pages`, `api_routes`, `cli_commands`, `tui_views`, `sdk_methods`, `docs_pages`, `tests`, `proof_commands`, `uiux_states`, `data_states`, `error_states`, `production_smoke`, `readiness_status`, `claim_scope`, `blockers`, `owner_lane`, and `next_build_cut`.
+EXIT: no product feature can be called complete unless this matrix proves its behavior, UI, docs, account flow, API contract, CLI/TUI parity, tests, and production proof.
+
+REDLINE: the 12 journeys must become executable product loops, not just graph rows.
+ACTION: FOR EACH journey in `public/product-graph.json`, attach a finished-flow contract:
+
+| journey | finished-flow redline |
+|---|---|
+| `gateway-capture` | A user can connect or paste an OpenAI/Anthropic/OpenRouter/Gemini-compatible call, see what is captured/redacted/excluded, and generate a compile-ready candidate with API, CLI, docs, account, and receipt proof. |
+| `privacy-lake` | A user can inspect capture rows, redaction classes, retention, storage backend, DP aggregate scope, export path, and secret-free readiness in one account flow. |
+| `datasets-labeling` | Captures can become datasets with provenance, labels, holdout split, synthetic boundary, reviewer identity, export history, and next distill action. |
+| `train-distill` | A user can choose dataset, teacher, student/search strategy, compute target, eval gate, cost budget, failure-mode loop, and signed artifact output. |
+| `models-backbones` | Model choice shows source-dated provider/model facts, modality, context, license, cost, memory, runtime target, device fit, and benchmark/readiness scope. |
+| `multimodal-tokenization` | Images, PDFs, audio, transcripts, and videos are explicitly supported, unsupported, or gated; each modality has tokenization, redaction, storage, benchmark, preview, and error-state proof. |
+| `compile-verify` | Artifacts show spec, model hash, dataset hash, eval gate, signature, quantization profile, runtime targets, dependency graph, receipts, diff, export status, and verification recovery. |
+| `runtime-inference` | A signed artifact can run or fail clearly across local, browser, server, MCP, device, hosted, and fallback contexts with latency, cost, memory, target, and receipt evidence. |
+| `compute-cloud` | Local, remote GPU, managed train, object storage, BYOC, deployment target, env readiness, cost, and missing-provider state are grouped without exposing secrets. |
+| `devices-fleet` | Device detection, target recommendation, install test, runtime compatibility, memory reason, offline/air-gap path, and team tunnel path are visible before deploy. |
+| `enterprise-governance` | Tenant, scoped keys, SSO/SCIM status, billing, approvals, audit export, privacy, compliance packet, role boundaries, and certification scope are visible and actionable. |
+| `agents-registry` | MCP/tool compilation, agent install proof, registry pinning, telemetry, hashed run logs, permissions, latency, failures, and publish/pull state are first-class. |
+
+EXIT: the public site, account UI, CLI, TUI, API docs, SDK docs, and product graph all tell the same three-loop story: route/capture, distill/compile, run/govern.
+
+REDLINE: account coverage is incomplete until 51 local account pages are classified by product journey, page mode, live data contract, and state model.
+ACTION: CREATE `docs/internal/account-product-matrix.json`, `docs/internal/account-product-matrix.md`, `scripts/build-account-product-matrix.cjs`, and `scripts/verify-account-product-matrix.cjs`.
+CODE: classify every `public/account/**/*.html` page as one of `live_tenant_dashboard`, `setup_wizard`, `generated_report`, `reference`, `experimental_wave`, `archive`, or `remove`. Every page must declare journey ownership, feature ownership, API routes, CLI/TUI equivalents, primary action, secondary actions, loading/empty/error/partial/success/no-auth/no-credential states, tenant-data safety, secret policy, claim scope, keyboard/mobile/dark/light proof, and local/prod authenticated smoke.
+EXIT: there is no orphan account page, and `/account/overview` is a real command center that links the three product loops, readiness closeout, storage/cloud status, billing/plan state, and next actions.
+
+REDLINE: the website cannot feel state-of-the-art while page families, nav, buttons, hero copy, account dashboards, demos, docs, and media are governed only by screenshot pass/fail.
+ACTION: CREATE `docs/internal/page-family-contracts.json`, `docs/internal/component-state-contracts.json`, `docs/internal/nav-contract.json`, and `scripts/verify-page-family-contracts.cjs`.
+CODE: page families must include homepage/category, product loop, developer/docs, trust/legal, pricing/commercial, comparison, vertical/use-case, account cockpit, demo/media, and article/content. Each family declares first-screen promise, primary CTA, secondary CTA, proof component, media requirement, SEO/structured data, account destination, docs/API destination, allowed density, nav behavior, button variants, state models, accessibility gates, Core Web Vitals budgets, and visual token exceptions.
+CODE: use WCAG 2.2 as the accessibility baseline, Core Web Vitals LCP/INP/CLS as performance budgets, OpenTelemetry GenAI conventions for model/runtime telemetry naming, and NIST AI RMF language for risk/governance surfaces. These are implementation constraints, not marketing copy.
+EXIT: visual quality is no longer "screenshots looked okay"; it is a page-family and component-state contract with decreasing budgets for raw hex, `!important`, inline styles, negative tracking, hover-only controls, layout shift, missing focus states, missing media dimensions, and unsupported claims.
+
+REDLINE: generated files are now numerous enough that stale or racing generation is a real build risk.
+ACTION: CREATE `docs/internal/generated-artifact-manifest.json`, `scripts/build-generated-artifact-manifest.cjs`, and `scripts/verify-generated-artifacts.cjs`.
+CODE: each generated artifact must declare source inputs, generator command, check command, downstream consumers, release inclusion, write lock, stale-file behavior, deterministic hash policy, and serial generation order. Include OpenAPI, API routes, CLI docs, SDK version manifest, product graph, readiness closeout, codebase ledger, wave registry, catalog manifest, design cascade ledger, media proof, sitemap, docs manifest, llms/AI context files, screenshots/reports, package manifests, and future matrices.
+EXIT: one agent cannot silently break another by regenerating files out of order, and final redline can prove every generated output is current.
+
+## Live Production, Observability, And Release Evidence Redline
+
+Current local production/release evidence:
+
+- `vercel.json` has `49` redirects, `526` rewrites, `52` account rewrites, `108` docs rewrites, and rewrites `/v1/(.*)`, `/health`, and `/ready` to `https://kolmogorov-stack-production.up.railway.app`.
+- `vercel.json` defines global security headers, including CSP, HSTS, frame denial, nosniff, referrer policy, and a permissions policy.
+- `server.js` uses `helmet`, `compression`, cookie parsing, raw Stripe webhook handling, JSON body limits, explicit static route handlers, and `src/router.js`.
+- `src/router.js` exposes public `/health`, deploy `/ready`, authenticated `/v1/health`, admin health, storage/cloud readiness, evidence readiness, package readiness, compliance readiness, and product graph routes.
+- `scripts/release-verify.cjs` is a strong local release gate: lint refs, control files, OpenAPI sync, SDK manifest, full tests, SDK smoke, local surfaces, doctor, whoami, artifact verify, and billing tiers.
+- `scripts/prod-surface-smoke.cjs` can probe production surfaces against `https://kolm.ai` and supports auth/deep modes.
+- `src/otel.js` implements an OTLP/HTTP exporter and `src/router.js` has inference-routing spans, but production evidence does not yet prove OTLP collector configuration, trace delivery, dashboard visibility, alert policy, or incident workflow.
+- `reports/` currently contains `95,988` files, almost all under `reports/ui-surface-audit/`; there is no `reports/deployments/`, no `reports/build-redline/`, no `production-evidence.json`, and no `final-build-redline.json`.
+
+REDLINE: local green gates are not production completion.
+ACTION: CREATE `reports/deployments/<release-id>/production-evidence.json`, `reports/deployments/<release-id>/production-evidence.md`, `scripts/build-production-evidence-packet.cjs`, and `scripts/verify-production-evidence-packet.cjs`.
+CODE: the packet must include release ID, commit, branch, dirty-tree status, deploy target, Vercel deployment URL, Railway service URL, production base URL, API rewrite target, env profile without secret values, generated artifact hashes, release-verify summary, prod public smoke, prod authenticated smoke, storage/cloud readiness, billing/pricing readiness, account auth smoke, screenshot report IDs, Core Web Vitals report, OpenAPI/API-doc route parity, SDK asset hash/SRI, CSP/header verification, telemetry export proof, rollback target, incident/watch window, and signoff decision.
+CODE: production smoke must run both public and authenticated paths. It must include `/`, `/product`, `/pricing`, `/docs`, `/quickstart`, `/capture`, `/distill`, `/compile`, `/run`, `/enterprise`, `/security`, `/account/overview`, `/openapi.json`, `/product-graph.json`, `/product-readiness-closeout.json`, `/health`, `/ready`, `/v1/product/graph`, `/v1/evidence/readiness`, `/v1/storage/object-readiness`, `/v1/billing/tiers`, and every surface smoke in `docs/product-surfaces.json`.
+EXIT: deploy is not "done" until the live production packet proves the deployed domain, backend, account auth, API, SDK assets, docs, page rendering, headers, readiness, telemetry, rollback, and external-gate scope for the exact release.
+
+REDLINE: observability is not complete while telemetry exists only as optional code and not as release evidence.
+ACTION: CREATE `docs/internal/observability-contract.json`, `scripts/build-observability-contract.cjs`, and `scripts/verify-observability-contract.cjs`; WIRE production evidence to it.
+CODE: every product journey must declare traces, metrics, logs/events, SLO, alert, dashboard, owner, runbook, data retention, PII/secret redaction, and customer-visible status. HTTP spans must follow OpenTelemetry semantic conventions; GenAI/model spans must use GenAI attributes where applicable; custom attributes must live under `kolm.*` and never leak prompts, secrets, API keys, raw PHI/PII, or model-provider credentials.
+CODE: minimum product signals: capture requests, provider routing decision, capture redaction count, dataset split, label queue depth, distill run state, K-Score gate, artifact compile/verify result, runtime latency/cost/quality, fallback reason, storage backend, cloud broker decision, device install result, audit export, billing/usage, SSO/SCIM state, package release readiness, compliance packet state, and readiness closeout state.
+EXIT: production incidents can be debugged without reading local logs or asking which product surface owns the route.
+
+REDLINE: release security is not complete while headers exist but security verification is not tied to route contracts, ASVS/API controls, production smoke, and evidence packets.
+ACTION: CREATE `docs/internal/security-release-contract.json`, `scripts/build-security-release-contract.cjs`, and `scripts/verify-security-release-contract.cjs`.
+CODE: map every public/account/API surface to controls for authentication, authorization, object authorization, rate/resource limiting, CSRF/session/cookie policy, CORS, CSP, secret handling, webhook signature verification, file/media upload policy, SSRF/upstream provider policy, tenant isolation, audit logging, redaction, retention, dependency/SBOM, provenance, vulnerability scanning, and incident response.
+CODE: production evidence must record security headers from `https://kolm.ai`, API CORS behavior, authenticated/unauthenticated route behavior, object authorization probes, idempotency behavior for mutating routes, webhook signature behavior, and no-secret report validation.
+EXIT: "secure enough to ship" is a traceable contract, not a collection of headers and scattered tests.
+
+REDLINE: the final build cannot be closed without supply-chain provenance and release metrics.
+ACTION: EXTEND `reports/build-redline/final-build-redline.json` to include SLSA-style provenance, DORA-style release metrics, generated artifact state, production evidence state, and rollback readiness.
+CODE: include build definition, build type, builder identity, source commit, dependency/package lock hash, generated artifact hashes, environment class, tests/gates, deploy start/end, deploy success, lead-time source, change failure indicator, restore/rollback target, incident links, and release notes. This is evidence metadata only; no secret values.
+EXIT: a future reviewer can reproduce what shipped, why it was considered safe, how it was deployed, how it was watched, and how it would be rolled back.
 
 ## Definition Of 100 Percent Finished Code
 
@@ -3127,3 +3868,149 @@ Scratch or quarantine paths that must not remain in a release tree:
 - `.w850-shots/`
 - `C?*site-failures*.txt`
 - `data/*.tmp`
+
+## Live Data Plane, Persistence, Env, And Retention Redline
+
+Current local evidence:
+
+- `src/store.js` is the server store facade. It supports only `json` and `sqlite` through `KOLM_STORE_DRIVER`, defaults local development to JSON files, and defaults production-like runtimes to SQLite only when `node:sqlite` is available. It writes JSON durably through temp file, fsync, backup `.bak`, and corruption quarantine. SQLite uses WAL, `synchronous=FULL`, foreign keys, busy timeout, and a generic `kolm_store_rows(table_name, json, created_at, updated_at)` table.
+- `src/store-drivers/vercel-postgres.js` and `src/store-drivers/vercel-kv.js` exist, but they are not selectable by the main `src/store.js` facade because that facade rejects every driver except `json` and `sqlite`. This is a real implementation gap, not a documentation nuance.
+- `src/env.js` auto-creates production-like `KOLM_DATA_DIR` and `KOLM_ARTIFACT_DIR` defaults under `os.tmpdir()` when explicit dirs are absent. `/ready` can therefore become green for writable temporary storage while still telling operators to override the paths for durable storage.
+- `src/event-store.js` is a separate event data plane. It owns a typed `events` table in `~/.kolm/events/events.sqlite` or a JSONL fallback, validates rows through `src/event-schema.js`, and keeps capture/lake events separate from the generic server row store.
+- `src/event-schema.js` is stronger than the generic store: it has explicit fields, required fields, closed enums for status/source/vendor/redaction/media state, canonicalization, and fail-closed review defaults.
+- `src/audit-retention.js` implements tenant-fenced audit retention with 90 day minimum, 365 day default, 2555 day maximum, dry-run eviction by default, and explicit confirmation for destructive enforcement.
+- `src/data-residency.js` implements region tagging and enforcement on top of the event store. It defaults undetermined data to `GLOBAL`, not EU, and requires explicit confirmation to write residency tags.
+- `src/secrets-vault.js` implements a local AES-256-GCM vault with `local:`, `env:`, and external secret reference envelopes. The local key is created beside the vault under the Kolm data root. External secret refs are currently intent envelopes; the product stores references but does not prove live AWS/GCP/Azure/Vault/1Password/Doppler/Infisical resolution in the main release gate.
+- A source-level env scan found 378 unique direct `process.env.*` variable names across local code. `.env.example` documents only a subset and still contains retired pricing/plan instructions for Stripe Payment Links (`$9`, `$149`, `$1,499`, `$2,999`, Starter, Teams, Business, Ent) while the product contract has moved to Free, Pro `$49`, Team `$499`, and Enterprise custom/contact sales.
+- `.gitignore` excludes `.env*`, data files, temp files, screenshots, reports, test output, and local agent directories. `.vercelignore` excludes many of the same paths from Vercel. There is no `.dockerignore`, and `Dockerfile` uses `COPY . .`, so the Docker path has no equivalent release-boundary proof.
+- The current root contains local/scratch/release-risk directories and artifacts: `.agent/`, `.claude/`, `.kolm-bundle/`, `.kolm-self-hosted-tmp/`, `.npm-cache/`, `.shots/`, `.tmp/`, `.tmp-w255/`, `.ui-debug/`, `.vercel/`, `archive/`, `audit-shots/`, `backups/`, `data/`, `node_modules/`, `reports/`, `screenshots/`, `tmp/`, `tmp-screenshots/`, `_audit/`, plus prior malformed path/test output artifacts. A clean product build cannot rely on developer discipline to exclude these.
+
+What this means:
+
+The backend has credible local primitives, but the production data plane is not yet finished. It is split across a generic JSON/SQLite store, a stronger typed event store, a local secrets vault, an audit-retention module, and a data-residency module. Those pieces need one generated authority that states which data is durable, which data is temporary, which storage drivers are supported by each runtime, which env vars are required, which secrets may resolve at runtime, what gets backed up, what gets deleted, and what is included in a release image.
+
+Hard redlines:
+
+1. Build `docs/internal/data-plane-contract.json` and `.md`.
+   - Inputs: `src/store.js`, `src/event-store.js`, `src/event-schema.js`, `src/store-drivers/*`, `src/object-storage.js`, `src/audit-retention.js`, `src/data-residency.js`, `docs/internal/catalog-manifest.json`, and `public/product-graph.json`.
+   - It must classify every persisted table/log/blob as `authoritative`, `derived`, `cache`, `scratch`, `audit`, `artifact`, `secret_reference`, or `test_fixture`.
+   - It must declare storage driver support per runtime: local dev, Railway, Vercel static/API rewrite, Docker, self-host, air-gapped, worker, CLI, and test.
+   - It must mark `json` as local/single-node only unless `KOLM_ALLOW_JSON_STORE=true` is explicitly in an emergency profile.
+   - It must resolve the mismatch between `src/store.js` and `src/store-drivers/*`: either wire supported async drivers through a real facade or demote those drivers to experimental/offline modules in the contract.
+   - It must define typed migration ownership for all generic JSON rows. Final state cannot leave major product tables as untyped JSON blobs without field ownership, indexes, tenant fence, migration version, and retention policy.
+
+2. Build `docs/internal/env-secret-contract.json` and `.md`.
+   - Inputs: direct env scan, `.env.example`, `src/env.js`, `src/secrets-vault.js`, deploy files, CI scripts, CLI help, provider catalogs, cloud readiness, and object-storage readiness.
+   - Every env var must have owner, type, sensitivity, default, valid values, required runtime, public-safe display name, rotation policy, source module, docs page, deploy target, and readiness check.
+   - Direct `process.env.*` reads must be classified. Secrets must route through `envSecret()` or a provider-specific resolver; booleans must route through `envBool()` or an equivalent parser.
+   - `.env.example` must be generated from this contract, not hand-maintained. It must remove retired Starter/Business/old-price Stripe instructions and reflect Free/Pro/Team/Enterprise sales flow.
+   - The local vault must be scoped honestly: acceptable for local/dev/self-host bootstrap, not a replacement for a production secrets manager unless the production evidence packet proves host encryption, key isolation, rotation, audit, and recovery.
+   - The contract must fail if a secret value appears in generated public files, logs, reports, screenshots, OpenAPI examples, or account UI responses.
+
+3. Build `docs/internal/data-retention-backup-contract.json` and `.md`.
+   - Inputs: `src/audit-retention.js`, `src/event-store.js`, account privacy/export/delete pages, route contracts, object storage, and production evidence.
+   - It must state retention per data class: account tenant, API key hash, event/capture, raw media, redacted text, audit event, artifact, benchmark fixture, billing record, support/sales lead, local cache, and generated report.
+   - It must define backup, restore, RPO, RTO, restore test cadence, encryption, region, object lock/versioning, legal hold, right-to-erasure exception, and deletion confirmation for each class.
+   - Destructive operations must be idempotent, audit-logged, tenant-fenced, dry-run capable, and covered by a restore/rollback story.
+   - The final production evidence packet must include an actual restore drill, not only a backup configuration screenshot.
+
+4. Build `docs/internal/tenant-data-boundary-contract.json` and `.md`.
+   - Inputs: `src/auth.js`, `src/event-schema.js`, `src/event-store.js`, `src/store.js`, `src/data-residency.js`, account/team/RBAC routes, route contracts, SDKs, and tests.
+   - It must define the canonical tenant identifier per table and route. Today the code uses `tenant`, `tenant_id`, tenant name, tenant id, and email in different places; the contract must specify what is allowed and where translation occurs.
+   - Every read path must state its tenant fence. Every write path must state how tenant identity is derived, whether cross-tenant admin access is allowed, and what audit row proves it.
+   - Export-control and sanctions controls must not be a permanently hardcoded legal source. `src/auth.js` can keep a baseline denylist, but the contract must define owner, legal review cadence, source of truth, override process, and production evidence.
+   - Account deletion, export, retention, merge, OAuth claim, team invite, key rotation, artifact publish, and event promotion must each be mapped to tenant-bound data effects.
+
+5. Build `docs/internal/release-boundary-manifest.json` and `.md`.
+   - Inputs: `Dockerfile`, `.dockerignore` once created, `.gitignore`, `.vercelignore`, `vercel.json`, `railway.toml`, `package.json`, file ledger, generated artifact manifest, and production evidence.
+   - It must declare the exact file inclusion/exclusion policy for Vercel, Railway, Docker, npm packages, SDK packages, browser extension, CLI bundle, and public static assets.
+   - Docker must not use an unbounded `COPY . .` without a manifest-backed `.dockerignore` or equivalent build context. The release packet must prove no `.env*`, local data, backups, screenshots, reports, node_modules cache, test output, local agent directories, or malformed temp artifacts enter the image.
+   - The file ledger must classify scratch paths as quarantine or release inputs. Anything unclassified blocks `final-build-redline`.
+
+6. Wire all five contracts into `reports/build-redline/final-build-redline.json`.
+   - `final-build-redline` must fail unless data plane, env/secrets, retention/backup, tenant boundary, and release boundary are all `pass`.
+   - It must list every open external item as `external_blocked`, not `done`.
+   - It must show the exact local and production evidence used for the release ID.
+
+External baselines imported into this redline:
+
+- The Twelve-Factor App config rule says deploy-specific config belongs in environment variables and should be strictly separated from code: https://www.12factor.net/config
+- OWASP Secrets Management Cheat Sheet requires centralized storage, provisioning, auditing, rotation, and management of secrets rather than scattered plaintext configuration: https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html
+- NIST SP 800-53 Rev. 5 contingency planning controls anchor backup, recovery, contingency planning, and resilience evidence for systems that need regulated trust posture: https://csrc.nist.gov/Pubs/sp/800/53/r5/upd1/Final
+
+Implementation owner notes:
+
+- This is not a request to rewrite storage immediately. The first implementation step is to generate the contracts from the current code and fail only on contradictions that can cause data loss, secret leakage, tenant leakage, or false production claims.
+- The first code redline after the contracts should be small: reconcile `KOLM_STORE_DRIVER` support so the facade and driver modules agree, generate `.env.example` from the env contract, add `.dockerignore` from the release-boundary manifest, and attach data-plane status to `/ready`, `/v1/product/graph`, account overview, and CLI/TUI surfaces.
+- Do not market cloud durability, production secret management, SOC 2 retention, data residency, or Docker release cleanliness until the production evidence packet proves these contracts on the deployed release.
+
+## Live CI, Release, Package, SBOM, And Provenance Redline
+
+Current local evidence:
+
+- `package.json` has many useful scripts: product graph/readiness, five generated control-file checks, reference/href/product-surface lint, kernel/journey/depth gates, local/prod surface smoke, redaction/quality/benchmark/compliance/package-release readiness, UI screenshot audit, full tests, and `release:verify`.
+- `scripts/release-verify.cjs` is a serious local release driver. It runs semantic gates for `lint:refs`, seven current control files, OpenAPI sync, browser SDK manifest, full `npm test`, SDK smoke against a local server, local product-surface smokes, CLI doctor/whoami, artifact verification, and billing tiers.
+- `release:verify` is still local-first. It does not produce a release ID packet, does not sign or attest the result, does not require production smokes/screenshots/headers/telemetry/rollback, and only knows the first seven generated control files, not the expanded master spec tree.
+- `.github/workflows/test-suite.yml` runs Node 20 and `node --test --test-concurrency=1 tests/` for selected path changes. It does not run `verify:depth`, `release:verify`, UI audits, production smokes, package release readiness, provenance verification, or the new control-file tree.
+- `.github/workflows/lint.yml` runs static ref/href audits, an `innerHTML` public-template-literal guard, orphan Vercel rewrite check, and `npm audit --omit=dev --audit-level=high`. It installs with `--omit=optional --omit=dev`, so it is not equivalent to the runtime/test install surface.
+- `.github/workflows/smoke.yml` starts the local server and runs `scripts/smoke-live.sh`; it is useful but narrow compared with `local:surfaces` and `release:verify`.
+- `.github/workflows/sbom.yml` generates CycloneDX via `@cyclonedx/cyclonedx-npm@latest`, generates a Python fallback SBOM in CycloneDX and SPDX shapes, uploads artifacts for 90 days, and opens an issue on CycloneDX failure. It does not attach SBOM hashes to a release packet, sign the SBOM, attest build provenance, verify uploaded artifact integrity, or link SBOM to each package/channel.
+- `.github/workflows/sdk-c-rust.yml` gives useful C/Rust checks. Other package channels do not have equivalent publish-grade CI in the workflow set.
+- `.github/workflows/kolm.yml` and `.github/workflows/kolm-distill.yml` are intentionally opt-in/reference workflows guarded by missing secrets or `if: false`. They are product examples, not proof that Kolm itself ships with automated distill release gates.
+- `.github/actions/kolm-compile/action.yml` and `.github/actions/kolm-publish/action.yml` install from `github:sneaky-hippo/kolm-stack` and use `KOLM_KEY`/API key env. They verify artifacts, but they do not pin a version/tag/digest of the action's CLI dependency or emit provenance for the compiled/published artifact.
+- `scripts/package-release-readiness.mjs --summary --require-local-contract` currently reports `ok=true publish_ready=false targets=16 structural_ok=16 pending=16 blocked=0`.
+- The 16 package/release targets are `sdk-ts`, `sdk-rn`, `attestation-npm`, `langchain-npm`, `llamaindex-npm`, `sdk-python`, `langchain-python`, `llamaindex-python`, `runtime-rs`, `sdk-swift`, `sdk-kotlin`, `homebrew`, `apt`, `winget`, `install-scripts`, and `browser-extension`.
+- Every package-release target is pending channel proof. Current blockers include signed release artifact or registry URL missing for all targets, Homebrew release archive SHA placeholder, and winget installer SHA placeholder.
+- `reports/` contains local logs, live-smoke artifacts, and many UI screenshot audit outputs, but there is no `reports/deployments/<release-id>/production-evidence.json`, no `reports/build-redline/final-build-redline.json`, and no release-bound package/SBOM/provenance bundle.
+
+What this means:
+
+Kolm has many gates, but it does not yet have a release control plane. The current system can say "many checks passed locally" and "package manifests structurally exist." It cannot yet say "this exact release artifact, Docker image, static site, API backend, SDK package set, installer set, browser extension, `.kolm` examples, SBOM, and provenance were built from this commit, tested by this matrix, signed/attested, deployed, smoked in production, and retained for audit."
+
+Hard redlines:
+
+1. Build `docs/internal/ci-release-pipeline-contract.json` and `.md`.
+   - Inputs: `package.json` scripts, `.github/workflows/*.yml`, `.github/actions/*/action.yml`, `scripts/release-verify.cjs`, `scripts/local-surface-smoke.cjs`, `scripts/prod-surface-smoke.cjs`, `scripts/ui-surface-audit.cjs`, package-readiness scripts, and generated control files.
+   - It must declare every CI workflow, trigger, path filter, runtime version, permissions block, secret use, install mode, commands run, artifacts emitted, retention period, and whether the workflow is required, optional, reference-only, or product-template-only.
+   - It must distinguish "Kolm product release gate" from "example workflow customers can copy." Reference workflows with `if: false` or manual-only triggers cannot count as product release proof.
+   - It must reconcile Node 20 CI with Node 22/24 local/runtime expectations. If Node 20 remains the compatibility target, the contract must say so and prove it; if Node 22+ is required for `node:sqlite`, the CI matrix must include it.
+   - It must require least-privilege GitHub permissions, pinned action versions, no unpinned `@latest` in release-critical generation, no unbounded global installs for release proof, and no secret-bearing output.
+
+2. Build `docs/internal/release-artifact-evidence-matrix.json` and `.md`.
+   - Inputs: package release readiness, generated artifact manifest, release boundary manifest, SBOM workflow, package manifests, browser extension build, SDK manifests, Docker/Railway/Vercel deploy files, and production evidence.
+   - It must list every release subject: static site bundle, Railway/API backend, Docker image, CLI/npm root package, browser SDK, Node SDK, Python SDK, Rust crate, C SDK binary, TypeScript package, React Native package, Swift package, Kotlin/Maven artifact, browser extension, Homebrew formula, winget manifests, apt/deb package, GitHub Actions, and sample `.kolm` artifacts.
+   - For every subject it must require commit SHA, version, build command, source inputs, output path, SHA-256, SBOM SHA-256, provenance SHA-256, signature/attestation bundle SHA-256, registry or artifact URL, local checks, production/channel checks, owner, and retention.
+   - Package-release readiness is not complete until `publish_ready=true` or the target is explicitly marked `not_released` with public copy/docs saying it is local-source only.
+   - Placeholder hashes in Homebrew/winget/installer/package metadata must fail the final build redline.
+
+3. Build `docs/internal/sbom-provenance-contract.json` and `.md`.
+   - Inputs: `.github/workflows/sbom.yml`, `apps/export/sbom.py`, package lockfiles, package release manifest, Docker/static/backend build outputs, SLSA/CycloneDX/SPDX/in-toto/GitHub attestation outputs.
+   - It must define required SBOM format per target. Node/dependency surfaces can use CycloneDX and SPDX; installable binaries/images/extensions must have target-specific SBOM subject references and hashes.
+   - It must require that SBOM artifacts are release artifacts, not loose workflow uploads. They need release ID, subject digest, generator identity, validation result, retention, and link from the production evidence packet.
+   - It must require provenance attestations for packages, images, browser extension zips, release archives, and generated SDK bundles.
+   - It must verify provenance, not only emit it. The final redline should include a command or report that validates each attestation against the expected repository, commit, workflow, and subject digest.
+
+4. Build `docs/internal/ci-required-checks-policy.json` and `.md`.
+   - Inputs: GitHub workflows, branch protection expectations, release scripts, package release readiness, security release contract, and active lane registry.
+   - It must say which checks are required before merge, before release candidate, before production deploy, and after production deploy.
+   - Required checks should include current control files plus the new data-plane, env/secrets, retention, tenant boundary, release boundary, API contracts, OpenAPI policy, SDK parity, docs IA, feature matrix, account matrix, page-family/nav/component contracts, generated artifacts, observability, security release, package release, SBOM/provenance, local surfaces, production surfaces, UI screenshots, and final redline.
+   - It must define flake policy, retry policy, timeout policy, artifact retention, owner escalation, and what can be skipped with a signed exception.
+
+5. Extend `scripts/release-verify.cjs` only after the contracts exist.
+   - It should consume the generated control files rather than hardcoding seven legacy control files.
+   - It should write `reports/build-redline/local-release-verify.json` with gate details, versions, command output pointers, and no secrets.
+   - It should have a separate production mode that consumes `reports/deployments/<release-id>/production-evidence.json`, not a local-mode flag that pretends production was proved.
+
+External baselines imported into this redline:
+
+- GitHub Artifact Attestations can establish build provenance for binaries and container images in GitHub Actions: https://docs.github.com/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds
+- npm provenance documents provenance attestations for packages published from supported CI systems: https://docs.npmjs.com/generating-provenance-statements
+- CycloneDX is a machine-readable BOM standard and supports SBOM and related BOM types: https://cyclonedx.org/specification/overview
+- SLSA v1.1 defines provenance levels and recommended attestation formats for software supply-chain integrity: https://slsa.dev/spec/
+- OpenSSF Scorecard exists to automatically assess open-source project security posture and should be tracked as an external hygiene signal, not a substitute for Kolm's own release evidence: https://openssf.org/scorecard/
+
+Implementation owner notes:
+
+- Do not replace working local gates. Wrap them in a release evidence model that captures subjects, outputs, hashes, attestations, and production proof.
+- The first build agent should implement the new contracts in read-only/warn mode, then fail on only three things first: missing release subjects, placeholder hashes, and secret leakage in release artifacts.
+- The second build agent should update CI to run the contract verifiers and emit artifacts, then only after that tighten branch/release requirements.

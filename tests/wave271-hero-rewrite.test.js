@@ -289,19 +289,11 @@ test('W271 #25 - sw.js CACHE slug bumped to wave-floor >= 271', () => {
 // (we explicitly do not rewrite the full page).
 // =====================================================================
 
-test('W271 #26 - existing demo-anchor section still ships below the hero', () => {
-  assert.match(INDEX, /<section class="demo-anchor"/,
-    'demo-anchor section below the hero must remain');
-});
-
-test('W271 #27 - existing v0.2 section preserved', () => {
-  assert.match(INDEX, /What (ships in )?v0\.2 (today\.|includes\.)/i,
-    'v0.2 heading must remain (W260 #5 anchor lives here)');
-});
-
-test('W271 #28 - existing 4-verb v0.2 grid (moe compose / tokenize / extract / doc check) preserved', () => {
-  assert.match(INDEX, /kolm moe compose/, 'v0.2 strip names moe compose');
-  assert.match(INDEX, /kolm tokenize/, 'v0.2 strip names tokenize');
-  assert.match(INDEX, /kolm extract/, 'v0.2 strip names extract');
-  assert.match(INDEX, /kolm doc check/, 'v0.2 strip names doc check');
-});
+// W864 (2026-05-25): user audit removed the offscreen demo-anchor stub,
+// the v0.2 release-verb scaffolding ("kolm moe compose / tokenize / extract /
+// doc check"), and the W220 floor-recovery payload from public/index.html.
+// They had been rendering as internal scaffolding text in page source.
+// Tests #26-#28 protected that scaffolding; with the scaffolding deleted,
+// these contracts are intentionally retired. The verbs they named still
+// exist in the CLI and are documented at /docs/cli (audit-trailed there,
+// not in homepage source).

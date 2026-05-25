@@ -33,10 +33,10 @@ The line is simple:
 | `docs/research/kolm-p0-control-files-implementation-spec-2026-05-25.md` | internal implementation spec | yes | Defines the P0 control files, schemas, scripts, and gates to build. | User docs or marketing claims. | Convert into scripts, JSON schemas, generated docs, and verifiers; archive after implementation. |
 | `docs/research/kolm-p0-control-files-buildbook-2026-05-25.md` | internal buildbook | yes | Practical build order and reuse map for existing scripts. | Public engineering blog, docs, or launch material. | Use as an implementation runbook; archive once all control files exist. |
 | `docs/research/kolm-codebase-file-ledger-seed-2026-05-25.md` | internal seed | yes, temporarily | Current file census and rules for `docs/codebase-file-ledger.json`. | Permanent spec or public docs. | Replace with generated `docs/codebase-file-ledger.json` and `docs/codebase-file-ledger.md`. |
-| `docs/research/kolm-product-feature-completion-matrix-seed-2026-05-25.md` | internal seed | yes, temporarily | Current feature/journey completion criteria across UI, API, CLI, TUI, docs, tests, and production proof. | Customer-facing product matrix. | Replace with generated `docs/product-feature-completion-matrix.json` and `.md`. |
+| `docs/research/kolm-product-feature-completion-matrix-seed-2026-05-25.md` | internal seed | yes, temporarily | Current feature/journey completion criteria across UI, API, CLI, TUI, docs, tests, and production proof. | Customer-facing product matrix. | Replace with generated `docs/internal/product-feature-completion-matrix.json` and `.md`. |
 | `docs/research/kolm-design-cascade-ledger-seed-2026-05-25.md` | internal seed | yes, temporarily | Current UI/CSS/nav/component cascade evidence and rules. | Design system website or external brand guide. | Replace with generated `docs/design-cascade-ledger.json` and exceptions ledger. |
 | `docs/research/kolm-product-media-proof-seed-2026-05-25.md` | internal seed | yes, temporarily | Current image/video/demo/social/screenshot evidence and rules for real product proof media. | Public media kit or brand campaign. | Replace with generated `docs/product-media-proof.json` and `.md`. |
-| `docs/research/kolm-account-product-matrix-seed-2026-05-25.md` | internal seed | yes, temporarily | Current post-auth account page inventory, journey ownership gaps, state requirements, and auth-smoke proof rules. | Customer-facing account documentation. | Replace with generated `docs/account-product-matrix.json` and `.md`. |
+| `docs/research/kolm-account-product-matrix-seed-2026-05-25.md` | internal seed | yes, temporarily | Current post-auth account page inventory, journey ownership gaps, state requirements, and auth-smoke proof rules. | Customer-facing account documentation. | Replace with generated `docs/internal/account-product-matrix.json` and `.md`. |
 | `docs/research/kolm-100-percent-finished-code-redline-2026-05-25.md` | internal code redline | yes | Primary implementation-only redline for finishing the codebase, cleaning the tree, integrating control files, and closing product behavior gaps. | Test plan, public roadmap, or research archive. | Keep active until `reports/build-redline/final-build-redline.json` is generated and green. |
 | `docs/research/kolm-internal-spec-index-2026-05-25.md` | internal index | yes | Explains which research docs are internal, external, useful, temporary, or archive-only. | Public docs. | Keep until repo has a stable internal docs index. |
 
@@ -46,14 +46,29 @@ These internal specs should produce generated files and verifiers:
 
 | internal spec | target artifact | target verifier |
 |---|---|---|
-| P0 control file spec/buildbook | `docs/wave-registry.json` | `verify:wave-registry` |
-| P0 control file spec/buildbook | `docs/active-lanes.json` | `verify:active-lanes` |
-| P0 control file spec/buildbook + codebase seed | `docs/codebase-file-ledger.json` | `verify:file-ledger` |
-| P0 control file spec/buildbook + feature matrix seed | `docs/product-feature-completion-matrix.json` | `verify:feature-matrix` |
-| P0 control file spec/buildbook + design cascade seed | `docs/design-cascade-ledger.json` | `verify:design-cascade-ledger` |
-| P0 control file spec/buildbook + media proof seed | `docs/product-media-proof.json` | `verify:product-media-proof` |
-| account product matrix seed | `docs/account-product-matrix.json` | `verify:account-product-matrix` |
-| P0 control file spec/buildbook | `docs/catalog-manifest.json` | `verify:catalog-manifest` |
+| P0 control file spec/buildbook | `docs/internal/wave-registry.json` | `verify:wave-registry` |
+| P0 control file spec/buildbook | `docs/internal/active-lanes.json` | `verify:active-lanes` |
+| P0 control file spec/buildbook + codebase seed | `docs/internal/codebase-file-ledger.json` | `verify:file-ledger` |
+| P0 control file spec/buildbook + API redline | `docs/internal/api-contract-matrix.json` | `verify:api-contracts` |
+| P0 control file spec/buildbook + API redline | `docs/internal/openapi-dialect-policy.json` | `verify:openapi-policy` |
+| P0 control file spec/buildbook + data-plane redline | `docs/internal/data-plane-contract.json` | `verify:data-plane` |
+| P0 control file spec/buildbook + env/secret redline | `docs/internal/env-secret-contract.json` | `verify:env-secrets` |
+| P0 control file spec/buildbook + retention redline | `docs/internal/data-retention-backup-contract.json` | `verify:data-retention` |
+| P0 control file spec/buildbook + tenant-boundary redline | `docs/internal/tenant-data-boundary-contract.json` | `verify:tenant-boundary` |
+| P0 control file spec/buildbook + SDK redline | `docs/internal/sdk-api-parity.json` | `verify:sdk-parity` |
+| P0 control file spec/buildbook + docs redline | `docs/internal/docs-ia-contract.json` | `verify:docs-ia` |
+| P0 control file spec/buildbook + feature matrix seed | `docs/internal/product-feature-completion-matrix.json` | `verify:feature-matrix` |
+| account product matrix seed | `docs/internal/account-product-matrix.json` | `verify:account-matrix` |
+| P0 control file spec/buildbook + page-family redline | `docs/internal/page-family-contracts.json` | `verify:page-families` |
+| P0 control file spec/buildbook + page-family redline | `docs/internal/component-state-contracts.json` | `verify:page-families` |
+| P0 control file spec/buildbook + page-family redline | `docs/internal/nav-contract.json` | `verify:page-families` |
+| P0 control file spec/buildbook + design cascade seed | `docs/internal/design-cascade-ledger.json` | `verify:design-cascade-ledger` |
+| P0 control file spec/buildbook + media proof seed | `docs/internal/product-media-proof.json` | `verify:product-media-proof` |
+| P0 control file spec/buildbook | `docs/internal/catalog-manifest.json` | `verify:catalog-manifest` |
+| P0 control file spec/buildbook | `docs/internal/generated-artifact-manifest.json` | `verify:generated-artifacts` |
+| P0 control file spec/buildbook + production redline | `docs/internal/observability-contract.json` | `verify:observability-contract` |
+| P0 control file spec/buildbook + production redline | `docs/internal/security-release-contract.json` | `verify:security-release` |
+| P0 control file spec/buildbook + release-boundary redline | `docs/internal/release-boundary-manifest.json` | `verify:release-boundary` |
 | P0 control file spec/buildbook | `reports/deployments/<release-id>/production-evidence.json` | `verify:production-evidence` |
 | P0 control file spec/buildbook | `reports/build-redline/final-build-redline.json` | `verify:final-redline` |
 

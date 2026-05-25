@@ -123,11 +123,15 @@ test('W220 #9 - persona signal (W205 lock) still present in hero', () => {
   assert.ok(hit, 'hero must hit at least one PERSONA token (W205 lock)');
 });
 
-test('W220 #10 - index.html still above W205 byte floor (200 KB)', () => {
-  // W220 is a hero-focused edit; bulk cuts land in W224. The page must
-  // still clear the W205 floor so other locks stay green.
+test('W220 #10 - index.html ships substantive content (W864: byte floor relaxed)', () => {
+  // W864 (2026-05-25): user audit flagged the W220/W205 byte-floor recovery
+  // payload as internal scaffolding rendering publicly. Hidden div with
+  // raw spec text was deleted. New contract: page ships substantive content
+  // (>= 50 KB) but no padded recovery payload is required. The original
+  // 200 KB floor was a regression guard against a specific 2026-04 cut;
+  // post-W864 the homepage is intentionally tighter (~100 KB visible).
   const bytes = fs.statSync(path.join(ROOT, 'public/index.html')).size;
-  assert.ok(bytes >= 200 * 1024, `index.html ${bytes} B below 200 KB floor`);
+  assert.ok(bytes >= 50 * 1024, `index.html ${bytes} B below 50 KB minimum`);
 });
 
 test('W220 #11 - sw.js CACHE wave-floor >= 220', () => {
@@ -136,12 +140,16 @@ test('W220 #11 - sw.js CACHE wave-floor >= 220', () => {
   assert.ok(parseInt(m[1], 10) >= 220, 'CACHE wave >= 220 (got ' + m[1] + ')');
 });
 
-test('W220 #12 - "AI compiler" category claim is in first 3KB of body (SEO above-fold)', () => {
-  // The 3-sec value prop must be visible without scrolling: H1 + lede +
-  // CTA all within the first 3 KB of <body>.
+test('W220 #12 - "AI compiler" category claim is in above-the-fold body window (SEO)', () => {
+  // The 3-sec value prop must be visible without scrolling. W864 (2026-05-25)
+  // relaxed the window from 3 KB to 8 KB of <body> because the modern
+  // homepage carries a richer nav + theme-toggle bootstrap script ahead of
+  // the H1; the H1 itself now lands ~5 KB into body and the SEO chip a few
+  // hundred bytes later. The claim must still appear in the first viewport's
+  // worth of HTML, not buried below the fold.
   const bodyMatch = INDEX.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
   assert.ok(bodyMatch, 'body present');
-  const above = bodyMatch[1].slice(0, 3000);
+  const above = bodyMatch[1].slice(0, 8000);
   assert.match(above, /the AI compiler/i,
-    'AI compiler category claim must be in first 3 KB of body');
+    'AI compiler category claim must be in first 8 KB of body');
 });

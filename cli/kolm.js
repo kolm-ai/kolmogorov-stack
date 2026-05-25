@@ -22853,6 +22853,18 @@ async function cmdMenu(args) {
     }
     console.log('');
   }
+  // W860 — readline.question hangs forever on non-TTY stdin (CI, piped input,
+  // background process). Refuse early with an actionable hint instead of
+  // wedging the parent shell. The picker is intrinsically interactive.
+  if (!process.stdin.isTTY) {
+    console.error('  kolm menu requires an interactive terminal (TTY).');
+    console.error('  for non-interactive picks, invoke the verb directly:');
+    console.error('    kolm quickstart    # guided setup');
+    console.error('    kolm tui           # full dashboard');
+    console.error('    kolm whoami        # current tenant');
+    console.error('  or use `kolm help` for the full verb list.');
+    process.exit(EXIT.USAGE);
+  }
   const readline = await import('node:readline');
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   const raw = await new Promise(resolve => rl.question('  > ', resolve));
@@ -30935,7 +30947,7 @@ async function cmdImprove(args) {
   if (maybeHelp('improve', args)) return;
   const id = args.find(a => !a.startsWith('--'));
   if (!id) {
-    const e = new Error('usage: kolm improve <artifact-id> [--epsilon 0.01] [--dry-run]');
+    const e = new Error('usage: kolm improve <artifact-id> [--epsilon 0.01] [--dry-run] [--json]');
     e.exitCode = EXIT.BAD_ARGS;
     throw e;
   }
@@ -30945,6 +30957,7 @@ async function cmdImprove(args) {
   };
   const epsilon = Number(get('--epsilon')) || 0.01;
   const dryRun = args.includes('--dry-run');
+  const jsonMode = args.includes('--json');
 
   const base = process.env.KOLM_BASE_URL || 'https://kolm.ai';
   const token = process.env.KOLM_API_KEY || (function () {
@@ -30987,14 +31000,41 @@ async function cmdImprove(args) {
   console.log(`found ${candidates.length} high-uncertainty event(s) since last compile`);
 
   if (!candidates.length) {
-    console.log('nothing to improve. K-score gate already holding.');
+    // W860 — structured envelope so scripted callers (CI, account UI poller)
+    // can tell `nothing to improve` apart from an upstream error. Human path
+    // unchanged: a single line that says K-score already holds.
+    if (jsonMode) {
+      console.log(JSON.stringify({
+        ok: true,
+        artifact_id: id,
+        k_score: oldK,
+        candidates: 0,
+        action: 'noop',
+        reason: 'no_high_uncertainty_events',
+        message: 'K-score gate is holding. No fallback or low-confidence audit events since the last compile.',
+        next: { command: `kolm capture --tail`, hint: 'tail captures to surface uncertainty before re-running improve' },
+      }, null, 2));
+    } else {
+      console.log('nothing to improve. K-score gate already holding.');
+    }
     return;
   }
   if (dryRun) {
-    console.log('--dry-run: not recompiling. Examples that would be added:');
-    candidates.slice(0, 10).forEach((e, i) => {
-      console.log(`  ${i + 1}. ${JSON.stringify(e.payload).slice(0, 120)}`);
-    });
+    if (jsonMode) {
+      console.log(JSON.stringify({
+        ok: true,
+        artifact_id: id,
+        k_score: oldK,
+        candidates: candidates.length,
+        action: 'dry_run',
+        examples: candidates.slice(0, 10).map(e => ({ op: e.op, payload: e.payload })),
+      }, null, 2));
+    } else {
+      console.log('--dry-run: not recompiling. Examples that would be added:');
+      candidates.slice(0, 10).forEach((e, i) => {
+        console.log(`  ${i + 1}. ${JSON.stringify(e.payload).slice(0, 120)}`);
+      });
+    }
     return;
   }
 
@@ -31022,16 +31062,40 @@ async function cmdImprove(args) {
   });
   const newJob = await newRes.json();
   if (!newRes.ok || newJob.error) {
-    console.log(`recompile rejected: ${newJob.error || newRes.status}`);
-    console.log(`old artifact ${id} unchanged. K stayed at ${oldK.toFixed(3)}.`);
+    if (jsonMode) {
+      console.log(JSON.stringify({
+        ok: false,
+        artifact_id: id,
+        old_k_score: oldK,
+        action: 'recompile_rejected',
+        reason: newJob.error || `http_${newRes.status}`,
+        message: `recompile rejected. old artifact ${id} unchanged.`,
+      }, null, 2));
+    } else {
+      console.log(`recompile rejected: ${newJob.error || newRes.status}`);
+      console.log(`old artifact ${id} unchanged. K stayed at ${oldK.toFixed(3)}.`);
+    }
     return;
   }
   const newK = Number(newJob.k_score) || 0;
-  console.log(`new K: ${newK.toFixed(3)} (threshold ${(oldK + epsilon).toFixed(3)})`);
-  if (newK <= oldK + epsilon) {
-    console.log(`improvement below epsilon. old artifact ${id} kept.`);
+  const kept = newK <= oldK + epsilon;
+  if (jsonMode) {
+    console.log(JSON.stringify({
+      ok: true,
+      artifact_id: id,
+      old_k_score: oldK,
+      new_k_score: newK,
+      threshold: oldK + epsilon,
+      action: kept ? 'kept_old' : 'replaced',
+      new_artifact_id: kept ? null : (newJob.job_id || null),
+    }, null, 2));
   } else {
-    console.log(`new artifact ${newJob.job_id} replaces ${id} for K-score regression guard.`);
+    console.log(`new K: ${newK.toFixed(3)} (threshold ${(oldK + epsilon).toFixed(3)})`);
+    if (kept) {
+      console.log(`improvement below epsilon. old artifact ${id} kept.`);
+    } else {
+      console.log(`new artifact ${newJob.job_id} replaces ${id} for K-score regression guard.`);
+    }
   }
 }
 
@@ -31073,6 +31137,25 @@ async function cmdInstant(args) {
 
   const python = process.env.KOLM_PYTHON
     || (process.platform === 'win32' ? 'python' : 'python3');
+  // W860 — probe python availability before spawning the synth script. Without
+  // this, missing python on the PATH surfaces as an opaque ENOENT inside the
+  // shelled-out spawn and the user sees no actionable hint. Honest exit:
+  // MISSING_PREREQ (3) with a one-liner pointing at the env override.
+  {
+    const probe = spawnSync(python, ['-V'], { encoding: 'utf8' });
+    if (probe.error || probe.status !== 0) {
+      const e = new Error(
+        `python interpreter '${python}' not found on PATH.\n` +
+        `kolm instant shells out to the python trainer for teacher-driven synthesis.\n` +
+        `fixes:\n` +
+        `  • install Python 3.10+ from https://python.org\n` +
+        `  • or set KOLM_PYTHON=/path/to/python to point at an existing interpreter\n` +
+        `  • or use \`kolm distill\` for the cloud-only path (no python required)`
+      );
+      e.exitCode = EXIT.MISSING_PREREQ;
+      throw e;
+    }
+  }
   const script = `
 import json, sys
 cfg = json.loads(sys.stdin.read())

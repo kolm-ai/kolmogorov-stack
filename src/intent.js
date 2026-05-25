@@ -59,11 +59,17 @@ import path from 'node:path';
 export const VERB_DESCRIPTIONS = [
   { verb: 'compile', desc: 'Build a .kolm artifact from a spec or task description.',
     when: 'You want to ship a new behaviour. The output is a signed .kolm.',
-    phrasings: ['compile', 'build a kolm', 'make a kolm', 'build the artifact', 'compile the spec'],
+    phrasings: ['compile', 'build a kolm', 'make a kolm', 'build the artifact', 'compile the spec',
+      'compile this', 'compile my spec', 'compile a kolm', 'package as kolm',
+      'build me a model', 'turn this into a kolm', 'wrap as artifact', 'bundle to kolm',
+      'compile artifact', 'produce a kolm', 'emit a kolm', 'ship a kolm'],
     examples: ['kolm compile --spec phi-redactor.spec.json'] },
   { verb: 'run', desc: 'Execute a .kolm artifact against an input.',
     when: 'You have a .kolm and want to call it.',
-    phrasings: ['run', 'execute', 'invoke', 'call the artifact'],
+    phrasings: ['run', 'execute', 'invoke', 'call the artifact',
+      'try this artifact', 'use my kolm', 'fire off this kolm',
+      'run the kolm', 'execute the kolm', 'invoke the kolm',
+      'call my kolm', 'test the artifact', 'try the artifact'],
     examples: ['kolm run phi-redactor.kolm "Patient John Doe..."'] },
   { verb: 'eval', desc: 'Re-run the evals embedded in a .kolm and recompute K-score.',
     when: 'You want to know if an artifact still passes its tests.',
@@ -81,7 +87,11 @@ export const VERB_DESCRIPTIONS = [
       'show compliance', 'compliance proof', 'show auditors', 'reproducibility proof',
       'prove reproducible', 'prove provenance', 'show provenance', 'check provenance',
       'audit trail', 'show audit trail', 'cryptographic proof', 'signed receipt',
-      'verify integrity', 'integrity check'],
+      'verify integrity', 'integrity check',
+      'is this trustworthy', 'is this signed correctly', 'check this for me',
+      'show me the binder', 'generate compliance binder', 'make a binder',
+      'emit a binder', 'is the signature valid', 'verify the artifact',
+      'check artifact integrity', 'verify the receipt'],
     examples: ['kolm verify phi-redactor.kolm --binder report.html'] },
   { verb: 'inspect', desc: 'Print the manifest, recipes, signature, and K-score of a .kolm.',
     when: 'You want to look inside an artifact.',
@@ -89,7 +99,11 @@ export const VERB_DESCRIPTIONS = [
     examples: ['kolm inspect phi-redactor.kolm'] },
   { verb: 'list', desc: 'List every local .kolm artifact under ~/.kolm/artifacts/.',
     when: 'You want to see what you have shipped.',
-    phrasings: ['list', 'ls', 'show artifacts', 'list artifacts', 'what artifacts', 'all artifacts'],
+    phrasings: ['list', 'ls', 'show artifacts', 'list artifacts', 'what artifacts', 'all artifacts',
+      'show my artifacts', 'show me my kolms', 'show my kolms',
+      'whats on disk', 'what do i have', 'list everything i built',
+      'show local artifacts', 'list local artifacts', 'kolms on disk',
+      'what have i compiled', 'what have i built'],
     examples: ['kolm list'] },
   { verb: 'artifacts', desc: 'List/show/diff remote artifacts on the cloud.',
     when: 'You want to see what is published to your tenant cloud.',
@@ -107,7 +121,12 @@ export const VERB_DESCRIPTIONS = [
       'reduce my openai bill', 'reduce my anthropic bill', 'reduce my api bill',
       'lower my openai bill', 'shrink my openai bill', 'cut openai costs',
       'cut llm costs', 'reduce llm costs', 'save on openai', 'save money on openai',
-      'cheaper than openai', 'replace openai', 'stop paying openai'],
+      'cheaper than openai', 'replace openai', 'stop paying openai',
+      'capture from openai', 'capture from anthropic', 'capture my llm calls',
+      'route through kolm', 'proxy openai', 'proxy anthropic', 'proxy llm',
+      'start capturing', 'turn on capture', 'enable proxy', 'set up the proxy',
+      'set up capture', 'record my llm calls', 'log llm traffic',
+      'snoop on my llm calls', 'shadow my llm traffic'],
     examples: ['kolm capture --provider openai --as ks_proxy'] },
   { verb: 'distill', desc: 'Auto-distill captured (input, output) pairs into a local LoRA. Supports a multi-teacher council via --teachers a,b,c --weights auto|equal|domain.',
     when: 'You have hundreds of captures and want a specialist model. Use --teachers when you want per-token best-of across multiple frontier teachers.',
@@ -118,7 +137,13 @@ export const VERB_DESCRIPTIONS = [
       'distill from anthropic and openai', 'distill from openai and anthropic',
       'distill from claude and gpt', 'distill from gpt and claude',
       'rank teachers', 'pick the best teacher', 'best teacher per token',
-      'teacher weighting', 'weighted teachers', 'teacher reliability'],
+      'teacher weighting', 'weighted teachers', 'teacher reliability',
+      'specialise a model', 'specialize a model', 'create a specialist',
+      'kick off a distill', 'start a distill', 'start distilling', 'distill it',
+      'make me a small model', 'shrink my model with captures',
+      'train on what i captured', 'train on my captures', 'train on the captures',
+      'turn my captures into a model', 'fine-tune from captures', 'lora from captures',
+      'build a specialist', 'build me a specialist'],
     examples: [
       'kolm distill --from-captures --namespace support',
       'kolm distill --teachers claude-opus-4-7,gpt-4o,gemini-2.5-pro --weights auto --namespace support',
@@ -149,15 +174,22 @@ export const VERB_DESCRIPTIONS = [
     examples: ['kolm marketplace search redactor'] },
   { verb: 'login', desc: 'Save an API key to ~/.kolm/config.json.',
     when: 'You need to authenticate.',
-    phrasings: ['login', 'log in', 'sign in', 'auth', 'authenticate'],
+    phrasings: ['login', 'log in', 'sign in', 'auth', 'authenticate',
+      'connect my account', 'link my key', 'link my account', 'put in my key',
+      'paste my key', 'save my api key', 'set my api key', 'use my api key',
+      'connect kolm', 'i have a key'],
     examples: ['kolm login --key ks_...'] },
   { verb: 'signup', desc: 'Provision a tenant + API key from the CLI.',
     when: 'You do not have an account yet.',
-    phrasings: ['signup', 'sign up', 'create account', 'new account', 'register'],
+    phrasings: ['signup', 'sign up', 'create account', 'new account', 'register',
+      'make me an account', 'open an account', 'i need an account',
+      'i dont have an account', 'sign me up', 'create a tenant', 'provision a tenant'],
     examples: ['kolm signup --email you@example.com'] },
   { verb: 'whoami', desc: 'Echo current tenant + plan + base URL.',
     when: 'You want to know which account you are logged in as.',
-    phrasings: ['whoami', 'who am i', 'who is logged in', 'current account', 'current tenant', 'current user'],
+    phrasings: ['whoami', 'who am i', 'who is logged in', 'current account', 'current tenant', 'current user',
+      'am i logged in', 'check my login', 'show my account', 'my account',
+      'whose account', 'what tenant', 'what plan am i on', 'my plan'],
     examples: ['kolm whoami --json'] },
   { verb: 'status', desc: 'Local snapshot: CLI version, base, key fingerprint, jobs.',
     when: 'You want a quick local-side health summary.',
@@ -200,7 +232,10 @@ export const VERB_DESCRIPTIONS = [
     examples: ['kolm new phi-redactor --from redactor'] },
   { verb: 'build', desc: 'One-shot: new + seeds + compile + verify (fastest path).',
     when: 'You want one command to take you from idea to verified artifact.',
-    phrasings: ['build', 'fast build', 'one shot', 'one-shot build', 'do everything'],
+    phrasings: ['build', 'fast build', 'one shot', 'one-shot build', 'do everything',
+      'just build me one', 'do the whole thing', 'compile and verify',
+      'just ship it', 'all-in-one build', 'end to end build', 'end-to-end build',
+      'full build', 'whole pipeline build'],
     examples: ['kolm build phi-redactor'] },
   { verb: 'seeds', desc: 'Local-first training-data helpers (new / generate / list / bootstrap).',
     when: 'You need to author or synthesise training rows.',
@@ -216,7 +251,10 @@ export const VERB_DESCRIPTIONS = [
     examples: ['kolm anonymize rows.jsonl'] },
   { verb: 'doctor', desc: 'Sanity-check the env (config, cloud, docker, project).',
     when: 'Something is broken and you want a diagnostic.',
-    phrasings: ['doctor', 'diagnose', 'health check', 'sanity check', 'why is it broken'],
+    phrasings: ['doctor', 'diagnose', 'health check', 'sanity check', 'why is it broken',
+      'whats wrong', 'why is it not working', 'troubleshoot', 'fix my install',
+      'check my setup', 'is my install ok', 'are my deps installed',
+      'run diagnostics', 'self-check', 'self check'],
     examples: ['kolm doctor'] },
   { verb: 'loop', desc: 'Run the value-loop smoke (capture → distill → replay).',
     when: 'You want to know the end-to-end pipeline works.',
@@ -342,7 +380,10 @@ export const VERB_DESCRIPTIONS = [
     examples: ['kolm version'] },
   { verb: 'tui', desc: 'Interactive .kolm shell (multi-pane TUI).',
     when: 'You want a keyboard-driven UI for captures + artifacts.',
-    phrasings: ['tui', 'open tui', 'launch tui'],
+    phrasings: ['tui', 'open tui', 'launch tui',
+      'open the dashboard', 'show the tui', 'open the terminal ui',
+      'terminal dashboard', 'terminal ui', 'launch the dashboard',
+      'kolm dashboard', 'open kolm dashboard', 'interactive dashboard'],
     examples: ['kolm tui'] },
   { verb: 'repl', desc: 'Interactive kolm REPL (one verb per line).',
     when: 'You want to type many kolm verbs without re-spawning the CLI.',
@@ -350,7 +391,10 @@ export const VERB_DESCRIPTIONS = [
     examples: ['kolm repl'] },
   { verb: 'chat', desc: 'Interactive natural-language session (airgap-safe).',
     when: 'You want a chat-style assistant.',
-    phrasings: ['chat', 'open chat', 'start chat', 'talk to kolm'],
+    phrasings: ['chat', 'open chat', 'start chat', 'talk to kolm',
+      'lets chat', "let's chat", 'open a chat session', 'free chat',
+      'have a conversation', 'chat with kolm', 'chat mode',
+      'interactive chat', 'open chat window'],
     examples: ['kolm chat'] },
   { verb: 'ask', desc: 'Natural-language gateway to status / builds / install / compile.',
     when: 'One-shot natural-language question.',
@@ -366,11 +410,16 @@ export const VERB_DESCRIPTIONS = [
     examples: ['kolm do "show captures"'] },
   { verb: 'what', desc: 'Snapshot of the current kolm state (artifacts, captures, jobs).',
     when: 'You want a one-screen dashboard of where you are.',
-    phrasings: ['what', 'what is going on', 'snapshot', 'dashboard', 'overview', 'show me everything'],
+    phrasings: ['what', 'what is going on', 'snapshot', 'dashboard', 'overview', 'show me everything',
+      'where am i', 'whats happening', 'project status', 'current state',
+      'show snapshot', 'full snapshot', 'overall status'],
     examples: ['kolm what --json'] },
   { verb: 'next', desc: 'Recommend the highest-value next action given current state.',
     when: 'You are stuck and want a guided next step.',
-    phrasings: ['next', 'next step', 'what next', 'what should i do'],
+    phrasings: ['next', 'next step', 'what next', 'what should i do',
+      'whats my next move', 'guide me forward', 'what should i do next',
+      'recommend next step', 'whats the next action', 'pick my next move',
+      'i am stuck', 'im stuck', 'what do i do now'],
     examples: ['kolm next --json'] },
   { verb: 'explain', desc: 'Plain-English description of a .kolm artifact.',
     when: 'You want to understand what an artifact does and how it was trained.',
@@ -387,19 +436,30 @@ export const VERB_DESCRIPTIONS = [
     when: 'You want to see calls / spend / models / providers across all captures.',
     phrasings: ['lake', 'lake stats', 'telemetry', 'usage', 'spend', 'spending',
       'how much am i spending', 'how much have i spent', 'show spend', 'show usage',
-      'show telemetry', 'show calls', 'how many calls', 'top providers', 'top models'],
+      'show telemetry', 'show calls', 'how many calls', 'top providers', 'top models',
+      'show me my usage', 'how much have i used', 'show my llm spend',
+      'cost breakdown', 'cost report', 'my spend', 'my usage',
+      'tokens consumed', 'whats my cost', 'whats my spend',
+      'llm bill summary', 'billing summary'],
     examples: ['kolm lake stats', 'kolm lake tail --namespace support'] },
   { verb: 'opportunities', desc: 'Savings-opportunity engine: repeated prompts, error spikes, privacy leaks.',
     when: 'You want to know where money / quality / risk is going.',
     phrasings: ['opportunities', 'find opportunities', 'savings', 'find savings',
       'duplicate calls', 'duplicate prompts', 'repeated prompts', 'find duplicates',
       'find waste', 'where can i save', 'find leaks', 'privacy leaks', 'find regressions',
-      'show errors', 'error spikes', 'expensive calls'],
+      'show errors', 'error spikes', 'expensive calls',
+      'where am i wasting money', 'what should i optimize', 'what should i optimise',
+      'find inefficiencies', 'cost optimization', 'cost optimisation',
+      'highest spend prompts', 'biggest spend areas', 'where to cut costs'],
     examples: ['kolm opportunities --namespace support'] },
   { verb: 'dataset', desc: 'Dataset workbench: create / inspect / promote a curated train+holdout split.',
     when: 'You want to turn captures into a reviewable, splitable training dataset.',
     phrasings: ['dataset', 'datasets', 'create dataset', 'make dataset', 'new dataset',
-      'inspect dataset', 'show dataset', 'list datasets', 'promote to dataset'],
+      'inspect dataset', 'show dataset', 'list datasets', 'promote to dataset',
+      'curate my data', 'build training data', 'prepare a dataset',
+      'pick training rows', 'split into train holdout', 'split train and holdout',
+      'turn captures into dataset', 'make a training set', 'dataset workbench',
+      'show my datasets', 'list my datasets'],
     examples: ['kolm dataset create --namespace support', 'kolm dataset list'] },
   { verb: 'labels', desc: 'Label / review queue: approve, reject, or rewrite captured (input, output) pairs.',
     when: 'You want a human-in-the-loop review pass before promoting to a dataset.',
@@ -409,7 +469,11 @@ export const VERB_DESCRIPTIONS = [
   { verb: 'bakeoff', desc: 'Side-by-side bake-off: candidate models vs holdout, ranked by K-score + cost.',
     when: 'You want to pick the cheapest model that meets your quality bar.',
     phrasings: ['bakeoff', 'bake off', 'bake-off', 'compare models', 'pick a model',
-      'which model is best', 'rank models', 'cheapest model', 'eval candidates'],
+      'which model is best', 'rank models', 'cheapest model', 'eval candidates',
+      'compare candidates', 'whats the best model for me', 'shootout',
+      'model competition', 'head to head', 'head-to-head', 'side by side',
+      'side-by-side', 'pick the right model', 'which model wins',
+      'rank by k score', 'rank by k-score', 'rank by cost'],
     examples: ['kolm bakeoff --dataset ds_xxx', 'kolm bakeoff --namespace support'] },
 
   // W853 — surface W700-W834 shipped features in the NL classifier so the
@@ -638,6 +702,95 @@ const SUBCOMMAND_WORKFLOWS = {
     },
   },
 };
+
+// ---------------------------------------------------------------------------
+// W863 — PER-VERB CONFIDENCE FLOORS.
+//
+// Before W863 we had a single flat 0.55 floor that routed below-threshold
+// overlap matches to `ask`. That under-served two opposite cases:
+//
+//   - Destructive / paid verbs (compile, distill, publish, deploy, pull) need
+//     a HIGHER floor. A wrong dispatch here costs the user money or ships an
+//     artifact they did not intend.
+//
+//   - Read-only / conversational verbs (status, what, whoami, ask) can survive
+//     a lower floor because the worst outcome is "showed too much."
+//
+// VERB_CONFIDENCE_FLOORS is the calibration table. classifyIntent reads it
+// via verbFloor() at the overlap-rank gate. A verb not listed inherits the
+// default 0.55 (the W848 value, preserved as default).
+// ---------------------------------------------------------------------------
+
+const DEFAULT_VERB_FLOOR = 0.55;
+const VERB_CONFIDENCE_FLOORS = {
+  // Destructive or paid actions — require high confidence before dispatching.
+  compile: 0.70, distill: 0.70, publish: 0.70, pull: 0.70, deploy: 0.70,
+  cloud: 0.70, federated: 0.70, quantize: 0.65, export: 0.65, migrate: 0.65,
+  import: 0.65, 'cloud train': 0.70, fix: 0.65, build: 0.65, tune: 0.65,
+  'rotate keys': 0.80, redact: 0.65, anonymize: 0.65, pack: 0.65,
+  // Read-only / informational — safe to dispatch at lower confidence.
+  what: 0.45, whoami: 0.45, status: 0.45, health: 0.45, list: 0.45,
+  metrics: 0.45, version: 0.45, jobs: 0.45, sessions: 0.45, logs: 0.45,
+  lake: 0.50, opportunities: 0.50, hub: 0.50, lineage: 0.50,
+  // Conversational / fallback — even lower (still produces helpful output).
+  ask: 0.30, chat: 0.40, next: 0.45,
+};
+
+function verbFloor(verb) {
+  if (Object.prototype.hasOwnProperty.call(VERB_CONFIDENCE_FLOORS, verb)) {
+    return VERB_CONFIDENCE_FLOORS[verb];
+  }
+  return DEFAULT_VERB_FLOOR;
+}
+
+// ---------------------------------------------------------------------------
+// W863 — SESSION-SCOPED PRONOUN RESOLUTION.
+//
+// When the user issues a follow-up like "verify it", "run that one", or "use
+// the same namespace", we need to bind the pronoun to the most-recent named
+// referent. The caller passes context.last_artifact / context.last_namespace
+// / context.last_dataset (typically set by the REPL or chat-box after each
+// successful dispatch). resolvePronouns() rewrites the input string in place
+// so the rest of the pipeline sees the resolved form.
+//
+// The substitutions are intentionally narrow — we only match well-known
+// pronoun phrasings so we don't accidentally clobber a literal noun like
+// "the artifact called widget". The match must occupy a word boundary on
+// both sides, and we only rewrite once per pronoun class per call.
+//
+// This runs BEFORE normalize() so the rewritten text inherits the rest of
+// the pipeline (typo repair, keyword fast-path, etc.).
+// ---------------------------------------------------------------------------
+
+const PRONOUN_RULES = [
+  // Artifact pronouns
+  { kind: 'artifact', re: /\b(?:the\s+artifact|that\s+artifact|this\s+artifact|the\s+kolm|that\s+kolm|this\s+kolm|the\s+same\s+artifact|the\s+same\s+kolm|the\s+previous\s+artifact|the\s+previous\s+kolm|that\s+one|the\s+one\s+(?:i\s+just|you\s+just)\s+(?:built|compiled|made|distilled))\b/i },
+  // Namespace pronouns
+  { kind: 'namespace', re: /\b(?:the\s+namespace|that\s+namespace|this\s+namespace|the\s+same\s+namespace|the\s+previous\s+namespace|the\s+ns|same\s+ns)\b/i },
+  // Dataset pronouns
+  { kind: 'dataset', re: /\b(?:the\s+dataset|that\s+dataset|this\s+dataset|the\s+same\s+dataset|the\s+previous\s+dataset|the\s+ds)\b/i },
+];
+
+function resolvePronouns(text, context) {
+  if (!text || !context) return text;
+  let out = String(text);
+  const slot = {
+    artifact: context.last_artifact || null,
+    namespace: context.last_namespace || null,
+    dataset: context.last_dataset || null,
+  };
+  for (const rule of PRONOUN_RULES) {
+    const ref = slot[rule.kind];
+    if (!ref) continue;
+    // Only the FIRST match per rule is replaced — pronouns refer to a single
+    // referent; multiple "it" tokens would still bind the same noun, but our
+    // simple greedy rewrite is enough for the common one-pronoun case.
+    if (rule.re.test(out)) {
+      out = out.replace(rule.re, String(ref));
+    }
+  }
+  return out;
+}
 
 // ---------------------------------------------------------------------------
 // Normalisation. Lowercase, collapse whitespace, strip trailing punctuation,
@@ -1165,7 +1318,13 @@ const FOLLOWUP_AFFIRM_RE = new RegExp(
 );
 
 export async function classifyIntent(text, context = {}) {
-  const original = text == null ? '' : String(text);
+  // W863 — pronoun pre-pass. If the caller supplied last_artifact /
+  // last_namespace / last_dataset on context, rewrite "verify it" →
+  // "verify <artifact_path>" BEFORE we normalize or classify. The resolved
+  // string flows through the rest of the pipeline unchanged so the regex
+  // extractors (which already know how to parse a .kolm filename) just work.
+  const rawText = text == null ? '' : String(text);
+  const original = resolvePronouns(rawText, context);
   const normalized = normalize(original);
   const empty = !normalized;
 
@@ -1295,12 +1454,26 @@ export async function classifyIntent(text, context = {}) {
     return baseEnvelope({ verb: 'ask', args: [original], confidence: 0.2, source: 'fallback' });
   }
   const [top, ...rest] = ranked;
-  // W848: confidence floor. Overlap caps at 0.65; anything < 0.55 is a
-  // weak guess and should NOT be emitted as `$ kolm <verb>` (it produces
-  // confidently-wrong answers like `$ kolm airgap` for "rate kolm /10").
-  // Route low-confidence misses to the conversational `ask` path with
-  // the rankings preserved as alternatives the UI can offer.
-  if (top.confidence < 0.55) {
+  // W863: per-verb confidence floor. Destructive verbs (compile, distill,
+  // publish) require ≥0.70 before we dispatch them as a confident pick — a
+  // wrong call here costs the user money or ships an artifact they did not
+  // intend. Informational verbs (status, what, list) are happy at ≥0.45.
+  // Fall back to the W848 default 0.55 for anything not in the table.
+  //
+  // When BOTH the top and the next-best are below their respective floors,
+  // we drop to `ask` (the conversational path) with all rankings preserved
+  // as alternatives the UI can offer.
+  const floor = verbFloor(top.verb);
+  if (top.confidence < floor) {
+    // If we suppressed top because it was a destructive verb under a
+    // higher floor, but a cheaper informational alternative passes its
+    // own floor, prefer that — it's safer and more often what the user
+    // actually wanted ("show me X" matching loosely on a paid action).
+    const safer = rest.find(r => r.confidence >= verbFloor(r.verb));
+    if (safer) {
+      const newRest = ranked.filter(r => r.verb !== safer.verb);
+      return baseEnvelope(safer, newRest);
+    }
     return baseEnvelope({
       verb: 'ask', args: [original], confidence: top.confidence,
       source: 'low_confidence', matchedPhrase: null
