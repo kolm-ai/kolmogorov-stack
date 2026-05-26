@@ -509,7 +509,7 @@ li code {
  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace !important;
  font-size: 0.86em !important;
  background: rgba(255,255,255,0.04) !important;
- color: #e6e9ee !important;
+ color: var(--ink-1) !important;
  padding: 1px 5px !important;
  border-radius: 4px !important;
  letter-spacing: 0 !important;
@@ -538,7 +538,7 @@ h1 code,
  padding: 2px 8px !important;
  background: rgba(230, 233, 238,0.10) !important;
  border-radius: 6px !important;
- color: #e6e9ee !important;
+ color: var(--ink-1) !important;
  font-weight: 500 !important;
  vertical-align: 2px !important;
  word-break: keep-all !important;
@@ -954,7 +954,7 @@ footer.modern::before {
  color: #aab0b8;
  text-align: center;
 }
-.diag-fanout .node b { display:block; color:#e6e9ee; font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; font-size: 13px; margin-bottom: 4px; letter-spacing: 0; }
+.diag-fanout .node b { display:block; color: var(--ink-1); font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; font-size: 13px; margin-bottom: 4px; letter-spacing: 0; }
 .diag-fanout .node span,
 .diag-fanout .center span { display:block; font-size: 10.5px; color:#6a727c; }
 .diag-fanout .center {
@@ -962,10 +962,10 @@ footer.modern::before {
  border: 1px solid rgba(230, 233, 238,0.32);
  background: linear-gradient(180deg, rgba(230, 233, 238,0.10), rgba(230, 233, 238,0.02));
  padding: 18px 20px; border-radius: 10px;
- text-align: center; font-size: 12px; color:#e6e9ee;
+ text-align: center; font-size: 12px; color: var(--ink-1);
  margin-bottom: 8px;
 }
-.diag-fanout .center b { color:#e6e9ee; font-size: 14px; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; font-weight: 500; }
+.diag-fanout .center b { color: var(--ink-1); font-size: 14px; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; font-weight: 500; }
 @media (max-width: 720px) {
  .diag-fanout { grid-template-columns: repeat(2, 1fr); }
  .diag-fanout .center { grid-column: 1 / -1; }
@@ -982,8 +982,8 @@ footer.modern::before {
  color: #aab0b8;
  line-height: 1.95;
 }
-.diag-tree .root { color:#e6e9ee; font-weight: 500; }
-.diag-tree .seg { color:#e6e9ee; }
+.diag-tree .root { color: var(--ink-1); font-weight: 500; }
+.diag-tree .seg { color: var(--ink-1); }
 .diag-tree .desc { color:#6a727c; padding-left: 8px; }
 @media (max-width: 720px) {
  .diag-tree { font-size: 11px; padding: 16px 18px; line-height: 1.75; }
@@ -1007,10 +1007,10 @@ footer.modern::before {
  display: block; font-size: 9px; color:#6a727c;
  letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 3px;
 }
-.diag-pipeline .stage b { display:block; color:#e6e9ee; font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; font-weight: 500; margin-bottom: 2px; letter-spacing: 0; }
+.diag-pipeline .stage b { display:block; color: var(--ink-1); font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; font-weight: 500; margin-bottom: 2px; letter-spacing: 0; }
 .diag-pipeline .stage span:not(.n) { display:block; color:#6a727c; font-size: 9.5px; letter-spacing: 0.02em; }
-.diag-pipeline .stage.acc { border-color: rgba(230, 233, 238,0.32); background: rgba(230, 233, 238,0.05); color:#e6e9ee; }
-.diag-pipeline .stage.acc b { color:#e6e9ee; }
+.diag-pipeline .stage.acc { border-color: rgba(230, 233, 238,0.32); background: rgba(230, 233, 238,0.05); color: var(--ink-1); }
+.diag-pipeline .stage.acc b { color: var(--ink-1); }
 @media (max-width: 720px) {
  .diag-pipeline { grid-template-columns: repeat(2, 1fr); }
 }
@@ -1030,8 +1030,8 @@ footer.modern::before {
  padding: 11px 16px;
 }
 .diag-chain .ring .lbl { color:#6a727c; text-transform: uppercase; font-size: 9.5px; letter-spacing: 0.04em; }
-.diag-chain .ring .hash { color:#e6e9ee; font-size: 11px; }
-.diag-chain .ring .ok { color:#e6e9ee; font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; }
+.diag-chain .ring .hash { color: var(--ink-1); font-size: 11px; }
+.diag-chain .ring .ok { color: var(--ink-1); font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; }
 @media (max-width: 720px) {
  .diag-chain .ring { grid-template-columns: 80px 1fr auto; gap: 10px; padding: 9px 12px; }
  .diag-chain .ring .hash { font-size: 10px; }
@@ -1044,13 +1044,13 @@ footer.modern::before {
  gap: 18px;
 }
 .diag-gauge .formula {
- font-size: 14px; color:#e6e9ee; letter-spacing: 0;
+ font-size: 14px; color: var(--ink-1); letter-spacing: 0;
  background: rgba(0,0,0,0.30);
  border: 1px solid rgba(255,255,255,0.06);
  border-radius: 8px;
  padding: 12px 18px;
 }
-.diag-gauge .formula .var { color:#e6e9ee; }
+.diag-gauge .formula .var { color: var(--ink-1); }
 .diag-gauge .formula .w { color:#6a727c; }
 .diag-gauge .bar {
  width: 100%; height: 6px;
@@ -1068,8 +1068,8 @@ footer.modern::before {
  font-size: 10px; color:#6a727c; letter-spacing: 0.03em;
  flex-wrap: wrap; gap: 6px 12px;
 }
-.diag-gauge .legend b { color:#e6e9ee; font-family: ui-monospace, monospace; font-weight: 500; margin-right: 4px; }
-.diag-gauge .legend .ok { color:#e6e9ee; }
+.diag-gauge .legend b { color: var(--ink-1); font-family: ui-monospace, monospace; font-weight: 500; margin-right: 4px; }
+.diag-gauge .legend .ok { color: var(--ink-1); }
 
 /* Tier ladder (pricing) */
 .diag-ladder {
@@ -1088,12 +1088,12 @@ footer.modern::before {
 }
 .diag-ladder .step:nth-child(1) { padding-top: 24px; }
 .diag-ladder .step:nth-child(2) { padding-top: 32px; }
-.diag-ladder .step:nth-child(3) { padding-top: 42px; border-color: rgba(230, 233, 238,0.30); background: rgba(230, 233, 238,0.04); color:#e6e9ee; }
+.diag-ladder .step:nth-child(3) { padding-top: 42px; border-color: rgba(230, 233, 238,0.30); background: rgba(230, 233, 238,0.04); color: var(--ink-1); }
 .diag-ladder .step:nth-child(4) { padding-top: 50px; }
 .diag-ladder .step:nth-child(5) { padding-top: 58px; }
 .diag-ladder .step:nth-child(6) { padding-top: 68px; }
-.diag-ladder .step b { display:block; color:#e6e9ee; font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; font-weight: 500; margin-bottom:2px; }
-.diag-ladder .step span { display:block; color:#e6e9ee; font-size: 11px; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+.diag-ladder .step b { display:block; color: var(--ink-1); font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; font-weight: 500; margin-bottom:2px; }
+.diag-ladder .step span { display:block; color: var(--ink-1); font-size: 11px; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
 .diag-ladder .step .d { color:#6a727c; font-size: 9px; margin-top: 2px; letter-spacing: 0.02em; }
 @media (max-width: 720px) {
  .diag-ladder { grid-template-columns: repeat(3, 1fr); gap: 4px; }
@@ -1115,12 +1115,12 @@ footer.modern::before {
  color: #aab0b8;
 }
 .diag-device .tgt b {
- display: block; color:#e6e9ee; font-size: 13px;
+ display: block; color: var(--ink-1); font-size: 13px;
  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif;
  font-weight: 500; margin-bottom: 5px;
 }
 .diag-device .tgt .lat,
-.diag-device .tgt i { color:#e6e9ee; font-size: 11px; margin-top: 4px; display: block; font-style: normal; }
+.diag-device .tgt i { color: var(--ink-1); font-size: 11px; margin-top: 4px; display: block; font-style: normal; }
 .diag-device .tgt span { display: block; font-size: 10px; color:#6a727c; }
 @media (max-width: 720px) {
  .diag-device { grid-template-columns: repeat(2, 1fr); }
@@ -1142,14 +1142,14 @@ footer.modern::before {
 }
 .diag-spec .col .lbl { font-size: 10px; color:#6a727c; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px; }
 .diag-spec .col ul { margin: 0; padding: 0; list-style: none; font-size: 12px; color:#aab0b8; line-height: 1.8; }
-.diag-spec .col ul b { color:#e6e9ee; font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; }
+.diag-spec .col ul b { color: var(--ink-1); font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; }
 .diag-spec .card b {
- display: block; color:#e6e9ee; font-size: 11px;
+ display: block; color: var(--ink-1); font-size: 11px;
  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
  letter-spacing: 0.04em; margin-bottom: 6px;
 }
 .diag-spec .card span {
- display: block; color:#e6e9ee; font-size: 13px;
+ display: block; color: var(--ink-1); font-size: 13px;
  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif;
  font-weight: 500; line-height: 1.35; margin-bottom: 8px;
 }
@@ -1161,8 +1161,8 @@ footer.modern::before {
  border-color: rgba(230, 233, 238,0.32);
  background: rgba(230, 233, 238,0.05);
 }
-.diag-spec .card.acc b { color:#e6e9ee; }
-.diag-spec .card.acc span { color:#e6e9ee; }
+.diag-spec .card.acc b { color: var(--ink-1); }
+.diag-spec .card.acc span { color: var(--ink-1); }
 @media (max-width: 720px) {
  .diag-spec { grid-template-columns: 1fr 1fr; gap: 8px; }
  .diag-spec .card { padding: 11px 12px; }
@@ -1178,10 +1178,10 @@ footer.modern::before {
 .tag.good,
 .status-ok,
 .dot-ok {
- color: #e6e9ee !important;
+ color: var(--ink-1) !important;
 }
 .toc a:hover {
- color: #e6e9ee !important;
+ color: var(--ink-1) !important;
  border-color: rgba(230, 233, 238,0.32) !important;
 }
 .toc a:focus-visible {
@@ -1194,7 +1194,7 @@ footer.modern::before {
 .badge.signed,
 .badge-verified,
 .verified-pill {
- color: #e6e9ee !important;
+ color: var(--ink-1) !important;
  border-color: rgba(230, 233, 238,0.32) !important;
  background: rgba(230, 233, 238,0.06) !important;
 }
@@ -1413,7 +1413,7 @@ footer.modern::before {
  flex: 0 0 34px;
 }
 .theme-toggle:hover {
- color: #e6e9ee;
+ color: var(--ink-1);
  border-color: rgba(230, 233, 238,0.32);
 }
 .theme-toggle svg {
@@ -2234,7 +2234,7 @@ header.site-header .site-actions .theme-toggle {
  text-decoration: none !important;
  background: rgba(230, 233, 238, 0.10) !important;
  border: 1px solid rgba(230, 233, 238, 0.32) !important;
- color: #e6e9ee !important;
+ color: var(--ink-1) !important;
  transition: background 140ms, border-color 140ms !important;
 }
 .kolm-auth-pill:hover {
@@ -2835,7 +2835,7 @@ button.primary,
 .uc-card:hover h3,
 .ac-card:hover h3,
 .ca-step:hover h3 {
- color: #e6e9ee !important;
+ color: var(--ink-1) !important;
  transition: color 160ms;
 }
 [data-theme="light"] .card:hover h3,
@@ -2848,8 +2848,8 @@ button.primary,
 /* Active tab in switchable strips (uc-tab.is-on) - emerald
  * underline rule already existed but was too quiet. Boost. */
 .uc-strip .uc-tab.is-on {
- color: #e6e9ee !important;
- border-bottom-color: #e6e9ee !important;
+ color: var(--ink-1) !important;
+ border-bottom-color: var(--ink-1) !important;
 }
 [data-theme="light"] .uc-strip .uc-tab.is-on {
  color: #0a8862 !important;
@@ -3304,7 +3304,7 @@ section.vr-calc-only {
  font-weight: 500 !important;
  letter-spacing: 0 !important;
  line-height: 1 !important;
- color: #e6e9ee !important;
+ color: var(--ink-1) !important;
 }
 
 [data-theme="light"] .vr-calc-solo .vc-result-x {

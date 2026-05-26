@@ -403,7 +403,7 @@ p code, li code {
  transform: translate3d(0,0,0);
 }
 .proof-shell {
- color: #e6e9ee;
+ color: var(--ink-1);
  --ink: #e6e9ee;
  --ink-mute: #c2cabf;
  --ink-faint: #8f9a90;
@@ -743,7 +743,7 @@ p code, li code {
  background: linear-gradient(180deg, rgba(230, 233, 238,0.025), rgba(11,13,16,0.78));
  box-shadow: inset 0 0 0 1px rgba(230, 233, 238,0.04), 0 0 24px -8px rgba(230, 233, 238,0.10);
 }
-.artifact-card-mini .panel-label { color: #e6e9ee; }
+.artifact-card-mini .panel-label { color: var(--ink-1); }
 .panel-label,
 .map-column span {
  display: block;
@@ -2641,7 +2641,7 @@ textarea {
  classes here own the visual contract. */
 .tax-strip { max-width: 1180px; margin: 36px auto; padding: 22px 28px; border: 1px solid rgba(230, 233, 238,0.18); background: rgba(230, 233, 238,0.04); border-radius: 12px; display: flex; flex-direction: column; gap: 14px; }
 .tax-strip-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-.tax-strip-eyebrow { font-family: var(--mono); font-size: 11.5px; color: #e6e9ee; letter-spacing: 0.04em; text-transform: lowercase; padding: 3px 8px; border-radius: 4px; background: rgba(230, 233, 238,0.08); }
+.tax-strip-eyebrow { font-family: var(--mono); font-size: 11.5px; color: var(--ink-1); letter-spacing: 0.04em; text-transform: lowercase; padding: 3px 8px; border-radius: 4px; background: rgba(230, 233, 238,0.08); }
 .tax-strip-h { font-size: 16.5px; font-weight: 500; margin: 0; color: var(--ink, #e6e9ee); }
 .tax-chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .tax-chip { font-family: var(--mono); font-size: 12px; padding: 4px 9px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.10); }
@@ -2650,7 +2650,7 @@ textarea {
 .tax-chip.compiled { color: #86efac; border-color: rgba(34,197,94,0.30); background: rgba(34,197,94,0.06); }
 .tax-chip.distill { color: #cbd0d6; border-color: rgba(150, 158, 170,0.30); background: rgba(150, 158, 170,0.06); }
 .tax-strip-body { font-size: 14px; color: var(--ink-mute, #aab0b8); line-height: 1.55; margin: 0; }
-.tax-strip-body a { color: #e6e9ee; }
+.tax-strip-body a { color: var(--ink-1); }
 [data-theme=light] .tax-strip { background: rgba(10,136,98,0.06); border-color: rgba(10,136,98,0.22); }
 [data-theme=light] .tax-strip-eyebrow { color: #059669; background: rgba(10,136,98,0.10); }
 [data-theme=light] .tax-strip-body { color: #4b5158; }
