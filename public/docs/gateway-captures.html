@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<title>Gateway captures — the hash-chain training lake &middot; kolm.ai</title>
+<meta name="description" content="Every gateway call writes a capture row to the configured lake (JSONL / SQLite / Postgres / S3) with a hash-chain prev_chain_hash so tampering is detectable. Captures feed the distill flywheel.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Gateway captures — the hash-chain training lake &middot; kolm.ai">
+<meta property="og:description" content="Every gateway call writes a capture row to the configured lake (JSONL / SQLite / Postgres / S3) with a hash-chain prev_chain_hash so tampering is detectable. Captures feed the distill flywheel.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/docs/gateway-captures">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Gateway captures — the hash-chain training lake &middot; kolm.ai">
+<meta name="twitter:description" content="Every gateway call writes a capture row to the configured lake (JSONL / SQLite / Postgres / S3) with a hash-chain prev_chain_hash so tampering is detectable. Captures feed the distill flywheel.">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="canonical" href="https://kolm.ai/docs/gateway-captures">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Gateway captures — the hash-chain training lake","description":"Every gateway call writes a capture row to the configured lake (JSONL / SQLite / Postgres / S3) with a hash-chain prev_chain_hash so tampering is detectable. Captures feed the distill flywheel.","url":"https://kolm.ai/docs/gateway-captures","datePublished":"2026-05-26","dateModified":"2026-05-26","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<link rel="stylesheet" href="/design-tokens.css">
+<style>
+:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230,233,238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#111111;--accent-soft:rgba(17,17,17,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.skip-link{position:absolute;left:-9999px}
+.skip-link:focus{position:static;background:var(--accent);color:#fff;padding:8px 14px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 36px}
+h2{font-size:24px;font-weight:500;letter-spacing:-0.018em;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:28px 0 8px;max-width:780px}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px}
+pre code{background:none;border:none;padding:0;color:inherit;font:inherit}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
+li{margin:4px 0}
+table{border-collapse:collapse;width:100%;max-width:920px;margin:14px 0;font-size:13.5px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink);font-weight:500}
+td code{font-size:12px}
+.related{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+@media(max-width:820px){.related{grid-template-columns:1fr}}
+.related a{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:4px}
+.related a:hover{border-color:var(--accent-soft)}
+.related b{font-size:14px;color:var(--ink);font-weight:500}
+.related span{font-size:12.5px;color:var(--ink-mute);line-height:1.5}
+.privacy-note{border-left:3px solid var(--accent);background:var(--accent-soft);padding:14px 18px;margin:18px 0;border-radius:0 8px 8px 0;max-width:780px}
+.privacy-note strong{color:var(--ink)}
+</style>
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/docs-shell.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<script defer src="/docs-shell.js"></script>
+</head>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / gateway-captures</div>
+<p class="eyebrow">Wrapper / Gateway</p>
+<h1>Every call captured. Every chain provable.</h1>
+<p class="lede">The capture lake is where every <code>capture_eligible:true</code> trace lands. Each row carries a <code>prev_chain_hash</code> (HMAC over sorted-key JSON) so a tampered row breaks the chain at exactly the point it was edited. Four backends ship by default. The lake feeds the distill flywheel: approve a slice, train a local artifact, route to it via the namespace chain, mark the falls-back-to-frontier rows as fresh captures, repeat.</p>
+
+<h2 id="four-backends">Four backends</h2>
+<table>
+  <thead><tr><th>Backend</th><th>Env</th><th>When</th></tr></thead>
+  <tbody>
+    <tr><td><code>jsonl</code></td><td><code>KOLM_CAPTURE_LAKE=jsonl</code> (default)</td><td>Dev, single-node, single-process. Append-only file at <code>~/.kolm/captures/&lt;ns&gt;.jsonl</code>.</td></tr>
+    <tr><td><code>sqlite</code></td><td><code>KOLM_CAPTURE_LAKE=sqlite</code></td><td>Single-node but many readers. WAL mode, hash-indexed.</td></tr>
+    <tr><td><code>postgres</code></td><td><code>KOLM_CAPTURE_LAKE=postgres KOLM_CAPTURE_PG_URL=postgres://...</code></td><td>Multi-node. Schema bundled in <code>migrations/</code>.</td></tr>
+    <tr><td><code>s3</code></td><td><code>KOLM_CAPTURE_LAKE=s3 KOLM_CAPTURE_S3_BUCKET=... KOLM_CAPTURE_S3_PREFIX=captures/</code></td><td>Audit / cold storage. One JSONL per hour, partitioned by namespace.</td></tr>
+  </tbody>
+</table>
+
+<h2 id="capture-row-shape">Capture row shape</h2>
+<pre><code>{
+  "id": "cap_01KYC1...",
+  "ts": "2026-05-26T00:53:44.327Z",
+  "namespace_id": "support",
+  "receipt_id": "rcpt_01KYC1...",
+  "input_text": "...",                  // redacted per PII mode
+  "output_text": "...",                 // redacted per PII mode
+  "input_hash": "sha256:...",
+  "output_hash": "sha256:...",
+  "provider": "anthropic",
+  "model": "claude-haiku-4-5",
+  "input_tokens": 14, "output_tokens": 38,
+  "cost_usd": 0.000204,
+  "labels": [],                         // human approve / curate later
+  "prev_chain_hash": "hmac-sha256:...", // chain integrity
+  "chain_signing_key_id": "abc...",
+  "status": "pending"                   // pending | approved | rejected | seed
+}</code></pre>
+
+<h2 id="cli-surface">CLI surface</h2>
+<pre><code>kolm captures list --namespace support --limit 20      # newest first
+kolm captures list --status pending --json
+kolm captures get cap_01KYC1...
+kolm captures approve cap_01KYC1...                    # mark for training
+kolm captures approve --bulk-from approved.jsonl       # bulk import
+kolm captures seed sample.jsonl --namespace support    # seed without going through the gateway
+kolm captures redact cap_01KYC1... --mode redact_captures   # one-off PII scrub of a row</code></pre>
+
+<h2 id="hash-chain-integrity">Hash-chain integrity</h2>
+<p>Every row's <code>prev_chain_hash</code> is <code>HMAC-SHA256(sorted-key JSON of previous row, signing_key)</code>. To prove a slice is untampered:</p>
+<pre><code>kolm captures verify-chain --namespace support
+# walks the chain from the first row; reports the first index where prev_chain_hash mismatches</code></pre>
+<p>The HMAC key (<code>KOLM_RECEIPT_SIGNING_KEY</code>) is rotated independently of the Ed25519 receipt key. Both can rotate without breaking historical verification.</p>
+
+<div class="related">
+  <a href="/docs/gateway-pii"><b>PII redactor &rarr;</b><span>4 modes; redact_captures scrubs the lake body.</span></a>
+  <a href="/docs/gateway-receipts"><b>Receipts &rarr;</b><span>The Ed25519 envelope that points into the lake.</span></a>
+  <a href="/distill"><b>Distill &rarr;</b><span>Turn approved captures into a local artifact.</span></a>
+</div>
+
+</div></main>
+
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/gateway">Gateway</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/docs/gateway">Gateway docs</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
