@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Wrapper quickstart · Wrapper docs · kolm.ai</title>
+<meta name="description" content="Install the kolm CLI, point your OpenAI SDK at the wrap endpoint, and capture your first signed call in 60 seconds.">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://kolm.ai/docs/gateway/quickstart">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<script src="/nav.js" defer></script>
+<style>
+  .wd-hero { padding-top: clamp(72px, 9vw, 128px); padding-bottom: clamp(40px, 6vw, 72px); border-bottom: 1px solid var(--line-1); }
+  .wd-hero h1 { font-size: clamp(34px, 4.6vw, 52px); font-weight: 580; letter-spacing: -0.02em; margin: 14px 0 18px; max-width: 22ch; }
+  .wd-body { padding: 48px 0 96px; }
+  .wd-body h2 { font-size: 22px; font-weight: 540; margin: 40px 0 12px; letter-spacing: -0.01em; color: var(--ink-1); }
+  .wd-body h3 { font-size: 16px; font-weight: 580; margin: 24px 0 8px; letter-spacing: -0.005em; color: var(--ink-1); }
+  .wd-body p, .wd-body li { font-size: 15px; line-height: 1.7; color: var(--ink-2); max-width: 76ch; }
+  .wd-body ul, .wd-body ol { padding-left: 22px; }
+  .wd-body li { margin: 4px 0; }
+  pre { background: #06080a; border: 1px solid var(--line-1); border-radius: 8px; padding: 16px 18px; overflow-x: auto; font: 12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; color: #e9eef3; max-width: 820px; margin: 12px 0 18px; }
+  code { font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size: 13px; background: rgba(127,140,158,0.10); padding: 1px 6px; border-radius: 4px; color: var(--ink-1); }
+  table { border-collapse: collapse; width: 100%; max-width: 820px; margin: 14px 0 20px; font-size: 13.5px; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line-1); vertical-align: top; color: var(--ink-2); }
+  th { color: var(--ink-1); font-weight: 540; font-size: 12.5px; }
+  .wd-caveat { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-size: 13.5px; color: var(--ink-2); line-height: 1.6; margin: 20px 0; max-width: 76ch; }
+  .wd-caveat b { color: var(--ink-1); font-weight: 580; }
+  .wd-cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0 10px; }
+  .wd-cta { display: inline-block; padding: 9px 16px; border: 1px solid var(--line-1); border-radius: 6px; color: var(--ink-1); text-decoration: none; font-size: 14px; font-weight: 500; }
+  .wd-cta.primary { background: var(--ink-1); color: var(--surface-0); border-color: var(--ink-1); }
+  .wd-cta:hover { border-color: var(--ink-1); }
+  .wd-crumbs { font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size: 12px; color: var(--ink-3); margin-bottom: 6px; }
+  .wd-crumbs a { color: var(--ink-3); text-decoration: none; }
+  .wd-crumbs a:hover { color: var(--ink-1); }
+</style>
+</head>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">-&gt;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main">
+
+<section class="wd-hero">
+  <div class="ks-wrap">
+    <p class="wd-crumbs"><a href="/docs">docs</a> / <a href="/docs/gateway/overview">gateway</a> / quickstart</p>
+    <p class="brand-eyebrow">Wrapper quickstart</p>
+    <h1>From zero to a signed capture in 60 seconds.</h1>
+    <p class="lede">Install the CLI, set one environment variable, fire a normal OpenAI call. The response is identical; a signed receipt lands in your capture lake.</p>
+  </div>
+</section>
+
+<section class="wd-body">
+  <div class="ks-wrap">
+    <h2>1. Install</h2>
+    <p>The CLI ships as a Python package and a Node package. Either is fine; both speak the same config file.</p>
+    <pre># Python
+pip install kolm
+
+# Node
+npm install -g @kolm/cli
+
+# Verify
+kolm --version
+kolm whoami   # prints "logged_in: false" until you sign up</pre>
+    <h2>2. Sign up for a free API key</h2>
+    <p>The free tier includes 50,000 captures per month, all 11 providers, signed receipts, and one namespace. No card required.</p>
+    <pre>kolm signup --email you@example.com
+# or visit https://kolm.ai/signup
+
+# Save the returned key
+export KOLM_API_KEY=ks_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</pre>
+    <h2>3. Point your SDK at the wrap endpoint</h2>
+    <p>The wrap endpoint is a drop-in replacement for the provider native URL. The path after <code>/v1/wrap/&lt;provider&gt;</code> is forwarded unchanged. Your <code>OPENAI_API_KEY</code> stays untouched &mdash; it travels through to OpenAI in the <code>Authorization</code> header. The <code>KOLM_API_KEY</code> authenticates you to the gateway via the <code>X-Kolm-Key</code> header.</p>
+    <pre># OpenAI
+export OPENAI_BASE_URL=https://kolm.ai/v1/wrap/openai
+export OPENAI_API_KEY=sk-...           # your existing OpenAI key
+
+# Anthropic
+export ANTHROPIC_BASE_URL=https://kolm.ai/v1/wrap/anthropic
+export ANTHROPIC_API_KEY=sk-ant-...
+
+# Header for kolm itself
+export KOLM_API_KEY=ks_...</pre>
+    <h2>4. Fire a request</h2>
+    <p>Use whatever SDK you already have. The wrap endpoint accepts the provider native request shape and returns the provider native response shape. The signed receipt is attached as response header <code>X-Kolm-Receipt-CID</code> and stored in your capture lake.</p>
+    <pre>curl -s https://kolm.ai/v1/wrap/openai/chat/completions \
+  -H "Authorization: Bearer $OPENAI_API_KEY" \
+  -H "X-Kolm-Key: $KOLM_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o-mini",
+    "messages": [{"role":"user","content":"Say hi."}]
+  }' | jq .
+
+# In the response headers you will see:
+#   X-Kolm-Receipt-CID: bafy2bzace...
+#   X-Kolm-Route-Decision: pinned
+#   X-Kolm-Cost-USD: 0.000041</pre>
+    <h2>5. Verify the capture</h2>
+    <p>List recent captures, fetch the receipt, replay the signature.</p>
+    <pre>kolm captures list --limit 5
+kolm captures get &lt;receipt_cid&gt;
+kolm verify &lt;receipt_cid&gt;   # recomputes Ed25519 signature, prints OK / FAIL</pre>
+    <h2>What you have now</h2>
+    <ul>
+      <li>Every OpenAI / Anthropic / Gemini / DeepSeek call is captured with a signed <code>kolm-audit-1</code> receipt.</li>
+      <li>You can attribute cost per namespace, per model, per route decision.</li>
+      <li>You can replay any capture into a different provider for A/B testing (<code>kolm bakeoff</code>).</li>
+      <li>You can compile a local <code>.kolm</code> specialist from those captures once you have a few hundred (<code>kolm distill</code>).</li>
+    </ul>
+    <div class="wd-caveat"><b>Caveats.</b> Free-tier captures are stored on kolm.ai infrastructure. If your captures contain regulated data, switch to PII redaction mode <code>redact_captures</code> (see <a href="/docs/gateway/configuration">configuration</a>) or self-host the gateway. Keys ship in plaintext to upstream providers exactly as they do in your current setup &mdash; the gateway never logs them.</div>
+    <p class="muted" style="margin-top:48px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;color:var(--ink-3)">See also: <a href="/docs/gateway/overview">Overview</a> &middot; <a href="/docs/gateway/configuration">Configuration</a> &middot; <a href="/docs/gateway/providers">Providers</a> &middot; <a href="/docs/gateway/troubleshooting">Troubleshooting</a></p>
+  </div>
+</section>
+
+</main>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <p>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm &middot; <a href="mailto:rodneyyesep@gmail.com">rodneyyesep@gmail.com</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

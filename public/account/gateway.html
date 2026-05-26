@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
+<title>Gateway - Account - kolm.ai</title>
+<meta name="description" content="Gateway dashboard for the kolm Wrapper surface. Total calls, % local artifact vs frontier, cost saved, mean confidence, routing breakdown, recent calls, and active namespaces.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://kolm.ai/account/gateway">
+<meta property="og:title" content="Gateway &middot; Account &middot; kolm.ai">
+<meta property="og:description" content="One URL, signed response, captured row, and a record of which provider answered.">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/account/gateway">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Gateway - Account - kolm.ai","description":"Gateway dashboard for the kolm Wrapper surface.","url":"https://kolm.ai/account/gateway","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"Gateway","item":"https://kolm.ai/account/gateway"}]}}</script>
+<style>
+.acct-shell{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:flex-start;max-width:1280px;margin:0 auto;padding:24px}
+#account-sidebar{position:sticky;top:24px;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13px}
+#account-sidebar h2{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin:0 0 10px}
+#account-sidebar ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+#account-sidebar a{display:block;padding:6px 10px;border-radius:4px;color:var(--ink-mute);text-decoration:none;font-family:var(--mono);font-size:12.5px}
+#account-sidebar a:hover{background:var(--bg-elev);color:var(--ink)}
+#account-sidebar a[aria-current=page]{background:var(--bg-elev);color:var(--accent);border-left:2px solid var(--accent);padding-left:8px}
+#account-sidebar a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.acct-content h1{margin:0 0 4px;font-size:28px;letter-spacing:0}
+.acct-content h2{font-size:16px;margin:22px 0 10px}
+.acct-content h3{font-size:14px;margin:16px 0 8px}
+.acct-content .lede{color:var(--ink-mute);font-size:14.5px;margin:0 0 8px;max-width:64ch}
+.acct-content .eyebrow{font-family:var(--mono);text-transform:uppercase;letter-spacing:0.08em;font-size:11px;color:var(--ink-faint);margin:0 0 6px}
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--ink,#e6e9ee);color:var(--bg,#08090c);padding:8px 12px;font-family:var(--mono);font-size:12px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
+.skip-link:focus{left:0}
+.metric-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:16px 0 20px}
+.metric-card{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px}
+.metric-card .label{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin-bottom:6px}
+.metric-card .value{font-size:22px;font-weight:600;font-family:var(--mono);color:var(--ink)}
+.metric-card .delta{font-size:11.5px;color:var(--ink-mute);margin-top:4px}
+.kpanel{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:16px}
+.kpanel h2{margin:0 0 12px;font-size:15px}
+.kpanel .pdesc{color:var(--ink-mute);font-size:13px;margin:0 0 12px}
+.ktable{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
+.ktable th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);color:var(--ink-faint);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;font-size:10.5px}
+.ktable td{padding:8px 8px;border-bottom:1px solid var(--line-soft,rgba(255,255,255,0.04));color:var(--ink)}
+.ktable tr:hover td{background:var(--bg-elev)}
+.ktable a{color:var(--accent);text-decoration:none}
+.ktable a:hover{text-decoration:underline}
+.ktable a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor}
+.pill.ok{color:var(--good)}.pill.warn{color:var(--warn)}.pill.bad{color:var(--bad)}.pill.mute{color:var(--ink-faint)}
+.pill.prov-local{color:var(--good)}
+.pill.prov-frontier{color:var(--warn)}
+.empty{background:var(--bg-card);border:1px dashed var(--line);border-radius:8px;padding:18px;color:var(--ink-mute);font-size:13.5px;line-height:1.6}
+.empty code{background:var(--bg-elev);padding:2px 6px;border-radius:3px;font-size:12.5px;color:var(--accent)}
+.empty pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-family:var(--mono);font-size:12px;color:var(--ink);margin-top:10px;overflow-x:auto}
+.copy-btn{display:inline-block;margin-top:8px;padding:4px 10px;border:1px solid var(--line);background:transparent;color:var(--ink-mute);font-family:var(--mono);font-size:11px;border-radius:4px;cursor:pointer}
+.copy-btn:hover{border-color:var(--accent);color:var(--accent)}
+.copy-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center}
+.toolbar input[type=text],.toolbar select{background:var(--bg-elev);border:1px solid var(--line);color:var(--ink);padding:6px 10px;border-radius:4px;font-family:var(--mono);font-size:12px}
+.toolbar input[type=text]:focus-visible,.toolbar select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.btn{display:inline-block;padding:6px 12px;border-radius:5px;border:1px solid var(--line-strong);background:transparent;color:var(--ink);font-family:var(--mono);font-size:12px;cursor:pointer;text-decoration:none}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.bars{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.bar-row{display:grid;grid-template-columns:140px 1fr 56px;gap:10px;align-items:center;font-family:var(--mono);font-size:11.5px}
+.bar-row .bar-label{color:var(--ink-mute);text-align:right}
+.bar-row .bar-track{position:relative;height:14px;background:var(--bg-elev);border-radius:3px;border:1px solid var(--line);overflow:hidden}
+.bar-row .bar-fill{height:100%;background:var(--accent);transition:width .25s ease-out}
+.bar-row .bar-fill.frontier{background:var(--warn)}
+.bar-row .bar-fill.zero{background:var(--ink-faint);opacity:0.25}
+.bar-row .bar-pct{color:var(--ink);text-align:right}
+.note{background:var(--bg-card);border-left:3px solid var(--ink-faint);padding:10px 14px;margin-top:18px;color:var(--ink-mute);font-size:12.5px;line-height:1.6}
+@media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}.metric-grid{grid-template-columns:repeat(2,1fr)}.bar-row{grid-template-columns:110px 1fr 48px}}
+</style>
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<script src="/nav.js" defer></script>
+</head>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+    </div>
+  </nav>
+</div>
+
+<a href="#main" class="skip-link">Skip to content</a>
+
+<main id="main">
+<div class="acct-shell">
+<nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview">Overview</a></li><li><a href="/account/gateway" aria-current="page">Gateway</a></li><li><a href="/account/gateway/providers">Provider config</a></li><li><a href="/account/captures">Captures</a></li><li><a href="/account/connectors">Connectors</a></li><li><a href="/account/captured">Captured calls</a></li><li><a href="/account/privacy-events">Privacy events</a></li><li><a href="/account/repeated-workflows">Repeated workflows</a></li><li><a href="/account/opportunities">Opportunities</a></li><li><a href="/account/labeling">Labeling queue</a></li><li><a href="/account/datasets">Datasets</a></li><li><a href="/account/simulations">Simulations</a></li><li><a href="/account/bakeoffs">Bakeoffs</a></li><li><a href="/account/builds">Artifact jobs</a></li><li><a href="/account/artifacts">Artifacts</a></li><li><a href="/account/devices">Devices</a></li><li><a href="/account/storage">Storage truth</a></li><li><a href="/account/billing">Billing</a></li><li><a href="/account/routing">Routing decisions</a></li><li><a href="/account/active-learning">Active learning</a></li></ul></nav>
+<section class="acct-content">
+
+<p class="eyebrow">Wrapper surface (W-A)</p>
+<h1>Gateway.</h1>
+<p class="lede">Routes every chat completion through one URL, signs the response, captures the row, and tells you which provider answered and what it cost.</p>
+
+<div class="toolbar">
+  <label for="ns-input" style="color:var(--ink-faint);font-family:var(--mono);font-size:11px">Namespace</label>
+  <input id="ns-input" type="text" placeholder="all" value="" style="min-width:160px">
+  <button id="ns-apply" class="btn" type="button">Apply</button>
+  <a class="btn" href="/account/gateway/providers">Provider config &rarr;</a>
+  <a class="btn" href="/docs/api" rel="noopener">API reference</a>
+</div>
+
+<div class="metric-grid">
+  <div class="metric-card"><div class="label">Total calls</div><div class="value" id="m-total">-</div><div class="delta" id="m-window">all time</div></div>
+  <div class="metric-card"><div class="label">% local artifact</div><div class="value" id="m-local-pct">-</div><div class="delta">served by .kolm</div></div>
+  <div class="metric-card"><div class="label">% frontier</div><div class="value" id="m-frontier-pct">-</div><div class="delta">openai / anthropic / etc.</div></div>
+  <div class="metric-card"><div class="label">Cost saved</div><div class="value" id="m-saved">-</div><div class="delta">vs all-frontier baseline</div></div>
+  <div class="metric-card"><div class="label">Mean confidence</div><div class="value" id="m-conf">-</div><div class="delta">first-token entropy gate</div></div>
+</div>
+
+<div class="kpanel">
+  <h2>Routing breakdown</h2>
+  <p class="pdesc">Share of traffic by provider. Local routes (<code>local-kolm</code>, <code>local-vllm</code>, <code>local-ollama</code>) render with the local accent; frontier routes use the warn tone.</p>
+  <div class="bars" id="bar-chart" role="img" aria-label="Provider routing breakdown"></div>
+  <div id="bars-empty" class="empty" hidden style="margin-top:12px">No calls yet. Once traffic flows through the gateway each provider's share will fill in.</div>
+</div>
+
+<div class="kpanel">
+  <h2>Recent calls</h2>
+  <p class="pdesc">Newest first. Each row links to a signed receipt; the receipt holds the full prompt / response, the routing decision, and the chain prev_hash.</p>
+  <table class="ktable">
+    <thead><tr><th>Timestamp</th><th>Namespace</th><th>Provider</th><th>Model</th><th>Confidence</th><th>Latency (ms)</th><th>Cost ($)</th><th>Receipt</th></tr></thead>
+    <tbody id="recent-rows"></tbody>
+  </table>
+  <div id="recent-empty" class="empty" hidden>
+    <strong>No calls yet.</strong> Point your OpenAI client at <code>https://kolm.ai/v1/wrap/openai</code> and try it.
+    <pre id="env-snippet">export OPENAI_BASE_URL=https://kolm.ai/v1/wrap/openai
+export OPENAI_API_KEY=&lt;your-kolm-api-key&gt;</pre>
+    <button class="copy-btn" type="button" id="env-copy" aria-label="Copy environment snippet">Copy snippet</button>
+  </div>
+</div>
+
+<div class="kpanel">
+  <h2>Active namespaces</h2>
+  <p class="pdesc">Per-namespace primary model, fallback chain, and confidence threshold. A namespace marked <em>paused</em> still receives capture rows but does not route to its primary model.</p>
+  <table class="ktable">
+    <thead><tr><th>Namespace</th><th>Primary model</th><th>Fallback chain</th><th>Confidence threshold</th><th>Status</th></tr></thead>
+    <tbody id="ns-rows"></tbody>
+  </table>
+  <div id="ns-empty" class="empty" hidden>
+    No namespaces configured yet. The first call through the gateway creates the <code>default</code> namespace automatically.
+  </div>
+</div>
+
+<div class="note">
+  <strong>Caveats.</strong> Cost saved is an estimate based on listed per-token prices for each frontier provider; settle against your invoice. Confidence is the first-token entropy gate the router compared against and is not a guarantee of answer correctness.
+</div>
+
+</section>
+</div>
+</main>
+
+<script>
+(function(){
+  var key=null; try{key=localStorage.getItem("kolm-key")||localStorage.getItem("ks_api_key")||localStorage.getItem("kolm_api_key")||localStorage.getItem("KOLM_API_KEY");}catch(_){}
+  window.KOLM_AUTH=key?{"Authorization":"Bearer "+key,"Accept":"application/json"}:{"Accept":"application/json"};
+  window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});o.credentials=o.credentials||"include";return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
+  window.kesc=function(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});};
+})();
+
+var PROVIDERS=["local-kolm","openai","anthropic","google","deepseek","openrouter","groq","together","fireworks","local-vllm","local-ollama"];
+var LOCAL=new Set(["local-kolm","local-vllm","local-ollama"]);
+
+function pct(n,total){if(!total||total<=0)return "0%";return Math.round((n/total)*100)+"%";}
+function fmtUsd(v){if(v==null)return "$0.00";var n=Number(v);if(n>=1)return "$"+n.toFixed(2);return "$"+n.toFixed(4);}
+function fmtConf(v){if(v==null)return "-";return Number(v).toFixed(2);}
+function fmtMs(v){if(v==null)return "-";return String(Math.round(Number(v)));}
+function fmtTs(t){if(!t)return "-";var d=new Date(t);if(isNaN(d.getTime()))return String(t);return d.toISOString().replace("T"," ").slice(0,19)+"Z";}
+function shortId(s){if(!s)return "-";s=String(s);return s.length>14?s.slice(0,8)+"..."+s.slice(-4):s;}
+function statusPill(s){var cls=s==="active"?"ok":(s==="paused"?"warn":"mute");return "<span class=\"pill "+cls+"\">"+window.kesc(s||"-")+"</span>";}
+function providerPill(p){var cls=LOCAL.has(p)?"prov-local":"prov-frontier";return "<span class=\"pill "+cls+"\">"+window.kesc(p||"-")+"</span>";}
+
+function paintMetrics(s){
+  s=s||{};
+  document.getElementById("m-total").textContent=String(s.total_calls||0);
+  document.getElementById("m-local-pct").textContent=pct(s.local_calls||0,s.total_calls||0);
+  document.getElementById("m-frontier-pct").textContent=pct(s.frontier_calls||0,s.total_calls||0);
+  document.getElementById("m-saved").textContent=fmtUsd(s.cost_saved_usd||0);
+  document.getElementById("m-conf").textContent=fmtConf(s.mean_confidence);
+  var win=s.window_label||"all time";
+  document.getElementById("m-window").textContent=win;
+}
+
+function paintBars(breakdown,total){
+  var host=document.getElementById("bar-chart");
+  var empty=document.getElementById("bars-empty");
+  host.innerHTML="";
+  var any=false;
+  breakdown=breakdown||{};
+  for(var i=0;i<PROVIDERS.length;i++){
+    var p=PROVIDERS[i];
+    var v=Number(breakdown[p]||0);
+    if(v>0)any=true;
+    var p100=(total>0)?(v/total)*100:0;
+    var row=document.createElement("div");
+    row.className="bar-row";
+    var cls=LOCAL.has(p)?"":"frontier";
+    if(p100<=0)cls+=" zero";
+    row.innerHTML="<div class=\"bar-label\">"+window.kesc(p)+"</div>"
+      +"<div class=\"bar-track\"><div class=\"bar-fill "+cls+"\" style=\"width:"+p100.toFixed(1)+"%\"></div></div>"
+      +"<div class=\"bar-pct\">"+(p100>0?p100.toFixed(1)+"%":"0%")+"</div>";
+    host.appendChild(row);
+  }
+  empty.hidden=any;
+}
+
+function paintRecent(rows){
+  var tbody=document.getElementById("recent-rows");
+  var empty=document.getElementById("recent-empty");
+  tbody.innerHTML="";
+  rows=rows||[];
+  if(rows.length===0){empty.hidden=false;return;}
+  empty.hidden=true;
+  for(var i=0;i<rows.length;i++){
+    var r=rows[i];
+    var rid=r.receipt_id||r.id||"";
+    var rlink=rid?("<a href=\"/account/receipts/"+encodeURIComponent(rid)+"\">"+window.kesc(shortId(rid))+"</a>"):"-";
+    var tr=document.createElement("tr");
+    tr.innerHTML="<td>"+window.kesc(fmtTs(r.ts))+"</td>"
+      +"<td>"+window.kesc(r.namespace||"default")+"</td>"
+      +"<td>"+providerPill(r.provider)+"</td>"
+      +"<td>"+window.kesc(r.model||"-")+"</td>"
+      +"<td>"+window.kesc(fmtConf(r.confidence))+"</td>"
+      +"<td>"+window.kesc(fmtMs(r.latency_ms))+"</td>"
+      +"<td>"+window.kesc(fmtUsd(r.cost_usd))+"</td>"
+      +"<td>"+rlink+"</td>";
+    tbody.appendChild(tr);
+  }
+}
+
+function paintNamespaces(rows){
+  var tbody=document.getElementById("ns-rows");
+  var empty=document.getElementById("ns-empty");
+  tbody.innerHTML="";
+  rows=rows||[];
+  if(rows.length===0){empty.hidden=false;return;}
+  empty.hidden=true;
+  for(var i=0;i<rows.length;i++){
+    var r=rows[i];
+    var chain=(r.fallback_chain||[]).join(" → ")||"-";
+    var tr=document.createElement("tr");
+    tr.innerHTML="<td>"+window.kesc(r.namespace||"default")+"</td>"
+      +"<td>"+window.kesc(r.primary_model||"-")+"</td>"
+      +"<td>"+window.kesc(chain)+"</td>"
+      +"<td>"+window.kesc(fmtConf(r.confidence_threshold))+"</td>"
+      +"<td>"+statusPill(r.status)+"</td>";
+    tbody.appendChild(tr);
+  }
+}
+
+function showEmptyState(){
+  paintMetrics({total_calls:0,local_calls:0,frontier_calls:0,cost_saved_usd:0,mean_confidence:null,window_label:"no data"});
+  paintBars({},0);
+  paintRecent([]);
+  paintNamespaces([]);
+}
+
+function load(){
+  var ns=(document.getElementById("ns-input").value||"").trim();
+  var url="/v1/gateway/dashboard";
+  if(ns)url+="?namespace="+encodeURIComponent(ns);
+  try{
+    window.kfetch(url).then(function(j){
+      j=j||{};
+      paintMetrics(j.summary||{});
+      paintBars((j.breakdown||{}),(j.summary&&j.summary.total_calls)||0);
+      paintRecent(j.recent||[]);
+      paintNamespaces(j.namespaces||[]);
+    }).catch(function(){showEmptyState();});
+  }catch(_){showEmptyState();}
+}
+
+document.getElementById("ns-apply").addEventListener("click",load);
+document.getElementById("ns-input").addEventListener("keydown",function(e){if(e.key==="Enter")load();});
+document.getElementById("env-copy").addEventListener("click",function(){
+  var pre=document.getElementById("env-snippet");
+  try{
+    navigator.clipboard.writeText(pre.textContent).then(function(){
+      var b=document.getElementById("env-copy");var t=b.textContent;b.textContent="Copied";setTimeout(function(){b.textContent=t;},1400);
+    });
+  }catch(_){
+    var r=document.createRange();r.selectNode(pre);var sel=window.getSelection();sel.removeAllRanges();sel.addRange(r);
+  }
+});
+load();
+</script>
+
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/integrations">Integrations</a></li><li><a href="/docs/api">API reference</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

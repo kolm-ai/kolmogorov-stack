@@ -32372,15 +32372,33 @@ async function cmdNamespace(args) {
   const sub = args && args[0];
   const rest = (args || []).slice(1);
   const jsonOut = rest.includes('--json');
+
+  // W-F / wrapper-completion — 5 new sub-verbs (create | config | deploy |
+  // undeploy | rollback) delegated to src/wrapper-cli.js. Pre-existing
+  // sub-verbs (fingerprint | warm-start-suggest | suggest | verticals)
+  // fall through to the W715 fingerprint logic below.
+  if (sub && ['create', 'config', 'deploy', 'undeploy', 'rollback', 'status'].includes(sub)) {
+    const wmod = await import('../src/wrapper-cli.js');
+    const handler = wmod.NAMESPACE_WRAPPER_VERBS[sub] && wmod.NAMESPACE_WRAPPER_VERBS[sub].fn;
+    if (handler) { await handler(rest); return; }
+  }
+
   const fp = await import('../src/namespace-fingerprint.js');
   const eventStore = await import('../src/event-store.js');
   if (!sub || sub === '--help' || sub === '-h' || sub === 'help') {
-    console.log('kolm namespace - privacy-safe namespace fingerprint + warm-start (W715)\n\n' +
+    const wmod = await import('../src/wrapper-cli.js');
+    console.log('kolm namespace — privacy-safe fingerprint (W715) + wrapper deploy (W-F)\n\n' +
       'USAGE\n' +
+      '  kolm namespace create <slug> [--display-name "..."] [--capture-mode mode]\n' +
+      '                               [--redact-mode mode] [--route-chain a,b,c]\n' +
+      '  kolm namespace config <slug> [--set key=value ...]\n' +
+      '  kolm namespace deploy <slug> [--artifact <id>]\n' +
+      '  kolm namespace undeploy <slug> [--reason "..."]\n' +
+      '  kolm namespace rollback <slug> [--to <artifact_id>]\n' +
       '  kolm namespace fingerprint [--namespace=<ns>] [--limit=N] [--json]\n' +
       '  kolm namespace warm-start-suggest [--namespace=<ns>] [--k=5] [--json]\n' +
       '  kolm namespace verticals [--json]\n\n' +
-      'Honest scope: fingerprint = sha256(bigram-bag) + top-K sha256(bigram) +\n' +
+      'Scope: fingerprint = sha256(bigram-bag) + top-K sha256(bigram) +\n' +
       'vertical guess. NO raw capture text is ever included. Sharing requires\n' +
       'explicit opt-in via /account/namespaces/new (default OFF).');
     return;
@@ -37771,6 +37789,18 @@ function _renderW741Diagnostic(envelope) {
 async function cmdW742Gateway(args) {
   const sub = (args && args[0]) || '';
 
+  // W-F / wrapper-completion — fold the 4 new wrapper-surface sub-verbs
+  // (start | health | providers | routes) into the same dispatcher so the
+  // entire `kolm gateway *` tree lives in one place. The pre-existing
+  // W742 sub-verbs (status | set | test-call) are preserved verbatim
+  // below for backward compatibility.
+  if (sub === 'start' || sub === 'health' || sub === 'providers' || sub === 'routes'
+      || sub === 'status' || sub === 'call' || sub === 'simulate-overflow') {
+    const mod = await import('../src/wrapper-cli.js');
+    const handler = mod.GATEWAY_VERBS[sub] && mod.GATEWAY_VERBS[sub].fn;
+    if (handler) { await handler(args.slice(1)); return; }
+  }
+
   async function _loadMod() {
     try { return await import('../src/gateway-mode.js'); }
     catch (e) {
@@ -37932,10 +37962,19 @@ async function cmdW742Gateway(args) {
   }
 
   // ──────────────────────── unknown subcommand ───────────────────────────────
-  console.error('usage: kolm gateway <status|set|test-call> [args]');
-  console.error('  status                                    — print current mode + reachability');
-  console.error('  set <cloud|local-ollama|local-vllm|mock>  — print shell snippet (parent shell sets env)');
-  console.error('  test-call --message "<text>" [--model m]  — call dispatchByMode and print response');
+  try {
+    const mod = await import('../src/wrapper-cli.js');
+    console.error(mod.gatewayHelp());
+  } catch (_) {
+    console.error('usage: kolm gateway <status|set|test-call|start|health|providers|routes> [args]');
+    console.error('  status                                    — print current mode + reachability');
+    console.error('  set <cloud|local-ollama|local-vllm|mock>  — print shell snippet (parent shell sets env)');
+    console.error('  test-call --message "<text>" [--model m]  — call dispatchByMode and print response');
+    console.error('  start [--port N] [--toml path] [--detach] — boot src/server.js as gateway');
+    console.error('  health                                    — /v1/health + /v1/gateway/dashboard');
+    console.error('  providers                                 — 11-provider registry with tenant overrides');
+    console.error('  routes [--namespace ns]                   — resolved route chain per namespace');
+  }
   process.exit(EXIT.BAD_ARGS);
 }
 
@@ -39671,20 +39710,33 @@ async function main() {
       // W808-6 — `kolm captures review` (plural noun) — manual review queue
       // dispatcher. Separate verb from singular `capture` to avoid colliding
       // with the existing `capture image|status|importance` sub-tree.
-      case 'captures':
-        if (rest[0] === 'review') {
+      case 'captures': {
+        const csub = rest[0];
+        if (csub === 'review') {
           await withErrorContext('captures review', () => cmdCapturesReview(rest.slice(1)));
-        } else if (rest[0] === 'analytics') {
+        } else if (csub === 'analytics') {
           // W811 — capture analytics dashboard mirror (per-namespace clusters
           // + K-Score breakdown + IDR staleness gauge + CSV export). Distinct
           // dispatcher name (cmdCapturesAnalyticsW811) so the parallel-wave
           // touch surface on this file stays explicit per W811 owner spec.
           await withErrorContext('captures analytics', () => cmdCapturesAnalyticsW811(rest.slice(1)));
+        } else if (csub && ['list', 'inspect', 'approve', 'reject', 'quarantine', 'stats', 'export', 'purge', 'seed'].includes(csub)) {
+          // W-F / wrapper-completion — 8 new sub-verbs delegated to
+          // src/wrapper-cli.js so the dispatcher stays one-line per verb.
+          const mod = await import('../src/wrapper-cli.js');
+          const handler = mod.CAPTURES_VERBS[csub] && mod.CAPTURES_VERBS[csub].fn;
+          await withErrorContext('captures ' + csub, () => handler(rest.slice(1)));
         } else {
-          console.error('usage: kolm captures review [--list-pending | --allow ID | --block ID --reason "..." | --auto-allow-since 24h]\n       kolm captures analytics --namespace <ns> [--json|--csv]');
+          try {
+            const mod = await import('../src/wrapper-cli.js');
+            console.error(mod.capturesHelp());
+          } catch (_) {
+            console.error('usage: kolm captures <list|inspect|approve|reject|quarantine|stats|export|purge|review|analytics> [args]');
+          }
           process.exit(EXIT.BAD_ARGS);
         }
         break;
+      }
       case 'labels':   await withErrorContext('labels',   () => cmdLabels(rest)); break;
       case 'distill':  await withErrorContext('distill',  () => cmdDistill(rest)); break;
       case 'spec-decode': await withErrorContext('spec-decode', () => cmdSpecDecode(rest)); break;
@@ -40050,6 +40102,23 @@ async function main() {
       // namespace fingerprint + discover warm-start siblings.
       case 'namespace':
       case 'ns':       await withErrorContext('namespace', () => cmdNamespace(rest)); break;
+      // W-F / wrapper-completion — `kolm receipts <verify|list|export|stats>`
+      // is a top-level dispatcher for kolm-audit-1 receipt operations.
+      // Distinct from `kolm auditor` (third-party signing tool) and the
+      // already-shipped `kolm audit` (per-tenant audit-log mirror). The
+      // verbs delegate to src/wrapper-cli.js for the implementations.
+      case 'receipts':
+      case 'receipt': {
+        const rsub = rest[0];
+        const wmod = await import('../src/wrapper-cli.js');
+        if (rsub && wmod.RECEIPTS_VERBS[rsub]) {
+          await withErrorContext('receipts ' + rsub, () => wmod.RECEIPTS_VERBS[rsub].fn(rest.slice(1)));
+        } else {
+          console.error(wmod.receiptsHelp());
+          process.exit(EXIT.BAD_ARGS);
+        }
+        break;
+      }
       case 'anonymize':await withErrorContext('anonymize',() => cmdAnonymize(rest)); break;
       case 'redact':   await withErrorContext('redact',   () => cmdRedact(rest)); break;
       // W454 — multimodal redaction worker (OCR / pdf-parse / whisper).

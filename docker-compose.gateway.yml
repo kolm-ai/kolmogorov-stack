@@ -1,0 +1,110 @@
+# kolm gateway self-host bundle
+#
+# Spin up a complete kolm node + capture store + object storage + OTLP
+# collector with one command:
+#
+#   cp .env.gateway.example .env.gateway
+#   # edit .env.gateway and fill in required secrets
+#   docker compose -f docker-compose.gateway.yml up -d
+#
+# Validate config without launching:
+#   docker compose -f docker-compose.gateway.yml config
+#
+# Required env vars are documented in .env.gateway.example. The compose
+# file fails fast on missing required vars; optional vars get sensible
+# defaults via the `${VAR:-default}` form.
+
+name: kolm-gateway
+
+services:
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.gateway
+    image: kolm/gateway:latest
+    container_name: kolm-gateway
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env.gateway
+    environment:
+      KOLM_GATEWAY_CONFIG: /etc/kolm/gateway.toml
+      KOLM_DATA_DIR: /var/lib/kolm
+    volumes:
+      - ./gateway.toml:/etc/kolm/gateway.toml:ro
+      - kolm_keys:/etc/kolm/keys
+      - kolm_captures:/var/lib/kolm/captures
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: kolm-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-kolm}
+      POSTGRES_DB: ${POSTGRES_DB:-captures}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    volumes:
+      - kolm_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U ${POSTGRES_USER:-kolm} -d ${POSTGRES_DB:-captures}
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: kolm-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?MINIO_ROOT_USER is required}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?MINIO_ROOT_PASSWORD is required}
+    volumes:
+      - kolm_minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: kolm-otel-collector
+    restart: unless-stopped
+    depends_on:
+      - gateway
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+
+volumes:
+  kolm_pg_data:
+    name: kolm_pg_data
+  kolm_minio_data:
+    name: kolm_minio_data
+  kolm_keys:
+    name: kolm_keys
+  kolm_captures:
+    name: kolm_captures

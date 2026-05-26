@@ -1,0 +1,34 @@
+// W-B / wrapper-completion — local-vLLM provider adapter.
+//
+// vLLM serves an OpenAI-compatible HTTP surface by default at
+// http://127.0.0.1:8000/v1/chat/completions (or whatever --host:--port
+// the operator passed). Auth is OPTIONAL — vLLM accepts requests with
+// or without a bearer when --api-key was set on the server. We pass
+// the upstreamKey if provided, otherwise we skip auth.
+//
+// Contract mirrors src/capture.js forwardOpenAI: returns
+//   { status: <http status int>, json: <parsed body or {_raw}>, elapsed_us }
+// Never throws on non-2xx — upstream errors flow through as-is so the
+// gateway can sign + capture them. Throws ONLY on transport failure.
+
+const VLLM_DEFAULT_BASE = 'http://127.0.0.1:8000';
+
+export async function forward({ url, body, upstreamKey, base }) {
+  const target = url || `${base || VLLM_DEFAULT_BASE}/v1/chat/completions`;
+  const headers = { 'content-type': 'application/json' };
+  if (upstreamKey) headers['authorization'] = `Bearer ${upstreamKey}`;
+  const t0 = process.hrtime.bigint();
+  const res = await fetch(target, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body),
+  });
+  const text = await res.text();
+  let json;
+  try { json = JSON.parse(text); } catch (_) { json = { _raw: text }; }
+  const elapsed_us = Math.round(Number(process.hrtime.bigint() - t0) / 1000);
+  return { status: res.status, json, elapsed_us };
+}
+
+export const PROVIDER_ID = 'local-vllm';
+export const DEFAULT_BASE = VLLM_DEFAULT_BASE;

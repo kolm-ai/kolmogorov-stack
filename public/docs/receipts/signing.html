@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Receipt signing keys · Wrapper docs · kolm.ai</title>
+<meta name="description" content="Ed25519 key generation, ~/.kolm/signing-key.pem mode 0600 storage, env-var overrides, 90-day rotation with 30-day overlap.">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://kolm.ai/docs/receipts/signing">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<script src="/nav.js" defer></script>
+<style>
+  .wd-hero { padding-top: clamp(72px, 9vw, 128px); padding-bottom: clamp(40px, 6vw, 72px); border-bottom: 1px solid var(--line-1); }
+  .wd-hero h1 { font-size: clamp(34px, 4.6vw, 52px); font-weight: 580; letter-spacing: -0.02em; margin: 14px 0 18px; max-width: 22ch; }
+  .wd-body { padding: 48px 0 96px; }
+  .wd-body h2 { font-size: 22px; font-weight: 540; margin: 40px 0 12px; letter-spacing: -0.01em; color: var(--ink-1); }
+  .wd-body h3 { font-size: 16px; font-weight: 580; margin: 24px 0 8px; letter-spacing: -0.005em; color: var(--ink-1); }
+  .wd-body p, .wd-body li { font-size: 15px; line-height: 1.7; color: var(--ink-2); max-width: 76ch; }
+  .wd-body ul, .wd-body ol { padding-left: 22px; }
+  .wd-body li { margin: 4px 0; }
+  pre { background: #06080a; border: 1px solid var(--line-1); border-radius: 8px; padding: 16px 18px; overflow-x: auto; font: 12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; color: #e9eef3; max-width: 820px; margin: 12px 0 18px; }
+  code { font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size: 13px; background: rgba(127,140,158,0.10); padding: 1px 6px; border-radius: 4px; color: var(--ink-1); }
+  table { border-collapse: collapse; width: 100%; max-width: 820px; margin: 14px 0 20px; font-size: 13.5px; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line-1); vertical-align: top; color: var(--ink-2); }
+  th { color: var(--ink-1); font-weight: 540; font-size: 12.5px; }
+  .wd-caveat { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-size: 13.5px; color: var(--ink-2); line-height: 1.6; margin: 20px 0; max-width: 76ch; }
+  .wd-caveat b { color: var(--ink-1); font-weight: 580; }
+  .wd-cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0 10px; }
+  .wd-cta { display: inline-block; padding: 9px 16px; border: 1px solid var(--line-1); border-radius: 6px; color: var(--ink-1); text-decoration: none; font-size: 14px; font-weight: 500; }
+  .wd-cta.primary { background: var(--ink-1); color: var(--surface-0); border-color: var(--ink-1); }
+  .wd-cta:hover { border-color: var(--ink-1); }
+  .wd-crumbs { font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size: 12px; color: var(--ink-3); margin-bottom: 6px; }
+  .wd-crumbs a { color: var(--ink-3); text-decoration: none; }
+  .wd-crumbs a:hover { color: var(--ink-1); }
+</style>
+</head>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">-&gt;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main">
+
+<section class="wd-hero">
+  <div class="ks-wrap">
+    <p class="wd-crumbs"><a href="/docs">docs</a> / <a href="/docs/receipts/overview">receipts</a> / signing</p>
+    <p class="brand-eyebrow">Receipt signing</p>
+    <h1>Ed25519 keys with a 90-day rotation cadence.</h1>
+    <p class="lede">Generate the keypair with <code>kolm key generate</code>. The private half lives at <code>~/.kolm/signing-key.pem</code> with mode 0600 by default; override via env var. Rotation is 90 days with a 30-day overlap window so verifiers do not break.</p>
+  </div>
+</section>
+
+<section class="wd-body">
+  <div class="ks-wrap">
+    <h2>Generating a key</h2>
+    <p>The CLI generates an Ed25519 keypair, writes the private key (PKCS#8 PEM) to disk with mode 0600, and registers the public key with the hosted gateway. For self-hosted gateways, the public key needs to be served at <code>/v1/keys/&lt;key_id&gt;</code>; the CLI writes it to <code>~/.kolm/public-keys/&lt;key_id&gt;.pub</code> for upload to your gateway.</p>
+    <pre># Generate (interactive: confirms overwrite if a key exists)
+kolm key generate
+
+# Generate with a specific key id (defaults to &lt;tenant&gt;_&lt;short-random&gt;)
+kolm key generate --key-id tenant_acme_v3
+
+# Generate to a specific path
+kolm key generate --out /etc/kolm/signing.ed25519 --key-id tenant_acme_v3
+
+# Inspect the current key (public half + metadata only; never prints private)
+kolm key show
+# key_id:     tenant_acme_v3
+# algorithm:  Ed25519
+# created:    2026-04-15T12:00:00Z
+# rotates:    2026-07-14T12:00:00Z (90 days)
+# public key: base64url:M+oS...vN</pre>
+    <h2>Storage location and permissions</h2>
+    <p>The default path is <code>~/.kolm/signing-key.pem</code> on Linux / macOS. Windows: <code>%USERPROFILE%\.kolm\signing-key.pem</code>. Mode is 0600 on POSIX (owner read/write only); the CLI refuses to load a key with looser permissions unless <code>--allow-loose-perms</code> is passed. Windows: the CLI sets the ACL to current user only.</p>
+    <table>
+      <thead><tr><th>Platform</th><th>Default path</th><th>Mode</th></tr></thead>
+      <tbody>
+      <tr><td>Linux / macOS</td><td><code>~/.kolm/signing-key.pem</code></td><td>0600</td></tr>
+      <tr><td>Windows</td><td><code>%USERPROFILE%\.kolm\signing-key.pem</code></td><td>ACL: current user only</td></tr>
+      <tr><td>Docker self-host</td><td>mount to <code>/etc/kolm/signing.ed25519</code></td><td>image expects 0400</td></tr>
+      </tbody>
+    </table>
+    <h2>Environment overrides</h2>
+    <p>Two env vars override the disk file. Useful for cloud-native deployments where the key comes from a secret manager (AWS Secrets Manager, GCP Secret Manager, Vault).</p>
+    <pre># Cloud deployment: inject key from secret manager
+export KOLM_ED25519_PRIVATE_KEY="$(aws secretsmanager get-secret-value --secret-id kolm/signing --query SecretString --output text)"
+
+# Or by path
+export KOLM_ED25519_PRIVATE_KEY_PATH=/var/run/secrets/kolm/signing-key.pem</pre>
+    <table>
+      <thead><tr><th>Env var</th><th>Type</th><th>Effect</th></tr></thead>
+      <tbody>
+      <tr><td><code>KOLM_ED25519_PRIVATE_KEY</code></td><td>PEM string (literal)</td><td>Used directly; precedence over file.</td></tr>
+      <tr><td><code>KOLM_ED25519_PRIVATE_KEY_PATH</code></td><td>filesystem path</td><td>Read from this path instead of the default.</td></tr>
+      </tbody>
+    </table>
+    <h2>The 90-day rotation cadence</h2>
+    <p>NIST SP 800-57 recommends rotating asymmetric signing keys on a periodic basis; the kolm default is 90 days. The rotation generates a new keypair, marks the old key as superseded but still valid for the 30-day overlap window, and starts signing new receipts with the new key. Receipts signed during the overlap remain verifiable against the old public key for the lifetime of the receipt.</p>
+    <pre># Manual rotation
+kolm key rotate
+# Generated tenant_acme_v4 (active 2026-07-14T00:00:00Z onwards)
+# Overlap window: tenant_acme_v3 valid for verifiers until 2026-08-13T00:00:00Z
+# New receipts will be signed with tenant_acme_v4.
+
+# Scheduled rotation (cron-style)
+kolm key rotate --schedule "90d --overlap 30d"
+# Sets a self-rotation cadence; the gateway issues a new key automatically on the cadence.</pre>
+    <h2>The 30-day overlap window</h2>
+    <p>When key v3 retires at day 90, key v4 has been live for 60 days. Verifiers can request either public key from <code>/v1/keys/&lt;key_id&gt;</code>; each receipt carries its <code>signing_key_id</code> so the right key is always retrievable. The overlap protects long-lived deployments where some verifier hasn’t yet refreshed its cached key list.</p>
+    <pre># Timeline
+day 0:    v3 active.   v4 not yet generated.
+day 60:   v3 active.   v4 generated, dormant.
+day 90:   v3 retired.  v4 takes over (new receipts use v4).
+day 120:  v3 still valid for verifying old receipts (overlap window).
+day 121+: v3 public key removed from the keys endpoint. Old receipts no longer verifiable.
+
+# Operator action at day 120: confirm no live verifier still has v3 cached past expiry</pre>
+    <h2>Key revocation</h2>
+    <p>If a key is compromised, revoke it immediately. Revocation removes the public key from the keys endpoint and adds the key id to a published revocation list. Receipts signed before the revocation timestamp remain verifiable if the revoker chooses; new verifications against revoked keys fail by default.</p>
+    <pre>kolm key revoke tenant_acme_v3 --reason "suspected compromise" --revoke-pre true
+# Revocation effective 2026-06-12T10:30:00Z
+# Pre-revocation receipts: --revoke-pre true (no longer verifiable, fail-closed)
+# Pre-revocation receipts: --revoke-pre false (still verifiable; document the trust assumption)</pre>
+    <div class="wd-caveat"><b>Caveats.</b> Lose the private key, lose the ability to sign new receipts under that key id. Past receipts remain verifiable as long as the public key is published. Back up the private key to your secret manager before rotation; the CLI refuses to delete a key file unless <code>--force</code> is passed. The rotation overlap of 30 days is the longest live verifier should ever need to converge; if you have longer-tail verifiers (regulatory archive readers), lengthen the overlap explicitly.</div>
+    <p class="muted" style="margin-top:48px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;color:var(--ink-3)">See also: <a href="/docs/receipts/overview">Receipts overview</a> &middot; <a href="/docs/receipts/format">Receipt format</a> &middot; <a href="/docs/receipts/verification">Verification</a> &middot; <a href="/docs/receipts/audit-export">Audit export</a></p>
+  </div>
+</section>
+
+</main>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <p>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm &middot; <a href="mailto:rodneyyesep@gmail.com">rodneyyesep@gmail.com</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,128 @@
+# kolm gateway reference configuration
+#
+# Purpose: production-ready reference for self-hosting the kolm gateway node.
+# Every section below maps 1:1 to a documented contract; see
+# /docs/gateway/configuration for the full schema, validation rules,
+# and per-field defaults.
+#
+# Precedence (highest wins):
+#   1. CLI flags          (e.g. `kolm gateway start --bind 0.0.0.0:9090`)
+#   2. Environment vars   (KOLM_GATEWAY_*)
+#   3. This file          (path via --config or KOLM_GATEWAY_CONFIG)
+#   4. Built-in defaults  (see /docs/gateway/configuration#defaults)
+#
+# Secrets must be supplied via environment variables (api_key_env fields
+# below). This file is safe to commit; .env.gateway is not.
+
+[server]
+bind = "0.0.0.0:8080"
+# tls_cert = "/etc/kolm/tls/fullchain.pem"
+# tls_key  = "/etc/kolm/tls/privkey.pem"
+max_request_body_bytes = 2_097_152      # 2 MiB hard cap
+request_timeout_seconds = 60
+
+[signing]
+algorithm = "ed25519"
+key_path = "/etc/kolm/keys/prod.ed25519"
+key_id = "kolm-prod-2026-q2"
+rotation_days = 90
+overlap_days = 30                        # NIST SP 800-57 dual-key overlap window
+
+[redaction]
+# mode: detect_only | redact_captures | redact_all | block
+mode = "redact_captures"
+detectors = ["email", "phone", "ssn", "credit_card", "ip", "name"]
+# Listed classes hard-fail the request with 422 PII_BLOCKED.
+block_on_pii_class = []
+
+[capture]
+# backend: jsonl | sqlite | postgres | s3
+backend = "postgres"
+postgres_url = "postgres://kolm@db/captures"
+s3_bucket = "kolm-captures"
+s3_region = "us-west-2"
+sqlite_path = "/var/lib/kolm/captures.db"
+jsonl_dir = "/var/lib/kolm/captures"
+retention_days = 90
+# HMAC chain key for tamper-evident capture log; resolved from this env var.
+hash_chain_secret_env = "KOLM_CHAIN_SECRET"
+
+[telemetry]
+otlp_endpoint = "https://otlp.kolm.ai:4317"
+metrics_interval_seconds = 10
+service_name = "kolm-gateway"
+
+[free_tier]
+monthly_capture_cap = 50_000
+
+# ---------------------------------------------------------------------------
+# Providers
+# ---------------------------------------------------------------------------
+# Each [provider.<id>] block registers an upstream model surface. The gateway
+# resolves namespace.primary / namespace.fallback against these ids using the
+# scheme `<provider_id>:<model>` (e.g. `openai:gpt-4o-mini`).
+
+[provider.openai]
+api_key_env = "OPENAI_API_KEY"
+base_url = "https://api.openai.com"
+rate_limit_rpm = 5000
+
+[provider.anthropic]
+api_key_env = "ANTHROPIC_API_KEY"
+base_url = "https://api.anthropic.com"
+rate_limit_rpm = 1000
+
+[provider.google]
+api_key_env = "GEMINI_API_KEY"
+base_url = "https://generativelanguage.googleapis.com"
+
+[provider.deepseek]
+api_key_env = "DEEPSEEK_API_KEY"
+base_url = "https://api.deepseek.com"
+
+[provider.groq]
+api_key_env = "GROQ_API_KEY"
+base_url = "https://api.groq.com/openai"
+
+[provider.together]
+api_key_env = "TOGETHER_API_KEY"
+base_url = "https://api.together.xyz"
+
+[provider.fireworks]
+api_key_env = "FIREWORKS_API_KEY"
+base_url = "https://api.fireworks.ai/inference"
+
+[provider.openrouter]
+api_key_env = "OPENROUTER_API_KEY"
+base_url = "https://openrouter.ai/api"
+
+[provider.local_vllm]
+base_url = "http://127.0.0.1:8000"
+
+[provider.local_ollama]
+base_url = "http://127.0.0.1:11434"
+
+[provider.local_kolm]
+artifact_dir = "~/.kolm/artifacts"
+default_artifact = "trinity-500-2026-05-26"
+
+# ---------------------------------------------------------------------------
+# Namespaces
+# ---------------------------------------------------------------------------
+# Namespaces route traffic by tenant intent. The gateway picks `primary`
+# first; on failure, low-confidence, or circuit-breaker open it walks
+# `fallback` left-to-right. `confidence_threshold = 0.0` disables routing
+# on confidence.
+
+[namespace.support]
+primary = "local:trinity-500-2026-05-26"
+fallback = ["anthropic:claude-opus-4-7", "openai:gpt-4o-mini"]
+confidence_threshold = 0.7
+redaction_mode = "redact_captures"
+capture_eligible = true
+
+[namespace.extraction]
+primary = "openai:gpt-4o-mini"
+fallback = ["anthropic:claude-opus-4-7"]
+confidence_threshold = 0.0
+capture_eligible = true

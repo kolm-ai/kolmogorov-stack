@@ -1,0 +1,64 @@
+# syntax=docker/dockerfile:1.7
+#
+# kolm gateway runtime image (multi-stage, Node 22 alpine).
+#
+# Stage 1 (builder): installs production deps deterministically from the
+# lockfile, then copies only the runtime-relevant source trees.
+# Stage 2 (runtime): minimal alpine + non-root `node` user, drops build
+# toolchains, exposes 8080, ships a wget-based healthcheck.
+#
+# Build:   docker build -f Dockerfile.gateway -t kolm/gateway:latest .
+# Run:     docker run --rm -p 8080:8080 -v $(pwd)/gateway.toml:/etc/kolm/gateway.toml:ro kolm/gateway:latest
+
+# -----------------------------------------------------------------------------
+# Stage 1 - builder
+# -----------------------------------------------------------------------------
+FROM node:22-alpine AS builder
+
+WORKDIR /app
+
+# Native build tools for any optional binary deps (better-sqlite3, etc.).
+# Removed entirely in the runtime stage so they never ship.
+RUN apk add --no-cache --virtual .build-deps python3 make g++
+
+COPY package.json package-lock.json* ./
+
+# Reproducible install from lockfile, production deps only.
+RUN npm ci --omit=dev --no-audit --no-fund
+
+# Only the trees the gateway actually loads at runtime.
+COPY src/   ./src/
+COPY cli/   ./cli/
+COPY apps/  ./apps/
+
+RUN apk del .build-deps
+
+# -----------------------------------------------------------------------------
+# Stage 2 - runtime
+# -----------------------------------------------------------------------------
+FROM node:22-alpine AS runtime
+
+# wget for the HEALTHCHECK below. tini reaps zombie children cleanly.
+RUN apk add --no-cache wget tini
+
+WORKDIR /app
+
+# Persisted directories owned by the unprivileged `node` user.
+RUN mkdir -p /etc/kolm/keys /var/lib/kolm/captures \
+ && chown -R node:node /etc/kolm /var/lib/kolm /app
+
+COPY --from=builder --chown=node:node /app /app
+
+ENV NODE_ENV=production \
+    KOLM_GATEWAY_CONFIG=/etc/kolm/gateway.toml \
+    KOLM_DATA_DIR=/var/lib/kolm
+
+USER node
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=5 \
+  CMD wget -qO- http://localhost:8080/v1/health || exit 1
+
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD ["node", "cli/kolm.js", "gateway", "start", "--config", "/etc/kolm/gateway.toml"]

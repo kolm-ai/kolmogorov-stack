@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Capture hash chain · Wrapper docs · kolm.ai</title>
+<meta name="description" content="HMAC-SHA256 linkage between consecutive capture rows. Tamper detection in O(n). kolm captures verify-chain re-derives every row.">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://kolm.ai/docs/capture/hash-chain">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<script src="/nav.js" defer></script>
+<style>
+  .wd-hero { padding-top: clamp(72px, 9vw, 128px); padding-bottom: clamp(40px, 6vw, 72px); border-bottom: 1px solid var(--line-1); }
+  .wd-hero h1 { font-size: clamp(34px, 4.6vw, 52px); font-weight: 580; letter-spacing: -0.02em; margin: 14px 0 18px; max-width: 22ch; }
+  .wd-body { padding: 48px 0 96px; }
+  .wd-body h2 { font-size: 22px; font-weight: 540; margin: 40px 0 12px; letter-spacing: -0.01em; color: var(--ink-1); }
+  .wd-body h3 { font-size: 16px; font-weight: 580; margin: 24px 0 8px; letter-spacing: -0.005em; color: var(--ink-1); }
+  .wd-body p, .wd-body li { font-size: 15px; line-height: 1.7; color: var(--ink-2); max-width: 76ch; }
+  .wd-body ul, .wd-body ol { padding-left: 22px; }
+  .wd-body li { margin: 4px 0; }
+  pre { background: #06080a; border: 1px solid var(--line-1); border-radius: 8px; padding: 16px 18px; overflow-x: auto; font: 12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; color: #e9eef3; max-width: 820px; margin: 12px 0 18px; }
+  code { font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size: 13px; background: rgba(127,140,158,0.10); padding: 1px 6px; border-radius: 4px; color: var(--ink-1); }
+  table { border-collapse: collapse; width: 100%; max-width: 820px; margin: 14px 0 20px; font-size: 13.5px; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line-1); vertical-align: top; color: var(--ink-2); }
+  th { color: var(--ink-1); font-weight: 540; font-size: 12.5px; }
+  .wd-caveat { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-size: 13.5px; color: var(--ink-2); line-height: 1.6; margin: 20px 0; max-width: 76ch; }
+  .wd-caveat b { color: var(--ink-1); font-weight: 580; }
+  .wd-cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0 10px; }
+  .wd-cta { display: inline-block; padding: 9px 16px; border: 1px solid var(--line-1); border-radius: 6px; color: var(--ink-1); text-decoration: none; font-size: 14px; font-weight: 500; }
+  .wd-cta.primary { background: var(--ink-1); color: var(--surface-0); border-color: var(--ink-1); }
+  .wd-cta:hover { border-color: var(--ink-1); }
+  .wd-crumbs { font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size: 12px; color: var(--ink-3); margin-bottom: 6px; }
+  .wd-crumbs a { color: var(--ink-3); text-decoration: none; }
+  .wd-crumbs a:hover { color: var(--ink-1); }
+</style>
+</head>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">-&gt;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main">
+
+<section class="wd-hero">
+  <div class="ks-wrap">
+    <p class="wd-crumbs"><a href="/docs">docs</a> / <a href="/docs/capture/overview">capture</a> / hash-chain</p>
+    <p class="brand-eyebrow">Capture hash chain</p>
+    <h1>Tamper-evident by construction.</h1>
+    <p class="lede">Every capture row carries an HMAC-SHA256 hash that links it to the previous row. Any single-byte mutation anywhere in history breaks the chain; <code>kolm captures verify-chain</code> finds the break in O(n).</p>
+  </div>
+</section>
+
+<section class="wd-body">
+  <div class="ks-wrap">
+    <h2>The construction</h2>
+    <p>Each row stores two hashes: <code>prev_hash</code> (the previous row’s <code>row_hash</code>, or the genesis seed for the first row) and <code>row_hash</code> (HMAC-SHA256 over the canonical serialization of this row, keyed by the tenant signing key).</p>
+    <pre># Genesis seed (per tenant, set at lake init)
+genesis = HMAC-SHA256(tenant_key, "kolm-capture-genesis-v1" || tenant_id)
+
+# Per-row computation
+row_bytes = canonical_json(row_minus_hash_fields)
+row_hash  = HMAC-SHA256(tenant_key, prev_hash || row_bytes)
+
+# Storage
+row.prev_hash = previous_row.row_hash   # or genesis for the first row
+row.row_hash  = row_hash</pre>
+    <h2>Why HMAC, not plain SHA</h2>
+    <p>Plain SHA-256 is content-addressed: anyone with the row bytes can recompute the hash. HMAC-SHA256 binds the hash to the tenant key &mdash; an attacker who tampers with rows and recomputes plain hashes cannot do so for HMAC without the key. The hash chain is therefore both tamper-evident and tamper-resistant against an attacker who can write but cannot read the key file.</p>
+    <p>The same key is used for the receipt Ed25519 signature in a different role; see <a href="/docs/receipts/signing">signing</a>. Compromise of one compromises the other.</p>
+    <h2>Canonical serialization</h2>
+    <p>The row hash must be reproducible from the stored row. We canonicalize before HMAC: JSON keys sorted lexicographically, integers as <code>NumberLong</code> (no leading zeros), floats as RFC 8259 grisu3, no whitespace, UTF-8 NFC. The <code>row_hash</code> and <code>prev_hash</code> fields themselves are excluded from the canonical form so the hash describes the rest of the row.</p>
+    <pre># Canonical form excerpt
+{"capture_id":"01HXYZ...","cost_usd":0.000041,"model":"gpt-4o-mini","namespace_id":"customer-support","prompt":{...},"provider":"openai","receipt_cid":"bafy2bzace...","response":{...},"route_decision":"teacher","state":"approved","tenant_id":"tenant_xxx","timestamp":"2026-05-20T14:32:01Z","tokens_in":48,"tokens_out":120}</pre>
+    <h2>Verifying the chain</h2>
+    <p>The <code>verify-chain</code> verb walks the lake in <code>capture_id</code> order, re-derives <code>row_hash</code> for each row, and compares against the stored value. The first mismatch is the tamper point; the verb reports it and exits non-zero.</p>
+    <pre># Verify the full chain for a tenant
+kolm captures verify-chain
+# Walking 1,248,301 rows...
+# OK: 1,248,301 rows hashed and linked.
+# Genesis: a3f4...91c2
+# Tip:     8e2b...f17a
+# Elapsed: 14.2s
+
+# Verify a slice (last 7 days)
+kolm captures verify-chain --since 7d
+# OK: 18,427 rows.
+
+# Fail mode (simulated tampering)
+kolm captures verify-chain --since 1d
+# FAIL at row cap_01HXYZ... (#18019)
+#   stored row_hash:  4f2a...09c1
+#   derived row_hash: 88b1...e342
+#   prev_hash chain:  4f2a... (matches previous row.row_hash)
+#   diagnosis: row body was modified after capture; chain breaks here.
+# Exit code: 2</pre>
+    <h2>Where the chain is verified</h2>
+    <ul>
+      <li><b>Before export</b> &mdash; <code>kolm captures export --verify</code> walks the slice first and aborts on mismatch.</li>
+      <li><b>Before distill</b> &mdash; <code>kolm distill --verify-chain</code> refuses to use a slice that fails verification.</li>
+      <li><b>Scheduled audit</b> &mdash; the self-hosted gateway can be set to verify nightly and emit a telemetry event on failure.</li>
+      <li><b>External auditor</b> &mdash; the verb runs against a read-only replica with the tenant public key (verifier mode skips HMAC, validates by re-deriving over the canonical form).</li>
+    </ul>
+    <h2>Genesis seed and key rotation</h2>
+    <p>The genesis seed is fixed for the lifetime of the lake; it does not rotate with the signing key. When the signing key rotates (90-day cadence; see <a href="/docs/receipts/signing">signing</a>), new rows use the new key for HMAC and the chain stores a <code>key_id</code> on each row. <code>verify-chain</code> uses the correct key per row.</p>
+    <div class="wd-caveat"><b>Caveats.</b> Hash chains protect against undetected mutation, not against deletion of the tail. An attacker who can truncate the file can roll back recent history; the verifier sees a shorter but internally consistent chain. Pair with off-site capture-id watermarks (e.g. nightly snapshot of <code>tip_capture_id</code> to S3 or to the public anchor at <a href="https://verify.kolm.ai">verify.kolm.ai</a>) so truncation is also detectable.</div>
+    <p class="muted" style="margin-top:48px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;color:var(--ink-3)">See also: <a href="/docs/capture/overview">Capture overview</a> &middot; <a href="/docs/capture/retention">Retention</a> &middot; <a href="/docs/receipts/signing">Receipt signing</a> &middot; <a href="/docs/receipts/verification">Receipt verification</a></p>
+  </div>
+</section>
+
+</main>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <p>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm &middot; <a href="mailto:rodneyyesep@gmail.com">rodneyyesep@gmail.com</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

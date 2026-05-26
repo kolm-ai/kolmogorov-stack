@@ -5229,6 +5229,394 @@ export function buildRouter() {
     }
   });
 
+  // W-G wrapper-completion — GET /v1/gateway/dashboard
+  // Aggregate routing breakdown + cost-savings + recent calls for the
+  // /account/gateway.html dashboard. Tenant-scoped via findByTenant.
+  r.get('/v1/gateway/dashboard', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const obs = findByTenant('observations', req.tenant) || [];
+      const now = Date.now();
+      const MONTH_MS = 30 * 24 * 60 * 60 * 1000;
+      const monthAgoISO = new Date(now - MONTH_MS).toISOString();
+      const monthly = obs.filter(o => String(o.created_at || '') >= monthAgoISO);
+
+      const byProvider = new Map();
+      let totalCalls = 0;
+      let localCalls = 0;
+      let frontierCalls = 0;
+      let costThisMonth = 0;
+      let savedThisMonth = 0;
+      let confidenceSum = 0;
+      let confidenceCount = 0;
+      for (const o of monthly) {
+        totalCalls++;
+        const prov = String(o.provider || o.upstream || 'unknown');
+        const isLocal = /^local(-|$)/.test(prov) || prov === '.kolm';
+        if (isLocal) localCalls++; else frontierCalls++;
+        const cost = Number(o.cost_usd) || 0;
+        costThisMonth += cost;
+        if (isLocal && Number.isFinite(o.frontier_equivalent_cost_usd)) {
+          savedThisMonth += Number(o.frontier_equivalent_cost_usd) - cost;
+        }
+        if (Number.isFinite(o.confidence)) {
+          confidenceSum += Number(o.confidence);
+          confidenceCount++;
+        }
+        const slot = byProvider.get(prov) || { provider: prov, calls: 0, cost_usd: 0, route_decision: isLocal ? 'local' : 'frontier' };
+        slot.calls++;
+        slot.cost_usd += cost;
+        byProvider.set(prov, slot);
+      }
+      const recent = obs.slice().sort((a, b) =>
+        String(b.created_at || '').localeCompare(String(a.created_at || ''))
+      ).slice(0, 20).map(o => ({
+        id: o.id,
+        timestamp: o.created_at,
+        namespace: o.corpus_namespace || o.namespace || 'default',
+        provider: o.provider || o.upstream || 'unknown',
+        model: o.model,
+        route_decision: /^local(-|$)/.test(String(o.provider || '')) ? 'local' : 'frontier',
+        confidence: Number.isFinite(o.confidence) ? Number(o.confidence) : null,
+        latency_ms: o.latency_ms || null,
+        cost_usd: o.cost_usd || 0,
+        receipt_id: o.receipt_id || null,
+      }));
+      const namespaces = [...new Set(monthly.map(o => o.corpus_namespace || o.namespace || 'default'))]
+        .map(n => ({
+          namespace: n,
+          calls: monthly.filter(o => (o.corpus_namespace || o.namespace || 'default') === n).length,
+        }));
+      res.json({
+        ok: true,
+        version: 'gateway-dashboard-1',
+        window: '30d',
+        metrics: {
+          total_calls: totalCalls,
+          local_calls: localCalls,
+          frontier_calls: frontierCalls,
+          local_pct: totalCalls > 0 ? localCalls / totalCalls : 0,
+          frontier_pct: totalCalls > 0 ? frontierCalls / totalCalls : 0,
+          cost_usd: Math.round(costThisMonth * 10000) / 10000,
+          saved_usd: Math.round(savedThisMonth * 10000) / 10000,
+          mean_confidence: confidenceCount > 0 ? confidenceSum / confidenceCount : null,
+        },
+        by_provider: [...byProvider.values()].sort((a, b) => b.calls - a.calls),
+        recent_calls: recent,
+        namespaces,
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'gateway_dashboard_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // W-G wrapper-completion — GET /v1/gateway/providers
+  // Return the 11 supported providers with the customer's per-tenant config
+  // overlaid (enabled, rate_limit, position-in-chain). Reads the registry
+  // for the canonical list, then merges per-tenant overrides if any.
+  r.get('/v1/gateway/providers', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const reg = await import('./provider-registry.js');
+      const overrides = (findByTenant('gateway_provider_configs', req.tenant) || [])[0] || {};
+      const providers = reg.SUPPORTED_PROVIDER_IDS.map((id, idx) => {
+        const cfg = reg.PROVIDERS[id] || {};
+        const ov = (overrides.providers && overrides.providers[id]) || {};
+        return {
+          provider: id,
+          enabled: ov.enabled !== false,
+          base_url: ov.base_url || cfg.upstream || '',
+          auth: cfg.auth || 'bearer',
+          env_key: cfg.env_key || '',
+          rate_limit_rpm: Number.isFinite(ov.rate_limit_rpm) ? ov.rate_limit_rpm : 0,
+          position: Number.isFinite(ov.position) ? ov.position : idx,
+          api_key_set: ov.api_key_set === true,
+          model_count: Object.keys(cfg.cost_per_1k || {}).length,
+        };
+      });
+      providers.sort((a, b) => a.position - b.position);
+      res.json({ ok: true, version: 'gateway-providers-1', providers });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'gateway_providers_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // W-G wrapper-completion — POST /v1/gateway/providers/config
+  // Persist per-tenant provider overrides (enabled toggle, position-in-chain,
+  // RPM limit). API keys are NEVER stored in the row — operators set them
+  // as environment variables; we only persist the FLAG that one is set.
+  r.post('/v1/gateway/providers/config', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const body = req.body || {};
+    if (!body.providers || typeof body.providers !== 'object') {
+      return res.status(400).json({ ok: false, error: 'providers_required', hint: 'send {providers: {<id>: {enabled, position, rate_limit_rpm, api_key_set}}}' });
+    }
+    try {
+      const reg = await import('./provider-registry.js');
+      const SAFE_KEYS = ['enabled', 'position', 'rate_limit_rpm', 'base_url', 'api_key_set'];
+      const cleaned = {};
+      for (const id of reg.SUPPORTED_PROVIDER_IDS) {
+        const raw = body.providers[id];
+        if (!raw || typeof raw !== 'object') continue;
+        const slot = {};
+        for (const k of SAFE_KEYS) if (k in raw) slot[k] = raw[k];
+        cleaned[id] = slot;
+      }
+      const store = await import('./store.js');
+      const existing = (store.findByTenant('gateway_provider_configs', req.tenant) || [])[0] || null;
+      const row = {
+        id: existing && existing.id ? existing.id : `gwcfg_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+        tenant: req.tenant,
+        providers: cleaned,
+        updated_at: new Date().toISOString(),
+      };
+      if (existing && existing.id) {
+        store.remove('gateway_provider_configs', (r2) => r2.id === existing.id);
+      }
+      store.insert('gateway_provider_configs', row);
+      res.json({ ok: true, version: 'gateway-providers-config-1', saved: true, providers: cleaned });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'gateway_providers_config_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // W-G wrapper-completion — POST /v1/gateway/test-connection
+  // Fire a tiny ping against an upstream to verify the key works. Body:
+  // {provider: 'anthropic', api_key: 'sk-ant-...'}. Returns {ok, status,
+  // elapsed_ms} but never echoes the key back.
+  r.post('/v1/gateway/test-connection', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const body = req.body || {};
+    const provider = String(body.provider || '').toLowerCase();
+    const apiKey = typeof body.api_key === 'string' ? body.api_key : null;
+    if (!provider) {
+      return res.status(400).json({ ok: false, error: 'provider_required', hint: 'pass provider id, one of openai/anthropic/google/deepseek/groq/together/fireworks/openrouter/local-vllm/local-ollama/local-kolm' });
+    }
+    try {
+      const reg = await import('./provider-registry.js');
+      if (!reg.SUPPORTED_PROVIDER_IDS.includes(provider)) {
+        return res.status(400).json({ ok: false, error: 'unknown_provider', supported: reg.SUPPORTED_PROVIDER_IDS.slice() });
+      }
+      // For local providers we ping the upstream /v1/models or root; for
+      // hosted we use a tiny chat completions with max_tokens=1 to confirm
+      // the auth header works without spending a meaningful amount.
+      const cfg = reg.PROVIDERS[provider];
+      const baseUrl = cfg && cfg.upstream;
+      const t0 = Date.now();
+      let status = 0;
+      let detail = '';
+      try {
+        if (/^local-/.test(provider)) {
+          const r2 = await fetch(`${baseUrl}/v1/models`, { method: 'GET' });
+          status = r2.status;
+        } else {
+          const router2 = await import('./gateway-router.js');
+          const result = await router2.dispatchToProvider({
+            provider,
+            body: { model: '__healthcheck__', messages: [{ role: 'user', content: 'ping' }], max_tokens: 1 },
+            upstreamKey: apiKey,
+          });
+          status = result.status;
+          if (result.json && result.json.error && result.json.error.message) detail = String(result.json.error.message).slice(0, 200);
+        }
+      } catch (e) {
+        return res.status(200).json({ ok: false, provider, status: 0, elapsed_ms: Date.now() - t0, error: 'transport_error', detail: String(e && e.message || e).slice(0, 200) });
+      }
+      const elapsed_ms = Date.now() - t0;
+      const okStatus = status > 0 && status < 500 && status !== 429;
+      res.json({ ok: okStatus, provider, status, elapsed_ms, detail: detail || null });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'gateway_test_connection_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // =====================================================================
+  // W-E wrapper-completion — POST /v1/gateway/dispatch
+  //
+  // Canonical wrapper entry. The caller sends an OpenAI-shaped body and
+  // optionally `x-kolm-namespace: <slug>`. We:
+  //   1. Resolve the namespace config (or fall back to the tenant default).
+  //   2. PII-scan the input under the namespace's redact_mode. block-mode
+  //      with findings → HTTP 400 + block envelope.
+  //   3. Apply the W807 confidence rule via selectRoute.
+  //   4. Dispatch through the provider chain with fallback (429 → 5xx → 0).
+  //   5. PII-scan the output.
+  //   6. Build the kolm-audit-1 receipt, sign it, persist + return.
+  //
+  // Every fallback marks `capture_eligible: true` so the flywheel picks up
+  // the cases where the local model fell short.
+  // =====================================================================
+  r.post('/v1/gateway/dispatch', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const t0 = Date.now();
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    const nsSlug = String(req.headers['x-kolm-namespace'] || body.namespace || 'default').toLowerCase();
+    const confidenceHeader = Number(req.headers['x-kolm-confidence']);
+    const tenant = req.tenant_record.id;
+
+    try {
+      const store = await import('./store.js');
+      const gw = await import('./gateway-router.js');
+      const pii = await import('./pii-redactor.js');
+      const grec = await import('./gateway-receipt.js');
+      const reg = await import('./provider-registry.js');
+
+      // 1. Resolve namespace
+      let ns = null;
+      try {
+        const rows = store.findByTenant(NS_TABLE, tenant) || [];
+        ns = rows.find((n) => n.slug === nsSlug) || null;
+      } catch (_) { /* table may be empty */ }
+      const nsConfig = ns || {
+        slug: nsSlug,
+        redact_mode: 'detect_only',
+        capture_mode: 'detect_only',
+        route_chain: null,
+        confidence_threshold: 0.7,
+        artifact_id: null,
+      };
+
+      // Build the input text for PII scanning + hashing
+      const messages = Array.isArray(body.messages) ? body.messages : [];
+      const inputText = messages.map((m) => {
+        if (typeof m.content === 'string') return m.content;
+        if (Array.isArray(m.content)) return m.content.map((c) => (c && (c.text || c.content)) || '').join('\n');
+        return '';
+      }).join('\n');
+
+      // 2. Input PII scan
+      const inputMode = nsConfig.redact_mode || 'detect_only';
+      const inputScan = pii.applyMode({ text: inputText, mode: inputMode });
+      if (inputScan.blocked) {
+        return res.status(400).json({
+          ok: false,
+          error: 'pii_blocked_in_input',
+          namespace: nsSlug,
+          redaction_applied: inputScan.redaction_applied,
+          block_reason: inputScan.block_reason,
+          block_classes: inputScan.block_classes,
+        });
+      }
+
+      // 3. Confidence + route selection. Adapt namespace.route_chain (array)
+      //    to gateway-router's {primary, fallback} shape, then apply the W807
+      //    rule via selectRoute. The chain is then built and pre-filled with
+      //    upstream keys from the env.
+      const confidence = Number.isFinite(confidenceHeader) ? confidenceHeader : (typeof body.confidence === 'number' ? body.confidence : null);
+      const chainRaw = Array.isArray(nsConfig.route_chain) && nsConfig.route_chain.length > 0
+        ? nsConfig.route_chain
+        : ['anthropic:' + (body.model || 'claude-opus-4-7')];
+      const cfgPF = {
+        primary: chainRaw[0],
+        fallback: chainRaw.slice(1),
+        confidence_threshold: nsConfig.confidence_threshold || 0.7,
+      };
+      const route = gw.selectRoute({ namespaceConfig: cfgPF, confidence });
+      let chain = gw.buildChainFromNamespace(cfgPF);
+      if (route.pre_routed_to_fallback && chain.length > 1) {
+        chain = chain.slice(1);
+      }
+      const upstreamKeys = {
+        anthropic: process.env.ANTHROPIC_API_KEY,
+        openai: process.env.OPENAI_API_KEY,
+        openrouter: process.env.OPENROUTER_API_KEY,
+        google: process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY,
+        groq: process.env.GROQ_API_KEY,
+        together: process.env.TOGETHER_API_KEY,
+        fireworks: process.env.FIREWORKS_API_KEY,
+        deepseek: process.env.DEEPSEEK_API_KEY,
+      };
+      for (const entry of chain) {
+        entry.upstreamKey = upstreamKeys[entry.provider] || null;
+      }
+      const attempted = [];
+      const result = await gw.dispatchWithFallback({
+        chain,
+        body,
+        onAttempt: (att) => attempted.push(att),
+      });
+
+      // 5. Output PII scan
+      const outputText = (() => {
+        const p = result.json || {};
+        if (p.choices && p.choices[0] && p.choices[0].message && typeof p.choices[0].message.content === 'string') return p.choices[0].message.content;
+        if (Array.isArray(p.content)) return p.content.map((c) => (c && c.text) || '').join('');
+        return '';
+      })();
+      const outputScan = pii.applyMode({ text: outputText, mode: nsConfig.redact_mode || 'detect_only' });
+
+      // 6. Build receipt
+      const fallback_reason = (attempted.length > 1) ? (attempted[attempted.length - 1].fallback_reason || null) : null;
+      const capture_eligible = !!fallback_reason || (nsConfig.capture_mode && nsConfig.capture_mode !== 'off');
+      const receiptInputs = {
+        namespace_id: nsConfig.slug,
+        route_decision: result.route_decision || (nsConfig.artifact_id ? 'local' : 'frontier'),
+        provider: result.provider,
+        model: (body.model || (chain[0] && chain[0].model) || 'unknown'),
+        artifact_id: nsConfig.artifact_id || null,
+        confidence,
+        fallback_reason,
+        input_text: inputText,
+        output_text: outputText,
+        capture_eligible,
+        capture_id: null,
+        redaction_applied: Array.from(new Set([...(inputScan.redaction_applied || []), ...(outputScan.redaction_applied || [])])),
+        input_tokens: (result.json && result.json.usage && (result.json.usage.prompt_tokens || result.json.usage.input_tokens)) || 0,
+        output_tokens: (result.json && result.json.usage && (result.json.usage.completion_tokens || result.json.usage.output_tokens)) || 0,
+        cost_usd: 0,
+      };
+      try {
+        const cost = await import('./cost-estimator.js');
+        if (cost && typeof cost.estimateCost === 'function') {
+          receiptInputs.cost_usd = cost.estimateCost({
+            provider: receiptInputs.provider,
+            model: receiptInputs.model,
+            input_tokens: receiptInputs.input_tokens,
+            output_tokens: receiptInputs.output_tokens,
+          }) || 0;
+        }
+      } catch (_) { /* cost optional */ }
+      const built = grec.buildAndSignReceipt(receiptInputs);
+      const receipt = built.receipt;
+
+      // 7. Persist observation
+      try {
+        store.insert('observations', {
+          id: receipt.receipt_id,
+          tenant,
+          namespace: nsConfig.slug,
+          provider: receipt.provider,
+          model: receipt.model,
+          route_decision: receipt.route_decision,
+          fallback_reason: receipt.fallback_reason,
+          input_hash: receipt.input_hash,
+          output_hash: receipt.output_hash,
+          input_tokens: receipt.input_tokens,
+          output_tokens: receipt.output_tokens,
+          cost_usd: receipt.cost_usd,
+          capture_eligible: receipt.capture_eligible,
+          redaction_applied: receipt.redaction_applied,
+          receipt_id: receipt.receipt_id,
+          receipt,
+          attempts: attempted,
+          elapsed_ms: Date.now() - t0,
+          ts: Date.now(),
+        });
+      } catch (_) { /* observation insert is best-effort; receipt is the source of truth */ }
+
+      // 8. Return
+      res.status(result.status).json({
+        ...result.json,
+        kolm_receipt: receipt,
+        kolm_route_decision: receipt.route_decision,
+        kolm_fallback_reason: receipt.fallback_reason,
+        kolm_attempts: attempted,
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'gateway_dispatch_error', detail: String(e && e.message || e) });
+    }
+  });
+
   // Authenticated /v1/health — full snapshot including provider availability
   // and feature flags. Admin-only because the booleans are useful signal for
   // staff debugging but unnecessary surface for tenants. Public /health
@@ -18298,6 +18686,257 @@ res.json({
     }
   });
 
+  // W-G wrapper-completion — GET /v1/captures/list
+  // Paginated capture browser feed for /account/captures.html. Filters:
+  // ?namespace, ?status (pending|approved|rejected|quarantined, multi-comma),
+  // ?risk_min, ?risk_max (0..1), ?pii (multi-comma), ?from, ?to (ISO),
+  // ?q (substring), ?limit (1-200), ?offset.
+  r.get('/v1/captures/list', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const q = req.query || {};
+      const ns = q.namespace ? String(q.namespace) : null;
+      const statuses = q.status ? String(q.status).split(',').map(s => s.trim()).filter(Boolean) : null;
+      const piis = q.pii ? String(q.pii).split(',').map(s => s.trim()).filter(Boolean) : null;
+      const rMin = q.risk_min ? Math.max(0, Math.min(1, Number(q.risk_min))) : 0;
+      const rMax = q.risk_max ? Math.max(0, Math.min(1, Number(q.risk_max))) : 1;
+      const fromISO = q.from ? String(q.from) : null;
+      const toISO = q.to ? String(q.to) : null;
+      const sub = q.q ? String(q.q).toLowerCase() : null;
+      const limit = Math.min(200, Math.max(1, parseInt(q.limit, 10) || 50));
+      const offset = Math.max(0, parseInt(q.offset, 10) || 0);
+
+      const obs = findByTenant('observations', req.tenant) || [];
+      const obsNs = (o) => o.corpus_namespace || o.namespace || 'default';
+      const obsStatus = (o) => o.review_status || (o.discarded ? 'rejected' : 'pending');
+      const obsRisk = (o) => Number.isFinite(o.risk_score) ? Number(o.risk_score) : 0;
+      const obsPii  = (o) => Array.isArray(o.redaction_applied) ? o.redaction_applied : [];
+
+      let rows = obs.slice();
+      if (ns) rows = rows.filter(o => obsNs(o) === ns);
+      if (statuses && statuses.length) rows = rows.filter(o => statuses.includes(obsStatus(o)));
+      if (piis && piis.length) rows = rows.filter(o => obsPii(o).some(p => piis.includes(p)));
+      rows = rows.filter(o => { const r = obsRisk(o); return r >= rMin && r <= rMax; });
+      if (fromISO) rows = rows.filter(o => String(o.created_at || '') >= fromISO);
+      if (toISO)   rows = rows.filter(o => String(o.created_at || '') <= toISO);
+      if (sub) rows = rows.filter(o => String(o.variable_input || o.prompt || '').toLowerCase().includes(sub)
+                                    || String(o.response || '').toLowerCase().includes(sub));
+
+      rows.sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
+      const total = rows.length;
+      const page = rows.slice(offset, offset + limit).map(o => ({
+        id: o.id,
+        timestamp: o.created_at,
+        namespace: obsNs(o),
+        provider: o.provider || o.upstream || 'unknown',
+        model: o.model,
+        status: obsStatus(o),
+        risk_score: obsRisk(o),
+        redaction_applied: obsPii(o),
+        confidence: Number.isFinite(o.confidence) ? Number(o.confidence) : null,
+        latency_ms: o.latency_ms || null,
+        cost_usd: o.cost_usd || 0,
+        prompt_preview: String(o.variable_input || o.prompt || '').slice(0, 200),
+        response_preview: String(o.response || '').slice(0, 200),
+        receipt_id: o.receipt_id || null,
+      }));
+      res.json({ ok: true, total, limit, offset, captures: page });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'captures_list_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // W-G wrapper-completion — GET /v1/captures/:id/inspect
+  // Single-row inspection (full prompt + response + receipt + chain hash).
+  r.get('/v1/captures/:id/inspect', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const id = String(req.params.id || '');
+      const obs = findByTenant('observations', req.tenant) || [];
+      const row = obs.find(o => o.id === id);
+      if (!row) return res.status(404).json({ ok: false, error: 'capture_not_found', capture_id: id });
+      res.json({
+        ok: true,
+        capture: {
+          id: row.id,
+          timestamp: row.created_at,
+          namespace: row.corpus_namespace || row.namespace || 'default',
+          provider: row.provider || row.upstream || 'unknown',
+          model: row.model,
+          status: row.review_status || (row.discarded ? 'rejected' : 'pending'),
+          risk_score: Number.isFinite(row.risk_score) ? Number(row.risk_score) : 0,
+          confidence: Number.isFinite(row.confidence) ? Number(row.confidence) : null,
+          latency_ms: row.latency_ms || null,
+          cost_usd: row.cost_usd || 0,
+          redaction_applied: Array.isArray(row.redaction_applied) ? row.redaction_applied : [],
+          poison_signals: Array.isArray(row.poison_signals) ? row.poison_signals : [],
+          prompt: row.variable_input || row.prompt || '',
+          response: row.response || '',
+          input_hash: row.input_hash || null,
+          output_hash: row.output_hash || null,
+          chain_prev_hash: row.chain_prev_hash || null,
+          chain_hash: row.chain_hash || null,
+          receipt_id: row.receipt_id || null,
+          template_hash: row.template_hash || null,
+        },
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'capture_inspect_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // W-G wrapper-completion — POST /v1/captures/:id/review
+  // Approve / reject / quarantine a capture. Body: {action: 'approve'|'reject'|'quarantine', reason?}.
+  // Bulk variant: POST /v1/captures/review-bulk {ids:[...], action, reason?}.
+  r.post('/v1/captures/:id/review', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const action = String((req.body || {}).action || '').toLowerCase();
+    if (!['approve', 'reject', 'quarantine'].includes(action)) {
+      return res.status(400).json({ ok: false, error: 'invalid_action', allowed: ['approve', 'reject', 'quarantine'] });
+    }
+    try {
+      const id = String(req.params.id || '');
+      const store = await import('./store.js');
+      const obs = store.findByTenant('observations', req.tenant) || [];
+      const row = obs.find(o => o.id === id);
+      if (!row) return res.status(404).json({ ok: false, error: 'capture_not_found', capture_id: id });
+      const status = action === 'approve' ? 'approved' : action === 'reject' ? 'rejected' : 'quarantined';
+      const updated = { ...row, review_status: status, review_reason: (req.body || {}).reason || null, review_at: new Date().toISOString(), discarded: status === 'rejected' || status === 'quarantined' };
+      store.update('observations', { id }, updated);
+      res.json({ ok: true, capture_id: id, status, action });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'capture_review_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  r.post('/v1/captures/review-bulk', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const body = req.body || {};
+    const ids = Array.isArray(body.ids) ? body.ids.filter(x => typeof x === 'string') : [];
+    const action = String(body.action || '').toLowerCase();
+    if (ids.length === 0) return res.status(400).json({ ok: false, error: 'ids_required' });
+    if (!['approve', 'reject', 'quarantine'].includes(action)) {
+      return res.status(400).json({ ok: false, error: 'invalid_action', allowed: ['approve', 'reject', 'quarantine'] });
+    }
+    try {
+      const status = action === 'approve' ? 'approved' : action === 'reject' ? 'rejected' : 'quarantined';
+      const store = await import('./store.js');
+      const obs = store.findByTenant('observations', req.tenant) || [];
+      const idSet = new Set(ids);
+      let updated_count = 0;
+      const notFound = [];
+      for (const id of ids) {
+        const row = obs.find(o => o.id === id);
+        if (!row) { notFound.push(id); continue; }
+        const upd = { ...row, review_status: status, review_reason: body.reason || null, review_at: new Date().toISOString(), discarded: status === 'rejected' || status === 'quarantined' };
+        store.update('observations', { id }, upd);
+        updated_count++;
+      }
+      res.json({ ok: true, status, action, updated_count, not_found: notFound, requested: ids.length });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'capture_review_bulk_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // W-D wrapper-completion — GET /v1/receipts/list
+  // Tenant-scoped receipt list with namespace + since + limit filters.
+  r.get('/v1/receipts/list', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const q = req.query || {};
+      const ns = q.namespace ? String(q.namespace) : null;
+      const sinceISO = q.since ? String(q.since) : null;
+      const limit = Math.min(500, Math.max(1, parseInt(q.limit, 10) || 50));
+      const offset = Math.max(0, parseInt(q.offset, 10) || 0);
+      const obs = findByTenant('observations', req.tenant) || [];
+      let rows = obs.filter(o => o.receipt_id);
+      if (ns) rows = rows.filter(o => (o.corpus_namespace || o.namespace || 'default') === ns);
+      if (sinceISO) rows = rows.filter(o => String(o.created_at || '') >= sinceISO);
+      rows.sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
+      const total = rows.length;
+      const page = rows.slice(offset, offset + limit).map(o => ({
+        receipt_id: o.receipt_id,
+        timestamp: o.created_at,
+        namespace: o.corpus_namespace || o.namespace || 'default',
+        provider: o.provider || 'unknown',
+        model: o.model,
+        route_decision: /^local(-|$)/.test(String(o.provider || '')) ? 'local' : 'frontier',
+        input_tokens: o.input_tokens || 0,
+        output_tokens: o.output_tokens || 0,
+        cost_usd: o.cost_usd || 0,
+        capture_id: o.id,
+      }));
+      res.json({ ok: true, total, limit, offset, receipts: page });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'receipts_list_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // W-D wrapper-completion — GET /v1/receipts/stats
+  // Aggregate receipt metrics (count, by_namespace, by_provider, by_route).
+  r.get('/v1/receipts/stats', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const q = req.query || {};
+      const sinceISO = q.since ? String(q.since) : null;
+      const obs = findByTenant('observations', req.tenant) || [];
+      let rows = obs.filter(o => o.receipt_id);
+      if (sinceISO) rows = rows.filter(o => String(o.created_at || '') >= sinceISO);
+      const byNamespace = {};
+      const byProvider = {};
+      const byRoute = { local: 0, frontier: 0 };
+      let totalCost = 0;
+      for (const o of rows) {
+        const ns = o.corpus_namespace || o.namespace || 'default';
+        const prov = o.provider || 'unknown';
+        byNamespace[ns] = (byNamespace[ns] || 0) + 1;
+        byProvider[prov] = (byProvider[prov] || 0) + 1;
+        if (/^local(-|$)/.test(prov)) byRoute.local++; else byRoute.frontier++;
+        totalCost += Number(o.cost_usd) || 0;
+      }
+      res.json({
+        ok: true,
+        total: rows.length,
+        cost_usd_total: Math.round(totalCost * 10000) / 10000,
+        by_namespace: byNamespace,
+        by_provider: byProvider,
+        by_route: byRoute,
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'receipts_stats_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // W-D wrapper-completion — GET /v1/verify/:receipt_id
+  // Public receipt verification surface. Returns the receipt JSON if known
+  // to this tenant + signature verification result. Used by the kolm-audit-1
+  // `verify_url` field; the third-party can hit this without auth to get
+  // back the signed payload + a deterministic verify result.
+  r.get('/v1/verify/:receipt_id', async (req, res) => {
+    const id = String(req.params.receipt_id || '');
+    if (!/^rcpt_[A-Za-z0-9]{20,}$/.test(id)) {
+      return res.status(400).json({ ok: false, error: 'invalid_receipt_id', hint: 'receipt ids look like rcpt_<22 base32 chars>' });
+    }
+    try {
+      const all2 = await import('./store.js');
+      const rows = all2.all('observations') || [];
+      const row = rows.find(o => o.receipt_id === id);
+      if (!row || !row.receipt) {
+        return res.status(404).json({ ok: false, error: 'receipt_not_found', receipt_id: id });
+      }
+      const grec = await import('./gateway-receipt.js');
+      const verifyResult = grec.verifyReceipt(row.receipt);
+      res.json({
+        ok: true,
+        receipt_id: id,
+        receipt: row.receipt,
+        verify: verifyResult,
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'verify_error', detail: String(e && e.message || e) });
+    }
+  });
+
   r.post('/v1/captures/forget', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     const body = req.body || {};
@@ -18340,6 +18979,192 @@ res.json({
       res.json(result);
     } catch (e) {
       res.status(500).json({ ok: false, error: 'captures_forgotten_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // =====================================================================
+  // W-F wrapper-completion — namespace deploy / undeploy / rollback /
+  // create / config routes. The wrapper CLI verbs in src/wrapper-cli.js
+  // call these. The slug rule is intentionally narrow
+  // (^[a-z][a-z0-9-]{1,62}$) — sticky, URL-safe, no underscores. Rows
+  // live in the `wrapper_namespaces` table with `tenant` field so the
+  // standard `findByTenant` indexed lookup works.
+  // =====================================================================
+  const NS_SLUG = /^[a-z][a-z0-9-]{1,62}$/;
+  const NS_TABLE = 'wrapper_namespaces';
+
+  async function _findNamespace(tenant, slug) {
+    const store = await import('./store.js');
+    const rows = store.findByTenant(NS_TABLE, tenant) || [];
+    return { store, rows, ns: rows.find((n) => n.slug === slug) };
+  }
+
+  // POST /v1/namespaces — create
+  r.post('/v1/namespaces', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const body = req.body || {};
+    const slug = String(body.slug || '').toLowerCase();
+    if (!NS_SLUG.test(slug)) {
+      return res.status(400).json({ ok: false, error: 'invalid_slug', hint: 'slug must match ^[a-z][a-z0-9-]{1,62}$' });
+    }
+    try {
+      const tenant = req.tenant_record.id;
+      const { store, rows } = await _findNamespace(tenant, slug);
+      if (rows.some((n) => n.slug === slug)) {
+        return res.status(409).json({ ok: false, error: 'namespace_exists', slug });
+      }
+      const now = new Date().toISOString();
+      const row = {
+        id: 'ns_' + slug + '_' + Date.now().toString(36),
+        tenant,
+        slug,
+        display_name: typeof body.display_name === 'string' ? body.display_name.slice(0, 128) : slug,
+        description: typeof body.description === 'string' ? body.description.slice(0, 512) : null,
+        capture_mode: ['off','metadata_only','detect_only','redact_captures','redact_all','block'].includes(body.capture_mode) ? body.capture_mode : 'detect_only',
+        redact_mode: ['detect_only','redact_captures','redact_all','block'].includes(body.redact_mode) ? body.redact_mode : 'detect_only',
+        route_chain: Array.isArray(body.route_chain) ? body.route_chain.slice(0, 16) : null,
+        confidence_threshold: (typeof body.confidence_threshold === 'number' && Number.isFinite(body.confidence_threshold)) ? Math.max(0, Math.min(1, body.confidence_threshold)) : 0.7,
+        artifact_id: null,
+        artifact_history: [],
+        status: 'active',
+        created_at: now,
+        updated_at: now,
+      };
+      store.insert(NS_TABLE, row);
+      res.status(201).json({ ok: true, namespace: row });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'namespace_create_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // GET /v1/namespaces/:slug — config read
+  r.get('/v1/namespaces/:slug', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const slug = String(req.params.slug || '').toLowerCase();
+    if (!NS_SLUG.test(slug)) return res.status(400).json({ ok: false, error: 'invalid_slug' });
+    try {
+      const tenant = req.tenant_record.id;
+      const { ns } = await _findNamespace(tenant, slug);
+      if (!ns) return res.status(404).json({ ok: false, error: 'namespace_not_found', slug });
+      res.json({ ok: true, namespace: ns });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'namespace_get_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // PUT /v1/namespaces/:slug — config patch
+  r.put('/v1/namespaces/:slug', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const slug = String(req.params.slug || '').toLowerCase();
+    if (!NS_SLUG.test(slug)) return res.status(400).json({ ok: false, error: 'invalid_slug' });
+    try {
+      const tenant = req.tenant_record.id;
+      const { store, ns } = await _findNamespace(tenant, slug);
+      if (!ns) return res.status(404).json({ ok: false, error: 'namespace_not_found', slug });
+      const patch = req.body || {};
+      const allowed = ['display_name', 'description', 'capture_mode', 'redact_mode', 'route_chain', 'confidence_threshold', 'status'];
+      const applied = {};
+      for (const k of allowed) {
+        if (Object.prototype.hasOwnProperty.call(patch, k)) {
+          ns[k] = patch[k];
+          applied[k] = patch[k];
+        }
+      }
+      ns.updated_at = new Date().toISOString();
+      store.update(NS_TABLE, (rr) => rr.id === ns.id, ns);
+      res.json({ ok: true, namespace: ns, applied });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'namespace_put_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // POST /v1/namespaces/:slug/deploy — set artifact
+  r.post('/v1/namespaces/:slug/deploy', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const slug = String(req.params.slug || '').toLowerCase();
+    if (!NS_SLUG.test(slug)) return res.status(400).json({ ok: false, error: 'invalid_slug' });
+    try {
+      const tenant = req.tenant_record.id;
+      const { store, ns } = await _findNamespace(tenant, slug);
+      if (!ns) return res.status(404).json({ ok: false, error: 'namespace_not_found', slug });
+      const body = req.body || {};
+      const artifact_id = typeof body.artifact_id === 'string' ? body.artifact_id : null;
+      if (!artifact_id) return res.status(400).json({ ok: false, error: 'missing_artifact_id' });
+      const history = Array.isArray(ns.artifact_history) ? ns.artifact_history.slice() : [];
+      history.push({ artifact_id: ns.artifact_id, at: ns.updated_at, action: 'deploy_supersede' });
+      ns.artifact_id = artifact_id;
+      ns.artifact_history = history.slice(-20);
+      ns.status = 'deployed';
+      ns.updated_at = new Date().toISOString();
+      store.update(NS_TABLE, (rr) => rr.id === ns.id, ns);
+      res.json({ ok: true, action: 'deploy', namespace: ns });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'namespace_deploy_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // POST /v1/namespaces/:slug/undeploy — clear artifact
+  r.post('/v1/namespaces/:slug/undeploy', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const slug = String(req.params.slug || '').toLowerCase();
+    if (!NS_SLUG.test(slug)) return res.status(400).json({ ok: false, error: 'invalid_slug' });
+    try {
+      const tenant = req.tenant_record.id;
+      const { store, ns } = await _findNamespace(tenant, slug);
+      if (!ns) return res.status(404).json({ ok: false, error: 'namespace_not_found', slug });
+      const history = Array.isArray(ns.artifact_history) ? ns.artifact_history.slice() : [];
+      history.push({ artifact_id: ns.artifact_id, at: ns.updated_at, action: 'undeploy', reason: (req.body && req.body.reason) || null });
+      ns.artifact_id = null;
+      ns.artifact_history = history.slice(-20);
+      ns.status = 'undeployed';
+      ns.updated_at = new Date().toISOString();
+      store.update(NS_TABLE, (rr) => rr.id === ns.id, ns);
+      res.json({ ok: true, action: 'undeploy', namespace: ns });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'namespace_undeploy_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // POST /v1/namespaces/:slug/rollback — restore prior artifact
+  r.post('/v1/namespaces/:slug/rollback', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const slug = String(req.params.slug || '').toLowerCase();
+    if (!NS_SLUG.test(slug)) return res.status(400).json({ ok: false, error: 'invalid_slug' });
+    try {
+      const tenant = req.tenant_record.id;
+      const { store, ns } = await _findNamespace(tenant, slug);
+      if (!ns) return res.status(404).json({ ok: false, error: 'namespace_not_found', slug });
+      const body = req.body || {};
+      const history = Array.isArray(ns.artifact_history) ? ns.artifact_history.slice() : [];
+      let target = typeof body.to === 'string' ? body.to : null;
+      if (!target) {
+        for (let i = history.length - 1; i >= 0; i--) {
+          if (history[i].artifact_id && history[i].artifact_id !== ns.artifact_id) { target = history[i].artifact_id; break; }
+        }
+      }
+      if (!target) return res.status(400).json({ ok: false, error: 'no_prior_artifact', hint: 'pass --to <artifact_id> or deploy something first' });
+      history.push({ artifact_id: ns.artifact_id, at: ns.updated_at, action: 'rollback_supersede' });
+      ns.artifact_id = target;
+      ns.artifact_history = history.slice(-20);
+      ns.status = 'deployed';
+      ns.updated_at = new Date().toISOString();
+      store.update(NS_TABLE, (rr) => rr.id === ns.id, ns);
+      res.json({ ok: true, action: 'rollback', to: target, namespace: ns });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'namespace_rollback_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // GET /v1/namespaces — list all for tenant (used by /account/namespaces)
+  r.get('/v1/namespaces', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const store = await import('./store.js');
+      const tenant = req.tenant_record.id;
+      const rows = store.findByTenant(NS_TABLE, tenant) || [];
+      res.json({ ok: true, count: rows.length, namespaces: rows });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'namespace_list_error', detail: String(e && e.message || e) });
     }
   });
 
