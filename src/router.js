@@ -5516,15 +5516,23 @@ export function buildRouter() {
       if (route.pre_routed_to_fallback && chain.length > 1) {
         chain = chain.slice(1);
       }
+      // Vercel function env vars land as lowercase (anthropic_api_key) while
+      // local + Railway use UPPERCASE; walk 4 case variants per provider so
+      // the dispatch path works on every host. Mirrors _w869FirstEnv in the
+      // teacher proxy above.
+      const _firstEnv = (names) => {
+        for (const n of names) { const v = process.env[n]; if (v && String(v).trim()) return v; }
+        return null;
+      };
       const upstreamKeys = {
-        anthropic: process.env.ANTHROPIC_API_KEY,
-        openai: process.env.OPENAI_API_KEY,
-        openrouter: process.env.OPENROUTER_API_KEY,
-        google: process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY,
-        groq: process.env.GROQ_API_KEY,
-        together: process.env.TOGETHER_API_KEY,
-        fireworks: process.env.FIREWORKS_API_KEY,
-        deepseek: process.env.DEEPSEEK_API_KEY,
+        anthropic:  _firstEnv(['ANTHROPIC_API_KEY', 'anthropic_api_key', 'ANTHROPIC_KEY', 'anthropic_key']),
+        openai:     _firstEnv(['OPENAI_API_KEY', 'openai_api_key', 'OPENAI_KEY', 'openai_key']),
+        openrouter: _firstEnv(['OPENROUTER_API_KEY', 'openrouter_api_key', 'OPENROUTER_KEY', 'openrouter_key']),
+        google:     _firstEnv(['GOOGLE_API_KEY', 'google_api_key', 'GEMINI_API_KEY', 'gemini_api_key']),
+        groq:       _firstEnv(['GROQ_API_KEY', 'groq_api_key', 'GROQ_KEY', 'groq_key']),
+        together:   _firstEnv(['TOGETHER_API_KEY', 'together_api_key', 'TOGETHER_KEY', 'together_key']),
+        fireworks:  _firstEnv(['FIREWORKS_API_KEY', 'fireworks_api_key', 'FIREWORKS_KEY', 'fireworks_key']),
+        deepseek:   _firstEnv(['DEEPSEEK_API_KEY', 'deepseek_api_key', 'DEEPSEEK_KEY', 'deepseek_key']),
       };
       for (const entry of chain) {
         entry.upstreamKey = upstreamKeys[entry.provider] || null;
